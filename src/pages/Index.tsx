@@ -2,6 +2,7 @@ import { Card } from "@/components/ui/card";
 import { AppLayout } from "@/components/ui/AppLayout";
 import { Calendar, DollarSign, FileText, Users } from "lucide-react";
 import JobMap from "@/components/JobMap";
+import type { Job } from "@/types/job";
 
 const stats = [
   {
@@ -34,14 +35,14 @@ const stats = [
   },
 ];
 
-const allJobs = [
+const allJobs: Job[] = [
   {
     id: "1",
     customer: "John Smith",
     type: "Plumbing Repair",
     status: "In Progress",
     date: "Today",
-    location: [151.2093, -33.8688], // Sydney
+    location: [151.2093, -33.8688] as [number, number],
   },
   {
     id: "2",
@@ -49,7 +50,7 @@ const allJobs = [
     type: "Electrical Installation",
     status: "Scheduled",
     date: "Tomorrow",
-    location: [151.2543, -33.8688], // Nearby location
+    location: [151.2543, -33.8688] as [number, number],
   },
   {
     id: "3",
@@ -57,7 +58,7 @@ const allJobs = [
     type: "HVAC Maintenance",
     status: "Completed",
     date: "Yesterday",
-    location: [151.1943, -33.8788], // Another nearby location
+    location: [151.1943, -33.8788] as [number, number],
   },
   {
     id: "4",
@@ -65,7 +66,7 @@ const allJobs = [
     type: "Kitchen Renovation",
     status: "Scheduled",
     date: "Tomorrow",
-    location: [151.2153, -33.8588], // Another nearby location
+    location: [151.2153, -33.8588] as [number, number],
   },
 ];
 

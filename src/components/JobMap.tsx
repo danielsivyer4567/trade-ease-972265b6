@@ -2,15 +2,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
-
-interface Job {
-  id: string;
-  customer: string;
-  type: string;
-  status: string;
-  date: string;
-  location?: [number, number]; // [longitude, latitude]
-}
+import type { Job } from '@/types/job';
 
 interface JobMapProps {
   jobs: Job[];
