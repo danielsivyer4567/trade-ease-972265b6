@@ -23,7 +23,7 @@ const JobMap = ({ jobs }: JobMapProps) => {
   };
 
   const options = {
-    mapTypeId: 'roadmap',
+    mapTypeId: 'satellite',
     streetViewControl: false,
     mapTypeControl: false,
   };
