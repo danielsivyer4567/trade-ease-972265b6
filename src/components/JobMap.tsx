@@ -18,8 +18,8 @@ const JobMap = ({ jobs }: JobMapProps) => {
   };
 
   const center = {
-    lat: -33.8688,
-    lng: 151.2093
+    lat: -33.8731,  // Updated to Woolworths Town Hall location
+    lng: 151.2069
   };
 
   const options = {
@@ -49,7 +49,7 @@ const JobMap = ({ jobs }: JobMapProps) => {
       <GoogleMap
         mapContainerStyle={mapContainerStyle}
         center={center}
-        zoom={11}
+        zoom={14}  // Increased zoom level for better city view
         options={options}
       >
         {jobs.map((job) => (
