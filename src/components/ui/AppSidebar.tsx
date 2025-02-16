@@ -32,7 +32,14 @@ export function AppSidebar() {
   return (
     <Sidebar>
       <SidebarHeader className="p-4">
-        <h2 className="text-lg font-semibold">TradeWork Hub</h2>
+        <div className="flex items-center gap-3">
+          <img 
+            src="/lovable-uploads/147b0371-94bb-403e-a449-f6fc081c4d6c.png" 
+            alt="Trade Ease Logo" 
+            className="w-8 h-8"
+          />
+          <h2 className="text-lg font-semibold">Trade Ease</h2>
+        </div>
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
