@@ -1,7 +1,7 @@
-
 import { Card } from "@/components/ui/card";
 import { AppLayout } from "@/components/ui/AppLayout";
 import { Calendar, DollarSign, FileText, Users } from "lucide-react";
+import JobMap from "@/components/JobMap";
 
 const stats = [
   {
@@ -34,13 +34,14 @@ const stats = [
   },
 ];
 
-const recentJobs = [
+const allJobs = [
   {
     id: "1",
     customer: "John Smith",
     type: "Plumbing Repair",
     status: "In Progress",
     date: "Today",
+    location: [151.2093, -33.8688], // Sydney
   },
   {
     id: "2",
@@ -48,6 +49,7 @@ const recentJobs = [
     type: "Electrical Installation",
     status: "Scheduled",
     date: "Tomorrow",
+    location: [151.2543, -33.8688], // Nearby location
   },
   {
     id: "3",
@@ -55,8 +57,20 @@ const recentJobs = [
     type: "HVAC Maintenance",
     status: "Completed",
     date: "Yesterday",
+    location: [151.1943, -33.8788], // Another nearby location
+  },
+  {
+    id: "4",
+    customer: "Emma Wilson",
+    type: "Kitchen Renovation",
+    status: "Scheduled",
+    date: "Tomorrow",
+    location: [151.2153, -33.8588], // Another nearby location
   },
 ];
+
+const todaysJobs = allJobs.filter(job => job.date === "Today");
+const tomorrowsJobs = allJobs.filter(job => job.date === "Tomorrow");
 
 const Index = () => {
   return (
@@ -71,6 +85,68 @@ const Index = () => {
             <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
               + New Job
             </button>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2">
+            <Card className="p-4">
+              <h2 className="text-lg font-semibold mb-4">Job Locations</h2>
+              <JobMap jobs={[...todaysJobs, ...tomorrowsJobs]} />
+            </Card>
+          </div>
+          <div className="space-y-6">
+            <Card className="p-4">
+              <h2 className="text-lg font-semibold mb-4">Today's Jobs</h2>
+              <div className="space-y-3">
+                {todaysJobs.map(job => (
+                  <div key={job.id} className="p-3 bg-gray-50 rounded-lg">
+                    <div className="font-medium">{job.customer}</div>
+                    <div className="text-sm text-gray-500">{job.type}</div>
+                    <span
+                      className={`inline-block mt-2 px-2 py-1 rounded-full text-xs ${
+                        job.status === "Completed"
+                          ? "bg-green-100 text-green-800"
+                          : job.status === "In Progress"
+                          ? "bg-blue-100 text-blue-800"
+                          : "bg-yellow-100 text-yellow-800"
+                      }`}
+                    >
+                      {job.status}
+                    </span>
+                  </div>
+                ))}
+                {todaysJobs.length === 0 && (
+                  <p className="text-gray-500 text-sm">No jobs scheduled for today</p>
+                )}
+              </div>
+            </Card>
+            
+            <Card className="p-4">
+              <h2 className="text-lg font-semibold mb-4">Tomorrow's Jobs</h2>
+              <div className="space-y-3">
+                {tomorrowsJobs.map(job => (
+                  <div key={job.id} className="p-3 bg-gray-50 rounded-lg">
+                    <div className="font-medium">{job.customer}</div>
+                    <div className="text-sm text-gray-500">{job.type}</div>
+                    <span
+                      className={`inline-block mt-2 px-2 py-1 rounded-full text-xs ${
+                        job.status === "Completed"
+                          ? "bg-green-100 text-green-800"
+                          : job.status === "In Progress"
+                          ? "bg-blue-100 text-blue-800"
+                          : "bg-yellow-100 text-yellow-800"
+                      }`}
+                    >
+                      {job.status}
+                    </span>
+                  </div>
+                ))}
+                {tomorrowsJobs.length === 0 && (
+                  <p className="text-gray-500 text-sm">No jobs scheduled for tomorrow</p>
+                )}
+              </div>
+            </Card>
           </div>
         </div>
 
@@ -111,7 +187,7 @@ const Index = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {recentJobs.map((job) => (
+                  {allJobs.map((job) => (
                     <tr
                       key={job.id}
                       className="border-t border-gray-100 text-sm"
