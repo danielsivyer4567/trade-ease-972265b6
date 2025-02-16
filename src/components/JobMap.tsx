@@ -16,13 +16,14 @@ const JobMap = ({ jobs }: JobMapProps) => {
     borderRadius: '0.5rem'
   };
 
+  // Updated coordinates for Gold Coast, Queensland
   const center = {
-    lat: -33.8700,
-    lng: 151.2099
+    lat: -28.017112731933594,
+    lng: 153.4014129638672
   };
 
   const options = {
-    mapTypeId: 'roadmap', // Changed from satellite to roadmap until API is activated
+    mapTypeId: 'roadmap',
     streetViewControl: false,
     mapTypeControl: false,
   };
@@ -32,13 +33,25 @@ const JobMap = ({ jobs }: JobMapProps) => {
       const marker = new google.maps.marker.AdvancedMarkerElement({
         position: { lat: job.location[1], lng: job.location[0] },
         map,
+        title: job.customer
       });
       marker.addListener('click', () => setSelectedJob(job));
+    });
+
+    // Add a marker for the center location
+    new google.maps.marker.AdvancedMarkerElement({
+      position: center,
+      map,
+      title: "Gold Coast"
     });
   };
 
   return (
-    <LoadScript googleMapsApiKey="AIzaSyAnIcvNA_ZjRUnN4aeyl-1MYpBSN-ODIvw">
+    <LoadScript 
+      googleMapsApiKey="AIzaSyAnIcvNA_ZjRUnN4aeyl-1MYpBSN-ODIvw"
+      libraries={["maps", "marker"]}
+      version="beta"
+    >
       <GoogleMap
         mapContainerStyle={mapContainerStyle}
         center={center}
