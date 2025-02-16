@@ -8,7 +8,6 @@ interface JobMapProps {
 }
 
 const JobMap = ({ jobs }: JobMapProps) => {
-  const [googleApiKey, setGoogleApiKey] = useState('');
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
 
   const mapContainerStyle = {
@@ -18,7 +17,7 @@ const JobMap = ({ jobs }: JobMapProps) => {
   };
 
   const center = {
-    lat: -33.8700,  // Updated to new Sydney location
+    lat: -33.8700,
     lng: 151.2099
   };
 
@@ -28,28 +27,12 @@ const JobMap = ({ jobs }: JobMapProps) => {
     mapTypeControl: false,
   };
 
-  if (!googleApiKey) {
-    return (
-      <div className="rounded-lg bg-gray-50 p-4 text-center">
-        <input
-          type="text"
-          placeholder="Enter your Google Maps API key"
-          className="px-4 py-2 border rounded"
-          onChange={(e) => setGoogleApiKey(e.target.value)}
-        />
-        <p className="mt-2 text-sm text-gray-500">
-          Get your API key at <a href="https://console.cloud.google.com" className="text-blue-500 hover:underline" target="_blank" rel="noopener noreferrer">Google Cloud Console</a>
-        </p>
-      </div>
-    );
-  }
-
   return (
-    <LoadScript googleMapsApiKey={googleApiKey}>
+    <LoadScript googleMapsApiKey="AIzaSyAnIcvNA_ZjRUnN4aeyl-1MYpBSN-ODIvw">
       <GoogleMap
         mapContainerStyle={mapContainerStyle}
         center={center}
-        zoom={14}  // Keeping the same zoom level for city view
+        zoom={14}
         options={options}
       >
         {jobs.map((job) => (
