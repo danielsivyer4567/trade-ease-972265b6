@@ -18,8 +18,8 @@ const JobMap = ({ jobs }: JobMapProps) => {
   };
 
   const center = {
-    lat: -33.8731,  // Updated to Woolworths Town Hall location
-    lng: 151.2069
+    lat: -33.8700,  // Updated to new Sydney location
+    lng: 151.2099
   };
 
   const options = {
@@ -49,7 +49,7 @@ const JobMap = ({ jobs }: JobMapProps) => {
       <GoogleMap
         mapContainerStyle={mapContainerStyle}
         center={center}
-        zoom={14}  // Increased zoom level for better city view
+        zoom={14}  // Keeping the same zoom level for city view
         options={options}
       >
         {jobs.map((job) => (
