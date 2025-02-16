@@ -1,7 +1,6 @@
 
-import React, { useEffect, useRef, useState } from 'react';
-import mapboxgl from 'mapbox-gl';
-import 'mapbox-gl/dist/mapbox-gl.css';
+import React, { useState } from 'react';
+import { GoogleMap, LoadScript, Marker, InfoWindow } from '@react-google-maps/api';
 import type { Job } from '@/types/job';
 
 interface JobMapProps {
@@ -9,73 +8,72 @@ interface JobMapProps {
 }
 
 const JobMap = ({ jobs }: JobMapProps) => {
-  const mapContainer = useRef<HTMLDivElement>(null);
-  const map = useRef<mapboxgl.Map | null>(null);
-  const [mapboxToken, setMapboxToken] = useState('');
+  const [googleApiKey, setGoogleApiKey] = useState('');
+  const [selectedJob, setSelectedJob] = useState<Job | null>(null);
 
-  useEffect(() => {
-    if (!mapContainer.current) return;
+  const mapContainerStyle = {
+    width: '100%',
+    height: '400px',
+    borderRadius: '0.5rem'
+  };
 
-    // Initialize map
-    if (mapboxToken) {
-      mapboxgl.accessToken = mapboxToken;
-      
-      map.current = new mapboxgl.Map({
-        container: mapContainer.current,
-        style: 'mapbox://styles/mapbox/satellite-streets-v12',
-        zoom: 10,
-        center: [151.2093, -33.8688], // Default to Sydney, Australia
-      });
+  const center = {
+    lat: -33.8688,
+    lng: 151.2093
+  };
 
-      // Add navigation controls
-      map.current.addControl(
-        new mapboxgl.NavigationControl(),
-        'top-right'
-      );
+  const options = {
+    mapTypeId: 'satellite',
+    streetViewControl: false,
+    mapTypeControl: false,
+  };
 
-      // Add markers for each job
-      jobs.forEach(job => {
-        if (job.location) {
-          new mapboxgl.Marker()
-            .setLngLat(job.location)
-            .setPopup(
-              new mapboxgl.Popup({ offset: 25 })
-                .setHTML(
-                  `<h3 class="font-semibold">${job.customer}</h3>
-                   <p>${job.type}</p>
-                   <p class="text-sm text-gray-500">${job.date}</p>`
-                )
-            )
-            .addTo(map.current!);
-        }
-      });
-    }
-
-    return () => {
-      map.current?.remove();
-    };
-  }, [jobs, mapboxToken]);
-
-  if (!mapboxToken) {
+  if (!googleApiKey) {
     return (
       <div className="rounded-lg bg-gray-50 p-4 text-center">
         <input
           type="text"
-          placeholder="Enter your Mapbox public token"
+          placeholder="Enter your Google Maps API key"
           className="px-4 py-2 border rounded"
-          onChange={(e) => setMapboxToken(e.target.value)}
+          onChange={(e) => setGoogleApiKey(e.target.value)}
         />
         <p className="mt-2 text-sm text-gray-500">
-          Get your token at <a href="https://mapbox.com" className="text-blue-500 hover:underline" target="_blank" rel="noopener noreferrer">mapbox.com</a>
+          Get your API key at <a href="https://console.cloud.google.com" className="text-blue-500 hover:underline" target="_blank" rel="noopener noreferrer">Google Cloud Console</a>
         </p>
       </div>
     );
   }
 
   return (
-    <div className="relative w-full h-[400px] rounded-lg overflow-hidden">
-      <div ref={mapContainer} className="absolute inset-0" />
-    </div>
+    <LoadScript googleMapsApiKey={googleApiKey}>
+      <GoogleMap
+        mapContainerStyle={mapContainerStyle}
+        center={center}
+        zoom={11}
+        options={options}
+      >
+        {jobs.map((job) => (
+          <Marker
+            key={job.id}
+            position={{ lat: job.location[1], lng: job.location[0] }}
+            onClick={() => setSelectedJob(job)}
+          />
+        ))}
+
+        {selectedJob && (
+          <InfoWindow
+            position={{ lat: selectedJob.location[1], lng: selectedJob.location[0] }}
+            onCloseClick={() => setSelectedJob(null)}
+          >
+            <div>
+              <h3 className="font-semibold">{selectedJob.customer}</h3>
+              <p>{selectedJob.type}</p>
+              <p className="text-sm text-gray-500">{selectedJob.date}</p>
+            </div>
+          </InfoWindow>
+        )}
+      </GoogleMap>
+    </LoadScript>
   );
 };
 
