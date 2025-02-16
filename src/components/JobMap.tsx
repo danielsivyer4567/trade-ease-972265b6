@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { GoogleMap, LoadScript, Marker, InfoWindow } from '@react-google-maps/api';
+import { GoogleMap, LoadScript, InfoWindow } from '@react-google-maps/api';
 import type { Job } from '@/types/job';
 
 interface JobMapProps {
@@ -22,9 +22,19 @@ const JobMap = ({ jobs }: JobMapProps) => {
   };
 
   const options = {
-    mapTypeId: 'satellite',
+    mapTypeId: 'roadmap', // Changed from satellite to roadmap until API is activated
     streetViewControl: false,
     mapTypeControl: false,
+  };
+
+  const onLoad = (map: google.maps.Map) => {
+    jobs.forEach((job) => {
+      const marker = new google.maps.marker.AdvancedMarkerElement({
+        position: { lat: job.location[1], lng: job.location[0] },
+        map,
+      });
+      marker.addListener('click', () => setSelectedJob(job));
+    });
   };
 
   return (
@@ -34,15 +44,8 @@ const JobMap = ({ jobs }: JobMapProps) => {
         center={center}
         zoom={14}
         options={options}
+        onLoad={onLoad}
       >
-        {jobs.map((job) => (
-          <Marker
-            key={job.id}
-            position={{ lat: job.location[1], lng: job.location[0] }}
-            onClick={() => setSelectedJob(job)}
-          />
-        ))}
-
         {selectedJob && (
           <InfoWindow
             position={{ lat: selectedJob.location[1], lng: selectedJob.location[0] }}
