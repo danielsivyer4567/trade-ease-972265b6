@@ -38,7 +38,7 @@ export function AppSidebar() {
             alt="Trade Ease Logo" 
             className="w-8 h-8"
           />
-          <h2 className="text-lg font-semibold">Trade Ease</h2>
+          <h2 className="text-2xl font-bold">Trade Ease</h2>
         </div>
       </SidebarHeader>
       <SidebarContent>
