@@ -14,7 +14,7 @@ import { cn } from '@/lib/utils';
 import { Button } from './button';
 
 export function AppSidebar() {
-  const { isOpen, toggle } = useSidebar();
+  const { state, toggleSidebar } = useSidebar();
 
   return (
     <>
@@ -22,14 +22,14 @@ export function AppSidebar() {
         variant="outline"
         size="icon"
         className="fixed left-4 top-4 z-40 lg:hidden"
-        onClick={toggle}
+        onClick={toggleSidebar}
       >
         <Menu />
       </Button>
       <div
         className={cn(
           "fixed inset-y-0 left-0 z-30 w-64 bg-white border-r transition-transform lg:translate-x-0",
-          !isOpen && "-translate-x-full"
+          state === "collapsed" && "-translate-x-full"
         )}
       >
         <div className="flex flex-col h-full">
@@ -44,13 +44,15 @@ export function AppSidebar() {
               <LayoutDashboard className="w-5 h-5" />
               Dashboard
             </Link>
-            <Link
-              to="/jobs"
+            <a
+              href="/jobs"
+              target="_blank"
+              rel="noopener noreferrer"
               className="flex items-center gap-2 p-2 rounded-lg hover:bg-gray-100 text-gray-700 hover:text-gray-900"
             >
               <Briefcase className="w-5 h-5" />
               Jobs
-            </Link>
+            </a>
             <Link
               to="/customers"
               className="flex items-center gap-2 p-2 rounded-lg hover:bg-gray-100 text-gray-700 hover:text-gray-900"
