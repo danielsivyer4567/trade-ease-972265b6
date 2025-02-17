@@ -3,6 +3,7 @@ import { AppLayout } from "@/components/ui/AppLayout";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Plus, Wrench, Zap, Wind, Tag, Clock, List } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import type { JobTemplate } from "@/types/job";
 
 const jobTemplates: JobTemplate[] = [
@@ -42,6 +43,8 @@ const categories = [
 ];
 
 export default function Jobs() {
+  const navigate = useNavigate();
+
   return (
     <AppLayout>
       <div className="space-y-6 p-6">
@@ -50,7 +53,7 @@ export default function Jobs() {
             <h1 className="text-3xl font-bold">Job Templates</h1>
             <p className="text-gray-500 mt-1">Manage and create job templates</p>
           </div>
-          <Button>
+          <Button onClick={() => navigate("/jobs/new-template")}>
             <Plus className="mr-2" />
             New Template
           </Button>
