@@ -1,7 +1,7 @@
 
 import { Card } from "@/components/ui/card";
 import { AppLayout } from "@/components/ui/AppLayout";
-import { Calendar, DollarSign, FileText, Users } from "lucide-react";
+import { Calendar, DollarSign, FileText, Users, CheckSquare, Clock, MessageSquare, XSquare } from "lucide-react";
 import JobMap from "@/components/JobMap";
 import type { Job } from "@/types/job";
 
@@ -74,6 +74,13 @@ const allJobs: Job[] = [
 const todaysJobs = allJobs.filter(job => job.date === "Today");
 const tomorrowsJobs = allJobs.filter(job => job.date === "Tomorrow");
 
+const quoteStatuses = [
+  { title: "Accepted Quotes", icon: CheckSquare, color: "#10B981", count: "5" },
+  { title: "Awaiting Acceptance", icon: Clock, color: "#F59E0B", count: "3" },
+  { title: "Replied Quotes", icon: MessageSquare, color: "#3B82F6", count: "2" },
+  { title: "Denied Quotes", icon: XSquare, color: "#EF4444", count: "1" },
+];
+
 const Index = () => {
   return (
     <AppLayout>
@@ -98,6 +105,24 @@ const Index = () => {
             </Card>
           </div>
           <div className="space-y-6">
+            <Card className="p-4">
+              <h2 className="text-lg font-semibold mb-4">Quote Status</h2>
+              <div className="space-y-3">
+                {quoteStatuses.map((quote) => (
+                  <div 
+                    key={quote.title}
+                    className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-all cursor-pointer"
+                  >
+                    <div className="flex items-center gap-3">
+                      <quote.icon className="w-5 h-5" style={{ color: quote.color }} />
+                      <span className="font-medium">{quote.title}</span>
+                    </div>
+                    <span className="text-sm font-semibold text-gray-600">{quote.count}</span>
+                  </div>
+                ))}
+              </div>
+            </Card>
+            
             <Card className="p-4">
               <h2 className="text-lg font-semibold mb-4">Today's Jobs</h2>
               <div className="space-y-3">
