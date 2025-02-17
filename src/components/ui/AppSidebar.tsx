@@ -41,8 +41,12 @@ export function AppSidebar() {
         )}
       >
         <div className="flex flex-col h-full">
-          <div className="p-2">
-            <h1 className="text-lg font-bold">Trade Ease</h1>
+          <div className="p-4">
+            <img 
+              src="/lovable-uploads/6a07dd00-f2c7-49da-8b00-48d960c13610.png"
+              alt="Trade Ease Logo"
+              className="w-8 h-8 mb-6"
+            />
           </div>
           <nav className="flex-1 p-1 space-y-0.5">
             <Link
