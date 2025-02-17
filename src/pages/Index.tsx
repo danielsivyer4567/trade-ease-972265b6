@@ -100,27 +100,27 @@ const Index = () => {
         <div className="flex flex-col items-center justify-center text-center mb-8">
           <h1 className="text-2xl font-semibold text-gray-900">Dashboard</h1>
           <p className="text-gray-500 mt-1">Welcome back to Trade Ease</p>
-        </div>
-
-        <div className="flex flex-wrap gap-2 justify-end">
-          <Button size="sm" className="bg-blue-600 hover:bg-blue-700">
-            <Plus className="w-4 h-4 mr-1" /> New Job
-          </Button>
-          <Button size="sm" className="bg-green-600 hover:bg-green-700">
-            <Plus className="w-4 h-4 mr-1" /> New Quote
-          </Button>
-          <Button size="sm" className="bg-purple-600 hover:bg-purple-700">
-            <Plus className="w-4 h-4 mr-1" /> New Customer
-          </Button>
-          <Button size="sm" className="bg-yellow-600 hover:bg-yellow-700 text-white">
-            <DollarSign className="w-4 h-4 mr-1" /> New Payment
-          </Button>
-          <Button size="sm" className="bg-orange-600 hover:bg-orange-700">
-            <CalendarIcon className="w-4 h-4 mr-1" /> Pay Run
-          </Button>
-          <Button size="sm" className="bg-indigo-600 hover:bg-indigo-700">
-            <FileText className="w-4 h-4 mr-1" /> New Invoice
-          </Button>
+          
+          <div className="flex flex-wrap gap-2 justify-center mt-6">
+            <Button size="sm" className="bg-blue-600 hover:bg-blue-700">
+              <Plus className="w-4 h-4 mr-1" /> New Job
+            </Button>
+            <Button size="sm" className="bg-green-600 hover:bg-green-700">
+              <Plus className="w-4 h-4 mr-1" /> New Quote
+            </Button>
+            <Button size="sm" className="bg-purple-600 hover:bg-purple-700">
+              <Plus className="w-4 h-4 mr-1" /> New Customer
+            </Button>
+            <Button size="sm" className="bg-yellow-600 hover:bg-yellow-700 text-white">
+              <DollarSign className="w-4 h-4 mr-1" /> New Payment
+            </Button>
+            <Button size="sm" className="bg-orange-600 hover:bg-orange-700">
+              <CalendarIcon className="w-4 h-4 mr-1" /> Pay Run
+            </Button>
+            <Button size="sm" className="bg-indigo-600 hover:bg-indigo-700">
+              <FileText className="w-4 h-4 mr-1" /> New Invoice
+            </Button>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
