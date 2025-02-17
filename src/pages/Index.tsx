@@ -1,4 +1,3 @@
-
 import { Card } from "@/components/ui/card";
 import { AppLayout } from "@/components/ui/AppLayout";
 import { Calendar, DollarSign, FileText, Users, CheckSquare, Clock, MessageSquare, XSquare } from "lucide-react";
@@ -85,16 +84,15 @@ const Index = () => {
   return (
     <AppLayout>
       <div className="space-y-6 animate-fadeIn">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-semibold text-gray-900">Dashboard</h1>
-            <p className="text-gray-500 mt-1">Welcome back to Trade Ease</p>
-          </div>
-          <div>
-            <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-              + New Job
-            </button>
-          </div>
+        <div className="flex flex-col items-center justify-center text-center mb-8">
+          <h1 className="text-2xl font-semibold text-gray-900">Dashboard</h1>
+          <p className="text-gray-500 mt-1">Welcome back to Trade Ease</p>
+        </div>
+
+        <div className="flex justify-end">
+          <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+            + New Job
+          </button>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
