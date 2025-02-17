@@ -12,7 +12,7 @@ interface AppLayoutProps {
 export function AppLayout({ children, className }: AppLayoutProps) {
   return (
     <SidebarProvider>
-      <div className="min-h-screen flex w-full bg-gray-50">
+      <div className="min-h-screen min-w-full flex bg-background">
         <AppSidebar />
         <main className={cn("flex-1 p-6 overflow-auto", className)}>
           <div className="mx-auto max-w-7xl">

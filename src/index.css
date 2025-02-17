@@ -90,6 +90,10 @@
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground min-h-screen min-w-full;
+  }
+
+  #root {
+    @apply min-h-screen min-w-full;
   }
 }
