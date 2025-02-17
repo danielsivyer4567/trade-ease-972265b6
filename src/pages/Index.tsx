@@ -98,29 +98,10 @@ const Index = () => {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2">
+          <div className="lg:col-span-2 space-y-6">
             <Card className="p-4">
               <h2 className="text-lg font-semibold mb-4">Job Locations</h2>
               <JobMap jobs={[...todaysJobs, ...tomorrowsJobs]} />
-            </Card>
-          </div>
-          <div className="space-y-6">
-            <Card className="p-4">
-              <h2 className="text-lg font-semibold mb-4">Quote Status</h2>
-              <div className="space-y-3">
-                {quoteStatuses.map((quote) => (
-                  <div 
-                    key={quote.title}
-                    className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-all cursor-pointer"
-                  >
-                    <div className="flex items-center gap-3">
-                      <quote.icon className="w-5 h-5" style={{ color: quote.color }} />
-                      <span className="font-medium">{quote.title}</span>
-                    </div>
-                    <span className="text-sm font-semibold text-gray-600">{quote.count}</span>
-                  </div>
-                ))}
-              </div>
             </Card>
             
             <Card className="p-4">
@@ -146,6 +127,25 @@ const Index = () => {
                 {todaysJobs.length === 0 && (
                   <p className="text-gray-500 text-sm">No jobs scheduled for today</p>
                 )}
+              </div>
+            </Card>
+          </div>
+          <div className="space-y-6">
+            <Card className="p-4">
+              <h2 className="text-lg font-semibold mb-4">Quote Status</h2>
+              <div className="space-y-3">
+                {quoteStatuses.map((quote) => (
+                  <div 
+                    key={quote.title}
+                    className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-all cursor-pointer"
+                  >
+                    <div className="flex items-center gap-3">
+                      <quote.icon className="w-5 h-5" style={{ color: quote.color }} />
+                      <span className="font-medium">{quote.title}</span>
+                    </div>
+                    <span className="text-sm font-semibold text-gray-600">{quote.count}</span>
+                  </div>
+                ))}
               </div>
             </Card>
             
