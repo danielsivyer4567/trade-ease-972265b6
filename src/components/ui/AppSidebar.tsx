@@ -1,95 +1,80 @@
 
-import {
-  Calendar,
-  ClipboardList,
-  FileText,
-  Home,
-  Settings,
-  Users,
-  Hammer,
-} from "lucide-react";
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarGroupLabel,
-  SidebarHeader,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-} from "@/components/ui/sidebar";
-
-const menuItems = [
-  { title: "Dashboard", icon: Home, url: "/" },
-  { title: "Jobs", icon: ClipboardList, url: "/jobs" },
-  { title: "Schedule", icon: Calendar, url: "/schedule" },
-  { title: "Customers", icon: Users, url: "/customers" },
-  { title: "Quotes & Invoices", icon: FileText, url: "/quotes" },
-  { title: "Settings", icon: Settings, url: "/settings" },
-];
-
-const teamSettings = [
-  { title: "Red Team", color: "#ea384c", url: "/settings/red-team" },
-  { title: "Blue Team", color: "#0EA5E9", url: "/settings/blue-team" },
-  { title: "Green Team", color: "#10B981", url: "/settings/green-team" },
-];
+import React from 'react';
+import { Link } from 'react-router-dom';
+import { 
+  LayoutDashboard, 
+  Briefcase, 
+  Users, 
+  FileText, 
+  Settings, 
+  Menu,
+} from 'lucide-react';
+import { useSidebar } from './sidebar';
+import { cn } from '@/lib/utils';
+import { Button } from './button';
 
 export function AppSidebar() {
+  const { isOpen, toggle } = useSidebar();
+
   return (
-    <Sidebar>
-      <SidebarHeader className="p-4">
-        <div className="flex items-center gap-3">
-          <img 
-            src="/lovable-uploads/147b0371-94bb-403e-a449-f6fc081c4d6c.png" 
-            alt="Trade Ease Logo" 
-            className="w-8 h-8"
-          />
-          <h2 className="text-2xl font-bold">Trade Ease</h2>
+    <>
+      <Button
+        variant="outline"
+        size="icon"
+        className="fixed left-4 top-4 z-40 lg:hidden"
+        onClick={toggle}
+      >
+        <Menu />
+      </Button>
+      <div
+        className={cn(
+          "fixed inset-y-0 left-0 z-30 w-64 bg-white border-r transition-transform lg:translate-x-0",
+          !isOpen && "-translate-x-full"
+        )}
+      >
+        <div className="flex flex-col h-full">
+          <div className="p-6">
+            <h1 className="text-2xl font-bold">Trade Ease</h1>
+          </div>
+          <nav className="flex-1 p-4 space-y-2">
+            <Link
+              to="/"
+              className="flex items-center gap-2 p-2 rounded-lg hover:bg-gray-100 text-gray-700 hover:text-gray-900"
+            >
+              <LayoutDashboard className="w-5 h-5" />
+              Dashboard
+            </Link>
+            <Link
+              to="/jobs"
+              className="flex items-center gap-2 p-2 rounded-lg hover:bg-gray-100 text-gray-700 hover:text-gray-900"
+            >
+              <Briefcase className="w-5 h-5" />
+              Jobs
+            </Link>
+            <Link
+              to="/customers"
+              className="flex items-center gap-2 p-2 rounded-lg hover:bg-gray-100 text-gray-700 hover:text-gray-900"
+            >
+              <Users className="w-5 h-5" />
+              Customers
+            </Link>
+            <Link
+              to="/quotes"
+              className="flex items-center gap-2 p-2 rounded-lg hover:bg-gray-100 text-gray-700 hover:text-gray-900"
+            >
+              <FileText className="w-5 h-5" />
+              Quotes
+            </Link>
+            <Link
+              to="/settings"
+              className="flex items-center gap-2 p-2 rounded-lg hover:bg-gray-100 text-gray-700 hover:text-gray-900"
+            >
+              <Settings className="w-5 h-5" />
+              Settings
+            </Link>
+          </nav>
         </div>
-      </SidebarHeader>
-      <SidebarContent>
-        <SidebarGroup>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {menuItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
-                    <a
-                      href={item.url}
-                      className="flex items-center gap-4 px-4 py-3 rounded-md hover:bg-gray-100 transition-all group"
-                    >
-                      <div className="transition-transform duration-200 group-hover:scale-110">
-                        <item.icon className="w-6 h-6" />
-                      </div>
-                      <span className={`text-lg font-medium ${
-                        item.title === "Dashboard" ? "text-2xl font-bold" : ""
-                      }`}>{item.title}</span>
-                    </a>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-              
-              {/* Team Settings listed separately */}
-              {teamSettings.map((team) => (
-                <SidebarMenuItem key={team.title}>
-                  <SidebarMenuButton asChild>
-                    <a
-                      href={team.url}
-                      className="flex items-center gap-4 px-4 py-3 pl-8 rounded-md hover:bg-gray-100 transition-all group"
-                    >
-                      <div className="transition-transform duration-200 group-hover:scale-110">
-                        <Hammer className="w-5 h-5" style={{ color: team.color }} />
-                      </div>
-                      <span className="text-lg font-medium">{team.title}</span>
-                    </a>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-      </SidebarContent>
-    </Sidebar>
+      </div>
+    </>
   );
 }
