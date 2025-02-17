@@ -7,6 +7,10 @@ import {
   Settings,
   Users,
   Hammer,
+  CheckSquare,
+  Clock,
+  MessageSquare,
+  XSquare
 } from "lucide-react";
 import {
   Sidebar,
@@ -27,6 +31,13 @@ const menuItems = [
   { title: "Customers", icon: Users, url: "/customers" },
   { title: "Quotes & Invoices", icon: FileText, url: "/quotes" },
   { title: "Settings", icon: Settings, url: "/settings" },
+];
+
+const quoteStatuses = [
+  { title: "Accepted Quotes", icon: CheckSquare, url: "/quotes/accepted", color: "#10B981" },
+  { title: "Awaiting Acceptance", icon: Clock, url: "/quotes/pending", color: "#F59E0B" },
+  { title: "Replied Quotes", icon: MessageSquare, url: "/quotes/replied", color: "#3B82F6" },
+  { title: "Denied Quotes", icon: XSquare, url: "/quotes/denied", color: "#EF4444" },
 ];
 
 const teamSettings = [
@@ -65,6 +76,23 @@ export function AppSidebar() {
                       <span className={`text-lg font-medium ${
                         item.title === "Dashboard" ? "text-2xl font-bold" : ""
                       }`}>{item.title}</span>
+                    </a>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+
+              {/* Quote Status Section */}
+              {quoteStatuses.map((quote) => (
+                <SidebarMenuItem key={quote.title}>
+                  <SidebarMenuButton asChild>
+                    <a
+                      href={quote.url}
+                      className="flex items-center gap-4 px-4 py-3 pl-8 rounded-md hover:bg-gray-100 transition-all group"
+                    >
+                      <div className="transition-transform duration-200 group-hover:scale-110">
+                        <quote.icon className="w-5 h-5" style={{ color: quote.color }} />
+                      </div>
+                      <span className="text-lg font-medium">{quote.title}</span>
                     </a>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
