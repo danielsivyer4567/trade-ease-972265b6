@@ -16,11 +16,6 @@ export function AppLayout({ children, className }: AppLayoutProps) {
         <AppSidebar />
         <main className={cn("flex-1 p-6 overflow-auto ml-40", className)}>
           <div className="relative mx-auto max-w-7xl">
-            <img 
-              src="/lovable-uploads/6a07dd00-f2c7-49da-8b00-48d960c13610.png"
-              alt="Trade Ease Logo"
-              className="absolute top-0 left-0 w-12 h-12 md:w-16 md:h-16"
-            />
             {children}
           </div>
         </main>
