@@ -62,7 +62,9 @@ export function AppSidebar() {
                       <div className="transition-transform duration-200 group-hover:scale-110">
                         <item.icon className="w-6 h-6" />
                       </div>
-                      <span className="text-lg font-medium">{item.title}</span>
+                      <span className={`text-lg font-medium ${
+                        item.title === "Dashboard" ? "text-2xl font-bold" : ""
+                      }`}>{item.title}</span>
                     </a>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
