@@ -102,7 +102,7 @@ const Index = () => {
           <img 
             src="/lovable-uploads/6a07dd00-f2c7-49da-8b00-48d960c13610.png"
             alt="Trade Ease Logo"
-            className="w-12 h-12 md:w-16 md:h-16 mb-4"
+            className="w-8 h-8 md:w-10 md:h-10 mb-2"
           />
           <h1 className="text-xl md:text-2xl font-semibold text-gray-900">Dashboard</h1>
           <div className="flex flex-wrap gap-1.5 md:gap-2 justify-center mt-4 md:mt-6 w-full max-w-screen-lg">
