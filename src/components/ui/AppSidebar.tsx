@@ -8,6 +8,14 @@ import {
   FileText, 
   Settings, 
   Menu,
+  Calendar,
+  Network,
+  Share,
+  Bot,
+  Mail,
+  MessageSquare,
+  Link as LinkIcon,
+  Database,
 } from 'lucide-react';
 import { useSidebar } from './sidebar';
 import { cn } from '@/lib/utils';
@@ -44,15 +52,20 @@ export function AppSidebar() {
               <LayoutDashboard className="w-3.5 h-3.5" />
               Dashboard
             </Link>
-            <a
-              href="/jobs"
-              target="_blank"
-              rel="noopener noreferrer"
+            <Link
+              to="/jobs"
               className="flex items-center gap-1.5 p-1.5 rounded-lg hover:bg-gray-100 text-gray-700 hover:text-gray-900 text-sm"
             >
               <Briefcase className="w-3.5 h-3.5" />
               Jobs
-            </a>
+            </Link>
+            <Link
+              to="/calendar"
+              className="flex items-center gap-1.5 p-1.5 rounded-lg hover:bg-gray-100 text-gray-700 hover:text-gray-900 text-sm"
+            >
+              <Calendar className="w-3.5 h-3.5" />
+              Calendar
+            </Link>
             <Link
               to="/customers"
               className="flex items-center gap-1.5 p-1.5 rounded-lg hover:bg-gray-100 text-gray-700 hover:text-gray-900 text-sm"
@@ -66,6 +79,55 @@ export function AppSidebar() {
             >
               <FileText className="w-3.5 h-3.5" />
               Quotes
+            </Link>
+            <Link
+              to="/messaging"
+              className="flex items-center gap-1.5 p-1.5 rounded-lg hover:bg-gray-100 text-gray-700 hover:text-gray-900 text-sm"
+            >
+              <MessageSquare className="w-3.5 h-3.5" />
+              Messaging
+            </Link>
+            <Link
+              to="/email"
+              className="flex items-center gap-1.5 p-1.5 rounded-lg hover:bg-gray-100 text-gray-700 hover:text-gray-900 text-sm"
+            >
+              <Mail className="w-3.5 h-3.5" />
+              Email
+            </Link>
+            <Link
+              to="/ai-features"
+              className="flex items-center gap-1.5 p-1.5 rounded-lg hover:bg-gray-100 text-gray-700 hover:text-gray-900 text-sm"
+            >
+              <Bot className="w-3.5 h-3.5" />
+              AI Features
+            </Link>
+            <Link
+              to="/integrations"
+              className="flex items-center gap-1.5 p-1.5 rounded-lg hover:bg-gray-100 text-gray-700 hover:text-gray-900 text-sm"
+            >
+              <Network className="w-3.5 h-3.5" />
+              Integrations
+            </Link>
+            <Link
+              to="/social"
+              className="flex items-center gap-1.5 p-1.5 rounded-lg hover:bg-gray-100 text-gray-700 hover:text-gray-900 text-sm"
+            >
+              <Share className="w-3.5 h-3.5" />
+              Social
+            </Link>
+            <Link
+              to="/referrals"
+              className="flex items-center gap-1.5 p-1.5 rounded-lg hover:bg-gray-100 text-gray-700 hover:text-gray-900 text-sm"
+            >
+              <LinkIcon className="w-3.5 h-3.5" />
+              Refer a Friend
+            </Link>
+            <Link
+              to="/database"
+              className="flex items-center gap-1.5 p-1.5 rounded-lg hover:bg-gray-100 text-gray-700 hover:text-gray-900 text-sm"
+            >
+              <Database className="w-3.5 h-3.5" />
+              Database
             </Link>
             <Link
               to="/settings"
