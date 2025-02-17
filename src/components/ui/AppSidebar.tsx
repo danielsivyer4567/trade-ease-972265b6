@@ -6,6 +6,8 @@ import {
   Home,
   Settings,
   Users,
+  Hammer,
+  ChevronDown,
 } from "lucide-react";
 import {
   Sidebar,
@@ -18,6 +20,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import { useState } from "react";
 
 const menuItems = [
   { title: "Dashboard", icon: Home, url: "/" },
@@ -25,10 +28,17 @@ const menuItems = [
   { title: "Schedule", icon: Calendar, url: "/schedule" },
   { title: "Customers", icon: Users, url: "/customers" },
   { title: "Quotes & Invoices", icon: FileText, url: "/quotes" },
-  { title: "Settings", icon: Settings, url: "/settings" },
+];
+
+const teamSettings = [
+  { title: "Red Team", color: "#ea384c", url: "/settings/red-team" },
+  { title: "Blue Team", color: "#0EA5E9", url: "/settings/blue-team" },
+  { title: "Green Team", color: "#10B981", url: "/settings/green-team" },
 ];
 
 export function AppSidebar() {
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+
   return (
     <Sidebar>
       <SidebarHeader className="p-4">
@@ -60,6 +70,45 @@ export function AppSidebar() {
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
+              
+              {/* Settings with nested team options */}
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild>
+                  <button
+                    onClick={() => setIsSettingsOpen(!isSettingsOpen)}
+                    className="w-full flex items-center gap-4 px-4 py-3 rounded-md hover:bg-gray-100 transition-all group"
+                  >
+                    <div className="transition-transform duration-200 group-hover:scale-110">
+                      <Settings className="w-6 h-6" />
+                    </div>
+                    <span className="text-lg font-medium flex-1 text-left">Settings</span>
+                    <ChevronDown 
+                      className={`w-5 h-5 transition-transform duration-200 ${
+                        isSettingsOpen ? "rotate-180" : ""
+                      }`} 
+                    />
+                  </button>
+                </SidebarMenuButton>
+                
+                {/* Nested team options */}
+                <div className={`overflow-hidden transition-all duration-200 ${
+                  isSettingsOpen ? "max-h-48" : "max-h-0"
+                }`}>
+                  {teamSettings.map((team) => (
+                    <SidebarMenuButton key={team.title} asChild>
+                      <a
+                        href={team.url}
+                        className="flex items-center gap-4 px-4 py-3 pl-14 rounded-md hover:bg-gray-100 transition-all group"
+                      >
+                        <div className="transition-transform duration-200 group-hover:scale-110">
+                          <Hammer className="w-5 h-5" style={{ color: team.color }} />
+                        </div>
+                        <span className="text-lg font-medium">{team.title}</span>
+                      </a>
+                    </SidebarMenuButton>
+                  ))}
+                </div>
+              </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
