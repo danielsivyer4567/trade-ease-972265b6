@@ -1,4 +1,3 @@
-
 import { Card } from "@/components/ui/card";
 import { AppLayout } from "@/components/ui/AppLayout";
 import { 
@@ -93,6 +92,39 @@ const quoteStatuses = [
   { title: "Replied Quotes", icon: MessageSquare, color: "#3B82F6", count: "2" },
   { title: "Denied Quotes", icon: XSquare, color: "#EF4444", count: "1" },
 ];
+
+const teamColors = {
+  plumbing: {
+    light: '#D3E4FD', // Soft Blue
+    primary: '#0EA5E9', // Ocean Blue
+    text: '#1E293B' // Dark Blue/Gray
+  },
+  electrical: {
+    light: '#E5DEFF', // Soft Purple
+    primary: '#9B87F5', // Primary Purple
+    text: '#1A1F2C' // Dark Purple
+  },
+  hvac: {
+    light: '#F2FCE2', // Soft Green
+    primary: '#22C55E', // Emerald Green
+    text: '#14532D' // Dark Green
+  },
+  carpentry: {
+    light: '#FEF7CD', // Soft Yellow
+    primary: '#EAB308', // Yellow
+    text: '#713F12' // Dark Brown
+  },
+  painting: {
+    light: '#FFDEE2', // Soft Pink
+    primary: '#EC4899', // Pink
+    text: '#831843' // Dark Pink
+  },
+  general: {
+    light: '#F1F0FB', // Soft Gray
+    primary: '#8E9196', // Neutral Gray
+    text: '#403E43' // Charcoal Gray
+  }
+};
 
 const Index = () => {
   return (
