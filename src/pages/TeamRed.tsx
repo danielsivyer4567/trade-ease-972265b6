@@ -45,6 +45,27 @@ export default function TeamRed() {
             </div>
           </Card>
         </div>
+
+        {/* Time Off Section */}
+        <Card className="p-4 mt-6">
+          <h2 className="text-lg font-semibold mb-3 text-red-600">Team Time Off</h2>
+          <div className="space-y-3">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="border rounded-lg p-3">
+                <h3 className="font-medium text-gray-700 mb-2">Pending Requests</h3>
+                <div className="text-sm text-gray-500">No pending time off requests</div>
+              </div>
+              <div className="border rounded-lg p-3">
+                <h3 className="font-medium text-gray-700 mb-2">Approved Time Off</h3>
+                <div className="text-sm text-gray-500">No approved time off</div>
+              </div>
+              <div className="border rounded-lg p-3">
+                <h3 className="font-medium text-gray-700 mb-2">Upcoming Time Off</h3>
+                <div className="text-sm text-gray-500">No upcoming time off scheduled</div>
+              </div>
+            </div>
+          </div>
+        </Card>
       </div>
     </AppLayout>
   );
