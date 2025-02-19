@@ -60,33 +60,6 @@ export function AppSidebar() {
               <LayoutDashboard className="w-3.5 h-3.5" />
               Dashboard
             </Link>
-
-            {/* Teams Section */}
-            <div className="pt-2">
-              <div className="px-1.5 mb-1 text-xs font-medium text-gray-500">Teams</div>
-              <Link
-                to="/team-red"
-                className="flex items-center gap-1.5 p-1.5 rounded-lg hover:bg-red-50 text-red-600 hover:text-red-700 text-sm"
-              >
-                <Hammer className="w-3.5 h-3.5" />
-                Team Red
-              </Link>
-              <Link
-                to="/team-blue"
-                className="flex items-center gap-1.5 p-1.5 rounded-lg hover:bg-blue-50 text-blue-600 hover:text-blue-700 text-sm"
-              >
-                <Hammer className="w-3.5 h-3.5" />
-                Team Blue
-              </Link>
-              <Link
-                to="/team-green"
-                className="flex items-center gap-1.5 p-1.5 rounded-lg hover:bg-green-50 text-green-600 hover:text-green-700 text-sm"
-              >
-                <Hammer className="w-3.5 h-3.5" />
-                Team Green
-              </Link>
-            </div>
-
             <Link
               to="/jobs"
               className="flex items-center gap-1.5 p-1.5 rounded-lg hover:bg-gray-100 text-gray-700 hover:text-gray-900 text-sm"
@@ -171,6 +144,32 @@ export function AppSidebar() {
               <Settings className="w-3.5 h-3.5" />
               Settings
             </Link>
+
+            {/* Teams Section - moved below settings with gap */}
+            <div className="pt-4">
+              <div className="px-1.5 mb-1 text-xs font-medium text-gray-500">Teams</div>
+              <Link
+                to="/team-red"
+                className="flex items-center gap-1.5 p-1.5 rounded-lg hover:bg-red-50 text-red-600 hover:text-red-700 text-sm"
+              >
+                <Hammer className="w-3.5 h-3.5" />
+                Team Red
+              </Link>
+              <Link
+                to="/team-blue"
+                className="flex items-center gap-1.5 p-1.5 rounded-lg hover:bg-blue-50 text-blue-600 hover:text-blue-700 text-sm"
+              >
+                <Hammer className="w-3.5 h-3.5" />
+                Team Blue
+              </Link>
+              <Link
+                to="/team-green"
+                className="flex items-center gap-1.5 p-1.5 rounded-lg hover:bg-green-50 text-green-600 hover:text-green-700 text-sm"
+              >
+                <Hammer className="w-3.5 h-3.5" />
+                Team Green
+              </Link>
+            </div>
           </nav>
         </div>
       </div>
