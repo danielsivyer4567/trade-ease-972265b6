@@ -43,11 +43,14 @@ export function AppSidebar() {
       >
         <div className="flex flex-col h-full">
           <div className="p-4">
-            <img 
-              src="/lovable-uploads/6a07dd00-f2c7-49da-8b00-48d960c13610.png"
-              alt="Trade Ease Logo"
-              className="w-8 h-8 mb-6"
-            />
+            <div className="flex items-center gap-2 mb-6">
+              <img 
+                src="/lovable-uploads/6a07dd00-f2c7-49da-8b00-48d960c13610.png"
+                alt="Trade Ease Logo"
+                className="w-8 h-8"
+              />
+              <span className="font-medium text-gray-900">Trade Ease</span>
+            </div>
           </div>
           <nav className="flex-1 p-1 space-y-0.5">
             <Link
