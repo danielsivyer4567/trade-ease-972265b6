@@ -1,3 +1,4 @@
+
 import {
   LayoutDashboard,
   ListChecks,
@@ -19,12 +20,9 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
-interface NavItemProps {
-  isExpanded: boolean
-}
-
 export function AppSidebar() {
-  const { isExpanded } = useSidebar()
+  const { state } = useSidebar()
+  const isExpanded = state === "expanded"
 
   return (
     <div className="flex flex-col h-full">
