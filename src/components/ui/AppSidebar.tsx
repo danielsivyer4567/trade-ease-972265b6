@@ -17,6 +17,7 @@ import {
   Link as LinkIcon,
   Database,
   Hammer,
+  Plus
 } from 'lucide-react';
 import { useSidebar } from './sidebar';
 import { cn } from '@/lib/utils';
@@ -102,7 +103,7 @@ export function AppSidebar() {
               Settings
             </Link>
 
-            {/* Teams Section - moved below settings with gap */}
+            {/* Teams Section */}
             <div className="pt-8">
               <div className="mb-1 text-sm font-bold text-black rounded-2xl my-0 py-[7px] px-px mx-1">Teams view</div>
               <Link
@@ -126,6 +127,14 @@ export function AppSidebar() {
                 <Hammer className="w-3.5 h-3.5" />
                 Green Team
               </Link>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="w-full flex items-center gap-1.5 p-1.5 text-gray-600 hover:text-gray-700 hover:bg-gray-50 text-sm mt-1"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                Add Team
+              </Button>
             </div>
           </nav>
         </div>
