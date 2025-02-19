@@ -86,6 +86,26 @@ export default function Jobs() {
     return template;
   };
 
+  const parseCSVTemplate = (csvContent: string): JobTemplate => {
+    const rows = csvContent.split('\n').map(row => row.split(',').map(cell => cell.trim()));
+    const headers = rows[0].map(header => header.toLowerCase());
+    const data = rows[1]; // Assuming first row after headers contains the template data
+
+    const getColumnValue = (columnName: string) => {
+      const index = headers.findIndex(h => h.includes(columnName));
+      return index !== -1 ? data[index] : '';
+    };
+
+    return {
+      id: crypto.randomUUID(),
+      title: getColumnValue('title') || "Untitled Template",
+      estimatedDuration: getColumnValue('duration') || "Not specified",
+      materials: getColumnValue('materials')?.split(';') || [],
+      price: getColumnValue('price') || "Not specified",
+      category: (getColumnValue('category') || "Plumbing") as "Plumbing" | "Electrical" | "HVAC",
+    };
+  };
+
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -130,6 +150,25 @@ export default function Jobs() {
       };
       
       setGeneratedTemplates([mockTemplate, ...generatedTemplates]);
+    } else if (file.type === 'text/csv' || file.name.endsWith('.csv')) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const template = parseCSVTemplate(e.target?.result as string);
+          setGeneratedTemplates([template, ...generatedTemplates]);
+          toast({
+            title: "Success",
+            description: "CSV template uploaded successfully",
+          });
+        } catch (error) {
+          toast({
+            title: "Error",
+            description: "Invalid CSV format. Please check the file structure.",
+            variant: "destructive",
+          });
+        }
+      };
+      reader.readAsText(file);
     } else {
       const reader = new FileReader();
       reader.onload = (e) => {
@@ -230,7 +269,7 @@ export default function Jobs() {
               <div className="border-2 border-dashed border-gray-200 rounded-lg p-6 text-center">
                 <Input
                   type="file"
-                  accept=".json,.txt,.pdf,.doc,.docx"
+                  accept=".json,.txt,.pdf,.doc,.docx,.csv"
                   onChange={handleFileUpload}
                   className="hidden"
                   id="template-upload"
@@ -244,7 +283,7 @@ export default function Jobs() {
                     Click to upload a template file
                   </span>
                   <span className="text-xs text-gray-400">
-                    Supports JSON, TXT, PDF, and Word documents
+                    Supports JSON, TXT, CSV, PDF, and Word documents
                   </span>
                 </label>
               </div>
@@ -252,11 +291,14 @@ export default function Jobs() {
                 <p className="font-medium mb-1">Document format:</p>
                 <p>Title: [Job Title]</p>
                 <p>Duration: [Estimated Duration]</p>
-                <p>Materials: [item1, item2, item3]</p>
+                <p>Materials: [item1; item2; item3]</p>
                 <p>Price: [Price Range]</p>
                 <p>Category: [Plumbing/Electrical/HVAC]</p>
                 <p className="mt-2 text-gray-400">
-                  For PDF and Word documents, please follow the format above for best results
+                  For CSV files, use headers: Title, Duration, Materials, Price, Category
+                </p>
+                <p className="text-gray-400">
+                  For PDF and Word documents, please follow the format above
                 </p>
               </div>
             </div>
