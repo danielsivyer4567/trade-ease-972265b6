@@ -16,6 +16,7 @@ export default function TeamRed() {
     jobRelated: 0
   });
   const [jobNumber, setJobNumber] = React.useState('');
+  const [selectedTeamMember, setSelectedTeamMember] = React.useState('');
   const [incidentReport, setIncidentReport] = React.useState({
     type: '',
     description: '',
@@ -24,12 +25,23 @@ export default function TeamRed() {
     severity: ''
   });
 
+  const teamMembers = [
+    { id: '1', name: 'John Smith' },
+    { id: '2', name: 'Sarah Johnson' },
+    { id: '3', name: 'Mike Williams' },
+    { id: '4', name: 'Emily Brown' }
+  ];
+
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>, type: 'insurance' | 'general' | 'jobRelated') => {
     if (event.target.files && event.target.files.length > 0) {
       setDocumentCount(prev => ({
         ...prev,
         [type]: prev[type] + event.target.files!.length
       }));
+      
+      if (selectedTeamMember) {
+        console.log(`Notifying team member ${selectedTeamMember} about new ${type} document upload`);
+      }
     }
   };
 
@@ -121,6 +133,16 @@ export default function TeamRed() {
                 <TabsContent value="general" className="space-y-4">
                   <div className="border rounded-lg p-4">
                     <h4 className="font-medium text-gray-700 mb-2">General Documents</h4>
+                    <select
+                      className="w-full rounded-md border border-input bg-background px-3 h-10 mb-4"
+                      value={selectedTeamMember}
+                      onChange={(e) => setSelectedTeamMember(e.target.value)}
+                    >
+                      <option value="">Select team member to notify</option>
+                      {teamMembers.map(member => (
+                        <option key={member.id} value={member.id}>{member.name}</option>
+                      ))}
+                    </select>
                     <label className="cursor-pointer">
                       <input type="file" className="hidden" multiple onChange={e => handleFileUpload(e, 'general')} accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" />
                       <Button variant="outline" className="w-full">
@@ -134,6 +156,16 @@ export default function TeamRed() {
                 <TabsContent value="insurance" className="space-y-4">
                   <div className="border rounded-lg p-4">
                     <h4 className="font-medium text-gray-700 mb-2">Insurance Documents</h4>
+                    <select
+                      className="w-full rounded-md border border-input bg-background px-3 h-10 mb-4"
+                      value={selectedTeamMember}
+                      onChange={(e) => setSelectedTeamMember(e.target.value)}
+                    >
+                      <option value="">Select team member to notify</option>
+                      {teamMembers.map(member => (
+                        <option key={member.id} value={member.id}>{member.name}</option>
+                      ))}
+                    </select>
                     <label className="cursor-pointer">
                       <input type="file" className="hidden" multiple onChange={e => handleFileUpload(e, 'insurance')} accept=".pdf,.doc,.docx" />
                       <Button variant="outline" className="w-full">
@@ -149,6 +181,16 @@ export default function TeamRed() {
                     <h4 className="font-medium text-gray-700 mb-2">Job Related Files</h4>
                     <div className="space-y-4">
                       <Input type="text" placeholder="Enter Job Number" value={jobNumber} onChange={e => setJobNumber(e.target.value)} className="mb-4" />
+                      <select
+                        className="w-full rounded-md border border-input bg-background px-3 h-10 mb-4"
+                        value={selectedTeamMember}
+                        onChange={(e) => setSelectedTeamMember(e.target.value)}
+                      >
+                        <option value="">Select team member to notify</option>
+                        {teamMembers.map(member => (
+                          <option key={member.id} value={member.id}>{member.name}</option>
+                        ))}
+                      </select>
                       <label className="cursor-pointer">
                         <input type="file" className="hidden" multiple onChange={e => handleFileUpload(e, 'jobRelated')} accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" />
                         <Button variant="outline" className="w-full" disabled={!jobNumber}>
