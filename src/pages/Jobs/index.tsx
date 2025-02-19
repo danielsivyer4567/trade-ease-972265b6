@@ -1,4 +1,3 @@
-
 import { AppLayout } from "@/components/ui/AppLayout";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -70,13 +69,40 @@ export default function Jobs() {
     }
   };
 
+  const parseTextTemplate = (text: string): JobTemplate => {
+    const lines = text.split('\n').map(line => line.trim());
+    const template: JobTemplate = {
+      id: crypto.randomUUID(),
+      title: lines.find(line => line.toLowerCase().includes('title:'))?.split(':')[1]?.trim() || "Untitled Template",
+      estimatedDuration: lines.find(line => line.toLowerCase().includes('duration:'))?.split(':')[1]?.trim() || "Not specified",
+      materials: lines
+        .find(line => line.toLowerCase().includes('materials:'))
+        ?.split(':')[1]
+        ?.split(',')
+        .map(item => item.trim()) || [],
+      price: lines.find(line => line.toLowerCase().includes('price:'))?.split(':')[1]?.trim() || "Not specified",
+      category: (lines.find(line => line.toLowerCase().includes('category:'))?.split(':')[1]?.trim() || "Plumbing") as "Plumbing" | "Electrical" | "HVAC",
+    };
+    return template;
+  };
+
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
       const reader = new FileReader();
       reader.onload = (e) => {
         try {
-          const template = JSON.parse(e.target?.result as string);
+          let template: JobTemplate;
+          
+          if (file.type === 'application/json') {
+            template = JSON.parse(e.target?.result as string);
+            if (!template.id) {
+              template.id = crypto.randomUUID();
+            }
+          } else {
+            template = parseTextTemplate(e.target?.result as string);
+          }
+          
           setGeneratedTemplates([template, ...generatedTemplates]);
           toast({
             title: "Success",
@@ -85,7 +111,7 @@ export default function Jobs() {
         } catch (error) {
           toast({
             title: "Error",
-            description: "Invalid template file format",
+            description: "Invalid template format. Please check your file format.",
             variant: "destructive",
           });
         }
@@ -96,6 +122,7 @@ export default function Jobs() {
 
   const createBlankTemplate = () => {
     const blankTemplate: JobTemplate = {
+      id: crypto.randomUUID(),
       title: "New Template",
       estimatedDuration: "",
       materials: [],
@@ -162,7 +189,7 @@ export default function Jobs() {
               <div className="border-2 border-dashed border-gray-200 rounded-lg p-6 text-center">
                 <Input
                   type="file"
-                  accept=".json"
+                  accept=".json,.txt"
                   onChange={handleFileUpload}
                   className="hidden"
                   id="template-upload"
@@ -176,9 +203,17 @@ export default function Jobs() {
                     Click to upload a template file
                   </span>
                   <span className="text-xs text-gray-400">
-                    Supports JSON format
+                    Supports JSON and TXT formats
                   </span>
                 </label>
+              </div>
+              <div className="text-xs text-gray-500 mt-2">
+                <p className="font-medium mb-1">Text file format:</p>
+                <p>Title: [Job Title]</p>
+                <p>Duration: [Estimated Duration]</p>
+                <p>Materials: [item1, item2, item3]</p>
+                <p>Price: [Price Range]</p>
+                <p>Category: [Plumbing/Electrical/HVAC]</p>
               </div>
             </div>
           </Card>
