@@ -147,7 +147,7 @@ export function AppSidebar() {
 
             {/* Teams Section - moved below settings with gap */}
             <div className="pt-4">
-              <div className="px-1.5 mb-1 text-xs font-medium text-gray-500">Teams</div>
+              <div className="px-1.5 mb-1 text-xs font-semibold text-gray-500 text-center">Teams</div>
               <Link
                 to="/team-red"
                 className="flex items-center gap-1.5 p-1.5 rounded-lg hover:bg-red-50 text-red-600 hover:text-red-700 text-sm"
