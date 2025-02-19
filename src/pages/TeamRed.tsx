@@ -60,7 +60,7 @@ export default function TeamRed() {
   };
   return <AppLayout>
       <div className="space-y-8">
-        <div className="flex items-center gap-3 mb-4 px-[240px] mx-[199px]">
+        <div className="flex items-center gap-3 mb-4 px-[240px] mx-[189px]">
           <img src="/lovable-uploads/6a07dd00-f2c7-49da-8b00-48d960c13610.png" alt="Trade Ease Logo" className="w-8 h-8" />
           <h2 className="text-xl font-semibold text-zinc-950">Red Team Calendar</h2>
         </div>
