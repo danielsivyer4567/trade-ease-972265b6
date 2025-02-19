@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { AppLayout } from '@/components/ui/AppLayout';
 import { Calendar } from '@/components/ui/calendar';
@@ -7,7 +6,6 @@ import { Button } from '@/components/ui/button';
 import { Upload } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
-
 export default function TeamRed() {
   const [date, setDate] = React.useState<Date | undefined>(new Date());
   const [documentCount, setDocumentCount] = React.useState({
@@ -16,7 +14,6 @@ export default function TeamRed() {
     jobRelated: 0
   });
   const [jobNumber, setJobNumber] = React.useState('');
-
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>, type: 'insurance' | 'general' | 'jobRelated') => {
     if (event.target.files && event.target.files.length > 0) {
       setDocumentCount(prev => ({
@@ -25,7 +22,6 @@ export default function TeamRed() {
       }));
     }
   };
-
   return <AppLayout>
       <div className="space-y-8">
         <h1 className="text-2xl font-bold text-red-600">Red Team Dashboard</h1>
@@ -34,30 +30,24 @@ export default function TeamRed() {
         <section>
           <h2 className="text-xl font-semibold mb-4 text-zinc-950">Team Calendar</h2>
           <div className="bg-white p-6 rounded-lg shadow-md">
-            <Calendar 
-              mode="single" 
-              selected={date} 
-              onSelect={setDate}
-              className="w-full" 
-              classNames={{
-                months: "w-full",
-                month: "w-full",
-                table: "w-full border-collapse",
-                head_row: "grid grid-cols-7",
-                head_cell: "text-muted-foreground text-center text-sm font-medium p-2",
-                row: "grid grid-cols-7",
-                cell: "h-16 text-center text-sm p-0 relative hover:bg-gray-100 rounded-md",
-                day: "h-16 w-full p-2 font-normal aria-selected:bg-red-600 aria-selected:text-white hover:bg-gray-100 rounded-md",
-                day_range_end: "day-range-end",
-                day_selected: "bg-red-600 text-white hover:bg-red-600 hover:text-white focus:bg-red-600 focus:text-white",
-                day_today: "bg-gray-100 text-gray-900",
-                day_outside: "text-gray-400",
-                nav: "space-x-1 flex items-center justify-between p-2",
-                nav_button_previous: "absolute left-1",
-                nav_button_next: "absolute right-1",
-                caption: "flex justify-center py-4 relative items-center text-lg font-semibold",
-              }}
-            />
+            <Calendar mode="single" selected={date} onSelect={setDate} className="w-full" classNames={{
+            months: "w-full",
+            month: "w-full",
+            table: "w-full border-collapse",
+            head_row: "grid grid-cols-7",
+            head_cell: "text-muted-foreground text-center text-sm font-medium p-2",
+            row: "grid grid-cols-7",
+            cell: "h-16 text-center text-sm p-0 relative hover:bg-gray-100 rounded-md",
+            day: "h-16 w-full p-2 font-normal aria-selected:bg-red-600 aria-selected:text-white hover:bg-gray-100 rounded-md",
+            day_range_end: "day-range-end",
+            day_selected: "bg-red-600 text-white hover:bg-red-600 hover:text-white focus:bg-red-600 focus:text-white",
+            day_today: "bg-gray-100 text-gray-900",
+            day_outside: "text-gray-400",
+            nav: "space-x-1 flex items-center justify-between p-2",
+            nav_button_previous: "absolute left-1",
+            nav_button_next: "absolute right-1",
+            caption: "flex justify-center py-4 relative items-center text-lg font-semibold"
+          }} />
           </div>
         </section>
 
@@ -176,55 +166,13 @@ export default function TeamRed() {
 
         {/* Meter Rates Section */}
         <section>
-          <h2 className="text-xl font-semibold text-red-600 mb-4">Meter Rates</h2>
+          
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Card className="p-4">
-              <h3 className="text-lg font-semibold mb-3 text-red-600">Standard Work</h3>
-              <div className="space-y-3">
-                <div className="border rounded-lg p-3">
-                  <h4 className="font-medium text-gray-700 mb-2">Regular Hours</h4>
-                  <p className="text-2xl font-bold text-red-600">$85/hr</p>
-                  <p className="text-sm text-gray-500">Monday - Friday, 8am - 5pm</p>
-                </div>
-                <div className="border rounded-lg p-3">
-                  <h4 className="font-medium text-gray-700 mb-2">After Hours</h4>
-                  <p className="text-2xl font-bold text-red-600">$127.50/hr</p>
-                  <p className="text-sm text-gray-500">Weekdays after 5pm</p>
-                </div>
-              </div>
-            </Card>
+            
 
-            <Card className="p-4">
-              <h3 className="text-lg font-semibold mb-3 text-red-600">Emergency Work</h3>
-              <div className="space-y-3">
-                <div className="border rounded-lg p-3">
-                  <h4 className="font-medium text-gray-700 mb-2">Regular Hours</h4>
-                  <p className="text-2xl font-bold text-red-600">$127.50/hr</p>
-                  <p className="text-sm text-gray-500">Emergency Response</p>
-                </div>
-                <div className="border rounded-lg p-3">
-                  <h4 className="font-medium text-gray-700 mb-2">After Hours</h4>
-                  <p className="text-2xl font-bold text-red-600">$170/hr</p>
-                  <p className="text-sm text-gray-500">Emergency After Hours</p>
-                </div>
-              </div>
-            </Card>
+            
 
-            <Card className="p-4">
-              <h3 className="text-lg font-semibold mb-3 text-red-600">Special Services</h3>
-              <div className="space-y-3">
-                <div className="border rounded-lg p-3">
-                  <h4 className="font-medium text-gray-700 mb-2">Consultation</h4>
-                  <p className="text-2xl font-bold text-red-600">$95/hr</p>
-                  <p className="text-sm text-gray-500">On-site Assessment</p>
-                </div>
-                <div className="border rounded-lg p-3">
-                  <h4 className="font-medium text-gray-700 mb-2">Project Planning</h4>
-                  <p className="text-2xl font-bold text-red-600">$105/hr</p>
-                  <p className="text-sm text-gray-500">Detailed Planning Services</p>
-                </div>
-              </div>
-            </Card>
+            
           </div>
         </section>
 
