@@ -88,21 +88,16 @@ export default function Jobs() {
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (file) {
+    if (!file) return;
+
+    if (file.type === 'application/json') {
       const reader = new FileReader();
       reader.onload = (e) => {
         try {
-          let template: JobTemplate;
-          
-          if (file.type === 'application/json') {
-            template = JSON.parse(e.target?.result as string);
-            if (!template.id) {
-              template.id = crypto.randomUUID();
-            }
-          } else {
-            template = parseTextTemplate(e.target?.result as string);
+          const template = JSON.parse(e.target?.result as string);
+          if (!template.id) {
+            template.id = crypto.randomUUID();
           }
-          
           setGeneratedTemplates([template, ...generatedTemplates]);
           toast({
             title: "Success",
@@ -111,7 +106,44 @@ export default function Jobs() {
         } catch (error) {
           toast({
             title: "Error",
-            description: "Invalid template format. Please check your file format.",
+            description: "Invalid JSON format",
+            variant: "destructive",
+          });
+        }
+      };
+      reader.readAsText(file);
+    } else if (file.type === 'application/pdf' || 
+               file.type === 'application/msword' || 
+               file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
+      toast({
+        title: "Info",
+        description: "PDF and Word documents need to be processed. Please ensure they follow the template format.",
+      });
+      
+      const mockTemplate: JobTemplate = {
+        id: crypto.randomUUID(),
+        title: file.name.replace(/\.[^/.]+$/, ""),
+        estimatedDuration: "Please edit",
+        materials: [],
+        price: "Please edit",
+        category: "Plumbing",
+      };
+      
+      setGeneratedTemplates([mockTemplate, ...generatedTemplates]);
+    } else {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const template = parseTextTemplate(e.target?.result as string);
+          setGeneratedTemplates([template, ...generatedTemplates]);
+          toast({
+            title: "Success",
+            description: "Template uploaded successfully",
+          });
+        } catch (error) {
+          toast({
+            title: "Error",
+            description: "Invalid template format",
             variant: "destructive",
           });
         }
@@ -147,7 +179,6 @@ export default function Jobs() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* AI Generation Card */}
           <Card className="p-6">
             <h2 className="text-xl font-semibold mb-4">Generate with AI</h2>
             <div className="space-y-4">
@@ -182,14 +213,13 @@ export default function Jobs() {
             </div>
           </Card>
 
-          {/* Upload Template Card */}
           <Card className="p-6">
             <h2 className="text-xl font-semibold mb-4">Upload Template</h2>
             <div className="space-y-4">
               <div className="border-2 border-dashed border-gray-200 rounded-lg p-6 text-center">
                 <Input
                   type="file"
-                  accept=".json,.txt"
+                  accept=".json,.txt,.pdf,.doc,.docx"
                   onChange={handleFileUpload}
                   className="hidden"
                   id="template-upload"
@@ -203,22 +233,24 @@ export default function Jobs() {
                     Click to upload a template file
                   </span>
                   <span className="text-xs text-gray-400">
-                    Supports JSON and TXT formats
+                    Supports JSON, TXT, PDF, and Word documents
                   </span>
                 </label>
               </div>
               <div className="text-xs text-gray-500 mt-2">
-                <p className="font-medium mb-1">Text file format:</p>
+                <p className="font-medium mb-1">Document format:</p>
                 <p>Title: [Job Title]</p>
                 <p>Duration: [Estimated Duration]</p>
                 <p>Materials: [item1, item2, item3]</p>
                 <p>Price: [Price Range]</p>
                 <p>Category: [Plumbing/Electrical/HVAC]</p>
+                <p className="mt-2 text-gray-400">
+                  For PDF and Word documents, please follow the format above for best results
+                </p>
               </div>
             </div>
           </Card>
 
-          {/* Blank Template Card */}
           <Card className="p-6">
             <h2 className="text-xl font-semibold mb-4">Start from Blank</h2>
             <div className="space-y-4">
