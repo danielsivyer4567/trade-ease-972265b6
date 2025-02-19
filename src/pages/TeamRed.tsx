@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { AppLayout } from '@/components/ui/AppLayout';
 import { Calendar } from '@/components/ui/calendar';
@@ -30,6 +31,36 @@ export default function TeamRed() {
           <h2 className="text-xl font-semibold text-red-600 mb-4">Team Calendar</h2>
           <div className="bg-white p-6 rounded-lg shadow-md">
             <Calendar mode="single" selected={date} onSelect={setDate} className="w-full border text-lg font-semibold rounded-3xl py-[2px] px-[225px] my-0 mx-[181px]" />
+          </div>
+        </section>
+
+        {/* Jobs Section */}
+        <section>
+          <h2 className="text-xl font-semibold text-red-600 mb-4">Jobs Overview</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {/* Today's Jobs */}
+            <Card className="p-4">
+              <h3 className="text-lg font-semibold mb-3 text-red-600">Today's Jobs</h3>
+              <div className="space-y-2">
+                <div className="text-sm text-gray-500">No jobs scheduled for today</div>
+              </div>
+            </Card>
+
+            {/* Tomorrow's Jobs */}
+            <Card className="p-4">
+              <h3 className="text-lg font-semibold mb-3 text-red-600">Tomorrow's Jobs</h3>
+              <div className="space-y-2">
+                <div className="text-sm text-gray-500">No jobs scheduled for tomorrow</div>
+              </div>
+            </Card>
+
+            {/* Upcoming Jobs */}
+            <Card className="p-4">
+              <h3 className="text-lg font-semibold mb-3 text-red-600">Upcoming Jobs</h3>
+              <div className="space-y-2">
+                <div className="text-sm text-gray-500">No upcoming jobs scheduled</div>
+              </div>
+            </Card>
           </div>
         </section>
 
@@ -90,36 +121,6 @@ export default function TeamRed() {
                   <p className="text-2xl font-bold text-red-600">{documentCount.general}</p>
                   <p className="text-sm text-gray-500">documents uploaded</p>
                 </div>
-              </div>
-            </Card>
-          </div>
-        </section>
-
-        {/* Jobs Section */}
-        <section>
-          <h2 className="text-xl font-semibold text-red-600 mb-4">Jobs Overview</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {/* Today's Jobs */}
-            <Card className="p-4">
-              <h3 className="text-lg font-semibold mb-3 text-red-600">Today's Jobs</h3>
-              <div className="space-y-2">
-                <div className="text-sm text-gray-500">No jobs scheduled for today</div>
-              </div>
-            </Card>
-
-            {/* Tomorrow's Jobs */}
-            <Card className="p-4">
-              <h3 className="text-lg font-semibold mb-3 text-red-600">Tomorrow's Jobs</h3>
-              <div className="space-y-2">
-                <div className="text-sm text-gray-500">No jobs scheduled for tomorrow</div>
-              </div>
-            </Card>
-
-            {/* Upcoming Jobs */}
-            <Card className="p-4">
-              <h3 className="text-lg font-semibold mb-3 text-red-600">Upcoming Jobs</h3>
-              <div className="space-y-2">
-                <div className="text-sm text-gray-500">No upcoming jobs scheduled</div>
               </div>
             </Card>
           </div>
