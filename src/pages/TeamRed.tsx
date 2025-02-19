@@ -176,6 +176,60 @@ export default function TeamRed() {
           </div>
         </section>
 
+        {/* Meter Rates Section */}
+        <section>
+          <h2 className="text-xl font-semibold text-red-600 mb-4">Meter Rates</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <Card className="p-4">
+              <h3 className="text-lg font-semibold mb-3 text-red-600">Standard Work</h3>
+              <div className="space-y-3">
+                <div className="border rounded-lg p-3">
+                  <h4 className="font-medium text-gray-700 mb-2">Regular Hours</h4>
+                  <p className="text-2xl font-bold text-red-600">$85/hr</p>
+                  <p className="text-sm text-gray-500">Monday - Friday, 8am - 5pm</p>
+                </div>
+                <div className="border rounded-lg p-3">
+                  <h4 className="font-medium text-gray-700 mb-2">After Hours</h4>
+                  <p className="text-2xl font-bold text-red-600">$127.50/hr</p>
+                  <p className="text-sm text-gray-500">Weekdays after 5pm</p>
+                </div>
+              </div>
+            </Card>
+
+            <Card className="p-4">
+              <h3 className="text-lg font-semibold mb-3 text-red-600">Emergency Work</h3>
+              <div className="space-y-3">
+                <div className="border rounded-lg p-3">
+                  <h4 className="font-medium text-gray-700 mb-2">Regular Hours</h4>
+                  <p className="text-2xl font-bold text-red-600">$127.50/hr</p>
+                  <p className="text-sm text-gray-500">Emergency Response</p>
+                </div>
+                <div className="border rounded-lg p-3">
+                  <h4 className="font-medium text-gray-700 mb-2">After Hours</h4>
+                  <p className="text-2xl font-bold text-red-600">$170/hr</p>
+                  <p className="text-sm text-gray-500">Emergency After Hours</p>
+                </div>
+              </div>
+            </Card>
+
+            <Card className="p-4">
+              <h3 className="text-lg font-semibold mb-3 text-red-600">Special Services</h3>
+              <div className="space-y-3">
+                <div className="border rounded-lg p-3">
+                  <h4 className="font-medium text-gray-700 mb-2">Consultation</h4>
+                  <p className="text-2xl font-bold text-red-600">$95/hr</p>
+                  <p className="text-sm text-gray-500">On-site Assessment</p>
+                </div>
+                <div className="border rounded-lg p-3">
+                  <h4 className="font-medium text-gray-700 mb-2">Project Planning</h4>
+                  <p className="text-2xl font-bold text-red-600">$105/hr</p>
+                  <p className="text-sm text-gray-500">Detailed Planning Services</p>
+                </div>
+              </div>
+            </Card>
+          </div>
+        </section>
+
         {/* Time Off Section */}
         <section>
           <h2 className="text-xl font-semibold text-red-600 mb-4">Team Time Off</h2>
