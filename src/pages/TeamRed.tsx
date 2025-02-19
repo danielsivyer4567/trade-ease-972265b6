@@ -1,23 +1,14 @@
-
 import React from 'react';
 import { AppLayout } from '@/components/ui/AppLayout';
 import { Calendar } from '@/components/ui/calendar';
 import { Card } from '@/components/ui/card';
-
 export default function TeamRed() {
   const [date, setDate] = React.useState<Date | undefined>(new Date());
-
-  return (
-    <AppLayout>
+  return <AppLayout>
       <div className="space-y-6">
         <h1 className="text-2xl font-bold text-red-600">Team Red Dashboard</h1>
         <div className="bg-white p-4 rounded-lg shadow-sm">
-          <Calendar 
-            mode="single" 
-            selected={date} 
-            onSelect={setDate} 
-            className="border mx-[240px] my-[15px] rounded-2xl px-[169px] py-[5px]" 
-          />
+          <Calendar mode="single" selected={date} onSelect={setDate} className="border rounded-2xl mx-0 my-0 px-[116px] py-0" />
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -52,12 +43,12 @@ export default function TeamRed() {
           <div className="space-y-3">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="border rounded-lg p-3">
-                <h3 className="font-medium text-gray-700 mb-2">Pending Requests</h3>
-                <div className="text-sm text-gray-500">No pending time off requests</div>
+                <h3 className="font-medium text-gray-700 mb-2">individual of team time off</h3>
+                <div className="text-sm text-gray-500">No pending time off indications</div>
               </div>
               <div className="border rounded-lg p-3">
-                <h3 className="font-medium text-gray-700 mb-2">Approved Time Off</h3>
-                <div className="text-sm text-gray-500">No approved time off</div>
+                <h3 className="font-medium text-gray-700 mb-2">acknowledged team Time Off</h3>
+                <div className="text-sm text-gray-500">No acknowledged time off</div>
               </div>
               <div className="border rounded-lg p-3">
                 <h3 className="font-medium text-gray-700 mb-2">Upcoming Time Off</h3>
@@ -67,6 +58,5 @@ export default function TeamRed() {
           </div>
         </Card>
       </div>
-    </AppLayout>
-  );
+    </AppLayout>;
 }
