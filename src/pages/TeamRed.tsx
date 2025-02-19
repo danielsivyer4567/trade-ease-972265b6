@@ -7,6 +7,7 @@ import { Upload, AlertTriangle } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+
 export default function TeamRed() {
   const [date, setDate] = React.useState<Date | undefined>(new Date());
   const [documentCount, setDocumentCount] = React.useState({
@@ -23,6 +24,7 @@ export default function TeamRed() {
     date: new Date(),
     severity: ''
   });
+
   const teamMembers = [{
     id: '1',
     name: 'John Smith'
@@ -36,6 +38,7 @@ export default function TeamRed() {
     id: '4',
     name: 'Emily Brown'
   }];
+
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>, type: 'insurance' | 'general' | 'jobRelated') => {
     if (event.target.files && event.target.files.length > 0) {
       setDocumentCount(prev => ({
@@ -47,6 +50,7 @@ export default function TeamRed() {
       }
     }
   };
+
   const handleIncidentSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     console.log('Incident Report Submitted:', incidentReport);
@@ -58,44 +62,46 @@ export default function TeamRed() {
       severity: ''
     });
   };
+
   return <AppLayout>
       <div className="space-y-8">
-        <div className="flex items-center gap-3 mx-[240px] py-[9px] my-0 px-[240px]  Red Team Calendar">
+        <div className="flex items-center gap-3 mb-4">
           <img src="/lovable-uploads/6a07dd00-f2c7-49da-8b00-48d960c13610.png" alt="Trade Ease Logo" className="w-8 h-8" />
-          <h1 className="text-2xl font-bold text-red-600">
-        </h1>
+          <h2 className="text-xl font-semibold text-zinc-950">Red Team Calendar</h2>
         </div>
         
-        {/* Calendar Section */}
         <section>
-          <h2 className="text-xl font-semibold mb-4 text-zinc-950"> Red Team Calendar</h2>
           <div className="bg-white p-6 rounded-lg shadow-md">
-            <Calendar mode="single" selected={date} onSelect={setDate} className="w-full" classNames={{
-            months: "w-full",
-            month: "w-full",
-            table: "w-full border-collapse",
-            head_row: "grid grid-cols-7",
-            head_cell: "text-muted-foreground text-center text-sm font-medium p-2",
-            row: "grid grid-cols-7",
-            cell: "h-16 text-center text-sm p-0 relative hover:bg-gray-100 rounded-md",
-            day: "h-16 w-full p-2 font-normal aria-selected:bg-red-600 aria-selected:text-white hover:bg-gray-100 rounded-md",
-            day_range_end: "day-range-end",
-            day_selected: "bg-red-600 text-white hover:bg-red-600 hover:text-white focus:bg-red-600 focus:text-white",
-            day_today: "bg-gray-100 text-gray-900",
-            day_outside: "text-gray-400",
-            nav: "space-x-1 flex items-center justify-between p-2",
-            nav_button_previous: "absolute left-1",
-            nav_button_next: "absolute right-1",
-            caption: "flex justify-center py-4 relative items-center text-lg font-semibold"
-          }} />
+            <Calendar 
+              mode="single" 
+              selected={date} 
+              onSelect={setDate} 
+              className="w-full"
+              classNames={{
+                months: "w-full",
+                month: "w-full",
+                table: "w-full border-collapse",
+                head_row: "grid grid-cols-7",
+                head_cell: "text-muted-foreground text-center text-sm font-medium p-2",
+                row: "grid grid-cols-7",
+                cell: "h-16 text-center text-sm p-0 relative hover:bg-gray-100 rounded-md",
+                day: "h-16 w-full p-2 font-normal aria-selected:bg-red-600 aria-selected:text-white hover:bg-gray-100 rounded-md",
+                day_range_end: "day-range-end",
+                day_selected: "bg-red-600 text-white hover:bg-red-600 hover:text-white focus:bg-red-600 focus:text-white",
+                day_today: "bg-gray-100 text-gray-900",
+                day_outside: "text-gray-400",
+                nav: "space-x-1 flex items-center justify-between p-2",
+                nav_button_previous: "absolute left-1",
+                nav_button_next: "absolute right-1",
+                caption: "flex justify-center py-4 relative items-center text-lg font-semibold"
+              }}
+            />
           </div>
         </section>
 
-        {/* Jobs Section */}
         <section>
           <h2 className="text-xl font-semibold mb-4 text-zinc-950">Jobs Overview</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {/* Today's Jobs */}
             <Card className="p-4">
               <h3 className="text-lg font-semibold mb-3 text-zinc-950">Today's Jobs</h3>
               <div className="space-y-2">
@@ -103,7 +109,6 @@ export default function TeamRed() {
               </div>
             </Card>
 
-            {/* Tomorrow's Jobs */}
             <Card className="p-4">
               <h3 className="text-lg font-semibold mb-3 text-zinc-950">Tomorrow's Jobs</h3>
               <div className="space-y-2">
@@ -111,7 +116,6 @@ export default function TeamRed() {
               </div>
             </Card>
 
-            {/* Upcoming Jobs */}
             <Card className="p-4">
               <h3 className="text-lg font-semibold mb-3 text-zinc-950">Upcoming Jobs</h3>
               <div className="space-y-2">
@@ -121,11 +125,9 @@ export default function TeamRed() {
           </div>
         </section>
 
-        {/* Document Management Section */}
         <section>
           <h2 className="text-xl font-semibold mb-4 text-zinc-950">Document Management</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Upload Section */}
             <Card className="p-4">
               <h3 className="text-lg font-semibold mb-3 text-zinc-950">Document Upload</h3>
               <Tabs defaultValue="general" className="space-y-4">
@@ -192,7 +194,6 @@ export default function TeamRed() {
               </Tabs>
             </Card>
 
-            {/* Document Count Section */}
             <Card className="p-4">
               <h3 className="text-lg font-semibold mb-3 text-zinc-950">Document Summary</h3>
               <div className="space-y-4">
@@ -216,13 +217,11 @@ export default function TeamRed() {
           </div>
         </section>
 
-        {/* Meter Rates Section */}
         <section>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           </div>
         </section>
 
-        {/* Time Off Section */}
         <section>
           <h2 className="text-xl font-semibold text-red-600 mb-4">Team Time Off</h2>
           <Card className="p-4">
@@ -245,14 +244,12 @@ export default function TeamRed() {
           </Card>
         </section>
 
-        {/* Incident/Injury Report Section */}
         <section>
           <h2 className="text-xl font-semibold mb-4 text-zinc-950 flex items-center gap-2">
             <AlertTriangle className="text-red-600 w-6 h-6" />
             Incident/Injury Reports
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Report Form */}
             <Card className="p-4">
               <h3 className="text-lg font-semibold mb-4 text-zinc-950">Submit New Report</h3>
               <form onSubmit={handleIncidentSubmit} className="space-y-4">
@@ -314,7 +311,6 @@ export default function TeamRed() {
               </form>
             </Card>
 
-            {/* Recent Reports */}
             <Card className="p-4">
               <h3 className="text-lg font-semibold mb-4 text-zinc-950">Recent Reports</h3>
               <div className="space-y-4">
