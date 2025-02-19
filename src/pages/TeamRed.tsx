@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { AppLayout } from '@/components/ui/AppLayout';
 import { Calendar } from '@/components/ui/calendar';
@@ -13,12 +12,7 @@ export default function TeamRed() {
         <section>
           <h2 className="text-xl font-semibold text-red-600 mb-4">Team Calendar</h2>
           <div className="bg-white p-6 rounded-lg shadow-md">
-            <Calendar 
-              mode="single" 
-              selected={date} 
-              onSelect={setDate} 
-              className="w-full border rounded-2xl text-lg font-semibold"
-            />
+            <Calendar mode="single" selected={date} onSelect={setDate} className="w-full border text-lg font-semibold rounded-3xl py-[2px] px-[225px] my-0 mx-[181px]" />
           </div>
         </section>
 
