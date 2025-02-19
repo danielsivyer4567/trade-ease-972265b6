@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { AppLayout } from '@/components/ui/AppLayout';
 import { Calendar } from '@/components/ui/calendar';
@@ -8,7 +7,6 @@ import { Upload, AlertTriangle } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-
 export default function TeamRed() {
   const [date, setDate] = React.useState<Date | undefined>(new Date());
   const [documentCount, setDocumentCount] = React.useState({
@@ -25,27 +23,30 @@ export default function TeamRed() {
     date: new Date(),
     severity: ''
   });
-
-  const teamMembers = [
-    { id: '1', name: 'John Smith' },
-    { id: '2', name: 'Sarah Johnson' },
-    { id: '3', name: 'Mike Williams' },
-    { id: '4', name: 'Emily Brown' }
-  ];
-
+  const teamMembers = [{
+    id: '1',
+    name: 'John Smith'
+  }, {
+    id: '2',
+    name: 'Sarah Johnson'
+  }, {
+    id: '3',
+    name: 'Mike Williams'
+  }, {
+    id: '4',
+    name: 'Emily Brown'
+  }];
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>, type: 'insurance' | 'general' | 'jobRelated') => {
     if (event.target.files && event.target.files.length > 0) {
       setDocumentCount(prev => ({
         ...prev,
         [type]: prev[type] + event.target.files!.length
       }));
-      
       if (selectedTeamMember) {
         console.log(`Notifying team member ${selectedTeamMember} about new ${type} document upload`);
       }
     }
   };
-
   const handleIncidentSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     console.log('Incident Report Submitted:', incidentReport);
@@ -57,17 +58,17 @@ export default function TeamRed() {
       severity: ''
     });
   };
-
   return <AppLayout>
       <div className="space-y-8">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 my-0 mx-[240px] px-[170px]">
           <img src="/lovable-uploads/6a07dd00-f2c7-49da-8b00-48d960c13610.png" alt="Trade Ease Logo" className="w-8 h-8" />
-          <h1 className="text-2xl font-bold text-red-600">Red Team Dashboard</h1>
+          <h1 className="text-2xl font-bold text-red-600">
+        </h1>
         </div>
         
         {/* Calendar Section */}
         <section>
-          <h2 className="text-xl font-semibold mb-4 text-zinc-950">Team Calendar</h2>
+          <h2 className="text-xl font-semibold mb-4 text-zinc-950"> Red Team Calendar</h2>
           <div className="bg-white p-6 rounded-lg shadow-md">
             <Calendar mode="single" selected={date} onSelect={setDate} className="w-full" classNames={{
             months: "w-full",
@@ -137,15 +138,9 @@ export default function TeamRed() {
                 <TabsContent value="general" className="space-y-4">
                   <div className="border rounded-lg p-4">
                     <h4 className="font-medium text-gray-700 mb-2">General Documents</h4>
-                    <select
-                      className="w-full rounded-md border border-input bg-background px-3 h-10 mb-4"
-                      value={selectedTeamMember}
-                      onChange={(e) => setSelectedTeamMember(e.target.value)}
-                    >
+                    <select className="w-full rounded-md border border-input bg-background px-3 h-10 mb-4" value={selectedTeamMember} onChange={e => setSelectedTeamMember(e.target.value)}>
                       <option value="">Select team member to notify</option>
-                      {teamMembers.map(member => (
-                        <option key={member.id} value={member.id}>{member.name}</option>
-                      ))}
+                      {teamMembers.map(member => <option key={member.id} value={member.id}>{member.name}</option>)}
                     </select>
                     <label className="cursor-pointer">
                       <input type="file" className="hidden" multiple onChange={e => handleFileUpload(e, 'general')} accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" />
@@ -160,15 +155,9 @@ export default function TeamRed() {
                 <TabsContent value="insurance" className="space-y-4">
                   <div className="border rounded-lg p-4">
                     <h4 className="font-medium text-gray-700 mb-2">Insurance Documents</h4>
-                    <select
-                      className="w-full rounded-md border border-input bg-background px-3 h-10 mb-4"
-                      value={selectedTeamMember}
-                      onChange={(e) => setSelectedTeamMember(e.target.value)}
-                    >
+                    <select className="w-full rounded-md border border-input bg-background px-3 h-10 mb-4" value={selectedTeamMember} onChange={e => setSelectedTeamMember(e.target.value)}>
                       <option value="">Select team member to notify</option>
-                      {teamMembers.map(member => (
-                        <option key={member.id} value={member.id}>{member.name}</option>
-                      ))}
+                      {teamMembers.map(member => <option key={member.id} value={member.id}>{member.name}</option>)}
                     </select>
                     <label className="cursor-pointer">
                       <input type="file" className="hidden" multiple onChange={e => handleFileUpload(e, 'insurance')} accept=".pdf,.doc,.docx" />
@@ -185,15 +174,9 @@ export default function TeamRed() {
                     <h4 className="font-medium text-gray-700 mb-2">Job Related Files</h4>
                     <div className="space-y-4">
                       <Input type="text" placeholder="Enter Job Number" value={jobNumber} onChange={e => setJobNumber(e.target.value)} className="mb-4" />
-                      <select
-                        className="w-full rounded-md border border-input bg-background px-3 h-10 mb-4"
-                        value={selectedTeamMember}
-                        onChange={(e) => setSelectedTeamMember(e.target.value)}
-                      >
+                      <select className="w-full rounded-md border border-input bg-background px-3 h-10 mb-4" value={selectedTeamMember} onChange={e => setSelectedTeamMember(e.target.value)}>
                         <option value="">Select team member to notify</option>
-                        {teamMembers.map(member => (
-                          <option key={member.id} value={member.id}>{member.name}</option>
-                        ))}
+                        {teamMembers.map(member => <option key={member.id} value={member.id}>{member.name}</option>)}
                       </select>
                       <label className="cursor-pointer">
                         <input type="file" className="hidden" multiple onChange={e => handleFileUpload(e, 'jobRelated')} accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" />
@@ -277,12 +260,10 @@ export default function TeamRed() {
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Type of Incident
                   </label>
-                  <select 
-                    className="w-full rounded-md border border-input bg-background px-3 h-10"
-                    value={incidentReport.type}
-                    onChange={e => setIncidentReport(prev => ({ ...prev, type: e.target.value }))}
-                    required
-                  >
+                  <select className="w-full rounded-md border border-input bg-background px-3 h-10" value={incidentReport.type} onChange={e => setIncidentReport(prev => ({
+                  ...prev,
+                  type: e.target.value
+                }))} required>
                     <option value="">Select type</option>
                     <option value="injury">Injury</option>
                     <option value="near-miss">Near Miss</option>
@@ -295,25 +276,20 @@ export default function TeamRed() {
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Location
                   </label>
-                  <Input
-                    type="text"
-                    value={incidentReport.location}
-                    onChange={e => setIncidentReport(prev => ({ ...prev, location: e.target.value }))}
-                    placeholder="Where did it happen?"
-                    required
-                  />
+                  <Input type="text" value={incidentReport.location} onChange={e => setIncidentReport(prev => ({
+                  ...prev,
+                  location: e.target.value
+                }))} placeholder="Where did it happen?" required />
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Severity
                   </label>
-                  <select 
-                    className="w-full rounded-md border border-input bg-background px-3 h-10"
-                    value={incidentReport.severity}
-                    onChange={e => setIncidentReport(prev => ({ ...prev, severity: e.target.value }))}
-                    required
-                  >
+                  <select className="w-full rounded-md border border-input bg-background px-3 h-10" value={incidentReport.severity} onChange={e => setIncidentReport(prev => ({
+                  ...prev,
+                  severity: e.target.value
+                }))} required>
                     <option value="">Select severity</option>
                     <option value="low">Low</option>
                     <option value="medium">Medium</option>
@@ -326,13 +302,10 @@ export default function TeamRed() {
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Description
                   </label>
-                  <Textarea
-                    value={incidentReport.description}
-                    onChange={e => setIncidentReport(prev => ({ ...prev, description: e.target.value }))}
-                    placeholder="Describe what happened..."
-                    className="min-h-[100px]"
-                    required
-                  />
+                  <Textarea value={incidentReport.description} onChange={e => setIncidentReport(prev => ({
+                  ...prev,
+                  description: e.target.value
+                }))} placeholder="Describe what happened..." className="min-h-[100px]" required />
                 </div>
 
                 <Button type="submit" className="w-full bg-red-600 hover:bg-red-700">
