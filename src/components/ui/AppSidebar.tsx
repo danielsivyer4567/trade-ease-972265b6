@@ -110,21 +110,21 @@ export function AppSidebar() {
                 className="flex items-center gap-1.5 p-1.5 rounded-lg hover:bg-red-50 text-red-600 hover:text-red-700 text-sm"
               >
                 <Hammer className="w-3.5 h-3.5" />
-                Team Red
+                Red Team
               </Link>
               <Link
                 to="/team-blue"
                 className="flex items-center gap-1.5 p-1.5 rounded-lg hover:bg-blue-50 text-blue-600 hover:text-blue-700 text-sm"
               >
                 <Hammer className="w-3.5 h-3.5" />
-                Team Blue
+                Blue Team
               </Link>
               <Link
                 to="/team-green"
                 className="flex items-center gap-1.5 p-1.5 rounded-lg hover:bg-green-50 text-green-600 hover:text-green-700 text-sm"
               >
                 <Hammer className="w-3.5 h-3.5" />
-                Team Green
+                Green Team
               </Link>
             </div>
           </nav>
