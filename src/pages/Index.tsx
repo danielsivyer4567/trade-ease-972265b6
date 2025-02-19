@@ -307,6 +307,22 @@ const Index = () => {
             </Button>
           </div>
         </div>
+
+        <div className="lg:col-span-3">
+          <Card className="p-3 md:p-4">
+            <h2 className="text-base md:text-lg font-semibold mb-3 md:mb-4">Teams View</h2>
+            <div className="flex justify-center mt-6">
+              <Button 
+                variant="outline" 
+                size="sm"
+                className="gap-2 text-gray-600 hover:text-gray-800"
+              >
+                <Plus className="w-4 h-4" />
+                Add Team
+              </Button>
+            </div>
+          </Card>
+        </div>
       </div>
     </AppLayout>;
 };
