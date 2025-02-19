@@ -4,6 +4,7 @@ import Index from "./pages/Index";
 import Jobs from "./pages/Jobs";
 import TeamRed from "./pages/TeamRed";
 import TeamBlue from "./pages/TeamBlue";
+import TeamGreen from "./pages/TeamGreen";
 import NotFound from "./pages/NotFound";
 import "./App.css";
 
@@ -15,10 +16,5 @@ function App() {
         <Route path="/jobs" element={<Jobs />} />
         <Route path="/team-red" element={<TeamRed />} />
         <Route path="/team-blue" element={<TeamBlue />} />
-        <Route path="*" element={<NotFound />} />
-      </Routes>
-    </Router>
-  );
-}
-
-export default App;
+        <Route path="/team-green" element={<TeamGreen />} />
+        <Route path="*" element={
