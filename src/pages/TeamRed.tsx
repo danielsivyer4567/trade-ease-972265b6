@@ -3,9 +3,11 @@ import { AppLayout } from '@/components/ui/AppLayout';
 import { Calendar } from '@/components/ui/calendar';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Upload } from 'lucide-react';
+import { Upload, AlertTriangle } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+
 export default function TeamRed() {
   const [date, setDate] = React.useState<Date | undefined>(new Date());
   const [documentCount, setDocumentCount] = React.useState({
@@ -14,6 +16,14 @@ export default function TeamRed() {
     jobRelated: 0
   });
   const [jobNumber, setJobNumber] = React.useState('');
+  const [incidentReport, setIncidentReport] = React.useState({
+    type: '',
+    description: '',
+    location: '',
+    date: new Date(),
+    severity: ''
+  });
+
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>, type: 'insurance' | 'general' | 'jobRelated') => {
     if (event.target.files && event.target.files.length > 0) {
       setDocumentCount(prev => ({
@@ -22,6 +32,19 @@ export default function TeamRed() {
       }));
     }
   };
+
+  const handleIncidentSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    console.log('Incident Report Submitted:', incidentReport);
+    setIncidentReport({
+      type: '',
+      description: '',
+      location: '',
+      date: new Date(),
+      severity: ''
+    });
+  };
+
   return <AppLayout>
       <div className="space-y-8">
         <h1 className="text-2xl font-bold text-red-600">Red Team Dashboard</h1>
@@ -166,13 +189,7 @@ export default function TeamRed() {
 
         {/* Meter Rates Section */}
         <section>
-          
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            
-
-            
-
-            
           </div>
         </section>
 
@@ -197,6 +214,95 @@ export default function TeamRed() {
               </div>
             </div>
           </Card>
+        </section>
+
+        {/* Incident/Injury Report Section */}
+        <section>
+          <h2 className="text-xl font-semibold mb-4 text-zinc-950 flex items-center gap-2">
+            <AlertTriangle className="text-red-600 w-6 h-6" />
+            Incident/Injury Reports
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Report Form */}
+            <Card className="p-4">
+              <h3 className="text-lg font-semibold mb-4 text-zinc-950">Submit New Report</h3>
+              <form onSubmit={handleIncidentSubmit} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Type of Incident
+                  </label>
+                  <select 
+                    className="w-full rounded-md border border-input bg-background px-3 h-10"
+                    value={incidentReport.type}
+                    onChange={e => setIncidentReport(prev => ({ ...prev, type: e.target.value }))}
+                    required
+                  >
+                    <option value="">Select type</option>
+                    <option value="injury">Injury</option>
+                    <option value="near-miss">Near Miss</option>
+                    <option value="property-damage">Property Damage</option>
+                    <option value="environmental">Environmental</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Location
+                  </label>
+                  <Input
+                    type="text"
+                    value={incidentReport.location}
+                    onChange={e => setIncidentReport(prev => ({ ...prev, location: e.target.value }))}
+                    placeholder="Where did it happen?"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Severity
+                  </label>
+                  <select 
+                    className="w-full rounded-md border border-input bg-background px-3 h-10"
+                    value={incidentReport.severity}
+                    onChange={e => setIncidentReport(prev => ({ ...prev, severity: e.target.value }))}
+                    required
+                  >
+                    <option value="">Select severity</option>
+                    <option value="low">Low</option>
+                    <option value="medium">Medium</option>
+                    <option value="high">High</option>
+                    <option value="critical">Critical</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Description
+                  </label>
+                  <Textarea
+                    value={incidentReport.description}
+                    onChange={e => setIncidentReport(prev => ({ ...prev, description: e.target.value }))}
+                    placeholder="Describe what happened..."
+                    className="min-h-[100px]"
+                    required
+                  />
+                </div>
+
+                <Button type="submit" className="w-full bg-red-600 hover:bg-red-700">
+                  Submit Report
+                </Button>
+              </form>
+            </Card>
+
+            {/* Recent Reports */}
+            <Card className="p-4">
+              <h3 className="text-lg font-semibold mb-4 text-zinc-950">Recent Reports</h3>
+              <div className="space-y-4">
+                <div className="text-sm text-gray-500">No recent reports</div>
+              </div>
+            </Card>
+          </div>
         </section>
       </div>
     </AppLayout>;
