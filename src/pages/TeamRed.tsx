@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Upload } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
+
 export default function TeamRed() {
   const [date, setDate] = React.useState<Date | undefined>(new Date());
   const [documentCount, setDocumentCount] = React.useState({
@@ -14,6 +15,7 @@ export default function TeamRed() {
     jobRelated: 0
   });
   const [jobNumber, setJobNumber] = React.useState('');
+
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>, type: 'insurance' | 'general' | 'jobRelated') => {
     if (event.target.files && event.target.files.length > 0) {
       setDocumentCount(prev => ({
@@ -22,15 +24,34 @@ export default function TeamRed() {
       }));
     }
   };
+
   return <AppLayout>
       <div className="space-y-8">
-        <h1 className="text-2xl font-bold text-red-600"> Red Team Dashboard</h1>
+        <h1 className="text-2xl font-bold text-red-600">Red Team Dashboard</h1>
         
         {/* Calendar Section */}
         <section>
           <h2 className="text-xl font-semibold mb-4 text-zinc-950">Team Calendar</h2>
           <div className="bg-white p-6 rounded-lg shadow-md">
-            <Calendar mode="single" selected={date} onSelect={setDate} className="w-full border text-lg font-semibold rounded-3xl py-[2px] px-[225px] my-0 mx-[181px]" />
+            <Calendar 
+              mode="single" 
+              selected={date} 
+              onSelect={setDate} 
+              className="mx-auto" 
+              classNames={{
+                months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
+                month: "space-y-4 w-full",
+                table: "w-full border-collapse space-y-1",
+                head_row: "flex w-full",
+                head_cell: "text-muted-foreground rounded-md w-full font-normal text-[0.8rem]",
+                row: "flex w-full mt-2",
+                cell: "text-center text-sm relative p-0 hover:bg-gray-100 rounded-md",
+                day: "h-9 w-9 p-0 font-normal hover:bg-gray-100 rounded-md",
+                day_range_end: "day-range-end",
+                day_selected: "bg-red-600 text-white hover:bg-red-600 hover:text-white focus:bg-red-600 focus:text-white",
+                day_today: "bg-gray-100 text-gray-900",
+              }}
+            />
           </div>
         </section>
 
