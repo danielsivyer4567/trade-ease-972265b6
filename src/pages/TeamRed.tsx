@@ -13,7 +13,7 @@ export default function TeamRed() {
             mode="single" 
             selected={date} 
             onSelect={setDate} 
-            className="w-full h-full border rounded-2xl text-lg font-semibold [&_.rdp-nav_button]:text-xl [&_.rdp-caption]:text-xl [&_.rdp-table]:w-full [&_.rdp]:w-full [&_.rdp-cell]:w-[14.28%] [&_.rdp-head_cell]:text-lg [&_.rdp-day]:text-lg [&_.rdp-day]:w-full [&_.rdp-day]:h-14"
+            className="w-full border rounded-2xl text-lg font-semibold"
           />
         </div>
 
