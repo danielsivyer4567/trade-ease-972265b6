@@ -146,7 +146,7 @@ export function AppSidebar() {
             </Link>
 
             {/* Teams Section - moved below settings with gap */}
-            <div className="pt-4">
+            <div className="pt-8">
               <div className="mb-1 text-sm font-bold text-black">Teams</div>
               <Link
                 to="/team-red"
