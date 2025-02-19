@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { 
@@ -103,7 +104,7 @@ export function AppSidebar() {
 
             {/* Teams Section - moved below settings with gap */}
             <div className="pt-8">
-              <div className="mb-1 text-sm font-bold text-black rounded-2xl my-0 py-[7px] px-px mx-[10px]">Teams view</div>
+              <div className="mb-1 text-sm font-bold text-black rounded-2xl my-0 py-[7px] px-px mx-1">Teams view</div>
               <Link
                 to="/team-red"
                 className="flex items-center gap-1.5 p-1.5 rounded-lg hover:bg-red-50 text-red-600 hover:text-red-700 text-sm"
