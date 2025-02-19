@@ -6,7 +6,6 @@ import JobMap from "@/components/JobMap";
 import type { Job } from "@/types/job";
 import { TeamCalendar } from '@/components/team/TeamCalendar';
 import React from 'react';
-
 const stats = [{
   title: "Active Jobs",
   value: "12",
@@ -32,7 +31,6 @@ const stats = [{
   change: "+15% vs last month",
   trend: "up"
 }];
-
 const allJobs: Job[] = [{
   id: "1",
   customer: "John Smith",
@@ -62,10 +60,8 @@ const allJobs: Job[] = [{
   date: "Tomorrow",
   location: [151.2153, -33.8588] as [number, number]
 }];
-
 const todaysJobs = allJobs.filter(job => job.date === "Today");
 const tomorrowsJobs = allJobs.filter(job => job.date === "Tomorrow");
-
 const quoteStatuses = [{
   title: "Accepted Quotes",
   icon: CheckSquare,
@@ -87,7 +83,6 @@ const quoteStatuses = [{
   color: "#EF4444",
   count: "1"
 }];
-
 const teamColors = {
   plumbing: {
     light: '#D3E4FD',
@@ -132,10 +127,8 @@ const teamColors = {
     text: '#403E43' // Charcoal Gray
   }
 };
-
 const Index = () => {
   const [sharedDate, setSharedDate] = React.useState<Date | undefined>(new Date());
-
   return <AppLayout>
       <div className="space-y-4 md:space-y-6 animate-fadeIn px-2 sm:px-4 md:px-6">
         <div className="flex flex-col items-center justify-center text-center mb-4 md:mb-8">
@@ -273,35 +266,19 @@ const Index = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <h3 className="text-lg font-semibold mb-2 text-red-600">Red Team Calendar</h3>
-              <TeamCalendar 
-                date={sharedDate}
-                setDate={setSharedDate}
-                teamColor="red"
-              />
+              <TeamCalendar date={sharedDate} setDate={setSharedDate} teamColor="red" />
             </div>
             <div>
               <h3 className="text-lg font-semibold mb-2 text-blue-600">Blue Team Calendar</h3>
-              <TeamCalendar 
-                date={sharedDate}
-                setDate={setSharedDate}
-                teamColor="blue"
-              />
+              <TeamCalendar date={sharedDate} setDate={setSharedDate} teamColor="blue" />
             </div>
             <div>
               <h3 className="text-lg font-semibold mb-2 text-green-600">Green Team Calendar</h3>
-              <TeamCalendar 
-                date={sharedDate}
-                setDate={setSharedDate}
-                teamColor="green"
-              />
+              <TeamCalendar date={sharedDate} setDate={setSharedDate} teamColor="green" />
             </div>
           </div>
           <div className="flex justify-center mt-6">
-            <Button 
-              variant="outline" 
-              size="sm"
-              className="gap-2 text-gray-600 hover:text-gray-800"
-            >
+            <Button variant="outline" size="sm" className="gap-2 text-gray-600 hover:text-gray-800">
               <Plus className="w-4 h-4" />
               Add Team
             </Button>
@@ -309,22 +286,9 @@ const Index = () => {
         </div>
 
         <div className="lg:col-span-3">
-          <Card className="p-3 md:p-4">
-            <h2 className="text-base md:text-lg font-semibold mb-3 md:mb-4">Teams View</h2>
-            <div className="flex justify-center mt-6">
-              <Button 
-                variant="outline" 
-                size="sm"
-                className="gap-2 text-gray-600 hover:text-gray-800"
-              >
-                <Plus className="w-4 h-4" />
-                Add Team
-              </Button>
-            </div>
-          </Card>
+          
         </div>
       </div>
     </AppLayout>;
 };
-
 export default Index;
