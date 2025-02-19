@@ -2,8 +2,25 @@ import React from 'react';
 import { AppLayout } from '@/components/ui/AppLayout';
 import { Calendar } from '@/components/ui/calendar';
 import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Upload } from 'lucide-react';
+
 export default function TeamRed() {
   const [date, setDate] = React.useState<Date | undefined>(new Date());
+  const [documentCount, setDocumentCount] = React.useState({
+    insurance: 0,
+    general: 0
+  });
+
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>, type: 'insurance' | 'general') => {
+    if (event.target.files && event.target.files.length > 0) {
+      setDocumentCount(prev => ({
+        ...prev,
+        [type]: prev[type] + event.target.files!.length
+      }));
+    }
+  };
+
   return <AppLayout>
       <div className="space-y-8">
         <h1 className="text-2xl font-bold text-red-600">Team Red Dashboard</h1>
@@ -13,6 +30,68 @@ export default function TeamRed() {
           <h2 className="text-xl font-semibold text-red-600 mb-4">Team Calendar</h2>
           <div className="bg-white p-6 rounded-lg shadow-md">
             <Calendar mode="single" selected={date} onSelect={setDate} className="w-full border text-lg font-semibold rounded-3xl py-[2px] px-[225px] my-0 mx-[181px]" />
+          </div>
+        </section>
+
+        {/* Document Management Section */}
+        <section>
+          <h2 className="text-xl font-semibold text-red-600 mb-4">Document Management</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Upload Section */}
+            <Card className="p-4">
+              <h3 className="text-lg font-semibold mb-3 text-red-600">Document Upload</h3>
+              <div className="space-y-4">
+                <div className="border rounded-lg p-4">
+                  <h4 className="font-medium text-gray-700 mb-2">Insurance Documents</h4>
+                  <label className="cursor-pointer">
+                    <input
+                      type="file"
+                      className="hidden"
+                      multiple
+                      onChange={(e) => handleFileUpload(e, 'insurance')}
+                      accept=".pdf,.doc,.docx"
+                    />
+                    <Button variant="outline" className="w-full">
+                      <Upload className="mr-2 h-4 w-4" />
+                      Upload Insurance Files
+                    </Button>
+                  </label>
+                </div>
+                <div className="border rounded-lg p-4">
+                  <h4 className="font-medium text-gray-700 mb-2">General Documents</h4>
+                  <label className="cursor-pointer">
+                    <input
+                      type="file"
+                      className="hidden"
+                      multiple
+                      onChange={(e) => handleFileUpload(e, 'general')}
+                      accept=".pdf,.doc,.docx"
+                    />
+                    <Button variant="outline" className="w-full">
+                      <Upload className="mr-2 h-4 w-4" />
+                      Upload Documents
+                    </Button>
+                  </label>
+                </div>
+              </div>
+            </Card>
+
+            {/* Document Count Section */}
+            <Card className="p-4">
+              <h3 className="text-lg font-semibold mb-3 text-red-600">Document Summary</h3>
+              <div className="space-y-4">
+                <div className="border rounded-lg p-4">
+                  <h4 className="font-medium text-gray-700 mb-2">Insurance Documents</h4>
+                  <p className="text-2xl font-bold text-red-600">{documentCount.insurance}</p>
+                  <p className="text-sm text-gray-500">documents uploaded</p>
+                </div>
+                <div className="border rounded-lg p-4">
+                  <h4 className="font-medium text-gray-700 mb-2">General Documents</h4>
+                  <p className="text-2xl font-bold text-red-600">{documentCount.general}</p>
+                  <p className="text-sm text-gray-500">documents uploaded</p>
+                </div>
+              </div>
+            </Card>
           </div>
         </section>
 
