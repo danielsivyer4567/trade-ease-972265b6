@@ -3,7 +3,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Plus, Wrench, Zap, Wind, Loader2, Upload, FileUp } from "lucide-react";
+import { Plus, Wrench, Zap, Wind, Loader2, Upload, FileUp, LinkIcon } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
@@ -168,6 +168,17 @@ export default function Jobs() {
     });
   };
 
+  const attachToJob = (template: JobTemplate) => {
+    toast({
+      title: "Template Attached",
+      description: `Template "${template.title}" has been attached to a new job. Redirecting to job creation...`,
+    });
+    
+    localStorage.setItem('selectedTemplate', JSON.stringify(template));
+    
+    navigate('/jobs/new');
+  };
+
   return (
     <AppLayout>
       <div className="space-y-6 p-6">
@@ -275,7 +286,18 @@ export default function Jobs() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {generatedTemplates.map((template, index) => (
             <Card key={index} className="p-4 hover:shadow-md transition-shadow">
-              <h3 className="font-medium mb-2">{template.title}</h3>
+              <div className="flex justify-between items-start mb-2">
+                <h3 className="font-medium">{template.title}</h3>
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={() => attachToJob(template)}
+                  className="text-blue-500 hover:text-blue-700"
+                >
+                  <LinkIcon className="h-4 w-4 mr-1" />
+                  Attach to Job
+                </Button>
+              </div>
               <div className="space-y-2 text-sm">
                 <p><span className="font-medium">Duration:</span> {template.estimatedDuration}</p>
                 <p><span className="font-medium">Price:</span> {template.price}</p>
