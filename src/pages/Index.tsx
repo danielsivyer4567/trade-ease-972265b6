@@ -131,7 +131,7 @@ const Index = () => {
         <div className="flex flex-col items-center justify-center text-center mb-4 md:mb-8">
           <div className="flex items-center gap-2 mb-4">
             <img src="/lovable-uploads/6a07dd00-f2c7-49da-8b00-48d960c13610.png" alt="Trade Ease Logo" className="w-8 h-8" />
-            <h1 className="text-xl md:text-2xl font-semibold text-gray-900">Managers Dashboard</h1>
+            <h1 className="text-xl md:text-2xl text-gray-900 mx-[7px] my-0 px-0 py-0 font-extrabold">Managers Dashboard</h1>
           </div>
           <div className="flex flex-wrap gap-1.5 md:gap-2 justify-center mt-4 md:mt-6 w-full max-w-screen-lg">
             <Button size="sm" className="bg-blue-600 hover:bg-blue-700 text-xs md:text-sm flex-grow md:flex-grow-0">
