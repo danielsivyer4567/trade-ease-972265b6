@@ -17,4 +17,10 @@ function App() {
         <Route path="/team-red" element={<TeamRed />} />
         <Route path="/team-blue" element={<TeamBlue />} />
         <Route path="/team-green" element={<TeamGreen />} />
-        <Route path="*" element={
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </Router>
+  );
+}
+
+export default App;
