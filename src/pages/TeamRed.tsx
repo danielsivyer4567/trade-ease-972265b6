@@ -6,7 +6,6 @@ import { Button } from '@/components/ui/button';
 import { Upload } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
-
 export default function TeamRed() {
   const [date, setDate] = React.useState<Date | undefined>(new Date());
   const [documentCount, setDocumentCount] = React.useState({
@@ -15,7 +14,6 @@ export default function TeamRed() {
     jobRelated: 0
   });
   const [jobNumber, setJobNumber] = React.useState('');
-
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>, type: 'insurance' | 'general' | 'jobRelated') => {
     if (event.target.files && event.target.files.length > 0) {
       setDocumentCount(prev => ({
@@ -24,14 +22,13 @@ export default function TeamRed() {
       }));
     }
   };
-
   return <AppLayout>
       <div className="space-y-8">
-        <h1 className="text-2xl font-bold text-red-600">Team Red Dashboard</h1>
+        <h1 className="text-2xl font-bold text-red-600"> Red Team Dashboard</h1>
         
         {/* Calendar Section */}
         <section>
-          <h2 className="text-xl font-semibold text-red-600 mb-4">Team Calendar</h2>
+          <h2 className="text-xl font-semibold mb-4 text-zinc-950">Team Calendar</h2>
           <div className="bg-white p-6 rounded-lg shadow-md">
             <Calendar mode="single" selected={date} onSelect={setDate} className="w-full border text-lg font-semibold rounded-3xl py-[2px] px-[225px] my-0 mx-[181px]" />
           </div>
@@ -39,11 +36,11 @@ export default function TeamRed() {
 
         {/* Jobs Section */}
         <section>
-          <h2 className="text-xl font-semibold text-red-600 mb-4">Jobs Overview</h2>
+          <h2 className="text-xl font-semibold mb-4 text-zinc-950">Jobs Overview</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {/* Today's Jobs */}
             <Card className="p-4">
-              <h3 className="text-lg font-semibold mb-3 text-red-600">Today's Jobs</h3>
+              <h3 className="text-lg font-semibold mb-3 text-zinc-950">Today's Jobs</h3>
               <div className="space-y-2">
                 <div className="text-sm text-gray-500">No jobs scheduled for today</div>
               </div>
@@ -51,7 +48,7 @@ export default function TeamRed() {
 
             {/* Tomorrow's Jobs */}
             <Card className="p-4">
-              <h3 className="text-lg font-semibold mb-3 text-red-600">Tomorrow's Jobs</h3>
+              <h3 className="text-lg font-semibold mb-3 text-zinc-950">Tomorrow's Jobs</h3>
               <div className="space-y-2">
                 <div className="text-sm text-gray-500">No jobs scheduled for tomorrow</div>
               </div>
@@ -59,7 +56,7 @@ export default function TeamRed() {
 
             {/* Upcoming Jobs */}
             <Card className="p-4">
-              <h3 className="text-lg font-semibold mb-3 text-red-600">Upcoming Jobs</h3>
+              <h3 className="text-lg font-semibold mb-3 text-zinc-950">Upcoming Jobs</h3>
               <div className="space-y-2">
                 <div className="text-sm text-gray-500">No upcoming jobs scheduled</div>
               </div>
@@ -69,11 +66,11 @@ export default function TeamRed() {
 
         {/* Document Management Section */}
         <section>
-          <h2 className="text-xl font-semibold text-red-600 mb-4">Document Management</h2>
+          <h2 className="text-xl font-semibold mb-4 text-zinc-950">Document Management</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Upload Section */}
             <Card className="p-4">
-              <h3 className="text-lg font-semibold mb-3 text-red-600">Document Upload</h3>
+              <h3 className="text-lg font-semibold mb-3 text-zinc-950">Document Upload</h3>
               <Tabs defaultValue="general" className="space-y-4">
                 <TabsList className="grid w-full grid-cols-3">
                   <TabsTrigger value="general">General</TabsTrigger>
@@ -85,13 +82,7 @@ export default function TeamRed() {
                   <div className="border rounded-lg p-4">
                     <h4 className="font-medium text-gray-700 mb-2">General Documents</h4>
                     <label className="cursor-pointer">
-                      <input
-                        type="file"
-                        className="hidden"
-                        multiple
-                        onChange={(e) => handleFileUpload(e, 'general')}
-                        accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
-                      />
+                      <input type="file" className="hidden" multiple onChange={e => handleFileUpload(e, 'general')} accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" />
                       <Button variant="outline" className="w-full">
                         <Upload className="mr-2 h-4 w-4" />
                         Upload Documents
@@ -104,13 +95,7 @@ export default function TeamRed() {
                   <div className="border rounded-lg p-4">
                     <h4 className="font-medium text-gray-700 mb-2">Insurance Documents</h4>
                     <label className="cursor-pointer">
-                      <input
-                        type="file"
-                        className="hidden"
-                        multiple
-                        onChange={(e) => handleFileUpload(e, 'insurance')}
-                        accept=".pdf,.doc,.docx"
-                      />
+                      <input type="file" className="hidden" multiple onChange={e => handleFileUpload(e, 'insurance')} accept=".pdf,.doc,.docx" />
                       <Button variant="outline" className="w-full">
                         <Upload className="mr-2 h-4 w-4" />
                         Upload Insurance Files
@@ -123,29 +108,15 @@ export default function TeamRed() {
                   <div className="border rounded-lg p-4">
                     <h4 className="font-medium text-gray-700 mb-2">Job Related Files</h4>
                     <div className="space-y-4">
-                      <Input
-                        type="text"
-                        placeholder="Enter Job Number"
-                        value={jobNumber}
-                        onChange={(e) => setJobNumber(e.target.value)}
-                        className="mb-4"
-                      />
+                      <Input type="text" placeholder="Enter Job Number" value={jobNumber} onChange={e => setJobNumber(e.target.value)} className="mb-4" />
                       <label className="cursor-pointer">
-                        <input
-                          type="file"
-                          className="hidden"
-                          multiple
-                          onChange={(e) => handleFileUpload(e, 'jobRelated')}
-                          accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
-                        />
+                        <input type="file" className="hidden" multiple onChange={e => handleFileUpload(e, 'jobRelated')} accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" />
                         <Button variant="outline" className="w-full" disabled={!jobNumber}>
                           <Upload className="mr-2 h-4 w-4" />
                           Upload Job Files
                         </Button>
                       </label>
-                      {!jobNumber && (
-                        <p className="text-sm text-red-500">Please enter a job number first</p>
-                      )}
+                      {!jobNumber && <p className="text-sm text-red-500">Please enter a job number first</p>}
                     </div>
                   </div>
                 </TabsContent>
@@ -154,7 +125,7 @@ export default function TeamRed() {
 
             {/* Document Count Section */}
             <Card className="p-4">
-              <h3 className="text-lg font-semibold mb-3 text-red-600">Document Summary</h3>
+              <h3 className="text-lg font-semibold mb-3 text-zinc-950">Document Summary</h3>
               <div className="space-y-4">
                 <div className="border rounded-lg p-4">
                   <h4 className="font-medium text-gray-700 mb-2">Insurance Documents</h4>
