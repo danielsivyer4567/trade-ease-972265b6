@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { AppLayout } from '@/components/ui/AppLayout';
 import { Calendar } from '@/components/ui/calendar';
@@ -9,12 +8,7 @@ export default function TeamRed() {
       <div className="space-y-6">
         <h1 className="text-2xl font-bold text-red-600">Team Red Dashboard</h1>
         <div className="bg-white p-4 rounded-lg shadow-sm">
-          <Calendar 
-            mode="single" 
-            selected={date} 
-            onSelect={setDate} 
-            className="w-full h-full border rounded-2xl text-lg font-semibold [&_.rdp-nav_button]:text-xl [&_.rdp-caption]:text-xl [&_.rdp-table]:w-full [&_.rdp]:w-full [&_.rdp-cell]:w-[14.28%] [&_.rdp-head_cell]:text-lg [&_.rdp-day]:text-lg [&_.rdp-day]:w-full [&_.rdp-day]:h-14"
-          />
+          <Calendar mode="single" selected={date} onSelect={setDate} className="w-full h-full border text-lg font-semibold [&_.rdp-nav_button]:text-xl [&_.rdp-caption]:text-xl [&_.rdp-table]:w-full [&_.rdp]:w-full [&_.rdp-cell]:w-[14.28%] [&_.rdp-head_cell]:text-lg [&_.rdp-day]:text-lg [&_.rdp-day]:w-full [&_.rdp-day]:h-14 mx-[240px] my-0 px-[157px] py-0 rounded-full" />
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
