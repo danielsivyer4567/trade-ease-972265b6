@@ -171,54 +171,54 @@ const Index = () => {
               <h2 className="text-base md:text-lg font-semibold mb-3 md:mb-4">Job Locations</h2>
               <JobMap jobs={[...todaysJobs, ...tomorrowsJobs]} />
             </Card>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6">
-              <Card className="p-3 md:p-4">
-                <h2 className="text-base md:text-lg font-semibold mb-3 md:mb-4">Today's Jobs</h2>
-                <div className="space-y-2 md:space-y-3">
-                  {todaysJobs.map(job => <div key={job.id} className="p-2 md:p-3 bg-gray-50 rounded-lg">
-                      <div className="font-medium text-sm md:text-base">{job.customer}</div>
-                      <div className="text-xs md:text-sm text-gray-500">{job.type}</div>
-                      <span className={`inline-block mt-1.5 md:mt-2 px-2 py-0.5 md:py-1 rounded-full text-xs ${job.status === "Completed" ? "bg-green-100 text-green-800" : job.status === "In Progress" ? "bg-blue-100 text-blue-800" : "bg-yellow-100 text-yellow-800"}`}>
-                        {job.status}
-                      </span>
-                    </div>)}
-                  {todaysJobs.length === 0 && <p className="text-gray-500 text-xs md:text-sm">No jobs scheduled for today</p>}
-                </div>
-              </Card>
+          </div>
+        </div>
 
-              <Card className="p-3 md:p-4">
-                <h2 className="text-base md:text-lg font-semibold mb-3 md:mb-4">Tomorrow's Jobs</h2>
-                <div className="space-y-2 md:space-y-3">
-                  {tomorrowsJobs.map(job => <div key={job.id} className="p-2 md:p-3 bg-gray-50 rounded-lg">
-                      <div className="font-medium text-sm md:text-base">{job.customer}</div>
-                      <div className="text-xs md:text-sm text-gray-500">{job.type}</div>
-                      <span className={`inline-block mt-1.5 md:mt-2 px-2 py-0.5 md:py-1 rounded-full text-xs ${job.status === "Completed" ? "bg-green-100 text-green-800" : job.status === "In Progress" ? "bg-blue-100 text-blue-800" : "bg-yellow-100 text-yellow-800"}`}>
-                        {job.status}
-                      </span>
-                    </div>)}
-                  {tomorrowsJobs.length === 0 && <p className="text-gray-500 text-xs md:text-sm">No jobs scheduled for tomorrow</p>}
-                </div>
-              </Card>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6">
+          <Card className="p-3 md:p-4">
+            <h2 className="text-base md:text-lg font-semibold mb-3 md:mb-4">Today's Jobs</h2>
+            <div className="space-y-2 md:space-y-3">
+              {todaysJobs.map(job => <div key={job.id} className="p-2 md:p-3 bg-gray-50 rounded-lg">
+                  <div className="font-medium text-sm md:text-base">{job.customer}</div>
+                  <div className="text-xs md:text-sm text-gray-500">{job.type}</div>
+                  <span className={`inline-block mt-1.5 md:mt-2 px-2 py-0.5 md:py-1 rounded-full text-xs ${job.status === "Completed" ? "bg-green-100 text-green-800" : job.status === "In Progress" ? "bg-blue-100 text-blue-800" : "bg-yellow-100 text-yellow-800"}`}>
+                    {job.status}
+                  </span>
+                </div>)}
+              {todaysJobs.length === 0 && <p className="text-gray-500 text-xs md:text-sm">No jobs scheduled for today</p>}
             </div>
-          </div>
+          </Card>
 
-          <div className="lg:col-span-3">
-            <Card className="p-3 md:p-4">
-              <h2 className="text-base md:text-lg font-semibold mb-3 md:mb-4">Quote Status</h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 md:gap-4">
-                {quoteStatuses.map(quote => <div key={quote.title} className="flex items-center justify-between p-2 md:p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-all cursor-pointer">
-                    <div className="flex items-center gap-2 md:gap-3">
-                      <quote.icon className="w-4 h-4 md:w-5 md:h-5" style={{
-                    color: quote.color
-                  }} />
-                      <span className="font-medium text-sm md:text-base">{quote.title}</span>
-                    </div>
-                    <span className="text-xs md:text-sm font-semibold text-gray-600">{quote.count}</span>
-                  </div>)}
-              </div>
-            </Card>
-          </div>
+          <Card className="p-3 md:p-4">
+            <h2 className="text-base md:text-lg font-semibold mb-3 md:mb-4">Tomorrow's Jobs</h2>
+            <div className="space-y-2 md:space-y-3">
+              {tomorrowsJobs.map(job => <div key={job.id} className="p-2 md:p-3 bg-gray-50 rounded-lg">
+                  <div className="font-medium text-sm md:text-base">{job.customer}</div>
+                  <div className="text-xs md:text-sm text-gray-500">{job.type}</div>
+                  <span className={`inline-block mt-1.5 md:mt-2 px-2 py-0.5 md:py-1 rounded-full text-xs ${job.status === "Completed" ? "bg-green-100 text-green-800" : job.status === "In Progress" ? "bg-blue-100 text-blue-800" : "bg-yellow-100 text-yellow-800"}`}>
+                    {job.status}
+                  </span>
+                </div>)}
+              {tomorrowsJobs.length === 0 && <p className="text-gray-500 text-xs md:text-sm">No jobs scheduled for tomorrow</p>}
+            </div>
+          </Card>
+        </div>
+
+        <div className="lg:col-span-3">
+          <Card className="p-3 md:p-4">
+            <h2 className="text-base md:text-lg font-semibold mb-3 md:mb-4">Quote Status</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 md:gap-4">
+              {quoteStatuses.map(quote => <div key={quote.title} className="flex items-center justify-between p-2 md:p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-all cursor-pointer">
+                  <div className="flex items-center gap-2 md:gap-3">
+                    <quote.icon className="w-4 h-4 md:w-5 md:h-5" style={{
+                  color: quote.color
+                }} />
+                    <span className="font-medium text-sm md:text-base">{quote.title}</span>
+                  </div>
+                  <span className="text-xs md:text-sm font-semibold text-gray-600">{quote.count}</span>
+                </div>)}
+            </div>
+          </Card>
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-6">
