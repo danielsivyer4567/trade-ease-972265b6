@@ -12,12 +12,11 @@ export default function TeamRed() {
   const [documentCount, setDocumentCount] = React.useState({
     insurance: 0,
     general: 0,
-    jobRelated: 0,
-    pricing: 0
+    jobRelated: 0
   });
   const [jobNumber, setJobNumber] = React.useState('');
 
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>, type: 'insurance' | 'general' | 'jobRelated' | 'pricing') => {
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>, type: 'insurance' | 'general' | 'jobRelated') => {
     if (event.target.files && event.target.files.length > 0) {
       setDocumentCount(prev => ({
         ...prev,
@@ -76,11 +75,10 @@ export default function TeamRed() {
             <Card className="p-4">
               <h3 className="text-lg font-semibold mb-3 text-red-600">Document Upload</h3>
               <Tabs defaultValue="general" className="space-y-4">
-                <TabsList className="grid w-full grid-cols-4">
+                <TabsList className="grid w-full grid-cols-3">
                   <TabsTrigger value="general">General</TabsTrigger>
                   <TabsTrigger value="insurance">Insurance</TabsTrigger>
                   <TabsTrigger value="job">Job Related</TabsTrigger>
-                  <TabsTrigger value="pricing">Pricing</TabsTrigger>
                 </TabsList>
                 
                 <TabsContent value="general" className="space-y-4">
@@ -151,27 +149,6 @@ export default function TeamRed() {
                     </div>
                   </div>
                 </TabsContent>
-
-                <TabsContent value="pricing" className="space-y-4">
-                  <div className="border rounded-lg p-4">
-                    <h4 className="font-medium text-gray-700 mb-2">Pricing Spreadsheet</h4>
-                    <div className="space-y-4">
-                      <label className="cursor-pointer">
-                        <input
-                          type="file"
-                          className="hidden"
-                          onChange={(e) => handleFileUpload(e, 'pricing')}
-                          accept=".xlsx,.xls,.csv"
-                        />
-                        <Button variant="outline" className="w-full">
-                          <Upload className="mr-2 h-4 w-4" />
-                          Upload Pricing Spreadsheet
-                        </Button>
-                      </label>
-                      <p className="text-sm text-gray-500">Supported formats: .xlsx, .xls, .csv</p>
-                    </div>
-                  </div>
-                </TabsContent>
               </Tabs>
             </Card>
 
@@ -193,11 +170,6 @@ export default function TeamRed() {
                   <h4 className="font-medium text-gray-700 mb-2">Job Related Documents</h4>
                   <p className="text-2xl font-bold text-red-600">{documentCount.jobRelated}</p>
                   <p className="text-sm text-gray-500">documents uploaded</p>
-                </div>
-                <div className="border rounded-lg p-4">
-                  <h4 className="font-medium text-gray-700 mb-2">Pricing Spreadsheets</h4>
-                  <p className="text-2xl font-bold text-red-600">{documentCount.pricing}</p>
-                  <p className="text-sm text-gray-500">spreadsheets uploaded</p>
                 </div>
               </div>
             </Card>
