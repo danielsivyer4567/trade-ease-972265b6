@@ -1,69 +1,166 @@
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { PlusCircle } from "lucide-react";
+import { Label } from "@/components/ui/label";
+import { CalendarIcon, Upload } from "lucide-react";
 
-interface TaskFormData {
-  title: string;
-  description: string;
-  dueDate: string;
-  assignedTeam: string;
-  assignedManager: string;
+interface TeamMember {
+  id: string;
+  name: string;
+  role: 'team_leader' | 'manager';
 }
 
 interface TaskCreateFormProps {
   teams: string[];
-  formData: TaskFormData;
-  onFormChange: (updates: Partial<TaskFormData>) => void;
+  teamMembers: TeamMember[];
+  formData: {
+    title: string;
+    description: string;
+    dueDate: string;
+    assignedTeam: string;
+    teamLeaderId: string;
+    managerId: string;
+    attachedFiles: string[];
+  };
+  onFormChange: (updates: Partial<TaskCreateFormProps['formData']>) => void;
+  onFileUpload: (files: FileList) => void;
   onSubmit: () => void;
 }
 
-export function TaskCreateForm({ teams, formData, onFormChange, onSubmit }: TaskCreateFormProps) {
+export function TaskCreateForm({
+  teams,
+  teamMembers,
+  formData,
+  onFormChange,
+  onFileUpload,
+  onSubmit
+}: TaskCreateFormProps) {
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files) {
+      onFileUpload(event.target.files);
+    }
+  };
+
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Create New Task</CardTitle>
-        <CardDescription>Assign a new task to a team</CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="space-y-2">
+    <Card className="p-6">
+      <form onSubmit={(e) => { e.preventDefault(); onSubmit(); }} className="space-y-4">
+        <div>
+          <Label htmlFor="title">Title</Label>
           <Input
-            placeholder="Task Title"
+            id="title"
             value={formData.title}
             onChange={(e) => onFormChange({ title: e.target.value })}
+            placeholder="Enter task title"
           />
         </div>
-        <div className="space-y-2">
+
+        <div>
+          <Label htmlFor="description">Description</Label>
           <Textarea
-            placeholder="Task Description"
+            id="description"
             value={formData.description}
             onChange={(e) => onFormChange({ description: e.target.value })}
+            placeholder="Enter task description"
           />
         </div>
-        <div className="grid grid-cols-2 gap-4">
-          <Input
-            type="date"
-            value={formData.dueDate}
-            onChange={(e) => onFormChange({ dueDate: e.target.value })}
-          />
+
+        <div>
+          <Label htmlFor="dueDate">Due Date</Label>
+          <div className="relative">
+            <Input
+              id="dueDate"
+              type="date"
+              value={formData.dueDate}
+              onChange={(e) => onFormChange({ dueDate: e.target.value })}
+            />
+            <CalendarIcon className="absolute right-3 top-2.5 h-5 w-5 text-gray-400" />
+          </div>
+        </div>
+
+        <div>
+          <Label htmlFor="team">Assigned Team</Label>
           <select
-            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+            id="team"
+            className="w-full rounded-md border border-input bg-background px-3 py-2"
             value={formData.assignedTeam}
             onChange={(e) => onFormChange({ assignedTeam: e.target.value })}
           >
-            <option value="">Select Team</option>
+            <option value="">Select a team</option>
             {teams.map(team => (
               <option key={team} value={team}>{team}</option>
             ))}
           </select>
         </div>
-        <Button onClick={onSubmit} className="w-full">
-          <PlusCircle className="mr-2 h-4 w-4" />
+
+        <div>
+          <Label htmlFor="teamLeader">Team Leader</Label>
+          <select
+            id="teamLeader"
+            className="w-full rounded-md border border-input bg-background px-3 py-2"
+            value={formData.teamLeaderId}
+            onChange={(e) => onFormChange({ teamLeaderId: e.target.value })}
+          >
+            <option value="">Select team leader</option>
+            {teamMembers
+              .filter(member => member.role === 'team_leader')
+              .map(leader => (
+                <option key={leader.id} value={leader.id}>{leader.name}</option>
+              ))
+            }
+          </select>
+        </div>
+
+        <div>
+          <Label htmlFor="manager">Dashboard Manager</Label>
+          <select
+            id="manager"
+            className="w-full rounded-md border border-input bg-background px-3 py-2"
+            value={formData.managerId}
+            onChange={(e) => onFormChange({ managerId: e.target.value })}
+          >
+            <option value="">Select manager</option>
+            {teamMembers
+              .filter(member => member.role === 'manager')
+              .map(manager => (
+                <option key={manager.id} value={manager.id}>{manager.name}</option>
+              ))
+            }
+          </select>
+        </div>
+
+        <div>
+          <Label htmlFor="files">Attach Files</Label>
+          <div className="mt-2">
+            <label className="cursor-pointer">
+              <div className="flex items-center gap-2 p-4 border-2 border-dashed rounded-lg hover:bg-gray-50">
+                <Upload className="h-6 w-6 text-gray-400" />
+                <span className="text-sm text-gray-600">Upload files</span>
+              </div>
+              <input
+                type="file"
+                id="files"
+                multiple
+                className="hidden"
+                onChange={handleFileChange}
+                accept="image/*,video/*"
+              />
+            </label>
+          </div>
+          {formData.attachedFiles.length > 0 && (
+            <div className="mt-2">
+              <p className="text-sm text-gray-600">
+                {formData.attachedFiles.length} file(s) attached
+              </p>
+            </div>
+          )}
+        </div>
+
+        <Button type="submit" className="w-full">
           Create Task
         </Button>
-      </CardContent>
+      </form>
     </Card>
   );
 }

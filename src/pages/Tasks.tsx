@@ -17,10 +17,27 @@ interface Task {
   acknowledgmentNote?: string;
   completionNote?: string;
   completionImages?: string[];
+  attachedFiles?: string[];
+  teamLeaderId?: string;
+  managerId?: string;
   assignedManager: string;
 }
 
+interface TeamMember {
+  id: string;
+  name: string;
+  role: 'team_leader' | 'manager';
+}
+
 const teams = ['Red Team', 'Blue Team', 'Green Team'];
+
+// Simulated team members data - in a real app, this would come from your backend
+const teamMembers: TeamMember[] = [
+  { id: '1', name: 'John Doe', role: 'team_leader' },
+  { id: '2', name: 'Jane Smith', role: 'manager' },
+  { id: '3', name: 'Mike Johnson', role: 'team_leader' },
+  { id: '4', name: 'Sarah Wilson', role: 'manager' },
+];
 
 export default function TasksPage() {
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -29,15 +46,18 @@ export default function TasksPage() {
     description: '',
     dueDate: '',
     assignedTeam: '',
-    assignedManager: ''
+    assignedManager: '',
+    teamLeaderId: '',
+    managerId: '',
+    attachedFiles: [] as string[]
   });
   const { toast } = useToast();
 
   const handleAddTask = () => {
-    if (!newTask.title || !newTask.dueDate || !newTask.assignedTeam) {
+    if (!newTask.title || !newTask.dueDate || !newTask.assignedTeam || !newTask.teamLeaderId || !newTask.managerId) {
       toast({
         title: "Missing Information",
-        description: "Please fill in all required fields",
+        description: "Please fill in all required fields including team leader and manager assignments",
         variant: "destructive"
       });
       return;
@@ -46,7 +66,8 @@ export default function TasksPage() {
     const task: Task = {
       id: crypto.randomUUID(),
       ...newTask,
-      status: 'pending'
+      status: 'pending',
+      attachedFiles: newTask.attachedFiles || []
     };
 
     setTasks([...tasks, task]);
@@ -55,12 +76,34 @@ export default function TasksPage() {
       description: '',
       dueDate: '',
       assignedTeam: '',
-      assignedManager: ''
+      assignedManager: '',
+      teamLeaderId: '',
+      managerId: '',
+      attachedFiles: []
     });
+
+    // Notify assigned team leader and manager
+    const teamLeader = teamMembers.find(m => m.id === newTask.teamLeaderId);
+    const manager = teamMembers.find(m => m.id === newTask.managerId);
 
     toast({
       title: "Task Added",
-      description: "New task has been created successfully"
+      description: `New task has been created and assigned to ${teamLeader?.name} and ${manager?.name}`
+    });
+  };
+
+  const handleFileUpload = (files: FileList) => {
+    // In a real application, you would upload these files to your backend storage
+    // For now, we'll just store the file names
+    const fileUrls = Array.from(files).map(file => URL.createObjectURL(file));
+    setNewTask(prev => ({
+      ...prev,
+      attachedFiles: [...(prev.attachedFiles || []), ...fileUrls]
+    }));
+
+    toast({
+      title: "Files Attached",
+      description: `${files.length} file(s) have been attached to the task`
     });
   };
 
@@ -111,8 +154,10 @@ export default function TasksPage() {
           <TabsContent value="create" className="space-y-4">
             <TaskCreateForm
               teams={teams}
+              teamMembers={teamMembers}
               formData={newTask}
               onFormChange={(updates) => setNewTask({ ...newTask, ...updates })}
+              onFileUpload={handleFileUpload}
               onSubmit={handleAddTask}
             />
           </TabsContent>
@@ -126,6 +171,7 @@ export default function TasksPage() {
               <TaskList
                 tasks={tasks}
                 teamName={team}
+                teamMembers={teamMembers}
                 onAcknowledge={handleTaskAcknowledgment}
                 onComplete={handleTaskCompletion}
               />
