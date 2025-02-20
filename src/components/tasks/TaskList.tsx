@@ -13,6 +13,7 @@ import { TaskProgress } from "./TaskProgress";
 import { TaskCompletion } from "./TaskCompletion";
 import { TaskStatusBadge } from "./TaskStatusBadge";
 import { FileUpload } from "./FileUpload";
+import { Textarea } from "@/components/ui/textarea";
 
 interface TeamMember {
   id: string;
@@ -46,29 +47,52 @@ interface TaskListProps {
   onComplete: (taskId: string, note: string, images: string[]) => void;
 }
 
+interface TaskImage {
+  url: string;
+  note: string;
+}
+
 export function TaskList({ tasks, teamName, teamMembers, onAcknowledge, onComplete }: TaskListProps) {
   const [progressNote, setProgressNote] = useState<string>("");
   const [progressFiles, setProgressFiles] = useState<string[]>([]);
   const [completionNote, setCompletionNote] = useState<string>("");
   const [completionFiles, setCompletionFiles] = useState<string[]>([]);
   const [openTaskId, setOpenTaskId] = useState<string | null>(null);
-  const [taskImages, setTaskImages] = useState<{ [key: string]: string[] }>({});
+  const [taskImages, setTaskImages] = useState<{ [key: string]: TaskImage[] }>({});
   const { toast } = useToast();
 
   const handleTaskImageUpload = (event: React.ChangeEvent<HTMLInputElement>, taskId: string) => {
     const files = event.target.files;
     if (files) {
-      const fileUrls = Array.from(files).map(file => URL.createObjectURL(file));
+      const newImages: TaskImage[] = Array.from(files).map(file => ({
+        url: URL.createObjectURL(file),
+        note: ''
+      }));
+      
       setTaskImages(prev => ({
         ...prev,
-        [taskId]: [...(prev[taskId] || []), ...fileUrls]
+        [taskId]: [...(prev[taskId] || []), ...newImages]
       }));
 
       toast({
         title: "Images Uploaded",
-        description: `${fileUrls.length} image(s) have been uploaded to the task`
+        description: `${newImages.length} image(s) have been uploaded to the task`
       });
     }
+  };
+
+  const handleImageNoteChange = (taskId: string, imageIndex: number, note: string) => {
+    setTaskImages(prev => {
+      const taskImagesCopy = [...(prev[taskId] || [])];
+      taskImagesCopy[imageIndex] = {
+        ...taskImagesCopy[imageIndex],
+        note
+      };
+      return {
+        ...prev,
+        [taskId]: taskImagesCopy
+      };
+    });
   };
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>, isProgress: boolean) => {
@@ -196,10 +220,25 @@ export function TaskList({ tasks, teamName, teamMembers, onAcknowledge, onComple
                     </div>
                     
                     {taskImages[task.id]?.length > 0 && (
-                      <ImagesGrid
-                        images={taskImages[task.id]}
-                        title="Task Images"
-                      />
+                      <div className="space-y-4">
+                        {taskImages[task.id].map((image, index) => (
+                          <div key={index} className="space-y-2">
+                            <div className="aspect-video rounded-lg overflow-hidden bg-gray-100">
+                              <img 
+                                src={image.url} 
+                                alt={`Task image ${index + 1}`}
+                                className="w-full h-full object-cover"
+                              />
+                            </div>
+                            <Textarea
+                              placeholder="Add a note about this image..."
+                              value={image.note}
+                              onChange={(e) => handleImageNoteChange(task.id, index, e.target.value)}
+                              className="w-full min-h-[80px]"
+                            />
+                          </div>
+                        ))}
+                      </div>
                     )}
                   </div>
 
