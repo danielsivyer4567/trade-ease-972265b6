@@ -136,6 +136,14 @@ export default function TradeRates() {
     });
   };
 
+  const handleRateSelect = (rate: Rate) => {
+    setSelectedRate(rate);
+    toast({
+      title: "Rate Selected",
+      description: `Selected ${rate.name} at $${rate.rate} ${rate.unit}`,
+    });
+  };
+
   const staffMembers: Staff[] = [
     { id: "1", name: "John Smith" },
     { id: "2", name: "Sarah Johnson" },
@@ -213,7 +221,7 @@ export default function TradeRates() {
                   </CardHeader>
                   <CardContent className="space-y-4">
                     {squareMeterRates.map((rate) => (
-                      <div key={rate.id} className="grid grid-cols-2 gap-4">
+                      <div key={rate.id} className="grid grid-cols-3 gap-4">
                         <Input
                           placeholder="Rate Name"
                           value={rate.name}
@@ -235,6 +243,12 @@ export default function TradeRates() {
                             setSquareMeterRates(updatedRates);
                           }}
                         />
+                        <Button 
+                          variant={selectedRate?.id === rate.id ? "default" : "outline"}
+                          onClick={() => handleRateSelect(rate)}
+                        >
+                          Select Rate
+                        </Button>
                       </div>
                     ))}
                     <Button variant="outline" onClick={() => addNewRate('square')}>
@@ -252,7 +266,7 @@ export default function TradeRates() {
                   </CardHeader>
                   <CardContent className="space-y-4">
                     {linealMeterRates.map((rate) => (
-                      <div key={rate.id} className="grid grid-cols-2 gap-4">
+                      <div key={rate.id} className="grid grid-cols-3 gap-4">
                         <Input
                           placeholder="Rate Name"
                           value={rate.name}
@@ -274,6 +288,12 @@ export default function TradeRates() {
                             setLinealMeterRates(updatedRates);
                           }}
                         />
+                        <Button 
+                          variant={selectedRate?.id === rate.id ? "default" : "outline"}
+                          onClick={() => handleRateSelect(rate)}
+                        >
+                          Select Rate
+                        </Button>
                       </div>
                     ))}
                     <Button variant="outline" onClick={() => addNewRate('lineal')}>
@@ -291,7 +311,7 @@ export default function TradeRates() {
                   </CardHeader>
                   <CardContent className="space-y-4">
                     {itemRates.map((rate) => (
-                      <div key={rate.id} className="grid grid-cols-2 gap-4">
+                      <div key={rate.id} className="grid grid-cols-3 gap-4">
                         <Input
                           placeholder="Rate Name"
                           value={rate.name}
@@ -313,6 +333,12 @@ export default function TradeRates() {
                             setItemRates(updatedRates);
                           }}
                         />
+                        <Button 
+                          variant={selectedRate?.id === rate.id ? "default" : "outline"}
+                          onClick={() => handleRateSelect(rate)}
+                        >
+                          Select Rate
+                        </Button>
                       </div>
                     ))}
                     <Button variant="outline" onClick={() => addNewRate('item')}>
