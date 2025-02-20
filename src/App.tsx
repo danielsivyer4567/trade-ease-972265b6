@@ -6,6 +6,7 @@ import AIFeatures from "./pages/AIFeatures";
 import TeamRed from "./pages/TeamRed";
 import TeamBlue from "./pages/TeamBlue";
 import TeamGreen from "./pages/TeamGreen";
+import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 import "./App.css";
 
@@ -19,6 +20,7 @@ function App() {
         <Route path="/team-red" element={<TeamRed />} />
         <Route path="/team-blue" element={<TeamBlue />} />
         <Route path="/team-green" element={<TeamGreen />} />
+        <Route path="/settings" element={<Settings />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </Router>
