@@ -27,7 +27,7 @@ export function TaskCompletion({
   const { toast } = useToast();
 
   return (
-    <div className="space-y-4 border-t pt-4">
+    <div className="space-y-6 border-t pt-4">
       <div className="flex items-center space-x-2">
         <Checkbox
           id={`complete-${taskId}`}
@@ -53,25 +53,34 @@ export function TaskCompletion({
         </Button>
       </div>
 
-      <Textarea
-        placeholder="Add completion notes (max 500 characters)..."
-        value={completionNote}
-        onChange={(e) => onCompletionNoteChange(e.target.value)}
-        maxLength={500}
-        className="w-full"
-      />
+      <div className="space-y-4">
+        <div>
+          <h4 className="text-sm font-medium mb-2">Completion Notes</h4>
+          <Textarea
+            placeholder="Add completion notes (max 500 characters)..."
+            value={completionNote}
+            onChange={(e) => onCompletionNoteChange(e.target.value)}
+            maxLength={500}
+            className="w-full"
+          />
+        </div>
 
-      <div className="flex gap-2">
-        <FileUpload
-          onFileUpload={onFileUpload}
-          label="Upload completion files"
-        />
+        <div>
+          <h4 className="text-sm font-medium mb-2">Upload Completion Evidence</h4>
+          <div className="grid gap-4">
+            <FileUpload
+              onFileUpload={onFileUpload}
+              label="Upload completion photos"
+            />
+            {completionFiles.length > 0 && (
+              <ImagesGrid
+                images={completionFiles}
+                title="Completion Photos"
+              />
+            )}
+          </div>
+        </div>
       </div>
-
-      <ImagesGrid
-        images={completionFiles}
-        title="Completion Files"
-      />
     </div>
   );
 }
