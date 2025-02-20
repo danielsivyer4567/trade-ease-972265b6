@@ -130,6 +130,10 @@ export function TaskList({ tasks, teamName, teamMembers, onAcknowledge, onComple
     });
   };
 
+  const isTaskInProgressOrCompleted = (task: Task) => {
+    return task.status === 'in_progress' || task.status === 'completed';
+  };
+
   return (
     <div className="grid gap-4">
       {tasks
@@ -196,7 +200,7 @@ export function TaskList({ tasks, teamName, teamMembers, onAcknowledge, onComple
                       onProgressNoteChange={setProgressNote}
                       onFileUpload={(e) => handleFileUpload(e, true)}
                       progressFiles={progressFiles}
-                      inProgress={task.status === 'in_progress' || task.status === 'completed'}
+                      inProgress={isTaskInProgressOrCompleted(task)}
                     />
                   )}
 
