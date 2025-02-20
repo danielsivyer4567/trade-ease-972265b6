@@ -280,7 +280,7 @@ export function TaskList({
                         disabled={task.status !== 'in_progress'}
                       />
                       <label htmlFor={`complete-${task.id}`}>
-                        Complete Task
+                        Task Completed
                       </label>
                     </div>
                   </div>
