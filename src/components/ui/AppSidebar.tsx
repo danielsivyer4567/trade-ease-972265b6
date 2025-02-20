@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { 
@@ -17,7 +18,8 @@ import {
   Database,
   Hammer,
   Plus,
-  BarChart
+  BarChart,
+  ListTodo
 } from 'lucide-react';
 import { useSidebar } from './sidebar';
 import { cn } from '@/lib/utils';
@@ -57,6 +59,10 @@ export function AppSidebar() {
             <Link to="/statistics" className="flex items-center gap-1.5 p-1.5 rounded-lg hover:bg-gray-100 text-gray-700 hover:text-gray-900 text-sm">
               <BarChart className="w-3.5 h-3.5" />
               Statistics
+            </Link>
+            <Link to="/statistics#tasks" className="flex items-center gap-1.5 p-1.5 rounded-lg hover:bg-gray-100 text-gray-700 hover:text-gray-900 text-sm">
+              <ListTodo className="w-3.5 h-3.5" />
+              Task Lists
             </Link>
             <Link to="/jobs" className="flex items-center gap-1.5 p-1.5 rounded-lg hover:bg-gray-100 text-gray-700 hover:text-gray-900 text-sm">
               <Briefcase className="w-3.5 h-3.5" />
