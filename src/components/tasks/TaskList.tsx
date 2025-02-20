@@ -117,30 +117,32 @@ export function TaskList({ tasks, teamName, teamMembers, onAcknowledge, onComple
           >
             <Card>
               <CardHeader className="relative">
-                <CollapsibleTrigger className="absolute right-4 top-4">
-                  {openTaskId === task.id ? (
-                    <ChevronUp className="h-4 w-4 text-gray-500" />
-                  ) : (
-                    <ChevronDown className="h-4 w-4 text-gray-500" />
-                  )}
-                </CollapsibleTrigger>
-                <div className="flex justify-between items-start pr-8">
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm font-medium text-gray-500">Task card #{index + 1}</span>
-                    <CardTitle>{task.title}</CardTitle>
+                <CollapsibleTrigger className="w-full text-left flex items-center justify-between">
+                  <div className="flex flex-col gap-2">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-medium text-gray-500">Task card #{index + 1}</span>
+                      <CardTitle>{task.title}</CardTitle>
+                    </div>
+                    <CardDescription>Due by: {task.dueDate}</CardDescription>
                   </div>
-                  <span className={`px-2 py-1 rounded-full text-xs ${
-                    task.status === 'completed' ? 'bg-green-100 text-green-800' :
-                    task.status === 'in_progress' ? 'bg-purple-100 text-purple-800' :
-                    task.status === 'acknowledged' ? 'bg-blue-100 text-blue-800' :
-                    'bg-yellow-100 text-yellow-800'
-                  }`}>
-                    {task.status.split('_').map(word => 
-                      word.charAt(0).toUpperCase() + word.slice(1)
-                    ).join(' ')}
-                  </span>
-                </div>
-                <CardDescription>Due by: {task.dueDate}</CardDescription>
+                  <div className="flex items-center gap-4">
+                    <span className={`px-2 py-1 rounded-full text-xs ${
+                      task.status === 'completed' ? 'bg-green-100 text-green-800' :
+                      task.status === 'in_progress' ? 'bg-purple-100 text-purple-800' :
+                      task.status === 'acknowledged' ? 'bg-blue-100 text-blue-800' :
+                      'bg-yellow-100 text-yellow-800'
+                    }`}>
+                      {task.status.split('_').map(word => 
+                        word.charAt(0).toUpperCase() + word.slice(1)
+                      ).join(' ')}
+                    </span>
+                    {openTaskId === task.id ? (
+                      <ChevronUp className="h-4 w-4 text-gray-500" />
+                    ) : (
+                      <ChevronDown className="h-4 w-4 text-gray-500" />
+                    )}
+                  </div>
+                </CollapsibleTrigger>
               </CardHeader>
 
               <CollapsibleContent>
