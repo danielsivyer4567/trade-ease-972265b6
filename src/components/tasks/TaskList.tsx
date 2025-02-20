@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { CheckSquare, CirclePlay, Upload, Tag, ChevronDown, ChevronUp, X } from "lucide-react";
@@ -60,16 +59,61 @@ export function TaskList({ tasks, teamName, teamMembers, onAcknowledge, onComple
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>, isProgress: boolean) => {
     const files = event.target.files;
     if (files) {
-      const fileUrls = Array.from(files).map(file => URL.createObjectURL(file));
+      const fileUrls = Array.from(files).map(file => {
+        const url = URL.createObjectURL(file);
+        console.log(`Created URL for ${isProgress ? 'progress' : 'completion'} file:`, url);
+        return url;
+      });
+
       if (isProgress) {
-        setProgressFiles(prev => [...prev, ...fileUrls]);
-        console.log('Progress files:', fileUrls); // Debug log
+        setProgressFiles(prev => {
+          const newFiles = [...prev, ...fileUrls];
+          console.log('Updated progress files:', newFiles);
+          return newFiles;
+        });
       } else {
-        setCompletionFiles(prev => [...prev, ...fileUrls]);
-        console.log('Completion files:', fileUrls); // Debug log
+        setCompletionFiles(prev => {
+          const newFiles = [...prev, ...fileUrls];
+          console.log('Updated completion files:', newFiles);
+          return newFiles;
+        });
       }
+
+      toast({
+        title: "Files Uploaded",
+        description: `${fileUrls.length} file(s) have been uploaded successfully`
+      });
     }
   };
+
+  const ImagePreview = ({ src, alt }: { src: string; alt: string }) => (
+    <Dialog>
+      <DialogTrigger asChild>
+        <div className="relative aspect-video rounded-lg overflow-hidden bg-gray-100 cursor-pointer hover:opacity-90 transition-opacity">
+          <img 
+            src={src} 
+            alt={alt} 
+            className="w-full h-full object-cover"
+            onError={(e) => {
+              console.error('Error loading image:', src);
+              e.currentTarget.src = '/placeholder.svg';
+            }}
+          />
+        </div>
+      </DialogTrigger>
+      <DialogContent className="max-w-4xl h-[80vh] flex items-center justify-center p-0">
+        <img 
+          src={src} 
+          alt={alt} 
+          className="max-w-full max-h-full object-contain"
+          onError={(e) => {
+            console.error('Error loading image in dialog:', src);
+            e.currentTarget.src = '/placeholder.svg';
+          }}
+        />
+      </DialogContent>
+    </Dialog>
+  );
 
   const handleAcknowledge = (taskId: string) => {
     onAcknowledge(taskId, "Task acknowledged by team");
@@ -111,27 +155,6 @@ export function TaskList({ tasks, teamName, teamMembers, onAcknowledge, onComple
       description: "Dashboard manager and team leader have been notified"
     });
   };
-
-  const ImagePreview = ({ src, alt }: { src: string; alt: string }) => (
-    <Dialog>
-      <DialogTrigger asChild>
-        <div className="relative aspect-video rounded-lg overflow-hidden bg-gray-100 cursor-pointer hover:opacity-90 transition-opacity">
-          <img 
-            src={src} 
-            alt={alt} 
-            className="w-full h-full object-contain"
-          />
-        </div>
-      </DialogTrigger>
-      <DialogContent className="max-w-4xl h-[80vh] flex items-center justify-center p-0">
-        <img 
-          src={src} 
-          alt={alt} 
-          className="max-w-full max-h-full object-contain"
-        />
-      </DialogContent>
-    </Dialog>
-  );
 
   return (
     <div className="grid gap-4">
@@ -177,7 +200,6 @@ export function TaskList({ tasks, teamName, teamMembers, onAcknowledge, onComple
                 <CardContent className="space-y-6">
                   <p className="text-gray-700">{task.description}</p>
 
-                  {/* Display Initial Attached Files */}
                   {task.attachedFiles && task.attachedFiles.length > 0 && (
                     <div className="space-y-2">
                       <h4 className="text-sm font-medium">Attached Files:</h4>
@@ -192,8 +214,7 @@ export function TaskList({ tasks, teamName, teamMembers, onAcknowledge, onComple
                       </div>
                     </div>
                   )}
-                  
-                  {/* Acknowledgment Section */}
+
                   <div className="flex items-center space-x-2">
                     <Checkbox
                       id={`acknowledge-${task.id}`}
@@ -210,7 +231,6 @@ export function TaskList({ tasks, teamName, teamMembers, onAcknowledge, onComple
                     </label>
                   </div>
 
-                  {/* In Progress Section */}
                   {task.status === 'acknowledged' && (
                     <div className="space-y-4 border-t pt-4">
                       <div className="flex items-center space-x-2">
@@ -243,26 +263,28 @@ export function TaskList({ tasks, teamName, teamMembers, onAcknowledge, onComple
                             multiple
                             className="hidden"
                             onChange={(e) => handleFileUpload(e, true)}
-                            accept="image/*,video/*"
+                            accept="image/*"
                           />
                         </label>
                       </div>
 
                       {progressFiles.length > 0 && (
-                        <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                          {progressFiles.map((file, index) => (
-                            <ImagePreview 
-                              key={index}
-                              src={file}
-                              alt={`Progress file ${index + 1}`}
-                            />
-                          ))}
+                        <div>
+                          <h4 className="text-sm font-medium mb-2">Progress Files:</h4>
+                          <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                            {progressFiles.map((file, index) => (
+                              <ImagePreview 
+                                key={index}
+                                src={file}
+                                alt={`Progress file ${index + 1}`}
+                              />
+                            ))}
+                          </div>
                         </div>
                       )}
                     </div>
                   )}
 
-                  {/* Completion Section */}
                   {task.status === 'in_progress' && (
                     <div className="space-y-4 border-t pt-4">
                       <div className="flex items-center space-x-2">
@@ -309,20 +331,23 @@ export function TaskList({ tasks, teamName, teamMembers, onAcknowledge, onComple
                             multiple
                             className="hidden"
                             onChange={(e) => handleFileUpload(e, false)}
-                            accept="image/*,video/*"
+                            accept="image/*"
                           />
                         </label>
                       </div>
 
                       {completionFiles.length > 0 && (
-                        <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                          {completionFiles.map((file, index) => (
-                            <ImagePreview 
-                              key={index}
-                              src={file}
-                              alt={`Completion file ${index + 1}`}
-                            />
-                          ))}
+                        <div>
+                          <h4 className="text-sm font-medium mb-2">Completion Files:</h4>
+                          <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                            {completionFiles.map((file, index) => (
+                              <ImagePreview 
+                                key={index}
+                                src={file}
+                                alt={`Completion file ${index + 1}`}
+                              />
+                            ))}
+                          </div>
                         </div>
                       )}
                     </div>
