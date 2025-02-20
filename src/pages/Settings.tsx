@@ -5,7 +5,7 @@ import {
   Settings, DollarSign, Receipt, Clock, Users, Shield, 
   FileText, Calendar, List, CreditCard, User, Bot, 
   Briefcase, Network, HelpCircle, Mail, FileJson, 
-  Building, Share, Zap, Search, ChartBar, TrendingUp, 
+  Building, Share, Zap, Search, BarChart, TrendingUp, 
   CircleDollarSign, UserCheck
 } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -41,7 +41,7 @@ const keyStatistics = [
     value: "$45,289",
     change: "+12.5%",
     trend: "up",
-    icon: ChartBar,
+    icon: BarChart,
     description: "vs. last month"
   },
   {
