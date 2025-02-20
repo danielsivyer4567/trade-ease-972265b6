@@ -1,4 +1,3 @@
-
 import { AppLayout } from "@/components/ui/AppLayout";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ListTodo } from "lucide-react";
@@ -67,7 +66,7 @@ export default function TasksPage() {
       id: crypto.randomUUID(),
       ...newTask,
       status: 'pending',
-      attachedFiles: newTask.attachedFiles || []
+      attachedFiles: newTask.attachedFiles
     };
 
     setTasks([...tasks, task]);
@@ -93,17 +92,23 @@ export default function TasksPage() {
   };
 
   const handleFileUpload = (files: FileList) => {
-    // In a real application, you would upload these files to your backend storage
-    // For now, we'll just store the file names
-    const fileUrls = Array.from(files).map(file => URL.createObjectURL(file));
+    // Create object URLs for immediate preview
+    const fileUrls = Array.from(files).map(file => {
+      // Check if file is an image or video
+      if (file.type.startsWith('image/') || file.type.startsWith('video/')) {
+        return URL.createObjectURL(file);
+      }
+      return '';
+    }).filter(url => url !== ''); // Remove any empty URLs
+
     setNewTask(prev => ({
       ...prev,
-      attachedFiles: [...(prev.attachedFiles || []), ...fileUrls]
+      attachedFiles: [...prev.attachedFiles, ...fileUrls]
     }));
 
     toast({
       title: "Files Attached",
-      description: `${files.length} file(s) have been attached to the task`
+      description: `${fileUrls.length} file(s) have been attached to the task`
     });
   };
 
