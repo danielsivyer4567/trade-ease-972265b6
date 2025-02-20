@@ -25,12 +25,15 @@ export function FileUpload({ onFileUpload, label }: FileUploadProps) {
     e.preventDefault();
     setIsDragging(false);
     
-    const files = e.dataTransfer.files;
+    const files = Array.from(e.dataTransfer.files).filter(file => 
+      file.type.startsWith('image/') || file.type.startsWith('video/')
+    );
+
     if (files.length > 0) {
       // Create a synthetic event to match the onChange interface
       const event = {
         target: {
-          files: files
+          files: files as unknown as FileList
         }
       } as unknown as React.ChangeEvent<HTMLInputElement>;
       
@@ -51,7 +54,7 @@ export function FileUpload({ onFileUpload, label }: FileUploadProps) {
       )}>
         <Upload className="h-4 w-4 text-gray-400" />
         <span className="text-sm text-gray-600">
-          {isDragging ? "Drop files here..." : label}
+          {isDragging ? "Drop files here..." : `${label} (Images and Videos)`}
         </span>
       </div>
       <input
@@ -59,7 +62,7 @@ export function FileUpload({ onFileUpload, label }: FileUploadProps) {
         multiple
         className="hidden"
         onChange={onFileUpload}
-        accept="image/*"
+        accept="image/*,video/*"
       />
     </label>
   );

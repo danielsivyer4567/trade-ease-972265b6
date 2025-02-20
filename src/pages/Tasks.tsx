@@ -1,4 +1,3 @@
-
 import { AppLayout } from "@/components/ui/AppLayout";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ListTodo } from "lucide-react";
@@ -6,6 +5,9 @@ import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { TaskCreateForm } from "@/components/tasks/TaskCreateForm";
 import { TaskList } from "@/components/tasks/TaskList";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { TaskStatusBadge } from "@/components/tasks/TaskStatusBadge";
+import { ImagesGrid } from "@/components/tasks/ImagesGrid";
 
 interface Task {
   id: string;
