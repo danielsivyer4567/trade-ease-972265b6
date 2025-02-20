@@ -52,6 +52,9 @@ export default function TasksPage() {
   });
   const { toast } = useToast();
 
+  const completedTasks = tasks.filter(task => task.status === 'completed');
+  const activeTasks = tasks.filter(task => task.status !== 'completed');
+
   const handleAddTask = () => {
     if (!newTask.title || !newTask.dueDate || !newTask.assignedTeam) {
       toast({
@@ -143,6 +146,7 @@ export default function TasksPage() {
         <Tabs defaultValue="create" className="space-y-4">
           <TabsList>
             <TabsTrigger value="create">Create Task</TabsTrigger>
+            <TabsTrigger value="completed">Completed Tasks</TabsTrigger>
             {teams.map(team => (
               <TabsTrigger key={team} value={team.toLowerCase().split(' ')[0]}>
                 {team}
@@ -161,6 +165,41 @@ export default function TasksPage() {
             />
           </TabsContent>
 
+          <TabsContent value="completed" className="space-y-4">
+            <div className="grid gap-4">
+              {completedTasks.map((task, index) => (
+                <Card key={task.id}>
+                  <CardHeader>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <CardTitle>{task.title}</CardTitle>
+                        <CardDescription>Completed by {task.assignedTeam}</CardDescription>
+                      </div>
+                      <TaskStatusBadge status={task.status} />
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-gray-600">{task.description}</p>
+                    {task.completionNote && (
+                      <div className="mt-4">
+                        <h4 className="font-medium">Completion Note:</h4>
+                        <p className="text-gray-600">{task.completionNote}</p>
+                      </div>
+                    )}
+                    {task.completionImages && task.completionImages.length > 0 && (
+                      <div className="mt-4">
+                        <ImagesGrid
+                          images={task.completionImages}
+                          title="Completion Images"
+                        />
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </TabsContent>
+
           {teams.map(team => (
             <TabsContent 
               key={team} 
@@ -168,7 +207,7 @@ export default function TasksPage() {
               className="space-y-4"
             >
               <TaskList
-                tasks={tasks}
+                tasks={activeTasks}
                 teamName={team}
                 teamMembers={teamMembers}
                 onAcknowledge={handleTaskAcknowledgment}

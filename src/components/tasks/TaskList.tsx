@@ -44,6 +44,11 @@ interface Task {
   assignedMemberId?: string;
 }
 
+interface TaskImage {
+  url: string;
+  note: string;
+}
+
 interface TaskListProps {
   tasks: Task[];
   teamName: string;
