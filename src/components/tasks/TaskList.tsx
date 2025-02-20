@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { useState } from "react";
@@ -13,6 +12,7 @@ import { ImagesGrid } from "./ImagesGrid";
 import { TaskProgress } from "./TaskProgress";
 import { TaskCompletion } from "./TaskCompletion";
 import { TaskStatusBadge } from "./TaskStatusBadge";
+import { FileUpload } from "./FileUpload";
 
 interface TeamMember {
   id: string;
@@ -52,7 +52,24 @@ export function TaskList({ tasks, teamName, teamMembers, onAcknowledge, onComple
   const [completionNote, setCompletionNote] = useState<string>("");
   const [completionFiles, setCompletionFiles] = useState<string[]>([]);
   const [openTaskId, setOpenTaskId] = useState<string | null>(null);
+  const [taskImages, setTaskImages] = useState<{ [key: string]: string[] }>({});
   const { toast } = useToast();
+
+  const handleTaskImageUpload = (event: React.ChangeEvent<HTMLInputElement>, taskId: string) => {
+    const files = event.target.files;
+    if (files) {
+      const fileUrls = Array.from(files).map(file => URL.createObjectURL(file));
+      setTaskImages(prev => ({
+        ...prev,
+        [taskId]: [...(prev[taskId] || []), ...fileUrls]
+      }));
+
+      toast({
+        title: "Images Uploaded",
+        description: `${fileUrls.length} image(s) have been uploaded to the task`
+      });
+    }
+  };
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>, isProgress: boolean) => {
     const files = event.target.files;
@@ -168,6 +185,23 @@ export function TaskList({ tasks, teamName, teamMembers, onAcknowledge, onComple
               <CollapsibleContent>
                 <CardContent className="space-y-6">
                   <p className="text-gray-700">{task.description}</p>
+
+                  <div className="space-y-4">
+                    <div>
+                      <h4 className="text-sm font-medium mb-2">Task Images</h4>
+                      <FileUpload
+                        onFileUpload={(e) => handleTaskImageUpload(e, task.id)}
+                        label="Upload task images"
+                      />
+                    </div>
+                    
+                    {taskImages[task.id]?.length > 0 && (
+                      <ImagesGrid
+                        images={taskImages[task.id]}
+                        title="Task Images"
+                      />
+                    )}
+                  </div>
 
                   {task.attachedFiles && task.attachedFiles.length > 0 && (
                     <ImagesGrid
