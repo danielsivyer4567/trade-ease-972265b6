@@ -95,24 +95,6 @@ export function TaskCreateForm({
         </div>
 
         <div>
-          <Label htmlFor="manager">Dashboard Manager</Label>
-          <select
-            id="manager"
-            className="w-full rounded-md border border-input bg-background px-3 py-2"
-            value={formData.managerId}
-            onChange={(e) => onFormChange({ managerId: e.target.value })}
-          >
-            <option value="">Select manager</option>
-            {teamMembers
-              .filter(member => member.role === 'manager')
-              .map(manager => (
-                <option key={manager.id} value={manager.id}>{manager.name}</option>
-              ))
-            }
-          </select>
-        </div>
-
-        <div>
           <Label htmlFor="files">Attach Files</Label>
           <div className="mt-2">
             <label className="cursor-pointer">
