@@ -1,7 +1,6 @@
-import { Button } from "@/components/ui/button";
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { CheckSquare, CirclePlay, Upload, Tag, ChevronDown, ChevronUp, X } from "lucide-react";
-import { Textarea } from "@/components/ui/textarea";
+import { ChevronDown, ChevronUp } from "lucide-react";
 import { useState } from "react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
@@ -10,11 +9,10 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-import {
-  Dialog,
-  DialogContent,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+import { ImagesGrid } from "./ImagesGrid";
+import { TaskProgress } from "./TaskProgress";
+import { TaskCompletion } from "./TaskCompletion";
+import { TaskStatusBadge } from "./TaskStatusBadge";
 
 interface TeamMember {
   id: string;
@@ -86,35 +84,6 @@ export function TaskList({ tasks, teamName, teamMembers, onAcknowledge, onComple
     }
   };
 
-  const ImagePreview = ({ src, alt }: { src: string; alt: string }) => (
-    <Dialog>
-      <DialogTrigger asChild>
-        <div className="relative aspect-video rounded-lg overflow-hidden bg-gray-100 cursor-pointer hover:opacity-90 transition-opacity">
-          <img 
-            src={src} 
-            alt={alt} 
-            className="w-full h-full object-cover"
-            onError={(e) => {
-              console.error('Error loading image:', src);
-              e.currentTarget.src = '/placeholder.svg';
-            }}
-          />
-        </div>
-      </DialogTrigger>
-      <DialogContent className="max-w-4xl h-[80vh] flex items-center justify-center p-0">
-        <img 
-          src={src} 
-          alt={alt} 
-          className="max-w-full max-h-full object-contain"
-          onError={(e) => {
-            console.error('Error loading image in dialog:', src);
-            e.currentTarget.src = '/placeholder.svg';
-          }}
-        />
-      </DialogContent>
-    </Dialog>
-  );
-
   const handleAcknowledge = (taskId: string) => {
     onAcknowledge(taskId, "Task acknowledged by team");
     toast({
@@ -177,16 +146,7 @@ export function TaskList({ tasks, teamName, teamMembers, onAcknowledge, onComple
                     <CardDescription>Due by: {task.dueDate}</CardDescription>
                   </div>
                   <div className="flex items-center gap-4">
-                    <span className={`px-2 py-1 rounded-full text-xs ${
-                      task.status === 'completed' ? 'bg-green-100 text-green-800' :
-                      task.status === 'in_progress' ? 'bg-purple-100 text-purple-800' :
-                      task.status === 'acknowledged' ? 'bg-blue-100 text-blue-800' :
-                      'bg-yellow-100 text-yellow-800'
-                    }`}>
-                      {task.status.split('_').map(word => 
-                        word.charAt(0).toUpperCase() + word.slice(1)
-                      ).join(' ')}
-                    </span>
+                    <TaskStatusBadge status={task.status} />
                     {openTaskId === task.id ? (
                       <ChevronUp className="h-4 w-4 text-gray-500" />
                     ) : (
@@ -201,18 +161,10 @@ export function TaskList({ tasks, teamName, teamMembers, onAcknowledge, onComple
                   <p className="text-gray-700">{task.description}</p>
 
                   {task.attachedFiles && task.attachedFiles.length > 0 && (
-                    <div className="space-y-2">
-                      <h4 className="text-sm font-medium">Attached Files:</h4>
-                      <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                        {task.attachedFiles.map((file, index) => (
-                          <ImagePreview 
-                            key={index}
-                            src={file}
-                            alt={`Attached file ${index + 1}`}
-                          />
-                        ))}
-                      </div>
-                    </div>
+                    <ImagesGrid
+                      images={task.attachedFiles}
+                      title="Attached Files"
+                    />
                   )}
 
                   <div className="flex items-center space-x-2">
@@ -232,125 +184,25 @@ export function TaskList({ tasks, teamName, teamMembers, onAcknowledge, onComple
                   </div>
 
                   {task.status === 'acknowledged' && (
-                    <div className="space-y-4 border-t pt-4">
-                      <div className="flex items-center space-x-2">
-                        <Checkbox
-                          id={`progress-${task.id}`}
-                          checked={false}
-                          onCheckedChange={() => handleInProgress(task.id)}
-                        />
-                        <label htmlFor={`progress-${task.id}`}>
-                          Mark as In Progress
-                        </label>
-                      </div>
-
-                      <Textarea
-                        placeholder="Add progress notes (max 500 characters)..."
-                        value={progressNote}
-                        onChange={(e) => setProgressNote(e.target.value)}
-                        maxLength={500}
-                        className="w-full"
-                      />
-
-                      <div className="flex gap-2">
-                        <label className="flex-1">
-                          <div className="flex items-center gap-2 p-2 border-2 border-dashed rounded-lg hover:bg-gray-50 cursor-pointer">
-                            <Upload className="h-4 w-4 text-gray-400" />
-                            <span className="text-sm text-gray-600">Upload progress files</span>
-                          </div>
-                          <input
-                            type="file"
-                            multiple
-                            className="hidden"
-                            onChange={(e) => handleFileUpload(e, true)}
-                            accept="image/*"
-                          />
-                        </label>
-                      </div>
-
-                      {progressFiles.length > 0 && (
-                        <div>
-                          <h4 className="text-sm font-medium mb-2">Progress Files:</h4>
-                          <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                            {progressFiles.map((file, index) => (
-                              <ImagePreview 
-                                key={index}
-                                src={file}
-                                alt={`Progress file ${index + 1}`}
-                              />
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                    </div>
+                    <TaskProgress
+                      taskId={task.id}
+                      onProgress={() => handleInProgress(task.id)}
+                      progressNote={progressNote}
+                      onProgressNoteChange={setProgressNote}
+                      onFileUpload={(e) => handleFileUpload(e, true)}
+                      progressFiles={progressFiles}
+                    />
                   )}
 
                   {task.status === 'in_progress' && (
-                    <div className="space-y-4 border-t pt-4">
-                      <div className="flex items-center space-x-2">
-                        <Checkbox
-                          id={`complete-${task.id}`}
-                          checked={false}
-                          onCheckedChange={() => handleComplete(task.id)}
-                        />
-                        <label htmlFor={`complete-${task.id}`}>
-                          Mark as Complete
-                        </label>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="ml-auto"
-                          onClick={() => {
-                            toast({
-                              title: "Team Leader Tagged",
-                              description: "Team leader has been notified of task completion"
-                            });
-                          }}
-                        >
-                          <Tag className="h-4 w-4 mr-1" />
-                          Tag Team Leader
-                        </Button>
-                      </div>
-
-                      <Textarea
-                        placeholder="Add completion notes (max 500 characters)..."
-                        value={completionNote}
-                        onChange={(e) => setCompletionNote(e.target.value)}
-                        maxLength={500}
-                        className="w-full"
-                      />
-
-                      <div className="flex gap-2">
-                        <label className="flex-1">
-                          <div className="flex items-center gap-2 p-2 border-2 border-dashed rounded-lg hover:bg-gray-50 cursor-pointer">
-                            <Upload className="h-4 w-4 text-gray-400" />
-                            <span className="text-sm text-gray-600">Upload completion files</span>
-                          </div>
-                          <input
-                            type="file"
-                            multiple
-                            className="hidden"
-                            onChange={(e) => handleFileUpload(e, false)}
-                            accept="image/*"
-                          />
-                        </label>
-                      </div>
-
-                      {completionFiles.length > 0 && (
-                        <div>
-                          <h4 className="text-sm font-medium mb-2">Completion Files:</h4>
-                          <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                            {completionFiles.map((file, index) => (
-                              <ImagePreview 
-                                key={index}
-                                src={file}
-                                alt={`Completion file ${index + 1}`}
-                              />
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                    </div>
+                    <TaskCompletion
+                      taskId={task.id}
+                      onComplete={() => handleComplete(task.id)}
+                      completionNote={completionNote}
+                      onCompletionNoteChange={setCompletionNote}
+                      onFileUpload={(e) => handleFileUpload(e, false)}
+                      completionFiles={completionFiles}
+                    />
                   )}
                 </CardContent>
               </CollapsibleContent>
