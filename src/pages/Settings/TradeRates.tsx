@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   DollarSign, ArrowLeft, Clock, Users, Percent, Box, 
-  Ruler, Package, Calculator, Equals 
+  Ruler, Package, Calculator, Equal 
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useState } from "react";
@@ -451,7 +451,7 @@ export default function TradeRates() {
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <Equals className="h-5 w-5" />
+                    <Equal className="h-5 w-5" />
                     Calculation Result
                   </CardTitle>
                 </CardHeader>
