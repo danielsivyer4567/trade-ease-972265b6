@@ -11,6 +11,7 @@ interface TaskProgressProps {
   onProgressNoteChange: (value: string) => void;
   onFileUpload: (event: React.ChangeEvent<HTMLInputElement>) => void;
   progressFiles: string[];
+  inProgress: boolean;
 }
 
 export function TaskProgress({
@@ -20,13 +21,14 @@ export function TaskProgress({
   onProgressNoteChange,
   onFileUpload,
   progressFiles,
+  inProgress,
 }: TaskProgressProps) {
   return (
     <div className="space-y-4 border-t pt-4">
       <div className="flex items-center space-x-2">
         <Checkbox
           id={`progress-${taskId}`}
-          checked={false}
+          checked={inProgress}
           onCheckedChange={onProgress}
         />
         <label htmlFor={`progress-${taskId}`}>
