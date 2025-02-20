@@ -210,6 +210,13 @@ export function TaskList({ tasks, teamName, teamMembers, onAcknowledge, onComple
                 <CardContent className="space-y-6">
                   <p className="text-gray-700">{task.description}</p>
 
+                  {task.attachedFiles && task.attachedFiles.length > 0 && (
+                    <ImagesGrid
+                      images={task.attachedFiles}
+                      title="Attached Files"
+                    />
+                  )}
+
                   <div className="space-y-4">
                     <div>
                       <h4 className="text-sm font-medium mb-2">Task Images</h4>
@@ -241,13 +248,6 @@ export function TaskList({ tasks, teamName, teamMembers, onAcknowledge, onComple
                       </div>
                     )}
                   </div>
-
-                  {task.attachedFiles && task.attachedFiles.length > 0 && (
-                    <ImagesGrid
-                      images={task.attachedFiles}
-                      title="Attached Files"
-                    />
-                  )}
 
                   <div className="flex items-center space-x-2">
                     <Checkbox
