@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { DollarSign, ArrowLeft, Clock, Users, Percent } from "lucide-react";
+import { DollarSign, ArrowLeft, Clock, Users, Percent, Box, Ruler, Package } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useState } from "react";
 import { useToast } from "@/components/ui/use-toast";
@@ -24,8 +24,14 @@ interface CommissionRate {
 }
 
 export default function TradeRates() {
-  const [meterRates, setMeterRates] = useState<Rate[]>([
-    { id: "1", name: "Standard Meter Rate", rate: 85, unit: "per meter" }
+  const [squareMeterRates, setSquareMeterRates] = useState<Rate[]>([
+    { id: "1", name: "Standard Square Meter Rate", rate: 85, unit: "per m²" }
+  ]);
+  const [linealMeterRates, setLinealMeterRates] = useState<Rate[]>([
+    { id: "1", name: "Standard Lineal Meter Rate", rate: 45, unit: "per lineal meter" }
+  ]);
+  const [itemRates, setItemRates] = useState<Rate[]>([
+    { id: "1", name: "Standard Item Rate", rate: 120, unit: "per item" }
   ]);
   const [hourlyRates, setHourlyRates] = useState<Rate[]>([
     { id: "1", name: "Standard Labor", rate: 95, unit: "per hour" }
@@ -43,18 +49,29 @@ export default function TradeRates() {
     });
   };
 
-  const addNewRate = (type: 'meter' | 'hourly') => {
+  const addNewRate = (type: 'square' | 'lineal' | 'item' | 'hourly') => {
     const newRate = {
       id: Date.now().toString(),
-      name: `New ${type === 'meter' ? 'Meter' : 'Hourly'} Rate`,
+      name: `New ${type.charAt(0).toUpperCase() + type.slice(1)} Rate`,
       rate: 0,
-      unit: type === 'meter' ? 'per meter' : 'per hour'
+      unit: type === 'square' ? 'per m²' : 
+            type === 'lineal' ? 'per lineal meter' :
+            type === 'item' ? 'per item' : 'per hour'
     };
     
-    if (type === 'meter') {
-      setMeterRates([...meterRates, newRate]);
-    } else {
-      setHourlyRates([...hourlyRates, newRate]);
+    switch(type) {
+      case 'square':
+        setSquareMeterRates([...squareMeterRates, newRate]);
+        break;
+      case 'lineal':
+        setLinealMeterRates([...linealMeterRates, newRate]);
+        break;
+      case 'item':
+        setItemRates([...itemRates, newRate]);
+        break;
+      case 'hourly':
+        setHourlyRates([...hourlyRates, newRate]);
+        break;
     }
   };
 
@@ -82,39 +99,47 @@ export default function TradeRates() {
           <Button onClick={handleSave}>Save Changes</Button>
         </div>
 
-        <Tabs defaultValue="meter" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="meter" className="flex items-center gap-2">
-              <DollarSign className="h-4 w-4" />
-              Meter Rates
+        <Tabs defaultValue="square" className="w-full">
+          <TabsList className="grid w-full grid-cols-6">
+            <TabsTrigger value="square" className="flex items-center gap-2">
+              <Box className="h-4 w-4" />
+              Square Meter
+            </TabsTrigger>
+            <TabsTrigger value="lineal" className="flex items-center gap-2">
+              <Ruler className="h-4 w-4" />
+              Lineal Meter
+            </TabsTrigger>
+            <TabsTrigger value="item" className="flex items-center gap-2">
+              <Package className="h-4 w-4" />
+              Per Item
             </TabsTrigger>
             <TabsTrigger value="hourly" className="flex items-center gap-2">
               <Clock className="h-4 w-4" />
-              Hourly Rates
+              Hourly
             </TabsTrigger>
             <TabsTrigger value="commission" className="flex items-center gap-2">
               <Percent className="h-4 w-4" />
-              Commission Rates
+              Commission
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="meter">
+          <TabsContent value="square">
             <Card>
               <CardHeader>
-                <CardTitle>Meter Rates</CardTitle>
-                <CardDescription>Set rates based on meter measurements</CardDescription>
+                <CardTitle>Square Meter Rates (m²)</CardTitle>
+                <CardDescription>Set rates based on square meter measurements</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                {meterRates.map((rate) => (
+                {squareMeterRates.map((rate) => (
                   <div key={rate.id} className="grid grid-cols-2 gap-4">
                     <Input
                       placeholder="Rate Name"
                       value={rate.name}
                       onChange={(e) => {
-                        const updatedRates = meterRates.map(r =>
+                        const updatedRates = squareMeterRates.map(r =>
                           r.id === rate.id ? { ...r, name: e.target.value } : r
                         );
-                        setMeterRates(updatedRates);
+                        setSquareMeterRates(updatedRates);
                       }}
                     />
                     <Input
@@ -122,16 +147,94 @@ export default function TradeRates() {
                       placeholder="Rate Amount"
                       value={rate.rate}
                       onChange={(e) => {
-                        const updatedRates = meterRates.map(r =>
+                        const updatedRates = squareMeterRates.map(r =>
                           r.id === rate.id ? { ...r, rate: Number(e.target.value) } : r
                         );
-                        setMeterRates(updatedRates);
+                        setSquareMeterRates(updatedRates);
                       }}
                     />
                   </div>
                 ))}
-                <Button variant="outline" onClick={() => addNewRate('meter')}>
-                  Add Meter Rate
+                <Button variant="outline" onClick={() => addNewRate('square')}>
+                  Add Square Meter Rate
+                </Button>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="lineal">
+            <Card>
+              <CardHeader>
+                <CardTitle>Lineal Meter Rates</CardTitle>
+                <CardDescription>Set rates based on lineal meter measurements</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {linealMeterRates.map((rate) => (
+                  <div key={rate.id} className="grid grid-cols-2 gap-4">
+                    <Input
+                      placeholder="Rate Name"
+                      value={rate.name}
+                      onChange={(e) => {
+                        const updatedRates = linealMeterRates.map(r =>
+                          r.id === rate.id ? { ...r, name: e.target.value } : r
+                        );
+                        setLinealMeterRates(updatedRates);
+                      }}
+                    />
+                    <Input
+                      type="number"
+                      placeholder="Rate Amount"
+                      value={rate.rate}
+                      onChange={(e) => {
+                        const updatedRates = linealMeterRates.map(r =>
+                          r.id === rate.id ? { ...r, rate: Number(e.target.value) } : r
+                        );
+                        setLinealMeterRates(updatedRates);
+                      }}
+                    />
+                  </div>
+                ))}
+                <Button variant="outline" onClick={() => addNewRate('lineal')}>
+                  Add Lineal Meter Rate
+                </Button>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="item">
+            <Card>
+              <CardHeader>
+                <CardTitle>Per Item Rates</CardTitle>
+                <CardDescription>Set rates based on individual items</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {itemRates.map((rate) => (
+                  <div key={rate.id} className="grid grid-cols-2 gap-4">
+                    <Input
+                      placeholder="Rate Name"
+                      value={rate.name}
+                      onChange={(e) => {
+                        const updatedRates = itemRates.map(r =>
+                          r.id === rate.id ? { ...r, name: e.target.value } : r
+                        );
+                        setItemRates(updatedRates);
+                      }}
+                    />
+                    <Input
+                      type="number"
+                      placeholder="Rate Amount"
+                      value={rate.rate}
+                      onChange={(e) => {
+                        const updatedRates = itemRates.map(r =>
+                          r.id === rate.id ? { ...r, rate: Number(e.target.value) } : r
+                        );
+                        setItemRates(updatedRates);
+                      }}
+                    />
+                  </div>
+                ))}
+                <Button variant="outline" onClick={() => addNewRate('item')}>
+                  Add Item Rate
                 </Button>
               </CardContent>
             </Card>
