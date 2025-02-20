@@ -1,10 +1,11 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { CheckSquare, CirclePlay, Upload } from "lucide-react";
+import { CheckSquare, CirclePlay, Upload, Tag } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { useState } from "react";
 import { Checkbox } from "@/components/ui/checkbox";
+import { useToast } from "@/hooks/use-toast";
 
 interface TeamMember {
   id: string;
@@ -20,8 +21,10 @@ interface Task {
   assignedTeam: string;
   status: 'pending' | 'acknowledged' | 'in_progress' | 'completed';
   acknowledgmentNote?: string;
+  progressNote?: string;
+  progressFiles?: string[];
   completionNote?: string;
-  completionImages?: string[];
+  completionFiles?: string[];
   assignedManager: string;
   teamLeaderId?: string;
   managerId?: string;
@@ -37,37 +40,63 @@ interface TaskListProps {
 }
 
 export function TaskList({ tasks, teamName, teamMembers, onAcknowledge, onComplete }: TaskListProps) {
+  const [progressNote, setProgressNote] = useState<string>("");
+  const [progressFiles, setProgressFiles] = useState<string[]>([]);
   const [completionNote, setCompletionNote] = useState<string>("");
   const [completionFiles, setCompletionFiles] = useState<string[]>([]);
-  const [taskInProgress, setTaskInProgress] = useState<string | null>(null);
-  const [progressNote, setProgressNote] = useState<string>("");
+  const { toast } = useToast();
 
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>, taskId: string) => {
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>, isProgress: boolean) => {
     const files = event.target.files;
     if (files) {
       const fileUrls = Array.from(files).map(file => URL.createObjectURL(file));
-      setCompletionFiles(prev => [...prev, ...fileUrls]);
+      if (isProgress) {
+        setProgressFiles(prev => [...prev, ...fileUrls]);
+      } else {
+        setCompletionFiles(prev => [...prev, ...fileUrls]);
+      }
     }
   };
 
   const handleAcknowledge = (taskId: string) => {
     onAcknowledge(taskId, "Task acknowledged by team");
+    toast({
+      title: "Task Acknowledged",
+      description: "Dashboard manager has been notified"
+    });
   };
 
   const handleInProgress = (taskId: string) => {
-    setTaskInProgress(taskId);
-    setProgressNote("");
+    if (progressNote.length > 500) {
+      toast({
+        title: "Error",
+        description: "Progress note must be less than 500 characters",
+        variant: "destructive"
+      });
+      return;
+    }
+    toast({
+      title: "Task In Progress",
+      description: "Status updated and team leader notified"
+    });
   };
 
   const handleComplete = (taskId: string) => {
     if (completionNote.length > 500) {
-      alert("Completion note must be less than 500 characters");
+      toast({
+        title: "Error",
+        description: "Completion note must be less than 500 characters",
+        variant: "destructive"
+      });
       return;
     }
     onComplete(taskId, completionNote, completionFiles);
     setCompletionNote("");
     setCompletionFiles([]);
-    setProgressNote("");
+    toast({
+      title: "Task Completed",
+      description: "Dashboard manager and team leader have been notified"
+    });
   };
 
   return (
@@ -92,48 +121,29 @@ export function TaskList({ tasks, teamName, teamMembers, onAcknowledge, onComple
               </div>
               <CardDescription>Due by: {task.dueDate}</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-6">
               <p className="text-gray-700">{task.description}</p>
               
-              {task.attachedFiles && task.attachedFiles.length > 0 && (
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                  {task.attachedFiles.map((file, index) => (
-                    <div key={index} className="relative aspect-video rounded-lg overflow-hidden bg-gray-100">
-                      <img 
-                        src={file} 
-                        alt={`Attachment ${index + 1}`} 
-                        className="w-full h-full object-contain"
-                        onError={(e) => {
-                          const target = e.target as HTMLImageElement;
-                          target.src = 'placeholder.svg';
-                          target.className = 'w-16 h-16 mx-auto mt-4';
-                        }}
-                      />
-                    </div>
-                  ))}
-                </div>
-              )}
-              
-              <div className="space-y-4">
-                {/* Acknowledgment Checkbox */}
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id={`acknowledge-${task.id}`}
-                    checked={task.status !== 'pending'}
-                    onCheckedChange={() => {
-                      if (task.status === 'pending') {
-                        handleAcknowledge(task.id);
-                      }
-                    }}
-                    disabled={task.status !== 'pending'}
-                  />
-                  <label htmlFor={`acknowledge-${task.id}`}>
-                    Acknowledge Task
-                  </label>
-                </div>
+              {/* Acknowledgment Section */}
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id={`acknowledge-${task.id}`}
+                  checked={task.status !== 'pending'}
+                  onCheckedChange={() => {
+                    if (task.status === 'pending') {
+                      handleAcknowledge(task.id);
+                    }
+                  }}
+                  disabled={task.status !== 'pending'}
+                />
+                <label htmlFor={`acknowledge-${task.id}`}>
+                  Acknowledge Task
+                </label>
+              </div>
 
-                {/* In Progress Checkbox */}
-                {task.status === 'acknowledged' && (
+              {/* In Progress Section */}
+              {task.status === 'acknowledged' && (
+                <div className="space-y-4 border-t pt-4">
                   <div className="flex items-center space-x-2">
                     <Checkbox
                       id={`progress-${task.id}`}
@@ -144,62 +154,114 @@ export function TaskList({ tasks, teamName, teamMembers, onAcknowledge, onComple
                       Mark as In Progress
                     </label>
                   </div>
-                )}
 
-                {/* Completion Section */}
-                {task.status === 'in_progress' && (
-                  <div className="space-y-4">
-                    <div className="flex items-center space-x-2">
-                      <Checkbox
-                        id={`complete-${task.id}`}
-                        checked={task.status === 'completed'}
-                        onCheckedChange={() => handleComplete(task.id)}
-                      />
-                      <label htmlFor={`complete-${task.id}`}>
-                        Mark as Complete
-                      </label>
-                    </div>
+                  <Textarea
+                    placeholder="Add progress notes (max 500 characters)..."
+                    value={progressNote}
+                    onChange={(e) => setProgressNote(e.target.value)}
+                    maxLength={500}
+                    className="w-full"
+                  />
 
-                    <Textarea
-                      placeholder="Add completion notes (max 500 characters)..."
-                      value={completionNote}
-                      onChange={(e) => setCompletionNote(e.target.value)}
-                      maxLength={500}
-                      className="w-full"
-                    />
-                    
-                    <div className="flex gap-2">
-                      <label className="flex-1">
-                        <div className="flex items-center gap-2 p-2 border-2 border-dashed rounded-lg hover:bg-gray-50 cursor-pointer">
-                          <Upload className="h-4 w-4 text-gray-400" />
-                          <span className="text-sm text-gray-600">Upload completion files</span>
-                        </div>
-                        <input
-                          type="file"
-                          multiple
-                          className="hidden"
-                          onChange={(e) => handleFileUpload(e, task.id)}
-                          accept="image/*,video/*"
-                        />
-                      </label>
-                    </div>
-
-                    {completionFiles.length > 0 && (
-                      <div className="grid grid-cols-2 md:grid-cols-3 gap-2 mt-2">
-                        {completionFiles.map((file, index) => (
-                          <div key={index} className="relative aspect-video rounded-lg overflow-hidden bg-gray-100">
-                            <img 
-                              src={file} 
-                              alt={`Completion file ${index + 1}`} 
-                              className="w-full h-full object-contain"
-                            />
-                          </div>
-                        ))}
+                  <div className="flex gap-2">
+                    <label className="flex-1">
+                      <div className="flex items-center gap-2 p-2 border-2 border-dashed rounded-lg hover:bg-gray-50 cursor-pointer">
+                        <Upload className="h-4 w-4 text-gray-400" />
+                        <span className="text-sm text-gray-600">Upload progress files</span>
                       </div>
-                    )}
+                      <input
+                        type="file"
+                        multiple
+                        className="hidden"
+                        onChange={(e) => handleFileUpload(e, true)}
+                        accept="image/*,video/*"
+                      />
+                    </label>
                   </div>
-                )}
-              </div>
+
+                  {progressFiles.length > 0 && (
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                      {progressFiles.map((file, index) => (
+                        <div key={index} className="relative aspect-video rounded-lg overflow-hidden bg-gray-100">
+                          <img 
+                            src={file} 
+                            alt={`Progress file ${index + 1}`} 
+                            className="w-full h-full object-contain"
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Completion Section */}
+              {task.status === 'in_progress' && (
+                <div className="space-y-4 border-t pt-4">
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id={`complete-${task.id}`}
+                      checked={task.status === 'completed'}
+                      onCheckedChange={() => handleComplete(task.id)}
+                    />
+                    <label htmlFor={`complete-${task.id}`}>
+                      Mark as Complete
+                    </label>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="ml-auto"
+                      onClick={() => {
+                        toast({
+                          title: "Team Leader Tagged",
+                          description: "Team leader has been notified of task completion"
+                        });
+                      }}
+                    >
+                      <Tag className="h-4 w-4 mr-1" />
+                      Tag Team Leader
+                    </Button>
+                  </div>
+
+                  <Textarea
+                    placeholder="Add completion notes (max 500 characters)..."
+                    value={completionNote}
+                    onChange={(e) => setCompletionNote(e.target.value)}
+                    maxLength={500}
+                    className="w-full"
+                  />
+
+                  <div className="flex gap-2">
+                    <label className="flex-1">
+                      <div className="flex items-center gap-2 p-2 border-2 border-dashed rounded-lg hover:bg-gray-50 cursor-pointer">
+                        <Upload className="h-4 w-4 text-gray-400" />
+                        <span className="text-sm text-gray-600">Upload completion files</span>
+                      </div>
+                      <input
+                        type="file"
+                        multiple
+                        className="hidden"
+                        onChange={(e) => handleFileUpload(e, false)}
+                        accept="image/*,video/*"
+                      />
+                    </label>
+                  </div>
+
+                  {completionFiles.length > 0 && (
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                      {completionFiles.map((file, index) => (
+                        <div key={index} className="relative aspect-video rounded-lg overflow-hidden bg-gray-100">
+                          <img 
+                            src={file} 
+                            alt={`Completion file ${index + 1}`} 
+                            className="w-full h-full object-contain"
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
             </CardContent>
           </Card>
         ))}
