@@ -1,5 +1,5 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ChevronDown, ChevronUp } from "lucide-react";
+import { ChevronDown, ChevronUp, UserPlus } from "lucide-react";
 import { useState } from "react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
@@ -10,6 +10,14 @@ import { TaskCompletion } from "./TaskCompletion";
 import { TaskStatusBadge } from "./TaskStatusBadge";
 import { FileUpload } from "./FileUpload";
 import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface TeamMember {
   id: string;
@@ -33,6 +41,7 @@ interface Task {
   teamLeaderId?: string;
   managerId?: string;
   attachedFiles?: string[];
+  assignedMemberId?: string;
 }
 
 interface TaskListProps {
@@ -41,11 +50,6 @@ interface TaskListProps {
   teamMembers: TeamMember[];
   onAcknowledge: (taskId: string, note: string) => void;
   onComplete: (taskId: string, note: string, images: string[]) => void;
-}
-
-interface TaskImage {
-  url: string;
-  note: string;
 }
 
 export function TaskList({
@@ -60,13 +64,21 @@ export function TaskList({
   const [completionNote, setCompletionNote] = useState<string>("");
   const [completionFiles, setCompletionFiles] = useState<string[]>([]);
   const [openTaskId, setOpenTaskId] = useState<string | null>(null);
-  const [taskImages, setTaskImages] = useState<{
-    [key: string]: TaskImage[];
-  }>({});
+  const [taskImages, setTaskImages] = useState<{[key: string]: TaskImage[]}>({});
+  const [assignedMembers, setAssignedMembers] = useState<{[key: string]: string}>({});
 
-  const {
-    toast
-  } = useToast();
+  const { toast } = useToast();
+
+  const handleAssignMember = (taskId: string, memberId: string) => {
+    setAssignedMembers(prev => ({
+      ...prev,
+      [taskId]: memberId
+    }));
+    toast({
+      title: "Team Member Assigned",
+      description: `Task assigned to ${teamMembers.find(m => m.id === memberId)?.name}`
+    });
+  };
 
   const handleTaskImageUpload = (event: React.ChangeEvent<HTMLInputElement>, taskId: string) => {
     const files = event.target.files;
@@ -210,7 +222,27 @@ export function TaskList({
 
               <CollapsibleContent>
                 <CardContent className="space-y-6">
-                  <p className="text-gray-700">{task.description}</p>
+                  <div className="flex items-center justify-between">
+                    <p className="text-gray-700">{task.description}</p>
+                    <div className="flex items-center gap-2">
+                      <UserPlus className="h-4 w-4 text-gray-500" />
+                      <Select
+                        value={assignedMembers[task.id] || ''}
+                        onValueChange={(value) => handleAssignMember(task.id, value)}
+                      >
+                        <SelectTrigger className="w-[200px]">
+                          <SelectValue placeholder="Assign team member" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {teamMembers.map((member) => (
+                            <SelectItem key={member.id} value={member.id}>
+                              {member.name} ({member.role})
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
 
                   {task.attachedFiles && task.attachedFiles.length > 0 && (
                     <ImagesGrid
