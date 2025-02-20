@@ -18,10 +18,24 @@ interface Task {
   acknowledgmentNote?: string;
   completionNote?: string;
   completionImages?: string[];
+  attachedFiles?: string[];
+  teamLeaderId?: string;
+  managerId?: string;
   assignedManager: string;
 }
 
+interface TeamMember {
+  id: string;
+  name: string;
+  role: 'team_leader' | 'manager';
+}
+
 const teams = ['Red Team', 'Blue Team', 'Green Team'];
+
+const teamMembers: TeamMember[] = [
+  { id: '1', name: 'John Doe', role: 'team_leader' },
+  { id: '2', name: 'Jane Smith', role: 'manager' },
+];
 
 export default function StatisticsPage() {
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -30,7 +44,10 @@ export default function StatisticsPage() {
     description: '',
     dueDate: '',
     assignedTeam: '',
-    assignedManager: ''
+    assignedManager: '',
+    teamLeaderId: '',
+    managerId: '',
+    attachedFiles: [] as string[]
   });
   const { toast } = useToast();
 
@@ -56,7 +73,10 @@ export default function StatisticsPage() {
       description: '',
       dueDate: '',
       assignedTeam: '',
-      assignedManager: ''
+      assignedManager: '',
+      teamLeaderId: '',
+      managerId: '',
+      attachedFiles: []
     });
 
     toast({
@@ -116,8 +136,16 @@ export default function StatisticsPage() {
             <TabsContent value="create" className="space-y-4">
               <TaskCreateForm
                 teams={teams}
+                teamMembers={teamMembers}
                 formData={newTask}
                 onFormChange={(updates) => setNewTask({ ...newTask, ...updates })}
+                onFileUpload={(files) => {
+                  const fileUrls = Array.from(files).map(file => URL.createObjectURL(file));
+                  setNewTask(prev => ({
+                    ...prev,
+                    attachedFiles: [...prev.attachedFiles, ...fileUrls]
+                  }));
+                }}
                 onSubmit={handleAddTask}
               />
             </TabsContent>
@@ -131,6 +159,7 @@ export default function StatisticsPage() {
                 <TaskList
                   tasks={tasks}
                   teamName={team}
+                  teamMembers={teamMembers}
                   onAcknowledge={handleTaskAcknowledgment}
                   onComplete={handleTaskCompletion}
                 />

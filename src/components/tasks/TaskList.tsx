@@ -62,20 +62,21 @@ export function TaskList({ tasks, teamName, teamMembers, onAcknowledge, onComple
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <p>{task.description}</p>
+                <p className="text-gray-700">{task.description}</p>
                 {task.attachedFiles && task.attachedFiles.length > 0 && (
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
                     {task.attachedFiles.map((file, index) => (
                       <div key={index} className="relative aspect-video rounded-lg overflow-hidden bg-gray-100">
-                        {file.match(/\.(jpg|jpeg|png|gif)$/i) ? (
-                          <img src={file} alt="Attached file" className="object-cover w-full h-full" />
-                        ) : file.match(/\.(mp4|webm)$/i) ? (
-                          <video src={file} controls className="w-full h-full" />
-                        ) : (
-                          <div className="flex items-center justify-center h-full text-gray-500">
-                            File attachment
-                          </div>
-                        )}
+                        <img 
+                          src={file} 
+                          alt={`Attachment ${index + 1}`} 
+                          className="w-full h-full object-contain"
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            target.src = 'placeholder.svg'; // Fallback image
+                            target.className = 'w-16 h-16 mx-auto mt-4';
+                          }}
+                        />
                       </div>
                     ))}
                   </div>
