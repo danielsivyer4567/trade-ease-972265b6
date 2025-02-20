@@ -3,29 +3,37 @@ import { AppLayout } from "@/components/ui/AppLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Brain, Sparkles, Zap, Network } from "lucide-react";
 import { useState } from "react";
 import { useToast } from "@/components/ui/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 export default function AIFeatures() {
   const [prompt, setPrompt] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
+  const [response, setResponse] = useState("");
   const { toast } = useToast();
   
   const handleOpenAIGenerate = async () => {
     setIsGenerating(true);
     try {
-      toast({
-        title: "Processing with OpenAI",
-        description: "Your request is being processed...",
+      const { data, error } = await supabase.functions.invoke('generate-with-openai', {
+        body: { prompt }
       });
-      // OpenAI integration will be added here
+
+      if (error) throw error;
+
+      setResponse(data.generatedText);
+      toast({
+        title: "Generation Complete",
+        description: "Your content has been generated successfully!",
+      });
     } catch (error) {
+      console.error('Error generating content:', error);
       toast({
         title: "Error",
-        description: "Failed to process your request",
+        description: "Failed to generate content. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -101,6 +109,16 @@ export default function AIFeatures() {
                     </span>
                   )}
                 </Button>
+                {response && (
+                  <Card className="mt-4">
+                    <CardHeader>
+                      <CardTitle className="text-lg">Generated Response</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="whitespace-pre-wrap">{response}</p>
+                    </CardContent>
+                  </Card>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
