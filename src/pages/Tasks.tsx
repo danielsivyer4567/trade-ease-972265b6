@@ -1,0 +1,138 @@
+
+import { AppLayout } from "@/components/ui/AppLayout";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ListTodo } from "lucide-react";
+import { useState } from "react";
+import { useToast } from "@/hooks/use-toast";
+import { TaskCreateForm } from "@/components/tasks/TaskCreateForm";
+import { TaskList } from "@/components/tasks/TaskList";
+
+interface Task {
+  id: string;
+  title: string;
+  description: string;
+  dueDate: string;
+  assignedTeam: string;
+  status: 'pending' | 'acknowledged' | 'completed';
+  acknowledgmentNote?: string;
+  completionNote?: string;
+  completionImages?: string[];
+  assignedManager: string;
+}
+
+const teams = ['Red Team', 'Blue Team', 'Green Team'];
+
+export default function TasksPage() {
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [newTask, setNewTask] = useState({
+    title: '',
+    description: '',
+    dueDate: '',
+    assignedTeam: '',
+    assignedManager: ''
+  });
+  const { toast } = useToast();
+
+  const handleAddTask = () => {
+    if (!newTask.title || !newTask.dueDate || !newTask.assignedTeam) {
+      toast({
+        title: "Missing Information",
+        description: "Please fill in all required fields",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const task: Task = {
+      id: crypto.randomUUID(),
+      ...newTask,
+      status: 'pending'
+    };
+
+    setTasks([...tasks, task]);
+    setNewTask({
+      title: '',
+      description: '',
+      dueDate: '',
+      assignedTeam: '',
+      assignedManager: ''
+    });
+
+    toast({
+      title: "Task Added",
+      description: "New task has been created successfully"
+    });
+  };
+
+  const handleTaskAcknowledgment = (taskId: string, note: string) => {
+    setTasks(tasks.map(task => 
+      task.id === taskId 
+        ? { ...task, status: 'acknowledged', acknowledgmentNote: note }
+        : task
+    ));
+    toast({
+      title: "Task Acknowledged",
+      description: "Task has been marked as acknowledged"
+    });
+  };
+
+  const handleTaskCompletion = (taskId: string, note: string, images: string[]) => {
+    setTasks(tasks.map(task => 
+      task.id === taskId 
+        ? { ...task, status: 'completed', completionNote: note, completionImages: images }
+        : task
+    ));
+    toast({
+      title: "Task Completed",
+      description: "Task has been marked as completed"
+    });
+  };
+
+  return (
+    <AppLayout>
+      <div className="p-6 space-y-8">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <ListTodo className="h-8 w-8 text-gray-700" />
+            <h1 className="text-3xl font-bold">Team Task Management</h1>
+          </div>
+        </div>
+
+        <Tabs defaultValue="create" className="space-y-4">
+          <TabsList>
+            <TabsTrigger value="create">Create Task</TabsTrigger>
+            {teams.map(team => (
+              <TabsTrigger key={team} value={team.toLowerCase().split(' ')[0]}>
+                {team}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+
+          <TabsContent value="create" className="space-y-4">
+            <TaskCreateForm
+              teams={teams}
+              formData={newTask}
+              onFormChange={(updates) => setNewTask({ ...newTask, ...updates })}
+              onSubmit={handleAddTask}
+            />
+          </TabsContent>
+
+          {teams.map(team => (
+            <TabsContent 
+              key={team} 
+              value={team.toLowerCase().split(' ')[0]} 
+              className="space-y-4"
+            >
+              <TaskList
+                tasks={tasks}
+                teamName={team}
+                onAcknowledge={handleTaskAcknowledgment}
+                onComplete={handleTaskCompletion}
+              />
+            </TabsContent>
+          ))}
+        </Tabs>
+      </div>
+    </AppLayout>
+  );
+}
