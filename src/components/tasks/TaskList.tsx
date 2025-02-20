@@ -1,7 +1,9 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { CheckSquare } from "lucide-react";
+import { CheckSquare, CirclePlay, Upload } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import { useState } from "react";
 
 interface TeamMember {
   id: string;
@@ -15,7 +17,7 @@ interface Task {
   description: string;
   dueDate: string;
   assignedTeam: string;
-  status: 'pending' | 'acknowledged' | 'completed';
+  status: 'pending' | 'acknowledged' | 'in_progress' | 'completed';
   acknowledgmentNote?: string;
   completionNote?: string;
   completionImages?: string[];
@@ -34,6 +36,33 @@ interface TaskListProps {
 }
 
 export function TaskList({ tasks, teamName, teamMembers, onAcknowledge, onComplete }: TaskListProps) {
+  const [completionNote, setCompletionNote] = useState<string>("");
+  const [completionFiles, setCompletionFiles] = useState<string[]>([]);
+  const [taskInProgress, setTaskInProgress] = useState<string | null>(null);
+
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>, taskId: string) => {
+    const files = event.target.files;
+    if (files) {
+      const fileUrls = Array.from(files).map(file => URL.createObjectURL(file));
+      setCompletionFiles(prev => [...prev, ...fileUrls]);
+    }
+  };
+
+  const handleComplete = (taskId: string) => {
+    onComplete(taskId, completionNote, completionFiles);
+    setCompletionNote("");
+    setCompletionFiles([]);
+  };
+
+  const handleInProgress = (taskId: string) => {
+    setTaskInProgress(taskId);
+    const updatedTasks = tasks.map(task => 
+      task.id === taskId ? { ...task, status: 'in_progress' } : task
+    );
+    // You would typically update this through a prop callback
+    // For now, we're just updating the local state
+  };
+
   return (
     <div className="grid gap-4">
       {tasks
@@ -49,10 +78,13 @@ export function TaskList({ tasks, teamName, teamMembers, onAcknowledge, onComple
                   <CardTitle>{task.title}</CardTitle>
                   <span className={`px-2 py-1 rounded-full text-xs ${
                     task.status === 'completed' ? 'bg-green-100 text-green-800' :
+                    task.status === 'in_progress' ? 'bg-purple-100 text-purple-800' :
                     task.status === 'acknowledged' ? 'bg-blue-100 text-blue-800' :
                     'bg-yellow-100 text-yellow-800'
                   }`}>
-                    {task.status.charAt(0).toUpperCase() + task.status.slice(1)}
+                    {task.status.split('_').map(word => 
+                      word.charAt(0).toUpperCase() + word.slice(1)
+                    ).join(' ')}
                   </span>
                 </div>
                 <CardDescription>
@@ -73,7 +105,7 @@ export function TaskList({ tasks, teamName, teamMembers, onAcknowledge, onComple
                           className="w-full h-full object-contain"
                           onError={(e) => {
                             const target = e.target as HTMLImageElement;
-                            target.src = 'placeholder.svg'; // Fallback image
+                            target.src = 'placeholder.svg';
                             target.className = 'w-16 h-16 mx-auto mt-4';
                           }}
                         />
@@ -81,23 +113,76 @@ export function TaskList({ tasks, teamName, teamMembers, onAcknowledge, onComple
                     ))}
                   </div>
                 )}
-                {task.status === 'pending' && (
-                  <Button
-                    variant="outline"
-                    onClick={() => onAcknowledge(task.id, "Task received and understood")}
-                  >
-                    <CheckSquare className="mr-2 h-4 w-4" />
-                    Acknowledge Task
-                  </Button>
-                )}
-                {task.status === 'acknowledged' && (
-                  <Button
-                    onClick={() => onComplete(task.id, "Task completed successfully", [])}
-                  >
-                    <CheckSquare className="mr-2 h-4 w-4" />
-                    Mark as Completed
-                  </Button>
-                )}
+                
+                <div className="flex gap-2">
+                  {task.status === 'pending' && (
+                    <Button
+                      variant="outline"
+                      onClick={() => onAcknowledge(task.id, "Task received and understood")}
+                    >
+                      <CheckSquare className="mr-2 h-4 w-4" />
+                      Acknowledge Task
+                    </Button>
+                  )}
+                  
+                  {task.status === 'acknowledged' && (
+                    <Button
+                      variant="outline"
+                      onClick={() => handleInProgress(task.id)}
+                    >
+                      <CirclePlay className="mr-2 h-4 w-4" />
+                      Mark In Progress
+                    </Button>
+                  )}
+
+                  {task.status === 'in_progress' && (
+                    <div className="space-y-4 w-full">
+                      <Textarea
+                        placeholder="Add completion notes..."
+                        value={completionNote}
+                        onChange={(e) => setCompletionNote(e.target.value)}
+                        className="w-full"
+                      />
+                      
+                      <div className="flex gap-2">
+                        <label className="flex-1">
+                          <div className="flex items-center gap-2 p-2 border-2 border-dashed rounded-lg hover:bg-gray-50 cursor-pointer">
+                            <Upload className="h-4 w-4 text-gray-400" />
+                            <span className="text-sm text-gray-600">Upload completion files</span>
+                          </div>
+                          <input
+                            type="file"
+                            multiple
+                            className="hidden"
+                            onChange={(e) => handleFileUpload(e, task.id)}
+                            accept="image/*,video/*"
+                          />
+                        </label>
+                        
+                        <Button
+                          onClick={() => handleComplete(task.id)}
+                        >
+                          <CheckSquare className="mr-2 h-4 w-4" />
+                          Complete Task
+                        </Button>
+                      </div>
+
+                      {completionFiles.length > 0 && (
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-2 mt-2">
+                          {completionFiles.map((file, index) => (
+                            <div key={index} className="relative aspect-video rounded-lg overflow-hidden bg-gray-100">
+                              <img 
+                                src={file} 
+                                alt={`Completion file ${index + 1}`} 
+                                className="w-full h-full object-contain"
+                              />
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
               </CardContent>
             </Card>
           );
