@@ -109,7 +109,7 @@ export function TaskList({ tasks, teamName, teamMembers, onAcknowledge, onComple
     <div className="grid gap-4">
       {tasks
         .filter(task => task.assignedTeam === teamName)
-        .map(task => (
+        .map((task, index) => (
           <Collapsible
             key={task.id}
             open={openTaskId === task.id}
@@ -125,7 +125,10 @@ export function TaskList({ tasks, teamName, teamMembers, onAcknowledge, onComple
                   )}
                 </CollapsibleTrigger>
                 <div className="flex justify-between items-start pr-8">
-                  <CardTitle>{task.title}</CardTitle>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-medium text-gray-500">Task card #{index + 1}</span>
+                    <CardTitle>{task.title}</CardTitle>
+                  </div>
                   <span className={`px-2 py-1 rounded-full text-xs ${
                     task.status === 'completed' ? 'bg-green-100 text-green-800' :
                     task.status === 'in_progress' ? 'bg-purple-100 text-purple-800' :
