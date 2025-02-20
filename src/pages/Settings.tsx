@@ -5,7 +5,8 @@ import {
   Settings, DollarSign, Receipt, Clock, Users, Shield, 
   FileText, Calendar, List, CreditCard, User, Bot, 
   Briefcase, Network, HelpCircle, Mail, FileJson, 
-  Building, Share, Zap, Search
+  Building, Share, Zap, Search, ChartBar, TrendingUp, 
+  CircleDollarSign, UserCheck
 } from "lucide-react";
 import { Link } from "react-router-dom";
 
@@ -34,33 +35,102 @@ const settingsSections = [
   { title: "AI Assistant Settings", icon: Zap, description: "Configure AI assistant" },
 ];
 
+const keyStatistics = [
+  {
+    title: "Monthly Revenue",
+    value: "$45,289",
+    change: "+12.5%",
+    trend: "up",
+    icon: ChartBar,
+    description: "vs. last month"
+  },
+  {
+    title: "Active Jobs",
+    value: "24",
+    change: "+4",
+    trend: "up",
+    icon: TrendingUp,
+    description: "vs. last week"
+  },
+  {
+    title: "Customer Satisfaction",
+    value: "94%",
+    change: "+2%",
+    trend: "up",
+    icon: UserCheck,
+    description: "based on recent reviews"
+  },
+  {
+    title: "Outstanding Payments",
+    value: "$12,450",
+    change: "-15%",
+    trend: "down",
+    icon: CircleDollarSign,
+    description: "vs. last month"
+  }
+];
+
 export default function SettingsPage() {
   return (
     <AppLayout>
-      <div className="p-6 space-y-6">
+      <div className="p-6 space-y-8">
         <div className="flex items-center gap-2">
           <Settings className="h-8 w-8 text-gray-700" />
           <h1 className="text-3xl font-bold">Settings</h1>
         </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {settingsSections.map((section) => (
-            <Link
-              key={section.title}
-              to={`/settings/${section.title.toLowerCase().replace(/\s+/g, '-')}`}
-              className="block"
-            >
-              <Card className="hover:shadow-md transition-shadow">
-                <CardHeader>
-                  <div className="flex items-center gap-2">
-                    <section.icon className="h-5 w-5 text-gray-600" />
-                    <CardTitle className="text-lg">{section.title}</CardTitle>
+
+        {/* Key Statistics Section */}
+        <div className="space-y-4">
+          <h2 className="text-xl font-semibold text-gray-900">Key Statistics</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {keyStatistics.map((stat) => (
+              <Card key={stat.title} className="hover:shadow-md transition-shadow">
+                <CardHeader className="space-y-0 pb-2">
+                  <div className="flex justify-between items-start">
+                    <CardTitle className="text-sm font-medium text-gray-500">
+                      {stat.title}
+                    </CardTitle>
+                    <stat.icon className="h-4 w-4 text-gray-400" />
                   </div>
-                  <CardDescription>{section.description}</CardDescription>
                 </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{stat.value}</div>
+                  <div className="flex items-center mt-1">
+                    <span className={`text-sm ${stat.trend === 'up' ? 'text-green-600' : 'text-red-600'}`}>
+                      {stat.change}
+                    </span>
+                    <span className="text-xs text-gray-500 ml-1">
+                      {stat.description}
+                    </span>
+                  </div>
+                </CardContent>
               </Card>
-            </Link>
-          ))}
+            ))}
+          </div>
+        </div>
+
+        {/* Settings Grid */}
+        <div className="space-y-4">
+          <h2 className="text-xl font-semibold text-gray-900">Configuration</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {settingsSections.map((section) => (
+              <Link
+                key={section.title}
+                to={`/settings/${section.title.toLowerCase().replace(/\s+/g, '-')}`}
+                className="block"
+              >
+                <Card className="hover:shadow-md transition-shadow">
+                  <CardHeader>
+                    <div className="flex items-center gap-2">
+                      <section.icon className="h-5 w-5 text-gray-600" />
+                      <CardTitle className="text-lg">{section.title}</CardTitle>
+                    </div>
+                    <CardDescription>{section.description}</CardDescription>
+                  </CardHeader>
+                </Card>
+              </Link>
+            ))}
+          </div>
         </div>
       </div>
     </AppLayout>
