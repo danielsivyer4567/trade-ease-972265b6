@@ -1,7 +1,6 @@
-
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { CheckSquare, CirclePlay, Upload, Tag, ChevronDown, ChevronUp } from "lucide-react";
+import { CheckSquare, CirclePlay, Upload, Tag, ChevronDown, ChevronUp, X } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { useState } from "react";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -11,6 +10,11 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+import {
+  Dialog,
+  DialogContent,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 interface TeamMember {
   id: string;
@@ -104,6 +108,27 @@ export function TaskList({ tasks, teamName, teamMembers, onAcknowledge, onComple
       description: "Dashboard manager and team leader have been notified"
     });
   };
+
+  const ImagePreview = ({ src, alt }: { src: string; alt: string }) => (
+    <Dialog>
+      <DialogTrigger asChild>
+        <div className="relative aspect-video rounded-lg overflow-hidden bg-gray-100 cursor-pointer hover:opacity-90 transition-opacity">
+          <img 
+            src={src} 
+            alt={alt} 
+            className="w-full h-full object-contain"
+          />
+        </div>
+      </DialogTrigger>
+      <DialogContent className="max-w-4xl h-[80vh] flex items-center justify-center p-0">
+        <img 
+          src={src} 
+          alt={alt} 
+          className="max-w-full max-h-full object-contain"
+        />
+      </DialogContent>
+    </Dialog>
+  );
 
   return (
     <div className="grid gap-4">
@@ -207,13 +232,11 @@ export function TaskList({ tasks, teamName, teamMembers, onAcknowledge, onComple
                       {progressFiles.length > 0 && (
                         <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
                           {progressFiles.map((file, index) => (
-                            <div key={index} className="relative aspect-video rounded-lg overflow-hidden bg-gray-100">
-                              <img 
-                                src={file} 
-                                alt={`Progress file ${index + 1}`} 
-                                className="w-full h-full object-contain"
-                              />
-                            </div>
+                            <ImagePreview 
+                              key={index}
+                              src={file}
+                              alt={`Progress file ${index + 1}`}
+                            />
                           ))}
                         </div>
                       )}
@@ -275,13 +298,11 @@ export function TaskList({ tasks, teamName, teamMembers, onAcknowledge, onComple
                       {completionFiles.length > 0 && (
                         <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
                           {completionFiles.map((file, index) => (
-                            <div key={index} className="relative aspect-video rounded-lg overflow-hidden bg-gray-100">
-                              <img 
-                                src={file} 
-                                alt={`Completion file ${index + 1}`} 
-                                className="w-full h-full object-contain"
-                              />
-                            </div>
+                            <ImagePreview 
+                              key={index}
+                              src={file}
+                              alt={`Completion file ${index + 1}`}
+                            />
                           ))}
                         </div>
                       )}
