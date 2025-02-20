@@ -1,9 +1,9 @@
-
 import { AppLayout } from "@/components/ui/AppLayout";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ListTodo } from "lucide-react";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { TaskCreateForm } from "@/components/tasks/TaskCreateForm";
 import { TaskList } from "@/components/tasks/TaskList";
 
 interface Task {
@@ -40,7 +40,77 @@ const teamMembers: TeamMember[] = [
 
 export default function TasksPage() {
   const [tasks, setTasks] = useState<Task[]>([]);
+  const [newTask, setNewTask] = useState({
+    title: '',
+    description: '',
+    dueDate: '',
+    assignedTeam: '',
+    assignedManager: '',
+    teamLeaderId: '',
+    managerId: '',
+    attachedFiles: [] as string[]
+  });
   const { toast } = useToast();
+
+  const handleAddTask = () => {
+    if (!newTask.title || !newTask.dueDate || !newTask.assignedTeam || !newTask.teamLeaderId || !newTask.managerId) {
+      toast({
+        title: "Missing Information",
+        description: "Please fill in all required fields including team leader and manager assignments",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const task: Task = {
+      id: crypto.randomUUID(),
+      ...newTask,
+      status: 'pending',
+      attachedFiles: newTask.attachedFiles
+    };
+
+    setTasks([...tasks, task]);
+    setNewTask({
+      title: '',
+      description: '',
+      dueDate: '',
+      assignedTeam: '',
+      assignedManager: '',
+      teamLeaderId: '',
+      managerId: '',
+      attachedFiles: []
+    });
+
+    // Notify assigned team leader and manager
+    const teamLeader = teamMembers.find(m => m.id === newTask.teamLeaderId);
+    const manager = teamMembers.find(m => m.id === newTask.managerId);
+
+    toast({
+      title: "Task Added",
+      description: `New task has been created and assigned to ${teamLeader?.name} and ${manager?.name}`
+    });
+  };
+
+  const handleFileUpload = (files: FileList) => {
+    // Create object URLs for immediate preview
+    const fileUrls = Array.from(files).map(file => {
+      // Check if file is an image or video
+      if (file.type.startsWith('image/') || file.type.startsWith('video/')) {
+        return URL.createObjectURL(file);
+      }
+      return '';
+    }).filter(url => url !== ''); // Remove any empty URLs
+
+    setNewTask(prev => ({
+      ...prev,
+      attachedFiles: [...prev.attachedFiles, ...fileUrls]
+    }));
+
+    toast({
+      title: "Files Attached",
+      description: `${fileUrls.length} file(s) have been attached to the task`
+    });
+  };
 
   const handleTaskAcknowledgment = (taskId: string, note: string) => {
     setTasks(tasks.map(task => 
@@ -76,14 +146,26 @@ export default function TasksPage() {
           </div>
         </div>
 
-        <Tabs defaultValue={teams[0].toLowerCase().split(' ')[0]} className="space-y-4">
+        <Tabs defaultValue="create" className="space-y-4">
           <TabsList>
+            <TabsTrigger value="create">Create Task</TabsTrigger>
             {teams.map(team => (
               <TabsTrigger key={team} value={team.toLowerCase().split(' ')[0]}>
                 {team}
               </TabsTrigger>
             ))}
           </TabsList>
+
+          <TabsContent value="create" className="space-y-4">
+            <TaskCreateForm
+              teams={teams}
+              teamMembers={teamMembers}
+              formData={newTask}
+              onFormChange={(updates) => setNewTask({ ...newTask, ...updates })}
+              onFileUpload={handleFileUpload}
+              onSubmit={handleAddTask}
+            />
+          </TabsContent>
 
           {teams.map(team => (
             <TabsContent 
