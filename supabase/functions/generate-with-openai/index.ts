@@ -1,6 +1,7 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import "https://deno.land/x/xhr@0.1.0/mod.ts"
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.7.1'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -14,6 +15,11 @@ serve(async (req) => {
   }
 
   try {
+    const supabase = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+    );
+
     const { prompt } = await req.json();
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -35,7 +41,7 @@ serve(async (req) => {
     const generatedText = data.choices[0].message.content;
 
     // Store the response in the database
-    const { data: insertData, error: insertError } = await supabase
+    const { error: insertError } = await supabase
       .from('ai_responses')
       .insert([
         {
