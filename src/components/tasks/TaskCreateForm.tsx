@@ -5,6 +5,8 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { CalendarIcon, Upload } from "lucide-react";
+import { useState } from "react";
+import { cn } from "@/lib/utils";
 
 interface TeamMember {
   id: string;
@@ -37,9 +39,34 @@ export function TaskCreateForm({
   onFileUpload,
   onSubmit
 }: TaskCreateFormProps) {
+  const [isDragging, setIsDragging] = useState(false);
+
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files) {
       onFileUpload(event.target.files);
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent<HTMLLabelElement>) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent<HTMLLabelElement>) => {
+    e.preventDefault();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e: React.DragEvent<HTMLLabelElement>) => {
+    e.preventDefault();
+    setIsDragging(false);
+    
+    const files = Array.from(e.dataTransfer.files).filter(file => 
+      file.type.startsWith('image/') || file.type.startsWith('video/')
+    );
+
+    if (files.length > 0) {
+      onFileUpload(files as unknown as FileList);
     }
   };
 
@@ -97,10 +124,20 @@ export function TaskCreateForm({
         <div>
           <Label htmlFor="files">Attach Files</Label>
           <div className="mt-2">
-            <label className="cursor-pointer">
-              <div className="flex items-center gap-2 p-4 border-2 border-dashed rounded-lg hover:bg-gray-50">
+            <label
+              className="cursor-pointer"
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
+            >
+              <div className={cn(
+                "flex items-center gap-2 p-4 border-2 border-dashed rounded-lg transition-colors duration-200",
+                isDragging ? "bg-gray-100 border-gray-400" : "hover:bg-gray-50 border-gray-200"
+              )}>
                 <Upload className="h-6 w-6 text-gray-400" />
-                <span className="text-sm text-gray-600">Upload files</span>
+                <span className="text-sm text-gray-600">
+                  {isDragging ? "Drop files here..." : "Upload or drag files (Images and Videos)"}
+                </span>
               </div>
               <input
                 type="file"
