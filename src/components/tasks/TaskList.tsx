@@ -10,11 +10,13 @@ import { TaskCompletion } from "./TaskCompletion";
 import { TaskStatusBadge } from "./TaskStatusBadge";
 import { FileUpload } from "./FileUpload";
 import { Textarea } from "@/components/ui/textarea";
+
 interface TeamMember {
   id: string;
   name: string;
   role: 'team_leader' | 'manager';
 }
+
 interface Task {
   id: string;
   title: string;
@@ -32,6 +34,7 @@ interface Task {
   managerId?: string;
   attachedFiles?: string[];
 }
+
 interface TaskListProps {
   tasks: Task[];
   teamName: string;
@@ -39,10 +42,12 @@ interface TaskListProps {
   onAcknowledge: (taskId: string, note: string) => void;
   onComplete: (taskId: string, note: string, images: string[]) => void;
 }
+
 interface TaskImage {
   url: string;
   note: string;
 }
+
 export function TaskList({
   tasks,
   teamName,
@@ -58,9 +63,11 @@ export function TaskList({
   const [taskImages, setTaskImages] = useState<{
     [key: string]: TaskImage[];
   }>({});
+
   const {
     toast
   } = useToast();
+
   const handleTaskImageUpload = (event: React.ChangeEvent<HTMLInputElement>, taskId: string) => {
     const files = event.target.files;
     if (files) {
@@ -78,6 +85,7 @@ export function TaskList({
       });
     }
   };
+
   const handleImageNoteChange = (taskId: string, imageIndex: number, note: string) => {
     setTaskImages(prev => {
       const taskImagesCopy = [...(prev[taskId] || [])];
@@ -91,6 +99,7 @@ export function TaskList({
       };
     });
   };
+
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>, isProgress: boolean) => {
     const files = event.target.files;
     if (files) {
@@ -118,6 +127,7 @@ export function TaskList({
       });
     }
   };
+
   const handleAcknowledge = (taskId: string) => {
     onAcknowledge(taskId, "Task acknowledged by team");
     toast({
@@ -125,6 +135,7 @@ export function TaskList({
       description: "Dashboard manager has been notified"
     });
   };
+
   const handleInProgress = (taskId: string) => {
     if (progressNote.length > 500) {
       toast({
@@ -143,6 +154,7 @@ export function TaskList({
       });
     }
   };
+
   const handleComplete = (taskId: string) => {
     if (completionNote.length > 500) {
       toast({
@@ -160,11 +172,21 @@ export function TaskList({
       description: "Dashboard manager and team leader have been notified"
     });
   };
+
   const isTaskInProgressOrCompleted = (task: Task) => {
     return task.status === 'in_progress' || task.status === 'completed';
   };
-  return <div className="grid gap-4">
-      {tasks.filter(task => task.assignedTeam === teamName).map((task, index) => <Collapsible key={task.id} open={openTaskId === task.id} onOpenChange={isOpen => setOpenTaskId(isOpen ? task.id : null)}>
+
+  return (
+    <div className="grid gap-4">
+      {tasks
+        .filter(task => task.assignedTeam === teamName)
+        .map((task, index) => (
+          <Collapsible
+            key={task.id}
+            open={openTaskId === task.id}
+            onOpenChange={(isOpen) => setOpenTaskId(isOpen ? task.id : null)}
+          >
             <Card>
               <CardHeader className="relative">
                 <CollapsibleTrigger className="w-full text-left flex items-center justify-between">
@@ -177,7 +199,11 @@ export function TaskList({
                   </div>
                   <div className="flex items-center gap-4">
                     <TaskStatusBadge status={task.status} />
-                    {openTaskId === task.id ? <ChevronUp className="h-4 w-4 text-gray-500" /> : <ChevronDown className="h-4 w-4 text-gray-500" />}
+                    {openTaskId === task.id ? (
+                      <ChevronUp className="h-4 w-4 text-gray-500" />
+                    ) : (
+                      <ChevronDown className="h-4 w-4 text-gray-500" />
+                    )}
                   </div>
                 </CollapsibleTrigger>
               </CardHeader>
@@ -186,41 +212,106 @@ export function TaskList({
                 <CardContent className="space-y-6">
                   <p className="text-gray-700">{task.description}</p>
 
-                  {task.attachedFiles && task.attachedFiles.length > 0 && <ImagesGrid images={task.attachedFiles} title="Attached Files" />}
+                  {task.attachedFiles && task.attachedFiles.length > 0 && (
+                    <ImagesGrid
+                      images={task.attachedFiles}
+                      title="Attached Files"
+                    />
+                  )}
 
                   <div className="space-y-4">
                     <div>
                       <h4 className="text-sm font-medium mb-2">Task Images</h4>
-                      <FileUpload onFileUpload={e => handleTaskImageUpload(e, task.id)} label="Upload task images" />
+                      <FileUpload
+                        onFileUpload={(e) => handleTaskImageUpload(e, task.id)}
+                        label="Upload task images"
+                      />
                     </div>
                     
-                    {taskImages[task.id]?.length > 0 && <div className="space-y-4">
-                        {taskImages[task.id].map((image, index) => <div key={index} className="space-y-2">
+                    {taskImages[task.id]?.length > 0 && (
+                      <div className="space-y-4">
+                        {taskImages[task.id].map((image, index) => (
+                          <div key={index} className="space-y-2">
                             <div className="aspect-video rounded-lg overflow-hidden bg-gray-100">
-                              <img src={image.url} alt={`Task image ${index + 1}`} className="w-full h-full object-cover" />
+                              <img 
+                                src={image.url} 
+                                alt={`Task image ${index + 1}`}
+                                className="w-full h-full object-cover"
+                              />
                             </div>
-                            <Textarea placeholder="Add a note about this image..." value={image.note} onChange={e => handleImageNoteChange(task.id, index, e.target.value)} className="w-full min-h-[80px]" />
-                          </div>)}
-                      </div>}
+                            <Textarea
+                              placeholder="Add a note about this image..."
+                              value={image.note}
+                              onChange={(e) => handleImageNoteChange(task.id, index, e.target.value)}
+                              className="w-full min-h-[80px]"
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
 
-                  <div className="flex items-center space-x-2">
-                    <Checkbox id={`acknowledge-${task.id}`} checked={task.status !== 'pending'} onCheckedChange={() => {
-                if (task.status === 'pending') {
-                  handleAcknowledge(task.id);
-                }
-              }} disabled={task.status !== 'pending'} />
-                    <label htmlFor={`acknowledge-${task.id}`} className="move this box to acknowledge task to original task upload only\n">
-                      Acknowledge Task
-                    </label>
+                  <div className="flex items-center gap-6">
+                    <div className="flex items-center space-x-2">
+                      <Checkbox
+                        id={`acknowledge-${task.id}`}
+                        checked={task.status !== 'pending'}
+                        onCheckedChange={() => {
+                          if (task.status === 'pending') {
+                            handleAcknowledge(task.id);
+                          }
+                        }}
+                        disabled={task.status !== 'pending'}
+                      />
+                      <label htmlFor={`acknowledge-${task.id}`}>
+                        Acknowledge Task
+                      </label>
+                    </div>
+
+                    <div className="flex items-center space-x-2">
+                      <Checkbox
+                        id={`complete-${task.id}`}
+                        checked={task.status === 'completed'}
+                        onCheckedChange={() => {
+                          if (task.status === 'in_progress') {
+                            handleComplete(task.id);
+                          }
+                        }}
+                        disabled={task.status !== 'in_progress'}
+                      />
+                      <label htmlFor={`complete-${task.id}`}>
+                        Complete Task
+                      </label>
+                    </div>
                   </div>
 
-                  {task.status === 'acknowledged' && <TaskProgress taskId={task.id} onProgress={() => handleInProgress(task.id)} progressNote={progressNote} onProgressNoteChange={setProgressNote} onFileUpload={e => handleFileUpload(e, true)} progressFiles={progressFiles} inProgress={isTaskInProgressOrCompleted(task)} />}
+                  {task.status === 'acknowledged' && (
+                    <TaskProgress
+                      taskId={task.id}
+                      onProgress={() => handleInProgress(task.id)}
+                      progressNote={progressNote}
+                      onProgressNoteChange={setProgressNote}
+                      onFileUpload={(e) => handleFileUpload(e, true)}
+                      progressFiles={progressFiles}
+                      inProgress={isTaskInProgressOrCompleted(task)}
+                    />
+                  )}
 
-                  {task.status === 'in_progress' && <TaskCompletion taskId={task.id} onComplete={() => handleComplete(task.id)} completionNote={completionNote} onCompletionNoteChange={setCompletionNote} onFileUpload={e => handleFileUpload(e, false)} completionFiles={completionFiles} />}
+                  {task.status === 'in_progress' && (
+                    <TaskCompletion
+                      taskId={task.id}
+                      onComplete={() => handleComplete(task.id)}
+                      completionNote={completionNote}
+                      onCompletionNoteChange={setCompletionNote}
+                      onFileUpload={(e) => handleFileUpload(e, false)}
+                      completionFiles={completionFiles}
+                    />
+                  )}
                 </CardContent>
               </CollapsibleContent>
             </Card>
-          </Collapsible>)}
-    </div>;
+          </Collapsible>
+        ))}
+    </div>
+  );
 }
