@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { CheckSquare, CirclePlay, Upload, Tag, ChevronDown, ChevronUp, X } from "lucide-react";
@@ -62,8 +63,10 @@ export function TaskList({ tasks, teamName, teamMembers, onAcknowledge, onComple
       const fileUrls = Array.from(files).map(file => URL.createObjectURL(file));
       if (isProgress) {
         setProgressFiles(prev => [...prev, ...fileUrls]);
+        console.log('Progress files:', fileUrls); // Debug log
       } else {
         setCompletionFiles(prev => [...prev, ...fileUrls]);
+        console.log('Completion files:', fileUrls); // Debug log
       }
     }
   };
@@ -173,6 +176,22 @@ export function TaskList({ tasks, teamName, teamMembers, onAcknowledge, onComple
               <CollapsibleContent>
                 <CardContent className="space-y-6">
                   <p className="text-gray-700">{task.description}</p>
+
+                  {/* Display Initial Attached Files */}
+                  {task.attachedFiles && task.attachedFiles.length > 0 && (
+                    <div className="space-y-2">
+                      <h4 className="text-sm font-medium">Attached Files:</h4>
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                        {task.attachedFiles.map((file, index) => (
+                          <ImagePreview 
+                            key={index}
+                            src={file}
+                            alt={`Attached file ${index + 1}`}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  )}
                   
                   {/* Acknowledgment Section */}
                   <div className="flex items-center space-x-2">
