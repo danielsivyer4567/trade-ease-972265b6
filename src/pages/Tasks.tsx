@@ -1,3 +1,4 @@
+
 import { AppLayout } from "@/components/ui/AppLayout";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ListTodo } from "lucide-react";
@@ -141,7 +142,7 @@ export default function TasksPage() {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <ListTodo className="h-8 w-8 text-gray-700" />
-            <h1 className="text-3xl font-bold">Team Task Management</h1>
+            <h1 className="text-3xl font-bold">Task Card Management</h1>
           </div>
         </div>
 
