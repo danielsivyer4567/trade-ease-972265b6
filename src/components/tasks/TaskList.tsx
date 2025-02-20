@@ -1,3 +1,4 @@
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { useState } from "react";
@@ -102,7 +103,7 @@ export function TaskList({ tasks, teamName, teamMembers, onAcknowledge, onComple
     }
     
     const task = tasks.find(t => t.id === taskId);
-    if (task?.status === 'acknowledged') {
+    if (task && task.status === 'acknowledged') {
       task.status = 'in_progress';
       toast({
         title: "Task In Progress",
@@ -195,7 +196,7 @@ export function TaskList({ tasks, teamName, teamMembers, onAcknowledge, onComple
                       onProgressNoteChange={setProgressNote}
                       onFileUpload={(e) => handleFileUpload(e, true)}
                       progressFiles={progressFiles}
-                      inProgress={task.status === 'in_progress'}
+                      inProgress={task.status === 'in_progress' || task.status === 'completed'}
                     />
                   )}
 
