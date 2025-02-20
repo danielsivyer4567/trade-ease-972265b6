@@ -1,3 +1,4 @@
+
 import { AppLayout } from "@/components/ui/AppLayout";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ListTodo } from "lucide-react";
@@ -30,7 +31,6 @@ interface TeamMember {
 
 const teams = ['Red Team', 'Blue Team', 'Green Team'];
 
-// Simulated team members data - in a real app, this would come from your backend
 const teamMembers: TeamMember[] = [
   { id: '1', name: 'John Doe', role: 'team_leader' },
   { id: '2', name: 'Jane Smith', role: 'manager' },
@@ -53,10 +53,10 @@ export default function TasksPage() {
   const { toast } = useToast();
 
   const handleAddTask = () => {
-    if (!newTask.title || !newTask.dueDate || !newTask.assignedTeam || !newTask.teamLeaderId || !newTask.managerId) {
+    if (!newTask.title || !newTask.dueDate || !newTask.assignedTeam) {
       toast({
         title: "Missing Information",
-        description: "Please fill in all required fields including team leader and manager assignments",
+        description: "Please fill in all required fields",
         variant: "destructive"
       });
       return;
@@ -81,25 +81,19 @@ export default function TasksPage() {
       attachedFiles: []
     });
 
-    // Notify assigned team leader and manager
-    const teamLeader = teamMembers.find(m => m.id === newTask.teamLeaderId);
-    const manager = teamMembers.find(m => m.id === newTask.managerId);
-
     toast({
       title: "Task Added",
-      description: `New task has been created and assigned to ${teamLeader?.name} and ${manager?.name}`
+      description: `New task has been created and assigned to ${task.assignedTeam}`
     });
   };
 
   const handleFileUpload = (files: FileList) => {
-    // Create object URLs for immediate preview
     const fileUrls = Array.from(files).map(file => {
-      // Check if file is an image or video
       if (file.type.startsWith('image/') || file.type.startsWith('video/')) {
         return URL.createObjectURL(file);
       }
       return '';
-    }).filter(url => url !== ''); // Remove any empty URLs
+    }).filter(url => url !== '');
 
     setNewTask(prev => ({
       ...prev,
