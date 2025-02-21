@@ -49,7 +49,7 @@ export function AppSidebar() {
               <Briefcase className="w-3.5 h-3.5" />
               Jobs
             </Link>
-            <Link to="/calendar" className="flex items-center gap-1.5 p-1.5 rounded-lg hover:bg-gray-100 text-gray-700 hover:text-gray-900 text-sm">
+            <Link to="/calendar" className="flex items-center gap-1.5 p-1.5 rounded-lg hover:bg-gray-100 text-gray-700 hover:text-gray-900 text-sm px-[17px] mx-px my-0 py-[5px]">
               <Calendar className="w-3.5 h-3.5" />
               Calendar
             </Link>
