@@ -19,7 +19,8 @@ import {
   Hammer,
   Plus,
   BarChart,
-  ListTodo
+  ListTodo,
+  Bell
 } from 'lucide-react';
 import { useSidebar } from './sidebar';
 import { cn } from '@/lib/utils';
@@ -27,6 +28,8 @@ import { Button } from './button';
 
 export function AppSidebar() {
   const { state, toggleSidebar } = useSidebar();
+  // This would typically come from your notification system
+  const notificationCount = 3;
 
   return (
     <>
@@ -52,6 +55,17 @@ export function AppSidebar() {
             </div>
           </div>
           <nav className="flex-1 p-1 space-y-0.5">
+            <Link to="/notifications" className="flex items-center justify-between gap-1.5 p-1.5 rounded-lg hover:bg-gray-100 text-gray-700 hover:text-gray-900 text-sm">
+              <div className="flex items-center gap-1.5">
+                <Bell className="w-3.5 h-3.5" />
+                Notifications
+              </div>
+              {notificationCount > 0 && (
+                <span className="bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                  {notificationCount}
+                </span>
+              )}
+            </Link>
             <Link to="/" className="flex items-center gap-1.5 p-1.5 rounded-lg hover:bg-gray-100 text-gray-700 hover:text-gray-900 text-sm">
               <LayoutDashboard className="w-3.5 h-3.5" />
               Dashboard
