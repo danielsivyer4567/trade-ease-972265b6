@@ -96,7 +96,7 @@ export default function Notifications() {
   const handleComplete = (notificationId: number) => {
     setNotifications(notifications.map(notification =>
       notification.id === notificationId
-        ? { ...notification, isCompleted: !notification.isCompleted, isSortedLater: false }
+        ? { ...notification, isCompleted: true, isSortedLater: false }
         : notification
     ));
   };
@@ -104,7 +104,7 @@ export default function Notifications() {
   const handleSortLater = (notificationId: number) => {
     setNotifications(notifications.map(notification =>
       notification.id === notificationId
-        ? { ...notification, isSortedLater: !notification.isSortedLater, isCompleted: false }
+        ? { ...notification, isSortedLater: true, isCompleted: false }
         : notification
     ));
   };
