@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { Calendar } from '@/components/ui/calendar';
-import { WaterDrop } from 'lucide-react';
+import { Droplet } from 'lucide-react';
 
 interface TeamCalendarProps {
   date: Date | undefined;
@@ -25,7 +25,7 @@ export function TeamCalendar({ date, setDate, teamColor }: TeamCalendarProps) {
 
   const modifiersStyles = {
     rainy: {
-      position: 'relative',
+      position: 'relative' as const
     }
   };
 
@@ -46,7 +46,7 @@ export function TeamCalendar({ date, setDate, teamColor }: TeamCalendarProps) {
                 <div className="relative w-full h-full flex items-center justify-center">
                   <span>{date.getDate()}</span>
                   {isRainy && (
-                    <WaterDrop className="absolute top-1 right-1 h-3 w-3 text-blue-500" />
+                    <Droplet className="absolute top-1 right-1 h-3 w-3 text-blue-500" />
                   )}
                 </div>
               );

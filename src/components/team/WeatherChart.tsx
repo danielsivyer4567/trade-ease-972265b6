@@ -2,7 +2,7 @@
 import React from 'react';
 import { Line, LineChart, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { Card } from '@/components/ui/card';
-import { WaterDrop } from 'lucide-react';
+import { Droplet } from 'lucide-react';
 
 interface WeatherDataPoint {
   date: string;
@@ -37,7 +37,7 @@ export function WeatherChart({ selectedDate, onRainyDateHighlight }: WeatherChar
   return (
     <Card className="p-4">
       <div className="flex items-center gap-2 mb-4">
-        <WaterDrop className="h-5 w-5 text-blue-500" />
+        <Droplet className="h-5 w-5 text-blue-500" />
         <h3 className="font-semibold text-gray-900">Weekly Rainfall Forecast</h3>
       </div>
       <div className="h-[200px]">
