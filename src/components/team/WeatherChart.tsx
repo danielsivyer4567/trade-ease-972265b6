@@ -1,70 +1,49 @@
 import React from 'react';
-import { Line, LineChart, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
-import { Card } from '@/components/ui/card';
-import { Droplet } from 'lucide-react';
-interface WeatherDataPoint {
-  date: string;
-  rainfall: number;
-  rainChance: number;
-  hasLightning: boolean;
-  condition: 'sunny' | 'partly-cloudy' | 'cloudy' | 'rainy' | 'storm';
-}
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+
 interface WeatherChartProps {
-  selectedDate: Date | undefined;
-  onRainyDateHighlight: (dates: string[], weatherData: WeatherDataPoint[]) => void;
+  selectedDate: string;
+  onRainyDateHighlight: (date: string) => void;
 }
-export function WeatherChart({
-  selectedDate,
-  onRainyDateHighlight
-}: WeatherChartProps) {
-  // Enhanced mock weather data with more details
-  const weatherData: WeatherDataPoint[] = [{
-    date: '2024-03-18',
-    rainfall: 0,
-    rainChance: 5,
-    hasLightning: false,
-    condition: 'sunny'
-  }, {
-    date: '2024-03-19',
-    rainfall: 5,
-    rainChance: 40,
-    hasLightning: false,
-    condition: 'rainy'
-  }, {
-    date: '2024-03-20',
-    rainfall: 12,
-    rainChance: 80,
-    hasLightning: true,
-    condition: 'storm'
-  }, {
-    date: '2024-03-21',
-    rainfall: 8,
-    rainChance: 60,
-    hasLightning: false,
-    condition: 'rainy'
-  }, {
-    date: '2024-03-22',
-    rainfall: 0,
-    rainChance: 0,
-    hasLightning: false,
-    condition: 'sunny'
-  }, {
-    date: '2024-03-23',
-    rainfall: 3,
-    rainChance: 30,
-    hasLightning: false,
-    condition: 'partly-cloudy'
-  }, {
-    date: '2024-03-24',
-    rainfall: 15,
-    rainChance: 90,
-    hasLightning: true,
-    condition: 'storm'
-  }];
-  React.useEffect(() => {
-    // Identify rainy dates (rainfall > 0)
-    const rainyDates = weatherData.filter(data => data.rainfall > 0).map(data => data.date);
-    onRainyDateHighlight(rainyDates, weatherData);
-  }, [onRainyDateHighlight]);
-  return;
+
+export function WeatherChart({ selectedDate, onRainyDateHighlight }: WeatherChartProps): JSX.Element {
+  const data = [
+    { date: '2024-03-01', precipitation: 20 },
+    { date: '2024-03-02', precipitation: 45 },
+    { date: '2024-03-03', precipitation: 30 },
+    { date: '2024-03-04', precipitation: 60 },
+    { date: '2024-03-05', precipitation: 15 },
+    { date: '2024-03-06', precipitation: 25 },
+    { date: '2024-03-07', precipitation: 50 },
+  ];
+
+  const handleMouseEnter = (data: any) => {
+    if (data && data.payload && data.payload.precipitation > 40) {
+      onRainyDateHighlight(data.payload.date);
+    }
+  };
+
+  return (
+    <div className="h-64 w-full">
+      <ResponsiveContainer width="100%" height="100%">
+        <LineChart data={data} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
+          <CartesianGrid strokeDasharray="3 3" />
+          <XAxis dataKey="date" />
+          <YAxis label={{ value: 'Precipitation (%)', angle: -90, position: 'insideLeft' }} />
+          <Tooltip />
+          <Line
+            type="monotone"
+            dataKey="precipitation"
+            stroke="#8884d8"
+            strokeWidth={2}
+            dot={{ 
+              fill: (entry: any) => entry.date === selectedDate ? '#ff0000' : '#8884d8',
+              r: (entry: any) => entry.date === selectedDate ? 6 : 4
+            }}
+            onMouseEnter={handleMouseEnter}
+          />
+        </LineChart>
+      </ResponsiveContainer>
+    </div>
+  );
 }
