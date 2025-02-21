@@ -12,12 +12,31 @@ import { TeamCalendar } from "@/components/team/TeamCalendar";
 import { TeamHeader } from "@/components/team/TeamHeader";
 import { TeamTimeOff } from "@/components/team/TeamTimeOff";
 
+interface TeamMember {
+  id: string;
+  name: string;
+}
+
+interface IncidentReport {
+  type: string;
+  location: string;
+  date: string;
+  severity: string;
+  description: string;
+}
+
 export default function TeamRed() {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [highlightedDate, setHighlightedDate] = useState("");
   const [selectedTeamMember, setSelectedTeamMember] = useState("");
   const [date, setDate] = useState(new Date());
-  const [incidentReport, setIncidentReport] = useState({ title: "", description: "" });
+  const [incidentReport, setIncidentReport] = useState<IncidentReport>({
+    type: "",
+    location: "",
+    date: "",
+    severity: "low",
+    description: ""
+  });
 
   const handleDateSelect = (date: Date | undefined) => {
     setSelectedDate(date);
@@ -31,15 +50,24 @@ export default function TeamRed() {
     console.log("Incident submitted:", data);
   };
 
-  const teamMembers = ["John Doe", "Jane Smith", "Bob Johnson"];
+  const teamMembers: TeamMember[] = [
+    { id: "1", name: "John Doe" },
+    { id: "2", name: "Jane Smith" },
+    { id: "3", name: "Bob Johnson" }
+  ];
+
   const teamColor = "red";
   const jobNumber = "JOB-001";
-  const documentCount = 5;
+  const documentSummary = {
+    insurance: 2,
+    general: 1,
+    jobRelated: 2
+  };
 
   return (
     <AppLayout>
       <div className="p-6 space-y-6">
-        <TeamHeader label="Red Team" />
+        <TeamHeader teamName="Red Team" teamColor={teamColor} />
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <div className="space-y-6">
@@ -71,7 +99,7 @@ export default function TeamRed() {
               handleIncidentSubmit={handleIncidentSubmit}
             />
             <DocumentSummary
-              documentCount={documentCount}
+              documentCount={documentSummary}
               teamColor={teamColor}
             />
           </div>
