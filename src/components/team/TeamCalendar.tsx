@@ -2,7 +2,6 @@
 import React, { useState } from 'react';
 import { Calendar } from '@/components/ui/calendar';
 import { Droplet, CloudRain, CloudLightning, Sun, CloudSun, Droplets } from 'lucide-react';
-import { WeatherChart } from './WeatherChart';
 
 interface TeamCalendarProps {
   date: Date | undefined;
@@ -13,6 +12,7 @@ interface TeamCalendarProps {
 interface WeatherData {
   date: string;
   rainfall: number;
+  temperature: number;
   rainChance: number;
   hasLightning: boolean;
   condition: 'sunny' | 'partly-cloudy' | 'cloudy' | 'rainy' | 'storm';
@@ -23,15 +23,45 @@ interface RainData extends WeatherData {
 }
 
 export function TeamCalendar({ date, setDate, teamColor }: TeamCalendarProps) {
-  const [weatherDates, setWeatherDates] = useState<RainData[]>([]);
-
-  const handleRainyDateHighlight = (dates: string[], weatherData: WeatherData[]) => {
-    const enhancedData = weatherData.map(data => ({
-      ...data,
-      amount: data.rainfall
-    }));
-    setWeatherDates(enhancedData);
-  };
+  const [weatherDates, setWeatherDates] = useState<RainData[]>([
+    { 
+      date: '2024-03-18', 
+      rainfall: 0, 
+      temperature: 25,
+      rainChance: 5, 
+      hasLightning: false, 
+      condition: 'sunny',
+      amount: 0 
+    },
+    { 
+      date: '2024-03-19', 
+      rainfall: 5, 
+      temperature: 22,
+      rainChance: 40, 
+      hasLightning: false, 
+      condition: 'rainy',
+      amount: 5 
+    },
+    { 
+      date: '2024-03-20', 
+      rainfall: 12, 
+      temperature: 19,
+      rainChance: 80, 
+      hasLightning: true, 
+      condition: 'storm',
+      amount: 12 
+    },
+    { 
+      date: '2024-03-21', 
+      rainfall: 8, 
+      temperature: 21,
+      rainChance: 60, 
+      hasLightning: false, 
+      condition: 'rainy',
+      amount: 8 
+    },
+    // ... more mock data can be added here
+  ]);
 
   const getWeatherIcon = (data: RainData) => {
     if (data.hasLightning) {
@@ -84,17 +114,22 @@ export function TeamCalendar({ date, setDate, teamColor }: TeamCalendarProps) {
                 <div className="relative w-full h-full flex items-center justify-center">
                   <span className="absolute top-1">{date.getDate()}</span>
                   {weatherData ? (
-                    <div className="absolute top-5">
-                      {getWeatherIcon(weatherData)}
-                    </div>
+                    <>
+                      <div className="absolute top-4">
+                        {getWeatherIcon(weatherData)}
+                      </div>
+                      <div className="absolute top-[35px] text-[10px] font-medium">
+                        {weatherData.temperature}°C
+                      </div>
+                      {weatherData.rainfall > 0 && (
+                        <div className="absolute bottom-1 text-[10px] text-blue-500 font-medium">
+                          {weatherData.rainfall}mm
+                        </div>
+                      )}
+                    </>
                   ) : (
-                    <div className="absolute top-5">
+                    <div className="absolute top-4">
                       <Sun className="h-4 w-4 text-orange-500/40" />
-                    </div>
-                  )}
-                  {weatherData && weatherData.rainChance > 1 && (
-                    <div className="absolute bottom-1 text-[10px] text-blue-500 font-medium">
-                      {weatherData.rainChance}%
                     </div>
                   )}
                 </div>
@@ -120,12 +155,6 @@ export function TeamCalendar({ date, setDate, teamColor }: TeamCalendarProps) {
             caption: "flex justify-center py-4 relative items-center text-lg font-semibold"
           }}
         />
-        <div className="mt-6">
-          <WeatherChart 
-            selectedDate={date} 
-            onRainyDateHighlight={handleRainyDateHighlight}
-          />
-        </div>
       </div>
     </section>
   );
