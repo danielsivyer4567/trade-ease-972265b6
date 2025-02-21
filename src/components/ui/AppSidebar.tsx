@@ -18,9 +18,14 @@ export function AppSidebar() {
       <div className={cn("fixed inset-y-0 left-0 z-30 w-40 bg-white border-r transition-transform lg:translate-x-0", state === "collapsed" && "-translate-x-full")}>
         <div className="flex flex-col h-full">
           <div className="p-4">
-            <div className="flex items-center gap-2 mb-6 mx-0 my-0 py-0 px-[19px]">
-              <img src="/lovable-uploads/6a07dd00-f2c7-49da-8b00-48d960c13610.png" alt="Trade Ease Logo" className="w-8 h-8" />
-              <span className="font-medium text-gray-900">Trade Ease</span>
+            <div className="flex items-center gap-3 mb-6 px-0 py-px my-0 mx-[2px]">
+              <img src="/lovable-uploads/6a07dd00-f2c7-49da-8b00-48d960c13610.png" alt="Trade Ease Logo" className="w-12 h-12" />
+              <span className="font-semibold text-lg text-gray-900 mx-[7px] my-0 py-0 px-[15px] text-left">
+
+
+
+Trade Ease
+            </span>
             </div>
           </div>
           <nav className="flex-1 p-1 space-y-0.5">
@@ -69,7 +74,7 @@ export function AppSidebar() {
               <Mail className="w-3.5 h-3.5" />
               Email
             </Link>
-            <Link to="/ai-features" className="flex items-center gap-1.5 p-1.5 rounded-lg hover:bg-gray-100 text-gray-700 hover:text-gray-900 text-sm">
+            <Link to="/ai-features" className={cn("flex items-center gap-1.5 p-1.5 rounded-lg hover:bg-gray-100 text-gray-700 hover:text-gray-900 text-sm", location.pathname === '/ai-features' && "bg-gray-100 text-gray-900")}>
               <Bot className="w-3.5 h-3.5" />
               AI Features
             </Link>
