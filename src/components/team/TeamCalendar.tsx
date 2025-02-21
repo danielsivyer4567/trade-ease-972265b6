@@ -82,25 +82,20 @@ export function TeamCalendar({ date, setDate, teamColor }: TeamCalendarProps) {
               
               return (
                 <div className="relative w-full h-full flex items-center justify-center">
-                  <span>{date.getDate()}</span>
-                  {weatherData && (
-                    <>
-                      {weatherData.rainChance > 1 && (
-                        <div className="absolute top-1 right-1 flex items-center gap-0.5">
-                          <span className="text-[10px] text-blue-500 font-medium">
-                            {weatherData.rainChance}%
-                          </span>
-                          {getWeatherIcon(weatherData)}
-                        </div>
-                      )}
-                      {weatherData.amount > 0 && (
-                        <div className="absolute bottom-1 left-1 flex items-center gap-0.5">
-                          <span className="text-[10px] text-blue-500 font-medium">
-                            {weatherData.amount}mm
-                          </span>
-                        </div>
-                      )}
-                    </>
+                  <span className="absolute top-1">{date.getDate()}</span>
+                  {weatherData ? (
+                    <div className="absolute top-5">
+                      {getWeatherIcon(weatherData)}
+                    </div>
+                  ) : (
+                    <div className="absolute top-5">
+                      <Sun className="h-4 w-4 text-orange-500/40" />
+                    </div>
+                  )}
+                  {weatherData && weatherData.rainChance > 1 && (
+                    <div className="absolute bottom-1 text-[10px] text-blue-500 font-medium">
+                      {weatherData.rainChance}%
+                    </div>
                   )}
                 </div>
               );
@@ -125,6 +120,12 @@ export function TeamCalendar({ date, setDate, teamColor }: TeamCalendarProps) {
             caption: "flex justify-center py-4 relative items-center text-lg font-semibold"
           }}
         />
+        <div className="mt-6">
+          <WeatherChart 
+            selectedDate={date} 
+            onRainyDateHighlight={handleRainyDateHighlight}
+          />
+        </div>
       </div>
     </section>
   );
