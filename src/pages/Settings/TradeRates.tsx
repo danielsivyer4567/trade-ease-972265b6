@@ -79,7 +79,7 @@ export default function TradeRates() {
   };
 
   const staffMembers: Staff[] = [
-    { id: "1", name: "John Smith" },
+    { id: "1", name: "Charl" },
     { id: "2", name: "Sarah Johnson" },
     { id: "3", name: "Mike Wilson" },
   ];
