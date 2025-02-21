@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { 
   LayoutDashboard, 
   Briefcase, 
@@ -28,7 +28,7 @@ import { Button } from './button';
 
 export function AppSidebar() {
   const { state, toggleSidebar } = useSidebar();
-  // This would typically come from your notification system
+  const location = useLocation();
   const notificationCount = 3;
 
   return (
@@ -55,7 +55,13 @@ export function AppSidebar() {
             </div>
           </div>
           <nav className="flex-1 p-1 space-y-0.5">
-            <Link to="/notifications" className="flex items-center justify-between gap-1.5 p-1.5 rounded-lg hover:bg-gray-100 text-gray-700 hover:text-gray-900 text-sm">
+            <Link 
+              to="/notifications" 
+              className={cn(
+                "flex items-center justify-between gap-1.5 p-1.5 rounded-lg hover:bg-gray-100 text-gray-700 hover:text-gray-900 text-sm",
+                location.pathname === '/notifications' && "bg-gray-100 text-gray-900"
+              )}
+            >
               <div className="flex items-center gap-1.5">
                 <Bell className="w-3.5 h-3.5" />
                 Notifications

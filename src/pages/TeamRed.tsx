@@ -15,6 +15,9 @@ import { TeamTimeOff } from "@/components/team/TeamTimeOff";
 export default function TeamRed() {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [highlightedDate, setHighlightedDate] = useState("");
+  const [selectedTeamMember, setSelectedTeamMember] = useState("");
+  const [date, setDate] = useState(new Date());
+  const [incidentReport, setIncidentReport] = useState({ title: "", description: "" });
 
   const handleDateSelect = (date: Date | undefined) => {
     setSelectedDate(date);
@@ -24,25 +27,53 @@ export default function TeamRed() {
     setHighlightedDate(date);
   };
 
+  const handleIncidentSubmit = (data: any) => {
+    console.log("Incident submitted:", data);
+  };
+
+  const teamMembers = ["John Doe", "Jane Smith", "Bob Johnson"];
+  const teamColor = "red";
+  const jobNumber = "JOB-001";
+  const documentCount = 5;
+
   return (
     <AppLayout>
       <div className="p-6 space-y-6">
-        <TeamHeader teamName="Red Team" teamColor="red" />
+        <TeamHeader label="Red Team" />
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <div className="space-y-6">
             <JobsOverview />
-            <DocumentUpload />
+            <DocumentUpload 
+              teamMembers={teamMembers}
+              selectedTeamMember={selectedTeamMember}
+              setSelectedTeamMember={setSelectedTeamMember}
+              jobNumber={jobNumber}
+              teamColor={teamColor}
+              onUpload={() => {}}
+            />
           </div>
           
           <div className="space-y-6">
-            <TeamCalendar />
-            <TeamTimeOff />
+            <TeamCalendar
+              date={date}
+              setDate={setDate}
+              teamColor={teamColor}
+            />
+            <TeamTimeOff teamColor={teamColor} />
           </div>
           
           <div className="space-y-6">
-            <IncidentReports />
-            <DocumentSummary />
+            <IncidentReports
+              teamColor={teamColor}
+              incidentReport={incidentReport}
+              setIncidentReport={setIncidentReport}
+              handleIncidentSubmit={handleIncidentSubmit}
+            />
+            <DocumentSummary
+              documentCount={documentCount}
+              teamColor={teamColor}
+            />
           </div>
         </div>
 
