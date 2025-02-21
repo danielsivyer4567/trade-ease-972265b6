@@ -13,6 +13,7 @@ import TeamBlue from "./pages/TeamBlue";
 import TeamGreen from "./pages/TeamGreen";
 import AIFeatures from "./pages/AIFeatures";
 import CustomersPage from "./pages/Customers";
+import NewJob from "./pages/Jobs/NewJob";
 
 export default function App() {
   return (
@@ -22,6 +23,7 @@ export default function App() {
         <Route path="/statistics" element={<Statistics />} />
         <Route path="/tasks" element={<Tasks />} />
         <Route path="/jobs" element={<Jobs />} />
+        <Route path="/jobs/new" element={<NewJob />} />
         <Route path="/settings" element={<SettingsPage />} />
         <Route path="/settings/trade-rates" element={<TradeRates />} />
         <Route path="/settings/contractors" element={<ContractorsPage />} />

@@ -6,6 +6,8 @@ import JobMap from "@/components/JobMap";
 import type { Job } from "@/types/job";
 import { TeamCalendar } from '@/components/team/TeamCalendar';
 import React from 'react';
+import { Link } from 'react-router-dom';
+
 const stats = [{
   title: "Active Jobs",
   value: "12",
@@ -31,6 +33,7 @@ const stats = [{
   change: "+15% vs last month",
   trend: "up"
 }];
+
 const allJobs: Job[] = [{
   id: "1",
   customer: "John Smith",
@@ -60,8 +63,10 @@ const allJobs: Job[] = [{
   date: "Tomorrow",
   location: [151.2153, -33.8588] as [number, number]
 }];
+
 const todaysJobs = allJobs.filter(job => job.date === "Today");
 const tomorrowsJobs = allJobs.filter(job => job.date === "Tomorrow");
+
 const quoteStatuses = [{
   title: "Accepted Quotes",
   icon: CheckSquare,
@@ -83,6 +88,7 @@ const quoteStatuses = [{
   color: "#EF4444",
   count: "1"
 }];
+
 const teamColors = {
   plumbing: {
     light: '#D3E4FD',
@@ -127,6 +133,7 @@ const teamColors = {
     text: '#403E43' // Charcoal Gray
   }
 };
+
 const Index = () => {
   const [sharedDate, setSharedDate] = React.useState<Date | undefined>(new Date());
   return <AppLayout>
@@ -137,8 +144,11 @@ const Index = () => {
             <h1 className="text-xl md:text-2xl text-gray-900 mx-[7px] my-0 px-0 py-0 font-extrabold">Managers Dashboard</h1>
           </div>
           <div className="flex flex-wrap gap-1.5 md:gap-2 justify-center mt-4 md:mt-6 w-full max-w-screen-lg">
-            <Button size="sm" className="bg-blue-600 hover:bg-blue-700 text-xs md:text-sm flex-grow md:flex-grow-0">
-              <Plus className="w-3 h-3 md:w-4 md:h-4 mr-1" /> New Job
+            <Button
+              asChild
+              className="bg-blue-600 hover:bg-blue-700 text-xs md:text-sm flex-grow md:flex-grow-0"
+            >
+              <Link to="/jobs/new">New Job</Link>
             </Button>
             <Button size="sm" className="bg-green-600 hover:bg-green-700 text-xs md:text-sm flex-grow md:flex-grow-0">
               <Plus className="w-3 h-3 md:w-4 md:h-4 mr-1" /> New Quote
@@ -291,4 +301,5 @@ const Index = () => {
       </div>
     </AppLayout>;
 };
+
 export default Index;
