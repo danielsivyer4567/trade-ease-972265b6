@@ -33,25 +33,27 @@ const NotificationCard = ({
         <p className="text-sm text-gray-600">{notification.description}</p>
         <span className="text-xs text-gray-500">{notification.date}</span>
       </div>
-      <div className="flex items-center gap-2">
-        <div className="flex items-center space-x-2">
+      <div className="flex items-center gap-4">
+        <div className="flex flex-col items-center">
           <Checkbox 
             id={`sort-later-${notification.id}`} 
             checked={notification.isSortedLater}
             onCheckedChange={() => onSortLater(notification.id)}
           />
-          <label htmlFor={`sort-later-${notification.id}`} className="text-sm text-gray-600">
+          <label htmlFor={`sort-later-${notification.id}`} className="flex flex-col items-center text-xs text-gray-600 mt-1">
             <Clock className="h-4 w-4" />
+            Sort Later
           </label>
         </div>
-        <div className="flex items-center space-x-2">
+        <div className="flex flex-col items-center">
           <Checkbox 
             id={`complete-${notification.id}`} 
             checked={notification.isCompleted}
             onCheckedChange={() => onComplete(notification.id)}
           />
-          <label htmlFor={`complete-${notification.id}`} className="text-sm text-gray-600">
+          <label htmlFor={`complete-${notification.id}`} className="flex flex-col items-center text-xs text-gray-600 mt-1">
             <Check className="h-4 w-4" />
+            Completed
           </label>
         </div>
       </div>
