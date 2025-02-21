@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { AppLayout } from "@/components/ui/AppLayout";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -7,8 +7,20 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Link } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
+import { FileUpload } from "@/components/tasks/FileUpload";
+import { ImagesGrid } from "@/components/tasks/ImagesGrid";
 
 export default function NewInvoice() {
+  const [templates, setTemplates] = useState<string[]>([]);
+
+  const handleTemplateUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (!files) return;
+
+    const newTemplates = Array.from(files).map(file => URL.createObjectURL(file));
+    setTemplates(prev => [...prev, ...newTemplates]);
+  };
+
   return (
     <AppLayout>
       <div className="p-6 space-y-6">
@@ -21,6 +33,20 @@ export default function NewInvoice() {
 
         <Card className="p-6">
           <form className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium mb-1">Invoice Template</label>
+              <div className="space-y-4">
+                <FileUpload 
+                  onFileUpload={handleTemplateUpload}
+                  label="Upload Template"
+                />
+                <ImagesGrid 
+                  images={templates}
+                  title="Uploaded Templates"
+                />
+              </div>
+            </div>
+
             <div>
               <label htmlFor="customer" className="block text-sm font-medium mb-1">Customer</label>
               <Input id="customer" placeholder="Select customer" />
