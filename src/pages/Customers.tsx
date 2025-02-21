@@ -10,6 +10,7 @@ import { ImagesGrid } from "@/components/tasks/ImagesGrid";
 export default function CustomersPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedFilter, setSelectedFilter] = useState("all");
+  const [expandedCustomerId, setExpandedCustomerId] = useState<number | null>(null);
   
   const customers = [
     {
@@ -127,10 +128,18 @@ export default function CustomersPage() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 gap-4">
           {filteredCustomers.map(customer => (
-            <Card key={customer.id} className="hover:shadow-md transition-shadow">
-              <CardHeader>
+            <Card 
+              key={customer.id} 
+              className={`hover:shadow-md transition-all cursor-pointer ${
+                expandedCustomerId === customer.id ? 'bg-gray-50' : ''
+              }`}
+              onClick={() => setExpandedCustomerId(
+                expandedCustomerId === customer.id ? null : customer.id
+              )}
+            >
+              <CardHeader className="py-3">
                 <CardTitle className="text-lg flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <User className="h-5 w-5 text-gray-500" />
@@ -141,55 +150,57 @@ export default function CustomersPage() {
                   </span>
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2 text-sm">
-                    <Phone className="h-4 w-4 text-gray-500" />
-                    {customer.phone}
+              {expandedCustomerId === customer.id && (
+                <CardContent className="space-y-4">
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2 text-sm">
+                      <Phone className="h-4 w-4 text-gray-500" />
+                      {customer.phone}
+                    </div>
+                    <div className="flex items-center gap-2 text-sm">
+                      <Mail className="h-4 w-4 text-gray-500" />
+                      {customer.email}
+                    </div>
+                    <div className="flex items-center gap-2 text-sm">
+                      <MapPin className="h-4 w-4 text-gray-500" />
+                      {customer.address}
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2 text-sm">
-                    <Mail className="h-4 w-4 text-gray-500" />
-                    {customer.email}
-                  </div>
-                  <div className="flex items-center gap-2 text-sm">
-                    <MapPin className="h-4 w-4 text-gray-500" />
-                    {customer.address}
-                  </div>
-                </div>
 
-                <div className="space-y-2">
-                  <h4 className="text-sm font-medium flex items-center gap-2">
-                    <Clock className="h-4 w-4" />
-                    Recent Jobs
-                  </h4>
-                  <div className="space-y-1">
-                    {customer.recentJobs.map(job => (
-                      <div key={job.id} className="text-sm flex items-center justify-between">
-                        <span>{job.title}</span>
-                        <span className={getStatusColor(job.status)}>
-                          {job.status}
-                        </span>
-                      </div>
-                    ))}
+                  <div className="space-y-2">
+                    <h4 className="text-sm font-medium flex items-center gap-2">
+                      <Clock className="h-4 w-4" />
+                      Recent Jobs
+                    </h4>
+                    <div className="space-y-1">
+                      {customer.recentJobs.map(job => (
+                        <div key={job.id} className="text-sm flex items-center justify-between">
+                          <span>{job.title}</span>
+                          <span className={getStatusColor(job.status)}>
+                            {job.status}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                </div>
 
-                <ImagesGrid 
-                  images={customer.projectImages}
-                  title="Project Images"
-                />
+                  <ImagesGrid 
+                    images={customer.projectImages}
+                    title="Project Images"
+                  />
 
-                <div className="pt-2 border-t flex justify-between text-sm">
-                  <div className="flex items-center gap-1">
-                    <DollarSign className="h-4 w-4 text-gray-500" />
-                    <span>Total Spent: ${customer.totalSpent}</span>
+                  <div className="pt-2 border-t flex justify-between text-sm">
+                    <div className="flex items-center gap-1">
+                      <DollarSign className="h-4 w-4 text-gray-500" />
+                      <span>Total Spent: ${customer.totalSpent}</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Clock className="h-4 w-4 text-gray-500" />
+                      <span>Last Service: {customer.lastService}</span>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-1">
-                    <Clock className="h-4 w-4 text-gray-500" />
-                    <span>Last Service: {customer.lastService}</span>
-                  </div>
-                </div>
-              </CardContent>
+                </CardContent>
+              )}
             </Card>
           ))}
         </div>
