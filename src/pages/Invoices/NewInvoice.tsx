@@ -9,6 +9,7 @@ import { Link } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { FileUpload } from "@/components/tasks/FileUpload";
 import { ImagesGrid } from "@/components/tasks/ImagesGrid";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
 export default function NewInvoice() {
   const [templates, setTemplates] = useState<string[]>([]);
@@ -33,39 +34,50 @@ export default function NewInvoice() {
 
         <Card className="p-6">
           <form className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium mb-1">Invoice Template</label>
-              <div className="space-y-4">
-                <FileUpload 
-                  onFileUpload={handleTemplateUpload}
-                  label="Upload Template"
-                />
-                <ImagesGrid 
-                  images={templates}
-                  title="Uploaded Templates"
-                />
-              </div>
-            </div>
+            <Tabs defaultValue="basic" className="w-full">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="basic">Basic Info</TabsTrigger>
+                <TabsTrigger value="template">Template</TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="basic" className="space-y-4 mt-4">
+                <div>
+                  <label htmlFor="customer" className="block text-sm font-medium mb-1">Customer</label>
+                  <Input id="customer" placeholder="Select customer" />
+                </div>
 
-            <div>
-              <label htmlFor="customer" className="block text-sm font-medium mb-1">Customer</label>
-              <Input id="customer" placeholder="Select customer" />
-            </div>
+                <div>
+                  <label htmlFor="items" className="block text-sm font-medium mb-1">Line Items</label>
+                  <Textarea id="items" placeholder="Enter invoice items" rows={4} />
+                </div>
 
-            <div>
-              <label htmlFor="items" className="block text-sm font-medium mb-1">Line Items</label>
-              <Textarea id="items" placeholder="Enter invoice items" rows={4} />
-            </div>
+                <div>
+                  <label htmlFor="amount" className="block text-sm font-medium mb-1">Total Amount</label>
+                  <Input id="amount" type="number" placeholder="Enter total amount" />
+                </div>
 
-            <div>
-              <label htmlFor="amount" className="block text-sm font-medium mb-1">Total Amount</label>
-              <Input id="amount" type="number" placeholder="Enter total amount" />
-            </div>
+                <div>
+                  <label htmlFor="dueDate" className="block text-sm font-medium mb-1">Due Date</label>
+                  <Input id="dueDate" type="date" />
+                </div>
+              </TabsContent>
 
-            <div>
-              <label htmlFor="dueDate" className="block text-sm font-medium mb-1">Due Date</label>
-              <Input id="dueDate" type="date" />
-            </div>
+              <TabsContent value="template" className="space-y-4 mt-4">
+                <div>
+                  <label className="block text-sm font-medium mb-1">Invoice Template</label>
+                  <div className="space-y-4">
+                    <FileUpload 
+                      onFileUpload={handleTemplateUpload}
+                      label="Upload Template"
+                    />
+                    <ImagesGrid 
+                      images={templates}
+                      title="Uploaded Templates"
+                    />
+                  </div>
+                </div>
+              </TabsContent>
+            </Tabs>
 
             <Button type="submit" className="w-full">Create Invoice</Button>
           </form>
