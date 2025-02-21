@@ -3,10 +3,11 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, Download, FileUp, Zap, Plus } from "lucide-react";
+import { ArrowLeft, Download, FileUp, Zap, Plus, Facebook } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import type { JobTemplate } from "@/types/job";
+
 export default function NewJob() {
   const [aiPrompt, setAiPrompt] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
@@ -28,6 +29,7 @@ export default function NewJob() {
     description: "Complete electrical system inspection and safety check",
     category: "Electrical"
   }];
+
   const handleGenerateTemplate = async () => {
     if (!aiPrompt) return;
     setIsGenerating(true);
@@ -50,15 +52,28 @@ export default function NewJob() {
       setIsGenerating(false);
     }
   };
-  return <AppLayout>
+
+  return (
+    <AppLayout>
       <div className="p-6 space-y-6">
-        <div className="flex items-center gap-4">
-          <Link to="/jobs">
-            <Button variant="ghost" size="icon">
-              <ArrowLeft className="h-4 w-4" />
-            </Button>
-          </Link>
-          <h1 className="text-3xl font-bold">Create New Job</h1>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <Link to="/jobs">
+              <Button variant="ghost" size="icon">
+                <ArrowLeft className="h-4 w-4" />
+              </Button>
+            </Link>
+            <h1 className="text-3xl font-bold">Create New Job</h1>
+          </div>
+          <a 
+            href="https://facebook.com/groups/tradeease" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="flex items-center gap-2 text-sm text-blue-600 hover:text-blue-700"
+          >
+            <Facebook className="h-4 w-4" />
+            Join our Trade Community
+          </a>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -152,5 +167,6 @@ export default function NewJob() {
           </div>
         </div>
       </div>
-    </AppLayout>;
+    </AppLayout>
+  );
 }
