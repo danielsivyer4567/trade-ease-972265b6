@@ -1,11 +1,10 @@
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { LayoutDashboard, Briefcase, Users, FileText, Settings, Menu, Calendar, Network, Share, Bot, Mail, MessageSquare, Link as LinkIcon, Database, Hammer, Plus, BarChart, ListTodo, Bell } from 'lucide-react';
 import { useSidebar } from './sidebar';
 import { cn } from '@/lib/utils';
 import { Button } from './button';
-import { removeBackground, loadImage } from '@/utils/imageProcessing';
 
 export function AppSidebar() {
   const {
@@ -14,24 +13,6 @@ export function AppSidebar() {
   } = useSidebar();
   const location = useLocation();
   const notificationCount = 3;
-  const [processedLogoUrl, setProcessedLogoUrl] = useState<string | null>(null);
-
-  useEffect(() => {
-    const processLogo = async () => {
-      try {
-        const response = await fetch('/lovable-uploads/6a07dd00-f2c7-49da-8b00-48d960c13610.png');
-        const blob = await response.blob();
-        const img = await loadImage(blob);
-        const processedBlob = await removeBackground(img);
-        const processedUrl = URL.createObjectURL(processedBlob);
-        setProcessedLogoUrl(processedUrl);
-      } catch (error) {
-        console.error('Error processing logo:', error);
-      }
-    };
-
-    processLogo();
-  }, []);
 
   return <>
       <Button variant="outline" size="icon" className="fixed left-4 top-4 z-40 lg:hidden" onClick={toggleSidebar}>
@@ -92,9 +73,6 @@ export function AppSidebar() {
               Email
             </Link>
             <Link to="/ai-features" className="flex items-center gap-1.5 p-1.5 rounded-lg hover:bg-gray-100 text-gray-700 hover:text-gray-900 text-sm">
-              {processedLogoUrl && (
-                <img src={processedLogoUrl} alt="" className="w-4 h-4 object-contain" />
-              )}
               <Bot className="w-3.5 h-3.5" />
               AI Features
             </Link>
