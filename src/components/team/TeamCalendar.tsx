@@ -9,17 +9,39 @@ interface TeamCalendarProps {
   teamColor: string;
 }
 
+interface RainData {
+  date: string;
+  amount: number;
+}
+
 export function TeamCalendar({ date, setDate, teamColor }: TeamCalendarProps) {
-  const [rainyDates, setRainyDates] = useState<string[]>([]);
+  const [rainyDates, setRainyDates] = useState<RainData[]>([]);
 
   const handleRainyDateHighlight = (dates: string[]) => {
-    setRainyDates(dates);
+    const rainData = dates.map(date => {
+      // Get rainfall amount from weather data
+      const weatherData = [
+        { date: '2024-03-18', rainfall: 0 },
+        { date: '2024-03-19', rainfall: 5 },
+        { date: '2024-03-20', rainfall: 12 },
+        { date: '2024-03-21', rainfall: 8 },
+        { date: '2024-03-22', rainfall: 0 },
+        { date: '2024-03-23', rainfall: 3 },
+        { date: '2024-03-24', rainfall: 15 },
+      ];
+      const dayData = weatherData.find(d => d.date === date);
+      return {
+        date,
+        amount: dayData?.rainfall || 0
+      };
+    });
+    setRainyDates(rainData);
   };
 
   const modifiers = {
     rainy: (date: Date) => {
       const dateStr = date.toISOString().split('T')[0];
-      return rainyDates.includes(dateStr);
+      return rainyDates.some(rd => rd.date === dateStr);
     }
   };
 
@@ -41,12 +63,18 @@ export function TeamCalendar({ date, setDate, teamColor }: TeamCalendarProps) {
           modifiersStyles={modifiersStyles}
           components={{
             DayContent: ({ date }) => {
-              const isRainy = modifiers.rainy(date);
+              const dateStr = date.toISOString().split('T')[0];
+              const rainData = rainyDates.find(rd => rd.date === dateStr);
+              const isRainy = !!rainData;
+              
               return (
                 <div className="relative w-full h-full flex items-center justify-center">
                   <span>{date.getDate()}</span>
                   {isRainy && (
-                    <Droplet className="absolute top-1 right-1 h-3 w-3 text-blue-500" />
+                    <div className="absolute top-1 left-1 flex items-center gap-0.5">
+                      <Droplet className="h-3 w-3 text-blue-500" />
+                      <span className="text-[10px] text-blue-500 font-medium">{rainData?.amount}mm</span>
+                    </div>
                   )}
                 </div>
               );
