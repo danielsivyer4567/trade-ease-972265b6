@@ -1,11 +1,14 @@
+
 import { AppLayout } from "@/components/ui/AppLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Settings, DollarSign, Receipt, Clock, Users, Shield, FileText, Calendar, List, CreditCard, User, Bot, Briefcase, Network, HelpCircle, Mail, FileJson, Building, Share, Zap, Search } from "lucide-react";
 import { Link } from "react-router-dom";
+
 const settingsSections = [{
   title: "Trade Rates",
   icon: DollarSign,
-  description: "Manage trade and service rates"
+  description: "Manage trade and service rates",
+  path: "/settings/trade-rates"
 }, {
   title: "Bills & Purchase Orders",
   icon: Receipt,
@@ -91,6 +94,7 @@ const settingsSections = [{
   icon: Zap,
   description: "Configure AI assistant"
 }];
+
 export default function SettingsPage() {
   return <AppLayout>
       <div className="p-6 space-y-8">
@@ -103,9 +107,14 @@ export default function SettingsPage() {
         <div className="space-y-4">
           <h2 className="text-xl font-semibold text-gray-900">Configuration</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {settingsSections.map(section => <Link key={section.title} to={`/settings/${section.title.toLowerCase().replace(/\s+/g, '-')}`} className="block">
+            {settingsSections.map(section => (
+              <Link 
+                key={section.title} 
+                to={section.path || `/settings/${section.title.toLowerCase().replace(/\s+/g, '-')}`} 
+                className="block"
+              >
                 <Card className="hover:shadow-md transition-shadow">
-                  <CardHeader className="allow trade rates to open up in a new page with calculator-">
+                  <CardHeader>
                     <div className="flex items-center gap-2">
                       <section.icon className="h-5 w-5 text-gray-600" />
                       <CardTitle className="text-lg">{section.title}</CardTitle>
@@ -113,7 +122,8 @@ export default function SettingsPage() {
                     <CardDescription>{section.description}</CardDescription>
                   </CardHeader>
                 </Card>
-              </Link>)}
+              </Link>
+            ))}
           </div>
         </div>
       </div>

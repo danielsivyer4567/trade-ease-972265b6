@@ -1,3 +1,4 @@
+
 import { AppLayout } from "@/components/ui/AppLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -356,7 +357,7 @@ export default function TradeRates() {
                   </CardHeader>
                   <CardContent className="space-y-4">
                     {hourlyRates.map((rate) => (
-                      <div key={rate.id} className="grid grid-cols-2 gap-4">
+                      <div key={rate.id} className="grid grid-cols-3 gap-4">
                         <Input
                           placeholder="Rate Name"
                           value={rate.name}
@@ -378,6 +379,12 @@ export default function TradeRates() {
                             setHourlyRates(updatedRates);
                           }}
                         />
+                        <Button 
+                          variant={selectedRate?.id === rate.id ? "default" : "outline"}
+                          onClick={() => handleRateSelect(rate)}
+                        >
+                          Select Rate
+                        </Button>
                       </div>
                     ))}
                     <Button variant="outline" onClick={() => addNewRate('hourly')}>
