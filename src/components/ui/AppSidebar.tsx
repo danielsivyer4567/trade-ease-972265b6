@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { LayoutDashboard, Briefcase, Users, FileText, Settings, Menu, Calendar, Network, Share, Bot, Mail, MessageSquare, Link as LinkIcon, Database, Hammer, Plus, BarChart, ListTodo, Bell } from 'lucide-react';
@@ -72,7 +71,13 @@ export function AppSidebar() {
               <Mail className="w-3.5 h-3.5" />
               Email
             </Link>
-            <Link to="/ai-features" className="flex items-center gap-1.5 p-1.5 rounded-lg hover:bg-gray-100 text-gray-700 hover:text-gray-900 text-sm">
+            <Link 
+              to="/ai-features" 
+              className={cn(
+                "flex items-center gap-1.5 p-1.5 rounded-lg hover:bg-gray-100 text-gray-700 hover:text-gray-900 text-sm",
+                location.pathname === '/ai-features' && "bg-gray-100 text-gray-900"
+              )}
+            >
               <Bot className="w-3.5 h-3.5" />
               AI Features
             </Link>
