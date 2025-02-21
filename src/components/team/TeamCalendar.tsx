@@ -1,8 +1,7 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Calendar } from '@/components/ui/calendar';
 import { Droplet } from 'lucide-react';
-import { WeatherChart } from './WeatherChart';
 
 interface TeamCalendarProps {
   date: Date | undefined;
@@ -18,27 +17,26 @@ interface RainData {
 export function TeamCalendar({ date, setDate, teamColor }: TeamCalendarProps) {
   const [rainyDates, setRainyDates] = useState<RainData[]>([]);
 
-  // Initialize weather data
-  useEffect(() => {
-    const weatherData = [
-      { date: '2024-03-18', rainfall: 0 },
-      { date: '2024-03-19', rainfall: 5 },
-      { date: '2024-03-20', rainfall: 12 },
-      { date: '2024-03-21', rainfall: 8 },
-      { date: '2024-03-22', rainfall: 0 },
-      { date: '2024-03-23', rainfall: 3 },
-      { date: '2024-03-24', rainfall: 15 },
-    ];
-    
-    const rainData = weatherData
-      .filter(day => day.rainfall > 0)
-      .map(day => ({
-        date: day.date,
-        amount: day.rainfall
-      }));
-    
+  const handleRainyDateHighlight = (dates: string[]) => {
+    const rainData = dates.map(date => {
+      // Get rainfall amount from weather data
+      const weatherData = [
+        { date: '2024-03-18', rainfall: 0 },
+        { date: '2024-03-19', rainfall: 5 },
+        { date: '2024-03-20', rainfall: 12 },
+        { date: '2024-03-21', rainfall: 8 },
+        { date: '2024-03-22', rainfall: 0 },
+        { date: '2024-03-23', rainfall: 3 },
+        { date: '2024-03-24', rainfall: 15 },
+      ];
+      const dayData = weatherData.find(d => d.date === date);
+      return {
+        date,
+        amount: dayData?.rainfall || 0
+      };
+    });
     setRainyDates(rainData);
-  }, []);
+  };
 
   const modifiers = {
     rainy: (date: Date) => {
@@ -101,9 +99,6 @@ export function TeamCalendar({ date, setDate, teamColor }: TeamCalendarProps) {
             caption: "flex justify-center py-4 relative items-center text-lg font-semibold"
           }}
         />
-        <div className="mt-6">
-          <WeatherChart selectedDate={date} onRainyDateHighlight={() => {}} />
-        </div>
       </div>
     </section>
   );
