@@ -1,11 +1,11 @@
-
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import Statistics from "./pages/Statistics";
 import Jobs from "./pages/Jobs";
 import Tasks from "./pages/Tasks";
 import NotFound from "./pages/NotFound";
-import Settings from "./pages/Settings";
+import SettingsPage from "./pages/Settings";
+import TradeRates from "./pages/Settings/TradeRates";
 import TeamRed from "./pages/TeamRed";
 import TeamBlue from "./pages/TeamBlue";
 import TeamGreen from "./pages/TeamGreen";
@@ -19,7 +19,8 @@ export default function App() {
         <Route path="/statistics" element={<Statistics />} />
         <Route path="/tasks" element={<Tasks />} />
         <Route path="/jobs" element={<Jobs />} />
-        <Route path="/settings" element={<Settings />} />
+        <Route path="/settings" element={<SettingsPage />} />
+        <Route path="/settings/trade-rates" element={<TradeRates />} />
         <Route path="/team-red" element={<TeamRed />} />
         <Route path="/team-blue" element={<TeamBlue />} />
         <Route path="/team-green" element={<TeamGreen />} />
