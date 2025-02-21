@@ -1,12 +1,14 @@
 import React from 'react';
 import { AppLayout } from '@/components/ui/AppLayout';
-import { Calendar } from '@/components/ui/calendar';
+import { TeamCalendar } from '@/components/team/TeamCalendar';
+import { WeatherChart } from '@/components/team/WeatherChart';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Upload, AlertTriangle } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+
 export default function TeamRed() {
   const [date, setDate] = React.useState<Date | undefined>(new Date());
   const [documentCount, setDocumentCount] = React.useState({
@@ -23,6 +25,7 @@ export default function TeamRed() {
     date: new Date(),
     severity: ''
   });
+
   const teamMembers = [{
     id: '1',
     name: 'John Smith'
@@ -36,6 +39,7 @@ export default function TeamRed() {
     id: '4',
     name: 'Emily Brown'
   }];
+
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>, type: 'insurance' | 'general' | 'jobRelated') => {
     if (event.target.files && event.target.files.length > 0) {
       setDocumentCount(prev => ({
@@ -47,6 +51,7 @@ export default function TeamRed() {
       }
     }
   };
+
   const handleIncidentSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     console.log('Incident Report Submitted:', incidentReport);
@@ -58,7 +63,9 @@ export default function TeamRed() {
       severity: ''
     });
   };
-  return <AppLayout>
+
+  return (
+    <AppLayout>
       <div className="space-y-8">
         <div className="flex items-center gap-3 mb-4 px-[240px] mx-[189px]">
           <img src="/lovable-uploads/6a07dd00-f2c7-49da-8b00-48d960c13610.png" alt="Trade Ease Logo" className="w-8 h-8" />
@@ -67,24 +74,10 @@ export default function TeamRed() {
         
         <section>
           <div className="bg-white p-6 rounded-lg shadow-md">
-            <Calendar mode="single" selected={date} onSelect={setDate} className="w-full" classNames={{
-            months: "w-full",
-            month: "w-full",
-            table: "w-full border-collapse",
-            head_row: "grid grid-cols-7",
-            head_cell: "text-muted-foreground text-center text-sm font-medium p-2",
-            row: "grid grid-cols-7",
-            cell: "h-16 text-center text-sm p-0 relative hover:bg-gray-100 rounded-md",
-            day: "h-16 w-full p-2 font-normal aria-selected:bg-red-600 aria-selected:text-white hover:bg-gray-100 rounded-md",
-            day_range_end: "day-range-end",
-            day_selected: "bg-red-600 text-white hover:bg-red-600 hover:text-white focus:bg-red-600 focus:text-white",
-            day_today: "bg-gray-100 text-gray-900",
-            day_outside: "text-gray-400",
-            nav: "space-x-1 flex items-center justify-between p-2",
-            nav_button_previous: "absolute left-1",
-            nav_button_next: "absolute right-1",
-            caption: "flex justify-center py-4 relative items-center text-lg font-semibold"
-          }} />
+            <TeamCalendar date={date} setDate={setDate} teamColor="red" />
+            <div className="mt-6">
+              <WeatherChart selectedDate={date} onRainyDateHighlight={() => {}} />
+            </div>
           </div>
         </section>
 
@@ -309,5 +302,6 @@ export default function TeamRed() {
           </div>
         </section>
       </div>
-    </AppLayout>;
+    </AppLayout>
+  );
 }

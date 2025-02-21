@@ -1,6 +1,7 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Calendar } from '@/components/ui/calendar';
+import { WaterDrop } from 'lucide-react';
 
 interface TeamCalendarProps {
   date: Date | undefined;
@@ -9,6 +10,25 @@ interface TeamCalendarProps {
 }
 
 export function TeamCalendar({ date, setDate, teamColor }: TeamCalendarProps) {
+  const [rainyDates, setRainyDates] = useState<string[]>([]);
+
+  const handleRainyDateHighlight = (dates: string[]) => {
+    setRainyDates(dates);
+  };
+
+  const modifiers = {
+    rainy: (date: Date) => {
+      const dateStr = date.toISOString().split('T')[0];
+      return rainyDates.includes(dateStr);
+    }
+  };
+
+  const modifiersStyles = {
+    rainy: {
+      position: 'relative',
+    }
+  };
+
   return (
     <section>
       <div className="bg-white p-6 rounded-lg shadow-md">
@@ -17,6 +37,21 @@ export function TeamCalendar({ date, setDate, teamColor }: TeamCalendarProps) {
           selected={date} 
           onSelect={setDate} 
           className="w-full"
+          modifiers={modifiers}
+          modifiersStyles={modifiersStyles}
+          components={{
+            DayContent: ({ date }) => {
+              const isRainy = modifiers.rainy(date);
+              return (
+                <div className="relative w-full h-full flex items-center justify-center">
+                  <span>{date.getDate()}</span>
+                  {isRainy && (
+                    <WaterDrop className="absolute top-1 right-1 h-3 w-3 text-blue-500" />
+                  )}
+                </div>
+              );
+            }
+          }}
           classNames={{
             months: "w-full",
             month: "w-full",
