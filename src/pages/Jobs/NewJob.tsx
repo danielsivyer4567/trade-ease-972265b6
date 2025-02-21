@@ -1,3 +1,4 @@
+
 import { AppLayout } from "@/components/ui/AppLayout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -27,6 +28,7 @@ export default function NewJob() {
     name: string;
     email: string;
   } | null>(null);
+  const [isDraggingOver, setIsDraggingOver] = useState(false);
 
   // Mock customers data - in a real app this would come from your backend
   const customers = [
@@ -76,6 +78,39 @@ export default function NewJob() {
     }
   };
 
+  const handleDragStart = (template: JobTemplate, event: React.DragEvent) => {
+    event.dataTransfer.setData('application/json', JSON.stringify(template));
+  };
+
+  const handleDragOver = (event: React.DragEvent) => {
+    event.preventDefault();
+    if (!selectedCustomer) return;
+    setIsDraggingOver(true);
+  };
+
+  const handleDragLeave = () => {
+    setIsDraggingOver(false);
+  };
+
+  const handleDrop = (event: React.DragEvent) => {
+    event.preventDefault();
+    setIsDraggingOver(false);
+    if (!selectedCustomer) return;
+
+    try {
+      const template = JSON.parse(event.dataTransfer.getData('application/json')) as JobTemplate;
+      console.log('Creating new job:', {
+        template,
+        customerId: selectedCustomer.id,
+        customerName: selectedCustomer.name
+      });
+      // Here you would typically create the job in your backend
+      setSelectedTemplate(template);
+    } catch (error) {
+      console.error('Error creating job:', error);
+    }
+  };
+
   return (
     <AppLayout>
       <div className="p-6 space-y-6">
@@ -99,10 +134,19 @@ export default function NewJob() {
           </a>
         </div>
 
-        <Card className="mb-6">
+        <Card 
+          className={`mb-6 transition-colors ${isDraggingOver && selectedCustomer ? 'bg-blue-50 border-blue-300' : ''}`}
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          onDrop={handleDrop}
+        >
           <CardHeader>
             <CardTitle>Select Customer</CardTitle>
-            <CardDescription>Choose a customer for this job</CardDescription>
+            <CardDescription>
+              {selectedCustomer 
+                ? "Drag a template here to create a new job for this customer" 
+                : "Choose a customer for this job"}
+            </CardDescription>
           </CardHeader>
           <CardContent>
             {selectedCustomer ? (
@@ -142,10 +186,19 @@ export default function NewJob() {
                 <CardDescription>Choose from our pre-made templates</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                {templates.map(template => <Button key={template.id} variant="outline" className="w-full justify-start" onClick={() => setSelectedTemplate(template)}>
+                {templates.map(template => (
+                  <Button
+                    key={template.id}
+                    variant="outline"
+                    className="w-full justify-start"
+                    onClick={() => setSelectedTemplate(template)}
+                    draggable
+                    onDragStart={(e) => handleDragStart(template, e)}
+                  >
                     <Download className="h-4 w-4 mr-2" />
                     {template.title}
-                  </Button>)}
+                  </Button>
+                ))}
               </CardContent>
             </Card>
 
@@ -164,16 +217,28 @@ export default function NewJob() {
 
             <Card>
               <CardHeader>
-                <CardTitle>AI Generated Template</CardTitle>
+                <CardTitle>AI Generate Template</CardTitle>
                 <CardDescription>Let AI create a template based on your description</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <Textarea placeholder="Describe the job you need a template for..." value={aiPrompt} onChange={e => setAiPrompt(e.target.value)} />
-                <Button className="w-full" onClick={handleGenerateTemplate} disabled={isGenerating || !aiPrompt.trim()}>
-                  {isGenerating ? <>Generating...</> : <>
+                <Textarea
+                  placeholder="Describe the job you need a template for..."
+                  value={aiPrompt}
+                  onChange={(e) => setAiPrompt(e.target.value)}
+                />
+                <Button 
+                  className="w-full" 
+                  onClick={handleGenerateTemplate}
+                  disabled={isGenerating || !aiPrompt.trim()}
+                >
+                  {isGenerating ? (
+                    <>Generating...</>
+                  ) : (
+                    <>
                       <Zap className="h-4 w-4 mr-2" />
                       Generate Template
-                    </>}
+                    </>
+                  )}
                 </Button>
               </CardContent>
             </Card>
@@ -184,11 +249,15 @@ export default function NewJob() {
               <CardHeader>
                 <CardTitle>Selected Template</CardTitle>
                 <CardDescription>
-                  {selectedTemplate ? "Customize the template for your job" : "Select or generate a template to start"}
+                  {selectedTemplate 
+                    ? "Customize the template for your job"
+                    : "Select or generate a template to start"
+                  }
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                {selectedTemplate ? <div className="space-y-4">
+                {selectedTemplate ? (
+                  <div className="space-y-4">
                     <div>
                       <label className="block text-sm font-medium mb-1">Title</label>
                       <Input defaultValue={selectedTemplate.title} />
@@ -208,18 +277,23 @@ export default function NewJob() {
                     <div>
                       <label className="block text-sm font-medium mb-1">Materials</label>
                       <div className="space-y-2">
-                        {selectedTemplate.materials.map((material, index) => <div key={index} className="flex items-center gap-2">
+                        {selectedTemplate.materials.map((material, index) => (
+                          <div key={index} className="flex items-center gap-2">
                             <Input defaultValue={material} />
                             <Button variant="ghost" size="icon">
                               <Plus className="h-4 w-4" />
                             </Button>
-                          </div>)}
+                          </div>
+                        ))}
                       </div>
                     </div>
                     <Button className="w-full">Create Job</Button>
-                  </div> : <div className="text-center py-8 text-gray-500">
+                  </div>
+                ) : (
+                  <div className="text-center py-8 text-gray-500">
                     No template selected
-                  </div>}
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>
