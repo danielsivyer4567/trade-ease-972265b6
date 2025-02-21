@@ -14,6 +14,11 @@ import TeamGreen from "./pages/TeamGreen";
 import AIFeatures from "./pages/AIFeatures";
 import CustomersPage from "./pages/Customers";
 import NewJob from "./pages/Jobs/NewJob";
+import NewQuote from "./pages/Quotes/NewQuote";
+import NewCustomer from "./pages/Customers/NewCustomer";
+import NewPayment from "./pages/Payments/NewPayment";
+import PayRun from "./pages/Payroll/PayRun";
+import NewInvoice from "./pages/Invoices/NewInvoice";
 
 export default function App() {
   return (
@@ -32,6 +37,11 @@ export default function App() {
         <Route path="/team-blue" element={<TeamBlue />} />
         <Route path="/team-green" element={<TeamGreen />} />
         <Route path="/ai-features" element={<AIFeatures />} />
+        <Route path="/quotes/new" element={<NewQuote />} />
+        <Route path="/customers/new" element={<NewCustomer />} />
+        <Route path="/payments/new" element={<NewPayment />} />
+        <Route path="/payroll/pay-run" element={<PayRun />} />
+        <Route path="/invoices/new" element={<NewInvoice />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </Router>

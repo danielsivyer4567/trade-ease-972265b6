@@ -151,19 +151,29 @@ const Index = () => {
               <Link to="/jobs/new">New Job</Link>
             </Button>
             <Button size="sm" className="bg-green-600 hover:bg-green-700 text-xs md:text-sm flex-grow md:flex-grow-0">
-              <Plus className="w-3 h-3 md:w-4 md:h-4 mr-1" /> New Quote
+              <Link to="/quotes/new" className="flex items-center">
+                <Plus className="w-3 h-3 md:w-4 md:h-4 mr-1" /> New Quote
+              </Link>
             </Button>
             <Button size="sm" className="bg-purple-600 hover:bg-purple-700 text-xs md:text-sm flex-grow md:flex-grow-0">
-              <Plus className="w-3 h-3 md:w-4 md:h-4 mr-1" /> New Customer
+              <Link to="/customers/new" className="flex items-center">
+                <Plus className="w-3 h-3 md:w-4 md:h-4 mr-1" /> New Customer
+              </Link>
             </Button>
             <Button size="sm" className="bg-yellow-600 hover:bg-yellow-700 text-white text-xs md:text-sm flex-grow md:flex-grow-0">
-              <DollarSign className="w-3 h-3 md:w-4 md:h-4 mr-1" /> New Payment
+              <Link to="/payments/new" className="flex items-center">
+                <DollarSign className="w-3 h-3 md:w-4 md:h-4 mr-1" /> New Payment
+              </Link>
             </Button>
             <Button size="sm" className="bg-orange-600 hover:bg-orange-700 text-xs md:text-sm flex-grow md:flex-grow-0">
-              <CalendarIcon className="w-3 h-3 md:w-4 md:h-4 mr-1" /> Pay Run
+              <Link to="/payroll/pay-run" className="flex items-center">
+                <CalendarIcon className="w-3 h-3 md:w-4 md:h-4 mr-1" /> Pay Run
+              </Link>
             </Button>
             <Button size="sm" className="bg-indigo-600 hover:bg-indigo-700 text-xs md:text-sm flex-grow md:flex-grow-0">
-              <FileText className="w-3 h-3 md:w-4 md:h-4 mr-1" /> New Invoice
+              <Link to="/invoices/new" className="flex items-center">
+                <FileText className="w-3 h-3 md:w-4 md:h-4 mr-1" /> New Invoice
+              </Link>
             </Button>
           </div>
         </div>
