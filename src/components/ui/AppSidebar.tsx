@@ -1,11 +1,9 @@
-
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { LayoutDashboard, Briefcase, Users, FileText, Settings, Menu, Calendar, Network, Share, Bot, Mail, MessageSquare, Link as LinkIcon, Database, Hammer, Plus, BarChart, ListTodo, Bell } from 'lucide-react';
 import { useSidebar } from './sidebar';
 import { cn } from '@/lib/utils';
 import { Button } from './button';
-
 export function AppSidebar() {
   const {
     state,
@@ -13,7 +11,6 @@ export function AppSidebar() {
   } = useSidebar();
   const location = useLocation();
   const notificationCount = 3;
-
   return <>
       <Button variant="outline" size="icon" className="fixed left-4 top-4 z-40 lg:hidden" onClick={toggleSidebar}>
         <Menu />
@@ -21,9 +18,9 @@ export function AppSidebar() {
       <div className={cn("fixed inset-y-0 left-0 z-30 w-40 bg-white border-r transition-transform lg:translate-x-0", state === "collapsed" && "-translate-x-full")}>
         <div className="flex flex-col h-full">
           <div className="p-4">
-            <div className="flex items-center gap-3 mb-6">
-              <img src="/lovable-uploads/6a07dd00-f2c7-49da-8b00-48d960c13610.png" alt="Trade Ease Logo" className="w-12 h-12" />
-              <span className="font-semibold text-lg text-gray-900">Trade Ease</span>
+            <div className="flex items-center gap-2 mb-6 mx-0 my-0 py-0 px-[19px]">
+              <img src="/lovable-uploads/6a07dd00-f2c7-49da-8b00-48d960c13610.png" alt="Trade Ease Logo" className="w-8 h-8" />
+              <span className="font-medium text-gray-900">Trade Ease</span>
             </div>
           </div>
           <nav className="flex-1 p-1 space-y-0.5">
