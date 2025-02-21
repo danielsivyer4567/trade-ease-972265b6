@@ -3,15 +3,38 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, Download, FileUp, Zap, Plus, Facebook } from "lucide-react";
+import { ArrowLeft, Download, FileUp, Zap, Plus, Facebook, Search, User } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import type { JobTemplate } from "@/types/job";
+import {
+  Command,
+  CommandDialog,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
 
 export default function NewJob() {
   const [aiPrompt, setAiPrompt] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState<JobTemplate | null>(null);
+  const [isCustomerSearchOpen, setIsCustomerSearchOpen] = useState(false);
+  const [selectedCustomer, setSelectedCustomer] = useState<{
+    id: number;
+    name: string;
+    email: string;
+  } | null>(null);
+
+  // Mock customers data - in a real app this would come from your backend
+  const customers = [
+    { id: 1, name: "John Smith", email: "john.smith@email.com" },
+    { id: 2, name: "Sarah Johnson", email: "sarah.j@email.com" },
+    { id: 3, name: "Michael Brown", email: "michael.b@email.com" },
+  ];
+
   const templates: JobTemplate[] = [{
     id: "1",
     title: "Basic Plumbing Service",
@@ -75,6 +98,41 @@ export default function NewJob() {
             Join our Trade Community
           </a>
         </div>
+
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle>Select Customer</CardTitle>
+            <CardDescription>Choose a customer for this job</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {selectedCustomer ? (
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <User className="h-4 w-4 text-gray-500" />
+                  <div className="text-sm">
+                    <div className="font-medium">{selectedCustomer.name}</div>
+                    <div className="text-gray-500">{selectedCustomer.email}</div>
+                  </div>
+                </div>
+                <Button 
+                  variant="outline"
+                  onClick={() => setIsCustomerSearchOpen(true)}
+                >
+                  Change Customer
+                </Button>
+              </div>
+            ) : (
+              <Button 
+                variant="outline" 
+                className="w-full"
+                onClick={() => setIsCustomerSearchOpen(true)}
+              >
+                <Search className="h-4 w-4 mr-2" />
+                Search for a customer
+              </Button>
+            )}
+          </CardContent>
+        </Card>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-6">
@@ -166,6 +224,30 @@ export default function NewJob() {
             </Card>
           </div>
         </div>
+
+        <CommandDialog open={isCustomerSearchOpen} onOpenChange={setIsCustomerSearchOpen}>
+          <CommandInput placeholder="Search customers..." />
+          <CommandList>
+            <CommandEmpty>No customers found.</CommandEmpty>
+            <CommandGroup heading="Customers">
+              {customers.map((customer) => (
+                <CommandItem
+                  key={customer.id}
+                  onSelect={() => {
+                    setSelectedCustomer(customer);
+                    setIsCustomerSearchOpen(false);
+                  }}
+                >
+                  <User className="h-4 w-4 mr-2" />
+                  <div className="flex flex-col">
+                    <span>{customer.name}</span>
+                    <span className="text-sm text-gray-500">{customer.email}</span>
+                  </div>
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          </CommandList>
+        </CommandDialog>
       </div>
     </AppLayout>
   );
