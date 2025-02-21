@@ -125,12 +125,6 @@ export function TeamCalendar({ date, setDate, teamColor }: TeamCalendarProps) {
             caption: "flex justify-center py-4 relative items-center text-lg font-semibold"
           }}
         />
-        <div className="mt-6">
-          <WeatherChart 
-            selectedDate={date} 
-            onRainyDateHighlight={handleRainyDateHighlight}
-          />
-        </div>
       </div>
     </section>
   );
