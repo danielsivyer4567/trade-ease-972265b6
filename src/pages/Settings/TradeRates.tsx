@@ -1,45 +1,17 @@
 
 import { AppLayout } from "@/components/ui/AppLayout";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { 
-  DollarSign, ArrowLeft, Clock, Users, Percent, Box, 
-  Ruler, Package, Calculator, Equal 
-} from "lucide-react";
 import { Link } from "react-router-dom";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
+import { DollarSign, ArrowLeft, Clock, Box, Ruler, Package, Percent } from "lucide-react";
 import { useState } from "react";
 import { useToast } from "@/components/ui/use-toast";
-
-interface Rate {
-  id: string;
-  name: string;
-  rate: number;
-  unit: string;
-}
-
-interface CommissionRate {
-  id: string;
-  staffName: string;
-  percentage: number;
-  minimumSale: number;
-}
-
-interface Staff {
-  id: string;
-  name: string;
-}
-
-interface Calculation {
-  rateType: string;
-  rateName: string;
-  rate: number;
-  quantity: number;
-  subtotal: number;
-  gst: number;
-  total: number;
-}
+import { Rate, CommissionRate, Staff, Calculation } from "./types";
+import { StaffSelector } from "./components/StaffSelector";
+import { RateEditor } from "./components/RateEditor";
+import { CommissionRateEditor } from "./components/CommissionRateEditor";
+import { RateCalculator } from "./components/RateCalculator";
+import { CalculationResult } from "./components/CalculationResult";
 
 export default function TradeRates() {
   const [squareMeterRates, setSquareMeterRates] = useState<Rate[]>([
@@ -58,7 +30,6 @@ export default function TradeRates() {
     { id: "1", staffName: "Sales Team A", percentage: 10, minimumSale: 1000 }
   ]);
   const [selectedStaff, setSelectedStaff] = useState<Staff | null>(null);
-  const [quantity, setQuantity] = useState<number>(0);
   const [selectedRate, setSelectedRate] = useState<Rate | null>(null);
   const [calculation, setCalculation] = useState<Calculation | null>(null);
 
@@ -107,44 +78,6 @@ export default function TradeRates() {
     setCommissionRates([...commissionRates, newRate]);
   };
 
-  const calculateTotal = () => {
-    if (!selectedRate || !quantity) {
-      toast({
-        title: "Error",
-        description: "Please select a rate and enter a quantity",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    const subtotal = selectedRate.rate * quantity;
-    const gst = subtotal * 0.1; // 10% GST
-    const total = subtotal + gst;
-
-    setCalculation({
-      rateType: selectedRate.unit,
-      rateName: selectedRate.name,
-      rate: selectedRate.rate,
-      quantity,
-      subtotal,
-      gst,
-      total,
-    });
-
-    toast({
-      title: "Calculation Complete",
-      description: "The total has been calculated with GST",
-    });
-  };
-
-  const handleRateSelect = (rate: Rate) => {
-    setSelectedRate(rate);
-    toast({
-      title: "Rate Selected",
-      description: `Selected ${rate.name} at $${rate.rate} ${rate.unit}`,
-    });
-  };
-
   const staffMembers: Staff[] = [
     { id: "1", name: "John Smith" },
     { id: "2", name: "Sarah Johnson" },
@@ -165,32 +98,17 @@ export default function TradeRates() {
           <Button onClick={handleSave}>Save Changes</Button>
         </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Users className="h-5 w-5" />
-              Select Staff Member
-            </CardTitle>
-            <CardDescription>Choose a staff member to calculate their rates</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {staffMembers.map((staff) => (
-                <Button
-                  key={staff.id}
-                  variant={selectedStaff?.id === staff.id ? "default" : "outline"}
-                  onClick={() => setSelectedStaff(staff)}
-                >
-                  {staff.name}
-                </Button>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+        <StaffSelector
+          staffMembers={staffMembers}
+          selectedStaff={selectedStaff}
+          onSelectStaff={setSelectedStaff}
+        />
 
         {selectedStaff && (
           <>
-            <Tabs defaultValue="square" className="w-full">
+            <Tabs defaultValue="square" className="w
+
+-full">
               <TabsList className="grid w-full grid-cols-6">
                 <TabsTrigger value="square" className="flex items-center gap-2">
                   <Box className="h-4 w-4" />
@@ -215,309 +133,72 @@ export default function TradeRates() {
               </TabsList>
 
               <TabsContent value="square">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Square Meter Rates (m²)</CardTitle>
-                    <CardDescription>Set rates based on square meter measurements</CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    {squareMeterRates.map((rate) => (
-                      <div key={rate.id} className="grid grid-cols-3 gap-4">
-                        <Input
-                          placeholder="Rate Name"
-                          value={rate.name}
-                          onChange={(e) => {
-                            const updatedRates = squareMeterRates.map(r =>
-                              r.id === rate.id ? { ...r, name: e.target.value } : r
-                            );
-                            setSquareMeterRates(updatedRates);
-                          }}
-                        />
-                        <Input
-                          type="number"
-                          placeholder="Rate Amount"
-                          value={rate.rate}
-                          onChange={(e) => {
-                            const updatedRates = squareMeterRates.map(r =>
-                              r.id === rate.id ? { ...r, rate: Number(e.target.value) } : r
-                            );
-                            setSquareMeterRates(updatedRates);
-                          }}
-                        />
-                        <Button 
-                          variant={selectedRate?.id === rate.id ? "default" : "outline"}
-                          onClick={() => handleRateSelect(rate)}
-                        >
-                          Select Rate
-                        </Button>
-                      </div>
-                    ))}
-                    <Button variant="outline" onClick={() => addNewRate('square')}>
-                      Add Square Meter Rate
-                    </Button>
-                  </CardContent>
-                </Card>
+                <RateEditor
+                  title="Square Meter Rates (m²)"
+                  description="Set rates based on square meter measurements"
+                  rates={squareMeterRates}
+                  onUpdateRates={setSquareMeterRates}
+                  onSelectRate={setSelectedRate}
+                  selectedRate={selectedRate}
+                  onAddRate={() => addNewRate('square')}
+                  addButtonText="Add Square Meter Rate"
+                />
               </TabsContent>
 
               <TabsContent value="lineal">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Lineal Meter Rates</CardTitle>
-                    <CardDescription>Set rates based on lineal meter measurements</CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    {linealMeterRates.map((rate) => (
-                      <div key={rate.id} className="grid grid-cols-3 gap-4">
-                        <Input
-                          placeholder="Rate Name"
-                          value={rate.name}
-                          onChange={(e) => {
-                            const updatedRates = linealMeterRates.map(r =>
-                              r.id === rate.id ? { ...r, name: e.target.value } : r
-                            );
-                            setLinealMeterRates(updatedRates);
-                          }}
-                        />
-                        <Input
-                          type="number"
-                          placeholder="Rate Amount"
-                          value={rate.rate}
-                          onChange={(e) => {
-                            const updatedRates = linealMeterRates.map(r =>
-                              r.id === rate.id ? { ...r, rate: Number(e.target.value) } : r
-                            );
-                            setLinealMeterRates(updatedRates);
-                          }}
-                        />
-                        <Button 
-                          variant={selectedRate?.id === rate.id ? "default" : "outline"}
-                          onClick={() => handleRateSelect(rate)}
-                        >
-                          Select Rate
-                        </Button>
-                      </div>
-                    ))}
-                    <Button variant="outline" onClick={() => addNewRate('lineal')}>
-                      Add Lineal Meter Rate
-                    </Button>
-                  </CardContent>
-                </Card>
+                <RateEditor
+                  title="Lineal Meter Rates"
+                  description="Set rates based on lineal meter measurements"
+                  rates={linealMeterRates}
+                  onUpdateRates={setLinealMeterRates}
+                  onSelectRate={setSelectedRate}
+                  selectedRate={selectedRate}
+                  onAddRate={() => addNewRate('lineal')}
+                  addButtonText="Add Lineal Meter Rate"
+                />
               </TabsContent>
 
               <TabsContent value="item">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Per Item Rates</CardTitle>
-                    <CardDescription>Set rates based on individual items</CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    {itemRates.map((rate) => (
-                      <div key={rate.id} className="grid grid-cols-3 gap-4">
-                        <Input
-                          placeholder="Rate Name"
-                          value={rate.name}
-                          onChange={(e) => {
-                            const updatedRates = itemRates.map(r =>
-                              r.id === rate.id ? { ...r, name: e.target.value } : r
-                            );
-                            setItemRates(updatedRates);
-                          }}
-                        />
-                        <Input
-                          type="number"
-                          placeholder="Rate Amount"
-                          value={rate.rate}
-                          onChange={(e) => {
-                            const updatedRates = itemRates.map(r =>
-                              r.id === rate.id ? { ...r, rate: Number(e.target.value) } : r
-                            );
-                            setItemRates(updatedRates);
-                          }}
-                        />
-                        <Button 
-                          variant={selectedRate?.id === rate.id ? "default" : "outline"}
-                          onClick={() => handleRateSelect(rate)}
-                        >
-                          Select Rate
-                        </Button>
-                      </div>
-                    ))}
-                    <Button variant="outline" onClick={() => addNewRate('item')}>
-                      Add Item Rate
-                    </Button>
-                  </CardContent>
-                </Card>
+                <RateEditor
+                  title="Per Item Rates"
+                  description="Set rates based on individual items"
+                  rates={itemRates}
+                  onUpdateRates={setItemRates}
+                  onSelectRate={setSelectedRate}
+                  selectedRate={selectedRate}
+                  onAddRate={() => addNewRate('item')}
+                  addButtonText="Add Item Rate"
+                />
               </TabsContent>
 
               <TabsContent value="hourly">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Hourly Rates</CardTitle>
-                    <CardDescription>Set rates based on time</CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    {hourlyRates.map((rate) => (
-                      <div key={rate.id} className="grid grid-cols-3 gap-4">
-                        <Input
-                          placeholder="Rate Name"
-                          value={rate.name}
-                          onChange={(e) => {
-                            const updatedRates = hourlyRates.map(r =>
-                              r.id === rate.id ? { ...r, name: e.target.value } : r
-                            );
-                            setHourlyRates(updatedRates);
-                          }}
-                        />
-                        <Input
-                          type="number"
-                          placeholder="Rate Amount"
-                          value={rate.rate}
-                          onChange={(e) => {
-                            const updatedRates = hourlyRates.map(r =>
-                              r.id === rate.id ? { ...r, rate: Number(e.target.value) } : r
-                            );
-                            setHourlyRates(updatedRates);
-                          }}
-                        />
-                        <Button 
-                          variant={selectedRate?.id === rate.id ? "default" : "outline"}
-                          onClick={() => handleRateSelect(rate)}
-                        >
-                          Select Rate
-                        </Button>
-                      </div>
-                    ))}
-                    <Button variant="outline" onClick={() => addNewRate('hourly')}>
-                      Add Hourly Rate
-                    </Button>
-                  </CardContent>
-                </Card>
+                <RateEditor
+                  title="Hourly Rates"
+                  description="Set rates based on time"
+                  rates={hourlyRates}
+                  onUpdateRates={setHourlyRates}
+                  onSelectRate={setSelectedRate}
+                  selectedRate={selectedRate}
+                  onAddRate={() => addNewRate('hourly')}
+                  addButtonText="Add Hourly Rate"
+                />
               </TabsContent>
 
               <TabsContent value="commission">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Commission Rates</CardTitle>
-                    <CardDescription>Set commission-based rates for sales staff</CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    {commissionRates.map((rate) => (
-                      <div key={rate.id} className="grid grid-cols-3 gap-4">
-                        <Input
-                          placeholder="Staff Name"
-                          value={rate.staffName}
-                          onChange={(e) => {
-                            const updatedRates = commissionRates.map(r =>
-                              r.id === rate.id ? { ...r, staffName: e.target.value } : r
-                            );
-                            setCommissionRates(updatedRates);
-                          }}
-                        />
-                        <Input
-                          type="number"
-                          placeholder="Commission %"
-                          value={rate.percentage}
-                          onChange={(e) => {
-                            const updatedRates = commissionRates.map(r =>
-                              r.id === rate.id ? { ...r, percentage: Number(e.target.value) } : r
-                            );
-                            setCommissionRates(updatedRates);
-                          }}
-                        />
-                        <Input
-                          type="number"
-                          placeholder="Minimum Sale"
-                          value={rate.minimumSale}
-                          onChange={(e) => {
-                            const updatedRates = commissionRates.map(r =>
-                              r.id === rate.id ? { ...r, minimumSale: Number(e.target.value) } : r
-                            );
-                            setCommissionRates(updatedRates);
-                          }}
-                        />
-                      </div>
-                    ))}
-                    <Button variant="outline" onClick={addNewCommissionRate}>
-                      Add Commission Rate
-                    </Button>
-                  </CardContent>
-                </Card>
+                <CommissionRateEditor
+                  rates={commissionRates}
+                  onUpdateRates={setCommissionRates}
+                  onAddRate={addNewCommissionRate}
+                />
               </TabsContent>
             </Tabs>
 
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Calculator className="h-5 w-5" />
-                  Calculate Rate
-                </CardTitle>
-                <CardDescription>Enter quantity and calculate total with GST</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="text-sm font-medium">Selected Rate</label>
-                    <Input
-                      value={selectedRate?.name || ""}
-                      placeholder="Click a rate above"
-                      readOnly
-                      className="bg-gray-50"
-                    />
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium">Quantity</label>
-                    <Input
-                      type="number"
-                      value={quantity}
-                      onChange={(e) => setQuantity(Number(e.target.value))}
-                      placeholder="Enter quantity"
-                    />
-                  </div>
-                </div>
-                <Button onClick={calculateTotal} className="w-full">
-                  Calculate Total
-                </Button>
-              </CardContent>
-            </Card>
+            <RateCalculator
+              selectedRate={selectedRate}
+              onCalculate={setCalculation}
+            />
 
-            {calculation && (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Equal className="h-5 w-5" />
-                    Calculation Result
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-2">
-                    <div className="grid grid-cols-2 gap-2">
-                      <span className="text-gray-600">Rate Type:</span>
-                      <span>{calculation.rateType}</span>
-                    </div>
-                    <div className="grid grid-cols-2 gap-2">
-                      <span className="text-gray-600">Rate:</span>
-                      <span>${calculation.rate.toFixed(2)}</span>
-                    </div>
-                    <div className="grid grid-cols-2 gap-2">
-                      <span className="text-gray-600">Quantity:</span>
-                      <span>{calculation.quantity}</span>
-                    </div>
-                    <div className="grid grid-cols-2 gap-2">
-                      <span className="text-gray-600">Subtotal:</span>
-                      <span>${calculation.subtotal.toFixed(2)}</span>
-                    </div>
-                    <div className="grid grid-cols-2 gap-2">
-                      <span className="text-gray-600">GST (10%):</span>
-                      <span>${calculation.gst.toFixed(2)}</span>
-                    </div>
-                    <div className="grid grid-cols-2 gap-2 text-lg font-bold">
-                      <span>Total:</span>
-                      <span>${calculation.total.toFixed(2)}</span>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
+            {calculation && <CalculationResult calculation={calculation} />}
           </>
         )}
       </div>
