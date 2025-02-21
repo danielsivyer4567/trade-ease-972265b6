@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { Calendar } from '@/components/ui/calendar';
 import { Droplet } from 'lucide-react';
+import { WeatherChart } from './WeatherChart';
 
 interface TeamCalendarProps {
   date: Date | undefined;
@@ -18,17 +19,16 @@ export function TeamCalendar({ date, setDate, teamColor }: TeamCalendarProps) {
   const [rainyDates, setRainyDates] = useState<RainData[]>([]);
 
   const handleRainyDateHighlight = (dates: string[]) => {
+    const weatherData = [
+      { date: '2024-03-18', rainfall: 0 },
+      { date: '2024-03-19', rainfall: 5 },
+      { date: '2024-03-20', rainfall: 12 },
+      { date: '2024-03-21', rainfall: 8 },
+      { date: '2024-03-22', rainfall: 0 },
+      { date: '2024-03-23', rainfall: 3 },
+      { date: '2024-03-24', rainfall: 15 },
+    ];
     const rainData = dates.map(date => {
-      // Get rainfall amount from weather data
-      const weatherData = [
-        { date: '2024-03-18', rainfall: 0 },
-        { date: '2024-03-19', rainfall: 5 },
-        { date: '2024-03-20', rainfall: 12 },
-        { date: '2024-03-21', rainfall: 8 },
-        { date: '2024-03-22', rainfall: 0 },
-        { date: '2024-03-23', rainfall: 3 },
-        { date: '2024-03-24', rainfall: 15 },
-      ];
       const dayData = weatherData.find(d => d.date === date);
       return {
         date,
@@ -65,7 +65,7 @@ export function TeamCalendar({ date, setDate, teamColor }: TeamCalendarProps) {
             DayContent: ({ date }) => {
               const dateStr = date.toISOString().split('T')[0];
               const rainData = rainyDates.find(rd => rd.date === dateStr);
-              const isRainy = !!rainData;
+              const isRainy = !!rainData && rainData.amount > 0;
               
               return (
                 <div className="relative w-full h-full flex items-center justify-center">
@@ -99,6 +99,12 @@ export function TeamCalendar({ date, setDate, teamColor }: TeamCalendarProps) {
             caption: "flex justify-center py-4 relative items-center text-lg font-semibold"
           }}
         />
+        <div className="mt-6">
+          <WeatherChart 
+            selectedDate={date} 
+            onRainyDateHighlight={handleRainyDateHighlight}
+          />
+        </div>
       </div>
     </section>
   );
