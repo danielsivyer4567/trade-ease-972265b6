@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
@@ -36,10 +37,14 @@ export function WeatherChart({ selectedDate, onRainyDateHighlight }: WeatherChar
             dataKey="precipitation"
             stroke="#8884d8"
             strokeWidth={2}
-            dot={{ 
-              fill: (entry: any) => entry.date === selectedDate ? '#ff0000' : '#8884d8',
-              r: (entry: any) => entry.date === selectedDate ? 6 : 4
-            }}
+            dot={{
+              fill: function(entry) {
+                return entry.date === selectedDate ? '#ff0000' : '#8884d8';
+              },
+              r: function(entry) {
+                return entry.date === selectedDate ? 6 : 4;
+              }
+            } as any}
             onMouseEnter={handleMouseEnter}
           />
         </LineChart>
