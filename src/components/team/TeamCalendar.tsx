@@ -13,16 +13,10 @@ export function TeamCalendar({ date, setDate, teamColor }: TeamCalendarProps) {
     <section>
       <div className="bg-white p-6 rounded-lg shadow-md">
         <Calendar 
-          mode="single"
-          selected={date}
-          onSelect={setDate}
+          mode="single" 
+          selected={date} 
+          onSelect={setDate} 
           className="w-full"
-          initialFocus
-          weekStartsOn={1}
-          showWeekNumber
-          ISOWeek
-          numberOfMonths={1}
-          view="week"
           classNames={{
             months: "w-full",
             month: "w-full",
