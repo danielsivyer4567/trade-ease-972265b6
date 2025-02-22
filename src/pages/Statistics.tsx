@@ -10,6 +10,7 @@ const teamData = [
     name: 'Red Team',
     gross: 145000,
     net: 98000,
+    invoiced: 168000,
     defects: 12,
     color: '#ef4444'
   },
@@ -17,6 +18,7 @@ const teamData = [
     name: 'Blue Team',
     gross: 165000,
     net: 120000,
+    invoiced: 182000,
     defects: 8,
     color: '#3b82f6'
   },
@@ -24,6 +26,7 @@ const teamData = [
     name: 'Green Team',
     gross: 158000,
     net: 110000,
+    invoiced: 175000,
     defects: 5,
     color: '#22c55e'
   }
@@ -63,6 +66,7 @@ export default function StatisticsPage() {
                   <YAxis yAxisId="right" orientation="right" />
                   <Tooltip />
                   <Legend />
+                  <Bar yAxisId="left" dataKey="invoiced" name="Total Invoiced ($)" fill="#9333ea" />
                   <Bar yAxisId="left" dataKey="gross" name="Gross Revenue ($)" fill="#8884d8" />
                   <Bar yAxisId="left" dataKey="net" name="Net Revenue ($)" fill="#82ca9d" />
                   <Bar yAxisId="right" dataKey="defects" name="Defect Tasks" fill="#ffc658" />
@@ -84,12 +88,22 @@ export default function StatisticsPage() {
               <CardContent>
                 <dl className="space-y-2">
                   <div className="flex justify-between">
+                    <dt className="font-medium text-gray-500">Total Invoiced</dt>
+                    <dd className="text-gray-900">${team.invoiced.toLocaleString()}</dd>
+                  </div>
+                  <div className="flex justify-between">
                     <dt className="font-medium text-gray-500">Gross Revenue</dt>
                     <dd className="text-gray-900">${team.gross.toLocaleString()}</dd>
                   </div>
                   <div className="flex justify-between">
                     <dt className="font-medium text-gray-500">Net Revenue</dt>
                     <dd className="text-gray-900">${team.net.toLocaleString()}</dd>
+                  </div>
+                  <div className="flex justify-between">
+                    <dt className="font-medium text-gray-500">Collection Rate</dt>
+                    <dd className="text-gray-900">
+                      {Math.round((team.gross / team.invoiced) * 100)}%
+                    </dd>
                   </div>
                   <div className="flex justify-between">
                     <dt className="font-medium text-gray-500">Profit Margin</dt>
