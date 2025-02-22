@@ -46,9 +46,6 @@ export default function TeamGreen() {
         ...prev,
         [type]: prev[type] + event.target.files!.length
       }));
-      if (selectedTeamMember) {
-        console.log(`Notifying team member ${selectedTeamMember} about new ${type} document upload`);
-      }
     }
   };
 

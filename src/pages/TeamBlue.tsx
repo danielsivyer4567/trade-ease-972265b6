@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { AppLayout } from '@/components/ui/AppLayout';
 import { TeamHeader } from '@/components/team/TeamHeader';
 import { TeamCalendar } from '@/components/team/TeamCalendar';
@@ -46,9 +46,6 @@ export default function TeamBlue() {
         ...prev,
         [type]: prev[type] + event.target.files!.length
       }));
-      if (selectedTeamMember) {
-        console.log(`Notifying team member ${selectedTeamMember} about new ${type} document upload`);
-      }
     }
   };
 

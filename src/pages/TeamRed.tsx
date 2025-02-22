@@ -1,9 +1,6 @@
 
 import React, { useState } from 'react';
 import { AppLayout } from "@/components/ui/AppLayout";
-import { format } from 'date-fns';
-import { Calendar } from "@/components/ui/calendar";
-import { WeatherChart } from "@/components/team/WeatherChart";
 import { DocumentSummary } from "@/components/team/DocumentSummary";
 import { DocumentUpload } from "@/components/team/DocumentUpload";
 import { IncidentReports } from "@/components/team/IncidentReports";
@@ -17,38 +14,22 @@ interface TeamMember {
   name: string;
 }
 
-interface IncidentReport {
-  type: string;
-  location: string;
-  date: string;
-  severity: string;
-  description: string;
-}
-
 export default function TeamRed() {
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
-  const [highlightedDate, setHighlightedDate] = useState("");
+  const [date, setDate] = useState<Date | undefined>(new Date());
   const [selectedTeamMember, setSelectedTeamMember] = useState("");
-  const [date, setDate] = useState(new Date());
-  const [incidentReport, setIncidentReport] = useState<IncidentReport>({
-    type: "",
-    location: "",
-    date: "",
-    severity: "low",
-    description: ""
+  const [jobNumber, setJobNumber] = useState("");
+  const [documentCount, setDocumentCount] = useState({
+    insurance: 0,
+    general: 0,
+    jobRelated: 0
   });
-
-  const handleDateSelect = (date: Date | undefined) => {
-    setSelectedDate(date);
-  };
-
-  const handleRainyDateHighlight = (date: string) => {
-    setHighlightedDate(date);
-  };
-
-  const handleIncidentSubmit = (data: any) => {
-    console.log("Incident submitted:", data);
-  };
+  const [incidentReport, setIncidentReport] = useState({
+    type: "",
+    description: "",
+    location: "",
+    date: new Date(),
+    severity: ""
+  });
 
   const teamMembers: TeamMember[] = [
     { id: "1", name: "John Doe" },
@@ -56,68 +37,59 @@ export default function TeamRed() {
     { id: "3", name: "Bob Johnson" }
   ];
 
-  const teamColor = "red";
-  const jobNumber = "JOB-001";
-  const documentSummary = {
-    insurance: 2,
-    general: 1,
-    jobRelated: 2
+  const handleIncidentSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    console.log('Incident Report Submitted:', incidentReport);
+  };
+
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>, type: 'insurance' | 'general' | 'jobRelated') => {
+    if (event.target.files && event.target.files.length > 0) {
+      setDocumentCount(prev => ({
+        ...prev,
+        [type]: prev[type] + event.target.files!.length
+      }));
+    }
   };
 
   return (
     <AppLayout>
-      <div className="p-6 space-y-6">
-        <TeamHeader teamName="Red Team" teamColor={teamColor} />
+      <div className="space-y-8">
+        <TeamHeader teamName="Red Team" />
         
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <div className="space-y-6">
-            <JobsOverview />
-            <DocumentUpload 
+        <TeamCalendar 
+          date={date}
+          setDate={setDate}
+          teamColor="red"
+        />
+
+        <JobsOverview />
+
+        <section>
+          <h2 className="text-xl font-semibold mb-4 text-zinc-950">Document Management</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <DocumentUpload
               teamMembers={teamMembers}
               selectedTeamMember={selectedTeamMember}
               setSelectedTeamMember={setSelectedTeamMember}
               jobNumber={jobNumber}
-              teamColor={teamColor}
-              onUpload={() => {}}
-            />
-          </div>
-          
-          <div className="space-y-6">
-            <TeamCalendar
-              date={date}
-              setDate={setDate}
-              teamColor={teamColor}
-            />
-            <TeamTimeOff teamColor={teamColor} />
-          </div>
-          
-          <div className="space-y-6">
-            <IncidentReports
-              teamColor={teamColor}
-              incidentReport={incidentReport}
-              setIncidentReport={setIncidentReport}
-              handleIncidentSubmit={handleIncidentSubmit}
+              setJobNumber={setJobNumber}
+              handleFileUpload={handleFileUpload}
             />
             <DocumentSummary
-              documentCount={documentSummary}
-              teamColor={teamColor}
+              documentCount={documentCount}
+              teamColor="red"
             />
           </div>
-        </div>
+        </section>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <Calendar
-            mode="single"
-            selected={selectedDate}
-            onSelect={handleDateSelect}
-            className="rounded-md border"
-          />
-          
-          <WeatherChart
-            selectedDate={selectedDate ? format(selectedDate, 'yyyy-MM-dd') : ''}
-            onRainyDateHighlight={handleRainyDateHighlight}
-          />
-        </div>
+        <TeamTimeOff teamColor="red" />
+
+        <IncidentReports
+          teamColor="red"
+          incidentReport={incidentReport}
+          setIncidentReport={setIncidentReport}
+          handleIncidentSubmit={handleIncidentSubmit}
+        />
       </div>
     </AppLayout>
   );
