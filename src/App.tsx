@@ -15,6 +15,7 @@ import Notifications from "./pages/Notifications";
 import Customers from "./pages/Customers";
 import NewCustomer from "./pages/Customers/NewCustomer";
 import CustomerDetail from "./pages/Customers/CustomerDetail";
+import NewPayment from "./pages/Payments/NewPayment";
 import NotFound from "./pages/NotFound";
 import "./App.css";
 
@@ -37,6 +38,7 @@ function App() {
         <Route path="/customers" element={<Customers />} />
         <Route path="/customers/new" element={<NewCustomer />} />
         <Route path="/customers/:id" element={<CustomerDetail />} />
+        <Route path="/payments/new" element={<NewPayment />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>
