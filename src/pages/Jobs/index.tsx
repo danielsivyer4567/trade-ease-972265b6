@@ -8,38 +8,46 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
 import type { JobTemplate } from "@/types/job";
+
 interface Job {
   id: string;
+  jobNumber: string;
   title: string;
   date: string;
   status: 'ready' | 'in-progress' | 'to-invoice' | 'invoiced';
   customer: string;
 }
+
 const mockJobs: Job[] = [{
   id: '1',
+  jobNumber: 'job-001',
   title: 'Water Heater Installation',
   date: '2024-03-15',
   status: 'ready',
   customer: 'John Smith'
 }, {
   id: '2',
+  jobNumber: 'job-002',
   title: 'HVAC Maintenance',
   date: '2024-03-14',
   status: 'in-progress',
   customer: 'Sarah Johnson'
 }, {
   id: '3',
+  jobNumber: 'job-003',
   title: 'Electrical Panel Upgrade',
   date: '2024-03-13',
   status: 'to-invoice',
   customer: 'Mike Brown'
 }, {
   id: '4',
+  jobNumber: 'job-004',
   title: 'Plumbing Repair',
   date: '2024-03-12',
   status: 'invoiced',
   customer: 'Emily Davis'
 }];
+
 const categories = [{
   name: "Plumbing",
   icon: Wrench,
@@ -53,6 +61,7 @@ const categories = [{
   icon: Wind,
   color: "text-green-500"
 }];
+
 export default function Jobs() {
   const navigate = useNavigate();
   const {
@@ -69,6 +78,7 @@ export default function Jobs() {
     if (!searchQuery) return true;
     return template.title.toLowerCase().includes(searchQuery.toLowerCase());
   });
+
   const generateTemplate = async () => {
     if (!jobDescription.trim()) {
       toast({
@@ -115,6 +125,7 @@ export default function Jobs() {
       setIsGenerating(false);
     }
   };
+
   const parseTextTemplate = (text: string): JobTemplate => {
     const lines = text.split('\n').map(line => line.trim());
     const template: JobTemplate = {
@@ -127,6 +138,7 @@ export default function Jobs() {
     };
     return template;
   };
+
   const parseCSVTemplate = (csvContent: string): JobTemplate => {
     const rows = csvContent.split('\n').map(row => row.split(',').map(cell => cell.trim()));
     const headers = rows[0].map(header => header.toLowerCase());
@@ -145,6 +157,7 @@ export default function Jobs() {
       category: (getColumnValue('category') || "Plumbing") as "Plumbing" | "Electrical" | "HVAC"
     };
   };
+
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -224,6 +237,7 @@ export default function Jobs() {
       reader.readAsText(file);
     }
   };
+
   const createBlankTemplate = () => {
     const blankTemplate: JobTemplate = {
       id: crypto.randomUUID(),
@@ -239,6 +253,7 @@ export default function Jobs() {
       description: "Blank template created"
     });
   };
+
   const attachToJob = (template: JobTemplate) => {
     toast({
       title: "Template Attached",
@@ -247,6 +262,7 @@ export default function Jobs() {
     localStorage.setItem('selectedTemplate', JSON.stringify(template));
     navigate('/jobs/new');
   };
+
   const updateJobStatus = (jobId: string, newStatus: Job['status']) => {
     setJobs(currentJobs => currentJobs.map(job => job.id === jobId ? {
       ...job,
@@ -257,6 +273,7 @@ export default function Jobs() {
       description: `Job status has been updated successfully`
     });
   };
+
   const getStatusIcon = (status: Job['status']) => {
     switch (status) {
       case 'ready':
@@ -271,6 +288,7 @@ export default function Jobs() {
         return null;
     }
   };
+
   return <AppLayout>
       <div className="space-y-6 p-6">
         <div>
@@ -280,6 +298,9 @@ export default function Jobs() {
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50 sticky top-0">
                   <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Job Number
+                    </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Job
                     </th>
@@ -299,6 +320,9 @@ export default function Jobs() {
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
                   {jobs.map(job => <tr key={job.id} className="hover:bg-gray-50">
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm font-mono text-gray-900">{job.jobNumber}</div>
+                      </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm font-medium text-gray-900">{job.title}</div>
                       </td>
@@ -330,8 +354,6 @@ export default function Jobs() {
             </div>
           </div>
         </div>
-
-        
 
         <div>
           <h2 className="text-2xl font-semibold mb-4">Template Library</h2>
