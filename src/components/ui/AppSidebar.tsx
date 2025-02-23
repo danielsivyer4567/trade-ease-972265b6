@@ -4,13 +4,21 @@ import { LayoutDashboard, Briefcase, Users, FileText, Settings, Menu, Calendar, 
 import { useSidebar } from './sidebar';
 import { cn } from '@/lib/utils';
 import { Button } from './button';
+
 export function AppSidebar() {
+  const [teams, setTeams] = React.useState([
+    { name: 'Red Team', color: 'red', path: '/team-red' },
+    { name: 'Blue Team', color: 'blue', path: '/team-blue' },
+    { name: 'Green Team', color: 'green', path: '/team-green' }
+  ]);
+
   const {
     state,
     toggleSidebar
   } = useSidebar();
   const location = useLocation();
   const notificationCount = 3;
+
   return <>
       <Button variant="outline" size="icon" className="fixed left-4 top-4 z-40 lg:hidden" onClick={toggleSidebar}>
         <Menu />
@@ -21,11 +29,8 @@ export function AppSidebar() {
             <div className="flex items-center gap-3 mb-6 px-0 py-px my-0 mx-0">
               <img src="/lovable-uploads/6a07dd00-f2c7-49da-8b00-48d960c13610.png" alt="Trade Ease Logo" className="w-12 h-12" />
               <span className="font-semibold text-lg text-gray-900 my-0 text-right px-0 py-[5px] mx-0">
-
-
-
-Trade Ease
-            </span>
+                Trade Ease
+              </span>
             </div>
           </div>
           <nav className="flex-1 p-1 space-y-0.5">
@@ -101,20 +106,31 @@ Trade Ease
 
             {/* Teams Section */}
             <div className="pt-8">
-              <div className="mb-1 text-sm font-bold text-black rounded-2xl my-0 py-[7px] px-px mx-1">Teams view</div>
-              <Link to="/team-red" className="flex items-center gap-1.5 p-1.5 rounded-lg hover:bg-red-50 text-red-600 hover:text-red-700 text-sm">
-                <Hammer className="w-3.5 h-3.5" />
-                Red Team
-              </Link>
-              <Link to="/team-blue" className="flex items-center gap-1.5 p-1.5 rounded-lg hover:bg-blue-50 text-blue-600 hover:text-blue-700 text-sm">
-                <Hammer className="w-3.5 h-3.5" />
-                Blue Team
-              </Link>
-              <Link to="/team-green" className="flex items-center gap-1.5 p-1.5 rounded-lg hover:bg-green-50 text-green-600 hover:text-green-700 text-sm">
-                <Hammer className="w-3.5 h-3.5" />
-                Green Team
-              </Link>
-              <Button variant="ghost" size="sm" className="w-full flex items-center gap-1.5 p-1.5 text-gray-600 hover:text-gray-700 hover:bg-gray-50 text-sm mt-1">
+              <div className="mb-1 text-sm font-bold text-black rounded-2xl my-0 py-[7px] px-px mx-1">
+                Teams view
+              </div>
+              {teams.map((team) => (
+                <Link 
+                  key={team.name}
+                  to={team.path} 
+                  className={cn(
+                    `flex items-center gap-1.5 p-1.5 rounded-lg`,
+                    `hover:bg-${team.color}-50 text-${team.color}-600 hover:text-${team.color}-700 text-sm`
+                  )}
+                >
+                  <Hammer className="w-3.5 h-3.5" />
+                  {team.name}
+                </Link>
+              ))}
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="w-full flex items-center gap-1.5 p-1.5 text-gray-600 hover:text-gray-700 hover:bg-gray-50 text-sm mt-1"
+                onClick={() => {
+                  // This button's click handler will be managed by the Index page
+                  // since that's where we maintain the teams state
+                }}
+              >
                 <Plus className="w-3.5 h-3.5" />
                 Add Team
               </Button>

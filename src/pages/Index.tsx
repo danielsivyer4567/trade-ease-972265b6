@@ -7,6 +7,7 @@ import type { Job } from "@/types/job";
 import { TeamCalendar } from '@/components/team/TeamCalendar';
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
 const stats = [{
   title: "Active Jobs",
@@ -92,50 +93,88 @@ const quoteStatuses = [{
 const teamColors = {
   plumbing: {
     light: '#D3E4FD',
-    // Soft Blue
     primary: '#0EA5E9',
-    // Ocean Blue
-    text: '#1E293B' // Dark Blue/Gray
+    text: '#1E293B'
   },
   electrical: {
     light: '#E5DEFF',
-    // Soft Purple
     primary: '#9B87F5',
-    // Primary Purple
-    text: '#1A1F2C' // Dark Purple
+    text: '#1A1F2C'
   },
   hvac: {
     light: '#F2FCE2',
-    // Soft Green
     primary: '#22C55E',
-    // Emerald Green
-    text: '#14532D' // Dark Green
+    text: '#14532D'
   },
   carpentry: {
     light: '#FEF7CD',
-    // Soft Yellow
     primary: '#EAB308',
-    // Yellow
-    text: '#713F12' // Dark Brown
+    text: '#713F12'
   },
   painting: {
     light: '#FFDEE2',
-    // Soft Pink
     primary: '#EC4899',
-    // Pink
-    text: '#831843' // Dark Pink
+    text: '#831843'
   },
   general: {
     light: '#F1F0FB',
-    // Soft Gray
     primary: '#8E9196',
-    // Neutral Gray
-    text: '#403E43' // Charcoal Gray
+    text: '#403E43'
   }
 };
 
 const Index = () => {
   const [sharedDate, setSharedDate] = React.useState<Date | undefined>(new Date());
+  const [teams, setTeams] = React.useState([
+    { name: 'Red Team', color: 'red' },
+    { name: 'Blue Team', color: 'blue' },
+    { name: 'Green Team', color: 'green' }
+  ]);
+
+  const handleAddTeam = () => {
+    const availableColors = {
+      purple: {
+        light: '#E5DEFF',
+        primary: '#9B87F5',
+        text: '#1A1F2C'
+      },
+      orange: {
+        light: '#FEF7CD',
+        primary: '#F97316',
+        text: '#7C2D12'
+      },
+      pink: {
+        light: '#FFDEE2',
+        primary: '#EC4899',
+        text: '#831843'
+      },
+      teal: {
+        light: '#CCFBF1',
+        primary: '#14B8A6',
+        text: '#134E4A'
+      }
+    };
+
+    const usedColors = teams.map(team => team.color);
+    const availableColorNames = Object.keys(availableColors).filter(color => 
+      !usedColors.includes(color)
+    );
+
+    if (availableColorNames.length > 0) {
+      const newColor = availableColorNames[0];
+      const newTeamNumber = teams.length + 1;
+      const newTeam = {
+        name: `Team ${newTeamNumber}`,
+        color: newColor
+      };
+      
+      setTeams([...teams, newTeam]);
+      toast.success(`Added ${newTeam.name} with ${newColor} color scheme`);
+    } else {
+      toast.error('Maximum number of teams reached');
+    }
+  };
+
   return <AppLayout>
       <div className="space-y-4 md:space-y-6 animate-fadeIn px-2 sm:px-4 md:px-6">
         <div className="flex flex-col items-center justify-center text-center mb-4 md:mb-8">
@@ -292,21 +331,26 @@ const Index = () => {
         <div className="lg:col-span-3">
           <h2 className="text-xl font-semibold mb-4 text-zinc-950">Team Calendars Overview</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-              <h3 className="text-lg font-semibold mb-2 text-red-600">Red Team Calendar</h3>
-              <TeamCalendar date={sharedDate} setDate={setSharedDate} teamColor="red" />
-            </div>
-            <div>
-              <h3 className="text-lg font-semibold mb-2 text-blue-600">Blue Team Calendar</h3>
-              <TeamCalendar date={sharedDate} setDate={setSharedDate} teamColor="blue" />
-            </div>
-            <div>
-              <h3 className="text-lg font-semibold mb-2 text-green-600">Green Team Calendar</h3>
-              <TeamCalendar date={sharedDate} setDate={setSharedDate} teamColor="green" />
-            </div>
+            {teams.map((team) => (
+              <div key={team.name}>
+                <h3 className={`text-lg font-semibold mb-2 text-${team.color}-600`}>
+                  {team.name} Calendar
+                </h3>
+                <TeamCalendar 
+                  date={sharedDate} 
+                  setDate={setSharedDate} 
+                  teamColor={team.color} 
+                />
+              </div>
+            ))}
           </div>
           <div className="flex justify-center mt-6">
-            <Button variant="outline" size="sm" className="gap-2 text-gray-600 hover:text-gray-800">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="gap-2 text-gray-600 hover:text-gray-800"
+              onClick={handleAddTeam}
+            >
               <Plus className="w-4 h-4" />
               Add Team
             </Button>
