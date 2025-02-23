@@ -1,6 +1,5 @@
 
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import React from 'react';
 import Index from "./pages/Index";
 import NewCustomer from "./pages/Customers/NewCustomer";
 import { Toaster } from "@/components/ui/toaster";
@@ -24,10 +23,10 @@ const router = createBrowserRouter([
 
 function App() {
   return (
-    <React.StrictMode>
+    <>
       <RouterProvider router={router} />
       <Toaster />
-    </React.StrictMode>
+    </>
   );
 }
 
