@@ -1,9 +1,10 @@
+
 import { AppLayout } from "@/components/ui/AppLayout";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Plus, Wrench, Zap, Wind, Loader2, Upload, FileUp, LinkIcon, Clock, CheckCircle, DollarSign, Search } from "lucide-react";
+import { Plus, Wrench, Zap, Wind, Loader2, Upload, FileUp, LinkIcon, Clock, CheckCircle, DollarSign, Search, ListTodo, UserPlus } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
@@ -291,6 +292,76 @@ export default function Jobs() {
 
   return <AppLayout>
       <div className="space-y-6 p-6">
+        <div>
+          <h2 className="text-2xl font-semibold mb-4">To be Assigned</h2>
+          <Card className="p-4 mb-6">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center space-x-2">
+                <ListTodo className="h-5 w-5 text-orange-500" />
+                <span className="font-medium">Unassigned Jobs</span>
+              </div>
+              <Button variant="outline" size="sm" className="flex items-center">
+                <UserPlus className="h-4 w-4 mr-2" />
+                Assign Jobs
+              </Button>
+            </div>
+            <div className="bg-white rounded-lg">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Job Number
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Job
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Customer
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Date Created
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {jobs.filter(job => job.status === 'ready').map(job => (
+                    <tr key={job.id} className="hover:bg-gray-50">
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm font-mono text-gray-900">{job.jobNumber}</div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm font-medium text-gray-900">{job.title}</div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm text-gray-500">{job.customer}</div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm text-gray-500">{job.date}</div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <Button variant="outline" size="sm">
+                          <UserPlus className="h-4 w-4 mr-2" />
+                          Assign
+                        </Button>
+                      </td>
+                    </tr>
+                  ))}
+                  {jobs.filter(job => job.status === 'ready').length === 0 && (
+                    <tr>
+                      <td colSpan={5} className="px-6 py-4 text-center text-gray-500">
+                        No jobs waiting to be assigned
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </Card>
+        </div>
+
         <div>
           <h2 className="text-2xl font-semibold mb-4">Current Jobs</h2>
           <div className="bg-white rounded-lg shadow overflow-hidden">
