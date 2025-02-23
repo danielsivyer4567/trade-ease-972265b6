@@ -12,7 +12,6 @@ import TeamBlue from "./pages/TeamBlue";
 import TeamGreen from "./pages/TeamGreen";
 import Notifications from "./pages/Notifications";
 import Customers from "./pages/Customers";
-import CustomerDetail from "./pages/Customers/CustomerDetail";
 import NotFound from "./pages/NotFound";
 import "./App.css";
 
@@ -32,7 +31,6 @@ function App() {
         <Route path="/team-green" element={<TeamGreen />} />
         <Route path="/notifications" element={<Notifications />} />
         <Route path="/customers" element={<Customers />} />
-        <Route path="/customers/:id" element={<CustomerDetail />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>
