@@ -16,6 +16,7 @@ import Customers from "./pages/Customers";
 import NewCustomer from "./pages/Customers/NewCustomer";
 import CustomerDetail from "./pages/Customers/CustomerDetail";
 import NewPayment from "./pages/Payments/NewPayment";
+import PayRun from "./pages/Payroll/PayRun";
 import NotFound from "./pages/NotFound";
 import "./App.css";
 
@@ -39,6 +40,7 @@ function App() {
         <Route path="/customers/new" element={<NewCustomer />} />
         <Route path="/customers/:id" element={<CustomerDetail />} />
         <Route path="/payments/new" element={<NewPayment />} />
+        <Route path="/payroll/pay-run" element={<PayRun />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>

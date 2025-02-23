@@ -107,6 +107,92 @@ export type Database = {
           },
         ]
       }
+      payroll_entries: {
+        Row: {
+          created_at: string
+          employee_id: string
+          gross_pay: number
+          hourly_rate: number
+          id: string
+          net_pay: number
+          overtime_hours: number
+          payroll_run_id: string | null
+          rdo_balance: number
+          rdo_hours: number
+          regular_hours: number
+          super_contribution: number
+          tax_withheld: number
+        }
+        Insert: {
+          created_at?: string
+          employee_id: string
+          gross_pay: number
+          hourly_rate: number
+          id?: string
+          net_pay: number
+          overtime_hours?: number
+          payroll_run_id?: string | null
+          rdo_balance?: number
+          rdo_hours?: number
+          regular_hours?: number
+          super_contribution: number
+          tax_withheld?: number
+        }
+        Update: {
+          created_at?: string
+          employee_id?: string
+          gross_pay?: number
+          hourly_rate?: number
+          id?: string
+          net_pay?: number
+          overtime_hours?: number
+          payroll_run_id?: string | null
+          rdo_balance?: number
+          rdo_hours?: number
+          regular_hours?: number
+          super_contribution?: number
+          tax_withheld?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payroll_entries_payroll_run_id_fkey"
+            columns: ["payroll_run_id"]
+            isOneToOne: false
+            referencedRelation: "payroll_runs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      payroll_runs: {
+        Row: {
+          created_at: string
+          id: string
+          pay_period_end: string
+          pay_period_start: string
+          status: string
+          stp_lodgment_id: string | null
+          submitted_to_ato: boolean | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          pay_period_end: string
+          pay_period_start: string
+          status?: string
+          stp_lodgment_id?: string | null
+          submitted_to_ato?: boolean | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          pay_period_end?: string
+          pay_period_start?: string
+          status?: string
+          stp_lodgment_id?: string | null
+          submitted_to_ato?: boolean | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
