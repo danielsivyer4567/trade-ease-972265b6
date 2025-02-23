@@ -3,7 +3,7 @@ import { AppLayout } from "@/components/ui/AppLayout";
 import { BarChart as BarChartIcon } from "lucide-react";
 import { KeyStatistics } from "@/components/statistics/KeyStatistics";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Line, CompositeChart } from 'recharts';
 
 const teamData = [
   {
@@ -11,6 +11,7 @@ const teamData = [
     gross: 145000,
     net: 98000,
     defects: 12,
+    profitMargin: 67.6,
     color: '#ef4444'
   },
   {
@@ -18,6 +19,7 @@ const teamData = [
     gross: 165000,
     net: 120000,
     defects: 8,
+    profitMargin: 72.7,
     color: '#3b82f6'
   },
   {
@@ -25,6 +27,7 @@ const teamData = [
     gross: 158000,
     net: 110000,
     defects: 5,
+    profitMargin: 69.6,
     color: '#22c55e'
   }
 ];
@@ -48,7 +51,7 @@ export default function StatisticsPage() {
           <CardContent>
             <div className="h-[400px] w-full">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart
+                <CompositeChart
                   data={teamData}
                   margin={{
                     top: 20,
@@ -61,12 +64,21 @@ export default function StatisticsPage() {
                   <XAxis dataKey="name" />
                   <YAxis yAxisId="left" />
                   <YAxis yAxisId="right" orientation="right" />
+                  <YAxis yAxisId="profit" orientation="right" tickFormatter={(value) => `${value}%`} />
                   <Tooltip />
                   <Legend />
                   <Bar yAxisId="left" dataKey="gross" name="Gross Revenue ($)" fill="#8884d8" />
                   <Bar yAxisId="left" dataKey="net" name="Net Revenue ($)" fill="#82ca9d" />
                   <Bar yAxisId="right" dataKey="defects" name="Defect Tasks" fill="#ffc658" />
-                </BarChart>
+                  <Line 
+                    yAxisId="profit" 
+                    type="monotone" 
+                    dataKey="profitMargin" 
+                    name="Profit Margin (%)" 
+                    stroke="#ff7300" 
+                    strokeWidth={2}
+                  />
+                </CompositeChart>
               </ResponsiveContainer>
             </div>
           </CardContent>
@@ -93,9 +105,7 @@ export default function StatisticsPage() {
                   </div>
                   <div className="flex justify-between">
                     <dt className="font-medium text-gray-500">Profit Margin</dt>
-                    <dd className="text-gray-900">
-                      {Math.round((team.net / team.gross) * 100)}%
-                    </dd>
+                    <dd className="text-gray-900">{team.profitMargin.toFixed(1)}%</dd>
                   </div>
                   <div className="flex justify-between">
                     <dt className="font-medium text-gray-500">Defect Tasks</dt>
