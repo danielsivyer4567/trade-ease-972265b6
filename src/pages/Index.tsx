@@ -38,30 +38,30 @@ const allJobs: Job[] = [{
   id: "1",
   customer: "John Smith",
   type: "Plumbing Repair",
-  status: "In Progress",
+  status: "in-progress",
   date: "Today",
-  location: [151.2093, -33.8688] as [number, number]
+  location: [151.2093, -33.8688]
 }, {
   id: "2",
   customer: "Sarah Johnson",
   type: "Electrical Installation",
-  status: "Scheduled",
+  status: "ready",
   date: "Tomorrow",
-  location: [151.2543, -33.8688] as [number, number]
+  location: [151.2543, -33.8688]
 }, {
   id: "3",
   customer: "Mike Brown",
   type: "HVAC Maintenance",
-  status: "Completed",
+  status: "invoiced",
   date: "Yesterday",
-  location: [151.1943, -33.8788] as [number, number]
+  location: [151.1943, -33.8788]
 }, {
   id: "4",
   customer: "Emma Wilson",
   type: "Kitchen Renovation",
-  status: "Scheduled",
+  status: "ready",
   date: "Tomorrow",
-  location: [151.2153, -33.8588] as [number, number]
+  location: [151.2153, -33.8588]
 }];
 
 const todaysJobs = allJobs.filter(job => job.date === "Today");
@@ -198,7 +198,11 @@ const Index = () => {
               {todaysJobs.map(job => <div key={job.id} className="p-2 md:p-3 bg-gray-50 rounded-lg">
                   <div className="font-medium text-sm md:text-base">{job.customer}</div>
                   <div className="text-xs md:text-sm text-gray-500">{job.type}</div>
-                  <span className={`inline-block mt-1.5 md:mt-2 px-2 py-0.5 md:py-1 rounded-full text-xs ${job.status === "Completed" ? "bg-green-100 text-green-800" : job.status === "In Progress" ? "bg-blue-100 text-blue-800" : "bg-yellow-100 text-yellow-800"}`}>
+                  <span className={`inline-block mt-1.5 md:mt-2 px-2 py-0.5 md:py-1 rounded-full text-xs ${
+    job.status === "invoiced" ? "bg-green-100 text-green-800" : 
+    job.status === "in-progress" ? "bg-blue-100 text-blue-800" : 
+    "bg-yellow-100 text-yellow-800"
+  }`}>
                     {job.status}
                   </span>
                 </div>)}
