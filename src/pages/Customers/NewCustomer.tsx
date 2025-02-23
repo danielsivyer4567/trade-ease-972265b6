@@ -12,7 +12,7 @@ export default function NewCustomer() {
     <AppLayout>
       <div className="p-6 space-y-6">
         <div className="flex items-center gap-2">
-          <Link to="/" className="hover:text-blue-500">
+          <Link to="/customers" className="hover:text-blue-500">
             <ArrowLeft className="h-6 w-6" />
           </Link>
           <h1 className="text-2xl font-bold">Add New Customer</h1>
