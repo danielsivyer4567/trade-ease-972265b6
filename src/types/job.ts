@@ -1,13 +1,11 @@
 
 export interface Job {
   id: string;
-  jobNumber: string;
-  title: string;
   customer: string;
   type: string;
-  status: 'ready' | 'in-progress' | 'to-invoice' | 'invoiced';
+  status: string;
   date: string;
-  location: [number, number];
+  location: [number, number]; // Explicitly typed as tuple
 }
 
 export interface JobTemplate {

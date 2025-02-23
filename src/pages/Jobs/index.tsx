@@ -21,8 +21,6 @@ interface Job {
   date: string;
   status: 'ready' | 'in-progress' | 'to-invoice' | 'invoiced';
   customer: string;
-  type: 'installation' | 'maintenance' | 'upgrade' | 'repair';
-  location: [number, number];
 }
 
 const mockJobs: Job[] = [{
@@ -31,36 +29,28 @@ const mockJobs: Job[] = [{
   title: 'Water Heater Installation',
   date: '2024-03-15',
   status: 'ready',
-  customer: 'John Smith',
-  type: 'installation',
-  location: [0, 0]
+  customer: 'John Smith'
 }, {
   id: '2',
   jobNumber: 'job-002',
   title: 'HVAC Maintenance',
   date: '2024-03-14',
   status: 'in-progress',
-  customer: 'Sarah Johnson',
-  type: 'maintenance',
-  location: [0, 0]
+  customer: 'Sarah Johnson'
 }, {
   id: '3',
   jobNumber: 'job-003',
   title: 'Electrical Panel Upgrade',
   date: '2024-03-13',
   status: 'to-invoice',
-  customer: 'Mike Brown',
-  type: 'upgrade',
-  location: [0, 0]
+  customer: 'Mike Brown'
 }, {
   id: '4',
   jobNumber: 'job-004',
   title: 'Plumbing Repair',
   date: '2024-03-12',
   status: 'invoiced',
-  customer: 'Emily Davis',
-  type: 'repair',
-  location: [0, 0]
+  customer: 'Emily Davis'
 }];
 
 const categories = [{
