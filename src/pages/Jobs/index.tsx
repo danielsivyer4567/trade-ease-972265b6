@@ -61,13 +61,14 @@ export default function Jobs() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedTemplates, setGeneratedTemplates] = useState<JobTemplate[]>([]);
   const [jobs, setJobs] = useState<Job[]>(mockJobs);
-  const [searchLetter, setSearchLetter] = useState<string>("");
+  const [searchLetter, setSearchLetter] = useState<string>(""); 
+  const [searchQuery, setSearchQuery] = useState("");
 
   const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
 
   const filteredTemplates = generatedTemplates.filter(template => {
-    if (!searchLetter) return true;
-    return template.title.toUpperCase().startsWith(searchLetter);
+    if (!searchQuery) return true;
+    return template.title.toLowerCase().includes(searchQuery.toLowerCase());
   });
 
   const generateTemplate = async () => {
@@ -365,59 +366,17 @@ export default function Jobs() {
         <div>
           <h2 className="text-2xl font-semibold mb-4">My Templates</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
-            {filteredTemplates.map((template, index) => (
-              <Card key={index} className="p-4 hover:shadow-md transition-shadow">
-                <div className="flex justify-between items-start mb-2">
-                  <h3 className="font-medium">{template.title}</h3>
-                  <Button 
-                    variant="ghost" 
-                    size="sm"
-                    onClick={() => attachToJob(template)}
-                    className="text-blue-500 hover:text-blue-700"
-                  >
-                    <LinkIcon className="h-4 w-4 mr-1" />
-                    Attach to Job
-                  </Button>
-                </div>
-                <div className="space-y-2 text-sm">
-                  <p><span className="font-medium">Duration:</span> {template.estimatedDuration}</p>
-                  <p><span className="font-medium">Price:</span> {template.price}</p>
-                  <p><span className="font-medium">Category:</span> {template.category}</p>
-                  <p className="text-gray-600">
-                    <span className="font-medium">Materials:</span> {template.materials.join(", ")}
-                  </p>
-                </div>
-              </Card>
-            ))}
-            {filteredTemplates.length === 0 && (
-              <div className="col-span-full text-center py-8 text-gray-500">
-                No templates found starting with '{searchLetter}'
+            <div className="max-w-md mb-4">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 h-4 w-4" />
+                <Input
+                  type="text"
+                  placeholder="Search templates..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10"
+                />
               </div>
-            )}
-          </div>
-        </div>
-
-        <div>
-          <h2 className="text-2xl font-semibold mb-4">Template Library</h2>
-          <div className="bg-white rounded-lg p-4 shadow-sm mb-4">
-            <div className="flex flex-wrap gap-2 mb-4">
-              <Button
-                variant={searchLetter === "" ? "default" : "outline"}
-                size="sm"
-                onClick={() => setSearchLetter("")}
-              >
-                All
-              </Button>
-              {alphabet.map((letter) => (
-                <Button
-                  key={letter}
-                  variant={searchLetter === letter ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setSearchLetter(letter)}
-                >
-                  {letter}
-                </Button>
-              ))}
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {filteredTemplates.map((template, index) => (
@@ -446,7 +405,56 @@ export default function Jobs() {
               ))}
               {filteredTemplates.length === 0 && (
                 <div className="col-span-full text-center py-8 text-gray-500">
-                  No templates found starting with '{searchLetter}'
+                  No templates found matching '{searchQuery}'
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <h2 className="text-2xl font-semibold mb-4">Template Library</h2>
+          <div className="bg-white rounded-lg p-4 shadow-sm mb-4">
+            <div className="max-w-md mb-4">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 h-4 w-4" />
+                <Input
+                  type="text"
+                  placeholder="Search templates..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {filteredTemplates.map((template, index) => (
+                <Card key={index} className="p-4 hover:shadow-md transition-shadow">
+                  <div className="flex justify-between items-start mb-2">
+                    <h3 className="font-medium">{template.title}</h3>
+                    <Button 
+                      variant="ghost" 
+                      size="sm"
+                      onClick={() => attachToJob(template)}
+                      className="text-blue-500 hover:text-blue-700"
+                    >
+                      <LinkIcon className="h-4 w-4 mr-1" />
+                      Attach to Job
+                    </Button>
+                  </div>
+                  <div className="space-y-2 text-sm">
+                    <p><span className="font-medium">Duration:</span> {template.estimatedDuration}</p>
+                    <p><span className="font-medium">Price:</span> {template.price}</p>
+                    <p><span className="font-medium">Category:</span> {template.category}</p>
+                    <p className="text-gray-600">
+                      <span className="font-medium">Materials:</span> {template.materials.join(", ")}
+                    </p>
+                  </div>
+                </Card>
+              ))}
+              {filteredTemplates.length === 0 && (
+                <div className="col-span-full text-center py-8 text-gray-500">
+                  No templates found matching '{searchQuery}'
                 </div>
               )}
             </div>
