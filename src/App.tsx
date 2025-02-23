@@ -19,6 +19,7 @@ import NewPayment from "./pages/Payments/NewPayment";
 import PayRun from "./pages/Payroll/PayRun";
 import NewInvoice from "./pages/Invoices/NewInvoice";
 import Messaging from "./pages/Messaging";
+import Integrations from "./pages/Settings/Integrations";
 import NotFound from "./pages/NotFound";
 import "./App.css";
 
@@ -33,7 +34,8 @@ function App() {
         <Route path="/quotes/new" element={<NewQuote />} />
         <Route path="/statistics" element={<Statistics />} />
         <Route path="/tasks" element={<Tasks />} />
-        <Route path="/settings/*" element={<Settings />} />
+        <Route path="/settings" element={<Settings />} />
+        <Route path="/settings/integrations" element={<Integrations />} />
         <Route path="/team-red" element={<TeamRed />} />
         <Route path="/team-blue" element={<TeamBlue />} />
         <Route path="/team-green" element={<TeamGreen />} />

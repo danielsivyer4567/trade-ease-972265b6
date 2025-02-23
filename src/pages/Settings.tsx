@@ -1,7 +1,7 @@
 
 import { AppLayout } from "@/components/ui/AppLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Settings, DollarSign, Receipt, Clock, Users, Shield, FileText, Calendar, List, CreditCard, User, Bot, Briefcase, Network, HelpCircle, Mail, FileJson, Building, Share, Zap, Search } from "lucide-react";
+import { Settings, DollarSign, Receipt, Clock, Users, Shield, FileText, Calendar, List, CreditCard, User, Bot, Briefcase, Network, Mail, FileJson, Building, Share, Zap, Search, Link2 } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const settingsSections = [{
@@ -59,9 +59,10 @@ const settingsSections = [{
   icon: User,
   description: "Manage customer information"
 }, {
-  title: "AI Settings",
-  icon: Bot,
-  description: "Configure AI features"
+  title: "API Integrations",
+  icon: Link2,
+  description: "Configure external API integrations",
+  path: "/settings/integrations"
 }, {
   title: "Jobs",
   icon: Briefcase,
