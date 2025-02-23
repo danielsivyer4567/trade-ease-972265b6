@@ -1,9 +1,13 @@
 
 import { AppLayout } from "@/components/ui/AppLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Link2, MessageSquare, CreditCard, Mail, Calendar } from "lucide-react";
+import { Link2, MessageSquare, CreditCard, Mail, Calendar, Key } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useState } from "react";
+import { toast } from "sonner";
 
 const availableIntegrations = [
   {
@@ -11,7 +15,8 @@ const availableIntegrations = [
     icon: MessageSquare,
     description: "Sync messages and communication with Go High Level",
     path: "/messaging",
-    status: "Not Connected"
+    status: "Not Connected",
+    apiKeyRequired: true
   },
   {
     title: "Stripe",
@@ -37,6 +42,23 @@ const availableIntegrations = [
 ];
 
 export default function IntegrationsPage() {
+  const [apiKeys, setApiKeys] = useState<Record<string, string>>({});
+  const [loading, setLoading] = useState<Record<string, boolean>>({});
+
+  const handleApiKeySubmit = async (integration: string) => {
+    setLoading(prev => ({ ...prev, [integration]: true }));
+    try {
+      // Here you would typically make an API call to validate and store the API key
+      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulated API call
+      toast.success(`${integration} API key configured successfully`);
+      localStorage.setItem(`${integration.toLowerCase()}-api-key`, apiKeys[integration]);
+    } catch (error) {
+      toast.error(`Failed to configure ${integration} API key`);
+    } finally {
+      setLoading(prev => ({ ...prev, [integration]: false }));
+    }
+  };
+
   return (
     <AppLayout>
       <div className="p-6 max-w-6xl mx-auto space-y-6">
@@ -64,9 +86,33 @@ export default function IntegrationsPage() {
                 </div>
                 <CardDescription>{integration.description}</CardDescription>
               </CardHeader>
-              <CardContent>
+              <CardContent className="space-y-4">
+                {integration.apiKeyRequired && (
+                  <div className="space-y-2">
+                    <Label htmlFor={`${integration.title}-api-key`}>API Key</Label>
+                    <div className="flex gap-2">
+                      <Input
+                        id={`${integration.title}-api-key`}
+                        type="password"
+                        placeholder="Enter API key"
+                        value={apiKeys[integration.title] || ''}
+                        onChange={(e) => setApiKeys(prev => ({
+                          ...prev,
+                          [integration.title]: e.target.value
+                        }))}
+                      />
+                      <Button 
+                        onClick={() => handleApiKeySubmit(integration.title)}
+                        disabled={loading[integration.title] || !apiKeys[integration.title]}
+                      >
+                        <Key className="h-4 w-4 mr-2" />
+                        {loading[integration.title] ? 'Saving...' : 'Save Key'}
+                      </Button>
+                    </div>
+                  </div>
+                )}
                 <Link to={integration.path}>
-                  <Button className="w-full">
+                  <Button className="w-full" variant="outline">
                     {integration.status === "Connected" ? "Manage Integration" : "Connect"}
                   </Button>
                 </Link>
