@@ -1,4 +1,3 @@
-
 import { AppLayout } from "@/components/ui/AppLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -140,7 +139,7 @@ export default function CustomersPage() {
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
-              <Button>
+              <Button onClick={() => navigate('/customers/new')}>
                 <UserPlus className="h-4 w-4 mr-2" />
                 Add Customer
               </Button>
