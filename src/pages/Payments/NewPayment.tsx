@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Link, useNavigate } from "react-router-dom";
-import { ArrowLeft, Receipt } from "lucide-react";
+import { ArrowLeft, Receipt, Search } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -24,6 +24,7 @@ interface Invoice {
   status: string;
   due_date: string;
   description: string;
+  customer_name?: string;
 }
 
 export default function NewPayment() {
@@ -34,6 +35,7 @@ export default function NewPayment() {
   const [paymentMethod, setPaymentMethod] = useState<string>("");
   const [notes, setNotes] = useState<string>("");
   const [loading, setLoading] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     fetchInvoices();
@@ -52,6 +54,16 @@ export default function NewPayment() {
 
     setInvoices(data || []);
   };
+
+  const filteredInvoices = invoices.filter((invoice) => {
+    const searchLower = searchQuery.toLowerCase();
+    const invoiceNumber = invoice.invoice_number.toLowerCase();
+    const customerName = (invoice.customer_name || "").toLowerCase();
+
+    return !searchQuery || 
+           invoiceNumber.includes(searchLower) || 
+           customerName.includes(searchLower);
+  });
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -104,6 +116,16 @@ export default function NewPayment() {
 
         <Card className="p-6">
           <form className="space-y-4" onSubmit={handleSubmit}>
+            <div className="relative">
+              <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+              <Input
+                placeholder="Search by invoice number or customer name..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+
             <div>
               <label htmlFor="invoice" className="block text-sm font-medium mb-1">
                 Select Invoice
@@ -117,7 +139,7 @@ export default function NewPayment() {
                   <SelectValue placeholder="Select an invoice" />
                 </SelectTrigger>
                 <SelectContent>
-                  {invoices.map((invoice) => (
+                  {filteredInvoices.map((invoice) => (
                     <SelectItem key={invoice.id} value={invoice.id}>
                       {`${invoice.invoice_number} - $${invoice.amount} (Due: ${new Date(
                         invoice.due_date
