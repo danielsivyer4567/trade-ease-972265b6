@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { AppLayout } from "@/components/ui/AppLayout";
 import { Button } from "@/components/ui/button";
@@ -11,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { FileUpload } from "@/components/tasks/FileUpload";
 
 export default function NewInvoice() {
   const [selectedTab, setSelectedTab] = useState("blank");
@@ -105,10 +105,27 @@ function BlankInvoiceForm() {
 }
 
 function TemplateInvoiceForm() {
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (!files || files.length === 0) return;
+
+    try {
+      // Handle the uploaded files here
+      toast.success(`File "${files[0].name}" uploaded successfully`);
+    } catch (error) {
+      toast.error("Failed to upload file");
+      console.error("Upload error:", error);
+    }
+  };
+
   return (
     <div className="space-y-4">
       <div className="text-center p-8 border-2 border-dashed rounded-lg">
-        <p className="text-muted-foreground">Select an invoice template to get started</p>
+        <p className="text-muted-foreground mb-4">Select an invoice template to get started</p>
+        <FileUpload 
+          onFileUpload={handleFileUpload}
+          label="Upload Invoice Template"
+        />
         <Button variant="outline" className="mt-4">
           Browse Templates
         </Button>
