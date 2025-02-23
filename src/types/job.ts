@@ -1,6 +1,8 @@
 
 export interface Job {
   id: string;
+  jobNumber: string;
+  title: string;
   customer: string;
   type: string;
   status: string;
