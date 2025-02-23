@@ -1,13 +1,29 @@
+
 import React from 'react';
 import { AppLayout } from "@/components/ui/AppLayout";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Link, useNavigate } from "react-router-dom";
 import { ArrowLeft, Plus, FileText, Settings } from "lucide-react";
+import { toast } from "sonner";
+
 export default function NewQuote() {
   const navigate = useNavigate();
+
+  const handleCreateBlankQuote = () => {
+    // Create a new blank text document
+    const blob = new Blob([''], { type: 'text/plain' });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'blank_quote.txt';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
+    toast.success('Blank quote template created');
+  };
+
   return <AppLayout>
       <div className="p-6 space-y-6">
         <div className="flex items-center gap-2">
@@ -53,7 +69,11 @@ export default function NewQuote() {
               </div>
               <h3 className="font-semibold text-lg">New Quote from scratch</h3>
               <p className="text-sm text-gray-500">Create a quote without a template</p>
-              <Button variant="outline" className="w-full">
+              <Button 
+                variant="outline" 
+                className="w-full"
+                onClick={handleCreateBlankQuote}
+              >
                 Create Quote
               </Button>
             </div>
