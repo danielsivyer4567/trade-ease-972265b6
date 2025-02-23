@@ -141,11 +141,8 @@ function QuoteInvoiceForm() {
 
   const handleSearch = (query: string) => {
     setSearchQuery(query);
-    // Here you would typically make an API call to search quotes
-    // For now, we'll just show a toast
     if (query.length > 2) {
-      toast({
-        title: "Searching quotes",
+      toast.info("Searching quotes...", {
         description: `Searching for "${query}" in quotes...`
       });
     }
@@ -184,7 +181,6 @@ function QuoteInvoiceForm() {
                     Searching for quotes matching "{searchQuery}"...
                   </div>
                 )}
-                {/* Results would be displayed here */}
                 <div className="mt-2 space-y-2">
                   {searchResults.length === 0 && searchQuery.length > 2 && (
                     <div className="text-sm text-muted-foreground">
@@ -202,13 +198,62 @@ function QuoteInvoiceForm() {
 }
 
 function TimesheetInvoiceForm() {
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
+
+  const handleSearch = (query: string) => {
+    setSearchQuery(query);
+    if (query.length > 2) {
+      toast.info("Searching timesheets...", {
+        description: `Searching for "${query}" in timesheets...`
+      });
+    }
+  };
+
   return (
     <div className="space-y-4">
       <div className="text-center p-8 border-2 border-dashed rounded-lg">
         <p className="text-muted-foreground">Select timesheets to generate invoice</p>
-        <Button variant="outline" className="mt-4">
-          Browse Timesheets
-        </Button>
+        <Sheet>
+          <SheetTrigger asChild>
+            <Button variant="outline" className="mt-4">
+              Browse Timesheets
+            </Button>
+          </SheetTrigger>
+          <SheetContent side="right" className="w-[400px] sm:w-[540px]">
+            <SheetHeader>
+              <SheetTitle>Search Timesheets</SheetTitle>
+              <SheetDescription>
+                Search by employee name or timesheet number
+              </SheetDescription>
+            </SheetHeader>
+            <div className="mt-6 space-y-4">
+              <div className="relative">
+                <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                <Input
+                  placeholder="Enter employee name or timesheet number..."
+                  value={searchQuery}
+                  onChange={(e) => handleSearch(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+              <div className="mt-4">
+                {searchQuery.length > 2 && (
+                  <div className="text-sm text-muted-foreground">
+                    Searching for timesheets matching "{searchQuery}"...
+                  </div>
+                )}
+                <div className="mt-2 space-y-2">
+                  {searchResults.length === 0 && searchQuery.length > 2 && (
+                    <div className="text-sm text-muted-foreground">
+                      No timesheets found matching your search.
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </SheetContent>
+        </Sheet>
       </div>
     </div>
   );
