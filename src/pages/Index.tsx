@@ -1,12 +1,14 @@
 import { AppLayout } from "@/components/ui/AppLayout";
-import { Calendar, DollarSign, FileText, Users, CheckSquare, Clock, MessageSquare, XSquare, Plus, Briefcase, Calendar as CalendarIcon } from "lucide-react";
+import { Calendar, DollarSign, FileText, Users, CheckSquare, Clock, MessageSquare, XSquare, Plus, Briefcase, Calendar as CalendarIcon, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import JobMap from "@/components/JobMap";
 import type { Job } from "@/types/job";
 import { TeamCalendar } from '@/components/team/TeamCalendar';
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 
 const stats = [{
   title: "Active Jobs",
@@ -93,39 +95,6 @@ const quoteStatuses = [{
   count: "1"
 }];
 
-const teamColors = {
-  plumbing: {
-    light: '#D3E4FD',
-    primary: '#0EA5E9',
-    text: '#1E293B'
-  },
-  electrical: {
-    light: '#E5DEFF',
-    primary: '#9B87F5',
-    text: '#1A1F2C'
-  },
-  hvac: {
-    light: '#F2FCE2',
-    primary: '#22C55E',
-    text: '#14532D'
-  },
-  carpentry: {
-    light: '#FEF7CD',
-    primary: '#EAB308',
-    text: '#713F12'
-  },
-  painting: {
-    light: '#FFDEE2',
-    primary: '#EC4899',
-    text: '#831843'
-  },
-  general: {
-    light: '#F1F0FB',
-    primary: '#8E9196',
-    text: '#403E43'
-  }
-};
-
 const Index = () => {
   const [sharedDate, setSharedDate] = React.useState<Date | undefined>(new Date());
   const [teams, setTeams] = React.useState([
@@ -155,7 +124,8 @@ const Index = () => {
     toast.success(`Added ${newTeam.name} with ${newColor} color scheme`);
   };
 
-  return <AppLayout>
+  return (
+    <AppLayout>
       <div className="space-y-4 md:space-y-6 animate-fadeIn px-2 sm:px-4 md:px-6">
         <div className="flex flex-col items-center justify-center text-center mb-4 md:mb-8">
           <div className="flex items-center gap-2 mb-4">
@@ -214,32 +184,44 @@ const Index = () => {
           <Card className="p-3 md:p-4">
             <h2 className="text-base md:text-lg font-semibold mb-3 md:mb-4">Today's Jobs</h2>
             <div className="space-y-2 md:space-y-3">
-              {todaysJobs.map(job => <div key={job.id} className="p-2 md:p-3 bg-gray-50 rounded-lg">
+              {todaysJobs.map(job => (
+                <div key={job.id} className="p-2 md:p-3 bg-gray-50 rounded-lg">
                   <div className="font-medium text-sm md:text-base">{job.customer}</div>
                   <div className="text-xs md:text-sm text-gray-500">{job.type}</div>
                   <span className={`inline-block mt-1.5 md:mt-2 px-2 py-0.5 md:py-1 rounded-full text-xs ${
-    job.status === "invoiced" ? "bg-green-100 text-green-800" : 
-    job.status === "in-progress" ? "bg-blue-100 text-blue-800" : 
-    "bg-yellow-100 text-yellow-800"
-  }`}>
+                    job.status === "invoiced" ? "bg-green-100 text-green-800" : 
+                    job.status === "in-progress" ? "bg-blue-100 text-blue-800" : 
+                    "bg-yellow-100 text-yellow-800"
+                  }`}>
                     {job.status}
                   </span>
-                </div>)}
-              {todaysJobs.length === 0 && <p className="text-gray-500 text-xs md:text-sm">No jobs scheduled for today</p>}
+                </div>
+              ))}
+              {todaysJobs.length === 0 && (
+                <p className="text-gray-500 text-xs md:text-sm">No jobs scheduled for today</p>
+              )}
             </div>
           </Card>
 
           <Card className="p-3 md:p-4">
             <h2 className="text-base md:text-lg font-semibold mb-3 md:mb-4">Tomorrow's Jobs</h2>
             <div className="space-y-2 md:space-y-3">
-              {tomorrowsJobs.map(job => <div key={job.id} className="p-2 md:p-3 bg-gray-50 rounded-lg">
+              {tomorrowsJobs.map(job => (
+                <div key={job.id} className="p-2 md:p-3 bg-gray-50 rounded-lg">
                   <div className="font-medium text-sm md:text-base">{job.customer}</div>
                   <div className="text-xs md:text-sm text-gray-500">{job.type}</div>
-                  <span className={`inline-block mt-1.5 md:mt-2 px-2 py-0.5 md:py-1 rounded-full text-xs ${job.status === "Completed" ? "bg-green-100 text-green-800" : job.status === "In Progress" ? "bg-blue-100 text-blue-800" : "bg-yellow-100 text-yellow-800"}`}>
+                  <span className={`inline-block mt-1.5 md:mt-2 px-2 py-0.5 md:py-1 rounded-full text-xs ${
+                    job.status === "invoiced" ? "bg-green-100 text-green-800" : 
+                    job.status === "in-progress" ? "bg-blue-100 text-blue-800" : 
+                    "bg-yellow-100 text-yellow-800"
+                  }`}>
                     {job.status}
                   </span>
-                </div>)}
-              {tomorrowsJobs.length === 0 && <p className="text-gray-500 text-xs md:text-sm">No jobs scheduled for tomorrow</p>}
+                </div>
+              ))}
+              {tomorrowsJobs.length === 0 && (
+                <p className="text-gray-500 text-xs md:text-sm">No jobs scheduled for tomorrow</p>
+              )}
             </div>
           </Card>
         </div>
@@ -248,21 +230,22 @@ const Index = () => {
           <Card className="p-3 md:p-4">
             <h2 className="text-base md:text-lg font-semibold mb-3 md:mb-4">Quote Status</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 md:gap-4">
-              {quoteStatuses.map(quote => <div key={quote.title} className="flex items-center justify-between p-2 md:p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-all cursor-pointer">
+              {quoteStatuses.map(quote => (
+                <div key={quote.title} className="flex items-center justify-between p-2 md:p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-all cursor-pointer">
                   <div className="flex items-center gap-2 md:gap-3">
-                    <quote.icon className="w-4 h-4 md:w-5 md:h-5" style={{
-                  color: quote.color
-                }} />
+                    <quote.icon className="w-4 h-4 md:w-5 md:h-5" style={{ color: quote.color }} />
                     <span className="font-medium text-sm md:text-base">{quote.title}</span>
                   </div>
                   <span className="text-xs md:text-sm font-semibold text-gray-600">{quote.count}</span>
-                </div>)}
+                </div>
+              ))}
             </div>
           </Card>
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-6">
-          {stats.map(stat => <Card key={stat.title} className="p-3 md:p-6 animate-slideUp">
+          {stats.map(stat => (
+            <Card key={stat.title} className="p-3 md:p-6 animate-slideUp">
               <div className="flex justify-between items-start">
                 <div>
                   <p className="text-xs md:text-sm font-medium text-gray-600">{stat.title}</p>
@@ -275,7 +258,8 @@ const Index = () => {
                 </div>
                 <stat.icon className="w-4 h-4 md:w-6 md:h-6 text-gray-400" />
               </div>
-            </Card>)}
+            </Card>
+          ))}
         </div>
 
         <Card className="animate-slideUp">
@@ -292,7 +276,8 @@ const Index = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {allJobs.map(job => <tr key={job.id} className="border-t border-gray-100 text-xs md:text-sm">
+                  {allJobs.map(job => (
+                    <tr key={job.id} className="border-t border-gray-100 text-xs md:text-sm">
                       <td className="py-2 md:py-3">{job.customer}</td>
                       <td className="py-2 md:py-3">{job.type}</td>
                       <td className="py-2 md:py-3">
@@ -301,7 +286,8 @@ const Index = () => {
                         </span>
                       </td>
                       <td className="py-2 md:py-3">{job.date}</td>
-                    </tr>)}
+                    </tr>
+                  ))}
                 </tbody>
               </table>
             </div>
@@ -341,7 +327,8 @@ const Index = () => {
           
         </div>
       </div>
-    </AppLayout>;
+    </AppLayout>
+  );
 };
 
 export default Index;
