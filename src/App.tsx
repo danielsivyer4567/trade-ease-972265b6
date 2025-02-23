@@ -4,6 +4,7 @@ import Index from "./pages/Index";
 import Jobs from "./pages/Jobs";
 import NewJob from "./pages/Jobs/NewJob";
 import NewTemplate from "./pages/Jobs/NewTemplate";
+import NewQuote from "./pages/Quotes/NewQuote";
 import Statistics from "./pages/Statistics";
 import Tasks from "./pages/Tasks";
 import Settings from "./pages/Settings";
@@ -24,6 +25,7 @@ function App() {
         <Route path="/jobs" element={<Jobs />} />
         <Route path="/jobs/new" element={<NewJob />} />
         <Route path="/jobs/template/new" element={<NewTemplate />} />
+        <Route path="/quotes/new" element={<NewQuote />} />
         <Route path="/statistics" element={<Statistics />} />
         <Route path="/tasks" element={<Tasks />} />
         <Route path="/settings/*" element={<Settings />} />
