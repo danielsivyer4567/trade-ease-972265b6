@@ -103,10 +103,16 @@ export default function CustomerDetail() {
             <Card>
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle>Quotes</CardTitle>
-                <Button size="sm" onClick={() => toast({ title: "Creating new quote", description: "This feature is coming soon!" })}>
-                  <Plus className="h-4 w-4 mr-2" />
-                  New Quote
-                </Button>
+                <div className="flex gap-2">
+                  <Button size="sm" variant="outline" onClick={() => toast({ title: "Creating from template", description: "This feature is coming soon!" })}>
+                    <Plus className="h-4 w-4 mr-2" />
+                    From Template
+                  </Button>
+                  <Button size="sm" onClick={() => toast({ title: "Creating new quote", description: "This feature is coming soon!" })}>
+                    <Plus className="h-4 w-4 mr-2" />
+                    New Quote
+                  </Button>
+                </div>
               </CardHeader>
               <CardContent>
                 <p className="text-gray-500">No quotes available</p>
@@ -118,10 +124,16 @@ export default function CustomerDetail() {
             <Card>
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle>Jobs</CardTitle>
-                <Button size="sm" onClick={() => toast({ title: "Creating new job", description: "This feature is coming soon!" })}>
-                  <Plus className="h-4 w-4 mr-2" />
-                  New Job
-                </Button>
+                <div className="flex gap-2">
+                  <Button size="sm" variant="outline" onClick={() => toast({ title: "Creating from template", description: "This feature is coming soon!" })}>
+                    <Plus className="h-4 w-4 mr-2" />
+                    From Template
+                  </Button>
+                  <Button size="sm" onClick={() => toast({ title: "Creating new job", description: "This feature is coming soon!" })}>
+                    <Plus className="h-4 w-4 mr-2" />
+                    New Job
+                  </Button>
+                </div>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
@@ -140,10 +152,16 @@ export default function CustomerDetail() {
             <Card>
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle>Invoices</CardTitle>
-                <Button size="sm" onClick={() => toast({ title: "Creating new invoice", description: "This feature is coming soon!" })}>
-                  <Plus className="h-4 w-4 mr-2" />
-                  New Invoice
-                </Button>
+                <div className="flex gap-2">
+                  <Button size="sm" variant="outline" onClick={() => toast({ title: "Creating from template", description: "This feature is coming soon!" })}>
+                    <Plus className="h-4 w-4 mr-2" />
+                    From Template
+                  </Button>
+                  <Button size="sm" onClick={() => toast({ title: "Creating new invoice", description: "This feature is coming soon!" })}>
+                    <Plus className="h-4 w-4 mr-2" />
+                    New Invoice
+                  </Button>
+                </div>
               </CardHeader>
               <CardContent>
                 <p className="text-gray-500">No invoices available</p>
@@ -155,10 +173,16 @@ export default function CustomerDetail() {
             <Card>
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle>Tasks</CardTitle>
-                <Button size="sm" onClick={() => toast({ title: "Creating new task", description: "This feature is coming soon!" })}>
-                  <Plus className="h-4 w-4 mr-2" />
-                  New Task
-                </Button>
+                <div className="flex gap-2">
+                  <Button size="sm" variant="outline" onClick={() => toast({ title: "Creating from template", description: "This feature is coming soon!" })}>
+                    <Plus className="h-4 w-4 mr-2" />
+                    From Template
+                  </Button>
+                  <Button size="sm" onClick={() => toast({ title: "Creating new task", description: "This feature is coming soon!" })}>
+                    <Plus className="h-4 w-4 mr-2" />
+                    New Task
+                  </Button>
+                </div>
               </CardHeader>
               <CardContent>
                 <p className="text-gray-500">No tasks available</p>
