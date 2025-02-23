@@ -26,8 +26,8 @@ export default function NewTemplate() {
     const files = event.target.files;
     if (files && files.length > 0) {
       const file = files[0];
-      if (file.type !== 'application/pdf') {
-        toast.error('Please upload a PDF file');
+      if (file.type !== 'application/pdf' && file.type !== 'text/csv') {
+        toast.error('Please upload a PDF or CSV file');
         return;
       }
       toast.success('Template uploaded successfully');

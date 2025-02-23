@@ -26,7 +26,7 @@ export function FileUpload({ onFileUpload, label }: FileUploadProps) {
     setIsDragging(false);
     
     const files = Array.from(e.dataTransfer.files).filter(file => 
-      file.type.startsWith('image/') || file.type.startsWith('video/')
+      file.type === 'application/pdf' || file.type === 'text/csv'
     );
 
     if (files.length > 0) {
@@ -43,26 +43,28 @@ export function FileUpload({ onFileUpload, label }: FileUploadProps) {
 
   return (
     <label 
-      className="flex-1"
+      className={cn(
+        "flex-1 cursor-pointer",
+        isDragging && "opacity-70"
+      )}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
     >
       <div className={cn(
-        "flex items-center gap-2 p-2 border-2 border-dashed rounded-lg cursor-pointer transition-colors duration-200",
+        "flex items-center gap-2 p-2 border-2 border-dashed rounded-lg transition-colors duration-200",
         isDragging ? "bg-gray-100 border-gray-400" : "hover:bg-gray-50 border-gray-200"
       )}>
         <Upload className="h-4 w-4 text-gray-400" />
         <span className="text-sm text-gray-600">
-          {isDragging ? "Drop files here..." : `${label} (Images and Videos)`}
+          {isDragging ? "Drop files here..." : `${label} (PDF or CSV)`}
         </span>
       </div>
       <input
         type="file"
-        multiple
         className="hidden"
         onChange={onFileUpload}
-        accept="image/*,video/*"
+        accept=".pdf,.csv,application/pdf,text/csv"
       />
     </label>
   );
