@@ -12,7 +12,7 @@ export default function Calendar() {
       <div className="p-6">
         <Card>
           <CardHeader>
-            <CardTitle>Calendar</CardTitle>
+            <CardTitle>Manager's Calendar</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex justify-center">
