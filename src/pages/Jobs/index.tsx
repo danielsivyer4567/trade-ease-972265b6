@@ -1,15 +1,18 @@
 import { AppLayout } from "@/components/ui/AppLayout";
+import { Plus, Wrench, Zap, Wind, Loader2, Upload, FileUp, LinkIcon, Clock, CheckCircle, DollarSign, Search, ListTodo, UserPlus, Users, CalendarIcon } from "lucide-react";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useToast } from "@/components/ui/use-toast";
+import type { JobTemplate } from "@/types/job";
+import { UnassignedJobs } from "./components/UnassignedJobs";
+import { CurrentJobs } from "./components/CurrentJobs";
+import { JobAssignmentDialog } from "./components/JobAssignmentDialog";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Calendar } from "@/components/ui/calendar";
-import { Plus, Wrench, Zap, Wind, Loader2, Upload, FileUp, LinkIcon, Clock, CheckCircle, DollarSign, Search, ListTodo, UserPlus, Users, CalendarIcon } from "lucide-react";
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { useToast } from "@/components/ui/use-toast";
-import type { JobTemplate } from "@/types/job";
 
 interface Job {
   id: string;
@@ -280,21 +283,6 @@ export default function Jobs() {
     });
   };
 
-  const getStatusIcon = (status: Job['status']) => {
-    switch (status) {
-      case 'ready':
-        return <Clock className="h-5 w-5 text-blue-500" />;
-      case 'in-progress':
-        return <Loader2 className="h-5 w-5 text-yellow-500" />;
-      case 'to-invoice':
-        return <DollarSign className="h-5 w-5 text-green-500" />;
-      case 'invoiced':
-        return <CheckCircle className="h-5 w-5 text-gray-500" />;
-      default:
-        return null;
-    }
-  };
-
   const handleAssign = (job: Job) => {
     setSelectedJob(job);
     setIsAssignDialogOpen(true);
@@ -327,141 +315,23 @@ export default function Jobs() {
     return template.title.toLowerCase().includes(searchQuery.toLowerCase());
   });
 
-  return <AppLayout>
+  return (
+    <AppLayout>
       <div className="space-y-6 p-6">
-        <div>
-          <h2 className="text-2xl font-semibold mb-4">To be Assigned</h2>
-          <Card className="p-4 mb-6">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center space-x-2">
-                <ListTodo className="h-5 w-5 text-orange-500" />
-                <span className="font-medium">Unassigned Jobs</span>
-              </div>
-              <Button variant="outline" size="sm" className="flex items-center">
-                <UserPlus className="h-4 w-4 mr-2" />
-                Assign Jobs
-              </Button>
-            </div>
-            <div className="bg-white rounded-lg">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Job Number
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Job
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Customer
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Date Created
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Actions
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {jobs.filter(job => job.status === 'ready').map(job => (
-                    <tr key={job.id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-mono text-gray-900">{job.jobNumber}</div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-gray-900">{job.title}</div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-500">{job.customer}</div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-500">{job.date}</div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <Button variant="outline" size="sm" onClick={() => handleAssign(job)}>
-                          <UserPlus className="h-4 w-4 mr-2" />
-                          Assign
-                        </Button>
-                      </td>
-                    </tr>
-                  ))}
-                  {jobs.filter(job => job.status === 'ready').length === 0 && (
-                    <tr>
-                      <td colSpan={5} className="px-6 py-4 text-center text-gray-500">
-                        No jobs waiting to be assigned
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </Card>
-        </div>
+        <UnassignedJobs jobs={jobs} onAssign={handleAssign} />
+        <CurrentJobs jobs={jobs} onStatusUpdate={updateJobStatus} />
 
-        <div>
-          <h2 className="text-2xl font-semibold mb-4">Current Jobs</h2>
-          <div className="bg-white rounded-lg shadow overflow-hidden">
-            <div className="max-h-[500px] overflow-y-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50 sticky top-0">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Job Number
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Job
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Customer
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Date
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Status
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Actions
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {jobs.map(job => <tr key={job.id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-mono text-gray-900">{job.jobNumber}</div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-gray-900">{job.title}</div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-500">{job.customer}</div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-500">{job.date}</div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center">
-                          {getStatusIcon(job.status)}
-                          <span className="ml-2 text-sm text-gray-500">
-                            {job.status.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
-                          </span>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <select className="text-sm border border-gray-300 rounded-md px-2 py-1" value={job.status} onChange={e => updateJobStatus(job.id, e.target.value as Job['status'])}>
-                          <option value="ready">Ready to Go</option>
-                          <option value="in-progress">In Progress</option>
-                          <option value="to-invoice">To Invoice</option>
-                          <option value="invoiced">Invoiced</option>
-                        </select>
-                      </td>
-                    </tr>)}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
+        <JobAssignmentDialog
+          isOpen={isAssignDialogOpen}
+          onOpenChange={setIsAssignDialogOpen}
+          selectedJob={selectedJob}
+          selectedTeam={selectedTeam}
+          setSelectedTeam={setSelectedTeam}
+          selectedDate={selectedDate}
+          setSelectedDate={setSelectedDate}
+          onAssign={handleAssignSubmit}
+          teams={teams}
+        />
 
         <div>
           <h2 className="text-2xl font-semibold mb-4">Template Library</h2>
@@ -473,7 +343,8 @@ export default function Jobs() {
               </div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {filteredTemplates.map((template, index) => <Card key={index} className="p-4 hover:shadow-md transition-shadow">
+              {filteredTemplates.map((template, index) => (
+                <Card key={index} className="p-4 hover:shadow-md transition-shadow">
                   <div className="flex justify-between items-start mb-2">
                     <h3 className="font-medium">{template.title}</h3>
                     <Button variant="ghost" size="sm" onClick={() => attachToJob(template)} className="text-blue-500 hover:text-blue-700">
@@ -489,10 +360,13 @@ export default function Jobs() {
                       <span className="font-medium">Materials:</span> {template.materials.join(", ")}
                     </p>
                   </div>
-                </Card>)}
-              {filteredTemplates.length === 0 && <div className="col-span-full text-center py-8 text-gray-500">
+                </Card>
+              ))}
+              {filteredTemplates.length === 0 && (
+                <div className="col-span-full text-center py-8 text-gray-500">
                   No templates found matching '{searchQuery}'
-                </div>}
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -515,13 +389,17 @@ export default function Jobs() {
                 <Textarea placeholder="E.g., Install a new water heater in a residential building..." value={jobDescription} onChange={e => setJobDescription(e.target.value)} className="min-h-[100px]" />
               </div>
               <Button onClick={generateTemplate} disabled={isGenerating || !jobDescription.trim()} className="w-full">
-                {isGenerating ? <>
+                {isGenerating ? (
+                  <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     Generating...
-                  </> : <>
+                  </>
+                ) : (
+                  <>
                     <Plus className="mr-2 h-4 w-4" />
                     Generate Template
-                  </>}
+                  </>
+                )}
               </Button>
             </div>
           </Card>
@@ -574,50 +452,7 @@ export default function Jobs() {
             </div>
           </Card>
         </div>
-
-        <Dialog open={isAssignDialogOpen} onOpenChange={setIsAssignDialogOpen}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Assign Job {selectedJob?.jobNumber}</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4 py-4">
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Select Team</label>
-                <div className="grid grid-cols-3 gap-2">
-                  {teams.map(team => (
-                    <Button
-                      key={team.id}
-                      variant={selectedTeam === team.id ? "default" : "outline"}
-                      className="flex items-center justify-center"
-                      onClick={() => setSelectedTeam(team.id)}
-                    >
-                      <Users className={`h-4 w-4 mr-2 ${team.color}`} />
-                      {team.name}
-                    </Button>
-                  ))}
-                </div>
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Select Date</label>
-                <Calendar
-                  mode="single"
-                  selected={selectedDate}
-                  onSelect={setSelectedDate}
-                  className="rounded-md border"
-                  initialFocus
-                />
-              </div>
-            </div>
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setIsAssignDialogOpen(false)}>
-                Cancel
-              </Button>
-              <Button onClick={handleAssignSubmit}>
-                Assign Job
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
       </div>
-    </AppLayout>;
+    </AppLayout>
+  );
 }
