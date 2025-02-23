@@ -159,7 +159,11 @@ const Index = () => {
                 <Plus className="w-3 h-3 md:w-4 md:h-4 mr-1" /> New Quote
               </Link>
             </Button>
-            <Button size="sm" className="bg-purple-600 hover:bg-purple-700 text-xs md:text-sm flex-grow md:flex-grow-0">
+            <Button
+              asChild
+              size="sm"
+              className="bg-purple-600 hover:bg-purple-700 text-xs md:text-sm flex-grow md:flex-grow-0"
+            >
               <Link to="/customers/new" className="flex items-center">
                 <Plus className="w-3 h-3 md:w-4 md:h-4 mr-1" /> New Customer
               </Link>
