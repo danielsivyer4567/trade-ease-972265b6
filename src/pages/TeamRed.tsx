@@ -8,6 +8,7 @@ import { JobsOverview } from "@/components/team/JobsOverview";
 import { TeamCalendar } from "@/components/team/TeamCalendar";
 import { TeamHeader } from "@/components/team/TeamHeader";
 import { TeamTimeOff } from "@/components/team/TeamTimeOff";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface TeamMember {
   id: string;
@@ -56,11 +57,20 @@ export default function TeamRed() {
       <div className="space-y-8">
         <TeamHeader teamName="Red Team" />
         
-        <TeamCalendar 
-          date={date}
-          setDate={setDate}
-          teamColor="red"
-        />
+        <Card className="w-full">
+          <CardHeader>
+            <CardTitle>Team Calendar</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="w-full">
+              <TeamCalendar 
+                date={date}
+                setDate={setDate}
+                teamColor="red"
+              />
+            </div>
+          </CardContent>
+        </Card>
 
         <JobsOverview />
 

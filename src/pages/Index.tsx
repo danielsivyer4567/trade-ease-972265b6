@@ -4,10 +4,6 @@ import { Job } from "@/types/job";
 import { useEffect, useState } from "react";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
-import { useNavigate } from "react-router-dom";
-import { toast } from "sonner";
 
 const mockJobs: Job[] = [
   {
@@ -55,38 +51,14 @@ const mockJobs: Job[] = [
 export default function Index() {
   const [jobs, setJobs] = useState<Job[]>([]);
   const [date, setDate] = useState<Date | undefined>(new Date());
-  const navigate = useNavigate();
 
   useEffect(() => {
     setJobs(mockJobs);
   }, []);
 
-  const handleAddTimeOff = () => {
-    toast.info("Time off feature coming soon!");
-  };
-
-  const handleAddAppointment = () => {
-    toast.info("Appointment scheduling coming soon!");
-  };
-
   return (
     <AppLayout>
       <div className="p-6 space-y-8">
-        <div className="flex justify-end gap-4">
-          <Button onClick={() => navigate('/jobs/new')} className="shadow-sm">
-            <Plus className="h-4 w-4 mr-2" />
-            Add Job
-          </Button>
-          <Button onClick={handleAddTimeOff} variant="outline" className="shadow-sm">
-            <Plus className="h-4 w-4 mr-2" />
-            Add Time Off
-          </Button>
-          <Button onClick={handleAddAppointment} variant="outline" className="shadow-sm">
-            <Plus className="h-4 w-4 mr-2" />
-            Add Appointment
-          </Button>
-        </div>
-
         <Card>
           <CardHeader>
             <CardTitle>Manager's Calendar</CardTitle>
