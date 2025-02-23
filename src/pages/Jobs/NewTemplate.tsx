@@ -1,12 +1,13 @@
-
 import { AppLayout } from "@/components/ui/AppLayout";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ArrowLeft, Download } from "lucide-react";
+import { ArrowLeft, Download, Upload } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { jsPDF } from "jspdf";
 import { useState } from "react";
+import { FileUpload } from "@/components/tasks/FileUpload";
+import { toast } from "sonner";
 
 export default function NewTemplate() {
   const navigate = useNavigate();
@@ -20,6 +21,18 @@ export default function NewTemplate() {
     description: "",
     price: "",
   });
+
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (files && files.length > 0) {
+      const file = files[0];
+      if (file.type !== 'application/pdf') {
+        toast.error('Please upload a PDF file');
+        return;
+      }
+      toast.success('Template uploaded successfully');
+    }
+  };
 
   const generatePDF = () => {
     const doc = new jsPDF();
@@ -95,14 +108,20 @@ export default function NewTemplate() {
               <p className="text-gray-500 mt-1">Define a new quote template</p>
             </div>
           </div>
-          <Button 
-            variant="outline"
-            onClick={generatePDF}
-            className="flex items-center gap-2"
-          >
-            <Download className="h-4 w-4" />
-            Download Template PDF
-          </Button>
+          <div className="flex gap-2">
+            <FileUpload 
+              onFileUpload={handleFileUpload}
+              label="Upload Template" 
+            />
+            <Button 
+              variant="outline"
+              onClick={generatePDF}
+              className="flex items-center gap-2 whitespace-nowrap"
+            >
+              <Download className="h-4 w-4" />
+              Download Template PDF
+            </Button>
+          </div>
         </div>
 
         <Card className="max-w-2xl">
