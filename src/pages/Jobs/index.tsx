@@ -393,7 +393,7 @@ export default function Jobs() {
         </div>
 
         <div className="mt-8">
-          <h2 className="text-2xl font-semibold mb-4">Recent Jobs</h2>
+          <h2 className="text-2xl font-semibold mb-4">Current Job Lists</h2>
           <div className="bg-white rounded-lg shadow overflow-hidden">
             <div className="max-h-[500px] overflow-y-auto">
               <table className="min-w-full divide-y divide-gray-200">
