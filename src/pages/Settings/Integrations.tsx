@@ -6,8 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 const availableIntegrations = [
   {
@@ -15,45 +16,80 @@ const availableIntegrations = [
     icon: MessageSquare,
     description: "Sync messages and communication with Go High Level",
     path: "/messaging",
-    status: "Not Connected",
     apiKeyRequired: true
   },
   {
     title: "Stripe",
     icon: CreditCard,
     description: "Process payments and manage subscriptions",
-    path: "/settings/integrations/stripe",
-    status: "Not Connected"
+    path: "/settings/integrations/stripe"
   },
   {
     title: "SendGrid",
     icon: Mail,
     description: "Send automated emails and notifications",
-    path: "/settings/integrations/sendgrid",
-    status: "Not Connected"
+    path: "/settings/integrations/sendgrid"
   },
   {
     title: "Google Calendar",
     icon: Calendar,
     description: "Sync appointments and schedules",
-    path: "/settings/integrations/google-calendar",
-    status: "Not Connected"
+    path: "/settings/integrations/google-calendar"
   }
 ];
 
 export default function IntegrationsPage() {
   const [apiKeys, setApiKeys] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState<Record<string, boolean>>({});
+  const [integrationStatuses, setIntegrationStatuses] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    loadIntegrationStatuses();
+  }, []);
+
+  const loadIntegrationStatuses = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('integration_configs')
+        .select('integration_name, status');
+
+      if (error) throw error;
+
+      const statuses = Object.fromEntries(
+        data.map(item => [item.integration_name, item.status])
+      );
+      setIntegrationStatuses(statuses);
+    } catch (error) {
+      console.error('Error loading integration statuses:', error);
+      toast.error('Failed to load integration statuses');
+    }
+  };
 
   const handleApiKeySubmit = async (integration: string) => {
     setLoading(prev => ({ ...prev, [integration]: true }));
     try {
-      // Here you would typically make an API call to validate and store the API key
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulated API call
-      toast.success(`${integration} API key configured successfully`);
-      localStorage.setItem(`${integration.toLowerCase()}-api-key`, apiKeys[integration]);
+      const response = await fetch('/api/validate-integration', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          integration,
+          apiKey: apiKeys[integration]
+        })
+      });
+
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to configure integration');
+      }
+
+      toast.success(data.message);
+      await loadIntegrationStatuses();
+      setApiKeys(prev => ({ ...prev, [integration]: '' }));
     } catch (error) {
-      toast.error(`Failed to configure ${integration} API key`);
+      toast.error(error.message);
     } finally {
       setLoading(prev => ({ ...prev, [integration]: false }));
     }
@@ -77,11 +113,12 @@ export default function IntegrationsPage() {
                     <CardTitle>{integration.title}</CardTitle>
                   </div>
                   <span className={`text-sm px-2 py-1 rounded-full ${
-                    integration.status === "Connected" 
+                    integrationStatuses[integration.title] === "connected"
                       ? "bg-green-100 text-green-800"
                       : "bg-gray-100 text-gray-800"
                   }`}>
-                    {integration.status}
+                    {integrationStatuses[integration.title]?.charAt(0).toUpperCase() + 
+                     integrationStatuses[integration.title]?.slice(1) || 'Not Connected'}
                   </span>
                 </div>
                 <CardDescription>{integration.description}</CardDescription>
@@ -112,8 +149,11 @@ export default function IntegrationsPage() {
                   </div>
                 )}
                 <Link to={integration.path}>
-                  <Button className="w-full" variant="outline">
-                    {integration.status === "Connected" ? "Manage Integration" : "Connect"}
+                  <Button 
+                    className="w-full" 
+                    variant={integrationStatuses[integration.title] === "connected" ? "default" : "outline"}
+                  >
+                    {integrationStatuses[integration.title] === "connected" ? "Manage Integration" : "Connect"}
                   </Button>
                 </Link>
               </CardContent>
