@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { AppLayout } from "@/components/ui/AppLayout";
 import { Button } from "@/components/ui/button";
@@ -7,12 +6,9 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Link, useNavigate } from "react-router-dom";
 import { ArrowLeft, Plus, FileText, Settings } from "lucide-react";
-
 export default function NewQuote() {
   const navigate = useNavigate();
-
-  return (
-    <AppLayout>
+  return <AppLayout>
       <div className="p-6 space-y-6">
         <div className="flex items-center gap-2">
           <Link to="/" className="hover:text-blue-500">
@@ -55,7 +51,7 @@ export default function NewQuote() {
               <div className="bg-purple-50 rounded-full w-12 h-12 flex items-center justify-center mx-auto">
                 <Plus className="h-6 w-6 text-purple-500" />
               </div>
-              <h3 className="font-semibold text-lg">New Quote</h3>
+              <h3 className="font-semibold text-lg">New Quote from scratch</h3>
               <p className="text-sm text-gray-500">Create a quote without a template</p>
               <Button variant="outline" className="w-full">
                 Create Quote
@@ -64,6 +60,5 @@ export default function NewQuote() {
           </Card>
         </div>
       </div>
-    </AppLayout>
-  );
+    </AppLayout>;
 }
