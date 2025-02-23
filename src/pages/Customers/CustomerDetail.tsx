@@ -1,9 +1,11 @@
+
 import { AppLayout } from "@/components/ui/AppLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { ArrowLeft, Phone, Mail, MapPin, FileText, Briefcase, Receipt, ListCheck } from "lucide-react";
+import { ArrowLeft, Phone, Mail, MapPin, FileText, Briefcase, Receipt, ListCheck, Plus } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
 
 // This would normally come from an API or database
 const customers = [
@@ -28,6 +30,7 @@ export default function CustomerDetail() {
   const navigate = useNavigate();
   const { id } = useParams();
   const customer = customers.find(c => c.id === Number(id));
+  const { toast } = useToast();
 
   if (!customer) {
     return (
@@ -98,8 +101,12 @@ export default function CustomerDetail() {
 
           <TabsContent value="quotes">
             <Card>
-              <CardHeader>
+              <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle>Quotes</CardTitle>
+                <Button size="sm" onClick={() => toast({ title: "Creating new quote", description: "This feature is coming soon!" })}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  New Quote
+                </Button>
               </CardHeader>
               <CardContent>
                 <p className="text-gray-500">No quotes available</p>
@@ -109,8 +116,12 @@ export default function CustomerDetail() {
 
           <TabsContent value="jobs">
             <Card>
-              <CardHeader>
+              <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle>Jobs</CardTitle>
+                <Button size="sm" onClick={() => toast({ title: "Creating new job", description: "This feature is coming soon!" })}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  New Job
+                </Button>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
@@ -127,8 +138,12 @@ export default function CustomerDetail() {
 
           <TabsContent value="invoices">
             <Card>
-              <CardHeader>
+              <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle>Invoices</CardTitle>
+                <Button size="sm" onClick={() => toast({ title: "Creating new invoice", description: "This feature is coming soon!" })}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  New Invoice
+                </Button>
               </CardHeader>
               <CardContent>
                 <p className="text-gray-500">No invoices available</p>
@@ -138,8 +153,12 @@ export default function CustomerDetail() {
 
           <TabsContent value="tasks">
             <Card>
-              <CardHeader>
+              <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle>Tasks</CardTitle>
+                <Button size="sm" onClick={() => toast({ title: "Creating new task", description: "This feature is coming soon!" })}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  New Task
+                </Button>
               </CardHeader>
               <CardContent>
                 <p className="text-gray-500">No tasks available</p>
