@@ -288,6 +288,72 @@ export default function Jobs() {
   return (
     <AppLayout>
       <div className="space-y-6 p-6">
+        <div>
+          <h2 className="text-2xl font-semibold mb-4">Current Jobs</h2>
+          <div className="bg-white rounded-lg shadow overflow-hidden">
+            <div className="max-h-[500px] overflow-y-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50 sticky top-0">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Job
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Customer
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Date
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Status
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {jobs.map((job) => (
+                    <tr key={job.id} className="hover:bg-gray-50">
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm font-medium text-gray-900">{job.title}</div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm text-gray-500">{job.customer}</div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm text-gray-500">{job.date}</div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex items-center">
+                          {getStatusIcon(job.status)}
+                          <span className="ml-2 text-sm text-gray-500">
+                            {job.status.split('-').map(word => 
+                              word.charAt(0).toUpperCase() + word.slice(1)
+                            ).join(' ')}
+                          </span>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <select
+                          className="text-sm border border-gray-300 rounded-md px-2 py-1"
+                          value={job.status}
+                          onChange={(e) => updateJobStatus(job.id, e.target.value as Job['status'])}
+                        >
+                          <option value="ready">Ready to Go</option>
+                          <option value="in-progress">In Progress</option>
+                          <option value="to-invoice">To Invoice</option>
+                          <option value="invoiced">Invoiced</option>
+                        </select>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
         <div className="flex justify-between items-center">
           <div>
             <h1 className="text-3xl font-bold">Job Templates</h1>
@@ -390,72 +456,6 @@ export default function Jobs() {
               </div>
             </div>
           </Card>
-        </div>
-
-        <div className="mt-8">
-          <h2 className="text-2xl font-semibold mb-4">Current Jobs</h2>
-          <div className="bg-white rounded-lg shadow overflow-hidden">
-            <div className="max-h-[500px] overflow-y-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50 sticky top-0">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Job
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Customer
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Date
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Status
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Actions
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {jobs.map((job) => (
-                    <tr key={job.id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-gray-900">{job.title}</div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-500">{job.customer}</div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-500">{job.date}</div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center">
-                          {getStatusIcon(job.status)}
-                          <span className="ml-2 text-sm text-gray-500">
-                            {job.status.split('-').map(word => 
-                              word.charAt(0).toUpperCase() + word.slice(1)
-                            ).join(' ')}
-                          </span>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <select
-                          className="text-sm border border-gray-300 rounded-md px-2 py-1"
-                          value={job.status}
-                          onChange={(e) => updateJobStatus(job.id, e.target.value as Job['status'])}
-                        >
-                          <option value="ready">Ready to Go</option>
-                          <option value="in-progress">In Progress</option>
-                          <option value="to-invoice">To Invoice</option>
-                          <option value="invoiced">Invoiced</option>
-                        </select>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
