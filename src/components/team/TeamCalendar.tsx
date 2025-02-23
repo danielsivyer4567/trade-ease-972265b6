@@ -1,9 +1,7 @@
 
 import React, { useState } from 'react';
 import { Calendar } from '@/components/ui/calendar';
-import { Droplet, CloudRain, CloudLightning, Sun, CloudSun, Droplets, Plus } from 'lucide-react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
+import { Droplet, CloudRain, CloudLightning, Sun, CloudSun, Droplets } from 'lucide-react';
 
 interface TeamCalendarProps {
   date: Date | undefined;
@@ -99,43 +97,7 @@ export function TeamCalendar({ date, setDate, teamColor }: TeamCalendarProps) {
 
   return (
     <section>
-      <div className="bg-white p-6 rounded-lg shadow-md relative">
-        <Dialog>
-          <DialogTrigger asChild>
-            <Button 
-              size="icon" 
-              className={`absolute top-2 right-2 bg-${teamColor}-600 hover:bg-${teamColor}-700`}
-            >
-              <Plus className="h-4 w-4" />
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Add New Event</DialogTitle>
-            </DialogHeader>
-            <div className="grid gap-4 py-4">
-              <Button 
-                onClick={() => console.log('Book job')} 
-                className={`bg-${teamColor}-600 hover:bg-${teamColor}-700`}
-              >
-                Book Job
-              </Button>
-              <Button 
-                onClick={() => console.log('Request time off')} 
-                className={`bg-${teamColor}-600 hover:bg-${teamColor}-700`}
-              >
-                Request Time Off
-              </Button>
-              <Button 
-                onClick={() => console.log('Schedule appointment')} 
-                className={`bg-${teamColor}-600 hover:bg-${teamColor}-700`}
-              >
-                Schedule Appointment
-              </Button>
-            </div>
-          </DialogContent>
-        </Dialog>
-
+      <div className="bg-white p-6 rounded-lg shadow-md">
         <Calendar 
           mode="single" 
           selected={date} 
