@@ -11,17 +11,17 @@ export default function Calendar() {
   return (
     <AppLayout>
       <div className="p-6 space-y-8">
-        <Card className="w-full">
+        <Card>
           <CardHeader>
             <CardTitle>Manager's Calendar</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="w-full">
+            <div className="flex justify-center">
               <CalendarComponent
                 mode="single"
                 selected={date}
                 onSelect={setDate}
-                className="w-full rounded-md border shadow"
+                className="rounded-md border shadow"
               />
             </div>
           </CardContent>

@@ -17,7 +17,7 @@ import AIFeatures from "@/pages/AIFeatures";
 import Settings from "@/pages/Settings";
 import Notifications from "@/pages/Notifications";
 import { Toaster } from "@/components/ui/toaster";
-import { ThemeProvider } from "next-themes";
+import { ThemeProvider } from "@/components/ui/theme-provider";
 
 function App() {
   return (
