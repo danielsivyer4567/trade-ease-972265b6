@@ -1,10 +1,11 @@
-
 import { AppLayout } from "@/components/ui/AppLayout";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Plus, Wrench, Zap, Wind, Loader2, Upload, FileUp, LinkIcon, Clock, CheckCircle, DollarSign, Search, ListTodo, UserPlus } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Calendar } from "@/components/ui/calendar";
+import { Plus, Wrench, Zap, Wind, Loader2, Upload, FileUp, LinkIcon, Clock, CheckCircle, DollarSign, Search, ListTodo, UserPlus, Users, CalendarIcon } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
@@ -63,22 +64,26 @@ const categories = [{
   color: "text-green-500"
 }];
 
+const teams = [
+  { id: '1', name: 'Team Red', color: 'text-red-500' },
+  { id: '2', name: 'Team Blue', color: 'text-blue-500' },
+  { id: '3', name: 'Team Green', color: 'text-green-500' },
+];
+
 export default function Jobs() {
   const navigate = useNavigate();
-  const {
-    toast
-  } = useToast();
+  const { toast } = useToast();
   const [jobDescription, setJobDescription] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedTemplates, setGeneratedTemplates] = useState<JobTemplate[]>([]);
   const [jobs, setJobs] = useState<Job[]>(mockJobs);
   const [searchLetter, setSearchLetter] = useState<string>("");
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedJob, setSelectedJob] = useState<Job | null>(null);
+  const [selectedTeam, setSelectedTeam] = useState<string>('');
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
+  const [isAssignDialogOpen, setIsAssignDialogOpen] = useState(false);
   const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
-  const filteredTemplates = generatedTemplates.filter(template => {
-    if (!searchQuery) return true;
-    return template.title.toLowerCase().includes(searchQuery.toLowerCase());
-  });
 
   const generateTemplate = async () => {
     if (!jobDescription.trim()) {
@@ -290,6 +295,38 @@ export default function Jobs() {
     }
   };
 
+  const handleAssign = (job: Job) => {
+    setSelectedJob(job);
+    setIsAssignDialogOpen(true);
+  };
+
+  const handleAssignSubmit = () => {
+    if (!selectedTeam || !selectedDate) {
+      toast({
+        title: "Error",
+        description: "Please select both a team and date",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    toast({
+      title: "Job Assigned",
+      description: `Job ${selectedJob?.jobNumber} has been assigned to ${teams.find(t => t.id === selectedTeam)?.name} for ${selectedDate.toLocaleDateString()}`,
+    });
+
+    setIsAssignDialogOpen(false);
+    setSelectedJob(null);
+    setSelectedTeam('');
+    setSelectedDate(undefined);
+    updateJobStatus(selectedJob!.id, 'in-progress');
+  };
+
+  const filteredTemplates = generatedTemplates.filter(template => {
+    if (!searchQuery) return true;
+    return template.title.toLowerCase().includes(searchQuery.toLowerCase());
+  });
+
   return <AppLayout>
       <div className="space-y-6 p-6">
         <div>
@@ -342,7 +379,7 @@ export default function Jobs() {
                         <div className="text-sm text-gray-500">{job.date}</div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <Button variant="outline" size="sm">
+                        <Button variant="outline" size="sm" onClick={() => handleAssign(job)}>
                           <UserPlus className="h-4 w-4 mr-2" />
                           Assign
                         </Button>
@@ -537,6 +574,50 @@ export default function Jobs() {
             </div>
           </Card>
         </div>
+
+        <Dialog open={isAssignDialogOpen} onOpenChange={setIsAssignDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Assign Job {selectedJob?.jobNumber}</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Select Team</label>
+                <div className="grid grid-cols-3 gap-2">
+                  {teams.map(team => (
+                    <Button
+                      key={team.id}
+                      variant={selectedTeam === team.id ? "default" : "outline"}
+                      className="flex items-center justify-center"
+                      onClick={() => setSelectedTeam(team.id)}
+                    >
+                      <Users className={`h-4 w-4 mr-2 ${team.color}`} />
+                      {team.name}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Select Date</label>
+                <Calendar
+                  mode="single"
+                  selected={selectedDate}
+                  onSelect={setSelectedDate}
+                  className="rounded-md border"
+                  initialFocus
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsAssignDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleAssignSubmit}>
+                Assign Job
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </AppLayout>;
 }
