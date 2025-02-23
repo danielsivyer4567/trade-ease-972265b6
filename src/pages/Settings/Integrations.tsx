@@ -1,4 +1,3 @@
-
 import { AppLayout } from "@/components/ui/AppLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Link2, MessageSquare, CreditCard, Mail, Calendar, Key } from "lucide-react";
@@ -9,6 +8,11 @@ import { Label } from "@/components/ui/label";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+
+interface IntegrationConfig {
+  integration_name: string;
+  status: string;
+}
 
 const availableIntegrations = [
   {
@@ -49,16 +53,18 @@ export default function IntegrationsPage() {
 
   const loadIntegrationStatuses = async () => {
     try {
-      const { data, error } = await supabase
+      const { data: integrationData, error } = await supabase
         .from('integration_configs')
-        .select('integration_name, status');
+        .select('integration_name, status') as { data: IntegrationConfig[] | null, error: any };
 
       if (error) throw error;
 
-      const statuses = Object.fromEntries(
-        data.map(item => [item.integration_name, item.status])
-      );
-      setIntegrationStatuses(statuses);
+      if (integrationData) {
+        const statuses = Object.fromEntries(
+          integrationData.map(item => [item.integration_name, item.status])
+        );
+        setIntegrationStatuses(statuses);
+      }
     } catch (error) {
       console.error('Error loading integration statuses:', error);
       toast.error('Failed to load integration statuses');

@@ -1,4 +1,3 @@
-import { Card } from "@/components/ui/card";
 import { AppLayout } from "@/components/ui/AppLayout";
 import { Calendar, DollarSign, FileText, Users, CheckSquare, Clock, MessageSquare, XSquare, Plus, Briefcase, Calendar as CalendarIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -7,7 +6,7 @@ import type { Job } from "@/types/job";
 import { TeamCalendar } from '@/components/team/TeamCalendar';
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { toast } from 'react-toastify';
+import { toast } from "sonner";
 
 const stats = [{
   title: "Active Jobs",
@@ -41,28 +40,32 @@ const allJobs: Job[] = [{
   type: "Plumbing Repair",
   status: "in-progress",
   date: "Today",
-  location: [151.2093, -33.8688]
+  location: [151.2093, -33.8688],
+  jobNumber: "PLM-001"
 }, {
   id: "2",
   customer: "Sarah Johnson",
   type: "Electrical Installation",
   status: "ready",
   date: "Tomorrow",
-  location: [151.2543, -33.8688]
+  location: [151.2543, -33.8688],
+  jobNumber: "ELE-001"
 }, {
   id: "3",
   customer: "Mike Brown",
   type: "HVAC Maintenance",
   status: "invoiced",
   date: "Yesterday",
-  location: [151.1943, -33.8788]
+  location: [151.1943, -33.8788],
+  jobNumber: "HVAC-001"
 }, {
   id: "4",
   customer: "Emma Wilson",
   type: "Kitchen Renovation",
   status: "ready",
   date: "Tomorrow",
-  location: [151.2153, -33.8588]
+  location: [151.2153, -33.8588],
+  jobNumber: "REN-001"
 }];
 
 const todaysJobs = allJobs.filter(job => job.date === "Today");
@@ -131,48 +134,25 @@ const Index = () => {
     { name: 'Green Team', color: 'green' }
   ]);
 
+  const getColorForTeam = (teamIndex: number) => {
+    const baseColors = [
+      'red', 'blue', 'green', 'purple', 'orange', 'pink', 'teal', 'yellow', 'indigo', 'rose'
+    ];
+    
+    const colorIndex = teamIndex % baseColors.length;
+    return baseColors[colorIndex];
+  };
+
   const handleAddTeam = () => {
-    const availableColors = {
-      purple: {
-        light: '#E5DEFF',
-        primary: '#9B87F5',
-        text: '#1A1F2C'
-      },
-      orange: {
-        light: '#FEF7CD',
-        primary: '#F97316',
-        text: '#7C2D12'
-      },
-      pink: {
-        light: '#FFDEE2',
-        primary: '#EC4899',
-        text: '#831843'
-      },
-      teal: {
-        light: '#CCFBF1',
-        primary: '#14B8A6',
-        text: '#134E4A'
-      }
+    const newTeamIndex = teams.length;
+    const newColor = getColorForTeam(newTeamIndex);
+    const newTeam = {
+      name: `Team ${newTeamIndex + 1}`,
+      color: newColor
     };
-
-    const usedColors = teams.map(team => team.color);
-    const availableColorNames = Object.keys(availableColors).filter(color => 
-      !usedColors.includes(color)
-    );
-
-    if (availableColorNames.length > 0) {
-      const newColor = availableColorNames[0];
-      const newTeamNumber = teams.length + 1;
-      const newTeam = {
-        name: `Team ${newTeamNumber}`,
-        color: newColor
-      };
-      
-      setTeams([...teams, newTeam]);
-      toast.success(`Added ${newTeam.name} with ${newColor} color scheme`);
-    } else {
-      toast.error('Maximum number of teams reached');
-    }
+    
+    setTeams([...teams, newTeam]);
+    toast.success(`Added ${newTeam.name} with ${newColor} color scheme`);
   };
 
   return <AppLayout>

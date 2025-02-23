@@ -7,7 +7,16 @@ export interface Job {
   date: string;
   location: [number, number];
   jobNumber: string;
+  title?: string;
   description?: string;
   assignedTeam?: string;
   assignedMemberId?: string;
+}
+
+export interface JobTemplate {
+  id: string;
+  title: string;
+  description: string;
+  type: string;
+  estimatedDuration: number;
 }
