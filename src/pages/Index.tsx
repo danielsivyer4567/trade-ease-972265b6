@@ -1,3 +1,4 @@
+
 import { AppLayout } from "@/components/ui/AppLayout";
 import { Job } from "@/types/job";
 import { useEffect, useState } from "react";
