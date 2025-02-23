@@ -4,7 +4,6 @@ import { LayoutDashboard, Briefcase, Users, FileText, Settings, Menu, Calendar, 
 import { useSidebar } from './sidebar';
 import { cn } from '@/lib/utils';
 import { Button } from './button';
-
 export function AppSidebar() {
   const {
     state,
@@ -12,7 +11,6 @@ export function AppSidebar() {
   } = useSidebar();
   const location = useLocation();
   const notificationCount = 3;
-
   return <>
       <Button variant="outline" size="icon" className="fixed left-4 top-4 z-40 lg:hidden" onClick={toggleSidebar}>
         <Menu />
@@ -23,8 +21,11 @@ export function AppSidebar() {
             <div className="flex items-center gap-3 mb-6 px-0 py-px my-0 mx-0">
               <img src="/lovable-uploads/6a07dd00-f2c7-49da-8b00-48d960c13610.png" alt="Trade Ease Logo" className="w-12 h-12" />
               <span className="font-semibold text-lg text-gray-900 my-0 text-right px-0 py-[5px] mx-0">
-                Trade Ease
-              </span>
+
+
+
+Trade Ease
+            </span>
             </div>
           </div>
           <nav className="flex-1 p-1 space-y-0.5">
@@ -37,20 +38,9 @@ export function AppSidebar() {
                   {notificationCount}
                 </span>}
             </Link>
-            <Link to="/" className={cn("flex items-center gap-1.5 p-1.5 rounded-lg hover:bg-gray-100 text-gray-700 hover:text-gray-900 text-sm", location.pathname === '/' && "bg-gray-100 text-gray-900")}>
+            <Link to="/" className="flex items-center gap-1.5 p-1.5 rounded-lg hover:bg-gray-100 text-gray-700 hover:text-gray-900 text-sm">
               <LayoutDashboard className="w-3.5 h-3.5" />
               Dashboard
-            </Link>
-            <Link to="/calendar" className={cn("flex flex-col gap-1 p-2 rounded-lg hover:bg-gray-100 text-gray-700 hover:text-gray-900", location.pathname === '/calendar' && "bg-gray-100 text-gray-900")}>
-              <div className="flex items-center gap-1.5">
-                <Calendar className="w-3.5 h-3.5" />
-                <span>Calendar</span>
-              </div>
-              <div className="pl-5 text-xs space-y-0.5">
-                <Link to="/team-red" className="block hover:text-red-600">Red Team</Link>
-                <Link to="/team-blue" className="block hover:text-blue-600">Blue Team</Link>
-                <Link to="/team-green" className="block hover:text-green-600">Green Team</Link>
-              </div>
             </Link>
             <Link to="/statistics" className="flex items-center gap-1.5 p-1.5 rounded-lg hover:bg-gray-100 text-gray-700 hover:text-gray-900 text-sm">
               <BarChart className="w-3.5 h-3.5" />
@@ -63,6 +53,10 @@ export function AppSidebar() {
             <Link to="/jobs" className="flex items-center gap-1.5 p-1.5 rounded-lg hover:bg-gray-100 text-gray-700 hover:text-gray-900 text-sm">
               <Briefcase className="w-3.5 h-3.5" />
               Jobs
+            </Link>
+            <Link to="/calendar" className="flex items-center gap-1.5 p-1.5 rounded-lg hover:bg-gray-100 text-gray-700 hover:text-gray-900 text-sm mx-px my-0 py-[5px] px-[7px]">
+              <Calendar className="w-3.5 h-3.5" />
+              Calendar
             </Link>
             <Link to="/customers" className="flex items-center gap-1.5 p-1.5 rounded-lg hover:bg-gray-100 text-gray-700 hover:text-gray-900 text-sm">
               <Users className="w-3.5 h-3.5" />
