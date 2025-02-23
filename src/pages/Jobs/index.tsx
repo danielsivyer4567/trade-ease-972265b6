@@ -8,7 +8,6 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
 import type { JobTemplate } from "@/types/job";
-import { supabase } from "@/lib/supabase";
 
 interface Job {
   id: string;
@@ -74,44 +73,32 @@ export default function Jobs() {
     }
     setIsGenerating(true);
     try {
-      const { data, error } = await supabase.functions.invoke('generate-with-openai', {
-        body: {
-          prompt: `Create a detailed job template for: ${jobDescription}. 
-          Return a JSON object with the following structure:
-          {
-            "title": "Job Title",
-            "estimatedDuration": "Estimated time to complete",
-            "materials": ["material1", "material2"],
-            "price": "Estimated price range",
-            "category": "One of: Plumbing, Electrical, or HVAC"
-          }`
-        }
+      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`
+        },
+        body: JSON.stringify({
+          model: "gpt-4o-mini",
+          messages: [{
+            role: "system",
+            content: "You are a professional job template creator. Create detailed job templates based on descriptions."
+          }, {
+            role: "user",
+            content: `Create a job template for: ${jobDescription}. Include title, estimated duration, required materials, price range, and category (Plumbing, Electrical, or HVAC).`
+          }]
+        })
       });
-
-      if (error) throw error;
-
-      const template = {
-        id: crypto.randomUUID(),
-        ...JSON.parse(data.generatedText)
-      };
-
+      const data = await response.json();
+      const template = JSON.parse(data.choices[0].message.content);
       setGeneratedTemplates([template, ...generatedTemplates]);
       setJobDescription("");
-      
-      // Store the response in the ai_responses table
-      await supabase.from('ai_responses').insert([{
-        prompt: jobDescription,
-        response: data.generatedText,
-        model: 'gpt-4o-mini',
-        provider: 'openai'
-      }]);
-
       toast({
         title: "Success",
         description: "Job template generated successfully"
       });
     } catch (error) {
-      console.error('Error generating template:', error);
       toast({
         title: "Error",
         description: "Failed to generate template. Please try again.",
