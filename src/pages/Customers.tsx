@@ -3,16 +3,26 @@ import { AppLayout } from "@/components/ui/AppLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, User, Phone, Mail, MapPin, FileText, Image, Clock, DollarSign, UserPlus } from "lucide-react";
+import { Search, User, Phone, Mail, MapPin, FileText, Image, Clock, DollarSign, UserPlus, Upload } from "lucide-react";
 import { useState } from "react";
 import { ImagesGrid } from "@/components/tasks/ImagesGrid";
 import { useNavigate } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export default function CustomersPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedFilter, setSelectedFilter] = useState("all");
   const [expandedCustomerId, setExpandedCustomerId] = useState<number | null>(null);
   const navigate = useNavigate();
+  const { toast } = useToast();
   
   const customers = [
     {
@@ -63,6 +73,17 @@ export default function CustomersPage() {
     },
   ];
 
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      // This is a placeholder for actual file processing
+      toast({
+        title: "File received",
+        description: `Processing ${file.name}. This feature is coming soon!`,
+      });
+    }
+  };
+
   const filteredCustomers = customers.filter(customer => {
     const matchesSearch = 
       customer.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -73,10 +94,6 @@ export default function CustomersPage() {
     return matchesSearch && customer.status === selectedFilter;
   });
 
-  const handleCustomerClick = (customerId: number) => {
-    navigate(`/customers/${customerId}`);
-  };
-
   return (
     <AppLayout>
       <div className="p-6 space-y-6">
@@ -86,10 +103,48 @@ export default function CustomersPage() {
               <User className="h-8 w-8" />
               Customers
             </h1>
-            <Button>
-              <UserPlus className="h-4 w-4 mr-2" />
-              Add Customer
-            </Button>
+            <div className="flex gap-2">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline">
+                    <Upload className="h-4 w-4 mr-2" />
+                    Import
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                  <DropdownMenuLabel>Import Customers</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => {
+                    const input = document.createElement('input');
+                    input.type = 'file';
+                    input.accept = '.csv';
+                    input.onchange = (e) => handleFileUpload(e as any);
+                    input.click();
+                  }}>
+                    Import from CSV
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => {
+                    const input = document.createElement('input');
+                    input.type = 'file';
+                    input.accept = '.xlsx,.xls';
+                    input.onchange = (e) => handleFileUpload(e as any);
+                    input.click();
+                  }}>
+                    Import from Spreadsheet
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => toast({
+                    title: "Google Docs Import",
+                    description: "Google Docs integration coming soon!"
+                  })}>
+                    Import from Google Docs
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+              <Button>
+                <UserPlus className="h-4 w-4 mr-2" />
+                Add Customer
+              </Button>
+            </div>
           </div>
           
           <div className="flex gap-4 flex-col sm:flex-row">
@@ -130,7 +185,7 @@ export default function CustomersPage() {
             <Card 
               key={customer.id} 
               className={`hover:shadow-md transition-all cursor-pointer`}
-              onClick={() => handleCustomerClick(customer.id)}
+              onClick={() => navigate(`/customers/${customer.id}`)}
             >
               <CardHeader className="py-3">
                 <CardTitle className="text-lg flex items-center justify-between">
