@@ -354,9 +354,39 @@ export default function Jobs() {
           </div>
         </div>
 
+        <div>
+          <h2 className="text-2xl font-semibold mb-4">My Templates</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+            {generatedTemplates.map((template, index) => (
+              <Card key={index} className="p-4 hover:shadow-md transition-shadow">
+                <div className="flex justify-between items-start mb-2">
+                  <h3 className="font-medium">{template.title}</h3>
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    onClick={() => attachToJob(template)}
+                    className="text-blue-500 hover:text-blue-700"
+                  >
+                    <LinkIcon className="h-4 w-4 mr-1" />
+                    Attach to Job
+                  </Button>
+                </div>
+                <div className="space-y-2 text-sm">
+                  <p><span className="font-medium">Duration:</span> {template.estimatedDuration}</p>
+                  <p><span className="font-medium">Price:</span> {template.price}</p>
+                  <p><span className="font-medium">Category:</span> {template.category}</p>
+                  <p className="text-gray-600">
+                    <span className="font-medium">Materials:</span> {template.materials.join(", ")}
+                  </p>
+                </div>
+              </Card>
+            ))}
+          </div>
+        </div>
+
         <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-3xl font-bold">Job Templates</h1>
+            <h1 className="text-3xl font-bold">Create New Template</h1>
             <p className="text-gray-500 mt-1">Generate and manage job templates with AI</p>
           </div>
         </div>
@@ -456,33 +486,6 @@ export default function Jobs() {
               </div>
             </div>
           </Card>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {generatedTemplates.map((template, index) => (
-            <Card key={index} className="p-4 hover:shadow-md transition-shadow">
-              <div className="flex justify-between items-start mb-2">
-                <h3 className="font-medium">{template.title}</h3>
-                <Button 
-                  variant="ghost" 
-                  size="sm"
-                  onClick={() => attachToJob(template)}
-                  className="text-blue-500 hover:text-blue-700"
-                >
-                  <LinkIcon className="h-4 w-4 mr-1" />
-                  Attach to Job
-                </Button>
-              </div>
-              <div className="space-y-2 text-sm">
-                <p><span className="font-medium">Duration:</span> {template.estimatedDuration}</p>
-                <p><span className="font-medium">Price:</span> {template.price}</p>
-                <p><span className="font-medium">Category:</span> {template.category}</p>
-                <p className="text-gray-600">
-                  <span className="font-medium">Materials:</span> {template.materials.join(", ")}
-                </p>
-              </div>
-            </Card>
-          ))}
         </div>
       </div>
     </AppLayout>
