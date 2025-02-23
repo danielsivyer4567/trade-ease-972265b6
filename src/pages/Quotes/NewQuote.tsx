@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { AppLayout } from "@/components/ui/AppLayout";
 import { Button } from "@/components/ui/button";
@@ -11,12 +10,12 @@ export default function NewQuote() {
   const navigate = useNavigate();
 
   const handleCreateBlankQuote = () => {
-    // Create a new blank text document
-    const blob = new Blob([''], { type: 'text/plain' });
+    // Create a new blank Word document
+    const blob = new Blob([''], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
     const url = window.URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = 'blank_quote.txt';
+    link.download = 'blank_quote.docx';
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -74,7 +73,7 @@ export default function NewQuote() {
                 className="w-full"
                 onClick={handleCreateBlankQuote}
               >
-                Create Quote
+                Create Word Document
               </Button>
             </div>
           </Card>
