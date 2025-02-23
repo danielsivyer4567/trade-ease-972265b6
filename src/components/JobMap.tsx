@@ -26,22 +26,47 @@ const JobMap = ({ jobs }: JobMapProps) => {
     mapTypeId: 'satellite',
     streetViewControl: false,
     mapTypeControl: false,
+    mapId: '8f348c1e276da9d5' // Added Map ID for Advanced Markers
   };
 
   const onLoad = (map: google.maps.Map) => {
     jobs.forEach((job) => {
+      // Create marker element
+      const markerElement = document.createElement('div');
+      markerElement.className = 'marker';
+      markerElement.innerHTML = `
+        <div class="bg-white p-2 rounded-lg shadow-lg">
+          <div class="font-semibold">${job.customer}</div>
+        </div>
+      `;
+
+      // Create the advanced marker
       const marker = new google.maps.marker.AdvancedMarkerElement({
         position: { lat: job.location[1], lng: job.location[0] },
         map,
+        content: markerElement,
         title: job.customer
       });
-      marker.addListener('click', () => setSelectedJob(job));
+
+      // Add click listener using the recommended 'gmp-click' event
+      marker.addListener('gmp-click', () => {
+        setSelectedJob(job);
+      });
     });
 
     // Add a marker for the center location
+    const centerMarkerElement = document.createElement('div');
+    centerMarkerElement.className = 'marker';
+    centerMarkerElement.innerHTML = `
+      <div class="bg-blue-500 text-white p-2 rounded-lg shadow-lg">
+        <div class="font-semibold">Gold Coast</div>
+      </div>
+    `;
+
     new google.maps.marker.AdvancedMarkerElement({
       position: center,
       map,
+      content: centerMarkerElement,
       title: "Gold Coast"
     });
   };
@@ -49,7 +74,7 @@ const JobMap = ({ jobs }: JobMapProps) => {
   return (
     <LoadScript 
       googleMapsApiKey="AIzaSyAnIcvNA_ZjRUnN4aeyl-1MYpBSN-ODIvw"
-      libraries={["maps", "marker"]}
+      libraries={["marker"]}
       version="beta"
     >
       <GoogleMap
