@@ -3,7 +3,7 @@ import { AppLayout } from "@/components/ui/AppLayout";
 import { BarChart as BarChartIcon } from "lucide-react";
 import { KeyStatistics } from "@/components/statistics/KeyStatistics";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Line, CompositeChart } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Line, ComposedChart } from 'recharts';
 
 const teamData = [
   {
@@ -51,7 +51,7 @@ export default function StatisticsPage() {
           <CardContent>
             <div className="h-[400px] w-full">
               <ResponsiveContainer width="100%" height="100%">
-                <CompositeChart
+                <ComposedChart
                   data={teamData}
                   margin={{
                     top: 20,
@@ -78,7 +78,7 @@ export default function StatisticsPage() {
                     stroke="#ff7300" 
                     strokeWidth={2}
                   />
-                </CompositeChart>
+                </ComposedChart>
               </ResponsiveContainer>
             </div>
           </CardContent>
