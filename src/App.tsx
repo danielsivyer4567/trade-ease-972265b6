@@ -13,6 +13,7 @@ import TeamGreen from "./pages/TeamGreen";
 import Notifications from "./pages/Notifications";
 import Customers from "./pages/Customers";
 import NotFound from "./pages/NotFound";
+import CustomerDetail from "./pages/Customers/CustomerDetail";
 import "./App.css";
 
 function App() {
@@ -31,6 +32,7 @@ function App() {
         <Route path="/team-green" element={<TeamGreen />} />
         <Route path="/notifications" element={<Notifications />} />
         <Route path="/customers" element={<Customers />} />
+        <Route path="/customers/:id" element={<CustomerDetail />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>

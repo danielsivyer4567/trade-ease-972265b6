@@ -3,14 +3,16 @@ import { AppLayout } from "@/components/ui/AppLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, User, Phone, Mail, MapPin, FileText, Image, Clock, DollarSign, UserPlus, Filter } from "lucide-react";
+import { Search, User, Phone, Mail, MapPin, FileText, Image, Clock, DollarSign, UserPlus } from "lucide-react";
 import { useState } from "react";
 import { ImagesGrid } from "@/components/tasks/ImagesGrid";
+import { useNavigate } from "react-router-dom";
 
 export default function CustomersPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedFilter, setSelectedFilter] = useState("all");
   const [expandedCustomerId, setExpandedCustomerId] = useState<number | null>(null);
+  const navigate = useNavigate();
   
   const customers = [
     {
@@ -71,13 +73,8 @@ export default function CustomersPage() {
     return matchesSearch && customer.status === selectedFilter;
   });
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "completed": return "text-green-600";
-      case "in-progress": return "text-blue-600";
-      case "pending": return "text-yellow-600";
-      default: return "text-gray-600";
-    }
+  const handleCustomerClick = (customerId: number) => {
+    navigate(`/customers/${customerId}`);
   };
 
   return (
@@ -132,12 +129,8 @@ export default function CustomersPage() {
           {filteredCustomers.map(customer => (
             <Card 
               key={customer.id} 
-              className={`hover:shadow-md transition-all cursor-pointer ${
-                expandedCustomerId === customer.id ? 'bg-gray-50' : ''
-              }`}
-              onClick={() => setExpandedCustomerId(
-                expandedCustomerId === customer.id ? null : customer.id
-              )}
+              className={`hover:shadow-md transition-all cursor-pointer`}
+              onClick={() => handleCustomerClick(customer.id)}
             >
               <CardHeader className="py-3">
                 <CardTitle className="text-lg flex items-center justify-between">
@@ -150,57 +143,22 @@ export default function CustomersPage() {
                   </span>
                 </CardTitle>
               </CardHeader>
-              {expandedCustomerId === customer.id && (
-                <CardContent className="space-y-4">
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2 text-sm">
-                      <Phone className="h-4 w-4 text-gray-500" />
-                      {customer.phone}
-                    </div>
-                    <div className="flex items-center gap-2 text-sm">
-                      <Mail className="h-4 w-4 text-gray-500" />
-                      {customer.email}
-                    </div>
-                    <div className="flex items-center gap-2 text-sm">
-                      <MapPin className="h-4 w-4 text-gray-500" />
-                      {customer.address}
-                    </div>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2 text-sm">
+                    <Phone className="h-4 w-4 text-gray-500" />
+                    {customer.phone}
                   </div>
-
-                  <div className="space-y-2">
-                    <h4 className="text-sm font-medium flex items-center gap-2">
-                      <Clock className="h-4 w-4" />
-                      Recent Jobs
-                    </h4>
-                    <div className="space-y-1">
-                      {customer.recentJobs.map(job => (
-                        <div key={job.id} className="text-sm flex items-center justify-between">
-                          <span>{job.title}</span>
-                          <span className={getStatusColor(job.status)}>
-                            {job.status}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
+                  <div className="flex items-center gap-2 text-sm">
+                    <Mail className="h-4 w-4 text-gray-500" />
+                    {customer.email}
                   </div>
-
-                  <ImagesGrid 
-                    images={customer.projectImages}
-                    title="Project Images"
-                  />
-
-                  <div className="pt-2 border-t flex justify-between text-sm">
-                    <div className="flex items-center gap-1">
-                      <DollarSign className="h-4 w-4 text-gray-500" />
-                      <span>Total Spent: ${customer.totalSpent}</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <Clock className="h-4 w-4 text-gray-500" />
-                      <span>Last Service: {customer.lastService}</span>
-                    </div>
+                  <div className="flex items-center gap-2 text-sm">
+                    <MapPin className="h-4 w-4 text-gray-500" />
+                    {customer.address}
                   </div>
-                </CardContent>
-              )}
+                </div>
+              </CardContent>
             </Card>
           ))}
         </div>
