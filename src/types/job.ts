@@ -6,6 +6,7 @@ export interface Job {
   status: 'ready' | 'in-progress' | 'to-invoice' | 'invoiced';
   date: string;
   location: [number, number];
+  address?: string;
   jobNumber: string;
   title?: string;
   description?: string;

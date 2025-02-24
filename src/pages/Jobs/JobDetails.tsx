@@ -18,6 +18,7 @@ const mockJobs: Job[] = [{
   status: "in-progress",
   date: "Today",
   location: [151.2093, -33.8688],
+  address: "123 Main Street, Sydney NSW 2000",
   jobNumber: "PLM-001",
   title: "Emergency Pipe Repair",
   description: "Fix leaking pipe in basement",
@@ -30,6 +31,7 @@ const mockJobs: Job[] = [{
   status: "ready",
   date: "Tomorrow",
   location: [151.2543, -33.8688],
+  address: "45 Park Avenue, Sydney NSW 2000",
   jobNumber: "ELE-001",
   title: "New Circuit Installation",
   description: "Install new circuit for home office",
@@ -131,12 +133,13 @@ export default function JobDetails() {
                 <div className="space-y-2">
                   <div className="flex items-center gap-2 text-gray-600">
                     <MapPin className="w-5 h-5" />
-                    <span className="font-medium">Location:</span> 
+                    <span className="font-medium">Location:</span>
+                    <span>{job.address}</span>
                     <a 
                       href={`https://www.google.com/maps?q=${job.location[1]},${job.location[0]}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-blue-600 hover:underline"
+                      className="text-blue-600 hover:underline ml-2"
                     >
                       View on Map
                     </a>
