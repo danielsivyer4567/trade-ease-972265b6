@@ -203,7 +203,7 @@ export default function JobDetails() {
             )}
 
             <div className="mt-6">
-              <div className="flex items-center justify-between gap-2 text-gray-600 mb-4">
+              <div className="flex items-center gap-2 text-gray-600 mb-4">
                 <div className="flex items-center gap-2">
                   <ImageIcon className="w-5 h-5" />
                   <span className="font-medium">Quote Inspection Photos</span>
@@ -219,6 +219,7 @@ export default function JobDetails() {
                     variant="outline"
                     size="sm"
                     onClick={handleTagMember}
+                    className="text-orange-500"
                   >
                     <Tag className="w-4 h-4 mr-2" />
                     Tag Member
