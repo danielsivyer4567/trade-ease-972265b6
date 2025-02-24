@@ -1,4 +1,3 @@
-
 import { AppLayout } from "@/components/ui/AppLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useParams, useNavigate } from "react-router-dom";
@@ -10,6 +9,7 @@ import { FileUpload } from "@/components/tasks/FileUpload";
 import { ImagesGrid } from "@/components/tasks/ImagesGrid";
 import { useToast } from "@/hooks/use-toast";
 import { Input } from "@/components/ui/input";
+import JobMap from "@/components/JobMap";
 
 const mockJobs: Job[] = [{
   id: "1",
@@ -128,17 +128,22 @@ export default function JobDetails() {
                   <Calendar className="w-5 h-5" />
                   <span className="font-medium">Date:</span> {job.date}
                 </div>
-                <div className="flex items-center gap-2 text-gray-600">
-                  <MapPin className="w-5 h-5" />
-                  <span className="font-medium">Location:</span> 
-                  <a 
-                    href={`https://www.google.com/maps?q=${job.location[1]},${job.location[0]}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-blue-600 hover:underline"
-                  >
-                    View on Map
-                  </a>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2 text-gray-600">
+                    <MapPin className="w-5 h-5" />
+                    <span className="font-medium">Location:</span> 
+                    <a 
+                      href={`https://www.google.com/maps?q=${job.location[1]},${job.location[0]}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-600 hover:underline"
+                    >
+                      View on Map
+                    </a>
+                  </div>
+                  <div className="h-[200px] rounded-lg overflow-hidden border border-gray-200">
+                    <JobMap jobs={[job]} />
+                  </div>
                 </div>
               </div>
 
