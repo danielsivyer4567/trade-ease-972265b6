@@ -2,7 +2,7 @@ import { AppLayout } from "@/components/ui/AppLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, MapPin, User, Calendar, Clock, FileText, Image as ImageIcon, Tag } from "lucide-react";
+import { ArrowLeft, MapPin, User, Calendar, Clock, FileText, Image as ImageIcon, Tag, Navigation } from "lucide-react";
 import type { Job } from "@/types/job";
 import React, { useState } from "react";
 import { FileUpload } from "@/components/tasks/FileUpload";
@@ -10,6 +10,7 @@ import { ImagesGrid } from "@/components/tasks/ImagesGrid";
 import { useToast } from "@/hooks/use-toast";
 import { Input } from "@/components/ui/input";
 import JobMap from "@/components/JobMap";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const mockJobs: Job[] = [{
   id: "1",
@@ -43,6 +44,7 @@ export default function JobDetails() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const job = mockJobs.find(j => j.id === id);
+  const isMobile = useIsMobile();
 
   const [quotePhotos, setQuotePhotos] = useState<string[]>([]);
   const [completionPhotos, setCompletionPhotos] = useState<string[]>([]);
@@ -77,6 +79,17 @@ export default function JobDetails() {
         description: `${memberToTag} has been notified about this job`
       });
       setMemberToTag("");
+    }
+  };
+
+  const getNavigationUrl = () => {
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    const [lng, lat] = job?.location || [0, 0];
+    
+    if (isIOS) {
+      return `maps://maps.apple.com/?daddr=${lat},${lng}&dirflg=d`;
+    } else {
+      return `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&travelmode=driving`;
     }
   };
 
@@ -135,14 +148,25 @@ export default function JobDetails() {
                     <MapPin className="w-5 h-5" />
                     <span className="font-medium">Location:</span>
                     <span>{job.address}</span>
-                    <a 
-                      href={`https://www.google.com/maps?q=${job.location[1]},${job.location[0]}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-blue-600 hover:underline ml-2"
-                    >
-                      View on Map
-                    </a>
+                    <div className="flex gap-2 ml-2">
+                      <a 
+                        href={`https://www.google.com/maps?q=${job.location[1]},${job.location[0]}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-600 hover:underline"
+                      >
+                        View on Map
+                      </a>
+                      {isMobile && (
+                        <a 
+                          href={getNavigationUrl()}
+                          className="flex items-center gap-1 text-green-600 hover:underline"
+                        >
+                          <Navigation className="w-4 h-4" />
+                          Navigate
+                        </a>
+                      )}
+                    </div>
                   </div>
                   <div className="h-[200px] rounded-lg overflow-hidden border border-gray-200">
                     <JobMap jobs={[job]} />
