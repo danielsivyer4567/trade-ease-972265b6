@@ -8,9 +8,22 @@ import React, { useState } from "react";
 import { FileUpload } from "@/components/tasks/FileUpload";
 import { ImagesGrid } from "@/components/tasks/ImagesGrid";
 import { useToast } from "@/hooks/use-toast";
-import { Input } from "@/components/ui/input";
 import JobMap from "@/components/JobMap";
 import { useIsMobile } from "@/hooks/use-mobile";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+const mockStaffMembers = [
+  { id: "1", name: "John Smith" },
+  { id: "2", name: "Sarah Johnson" },
+  { id: "3", name: "Mike Williams" },
+  { id: "4", name: "Emma Davis" },
+];
 
 const mockJobs: Job[] = [{
   id: "1",
@@ -48,7 +61,7 @@ export default function JobDetails() {
 
   const [quotePhotos, setQuotePhotos] = useState<string[]>([]);
   const [completionPhotos, setCompletionPhotos] = useState<string[]>([]);
-  const [memberToTag, setMemberToTag] = useState("");
+  const [selectedMembers, setSelectedMembers] = useState<string[]>([]);
 
   const handleQuotePhotoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files) {
@@ -72,13 +85,18 @@ export default function JobDetails() {
     }
   };
 
-  const handleTagMember = () => {
-    if (memberToTag) {
+  const handleTagMembers = () => {
+    if (selectedMembers.length > 0) {
+      const taggedMembers = selectedMembers
+        .map(id => mockStaffMembers.find(m => m.id === id)?.name)
+        .filter(Boolean)
+        .join(", ");
+      
       toast({
-        title: "Member Tagged",
-        description: `${memberToTag} has been notified about this job`
+        title: "Members Tagged",
+        description: `${taggedMembers} have been notified about this job`
       });
-      setMemberToTag("");
+      setSelectedMembers([]);
     }
   };
 
@@ -209,20 +227,39 @@ export default function JobDetails() {
                   <span className="font-medium">Quote Inspection Photos</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Input
-                    placeholder="Tag team member..."
-                    value={memberToTag}
-                    onChange={(e) => setMemberToTag(e.target.value)}
-                    className="w-48"
-                  />
+                  <Select
+                    onValueChange={(value) => {
+                      setSelectedMembers(prev => 
+                        prev.includes(value) 
+                          ? prev.filter(id => id !== value)
+                          : [...prev, value]
+                      );
+                    }}
+                  >
+                    <SelectTrigger className="w-[200px]">
+                      <SelectValue placeholder="Select team members..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {mockStaffMembers.map((member) => (
+                        <SelectItem 
+                          key={member.id} 
+                          value={member.id}
+                          className={selectedMembers.includes(member.id) ? "bg-accent" : ""}
+                        >
+                          {member.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={handleTagMember}
+                    onClick={handleTagMembers}
                     className="font-bold text-black uppercase"
+                    disabled={selectedMembers.length === 0}
                   >
                     <Tag className="w-4 h-4 mr-2" />
-                    Tag Member
+                    Tag Members ({selectedMembers.length})
                   </Button>
                 </div>
               </div>
