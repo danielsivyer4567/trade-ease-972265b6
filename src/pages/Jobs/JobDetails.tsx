@@ -219,7 +219,7 @@ export default function JobDetails() {
                     variant="outline"
                     size="sm"
                     onClick={handleTagMember}
-                    className="text-orange-500"
+                    className="font-bold text-black uppercase"
                   >
                     <Tag className="w-4 h-4 mr-2" />
                     Tag Member
