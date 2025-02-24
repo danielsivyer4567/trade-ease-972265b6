@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import Jobs from "./pages/Jobs";
 import NewJob from "./pages/Jobs/NewJob";
+import JobDetails from "./pages/Jobs/JobDetails";
 import NewTemplate from "./pages/Jobs/NewTemplate";
 import NewQuote from "./pages/Quotes/NewQuote";
 import Statistics from "./pages/Statistics";
@@ -30,6 +31,7 @@ function App() {
         <Route path="/" element={<Index />} />
         <Route path="/jobs" element={<Jobs />} />
         <Route path="/jobs/new" element={<NewJob />} />
+        <Route path="/jobs/:id" element={<JobDetails />} />
         <Route path="/jobs/template/new" element={<NewTemplate />} />
         <Route path="/quotes/new" element={<NewQuote />} />
         <Route path="/statistics" element={<Statistics />} />

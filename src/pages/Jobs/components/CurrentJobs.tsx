@@ -2,6 +2,7 @@
 import { Button } from "@/components/ui/button";
 import { Clock, Loader2, DollarSign, CheckCircle } from "lucide-react";
 import { Job } from "@/types/job";
+import { useNavigate } from "react-router-dom";
 
 interface CurrentJobsProps {
   jobs: Job[];
@@ -9,6 +10,8 @@ interface CurrentJobsProps {
 }
 
 export function CurrentJobs({ jobs, onStatusUpdate }: CurrentJobsProps) {
+  const navigate = useNavigate();
+  
   const getStatusIcon = (status: Job['status']) => {
     switch (status) {
       case 'ready':
@@ -54,12 +57,16 @@ export function CurrentJobs({ jobs, onStatusUpdate }: CurrentJobsProps) {
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {jobs.map(job => (
-                <tr key={job.id} className="hover:bg-gray-50">
+                <tr 
+                  key={job.id} 
+                  className="hover:bg-gray-50 cursor-pointer"
+                  onClick={() => navigate(`/jobs/${job.id}`)}
+                >
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm font-mono text-gray-900">{job.jobNumber}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm font-medium text-gray-900">{job.title}</div>
+                    <div className="text-sm font-medium text-gray-900">{job.title || job.type}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm text-gray-500">{job.customer}</div>
@@ -77,9 +84,10 @@ export function CurrentJobs({ jobs, onStatusUpdate }: CurrentJobsProps) {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <select 
-                      className="text-sm border border-gray-300 rounded-md px-2 py-1" 
-                      value={job.status} 
-                      onChange={e => onStatusUpdate(job.id, e.target.value as Job['status'])}
+                      className="text-sm border border-gray-300 rounded-md px-2 py-1"
+                      value={job.status}
+                      onClick={(e) => e.stopPropagation()}
+                      onChange={(e) => onStatusUpdate(job.id, e.target.value as Job['status'])}
                     >
                       <option value="ready">Ready to Go</option>
                       <option value="in-progress">In Progress</option>
