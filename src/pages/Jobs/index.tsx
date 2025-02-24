@@ -58,7 +58,8 @@ const mockJobs: Job[] = [{
   location: [151.2093, -33.8688],
   jobNumber: "job-003",
   title: "Electrical Panel Upgrade",
-  description: "Upgrade main electrical panel"
+  description: "Upgrade main electrical panel",
+  assignedTeam: "Unassigned"
 }, {
   id: "4",
   customer: "Emily Davis",
@@ -68,7 +69,8 @@ const mockJobs: Job[] = [{
   location: [151.2093, -33.8688],
   jobNumber: "job-004",
   title: "Plumbing Repair",
-  description: "Fix kitchen sink"
+  description: "Fix kitchen sink",
+  assignedTeam: "Unassigned"
 }];
 
 const categories = [{

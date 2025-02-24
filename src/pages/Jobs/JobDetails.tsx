@@ -19,10 +19,10 @@ import {
 } from "@/components/ui/select";
 
 const mockStaffMembers = [
-  { id: "1", name: "John Smith" },
-  { id: "2", name: "Sarah Johnson" },
-  { id: "3", name: "Mike Williams" },
-  { id: "4", name: "Emma Davis" },
+  { id: "1", name: "John Smith", role: "<strong>Senior Plumber</strong>" },
+  { id: "2", name: "Sarah Johnson", role: "<em>Electrical Lead</em>" },
+  { id: "3", name: "Mike Williams", role: "<strong>HVAC Specialist</strong>" },
+  { id: "4", name: "Emma Davis", role: "<em>Project Manager</em>" },
 ];
 
 const mockJobs: Job[] = [{
@@ -88,13 +88,18 @@ export default function JobDetails() {
   const handleTagMembers = () => {
     if (selectedMembers.length > 0) {
       const taggedMembers = selectedMembers
-        .map(id => mockStaffMembers.find(m => m.id === id)?.name)
+        .map(id => {
+          const member = mockStaffMembers.find(m => m.id === id);
+          return member ? `${member.name} (${member.role})` : null;
+        })
         .filter(Boolean)
-        .join(", ");
+        .join("<br/>");
       
       toast({
         title: "Members Tagged",
-        description: `${taggedMembers} have been notified about this job`
+        description: (
+          <div dangerouslySetInnerHTML={{ __html: `${taggedMembers} have been notified about this job` }} />
+        )
       });
       setSelectedMembers([]);
     }
@@ -246,7 +251,7 @@ export default function JobDetails() {
                           value={member.id}
                           className={selectedMembers.includes(member.id) ? "bg-accent" : ""}
                         >
-                          {member.name}
+                          <div dangerouslySetInnerHTML={{ __html: `${member.name} - ${member.role}` }} />
                         </SelectItem>
                       ))}
                     </SelectContent>
