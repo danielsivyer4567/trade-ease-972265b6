@@ -95,6 +95,21 @@ const quoteStatuses = [{
   count: "1"
 }];
 
+const statusColor = (status: Job['status']) => {
+  switch (status) {
+    case 'ready':
+      return 'bg-yellow-100 text-yellow-800';
+    case 'in-progress':
+      return 'bg-blue-100 text-blue-800';
+    case 'to-invoice':
+      return 'bg-purple-100 text-purple-800';
+    case 'invoiced':
+      return 'bg-green-100 text-green-800';
+    default:
+      return 'bg-gray-100 text-gray-800';
+  }
+};
+
 const Index = () => {
   const [sharedDate, setSharedDate] = React.useState<Date | undefined>(new Date());
   const [teams, setTeams] = React.useState([
@@ -188,11 +203,7 @@ const Index = () => {
                 <div key={job.id} className="p-2 md:p-3 bg-gray-50 rounded-lg">
                   <div className="font-medium text-sm md:text-base">{job.customer}</div>
                   <div className="text-xs md:text-sm text-gray-500">{job.type}</div>
-                  <span className={`inline-block mt-1.5 md:mt-2 px-2 py-0.5 md:py-1 rounded-full text-xs ${
-                    job.status === "invoiced" ? "bg-green-100 text-green-800" : 
-                    job.status === "in-progress" ? "bg-blue-100 text-blue-800" : 
-                    "bg-yellow-100 text-yellow-800"
-                  }`}>
+                  <span className={`inline-block mt-1.5 md:mt-2 px-2 py-0.5 md:py-1 rounded-full text-xs ${statusColor(job.status)}`}>
                     {job.status}
                   </span>
                 </div>
@@ -210,11 +221,7 @@ const Index = () => {
                 <div key={job.id} className="p-2 md:p-3 bg-gray-50 rounded-lg">
                   <div className="font-medium text-sm md:text-base">{job.customer}</div>
                   <div className="text-xs md:text-sm text-gray-500">{job.type}</div>
-                  <span className={`inline-block mt-1.5 md:mt-2 px-2 py-0.5 md:py-1 rounded-full text-xs ${
-                    job.status === "invoiced" ? "bg-green-100 text-green-800" : 
-                    job.status === "in-progress" ? "bg-blue-100 text-blue-800" : 
-                    "bg-yellow-100 text-yellow-800"
-                  }`}>
+                  <span className={`inline-block mt-1.5 md:mt-2 px-2 py-0.5 md:py-1 rounded-full text-xs ${statusColor(job.status)}`}>
                     {job.status}
                   </span>
                 </div>

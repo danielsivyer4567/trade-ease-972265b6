@@ -8,7 +8,7 @@ export interface Job {
   location: [number, number];
   address?: string;
   jobNumber: string;
-  title?: string;
+  title: string;
   description?: string;
   assignedTeam?: string;
   assignedMemberId?: string;

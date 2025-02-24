@@ -21,36 +21,51 @@ interface Job {
   date: string;
   status: 'ready' | 'in-progress' | 'to-invoice' | 'invoiced';
   customer: string;
+  type: string;
+  location: [number, number];
+  description: string;
 }
 
 const mockJobs: Job[] = [{
-  id: '1',
-  jobNumber: 'job-001',
-  title: 'Water Heater Installation',
-  date: '2024-03-15',
-  status: 'ready',
-  customer: 'John Smith'
+  id: "1",
+  customer: "John Smith",
+  type: "Plumbing",
+  status: "ready",
+  date: "2024-03-15",
+  location: [151.2093, -33.8688],
+  jobNumber: "job-001",
+  title: "Water Heater Installation",
+  description: "Install new water heater system"
 }, {
-  id: '2',
-  jobNumber: 'job-002',
-  title: 'HVAC Maintenance',
-  date: '2024-03-14',
-  status: 'in-progress',
-  customer: 'Sarah Johnson'
+  id: "2",
+  customer: "Sarah Johnson",
+  type: "HVAC",
+  status: "in-progress",
+  date: "2024-03-14",
+  location: [151.2543, -33.8688],
+  jobNumber: "job-002",
+  title: "HVAC Maintenance",
+  description: "Regular maintenance check"
 }, {
-  id: '3',
-  jobNumber: 'job-003',
-  title: 'Electrical Panel Upgrade',
-  date: '2024-03-13',
-  status: 'to-invoice',
-  customer: 'Mike Brown'
+  id: "3",
+  customer: "Mike Brown",
+  type: "Electrical",
+  status: "to-invoice",
+  date: "2024-03-13",
+  location: [151.2093, -33.8688],
+  jobNumber: "job-003",
+  title: "Electrical Panel Upgrade",
+  description: "Upgrade main electrical panel"
 }, {
-  id: '4',
-  jobNumber: 'job-004',
-  title: 'Plumbing Repair',
-  date: '2024-03-12',
-  status: 'invoiced',
-  customer: 'Emily Davis'
+  id: "4",
+  customer: "Emily Davis",
+  type: "Plumbing",
+  status: "invoiced",
+  date: "2024-03-12",
+  location: [151.2093, -33.8688],
+  jobNumber: "job-004",
+  title: "Plumbing Repair",
+  description: "Fix kitchen sink"
 }];
 
 const categories = [{

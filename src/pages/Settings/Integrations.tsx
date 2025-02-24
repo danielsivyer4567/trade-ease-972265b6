@@ -42,6 +42,20 @@ const availableIntegrations = [
   }
 ];
 
+const fetchConfigs = async () => {
+  try {
+    const { data: configs, error } = await supabase
+      .from('integration_configs')
+      .select('*');
+
+    if (error) throw error;
+    return configs || [];
+  } catch (error) {
+    console.error('Error fetching integration configs:', error);
+    return [];
+  }
+};
+
 export default function IntegrationsPage() {
   const [apiKeys, setApiKeys] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState<Record<string, boolean>>({});

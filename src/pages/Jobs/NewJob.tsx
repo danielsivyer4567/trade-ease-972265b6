@@ -1,4 +1,3 @@
-
 import { AppLayout } from "@/components/ui/AppLayout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -40,18 +39,20 @@ export default function NewJob() {
   const templates: JobTemplate[] = [{
     id: "1",
     title: "Basic Plumbing Service",
-    estimatedDuration: "2-3 hours",
-    materials: ["Pipe wrench", "Plumber's tape", "Replacement parts"],
-    price: "$150-200",
     description: "Standard plumbing service including inspection and basic repairs",
+    type: "Plumbing",
+    estimatedDuration: 3,
+    materials: ["Pipe wrench", "Plumber's tape", "Replacement parts"],
+    price: 150,
     category: "Plumbing"
   }, {
     id: "2",
     title: "Electrical Inspection",
-    estimatedDuration: "1-2 hours",
-    materials: ["Multimeter", "Safety equipment", "Testing tools"],
-    price: "$120-180",
     description: "Complete electrical system inspection and safety check",
+    type: "Electrical",
+    estimatedDuration: 2,
+    materials: ["Multimeter", "Safety equipment", "Testing tools"],
+    price: 120,
     category: "Electrical"
   }];
 
@@ -64,10 +65,11 @@ export default function NewJob() {
       const newTemplate: JobTemplate = {
         id: crypto.randomUUID(),
         title: "AI Generated Template",
-        estimatedDuration: "TBD",
-        materials: [],
-        price: "TBD",
         description: `Generated based on: ${aiPrompt}`,
+        type: "Custom",
+        estimatedDuration: 1,
+        materials: [],
+        price: 100,
         category: "Custom"
       };
       setSelectedTemplate(newTemplate);
