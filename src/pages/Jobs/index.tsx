@@ -24,6 +24,7 @@ interface Job {
   type: string;
   location: [number, number];
   description: string;
+  assignedTeam: string;
 }
 
 const mockJobs: Job[] = [{
@@ -35,7 +36,8 @@ const mockJobs: Job[] = [{
   location: [151.2093, -33.8688],
   jobNumber: "job-001",
   title: "Water Heater Installation",
-  description: "Install new water heater system"
+  description: "Install new water heater system",
+  assignedTeam: "Team A"
 }, {
   id: "2",
   customer: "Sarah Johnson",
@@ -45,7 +47,8 @@ const mockJobs: Job[] = [{
   location: [151.2543, -33.8688],
   jobNumber: "job-002",
   title: "HVAC Maintenance",
-  description: "Regular maintenance check"
+  description: "Regular maintenance check",
+  assignedTeam: "Team B"
 }, {
   id: "3",
   customer: "Mike Brown",

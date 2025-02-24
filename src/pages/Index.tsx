@@ -43,7 +43,8 @@ const allJobs: Job[] = [{
   status: "in-progress",
   date: "Today",
   location: [151.2093, -33.8688],
-  jobNumber: "PLM-001"
+  jobNumber: "PLM-001",
+  title: "Emergency Plumbing Fix"
 }, {
   id: "2",
   customer: "Sarah Johnson",
@@ -51,7 +52,8 @@ const allJobs: Job[] = [{
   status: "ready",
   date: "Tomorrow",
   location: [151.2543, -33.8688],
-  jobNumber: "ELE-001"
+  jobNumber: "ELE-001",
+  title: "New Electrical Setup"
 }, {
   id: "3",
   customer: "Mike Brown",
@@ -59,7 +61,8 @@ const allJobs: Job[] = [{
   status: "invoiced",
   date: "Yesterday",
   location: [151.1943, -33.8788],
-  jobNumber: "HVAC-001"
+  jobNumber: "HVAC-001",
+  title: "HVAC System Service"
 }, {
   id: "4",
   customer: "Emma Wilson",
@@ -67,7 +70,8 @@ const allJobs: Job[] = [{
   status: "ready",
   date: "Tomorrow",
   location: [151.2153, -33.8588],
-  jobNumber: "REN-001"
+  jobNumber: "REN-001",
+  title: "Kitchen Upgrade"
 }];
 
 const todaysJobs = allJobs.filter(job => job.date === "Today");
@@ -288,7 +292,7 @@ const Index = () => {
                       <td className="py-2 md:py-3">{job.customer}</td>
                       <td className="py-2 md:py-3">{job.type}</td>
                       <td className="py-2 md:py-3">
-                        <span className={`px-2 py-0.5 md:py-1 rounded-full text-xs ${job.status === "Completed" ? "bg-green-100 text-green-800" : job.status === "In Progress" ? "bg-blue-100 text-blue-800" : "bg-yellow-100 text-yellow-800"}`}>
+                        <span className={`px-2 py-0.5 md:py-1 rounded-full text-xs ${statusColor(job.status)}`}>
                           {job.status}
                         </span>
                       </td>
