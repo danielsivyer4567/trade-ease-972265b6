@@ -3,9 +3,13 @@ import { AppLayout } from "@/components/ui/AppLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, MapPin, User, Calendar, Clock, FileText, Image as ImageIcon } from "lucide-react";
+import { ArrowLeft, MapPin, User, Calendar, Clock, FileText, Image as ImageIcon, Tag } from "lucide-react";
 import type { Job } from "@/types/job";
-import React from "react";
+import React, { useState } from "react";
+import { FileUpload } from "@/components/tasks/FileUpload";
+import { ImagesGrid } from "@/components/tasks/ImagesGrid";
+import { useToast } from "@/hooks/use-toast";
+import { Input } from "@/components/ui/input";
 
 const mockJobs: Job[] = [{
   id: "1",
@@ -35,7 +39,44 @@ const mockJobs: Job[] = [{
 export default function JobDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { toast } = useToast();
   const job = mockJobs.find(j => j.id === id);
+
+  const [quotePhotos, setQuotePhotos] = useState<string[]>([]);
+  const [completionPhotos, setCompletionPhotos] = useState<string[]>([]);
+  const [memberToTag, setMemberToTag] = useState("");
+
+  const handleQuotePhotoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files) {
+      const newPhotos = Array.from(event.target.files).map(file => URL.createObjectURL(file));
+      setQuotePhotos([...quotePhotos, ...newPhotos]);
+      toast({
+        title: "Photos Uploaded",
+        description: `${event.target.files.length} quote inspection photos added`
+      });
+    }
+  };
+
+  const handleCompletionPhotoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files) {
+      const newPhotos = Array.from(event.target.files).map(file => URL.createObjectURL(file));
+      setCompletionPhotos([...completionPhotos, ...newPhotos]);
+      toast({
+        title: "Photos Uploaded",
+        description: `${event.target.files.length} completion photos added`
+      });
+    }
+  };
+
+  const handleTagMember = () => {
+    if (memberToTag) {
+      toast({
+        title: "Member Tagged",
+        description: `${memberToTag} has been notified about this job`
+      });
+      setMemberToTag("");
+    }
+  };
 
   if (!job) {
     return (
@@ -130,14 +171,66 @@ export default function JobDetails() {
             )}
 
             <div className="mt-6">
-              <div className="flex items-center gap-2 text-gray-600 mb-2">
-                <ImageIcon className="w-5 h-5" />
-                <span className="font-medium">Job Photos:</span>
-              </div>
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                <div className="aspect-square bg-gray-100 rounded-lg flex items-center justify-center text-gray-400">
-                  No photos uploaded
+              <div className="flex items-center justify-between gap-2 text-gray-600 mb-4">
+                <div className="flex items-center gap-2">
+                  <ImageIcon className="w-5 h-5" />
+                  <span className="font-medium">Quote Inspection Photos</span>
                 </div>
+                <div className="flex items-center gap-2">
+                  <Input
+                    placeholder="Tag team member..."
+                    value={memberToTag}
+                    onChange={(e) => setMemberToTag(e.target.value)}
+                    className="w-48"
+                  />
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleTagMember}
+                  >
+                    <Tag className="w-4 h-4 mr-2" />
+                    Tag Member
+                  </Button>
+                </div>
+              </div>
+              <div className="space-y-4">
+                <FileUpload
+                  onFileUpload={handleQuotePhotoUpload}
+                  label="Upload quote inspection photos"
+                />
+                {quotePhotos.length > 0 ? (
+                  <ImagesGrid
+                    images={quotePhotos}
+                    title="Quote Inspection Photos"
+                  />
+                ) : (
+                  <div className="aspect-square bg-gray-100 rounded-lg flex items-center justify-center text-gray-400">
+                    No quote inspection photos uploaded
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="mt-6">
+              <div className="flex items-center gap-2 text-gray-600 mb-4">
+                <ImageIcon className="w-5 h-5" />
+                <span className="font-medium">Completion Photos</span>
+              </div>
+              <div className="space-y-4">
+                <FileUpload
+                  onFileUpload={handleCompletionPhotoUpload}
+                  label="Upload completion photos"
+                />
+                {completionPhotos.length > 0 ? (
+                  <ImagesGrid
+                    images={completionPhotos}
+                    title="Completion Photos"
+                  />
+                ) : (
+                  <div className="aspect-square bg-gray-100 rounded-lg flex items-center justify-center text-gray-400">
+                    No completion photos uploaded
+                  </div>
+                )}
               </div>
             </div>
           </CardContent>
