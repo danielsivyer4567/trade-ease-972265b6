@@ -75,6 +75,12 @@ export default function JobDetails() {
   const [invoices, setInvoices] = useState<any[]>([]);
   const [bills, setBills] = useState<any[]>([]);
   const [costs, setCosts] = useState<any[]>([]);
+  const [tabNotes, setTabNotes] = useState<Record<string, string>>({
+    bills: "",
+    costs: "",
+    invoices: "",
+    purchase_orders: ""
+  });
 
   const handleQuotePhotoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files) {
@@ -129,11 +135,18 @@ export default function JobDetails() {
     }
   };
 
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>, type: 'bill' | 'receipt' | 'invoice') => {
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>, type: 'bill' | 'receipt' | 'invoice' | 'purchase_order') => {
     if (event.target.files) {
-      toast({
-        title: "File Uploaded",
-        description: `${type} has been uploaded successfully`
+      const files = Array.from(event.target.files);
+      files.forEach(file => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          toast({
+            title: "File Uploaded",
+            description: `${file.name} has been uploaded successfully`
+          });
+        };
+        reader.readAsDataURL(file);
       });
       // TODO: Implement actual file upload and calculation logic
     }
@@ -422,36 +435,84 @@ export default function JobDetails() {
                   <TabsContent value="purchase-orders" className="space-y-4">
                     <div className="border rounded-lg p-4">
                       <h3 className="font-medium mb-4">Purchase Orders</h3>
-                      {/* TODO: Add purchase orders management */}
+                      <div className="space-y-4">
+                        <FileUpload
+                          onFileUpload={(e) => handleFileUpload(e, 'purchase_order')}
+                          label="Upload purchase order documents"
+                        />
+                        <textarea
+                          placeholder="Add notes about purchase orders..."
+                          value={tabNotes.purchase_orders}
+                          onChange={(e) => setTabNotes(prev => ({
+                            ...prev,
+                            purchase_orders: e.target.value
+                          }))}
+                          className="w-full min-h-[100px] p-3 border rounded-lg mt-4"
+                        />
+                      </div>
                     </div>
                   </TabsContent>
 
                   <TabsContent value="bills" className="space-y-4">
                     <div className="border rounded-lg p-4">
                       <h3 className="font-medium mb-4">Bills & Receipts</h3>
-                      <FileUpload
-                        onFileUpload={(e) => handleFileUpload(e, 'bill')}
-                        label="Upload bills or receipts"
-                      />
-                      {/* TODO: Add bills list and total */}
+                      <div className="space-y-4">
+                        <FileUpload
+                          onFileUpload={(e) => handleFileUpload(e, 'bill')}
+                          label="Upload bills or receipts"
+                        />
+                        <textarea
+                          placeholder="Add notes about bills and receipts..."
+                          value={tabNotes.bills}
+                          onChange={(e) => setTabNotes(prev => ({
+                            ...prev,
+                            bills: e.target.value
+                          }))}
+                          className="w-full min-h-[100px] p-3 border rounded-lg mt-4"
+                        />
+                      </div>
                     </div>
                   </TabsContent>
 
                   <TabsContent value="costs" className="space-y-4">
                     <div className="border rounded-lg p-4">
                       <h3 className="font-medium mb-4">Costs Overview</h3>
-                      {/* TODO: Add costs breakdown and profit/loss calculation */}
+                      <div className="space-y-4">
+                        <FileUpload
+                          onFileUpload={(e) => handleFileUpload(e, 'receipt')}
+                          label="Upload cost documentation"
+                        />
+                        <textarea
+                          placeholder="Add notes about costs..."
+                          value={tabNotes.costs}
+                          onChange={(e) => setTabNotes(prev => ({
+                            ...prev,
+                            costs: e.target.value
+                          }))}
+                          className="w-full min-h-[100px] p-3 border rounded-lg mt-4"
+                        />
+                      </div>
                     </div>
                   </TabsContent>
 
                   <TabsContent value="invoices" className="space-y-4">
                     <div className="border rounded-lg p-4">
                       <h3 className="font-medium mb-4">Invoices</h3>
-                      <FileUpload
-                        onFileUpload={(e) => handleFileUpload(e, 'invoice')}
-                        label="Upload contractor invoice"
-                      />
-                      {/* TODO: Add invoices list and total */}
+                      <div className="space-y-4">
+                        <FileUpload
+                          onFileUpload={(e) => handleFileUpload(e, 'invoice')}
+                          label="Upload contractor invoice"
+                        />
+                        <textarea
+                          placeholder="Add notes about invoices..."
+                          value={tabNotes.invoices}
+                          onChange={(e) => setTabNotes(prev => ({
+                            ...prev,
+                            invoices: e.target.value
+                          }))}
+                          className="w-full min-h-[100px] p-3 border rounded-lg mt-4"
+                        />
+                      </div>
                     </div>
                   </TabsContent>
                 </>

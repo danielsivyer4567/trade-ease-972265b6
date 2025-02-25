@@ -26,7 +26,9 @@ export function FileUpload({ onFileUpload, label }: FileUploadProps) {
     setIsDragging(false);
     
     const files = Array.from(e.dataTransfer.files).filter(file => 
-      file.type === 'application/pdf' || file.type === 'text/csv'
+      file.type === 'application/pdf' || 
+      file.type === 'text/csv' ||
+      file.type.startsWith('image/')
     );
 
     if (files.length > 0) {
@@ -57,14 +59,15 @@ export function FileUpload({ onFileUpload, label }: FileUploadProps) {
       )}>
         <Upload className="h-4 w-4 text-gray-400" />
         <span className="text-sm text-gray-600">
-          {isDragging ? "Drop files here..." : `${label} (PDF or CSV)`}
+          {isDragging ? "Drop files here..." : `${label} (PDF, CSV, or Images)`}
         </span>
       </div>
       <input
         type="file"
         className="hidden"
         onChange={onFileUpload}
-        accept=".pdf,.csv,application/pdf,text/csv"
+        accept=".pdf,.csv,image/*"
+        multiple
       />
     </label>
   );
