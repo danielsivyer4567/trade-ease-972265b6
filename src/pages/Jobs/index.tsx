@@ -164,10 +164,12 @@ export default function Jobs() {
     const template: JobTemplate = {
       id: crypto.randomUUID(),
       title: lines.find(line => line.toLowerCase().includes('title:'))?.split(':')[1]?.trim() || "Untitled Template",
-      estimatedDuration: lines.find(line => line.toLowerCase().includes('duration:'))?.split(':')[1]?.trim() || "Not specified",
+      description: '',
+      type: lines.find(line => line.toLowerCase().includes('type:'))?.split(':')[1]?.trim() || "",
+      estimatedDuration: Number(lines.find(line => line.toLowerCase().includes('duration:'))?.split(':')[1]?.trim()) || 0,
+      price: Number(lines.find(line => line.toLowerCase().includes('price:'))?.split(':')[1]?.trim()) || 0,
       materials: lines.find(line => line.toLowerCase().includes('materials:'))?.split(':')[1]?.split(',').map(item => item.trim()) || [],
-      price: lines.find(line => line.toLowerCase().includes('price:'))?.split(':')[1]?.trim() || "Not specified",
-      category: (lines.find(line => line.toLowerCase().includes('category:'))?.split(':')[1]?.trim() || "Plumbing") as "Plumbing" | "Electrical" | "HVAC"
+      category: (lines.find(line => line.toLowerCase().includes('category:'))?.split(':')[1]?.trim() || "Plumbing")
     };
     return template;
   };
@@ -175,19 +177,22 @@ export default function Jobs() {
   const parseCSVTemplate = (csvContent: string): JobTemplate => {
     const rows = csvContent.split('\n').map(row => row.split(',').map(cell => cell.trim()));
     const headers = rows[0].map(header => header.toLowerCase());
-    const data = rows[1]; // Assuming first row after headers contains the template data
+    const data = rows[1];
 
     const getColumnValue = (columnName: string) => {
       const index = headers.findIndex(h => h.includes(columnName));
       return index !== -1 ? data[index] : '';
     };
+
     return {
       id: crypto.randomUUID(),
       title: getColumnValue('title') || "Untitled Template",
-      estimatedDuration: getColumnValue('duration') || "Not specified",
+      description: getColumnValue('description') || "",
+      type: getColumnValue('type') || "",
+      estimatedDuration: Number(getColumnValue('duration')) || 0,
+      price: Number(getColumnValue('price')) || 0,
       materials: getColumnValue('materials')?.split(';') || [],
-      price: getColumnValue('price') || "Not specified",
-      category: (getColumnValue('category') || "Plumbing") as "Plumbing" | "Electrical" | "HVAC"
+      category: getColumnValue('category') || "Plumbing"
     };
   };
 
