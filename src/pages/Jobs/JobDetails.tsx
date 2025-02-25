@@ -283,6 +283,10 @@ export default function JobDetails() {
     });
   };
 
+  const handleDragStart = (e: React.DragEvent<HTMLDivElement>, jobId: string) => {
+    e.dataTransfer.setData('jobId', jobId);
+  };
+
   if (!job) {
     return (
       <AppLayout>
@@ -540,42 +544,66 @@ export default function JobDetails() {
               </TabsContent>
 
               <TabsContent value="calendar" className="space-y-4">
-                <div className="h-[500px] border rounded-lg p-4">
-                  <div className="flex justify-between items-center mb-4">
-                    <h3 className="text-lg font-semibold">Job Schedule</h3>
-                    <div className="flex gap-2">
-                      <Select
-                        value={job?.assignedTeam || ''}
-                        onValueChange={(value) => {
-                          setJobs(prevJobs => prevJobs.map(j => 
-                            j.id === job?.id 
-                              ? { ...j, assignedTeam: value }
-                              : j
-                          ));
-                          toast({
-                            title: "Team Assigned",
-                            description: `Job has been assigned to ${value}`,
-                          });
-                        }}
-                      >
-                        <SelectTrigger className="w-[200px]">
-                          <SelectValue placeholder="Select team..." />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="Red Team">Red Team</SelectItem>
-                          <SelectItem value="Blue Team">Blue Team</SelectItem>
-                          <SelectItem value="Green Team">Green Team</SelectItem>
-                        </SelectContent>
-                      </Select>
+                <div className="border rounded-lg p-4">
+                  <div className="flex flex-col space-y-4">
+                    <div className="flex justify-between items-center">
+                      <h3 className="text-lg font-semibold">Job Schedule</h3>
+                      <div className="flex gap-2">
+                        <Select
+                          value={job?.assignedTeam || ''}
+                          onValueChange={(value) => {
+                            setJobs(prevJobs => prevJobs.map(j => 
+                              j.id === job?.id 
+                                ? { ...j, assignedTeam: value }
+                                : j
+                            ));
+                            toast({
+                              title: "Team Assigned",
+                              description: `Job has been assigned to ${value}`,
+                            });
+                          }}
+                        >
+                          <SelectTrigger className="w-[200px]">
+                            <SelectValue placeholder="Select team..." />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="Red Team">Red Team</SelectItem>
+                            <SelectItem value="Blue Team">Blue Team</SelectItem>
+                            <SelectItem value="Green Team">Green Team</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
                     </div>
+
+                    <div
+                      draggable
+                      onDragStart={(e) => handleDragStart(e, job?.id || '')}
+                      className="p-4 bg-white border rounded-lg shadow-sm cursor-move hover:shadow-md transition-shadow"
+                    >
+                      <div className="flex justify-between items-center">
+                        <div>
+                          <h4 className="font-medium">{job?.title}</h4>
+                          <p className="text-sm text-gray-500">{job?.jobNumber}</p>
+                        </div>
+                        <div className={`px-3 py-1 rounded-full text-sm ${
+                          job?.status === "ready" ? "bg-yellow-100 text-yellow-800" :
+                          job?.status === "in-progress" ? "bg-blue-100 text-blue-800" :
+                          job?.status === "to-invoice" ? "bg-purple-100 text-purple-800" :
+                          "bg-green-100 text-green-800"
+                        }`}>
+                          {job?.status.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
+                        </div>
+                      </div>
+                    </div>
+
+                    <TeamCalendar 
+                      date={selectedDate}
+                      setDate={setSelectedDate}
+                      teamColor={job?.assignedTeam === 'Red Team' ? 'red' : job?.assignedTeam === 'Blue Team' ? 'blue' : 'green'}
+                      onJobAssign={handleJobAssign}
+                      assignedJobs={jobs}
+                    />
                   </div>
-                  <TeamCalendar 
-                    date={selectedDate}
-                    setDate={setSelectedDate}
-                    teamColor={job?.assignedTeam === 'Red Team' ? 'red' : job?.assignedTeam === 'Blue Team' ? 'blue' : 'green'}
-                    onJobAssign={handleJobAssign}
-                    assignedJobs={jobs}
-                  />
                 </div>
               </TabsContent>
 
