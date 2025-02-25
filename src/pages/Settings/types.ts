@@ -23,3 +23,20 @@ export interface Calculation {
   rate: number;
   total: number;
 }
+
+export interface Job {
+  id: string;
+  jobNumber: string;
+  title: string;
+  measurements: {
+    squareMeters?: number;
+    linealMeters?: number;
+    items?: number;
+    hours?: number;
+  };
+}
+
+export interface SearchResult {
+  job: Job;
+  matchingRate?: Rate;
+}

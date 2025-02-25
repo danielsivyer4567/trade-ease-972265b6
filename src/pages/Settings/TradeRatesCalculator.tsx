@@ -1,4 +1,3 @@
-
 import { AppLayout } from "@/components/ui/AppLayout";
 import { Link } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -6,12 +5,13 @@ import { Button } from "@/components/ui/button";
 import { DollarSign, ArrowLeft, Clock, Box, Ruler, Package, Percent } from "lucide-react";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { Rate, CommissionRate, Staff, Calculation } from "./types";
+import { Rate, CommissionRate, Staff, Calculation, Job } from "./types";
 import { StaffSelector } from "./components/StaffSelector";
 import { RateEditor } from "./components/RateEditor";
 import { CommissionRateEditor } from "./components/CommissionRateEditor";
 import { RateCalculator } from "./components/RateCalculator";
 import { CalculationResult } from "./components/CalculationResult";
+import { JobSearch } from "./components/JobSearch";
 
 export default function TradeRatesCalculator() {
   const [squareMeterRates, setSquareMeterRates] = useState<Rate[]>([
@@ -78,6 +78,48 @@ export default function TradeRatesCalculator() {
     setCommissionRates([...commissionRates, newRate]);
   };
 
+  const handleJobSelect = (job: Job, matchingRate: Rate | undefined) => {
+    if (matchingRate) {
+      setSelectedRate(matchingRate);
+      if (job.measurements.squareMeters) {
+        setCalculation({
+          quantity: job.measurements.squareMeters,
+          rate: matchingRate.rate,
+          total: job.measurements.squareMeters * matchingRate.rate
+        });
+      } else if (job.measurements.linealMeters) {
+        setCalculation({
+          quantity: job.measurements.linealMeters,
+          rate: matchingRate.rate,
+          total: job.measurements.linealMeters * matchingRate.rate
+        });
+      } else if (job.measurements.items) {
+        setCalculation({
+          quantity: job.measurements.items,
+          rate: matchingRate.rate,
+          total: job.measurements.items * matchingRate.rate
+        });
+      } else if (job.measurements.hours) {
+        setCalculation({
+          quantity: job.measurements.hours,
+          rate: matchingRate.rate,
+          total: job.measurements.hours * matchingRate.rate
+        });
+      }
+      toast({
+        title: "Job Loaded",
+        description: `Loaded measurements from job ${job.jobNumber}`,
+      });
+    }
+  };
+
+  const getAllRates = () => [
+    ...squareMeterRates,
+    ...linealMeterRates,
+    ...itemRates,
+    ...hourlyRates
+  ];
+
   const staffMembers: Staff[] = [
     { id: "1", name: "Charl" },
     { id: "2", name: "Sarah Johnson" },
@@ -97,6 +139,11 @@ export default function TradeRatesCalculator() {
           </div>
           <Button onClick={handleSave}>Save Changes</Button>
         </div>
+
+        <JobSearch
+          onJobSelect={handleJobSelect}
+          availableRates={getAllRates()}
+        />
 
         <StaffSelector
           staffMembers={staffMembers}
