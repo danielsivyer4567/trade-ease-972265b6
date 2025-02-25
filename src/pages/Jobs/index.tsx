@@ -34,7 +34,7 @@ const mockJobs: Job[] = [{
   status: "ready",
   date: "2024-03-15",
   location: [151.2093, -33.8688],
-  jobNumber: "job-001",
+  jobNumber: "PLM-001",
   title: "Water Heater Installation",
   description: "Install new water heater system",
   assignedTeam: "Red Team"
@@ -45,7 +45,7 @@ const mockJobs: Job[] = [{
   status: "in-progress",
   date: "2024-03-14",
   location: [151.2543, -33.8688],
-  jobNumber: "job-002",
+  jobNumber: "HVAC-001",
   title: "HVAC Maintenance",
   description: "Regular maintenance check",
   assignedTeam: "Blue Team"
@@ -56,7 +56,7 @@ const mockJobs: Job[] = [{
   status: "to-invoice",
   date: "2024-03-13",
   location: [151.1943, -33.8788],
-  jobNumber: "job-003",
+  jobNumber: "ELE-001",
   title: "Electrical Panel Upgrade",
   description: "Upgrade main electrical panel",
   assignedTeam: "Green Team"
@@ -67,7 +67,7 @@ const mockJobs: Job[] = [{
   status: "invoiced",
   date: "2024-03-12",
   location: [151.2153, -33.8588],
-  jobNumber: "job-004",
+  jobNumber: "PLM-002",
   title: "Plumbing Repair",
   description: "Fix kitchen sink",
   assignedTeam: "Red Team"

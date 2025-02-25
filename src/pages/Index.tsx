@@ -360,7 +360,6 @@ const Index = () => {
           </div>
         </Card>
 
-        {/* Team Calendars */}
         <div className="lg:col-span-3">
           <Card className="p-4">
             <div className="flex items-center justify-between mb-6">
