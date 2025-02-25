@@ -9,6 +9,12 @@ import {
 import { useSidebar } from './sidebar';
 import { cn } from '@/lib/utils';
 import { Button } from './button';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "./tooltip";
 
 export function AppSidebar() {
   const [teams] = React.useState([
@@ -19,137 +25,146 @@ export function AppSidebar() {
 
   const {
     state,
-    toggleSidebar
+    toggleSidebar,
+    isMobile
   } = useSidebar();
   const location = useLocation();
   const notificationCount = 3;
   const isCollapsed = state === "collapsed";
 
-  return <>
-    <Button 
-      variant="outline" 
-      size="icon" 
-      className="fixed left-4 top-4 z-40 lg:hidden" 
-      onClick={toggleSidebar}
-    >
-      <Menu />
-    </Button>
-    <div className={cn(
-      "fixed inset-y-0 left-0 z-30 bg-white border-r transition-all duration-300 ease-in-out",
-      isCollapsed ? "w-[60px]" : "w-[240px]",
-      "lg:translate-x-0",
-      state === "collapsed" && "-translate-x-full lg:translate-x-0"
-    )}>
-      <div className="flex flex-col h-full">
-        <div className="p-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <img 
-              src="/lovable-uploads/6a07dd00-f2c7-49da-8b00-48d960c13610.png" 
-              alt="Trade Ease Logo" 
-              className="w-8 h-8"
-            />
-            <span className={cn(
-              "font-semibold text-lg text-gray-900 transition-opacity duration-200",
-              isCollapsed && "opacity-0 lg:hidden"
-            )}>
-              Trade Ease
-            </span>
-          </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="hidden lg:flex"
-            onClick={toggleSidebar}
-          >
-            {isCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
-          </Button>
-        </div>
+  const renderNavLink = (icon: React.ReactNode, label: string, path: string) => {
+    const content = (
+      <Link
+        to={path}
+        className={cn(
+          "flex items-center gap-2 p-2 rounded-lg hover:bg-gray-100 text-gray-700 hover:text-gray-900 text-sm",
+          location.pathname === path && "bg-gray-100 text-gray-900"
+        )}
+      >
+        {icon}
+        <span className={cn("transition-opacity duration-200", isCollapsed && "hidden lg:hidden")}>
+          {label}
+        </span>
+      </Link>
+    );
 
-        <nav className="flex-1 p-2 space-y-1 overflow-y-auto">
-          <Link to="/notifications" className={cn(
-            "flex items-center justify-between gap-2 p-2 rounded-lg hover:bg-gray-100 text-gray-700 hover:text-gray-900 text-sm",
-            location.pathname === '/notifications' && "bg-gray-100 text-gray-900"
-          )}>
-            <div className="flex items-center gap-2 min-w-0">
-              <Bell className="w-4 h-4 flex-shrink-0" />
-              <span className={cn("transition-opacity duration-200", isCollapsed && "hidden lg:hidden")}>
-                Notifications
+    return isCollapsed && !isMobile ? (
+      <Tooltip>
+        <TooltipTrigger asChild>
+          {content}
+        </TooltipTrigger>
+        <TooltipContent side="right">
+          {label}
+        </TooltipContent>
+      </Tooltip>
+    ) : content;
+  };
+
+  return (
+    <>
+      <Button 
+        variant="outline" 
+        size="icon" 
+        className="fixed left-4 top-4 z-40 lg:hidden" 
+        onClick={toggleSidebar}
+      >
+        <Menu className="h-4 w-4" />
+      </Button>
+
+      <div
+        data-state={state}
+        className={cn(
+          "fixed inset-y-0 left-0 z-30 bg-white border-r transition-all duration-300 ease-in-out peer",
+          isCollapsed ? "w-[60px]" : "w-[240px]",
+          "lg:translate-x-0",
+          state === "collapsed" && "-translate-x-full lg:translate-x-0"
+        )}
+      >
+        <div className="flex flex-col h-full">
+          <div className="p-4 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <img 
+                src="/lovable-uploads/6a07dd00-f2c7-49da-8b00-48d960c13610.png" 
+                alt="Trade Ease Logo" 
+                className="w-8 h-8"
+              />
+              <span className={cn(
+                "font-semibold text-lg text-gray-900 transition-opacity duration-200",
+                isCollapsed && "opacity-0 lg:hidden"
+              )}>
+                Trade Ease
               </span>
             </div>
-            {notificationCount > 0 && <span className={cn(
-              "bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center",
-              isCollapsed && "hidden lg:hidden"
-            )}>
-              {notificationCount}
-            </span>}
-          </Link>
-
-          {[
-            { icon: LayoutDashboard, label: 'Dashboard', path: '/' },
-            { icon: BarChart, label: 'Statistics', path: '/statistics' },
-            { icon: ListTodo, label: 'Task Lists', path: '/tasks' },
-            { icon: Briefcase, label: 'Jobs', path: '/jobs' },
-            { icon: Calendar, label: 'Calendar', path: '/calendar' },
-            { icon: Users, label: 'Customers', path: '/customers' },
-            { icon: FileText, label: 'Quotes', path: '/quotes' },
-            { icon: MessageSquare, label: 'Messaging', path: '/messaging' },
-            { icon: Mail, label: 'Email', path: '/email' },
-            { icon: Bot, label: 'AI Features', path: '/ai-features' },
-            { icon: Network, label: 'Integrations', path: '/integrations' },
-            { icon: Share, label: 'Social', path: '/social' },
-            { icon: LinkIcon, label: 'Refer a Friend', path: '/referrals' },
-            { icon: Database, label: 'Database', path: '/database' },
-            { icon: Settings, label: 'Settings', path: '/settings' },
-          ].map(({ icon: Icon, label, path }) => (
-            <Link
-              key={path}
-              to={path}
-              className={cn(
-                "flex items-center gap-2 p-2 rounded-lg hover:bg-gray-100 text-gray-700 hover:text-gray-900 text-sm",
-                location.pathname === path && "bg-gray-100 text-gray-900"
-              )}
+            <Button
+              variant="ghost"
+              size="icon"
+              className="hidden lg:flex h-8 w-8"
+              onClick={toggleSidebar}
             >
-              <Icon className="w-4 h-4 flex-shrink-0" />
-              <span className={cn("transition-opacity duration-200", isCollapsed && "hidden lg:hidden")}>
-                {label}
-              </span>
-            </Link>
-          ))}
-
-          {/* Teams Section */}
-          <div className={cn("pt-8", isCollapsed && "hidden lg:hidden")}>
-            <div className="mb-2 text-sm font-bold text-black px-2">
-              Teams view
-            </div>
-            {teams.map((team) => (
-              <Link 
-                key={team.name}
-                to={team.path} 
-                className={cn(
-                  "flex items-center gap-2 p-2 rounded-lg text-sm",
-                  `hover:bg-${team.color}-50 text-${team.color}-600 hover:text-${team.color}-700`
-                )}
-              >
-                <Hammer className="w-4 h-4 flex-shrink-0" />
-                <span className={cn("transition-opacity duration-200", isCollapsed && "hidden lg:hidden")}>
-                  {team.name}
-                </span>
-              </Link>
-            ))}
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              className={cn(
-                "w-full flex items-center gap-2 p-2 text-gray-600 hover:text-gray-700 hover:bg-gray-50 text-sm mt-1",
-                isCollapsed && "hidden lg:hidden"
-              )}
-            >
-              <Plus className="w-4 h-4 flex-shrink-0" />
-              <span>Add Team</span>
+              {isCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
             </Button>
           </div>
-        </nav>
+
+          <nav className="flex-1 p-2 space-y-1 overflow-y-auto">
+            <TooltipProvider delayDuration={0}>
+              {renderNavLink(<Bell className="w-4 h-4 flex-shrink-0" />, "Notifications", "/notifications")}
+
+              {[
+                { icon: LayoutDashboard, label: 'Dashboard', path: '/' },
+                { icon: BarChart, label: 'Statistics', path: '/statistics' },
+                { icon: ListTodo, label: 'Task Lists', path: '/tasks' },
+                { icon: Briefcase, label: 'Jobs', path: '/jobs' },
+                { icon: Calendar, label: 'Calendar', path: '/calendar' },
+                { icon: Users, label: 'Customers', path: '/customers' },
+                { icon: FileText, label: 'Quotes', path: '/quotes' },
+                { icon: MessageSquare, label: 'Messaging', path: '/messaging' },
+                { icon: Mail, label: 'Email', path: '/email' },
+                { icon: Bot, label: 'AI Features', path: '/ai-features' },
+                { icon: Network, label: 'Integrations', path: '/integrations' },
+                { icon: Share, label: 'Social', path: '/social' },
+                { icon: LinkIcon, label: 'Refer a Friend', path: '/referrals' },
+                { icon: Database, label: 'Database', path: '/database' },
+                { icon: Settings, label: 'Settings', path: '/settings' },
+              ].map(({ icon: Icon, label, path }) => (
+                renderNavLink(<Icon className="w-4 h-4 flex-shrink-0" />, label, path)
+              ))}
+            </TooltipProvider>
+
+            {/* Teams Section */}
+            <div className={cn("pt-8", isCollapsed && "hidden lg:hidden")}>
+              <div className="mb-2 text-sm font-bold text-black px-2">
+                Teams view
+              </div>
+              {teams.map((team) => (
+                <Link 
+                  key={team.name}
+                  to={team.path} 
+                  className={cn(
+                    "flex items-center gap-2 p-2 rounded-lg text-sm",
+                    `hover:bg-${team.color}-50 text-${team.color}-600 hover:text-${team.color}-700`
+                  )}
+                >
+                  <Hammer className="w-4 h-4 flex-shrink-0" />
+                  <span className={cn("transition-opacity duration-200", isCollapsed && "hidden lg:hidden")}>
+                    {team.name}
+                  </span>
+                </Link>
+              ))}
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className={cn(
+                  "w-full flex items-center gap-2 p-2 text-gray-600 hover:text-gray-700 hover:bg-gray-50 text-sm mt-1",
+                  isCollapsed && "hidden lg:hidden"
+                )}
+              >
+                <Plus className="w-4 h-4 flex-shrink-0" />
+                <span>Add Team</span>
+              </Button>
+            </div>
+          </nav>
+        </div>
       </div>
-    </div>
-  </>;
+    </>
+  );
 }
