@@ -63,10 +63,7 @@ export default function Calendar() {
   };
 
   const handleJobAssign = (jobId: string, date: Date) => {
-    toast({
-      title: "Job Assigned",
-      description: `Job ${jobId} has been scheduled for ${format(date, 'PPP')}`,
-    });
+    toast.success(`Job ${jobId} has been scheduled for ${format(date, 'PPP')}`);
   };
 
   return (
@@ -88,7 +85,7 @@ export default function Calendar() {
           {teams.map((team) => (
             <Card key={team.name}>
               <CardHeader>
-                <CardTitle>{team.name}</CardTitle>
+                <CardTitle className="text-lg">{team.name}</CardTitle>
                 <CardDescription>View and manage team schedule</CardDescription>
               </CardHeader>
               <CardContent>

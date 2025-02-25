@@ -130,7 +130,7 @@ export default function Jobs() {
           'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`
         },
         body: JSON.stringify({
-          model: "gpt-4o-mini",
+          model: "gpt-4",
           messages: [{
             role: "system",
             content: "You are a professional job template creator. Create detailed job templates based on descriptions."
