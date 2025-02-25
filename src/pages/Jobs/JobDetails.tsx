@@ -2,9 +2,9 @@ import { AppLayout } from "@/components/ui/AppLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, MapPin, User, Calendar, Clock, FileText, Image as ImageIcon, Tag, Navigation, Receipt, DollarSign, ScrollText, Calculator, Upload } from "lucide-react";
+import { ArrowLeft, MapPin, User, Calendar, Clock, FileText, Image as ImageIcon, Tag, Navigation, Receipt, DollarSign, ScrollText, Calculator, Upload, Play, Pause, Utensils } from "lucide-react";
 import type { Job } from "@/types/job";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { FileUpload } from "@/components/tasks/FileUpload";
 import { ImagesGrid } from "@/components/tasks/ImagesGrid";
 import { useToast } from "@/hooks/use-toast";
@@ -71,6 +71,7 @@ export default function JobDetails() {
   const [selectedMembers, setSelectedMembers] = useState<string[]>([]);
   const [jobTimer, setJobTimer] = useState<number>(0);
   const [isTimerRunning, setIsTimerRunning] = useState(false);
+  const [isOnBreak, setIsOnBreak] = useState(false);
   const [jobNotes, setJobNotes] = useState<string>("");
   const [invoices, setInvoices] = useState<any[]>([]);
   const [bills, setBills] = useState<any[]>([]);
@@ -81,6 +82,7 @@ export default function JobDetails() {
     invoices: "",
     purchase_orders: ""
   });
+  const [locationHistory, setLocationHistory] = useState<{timestamp: number; coords: [number, number]}[]>([]);
 
   const handleQuotePhotoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files) {
@@ -149,6 +151,66 @@ export default function JobDetails() {
         reader.readAsDataURL(file);
       });
       // TODO: Implement actual file upload and calculation logic
+    }
+  };
+
+  useEffect(() => {
+    let interval: number | undefined;
+
+    if (isTimerRunning && !isOnBreak) {
+      interval = window.setInterval(() => {
+        setJobTimer(prev => prev + 1);
+      }, 1000);
+    }
+
+    return () => {
+      if (interval) {
+        clearInterval(interval);
+      }
+    };
+  }, [isTimerRunning, isOnBreak]);
+
+  const handleTimerToggle = () => {
+    setIsTimerRunning(!isTimerRunning);
+    if (!isTimerRunning) { // Starting timer
+      getCurrentLocation("Timer started");
+    } else { // Stopping timer
+      getCurrentLocation("Timer stopped");
+    }
+  };
+
+  const handleBreakToggle = () => {
+    setIsOnBreak(!isOnBreak);
+    if (!isOnBreak) { // Starting break
+      getCurrentLocation("Break started");
+    } else { // Ending break
+      getCurrentLocation("Break ended");
+    }
+  };
+
+  const getCurrentLocation = (action: string) => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const newLocation = {
+            timestamp: Date.now(),
+            coords: [position.coords.longitude, position.coords.latitude] as [number, number]
+          };
+          setLocationHistory(prev => [...prev, newLocation]);
+          toast({
+            title: action,
+            description: `Location recorded: ${position.coords.latitude.toFixed(6)}, ${position.coords.longitude.toFixed(6)}`
+          });
+        },
+        (error) => {
+          toast({
+            title: "Location Error",
+            description: "Could not get current location. Please enable location services.",
+            variant: "destructive"
+          });
+          console.error("Location error:", error);
+        }
+      );
     }
   };
 
@@ -415,18 +477,55 @@ export default function JobDetails() {
               </TabsContent>
 
               <TabsContent value="timer" className="space-y-4">
-                <div className="flex items-center justify-center space-x-4">
+                <div className="flex flex-col items-center space-y-6">
                   <div className="text-4xl font-mono">
                     {Math.floor(jobTimer / 3600).toString().padStart(2, '0')}:
                     {Math.floor((jobTimer % 3600) / 60).toString().padStart(2, '0')}:
                     {(jobTimer % 60).toString().padStart(2, '0')}
                   </div>
-                  <Button
-                    onClick={() => setIsTimerRunning(!isTimerRunning)}
-                    variant={isTimerRunning ? "destructive" : "default"}
-                  >
-                    {isTimerRunning ? "Stop" : "Start"}
-                  </Button>
+                  <div className="flex items-center justify-center space-x-4">
+                    <Button
+                      onClick={handleTimerToggle}
+                      variant={isTimerRunning ? "destructive" : "default"}
+                      className="w-32"
+                    >
+                      {isTimerRunning ? (
+                        <>
+                          <Pause className="w-4 h-4 mr-2" />
+                          Stop
+                        </>
+                      ) : (
+                        <>
+                          <Play className="w-4 h-4 mr-2" />
+                          Start
+                        </>
+                      )}
+                    </Button>
+                    <Button
+                      onClick={handleBreakToggle}
+                      variant={isOnBreak ? "outline" : "secondary"}
+                      className="w-32"
+                      disabled={!isTimerRunning}
+                    >
+                      <Utensils className="w-4 h-4 mr-2" />
+                      {isOnBreak ? "End Break" : "Break"}
+                    </Button>
+                  </div>
+                  {locationHistory.length > 0 && (
+                    <div className="w-full mt-6 space-y-2">
+                      <h3 className="font-medium text-lg">Location History</h3>
+                      <div className="border rounded-lg p-4 space-y-2 max-h-[200px] overflow-y-auto">
+                        {locationHistory.map((entry, index) => (
+                          <div key={index} className="flex items-center gap-2 text-sm text-gray-600">
+                            <MapPin className="w-4 h-4" />
+                            <span>
+                              {new Date(entry.timestamp).toLocaleTimeString()}: {entry.coords[1].toFixed(6)}, {entry.coords[0].toFixed(6)}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               </TabsContent>
 
