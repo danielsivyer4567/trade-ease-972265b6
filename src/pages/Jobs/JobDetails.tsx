@@ -87,7 +87,6 @@ export default function JobDetails() {
   const [locationHistory, setLocationHistory] = useState<{timestamp: number; coords: [number, number]}[]>([]);
   const [hasLocationPermission, setHasLocationPermission] = useState<boolean | null>(null);
   const [jobs, setJobs] = useState(mockJobs);
-
   const [selectedDate, setSelectedDate] = useState<Date>();
 
   useEffect(() => {
@@ -280,7 +279,7 @@ export default function JobDetails() {
 
     toast({
       title: "Job Rescheduled",
-      description: `Job has been reassigned to ${format(newDate, 'PPP')}`,
+      description: `Job has been rescheduled to ${format(newDate, 'PPP')}`,
     });
   };
 
@@ -542,12 +541,40 @@ export default function JobDetails() {
 
               <TabsContent value="calendar" className="space-y-4">
                 <div className="h-[500px] border rounded-lg p-4">
+                  <div className="flex justify-between items-center mb-4">
+                    <h3 className="text-lg font-semibold">Job Schedule</h3>
+                    <div className="flex gap-2">
+                      <Select
+                        value={job?.assignedTeam || ''}
+                        onValueChange={(value) => {
+                          setJobs(prevJobs => prevJobs.map(j => 
+                            j.id === job?.id 
+                              ? { ...j, assignedTeam: value }
+                              : j
+                          ));
+                          toast({
+                            title: "Team Assigned",
+                            description: `Job has been assigned to ${value}`,
+                          });
+                        }}
+                      >
+                        <SelectTrigger className="w-[200px]">
+                          <SelectValue placeholder="Select team..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Red Team">Red Team</SelectItem>
+                          <SelectItem value="Blue Team">Blue Team</SelectItem>
+                          <SelectItem value="Green Team">Green Team</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
                   <TeamCalendar 
                     date={selectedDate}
                     setDate={setSelectedDate}
                     teamColor={job?.assignedTeam === 'Red Team' ? 'red' : job?.assignedTeam === 'Blue Team' ? 'blue' : 'green'}
                     onJobAssign={handleJobAssign}
-                    assignedJobs={mockJobs}
+                    assignedJobs={jobs}
                   />
                 </div>
               </TabsContent>
