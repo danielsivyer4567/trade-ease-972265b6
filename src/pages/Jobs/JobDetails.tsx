@@ -2,7 +2,7 @@ import { AppLayout } from "@/components/ui/AppLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, MapPin, User, Calendar, Clock, FileText, Image as ImageIcon, Tag, Navigation, Receipt, DollarSign, FileInvoice, Calculator, Upload } from "lucide-react";
+import { ArrowLeft, MapPin, User, Calendar, Clock, FileText, Image as ImageIcon, Tag, Navigation, Receipt, DollarSign, ScrollText, Calculator, Upload } from "lucide-react";
 import type { Job } from "@/types/job";
 import React, { useState } from "react";
 import { FileUpload } from "@/components/tasks/FileUpload";
@@ -209,7 +209,7 @@ export default function JobDetails() {
                       Costs
                     </TabsTrigger>
                     <TabsTrigger value="invoices">
-                      <FileInvoice className="w-4 h-4 mr-2" />
+                      <ScrollText className="w-4 h-4 mr-2" />
                       Invoices
                     </TabsTrigger>
                   </>
