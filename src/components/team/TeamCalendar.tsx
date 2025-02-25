@@ -4,6 +4,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { Droplet, CloudRain, CloudLightning, Sun, CloudSun, Droplets } from 'lucide-react';
 import { Job } from '@/types/job';
 import { useToast } from '@/hooks/use-toast';
+import { format } from 'date-fns';
 
 interface TeamCalendarProps {
   date: Date | undefined;
@@ -93,14 +94,14 @@ export function TeamCalendar({ date, setDate, teamColor, onJobAssign, assignedJo
       onJobAssign(jobId, targetDate);
       toast({
         title: "Job Rescheduled",
-        description: `Job has been rescheduled to ${targetDate.toLocaleDateString()}`,
+        description: `Job has been rescheduled to ${format(targetDate, 'PPP')}`,
       });
     }
   };
 
   const modifiers = {
     rainy: (date: Date) => {
-      const dateStr = date.toISOString().split('T')[0];
+      const dateStr = format(date, 'yyyy-MM-dd');
       return weatherDates.some(rd => rd.date === dateStr);
     }
   };
@@ -123,11 +124,17 @@ export function TeamCalendar({ date, setDate, teamColor, onJobAssign, assignedJo
           modifiersStyles={modifiersStyles}
           components={{
             DayContent: ({ date }) => {
-              const dateStr = date.toISOString().split('T')[0];
+              const dateStr = format(date, 'yyyy-MM-dd');
               const weatherData = weatherDates.find(rd => rd.date === dateStr);
-              const jobsForDate = assignedJobs?.filter(job => 
-                new Date(job.date).toISOString().split('T')[0] === dateStr
-              );
+              const jobsForDate = assignedJobs?.filter(job => {
+                try {
+                  const jobDate = new Date(job.date);
+                  return format(jobDate, 'yyyy-MM-dd') === dateStr;
+                } catch (e) {
+                  console.error('Invalid date in job:', job);
+                  return false;
+                }
+              });
               
               return (
                 <div 

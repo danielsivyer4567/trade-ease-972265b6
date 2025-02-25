@@ -24,6 +24,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { TeamCalendar } from "@/components/team/TeamCalendar";
+import { format } from "date-fns";
 
 const mockStaffMembers = [
   { id: "1", name: "John Smith", role: "<strong>Senior Plumber</strong>" },
@@ -85,6 +86,7 @@ export default function JobDetails() {
   });
   const [locationHistory, setLocationHistory] = useState<{timestamp: number; coords: [number, number]}[]>([]);
   const [hasLocationPermission, setHasLocationPermission] = useState<boolean | null>(null);
+  const [jobs, setJobs] = useState(mockJobs);
 
   const [selectedDate, setSelectedDate] = useState<Date>();
 
@@ -270,16 +272,15 @@ export default function JobDetails() {
   };
 
   const handleJobAssign = (jobId: string, newDate: Date) => {
-    // Update job date
     setJobs(prevJobs => prevJobs.map(job => 
       job.id === jobId 
-        ? { ...job, date: newDate.toISOString().split('T')[0] }
+        ? { ...job, date: format(newDate, 'yyyy-MM-dd') }
         : job
     ));
 
     toast({
       title: "Job Rescheduled",
-      description: `Job has been reassigned to ${newDate.toLocaleDateString()}`,
+      description: `Job has been reassigned to ${format(newDate, 'PPP')}`,
     });
   };
 
