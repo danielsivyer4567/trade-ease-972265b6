@@ -1,5 +1,4 @@
-
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import Index from "./pages/Index";
 import Jobs from "./pages/Jobs";
 import NewJob from "./pages/Jobs/NewJob";
@@ -22,36 +21,107 @@ import NewInvoice from "./pages/Invoices/NewInvoice";
 import Messaging from "./pages/Messaging";
 import Integrations from "./pages/Settings/Integrations";
 import NotFound from "./pages/NotFound";
+import TradeRatesCalculator from "./pages/Settings/TradeRatesCalculator";
 import "./App.css";
+
+const router = createBrowserRouter([
+  {
+    path: "/",
+    element: <Index />,
+  },
+  {
+    path: "/jobs",
+    element: <Jobs />,
+  },
+  {
+    path: "/jobs/new",
+    element: <NewJob />,
+  },
+  {
+    path: "/jobs/:id",
+    element: <JobDetails />,
+  },
+  {
+    path: "/jobs/template/new",
+    element: <NewTemplate />,
+  },
+  {
+    path: "/quotes/new",
+    element: <NewQuote />,
+  },
+  {
+    path: "/statistics",
+    element: <Statistics />,
+  },
+  {
+    path: "/tasks",
+    element: <Tasks />,
+  },
+  {
+    path: "/settings",
+    element: <Settings />,
+  },
+  {
+    path: "/settings/integrations",
+    element: <Integrations />,
+  },
+  {
+    path: "/team-red",
+    element: <TeamRed />,
+  },
+  {
+    path: "/team-blue",
+    element: <TeamBlue />,
+  },
+  {
+    path: "/team-green",
+    element: <TeamGreen />,
+  },
+  {
+    path: "/notifications",
+    element: <Notifications />,
+  },
+  {
+    path: "/customers",
+    element: <Customers />,
+  },
+  {
+    path: "/customers/new",
+    element: <NewCustomer />,
+  },
+  {
+    path: "/customers/:id",
+    element: <CustomerDetail />,
+  },
+  {
+    path: "/payments/new",
+    element: <NewPayment />,
+  },
+  {
+    path: "/payroll/pay-run",
+    element: <PayRun />,
+  },
+  {
+    path: "/invoices/new",
+    element: <NewInvoice />,
+  },
+  {
+    path: "/messaging",
+    element: <Messaging />,
+  },
+  {
+    path: "/settings/trade-rates/calculator",
+    element: <TradeRatesCalculator />,
+  },
+  {
+    path: "*",
+    element: <NotFound />,
+  },
+]);
 
 function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Index />} />
-        <Route path="/jobs" element={<Jobs />} />
-        <Route path="/jobs/new" element={<NewJob />} />
-        <Route path="/jobs/:id" element={<JobDetails />} />
-        <Route path="/jobs/template/new" element={<NewTemplate />} />
-        <Route path="/quotes/new" element={<NewQuote />} />
-        <Route path="/statistics" element={<Statistics />} />
-        <Route path="/tasks" element={<Tasks />} />
-        <Route path="/settings" element={<Settings />} />
-        <Route path="/settings/integrations" element={<Integrations />} />
-        <Route path="/team-red" element={<TeamRed />} />
-        <Route path="/team-blue" element={<TeamBlue />} />
-        <Route path="/team-green" element={<TeamGreen />} />
-        <Route path="/notifications" element={<Notifications />} />
-        <Route path="/customers" element={<Customers />} />
-        <Route path="/customers/new" element={<NewCustomer />} />
-        <Route path="/customers/:id" element={<CustomerDetail />} />
-        <Route path="/payments/new" element={<NewPayment />} />
-        <Route path="/payroll/pay-run" element={<PayRun />} />
-        <Route path="/invoices/new" element={<NewInvoice />} />
-        <Route path="/messaging" element={<Messaging />} />
-        <Route path="*" element={<NotFound />} />
-      </Routes>
-    </BrowserRouter>
+    <RouterProvider router={router} />
   );
 }
 

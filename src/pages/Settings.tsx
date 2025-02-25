@@ -1,4 +1,3 @@
-
 import { AppLayout } from "@/components/ui/AppLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Settings, DollarSign, Receipt, Clock, Users, Shield, FileText, Calendar, List, CreditCard, User, Bot, Briefcase, Network, Mail, FileJson, Building, Share, Zap, Search, Link2 } from "lucide-react";
@@ -7,8 +6,8 @@ import { Link } from "react-router-dom";
 const settingsSections = [{
   title: "Trade Rates",
   icon: DollarSign,
-  description: "Manage trade and service rates",
-  path: "/settings/trade-rates"
+  description: "Calculate and manage trade rates",
+  path: "/settings/trade-rates/calculator"
 }, {
   title: "Bills & Purchase Orders",
   icon: Receipt,
