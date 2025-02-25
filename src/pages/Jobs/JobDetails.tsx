@@ -23,6 +23,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { TeamCalendar } from "@/components/team/TeamCalendar";
 
 const mockStaffMembers = [
   { id: "1", name: "John Smith", role: "<strong>Senior Plumber</strong>" },
@@ -84,6 +85,8 @@ export default function JobDetails() {
   });
   const [locationHistory, setLocationHistory] = useState<{timestamp: number; coords: [number, number]}[]>([]);
   const [hasLocationPermission, setHasLocationPermission] = useState<boolean | null>(null);
+
+  const [selectedDate, setSelectedDate] = useState<Date>();
 
   useEffect(() => {
     checkLocationPermission();
@@ -264,6 +267,20 @@ export default function JobDetails() {
     } else {
       return `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&travelmode=driving`;
     }
+  };
+
+  const handleJobAssign = (jobId: string, newDate: Date) => {
+    // Update job date
+    setJobs(prevJobs => prevJobs.map(job => 
+      job.id === jobId 
+        ? { ...job, date: newDate.toISOString().split('T')[0] }
+        : job
+    ));
+
+    toast({
+      title: "Job Rescheduled",
+      description: `Job has been reassigned to ${newDate.toLocaleDateString()}`,
+    });
   };
 
   if (!job) {
@@ -523,8 +540,14 @@ export default function JobDetails() {
               </TabsContent>
 
               <TabsContent value="calendar" className="space-y-4">
-                <div className="h-[400px] border rounded-lg flex items-center justify-center">
-                  Calendar view coming soon
+                <div className="h-[500px] border rounded-lg p-4">
+                  <TeamCalendar 
+                    date={selectedDate}
+                    setDate={setSelectedDate}
+                    teamColor={job?.assignedTeam === 'Red Team' ? 'red' : job?.assignedTeam === 'Blue Team' ? 'blue' : 'green'}
+                    onJobAssign={handleJobAssign}
+                    assignedJobs={mockJobs}
+                  />
                 </div>
               </TabsContent>
 
