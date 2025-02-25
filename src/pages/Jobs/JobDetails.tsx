@@ -83,6 +83,7 @@ export default function JobDetails() {
     purchase_orders: ""
   });
   const [locationHistory, setLocationHistory] = useState<{timestamp: number; coords: [number, number]}[]>([]);
+  const [hasLocationPermission, setHasLocationPermission] = useState<boolean | null>(null);
 
   const handleQuotePhotoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files) {
@@ -155,6 +156,10 @@ export default function JobDetails() {
   };
 
   useEffect(() => {
+    checkLocationPermission();
+  }, []);
+
+  useEffect(() => {
     let interval: number | undefined;
 
     if (isTimerRunning && !isOnBreak) {
@@ -170,7 +175,56 @@ export default function JobDetails() {
     };
   }, [isTimerRunning, isOnBreak]);
 
+  const checkLocationPermission = async () => {
+    if (!navigator.geolocation) {
+      setHasLocationPermission(false);
+      return;
+    }
+
+    try {
+      const permission = await navigator.permissions.query({ name: 'geolocation' });
+      setHasLocationPermission(permission.state === 'granted');
+      
+      permission.addEventListener('change', () => {
+        setHasLocationPermission(permission.state === 'granted');
+      });
+    } catch (error) {
+      // Fallback to checking via getCurrentPosition if permissions API is not supported
+      navigator.geolocation.getCurrentPosition(
+        () => setHasLocationPermission(true),
+        () => setHasLocationPermission(false)
+      );
+    }
+  };
+
+  const requestLocationPermission = () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        () => {
+          setHasLocationPermission(true);
+          toast({
+            title: "Location Access Granted",
+            description: "You can now start the timer.",
+          });
+        },
+        (error) => {
+          setHasLocationPermission(false);
+          toast({
+            title: "Location Access Required",
+            description: "Please enable location services to use the timer.",
+            variant: "destructive"
+          });
+        }
+      );
+    }
+  };
+
   const handleTimerToggle = () => {
+    if (!hasLocationPermission) {
+      requestLocationPermission();
+      return;
+    }
+
     setIsTimerRunning(!isTimerRunning);
     if (!isTimerRunning) { // Starting timer
       getCurrentLocation("Timer started");
@@ -483,33 +537,53 @@ export default function JobDetails() {
                     {Math.floor((jobTimer % 3600) / 60).toString().padStart(2, '0')}:
                     {(jobTimer % 60).toString().padStart(2, '0')}
                   </div>
-                  <div className="flex items-center justify-center space-x-4">
-                    <Button
-                      onClick={handleTimerToggle}
-                      variant={isTimerRunning ? "destructive" : "default"}
-                      className="w-32"
-                    >
-                      {isTimerRunning ? (
-                        <>
-                          <Pause className="w-4 h-4 mr-2" />
-                          Stop
-                        </>
+                  <div className="flex flex-col items-center space-y-4">
+                    {!hasLocationPermission && (
+                      <div className="text-sm text-red-500 mb-2">
+                        Location access is required to use the timer
+                      </div>
+                    )}
+                    <div className="flex items-center justify-center space-x-4">
+                      {!hasLocationPermission ? (
+                        <Button
+                          onClick={requestLocationPermission}
+                          variant="default"
+                          className="w-48"
+                        >
+                          <MapPin className="w-4 h-4 mr-2" />
+                          Enable Location Access
+                        </Button>
                       ) : (
                         <>
-                          <Play className="w-4 h-4 mr-2" />
-                          Start
+                          <Button
+                            onClick={handleTimerToggle}
+                            variant={isTimerRunning ? "destructive" : "default"}
+                            className="w-32"
+                          >
+                            {isTimerRunning ? (
+                              <>
+                                <Pause className="w-4 h-4 mr-2" />
+                                Stop
+                              </>
+                            ) : (
+                              <>
+                                <Play className="w-4 h-4 mr-2" />
+                                Start
+                              </>
+                            )}
+                          </Button>
+                          <Button
+                            onClick={handleBreakToggle}
+                            variant={isOnBreak ? "outline" : "secondary"}
+                            className="w-32"
+                            disabled={!isTimerRunning}
+                          >
+                            <Utensils className="w-4 h-4 mr-2" />
+                            {isOnBreak ? "End Break" : "Break"}
+                          </Button>
                         </>
                       )}
-                    </Button>
-                    <Button
-                      onClick={handleBreakToggle}
-                      variant={isOnBreak ? "outline" : "secondary"}
-                      className="w-32"
-                      disabled={!isTimerRunning}
-                    >
-                      <Utensils className="w-4 h-4 mr-2" />
-                      {isOnBreak ? "End Break" : "Break"}
-                    </Button>
+                    </div>
                   </div>
                   {locationHistory.length > 0 && (
                     <div className="w-full mt-6 space-y-2">
