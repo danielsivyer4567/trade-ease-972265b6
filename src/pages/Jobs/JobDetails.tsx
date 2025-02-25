@@ -69,10 +69,10 @@ export default function JobDetails() {
   const [quotePhotos, setQuotePhotos] = useState<string[]>([]);
   const [completionPhotos, setCompletionPhotos] = useState<string[]>([]);
   const [selectedMembers, setSelectedMembers] = useState<string[]>([]);
-  const [jobTimer, setJobTimer] = useState<number>(0);
+  const [jobTimer, setJobTimer] = useState(0);
   const [isTimerRunning, setIsTimerRunning] = useState(false);
   const [isOnBreak, setIsOnBreak] = useState(false);
-  const [jobNotes, setJobNotes] = useState<string>("");
+  const [jobNotes, setJobNotes] = useState("");
   const [invoices, setInvoices] = useState<any[]>([]);
   const [bills, setBills] = useState<any[]>([]);
   const [costs, setCosts] = useState<any[]>([]);
@@ -84,76 +84,6 @@ export default function JobDetails() {
   });
   const [locationHistory, setLocationHistory] = useState<{timestamp: number; coords: [number, number]}[]>([]);
   const [hasLocationPermission, setHasLocationPermission] = useState<boolean | null>(null);
-
-  const handleQuotePhotoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (event.target.files) {
-      const newPhotos = Array.from(event.target.files).map(file => URL.createObjectURL(file));
-      setQuotePhotos([...quotePhotos, ...newPhotos]);
-      toast({
-        title: "Photos Uploaded",
-        description: `${event.target.files.length} quote inspection photos added`
-      });
-    }
-  };
-
-  const handleCompletionPhotoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (event.target.files) {
-      const newPhotos = Array.from(event.target.files).map(file => URL.createObjectURL(file));
-      setCompletionPhotos([...completionPhotos, ...newPhotos]);
-      toast({
-        title: "Photos Uploaded",
-        description: `${event.target.files.length} completion photos added`
-      });
-    }
-  };
-
-  const handleTagMembers = () => {
-    if (selectedMembers.length > 0) {
-      const taggedMembers = selectedMembers
-        .map(id => {
-          const member = mockStaffMembers.find(m => m.id === id);
-          return member ? `${member.name} (${member.role})` : null;
-        })
-        .filter(Boolean)
-        .join("<br/>");
-      
-      toast({
-        title: "Members Tagged",
-        description: (
-          <div dangerouslySetInnerHTML={{ __html: `${taggedMembers} have been notified about this job` }} />
-        )
-      });
-      setSelectedMembers([]);
-    }
-  };
-
-  const getNavigationUrl = () => {
-    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-    const [lng, lat] = job?.location || [0, 0];
-    
-    if (isIOS) {
-      return `maps://maps.apple.com/?daddr=${lat},${lng}&dirflg=d`;
-    } else {
-      return `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&travelmode=driving`;
-    }
-  };
-
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>, type: 'bill' | 'receipt' | 'invoice' | 'purchase_order') => {
-    if (event.target.files) {
-      const files = Array.from(event.target.files);
-      files.forEach(file => {
-        const reader = new FileReader();
-        reader.onload = () => {
-          toast({
-            title: "File Uploaded",
-            description: `${file.name} has been uploaded successfully`
-          });
-        };
-        reader.readAsDataURL(file);
-      });
-      // TODO: Implement actual file upload and calculation logic
-    }
-  };
 
   useEffect(() => {
     checkLocationPermission();
@@ -189,7 +119,6 @@ export default function JobDetails() {
         setHasLocationPermission(permission.state === 'granted');
       });
     } catch (error) {
-      // Fallback to checking via getCurrentPosition if permissions API is not supported
       navigator.geolocation.getCurrentPosition(
         () => setHasLocationPermission(true),
         () => setHasLocationPermission(false)
@@ -226,18 +155,18 @@ export default function JobDetails() {
     }
 
     setIsTimerRunning(!isTimerRunning);
-    if (!isTimerRunning) { // Starting timer
+    if (!isTimerRunning) {
       getCurrentLocation("Timer started");
-    } else { // Stopping timer
+    } else {
       getCurrentLocation("Timer stopped");
     }
   };
 
   const handleBreakToggle = () => {
     setIsOnBreak(!isOnBreak);
-    if (!isOnBreak) { // Starting break
+    if (!isOnBreak) {
       getCurrentLocation("Break started");
-    } else { // Ending break
+    } else {
       getCurrentLocation("Break ended");
     }
   };
@@ -265,6 +194,75 @@ export default function JobDetails() {
           console.error("Location error:", error);
         }
       );
+    }
+  };
+
+  const handleQuotePhotoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files) {
+      const newPhotos = Array.from(event.target.files).map(file => URL.createObjectURL(file));
+      setQuotePhotos([...quotePhotos, ...newPhotos]);
+      toast({
+        title: "Photos Uploaded",
+        description: `${event.target.files.length} quote inspection photos added`
+      });
+    }
+  };
+
+  const handleCompletionPhotoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files) {
+      const newPhotos = Array.from(event.target.files).map(file => URL.createObjectURL(file));
+      setCompletionPhotos([...completionPhotos, ...newPhotos]);
+      toast({
+        title: "Photos Uploaded",
+        description: `${event.target.files.length} completion photos added`
+      });
+    }
+  };
+
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>, type: 'bill' | 'receipt' | 'invoice' | 'purchase_order') => {
+    if (event.target.files) {
+      const files = Array.from(event.target.files);
+      files.forEach(file => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          toast({
+            title: "File Uploaded",
+            description: `${file.name} has been uploaded successfully`
+          });
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+  };
+
+  const handleTagMembers = () => {
+    if (selectedMembers.length > 0) {
+      const taggedMembers = selectedMembers
+        .map(id => {
+          const member = mockStaffMembers.find(m => m.id === id);
+          return member ? `${member.name} (${member.role})` : null;
+        })
+        .filter(Boolean)
+        .join("<br/>");
+      
+      toast({
+        title: "Members Tagged",
+        description: (
+          <div dangerouslySetInnerHTML={{ __html: `${taggedMembers} have been notified about this job` }} />
+        )
+      });
+      setSelectedMembers([]);
+    }
+  };
+
+  const getNavigationUrl = () => {
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    const [lng, lat] = job?.location || [0, 0];
+    
+    if (isIOS) {
+      return `maps://maps.apple.com/?daddr=${lat},${lng}&dirflg=d`;
+    } else {
+      return `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&travelmode=driving`;
     }
   };
 
