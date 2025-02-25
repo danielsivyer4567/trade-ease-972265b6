@@ -37,7 +37,7 @@ const mockJobs: Job[] = [{
   jobNumber: "job-001",
   title: "Water Heater Installation",
   description: "Install new water heater system",
-  assignedTeam: "Team A"
+  assignedTeam: "Red Team"
 }, {
   id: "2",
   customer: "Sarah Johnson",
@@ -48,29 +48,29 @@ const mockJobs: Job[] = [{
   jobNumber: "job-002",
   title: "HVAC Maintenance",
   description: "Regular maintenance check",
-  assignedTeam: "Team B"
+  assignedTeam: "Blue Team"
 }, {
   id: "3",
   customer: "Mike Brown",
   type: "Electrical",
   status: "to-invoice",
   date: "2024-03-13",
-  location: [151.2093, -33.8688],
+  location: [151.1943, -33.8788],
   jobNumber: "job-003",
   title: "Electrical Panel Upgrade",
   description: "Upgrade main electrical panel",
-  assignedTeam: "Unassigned"
+  assignedTeam: "Green Team"
 }, {
   id: "4",
   customer: "Emily Davis",
   type: "Plumbing",
   status: "invoiced",
   date: "2024-03-12",
-  location: [151.2093, -33.8688],
+  location: [151.2153, -33.8588],
   jobNumber: "job-004",
   title: "Plumbing Repair",
   description: "Fix kitchen sink",
-  assignedTeam: "Unassigned"
+  assignedTeam: "Red Team"
 }];
 
 const categories = [{

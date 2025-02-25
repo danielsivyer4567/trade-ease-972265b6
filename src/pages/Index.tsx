@@ -9,6 +9,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { format } from 'date-fns';
 
 const stats = [{
   title: "Active Jobs",
@@ -142,6 +143,60 @@ const Index = () => {
     setTeams([...teams, newTeam]);
     toast.success(`Added ${newTeam.name} with ${newColor} color scheme`);
   };
+
+  const handleJobAssign = (jobId: string, date: Date) => {
+    // Handle job assignment
+    toast({
+      title: "Job Assigned",
+      description: `Job ${jobId} has been scheduled for ${format(date, 'PPP')}`,
+    });
+  };
+
+  const mockJobs: Job[] = [{
+    id: "1",
+    customer: "John Smith",
+    type: "Plumbing",
+    status: "ready",
+    date: "2024-03-15",
+    location: [151.2093, -33.8688],
+    jobNumber: "job-001",
+    title: "Water Heater Installation",
+    description: "Install new water heater system",
+    assignedTeam: "Red Team"
+  }, {
+    id: "2",
+    customer: "Sarah Johnson",
+    type: "HVAC",
+    status: "in-progress",
+    date: "2024-03-14",
+    location: [151.2543, -33.8688],
+    jobNumber: "job-002",
+    title: "HVAC Maintenance",
+    description: "Regular maintenance check",
+    assignedTeam: "Blue Team"
+  }, {
+    id: "3",
+    customer: "Mike Brown",
+    type: "Electrical",
+    status: "to-invoice",
+    date: "2024-03-13",
+    location: [151.1943, -33.8788],
+    jobNumber: "job-003",
+    title: "Electrical Panel Upgrade",
+    description: "Upgrade main electrical panel",
+    assignedTeam: "Green Team"
+  }, {
+    id: "4",
+    customer: "Emily Davis",
+    type: "Plumbing",
+    status: "invoiced",
+    date: "2024-03-12",
+    location: [151.2153, -33.8588],
+    jobNumber: "job-004",
+    title: "Plumbing Repair",
+    description: "Fix kitchen sink",
+    assignedTeam: "Red Team"
+  }];
 
   return (
     <AppLayout>
@@ -305,33 +360,44 @@ const Index = () => {
           </div>
         </Card>
 
+        {/* Team Calendars */}
         <div className="lg:col-span-3">
-          <h2 className="text-xl font-semibold mb-4 text-zinc-950">Team Calendars Overview</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {teams.map((team) => (
-              <div key={team.name}>
-                <h3 className={`text-lg font-semibold mb-2 text-${team.color}-600`}>
-                  {team.name} Calendar
-                </h3>
-                <TeamCalendar 
-                  date={sharedDate} 
-                  setDate={setSharedDate} 
-                  teamColor={team.color} 
-                />
-              </div>
-            ))}
-          </div>
-          <div className="flex justify-center mt-6">
-            <Button 
-              variant="outline" 
-              size="sm" 
-              className="gap-2 text-gray-600 hover:text-gray-800"
-              onClick={handleAddTeam}
-            >
-              <Plus className="w-4 h-4" />
-              Add Team
-            </Button>
-          </div>
+          <Card className="p-4">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-semibold">Team Calendars Overview</h2>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={handleAddTeam}
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Add Team
+              </Button>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {teams.map((team) => (
+                <Card key={team.name} className="p-4">
+                  <CardHeader className="p-0 mb-4">
+                    <CardTitle className={`text-lg font-semibold text-${team.color}-600`}>
+                      {team.name}
+                    </CardTitle>
+                    <CardDescription>
+                      View and manage team schedule
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="p-0">
+                    <TeamCalendar 
+                      date={sharedDate} 
+                      setDate={setSharedDate} 
+                      teamColor={team.color}
+                      onJobAssign={handleJobAssign}
+                      assignedJobs={mockJobs.filter(job => job.assignedTeam === team.name)}
+                    />
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </Card>
         </div>
 
         <div className="lg:col-span-3">
