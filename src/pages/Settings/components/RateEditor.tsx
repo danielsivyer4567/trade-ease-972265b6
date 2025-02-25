@@ -1,7 +1,8 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Rate } from "../types";
 
 interface RateEditorProps {
@@ -15,16 +16,23 @@ interface RateEditorProps {
   addButtonText: string;
 }
 
-export function RateEditor({ 
-  title, 
-  description, 
-  rates, 
-  onUpdateRates, 
+export function RateEditor({
+  title,
+  description,
+  rates,
+  onUpdateRates,
   onSelectRate,
   selectedRate,
   onAddRate,
-  addButtonText 
+  addButtonText,
 }: RateEditorProps) {
+  const handleRateChange = (id: string, value: number) => {
+    const updatedRates = rates.map((rate) =>
+      rate.id === id ? { ...rate, rate: value } : rate
+    );
+    onUpdateRates(updatedRates);
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -33,37 +41,25 @@ export function RateEditor({
       </CardHeader>
       <CardContent className="space-y-4">
         {rates.map((rate) => (
-          <div key={rate.id} className="grid grid-cols-3 gap-4">
-            <Input
-              placeholder="Rate Name"
-              value={rate.name}
-              onChange={(e) => {
-                const updatedRates = rates.map(r =>
-                  r.id === rate.id ? { ...r, name: e.target.value } : r
-                );
-                onUpdateRates(updatedRates);
-              }}
-            />
-            <Input
-              type="number"
-              placeholder="Rate Amount"
-              value={rate.rate}
-              onChange={(e) => {
-                const updatedRates = rates.map(r =>
-                  r.id === rate.id ? { ...r, rate: Number(e.target.value) } : r
-                );
-                onUpdateRates(updatedRates);
-              }}
-            />
-            <Button 
-              variant={selectedRate?.id === rate.id ? "default" : "outline"}
-              onClick={() => onSelectRate(rate)}
-            >
-              Select Rate
-            </Button>
+          <div key={rate.id} className="space-y-2">
+            <Label>{rate.name}</Label>
+            <div className="flex items-center gap-4">
+              <Input
+                type="number"
+                value={rate.rate}
+                onChange={(e) => handleRateChange(rate.id, parseFloat(e.target.value) || 0)}
+                placeholder="Enter rate"
+              />
+              <Button
+                variant="outline"
+                onClick={() => onSelectRate(rate)}
+              >
+                Use Rate
+              </Button>
+            </div>
           </div>
         ))}
-        <Button variant="outline" onClick={onAddRate}>
+        <Button onClick={onAddRate} className="w-full">
           {addButtonText}
         </Button>
       </CardContent>

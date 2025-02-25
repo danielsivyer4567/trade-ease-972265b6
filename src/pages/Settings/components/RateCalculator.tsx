@@ -1,11 +1,10 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Calculator, Equal } from "lucide-react";
-import { Rate, Calculation } from "../types";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { useState } from "react";
-import { useToast } from "@/components/ui/use-toast";
+import { Rate, Calculation } from "../types";
 
 interface RateCalculatorProps {
   selectedRate: Rate | null;
@@ -13,71 +12,39 @@ interface RateCalculatorProps {
 }
 
 export function RateCalculator({ selectedRate, onCalculate }: RateCalculatorProps) {
-  const [quantity, setQuantity] = useState<number>(0);
-  const { toast } = useToast();
+  const [quantity, setQuantity] = useState<string>("");
 
-  const calculateTotal = () => {
-    if (!selectedRate || !quantity) {
-      toast({
-        title: "Error",
-        description: "Please select a rate and enter a quantity",
-        variant: "destructive",
+  const handleCalculate = () => {
+    if (selectedRate && quantity) {
+      const numQuantity = parseFloat(quantity);
+      const total = numQuantity * selectedRate.rate;
+      onCalculate({
+        quantity: numQuantity,
+        rate: selectedRate.rate,
+        total,
       });
-      return;
     }
-
-    const subtotal = selectedRate.rate * quantity;
-    const gst = subtotal * 0.1; // 10% GST
-    const total = subtotal + gst;
-
-    const calculation: Calculation = {
-      rateType: selectedRate.unit,
-      rateName: selectedRate.name,
-      rate: selectedRate.rate,
-      quantity,
-      subtotal,
-      gst,
-      total,
-    };
-
-    onCalculate(calculation);
-    toast({
-      title: "Calculation Complete",
-      description: "The total has been calculated with GST",
-    });
   };
+
+  if (!selectedRate) return null;
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Calculator className="h-5 w-5" />
-          Calculate Rate
-        </CardTitle>
-        <CardDescription>Enter quantity and calculate total with GST</CardDescription>
+        <CardTitle>Calculate Rate</CardTitle>
+        <CardDescription>Calculate total for {selectedRate.name}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="text-sm font-medium">Selected Rate</label>
-            <Input
-              value={selectedRate?.name || ""}
-              placeholder="Click a rate above"
-              readOnly
-              className="bg-gray-50"
-            />
-          </div>
-          <div>
-            <label className="text-sm font-medium">Quantity</label>
-            <Input
-              type="number"
-              value={quantity}
-              onChange={(e) => setQuantity(Number(e.target.value))}
-              placeholder="Enter quantity"
-            />
-          </div>
+        <div className="space-y-2">
+          <Label>Quantity ({selectedRate.unit})</Label>
+          <Input
+            type="number"
+            value={quantity}
+            onChange={(e) => setQuantity(e.target.value)}
+            placeholder={`Enter quantity in ${selectedRate.unit}`}
+          />
         </div>
-        <Button onClick={calculateTotal} className="w-full">
+        <Button onClick={handleCalculate} className="w-full">
           Calculate Total
         </Button>
       </CardContent>

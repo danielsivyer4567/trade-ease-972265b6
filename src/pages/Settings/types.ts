@@ -1,4 +1,9 @@
 
+export interface Staff {
+  id: string;
+  name: string;
+}
+
 export interface Rate {
   id: string;
   name: string;
@@ -13,17 +18,8 @@ export interface CommissionRate {
   minimumSale: number;
 }
 
-export interface Staff {
-  id: string;
-  name: string;
-}
-
 export interface Calculation {
-  rateType: string;
-  rateName: string;
-  rate: number;
   quantity: number;
-  subtotal: number;
-  gst: number;
+  rate: number;
   total: number;
 }
