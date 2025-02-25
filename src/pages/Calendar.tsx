@@ -1,173 +1,107 @@
 
+import React from 'react';
 import { AppLayout } from "@/components/ui/AppLayout";
-import { Calendar } from "@/components/ui/calendar";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
-import { useState } from "react";
-import { CalendarDays, Users, CalendarRange, Calendar as CalendarIcon } from "lucide-react";
+import { TeamCalendar } from '@/components/team/TeamCalendar';
+import { Plus } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
+import { format } from 'date-fns';
+import type { Job } from '@/types/job';
 
-export default function CalendarPage() {
-  const [date, setDate] = useState<Date | undefined>(new Date());
-  const [view, setView] = useState("month");
-  const [showWeekends, setShowWeekends] = useState(true);
-  const [showTeamEvents, setShowTeamEvents] = useState(true);
+export default function Calendar() {
+  const [sharedDate, setSharedDate] = React.useState<Date | undefined>(new Date());
+  const [teams, setTeams] = React.useState([
+    { name: 'Red Team', color: 'red' },
+    { name: 'Blue Team', color: 'blue' },
+    { name: 'Green Team', color: 'green' }
+  ]);
+
+  const mockJobs: Job[] = [{
+    id: "1",
+    customer: "John Smith",
+    type: "Plumbing",
+    status: "ready",
+    date: "2024-03-15",
+    location: [151.2093, -33.8688],
+    jobNumber: "PLM-001",
+    title: "Water Heater Installation",
+    description: "Install new water heater system",
+    assignedTeam: "Red Team"
+  }, {
+    id: "2",
+    customer: "Sarah Johnson",
+    type: "HVAC",
+    status: "in-progress",
+    date: "2024-03-14",
+    location: [151.2543, -33.8688],
+    jobNumber: "HVAC-001",
+    title: "HVAC Maintenance",
+    description: "Regular maintenance check",
+    assignedTeam: "Blue Team"
+  }];
+
+  const getColorForTeam = (teamIndex: number) => {
+    const baseColors = [
+      'red', 'blue', 'green', 'purple', 'orange', 'pink', 'teal', 'yellow', 'indigo', 'rose'
+    ];
+    
+    const colorIndex = teamIndex % baseColors.length;
+    return baseColors[colorIndex];
+  };
+
+  const handleAddTeam = () => {
+    const newTeamIndex = teams.length;
+    const newColor = getColorForTeam(newTeamIndex);
+    const newTeam = {
+      name: `Team ${newTeamIndex + 1}`,
+      color: newColor
+    };
+    
+    setTeams([...teams, newTeam]);
+    toast.success(`Added ${newTeam.name} with ${newColor} color scheme`);
+  };
+
+  const handleJobAssign = (jobId: string, date: Date) => {
+    toast({
+      title: "Job Assigned",
+      description: `Job ${jobId} has been scheduled for ${format(date, 'PPP')}`,
+    });
+  };
 
   return (
     <AppLayout>
-      <div className="p-6">
-        <div className="flex items-center gap-2 mb-6">
-          <CalendarIcon className="h-8 w-8 text-gray-700" />
-          <h1 className="text-3xl font-bold">Calendar</h1>
+      <div className="space-y-4 md:space-y-6 animate-fadeIn p-4 md:p-6">
+        <div className="flex items-center justify-between">
+          <h1 className="text-2xl font-bold">Team Calendars</h1>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={handleAddTeam}
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Add Team
+          </Button>
         </div>
 
-        <div className="grid md:grid-cols-[300px_1fr] gap-6">
-          <div className="space-y-6">
-            <Card>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {teams.map((team) => (
+            <Card key={team.name}>
               <CardHeader>
-                <CardTitle>Settings</CardTitle>
-                <CardDescription>Configure your calendar view</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label>View Type</Label>
-                  <Select value={view} onValueChange={setView}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select view" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="month">Month</SelectItem>
-                      <SelectItem value="week">Week</SelectItem>
-                      <SelectItem value="day">Day</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <Label>Show Weekends</Label>
-                  <Switch
-                    checked={showWeekends}
-                    onCheckedChange={setShowWeekends}
-                  />
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <Label>Show Team Events</Label>
-                  <Switch
-                    checked={showTeamEvents}
-                    onCheckedChange={setShowTeamEvents}
-                  />
-                </div>
-
-                <Button className="w-full" variant="outline">
-                  <Users className="w-4 h-4 mr-2" />
-                  Manage Team Calendar
-                </Button>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Mini Calendar</CardTitle>
+                <CardTitle>{team.name}</CardTitle>
+                <CardDescription>View and manage team schedule</CardDescription>
               </CardHeader>
               <CardContent>
-                <Calendar
-                  mode="single"
-                  selected={date}
-                  onSelect={setDate}
-                  className="rounded-md border"
+                <TeamCalendar 
+                  date={sharedDate} 
+                  setDate={setSharedDate} 
+                  teamColor={team.color}
+                  onJobAssign={handleJobAssign}
+                  assignedJobs={mockJobs.filter(job => job.assignedTeam === team.name)}
                 />
               </CardContent>
             </Card>
-          </div>
-
-          <Tabs defaultValue="schedule" className="flex-1">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="schedule" className="flex items-center gap-2">
-                <CalendarDays className="h-4 w-4" />
-                Schedule
-              </TabsTrigger>
-              <TabsTrigger value="availability" className="flex items-center gap-2">
-                <CalendarRange className="h-4 w-4" />
-                Availability
-              </TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="schedule">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Schedule View</CardTitle>
-                  <CardDescription>
-                    View and manage your calendar events
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Calendar
-                    mode="single"
-                    selected={date}
-                    onSelect={setDate}
-                    className="rounded-md border"
-                    disabled={(date) =>
-                      !showWeekends && [0, 6].includes(date.getDay())
-                    }
-                  />
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="availability">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Availability Settings</CardTitle>
-                  <CardDescription>
-                    Set your working hours and availability
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="grid gap-4">
-                      {["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"].map((day) => (
-                        <div key={day} className="flex items-center justify-between">
-                          <Label>{day}</Label>
-                          <div className="flex items-center gap-2">
-                            <Select defaultValue="9">
-                              <SelectTrigger className="w-[100px]">
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {Array.from({ length: 12 }, (_, i) => i + 7).map((hour) => (
-                                  <SelectItem key={hour} value={hour.toString()}>
-                                    {hour}:00
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                            <span>to</span>
-                            <Select defaultValue="17">
-                              <SelectTrigger className="w-[100px]">
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {Array.from({ length: 12 }, (_, i) => i + 13).map((hour) => (
-                                  <SelectItem key={hour} value={hour.toString()}>
-                                    {hour}:00
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                    <Button className="w-full">Save Availability</Button>
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-          </Tabs>
+          ))}
         </div>
       </div>
     </AppLayout>

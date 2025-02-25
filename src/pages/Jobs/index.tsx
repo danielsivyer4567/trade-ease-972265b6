@@ -27,6 +27,10 @@ interface Job {
   assignedTeam: string;
 }
 
+interface JobLocation {
+  coordinates: [number, number];
+}
+
 const mockJobs: Job[] = [{
   id: "1",
   customer: "John Smith",
