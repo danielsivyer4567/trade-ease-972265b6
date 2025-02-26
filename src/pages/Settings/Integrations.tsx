@@ -1,6 +1,7 @@
+
 import { AppLayout } from "@/components/ui/AppLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Link2, MessageSquare, CreditCard, Mail, Calendar, Key } from "lucide-react";
+import { Link2, MessageSquare, CreditCard, Mail, Calendar, Key, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { Input } from "@/components/ui/input";
@@ -39,6 +40,13 @@ const availableIntegrations = [
     icon: Calendar,
     description: "Sync appointments and schedules",
     path: "/settings/integrations/google-calendar"
+  },
+  {
+    title: "Xero",
+    icon: FileText,
+    description: "Sync invoices, payments and accounting data with Xero",
+    path: "/settings/integrations/xero",
+    apiKeyRequired: true
   }
 ];
 
@@ -49,6 +57,9 @@ const fetchConfigs = async () => {
       status: "connected"
     }, {
       integration_name: "Stripe",
+      status: "not_connected"
+    }, {
+      integration_name: "Xero",
       status: "not_connected"
     }];
   } catch (error) {
