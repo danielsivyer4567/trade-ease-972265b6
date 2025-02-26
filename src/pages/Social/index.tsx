@@ -1,16 +1,16 @@
-
 import { AppLayout } from "@/components/ui/AppLayout";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { FileUpload } from "@/components/tasks/FileUpload";
 import { ImagesGrid } from "@/components/tasks/ImagesGrid";
 import { useState } from "react";
-import { Facebook, Instagram, Youtube, Store, Check, Plus } from "lucide-react";
+import { Facebook, Instagram, Youtube, Store, Check, Plus, Sparkles, Brain } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 interface SocialAccount {
   id: string;
@@ -22,6 +22,11 @@ interface SocialAccount {
 interface PostContent {
   text: string;
   images: string[];
+}
+
+interface AIEditingOptions {
+  tone: string;
+  length: string;
 }
 
 export default function Social() {
@@ -38,6 +43,11 @@ export default function Social() {
   });
 
   const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>([]);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editingOptions, setEditingOptions] = useState<AIEditingOptions>({
+    tone: 'professional',
+    length: 'medium'
+  });
   const { toast } = useToast();
 
   const handleConnect = (accountId: string) => {
@@ -84,15 +94,54 @@ export default function Social() {
       return;
     }
 
-    // Here you would integrate with each platform's API
     toast({
       title: "Content Posted",
       description: "Your content has been scheduled for posting.",
     });
 
-    // Reset form
     setPostContent({ text: '', images: [] });
     setSelectedPlatforms([]);
+  };
+
+  const handleAIEdit = async () => {
+    if (!postContent.text) {
+      toast({
+        title: "Error",
+        description: "Please add some content to edit.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsEditing(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-with-openai', {
+        body: {
+          prompt: `Edit the following social media post with a ${editingOptions.tone} tone and make it ${editingOptions.length} length: ${postContent.text}`,
+        },
+      });
+
+      if (error) throw error;
+
+      setPostContent(prev => ({
+        ...prev,
+        text: data.generatedText,
+      }));
+
+      toast({
+        title: "Content Edited",
+        description: "Your content has been enhanced by AI.",
+      });
+    } catch (error) {
+      console.error('Error editing content:', error);
+      toast({
+        title: "Error",
+        description: "Failed to edit content. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsEditing(false);
+    }
   };
 
   const getPlatformIcon = (platform: string) => {
@@ -179,36 +228,91 @@ export default function Social() {
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <Label>Post Content</Label>
-                <Textarea
-                  placeholder="What would you like to share?"
-                  value={postContent.text}
-                  onChange={(e) => setPostContent({ ...postContent, text: e.target.value })}
-                  className="min-h-[100px]"
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label>Post Content</Label>
+                  <Textarea
+                    placeholder="What would you like to share?"
+                    value={postContent.text}
+                    onChange={(e) => setPostContent({ ...postContent, text: e.target.value })}
+                    className="min-h-[100px]"
+                  />
+                </div>
+
+                <Card className="border-dashed">
+                  <CardHeader>
+                    <CardTitle className="text-sm flex items-center gap-2">
+                      <Brain className="h-4 w-4 text-purple-500" />
+                      AI Content Enhancement
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label>Tone</Label>
+                        <select
+                          className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                          value={editingOptions.tone}
+                          onChange={(e) => setEditingOptions(prev => ({ ...prev, tone: e.target.value }))}
+                        >
+                          <option value="professional">Professional</option>
+                          <option value="casual">Casual</option>
+                          <option value="friendly">Friendly</option>
+                          <option value="formal">Formal</option>
+                        </select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Length</Label>
+                        <select
+                          className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                          value={editingOptions.length}
+                          onChange={(e) => setEditingOptions(prev => ({ ...prev, length: e.target.value }))}
+                        >
+                          <option value="short">Short</option>
+                          <option value="medium">Medium</option>
+                          <option value="long">Long</option>
+                        </select>
+                      </div>
+                    </div>
+                    <Button
+                      onClick={handleAIEdit}
+                      variant="outline"
+                      className="w-full"
+                      disabled={isEditing || !postContent.text}
+                    >
+                      {isEditing ? (
+                        "Enhancing content..."
+                      ) : (
+                        <span className="flex items-center gap-2">
+                          <Sparkles className="h-4 w-4" />
+                          Enhance with AI
+                        </span>
+                      )}
+                    </Button>
+                  </CardContent>
+                </Card>
+
+                <div className="space-y-2">
+                  <Label>Add Media</Label>
+                  <FileUpload
+                    onFileUpload={handleFileUpload}
+                    label="Upload Images"
+                  />
+                </div>
+
+                <ImagesGrid
+                  images={postContent.images}
+                  title="Selected Images"
                 />
+
+                <Button
+                  onClick={handlePost}
+                  className="w-full"
+                  disabled={(!postContent.text && postContent.images.length === 0) || selectedPlatforms.length === 0}
+                >
+                  Post to Selected Platforms
+                </Button>
               </div>
-
-              <div className="space-y-2">
-                <Label>Add Media</Label>
-                <FileUpload
-                  onFileUpload={handleFileUpload}
-                  label="Upload Images"
-                />
-              </div>
-
-              <ImagesGrid
-                images={postContent.images}
-                title="Selected Images"
-              />
-
-              <Button
-                onClick={handlePost}
-                className="w-full"
-                disabled={(!postContent.text && postContent.images.length === 0) || selectedPlatforms.length === 0}
-              >
-                Post to Selected Platforms
-              </Button>
             </CardContent>
           </Card>
         </div>
