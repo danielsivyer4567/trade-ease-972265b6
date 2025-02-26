@@ -221,6 +221,7 @@ export default function Jobs() {
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
+
     if (file.type === 'application/json') {
       const reader = new FileReader();
       reader.onload = e => {
@@ -229,6 +230,8 @@ export default function Jobs() {
           if (!template.id) {
             template.id = crypto.randomUUID();
           }
+          template.estimatedDuration = Number(template.estimatedDuration) || 0;
+          template.price = Number(template.price) || 0;
           setGeneratedTemplates([template, ...generatedTemplates]);
           toast({
             title: "Success",
@@ -251,9 +254,11 @@ export default function Jobs() {
       const mockTemplate: JobTemplate = {
         id: crypto.randomUUID(),
         title: file.name.replace(/\.[^/.]+$/, ""),
-        estimatedDuration: "Please edit",
+        description: "",
+        type: "",
+        estimatedDuration: 0,
+        price: 0,
         materials: [],
-        price: "Please edit",
         category: "Plumbing"
       };
       setGeneratedTemplates([mockTemplate, ...generatedTemplates]);
