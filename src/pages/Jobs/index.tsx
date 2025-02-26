@@ -189,8 +189,8 @@ export default function Jobs() {
       title: getColumnValue('title') || "Untitled Template",
       description: getColumnValue('description') || "",
       type: getColumnValue('type') || "",
-      estimatedDuration: Number(getColumnValue('duration')) || 0,
-      price: Number(getColumnValue('price')) || 0,
+      estimatedDuration: parseInt(getColumnValue('duration') || "0"),
+      price: parseFloat(getColumnValue('price') || "0"),
       materials: getColumnValue('materials')?.split(';') || [],
       category: getColumnValue('category') || "Plumbing"
     };
