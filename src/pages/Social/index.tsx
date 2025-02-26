@@ -1,16 +1,10 @@
+
 import { AppLayout } from "@/components/ui/AppLayout";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { FileUpload } from "@/components/tasks/FileUpload";
-import { ImagesGrid } from "@/components/tasks/ImagesGrid";
 import { useState } from "react";
-import { Facebook, Instagram, Youtube, Store, Check, Plus, Sparkles, Brain } from "lucide-react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { SocialAccountCard } from "@/components/tasks/SocialAccountCard";
+import { CreatePostCard } from "@/components/tasks/CreatePostCard";
 
 interface SocialAccount {
   id: string;
@@ -144,177 +138,30 @@ export default function Social() {
     }
   };
 
-  const getPlatformIcon = (platform: string) => {
-    switch (platform) {
-      case 'Facebook':
-        return <Facebook className="h-5 w-5" />;
-      case 'Instagram':
-        return <Instagram className="h-5 w-5" />;
-      case 'TikTok':
-        return <Youtube className="h-5 w-5" />;
-      case 'Google Business':
-        return <Store className="h-5 w-5" />;
-      default:
-        return <Plus className="h-5 w-5" />;
-    }
-  };
-
   return (
     <AppLayout>
       <div className="p-6 space-y-6">
         <h1 className="text-2xl font-bold">Social Media Management</h1>
         
         <div className="grid md:grid-cols-2 gap-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Connected Accounts</CardTitle>
-              <CardDescription>Link your social media accounts to post content</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {accounts.map(account => (
-                <div key={account.id} className="flex items-center justify-between p-3 border rounded-lg">
-                  <div className="flex items-center gap-3">
-                    {getPlatformIcon(account.platform)}
-                    <div>
-                      <p className="font-medium">{account.platform}</p>
-                      {account.connected && (
-                        <p className="text-sm text-gray-500">Connected</p>
-                      )}
-                    </div>
-                  </div>
-                  <Button
-                    variant={account.connected ? "outline" : "default"}
-                    onClick={() => handleConnect(account.id)}
-                  >
-                    {account.connected ? (
-                      <span className="flex items-center gap-2">
-                        <Check className="h-4 w-4" />
-                        Connected
-                      </span>
-                    ) : (
-                      "Connect"
-                    )}
-                  </Button>
-                </div>
-              ))}
-            </CardContent>
-          </Card>
+          <SocialAccountCard
+            accounts={accounts}
+            onConnect={handleConnect}
+          />
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Create Post</CardTitle>
-              <CardDescription>Share content across multiple platforms</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label>Select Platforms</Label>
-                <div className="flex flex-wrap gap-2">
-                  {accounts.filter(a => a.connected).map(account => (
-                    <div key={account.id} className="flex items-center space-x-2">
-                      <Checkbox
-                        id={account.id}
-                        checked={selectedPlatforms.includes(account.id)}
-                        onCheckedChange={(checked) => {
-                          if (checked) {
-                            setSelectedPlatforms([...selectedPlatforms, account.id]);
-                          } else {
-                            setSelectedPlatforms(selectedPlatforms.filter(id => id !== account.id));
-                          }
-                        }}
-                      />
-                      <Label htmlFor={account.id}>{account.platform}</Label>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label>Post Content</Label>
-                  <Textarea
-                    placeholder="What would you like to share?"
-                    value={postContent.text}
-                    onChange={(e) => setPostContent({ ...postContent, text: e.target.value })}
-                    className="min-h-[100px]"
-                  />
-                </div>
-
-                <Card className="border-dashed">
-                  <CardHeader>
-                    <CardTitle className="text-sm flex items-center gap-2">
-                      <Brain className="h-4 w-4 text-purple-500" />
-                      AI Content Enhancement
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label>Tone</Label>
-                        <select
-                          className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                          value={editingOptions.tone}
-                          onChange={(e) => setEditingOptions(prev => ({ ...prev, tone: e.target.value }))}
-                        >
-                          <option value="professional">Professional</option>
-                          <option value="casual">Casual</option>
-                          <option value="friendly">Friendly</option>
-                          <option value="formal">Formal</option>
-                        </select>
-                      </div>
-                      <div className="space-y-2">
-                        <Label>Length</Label>
-                        <select
-                          className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                          value={editingOptions.length}
-                          onChange={(e) => setEditingOptions(prev => ({ ...prev, length: e.target.value }))}
-                        >
-                          <option value="short">Short</option>
-                          <option value="medium">Medium</option>
-                          <option value="long">Long</option>
-                        </select>
-                      </div>
-                    </div>
-                    <Button
-                      onClick={handleAIEdit}
-                      variant="outline"
-                      className="w-full"
-                      disabled={isEditing || !postContent.text}
-                    >
-                      {isEditing ? (
-                        "Enhancing content..."
-                      ) : (
-                        <span className="flex items-center gap-2">
-                          <Sparkles className="h-4 w-4" />
-                          Enhance with AI
-                        </span>
-                      )}
-                    </Button>
-                  </CardContent>
-                </Card>
-
-                <div className="space-y-2">
-                  <Label>Add Media</Label>
-                  <FileUpload
-                    onFileUpload={handleFileUpload}
-                    label="Upload Images"
-                  />
-                </div>
-
-                <ImagesGrid
-                  images={postContent.images}
-                  title="Selected Images"
-                />
-
-                <Button
-                  onClick={handlePost}
-                  className="w-full"
-                  disabled={(!postContent.text && postContent.images.length === 0) || selectedPlatforms.length === 0}
-                >
-                  Post to Selected Platforms
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+          <CreatePostCard
+            accounts={accounts}
+            selectedPlatforms={selectedPlatforms}
+            onPlatformSelect={setSelectedPlatforms}
+            postContent={postContent}
+            onPostContentChange={setPostContent}
+            onPost={handlePost}
+            isEditing={isEditing}
+            editingOptions={editingOptions}
+            onEditingOptionsChange={setEditingOptions}
+            onAIEnhance={handleAIEdit}
+            onFileUpload={handleFileUpload}
+          />
         </div>
       </div>
     </AppLayout>
