@@ -3,11 +3,11 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import type { Job } from "@/types/job";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Mic, MicOff, Volume2, VolumeX } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
-const RING_TONE_URL = "/ringtone.mp3"; // You would need to add this audio file to your public folder
+const RING_TONE_URL = "/ringtone.mp3";
 
 interface JobHeaderProps {
   job: Job;
@@ -18,32 +18,67 @@ export const JobHeader = ({ job }: JobHeaderProps) => {
   const [isListening, setIsListening] = useState(true);
   const [audio] = useState(new Audio(RING_TONE_URL));
   const { toast } = useToast();
+  
+  // Media recorder setup
+  const mediaRecorder = useRef<MediaRecorder | null>(null);
+  const audioChunks = useRef<Blob[]>([]);
 
   useEffect(() => {
-    // Cleanup audio on unmount
-    return () => {
-      audio.pause();
-      audio.currentTime = 0;
-    };
-  }, [audio]);
+    // Request microphone access
+    navigator.mediaDevices.getUserMedia({ audio: true })
+      .then(stream => {
+        mediaRecorder.current = new MediaRecorder(stream);
+        
+        mediaRecorder.current.ondataavailable = (event) => {
+          audioChunks.current.push(event.data);
+        };
 
-  const handleWalkieTalkieClick = () => {
-    if (!isTransmitting) {
-      setIsTransmitting(true);
-      audio.play().catch(error => {
+        mediaRecorder.current.onstop = () => {
+          const audioBlob = new Blob(audioChunks.current, { type: 'audio/wav' });
+          const audioUrl = URL.createObjectURL(audioBlob);
+          const playbackAudio = new Audio(audioUrl);
+          playbackAudio.play().catch(error => {
+            toast({
+              title: "Playback Error",
+              description: "Could not play recorded audio",
+              variant: "destructive"
+            });
+          });
+          audioChunks.current = [];
+        };
+      })
+      .catch(error => {
         toast({
-          title: "Audio Error",
-          description: "Could not play walkie-talkie sound",
+          title: "Microphone Error",
+          description: "Could not access microphone",
           variant: "destructive"
         });
       });
 
-      // Simulate transmission duration
-      setTimeout(() => {
-        setIsTransmitting(false);
-        audio.pause();
-        audio.currentTime = 0;
-      }, 3000);
+    return () => {
+      if (mediaRecorder.current?.state === 'recording') {
+        mediaRecorder.current.stop();
+      }
+      audio.pause();
+      audio.currentTime = 0;
+    };
+  }, [audio, toast]);
+
+  const startRecording = () => {
+    if (mediaRecorder.current?.state === 'inactive') {
+      audioChunks.current = [];
+      setIsTransmitting(true);
+      audio.play().catch(console.error); // Play connection sound
+      mediaRecorder.current?.start();
+    }
+  };
+
+  const stopRecording = () => {
+    if (mediaRecorder.current?.state === 'recording') {
+      mediaRecorder.current.stop();
+      setIsTransmitting(false);
+      audio.pause();
+      audio.currentTime = 0;
     }
   };
 
@@ -74,8 +109,11 @@ export const JobHeader = ({ job }: JobHeaderProps) => {
             </Button>
             <Button
               className="bg-green-500 hover:bg-green-600 text-white font-bold uppercase tracking-wider flex items-center gap-2 min-w-[200px] h-12"
-              onClick={handleWalkieTalkieClick}
-              disabled={isTransmitting}
+              onMouseDown={startRecording}
+              onMouseUp={stopRecording}
+              onMouseLeave={stopRecording}
+              onTouchStart={startRecording}
+              onTouchEnd={stopRecording}
             >
               {isTransmitting ? <MicOff className="animate-pulse" /> : <Mic />}
               {isTransmitting ? "TRANSMITTING..." : "WALKIE TALKIE"}
@@ -83,7 +121,7 @@ export const JobHeader = ({ job }: JobHeaderProps) => {
           </div>
         </div>
         <div className="flex items-center gap-4">
-          <Badge variant={job.status === "completed" ? "default" : "secondary"}>
+          <Badge variant={job.status === "invoiced" ? "default" : "secondary"}>
             {job.status}
           </Badge>
           <span className="text-gray-500">{job.date}</span>
