@@ -1,10 +1,7 @@
 
-import React, { useState, useEffect } from 'react';
-import { GoogleMap, LoadScript, InfoWindow, Marker } from '@react-google-maps/api';
+import React, { useState } from 'react';
+import { GoogleMap, LoadScript, InfoWindow } from '@react-google-maps/api';
 import type { Job } from '@/types/job';
-import { Button } from './ui/button';
-import { Navigation } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
 
 interface JobMapProps {
   jobs: Job[];
@@ -12,63 +9,72 @@ interface JobMapProps {
 
 const JobMap = ({ jobs }: JobMapProps) => {
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
-  const [center, setCenter] = useState({
-    lat: -28.017112731933594,
-    lng: 153.4014129638672
-  });
-  const { toast } = useToast();
 
   const mapContainerStyle = {
     width: '100%',
-    height: '200px',
+    height: '400px',
     borderRadius: '0.5rem'
+  };
+
+  // Updated coordinates for Gold Coast, Queensland
+  const center = {
+    lat: -28.017112731933594,
+    lng: 153.4014129638672
   };
 
   const options = {
     mapTypeId: 'satellite',
     streetViewControl: false,
     mapTypeControl: false,
-    mapId: '8f348c1e276da9d5'
+    mapId: '8f348c1e276da9d5' // Added Map ID for Advanced Markers
   };
 
-  useEffect(() => {
-    if (jobs.length > 0 && jobs[0].address) {
-      // Geocode the address to get coordinates
-      const geocoder = new google.maps.Geocoder();
-      geocoder.geocode({ address: jobs[0].address }, (results, status) => {
-        if (status === 'OK' && results && results[0]) {
-          const location = results[0].geometry.location;
-          setCenter({
-            lat: location.lat(),
-            lng: location.lng()
-          });
-        }
+  const onLoad = (map: google.maps.Map) => {
+    jobs.forEach((job) => {
+      // Create marker element
+      const markerElement = document.createElement('div');
+      markerElement.className = 'marker';
+      markerElement.innerHTML = `
+        <div class="bg-white p-2 rounded-lg shadow-lg">
+          <div class="font-semibold">${job.customer}</div>
+        </div>
+      `;
+
+      // Create the advanced marker
+      const marker = new google.maps.marker.AdvancedMarkerElement({
+        position: { lat: job.location[1], lng: job.location[0] },
+        map,
+        content: markerElement,
+        title: job.customer
       });
-    }
-  }, [jobs]);
 
-  const handleNavigate = (job: Job) => {
-    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-    const [lng, lat] = job.location;
-    
-    let navigationUrl;
-    if (isIOS) {
-      navigationUrl = `maps://maps.apple.com/?daddr=${lat},${lng}&dirflg=d`;
-    } else {
-      navigationUrl = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&travelmode=driving`;
-    }
+      // Add click listener using the recommended 'gmp-click' event
+      marker.addListener('gmp-click', () => {
+        setSelectedJob(job);
+      });
+    });
 
-    window.open(navigationUrl, '_blank');
-    toast({
-      title: "Navigation Started",
-      description: "Opening navigation in a new window"
+    // Add a marker for the center location
+    const centerMarkerElement = document.createElement('div');
+    centerMarkerElement.className = 'marker';
+    centerMarkerElement.innerHTML = `
+      <div class="bg-blue-500 text-white p-2 rounded-lg shadow-lg">
+        <div class="font-semibold">Gold Coast</div>
+      </div>
+    `;
+
+    new google.maps.marker.AdvancedMarkerElement({
+      position: center,
+      map,
+      content: centerMarkerElement,
+      title: "Gold Coast"
     });
   };
 
   return (
     <LoadScript 
       googleMapsApiKey="AIzaSyAnIcvNA_ZjRUnN4aeyl-1MYpBSN-ODIvw"
-      libraries={["places"]}
+      libraries={["marker"]}
       version="beta"
     >
       <GoogleMap
@@ -76,33 +82,17 @@ const JobMap = ({ jobs }: JobMapProps) => {
         center={center}
         zoom={14}
         options={options}
+        onLoad={onLoad}
       >
-        {jobs.map((job) => (
-          <Marker
-            key={job.id}
-            position={{ lat: job.location[1], lng: job.location[0] }}
-            onClick={() => setSelectedJob(job)}
-          />
-        ))}
-
         {selectedJob && (
           <InfoWindow
             position={{ lat: selectedJob.location[1], lng: selectedJob.location[0] }}
             onCloseClick={() => setSelectedJob(null)}
           >
-            <div className="p-2">
-              <h3 className="font-semibold mb-1">{selectedJob.customer}</h3>
-              <p className="text-sm text-gray-600 mb-2">{selectedJob.type}</p>
-              <p className="text-sm text-gray-500 mb-2">{selectedJob.date}</p>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="w-full"
-                onClick={() => handleNavigate(selectedJob)}
-              >
-                <Navigation className="w-4 h-4 mr-2" />
-                Set to Navigation
-              </Button>
+            <div>
+              <h3 className="font-semibold">{selectedJob.customer}</h3>
+              <p>{selectedJob.type}</p>
+              <p className="text-sm text-gray-500">{selectedJob.date}</p>
             </div>
           </InfoWindow>
         )}
