@@ -4,6 +4,15 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useState } from "react";
+import { Search } from "lucide-react";
+
+// Mock data for demonstration - in a real app this would come from your database
+const mockCustomerQuotes = [
+  { id: "qt3455", customerName: "Jess Williams", amount: 2500 },
+  { id: "qt3344", customerName: "Jess Williams", amount: 1800 },
+  { id: "qt3456", customerName: "John Smith", amount: 3200 },
+  { id: "qt3457", customerName: "Sarah Johnson", amount: 4100 }
+];
 
 interface JobFinancialsTabProps {
   jobTimer: number;
@@ -21,14 +30,52 @@ export const JobFinancialsTab = ({
   totalCosts 
 }: JobFinancialsTabProps) => {
   const [quoteAmount, setQuoteAmount] = useState(0);
+  const [searchTerm, setSearchTerm] = useState("");
   const laborCost = (jobTimer / 3600) * 50; // Assuming $50/hour labor rate
   const totalCostsWithLabor = totalCosts + laborCost;
   const netProfitWithLabor = quoteAmount - totalCostsWithLabor;
+
+  const filteredQuotes = mockCustomerQuotes.filter(quote => 
+    quote.customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    quote.id.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
     <TabsContent value="financials" className="space-y-4">
       <div className="border rounded-lg p-4">
         <div className="space-y-4">
+          <div>
+            <Label htmlFor="search">Search Customer Quotes</Label>
+            <div className="relative">
+              <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+              <Input
+                id="search"
+                type="text"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="Search by customer name or quote number..."
+                className="pl-10"
+              />
+            </div>
+            {searchTerm && (
+              <div className="mt-2 border rounded-lg divide-y">
+                {filteredQuotes.map(quote => (
+                  <div 
+                    key={quote.id}
+                    className="p-2 hover:bg-gray-50 cursor-pointer flex justify-between items-center"
+                    onClick={() => setQuoteAmount(quote.amount)}
+                  >
+                    <div>
+                      <span className="font-medium">{quote.customerName}</span>
+                      <span className="text-sm text-gray-500 ml-2">({quote.id})</span>
+                    </div>
+                    <span className="font-medium text-blue-600">${quote.amount}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
           <div>
             <Label htmlFor="quote">Quote Amount ($)</Label>
             <Input
