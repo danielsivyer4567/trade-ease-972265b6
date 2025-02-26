@@ -7,6 +7,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { FileUpload } from "./FileUpload";
 import { ImagesGrid } from "./ImagesGrid";
 import { AIContentEditor } from "./AIContentEditor";
+import { VideoEditor } from "./VideoEditor";
+import { useState } from "react";
 
 interface PostContent {
   text: string;
@@ -52,6 +54,20 @@ export function CreatePostCard({
   onAIEnhance,
   onFileUpload,
 }: CreatePostCardProps) {
+  const [selectedVideo, setSelectedVideo] = useState<File | null>(null);
+
+  const handleVideoSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (files && files[0]) {
+      setSelectedVideo(files[0]);
+    }
+  };
+
+  const handleVideoEdit = () => {
+    const clipchampUrl = `https://clipchamp.com/en/video-editor?source=embed&video=${encodeURIComponent(selectedVideo?.name || '')}`;
+    window.open(clipchampUrl, '_blank', 'width=1200,height=800');
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -98,6 +114,13 @@ export function CreatePostCard({
             onEnhance={onAIEnhance}
             isEditing={isEditing}
             disabled={!postContent.text}
+          />
+
+          <VideoEditor
+            onVideoSelect={handleVideoSelect}
+            onEdit={handleVideoEdit}
+            disabled={!selectedVideo}
+            selectedVideo={selectedVideo}
           />
 
           <div className="space-y-2">
