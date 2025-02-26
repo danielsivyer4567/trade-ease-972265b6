@@ -26,7 +26,7 @@ export default function Index() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <Card>
             <CardHeader>
-              <h2 className="text-lg font-semibold">Red Team Calendar</h2>
+              <h2 className="text-lg font-semibold text-red-500">Red Team Calendar</h2>
             </CardHeader>
             <CardContent>
               <TeamCalendar
@@ -39,7 +39,7 @@ export default function Index() {
 
           <Card>
             <CardHeader>
-              <h2 className="text-lg font-semibold">Blue Team Calendar</h2>
+              <h2 className="text-lg font-semibold text-blue-500">Blue Team Calendar</h2>
             </CardHeader>
             <CardContent>
               <TeamCalendar
@@ -52,7 +52,7 @@ export default function Index() {
 
           <Card>
             <CardHeader>
-              <h2 className="text-lg font-semibold">Green Team Calendar</h2>
+              <h2 className="text-lg font-semibold text-green-500">Green Team Calendar</h2>
             </CardHeader>
             <CardContent>
               <TeamCalendar
