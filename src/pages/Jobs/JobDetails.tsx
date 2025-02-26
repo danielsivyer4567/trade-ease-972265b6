@@ -2,7 +2,7 @@ import { AppLayout } from "@/components/ui/AppLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, MapPin, User, Calendar, Clock, FileText, Image as ImageIcon, Tag, Navigation, Receipt, DollarSign, ScrollText, Calculator, Upload, Play, Pause, Utensils } from "lucide-react";
+import { ArrowLeft, MapPin, User, Calendar, Clock, FileText, Image as ImageIcon, Tag, Navigation, Receipt, DollarSign, ScrollText, Calculator, Upload, Play, Pause, Utensils, Wallet } from "lucide-react";
 import type { Job } from "@/types/job";
 import React, { useState, useEffect } from "react";
 import { FileUpload } from "@/components/tasks/FileUpload";
@@ -364,6 +364,10 @@ export default function JobDetails() {
                     <TabsTrigger value="invoices">
                       <ScrollText className="w-4 h-4 mr-2" />
                       Invoices
+                    </TabsTrigger>
+                    <TabsTrigger value="financials">
+                      <Wallet className="w-4 h-4 mr-2" />
+                      Financials
                     </TabsTrigger>
                   </>
                 )}
@@ -750,6 +754,53 @@ export default function JobDetails() {
                       </div>
                     </div>
                   </TabsContent>
+                  <TabsContent value="financials" className="space-y-4">
+                  <div className="border rounded-lg p-4">
+                    <h3 className="font-medium mb-4">Financial Overview</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <div className="flex justify-between items-center">
+                          <span>Total Revenue:</span>
+                          <span className="font-medium text-green-600">$0.00</span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span>Total Costs:</span>
+                          <span className="font-medium text-red-600">$0.00</span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span>Net Profit:</span>
+                          <span className="font-medium">$0.00</span>
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        <div className="flex justify-between items-center">
+                          <span>Labor Hours:</span>
+                          <span className="font-medium">{jobTimer ? Math.floor(jobTimer / 3600) : 0} hrs</span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span>Labor Cost:</span>
+                          <span className="font-medium">$0.00</span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span>Materials Cost:</span>
+                          <span className="font-medium">$0.00</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="mt-4">
+                      <h4 className="font-medium mb-2">Financial Notes</h4>
+                      <textarea
+                        placeholder="Add financial notes here..."
+                        className="w-full min-h-[100px] p-3 border rounded-lg"
+                        value={tabNotes.financials || ""}
+                        onChange={(e) => setTabNotes(prev => ({
+                          ...prev,
+                          financials: e.target.value
+                        }))}
+                      />
+                    </div>
+                  </div>
+                </TabsContent>
                 </>
               )}
             </Tabs>
