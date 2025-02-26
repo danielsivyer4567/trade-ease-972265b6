@@ -20,7 +20,7 @@ export interface JobTemplate {
   description: string;
   type: string;
   estimatedDuration: number;
-  price?: number;
+  price: number;
   materials?: string[];
   category?: string;
 }
