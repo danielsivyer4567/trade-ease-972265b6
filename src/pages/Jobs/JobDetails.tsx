@@ -1,4 +1,3 @@
-
 import { AppLayout } from "@/components/ui/AppLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useParams } from "react-router-dom";
@@ -37,7 +36,6 @@ export default function JobDetails() {
     bills: "",
     costs: "",
     invoices: "",
-    purchase_orders: "",
     financials: ""
   });
   const [locationHistory, setLocationHistory] = useState<{timestamp: number; coords: [number, number]}[]>([]);
