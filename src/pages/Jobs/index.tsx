@@ -197,7 +197,7 @@ export default function Jobs() {
       return index !== -1 ? data[index] : '';
     };
 
-    const getDurationValue = (value: string): number): number => {
+    const getDurationValue = (value: string): number => {
       const numValue = Number(value.replace(/[^\d.-]/g, ''));
       return isNaN(numValue) ? 0 : numValue;
     };
