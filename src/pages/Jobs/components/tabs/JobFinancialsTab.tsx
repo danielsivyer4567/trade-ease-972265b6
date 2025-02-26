@@ -6,9 +6,22 @@ interface JobFinancialsTabProps {
   jobTimer: number;
   tabNotes: Record<string, string>;
   setTabNotes: (notes: Record<string, string>) => void;
+  totalRevenue: number;
+  totalCosts: number;
 }
 
-export const JobFinancialsTab = ({ jobTimer, tabNotes, setTabNotes }: JobFinancialsTabProps) => {
+export const JobFinancialsTab = ({ 
+  jobTimer, 
+  tabNotes, 
+  setTabNotes, 
+  totalRevenue, 
+  totalCosts 
+}: JobFinancialsTabProps) => {
+  const netProfit = totalRevenue - totalCosts;
+  const laborCost = (jobTimer / 3600) * 50; // Assuming $50/hour labor rate
+  const totalCostsWithLabor = totalCosts + laborCost;
+  const netProfitWithLabor = totalRevenue - totalCostsWithLabor;
+
   return (
     <TabsContent value="financials" className="space-y-4">
       <div className="border rounded-lg p-4">
@@ -17,15 +30,17 @@ export const JobFinancialsTab = ({ jobTimer, tabNotes, setTabNotes }: JobFinanci
           <div className="space-y-2">
             <div className="flex justify-between items-center">
               <span>Total Revenue:</span>
-              <span className="font-medium text-green-600">$0.00</span>
+              <span className="font-medium text-green-600">${totalRevenue.toFixed(2)}</span>
             </div>
             <div className="flex justify-between items-center">
               <span>Total Costs:</span>
-              <span className="font-medium text-red-600">$0.00</span>
+              <span className="font-medium text-red-600">${totalCostsWithLabor.toFixed(2)}</span>
             </div>
             <div className="flex justify-between items-center">
               <span>Net Profit:</span>
-              <span className="font-medium">$0.00</span>
+              <span className={`font-medium ${netProfitWithLabor >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                ${netProfitWithLabor.toFixed(2)}
+              </span>
             </div>
           </div>
           <div className="space-y-2">
@@ -35,11 +50,11 @@ export const JobFinancialsTab = ({ jobTimer, tabNotes, setTabNotes }: JobFinanci
             </div>
             <div className="flex justify-between items-center">
               <span>Labor Cost:</span>
-              <span className="font-medium">$0.00</span>
+              <span className="font-medium">${laborCost.toFixed(2)}</span>
             </div>
             <div className="flex justify-between items-center">
               <span>Materials Cost:</span>
-              <span className="font-medium">$0.00</span>
+              <span className="font-medium">${totalCosts.toFixed(2)}</span>
             </div>
           </div>
         </div>

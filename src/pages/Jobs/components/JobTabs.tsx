@@ -6,7 +6,11 @@ import { JobNotesTab } from "./tabs/JobNotesTab";
 import { JobCalendarTab } from "./tabs/JobCalendarTab";
 import { JobTimerTab } from "./tabs/JobTimerTab";
 import { JobFinancialsTab } from "./tabs/JobFinancialsTab";
+import { JobBillsTab } from "./tabs/JobBillsTab";
+import { JobCostsTab } from "./tabs/JobCostsTab";
+import { JobInvoicesTab } from "./tabs/JobInvoicesTab";
 import type { Job } from "@/types/job";
+import { useState } from "react";
 
 interface JobTabsProps {
   job: Job;
@@ -39,6 +43,22 @@ export const JobTabs = ({
   isTimerRunning,
   isOnBreak
 }: JobTabsProps) => {
+  const [totalRevenue, setTotalRevenue] = useState(0);
+  const [totalCosts, setTotalCosts] = useState(0);
+  const [totalBills, setTotalBills] = useState(0);
+
+  const handleUpdateInvoiceTotals = (amount: number) => {
+    setTotalRevenue(prev => prev + amount);
+  };
+
+  const handleUpdateCostsTotals = (amount: number) => {
+    setTotalCosts(prev => prev + amount);
+  };
+
+  const handleUpdateBillsTotals = (amount: number) => {
+    setTotalBills(prev => prev + amount);
+  };
+
   return (
     <Tabs defaultValue="details" className="w-full">
       <TabsList className="grid grid-cols-4 lg:grid-cols-8 mb-4">
@@ -57,12 +77,8 @@ export const JobTabs = ({
         </TabsTrigger>
         {isManager && (
           <>
-            <TabsTrigger value="purchase-orders">
-              <Receipt className="w-4 h-4 mr-2" />
-              Orders
-            </TabsTrigger>
             <TabsTrigger value="bills">
-              <DollarSign className="w-4 h-4 mr-2" />
+              <Receipt className="w-4 h-4 mr-2" />
               Bills
             </TabsTrigger>
             <TabsTrigger value="costs">
@@ -94,11 +110,30 @@ export const JobTabs = ({
         locationHistory={locationHistory}
       />
       {isManager && (
-        <JobFinancialsTab
-          jobTimer={jobTimer}
-          tabNotes={tabNotes}
-          setTabNotes={setTabNotes}
-        />
+        <>
+          <JobBillsTab
+            tabNotes={tabNotes}
+            setTabNotes={setTabNotes}
+            onUpdateTotals={handleUpdateBillsTotals}
+          />
+          <JobCostsTab
+            tabNotes={tabNotes}
+            setTabNotes={setTabNotes}
+            onUpdateTotals={handleUpdateCostsTotals}
+          />
+          <JobInvoicesTab
+            tabNotes={tabNotes}
+            setTabNotes={setTabNotes}
+            onUpdateTotals={handleUpdateInvoiceTotals}
+          />
+          <JobFinancialsTab
+            jobTimer={jobTimer}
+            tabNotes={tabNotes}
+            setTabNotes={setTabNotes}
+            totalRevenue={totalRevenue}
+            totalCosts={totalCosts + totalBills}
+          />
+        </>
       )}
     </Tabs>
   );
