@@ -166,8 +166,8 @@ export default function Jobs() {
       title: lines.find(line => line.toLowerCase().includes('title:'))?.split(':')[1]?.trim() || "Untitled Template",
       description: '',
       type: lines.find(line => line.toLowerCase().includes('type:'))?.split(':')[1]?.trim() || "",
-      estimatedDuration: Number(lines.find(line => line.toLowerCase().includes('duration:'))?.split(':')[1]?.trim()) || 0,
-      price: Number(lines.find(line => line.toLowerCase().includes('price:'))?.split(':')[1]?.trim()) || 0,
+      estimatedDuration: parseInt(lines.find(line => line.toLowerCase().includes('duration:'))?.split(':')[1]?.trim() || "0"),
+      price: parseFloat(lines.find(line => line.toLowerCase().includes('price:'))?.split(':')[1]?.trim() || "0"),
       materials: lines.find(line => line.toLowerCase().includes('materials:'))?.split(':')[1]?.split(',').map(item => item.trim()) || [],
       category: (lines.find(line => line.toLowerCase().includes('category:'))?.split(':')[1]?.trim() || "Plumbing")
     };

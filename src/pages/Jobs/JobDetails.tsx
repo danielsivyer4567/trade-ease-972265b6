@@ -320,17 +320,15 @@ export default function JobDetails() {
         </div>
 
         <Card>
-          <CardHeader className="space-y-0">
-            <div className="flex flex-col md:flex-row gap-4 items-start">
-              <div className="flex-1">
-                <CardTitle className="text-2xl flex items-center justify-between">
-                  {job.title || job.type}
-                  <span className="text-sm font-mono text-gray-500">#{job.jobNumber}</span>
-                </CardTitle>
-              </div>
-              <div className="w-full md:w-2/3 h-[200px] rounded-lg overflow-hidden border border-gray-200">
-                <JobMap jobs={[job]} />
-              </div>
+          <CardHeader className="space-y-4">
+            <div className="text-center">
+              <CardTitle className="text-2xl mb-2">
+                {job.title || job.type}
+                <span className="text-sm font-mono text-gray-500 ml-2">#{job.jobNumber}</span>
+              </CardTitle>
+            </div>
+            <div className="w-full h-[200px] rounded-lg overflow-hidden border border-gray-200">
+              <JobMap jobs={[job]} />
             </div>
           </CardHeader>
           <CardContent>
