@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import type { Job } from "@/types/job";
 import { useState, useEffect, useRef } from "react";
-import { Mic, MicOff, Volume2, VolumeX } from "lucide-react";
+import { Mic, MicOff, Volume2, VolumeX, Coffee, PackageX } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 const RING_TONE_URL = "/ringtone.mp3";
@@ -16,6 +16,7 @@ interface JobHeaderProps {
 export const JobHeader = ({ job }: JobHeaderProps) => {
   const [isTransmitting, setIsTransmitting] = useState(false);
   const [isListening, setIsListening] = useState(true);
+  const [isOnSmoko, setIsOnSmoko] = useState(false);
   const [audio] = useState(new Audio(RING_TONE_URL));
   const { toast } = useToast();
   
@@ -68,7 +69,7 @@ export const JobHeader = ({ job }: JobHeaderProps) => {
     if (mediaRecorder.current?.state === 'inactive') {
       audioChunks.current = [];
       setIsTransmitting(true);
-      audio.play().catch(console.error); // Play connection sound
+      audio.play().catch(console.error);
       mediaRecorder.current?.start();
     }
   };
@@ -90,6 +91,21 @@ export const JobHeader = ({ job }: JobHeaderProps) => {
     });
   };
 
+  const handleSmoko = () => {
+    setIsOnSmoko(!isOnSmoko);
+    toast({
+      title: isOnSmoko ? "Break Ended" : "Break Started",
+      description: isOnSmoko ? "Back to work!" : "Enjoy your break!",
+    });
+  };
+
+  const handlePackUp = () => {
+    toast({
+      title: "Packing Up",
+      description: "End of work day recorded. Good job!",
+    });
+  };
+
   return (
     <Card className="relative">
       <div className="p-6">
@@ -106,6 +122,22 @@ export const JobHeader = ({ job }: JobHeaderProps) => {
               className="rounded-full"
             >
               {isListening ? <Volume2 /> : <VolumeX />}
+            </Button>
+            <Button
+              className={`bg-red-500 hover:bg-red-600 text-white font-bold uppercase tracking-wider flex items-center gap-2 min-w-[150px] h-12 ${
+                isOnSmoko ? 'animate-pulse' : ''
+              }`}
+              onClick={handleSmoko}
+            >
+              <Coffee className={isOnSmoko ? 'animate-bounce' : ''} />
+              SMOKO
+            </Button>
+            <Button
+              className="bg-red-700 hover:bg-red-800 text-white font-bold uppercase tracking-wider flex items-center gap-2 min-w-[150px] h-12"
+              onClick={handlePackUp}
+            >
+              <PackageX />
+              PACK HER UP
             </Button>
             <Button
               className="bg-green-500 hover:bg-green-600 text-white font-bold uppercase tracking-wider flex items-center gap-2 min-w-[200px] h-12"
