@@ -33,12 +33,15 @@ export function AppSidebar() {
   const isCollapsed = state === "collapsed";
 
   const renderNavLink = (icon: React.ReactNode, label: string, path: string) => {
+    const isActive = location.pathname === path || 
+                    (path === '/ai-features' && location.pathname === '/ai-features');
+                    
     const content = (
       <Link
         to={path}
         className={cn(
           "flex items-center gap-2 p-2 rounded-lg hover:bg-gray-100 text-gray-700 hover:text-gray-900 text-sm",
-          location.pathname === path && "bg-gray-100 text-gray-900"
+          isActive && "bg-gray-100 text-gray-900 font-medium"
         )}
       >
         {icon}
