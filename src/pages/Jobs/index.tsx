@@ -163,14 +163,14 @@ export default function Jobs() {
     const lines = text.split('\n').map(line => line.trim());
     const getDurationValue = (durationStr: string | undefined): number => {
       if (!durationStr) return 0;
-      const numValue = Number(durationStr.split(':')[1]?.trim());
-      return isNaN(numValue) ? 0 : numValue;
+      const match = durationStr.match(/\d+/);
+      return match ? Number(match[0]) : 0;
     };
 
     const getPriceValue = (priceStr: string | undefined): number => {
       if (!priceStr) return 0;
-      const numValue = Number(priceStr.split(':')[1]?.trim().replace('$', ''));
-      return isNaN(numValue) ? 0 : numValue;
+      const match = priceStr.match(/\d+/);
+      return match ? Number(match[0]) : 0;
     };
 
     const template: JobTemplate = {
@@ -197,12 +197,12 @@ export default function Jobs() {
     };
 
     const getDurationValue = (value: string): number => {
-      const numValue = Number(value);
+      const numValue = Number(value.replace(/[^\d.-]/g, ''));
       return isNaN(numValue) ? 0 : numValue;
     };
 
     const getPriceValue = (value: string): number => {
-      const numValue = Number(value.replace('$', ''));
+      const numValue = Number(value.replace(/[^\d.-]/g, ''));
       return isNaN(numValue) ? 0 : numValue;
     };
 
