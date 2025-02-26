@@ -280,9 +280,11 @@ export default function Jobs() {
     const blankTemplate: JobTemplate = {
       id: crypto.randomUUID(),
       title: "New Template",
-      estimatedDuration: "",
+      description: "",
+      type: "",
+      estimatedDuration: 0,
+      price: 0,
       materials: [],
-      price: "",
       category: "Plumbing"
     };
     setGeneratedTemplates([blankTemplate, ...generatedTemplates]);
@@ -310,6 +312,17 @@ export default function Jobs() {
       title: "Status Updated",
       description: `Job status has been updated successfully`
     });
+  };
+
+  const mockTemplate: JobTemplate = {
+    id: crypto.randomUUID(),
+    title: "",
+    description: "",
+    type: "",
+    estimatedDuration: 0,
+    price: 0,
+    materials: [],
+    category: "Plumbing"
   };
 
   const handleAssign = (job: Job) => {
