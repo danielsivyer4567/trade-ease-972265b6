@@ -1,3 +1,4 @@
+
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { ToastProvider } from './components/ui/toast';
 import { Toaster } from './components/ui/toaster';
