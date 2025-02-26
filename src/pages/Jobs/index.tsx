@@ -161,13 +161,25 @@ export default function Jobs() {
 
   const parseTextTemplate = (text: string): JobTemplate => {
     const lines = text.split('\n').map(line => line.trim());
+    const getDurationValue = (durationStr: string | undefined): number => {
+      if (!durationStr) return 0;
+      const numValue = Number(durationStr.split(':')[1]?.trim());
+      return isNaN(numValue) ? 0 : numValue;
+    };
+
+    const getPriceValue = (priceStr: string | undefined): number => {
+      if (!priceStr) return 0;
+      const numValue = Number(priceStr.split(':')[1]?.trim().replace('$', ''));
+      return isNaN(numValue) ? 0 : numValue;
+    };
+
     const template: JobTemplate = {
       id: crypto.randomUUID(),
       title: lines.find(line => line.toLowerCase().includes('title:'))?.split(':')[1]?.trim() || "Untitled Template",
       description: '',
       type: lines.find(line => line.toLowerCase().includes('type:'))?.split(':')[1]?.trim() || "",
-      estimatedDuration: parseInt(lines.find(line => line.toLowerCase().includes('duration:'))?.split(':')[1]?.trim() || "0"),
-      price: parseFloat(lines.find(line => line.toLowerCase().includes('price:'))?.split(':')[1]?.trim() || "0"),
+      estimatedDuration: getDurationValue(lines.find(line => line.toLowerCase().includes('duration:'))),
+      price: getPriceValue(lines.find(line => line.toLowerCase().includes('price:'))),
       materials: lines.find(line => line.toLowerCase().includes('materials:'))?.split(':')[1]?.split(',').map(item => item.trim()) || [],
       category: (lines.find(line => line.toLowerCase().includes('category:'))?.split(':')[1]?.trim() || "Plumbing")
     };
@@ -184,13 +196,23 @@ export default function Jobs() {
       return index !== -1 ? data[index] : '';
     };
 
+    const getDurationValue = (value: string): number => {
+      const numValue = Number(value);
+      return isNaN(numValue) ? 0 : numValue;
+    };
+
+    const getPriceValue = (value: string): number => {
+      const numValue = Number(value.replace('$', ''));
+      return isNaN(numValue) ? 0 : numValue;
+    };
+
     return {
       id: crypto.randomUUID(),
       title: getColumnValue('title') || "Untitled Template",
       description: getColumnValue('description') || "",
       type: getColumnValue('type') || "",
-      estimatedDuration: Number(getColumnValue('duration')) || 0,
-      price: Number(getColumnValue('price')) || 0,
+      estimatedDuration: getDurationValue(getColumnValue('duration')),
+      price: getPriceValue(getColumnValue('price')),
       materials: getColumnValue('materials')?.split(';') || [],
       category: getColumnValue('category') || "Plumbing"
     };
