@@ -24,6 +24,7 @@ import Statistics from "@/pages/Statistics";
 import Settings from "@/pages/Settings";
 import OfficeStaff from "@/pages/Settings/OfficeStaff";
 import TradeRates from "@/pages/Settings/TradeRates";
+import BillsPurchaseOrders from "@/pages/Settings/BillsPurchaseOrders";
 import AIAssistantSettings from "@/pages/Settings/AIAssistantSettings";
 
 import { Toaster } from "@/components/ui/toaster";
@@ -52,6 +53,7 @@ function App() {
         <Route path="/statistics/*" element={<Statistics />} />
         <Route path="/settings" element={<Settings />} />
         <Route path="/settings/trade-rates" element={<TradeRates />} />
+        <Route path="/settings/bills-purchase-orders" element={<BillsPurchaseOrders />} />
         <Route path="/settings/office-staff" element={<OfficeStaff />} />
         <Route path="/settings/ai-assistant-settings" element={<AIAssistantSettings />} />
         <Route path="*" element={<NotFound />} />
