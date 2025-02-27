@@ -1,8 +1,8 @@
 
 import { AppLayout } from "@/components/ui/AppLayout";
 import { useState } from "react";
-import { useNavigate, Routes, Route } from "react-router-dom";
-import { useToast } from "@/components/ui/use-toast";
+import { useNavigate, Routes, Route, Navigate } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
 import type { JobTemplate, Job } from "@/types/job";
 import { UnassignedJobs } from "./components/UnassignedJobs";
 import { CurrentJobs } from "./components/CurrentJobs";
@@ -110,43 +110,41 @@ export default function Jobs() {
     navigate('/jobs/new');
   };
 
+  const JobsList = () => (
+    <div className="space-y-6 p-6">
+      <UnassignedJobs jobs={jobs} onAssign={handleAssign} />
+      <CurrentJobs jobs={jobs} onStatusUpdate={updateJobStatus} />
+
+      <JobAssignmentDialog
+        isOpen={isAssignDialogOpen}
+        onOpenChange={setIsAssignDialogOpen}
+        selectedJob={selectedJob}
+        selectedTeam={selectedTeam}
+        setSelectedTeam={setSelectedTeam}
+        selectedDate={selectedDate}
+        setSelectedDate={setSelectedDate}
+        onAssign={handleAssignSubmit}
+        teams={teams}
+      />
+
+      <TemplateLibrary
+        templates={generatedTemplates}
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+        onAttachToJob={handleAttachToJob}
+      />
+
+      <TemplateCreation
+        onTemplateCreate={(template) => setGeneratedTemplates([template, ...generatedTemplates])}
+      />
+    </div>
+  );
+
   return (
     <AppLayout>
       <Routes>
-        <Route path="/*" element={
-          <Routes>
-            <Route path="/" element={
-              <div className="space-y-6 p-6">
-                <UnassignedJobs jobs={jobs} onAssign={handleAssign} />
-                <CurrentJobs jobs={jobs} onStatusUpdate={updateJobStatus} />
-
-                <JobAssignmentDialog
-                  isOpen={isAssignDialogOpen}
-                  onOpenChange={setIsAssignDialogOpen}
-                  selectedJob={selectedJob}
-                  selectedTeam={selectedTeam}
-                  setSelectedTeam={setSelectedTeam}
-                  selectedDate={selectedDate}
-                  setSelectedDate={setSelectedDate}
-                  onAssign={handleAssignSubmit}
-                  teams={teams}
-                />
-
-                <TemplateLibrary
-                  templates={generatedTemplates}
-                  searchQuery={searchQuery}
-                  onSearchChange={setSearchQuery}
-                  onAttachToJob={handleAttachToJob}
-                />
-
-                <TemplateCreation
-                  onTemplateCreate={(template) => setGeneratedTemplates([template, ...generatedTemplates])}
-                />
-              </div>
-            } />
-            <Route path=":id" element={<JobDetails />} />
-          </Routes>
-        } />
+        <Route index element={<JobsList />} />
+        <Route path=":id" element={<JobDetails />} />
       </Routes>
     </AppLayout>
   );

@@ -1,8 +1,8 @@
 
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { JobHeader } from './components/JobHeader';
 import { JobTabs } from './components/JobTabs';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { Job } from '@/types/job';
 
 const mockJobs: Job[] = [{
@@ -16,11 +16,34 @@ const mockJobs: Job[] = [{
   title: "Water Heater Installation",
   description: "Install new water heater system",
   assignedTeam: "Red Team"
+}, {
+  id: "2",
+  customer: "Sarah Johnson",
+  type: "HVAC",
+  status: "in-progress",
+  date: "2024-03-14",
+  location: [151.2543, -33.8688],
+  jobNumber: "HVAC-001",
+  title: "HVAC Maintenance",
+  description: "Regular maintenance check",
+  assignedTeam: "Blue Team"
+}, {
+  id: "3",
+  customer: "Mike Brown",
+  type: "Electrical",
+  status: "to-invoice",
+  date: "2024-03-13",
+  location: [151.1943, -33.8788],
+  jobNumber: "ELE-001",
+  title: "Electrical Panel Upgrade",
+  description: "Upgrade main electrical panel",
+  assignedTeam: "Green Team"
 }];
 
 export function JobDetails() {
   const { id } = useParams();
-  const job = mockJobs.find(j => j.id === id) || mockJobs[0];
+  const navigate = useNavigate();
+  const job = mockJobs.find(j => j.id === id);
   const [jobTimer, setJobTimer] = useState(0);
   const [hasLocationPermission, setHasLocationPermission] = useState<boolean | null>(null);
   const [isTimerRunning, setIsTimerRunning] = useState(false);
@@ -29,6 +52,16 @@ export function JobDetails() {
   const [jobNotes, setJobNotes] = useState("");
   const [tabNotes, setTabNotes] = useState<Record<string, string>>({});
   const isManager = true;
+
+  useEffect(() => {
+    if (!job) {
+      navigate('/jobs');
+    }
+  }, [job, navigate]);
+
+  if (!job) {
+    return null;
+  }
 
   const handleTimerToggle = () => {
     setIsTimerRunning(!isTimerRunning);
