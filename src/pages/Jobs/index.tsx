@@ -1,3 +1,4 @@
+
 import { AppLayout } from "@/components/ui/AppLayout";
 import { useState } from "react";
 import { useNavigate, Routes, Route } from "react-router-dom";
@@ -10,53 +11,40 @@ import { JobDetails } from "./JobDetails";
 import { TemplateLibrary } from "./components/TemplateLibrary";
 import { TemplateCreation } from "./components/TemplateCreation";
 
-const mockJobs: Job[] = [
-  {
-    id: "1",
-    customer: "John Smith",
-    type: "Plumbing",
-    status: "ready",
-    date: "2024-03-15",
-    location: [151.2093, -33.8688],
-    jobNumber: "PLM-001",
-    title: "Water Heater Installation",
-    description: "Install new water heater system",
-    assignedTeam: "Red Team"
-  }, {
-    id: "2",
-    customer: "Sarah Johnson",
-    type: "HVAC",
-    status: "in-progress",
-    date: "2024-03-14",
-    location: [151.2543, -33.8688],
-    jobNumber: "HVAC-001",
-    title: "HVAC Maintenance",
-    description: "Regular maintenance check",
-    assignedTeam: "Blue Team"
-  }, {
-    id: "3",
-    customer: "Mike Brown",
-    type: "Electrical",
-    status: "to-invoice",
-    date: "2024-03-13",
-    location: [151.1943, -33.8788],
-    jobNumber: "ELE-001",
-    title: "Electrical Panel Upgrade",
-    description: "Upgrade main electrical panel",
-    assignedTeam: "Green Team"
-  }, {
-    id: "4",
-    customer: "Emily Davis",
-    type: "Plumbing",
-    status: "invoiced",
-    date: "2024-03-12",
-    location: [151.2153, -33.8588],
-    jobNumber: "PLM-002",
-    title: "Plumbing Repair",
-    description: "Fix kitchen sink",
-    assignedTeam: "Red Team"
-  }
-];
+const mockJobs: Job[] = [{
+  id: "1",
+  customer: "John Smith",
+  type: "Plumbing",
+  status: "ready",
+  date: "2024-03-15",
+  location: [151.2093, -33.8688],
+  jobNumber: "PLM-001",
+  title: "Water Heater Installation",
+  description: "Install new water heater system",
+  assignedTeam: "Red Team"
+}, {
+  id: "2",
+  customer: "Sarah Johnson",
+  type: "HVAC",
+  status: "in-progress",
+  date: "2024-03-14",
+  location: [151.2543, -33.8688],
+  jobNumber: "HVAC-001",
+  title: "HVAC Maintenance",
+  description: "Regular maintenance check",
+  assignedTeam: "Blue Team"
+}, {
+  id: "3",
+  customer: "Mike Brown",
+  type: "Electrical",
+  status: "to-invoice",
+  date: "2024-03-13",
+  location: [151.1943, -33.8788],
+  jobNumber: "ELE-001",
+  title: "Electrical Panel Upgrade",
+  description: "Upgrade main electrical panel",
+  assignedTeam: "Green Team"
+}];
 
 const teams = [
   { id: '1', name: 'Team Red', color: 'text-red-500' },
@@ -125,36 +113,40 @@ export default function Jobs() {
   return (
     <AppLayout>
       <Routes>
-        <Route path="/" element={
-          <div className="space-y-6 p-6">
-            <UnassignedJobs jobs={jobs} onAssign={handleAssign} />
-            <CurrentJobs jobs={jobs} onStatusUpdate={updateJobStatus} />
+        <Route path="/*" element={
+          <Routes>
+            <Route path="/" element={
+              <div className="space-y-6 p-6">
+                <UnassignedJobs jobs={jobs} onAssign={handleAssign} />
+                <CurrentJobs jobs={jobs} onStatusUpdate={updateJobStatus} />
 
-            <JobAssignmentDialog
-              isOpen={isAssignDialogOpen}
-              onOpenChange={setIsAssignDialogOpen}
-              selectedJob={selectedJob}
-              selectedTeam={selectedTeam}
-              setSelectedTeam={setSelectedTeam}
-              selectedDate={selectedDate}
-              setSelectedDate={setSelectedDate}
-              onAssign={handleAssignSubmit}
-              teams={teams}
-            />
+                <JobAssignmentDialog
+                  isOpen={isAssignDialogOpen}
+                  onOpenChange={setIsAssignDialogOpen}
+                  selectedJob={selectedJob}
+                  selectedTeam={selectedTeam}
+                  setSelectedTeam={setSelectedTeam}
+                  selectedDate={selectedDate}
+                  setSelectedDate={setSelectedDate}
+                  onAssign={handleAssignSubmit}
+                  teams={teams}
+                />
 
-            <TemplateLibrary
-              templates={generatedTemplates}
-              searchQuery={searchQuery}
-              onSearchChange={setSearchQuery}
-              onAttachToJob={handleAttachToJob}
-            />
+                <TemplateLibrary
+                  templates={generatedTemplates}
+                  searchQuery={searchQuery}
+                  onSearchChange={setSearchQuery}
+                  onAttachToJob={handleAttachToJob}
+                />
 
-            <TemplateCreation
-              onTemplateCreate={(template) => setGeneratedTemplates([template, ...generatedTemplates])}
-            />
-          </div>
+                <TemplateCreation
+                  onTemplateCreate={(template) => setGeneratedTemplates([template, ...generatedTemplates])}
+                />
+              </div>
+            } />
+            <Route path=":id" element={<JobDetails />} />
+          </Routes>
         } />
-        <Route path=":id" element={<JobDetails />} />
       </Routes>
     </AppLayout>
   );
