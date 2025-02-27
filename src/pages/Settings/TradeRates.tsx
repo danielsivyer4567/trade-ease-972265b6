@@ -1,12 +1,58 @@
 
-import { DollarSign } from "lucide-react";
+import { DollarSign, Search, Plus, X } from "lucide-react";
 import SettingsPageTemplate from "./SettingsPageTemplate";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Job } from "@/types/job";
+
+// Dummy job data
+const dummyJobs: Job[] = [
+  {
+    id: "1",
+    customer: "John Smith",
+    type: "Plumbing",
+    status: "ready",
+    date: "2024-03-15",
+    location: [151.2093, -33.8688],
+    jobNumber: "PLM-001",
+    title: "Water Heater Installation",
+    description: "Install new water heater system",
+  },
+  {
+    id: "2",
+    customer: "Sarah Johnson",
+    type: "HVAC",
+    status: "in-progress",
+    date: "2024-03-14",
+    location: [151.2543, -33.8688],
+    jobNumber: "HVAC-001",
+    title: "HVAC Maintenance",
+    description: "Regular maintenance check",
+    assignedTeam: "Blue Team"
+  },
+  {
+    id: "3",
+    customer: "Mike Brown",
+    type: "Electrical",
+    status: "to-invoice",
+    date: "2024-03-13",
+    location: [151.1943, -33.8788],
+    jobNumber: "ELE-001",
+    title: "Electrical Panel Upgrade",
+    description: "Upgrade main electrical panel",
+    assignedTeam: "Green Team"
+  }
+];
+
+type Extra = {
+  id: string;
+  name: string;
+  price: number;
+};
 
 export default function TradeRates() {
   // Square meter calculation state
@@ -26,6 +72,16 @@ export default function TradeRates() {
   const [markupPercentage, setMarkupPercentage] = useState(30);
   const [gstRate, setGstRate] = useState(10);
 
+  // Job search state
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedJob, setSelectedJob] = useState<Job | null>(null);
+  const [showJobResults, setShowJobResults] = useState(false);
+
+  // Extras state
+  const [extras, setExtras] = useState<Extra[]>([]);
+  const [newExtraName, setNewExtraName] = useState("");
+  const [newExtraPrice, setNewExtraPrice] = useState(0);
+
   // Calculation functions
   const calculateSquareMeterLabor = () => {
     return squareMeterRate * squareMeters;
@@ -43,8 +99,12 @@ export default function TradeRates() {
     return materials * (1 + markupPercentage / 100);
   };
 
+  const calculateExtrasCost = () => {
+    return extras.reduce((total, extra) => total + extra.price, 0);
+  };
+
   const calculateSubtotal = (laborCost) => {
-    return laborCost + calculateMaterialsWithMarkup();
+    return laborCost + calculateMaterialsWithMarkup() + calculateExtrasCost();
   };
 
   const calculateGST = (subtotal) => {
@@ -55,6 +115,41 @@ export default function TradeRates() {
     const subtotal = calculateSubtotal(laborCost);
     const gst = calculateGST(subtotal);
     return subtotal + gst;
+  };
+
+  // Filter jobs based on search query
+  const filteredJobs = dummyJobs.filter(job => 
+    job.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    job.jobNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    job.customer.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  // Handle job selection
+  const handleJobSelect = (job: Job) => {
+    setSelectedJob(job);
+    setShowJobResults(false);
+  };
+
+  // Handle adding a new extra
+  const handleAddExtra = () => {
+    if (newExtraName.trim() === "" || newExtraPrice <= 0) return;
+    
+    setExtras([
+      ...extras,
+      {
+        id: Date.now().toString(),
+        name: newExtraName,
+        price: newExtraPrice
+      }
+    ]);
+    
+    setNewExtraName("");
+    setNewExtraPrice(0);
+  };
+
+  // Handle removing an extra
+  const handleRemoveExtra = (id: string) => {
+    setExtras(extras.filter(extra => extra.id !== id));
   };
 
   return (
@@ -71,6 +166,61 @@ export default function TradeRates() {
               <CardTitle>Rate Calculator</CardTitle>
             </CardHeader>
             <CardContent>
+              <div className="mb-4 relative">
+                <Label htmlFor="jobSearch">Search Job</Label>
+                <div className="relative">
+                  <Input 
+                    id="jobSearch" 
+                    placeholder="Search by job number, title, or customer name" 
+                    value={searchQuery}
+                    onChange={(e) => {
+                      setSearchQuery(e.target.value);
+                      setShowJobResults(e.target.value.length > 0);
+                    }}
+                    className="pr-10"
+                  />
+                  <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                </div>
+                
+                {showJobResults && searchQuery.length > 0 && (
+                  <div className="absolute z-10 mt-1 w-full bg-white border border-gray-200 shadow-lg rounded-md max-h-60 overflow-y-auto">
+                    {filteredJobs.length > 0 ? (
+                      filteredJobs.map(job => (
+                        <div 
+                          key={job.id}
+                          className="p-2 hover:bg-gray-100 cursor-pointer"
+                          onClick={() => handleJobSelect(job)}
+                        >
+                          <div className="font-medium">{job.jobNumber} - {job.title}</div>
+                          <div className="text-sm text-gray-600">{job.customer}</div>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="p-2 text-gray-500">No jobs found</div>
+                    )}
+                  </div>
+                )}
+              </div>
+              
+              {selectedJob && (
+                <div className="mb-4 p-3 bg-gray-50 rounded-md">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <h3 className="font-medium">{selectedJob.jobNumber} - {selectedJob.title}</h3>
+                      <p className="text-sm text-gray-600">Customer: {selectedJob.customer}</p>
+                      <p className="text-sm text-gray-600">Type: {selectedJob.type}</p>
+                    </div>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      onClick={() => setSelectedJob(null)}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              )}
+              
               <Tabs defaultValue="square-meter">
                 <TabsList className="grid w-full grid-cols-3">
                   <TabsTrigger value="square-meter">Square Meter</TabsTrigger>
@@ -106,6 +256,12 @@ export default function TradeRates() {
                       <span>Materials (with markup):</span>
                       <span className="font-medium">${calculateMaterialsWithMarkup().toFixed(2)}</span>
                     </div>
+                    {extras.length > 0 && (
+                      <div className="flex justify-between py-2">
+                        <span>Extras:</span>
+                        <span className="font-medium">${calculateExtrasCost().toFixed(2)}</span>
+                      </div>
+                    )}
                     <div className="flex justify-between py-2">
                       <span>Subtotal:</span>
                       <span className="font-medium">${calculateSubtotal(calculateSquareMeterLabor()).toFixed(2)}</span>
@@ -149,6 +305,12 @@ export default function TradeRates() {
                       <span>Materials (with markup):</span>
                       <span className="font-medium">${calculateMaterialsWithMarkup().toFixed(2)}</span>
                     </div>
+                    {extras.length > 0 && (
+                      <div className="flex justify-between py-2">
+                        <span>Extras:</span>
+                        <span className="font-medium">${calculateExtrasCost().toFixed(2)}</span>
+                      </div>
+                    )}
                     <div className="flex justify-between py-2">
                       <span>Subtotal:</span>
                       <span className="font-medium">${calculateSubtotal(calculateLinearMeterLabor()).toFixed(2)}</span>
@@ -192,6 +354,12 @@ export default function TradeRates() {
                       <span>Materials (with markup):</span>
                       <span className="font-medium">${calculateMaterialsWithMarkup().toFixed(2)}</span>
                     </div>
+                    {extras.length > 0 && (
+                      <div className="flex justify-between py-2">
+                        <span>Extras:</span>
+                        <span className="font-medium">${calculateExtrasCost().toFixed(2)}</span>
+                      </div>
+                    )}
                     <div className="flex justify-between py-2">
                       <span>Subtotal:</span>
                       <span className="font-medium">${calculateSubtotal(calculateHourlyLabor()).toFixed(2)}</span>
@@ -237,7 +405,63 @@ export default function TradeRates() {
                   />
                 </div>
               </div>
+
+              <div className="mt-6 pt-4 border-t">
+                <h3 className="font-medium mb-2">Additional Extras</h3>
+                
+                {extras.length > 0 && (
+                  <div className="mb-4 space-y-2">
+                    {extras.map(extra => (
+                      <div key={extra.id} className="flex items-center justify-between bg-gray-50 p-2 rounded">
+                        <span className="flex-1">{extra.name}</span>
+                        <span className="font-medium mr-2">${extra.price.toFixed(2)}</span>
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          onClick={() => handleRemoveExtra(extra.id)}
+                        >
+                          <X className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                
+                <div className="flex space-x-2">
+                  <div className="flex-1">
+                    <Input 
+                      placeholder="Extra name" 
+                      value={newExtraName}
+                      onChange={(e) => setNewExtraName(e.target.value)}
+                    />
+                  </div>
+                  <div className="w-28">
+                    <Input 
+                      type="number"
+                      placeholder="Price" 
+                      value={newExtraPrice || ""}
+                      onChange={(e) => setNewExtraPrice(parseFloat(e.target.value) || 0)}
+                    />
+                  </div>
+                  <Button 
+                    variant="secondary" 
+                    size="sm" 
+                    onClick={handleAddExtra}
+                    className="whitespace-nowrap"
+                  >
+                    <Plus className="h-4 w-4 mr-1" />
+                    Add Extra
+                  </Button>
+                </div>
+              </div>
             </CardContent>
+            <CardFooter>
+              {selectedJob && (
+                <Button className="w-full">
+                  Apply Pricing to Job #{selectedJob.jobNumber}
+                </Button>
+              )}
+            </CardFooter>
           </Card>
           
           <Card>
