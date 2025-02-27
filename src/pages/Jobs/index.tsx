@@ -1,7 +1,7 @@
 
 import { AppLayout } from "@/components/ui/AppLayout";
 import { useState } from "react";
-import { useNavigate, Routes, Route, Navigate } from "react-router-dom";
+import { useNavigate, Routes, Route, Outlet } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import type { JobTemplate, Job } from "@/types/job";
 import { UnassignedJobs } from "./components/UnassignedJobs";
@@ -52,7 +52,20 @@ const teams = [
   { id: '3', name: 'Team Green', color: 'text-green-500' },
 ];
 
+// Main Jobs component that handles all routes
 export default function Jobs() {
+  return (
+    <AppLayout>
+      <Routes>
+        <Route index element={<JobsMain />} />
+        <Route path=":id" element={<JobDetails />} />
+      </Routes>
+    </AppLayout>
+  );
+}
+
+// Component for the main jobs listing page
+function JobsMain() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [generatedTemplates, setGeneratedTemplates] = useState<JobTemplate[]>([]);
@@ -110,7 +123,7 @@ export default function Jobs() {
     navigate('/jobs/new');
   };
 
-  const JobsList = () => (
+  return (
     <div className="space-y-6 p-6">
       <UnassignedJobs jobs={jobs} onAssign={handleAssign} />
       <CurrentJobs jobs={jobs} onStatusUpdate={updateJobStatus} />
@@ -138,14 +151,5 @@ export default function Jobs() {
         onTemplateCreate={(template) => setGeneratedTemplates([template, ...generatedTemplates])}
       />
     </div>
-  );
-
-  return (
-    <AppLayout>
-      <Routes>
-        <Route index element={<JobsList />} />
-        <Route path=":id" element={<JobDetails />} />
-      </Routes>
-    </AppLayout>
   );
 }

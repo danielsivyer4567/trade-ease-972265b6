@@ -1,60 +1,57 @@
 
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { ToastProvider } from './components/ui/toast';
-import { Toaster } from './components/ui/toaster';
-import { SidebarProvider } from './components/ui/sidebar';
-import { AppSidebar } from './components/ui/AppSidebar';
-import Index from './pages/Index';
-import AIFeatures from './pages/AIFeatures';
-import NotFound from './pages/NotFound';
-import Calendar from './pages/Calendar';
-import Customers from './pages/Customers';
-import Database from './pages/Database';
-import Email from './pages/Email';
-import Integrations from './pages/Integrations';
-import Jobs from './pages/Jobs';
-import Messaging from './pages/Messaging';
-import Quotes from './pages/Quotes';
-import Referrals from './pages/Referrals';
-import Settings from './pages/Settings';
-import Social from './pages/Social';
-import Statistics from './pages/Statistics';
-import Tasks from './pages/Tasks';
-import Notifications from './pages/Notifications';
+import { BrowserRouter, Route, Routes } from "react-router-dom";
+import './App.css';
+
+import NotFound from "@/pages/NotFound";
+import Jobs from "@/pages/Jobs";
+import Customers from "@/pages/Customers";
+import Quotes from "@/pages/Quotes";
+import Email from "@/pages/Email";
+import Messaging from "@/pages/Messaging";
+import Social from "@/pages/Social";
+import Index from "@/pages/Index";
+import Calendar from "@/pages/Calendar";
+import Database from "@/pages/Database";
+import AIFeatures from "@/pages/AIFeatures";
+import Integrations from "@/pages/Integrations";
+import Notifications from "@/pages/Notifications";
+import Referrals from "@/pages/Referrals";
+import TeamRed from "@/pages/TeamRed";
+import TeamBlue from "@/pages/TeamBlue";
+import TeamGreen from "@/pages/TeamGreen";
+import Tasks from "@/pages/Tasks";
+import Statistics from "@/pages/Statistics";
+import Settings from "@/pages/Settings";
+
+import { Toaster } from "@/components/ui/toaster";
 
 function App() {
   return (
-    <Router>
-      <ToastProvider>
-        <SidebarProvider>
-          <div className="flex min-h-screen w-full">
-            <AppSidebar />
-            <main className="flex-1">
-              <Routes>
-                <Route path="/" element={<Index />} />
-                <Route path="/ai-features" element={<AIFeatures />} />
-                <Route path="/calendar" element={<Calendar />} />
-                <Route path="/customers" element={<Customers />} />
-                <Route path="/database" element={<Database />} />
-                <Route path="/email" element={<Email />} />
-                <Route path="/integrations" element={<Integrations />} />
-                <Route path="/jobs" element={<Jobs />} />
-                <Route path="/messaging" element={<Messaging />} />
-                <Route path="/notifications" element={<Notifications />} />
-                <Route path="/quotes" element={<Quotes />} />
-                <Route path="/referrals" element={<Referrals />} />
-                <Route path="/settings" element={<Settings />} />
-                <Route path="/social" element={<Social />} />
-                <Route path="/statistics" element={<Statistics />} />
-                <Route path="/tasks" element={<Tasks />} />
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </main>
-          </div>
-          <Toaster />
-        </SidebarProvider>
-      </ToastProvider>
-    </Router>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Index />} />
+        <Route path="/customers/*" element={<Customers />} />
+        <Route path="/quotes/*" element={<Quotes />} />
+        <Route path="/jobs/*" element={<Jobs />} />
+        <Route path="/email/*" element={<Email />} />
+        <Route path="/messaging/*" element={<Messaging />} />
+        <Route path="/social/*" element={<Social />} />
+        <Route path="/calendar/*" element={<Calendar />} />
+        <Route path="/database/*" element={<Database />} />
+        <Route path="/ai-features/*" element={<AIFeatures />} />
+        <Route path="/integrations/*" element={<Integrations />} />
+        <Route path="/notifications/*" element={<Notifications />} />
+        <Route path="/referrals/*" element={<Referrals />} />
+        <Route path="/team-red/*" element={<TeamRed />} />
+        <Route path="/team-blue/*" element={<TeamBlue />} />
+        <Route path="/team-green/*" element={<TeamGreen />} />
+        <Route path="/tasks/*" element={<Tasks />} />
+        <Route path="/statistics/*" element={<Statistics />} />
+        <Route path="/settings/*" element={<Settings />} />
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+      <Toaster />
+    </BrowserRouter>
   );
 }
 
