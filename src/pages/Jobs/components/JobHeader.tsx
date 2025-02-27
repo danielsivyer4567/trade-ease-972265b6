@@ -27,16 +27,25 @@ export const JobHeader = ({ job }: JobHeaderProps) => {
 
   // Initialize WebSocket connection
   useEffect(() => {
-    // Create a WebSocket connection
-    const socket = new WebSocket(`wss://audio-relay-service.example.com/jobs/${job.id}`);
+    // Create a WebSocket connection with a more specific URL
+    // In a production app, you would use an environment variable for the base URL
+    const WEBSOCKET_BASE_URL = "wss://api.yourcompany.com/ws";
+    const userId = "user-123"; // In production, get this from your auth system
+    const authToken = "your-auth-token"; // In production, get this from your auth system
+    
+    // Construct the WebSocket URL with job ID and authentication
+    const socket = new WebSocket(
+      `${WEBSOCKET_BASE_URL}/jobs/${job.id}?userId=${userId}&token=${authToken}`
+    );
     
     socket.onopen = () => {
       console.log('WebSocket connected');
-      // Join the job channel
+      // Join the job channel with authentication
       socket.send(JSON.stringify({
         type: 'join',
         jobId: job.id,
-        userId: 'current-user-id' // In a real app, this would be the authenticated user's ID
+        userId: userId,
+        authToken: authToken
       }));
     };
     
@@ -79,6 +88,13 @@ export const JobHeader = ({ job }: JobHeaderProps) => {
     socket.onclose = () => {
       console.log('WebSocket disconnected');
       // Attempt to reconnect in a real implementation
+      setTimeout(() => {
+        toast({
+          title: "Reconnecting",
+          description: "Attempting to reconnect to the team communication..."
+        });
+        // In a real implementation, you would recall this effect to reconnect
+      }, 5000);
     };
     
     socketRef.current = socket;
@@ -112,10 +128,13 @@ export const JobHeader = ({ job }: JobHeaderProps) => {
             reader.onloadend = () => {
               const base64Audio = reader.result?.toString().split(',')[1]; // Remove data URL prefix
               if (base64Audio) {
+                const userId = "user-123"; // In production, get this from your auth system
+                
                 socketRef.current?.send(JSON.stringify({
                   type: 'audio',
                   jobId: job.id,
-                  userId: 'current-user-id', // Replace with actual user ID
+                  userId: userId,
+                  timestamp: new Date().toISOString(),
                   audioData: base64Audio
                 }));
               }
@@ -198,10 +217,13 @@ export const JobHeader = ({ job }: JobHeaderProps) => {
       
       // Notify team members through WebSocket that you're starting transmission
       if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
+        const userId = "user-123"; // In production, get this from your auth system
+        
         socketRef.current.send(JSON.stringify({
           type: 'transmission_started',
           jobId: job.id,
-          userId: 'current-user-id' // Replace with actual user ID
+          userId: userId,
+          timestamp: new Date().toISOString()
         }));
       }
       
@@ -221,10 +243,13 @@ export const JobHeader = ({ job }: JobHeaderProps) => {
       
       // Notify team members through WebSocket that you've stopped transmission
       if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
+        const userId = "user-123"; // In production, get this from your auth system
+        
         socketRef.current.send(JSON.stringify({
           type: 'transmission_ended',
           jobId: job.id,
-          userId: 'current-user-id' // Replace with actual user ID
+          userId: userId,
+          timestamp: new Date().toISOString()
         }));
       }
       
@@ -249,10 +274,13 @@ export const JobHeader = ({ job }: JobHeaderProps) => {
     
     // Notify system about listening state change
     if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
+      const userId = "user-123"; // In production, get this from your auth system
+      
       socketRef.current.send(JSON.stringify({
         type: isListening ? 'mute' : 'unmute',
         jobId: job.id,
-        userId: 'current-user-id' // Replace with actual user ID
+        userId: userId,
+        timestamp: new Date().toISOString()
       }));
     }
   };
