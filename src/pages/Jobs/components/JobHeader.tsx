@@ -20,6 +20,8 @@ export const JobHeader = ({ job }: JobHeaderProps) => {
   
   const mediaRecorder = useRef<MediaRecorder | null>(null);
   const audioChunks = useRef<Blob[]>([]);
+  const audioQueue = useRef<Array<Blob>>([]);
+  const isPlayingRef = useRef(false);
 
   useEffect(() => {
     navigator.mediaDevices.getUserMedia({ audio: true })
@@ -32,15 +34,15 @@ export const JobHeader = ({ job }: JobHeaderProps) => {
 
         mediaRecorder.current.onstop = () => {
           const audioBlob = new Blob(audioChunks.current, { type: 'audio/wav' });
-          const audioUrl = URL.createObjectURL(audioBlob);
-          const playbackAudio = new Audio(audioUrl);
-          playbackAudio.play().catch(error => {
-            toast({
-              title: "Playback Error",
-              description: "Could not play recorded audio",
-              variant: "destructive"
-            });
-          });
+          
+          // Simulate sending to other users by adding to local queue
+          audioQueue.current.push(audioBlob);
+          
+          // If not already playing, start playing audio messages
+          if (!isPlayingRef.current) {
+            playNextInQueue();
+          }
+          
           audioChunks.current = [];
         };
       })
@@ -61,12 +63,56 @@ export const JobHeader = ({ job }: JobHeaderProps) => {
     };
   }, [audio, toast]);
 
+  const playNextInQueue = async () => {
+    if (audioQueue.current.length === 0) {
+      isPlayingRef.current = false;
+      return;
+    }
+
+    isPlayingRef.current = true;
+    const nextAudio = audioQueue.current.shift();
+    if (!nextAudio) return;
+
+    const audioUrl = URL.createObjectURL(nextAudio);
+    const playbackAudio = new Audio(audioUrl);
+    
+    // When this message finishes playing, play the next one if available
+    playbackAudio.onended = () => {
+      URL.revokeObjectURL(audioUrl); // Clean up
+      playNextInQueue();
+    };
+
+    try {
+      await playbackAudio.play();
+      
+      // Show toast when a new transmission is received
+      if (isListening) {
+        toast({
+          title: "Incoming Transmission",
+          description: `Receiving audio from team member`,
+        });
+      }
+    } catch (error) {
+      console.error("Error playing audio:", error);
+      playNextInQueue(); // Try the next one if this one fails
+    }
+  };
+
   const startRecording = () => {
     if (mediaRecorder.current?.state === 'inactive') {
       audioChunks.current = [];
       setIsTransmitting(true);
+      
+      // Play the ringtone to indicate start of transmission
       audio.play().catch(console.error);
+      
+      // Start recording
       mediaRecorder.current?.start();
+      
+      toast({
+        title: "Transmitting",
+        description: "Your voice is being transmitted to the team",
+      });
     }
   };
 
@@ -76,6 +122,11 @@ export const JobHeader = ({ job }: JobHeaderProps) => {
       setIsTransmitting(false);
       audio.pause();
       audio.currentTime = 0;
+      
+      toast({
+        title: "Transmission Complete",
+        description: "Your message has been sent to the team",
+      });
     }
   };
 
@@ -85,6 +136,11 @@ export const JobHeader = ({ job }: JobHeaderProps) => {
       title: isListening ? "Walkie-Talkie Muted" : "Walkie-Talkie Unmuted",
       description: isListening ? "You won't receive transmissions" : "You will receive transmissions"
     });
+    
+    // Clear the audio queue when muting
+    if (isListening) {
+      audioQueue.current = [];
+    }
   };
 
   const handleSmoko = () => {
