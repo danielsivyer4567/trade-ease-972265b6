@@ -21,14 +21,22 @@ const mockJobs: Job[] = [{
 export function JobDetails() {
   const { id } = useParams();
   const job = mockJobs.find(j => j.id === id) || mockJobs[0];
-  const [jobTimer] = useState(0);
-  const [hasLocationPermission] = useState<boolean | null>(null);
-  const [isTimerRunning] = useState(false);
-  const [isOnBreak] = useState(false);
-  const [locationHistory] = useState<Array<{timestamp: number; coords: [number, number]}>>([]);
+  const [jobTimer, setJobTimer] = useState(0);
+  const [hasLocationPermission, setHasLocationPermission] = useState<boolean | null>(null);
+  const [isTimerRunning, setIsTimerRunning] = useState(false);
+  const [isOnBreak, setIsOnBreak] = useState(false);
+  const [locationHistory, setLocationHistory] = useState<Array<{timestamp: number; coords: [number, number]}>>([]);
   const [jobNotes, setJobNotes] = useState("");
   const [tabNotes, setTabNotes] = useState<Record<string, string>>({});
   const isManager = true;
+
+  const handleTimerToggle = () => {
+    setIsTimerRunning(!isTimerRunning);
+  };
+
+  const handleBreakToggle = () => {
+    setIsOnBreak(!isOnBreak);
+  };
 
   return (
     <div className="space-y-6 p-6">
@@ -43,8 +51,8 @@ export function JobDetails() {
         setTabNotes={setTabNotes}
         locationHistory={locationHistory}
         hasLocationPermission={hasLocationPermission}
-        handleTimerToggle={() => {}}
-        handleBreakToggle={() => {}}
+        handleTimerToggle={handleTimerToggle}
+        handleBreakToggle={handleBreakToggle}
         isTimerRunning={isTimerRunning}
         isOnBreak={isOnBreak}
       />

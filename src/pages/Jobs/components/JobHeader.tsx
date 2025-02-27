@@ -7,8 +7,6 @@ import { useState, useEffect, useRef } from "react";
 import { Mic, MicOff, Volume2, VolumeX, Coffee, PackageX } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
-const RING_TONE_URL = "/ringtone.mp3";
-
 interface JobHeaderProps {
   job: Job;
 }
@@ -17,15 +15,13 @@ export const JobHeader = ({ job }: JobHeaderProps) => {
   const [isTransmitting, setIsTransmitting] = useState(false);
   const [isListening, setIsListening] = useState(true);
   const [isOnSmoko, setIsOnSmoko] = useState(false);
-  const [audio] = useState(new Audio(RING_TONE_URL));
+  const [audio] = useState(new Audio("/ringtone.mp3"));
   const { toast } = useToast();
   
-  // Media recorder setup
   const mediaRecorder = useRef<MediaRecorder | null>(null);
   const audioChunks = useRef<Blob[]>([]);
 
   useEffect(() => {
-    // Request microphone access
     navigator.mediaDevices.getUserMedia({ audio: true })
       .then(stream => {
         mediaRecorder.current = new MediaRecorder(stream);
@@ -161,4 +157,4 @@ export const JobHeader = ({ job }: JobHeaderProps) => {
       </div>
     </Card>
   );
-};
+}
