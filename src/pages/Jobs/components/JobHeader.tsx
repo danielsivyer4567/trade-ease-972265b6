@@ -22,7 +22,76 @@ export const JobHeader = ({ job }: JobHeaderProps) => {
   const audioChunks = useRef<Blob[]>([]);
   const audioQueue = useRef<Array<Blob>>([]);
   const isPlayingRef = useRef(false);
+  const socketRef = useRef<WebSocket | null>(null);
+  const jobIdRef = useRef<string>(job.id);
 
+  // Initialize WebSocket connection
+  useEffect(() => {
+    // Create a WebSocket connection
+    const socket = new WebSocket(`wss://audio-relay-service.example.com/jobs/${job.id}`);
+    
+    socket.onopen = () => {
+      console.log('WebSocket connected');
+      // Join the job channel
+      socket.send(JSON.stringify({
+        type: 'join',
+        jobId: job.id,
+        userId: 'current-user-id' // In a real app, this would be the authenticated user's ID
+      }));
+    };
+    
+    socket.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        
+        if (data.type === 'audio' && data.jobId === job.id && isListening) {
+          // Convert base64 audio data to a Blob
+          const audioData = atob(data.audioData);
+          const arrayBuffer = new ArrayBuffer(audioData.length);
+          const uint8Array = new Uint8Array(arrayBuffer);
+          
+          for (let i = 0; i < audioData.length; i++) {
+            uint8Array[i] = audioData.charCodeAt(i);
+          }
+          
+          const audioBlob = new Blob([uint8Array], { type: 'audio/wav' });
+          
+          // Add to queue and play if not already playing
+          audioQueue.current.push(audioBlob);
+          if (!isPlayingRef.current) {
+            playNextInQueue();
+          }
+        }
+      } catch (error) {
+        console.error('Error processing WebSocket message:', error);
+      }
+    };
+    
+    socket.onerror = (error) => {
+      console.error('WebSocket error:', error);
+      toast({
+        title: "Connection Error",
+        description: "Lost connection to the team. Trying to reconnect...",
+        variant: "destructive"
+      });
+    };
+    
+    socket.onclose = () => {
+      console.log('WebSocket disconnected');
+      // Attempt to reconnect in a real implementation
+    };
+    
+    socketRef.current = socket;
+    
+    // Clean up WebSocket on unmount
+    return () => {
+      if (socket.readyState === WebSocket.OPEN) {
+        socket.close();
+      }
+    };
+  }, [job.id, toast]);
+
+  // Set up audio recording
   useEffect(() => {
     navigator.mediaDevices.getUserMedia({ audio: true })
       .then(stream => {
@@ -35,7 +104,25 @@ export const JobHeader = ({ job }: JobHeaderProps) => {
         mediaRecorder.current.onstop = () => {
           const audioBlob = new Blob(audioChunks.current, { type: 'audio/wav' });
           
-          // Simulate sending to other users by adding to local queue
+          // Send the audio data over WebSocket
+          if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
+            // Convert Blob to base64
+            const reader = new FileReader();
+            reader.readAsDataURL(audioBlob);
+            reader.onloadend = () => {
+              const base64Audio = reader.result?.toString().split(',')[1]; // Remove data URL prefix
+              if (base64Audio) {
+                socketRef.current?.send(JSON.stringify({
+                  type: 'audio',
+                  jobId: job.id,
+                  userId: 'current-user-id', // Replace with actual user ID
+                  audioData: base64Audio
+                }));
+              }
+            };
+          }
+          
+          // Add to local queue for playback as well (for testing)
           audioQueue.current.push(audioBlob);
           
           // If not already playing, start playing audio messages
@@ -61,7 +148,7 @@ export const JobHeader = ({ job }: JobHeaderProps) => {
       audio.pause();
       audio.currentTime = 0;
     };
-  }, [audio, toast]);
+  }, [audio, toast, job.id]);
 
   const playNextInQueue = async () => {
     if (audioQueue.current.length === 0) {
@@ -109,6 +196,15 @@ export const JobHeader = ({ job }: JobHeaderProps) => {
       // Start recording
       mediaRecorder.current?.start();
       
+      // Notify team members through WebSocket that you're starting transmission
+      if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
+        socketRef.current.send(JSON.stringify({
+          type: 'transmission_started',
+          jobId: job.id,
+          userId: 'current-user-id' // Replace with actual user ID
+        }));
+      }
+      
       toast({
         title: "Transmitting",
         description: "Your voice is being transmitted to the team",
@@ -122,6 +218,15 @@ export const JobHeader = ({ job }: JobHeaderProps) => {
       setIsTransmitting(false);
       audio.pause();
       audio.currentTime = 0;
+      
+      // Notify team members through WebSocket that you've stopped transmission
+      if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
+        socketRef.current.send(JSON.stringify({
+          type: 'transmission_ended',
+          jobId: job.id,
+          userId: 'current-user-id' // Replace with actual user ID
+        }));
+      }
       
       toast({
         title: "Transmission Complete",
@@ -140,6 +245,15 @@ export const JobHeader = ({ job }: JobHeaderProps) => {
     // Clear the audio queue when muting
     if (isListening) {
       audioQueue.current = [];
+    }
+    
+    // Notify system about listening state change
+    if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
+      socketRef.current.send(JSON.stringify({
+        type: isListening ? 'mute' : 'unmute',
+        jobId: job.id,
+        userId: 'current-user-id' // Replace with actual user ID
+      }));
     }
   };
 
