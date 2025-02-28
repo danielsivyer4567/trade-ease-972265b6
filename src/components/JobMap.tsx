@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { GoogleMap, LoadScript, InfoWindow } from '@react-google-maps/api';
 import type { Job } from '@/types/job';
+import { Briefcase } from 'lucide-react';
 
 interface JobMapProps {
   jobs: Job[];
@@ -36,7 +37,15 @@ const JobMap = ({ jobs }: JobMapProps) => {
       markerElement.className = 'marker';
       markerElement.innerHTML = `
         <div class="bg-white p-2 rounded-lg shadow-lg">
-          <div class="font-semibold">${job.customer}</div>
+          <div class="flex items-center gap-2 font-semibold">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-blue-600">
+              <path d="M15 2H9a3 3 0 0 0-3 3v14a3 3 0 0 0 3 3h6a3 3 0 0 0 3-3V5a3 3 0 0 0-3-3Z" />
+              <path d="M12 9h.01" />
+              <path d="M12 12h.01" />
+              <path d="M12 15h.01" />
+            </svg>
+            <span>${job.jobNumber || 'N/A'}</span>
+          </div>
         </div>
       `;
 
