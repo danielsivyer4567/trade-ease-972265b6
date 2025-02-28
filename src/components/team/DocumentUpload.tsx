@@ -7,6 +7,7 @@ import { Upload, Send } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { FileUpload } from '@/components/tasks/FileUpload';
 import { toast } from "sonner";
+import { useNavigate } from 'react-router-dom';
 
 interface TeamMember {
   id: string;
@@ -30,6 +31,7 @@ export function DocumentUpload({
   setJobNumber,
   handleFileUpload
 }: DocumentUploadProps) {
+  const navigate = useNavigate();
   const [isDragging, setIsDragging] = useState(false);
   const [uploadedFiles, setUploadedFiles] = useState<{
     general: File[],
@@ -137,7 +139,55 @@ export function DocumentUpload({
           successMessage = `${uploadedFiles[type].length} insurance document(s) processed and sent to ${memberName}`;
           break;
         case 'jobRelated':
-          successMessage = `${uploadedFiles[type].length} job-related document(s) for job #${jobNumber} processed and sent to ${memberName}`;
+          // For job-related files, create a job note with the uploaded files
+          const mockJobs = [
+            { id: "1", jobNumber: "PLM-001", title: "Water Heater Installation" },
+            { id: "2", jobNumber: "HVAC-001", title: "HVAC Maintenance" },
+            { id: "3", jobNumber: "ELE-001", title: "Electrical Panel Upgrade" }
+          ];
+          
+          // Find job by job number
+          const job = mockJobs.find(j => j.jobNumber === jobNumber);
+          
+          if (job) {
+            // Create a note for the job containing file information
+            const fileNames = uploadedFiles[type].map(file => file.name).join(", ");
+            
+            // Create job note entry in local storage
+            const existingNotes = localStorage.getItem(`job_notes_${job.id}`);
+            const parsedNotes = existingNotes ? JSON.parse(existingNotes) : [];
+            
+            const newNote = {
+              id: Date.now().toString(),
+              text: `Files uploaded by ${memberName}: ${fileNames}`,
+              timestamp: new Date().toLocaleString(),
+              important: true,
+              files: uploadedFiles[type].map(file => ({
+                name: file.name,
+                size: file.size,
+                type: file.type,
+                lastModified: file.lastModified
+              }))
+            };
+            
+            const updatedNotes = [...parsedNotes, newNote];
+            localStorage.setItem(`job_notes_${job.id}`, JSON.stringify(updatedNotes));
+            
+            successMessage = `${uploadedFiles[type].length} file(s) processed, added to job #${jobNumber} notes, and sent to ${memberName}`;
+            
+            // Ask if user wants to navigate to job details page
+            toast({
+              title: "Would you like to view the job details?",
+              description: `Files uploaded to job #${jobNumber}`,
+              action: {
+                label: "View Job",
+                onClick: () => navigate(`/jobs/${job.id}`),
+              },
+              duration: 10000, // Show for 10 seconds
+            });
+          } else {
+            successMessage = `${uploadedFiles[type].length} job-related document(s) for job #${jobNumber} processed and sent to ${memberName}`;
+          }
           break;
       }
       
