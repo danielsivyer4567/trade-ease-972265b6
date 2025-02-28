@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Upload } from 'lucide-react';
+import { Upload, Send } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { FileUpload } from '@/components/tasks/FileUpload';
 import { toast } from "sonner";
@@ -31,6 +31,16 @@ export function DocumentUpload({
   handleFileUpload
 }: DocumentUploadProps) {
   const [isDragging, setIsDragging] = useState(false);
+  const [uploadedFiles, setUploadedFiles] = useState<{
+    general: File[],
+    insurance: File[],
+    jobRelated: File[]
+  }>({
+    general: [],
+    insurance: [],
+    jobRelated: []
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
@@ -54,6 +64,12 @@ export function DocumentUpload({
     const files = Array.from(e.dataTransfer.files);
     
     if (files.length > 0) {
+      // Store uploaded files in state
+      setUploadedFiles(prev => ({
+        ...prev,
+        [type]: [...prev[type], ...files]
+      }));
+      
       // Create a synthetic event to match the onChange interface
       const event = {
         target: {
@@ -73,9 +89,68 @@ export function DocumentUpload({
     }
     
     if (e.target.files && e.target.files.length > 0) {
+      const files = Array.from(e.target.files);
+      
+      // Store uploaded files in state
+      setUploadedFiles(prev => ({
+        ...prev,
+        [type]: [...prev[type], ...files]
+      }));
+      
       handleFileUpload(e, type);
       toast.success(`${e.target.files.length} file(s) uploaded successfully`);
     }
+  };
+
+  const handleSubmitFiles = (type: 'insurance' | 'general' | 'jobRelated') => {
+    setIsSubmitting(true);
+    
+    // Validation
+    if (type === 'jobRelated' && !jobNumber) {
+      toast.error("Please enter a job number first");
+      setIsSubmitting(false);
+      return;
+    }
+    
+    if (!selectedTeamMember) {
+      toast.error("Please select a team member to notify");
+      setIsSubmitting(false);
+      return;
+    }
+    
+    if (uploadedFiles[type].length === 0) {
+      toast.error("No files have been uploaded");
+      setIsSubmitting(false);
+      return;
+    }
+    
+    // Simulate processing the files
+    setTimeout(() => {
+      const memberName = teamMembers.find(m => m.id === selectedTeamMember)?.name || "team member";
+      
+      let successMessage = "";
+      switch(type) {
+        case 'general':
+          successMessage = `${uploadedFiles[type].length} general document(s) processed and sent to ${memberName}`;
+          break;
+        case 'insurance':
+          successMessage = `${uploadedFiles[type].length} insurance document(s) processed and sent to ${memberName}`;
+          break;
+        case 'jobRelated':
+          successMessage = `${uploadedFiles[type].length} job-related document(s) for job #${jobNumber} processed and sent to ${memberName}`;
+          break;
+      }
+      
+      toast.success(successMessage);
+      
+      // Clear the uploaded files for this type
+      setUploadedFiles(prev => ({
+        ...prev,
+        [type]: []
+      }));
+      
+      setIsSubmitting(false);
+    }, 1500);
   };
 
   return (
@@ -110,6 +185,23 @@ export function DocumentUpload({
               onFileUpload={(e) => handleFileInputChange(e, 'general')}
               label="Drag and drop files or click to upload"
             />
+            {uploadedFiles.general.length > 0 && (
+              <div className="mt-4">
+                <p className="text-sm font-medium text-gray-700">{uploadedFiles.general.length} file(s) ready to submit</p>
+                <ul className="text-xs text-gray-500 mt-1 mb-3 max-h-20 overflow-y-auto">
+                  {uploadedFiles.general.map((file, index) => (
+                    <li key={index} className="truncate">{file.name} ({Math.round(file.size / 1024)} KB)</li>
+                  ))}
+                </ul>
+                <Button 
+                  className="w-full" 
+                  onClick={() => handleSubmitFiles('general')}
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? "Processing..." : "Process Uploaded Files"} <Send className="ml-2 h-4 w-4" />
+                </Button>
+              </div>
+            )}
             <p className="text-xs text-gray-500 mt-2">
               Supported formats: PDF, DOC, DOCX, JPG, JPEG, PNG, MP4, MOV. Max file size: 100MB
             </p>
@@ -138,6 +230,23 @@ export function DocumentUpload({
               onFileUpload={(e) => handleFileInputChange(e, 'insurance')}
               label="Drag and drop files or click to upload"
             />
+            {uploadedFiles.insurance.length > 0 && (
+              <div className="mt-4">
+                <p className="text-sm font-medium text-gray-700">{uploadedFiles.insurance.length} file(s) ready to submit</p>
+                <ul className="text-xs text-gray-500 mt-1 mb-3 max-h-20 overflow-y-auto">
+                  {uploadedFiles.insurance.map((file, index) => (
+                    <li key={index} className="truncate">{file.name} ({Math.round(file.size / 1024)} KB)</li>
+                  ))}
+                </ul>
+                <Button 
+                  className="w-full" 
+                  onClick={() => handleSubmitFiles('insurance')}
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? "Processing..." : "Process Uploaded Files"} <Send className="ml-2 h-4 w-4" />
+                </Button>
+              </div>
+            )}
             <p className="text-xs text-gray-500 mt-2">
               Supported formats: PDF, DOC, DOCX. Max file size: 100MB
             </p>
@@ -174,6 +283,23 @@ export function DocumentUpload({
                 onFileUpload={(e) => handleFileInputChange(e, 'jobRelated')}
                 label="Drag and drop files or click to upload"
               />
+              {uploadedFiles.jobRelated.length > 0 && (
+                <div className="mt-4">
+                  <p className="text-sm font-medium text-gray-700">{uploadedFiles.jobRelated.length} file(s) ready to submit</p>
+                  <ul className="text-xs text-gray-500 mt-1 mb-3 max-h-20 overflow-y-auto">
+                    {uploadedFiles.jobRelated.map((file, index) => (
+                      <li key={index} className="truncate">{file.name} ({Math.round(file.size / 1024)} KB)</li>
+                    ))}
+                  </ul>
+                  <Button 
+                    className="w-full" 
+                    onClick={() => handleSubmitFiles('jobRelated')}
+                    disabled={isSubmitting || !jobNumber}
+                  >
+                    {isSubmitting ? "Processing..." : "Process Uploaded Files"} <Send className="ml-2 h-4 w-4" />
+                  </Button>
+                </div>
+              )}
               <p className="text-xs text-gray-500 mt-2">
                 Supported formats: PDF, DOC, DOCX, JPG, JPEG, PNG, MP4, MOV. Max file size: 100MB
               </p>
