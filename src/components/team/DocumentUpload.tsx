@@ -175,9 +175,8 @@ export function DocumentUpload({
             
             successMessage = `${uploadedFiles[type].length} file(s) processed, added to job #${jobNumber} notes, and sent to ${memberName}`;
             
-            // Ask if user wants to navigate to job details page
-            toast({
-              description: `Files uploaded to job #${jobNumber}`,
+            // Fixed toast implementation to use the correct Sonner API
+            toast.success("Files uploaded to job #" + jobNumber, {
               action: {
                 label: "View Job",
                 onClick: () => navigate(`/jobs/${job.id}`),
@@ -214,7 +213,7 @@ export function DocumentUpload({
         
         <TabsContent value="general" className="space-y-4">
           <div 
-            className={`border rounded-lg p-4 ${isDragging ? 'bg-gray-50 border-blue-400' : ''}`}
+            className={`border-2 border-black rounded-lg p-4 ${isDragging ? 'bg-gray-50 border-blue-400' : ''}`}
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
             onDrop={(e) => handleDrop(e, 'general')}
@@ -243,7 +242,7 @@ export function DocumentUpload({
                   ))}
                 </ul>
                 <Button 
-                  className="w-full" 
+                  className="w-full border-2 border-black" 
                   onClick={() => handleSubmitFiles('general')}
                   disabled={isSubmitting}
                 >
@@ -259,7 +258,7 @@ export function DocumentUpload({
 
         <TabsContent value="insurance" className="space-y-4">
           <div 
-            className={`border rounded-lg p-4 ${isDragging ? 'bg-gray-50 border-blue-400' : ''}`}
+            className={`border-2 border-black rounded-lg p-4 ${isDragging ? 'bg-gray-50 border-blue-400' : ''}`}
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
             onDrop={(e) => handleDrop(e, 'insurance')}
@@ -288,7 +287,7 @@ export function DocumentUpload({
                   ))}
                 </ul>
                 <Button 
-                  className="w-full" 
+                  className="w-full border-2 border-black" 
                   onClick={() => handleSubmitFiles('insurance')}
                   disabled={isSubmitting}
                 >
@@ -304,7 +303,7 @@ export function DocumentUpload({
 
         <TabsContent value="job" className="space-y-4">
           <div 
-            className={`border rounded-lg p-4 ${isDragging ? 'bg-gray-50 border-blue-400' : ''}`}
+            className={`border-2 border-black rounded-lg p-4 ${isDragging ? 'bg-gray-50 border-blue-400' : ''}`}
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
             onDrop={(e) => handleDrop(e, 'jobRelated')}
@@ -316,10 +315,10 @@ export function DocumentUpload({
                 placeholder="Enter Job Number" 
                 value={jobNumber} 
                 onChange={e => setJobNumber(e.target.value)} 
-                className="mb-4" 
+                className="mb-4 border-2 border-black" 
               />
               <select 
-                className="w-full rounded-md border border-input bg-background px-3 h-10 mb-4" 
+                className="w-full rounded-md border-2 border-black bg-background px-3 h-10 mb-4" 
                 value={selectedTeamMember} 
                 onChange={e => setSelectedTeamMember(e.target.value)}
               >
@@ -341,7 +340,7 @@ export function DocumentUpload({
                     ))}
                   </ul>
                   <Button 
-                    className="w-full" 
+                    className="w-full border-2 border-black" 
                     onClick={() => handleSubmitFiles('jobRelated')}
                     disabled={isSubmitting || !jobNumber}
                   >
