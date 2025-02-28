@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { TeamCalendar } from '@/components/team/TeamCalendar';
+import { cn } from "@/lib/utils";
 
 export default function TeamNew() {
   const [teamName, setTeamName] = useState("");
@@ -16,13 +17,13 @@ export default function TeamNew() {
   const navigate = useNavigate();
 
   const availableColors = [
-    { name: "Purple", value: "purple" },
-    { name: "Orange", value: "orange" },
-    { name: "Pink", value: "pink" },
-    { name: "Teal", value: "teal" },
-    { name: "Yellow", value: "yellow" },
-    { name: "Indigo", value: "indigo" },
-    { name: "Rose", value: "rose" }
+    { name: "Purple", value: "purple", bgClass: "bg-purple-500", borderClass: "border-purple-700", hoverClass: "bg-purple-600" },
+    { name: "Orange", value: "orange", bgClass: "bg-orange-500", borderClass: "border-orange-700", hoverClass: "bg-orange-600" },
+    { name: "Pink", value: "pink", bgClass: "bg-pink-500", borderClass: "border-pink-700", hoverClass: "bg-pink-600" },
+    { name: "Teal", value: "teal", bgClass: "bg-teal-500", borderClass: "border-teal-700", hoverClass: "bg-teal-600" },
+    { name: "Yellow", value: "yellow", bgClass: "bg-yellow-500", borderClass: "border-yellow-700", hoverClass: "bg-yellow-600" },
+    { name: "Indigo", value: "indigo", bgClass: "bg-indigo-500", borderClass: "border-indigo-700", hoverClass: "bg-indigo-600" },
+    { name: "Rose", value: "rose", bgClass: "bg-rose-500", borderClass: "border-rose-700", hoverClass: "bg-rose-600" }
   ];
 
   const handleCreateTeam = () => {
@@ -38,6 +39,9 @@ export default function TeamNew() {
     // For now, we'll just navigate back to the calendar page
     navigate("/calendar");
   };
+
+  // Find the selected color object
+  const selectedColor = availableColors.find(color => color.value === teamColor) || availableColors[0];
 
   return (
     <AppLayout>
@@ -68,9 +72,11 @@ export default function TeamNew() {
                 {availableColors.map((color) => (
                   <button
                     key={color.value}
-                    className={`w-8 h-8 rounded-full bg-${color.value}-500 flex items-center justify-center border-2 ${
-                      teamColor === color.value ? `border-${color.value}-700` : "border-transparent"
-                    }`}
+                    className={cn(
+                      "w-8 h-8 rounded-full flex items-center justify-center border-2",
+                      color.bgClass,
+                      teamColor === color.value ? color.borderClass : "border-transparent"
+                    )}
                     onClick={() => setTeamColor(color.value)}
                     aria-label={`Select ${color.name} color`}
                   >
@@ -96,7 +102,7 @@ export default function TeamNew() {
             </div>
             
             <Button 
-              className={`bg-${teamColor}-500 hover:bg-${teamColor}-600 mt-4`}
+              className={cn("mt-4", selectedColor.bgClass, "hover:" + selectedColor.hoverClass, "text-white")}
               onClick={handleCreateTeam}
             >
               Create Team
