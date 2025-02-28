@@ -67,11 +67,9 @@ export default function Index() {
                     const markerElement = document.createElement('div');
                     markerElement.className = 'marker';
                     markerElement.innerHTML = `
-                      <div class="bg-white p-2 rounded-lg shadow-lg">
-                        <div class="flex items-center gap-2 font-semibold">
-                          <img src="/lovable-uploads/34bca7f1-d63b-45a0-b1ca-a562443686ad.png" alt="Trade Ease Logo" width="20" height="20" class="object-contain" />
-                          <span>${location.jobNumber || 'N/A'}</span>
-                        </div>
+                      <div class="flex items-center gap-2 font-semibold text-white bg-black/50 backdrop-blur-sm px-2 py-1 rounded-lg shadow-lg border border-white/20">
+                        <img src="/lovable-uploads/34bca7f1-d63b-45a0-b1ca-a562443686ad.png" alt="Trade Ease Logo" width="20" height="20" class="object-contain" />
+                        <span>${location.jobNumber || 'N/A'}</span>
                       </div>
                     `;
 
