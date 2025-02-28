@@ -7,15 +7,36 @@ import { Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
+import { useNavigate } from 'react-router-dom';
 import type { Job } from '@/types/job';
 
 export default function Calendar() {
   const [sharedDate, setSharedDate] = React.useState<Date | undefined>(new Date());
+  const navigate = useNavigate();
   const [teams, setTeams] = React.useState([
     { name: 'Red Team', color: 'red' },
     { name: 'Blue Team', color: 'blue' },
     { name: 'Green Team', color: 'green' }
   ]);
+
+  // Check for new team from localStorage (would be set in TeamNew component)
+  React.useEffect(() => {
+    const newTeamData = localStorage.getItem('newTeam');
+    if (newTeamData) {
+      try {
+        const newTeam = JSON.parse(newTeamData);
+        // Only add if team with this name doesn't already exist
+        if (!teams.some(team => team.name === newTeam.name)) {
+          setTeams(prevTeams => [...prevTeams, newTeam]);
+          toast.success(`${newTeam.name} has been added to your calendar view`);
+        }
+        // Clear localStorage after adding
+        localStorage.removeItem('newTeam');
+      } catch (error) {
+        console.error('Error parsing new team data:', error);
+      }
+    }
+  }, [teams]);
 
   const mockJobs: Job[] = [{
     id: "1",
@@ -51,15 +72,7 @@ export default function Calendar() {
   };
 
   const handleAddTeam = () => {
-    const newTeamIndex = teams.length;
-    const newColor = getColorForTeam(newTeamIndex);
-    const newTeam = {
-      name: `Team ${newTeamIndex + 1}`,
-      color: newColor
-    };
-    
-    setTeams([...teams, newTeam]);
-    toast.success(`Added ${newTeam.name} with ${newColor} color scheme`);
+    navigate('/team-new');
   };
 
   const handleJobAssign = (jobId: string, date: Date) => {
@@ -82,8 +95,8 @@ export default function Calendar() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {teams.map((team) => (
-            <Card key={team.name}>
+          {teams.map((team, index) => (
+            <Card key={`${team.name}-${index}`}>
               <CardHeader>
                 <CardTitle className="text-lg">{team.name}</CardTitle>
                 <CardDescription>View and manage team schedule</CardDescription>

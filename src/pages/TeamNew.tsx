@@ -32,11 +32,18 @@ export default function TeamNew() {
       return;
     }
 
-    toast.success(`Team "${teamName}" has been created!`);
-    // In a real application, you would save the team to the database here
-    // and then navigate to the newly created team page
+    // Create team object
+    const newTeam = {
+      name: teamName,
+      color: teamColor
+    };
+
+    // Save to localStorage for the Calendar component to pick up
+    localStorage.setItem('newTeam', JSON.stringify(newTeam));
     
-    // For now, we'll just navigate back to the calendar page
+    toast.success(`Team "${teamName}" has been created!`);
+    
+    // Navigate back to calendar
     navigate("/calendar");
   };
 
