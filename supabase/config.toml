@@ -1,1 +1,14 @@
+
 project_id = "wxwbxupdisbofesaygqj"
+
+[functions.validate-ghl-number]
+verify_jwt = false
+
+[functions.validate-integration]
+verify_jwt = false
+
+[functions.generate-with-openai]
+verify_jwt = false
+
+[functions.notify-team-leader]
+verify_jwt = false

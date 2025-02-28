@@ -3,6 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Clock, Loader2, DollarSign, CheckCircle, Brush } from "lucide-react";
 import { Job } from "@/types/job";
 import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 interface CurrentJobsProps {
   jobs: Job[];
@@ -27,6 +29,35 @@ export function CurrentJobs({ jobs, onStatusUpdate }: CurrentJobsProps) {
       default:
         return null;
     }
+  };
+
+  const handleStatusChange = async (jobId: string, newStatus: Job['status']) => {
+    // If status is changing to clean-required, notify Paul Finch
+    if (newStatus === 'clean-required') {
+      try {
+        const { data, error } = await supabase.functions.invoke('notify-team-leader', {
+          body: { 
+            phoneNumber: '0430388131',
+            name: 'Paul Finch',
+            message: `Job ${jobId} requires cleaning. Please check the dashboard for details.`
+          }
+        });
+        
+        if (error) throw error;
+        
+        if (data.success) {
+          toast.success("Paul Finch has been notified about the cleaning requirement");
+        } else {
+          toast.error("Failed to send notification to Paul Finch");
+        }
+      } catch (error) {
+        console.error('Error sending notification:', error);
+        toast.error("Failed to send notification. Using fallback notification system.");
+      }
+    }
+    
+    // Call the original status update function
+    onStatusUpdate(jobId, newStatus);
   };
 
   return (
@@ -81,6 +112,7 @@ export function CurrentJobs({ jobs, onStatusUpdate }: CurrentJobsProps) {
                       {getStatusIcon(job.status)}
                       <span className="ml-2 text-sm text-gray-500">
                         {job.status === 'invoiced' ? 'Completed' : 
+                          job.status === 'clean-required' ? 'Clean Required (Paul Finch notified)' :
                           job.status.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
                       </span>
                     </div>
@@ -90,7 +122,7 @@ export function CurrentJobs({ jobs, onStatusUpdate }: CurrentJobsProps) {
                       className="text-sm border border-gray-300 rounded-md px-2 py-1"
                       value={job.status}
                       onClick={(e) => e.stopPropagation()}
-                      onChange={(e) => onStatusUpdate(job.id, e.target.value as Job['status'])}
+                      onChange={(e) => handleStatusChange(job.id, e.target.value as Job['status'])}
                     >
                       <option value="ready">Ready to Go</option>
                       <option value="in-progress">In Progress</option>
