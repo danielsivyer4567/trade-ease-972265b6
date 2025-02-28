@@ -15,50 +15,72 @@ serve(async (req) => {
   try {
     const { phoneNumber, name, message } = await req.json()
 
-    // In a production environment, you would integrate with a text messaging service like Twilio here
-    // For this example, we'll log the message and simulate a successful text message send
+    // Get Twilio credentials from environment variables
+    const twilioAccountSid = Deno.env.get('TWILIO_ACCOUNT_SID');
+    const twilioAuthToken = Deno.env.get('TWILIO_AUTH_TOKEN');
+    const twilioPhoneNumber = Deno.env.get('TWILIO_PHONE_NUMBER');
 
-    console.log(`Sending text message to ${name} (${phoneNumber}): ${message}`)
+    // Validate required environment variables
+    if (!twilioAccountSid || !twilioAuthToken || !twilioPhoneNumber) {
+      console.error('Missing required Twilio environment variables');
+      return new Response(
+        JSON.stringify({
+          success: false,
+          message: 'Twilio configuration is incomplete'
+        }),
+        {
+          status: 500,
+          headers: {
+            ...corsHeaders,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+    }
 
-    // Simulate sending a text message
-    // In production, you would include code like:
-    // 
-    // const twilioAccountSid = Deno.env.get('TWILIO_ACCOUNT_SID');
-    // const twilioAuthToken = Deno.env.get('TWILIO_AUTH_TOKEN');
-    // const twilioPhoneNumber = Deno.env.get('TWILIO_PHONE_NUMBER');
-    // 
-    // const response = await fetch(`https://api.twilio.com/2010-04-01/Accounts/${twilioAccountSid}/Messages.json`, {
-    //   method: 'POST',
-    //   headers: {
-    //     'Content-Type': 'application/x-www-form-urlencoded',
-    //     'Authorization': `Basic ${btoa(`${twilioAccountSid}:${twilioAuthToken}`)}`
-    //   },
-    //   body: new URLSearchParams({
-    //     'To': phoneNumber,
-    //     'From': twilioPhoneNumber,
-    //     'Body': message
-    //   })
-    // });
-    // 
-    // const result = await response.json();
+    console.log(`Attempting to send text message to ${name} (${phoneNumber}): ${message}`);
 
-    // For now, simulate a successful send
-    const success = true
+    // Format the phone number to ensure it's in E.164 format (required by Twilio)
+    // This is a simple example - you might need more sophisticated formatting
+    const formattedPhoneNumber = phoneNumber.startsWith('+') 
+      ? phoneNumber 
+      : `+61${phoneNumber.startsWith('0') ? phoneNumber.substring(1) : phoneNumber}`;
+
+    // Send the SMS using Twilio API
+    const response = await fetch(`https://api.twilio.com/2010-04-01/Accounts/${twilioAccountSid}/Messages.json`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'Authorization': `Basic ${btoa(`${twilioAccountSid}:${twilioAuthToken}`)}`
+      },
+      body: new URLSearchParams({
+        'To': formattedPhoneNumber,
+        'From': twilioPhoneNumber,
+        'Body': message
+      })
+    });
+
+    const result = await response.json();
+    console.log('Twilio API response:', result);
+
+    const success = result.sid ? true : false;
 
     return new Response(
       JSON.stringify({
         success,
-        message: success ? 'Text message sent successfully' : 'Failed to send text message'
+        message: success ? 'Text message sent successfully' : 'Failed to send text message',
+        details: result
       }),
       {
         headers: {
           ...corsHeaders,
           'Content-Type': 'application/json'
-        }
+        },
+        status: success ? 200 : 400
       }
-    )
+    );
   } catch (error) {
-    console.error('Error:', error)
+    console.error('Error sending SMS:', error);
 
     return new Response(
       JSON.stringify({
@@ -66,12 +88,12 @@ serve(async (req) => {
         error: error.message
       }),
       {
-        status: 400,
+        status: 500,
         headers: {
           ...corsHeaders,
           'Content-Type': 'application/json'
         }
       }
-    )
+    );
   }
-})
+});
