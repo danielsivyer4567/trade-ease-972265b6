@@ -36,10 +36,10 @@ export default function Index() {
   };
 
   const locations = [
-    { id: 1, name: "Job Site 1", lat: -28.012, lng: 153.402, type: "Plumbing" },
-    { id: 2, name: "Job Site 2", lat: -28.025, lng: 153.410, type: "Electrical" },
-    { id: 3, name: "Job Site 3", lat: -28.020, lng: 153.422, type: "HVAC" },
-    { id: 4, name: "Headquarters", lat: -28.017, lng: 153.401, type: "Office" },
+    { id: 1, name: "Job Site 1", lat: -28.012, lng: 153.402, type: "Plumbing", jobNumber: "PLM-001" },
+    { id: 2, name: "Job Site 2", lat: -28.025, lng: 153.410, type: "Electrical", jobNumber: "ELE-001" },
+    { id: 3, name: "Job Site 3", lat: -28.020, lng: 153.422, type: "HVAC", jobNumber: "HVAC-001" },
+    { id: 4, name: "Headquarters", lat: -28.017, lng: 153.401, type: "Office", jobNumber: "HQ-001" },
   ];
 
   return (
@@ -68,7 +68,10 @@ export default function Index() {
                     markerElement.className = 'marker';
                     markerElement.innerHTML = `
                       <div class="bg-white p-2 rounded-lg shadow-lg">
-                        <div class="font-semibold">${location.name}</div>
+                        <div class="flex items-center gap-2 font-semibold">
+                          <img src="/lovable-uploads/34bca7f1-d63b-45a0-b1ca-a562443686ad.png" alt="Trade Ease Logo" width="20" height="20" class="object-contain" />
+                          <span>${location.jobNumber || 'N/A'}</span>
+                        </div>
                       </div>
                     `;
 
