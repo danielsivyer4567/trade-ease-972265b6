@@ -21,7 +21,7 @@ export function CurrentJobs({ jobs, onStatusUpdate }: CurrentJobsProps) {
       case 'to-invoice':
         return <DollarSign className="h-5 w-5 text-green-500" />;
       case 'invoiced':
-        return <CheckCircle className="h-5 w-5 text-gray-500" />;
+        return <CheckCircle className="h-5 w-5 text-green-500" />;
       case 'clean-required':
         return <Brush className="h-5 w-5 text-orange-500" />;
       default:
@@ -80,7 +80,8 @@ export function CurrentJobs({ jobs, onStatusUpdate }: CurrentJobsProps) {
                     <div className="flex items-center">
                       {getStatusIcon(job.status)}
                       <span className="ml-2 text-sm text-gray-500">
-                        {job.status.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
+                        {job.status === 'invoiced' ? 'Completed' : 
+                          job.status.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
                       </span>
                     </div>
                   </td>
@@ -95,7 +96,7 @@ export function CurrentJobs({ jobs, onStatusUpdate }: CurrentJobsProps) {
                       <option value="in-progress">In Progress</option>
                       <option value="clean-required">Clean Required</option>
                       <option value="to-invoice">To Invoice</option>
-                      <option value="invoiced">Invoiced</option>
+                      <option value="invoiced">Completed</option>
                     </select>
                   </td>
                 </tr>
