@@ -9,12 +9,31 @@ import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { TeamCalendar } from '@/components/team/TeamCalendar';
 import { cn } from "@/lib/utils";
+import { Search, X } from 'lucide-react';
 
 export default function TeamNew() {
   const [teamName, setTeamName] = useState("");
   const [teamColor, setTeamColor] = useState("purple");
   const [date, setDate] = useState<Date | undefined>(new Date());
+  const [searchTerm, setSearchTerm] = useState("");
+  const [teamLeader] = useState({
+    name: "Paul Finch",
+    role: "Team Leader",
+    email: "paul.finch@example.com",
+    avatar: "https://randomuser.me/api/portraits/men/72.jpg"
+  });
   const navigate = useNavigate();
+
+  // Sample team members for search functionality
+  const [availableMembers] = useState([
+    { id: 1, name: "John Smith", role: "Technician", email: "john.smith@example.com" },
+    { id: 2, name: "Sarah Johnson", role: "Electrician", email: "sarah.johnson@example.com" },
+    { id: 3, name: "Mike Williams", role: "Plumber", email: "mike.williams@example.com" },
+    { id: 4, name: "Lisa Brown", role: "HVAC Specialist", email: "lisa.brown@example.com" },
+    { id: 5, name: "Robert Davis", role: "Carpenter", email: "robert.davis@example.com" },
+  ]);
+
+  const [selectedMembers, setSelectedMembers] = useState<typeof availableMembers>([]);
 
   const availableColors = [
     { name: "Purple", value: "purple", bgClass: "bg-purple-500", borderClass: "border-purple-700", hoverClass: "bg-purple-600" },
@@ -46,6 +65,23 @@ export default function TeamNew() {
     // Navigate back to calendar
     navigate("/calendar");
   };
+
+  const handleAddMember = (member: typeof availableMembers[0]) => {
+    if (!selectedMembers.some(m => m.id === member.id)) {
+      setSelectedMembers([...selectedMembers, member]);
+      toast.success(`${member.name} has been added to the team`);
+      setSearchTerm("");
+    }
+  };
+
+  const handleRemoveMember = (id: number) => {
+    setSelectedMembers(selectedMembers.filter(member => member.id !== id));
+  };
+
+  const filteredMembers = availableMembers.filter(member => 
+    member.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
+    !selectedMembers.some(m => m.id === member.id)
+  );
 
   // Find the selected color object
   const selectedColor = availableColors.find(color => color.value === teamColor) || availableColors[0];
@@ -137,13 +173,96 @@ export default function TeamNew() {
           <CardHeader>
             <CardTitle>Team Members</CardTitle>
             <CardDescription>
-              You can add team members after creating the team
+              Add members to your team
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="flex flex-col space-y-2">
-              <div className="text-sm text-gray-500">
-                No team members yet. Create the team first to add members.
+            <div className="space-y-4">
+              {/* Team Leader Section */}
+              <div>
+                <h3 className="text-sm font-medium mb-2">Team Leader</h3>
+                <div className="flex items-center p-3 rounded-md border bg-gray-50">
+                  <div className="flex-shrink-0 mr-3">
+                    <img 
+                      src={teamLeader.avatar} 
+                      alt={teamLeader.name} 
+                      className="h-10 w-10 rounded-full"
+                    />
+                  </div>
+                  <div>
+                    <p className="font-medium">{teamLeader.name}</p>
+                    <p className="text-sm text-gray-500">{teamLeader.role}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Search for team members */}
+              <div className="space-y-2">
+                <Label htmlFor="search-members">Add Team Members</Label>
+                <div className="relative">
+                  <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
+                  <Input
+                    id="search-members"
+                    placeholder="Search for team members..." 
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-9"
+                  />
+                </div>
+                
+                {/* Search results */}
+                {searchTerm && (
+                  <div className="mt-1 border rounded-md divide-y max-h-48 overflow-y-auto">
+                    {filteredMembers.length > 0 ? (
+                      filteredMembers.map(member => (
+                        <div 
+                          key={member.id}
+                          className="p-2 hover:bg-gray-50 cursor-pointer flex items-center justify-between"
+                          onClick={() => handleAddMember(member)}
+                        >
+                          <div>
+                            <p className="font-medium">{member.name}</p>
+                            <p className="text-xs text-gray-500">{member.role}</p>
+                          </div>
+                          <Button size="sm" variant="ghost" className={selectedColor.bgClass + " text-white"}>
+                            Add
+                          </Button>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="p-2 text-center text-gray-500">No members found</div>
+                    )}
+                  </div>
+                )}
+              </div>
+              
+              {/* Selected team members */}
+              <div>
+                <h3 className="text-sm font-medium mb-2">Team Members</h3>
+                {selectedMembers.length > 0 ? (
+                  <div className="space-y-2">
+                    {selectedMembers.map(member => (
+                      <div key={member.id} className="flex items-center justify-between p-2 border rounded-md">
+                        <div>
+                          <p className="font-medium">{member.name}</p>
+                          <p className="text-xs text-gray-500">{member.role}</p>
+                        </div>
+                        <Button 
+                          size="sm" 
+                          variant="ghost" 
+                          onClick={() => handleRemoveMember(member.id)}
+                          className="text-gray-500 hover:text-red-500"
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-sm text-gray-500 p-2 border rounded-md bg-gray-50">
+                    No team members selected. Search to add members.
+                  </div>
+                )}
               </div>
             </div>
           </CardContent>
