@@ -38,9 +38,7 @@ const JobMap = ({ jobs }: JobMapProps) => {
       markerElement.innerHTML = `
         <div class="bg-white p-2 rounded-lg shadow-lg">
           <div class="flex items-center gap-2 font-semibold">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-blue-600">
-              <path d="M20 8h-4.7M20 12h-8M20 16h-4.7M2 8h2m0 0c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 8h2m-2 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0-4h8"/>
-            </svg>
+            <img src="/lovable-uploads/34bca7f1-d63b-45a0-b1ca-a562443686ad.png" alt="Trade Ease Logo" width="20" height="20" class="object-contain" />
             <span>${job.jobNumber || 'N/A'}</span>
           </div>
         </div>
