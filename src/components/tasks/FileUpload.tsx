@@ -25,11 +25,7 @@ export function FileUpload({ onFileUpload, label }: FileUploadProps) {
     e.preventDefault();
     setIsDragging(false);
     
-    const files = Array.from(e.dataTransfer.files).filter(file => 
-      file.type === 'application/pdf' || 
-      file.type === 'text/csv' ||
-      file.type.startsWith('image/')
-    );
+    const files = Array.from(e.dataTransfer.files);
 
     if (files.length > 0) {
       // Create a synthetic event to match the onChange interface
@@ -54,19 +50,20 @@ export function FileUpload({ onFileUpload, label }: FileUploadProps) {
       onDrop={handleDrop}
     >
       <div className={cn(
-        "flex items-center gap-2 p-2 border-2 border-dashed rounded-lg transition-colors duration-200",
+        "flex flex-col items-center gap-2 p-6 border-2 border-dashed rounded-lg transition-colors duration-200",
         isDragging ? "bg-gray-100 border-gray-400" : "hover:bg-gray-50 border-gray-200"
       )}>
-        <Upload className="h-4 w-4 text-gray-400" />
-        <span className="text-sm text-gray-600">
-          {isDragging ? "Drop files here..." : `${label} (PDF, CSV, or Images)`}
+        <Upload className="h-10 w-10 text-gray-400" />
+        <span className="text-sm text-center text-gray-600">
+          {isDragging ? "Drop files here..." : label}
         </span>
+        <span className="text-xs text-gray-500">Drag & drop or click to browse</span>
       </div>
       <input
         type="file"
         className="hidden"
         onChange={onFileUpload}
-        accept=".pdf,.csv,image/*"
+        accept=".pdf,.doc,.docx,.csv,.jpg,.jpeg,.png,.mp4,.mov"
         multiple
       />
     </label>
