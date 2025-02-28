@@ -1,6 +1,6 @@
 
 import { Button } from "@/components/ui/button";
-import { Clock, Loader2, DollarSign, CheckCircle } from "lucide-react";
+import { Clock, Loader2, DollarSign, CheckCircle, Brush } from "lucide-react";
 import { Job } from "@/types/job";
 import { useNavigate } from "react-router-dom";
 
@@ -22,6 +22,8 @@ export function CurrentJobs({ jobs, onStatusUpdate }: CurrentJobsProps) {
         return <DollarSign className="h-5 w-5 text-green-500" />;
       case 'invoiced':
         return <CheckCircle className="h-5 w-5 text-gray-500" />;
+      case 'clean-required':
+        return <Brush className="h-5 w-5 text-orange-500" />;
       default:
         return null;
     }
@@ -91,6 +93,7 @@ export function CurrentJobs({ jobs, onStatusUpdate }: CurrentJobsProps) {
                     >
                       <option value="ready">Ready to Go</option>
                       <option value="in-progress">In Progress</option>
+                      <option value="clean-required">Clean Required</option>
                       <option value="to-invoice">To Invoice</option>
                       <option value="invoiced">Invoiced</option>
                     </select>
