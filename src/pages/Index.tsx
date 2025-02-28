@@ -107,9 +107,21 @@ export default function Index() {
                       <Button 
                         size="sm" 
                         className="mt-2 w-full"
-                        onClick={() => navigate("/jobs")}
+                        onClick={() => {
+                          const selectedJobInfo = locations.find(l => 
+                            l.lat === selectedLocation?.lat && 
+                            l.lng === selectedLocation?.lng
+                          );
+                          if (selectedJobInfo) {
+                            // Navigate to the specific job's details page using its ID
+                            navigate(`/jobs/${selectedJobInfo.id}`);
+                          } else {
+                            // Fallback to the jobs list if no specific job is found
+                            navigate("/jobs");
+                          }
+                        }}
                       >
-                        View Jobs
+                        View Job Details
                       </Button>
                     </div>
                   </InfoWindow>
