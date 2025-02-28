@@ -177,7 +177,6 @@ export function DocumentUpload({
             
             // Ask if user wants to navigate to job details page
             toast({
-              title: "Would you like to view the job details?",
               description: `Files uploaded to job #${jobNumber}`,
               action: {
                 label: "View Job",
