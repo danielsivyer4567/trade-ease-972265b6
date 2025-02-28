@@ -153,17 +153,16 @@ export function AppSidebar() {
                   </span>
                 </Link>
               ))}
-              <Button 
-                variant="ghost" 
-                size="sm" 
+              <Link 
+                to="/team-new"
                 className={cn(
-                  "w-full flex items-center gap-2 p-2 text-gray-600 hover:text-gray-700 hover:bg-gray-50 text-sm mt-1",
+                  "flex items-center gap-2 p-2 rounded-lg hover:bg-gray-100 text-gray-600 hover:text-gray-700 text-sm mt-1",
                   isCollapsed && "hidden lg:hidden"
                 )}
               >
                 <Plus className="w-4 h-4 flex-shrink-0" />
                 <span>Add Team</span>
-              </Button>
+              </Link>
             </div>
           </nav>
         </div>

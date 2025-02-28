@@ -19,6 +19,7 @@ import Referrals from "@/pages/Referrals";
 import TeamRed from "@/pages/TeamRed";
 import TeamBlue from "@/pages/TeamBlue";
 import TeamGreen from "@/pages/TeamGreen";
+import TeamNew from "@/pages/TeamNew";
 import Tasks from "@/pages/Tasks";
 import Statistics from "@/pages/Statistics";
 import Settings from "@/pages/Settings";
@@ -49,6 +50,7 @@ function App() {
         <Route path="/team-red/*" element={<TeamRed />} />
         <Route path="/team-blue/*" element={<TeamBlue />} />
         <Route path="/team-green/*" element={<TeamGreen />} />
+        <Route path="/team-new/*" element={<TeamNew />} />
         <Route path="/tasks/*" element={<Tasks />} />
         <Route path="/statistics/*" element={<Statistics />} />
         <Route path="/settings" element={<Settings />} />
