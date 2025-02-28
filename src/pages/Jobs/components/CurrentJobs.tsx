@@ -19,7 +19,7 @@ export function CurrentJobs({ jobs, onStatusUpdate }: CurrentJobsProps) {
       case 'in-progress':
         return <Loader2 className="h-5 w-5 text-yellow-500" />;
       case 'to-invoice':
-        return <DollarSign className="h-5 w-5 text-green-500" />;
+        return <CheckCircle className="h-6 w-6 text-green-500" />;
       case 'invoiced':
         return <CheckCircle className="h-5 w-5 text-green-500" />;
       case 'clean-required':
