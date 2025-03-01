@@ -52,7 +52,7 @@ export function AppSidebar() {
     );
 
     return isCollapsed && !isMobile ? (
-      <Tooltip>
+      <Tooltip key={`tooltip-${path}`}>
         <TooltipTrigger asChild>
           {content}
         </TooltipTrigger>
