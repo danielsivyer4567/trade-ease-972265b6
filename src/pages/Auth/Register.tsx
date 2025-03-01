@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
@@ -37,7 +36,7 @@ const Register = () => {
   return <div className="flex flex-col md:flex-row min-h-screen items-center justify-center bg-gray-50 px-4 py-12 dark:bg-gray-900 sm:px-6 lg:px-8">
       <div className="hidden md:flex flex-col items-start justify-center h-full md:w-64 lg:w-96 space-y-8 mb-8 md:mb-0 md:mr-12">
         <div className="space-y-4 px-0 py-0 mx-0">
-          <h2 className="text-3xl font-bold tracking-tight text-primary mx-0 px-0 py-0 my-[38px]">More features</h2>
+          <h2 className="text-3xl font-bold tracking-tight text-primary mx-0 py-0 my-[29px] px-[3px] text-left">More features</h2>
           <h2 className="text-3xl font-bold tracking-tight text-primary mx-0 px-0 py-0 my-[103px]">More options</h2>
           <h2 className="text-3xl font-bold tracking-tight text-primary px-[3px]">More profits</h2>
         </div>
