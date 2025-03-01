@@ -91,13 +91,13 @@
 
   body {
     @apply bg-background text-foreground min-h-screen min-w-full;
-    background-image: url('https://images.unsplash.com/photo-1500673922987-e212871fec22?auto=format&fit=crop&q=80');
+    background-image: url('/lovable-uploads/34bca7f1-d63b-45a0-b1ca-a562443686ad.png');
     background-size: cover;
     background-position: center;
     background-attachment: fixed;
     background-repeat: no-repeat;
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
   }
 
   #root {
