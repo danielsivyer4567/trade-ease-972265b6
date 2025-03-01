@@ -269,7 +269,7 @@ export function NewTemplateForm() {
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="materials">Materials Order</Label>
+            <Label htmlFor="materials">Materials Ordered</Label>
             <Textarea 
               id="materials"
               value={materials} 
