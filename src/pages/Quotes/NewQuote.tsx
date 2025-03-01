@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AppLayout } from "@/components/ui/AppLayout";
@@ -11,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { QuoteTemplateSelector } from "./components/QuoteTemplateSelector";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Plus, Trash2, ChevronRight, ChevronLeft, Save, SendHorizontal } from "lucide-react";
+import { ArrowLeft, Plus, Trash2, ChevronRight, ChevronLeft, Save, SendHorizontal, Search } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
 export default function NewQuote() {
@@ -23,6 +22,25 @@ export default function NewQuote() {
   ]);
   
   const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
+  const [searchPriceList, setSearchPriceList] = useState("");
+  
+  const priceListItems = [
+    { id: "pl1", name: "Hourly Labor - Standard", category: "Labor", price: 85 },
+    { id: "pl2", name: "Hourly Labor - Premium", category: "Labor", price: 120 },
+    { id: "pl3", name: "Material - Pine Wood (per sqft)", category: "Materials", price: 3.50 },
+    { id: "pl4", name: "Material - Oak Wood (per sqft)", category: "Materials", price: 7.25 },
+    { id: "pl5", name: "Material - Tile (per sqft)", category: "Materials", price: 5.75 },
+    { id: "pl6", name: "Tool Rental - Basic Kit", category: "Equipment", price: 75 },
+    { id: "pl7", name: "Tool Rental - Premium Kit", category: "Equipment", price: 150 },
+    { id: "pl8", name: "Disposal Fee", category: "Services", price: 200 },
+    { id: "pl9", name: "Cleanup Service", category: "Services", price: 150 },
+    { id: "pl10", name: "Inspection Fee", category: "Services", price: 125 },
+  ];
+  
+  const filteredPriceItems = priceListItems.filter(item => 
+    item.name.toLowerCase().includes(searchPriceList.toLowerCase()) ||
+    item.category.toLowerCase().includes(searchPriceList.toLowerCase())
+  );
   
   const handleBack = () => {
     navigate("/quotes");
@@ -59,12 +77,29 @@ export default function NewQuote() {
       description: `Template ${templateId} has been applied to your quote`,
     });
     
-    // In a real app, this would populate the quote with template data
     setQuoteItems([
       { description: "Labor - Standard Rate", quantity: 8, rate: 85, total: 680 },
       { description: "Materials - Premium Grade", quantity: 1, rate: 450, total: 450 },
       { description: "Equipment Rental", quantity: 1, rate: 200, total: 200 }
     ]);
+  };
+  
+  const handleAddPriceListItem = (item: typeof priceListItems[0]) => {
+    const newItem = {
+      description: item.name,
+      quantity: 1,
+      rate: item.price,
+      total: item.price
+    };
+    
+    setQuoteItems([...quoteItems, newItem]);
+    
+    toast({
+      title: "Item Added",
+      description: `${item.name} has been added to your quote`,
+    });
+    
+    setActiveTab("items");
   };
   
   const handleSaveQuote = () => {
@@ -96,9 +131,10 @@ export default function NewQuote() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="md:col-span-2">
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList className="grid grid-cols-4 mb-6">
+              <TabsList className="grid grid-cols-5 mb-6">
                 <TabsTrigger value="details">Customer Details</TabsTrigger>
                 <TabsTrigger value="items">Quote Items</TabsTrigger>
+                <TabsTrigger value="price-list">Price List</TabsTrigger>
                 <TabsTrigger value="terms">Terms & Notes</TabsTrigger>
                 <TabsTrigger value="preview">Preview</TabsTrigger>
               </TabsList>
@@ -245,6 +281,78 @@ export default function NewQuote() {
                     
                     <div className="flex justify-between mt-6">
                       <Button variant="outline" onClick={() => setActiveTab("details")}>
+                        <ChevronLeft className="mr-2 h-4 w-4" />
+                        Back
+                      </Button>
+                      <Button onClick={() => setActiveTab("terms")}>
+                        Next: Terms & Notes
+                        <ChevronRight className="ml-2 h-4 w-4" />
+                      </Button>
+                    </div>
+                  </TabsContent>
+                  
+                  <TabsContent value="price-list" className="mt-0">
+                    <div className="space-y-6">
+                      <div>
+                        <Label htmlFor="price-list-search">Search Price List</Label>
+                        <div className="relative mt-1">
+                          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 h-4 w-4" />
+                          <Input 
+                            id="price-list-search" 
+                            placeholder="Search by name or category..." 
+                            className="pl-10"
+                            value={searchPriceList}
+                            onChange={(e) => setSearchPriceList(e.target.value)}
+                          />
+                        </div>
+                      </div>
+                      
+                      <div className="border rounded-md overflow-hidden">
+                        <table className="w-full text-sm">
+                          <thead>
+                            <tr className="bg-gray-50 border-b">
+                              <th className="text-left py-2 px-4 font-medium">Item</th>
+                              <th className="text-left py-2 px-4 font-medium">Category</th>
+                              <th className="text-right py-2 px-4 font-medium">Price</th>
+                              <th className="text-center py-2 px-4 font-medium w-24">Action</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {filteredPriceItems.length > 0 ? (
+                              filteredPriceItems.map((item) => (
+                                <tr key={item.id} className="border-b hover:bg-gray-50">
+                                  <td className="py-3 px-4">{item.name}</td>
+                                  <td className="py-3 px-4">
+                                    <Badge variant="secondary" className="font-normal">
+                                      {item.category}
+                                    </Badge>
+                                  </td>
+                                  <td className="py-3 px-4 text-right">${item.price.toFixed(2)}</td>
+                                  <td className="py-3 px-4 text-center">
+                                    <Button 
+                                      size="sm" 
+                                      onClick={() => handleAddPriceListItem(item)}
+                                    >
+                                      <Plus className="h-4 w-4 mr-1" />
+                                      Add
+                                    </Button>
+                                  </td>
+                                </tr>
+                              ))
+                            ) : (
+                              <tr>
+                                <td colSpan={4} className="py-8 text-center text-gray-500">
+                                  No items found matching your search criteria
+                                </td>
+                              </tr>
+                            )}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                    
+                    <div className="flex justify-between mt-6">
+                      <Button variant="outline" onClick={() => setActiveTab("items")}>
                         <ChevronLeft className="mr-2 h-4 w-4" />
                         Back
                       </Button>
