@@ -1,4 +1,3 @@
-
 import { AppLayout } from "@/components/ui/AppLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Settings, DollarSign, Receipt, Clock, Users, Shield, FileText, Calendar, List, CreditCard, User, Bot, Briefcase, Network, Mail, FileJson, Building, Share, Zap, Search, Link2 } from "lucide-react";
@@ -93,7 +92,7 @@ const settingsSections = [{
   title: "Email",
   icon: Mail,
   description: "Email settings and templates",
-  path: "/settings/email"
+  path: "/email"
 }, {
   title: "Document Styles",
   icon: FileJson,
