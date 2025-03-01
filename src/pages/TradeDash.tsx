@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { AppLayout } from "@/components/ui/AppLayout";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -16,7 +16,8 @@ import {
   CheckCircle,
   AlertCircle,
   TrendingUp,
-  Star
+  Star,
+  Award
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -25,8 +26,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
-// Comprehensive list of trade types
 const TRADE_TYPES = [
   "All Trades",
   "Building & Construction",
@@ -61,7 +63,6 @@ const TRADE_TYPES = [
   "Paving"
 ];
 
-// Mock lead data
 const mockLeads = [
   {
     id: 1,
@@ -130,7 +131,6 @@ const mockLeads = [
   }
 ];
 
-// Mock ranking data
 const mockRankings = [
   { id: 1, tradeName: "Sydney Plumbing Pro", category: "Plumbing", area: "Sydney CBD", responseRate: 95, jobsCompleted: 142, rating: 4.9 },
   { id: 2, tradeName: "Elite Electricians", category: "Electrical", area: "North Sydney", responseRate: 92, jobsCompleted: 118, rating: 4.8 },
@@ -141,13 +141,14 @@ const mockRankings = [
   { id: 7, tradeName: "Perfect Tilers", category: "Tiling", area: "Sutherland Shire", responseRate: 84, jobsCompleted: 51, rating: 4.3 },
 ];
 
-// Mock user stats
 const userStats = {
   totalJobs: 87,
   fiveStarReviews: 72,
   overallRating: 4.8,
-  ranking: 3, // User is ranked 3rd
-  responseRate: 94
+  ranking: 3,
+  responseRate: 94,
+  isTopTen: true,
+  freeLeadsAvailable: 3
 };
 
 export default function TradeDash() {
@@ -167,18 +168,33 @@ export default function TradeDash() {
   ]);
   
   const [activeTab, setActiveTab] = useState("marketplace");
+  const [freeLeads, setFreeLeads] = useState(userStats.freeLeadsAvailable);
 
   const availableLeads = mockLeads.filter(lead => lead.status === "available").length;
   const purchasedLeads = mockLeads.filter(lead => lead.status === "purchased").length;
   
-  // Filter leads
+  useEffect(() => {
+    const fetchFreeLeads = async () => {
+      // This would be replaced with actual API call in production
+      // const { data, error } = await supabase
+      //   .from('free_leads')
+      //   .select('leads_available')
+      //   .eq('trade_id', 'current-user-id')
+      //   .single();
+      
+      // if (data) {
+      //   setFreeLeads(data.leads_available);
+      // }
+    };
+    
+    fetchFreeLeads();
+  }, []);
+  
   const filteredLeads = mockLeads.filter(lead => {
     if (filters.postcode && !lead.postcode.includes(filters.postcode)) return false;
     if (filters.minSize && lead.size < parseInt(filters.minSize)) return false;
     if (filters.leadType === "available" && lead.status !== "available") return false;
     if (filters.leadType === "purchased" && lead.status !== "purchased") return false;
-    // We're not filtering by trade type yet since our mock data doesn't have that field
-    // In a real app, you would add: if (filters.tradeType !== "All Trades" && lead.tradeType !== filters.tradeType) return false;
     return true;
   });
 
@@ -194,8 +210,28 @@ export default function TradeDash() {
   };
 
   const buyLead = (leadId) => {
-    // In a real app, this would call an API to purchase the lead
     alert(`Lead #${leadId} purchased successfully! You can now contact the customer.`);
+  };
+  
+  const claimFreeLead = async (leadId) => {
+    if (freeLeads <= 0) {
+      toast.error("You have no free leads available");
+      return;
+    }
+    
+    // In a real app, this would call Supabase to update free leads count
+    // const { error } = await supabase
+    //   .from('free_leads')
+    //   .update({ leads_available: freeLeads - 1 })
+    //   .eq('trade_id', 'current-user-id');
+    
+    // if (error) {
+    //   toast.error("Failed to claim free lead");
+    //   return;
+    // }
+    
+    setFreeLeads(prev => prev - 1);
+    toast.success(`Lead #${leadId} claimed for free! You have ${freeLeads - 1} free leads remaining.`);
   };
 
   return (
@@ -204,7 +240,6 @@ export default function TradeDash() {
         <h1 className="text-4xl font-bold text-gray-900">Easy Lead Dashboard</h1>
         
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          {/* Dashboard stats */}
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
@@ -266,7 +301,6 @@ export default function TradeDash() {
           </Card>
         </div>
         
-        {/* User rating and review stats */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -313,7 +347,28 @@ export default function TradeDash() {
           </Card>
         </div>
         
-        {/* Main content with tabs */}
+        {userStats.isTopTen && (
+          <Card className="bg-gradient-to-r from-amber-50 to-yellow-100 border-yellow-200">
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <div className="flex items-center gap-2">
+                <Award className="h-5 w-5 text-yellow-500" />
+                <CardTitle className="text-base font-medium text-yellow-800">
+                  Top 10 Trade Reward
+                </CardTitle>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-yellow-700">
+                Congratulations! As one of our top 10 rated trades, you receive <strong>{freeLeads} free leads</strong> each week.
+              </p>
+              <div className="flex items-center gap-2 mt-2">
+                <Progress value={(freeLeads / 3) * 100} className="h-2 flex-1 bg-yellow-200" />
+                <span className="text-sm font-medium text-yellow-700">{freeLeads}/3 remaining</span>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+        
         <Tabs defaultValue="marketplace" className="w-full" onValueChange={setActiveTab}>
           <div className="flex items-center justify-between mb-4">
             <TabsList>
@@ -431,7 +486,6 @@ export default function TradeDash() {
               </Card>
             )}
             
-            {/* Leads display */}
             <div className="space-y-4">
               {filteredLeads.map((lead) => (
                 <Card key={lead.id} className={`border-l-4 ${lead.status === 'available' ? 'border-l-blue-500' : 'border-l-green-500'}`}>
@@ -486,12 +540,24 @@ export default function TradeDash() {
                       )}
                     </div>
                     {lead.status === 'available' && (
-                      <Button 
-                        onClick={() => buyLead(lead.id)}
-                        className="bg-green-600 hover:bg-green-700"
-                      >
-                        Buy Lead (5 credits)
-                      </Button>
+                      <div className="flex gap-2">
+                        {userStats.isTopTen && freeLeads > 0 && (
+                          <Button 
+                            onClick={() => claimFreeLead(lead.id)}
+                            variant="outline"
+                            className="flex items-center gap-1 bg-yellow-50 text-yellow-700 border-yellow-300 hover:bg-yellow-100"
+                          >
+                            <Award className="h-4 w-4" />
+                            Claim Free Lead
+                          </Button>
+                        )}
+                        <Button 
+                          onClick={() => buyLead(lead.id)}
+                          className="bg-green-600 hover:bg-green-700"
+                        >
+                          Buy Lead (5 credits)
+                        </Button>
+                      </div>
                     )}
                     {lead.status === 'purchased' && (
                       <Button variant="outline">
@@ -523,7 +589,14 @@ export default function TradeDash() {
                   
                   {mockRankings.map((ranking, index) => (
                     <div key={ranking.id} className="grid grid-cols-7 gap-4 text-sm py-2 border-b border-gray-100">
-                      <div className="font-bold text-lg flex items-center">{index + 1}</div>
+                      <div className="font-bold text-lg flex items-center">
+                        {index + 1}
+                        {index < 10 && (
+                          <span className="ml-1">
+                            <Award className="h-4 w-4 text-yellow-500" />
+                          </span>
+                        )}
+                      </div>
                       <div className="col-span-2 font-medium">{ranking.tradeName}</div>
                       <div>{ranking.category}</div>
                       <div>
@@ -543,9 +616,15 @@ export default function TradeDash() {
               </CardContent>
               <CardFooter className="flex justify-between">
                 <span className="text-sm text-gray-500">Last updated: Today, 9:45 AM</span>
-                <Button variant="outline" className="text-sm">
-                  See My Ranking
-                </Button>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-yellow-700">
+                    <Award className="h-4 w-4 text-yellow-500 inline mr-1" />
+                    Top 10 trades receive 3 free leads weekly
+                  </span>
+                  <Button variant="outline" className="text-sm">
+                    See My Ranking
+                  </Button>
+                </div>
               </CardFooter>
             </Card>
             
