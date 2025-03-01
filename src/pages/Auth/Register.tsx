@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
+
 const Register = () => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -15,6 +16,7 @@ const Register = () => {
   const {
     register
   } = useAuth();
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (password !== confirmPassword) {
@@ -33,7 +35,9 @@ const Register = () => {
       setIsLoading(false);
     }
   };
-  return <div className="flex flex-col md:flex-row min-h-screen items-center justify-center bg-gray-50 px-4 py-12 dark:bg-gray-900 sm:px-6 lg:px-8">
+
+  return (
+    <div className="flex flex-col md:flex-row min-h-screen items-center justify-center bg-gray-50 px-4 py-12 dark:bg-gray-900 sm:px-6 lg:px-8">
       <div className="hidden md:flex flex-col items-start justify-center h-full md:w-64 lg:w-96 space-y-8 mb-8 md:mb-0 md:mr-12">
         <div className="space-y-4 px-0 py-0 mx-0">
           <h2 className="text-3xl font-bold tracking-tight text-primary mx-0 py-0 my-[29px] px-[3px] text-left">More features</h2>
@@ -42,9 +46,9 @@ const Register = () => {
         </div>
       </div>
       
-      <div className="flex flex-col items-center my-[16px] px-0 mx-[240px] py-[16px]">
+      <div className="flex flex-col items-center max-w-md mx-auto">
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-extrabold tracking-tight text-primary md:text-5xl lg:text-6xl mx-[237px] my-0 px-[43px] py-0 text-center">
+          <h1 className="text-4xl font-extrabold tracking-tight text-primary md:text-5xl lg:text-6xl">
             TradeEase
           </h1>
           <p className="mt-2 text-xl text-gray-600 dark:text-gray-400">
@@ -52,13 +56,13 @@ const Register = () => {
           </p>
         </div>
         
-        <Card className="w-full max-w-md">
+        <Card className="w-full">
           <CardHeader className="space-y-1">
             <CardTitle className="text-center text-2xl font-bold">Create an account</CardTitle>
             <CardDescription className="text-center">Enter your information to create an account</CardDescription>
           </CardHeader>
           <form onSubmit={handleSubmit}>
-            <CardContent className="space-y-4 px-[15px] py-[25px] mx-[5px] my-[4px]">
+            <CardContent className="space-y-4">
               <div className="space-y-2">
                 <label htmlFor="name" className="text-sm font-medium">Full Name</label>
                 <Input id="name" type="text" value={name} onChange={e => setName(e.target.value)} placeholder="John Doe" required />
@@ -90,6 +94,8 @@ const Register = () => {
           </form>
         </Card>
       </div>
-    </div>;
+    </div>
+  );
 };
+
 export default Register;
