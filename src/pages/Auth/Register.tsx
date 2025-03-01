@@ -5,7 +5,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
-
 const Register = () => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -13,18 +12,16 @@ const Register = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
-  const { register } = useAuth();
-
+  const {
+    register
+  } = useAuth();
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
     if (password !== confirmPassword) {
       toast.error('Passwords do not match');
       return;
     }
-
     setIsLoading(true);
-
     try {
       await register(email, password, name);
       toast.success('Registration successful');
@@ -36,15 +33,13 @@ const Register = () => {
       setIsLoading(false);
     }
   };
-
-  return (
-    <div className="flex flex-col md:flex-row min-h-screen items-center justify-center bg-gray-50 px-4 py-12 dark:bg-gray-900 sm:px-6 lg:px-8">
+  return <div className="flex flex-col md:flex-row min-h-screen items-center justify-center bg-gray-50 px-4 py-12 dark:bg-gray-900 sm:px-6 lg:px-8">
       {/* Left side text display - visible on medium and larger screens */}
       <div className="hidden md:flex flex-col items-start justify-center h-full md:w-64 lg:w-96 space-y-8 mb-8 md:mb-0 md:mr-12">
         <div className="space-y-4">
           <h2 className="text-3xl font-bold tracking-tight text-primary">More features</h2>
           <h2 className="text-3xl font-bold tracking-tight text-primary">More options</h2>
-          <h2 className="text-3xl font-bold tracking-tight text-primary">More profits</h2>
+          <h2 className="text-3xl font-bold tracking-tight text-primary px-[3px]">More profits</h2>
         </div>
       </div>
       
@@ -68,47 +63,19 @@ const Register = () => {
             <CardContent className="space-y-4">
               <div className="space-y-2">
                 <label htmlFor="name" className="text-sm font-medium">Full Name</label>
-                <Input
-                  id="name"
-                  type="text"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="John Doe"
-                  required
-                />
+                <Input id="name" type="text" value={name} onChange={e => setName(e.target.value)} placeholder="John Doe" required />
               </div>
               <div className="space-y-2">
                 <label htmlFor="email" className="text-sm font-medium">Email</label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="name@example.com"
-                  required
-                />
+                <Input id="email" type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="name@example.com" required />
               </div>
               <div className="space-y-2">
                 <label htmlFor="password" className="text-sm font-medium">Password</label>
-                <Input
-                  id="password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
-                  required
-                />
+                <Input id="password" type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••••" required />
               </div>
               <div className="space-y-2">
                 <label htmlFor="confirmPassword" className="text-sm font-medium">Confirm Password</label>
-                <Input
-                  id="confirmPassword"
-                  type="password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  placeholder="••••••••"
-                  required
-                />
+                <Input id="confirmPassword" type="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} placeholder="••••••••" required />
               </div>
             </CardContent>
             <CardFooter className="flex flex-col space-y-4">
@@ -125,8 +92,6 @@ const Register = () => {
           </form>
         </Card>
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default Register;
