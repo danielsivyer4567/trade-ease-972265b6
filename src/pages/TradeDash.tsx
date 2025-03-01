@@ -1,15 +1,12 @@
-
 import { AppLayout } from "@/components/ui/AppLayout";
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { ArrowUpRight, Hammer, DollarSign, Users, Clock, Building } from "lucide-react";
-
 export default function TradeDash() {
-  return (
-    <AppLayout>
+  return <AppLayout>
       <div className="p-6">
         <div className="mb-6">
-          <h1 className="text-2xl font-bold">Trade Performance Dashboard</h1>
+          <h1 className="text-2xl font-bold">Easy lead Performance Dashboard</h1>
           <p className="text-muted-foreground">Monitor performance metrics across all trades</p>
         </div>
 
@@ -207,6 +204,5 @@ export default function TradeDash() {
           </div>
         </Card>
       </div>
-    </AppLayout>
-  );
+    </AppLayout>;
 }
