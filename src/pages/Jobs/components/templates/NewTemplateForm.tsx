@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -18,6 +17,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Save } from "lucide-react";
 import type { JobTemplate } from "@/types/job";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export function NewTemplateForm() {
   const { toast } = useToast();
@@ -29,6 +29,12 @@ export function NewTemplateForm() {
   const [price, setPrice] = useState("0");
   const [materials, setMaterials] = useState("");
   const [images, setImages] = useState<string[]>([]);
+
+  const [squareMeterRate, setSquareMeterRate] = useState("45");
+  const [linearMeterRate, setLinearMeterRate] = useState("35");
+  const [hourlyRate, setHourlyRate] = useState("85");
+  const [materialsMarkup, setMaterialsMarkup] = useState("30");
+  const [rateType, setRateType] = useState("hourly");
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
@@ -78,10 +84,16 @@ export function NewTemplateForm() {
       price: parseFloat(price) || 0,
       materials: materials.split("\n").filter(item => item.trim()),
       category,
-      images
+      images,
+      rateType,
+      rates: {
+        hourly: parseFloat(hourlyRate) || 0,
+        squareMeter: parseFloat(squareMeterRate) || 0,
+        linearMeter: parseFloat(linearMeterRate) || 0,
+        materialsMarkup: parseFloat(materialsMarkup) || 0,
+      }
     };
 
-    // In a real app, save to database here
     console.log("Saving template:", template);
     
     localStorage.setItem('newTemplate', JSON.stringify(template));
@@ -135,18 +147,94 @@ export function NewTemplateForm() {
             </Select>
           </div>
           
+          <div className="space-y-4">
+            <Label>Rate Calculation Method</Label>
+            <Tabs defaultValue={rateType} onValueChange={setRateType}>
+              <TabsList className="grid w-full grid-cols-3">
+                <TabsTrigger value="hourly">Hourly</TabsTrigger>
+                <TabsTrigger value="squareMeter">Square Meter</TabsTrigger>
+                <TabsTrigger value="linearMeter">Linear Meter</TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="hourly" className="space-y-4 mt-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="hourlyRate">Hourly Rate ($)</Label>
+                    <Input 
+                      id="hourlyRate"
+                      type="number" 
+                      min="0" 
+                      value={hourlyRate} 
+                      onChange={e => setHourlyRate(e.target.value)} 
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="duration">Estimated Duration (hours)</Label>
+                    <Input 
+                      id="duration"
+                      type="number" 
+                      min="0" 
+                      step="0.5" 
+                      value={estimatedDuration} 
+                      onChange={e => setEstimatedDuration(e.target.value)} 
+                    />
+                  </div>
+                </div>
+              </TabsContent>
+              
+              <TabsContent value="squareMeter" className="space-y-4 mt-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="squareMeterRate">Rate per m² ($)</Label>
+                    <Input 
+                      id="squareMeterRate"
+                      type="number" 
+                      min="0" 
+                      value={squareMeterRate} 
+                      onChange={e => setSquareMeterRate(e.target.value)} 
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="area">Estimated Area (m²)</Label>
+                    <Input 
+                      id="area"
+                      type="number" 
+                      min="0" 
+                      value={estimatedDuration} 
+                      onChange={e => setEstimatedDuration(e.target.value)} 
+                    />
+                  </div>
+                </div>
+              </TabsContent>
+              
+              <TabsContent value="linearMeter" className="space-y-4 mt-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="linearMeterRate">Rate per Linear Meter ($)</Label>
+                    <Input 
+                      id="linearMeterRate"
+                      type="number" 
+                      min="0" 
+                      value={linearMeterRate} 
+                      onChange={e => setLinearMeterRate(e.target.value)} 
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="length">Estimated Length (m)</Label>
+                    <Input 
+                      id="length"
+                      type="number" 
+                      min="0" 
+                      value={estimatedDuration} 
+                      onChange={e => setEstimatedDuration(e.target.value)} 
+                    />
+                  </div>
+                </div>
+              </TabsContent>
+            </Tabs>
+          </div>
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="duration">Estimated Duration (hours)</Label>
-              <Input 
-                id="duration"
-                type="number" 
-                min="0" 
-                step="0.5" 
-                value={estimatedDuration} 
-                onChange={e => setEstimatedDuration(e.target.value)} 
-              />
-            </div>
             <div className="space-y-2">
               <Label htmlFor="price">Price (estimate)</Label>
               <Input 
@@ -155,6 +243,16 @@ export function NewTemplateForm() {
                 min="0" 
                 value={price} 
                 onChange={e => setPrice(e.target.value)} 
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="materialsMarkup">Materials Markup (%)</Label>
+              <Input 
+                id="materialsMarkup"
+                type="number" 
+                min="0" 
+                value={materialsMarkup} 
+                onChange={e => setMaterialsMarkup(e.target.value)} 
               />
             </div>
           </div>

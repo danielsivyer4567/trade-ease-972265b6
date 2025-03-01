@@ -24,4 +24,11 @@ export interface JobTemplate {
   materials?: string[];
   category?: string;
   images?: string[];
+  rateType?: 'hourly' | 'squareMeter' | 'linearMeter';
+  rates?: {
+    hourly: number;
+    squareMeter: number;
+    linearMeter: number;
+    materialsMarkup: number;
+  };
 }
