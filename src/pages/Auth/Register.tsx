@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
+
 const Register = () => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -15,6 +16,7 @@ const Register = () => {
   const {
     register
   } = useAuth();
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (password !== confirmPassword) {
@@ -33,8 +35,8 @@ const Register = () => {
       setIsLoading(false);
     }
   };
+
   return <div className="flex flex-col md:flex-row min-h-screen items-center justify-center bg-gray-50 px-4 py-12 dark:bg-gray-900 sm:px-6 lg:px-8">
-      {/* Left side text display - visible on medium and larger screens */}
       <div className="hidden md:flex flex-col items-start justify-center h-full md:w-64 lg:w-96 space-y-8 mb-8 md:mb-0 md:mr-12">
         <div className="space-y-4 px-0 py-0 mx-0">
           <h2 className="text-3xl font-bold tracking-tight text-primary">More features</h2>
@@ -43,8 +45,7 @@ const Register = () => {
         </div>
       </div>
       
-      <div className="flex flex-col items-center px-[8px] my-[62px] py-[2px] mx-[240px]">
-        {/* TradeEase Header */}
+      <div className="flex flex-col items-center px-[8px] py-[2px] mx-auto">
         <div className="text-center mb-8">
           <h1 className="text-4xl font-extrabold tracking-tight text-primary md:text-5xl lg:text-6xl">
             TradeEase
@@ -94,4 +95,5 @@ const Register = () => {
       </div>
     </div>;
 };
+
 export default Register;
