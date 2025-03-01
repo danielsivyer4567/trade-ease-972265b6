@@ -91,9 +91,31 @@
 
   body {
     @apply bg-background text-foreground min-h-screen min-w-full;
+    background-image: url('https://images.unsplash.com/photo-1500673922987-e212871fec22?auto=format&fit=crop&q=80');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    background-repeat: no-repeat;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
   }
 
   #root {
     @apply min-h-screen min-w-full;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
   }
 }
+
+/* Add glassmorphism utility classes */
+@layer utilities {
+  .glass-effect {
+    @apply bg-white/20 backdrop-blur-md border border-white/30 shadow-md;
+  }
+  
+  .glass-card {
+    @apply bg-white/40 backdrop-blur-sm border border-white/30 shadow-lg;
+  }
+}
+
+/* Remove or update the App.css imports since we've incorporated those styles here */
