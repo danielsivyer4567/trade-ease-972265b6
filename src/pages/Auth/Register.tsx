@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
@@ -38,14 +37,14 @@ const Register = () => {
       <div className="hidden md:flex flex-col items-start justify-center h-full md:w-64 lg:w-96 space-y-8 mb-8 md:mb-0 md:mr-12">
         <div className="space-y-4 px-0 py-0 mx-0">
           <h2 className="text-3xl font-bold tracking-tight text-primary mx-0 py-0 my-[29px] px-[3px] text-left">More features</h2>
-          <h2 className="text-3xl font-bold tracking-tight text-primary mx-0 px-0 py-0 my-[103px]">More options</h2>
-          <h2 className="text-3xl font-bold tracking-tight text-primary px-[3px]">More profits</h2>
+          <h2 className="text-3xl font-bold tracking-tight text-primary mx-0 px-0 py-0 my-[118px]">More options</h2>
+          <h2 className="text-3xl font-bold tracking-tight text-primary px-[3px] my-[61px]">More profits</h2>
         </div>
       </div>
       
       <div className="flex flex-col items-center mx-auto py-[43px] px-[8px]">
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-extrabold tracking-tight text-primary md:text-5xl lg:text-6xl">
+          <h1 className="text-4xl font-extrabold tracking-tight text-primary md:text-5xl lg:text-6xl mx-[237px] my-0 px-[43px] py-0 text-center">
             TradeEase
           </h1>
           <p className="mt-2 text-xl text-gray-600 dark:text-gray-400">
