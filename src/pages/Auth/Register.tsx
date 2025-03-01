@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
@@ -42,7 +43,7 @@ const Register = () => {
         </div>
       </div>
       
-      <div className="flex flex-col items-center py-[43px] px-[8px] mx-[60px] my-0">
+      <div className="flex flex-col items-center mx-auto py-[43px] px-[8px]">
         <div className="text-center mb-8">
           <h1 className="text-4xl font-extrabold tracking-tight text-primary md:text-5xl lg:text-6xl">
             TradeEase
