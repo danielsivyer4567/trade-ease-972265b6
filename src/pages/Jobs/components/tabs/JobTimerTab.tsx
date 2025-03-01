@@ -86,7 +86,7 @@ export const JobTimerTab = ({
                 <div key={index} className="flex items-center gap-2 text-sm text-gray-600">
                   <MapPin className="w-4 h-4" />
                   <span>
-                    {new Date(entry.timestamp).toLocaleTimeString()}: {entry.coords[1].toFixed(6)}, {entry.coords[0].toFixed(6)}
+                    {new Date(entry.timestamp).toLocaleTimeString()}: {entry.coords[0].toFixed(6)}, {entry.coords[1].toFixed(6)}
                   </span>
                 </div>
               ))}
