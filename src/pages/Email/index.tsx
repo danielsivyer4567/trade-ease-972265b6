@@ -1,4 +1,3 @@
-
 import { AppLayout } from "@/components/ui/AppLayout";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -145,7 +144,7 @@ export default function Email() {
                 <Input 
                   id="forwarding-email" 
                   type="email" 
-                  placeholder="your@email.com" 
+                  placeholder="your@tradeease.com.au" 
                   value={forwardingEmail}
                   onChange={(e) => setForwardingEmail(e.target.value)}
                 />

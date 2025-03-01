@@ -229,7 +229,7 @@ export default function Notifications() {
                   <Input 
                     id="forwarding-email" 
                     type="email" 
-                    placeholder="your@email.com" 
+                    placeholder="your@tradeease.com.au" 
                     value={forwardingEmail}
                     onChange={(e) => setForwardingEmail(e.target.value)}
                   />
@@ -272,7 +272,7 @@ export default function Notifications() {
                   <Input 
                     id="enquiry-email" 
                     type="email" 
-                    placeholder="your@email.com" 
+                    placeholder="your@tradeease.com.au" 
                     value={enquiryEmail}
                     onChange={(e) => setEnquiryEmail(e.target.value)}
                   />
