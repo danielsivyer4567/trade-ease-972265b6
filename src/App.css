@@ -1,0 +1,10 @@
+
+/* Base application styles */
+.app-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Any additional app-specific styling can be added here */
+/* Note: Most styling is handled by Tailwind CSS in index.css */
