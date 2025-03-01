@@ -12,7 +12,7 @@ interface AppLayoutProps {
 export function AppLayout({ children, className }: AppLayoutProps) {
   return (
     <SidebarProvider defaultOpen={!window.matchMedia('(max-width: 1024px)').matches}>
-      <div className="min-h-screen min-w-full flex bg-transparent">
+      <div className="min-h-screen min-w-full flex bg-background">
         <AppSidebar />
         <main className={cn(
           "flex-1 p-4 md:p-6 overflow-auto transition-[margin] duration-300 ease-in-out",

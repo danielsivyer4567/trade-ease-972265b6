@@ -91,37 +91,9 @@
 
   body {
     @apply bg-background text-foreground min-h-screen min-w-full;
-    background-image: url('/lovable-uploads/147b0371-94bb-403e-a449-f6fc081c4d6c.png');
-    background-size: cover;
-    background-position: center;
-    background-attachment: fixed;
-    position: relative;
-  }
-
-  body::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: hsla(var(--background) / 0.7);
-    backdrop-filter: blur(15px);
-    z-index: -1;
   }
 
   #root {
-    @apply min-h-screen min-w-full relative z-0;
-  }
-}
-
-/* Add elegant card styling */
-@layer components {
-  .elegant-card {
-    @apply bg-white/60 backdrop-blur-md border border-white/20 rounded-lg shadow-lg;
-  }
-  
-  .elegant-sidebar {
-    @apply backdrop-blur-lg bg-white/80 border-r border-white/20 shadow-lg;
+    @apply min-h-screen min-w-full;
   }
 }

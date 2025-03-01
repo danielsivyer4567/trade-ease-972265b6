@@ -13,17 +13,18 @@ const Register = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
-  const {
-    register
-  } = useAuth();
+  const { register } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
     if (password !== confirmPassword) {
       toast.error('Passwords do not match');
       return;
     }
+
     setIsLoading(true);
+
     try {
       await register(email, password, name);
       toast.success('Registration successful');
@@ -38,15 +39,17 @@ const Register = () => {
 
   return (
     <div className="flex flex-col md:flex-row min-h-screen items-center justify-center bg-gray-50 px-4 py-12 dark:bg-gray-900 sm:px-6 lg:px-8">
+      {/* Left side text display - visible on medium and larger screens */}
       <div className="hidden md:flex flex-col items-start justify-center h-full md:w-64 lg:w-96 space-y-8 mb-8 md:mb-0 md:mr-12">
-        <div className="space-y-4 px-0 py-0 mx-0">
-          <h2 className="text-3xl font-bold tracking-tight text-primary mx-0 py-0 my-[29px] px-[3px] text-left">More features</h2>
-          <h2 className="text-3xl font-bold tracking-tight text-primary mx-0 px-0 py-0 my-[118px]">More options</h2>
-          <h2 className="text-3xl font-bold tracking-tight text-primary px-[3px] my-[61px]">More profits</h2>
+        <div className="space-y-4">
+          <h2 className="text-3xl font-bold tracking-tight text-primary">More features</h2>
+          <h2 className="text-3xl font-bold tracking-tight text-primary">More options</h2>
+          <h2 className="text-3xl font-bold tracking-tight text-primary">More profits</h2>
         </div>
       </div>
       
-      <div className="flex flex-col items-center max-w-md mx-auto">
+      <div className="flex flex-col items-center">
+        {/* TradeEase Header */}
         <div className="text-center mb-8">
           <h1 className="text-4xl font-extrabold tracking-tight text-primary md:text-5xl lg:text-6xl">
             TradeEase
@@ -56,7 +59,7 @@ const Register = () => {
           </p>
         </div>
         
-        <Card className="w-full">
+        <Card className="w-full max-w-md">
           <CardHeader className="space-y-1">
             <CardTitle className="text-center text-2xl font-bold">Create an account</CardTitle>
             <CardDescription className="text-center">Enter your information to create an account</CardDescription>
@@ -65,19 +68,47 @@ const Register = () => {
             <CardContent className="space-y-4">
               <div className="space-y-2">
                 <label htmlFor="name" className="text-sm font-medium">Full Name</label>
-                <Input id="name" type="text" value={name} onChange={e => setName(e.target.value)} placeholder="John Doe" required />
+                <Input
+                  id="name"
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="John Doe"
+                  required
+                />
               </div>
               <div className="space-y-2">
                 <label htmlFor="email" className="text-sm font-medium">Email</label>
-                <Input id="email" type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="name@example.com" required />
+                <Input
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="name@example.com"
+                  required
+                />
               </div>
               <div className="space-y-2">
                 <label htmlFor="password" className="text-sm font-medium">Password</label>
-                <Input id="password" type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••••" required />
+                <Input
+                  id="password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  required
+                />
               </div>
               <div className="space-y-2">
                 <label htmlFor="confirmPassword" className="text-sm font-medium">Confirm Password</label>
-                <Input id="confirmPassword" type="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} placeholder="••••••••" required />
+                <Input
+                  id="confirmPassword"
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder="••••••••"
+                  required
+                />
               </div>
             </CardContent>
             <CardFooter className="flex flex-col space-y-4">
