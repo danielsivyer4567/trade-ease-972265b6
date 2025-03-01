@@ -114,7 +114,7 @@ export function AppSidebar() {
 
               {[
                 { icon: LayoutDashboard, label: 'Dashboard', path: '/' },
-                { icon: Gauge, label: 'Trade Dash', path: '/trade-dash' },
+                { icon: Gauge, label: 'Easy Lead Dashboard', path: '/trade-dash' },
                 { icon: BarChart, label: 'Statistics', path: '/statistics' },
                 { icon: ListTodo, label: 'Task Lists', path: '/tasks' },
                 { icon: Briefcase, label: 'Jobs', path: '/jobs' },
