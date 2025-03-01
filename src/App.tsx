@@ -1,88 +1,71 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
-import { Toaster } from "sonner";
-import { ThemeProvider } from "@/components/theme-provider";
-import { AuthProvider } from "@/context/AuthContext";
-import { ProtectedRoute } from "@/components/ProtectedRoute";
-import { Suspense, lazy } from "react";
-import { LoadingScreen } from "@/components/LoadingScreen";
 
-// Lazy-loaded components
-const LoginPage = lazy(() => import("@/pages/Auth/Login"));
-const RegisterPage = lazy(() => import("@/pages/Auth/Register"));
-const ForgotPasswordPage = lazy(() => import("@/pages/Auth/ForgotPassword"));
-const ResetPasswordPage = lazy(() => import("@/pages/Auth/ResetPassword"));
-const DashboardPage = lazy(() => import("@/pages/Dashboard"));
-const JobsPage = lazy(() => import("@/pages/Jobs"));
-const JobDetailsPage = lazy(() => import("@/pages/Jobs/JobDetails"));
-const CustomersPage = lazy(() => import("@/pages/Customers"));
-const CustomerDetailsPage = lazy(() => import("@/pages/Customers/CustomerDetails"));
-const InvoicesPage = lazy(() => import("@/pages/Invoices"));
-const InvoiceDetailsPage = lazy(() => import("@/pages/Invoices/InvoiceDetails"));
-const SettingsPage = lazy(() => import("@/pages/Settings"));
-const ProfilePage = lazy(() => import("@/pages/Settings/Profile"));
-const TeamPage = lazy(() => import("@/pages/Settings/Team"));
-const NotificationsPage = lazy(() => import("@/pages/Settings/Notifications"));
-const IntegrationsPage = lazy(() => import("@/pages/Integrations"));
-const AddIntegration = lazy(() => import("@/pages/Integrations/AddIntegration"));
-const MessagingPage = lazy(() => import("@/pages/Messaging"));
-const CalendarPage = lazy(() => import("@/pages/Calendar"));
-const ReportsPage = lazy(() => import("@/pages/Reports"));
-const NotFoundPage = lazy(() => import("@/pages/NotFound"));
+import { BrowserRouter, Route, Routes } from "react-router-dom";
+import './App.css';
+
+import NotFound from "@/pages/NotFound";
+import Jobs from "@/pages/Jobs";
+import Customers from "@/pages/Customers";
+import Quotes from "@/pages/Quotes";
+import Email from "@/pages/Email";
+import Messaging from "@/pages/Messaging";
+import Social from "@/pages/Social";
+import Index from "@/pages/Index";
+import Calendar from "@/pages/Calendar";
+import Database from "@/pages/Database";
+import AIFeatures from "@/pages/AIFeatures";
+import Integrations from "@/pages/Integrations";
+import Notifications from "@/pages/Notifications";
+import Referrals from "@/pages/Referrals";
+import TeamRed from "@/pages/TeamRed";
+import TeamBlue from "@/pages/TeamBlue";
+import TeamGreen from "@/pages/TeamGreen";
+import TeamNew from "@/pages/TeamNew";
+import Tasks from "@/pages/Tasks";
+import Statistics from "@/pages/Statistics";
+import Settings from "@/pages/Settings";
+import OfficeStaff from "@/pages/Settings/OfficeStaff";
+import TradeRates from "@/pages/Settings/TradeRates";
+import BillsPurchaseOrders from "@/pages/Settings/BillsPurchaseOrders";
+import AIAssistantSettings from "@/pages/Settings/AIAssistantSettings";
+import TradeDash from './pages/TradeDash';
+import NewTemplate from "./pages/Jobs/NewTemplate";
+
+import { Toaster } from "@/components/ui/toaster";
 
 function App() {
   return (
-    <ThemeProvider defaultTheme="light" storageKey="tradeease-theme">
-      <AuthProvider>
-        <Router>
-          <Suspense fallback={<LoadingScreen />}>
-            <Routes>
-              {/* Auth Routes */}
-              <Route path="/login" element={<LoginPage />} />
-              <Route path="/register" element={<RegisterPage />} />
-              <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-              <Route path="/reset-password" element={<ResetPasswordPage />} />
-
-              {/* Protected Routes */}
-              <Route element={<ProtectedRoute />}>
-                <Route path="/" element={<Navigate to="/dashboard" replace />} />
-                <Route path="/dashboard" element={<DashboardPage />} />
-                
-                {/* Jobs */}
-                <Route path="/jobs" element={<JobsPage />} />
-                <Route path="/jobs/:id" element={<JobDetailsPage />} />
-                
-                {/* Customers */}
-                <Route path="/customers" element={<CustomersPage />} />
-                <Route path="/customers/:id" element={<CustomerDetailsPage />} />
-                
-                {/* Invoices */}
-                <Route path="/invoices" element={<InvoicesPage />} />
-                <Route path="/invoices/:id" element={<InvoiceDetailsPage />} />
-                
-                {/* Settings */}
-                <Route path="/settings" element={<SettingsPage />} />
-                <Route path="/settings/profile" element={<ProfilePage />} />
-                <Route path="/settings/team" element={<TeamPage />} />
-                <Route path="/settings/notifications" element={<NotificationsPage />} />
-                
-                {/* Integrations */}
-                <Route path="/integrations" element={<IntegrationsPage />} />
-                <Route path="/integrations/add" element={<AddIntegration />} />
-                
-                {/* Other Pages */}
-                <Route path="/messaging" element={<MessagingPage />} />
-                <Route path="/calendar" element={<CalendarPage />} />
-                <Route path="/reports" element={<ReportsPage />} />
-              </Route>
-
-              {/* 404 Page */}
-              <Route path="*" element={<NotFoundPage />} />
-            </Routes>
-          </Suspense>
-        </Router>
-        <Toaster position="top-right" richColors />
-      </AuthProvider>
-    </ThemeProvider>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Index />} />
+        <Route path="/customers/*" element={<Customers />} />
+        <Route path="/quotes/*" element={<Quotes />} />
+        <Route path="/jobs/*" element={<Jobs />} />
+        <Route path="/jobs/new-template" element={<NewTemplate />} />
+        <Route path="/email/*" element={<Email />} />
+        <Route path="/messaging/*" element={<Messaging />} />
+        <Route path="/social/*" element={<Social />} />
+        <Route path="/calendar/*" element={<Calendar />} />
+        <Route path="/database/*" element={<Database />} />
+        <Route path="/ai-features/*" element={<AIFeatures />} />
+        <Route path="/integrations/*" element={<Integrations />} />
+        <Route path="/notifications/*" element={<Notifications />} />
+        <Route path="/referrals/*" element={<Referrals />} />
+        <Route path="/team-red/*" element={<TeamRed />} />
+        <Route path="/team-blue/*" element={<TeamBlue />} />
+        <Route path="/team-green/*" element={<TeamGreen />} />
+        <Route path="/team-new/*" element={<TeamNew />} />
+        <Route path="/tasks/*" element={<Tasks />} />
+        <Route path="/statistics/*" element={<Statistics />} />
+        <Route path="/settings" element={<Settings />} />
+        <Route path="/settings/trade-rates" element={<TradeRates />} />
+        <Route path="/settings/bills-purchase-orders" element={<BillsPurchaseOrders />} />
+        <Route path="/settings/office-staff" element={<OfficeStaff />} />
+        <Route path="/settings/ai-assistant-settings" element={<AIAssistantSettings />} />
+        <Route path="/trade-dash" element={<TradeDash />} />
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+      <Toaster />
+    </BrowserRouter>
   );
 }
 
