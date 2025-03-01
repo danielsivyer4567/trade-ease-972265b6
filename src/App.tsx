@@ -1,4 +1,3 @@
-
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import './App.css';
 
@@ -27,6 +26,7 @@ import OfficeStaff from "@/pages/Settings/OfficeStaff";
 import TradeRates from "@/pages/Settings/TradeRates";
 import BillsPurchaseOrders from "@/pages/Settings/BillsPurchaseOrders";
 import AIAssistantSettings from "@/pages/Settings/AIAssistantSettings";
+import TradeDash from './pages/TradeDash';
 
 import { Toaster } from "@/components/ui/toaster";
 
@@ -58,6 +58,7 @@ function App() {
         <Route path="/settings/bills-purchase-orders" element={<BillsPurchaseOrders />} />
         <Route path="/settings/office-staff" element={<OfficeStaff />} />
         <Route path="/settings/ai-assistant-settings" element={<AIAssistantSettings />} />
+        <Route path="/trade-dash" element={<TradeDash />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
       <Toaster />

@@ -4,7 +4,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { 
   LayoutDashboard, Briefcase, Users, FileText, Settings, Menu, Calendar, 
   Network, Share, Bot, Mail, MessageSquare, Link as LinkIcon, Database, 
-  Hammer, Plus, BarChart, ListTodo, Bell, ChevronLeft, ChevronRight 
+  Hammer, Plus, BarChart, ListTodo, Bell, ChevronLeft, ChevronRight, Gauge 
 } from 'lucide-react';
 import { useSidebar } from './sidebar';
 import { cn } from '@/lib/utils';
@@ -114,6 +114,7 @@ export function AppSidebar() {
 
               {[
                 { icon: LayoutDashboard, label: 'Dashboard', path: '/' },
+                { icon: Gauge, label: 'Trade Dash', path: '/trade-dash' },
                 { icon: BarChart, label: 'Statistics', path: '/statistics' },
                 { icon: ListTodo, label: 'Task Lists', path: '/tasks' },
                 { icon: Briefcase, label: 'Jobs', path: '/jobs' },
