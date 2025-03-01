@@ -34,7 +34,7 @@ export function NewTemplateForm() {
   const [linearMeterRate, setLinearMeterRate] = useState("35");
   const [hourlyRate, setHourlyRate] = useState("85");
   const [materialsMarkup, setMaterialsMarkup] = useState("30");
-  const [rateType, setRateType] = useState("hourly");
+  const [rateType, setRateType] = useState<"hourly" | "squareMeter" | "linearMeter">("hourly");
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
@@ -269,7 +269,7 @@ export function NewTemplateForm() {
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="materials">Required Materials</Label>
+            <Label htmlFor="materials">Materials Order</Label>
             <Textarea 
               id="materials"
               value={materials} 
