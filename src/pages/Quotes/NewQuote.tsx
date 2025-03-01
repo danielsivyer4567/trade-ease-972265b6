@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { AppLayout } from "@/components/ui/AppLayout";
@@ -9,7 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { QuoteTemplateSelector } from "./components/QuoteTemplateSelector";
-import { useToast } from "@/components/ui/toast";
+import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, Plus, Trash2, ChevronRight, ChevronLeft, Save, SendHorizontal, Search } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
@@ -48,7 +49,7 @@ export default function NewQuote() {
     try {
       setIsLoading(true);
       const { data, error } = await supabase
-        .from('price_list_items' as any)
+        .from('price_list_items')
         .select('*')
         .order('name', { ascending: true });
       
@@ -62,14 +63,16 @@ export default function NewQuote() {
         return;
       }
       
-      const formattedData = data.map((item: any) => ({
-        id: item.id,
-        name: item.name,
-        category: item.category,
-        price: parseFloat(item.price)
-      }));
-      
-      setPriceListItems(formattedData);
+      if (data) {
+        const formattedData = data.map((item) => ({
+          id: item.id,
+          name: item.name,
+          category: item.category,
+          price: parseFloat(item.price)
+        }));
+        
+        setPriceListItems(formattedData);
+      }
     } catch (error) {
       console.error('Error in fetchPriceListItems:', error);
       toast({
@@ -174,14 +177,14 @@ export default function NewQuote() {
       setIsLoading(true);
       
       const { data, error } = await supabase
-        .from('price_list_items' as any)
+        .from('price_list_items')
         .insert([
           {
             name: newPriceItem.name,
             category: newPriceItem.category,
             price: newPriceItem.price
           }
-        ] as any)
+        ])
         .select();
       
       if (error) {

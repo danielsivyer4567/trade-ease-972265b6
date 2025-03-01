@@ -1,3 +1,6 @@
+
+// This file reexports the toast-related components from @/components/ui/toast.tsx
+// but adds the state management functionality needed for the toast system
 import * as React from "react"
 
 import type {
