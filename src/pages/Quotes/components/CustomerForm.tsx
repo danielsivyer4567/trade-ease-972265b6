@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -12,12 +12,18 @@ interface CustomerFormProps {
 }
 
 export const CustomerForm = ({ onNextTab }: CustomerFormProps) => {
+  const [customer, setCustomer] = useState<string>("");
+  const [email, setEmail] = useState<string>("");
+  const [phone, setPhone] = useState<string>("");
+  const [address, setAddress] = useState<string>("");
+  const [quoteNumber] = useState<string>("Q-2024-009");
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
       <div className="space-y-4">
         <div>
           <Label htmlFor="customer">Customer</Label>
-          <Select>
+          <Select value={customer} onValueChange={setCustomer}>
             <SelectTrigger>
               <SelectValue placeholder="Select a customer" />
             </SelectTrigger>
@@ -30,21 +36,37 @@ export const CustomerForm = ({ onNextTab }: CustomerFormProps) => {
         </div>
         <div>
           <Label htmlFor="email">Email</Label>
-          <Input id="email" placeholder="customer@example.com" />
+          <Input 
+            id="email" 
+            placeholder="customer@example.com" 
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
         </div>
         <div>
           <Label htmlFor="phone">Phone</Label>
-          <Input id="phone" placeholder="(555) 123-4567" />
+          <Input 
+            id="phone" 
+            placeholder="(555) 123-4567"
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+          />
         </div>
       </div>
       <div className="space-y-4">
         <div>
           <Label htmlFor="address">Address</Label>
-          <Textarea id="address" placeholder="Customer address" rows={3} />
+          <Textarea 
+            id="address" 
+            placeholder="Customer address" 
+            rows={3}
+            value={address}
+            onChange={(e) => setAddress(e.target.value)}
+          />
         </div>
         <div>
           <Label htmlFor="quote-number">Quote #</Label>
-          <Input id="quote-number" value="Q-2024-009" readOnly className="bg-gray-50" />
+          <Input id="quote-number" value={quoteNumber} readOnly className="bg-gray-50" />
         </div>
       </div>
       

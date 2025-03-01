@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -13,6 +13,10 @@ interface TermsFormProps {
 }
 
 export const TermsForm = ({ onPrevTab, onNextTab }: TermsFormProps) => {
+  const [quoteValidity, setQuoteValidity] = useState<string>("30");
+  const [paymentTerms, setPaymentTerms] = useState<string>("14-days");
+  const [notes, setNotes] = useState<string>("");
+
   return (
     <div className="space-y-6">
       <div>
@@ -20,14 +24,15 @@ export const TermsForm = ({ onPrevTab, onNextTab }: TermsFormProps) => {
         <Input 
           id="quote-validity" 
           type="number" 
-          defaultValue="30" 
+          value={quoteValidity}
+          onChange={(e) => setQuoteValidity(e.target.value)}
           className="mt-1 max-w-xs" 
         />
       </div>
       
       <div>
         <Label htmlFor="payment-terms">Payment Terms</Label>
-        <Select defaultValue="14-days">
+        <Select value={paymentTerms} onValueChange={setPaymentTerms}>
           <SelectTrigger className="mt-1 max-w-md">
             <SelectValue placeholder="Select payment terms" />
           </SelectTrigger>
@@ -44,7 +49,9 @@ export const TermsForm = ({ onPrevTab, onNextTab }: TermsFormProps) => {
         <Label htmlFor="notes">Notes to Customer</Label>
         <Textarea 
           id="notes" 
-          placeholder="Additional information or terms for the customer" 
+          placeholder="Additional information or terms for the customer"
+          value={notes}
+          onChange={(e) => setNotes(e.target.value)}
           rows={5} 
           className="mt-1" 
         />

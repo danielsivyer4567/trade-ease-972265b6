@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -39,7 +39,7 @@ export const PriceListForm = ({ onAddItemToQuote, onChangeTab }: PriceListFormPr
     try {
       setIsLoading(true);
       const { data, error } = await supabase
-        .from('price_list_items' as any)
+        .from('price_list_items')
         .select('*')
         .order('name', { ascending: true });
       
@@ -75,9 +75,9 @@ export const PriceListForm = ({ onAddItemToQuote, onChangeTab }: PriceListFormPr
     }
   };
   
-  useState(() => {
+  useEffect(() => {
     fetchPriceListItems();
-  });
+  }, []);
   
   const filteredPriceItems = priceListItems.filter(item => 
     item.name.toLowerCase().includes(searchPriceList.toLowerCase()) ||
@@ -107,14 +107,14 @@ export const PriceListForm = ({ onAddItemToQuote, onChangeTab }: PriceListFormPr
       setIsLoading(true);
       
       const { data, error } = await supabase
-        .from('price_list_items' as any)
+        .from('price_list_items')
         .insert([
           {
             name: newPriceItem.name,
             category: newPriceItem.category,
             price: newPriceItem.price
           }
-        ] as any)
+        ])
         .select();
       
       if (error) {
