@@ -36,13 +36,13 @@ const Register = () => {
   return <div className="flex flex-col md:flex-row min-h-screen items-center justify-center bg-gray-50 px-4 py-12 dark:bg-gray-900 sm:px-6 lg:px-8">
       <div className="hidden md:flex flex-col items-start justify-center h-full md:w-64 lg:w-96 space-y-8 mb-8 md:mb-0 md:mr-12">
         <div className="space-y-4 px-0 py-0 mx-0">
-          <h2 className="text-3xl font-bold tracking-tight text-primary">More features</h2>
-          <h2 className="text-3xl font-bold tracking-tight text-primary">More options</h2>
+          <h2 className="text-3xl font-bold tracking-tight text-primary mx-0 px-0 py-0 my-[38px]">More features</h2>
+          <h2 className="text-3xl font-bold tracking-tight text-primary mx-0 px-0 py-0 my-[103px]">More options</h2>
           <h2 className="text-3xl font-bold tracking-tight text-primary px-[3px]">More profits</h2>
         </div>
       </div>
       
-      <div className="flex flex-col items-center mx-[240px] py-[43px] px-[43px]">
+      <div className="flex flex-col items-center py-[43px] px-[8px] mx-[240px] my-0">
         <div className="text-center mb-8">
           <h1 className="text-4xl font-extrabold tracking-tight text-primary md:text-5xl lg:text-6xl">
             TradeEase
