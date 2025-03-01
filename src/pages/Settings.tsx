@@ -8,7 +8,7 @@ const settingsSections = [{
   title: "Notifications",
   icon: Bell,
   description: "Configure notification settings",
-  path: "/notifications"
+  path: "/settings/notifications"
 }, {
   title: "Trade Rates",
   icon: DollarSign,
@@ -98,7 +98,7 @@ const settingsSections = [{
   title: "Web Enquiry Form",
   icon: Globe,
   description: "Configure web form for enquiries",
-  path: "/notifications?tab=web-enquiry"
+  path: "/settings/notifications?tab=web-enquiry"
 }, {
   title: "Email",
   icon: Mail,

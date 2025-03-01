@@ -27,6 +27,7 @@ import OfficeStaff from "@/pages/Settings/OfficeStaff";
 import TradeRates from "@/pages/Settings/TradeRates";
 import BillsPurchaseOrders from "@/pages/Settings/BillsPurchaseOrders";
 import AIAssistantSettings from "@/pages/Settings/AIAssistantSettings";
+import NotificationsSettings from "@/pages/Settings/Notifications";
 import TradeDash from './pages/TradeDash';
 import NewTemplate from "./pages/Jobs/NewTemplate";
 
@@ -61,6 +62,7 @@ function App() {
         <Route path="/settings/bills-purchase-orders" element={<BillsPurchaseOrders />} />
         <Route path="/settings/office-staff" element={<OfficeStaff />} />
         <Route path="/settings/ai-assistant-settings" element={<AIAssistantSettings />} />
+        <Route path="/settings/notifications" element={<NotificationsSettings />} />
         <Route path="/trade-dash" element={<TradeDash />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
