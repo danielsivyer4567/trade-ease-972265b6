@@ -3,10 +3,10 @@ import React from 'react';
 import { AppLayout } from '@/components/ui/AppLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { KeyStatistics } from '@/components/statistics/KeyStatistics';
-import { UpcomingJobs } from '@/components/dashboard/UpcomingJobs';
-import { RecentActivity } from '@/components/dashboard/RecentActivity';
-import { CleaningRequiredJobs } from '@/components/dashboard/CleaningRequiredJobs';
-import { JobSiteMap } from '@/components/dashboard/JobSiteMap';
+import UpcomingJobs from '@/components/dashboard/UpcomingJobs';
+import RecentActivity from '@/components/dashboard/RecentActivity';
+import CleaningRequiredJobs from '@/components/dashboard/CleaningRequiredJobs';
+import JobSiteMap from '@/components/dashboard/JobSiteMap';
 
 const Dashboard = () => {
   return (
