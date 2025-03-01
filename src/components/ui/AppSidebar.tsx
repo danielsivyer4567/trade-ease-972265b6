@@ -40,8 +40,8 @@ export function AppSidebar() {
       <Link
         to={path}
         className={cn(
-          "flex items-center gap-2 p-2 rounded-lg hover:bg-gray-100 text-gray-700 hover:text-gray-900 text-sm",
-          isActive && "bg-gray-100 text-gray-900 font-medium"
+          "flex items-center gap-2 p-2 rounded-lg hover:bg-white/60 text-gray-700 hover:text-gray-900 text-sm transition-all duration-200",
+          isActive && "bg-white/70 text-gray-900 font-medium shadow-sm"
         )}
       >
         {icon}
@@ -68,7 +68,7 @@ export function AppSidebar() {
       <Button 
         variant="outline" 
         size="icon" 
-        className="fixed left-4 top-4 z-40 lg:hidden" 
+        className="fixed left-4 top-4 z-40 lg:hidden backdrop-blur-md bg-white/50" 
         onClick={toggleSidebar}
       >
         <Menu className="h-4 w-4" />
@@ -77,7 +77,7 @@ export function AppSidebar() {
       <div
         data-state={state}
         className={cn(
-          "fixed inset-y-0 left-0 z-30 bg-white border-r transition-all duration-300 ease-in-out peer",
+          "fixed inset-y-0 left-0 z-30 border-r transition-all duration-300 ease-in-out peer elegant-sidebar",
           isCollapsed ? "w-[60px]" : "w-[240px]",
           "lg:translate-x-0",
           state === "collapsed" && "-translate-x-full lg:translate-x-0"
