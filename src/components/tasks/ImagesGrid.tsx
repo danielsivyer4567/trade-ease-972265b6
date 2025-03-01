@@ -29,7 +29,10 @@ export function ImagesGrid({ images, title }: ImagesGridProps) {
       <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
         {images.map((image, index) => (
           <div key={index} className="relative group">
-            <ImagePreview src={image} />
+            <ImagePreview 
+              src={image} 
+              alt={title ? `${title} ${index + 1}` : `Image ${index + 1}`} 
+            />
             <div className="absolute bottom-2 right-2">
               <Button 
                 variant={completedImages[image] ? "default" : "outline"} 
