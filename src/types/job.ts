@@ -23,4 +23,5 @@ export interface JobTemplate {
   price: number;
   materials?: string[];
   category?: string;
+  images?: string[];
 }

@@ -1,4 +1,3 @@
-
 import { Plus, Loader2, Upload, FileUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -8,6 +7,7 @@ import { useToast } from "@/components/ui/use-toast";
 import type { JobTemplate } from "@/types/job";
 import { parseTextTemplate, parseCSVTemplate } from "@/utils/templateUtils";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 interface TemplateCreationProps {
   onTemplateCreate: (template: JobTemplate) => void;
@@ -15,6 +15,7 @@ interface TemplateCreationProps {
 
 export function TemplateCreation({ onTemplateCreate }: TemplateCreationProps) {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [jobDescription, setJobDescription] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
 
@@ -102,21 +103,7 @@ export function TemplateCreation({ onTemplateCreate }: TemplateCreationProps) {
   };
 
   const createBlankTemplate = () => {
-    const blankTemplate: JobTemplate = {
-      id: crypto.randomUUID(),
-      title: "New Template",
-      description: "",
-      type: "",
-      estimatedDuration: 0,
-      price: 0,
-      materials: [],
-      category: "Plumbing"
-    };
-    onTemplateCreate(blankTemplate);
-    toast({
-      title: "Success",
-      description: "Blank template created"
-    });
+    navigate('/jobs/new-template');
   };
 
   return (

@@ -1,3 +1,4 @@
+
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import './App.css';
 
@@ -27,6 +28,7 @@ import TradeRates from "@/pages/Settings/TradeRates";
 import BillsPurchaseOrders from "@/pages/Settings/BillsPurchaseOrders";
 import AIAssistantSettings from "@/pages/Settings/AIAssistantSettings";
 import TradeDash from './pages/TradeDash';
+import NewTemplate from "./pages/Jobs/NewTemplate";
 
 import { Toaster } from "@/components/ui/toaster";
 
@@ -38,6 +40,7 @@ function App() {
         <Route path="/customers/*" element={<Customers />} />
         <Route path="/quotes/*" element={<Quotes />} />
         <Route path="/jobs/*" element={<Jobs />} />
+        <Route path="/jobs/new-template" element={<NewTemplate />} />
         <Route path="/email/*" element={<Email />} />
         <Route path="/messaging/*" element={<Messaging />} />
         <Route path="/social/*" element={<Social />} />
