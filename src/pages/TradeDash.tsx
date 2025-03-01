@@ -17,7 +17,9 @@ import {
   AlertCircle,
   TrendingUp,
   Star,
-  Award
+  Award,
+  Settings,
+  ToggleLeft
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -28,6 +30,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { Switch } from "@/components/ui/switch";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 const TRADE_TYPES = [
   "All Trades",
@@ -169,6 +173,51 @@ export default function TradeDash() {
   
   const [activeTab, setActiveTab] = useState("marketplace");
   const [freeLeads, setFreeLeads] = useState(userStats.freeLeadsAvailable);
+  const [showAutoLeadDialog, setShowAutoLeadDialog] = useState(false);
+  const [autoPurchaseEnabled, setAutoPurchaseEnabled] = useState(false);
+  const [autoLeadPreferences, setAutoLeadPreferences] = useState({
+    maxPerWeek: 3,
+    minBudget: "5000",
+    maxDistance: "25",
+    preferredTypes: ["Kitchen Renovation", "Bathroom Remodel"],
+    postcodes: []
+  });
+  const [preferredPostcode, setPreferredPostcode] = useState("");
+
+  const loadAutoLeadPreferences = async () => {
+    try {
+      console.log("Loading auto-lead preferences...");
+    } catch (error) {
+      console.error("Error loading auto-lead preferences:", error);
+    }
+  };
+
+  const saveAutoLeadPreferences = async () => {
+    try {
+      toast.success("Auto-purchase preferences saved successfully!");
+      setShowAutoLeadDialog(false);
+    } catch (error) {
+      console.error("Error saving auto-lead preferences:", error);
+      toast.error("Failed to save auto-purchase preferences");
+    }
+  };
+
+  const addPreferredPostcode = () => {
+    if (preferredPostcode && !autoLeadPreferences.postcodes.includes(preferredPostcode)) {
+      setAutoLeadPreferences({
+        ...autoLeadPreferences,
+        postcodes: [...autoLeadPreferences.postcodes, preferredPostcode]
+      });
+      setPreferredPostcode("");
+    }
+  };
+
+  const removePreferredPostcode = (postcode) => {
+    setAutoLeadPreferences({
+      ...autoLeadPreferences,
+      postcodes: autoLeadPreferences.postcodes.filter(p => p !== postcode)
+    });
+  };
 
   const availableLeads = mockLeads.filter(lead => lead.status === "available").length;
   const purchasedLeads = mockLeads.filter(lead => lead.status === "purchased").length;
@@ -188,6 +237,7 @@ export default function TradeDash() {
     };
     
     fetchFreeLeads();
+    loadAutoLeadPreferences();
   }, []);
   
   const filteredLeads = mockLeads.filter(lead => {
@@ -218,17 +268,6 @@ export default function TradeDash() {
       toast.error("You have no free leads available");
       return;
     }
-    
-    // In a real app, this would call Supabase to update free leads count
-    // const { error } = await supabase
-    //   .from('free_leads')
-    //   .update({ leads_available: freeLeads - 1 })
-    //   .eq('trade_id', 'current-user-id');
-    
-    // if (error) {
-    //   toast.error("Failed to claim free lead");
-    //   return;
-    // }
     
     setFreeLeads(prev => prev - 1);
     toast.success(`Lead #${leadId} claimed for free! You have ${freeLeads - 1} free leads remaining.`);
@@ -294,9 +333,174 @@ export default function TradeDash() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">25</div>
-              <Button size="sm" className="mt-2 w-full">
-                Buy More Credits
-              </Button>
+              <div className="flex flex-col gap-2 mt-2">
+                <Button size="sm" className="w-full">
+                  Buy More Credits
+                </Button>
+                <Dialog open={showAutoLeadDialog} onOpenChange={setShowAutoLeadDialog}>
+                  <DialogTrigger asChild>
+                    <Button 
+                      size="sm" 
+                      variant="outline" 
+                      className="w-full flex items-center gap-1"
+                    >
+                      <Settings className="h-4 w-4" />
+                      Auto-Purchase Settings
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-[500px]">
+                    <DialogHeader>
+                      <DialogTitle>Auto-Purchase Lead Settings</DialogTitle>
+                      <DialogDescription>
+                        Configure automatic lead purchases (max 3 per week)
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-4 py-4">
+                      <div className="flex items-center justify-between">
+                        <Label htmlFor="auto-purchase-toggle" className="font-medium">
+                          Enable Auto-Purchase
+                        </Label>
+                        <Switch
+                          id="auto-purchase-toggle"
+                          checked={autoPurchaseEnabled}
+                          onCheckedChange={setAutoPurchaseEnabled}
+                        />
+                      </div>
+                      
+                      {autoPurchaseEnabled && (
+                        <>
+                          <div className="space-y-2">
+                            <Label htmlFor="max-per-week">Maximum Leads Per Week</Label>
+                            <Select 
+                              value={autoLeadPreferences.maxPerWeek.toString()} 
+                              onValueChange={v => setAutoLeadPreferences({
+                                ...autoLeadPreferences,
+                                maxPerWeek: parseInt(v)
+                              })}
+                            >
+                              <SelectTrigger id="max-per-week">
+                                <SelectValue placeholder="Select maximum" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="1">1 per week</SelectItem>
+                                <SelectItem value="2">2 per week</SelectItem>
+                                <SelectItem value="3">3 per week</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          
+                          <div className="space-y-2">
+                            <Label htmlFor="min-budget">Minimum Budget</Label>
+                            <div className="flex items-center gap-2">
+                              <span className="text-sm text-gray-500">$</span>
+                              <Input
+                                id="min-budget"
+                                type="number"
+                                value={autoLeadPreferences.minBudget}
+                                onChange={(e) => setAutoLeadPreferences({
+                                  ...autoLeadPreferences,
+                                  minBudget: e.target.value
+                                })}
+                                placeholder="5000"
+                              />
+                            </div>
+                          </div>
+                          
+                          <div className="space-y-2">
+                            <Label htmlFor="max-distance">Maximum Distance (km)</Label>
+                            <Input
+                              id="max-distance"
+                              type="number"
+                              value={autoLeadPreferences.maxDistance}
+                              onChange={(e) => setAutoLeadPreferences({
+                                ...autoLeadPreferences,
+                                maxDistance: e.target.value
+                              })}
+                              placeholder="25"
+                            />
+                          </div>
+                          
+                          <div className="space-y-2">
+                            <Label>Preferred Postcodes</Label>
+                            <div className="flex gap-2">
+                              <Input
+                                value={preferredPostcode}
+                                onChange={(e) => setPreferredPostcode(e.target.value)}
+                                placeholder="e.g. 2000"
+                              />
+                              <Button 
+                                type="button" 
+                                variant="secondary" 
+                                onClick={addPreferredPostcode}
+                              >
+                                Add
+                              </Button>
+                            </div>
+                            <div className="flex flex-wrap gap-2 mt-2">
+                              {autoLeadPreferences.postcodes.map((postcode) => (
+                                <div 
+                                  key={postcode}
+                                  className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-sm flex items-center gap-1"
+                                >
+                                  {postcode}
+                                  <button 
+                                    onClick={() => removePreferredPostcode(postcode)}
+                                    className="text-blue-600 hover:text-blue-800"
+                                  >
+                                    ×
+                                  </button>
+                                </div>
+                              ))}
+                              {autoLeadPreferences.postcodes.length === 0 && (
+                                <p className="text-sm text-gray-500">No preferred postcodes added</p>
+                              )}
+                            </div>
+                          </div>
+                          
+                          <div className="space-y-2">
+                            <Label>Job Types</Label>
+                            <div className="grid grid-cols-2 gap-2 mt-2">
+                              {["Kitchen Renovation", "Bathroom Remodel", "Deck Construction", "House Painting", "Flooring Installation"].map((type) => (
+                                <div key={type} className="flex items-center space-x-2">
+                                  <Checkbox 
+                                    id={`job-type-${type}`}
+                                    checked={autoLeadPreferences.preferredTypes.includes(type)}
+                                    onCheckedChange={(checked) => {
+                                      if (checked) {
+                                        setAutoLeadPreferences({
+                                          ...autoLeadPreferences,
+                                          preferredTypes: [...autoLeadPreferences.preferredTypes, type]
+                                        });
+                                      } else {
+                                        setAutoLeadPreferences({
+                                          ...autoLeadPreferences,
+                                          preferredTypes: autoLeadPreferences.preferredTypes.filter(t => t !== type)
+                                        });
+                                      }
+                                    }}
+                                  />
+                                  <label
+                                    htmlFor={`job-type-${type}`}
+                                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                                  >
+                                    {type}
+                                  </label>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                    <DialogFooter>
+                      <Button variant="outline" onClick={() => setShowAutoLeadDialog(false)}>
+                        Cancel
+                      </Button>
+                      <Button onClick={saveAutoLeadPreferences}>Save Preferences</Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
+              </div>
             </CardContent>
           </Card>
         </div>
@@ -364,6 +568,31 @@ export default function TradeDash() {
               <div className="flex items-center gap-2 mt-2">
                 <Progress value={(freeLeads / 3) * 100} className="h-2 flex-1 bg-yellow-200" />
                 <span className="text-sm font-medium text-yellow-700">{freeLeads}/3 remaining</span>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+        
+        {autoPurchaseEnabled && (
+          <Card className="bg-gradient-to-r from-blue-50 to-indigo-100 border-blue-200">
+            <CardContent className="py-4">
+              <div className="flex items-center gap-3">
+                <div className="bg-blue-200 p-2 rounded-full">
+                  <ToggleLeft className="h-5 w-5 text-blue-700" />
+                </div>
+                <div>
+                  <h3 className="font-medium text-blue-800">Auto-Purchase Leads Active</h3>
+                  <p className="text-sm text-blue-700">
+                    System will auto-purchase up to {autoLeadPreferences.maxPerWeek} leads per week matching your preferences.
+                    <Button 
+                      variant="link" 
+                      className="p-0 h-auto text-blue-800 font-medium" 
+                      onClick={() => setShowAutoLeadDialog(true)}
+                    >
+                      Adjust settings
+                    </Button>
+                  </p>
+                </div>
               </div>
             </CardContent>
           </Card>
