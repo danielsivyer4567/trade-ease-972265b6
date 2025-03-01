@@ -15,7 +15,8 @@ import {
   Calendar, 
   CheckCircle,
   AlertCircle,
-  TrendingUp
+  TrendingUp,
+  Star
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -140,6 +141,15 @@ const mockRankings = [
   { id: 7, tradeName: "Perfect Tilers", category: "Tiling", area: "Sutherland Shire", responseRate: 84, jobsCompleted: 51, rating: 4.3 },
 ];
 
+// Mock user stats
+const userStats = {
+  totalJobs: 87,
+  fiveStarReviews: 72,
+  overallRating: 4.8,
+  ranking: 3, // User is ranked 3rd
+  responseRate: 94
+};
+
 export default function TradeDash() {
   const [filters, setFilters] = useState({
     postcode: "",
@@ -193,7 +203,7 @@ export default function TradeDash() {
       <div className="space-y-6 p-6">
         <h1 className="text-4xl font-bold text-gray-900">Easy Lead Dashboard</h1>
         
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
           {/* Dashboard stats */}
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -228,6 +238,21 @@ export default function TradeDash() {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
+                Your Ranking
+              </CardTitle>
+              <TrendingUp className="h-4 w-4 text-purple-500" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">#{userStats.ranking}</div>
+              <p className="text-xs text-muted-foreground">
+                Based on {userStats.totalJobs} completed jobs
+              </p>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
                 Lead Credits Balance
               </CardTitle>
               <DollarSign className="h-4 w-4 text-yellow-500" />
@@ -237,6 +262,53 @@ export default function TradeDash() {
               <Button size="sm" className="mt-2 w-full">
                 Buy More Credits
               </Button>
+            </CardContent>
+          </Card>
+        </div>
+        
+        {/* User rating and review stats */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                5-Star Reviews
+              </CardTitle>
+              <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center gap-4">
+                <div className="text-2xl font-bold">{userStats.fiveStarReviews}</div>
+                <Progress value={(userStats.fiveStarReviews / userStats.totalJobs) * 100} className="h-2 flex-1" />
+                <div className="text-sm text-muted-foreground">{Math.round((userStats.fiveStarReviews / userStats.totalJobs) * 100)}%</div>
+              </div>
+              <p className="text-xs text-muted-foreground mt-2">
+                {userStats.fiveStarReviews} out of {userStats.totalJobs} jobs rated 5 stars
+              </p>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                Overall Rating
+              </CardTitle>
+              <div className="flex items-center">
+                {[...Array(5)].map((_, i) => (
+                  <Star 
+                    key={i} 
+                    className={`h-4 w-4 ${i < Math.floor(userStats.overallRating) ? 'text-yellow-500 fill-yellow-500' : 'text-gray-300'}`} 
+                  />
+                ))}
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center gap-4">
+                <div className="text-2xl font-bold">{userStats.overallRating}</div>
+                <Progress value={(userStats.overallRating / 5) * 100} className="h-2 flex-1" />
+              </div>
+              <p className="text-xs text-muted-foreground mt-2">
+                Based on {userStats.totalJobs} completed jobs
+              </p>
             </CardContent>
           </Card>
         </div>
