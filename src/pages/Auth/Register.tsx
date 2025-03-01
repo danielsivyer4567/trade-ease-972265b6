@@ -42,7 +42,7 @@ const Register = () => {
         </div>
       </div>
       
-      <div className="flex flex-col items-center px-[8px] py-[2px] mx-auto">
+      <div className="flex flex-col items-center mx-[240px] py-[43px] px-[43px]">
         <div className="text-center mb-8">
           <h1 className="text-4xl font-extrabold tracking-tight text-primary md:text-5xl lg:text-6xl">
             TradeEase
