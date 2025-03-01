@@ -24,6 +24,41 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
 
+// Comprehensive list of trade types
+const TRADE_TYPES = [
+  "All Trades",
+  "Building & Construction",
+  "Plumbing",
+  "Electrical",
+  "Carpentry",
+  "Painting",
+  "Plastering",
+  "Roofing",
+  "Landscaping",
+  "Tiling",
+  "Flooring",
+  "HVAC (Heating, Ventilation, Air Conditioning)",
+  "Fencing",
+  "Concreting",
+  "Bricklaying",
+  "Cabinetmaking",
+  "Glazing",
+  "Waterproofing",
+  "Pest Control",
+  "Demolition",
+  "Asbestos Removal",
+  "Pool Installation",
+  "Solar Panel Installation",
+  "Kitchen Renovation",
+  "Bathroom Renovation",
+  "Handyman Services",
+  "Joinery",
+  "Metal Fabrication",
+  "Stone Masonry",
+  "Excavation",
+  "Paving"
+];
+
 // Mock lead data
 const mockLeads = [
   {
@@ -98,7 +133,8 @@ export default function TradeDash() {
     postcode: "",
     minSize: "",
     maxBudget: "",
-    leadType: "all"
+    leadType: "all",
+    tradeType: "All Trades"
   });
   
   const [showFilters, setShowFilters] = useState(false);
@@ -117,6 +153,8 @@ export default function TradeDash() {
     if (filters.minSize && lead.size < parseInt(filters.minSize)) return false;
     if (filters.leadType === "available" && lead.status !== "available") return false;
     if (filters.leadType === "purchased" && lead.status !== "purchased") return false;
+    // We're not filtering by trade type yet since our mock data doesn't have that field
+    // In a real app, you would add: if (filters.tradeType !== "All Trades" && lead.tradeType !== filters.tradeType) return false;
     return true;
   });
 
@@ -244,6 +282,25 @@ export default function TradeDash() {
                       <SelectItem value="all">All Leads</SelectItem>
                       <SelectItem value="available">Available Only</SelectItem>
                       <SelectItem value="purchased">Purchased Only</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="tradeType">Trade Type</Label>
+                  <Select 
+                    value={filters.tradeType} 
+                    onValueChange={(value) => handleFilterChange('tradeType', value)}
+                  >
+                    <SelectTrigger id="tradeType">
+                      <SelectValue placeholder="Select trade type" />
+                    </SelectTrigger>
+                    <SelectContent className="max-h-[200px] overflow-y-auto">
+                      {TRADE_TYPES.map((trade) => (
+                        <SelectItem key={trade} value={trade}>
+                          {trade}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
