@@ -34,7 +34,7 @@ export function AppSidebar() {
 
   const renderNavLink = (icon: React.ReactNode, label: string, path: string) => {
     const isActive = location.pathname === path || 
-                    (path === '/ai-features' && location.pathname === '/ai-features');
+                    (path !== '/' && location.pathname.startsWith(path));
                     
     const content = (
       <Link
