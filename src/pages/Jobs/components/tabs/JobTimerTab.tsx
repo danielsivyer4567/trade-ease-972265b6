@@ -37,7 +37,7 @@ export const JobTimerTab = ({
             </div>
           )}
           <div className="flex items-center justify-center space-x-4">
-            {hasLocationPermission === false ? (
+            {hasLocationPermission === null || hasLocationPermission === false ? (
               <Button
                 onClick={handleTimerToggle}
                 variant="default"

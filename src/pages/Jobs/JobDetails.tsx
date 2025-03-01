@@ -59,17 +59,93 @@ export function JobDetails() {
     }
   }, [job, navigate]);
 
-  if (!job) {
-    return null;
-  }
+  // Implement timer functionality
+  useEffect(() => {
+    let timerInterval: number | null = null;
+    
+    if (isTimerRunning) {
+      timerInterval = window.setInterval(() => {
+        setJobTimer(prev => prev + 1);
+        
+        // Capture location data if we have permission and not on break
+        if (hasLocationPermission === true && !isOnBreak) {
+          navigator.geolocation.getCurrentPosition(
+            (position) => {
+              const { latitude, longitude } = position.coords;
+              setLocationHistory(prev => [
+                ...prev,
+                {
+                  timestamp: Date.now(),
+                  coords: [longitude, latitude]
+                }
+              ]);
+            },
+            (error) => {
+              console.error("Error getting location:", error);
+              setHasLocationPermission(false);
+            }
+          );
+        }
+      }, 1000);
+    }
+    
+    return () => {
+      if (timerInterval !== null) {
+        clearInterval(timerInterval);
+      }
+    };
+  }, [isTimerRunning, hasLocationPermission, isOnBreak]);
 
   const handleTimerToggle = () => {
-    setIsTimerRunning(!isTimerRunning);
+    if (hasLocationPermission === null) {
+      // Request permission when user tries to start timer
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setHasLocationPermission(true);
+          setIsTimerRunning(true);
+          // Add initial location to history
+          const { latitude, longitude } = position.coords;
+          setLocationHistory([{
+            timestamp: Date.now(),
+            coords: [longitude, latitude]
+          }]);
+        },
+        (error) => {
+          console.error("Error getting location permission:", error);
+          setHasLocationPermission(false);
+        }
+      );
+    } else if (hasLocationPermission === false) {
+      // Try requesting permission again
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setHasLocationPermission(true);
+          setIsTimerRunning(true);
+          // Add initial location to history
+          const { latitude, longitude } = position.coords;
+          setLocationHistory([{
+            timestamp: Date.now(),
+            coords: [longitude, latitude]
+          }]);
+        },
+        (error) => {
+          console.error("Error getting location permission:", error);
+          alert("Location permission is required to use the timer.");
+        }
+      );
+    } else {
+      // Toggle timer state when we already have permission
+      setIsTimerRunning(!isTimerRunning);
+    }
   };
 
   const handleBreakToggle = () => {
     setIsOnBreak(!isOnBreak);
   };
+
+  if (!job) {
+    return null;
+  }
 
   return (
     <div className="space-y-6 p-6">
