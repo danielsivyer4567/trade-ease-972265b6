@@ -106,6 +106,12 @@ export function NewTemplateForm() {
     navigate('/jobs');
   };
 
+  const handleRateTypeChange = (value: string) => {
+    if (value === "hourly" || value === "squareMeter" || value === "linearMeter") {
+      setRateType(value);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -142,6 +148,15 @@ export function NewTemplateForm() {
                 <SelectItem value="Electrical">Electrical</SelectItem>
                 <SelectItem value="HVAC">HVAC</SelectItem>
                 <SelectItem value="Carpentry">Carpentry</SelectItem>
+                <SelectItem value="Fencing">Fencing</SelectItem>
+                <SelectItem value="Retaining Walls">Retaining Walls</SelectItem>
+                <SelectItem value="Gates">Gates</SelectItem>
+                <SelectItem value="Solar">Solar</SelectItem>
+                <SelectItem value="Cleaning">Cleaning</SelectItem>
+                <SelectItem value="Painting">Painting</SelectItem>
+                <SelectItem value="Landscaping">Landscaping</SelectItem>
+                <SelectItem value="Roofing">Roofing</SelectItem>
+                <SelectItem value="Flooring">Flooring</SelectItem>
                 <SelectItem value="Other">Other</SelectItem>
               </SelectContent>
             </Select>
@@ -149,7 +164,7 @@ export function NewTemplateForm() {
           
           <div className="space-y-4">
             <Label>Rate Calculation Method</Label>
-            <Tabs defaultValue={rateType} onValueChange={setRateType}>
+            <Tabs defaultValue={rateType} onValueChange={handleRateTypeChange}>
               <TabsList className="grid w-full grid-cols-3">
                 <TabsTrigger value="hourly">Hourly</TabsTrigger>
                 <TabsTrigger value="squareMeter">Square Meter</TabsTrigger>
