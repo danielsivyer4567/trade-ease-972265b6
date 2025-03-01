@@ -84,10 +84,10 @@ export const CurrentJobs: React.FC<CurrentJobsProps> = ({ jobs, onStatusUpdate }
                       
                       {job.status === 'to-invoice' && (
                         <button
-                          onClick={() => handleStatusChange(job.id, 'completed')}
+                          onClick={() => handleStatusChange(job.id, 'invoiced')}
                           className="px-3 py-1 text-xs bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
                         >
-                          Mark as Completed
+                          Mark as Invoiced
                         </button>
                       )}
                     </div>
