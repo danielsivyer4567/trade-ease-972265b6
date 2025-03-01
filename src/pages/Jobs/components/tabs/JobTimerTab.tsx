@@ -31,13 +31,13 @@ export const JobTimerTab = ({
           {(jobTimer % 60).toString().padStart(2, '0')}
         </div>
         <div className="flex flex-col items-center space-y-4">
-          {!hasLocationPermission && (
+          {hasLocationPermission === false && (
             <div className="text-sm text-red-500 mb-2">
               Location access is required to use the timer
             </div>
           )}
           <div className="flex items-center justify-center space-x-4">
-            {!hasLocationPermission ? (
+            {hasLocationPermission === false ? (
               <Button
                 onClick={handleTimerToggle}
                 variant="default"
