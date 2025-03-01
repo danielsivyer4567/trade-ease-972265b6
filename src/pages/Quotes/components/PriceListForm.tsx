@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -112,7 +111,7 @@ export const PriceListForm = ({ onAddItemToQuote, onChangeTab }: PriceListFormPr
           {
             name: newPriceItem.name,
             category: newPriceItem.category,
-            price: newPriceItem.price
+            price: newPriceItem.price.toString()
           }
         ])
         .select();
