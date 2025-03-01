@@ -49,7 +49,7 @@ export default function NewQuote() {
     try {
       setIsLoading(true);
       const { data, error } = await supabase
-        .from('price_list_items')
+        .from('price_list_items' as any)
         .select('*')
         .order('name', { ascending: true });
       
@@ -64,7 +64,7 @@ export default function NewQuote() {
       }
       
       if (data) {
-        const formattedData = data.map((item) => ({
+        const formattedData = data.map((item: any) => ({
           id: item.id,
           name: item.name,
           category: item.category,
@@ -177,14 +177,14 @@ export default function NewQuote() {
       setIsLoading(true);
       
       const { data, error } = await supabase
-        .from('price_list_items')
+        .from('price_list_items' as any)
         .insert([
           {
             name: newPriceItem.name,
             category: newPriceItem.category,
             price: newPriceItem.price
           }
-        ])
+        ] as any)
         .select();
       
       if (error) {
