@@ -12,10 +12,101 @@ const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiO
 export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
 
 // Helper function to auto-purchase leads
-// This functionality is temporarily disabled until proper database tables are set up
 export const checkAndAutoPurchaseLeads = async (userId: string) => {
-  // TODO: Implement this functionality once the required tables are set up in the database
-  console.log("Auto-purchase leads feature is temporarily disabled");
-  return;
-};
+  try {
+    // Get user's auto-purchase preferences
+    const { data: preferences, error: preferencesError } = await supabase
+      .from('auto_lead_preferences')
+      .select('*')
+      .eq('user_id', userId)
+      .single();
 
+    if (preferencesError || !preferences || !preferences.enabled) {
+      return;
+    }
+
+    // Get count of already auto-purchased leads this week
+    const startOfWeek = new Date();
+    startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay());
+    startOfWeek.setHours(0, 0, 0, 0);
+
+    const { count: purchasedThisWeek, error: countError } = await supabase
+      .from('lead_purchases')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', userId)
+      .eq('auto_purchased', true)
+      .gte('purchased_at', startOfWeek.toISOString());
+
+    if (countError) {
+      console.error("Error counting purchased leads:", countError);
+      return;
+    }
+
+    // If user hasn't reached their weekly limit
+    const maxPerWeek = preferences.preferences.maxPerWeek || 3;
+    if (purchasedThisWeek < maxPerWeek) {
+      // Find matching leads based on preferences
+      const { data: availableLeads, error: leadsError } = await supabase
+        .from('leads')
+        .select('*')
+        .eq('status', 'available')
+        .gte('budget_min', preferences.preferences.minBudget || 0);
+
+      if (leadsError || !availableLeads || availableLeads.length === 0) {
+        return;
+      }
+
+      // Filter leads by preferences (in a real app, this would be done in the database query)
+      const matchingLeads = availableLeads.filter(lead => {
+        // Check postcode preference
+        if (preferences.preferences.postcodes && preferences.preferences.postcodes.length > 0) {
+          if (!preferences.preferences.postcodes.includes(lead.postcode)) {
+            return false;
+          }
+        }
+
+        // Check job type preference
+        if (preferences.preferences.preferredTypes && preferences.preferences.preferredTypes.length > 0) {
+          if (!preferences.preferences.preferredTypes.includes(lead.job_type)) {
+            return false;
+          }
+        }
+
+        return true;
+      });
+
+      // Purchase the first matching lead
+      if (matchingLeads.length > 0) {
+        const leadToPurchase = matchingLeads[0];
+        
+        // Update lead status
+        const { error: updateError } = await supabase
+          .from('leads')
+          .update({ status: 'purchased' })
+          .eq('id', leadToPurchase.id);
+
+        if (updateError) {
+          console.error("Error updating lead status:", updateError);
+          return;
+        }
+
+        // Record the purchase
+        const { error: purchaseError } = await supabase
+          .from('lead_purchases')
+          .insert({
+            user_id: userId,
+            lead_id: leadToPurchase.id,
+            purchased_at: new Date().toISOString(),
+            auto_purchased: true,
+            cost: 5 // Assuming standard cost of 5 credits
+          });
+
+        if (purchaseError) {
+          console.error("Error recording lead purchase:", purchaseError);
+        }
+      }
+    }
+  } catch (error) {
+    console.error("Error in auto-purchase process:", error);
+  }
+};

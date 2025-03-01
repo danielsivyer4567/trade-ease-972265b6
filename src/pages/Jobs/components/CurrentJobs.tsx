@@ -1,103 +1,142 @@
 
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Job } from '@/types/job';
+import { Button } from "@/components/ui/button";
+import { Clock, Loader2, DollarSign, CheckCircle, Brush } from "lucide-react";
+import { Job } from "@/types/job";
+import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 interface CurrentJobsProps {
   jobs: Job[];
   onStatusUpdate: (jobId: string, newStatus: Job['status']) => void;
 }
 
-export const CurrentJobs: React.FC<CurrentJobsProps> = ({ jobs, onStatusUpdate }) => {
-  const inProgressJobs = jobs.filter(job => job.status === 'in-progress');
-
-  const getStatusClass = (status: Job['status']) => {
+export function CurrentJobs({ jobs, onStatusUpdate }: CurrentJobsProps) {
+  const navigate = useNavigate();
+  
+  const getStatusIcon = (status: Job['status']) => {
     switch (status) {
       case 'ready':
-        return 'bg-blue-100 text-blue-800';
+        return <Clock className="h-5 w-5 text-blue-500" />;
       case 'in-progress':
-        return 'bg-yellow-100 text-yellow-800';
+        return <Loader2 className="h-5 w-5 text-yellow-500" />;
       case 'to-invoice':
-        return 'bg-green-100 text-green-800';
+        return <CheckCircle className="h-6 w-6 text-green-500" />;
+      case 'invoiced':
+        return <CheckCircle className="h-5 w-5 text-green-500" />;
+      case 'clean-required':
+        return <Brush className="h-5 w-5 text-orange-500" />;
       default:
-        return 'bg-gray-100 text-gray-800';
+        return null;
     }
   };
 
-  const handleStatusChange = (jobId: string, newStatus: Job['status']) => {
+  const handleStatusChange = async (jobId: string, newStatus: Job['status']) => {
+    // If status is changing to clean-required, notify Paul Finch
+    if (newStatus === 'clean-required') {
+      try {
+        const { data, error } = await supabase.functions.invoke('notify-team-leader', {
+          body: { 
+            phoneNumber: '0430388131',
+            name: 'Paul Finch',
+            message: `Job ${jobId} requires cleaning. Please check the dashboard for details.`
+          }
+        });
+        
+        if (error) throw error;
+        
+        if (data.success) {
+          toast.success("Paul Finch has been notified about the cleaning requirement");
+        } else {
+          toast.error("Failed to send notification to Paul Finch");
+        }
+      } catch (error) {
+        console.error('Error sending notification:', error);
+        toast.error("Failed to send notification. Using fallback notification system.");
+      }
+    }
+    
+    // Call the original status update function
     onStatusUpdate(jobId, newStatus);
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Current Jobs</CardTitle>
-        <CardDescription>Jobs currently in progress or awaiting invoicing</CardDescription>
-      </CardHeader>
-      <CardContent>
-        {inProgressJobs.length === 0 ? (
-          <div className="text-center py-6 text-gray-500">
-            No jobs currently in progress
-          </div>
-        ) : (
-          <div className="grid gap-4 sm:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3">
-            {inProgressJobs.map((job) => (
-              <Card key={job.id} className="overflow-hidden border-l-4 border-l-yellow-400">
-                <CardContent className="p-4">
-                  <div className="flex flex-col gap-2">
-                    <div className="flex justify-between items-center">
-                      <Link to={`/jobs/${job.id}`} className="text-lg font-semibold hover:underline truncate max-w-[70%]">
-                        {job.title}
-                      </Link>
-                      <span className={`px-2 py-1 rounded-full text-xs whitespace-nowrap ${getStatusClass(job.status)}`}>
-                        {job.status === 'in-progress' ? 'In Progress' : 'To Invoice'}
+    <div>
+      <h2 className="text-2xl font-semibold mb-4">Current Jobs</h2>
+      <div className="bg-white rounded-lg shadow overflow-hidden">
+        <div className="max-h-[500px] overflow-y-auto">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50 sticky top-0">
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Job Number
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Job
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Customer
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Date
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Status
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Actions
+                </th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {jobs.map(job => (
+                <tr 
+                  key={job.id} 
+                  className="hover:bg-gray-50 cursor-pointer"
+                  onClick={() => navigate(`/jobs/${job.id}`)}
+                >
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm font-mono text-gray-900">{job.jobNumber}</div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm font-medium text-gray-900">{job.title || job.type}</div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm text-gray-500">{job.customer}</div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm text-gray-500">{job.date}</div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="flex items-center">
+                      {getStatusIcon(job.status)}
+                      <span className="ml-2 text-sm text-gray-500">
+                        {job.status === 'invoiced' ? 'Completed' : 
+                          job.status === 'clean-required' ? 'Clean Required (Paul Finch notified)' :
+                          job.status.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
                       </span>
                     </div>
-                    
-                    <div className="text-sm text-gray-500 truncate">
-                      Customer: {job.customer}
-                    </div>
-                    
-                    <div className="text-sm text-gray-500">
-                      Job #: {job.jobNumber}
-                    </div>
-                    
-                    <div className="text-sm text-gray-500">
-                      Type: {job.type}
-                    </div>
-                    
-                    <div className="flex justify-between items-center text-sm text-gray-500">
-                      <span>Team: {job.assignedTeam}</span>
-                      <span>{new Date(job.date).toLocaleDateString()}</span>
-                    </div>
-                    
-                    <div className="flex gap-2 mt-2">
-                      {job.status === 'in-progress' && (
-                        <button
-                          onClick={() => handleStatusChange(job.id, 'to-invoice')}
-                          className="px-3 py-1 text-xs bg-green-500 text-white rounded hover:bg-green-600 transition-colors"
-                        >
-                          Mark Ready for Invoice
-                        </button>
-                      )}
-                      
-                      {job.status === 'to-invoice' && (
-                        <button
-                          onClick={() => handleStatusChange(job.id, 'completed')}
-                          className="px-3 py-1 text-xs bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
-                        >
-                          Mark as Completed
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        )}
-      </CardContent>
-    </Card>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <select 
+                      className="text-sm border border-gray-300 rounded-md px-2 py-1"
+                      value={job.status}
+                      onClick={(e) => e.stopPropagation()}
+                      onChange={(e) => handleStatusChange(job.id, e.target.value as Job['status'])}
+                    >
+                      <option value="ready">Ready to Go</option>
+                      <option value="in-progress">In Progress</option>
+                      <option value="clean-required">Clean Required</option>
+                      <option value="to-invoice">To Invoice</option>
+                      <option value="invoiced">Completed</option>
+                    </select>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
   );
-};
+}
