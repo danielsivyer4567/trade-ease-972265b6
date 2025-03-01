@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { AppLayout } from "@/components/ui/AppLayout";
 import { Button } from "@/components/ui/button";
@@ -12,6 +12,7 @@ import { QuoteTemplateSelector } from "./components/QuoteTemplateSelector";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, Plus, Trash2, ChevronRight, ChevronLeft, Save, SendHorizontal, Search } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { supabase } from "@/integrations/supabase/client";
 
 export default function NewQuote() {
   const navigate = useNavigate();
@@ -24,24 +25,62 @@ export default function NewQuote() {
   const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
   const [searchPriceList, setSearchPriceList] = useState("");
   
-  const [priceListItems, setPriceListItems] = useState([
-    { id: "pl1", name: "Hourly Labor - Standard", category: "Labor", price: 85 },
-    { id: "pl2", name: "Hourly Labor - Premium", category: "Labor", price: 120 },
-    { id: "pl3", name: "Material - Pine Wood (per sqft)", category: "Materials", price: 3.50 },
-    { id: "pl4", name: "Material - Oak Wood (per sqft)", category: "Materials", price: 7.25 },
-    { id: "pl5", name: "Material - Tile (per sqft)", category: "Materials", price: 5.75 },
-    { id: "pl6", name: "Tool Rental - Basic Kit", category: "Equipment", price: 75 },
-    { id: "pl7", name: "Tool Rental - Premium Kit", category: "Equipment", price: 150 },
-    { id: "pl8", name: "Disposal Fee", category: "Services", price: 200 },
-    { id: "pl9", name: "Cleanup Service", category: "Services", price: 150 },
-    { id: "pl10", name: "Inspection Fee", category: "Services", price: 125 },
-  ]);
+  const [priceListItems, setPriceListItems] = useState<{
+    id: string;
+    name: string;
+    category: string;
+    price: number;
+  }[]>([]);
+  
+  const [isLoading, setIsLoading] = useState(false);
   
   const [newPriceItem, setNewPriceItem] = useState({
     name: "",
     category: "Materials",
     price: 0
   });
+  
+  const fetchPriceListItems = async () => {
+    try {
+      setIsLoading(true);
+      const { data, error } = await supabase
+        .from('price_list_items')
+        .select('*')
+        .order('name', { ascending: true });
+      
+      if (error) {
+        console.error('Error fetching price list items:', error);
+        toast({
+          title: "Error",
+          description: "Failed to load price list items",
+          variant: "destructive"
+        });
+        return;
+      }
+      
+      const formattedData = data.map(item => ({
+        id: item.id,
+        name: item.name,
+        category: item.category,
+        price: parseFloat(item.price)
+      }));
+      
+      setPriceListItems(formattedData);
+    } catch (error) {
+      console.error('Error in fetchPriceListItems:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load price list items",
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
+  useEffect(() => {
+    fetchPriceListItems();
+  }, []);
   
   const filteredPriceItems = priceListItems.filter(item => 
     item.name.toLowerCase().includes(searchPriceList.toLowerCase()) ||
@@ -108,7 +147,7 @@ export default function NewQuote() {
     setActiveTab("items");
   };
   
-  const handleAddNewPriceItem = () => {
+  const handleAddNewPriceItem = async () => {
     if (!newPriceItem.name) {
       toast({
         title: "Error",
@@ -127,28 +166,64 @@ export default function NewQuote() {
       return;
     }
     
-    const newItem = {
-      id: `pl${priceListItems.length + 1}`,
-      name: newPriceItem.name,
-      category: newPriceItem.category,
-      price: parseFloat(newPriceItem.price.toString())
-    };
-    
-    setPriceListItems([...priceListItems, newItem]);
-    
-    toast({
-      title: "Price List Item Added",
-      description: `${newItem.name} has been added to your price list`,
-    });
-    
-    setNewPriceItem({
-      name: "",
-      category: "Materials",
-      price: 0
-    });
+    try {
+      setIsLoading(true);
+      
+      const { data, error } = await supabase
+        .from('price_list_items')
+        .insert([
+          {
+            name: newPriceItem.name,
+            category: newPriceItem.category,
+            price: newPriceItem.price
+          }
+        ])
+        .select();
+      
+      if (error) {
+        console.error('Error adding price list item:', error);
+        toast({
+          title: "Error",
+          description: "Failed to add price list item to database",
+          variant: "destructive"
+        });
+        return;
+      }
+      
+      if (data && data.length > 0) {
+        const newItem = {
+          id: data[0].id,
+          name: data[0].name,
+          category: data[0].category,
+          price: parseFloat(data[0].price)
+        };
+        
+        setPriceListItems([...priceListItems, newItem]);
+        
+        toast({
+          title: "Price List Item Saved",
+          description: `${newItem.name} has been added to your price list`,
+        });
+        
+        setNewPriceItem({
+          name: "",
+          category: "Materials",
+          price: 0
+        });
+      }
+    } catch (error) {
+      console.error('Error in handleAddNewPriceItem:', error);
+      toast({
+        title: "Error",
+        description: "Failed to add price list item",
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
   
-  const handleSaveQuote = () => {
+  const handleSaveQuote = async () => {
     toast({
       title: "Quote Saved",
       description: "Quote has been saved successfully",
@@ -401,53 +476,74 @@ export default function NewQuote() {
                         <Button 
                           className="mt-3"
                           onClick={handleAddNewPriceItem}
+                          disabled={isLoading}
                         >
-                          <Plus className="h-4 w-4 mr-1" />
-                          Add to Price List
+                          {isLoading ? (
+                            <span className="flex items-center">
+                              <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                              </svg>
+                              Saving...
+                            </span>
+                          ) : (
+                            <>
+                              <Plus className="h-4 w-4 mr-1" />
+                              Add to Price List
+                            </>
+                          )}
                         </Button>
                       </div>
                       
                       <div className="border rounded-md overflow-hidden">
-                        <table className="w-full text-sm">
-                          <thead>
-                            <tr className="bg-gray-50 border-b">
-                              <th className="text-left py-2 px-4 font-medium">Item</th>
-                              <th className="text-left py-2 px-4 font-medium">Category</th>
-                              <th className="text-right py-2 px-4 font-medium">Price</th>
-                              <th className="text-center py-2 px-4 font-medium w-24">Action</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {filteredPriceItems.length > 0 ? (
-                              filteredPriceItems.map((item) => (
-                                <tr key={item.id} className="border-b hover:bg-gray-50">
-                                  <td className="py-3 px-4">{item.name}</td>
-                                  <td className="py-3 px-4">
-                                    <Badge variant="secondary" className="font-normal">
-                                      {item.category}
-                                    </Badge>
-                                  </td>
-                                  <td className="py-3 px-4 text-right">${item.price.toFixed(2)}</td>
-                                  <td className="py-3 px-4 text-center">
-                                    <Button 
-                                      size="sm" 
-                                      onClick={() => handleAddPriceListItem(item)}
-                                    >
-                                      <Plus className="h-4 w-4 mr-1" />
-                                      Add
-                                    </Button>
+                        {isLoading && priceListItems.length === 0 ? (
+                          <div className="p-8 text-center">
+                            <p className="text-gray-500">Loading price list items...</p>
+                          </div>
+                        ) : (
+                          <table className="w-full text-sm">
+                            <thead>
+                              <tr className="bg-gray-50 border-b">
+                                <th className="text-left py-2 px-4 font-medium">Item</th>
+                                <th className="text-left py-2 px-4 font-medium">Category</th>
+                                <th className="text-right py-2 px-4 font-medium">Price</th>
+                                <th className="text-center py-2 px-4 font-medium w-24">Action</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {filteredPriceItems.length > 0 ? (
+                                filteredPriceItems.map((item) => (
+                                  <tr key={item.id} className="border-b hover:bg-gray-50">
+                                    <td className="py-3 px-4">{item.name}</td>
+                                    <td className="py-3 px-4">
+                                      <Badge variant="secondary" className="font-normal">
+                                        {item.category}
+                                      </Badge>
+                                    </td>
+                                    <td className="py-3 px-4 text-right">${item.price.toFixed(2)}</td>
+                                    <td className="py-3 px-4 text-center">
+                                      <Button 
+                                        size="sm" 
+                                        onClick={() => handleAddPriceListItem(item)}
+                                      >
+                                        <Plus className="h-4 w-4 mr-1" />
+                                        Add
+                                      </Button>
+                                    </td>
+                                  </tr>
+                                ))
+                              ) : (
+                                <tr>
+                                  <td colSpan={4} className="py-8 text-center text-gray-500">
+                                    {searchPriceList ? 
+                                      "No items found matching your search criteria" : 
+                                      "No price list items found. Add some to get started."}
                                   </td>
                                 </tr>
-                              ))
-                            ) : (
-                              <tr>
-                                <td colSpan={4} className="py-8 text-center text-gray-500">
-                                  No items found matching your search criteria
-                                </td>
-                              </tr>
-                            )}
-                          </tbody>
-                        </table>
+                              )}
+                            </tbody>
+                          </table>
+                        )}
                       </div>
                     </div>
                     
