@@ -39,7 +39,17 @@ const Register = () => {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4 py-12 dark:bg-gray-900 sm:px-6 lg:px-8">
+    <div className="flex flex-col min-h-screen items-center justify-center bg-gray-50 px-4 py-12 dark:bg-gray-900 sm:px-6 lg:px-8">
+      {/* TradeEase Header */}
+      <div className="text-center mb-8">
+        <h1 className="text-4xl font-extrabold tracking-tight text-primary md:text-5xl lg:text-6xl">
+          TradeEase
+        </h1>
+        <p className="mt-2 text-xl text-gray-600 dark:text-gray-400">
+          Streamline your trade business
+        </p>
+      </div>
+      
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
           <CardTitle className="text-center text-2xl font-bold">Create an account</CardTitle>

@@ -1,11 +1,12 @@
+
 import React from 'react';
 import { AppLayout } from '@/components/ui/AppLayout';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import CurrentJobs from './components/CurrentJobs';
-import UnassignedJobs from './components/UnassignedJobs';
-import TemplateLibrary from './components/TemplateLibrary';
+import { CurrentJobs } from './components/CurrentJobs';
+import { UnassignedJobs } from './components/UnassignedJobs';
+import { TemplateLibrary } from './components/TemplateLibrary';
 // Correct the import for JobDetails
 import JobDetails from './JobDetails';
 
