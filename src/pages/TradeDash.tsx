@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { AppLayout } from "@/components/ui/AppLayout";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,7 +14,8 @@ import {
   Maximize2, 
   Calendar, 
   CheckCircle,
-  AlertCircle
+  AlertCircle,
+  TrendingUp
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -23,6 +23,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 // Comprehensive list of trade types
 const TRADE_TYPES = [
@@ -128,6 +129,17 @@ const mockLeads = [
   }
 ];
 
+// Mock ranking data
+const mockRankings = [
+  { id: 1, tradeName: "Sydney Plumbing Pro", category: "Plumbing", area: "Sydney CBD", responseRate: 95, jobsCompleted: 142, rating: 4.9 },
+  { id: 2, tradeName: "Elite Electricians", category: "Electrical", area: "North Sydney", responseRate: 92, jobsCompleted: 118, rating: 4.8 },
+  { id: 3, tradeName: "Master Carpenters", category: "Carpentry", area: "Eastern Suburbs", responseRate: 89, jobsCompleted: 97, rating: 4.7 },
+  { id: 4, tradeName: "Premium Painters", category: "Painting", area: "Inner West", responseRate: 91, jobsCompleted: 88, rating: 4.6 },
+  { id: 5, tradeName: "Complete Roofing", category: "Roofing", area: "Northern Beaches", responseRate: 87, jobsCompleted: 73, rating: 4.5 },
+  { id: 6, tradeName: "Green Gardens Landscaping", category: "Landscaping", area: "North Shore", responseRate: 85, jobsCompleted: 64, rating: 4.4 },
+  { id: 7, tradeName: "Perfect Tilers", category: "Tiling", area: "Sutherland Shire", responseRate: 84, jobsCompleted: 51, rating: 4.3 },
+];
+
 export default function TradeDash() {
   const [filters, setFilters] = useState({
     postcode: "",
@@ -143,6 +155,8 @@ export default function TradeDash() {
     { name: "Large Renovations", active: false },
     { name: "Small Quick Jobs", active: false },
   ]);
+  
+  const [activeTab, setActiveTab] = useState("marketplace");
 
   const availableLeads = mockLeads.filter(lead => lead.status === "available").length;
   const purchasedLeads = mockLeads.filter(lead => lead.status === "purchased").length;
@@ -227,181 +241,289 @@ export default function TradeDash() {
           </Card>
         </div>
         
-        {/* Filters section */}
-        <div className="flex items-center justify-between">
-          <h2 className="text-2xl font-semibold">Lead Marketplace</h2>
-          <Button 
-            onClick={toggleFilters} 
-            variant="outline" 
-            className="flex items-center gap-2"
-          >
-            <Filter className="h-4 w-4" />
-            {showFilters ? "Hide Filters" : "Show Filters"}
-          </Button>
-        </div>
-        
-        {showFilters && (
-          <Card className="border border-blue-100 bg-blue-50/50">
-            <CardHeader>
-              <CardTitle className="text-lg">Lead Filters</CardTitle>
-              <CardDescription>Set your preferences to find the right leads for your business</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="postcode">Postcode/Area</Label>
-                  <Input 
-                    id="postcode" 
-                    placeholder="e.g. 2000" 
-                    value={filters.postcode}
-                    onChange={(e) => handleFilterChange('postcode', e.target.value)}
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="minSize">Minimum Size (sqm)</Label>
-                  <Input 
-                    id="minSize" 
-                    type="number" 
-                    placeholder="e.g. 20" 
-                    value={filters.minSize}
-                    onChange={(e) => handleFilterChange('minSize', e.target.value)}
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="leadType">Lead Type</Label>
-                  <Select 
-                    value={filters.leadType} 
-                    onValueChange={(value) => handleFilterChange('leadType', value)}
-                  >
-                    <SelectTrigger id="leadType">
-                      <SelectValue placeholder="All Leads" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Leads</SelectItem>
-                      <SelectItem value="available">Available Only</SelectItem>
-                      <SelectItem value="purchased">Purchased Only</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="tradeType">Trade Type</Label>
-                  <Select 
-                    value={filters.tradeType} 
-                    onValueChange={(value) => handleFilterChange('tradeType', value)}
-                  >
-                    <SelectTrigger id="tradeType">
-                      <SelectValue placeholder="Select trade type" />
-                    </SelectTrigger>
-                    <SelectContent className="max-h-[200px] overflow-y-auto">
-                      {TRADE_TYPES.map((trade) => (
-                        <SelectItem key={trade} value={trade}>
-                          {trade}
-                        </SelectItem>
+        {/* Main content with tabs */}
+        <Tabs defaultValue="marketplace" className="w-full" onValueChange={setActiveTab}>
+          <div className="flex items-center justify-between mb-4">
+            <TabsList>
+              <TabsTrigger value="marketplace" className="flex items-center gap-2">
+                <Building className="h-4 w-4" />
+                Lead Marketplace
+              </TabsTrigger>
+              <TabsTrigger value="ranking" className="flex items-center gap-2">
+                <TrendingUp className="h-4 w-4" />
+                Easy Ranking
+              </TabsTrigger>
+            </TabsList>
+            
+            {activeTab === "marketplace" && (
+              <Button 
+                onClick={toggleFilters} 
+                variant="outline" 
+                className="flex items-center gap-2"
+              >
+                <Filter className="h-4 w-4" />
+                {showFilters ? "Hide Filters" : "Show Filters"}
+              </Button>
+            )}
+          </div>
+
+          <TabsContent value="marketplace" className="mt-0">
+            {showFilters && (
+              <Card className="border border-blue-100 bg-blue-50/50 mb-6">
+                <CardHeader>
+                  <CardTitle className="text-lg">Lead Filters</CardTitle>
+                  <CardDescription>Set your preferences to find the right leads for your business</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="postcode">Postcode/Area</Label>
+                      <Input 
+                        id="postcode" 
+                        placeholder="e.g. 2000" 
+                        value={filters.postcode}
+                        onChange={(e) => handleFilterChange('postcode', e.target.value)}
+                      />
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor="minSize">Minimum Size (sqm)</Label>
+                      <Input 
+                        id="minSize" 
+                        type="number" 
+                        placeholder="e.g. 20" 
+                        value={filters.minSize}
+                        onChange={(e) => handleFilterChange('minSize', e.target.value)}
+                      />
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor="leadType">Lead Type</Label>
+                      <Select 
+                        value={filters.leadType} 
+                        onValueChange={(value) => handleFilterChange('leadType', value)}
+                      >
+                        <SelectTrigger id="leadType">
+                          <SelectValue placeholder="All Leads" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">All Leads</SelectItem>
+                          <SelectItem value="available">Available Only</SelectItem>
+                          <SelectItem value="purchased">Purchased Only</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor="tradeType">Trade Type</Label>
+                      <Select 
+                        value={filters.tradeType} 
+                        onValueChange={(value) => handleFilterChange('tradeType', value)}
+                      >
+                        <SelectTrigger id="tradeType">
+                          <SelectValue placeholder="Select trade type" />
+                        </SelectTrigger>
+                        <SelectContent className="max-h-[200px] overflow-y-auto">
+                          {TRADE_TYPES.map((trade) => (
+                            <SelectItem key={trade} value={trade}>
+                              {trade}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    
+                    <div className="space-y-2 flex items-end">
+                      <Button className="w-full">Save Filter</Button>
+                    </div>
+                  </div>
+                  
+                  <div className="mt-4">
+                    <Label>Saved Filters</Label>
+                    <div className="flex flex-wrap gap-2 mt-2">
+                      {savedFilters.map((filter, index) => (
+                        <div 
+                          key={index}
+                          className={`px-3 py-1 rounded-full text-sm cursor-pointer ${
+                            filter.active 
+                              ? 'bg-blue-600 text-white' 
+                              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                          }`}
+                        >
+                          {filter.name}
+                        </div>
                       ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                
-                <div className="space-y-2 flex items-end">
-                  <Button className="w-full">Save Filter</Button>
-                </div>
-              </div>
-              
-              <div className="mt-4">
-                <Label>Saved Filters</Label>
-                <div className="flex flex-wrap gap-2 mt-2">
-                  {savedFilters.map((filter, index) => (
-                    <div 
-                      key={index}
-                      className={`px-3 py-1 rounded-full text-sm cursor-pointer ${
-                        filter.active 
-                          ? 'bg-blue-600 text-white' 
-                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                      }`}
-                    >
-                      {filter.name}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+            
+            {/* Leads display */}
+            <div className="space-y-4">
+              {filteredLeads.map((lead) => (
+                <Card key={lead.id} className={`border-l-4 ${lead.status === 'available' ? 'border-l-blue-500' : 'border-l-green-500'}`}>
+                  <CardHeader className="pb-2">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <CardTitle>{lead.title}</CardTitle>
+                        <CardDescription className="text-sm mt-1">
+                          {lead.description}
+                        </CardDescription>
+                      </div>
+                      <div className="text-right">
+                        <span className={`px-2 py-1 rounded-full text-xs ${
+                          lead.status === 'available' 
+                            ? 'bg-blue-100 text-blue-800' 
+                            : 'bg-green-100 text-green-800'
+                        }`}>
+                          {lead.status === 'available' ? 'Available' : 'Purchased'}
+                        </span>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="pb-2">
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                      <div className="flex items-center gap-2">
+                        <MapPin className="h-4 w-4 text-gray-500" />
+                        <span>{lead.suburb} ({lead.postcode})</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Maximize2 className="h-4 w-4 text-gray-500" />
+                        <span>{lead.size} sqm</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <DollarSign className="h-4 w-4 text-gray-500" />
+                        <span>{lead.budget}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Calendar className="h-4 w-4 text-gray-500" />
+                        <span>{lead.date}</span>
+                      </div>
+                    </div>
+                  </CardContent>
+                  <CardFooter className="flex justify-between pt-2">
+                    <div className="text-sm">
+                      {lead.status === 'purchased' ? (
+                        <div className="flex items-center gap-2">
+                          <Users className="h-4 w-4 text-gray-500" />
+                          <span>{lead.customerName} • Best contact: {lead.contactTime}</span>
+                        </div>
+                      ) : (
+                        <span className="text-gray-500">Contact details available after purchase</span>
+                      )}
+                    </div>
+                    {lead.status === 'available' && (
+                      <Button 
+                        onClick={() => buyLead(lead.id)}
+                        className="bg-green-600 hover:bg-green-700"
+                      >
+                        Buy Lead (5 credits)
+                      </Button>
+                    )}
+                    {lead.status === 'purchased' && (
+                      <Button variant="outline">
+                        View Details
+                      </Button>
+                    )}
+                  </CardFooter>
+                </Card>
+              ))}
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="ranking" className="mt-0">
+            <Card>
+              <CardHeader>
+                <CardTitle>Trade Professionals Ranking</CardTitle>
+                <CardDescription>See how you stack up against other trades in your area</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="grid grid-cols-7 gap-4 font-medium text-sm text-gray-500 pb-2 border-b">
+                    <div>Rank</div>
+                    <div className="col-span-2">Trade Name</div>
+                    <div>Category</div>
+                    <div>Response Rate</div>
+                    <div>Jobs Completed</div>
+                    <div>Rating</div>
+                  </div>
+                  
+                  {mockRankings.map((ranking, index) => (
+                    <div key={ranking.id} className="grid grid-cols-7 gap-4 text-sm py-2 border-b border-gray-100">
+                      <div className="font-bold text-lg flex items-center">{index + 1}</div>
+                      <div className="col-span-2 font-medium">{ranking.tradeName}</div>
+                      <div>{ranking.category}</div>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span>{ranking.responseRate}%</span>
+                          <Progress value={ranking.responseRate} className="h-2 w-16" />
+                        </div>
+                      </div>
+                      <div>{ranking.jobsCompleted}</div>
+                      <div className="flex items-center gap-1">
+                        <span>{ranking.rating}</span>
+                        <div className="text-yellow-500">★</div>
+                      </div>
                     </div>
                   ))}
                 </div>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-        
-        {/* Leads display */}
-        <div className="space-y-4">
-          {filteredLeads.map((lead) => (
-            <Card key={lead.id} className={`border-l-4 ${lead.status === 'available' ? 'border-l-blue-500' : 'border-l-green-500'}`}>
-              <CardHeader className="pb-2">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <CardTitle>{lead.title}</CardTitle>
-                    <CardDescription className="text-sm mt-1">
-                      {lead.description}
-                    </CardDescription>
-                  </div>
-                  <div className="text-right">
-                    <span className={`px-2 py-1 rounded-full text-xs ${
-                      lead.status === 'available' 
-                        ? 'bg-blue-100 text-blue-800' 
-                        : 'bg-green-100 text-green-800'
-                    }`}>
-                      {lead.status === 'available' ? 'Available' : 'Purchased'}
-                    </span>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent className="pb-2">
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                  <div className="flex items-center gap-2">
-                    <MapPin className="h-4 w-4 text-gray-500" />
-                    <span>{lead.suburb} ({lead.postcode})</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Maximize2 className="h-4 w-4 text-gray-500" />
-                    <span>{lead.size} sqm</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <DollarSign className="h-4 w-4 text-gray-500" />
-                    <span>{lead.budget}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Calendar className="h-4 w-4 text-gray-500" />
-                    <span>{lead.date}</span>
-                  </div>
-                </div>
               </CardContent>
-              <CardFooter className="flex justify-between pt-2">
-                <div className="text-sm">
-                  {lead.status === 'purchased' ? (
-                    <div className="flex items-center gap-2">
-                      <Users className="h-4 w-4 text-gray-500" />
-                      <span>{lead.customerName} • Best contact: {lead.contactTime}</span>
-                    </div>
-                  ) : (
-                    <span className="text-gray-500">Contact details available after purchase</span>
-                  )}
-                </div>
-                {lead.status === 'available' && (
-                  <Button 
-                    onClick={() => buyLead(lead.id)}
-                    className="bg-green-600 hover:bg-green-700"
-                  >
-                    Buy Lead (5 credits)
-                  </Button>
-                )}
-                {lead.status === 'purchased' && (
-                  <Button variant="outline">
-                    View Details
-                  </Button>
-                )}
+              <CardFooter className="flex justify-between">
+                <span className="text-sm text-gray-500">Last updated: Today, 9:45 AM</span>
+                <Button variant="outline" className="text-sm">
+                  See My Ranking
+                </Button>
               </CardFooter>
             </Card>
-          ))}
-        </div>
+            
+            <Card className="mt-6">
+              <CardHeader>
+                <CardTitle>Improve Your Ranking</CardTitle>
+                <CardDescription>Tips to climb up the Easy Ranking ladder</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ul className="space-y-3">
+                  <li className="flex items-start gap-2">
+                    <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <p className="font-medium">Respond quickly to new leads</p>
+                      <p className="text-sm text-gray-600">Aim to respond within 1 hour for the best results</p>
+                    </div>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <p className="font-medium">Complete jobs on time</p>
+                      <p className="text-sm text-gray-600">On-time completion boosts your reliability score</p>
+                    </div>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <p className="font-medium">Ask for reviews</p>
+                      <p className="text-sm text-gray-600">Encourage satisfied customers to leave positive feedback</p>
+                    </div>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <p className="font-medium">Update your profile regularly</p>
+                      <p className="text-sm text-gray-600">Keep your portfolio and trade information up to date</p>
+                    </div>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <p className="font-medium">Maintain accurate availability</p>
+                      <p className="text-sm text-gray-600">This helps match you with leads you can actually take on</p>
+                    </div>
+                  </li>
+                </ul>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
       </div>
     </AppLayout>
   );
