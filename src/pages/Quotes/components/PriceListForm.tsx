@@ -7,12 +7,15 @@ import { Plus, Search } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { Textarea } from "@/components/ui/textarea";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export interface PriceListItem {
   id: string;
   name: string;
   category: string;
   price: number;
+  description?: string;
   created_at?: string;
   updated_at?: string;
 }
@@ -27,11 +30,13 @@ export const PriceListForm = ({ onAddItemToQuote, onChangeTab }: PriceListFormPr
   const [searchPriceList, setSearchPriceList] = useState("");
   const [priceListItems, setPriceListItems] = useState<PriceListItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [activeItemTab, setActiveItemTab] = useState("basic");
   
   const [newPriceItem, setNewPriceItem] = useState({
     name: "",
     category: "Materials",
-    price: 0
+    price: 0,
+    description: ""
   });
 
   const fetchPriceListItems = async () => {
@@ -57,7 +62,8 @@ export const PriceListForm = ({ onAddItemToQuote, onChangeTab }: PriceListFormPr
           id: item.id,
           name: item.name,
           category: item.category,
-          price: parseFloat(item.price)
+          price: parseFloat(item.price),
+          description: item.description || ""
         }));
         
         setPriceListItems(formattedData);
@@ -111,7 +117,8 @@ export const PriceListForm = ({ onAddItemToQuote, onChangeTab }: PriceListFormPr
           {
             name: newPriceItem.name,
             category: newPriceItem.category,
-            price: newPriceItem.price.toString()
+            price: newPriceItem.price,
+            description: newPriceItem.description
           }
         ])
         .select();
@@ -131,7 +138,8 @@ export const PriceListForm = ({ onAddItemToQuote, onChangeTab }: PriceListFormPr
           id: data[0].id,
           name: data[0].name,
           category: data[0].category,
-          price: parseFloat(data[0].price)
+          price: parseFloat(data[0].price),
+          description: data[0].description || ""
         };
         
         setPriceListItems([...priceListItems, newItem]);
@@ -144,7 +152,8 @@ export const PriceListForm = ({ onAddItemToQuote, onChangeTab }: PriceListFormPr
         setNewPriceItem({
           name: "",
           category: "Materials",
-          price: 0
+          price: 0,
+          description: ""
         });
       }
     } catch (error) {
@@ -182,51 +191,78 @@ export const PriceListForm = ({ onAddItemToQuote, onChangeTab }: PriceListFormPr
       
       <div className="border rounded-md p-4 bg-gray-50">
         <h3 className="font-medium mb-3">Add New Price List Item</h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div>
-            <Label htmlFor="item-name">Item Name</Label>
-            <Input
-              id="item-name"
-              placeholder="Enter item name"
-              value={newPriceItem.name}
-              onChange={(e) => setNewPriceItem({...newPriceItem, name: e.target.value})}
-              className="mt-1"
-            />
-          </div>
-          <div>
-            <Label htmlFor="item-category">Category</Label>
-            <Select 
-              value={newPriceItem.category}
-              onValueChange={(value) => setNewPriceItem({...newPriceItem, category: value})}
-            >
-              <SelectTrigger id="item-category" className="mt-1">
-                <SelectValue placeholder="Select a category" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="Labor">Labor</SelectItem>
-                <SelectItem value="Materials">Materials</SelectItem>
-                <SelectItem value="Equipment">Equipment</SelectItem>
-                <SelectItem value="Services">Services</SelectItem>
-                <SelectItem value="Other">Other</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <div>
-            <Label htmlFor="item-price">Price ($)</Label>
-            <Input
-              id="item-price"
-              type="number"
-              placeholder="0.00"
-              value={newPriceItem.price}
-              onChange={(e) => setNewPriceItem({...newPriceItem, price: parseFloat(e.target.value) || 0})}
-              className="mt-1"
-              min="0"
-              step="0.01"
-            />
-          </div>
-        </div>
+        
+        <Tabs value={activeItemTab} onValueChange={setActiveItemTab} className="w-full">
+          <TabsList className="w-full mb-4">
+            <TabsTrigger value="basic" className="flex-1">Basic Info</TabsTrigger>
+            <TabsTrigger value="description" className="flex-1">Description</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="basic" className="mt-0">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <Label htmlFor="item-name">Item Name</Label>
+                <Input
+                  id="item-name"
+                  placeholder="Enter item name"
+                  value={newPriceItem.name}
+                  onChange={(e) => setNewPriceItem({...newPriceItem, name: e.target.value})}
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <Label htmlFor="item-category">Category</Label>
+                <Select 
+                  value={newPriceItem.category}
+                  onValueChange={(value) => setNewPriceItem({...newPriceItem, category: value})}
+                >
+                  <SelectTrigger id="item-category" className="mt-1">
+                    <SelectValue placeholder="Select a category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Labor">Labor</SelectItem>
+                    <SelectItem value="Materials">Materials</SelectItem>
+                    <SelectItem value="Equipment">Equipment</SelectItem>
+                    <SelectItem value="Services">Services</SelectItem>
+                    <SelectItem value="Other">Other</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label htmlFor="item-price">Price ($)</Label>
+                <Input
+                  id="item-price"
+                  type="number"
+                  placeholder="0.00"
+                  value={newPriceItem.price}
+                  onChange={(e) => setNewPriceItem({...newPriceItem, price: parseFloat(e.target.value) || 0})}
+                  className="mt-1"
+                  min="0"
+                  step="0.01"
+                />
+              </div>
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="description" className="mt-0">
+            <div>
+              <Label htmlFor="item-description">Item Description</Label>
+              <Textarea
+                id="item-description"
+                placeholder="Enter detailed description of the item..."
+                value={newPriceItem.description}
+                onChange={(e) => setNewPriceItem({...newPriceItem, description: e.target.value})}
+                className="mt-1 min-h-32"
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                Add details about specifications, usage, warranty, or any other relevant information.
+              </p>
+            </div>
+          </TabsContent>
+        </Tabs>
+        
         <Button 
-          className="mt-3"
+          className="mt-4"
           onClick={handleAddNewPriceItem}
           disabled={isLoading}
         >
@@ -266,7 +302,16 @@ export const PriceListForm = ({ onAddItemToQuote, onChangeTab }: PriceListFormPr
               {filteredPriceItems.length > 0 ? (
                 filteredPriceItems.map((item) => (
                   <tr key={item.id} className="border-b hover:bg-gray-50">
-                    <td className="py-3 px-4">{item.name}</td>
+                    <td className="py-3 px-4">
+                      <div>
+                        {item.name}
+                        {item.description && (
+                          <p className="text-xs text-gray-500 mt-1 truncate max-w-xs">
+                            {item.description}
+                          </p>
+                        )}
+                      </div>
+                    </td>
                     <td className="py-3 px-4">
                       <Badge variant="secondary" className="font-normal">
                         {item.category}
