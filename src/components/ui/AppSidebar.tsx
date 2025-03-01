@@ -110,7 +110,7 @@ export function AppSidebar() {
 
           <nav className="flex-1 p-2 space-y-1 overflow-y-auto">
             <TooltipProvider delayDuration={0}>
-              {renderNavLink(<Bell className="w-4 h-4 flex-shrink-0" />, "Notifications", "/notifications")}
+              {renderNavLink(<Bell className="w-4 h-4 flex-shrink-0" />, "Notifications", "/settings/notifications")}
 
               {[
                 { icon: LayoutDashboard, label: 'Dashboard', path: '/' },
@@ -129,8 +129,10 @@ export function AppSidebar() {
                 { icon: LinkIcon, label: 'Refer a Friend', path: '/referrals' },
                 { icon: Database, label: 'Database', path: '/database' },
                 { icon: Settings, label: 'Settings', path: '/settings' },
-              ].map(({ icon: Icon, label, path }) => (
-                renderNavLink(<Icon className="w-4 h-4 flex-shrink-0" />, label, path)
+              ].map(({ icon: Icon, label, path }, index) => (
+                <React.Fragment key={path + index}>
+                  {renderNavLink(<Icon className="w-4 h-4 flex-shrink-0" />, label, path)}
+                </React.Fragment>
               ))}
             </TooltipProvider>
 
