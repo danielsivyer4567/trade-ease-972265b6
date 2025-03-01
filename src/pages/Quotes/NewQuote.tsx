@@ -9,10 +9,19 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { QuoteTemplateSelector } from "./components/QuoteTemplateSelector";
-import { useToast } from "@/hooks/use-toast";
+import { useToast } from "@/components/ui/toast";
 import { ArrowLeft, Plus, Trash2, ChevronRight, ChevronLeft, Save, SendHorizontal, Search } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
+
+interface PriceListItem {
+  id: string;
+  name: string;
+  category: string;
+  price: number;
+  created_at?: string;
+  updated_at?: string;
+}
 
 export default function NewQuote() {
   const navigate = useNavigate();
@@ -25,12 +34,7 @@ export default function NewQuote() {
   const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
   const [searchPriceList, setSearchPriceList] = useState("");
   
-  const [priceListItems, setPriceListItems] = useState<{
-    id: string;
-    name: string;
-    category: string;
-    price: number;
-  }[]>([]);
+  const [priceListItems, setPriceListItems] = useState<PriceListItem[]>([]);
   
   const [isLoading, setIsLoading] = useState(false);
   
@@ -44,7 +48,7 @@ export default function NewQuote() {
     try {
       setIsLoading(true);
       const { data, error } = await supabase
-        .from('price_list_items')
+        .from('price_list_items' as any)
         .select('*')
         .order('name', { ascending: true });
       
@@ -58,7 +62,7 @@ export default function NewQuote() {
         return;
       }
       
-      const formattedData = data.map(item => ({
+      const formattedData = data.map((item: any) => ({
         id: item.id,
         name: item.name,
         category: item.category,
@@ -129,7 +133,7 @@ export default function NewQuote() {
     ]);
   };
   
-  const handleAddPriceListItem = (item: typeof priceListItems[0]) => {
+  const handleAddPriceListItem = (item: PriceListItem) => {
     const newItem = {
       description: item.name,
       quantity: 1,
@@ -170,14 +174,14 @@ export default function NewQuote() {
       setIsLoading(true);
       
       const { data, error } = await supabase
-        .from('price_list_items')
+        .from('price_list_items' as any)
         .insert([
           {
             name: newPriceItem.name,
             category: newPriceItem.category,
             price: newPriceItem.price
           }
-        ])
+        ] as any)
         .select();
       
       if (error) {
