@@ -5,7 +5,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
-
 const Register = () => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -16,7 +15,6 @@ const Register = () => {
   const {
     register
   } = useAuth();
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (password !== confirmPassword) {
@@ -35,7 +33,6 @@ const Register = () => {
       setIsLoading(false);
     }
   };
-
   return <div className="flex flex-col md:flex-row min-h-screen items-center justify-center bg-gray-50 px-4 py-12 dark:bg-gray-900 sm:px-6 lg:px-8">
       <div className="hidden md:flex flex-col items-start justify-center h-full md:w-64 lg:w-96 space-y-8 mb-8 md:mb-0 md:mr-12">
         <div className="space-y-4 px-0 py-0 mx-0">
@@ -61,7 +58,7 @@ const Register = () => {
             <CardDescription className="text-center">Enter your information to create an account</CardDescription>
           </CardHeader>
           <form onSubmit={handleSubmit}>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-4 px-[15px] py-[25px] mx-[5px] my-[4px]">
               <div className="space-y-2">
                 <label htmlFor="name" className="text-sm font-medium">Full Name</label>
                 <Input id="name" type="text" value={name} onChange={e => setName(e.target.value)} placeholder="John Doe" required />
@@ -95,5 +92,4 @@ const Register = () => {
       </div>
     </div>;
 };
-
 export default Register;
