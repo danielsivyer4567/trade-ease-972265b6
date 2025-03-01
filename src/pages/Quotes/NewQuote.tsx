@@ -24,7 +24,7 @@ export default function NewQuote() {
   const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
   const [searchPriceList, setSearchPriceList] = useState("");
   
-  const priceListItems = [
+  const [priceListItems, setPriceListItems] = useState([
     { id: "pl1", name: "Hourly Labor - Standard", category: "Labor", price: 85 },
     { id: "pl2", name: "Hourly Labor - Premium", category: "Labor", price: 120 },
     { id: "pl3", name: "Material - Pine Wood (per sqft)", category: "Materials", price: 3.50 },
@@ -35,7 +35,13 @@ export default function NewQuote() {
     { id: "pl8", name: "Disposal Fee", category: "Services", price: 200 },
     { id: "pl9", name: "Cleanup Service", category: "Services", price: 150 },
     { id: "pl10", name: "Inspection Fee", category: "Services", price: 125 },
-  ];
+  ]);
+  
+  const [newPriceItem, setNewPriceItem] = useState({
+    name: "",
+    category: "Materials",
+    price: 0
+  });
   
   const filteredPriceItems = priceListItems.filter(item => 
     item.name.toLowerCase().includes(searchPriceList.toLowerCase()) ||
@@ -100,6 +106,46 @@ export default function NewQuote() {
     });
     
     setActiveTab("items");
+  };
+  
+  const handleAddNewPriceItem = () => {
+    if (!newPriceItem.name) {
+      toast({
+        title: "Error",
+        description: "Please enter a name for the price list item",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    if (newPriceItem.price <= 0) {
+      toast({
+        title: "Error",
+        description: "Price must be greater than 0",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    const newItem = {
+      id: `pl${priceListItems.length + 1}`,
+      name: newPriceItem.name,
+      category: newPriceItem.category,
+      price: parseFloat(newPriceItem.price.toString())
+    };
+    
+    setPriceListItems([...priceListItems, newItem]);
+    
+    toast({
+      title: "Price List Item Added",
+      description: `${newItem.name} has been added to your price list`,
+    });
+    
+    setNewPriceItem({
+      name: "",
+      category: "Materials",
+      price: 0
+    });
   };
   
   const handleSaveQuote = () => {
@@ -305,6 +351,60 @@ export default function NewQuote() {
                             onChange={(e) => setSearchPriceList(e.target.value)}
                           />
                         </div>
+                      </div>
+                      
+                      <div className="border rounded-md p-4 bg-gray-50">
+                        <h3 className="font-medium mb-3">Add New Price List Item</h3>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                          <div>
+                            <Label htmlFor="item-name">Item Name</Label>
+                            <Input
+                              id="item-name"
+                              placeholder="Enter item name"
+                              value={newPriceItem.name}
+                              onChange={(e) => setNewPriceItem({...newPriceItem, name: e.target.value})}
+                              className="mt-1"
+                            />
+                          </div>
+                          <div>
+                            <Label htmlFor="item-category">Category</Label>
+                            <Select 
+                              value={newPriceItem.category}
+                              onValueChange={(value) => setNewPriceItem({...newPriceItem, category: value})}
+                            >
+                              <SelectTrigger id="item-category" className="mt-1">
+                                <SelectValue placeholder="Select a category" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="Labor">Labor</SelectItem>
+                                <SelectItem value="Materials">Materials</SelectItem>
+                                <SelectItem value="Equipment">Equipment</SelectItem>
+                                <SelectItem value="Services">Services</SelectItem>
+                                <SelectItem value="Other">Other</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div>
+                            <Label htmlFor="item-price">Price ($)</Label>
+                            <Input
+                              id="item-price"
+                              type="number"
+                              placeholder="0.00"
+                              value={newPriceItem.price}
+                              onChange={(e) => setNewPriceItem({...newPriceItem, price: parseFloat(e.target.value) || 0})}
+                              className="mt-1"
+                              min="0"
+                              step="0.01"
+                            />
+                          </div>
+                        </div>
+                        <Button 
+                          className="mt-3"
+                          onClick={handleAddNewPriceItem}
+                        >
+                          <Plus className="h-4 w-4 mr-1" />
+                          Add to Price List
+                        </Button>
                       </div>
                       
                       <div className="border rounded-md overflow-hidden">
