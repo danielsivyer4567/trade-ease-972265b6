@@ -1,9 +1,15 @@
+
 import { AppLayout } from "@/components/ui/AppLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Settings, DollarSign, Receipt, Clock, Users, Shield, FileText, Calendar, List, CreditCard, User, Bot, Briefcase, Network, Mail, FileJson, Building, Share, Zap, Search, Link2 } from "lucide-react";
+import { Settings, DollarSign, Receipt, Clock, Users, Shield, FileText, Calendar, List, CreditCard, User, Bot, Briefcase, Network, Mail, FileJson, Building, Share, Zap, Search, Link2, Bell, Globe } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const settingsSections = [{
+  title: "Notifications",
+  icon: Bell,
+  description: "Configure notification settings",
+  path: "/notifications"
+}, {
   title: "Trade Rates",
   icon: DollarSign,
   description: "Calculate and manage trade rates",
@@ -88,6 +94,11 @@ const settingsSections = [{
   icon: Search,
   description: "Configure inquiry handling",
   path: "/settings/inquiries"
+}, {
+  title: "Web Enquiry Form",
+  icon: Globe,
+  description: "Configure web form for enquiries",
+  path: "/notifications?tab=web-enquiry"
 }, {
   title: "Email",
   icon: Mail,
