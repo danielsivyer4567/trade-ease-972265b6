@@ -19,7 +19,7 @@ export function AppLayout({ children, className }: AppLayoutProps) {
           "peer-data-[state=expanded]:ml-[240px] peer-data-[state=collapsed]:ml-[60px]",
           className
         )}>
-          <div className="relative mx-auto max-w-7xl glass-card p-6 rounded-lg">
+          <div className="relative mx-auto max-w-7xl glass-card p-6 rounded-lg border-2 border-white/50 shadow-2xl">
             {children}
           </div>
         </main>
