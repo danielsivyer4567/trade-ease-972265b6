@@ -91,6 +91,32 @@ export const QuotePreview = ({ quoteItems, onPrevTab }: QuotePreviewProps) => {
             <p className="text-sm">Email: john@example.com</p>
           </div>
         </div>
+
+        {/* File upload section - moved above the pricing table */}
+        <div className="mt-6 border-t pt-4">
+          <h3 className="font-medium mb-2 flex items-center">
+            <FileImage className="mr-2 h-4 w-4" />
+            Attach Images to Quote
+          </h3>
+          <FileUpload 
+            onFileUpload={handleFileUpload}
+            label="Drag and drop images or click to browse"
+          />
+          {uploadedFiles.length > 0 && (
+            <div className="mt-2">
+              <p className="text-sm text-gray-600">
+                {uploadedFiles.length} file(s) attached to quote
+              </p>
+            </div>
+          )}
+        </div>
+        
+        {previewImages.length > 0 && (
+          <div className="mt-4">
+            <h3 className="font-medium mb-2">Attached Photos</h3>
+            <ImagesGrid images={previewImages} />
+          </div>
+        )}
         
         <div className="mt-8">
           <table className="w-full text-sm">
@@ -129,36 +155,10 @@ export const QuotePreview = ({ quoteItems, onPrevTab }: QuotePreviewProps) => {
           </table>
         </div>
         
-        {previewImages.length > 0 && (
-          <div className="mt-6 border-t pt-4">
-            <h3 className="font-medium mb-2">Attached Photos</h3>
-            <ImagesGrid images={previewImages} />
-          </div>
-        )}
-        
         <div className="mt-8 border-t pt-4">
           <h3 className="font-medium mb-2">Terms & Conditions</h3>
           <p className="text-sm">Payment due within 14 days of quote acceptance. This quote is valid for 30 days from the date of issue.</p>
         </div>
-      </div>
-      
-      {/* File upload section */}
-      <div className="border rounded-md p-4 bg-gray-50">
-        <h3 className="font-medium mb-2 flex items-center">
-          <FileImage className="mr-2 h-4 w-4" />
-          Attach Images to Quote
-        </h3>
-        <FileUpload 
-          onFileUpload={handleFileUpload}
-          label="Drag and drop images or click to browse"
-        />
-        {uploadedFiles.length > 0 && (
-          <div className="mt-2">
-            <p className="text-sm text-gray-600">
-              {uploadedFiles.length} file(s) attached to quote
-            </p>
-          </div>
-        )}
       </div>
       
       <div className="flex justify-between mt-6">
