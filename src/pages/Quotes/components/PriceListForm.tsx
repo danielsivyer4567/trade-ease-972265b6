@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -117,8 +118,8 @@ export const PriceListForm = ({ onAddItemToQuote, onChangeTab }: PriceListFormPr
           {
             name: newPriceItem.name,
             category: newPriceItem.category,
-            price: newPriceItem.price,
-            description: newPriceItem.description
+            price: newPriceItem.price.toString(), // Fix: Convert number to string
+            description: newPriceItem.description // This will be null if the column doesn't exist
           }
         ])
         .select();
@@ -134,12 +135,15 @@ export const PriceListForm = ({ onAddItemToQuote, onChangeTab }: PriceListFormPr
       }
       
       if (data && Array.isArray(data) && data.length > 0) {
+        // Create a new item with the same shape as our PriceListItem interface
         const newItem: PriceListItem = {
           id: data[0].id,
           name: data[0].name,
           category: data[0].category,
           price: parseFloat(data[0].price),
-          description: data[0].description || ""
+          description: data[0].description || "", // Handle missing description
+          created_at: data[0].created_at,
+          updated_at: data[0].updated_at
         };
         
         setPriceListItems([...priceListItems, newItem]);
