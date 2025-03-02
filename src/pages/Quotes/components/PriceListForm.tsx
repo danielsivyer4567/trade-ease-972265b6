@@ -112,16 +112,15 @@ export const PriceListForm = ({ onAddItemToQuote, onChangeTab }: PriceListFormPr
     try {
       setIsLoading(true);
       
+      // Fix 1: Convert price to number in the insert operation and exclude description from insertion
+      // since it's not in the table schema
       const { data, error } = await supabase
         .from('price_list_items')
-        .insert([
-          {
-            name: newPriceItem.name,
-            category: newPriceItem.category,
-            price: newPriceItem.price.toString(), // Fix: Convert number to string
-            description: newPriceItem.description // This will be null if the column doesn't exist
-          }
-        ])
+        .insert({
+          name: newPriceItem.name,
+          category: newPriceItem.category,
+          price: newPriceItem.price, // Price should be number, not string
+        })
         .select();
       
       if (error) {
@@ -135,15 +134,16 @@ export const PriceListForm = ({ onAddItemToQuote, onChangeTab }: PriceListFormPr
       }
       
       if (data && Array.isArray(data) && data.length > 0) {
-        // Create a new item with the same shape as our PriceListItem interface
+        // Fix 2 & 3: Create item with correct property types and without description property
         const newItem: PriceListItem = {
           id: data[0].id,
           name: data[0].name,
           category: data[0].category,
-          price: parseFloat(data[0].price),
-          description: data[0].description || "", // Handle missing description
+          price: parseFloat(data[0].price.toString()), // Ensure it's a number
           created_at: data[0].created_at,
-          updated_at: data[0].updated_at
+          updated_at: data[0].updated_at,
+          // We'll handle description in our interface but not expect it from database
+          description: "" // Add an empty description since it's optional in our interface
         };
         
         setPriceListItems([...priceListItems, newItem]);
