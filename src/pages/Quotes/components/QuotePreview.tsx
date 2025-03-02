@@ -1,10 +1,12 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, Save, SendHorizontal } from "lucide-react";
+import { ChevronLeft, Save, SendHorizontal, FileImage } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { QuoteItem } from "./QuoteItemsForm";
+import { FileUpload } from "@/components/tasks/FileUpload";
+import { ImagesGrid } from "@/components/tasks/ImagesGrid";
 
 interface QuotePreviewProps {
   quoteItems: QuoteItem[];
@@ -14,8 +16,32 @@ interface QuotePreviewProps {
 export const QuotePreview = ({ quoteItems, onPrevTab }: QuotePreviewProps) => {
   const { toast } = useToast();
   const navigate = useNavigate();
+  const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
+  const [previewImages, setPreviewImages] = useState<string[]>([]);
   
   const totalAmount = quoteItems.reduce((sum, item) => sum + item.total, 0);
+  
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      const newFiles = Array.from(e.target.files);
+      setUploadedFiles(prev => [...prev, ...newFiles]);
+      
+      // Create preview URLs for images
+      const newPreviewUrls = newFiles.map(file => {
+        if (file.type.startsWith('image/')) {
+          return URL.createObjectURL(file);
+        }
+        return '';
+      }).filter(url => url !== '');
+      
+      setPreviewImages(prev => [...prev, ...newPreviewUrls]);
+      
+      toast({
+        title: "Files Uploaded",
+        description: `${newFiles.length} file(s) added to quote`,
+      });
+    }
+  };
   
   const handleSaveQuote = async () => {
     toast({
@@ -103,10 +129,36 @@ export const QuotePreview = ({ quoteItems, onPrevTab }: QuotePreviewProps) => {
           </table>
         </div>
         
+        {previewImages.length > 0 && (
+          <div className="mt-6 border-t pt-4">
+            <h3 className="font-medium mb-2">Attached Photos</h3>
+            <ImagesGrid images={previewImages} />
+          </div>
+        )}
+        
         <div className="mt-8 border-t pt-4">
           <h3 className="font-medium mb-2">Terms & Conditions</h3>
           <p className="text-sm">Payment due within 14 days of quote acceptance. This quote is valid for 30 days from the date of issue.</p>
         </div>
+      </div>
+      
+      {/* File upload section */}
+      <div className="border rounded-md p-4 bg-gray-50">
+        <h3 className="font-medium mb-2 flex items-center">
+          <FileImage className="mr-2 h-4 w-4" />
+          Attach Images to Quote
+        </h3>
+        <FileUpload 
+          onFileUpload={handleFileUpload}
+          label="Drag and drop images or click to browse"
+        />
+        {uploadedFiles.length > 0 && (
+          <div className="mt-2">
+            <p className="text-sm text-gray-600">
+              {uploadedFiles.length} file(s) attached to quote
+            </p>
+          </div>
+        )}
       </div>
       
       <div className="flex justify-between mt-6">
