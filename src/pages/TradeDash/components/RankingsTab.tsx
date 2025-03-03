@@ -19,8 +19,10 @@ interface RankingsTabProps {
 export const RankingsTab: React.FC<RankingsTabProps> = ({ rankings }) => {
   return (
     <div className="space-y-4">
-      <h2 className="text-2xl font-semibold">Top Tradespeople Rankings</h2>
-      <RankingsTable rankings={rankings} />
+      <h2 className="text-2xl font-semibold mb-4">Top Tradespeople Rankings</h2>
+      <div className="bg-white/80 backdrop-blur-sm rounded-lg shadow-md p-4">
+        <RankingsTable rankings={rankings} />
+      </div>
     </div>
   );
 };

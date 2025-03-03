@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { cn } from '@/lib/utils';
 import { SidebarProvider } from '../ui/sidebar';
@@ -14,7 +15,7 @@ export function AppLayout({
       <div className="min-h-screen min-w-full flex bg-transparent">
         <AppSidebar />
         <main className={cn("flex-1 p-4 md:p-6 overflow-auto transition-[margin] duration-300 ease-in-out", "peer-data-[state=expanded]:ml-[240px] peer-data-[state=collapsed]:ml-[60px]", className)}>
-          <div className="relative mx-auto max-w-7xl glass-card p-6 rounded-lg border-2 border-white/50 shadow-2xl bg-[#adadad]">
+          <div className="relative mx-auto max-w-7xl glass-card p-6 rounded-lg border-2 border-white/50 shadow-2xl">
             {children}
           </div>
         </main>
