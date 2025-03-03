@@ -2,10 +2,11 @@
 import { AppLayout } from "@/components/ui/AppLayout";
 import { ListTodo } from "lucide-react";
 import { TaskManager } from "@/components/tasks/TaskManager";
+import { TeamMember } from "@/components/tasks/types";
 
 // Mock data
 const teams = ['Red Team', 'Blue Team', 'Green Team'];
-const teamMembers = [{
+const teamMembers: TeamMember[] = [{
   id: '1',
   name: 'John Doe',
   role: 'team_leader'

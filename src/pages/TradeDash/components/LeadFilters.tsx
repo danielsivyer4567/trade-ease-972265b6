@@ -21,12 +21,14 @@ interface FiltersProps {
   };
   savedFilters: SavedFilter[];
   onFilterChange: (field: string, value: string) => void;
+  onSavedFilterToggle: (index: number) => void;
 }
 
 export const LeadFilters: React.FC<FiltersProps> = ({ 
   filters, 
   savedFilters, 
-  onFilterChange 
+  onFilterChange,
+  onSavedFilterToggle
 }) => {
   return (
     <div className="bg-gray-50 rounded-md p-4 space-y-4">
@@ -82,11 +84,12 @@ export const LeadFilters: React.FC<FiltersProps> = ({
       <div>
         <h4 className="text-md font-medium">Saved Filters</h4>
         <div className="flex gap-2">
-          {savedFilters.map(filter => (
+          {savedFilters.map((filter, index) => (
             <Button 
               key={filter.name} 
               variant={filter.active ? "default" : "outline"} 
               size="sm"
+              onClick={() => onSavedFilterToggle(index)}
             >
               {filter.name}
             </Button>

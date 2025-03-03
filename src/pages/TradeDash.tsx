@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { AppLayout } from "@/components/ui/AppLayout";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -117,6 +116,22 @@ export default function TradeDash() {
     });
   };
 
+  const toggleSavedFilter = (index: number) => {
+    const newFilters = [...savedFilters];
+    newFilters[index].active = !newFilters[index].active;
+    setSavedFilters(newFilters);
+    
+    if (newFilters[index].active) {
+      if (index === 0) { // Sydney CBD Jobs
+        setFilters({...filters, postcode: "2000"});
+      } else if (index === 1) { // Large Renovations
+        setFilters({...filters, minSize: "100"});
+      } else if (index === 2) { // Small Quick Jobs
+        setFilters({...filters, maxBudget: "2000"});
+      }
+    }
+  };
+
   const availableLeads = mockLeads.filter(lead => lead.status === "available").length;
   const purchasedLeads = mockLeads.filter(lead => lead.status === "purchased").length;
   
@@ -208,6 +223,7 @@ export default function TradeDash() {
               filters={filters}
               savedFilters={savedFilters}
               onFilterChange={handleFilterChange}
+              onSavedFilterToggle={toggleSavedFilter}
               onClaimFreeLead={claimFreeLead}
               onBuyLead={buyLead}
             />
