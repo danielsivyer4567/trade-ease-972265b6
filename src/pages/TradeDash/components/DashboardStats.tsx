@@ -47,7 +47,10 @@ export const DashboardStats = ({
       
       {/* Lead Credits Card moved down and stretched full width */}
       <div className="w-full">
-        <LeadCreditsCard creditsBalance={creditsBalance} />
+        <LeadCreditsCard 
+          creditsBalance={creditsBalance} 
+          usedLeadsThisWeek={1} // Hardcoded for now since we don't have access to this prop in this component
+        />
       </div>
     </div>
   );
