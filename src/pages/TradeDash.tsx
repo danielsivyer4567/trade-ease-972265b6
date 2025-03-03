@@ -19,7 +19,9 @@ import {
   Star,
   Award,
   Settings,
-  ToggleLeft
+  ToggleLeft,
+  AlertTriangle,
+  Sliders
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -182,6 +184,20 @@ export default function TradeDash() {
     preferredTypes: ["Kitchen Renovation", "Bathroom Remodel"],
     postcodes: []
   });
+  const [showAdvancedFiltersDialog, setShowAdvancedFiltersDialog] = useState(false);
+  const [advancedAutoLeadEnabled, setAdvancedAutoLeadEnabled] = useState(false);
+  const [advancedAutoLeadPreferences, setAdvancedAutoLeadPreferences] = useState({
+    maxPerWeek: 3,
+    minBudget: "5000",
+    maxDistance: "25",
+    preferredTypes: [],
+    postcodes: [],
+    minSize: "0",
+    maxSize: "500",
+    serviceAreas: []
+  });
+  const [serviceArea, setServiceArea] = useState("");
+  const [usedLeadsThisWeek, setUsedLeadsThisWeek] = useState(1);
   const [preferredPostcode, setPreferredPostcode] = useState("");
 
   const loadAutoLeadPreferences = async () => {
@@ -219,6 +235,34 @@ export default function TradeDash() {
     });
   };
 
+  const saveAdvancedAutoLeadPreferences = async () => {
+    try {
+      // In a real app, this would save to the database
+      toast.success("Advanced auto-purchase preferences saved successfully!");
+      setShowAdvancedFiltersDialog(false);
+    } catch (error) {
+      console.error("Error saving advanced auto-lead preferences:", error);
+      toast.error("Failed to save advanced auto-purchase preferences");
+    }
+  };
+
+  const addServiceArea = () => {
+    if (serviceArea && !advancedAutoLeadPreferences.serviceAreas.includes(serviceArea)) {
+      setAdvancedAutoLeadPreferences({
+        ...advancedAutoLeadPreferences,
+        serviceAreas: [...advancedAutoLeadPreferences.serviceAreas, serviceArea]
+      });
+      setServiceArea("");
+    }
+  };
+
+  const removeServiceArea = (area) => {
+    setAdvancedAutoLeadPreferences({
+      ...advancedAutoLeadPreferences,
+      serviceAreas: advancedAutoLeadPreferences.serviceAreas.filter(a => a !== area)
+    });
+  };
+
   const availableLeads = mockLeads.filter(lead => lead.status === "available").length;
   const purchasedLeads = mockLeads.filter(lead => lead.status === "purchased").length;
   
@@ -238,6 +282,9 @@ export default function TradeDash() {
     
     fetchFreeLeads();
     loadAutoLeadPreferences();
+
+    // Simulate used leads for the week
+    setUsedLeadsThisWeek(Math.floor(Math.random() * 3));
   }, []);
   
   const filteredLeads = mockLeads.filter(lead => {
@@ -337,169 +384,403 @@ export default function TradeDash() {
                 <Button size="sm" className="w-full">
                   Buy More Credits
                 </Button>
-                <Dialog open={showAutoLeadDialog} onOpenChange={setShowAutoLeadDialog}>
-                  <DialogTrigger asChild>
-                    <Button 
-                      size="sm" 
-                      variant="outline" 
-                      className="w-full flex items-center gap-1"
-                    >
-                      <Settings className="h-4 w-4" />
-                      Auto-Purchase Settings
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="sm:max-w-[500px]">
-                    <DialogHeader>
-                      <DialogTitle>Auto-Purchase Lead Settings</DialogTitle>
-                      <DialogDescription>
-                        Configure automatic lead purchases (max 3 per week)
-                      </DialogDescription>
-                    </DialogHeader>
-                    <div className="space-y-4 py-4">
-                      <div className="flex items-center justify-between">
-                        <Label htmlFor="auto-purchase-toggle" className="font-medium">
-                          Enable Auto-Purchase
-                        </Label>
-                        <Switch
-                          id="auto-purchase-toggle"
-                          checked={autoPurchaseEnabled}
-                          onCheckedChange={setAutoPurchaseEnabled}
-                        />
-                      </div>
-                      
-                      {autoPurchaseEnabled && (
-                        <>
-                          <div className="space-y-2">
-                            <Label htmlFor="max-per-week">Maximum Leads Per Week</Label>
-                            <Select 
-                              value={autoLeadPreferences.maxPerWeek.toString()} 
-                              onValueChange={v => setAutoLeadPreferences({
-                                ...autoLeadPreferences,
-                                maxPerWeek: parseInt(v)
-                              })}
-                            >
-                              <SelectTrigger id="max-per-week">
-                                <SelectValue placeholder="Select maximum" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="1">1 per week</SelectItem>
-                                <SelectItem value="2">2 per week</SelectItem>
-                                <SelectItem value="3">3 per week</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </div>
-                          
-                          <div className="space-y-2">
-                            <Label htmlFor="min-budget">Minimum Budget</Label>
-                            <div className="flex items-center gap-2">
-                              <span className="text-sm text-gray-500">$</span>
+                <div className="flex gap-2">
+                  <Dialog open={showAutoLeadDialog} onOpenChange={setShowAutoLeadDialog}>
+                    <DialogTrigger asChild>
+                      <Button 
+                        size="sm" 
+                        variant="outline" 
+                        className="w-full flex items-center gap-1"
+                      >
+                        <Settings className="h-4 w-4" />
+                        Standard Auto-Purchase
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="sm:max-w-[500px]">
+                      <DialogHeader>
+                        <DialogTitle>Auto-Purchase Lead Settings</DialogTitle>
+                        <DialogDescription>
+                          Configure automatic lead purchases (max 3 per week)
+                        </DialogDescription>
+                      </DialogHeader>
+                      <div className="space-y-4 py-4">
+                        <div className="flex items-center justify-between">
+                          <Label htmlFor="auto-purchase-toggle" className="font-medium">
+                            Enable Auto-Purchase
+                          </Label>
+                          <Switch
+                            id="auto-purchase-toggle"
+                            checked={autoPurchaseEnabled}
+                            onCheckedChange={setAutoPurchaseEnabled}
+                          />
+                        </div>
+                        
+                        {autoPurchaseEnabled && (
+                          <>
+                            <div className="space-y-2">
+                              <Label htmlFor="max-per-week">Maximum Leads Per Week</Label>
+                              <Select 
+                                value={autoLeadPreferences.maxPerWeek.toString()} 
+                                onValueChange={v => setAutoLeadPreferences({
+                                  ...autoLeadPreferences,
+                                  maxPerWeek: parseInt(v)
+                                })}
+                              >
+                                <SelectTrigger id="max-per-week">
+                                  <SelectValue placeholder="Select maximum" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="1">1 per week</SelectItem>
+                                  <SelectItem value="2">2 per week</SelectItem>
+                                  <SelectItem value="3">3 per week</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            
+                            <div className="space-y-2">
+                              <Label htmlFor="min-budget">Minimum Budget</Label>
+                              <div className="flex items-center gap-2">
+                                <span className="text-sm text-gray-500">$</span>
+                                <Input
+                                  id="min-budget"
+                                  type="number"
+                                  value={autoLeadPreferences.minBudget}
+                                  onChange={(e) => setAutoLeadPreferences({
+                                    ...autoLeadPreferences,
+                                    minBudget: e.target.value
+                                  })}
+                                  placeholder="5000"
+                                />
+                              </div>
+                            </div>
+                            
+                            <div className="space-y-2">
+                              <Label htmlFor="max-distance">Maximum Distance (km)</Label>
                               <Input
-                                id="min-budget"
+                                id="max-distance"
                                 type="number"
-                                value={autoLeadPreferences.minBudget}
+                                value={autoLeadPreferences.maxDistance}
                                 onChange={(e) => setAutoLeadPreferences({
                                   ...autoLeadPreferences,
-                                  minBudget: e.target.value
+                                  maxDistance: e.target.value
                                 })}
-                                placeholder="5000"
+                                placeholder="25"
                               />
                             </div>
-                          </div>
-                          
-                          <div className="space-y-2">
-                            <Label htmlFor="max-distance">Maximum Distance (km)</Label>
-                            <Input
-                              id="max-distance"
-                              type="number"
-                              value={autoLeadPreferences.maxDistance}
-                              onChange={(e) => setAutoLeadPreferences({
-                                ...autoLeadPreferences,
-                                maxDistance: e.target.value
-                              })}
-                              placeholder="25"
-                            />
-                          </div>
-                          
-                          <div className="space-y-2">
-                            <Label>Preferred Postcodes</Label>
-                            <div className="flex gap-2">
-                              <Input
-                                value={preferredPostcode}
-                                onChange={(e) => setPreferredPostcode(e.target.value)}
-                                placeholder="e.g. 2000"
-                              />
-                              <Button 
-                                type="button" 
-                                variant="secondary" 
-                                onClick={addPreferredPostcode}
-                              >
-                                Add
-                              </Button>
-                            </div>
-                            <div className="flex flex-wrap gap-2 mt-2">
-                              {autoLeadPreferences.postcodes.map((postcode) => (
-                                <div 
-                                  key={postcode}
-                                  className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-sm flex items-center gap-1"
+                            
+                            <div className="space-y-2">
+                              <Label>Preferred Postcodes</Label>
+                              <div className="flex gap-2">
+                                <Input
+                                  value={preferredPostcode}
+                                  onChange={(e) => setPreferredPostcode(e.target.value)}
+                                  placeholder="e.g. 2000"
+                                />
+                                <Button 
+                                  type="button" 
+                                  variant="secondary" 
+                                  onClick={addPreferredPostcode}
                                 >
-                                  {postcode}
-                                  <button 
-                                    onClick={() => removePreferredPostcode(postcode)}
-                                    className="text-blue-600 hover:text-blue-800"
+                                  Add
+                                </Button>
+                              </div>
+                              <div className="flex flex-wrap gap-2 mt-2">
+                                {autoLeadPreferences.postcodes.map((postcode) => (
+                                  <div 
+                                    key={postcode}
+                                    className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-sm flex items-center gap-1"
                                   >
-                                    ×
-                                  </button>
-                                </div>
-                              ))}
-                              {autoLeadPreferences.postcodes.length === 0 && (
-                                <p className="text-sm text-gray-500">No preferred postcodes added</p>
-                              )}
+                                    {postcode}
+                                    <button 
+                                      onClick={() => removePreferredPostcode(postcode)}
+                                      className="text-blue-600 hover:text-blue-800"
+                                    >
+                                      ×
+                                    </button>
+                                  </div>
+                                ))}
+                                {autoLeadPreferences.postcodes.length === 0 && (
+                                  <p className="text-sm text-gray-500">No preferred postcodes added</p>
+                                )}
+                              </div>
                             </div>
-                          </div>
-                          
-                          <div className="space-y-2">
-                            <Label>Job Types</Label>
-                            <div className="grid grid-cols-2 gap-2 mt-2">
-                              {["Kitchen Renovation", "Bathroom Remodel", "Deck Construction", "House Painting", "Flooring Installation"].map((type) => (
-                                <div key={type} className="flex items-center space-x-2">
-                                  <Checkbox 
-                                    id={`job-type-${type}`}
-                                    checked={autoLeadPreferences.preferredTypes.includes(type)}
-                                    onCheckedChange={(checked) => {
-                                      if (checked) {
-                                        setAutoLeadPreferences({
-                                          ...autoLeadPreferences,
-                                          preferredTypes: [...autoLeadPreferences.preferredTypes, type]
-                                        });
-                                      } else {
-                                        setAutoLeadPreferences({
-                                          ...autoLeadPreferences,
-                                          preferredTypes: autoLeadPreferences.preferredTypes.filter(t => t !== type)
-                                        });
-                                      }
-                                    }}
-                                  />
-                                  <label
-                                    htmlFor={`job-type-${type}`}
-                                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                                  >
-                                    {type}
-                                  </label>
-                                </div>
-                              ))}
+                            
+                            <div className="space-y-2">
+                              <Label>Job Types</Label>
+                              <div className="grid grid-cols-2 gap-2 mt-2">
+                                {["Kitchen Renovation", "Bathroom Remodel", "Deck Construction", "House Painting", "Flooring Installation"].map((type) => (
+                                  <div key={type} className="flex items-center space-x-2">
+                                    <Checkbox 
+                                      id={`job-type-${type}`}
+                                      checked={autoLeadPreferences.preferredTypes.includes(type)}
+                                      onCheckedChange={(checked) => {
+                                        if (checked) {
+                                          setAutoLeadPreferences({
+                                            ...autoLeadPreferences,
+                                            preferredTypes: [...autoLeadPreferences.preferredTypes, type]
+                                          });
+                                        } else {
+                                          setAutoLeadPreferences({
+                                            ...autoLeadPreferences,
+                                            preferredTypes: autoLeadPreferences.preferredTypes.filter(t => t !== type)
+                                          });
+                                        }
+                                      }}
+                                    />
+                                    <label
+                                      htmlFor={`job-type-${type}`}
+                                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                                    >
+                                      {type}
+                                    </label>
+                                  </div>
+                                ))}
+                              </div>
                             </div>
-                          </div>
-                        </>
-                      )}
-                    </div>
-                    <DialogFooter>
-                      <Button variant="outline" onClick={() => setShowAutoLeadDialog(false)}>
-                        Cancel
+                          </>
+                        )}
+                      </div>
+                      <DialogFooter>
+                        <Button variant="outline" onClick={() => setShowAutoLeadDialog(false)}>
+                          Cancel
+                        </Button>
+                        <Button onClick={saveAutoLeadPreferences}>Save Preferences</Button>
+                      </DialogFooter>
+                    </DialogContent>
+                  </Dialog>
+                  
+                  <Dialog open={showAdvancedFiltersDialog} onOpenChange={setShowAdvancedFiltersDialog}>
+                    <DialogTrigger asChild>
+                      <Button 
+                        size="sm" 
+                        variant="outline" 
+                        className="w-full flex items-center gap-1 bg-purple-50 text-purple-800 border-purple-300 hover:bg-purple-100"
+                      >
+                        <Sliders className="h-4 w-4" />
+                        Advanced Auto-Purchase
                       </Button>
-                      <Button onClick={saveAutoLeadPreferences}>Save Preferences</Button>
-                    </DialogFooter>
-                  </DialogContent>
-                </Dialog>
+                    </DialogTrigger>
+                    <DialogContent className="sm:max-w-[550px]">
+                      <DialogHeader>
+                        <DialogTitle>Advanced Auto-Purchase Lead Settings</DialogTitle>
+                        <DialogDescription>
+                          Configure targeted auto-purchase with advanced filters (max 3 per week)
+                        </DialogDescription>
+                      </DialogHeader>
+                      <div className="space-y-4 py-4">
+                        <div className="flex items-center justify-between">
+                          <Label htmlFor="advanced-auto-purchase-toggle" className="font-medium">
+                            Enable Advanced Auto-Purchase
+                          </Label>
+                          <Switch
+                            id="advanced-auto-purchase-toggle"
+                            checked={advancedAutoLeadEnabled}
+                            onCheckedChange={setAdvancedAutoLeadEnabled}
+                          />
+                        </div>
+                        
+                        {advancedAutoLeadEnabled && (
+                          <>
+                            <div className="bg-amber-50 p-3 rounded-md border border-amber-200 flex items-center gap-3">
+                              <AlertTriangle className="h-5 w-5 text-amber-600 flex-shrink-0" />
+                              <p className="text-sm text-amber-800">
+                                You have used <span className="font-bold">{usedLeadsThisWeek}/3</span> auto-purchased leads this week.
+                              </p>
+                            </div>
+                            
+                            <div className="space-y-2">
+                              <Label htmlFor="advanced-max-per-week">Maximum Leads Per Week</Label>
+                              <div className="text-sm text-gray-500 mb-1">
+                                Maximum of 3 leads can be auto-purchased per week
+                              </div>
+                              <Select 
+                                value={advancedAutoLeadPreferences.maxPerWeek.toString()} 
+                                onValueChange={v => setAdvancedAutoLeadPreferences({
+                                  ...advancedAutoLeadPreferences,
+                                  maxPerWeek: parseInt(v)
+                                })}
+                              >
+                                <SelectTrigger id="advanced-max-per-week">
+                                  <SelectValue placeholder="Select maximum" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="1">1 per week</SelectItem>
+                                  <SelectItem value="2">2 per week</SelectItem>
+                                  <SelectItem value="3">3 per week</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            
+                            <div className="space-y-2">
+                              <Label htmlFor="adv-min-budget">Minimum Budget</Label>
+                              <div className="flex items-center gap-2">
+                                <span className="text-sm text-gray-500">$</span>
+                                <Input
+                                  id="adv-min-budget"
+                                  type="number"
+                                  value={advancedAutoLeadPreferences.minBudget}
+                                  onChange={(e) => setAdvancedAutoLeadPreferences({
+                                    ...advancedAutoLeadPreferences,
+                                    minBudget: e.target.value
+                                  })}
+                                  placeholder="5000"
+                                />
+                              </div>
+                            </div>
+                            
+                            <div className="grid grid-cols-2 gap-4">
+                              <div className="space-y-2">
+                                <Label htmlFor="adv-min-size">Minimum Size (sqm)</Label>
+                                <Input
+                                  id="adv-min-size"
+                                  type="number"
+                                  value={advancedAutoLeadPreferences.minSize}
+                                  onChange={(e) => setAdvancedAutoLeadPreferences({
+                                    ...advancedAutoLeadPreferences,
+                                    minSize: e.target.value
+                                  })}
+                                  placeholder="0"
+                                />
+                              </div>
+                              <div className="space-y-2">
+                                <Label htmlFor="adv-max-size">Maximum Size (sqm)</Label>
+                                <Input
+                                  id="adv-max-size"
+                                  type="number"
+                                  value={advancedAutoLeadPreferences.maxSize}
+                                  onChange={(e) => setAdvancedAutoLeadPreferences({
+                                    ...advancedAutoLeadPreferences,
+                                    maxSize: e.target.value
+                                  })}
+                                  placeholder="500"
+                                />
+                              </div>
+                            </div>
+                            
+                            <div className="space-y-2">
+                              <Label>Preferred Postcodes</Label>
+                              <div className="text-sm text-gray-500 mb-1">
+                                Auto-purchase leads only from these postal codes
+                              </div>
+                              <div className="flex gap-2">
+                                <Input
+                                  value={preferredPostcode}
+                                  onChange={(e) => setPreferredPostcode(e.target.value)}
+                                  placeholder="e.g. 2000"
+                                />
+                                <Button 
+                                  type="button" 
+                                  variant="secondary" 
+                                  onClick={addPreferredPostcode}
+                                >
+                                  Add
+                                </Button>
+                              </div>
+                              <div className="flex flex-wrap gap-2 mt-2">
+                                {advancedAutoLeadPreferences.postcodes.map((postcode) => (
+                                  <div 
+                                    key={postcode}
+                                    className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-sm flex items-center gap-1"
+                                  >
+                                    {postcode}
+                                    <button 
+                                      onClick={() => removePreferredPostcode(postcode)}
+                                      className="text-blue-600 hover:text-blue-800"
+                                    >
+                                      ×
+                                    </button>
+                                  </div>
+                                ))}
+                                {advancedAutoLeadPreferences.postcodes.length === 0 && (
+                                  <p className="text-sm text-gray-500">No preferred postcodes added</p>
+                                )}
+                              </div>
+                            </div>
+                            
+                            <div className="space-y-2">
+                              <Label>Service Areas</Label>
+                              <div className="text-sm text-gray-500 mb-1">
+                                Add suburbs or regions you're willing to service
+                              </div>
+                              <div className="flex gap-2">
+                                <Input
+                                  value={serviceArea}
+                                  onChange={(e) => setServiceArea(e.target.value)}
+                                  placeholder="e.g. Northern Beaches"
+                                />
+                                <Button 
+                                  type="button" 
+                                  variant="secondary" 
+                                  onClick={addServiceArea}
+                                >
+                                  Add
+                                </Button>
+                              </div>
+                              <div className="flex flex-wrap gap-2 mt-2">
+                                {advancedAutoLeadPreferences.serviceAreas.map((area) => (
+                                  <div 
+                                    key={area}
+                                    className="bg-green-100 text-green-800 px-2 py-1 rounded-full text-sm flex items-center gap-1"
+                                  >
+                                    {area}
+                                    <button 
+                                      onClick={() => removeServiceArea(area)}
+                                      className="text-green-600 hover:text-green-800"
+                                    >
+                                      ×
+                                    </button>
+                                  </div>
+                                ))}
+                                {advancedAutoLeadPreferences.serviceAreas.length === 0 && (
+                                  <p className="text-sm text-gray-500">No service areas added</p>
+                                )}
+                              </div>
+                            </div>
+                            
+                            <div className="space-y-2">
+                              <Label>Preferred Services</Label>
+                              <div className="grid grid-cols-2 gap-2 mt-2">
+                                {["Kitchen Renovation", "Bathroom Remodel", "Deck Construction", "House Painting", "Flooring Installation", "Plastering", "Tiling", "Plumbing", "Electrical Work"].map((type) => (
+                                  <div key={type} className="flex items-center space-x-2">
+                                    <Checkbox 
+                                      id={`adv-job-type-${type}`}
+                                      checked={advancedAutoLeadPreferences.preferredTypes.includes(type)}
+                                      onCheckedChange={(checked) => {
+                                        if (checked) {
+                                          setAdvancedAutoLeadPreferences({
+                                            ...advancedAutoLeadPreferences,
+                                            preferredTypes: [...advancedAutoLeadPreferences.preferredTypes, type]
+                                          });
+                                        } else {
+                                          setAdvancedAutoLeadPreferences({
+                                            ...advancedAutoLeadPreferences,
+                                            preferredTypes: advancedAutoLeadPreferences.preferredTypes.filter(t => t !== type)
+                                          });
+                                        }
+                                      }}
+                                    />
+                                    <label
+                                      htmlFor={`adv-job-type-${type}`}
+                                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                                    >
+                                      {type}
+                                    </label>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          </>
+                        )}
+                      </div>
+                      <DialogFooter>
+                        <Button variant="outline" onClick={() => setShowAdvancedFiltersDialog(false)}>
+                          Cancel
+                        </Button>
+                        <Button onClick={saveAdvancedAutoLeadPreferences}>Save Preferences</Button>
+                      </DialogFooter>
+                    </DialogContent>
+                  </Dialog>
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -555,356 +836,4 @@ export default function TradeDash() {
           <Card className="bg-gradient-to-r from-amber-50 to-yellow-100 border-yellow-200">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <div className="flex items-center gap-2">
-                <Award className="h-5 w-5 text-yellow-500" />
-                <CardTitle className="text-base font-medium text-yellow-800">
-                  Top 10 Trade Reward
-                </CardTitle>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-yellow-700">
-                Congratulations! As one of our top 10 rated trades, you receive <strong>{freeLeads} free leads</strong> each week.
-              </p>
-              <div className="flex items-center gap-2 mt-2">
-                <Progress value={(freeLeads / 3) * 100} className="h-2 flex-1 bg-yellow-200" />
-                <span className="text-sm font-medium text-yellow-700">{freeLeads}/3 remaining</span>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-        
-        {autoPurchaseEnabled && (
-          <Card className="bg-gradient-to-r from-blue-50 to-indigo-100 border-blue-200">
-            <CardContent className="py-4">
-              <div className="flex items-center gap-3">
-                <div className="bg-blue-200 p-2 rounded-full">
-                  <ToggleLeft className="h-5 w-5 text-blue-700" />
-                </div>
-                <div>
-                  <h3 className="font-medium text-blue-800">Auto-Purchase Leads Active</h3>
-                  <p className="text-sm text-blue-700">
-                    System will auto-purchase up to {autoLeadPreferences.maxPerWeek} leads per week matching your preferences.
-                    <Button 
-                      variant="link" 
-                      className="p-0 h-auto text-blue-800 font-medium" 
-                      onClick={() => setShowAutoLeadDialog(true)}
-                    >
-                      Adjust settings
-                    </Button>
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-        
-        <Tabs defaultValue="marketplace" className="w-full" onValueChange={setActiveTab}>
-          <div className="flex items-center justify-between mb-4">
-            <TabsList>
-              <TabsTrigger value="marketplace" className="flex items-center gap-2">
-                <Building className="h-4 w-4" />
-                Lead Marketplace
-              </TabsTrigger>
-              <TabsTrigger value="ranking" className="flex items-center gap-2">
-                <TrendingUp className="h-4 w-4" />
-                Easy Ranking
-              </TabsTrigger>
-            </TabsList>
-            
-            {activeTab === "marketplace" && (
-              <Button 
-                onClick={toggleFilters} 
-                variant="outline" 
-                className="flex items-center gap-2"
-              >
-                <Filter className="h-4 w-4" />
-                {showFilters ? "Hide Filters" : "Show Filters"}
-              </Button>
-            )}
-          </div>
-
-          <TabsContent value="marketplace" className="mt-0">
-            {showFilters && (
-              <Card className="border border-blue-100 bg-blue-50/50 mb-6">
-                <CardHeader>
-                  <CardTitle className="text-lg">Lead Filters</CardTitle>
-                  <CardDescription>Set your preferences to find the right leads for your business</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="postcode">Postcode/Area</Label>
-                      <Input 
-                        id="postcode" 
-                        placeholder="e.g. 2000" 
-                        value={filters.postcode}
-                        onChange={(e) => handleFilterChange('postcode', e.target.value)}
-                      />
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <Label htmlFor="minSize">Minimum Size (sqm)</Label>
-                      <Input 
-                        id="minSize" 
-                        type="number" 
-                        placeholder="e.g. 20" 
-                        value={filters.minSize}
-                        onChange={(e) => handleFilterChange('minSize', e.target.value)}
-                      />
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <Label htmlFor="leadType">Lead Type</Label>
-                      <Select 
-                        value={filters.leadType} 
-                        onValueChange={(value) => handleFilterChange('leadType', value)}
-                      >
-                        <SelectTrigger id="leadType">
-                          <SelectValue placeholder="All Leads" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="all">All Leads</SelectItem>
-                          <SelectItem value="available">Available Only</SelectItem>
-                          <SelectItem value="purchased">Purchased Only</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <Label htmlFor="tradeType">Trade Type</Label>
-                      <Select 
-                        value={filters.tradeType} 
-                        onValueChange={(value) => handleFilterChange('tradeType', value)}
-                      >
-                        <SelectTrigger id="tradeType">
-                          <SelectValue placeholder="Select trade type" />
-                        </SelectTrigger>
-                        <SelectContent className="max-h-[200px] overflow-y-auto">
-                          {TRADE_TYPES.map((trade) => (
-                            <SelectItem key={trade} value={trade}>
-                              {trade}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    
-                    <div className="space-y-2 flex items-end">
-                      <Button className="w-full">Save Filter</Button>
-                    </div>
-                  </div>
-                  
-                  <div className="mt-4">
-                    <Label>Saved Filters</Label>
-                    <div className="flex flex-wrap gap-2 mt-2">
-                      {savedFilters.map((filter, index) => (
-                        <div 
-                          key={index}
-                          className={`px-3 py-1 rounded-full text-sm cursor-pointer ${
-                            filter.active 
-                              ? 'bg-blue-600 text-white' 
-                              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                          }`}
-                        >
-                          {filter.name}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-            
-            <div className="space-y-4">
-              {filteredLeads.map((lead) => (
-                <Card key={lead.id} className={`border-l-4 ${lead.status === 'available' ? 'border-l-blue-500' : 'border-l-green-500'}`}>
-                  <CardHeader className="pb-2">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <CardTitle>{lead.title}</CardTitle>
-                        <CardDescription className="text-sm mt-1">
-                          {lead.description}
-                        </CardDescription>
-                      </div>
-                      <div className="text-right">
-                        <span className={`px-2 py-1 rounded-full text-xs ${
-                          lead.status === 'available' 
-                            ? 'bg-blue-100 text-blue-800' 
-                            : 'bg-green-100 text-green-800'
-                        }`}>
-                          {lead.status === 'available' ? 'Available' : 'Purchased'}
-                        </span>
-                      </div>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="pb-2">
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                      <div className="flex items-center gap-2">
-                        <MapPin className="h-4 w-4 text-gray-500" />
-                        <span>{lead.suburb} ({lead.postcode})</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Maximize2 className="h-4 w-4 text-gray-500" />
-                        <span>{lead.size} sqm</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <DollarSign className="h-4 w-4 text-gray-500" />
-                        <span>{lead.budget}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Calendar className="h-4 w-4 text-gray-500" />
-                        <span>{lead.date}</span>
-                      </div>
-                    </div>
-                  </CardContent>
-                  <CardFooter className="flex justify-between pt-2">
-                    <div className="text-sm">
-                      {lead.status === 'purchased' ? (
-                        <div className="flex items-center gap-2">
-                          <Users className="h-4 w-4 text-gray-500" />
-                          <span>{lead.customerName} • Best contact: {lead.contactTime}</span>
-                        </div>
-                      ) : (
-                        <span className="text-gray-500">Contact details available after purchase</span>
-                      )}
-                    </div>
-                    {lead.status === 'available' && (
-                      <div className="flex gap-2">
-                        {userStats.isTopTen && freeLeads > 0 && (
-                          <Button 
-                            onClick={() => claimFreeLead(lead.id)}
-                            variant="outline"
-                            className="flex items-center gap-1 bg-yellow-50 text-yellow-700 border-yellow-300 hover:bg-yellow-100"
-                          >
-                            <Award className="h-4 w-4" />
-                            Claim Free Lead
-                          </Button>
-                        )}
-                        <Button 
-                          onClick={() => buyLead(lead.id)}
-                          className="bg-green-600 hover:bg-green-700"
-                        >
-                          Buy Lead (5 credits)
-                        </Button>
-                      </div>
-                    )}
-                    {lead.status === 'purchased' && (
-                      <Button variant="outline">
-                        View Details
-                      </Button>
-                    )}
-                  </CardFooter>
-                </Card>
-              ))}
-            </div>
-          </TabsContent>
-          
-          <TabsContent value="ranking" className="mt-0">
-            <Card>
-              <CardHeader>
-                <CardTitle>Trade Professionals Ranking</CardTitle>
-                <CardDescription>See how you stack up against other trades in your area</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="grid grid-cols-7 gap-4 font-medium text-sm text-gray-500 pb-2 border-b">
-                    <div>Rank</div>
-                    <div className="col-span-2">Trade Name</div>
-                    <div>Category</div>
-                    <div>Response Rate</div>
-                    <div>Jobs Completed</div>
-                    <div>Rating</div>
-                  </div>
-                  
-                  {mockRankings.map((ranking, index) => (
-                    <div key={ranking.id} className="grid grid-cols-7 gap-4 text-sm py-2 border-b border-gray-100">
-                      <div className="font-bold text-lg flex items-center">
-                        {index + 1}
-                        {index < 10 && (
-                          <span className="ml-1">
-                            <Award className="h-4 w-4 text-yellow-500" />
-                          </span>
-                        )}
-                      </div>
-                      <div className="col-span-2 font-medium">{ranking.tradeName}</div>
-                      <div>{ranking.category}</div>
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <span>{ranking.responseRate}%</span>
-                          <Progress value={ranking.responseRate} className="h-2 w-16" />
-                        </div>
-                      </div>
-                      <div>{ranking.jobsCompleted}</div>
-                      <div className="flex items-center gap-1">
-                        <span>{ranking.rating}</span>
-                        <div className="text-yellow-500">★</div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-              <CardFooter className="flex justify-between">
-                <span className="text-sm text-gray-500">Last updated: Today, 9:45 AM</span>
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-yellow-700">
-                    <Award className="h-4 w-4 text-yellow-500 inline mr-1" />
-                    Top 10 trades receive 3 free leads weekly
-                  </span>
-                  <Button variant="outline" className="text-sm">
-                    See My Ranking
-                  </Button>
-                </div>
-              </CardFooter>
-            </Card>
-            
-            <Card className="mt-6">
-              <CardHeader>
-                <CardTitle>Improve Your Ranking</CardTitle>
-                <CardDescription>Tips to climb up the Easy Ranking ladder</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ul className="space-y-3">
-                  <li className="flex items-start gap-2">
-                    <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
-                    <div>
-                      <p className="font-medium">Respond quickly to new leads</p>
-                      <p className="text-sm text-gray-600">Aim to respond within 1 hour for the best results</p>
-                    </div>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
-                    <div>
-                      <p className="font-medium">Complete jobs on time</p>
-                      <p className="text-sm text-gray-600">On-time completion boosts your reliability score</p>
-                    </div>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
-                    <div>
-                      <p className="font-medium">Ask for reviews</p>
-                      <p className="text-sm text-gray-600">Encourage satisfied customers to leave positive feedback</p>
-                    </div>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
-                    <div>
-                      <p className="font-medium">Update your profile regularly</p>
-                      <p className="text-sm text-gray-600">Keep your portfolio and trade information up to date</p>
-                    </div>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
-                    <div>
-                      <p className="font-medium">Maintain accurate availability</p>
-                      <p className="text-sm text-gray-600">This helps match you with leads you can actually take on</p>
-                    </div>
-                  </li>
-                </ul>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
-      </div>
-    </AppLayout>
-  );
-}
+                <
