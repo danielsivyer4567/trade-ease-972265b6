@@ -15,27 +15,26 @@ interface Lead {
   budget: string;
   date: string;
   status: string;
-}
-
-interface Filters {
-  postcode: string;
-  minSize: string;
-  maxBudget: string;
-  leadType: string;
-  tradeType: string;
-}
-
-interface SavedFilter {
-  name: string;
-  active: boolean;
+  customerName: string;
+  contactTime: string;
 }
 
 interface MarketplaceTabProps {
   leads: Lead[];
   freeLeads: number;
-  filters: Filters;
-  savedFilters: SavedFilter[];
+  filters: {
+    postcode: string;
+    minSize: string;
+    maxBudget: string;
+    leadType: string;
+    tradeType: string;
+  };
+  savedFilters: Array<{
+    name: string;
+    active: boolean;
+  }>;
   onFilterChange: (field: string, value: string) => void;
+  onSavedFilterToggle: (index: number) => void;
   onClaimFreeLead: (leadId: number) => void;
   onBuyLead: (leadId: number) => void;
 }
@@ -46,42 +45,38 @@ export const MarketplaceTab: React.FC<MarketplaceTabProps> = ({
   filters,
   savedFilters,
   onFilterChange,
+  onSavedFilterToggle,
   onClaimFreeLead,
-  onBuyLead,
+  onBuyLead
 }) => {
   const availableLeads = leads.filter(lead => lead.status === "available");
-  
+
   return (
-    <div className="space-y-6">
-      <SectionHeader title="Available Leads Marketplace" />
+    <div className="space-y-4">
+      <SectionHeader title="Lead Marketplace" />
       
       <GlassCard>
-        <LeadFilters 
+        <LeadFilters
           filters={filters}
           savedFilters={savedFilters}
           onFilterChange={onFilterChange}
+          onSavedFilterToggle={onSavedFilterToggle}
         />
       </GlassCard>
       
-      <GlassCard>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {availableLeads.length > 0 ? (
-            availableLeads.map(lead => (
-              <LeadCard
-                key={lead.id}
-                lead={lead}
-                onClaimFreeLead={onClaimFreeLead}
-                onBuyLead={onBuyLead}
-                freeLeads={freeLeads}
-              />
-            ))
-          ) : (
-            <div className="col-span-3 text-center py-8 text-gray-500">
-              No leads match your current filters. Try adjusting your search criteria.
-            </div>
-          )}
-        </div>
-      </GlassCard>
+      <SectionHeader title={`Available Leads (${availableLeads.length})`} />
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {availableLeads.map(lead => (
+          <LeadCard
+            key={lead.id}
+            lead={lead}
+            freeLeads={freeLeads}
+            onClaimFreeLead={onClaimFreeLead}
+            onBuyLead={onBuyLead}
+          />
+        ))}
+      </div>
     </div>
   );
 };
