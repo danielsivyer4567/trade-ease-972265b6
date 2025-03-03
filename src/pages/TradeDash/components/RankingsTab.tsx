@@ -1,6 +1,8 @@
 
 import React from "react";
 import { RankingsTable } from "./RankingsTable";
+import { GlassCard } from "@/components/ui/GlassCard";
+import { SectionHeader } from "@/components/ui/SectionHeader";
 
 interface Ranking {
   id: number;
@@ -19,10 +21,10 @@ interface RankingsTabProps {
 export const RankingsTab: React.FC<RankingsTabProps> = ({ rankings }) => {
   return (
     <div className="space-y-4">
-      <h2 className="text-2xl font-semibold mb-4">Top Tradespeople Rankings</h2>
-      <div className="bg-white/80 backdrop-blur-sm rounded-lg shadow-md p-4">
+      <SectionHeader title="Top Tradespeople Rankings" />
+      <GlassCard>
         <RankingsTable rankings={rankings} />
-      </div>
+      </GlassCard>
     </div>
   );
 };

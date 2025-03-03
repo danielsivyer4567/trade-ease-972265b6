@@ -1,9 +1,9 @@
 
-import React, { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Filter } from "lucide-react";
-import { LeadFilters } from "./LeadFilters";
+import React from "react";
 import { LeadCard } from "./LeadCard";
+import { LeadFilters } from "./LeadFilters";
+import { GlassCard } from "@/components/ui/GlassCard";
+import { SectionHeader } from "@/components/ui/SectionHeader";
 
 interface Lead {
   id: number;
@@ -15,24 +15,26 @@ interface Lead {
   budget: string;
   date: string;
   status: string;
-  customerName: string;
-  contactTime: string;
+}
+
+interface Filters {
+  postcode: string;
+  minSize: string;
+  maxBudget: string;
+  leadType: string;
+  tradeType: string;
+}
+
+interface SavedFilter {
+  name: string;
+  active: boolean;
 }
 
 interface MarketplaceTabProps {
   leads: Lead[];
   freeLeads: number;
-  filters: {
-    postcode: string;
-    minSize: string;
-    maxBudget: string;
-    leadType: string;
-    tradeType: string;
-  };
-  savedFilters: {
-    name: string;
-    active: boolean;
-  }[];
+  filters: Filters;
+  savedFilters: SavedFilter[];
   onFilterChange: (field: string, value: string) => void;
   onClaimFreeLead: (leadId: number) => void;
   onBuyLead: (leadId: number) => void;
@@ -45,43 +47,41 @@ export const MarketplaceTab: React.FC<MarketplaceTabProps> = ({
   savedFilters,
   onFilterChange,
   onClaimFreeLead,
-  onBuyLead
+  onBuyLead,
 }) => {
-  const [showFilters, setShowFilters] = useState(false);
-
-  const toggleFilters = () => {
-    setShowFilters(!showFilters);
-  };
-
+  const availableLeads = leads.filter(lead => lead.status === "available");
+  
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-semibold">Available Leads</h2>
-        <Button variant="outline" size="sm" onClick={toggleFilters}>
-          <Filter className="mr-2 h-4 w-4" />
-          {showFilters ? "Hide Filters" : "Show Filters"}
-        </Button>
-      </div>
+    <div className="space-y-6">
+      <SectionHeader title="Available Leads Marketplace" />
       
-      {showFilters && (
+      <GlassCard>
         <LeadFilters 
           filters={filters}
           savedFilters={savedFilters}
           onFilterChange={onFilterChange}
         />
-      )}
+      </GlassCard>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {leads.map(lead => (
-          <LeadCard
-            key={lead.id}
-            lead={lead}
-            freeLeads={freeLeads}
-            onClaimFreeLead={onClaimFreeLead}
-            onBuyLead={onBuyLead}
-          />
-        ))}
-      </div>
+      <GlassCard>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {availableLeads.length > 0 ? (
+            availableLeads.map(lead => (
+              <LeadCard
+                key={lead.id}
+                lead={lead}
+                onClaimFreeLead={onClaimFreeLead}
+                onBuyLead={onBuyLead}
+                freeLeads={freeLeads}
+              />
+            ))
+          ) : (
+            <div className="col-span-3 text-center py-8 text-gray-500">
+              No leads match your current filters. Try adjusting your search criteria.
+            </div>
+          )}
+        </div>
+      </GlassCard>
     </div>
   );
 };
