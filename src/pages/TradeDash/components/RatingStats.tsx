@@ -1,29 +1,68 @@
 
-import { RatingCard } from "./RatingCard";
+import React from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
+import { Star } from "lucide-react";
 
-interface RatingStatsProps {
-  fiveStarReviews: number;
+interface UserStats {
   totalJobs: number;
+  fiveStarReviews: number;
   overallRating: number;
+  ranking: number;
+  responseRate: number;
+  isTopTen: boolean;
+  freeLeadsAvailable: number;
 }
 
-export function RatingStats({ fiveStarReviews, totalJobs, overallRating }: RatingStatsProps) {
+interface RatingStatsProps {
+  userStats: UserStats;
+}
+
+export const RatingStats = ({ userStats }: RatingStatsProps) => {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-      <RatingCard
-        title="5-Star Reviews"
-        value={fiveStarReviews}
-        totalValue={totalJobs}
-        description={`${fiveStarReviews} out of ${totalJobs} jobs rated 5 stars`}
-      />
-      
-      <RatingCard
-        title="Overall Rating"
-        value={overallRating}
-        totalValue={5}
-        description={`Based on ${totalJobs} completed jobs`}
-        showStars={true}
-      />
-    </div>
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-xl flex items-center gap-2">
+          <Star className="h-5 w-5 text-yellow-500" />
+          Performance Rating
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div>
+          <div className="flex justify-between mb-1">
+            <span className="text-sm font-medium">Overall Rating</span>
+            <span className="text-sm font-medium">{userStats.overallRating}/5</span>
+          </div>
+          <Progress value={userStats.overallRating * 20} className="h-2" />
+        </div>
+        
+        <div>
+          <div className="flex justify-between mb-1">
+            <span className="text-sm font-medium">5-Star Reviews</span>
+            <span className="text-sm font-medium">{userStats.fiveStarReviews}/{userStats.totalJobs}</span>
+          </div>
+          <Progress value={(userStats.fiveStarReviews / userStats.totalJobs) * 100} className="h-2" />
+        </div>
+        
+        <div>
+          <div className="flex justify-between mb-1">
+            <span className="text-sm font-medium">Response Rate</span>
+            <span className="text-sm font-medium">{userStats.responseRate}%</span>
+          </div>
+          <Progress value={userStats.responseRate} className="h-2" />
+        </div>
+        
+        <div className="grid grid-cols-2 gap-4 mt-4">
+          <div className="bg-gray-100 p-3 rounded-md">
+            <div className="text-lg font-bold">{userStats.ranking}</div>
+            <div className="text-xs text-gray-500">Your Ranking</div>
+          </div>
+          <div className="bg-gray-100 p-3 rounded-md">
+            <div className="text-lg font-bold">{userStats.totalJobs}</div>
+            <div className="text-xs text-gray-500">Jobs Completed</div>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
   );
 }
