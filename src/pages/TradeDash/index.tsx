@@ -26,6 +26,7 @@ export default function TradeDash() {
   
   const [activeTab, setActiveTab] = useState("marketplace");
   const [freeLeads, setFreeLeads] = useState(userStats.freeLeadsAvailable);
+  const [creditsBalance, setCreditsBalance] = useState(25);
 
   const loadAutoLeadPreferences = async () => {
     try {
@@ -97,14 +98,12 @@ export default function TradeDash() {
         <DashboardStats 
           availableLeads={availableLeads}
           purchasedLeads={purchasedLeads}
-          ranking={userStats.ranking}
-          totalJobs={userStats.totalJobs}
+          userStats={userStats}
+          creditsBalance={creditsBalance}
         />
         
         <RatingStats 
-          fiveStarReviews={userStats.fiveStarReviews}
-          totalJobs={userStats.totalJobs}
-          overallRating={userStats.overallRating}
+          userStats={userStats}
         />
         
         {userStats.isTopTen && <TopPerformerCard />}
