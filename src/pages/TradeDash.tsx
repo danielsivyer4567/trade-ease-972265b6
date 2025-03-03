@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { AppLayout } from "@/components/ui/AppLayout";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -836,4 +837,360 @@ export default function TradeDash() {
           <Card className="bg-gradient-to-r from-amber-50 to-yellow-100 border-yellow-200">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <div className="flex items-center gap-2">
-                <
+                <Award className="h-5 w-5 text-amber-600" />
+                <CardTitle className="text-sm font-medium text-amber-800">
+                  Top 10 Ranked Trade
+                </CardTitle>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-amber-800">
+                Your business is ranked in the top 10 for your trade in your area! This gives you priority access to new leads.
+              </p>
+              <div className="mt-3">
+                <div className="text-xs font-medium text-amber-800">Free Leads Available</div>
+                <div className="flex items-center gap-2 mt-1">
+                  <div className="text-lg font-bold text-amber-800">{freeLeads}</div>
+                  <Button size="sm" variant="outline" className="text-amber-800 border-amber-300 bg-amber-50 hover:bg-amber-100">
+                    View Available Free Leads
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+        
+        <Tabs defaultValue="marketplace" className="w-full" onValueChange={setActiveTab}>
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="marketplace">Lead Marketplace</TabsTrigger>
+            <TabsTrigger value="myleads">My Leads</TabsTrigger>
+            <TabsTrigger value="rankings">Rankings</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="marketplace" className="space-y-4 mt-4">
+            <div className="flex justify-between items-center">
+              <h2 className="text-xl font-bold">Available Leads</h2>
+              <Button variant="outline" size="sm" onClick={toggleFilters} className="flex items-center gap-1">
+                <Filter className="h-4 w-4" />
+                {showFilters ? "Hide" : "Show"} Filters
+              </Button>
+            </div>
+            
+            {showFilters && (
+              <Card className="p-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <Label htmlFor="postcode">Postcode</Label>
+                    <Input 
+                      id="postcode" 
+                      placeholder="e.g. 2000" 
+                      value={filters.postcode}
+                      onChange={(e) => handleFilterChange('postcode', e.target.value)}
+                    />
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="minSize">Minimum Size (sqm)</Label>
+                    <Input 
+                      id="minSize" 
+                      type="number" 
+                      placeholder="e.g. 25" 
+                      value={filters.minSize}
+                      onChange={(e) => handleFilterChange('minSize', e.target.value)}
+                    />
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="tradeType">Trade Type</Label>
+                    <Select 
+                      value={filters.tradeType} 
+                      onValueChange={(value) => handleFilterChange('tradeType', value)}
+                    >
+                      <SelectTrigger id="tradeType">
+                        <SelectValue placeholder="Select trade type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {TRADE_TYPES.map((trade) => (
+                          <SelectItem key={trade} value={trade}>
+                            {trade}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                
+                <div className="flex justify-between mt-4">
+                  <div className="flex gap-2">
+                    {savedFilters.map((filter, index) => (
+                      <Button 
+                        key={index}
+                        variant={filter.active ? "default" : "outline"}
+                        size="sm"
+                        className="flex items-center gap-1"
+                      >
+                        {filter.name}
+                      </Button>
+                    ))}
+                  </div>
+                  
+                  <Button variant="outline" size="sm">
+                    Save Current Filter
+                  </Button>
+                </div>
+              </Card>
+            )}
+            
+            <div className="grid grid-cols-1 gap-4">
+              {filteredLeads.filter(lead => lead.status === "available").map((lead) => (
+                <Card key={lead.id} className="overflow-hidden">
+                  <div className="flex flex-col md:flex-row">
+                    <div className="p-4 md:p-6 flex-1">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <h3 className="text-lg font-bold">{lead.title}</h3>
+                          <div className="flex items-center gap-2 text-sm text-gray-500 mt-1">
+                            <MapPin className="h-3 w-3" /> 
+                            <span>{lead.suburb}, {lead.postcode}</span>
+                          </div>
+                        </div>
+                        <Badge variant="outline" className="text-blue-500 border-blue-200 bg-blue-50">{lead.budget}</Badge>
+                      </div>
+                      
+                      <div className="mt-4">
+                        <p className="text-gray-700">{lead.description}</p>
+                      </div>
+                      
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mt-4">
+                        <div className="flex items-center gap-1 text-sm text-gray-600">
+                          <Maximize2 className="h-3.5 w-3.5 text-gray-400" />
+                          <span>{lead.size} sqm</span>
+                        </div>
+                        
+                        <div className="flex items-center gap-1 text-sm text-gray-600">
+                          <Calendar className="h-3.5 w-3.5 text-gray-400" />
+                          <span>Posted {lead.date}</span>
+                        </div>
+                        
+                        <div className="flex items-center gap-1 text-sm text-gray-600">
+                          <Clock className="h-3.5 w-3.5 text-gray-400" />
+                          <span>Contact: {lead.contactTime}</span>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="bg-gray-50 p-4 md:p-6 md:w-64 flex flex-col justify-center space-y-3 border-t md:border-t-0 md:border-l">
+                      <Button 
+                        onClick={() => buyLead(lead.id)}
+                        className="w-full"
+                      >
+                        Buy Lead (15 Credits)
+                      </Button>
+                      
+                      {freeLeads > 0 && (
+                        <Button 
+                          onClick={() => claimFreeLead(lead.id)}
+                          variant="outline"
+                          className="w-full border-green-300 text-green-700 hover:bg-green-50"
+                        >
+                          Claim as Free Lead
+                        </Button>
+                      )}
+                      
+                      <div className="text-xs text-center text-gray-500 mt-2">
+                        View contact details after purchase
+                      </div>
+                    </div>
+                  </div>
+                </Card>
+              ))}
+              
+              {filteredLeads.filter(lead => lead.status === "available").length === 0 && (
+                <div className="text-center py-10 bg-gray-50 rounded-lg">
+                  <p className="text-gray-500">No leads match your current filters</p>
+                  {showFilters && (
+                    <Button variant="link" onClick={() => setFilters({
+                      postcode: "",
+                      minSize: "",
+                      maxBudget: "",
+                      leadType: "all",
+                      tradeType: "All Trades"
+                    })}>
+                      Clear all filters
+                    </Button>
+                  )}
+                </div>
+              )}
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="myleads" className="space-y-4 mt-4">
+            <div className="flex justify-between items-center">
+              <h2 className="text-xl font-bold">My Purchased Leads</h2>
+              <Select 
+                value={filters.leadType} 
+                onValueChange={(value) => handleFilterChange('leadType', value)}
+              >
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue placeholder="All Leads" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Leads</SelectItem>
+                  <SelectItem value="available">Available</SelectItem>
+                  <SelectItem value="purchased">Purchased</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div className="grid grid-cols-1 gap-4">
+              {mockLeads.filter(lead => lead.status === "purchased").map((lead) => (
+                <Card key={lead.id} className="overflow-hidden">
+                  <div className="flex flex-col md:flex-row">
+                    <div className="p-4 md:p-6 flex-1">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <h3 className="text-lg font-bold">{lead.title}</h3>
+                          <div className="flex items-center gap-2 text-sm text-gray-500 mt-1">
+                            <MapPin className="h-3 w-3" /> 
+                            <span>{lead.suburb}, {lead.postcode}</span>
+                          </div>
+                        </div>
+                        <Badge variant="outline" className="text-blue-500 border-blue-200 bg-blue-50">{lead.budget}</Badge>
+                      </div>
+                      
+                      <div className="mt-4">
+                        <p className="text-gray-700">{lead.description}</p>
+                      </div>
+                      
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mt-4">
+                        <div className="flex items-center gap-1 text-sm text-gray-600">
+                          <Maximize2 className="h-3.5 w-3.5 text-gray-400" />
+                          <span>{lead.size} sqm</span>
+                        </div>
+                        
+                        <div className="flex items-center gap-1 text-sm text-gray-600">
+                          <Calendar className="h-3.5 w-3.5 text-gray-400" />
+                          <span>Purchased {lead.date}</span>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="bg-gray-50 p-4 md:p-6 md:w-64 flex flex-col justify-center space-y-3 border-t md:border-t-0 md:border-l">
+                      <div className="space-y-2">
+                        <div className="text-sm font-medium">Customer Details</div>
+                        <div className="text-sm">{lead.customerName}</div>
+                        <div className="text-sm">0400 123 456</div>
+                        <div className="text-sm">customer@example.com</div>
+                      </div>
+                      
+                      <Button className="w-full">
+                        Contact Customer
+                      </Button>
+                      
+                      <Button variant="outline" className="w-full">
+                        Mark as Contacted
+                      </Button>
+                    </div>
+                  </div>
+                </Card>
+              ))}
+              
+              {mockLeads.filter(lead => lead.status === "purchased").length === 0 && (
+                <div className="text-center py-10 bg-gray-50 rounded-lg">
+                  <p className="text-gray-500">You haven't purchased any leads yet</p>
+                  <Button variant="link" onClick={() => setActiveTab("marketplace")}>
+                    View available leads
+                  </Button>
+                </div>
+              )}
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="rankings" className="space-y-4 mt-4">
+            <div className="flex justify-between items-center">
+              <h2 className="text-xl font-bold">Trade Business Rankings</h2>
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-gray-500">Your Ranking: </span>
+                <Badge variant="outline" className="text-purple-500 border-purple-200 bg-purple-50 font-bold">#{userStats.ranking}</Badge>
+              </div>
+            </div>
+            
+            <Card>
+              <CardContent className="p-4">
+                <div className="border rounded-lg divide-y">
+                  <div className="grid grid-cols-12 gap-4 p-3 bg-gray-50 font-medium text-sm">
+                    <div className="col-span-1">Rank</div>
+                    <div className="col-span-3">Trade Business</div>
+                    <div className="col-span-2">Category</div>
+                    <div className="col-span-2">Service Area</div>
+                    <div className="col-span-1 text-center">Response</div>
+                    <div className="col-span-1 text-center">Jobs</div>
+                    <div className="col-span-2 text-center">Rating</div>
+                  </div>
+                  
+                  {mockRankings.map((trade, idx) => (
+                    <div 
+                      key={trade.id} 
+                      className={`grid grid-cols-12 gap-4 p-3 text-sm ${idx + 1 === userStats.ranking ? 'bg-purple-50' : ''}`}
+                    >
+                      <div className="col-span-1 font-bold">#{idx + 1}</div>
+                      <div className="col-span-3">{trade.tradeName}</div>
+                      <div className="col-span-2">{trade.category}</div>
+                      <div className="col-span-2">{trade.area}</div>
+                      <div className="col-span-1 text-center">{trade.responseRate}%</div>
+                      <div className="col-span-1 text-center">{trade.jobsCompleted}</div>
+                      <div className="col-span-2">
+                        <div className="flex items-center justify-center gap-1">
+                          <span>{trade.rating}</span>
+                          <div className="flex">
+                            {[...Array(5)].map((_, i) => (
+                              <Star 
+                                key={i} 
+                                className={`h-3 w-3 ${i < Math.floor(trade.rating) ? 'text-yellow-500 fill-yellow-500' : 'text-gray-300'}`} 
+                              />
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base">How Rankings Work</CardTitle>
+              </CardHeader>
+              <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 pt-0">
+                <div className="space-y-2">
+                  <div className="font-medium flex items-center gap-2">
+                    <Star className="h-4 w-4 text-yellow-500" />
+                    Customer Satisfaction
+                  </div>
+                  <p className="text-sm text-gray-600">Higher star ratings and positive reviews increase your ranking</p>
+                </div>
+                
+                <div className="space-y-2">
+                  <div className="font-medium flex items-center gap-2">
+                    <Clock className="h-4 w-4 text-blue-500" />
+                    Response Time
+                  </div>
+                  <p className="text-sm text-gray-600">Faster responses to leads and customer inquiries boost your position</p>
+                </div>
+                
+                <div className="space-y-2">
+                  <div className="font-medium flex items-center gap-2">
+                    <Building className="h-4 w-4 text-green-500" />
+                    Completed Jobs
+                  </div>
+                  <p className="text-sm text-gray-600">More successfully completed jobs improve your ranking score</p>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
+      </div>
+    </AppLayout>
+  );
+}
