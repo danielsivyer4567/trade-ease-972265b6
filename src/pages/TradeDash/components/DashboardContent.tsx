@@ -46,7 +46,7 @@ export const DashboardContent: React.FC<DashboardContentProps> = ({
   });
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 md:space-y-6">
       <DashboardStats 
         availableLeads={availableLeads}
         purchasedLeads={purchasedLeads}
@@ -54,7 +54,7 @@ export const DashboardContent: React.FC<DashboardContentProps> = ({
         creditsBalance={creditsBalance}
       />
       
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
         <RatingStats userStats={userStats} />
       </div>
       
@@ -63,10 +63,10 @@ export const DashboardContent: React.FC<DashboardContentProps> = ({
       )}
 
       <Tabs defaultValue="marketplace" className="w-full">
-        <TabsList>
-          <TabsTrigger value="marketplace">Lead Marketplace</TabsTrigger>
-          <TabsTrigger value="my-leads">My Leads</TabsTrigger>
-          <TabsTrigger value="rankings">Rankings</TabsTrigger>
+        <TabsList className="w-full mb-2 overflow-x-auto flex-nowrap">
+          <TabsTrigger value="marketplace" className="flex-1">Lead Marketplace</TabsTrigger>
+          <TabsTrigger value="my-leads" className="flex-1">My Leads</TabsTrigger>
+          <TabsTrigger value="rankings" className="flex-1">Rankings</TabsTrigger>
         </TabsList>
         
         <TabsContent value="marketplace">

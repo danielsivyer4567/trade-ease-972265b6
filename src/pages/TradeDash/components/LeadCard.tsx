@@ -1,10 +1,9 @@
 
 import React from "react";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { MapPin, Maximize2, DollarSign, Calendar } from "lucide-react";
-import { toast } from "sonner";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { MapPin, Calendar, User, Phone, DollarSign } from "lucide-react";
 
 interface Lead {
   id: number;
@@ -27,44 +26,63 @@ interface LeadCardProps {
   onBuyLead: (leadId: number) => void;
 }
 
-export const LeadCard: React.FC<LeadCardProps> = ({ lead, freeLeads, onClaimFreeLead, onBuyLead }) => {
+export const LeadCard: React.FC<LeadCardProps> = ({
+  lead,
+  freeLeads,
+  onClaimFreeLead,
+  onBuyLead
+}) => {
+  const hasFreeLeadsAvailable = freeLeads > 0;
+  
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>{lead.title}</CardTitle>
-        <CardDescription>{lead.description}</CardDescription>
+    <Card className="h-full flex flex-col shadow-lg hover:shadow-xl transition-shadow">
+      <CardHeader className="pb-2">
+        <div className="flex justify-between items-start">
+          <CardTitle className="text-lg font-semibold line-clamp-2">{lead.title}</CardTitle>
+          <Badge variant="outline" className="whitespace-nowrap">
+            {lead.postcode}
+          </Badge>
+        </div>
       </CardHeader>
-      <CardContent className="space-y-2">
-        <div className="flex items-center gap-2">
-          <MapPin className="h-4 w-4 text-gray-500" />
-          <span>{lead.suburb}, {lead.postcode}</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <Maximize2 className="h-4 w-4 text-gray-500" />
-          <span>Size: {lead.size} sqm</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <DollarSign className="h-4 w-4 text-gray-500" />
-          <span>Budget: {lead.budget}</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <Calendar className="h-4 w-4 text-gray-500" />
-          <span>Date Posted: {lead.date}</span>
+      <CardContent className="flex-grow pb-2">
+        <div className="space-y-2">
+          <p className="text-sm text-gray-600 line-clamp-3 min-h-[3rem]">{lead.description}</p>
+          
+          <div className="flex flex-col gap-2 mt-3">
+            <div className="flex items-center gap-2 text-sm text-gray-600">
+              <MapPin className="w-4 h-4 text-gray-500" />
+              <span>{lead.suburb}</span>
+            </div>
+            <div className="flex items-center gap-2 text-sm text-gray-600">
+              <Calendar className="w-4 h-4 text-gray-500" />
+              <span>{lead.date}</span>
+            </div>
+            <div className="flex items-center gap-2 text-sm text-gray-600">
+              <DollarSign className="w-4 h-4 text-gray-500" />
+              <span>Budget: {lead.budget}</span>
+            </div>
+            <div className="flex items-center gap-2 text-sm text-gray-600">
+              <User className="w-4 h-4 text-gray-500" />
+              <span>{lead.size}m²</span>
+            </div>
+          </div>
         </div>
       </CardContent>
-      <CardFooter className="justify-between">
-        {lead.status === "available" ? (
-          <>
-            {freeLeads > 0 ? (
-              <Button variant="secondary" onClick={() => onClaimFreeLead(lead.id)}>
-                Claim Free Lead ({freeLeads} left)
-              </Button>
-            ) : (
-              <Button onClick={() => onBuyLead(lead.id)}>Buy Lead</Button>
-            )}
-          </>
+      <CardFooter className="pt-2 flex flex-col md:flex-row gap-2 w-full">
+        {hasFreeLeadsAvailable ? (
+          <Button 
+            onClick={() => onClaimFreeLead(lead.id)} 
+            className="w-full bg-green-600 hover:bg-green-700 text-white"
+          >
+            Claim Free Lead
+          </Button>
         ) : (
-          <Badge variant="outline">Purchased</Badge>
+          <Button 
+            onClick={() => onBuyLead(lead.id)} 
+            className="w-full"
+          >
+            Buy Lead
+          </Button>
         )}
       </CardFooter>
     </Card>

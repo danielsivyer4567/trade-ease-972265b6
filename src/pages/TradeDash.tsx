@@ -21,8 +21,8 @@ export default function TradeDash() {
 
   return (
     <AppLayout>
-      <div className="space-y-6 p-6">
-        <h1 className="text-4xl font-bold text-gray-900">Easy Lead Dashboard</h1>
+      <div className="space-y-4 md:space-y-6 p-2 md:p-6">
+        <h1 className="text-2xl md:text-4xl font-bold text-gray-900">Easy Lead Dashboard</h1>
         
         <DashboardContent 
           userStats={userStats}
