@@ -11,13 +11,19 @@ import { mockLeads, mockRankings } from "../constants";
 import { useLeadFilters } from "../hooks/useLeadFilters";
 import { useLeadActions } from "../hooks/useLeadActions";
 
+// Define the UserStats interface to match what RatingStats expects
+interface UserStats {
+  totalJobs: number;
+  fiveStarReviews: number;
+  overallRating: number;
+  ranking: number;
+  responseRate: number;
+  isTopTen: boolean;
+  freeLeadsAvailable: number;
+}
+
 interface DashboardContentProps {
-  userStats: {
-    ranking: number;
-    totalJobs: number;
-    isTopTen: boolean;
-    freeLeadsAvailable: number;
-  };
+  userStats: UserStats;
   creditsBalance: number;
 }
 
