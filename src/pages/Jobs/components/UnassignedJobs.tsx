@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -72,7 +71,7 @@ export function UnassignedJobs({
               <ArrowLeft className="h-5 w-5" />
             </Button>
             
-            <div className="flex space-x-2">
+            <div className="flex space-x-2 mx-0 my-[9px]">
               <Link to="/jobs/new-template">
                 <Button variant="default" className="rounded-lg bg-[#D3E4FD] hover:bg-[#B5D1F8] border-[#A3C0ED] text-[#1E40AF] hover:text-[#1E3A8A]">
                   Create New Template
@@ -84,7 +83,7 @@ export function UnassignedJobs({
             </div>
           </div>
           
-          <TabsList className="flex gap-2 mr-4">
+          <TabsList className="flex gap-2 mr-4 mx-[5px] px-0 my-[2px] py-[16px]">
             <TabsTrigger value="unassigned-jobs" className="rounded-lg bg-[#D3E4FD] hover:bg-[#B5D1F8] border-[#A3C0ED] text-[#1E40AF] hover:text-[#1E3A8A] data-[state=active]:bg-[#B5D1F8] data-[state=active]:text-[#1E3A8A] px-3 py-1 text-xs">
               Unassigned Jobs
             </TabsTrigger>
