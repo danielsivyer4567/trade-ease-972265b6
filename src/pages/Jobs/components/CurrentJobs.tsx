@@ -1,10 +1,11 @@
 
 import { Button } from "@/components/ui/button";
-import { Clock, Loader2, DollarSign, CheckCircle, Brush } from "lucide-react";
+import { Clock, Loader2, DollarSign, CheckCircle, Brush, MoreHorizontal } from "lucide-react";
 import { Job } from "@/types/job";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 interface CurrentJobsProps {
   jobs: Job[];
@@ -112,24 +113,71 @@ export function CurrentJobs({ jobs, onStatusUpdate }: CurrentJobsProps) {
                       {getStatusIcon(job.status)}
                       <span className="ml-2 text-sm text-gray-500">
                         {job.status === 'invoiced' ? 'Completed' : 
-                          job.status === 'clean-required' ? 'Clean Required (Paul Finch notified)' :
+                          job.status === 'clean-required' ? 'Clean Required' :
                           job.status.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
                       </span>
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <select 
-                      className="text-sm border border-gray-300 rounded-md px-2 py-1"
-                      value={job.status}
-                      onClick={(e) => e.stopPropagation()}
-                      onChange={(e) => handleStatusChange(job.id, e.target.value as Job['status'])}
-                    >
-                      <option value="ready">Ready to Go</option>
-                      <option value="in-progress">In Progress</option>
-                      <option value="clean-required">Clean Required</option>
-                      <option value="to-invoice">To Invoice</option>
-                      <option value="invoiced">Completed</option>
-                    </select>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+                        <Button variant="ghost" size="icon" className="h-8 w-8">
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem 
+                          className="flex items-center gap-2" 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleStatusChange(job.id, 'ready');
+                          }}
+                        >
+                          <Clock className="h-4 w-4 text-blue-500" />
+                          <span>Set as Ready</span>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem 
+                          className="flex items-center gap-2"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleStatusChange(job.id, 'in-progress');
+                          }}
+                        >
+                          <Loader2 className="h-4 w-4 text-yellow-500" />
+                          <span>Set In Progress</span>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem 
+                          className="flex items-center gap-2"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleStatusChange(job.id, 'clean-required');
+                          }}
+                        >
+                          <Brush className="h-4 w-4 text-orange-500" />
+                          <span>Set Clean Required</span>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem 
+                          className="flex items-center gap-2"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleStatusChange(job.id, 'to-invoice');
+                          }}
+                        >
+                          <DollarSign className="h-4 w-4 text-green-500" />
+                          <span>Set To Invoice</span>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem 
+                          className="flex items-center gap-2"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleStatusChange(job.id, 'invoiced');
+                          }}
+                        >
+                          <CheckCircle className="h-4 w-4 text-green-500" />
+                          <span>Set as Completed</span>
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </td>
                 </tr>
               ))}
