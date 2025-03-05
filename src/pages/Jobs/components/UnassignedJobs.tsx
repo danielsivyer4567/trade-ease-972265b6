@@ -9,12 +9,10 @@ import { Separator } from "@/components/ui/separator";
 import { ArrowLeft } from "lucide-react";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-
 interface UnassignedJobsProps {
   jobs: Job[];
   onAssign: (job: Job) => void;
 }
-
 export function UnassignedJobs({
   jobs,
   onAssign
@@ -24,10 +22,8 @@ export function UnassignedJobs({
   const {
     toast
   } = useToast();
-
   const [showTemplateSearch, setShowTemplateSearch] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-
   const templates: JobTemplate[] = [{
     id: "1",
     title: "Basic Plumbing Fix",
@@ -56,7 +52,6 @@ export function UnassignedJobs({
     materials: ["Tiles", "Fixtures", "Pipes", "Paint"],
     category: "Residential"
   }];
-
   const handleTemplateSelection = (template: JobTemplate) => {
     toast({
       title: "Template selected",
@@ -64,21 +59,20 @@ export function UnassignedJobs({
     });
     setShowTemplateSearch(false);
   };
-
   return <div className="mb-4 px-0">
       <Tabs defaultValue="unassigned-jobs" className="mt-2">
         <div className="flex items-center gap-4 mb-4 px-4 py-2">
-          <Button variant="outline" size="sm" className="rounded-md border border-gray-300" onClick={() => navigate(-1)}>
+          <Button variant="outline" size="sm" onClick={() => navigate(-1)} className="rounded-md border border-gray-300 px-0">
             <ArrowLeft className="h-5 w-5" />
           </Button>
           
           <Link to="/jobs/new-template">
-            <Button size="sm" variant="default" className="rounded-lg bg-[#D3E4FD] hover:bg-[#B5D1F8] border-[#A3C0ED] text-[#1E40AF] hover:text-[#1E3A8A] px-3 py-1 text-xs">
+            <Button size="sm" variant="default" className="rounded-lg bg-[#D3E4FD] hover:bg-[#B5D1F8] border-[#A3C0ED] text-[#1E40AF] hover:text-[#1E3A8A] text-xs my-0 px-px py-0">
               Create New Template
             </Button>
           </Link>
           
-          <Button size="sm" variant="default" onClick={() => setShowTemplateSearch(true)} className="rounded-lg bg-[#D3E4FD] hover:bg-[#B5D1F8] border-[#A3C0ED] text-[#1E40AF] hover:text-[#1E3A8A] px-3 py-1 text-xs">
+          <Button size="sm" variant="default" onClick={() => setShowTemplateSearch(true)} className="rounded-lg bg-[#D3E4FD] hover:bg-[#B5D1F8] border-[#A3C0ED] text-[#1E40AF] hover:text-[#1E3A8A] text-xs px-[11px] py-0 my-0">
             Create New Job
           </Button>
           
