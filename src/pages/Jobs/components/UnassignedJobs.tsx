@@ -7,6 +7,8 @@ import { TemplateLibrary } from "./TemplateLibrary";
 import { useToast } from "@/hooks/use-toast";
 import { Separator } from "@/components/ui/separator";
 import { ArrowLeft } from "lucide-react";
+import { SectionHeader } from "@/components/ui/SectionHeader";
+
 interface UnassignedJobsProps {
   jobs: Job[];
   onAssign: (job: Job) => void;
@@ -79,6 +81,7 @@ export function UnassignedJobs({
         </div>
       </div>
       
+      <SectionHeader title="Unassigned Jobs" className="ml-4 mt-8 mb-2" />
       <Separator className="h-[2px] bg-gray-400 my-[63px]" />
       
       {showTemplateSearch ? <div className="mb-4">
