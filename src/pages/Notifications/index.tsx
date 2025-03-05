@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { AppLayout } from "@/components/ui/AppLayout";
 import { Card } from "@/components/ui/card";
@@ -30,34 +29,24 @@ const NotificationCard = ({
   onSortLater: (id: number) => void;
   onNotificationClick: (id: number) => void;
 }) => (
-  <Card key={notification.id} className="p-4 mb-4 cursor-pointer hover:bg-gray-50">
-    <div className="flex items-start justify-between gap-4">
+  <Card key={notification.id} className="p-3 mb-3 cursor-pointer hover:bg-gray-50 border-2 border-black">
+    <div className="flex items-start gap-2">
       <div className="flex-1" onClick={() => onNotificationClick(notification.id)}>
-        <h3 className="font-medium">{notification.title}</h3>
-        <p className="text-sm text-gray-600">{notification.description}</p>
+        <h3 className="font-medium text-sm">{notification.title}</h3>
+        <p className="text-xs text-gray-600">{notification.description}</p>
         <span className="text-xs text-gray-500">{notification.date}</span>
       </div>
-      <div className="flex items-center gap-4">
-        <div className="flex flex-col items-center">
-          <Checkbox 
-            id={`sort-later-${notification.id}`} 
-            checked={notification.isSortedLater}
-            onCheckedChange={() => onSortLater(notification.id)}
-          />
-          <label htmlFor={`sort-later-${notification.id}`} className="flex flex-col items-center text-xs text-gray-600 mt-1">
-            <Clock className="h-4 w-4" />
-            Sort Later
+      <div className="flex gap-2">
+        <div className="flex items-center">
+          <Checkbox id={`sort-later-${notification.id}`} checked={notification.isSortedLater} onCheckedChange={() => onSortLater(notification.id)} />
+          <label htmlFor={`sort-later-${notification.id}`} className="flex items-center text-xs ml-1">
+            <Clock className="h-3 w-3 mr-1" />Later
           </label>
         </div>
-        <div className="flex flex-col items-center">
-          <Checkbox 
-            id={`complete-${notification.id}`} 
-            checked={notification.isCompleted}
-            onCheckedChange={() => onComplete(notification.id)}
-          />
-          <label htmlFor={`complete-${notification.id}`} className="flex flex-col items-center text-xs text-gray-600 mt-1">
-            <Check className="h-4 w-4" />
-            Completed
+        <div className="flex items-center">
+          <Checkbox id={`complete-${notification.id}`} checked={notification.isCompleted} onCheckedChange={() => onComplete(notification.id)} />
+          <label htmlFor={`complete-${notification.id}`} className="flex items-center text-xs ml-1">
+            <Check className="h-3 w-3 mr-1" />Done
           </label>
         </div>
       </div>
@@ -94,11 +83,9 @@ export default function Notifications() {
     }
   ]);
 
-  // Email notification settings
   const [forwardingEmail, setForwardingEmail] = useState("");
   const [emailNotificationsEnabled, setEmailNotificationsEnabled] = useState(true);
   
-  // Web enquiry settings
   const [webEnquiryNotifications, setWebEnquiryNotifications] = useState(true);
   const [enquiryEmail, setEnquiryEmail] = useState("");
 
