@@ -35,6 +35,7 @@ export const EmailSettingsTab = ({
             id="email-notifications-enabled" 
             checked={emailNotificationsEnabled}
             onCheckedChange={(checked) => setEmailNotificationsEnabled(checked as boolean)}
+            className="h-3 w-3"
           />
           <Label htmlFor="email-notifications-enabled">Enable email notifications</Label>
         </div>
@@ -47,6 +48,7 @@ export const EmailSettingsTab = ({
             placeholder="your@tradeease.com.au" 
             value={forwardingEmail}
             onChange={(e) => setForwardingEmail(e.target.value)}
+            className="h-7 text-sm"
           />
           <p className="text-sm text-gray-500">
             All system notifications will be forwarded to this email address
@@ -56,6 +58,7 @@ export const EmailSettingsTab = ({
         <Button 
           onClick={saveEmailSettings}
           disabled={emailNotificationsEnabled && (!forwardingEmail || !/^\S+@\S+\.\S+$/.test(forwardingEmail))}
+          className="h-7 text-xs py-0"
         >
           Save Email Settings
         </Button>

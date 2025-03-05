@@ -27,15 +27,15 @@ export const NotificationCard = ({
       </div>
       <div className="flex gap-2">
         <div className="flex items-center">
-          <Checkbox id={`sort-later-${notification.id}`} checked={notification.isSortedLater} onCheckedChange={() => onSortLater(notification.id)} />
+          <Checkbox id={`sort-later-${notification.id}`} checked={notification.isSortedLater} onCheckedChange={() => onSortLater(notification.id)} className="h-3 w-3" />
           <label htmlFor={`sort-later-${notification.id}`} className="flex items-center text-xs ml-1">
-            <Clock className="h-3 w-3 mr-1" />Later
+            <Clock className="h-2 w-2 mr-1" />Later
           </label>
         </div>
         <div className="flex items-center">
-          <Checkbox id={`complete-${notification.id}`} checked={notification.isCompleted} onCheckedChange={() => onComplete(notification.id)} />
+          <Checkbox id={`complete-${notification.id}`} checked={notification.isCompleted} onCheckedChange={() => onComplete(notification.id)} className="h-3 w-3" />
           <label htmlFor={`complete-${notification.id}`} className="flex items-center text-xs ml-1">
-            <Check className="h-3 w-3 mr-1" />Done
+            <Check className="h-2 w-2 mr-1" />Done
           </label>
         </div>
       </div>

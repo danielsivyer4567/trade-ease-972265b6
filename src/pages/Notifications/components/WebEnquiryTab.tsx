@@ -35,6 +35,7 @@ export const WebEnquiryTab = ({
             id="web-enquiry-notifications" 
             checked={webEnquiryNotifications}
             onCheckedChange={(checked) => setWebEnquiryNotifications(checked as boolean)}
+            className="h-3 w-3"
           />
           <Label htmlFor="web-enquiry-notifications">
             Receive notifications for web enquiry form submissions
@@ -49,6 +50,7 @@ export const WebEnquiryTab = ({
             placeholder="your@tradeease.com.au" 
             value={enquiryEmail}
             onChange={(e) => setEnquiryEmail(e.target.value)}
+            className="h-7 text-sm"
           />
           <p className="text-sm text-gray-500">
             Web enquiry form submissions will create notifications and be sent to this email
@@ -63,6 +65,7 @@ export const WebEnquiryTab = ({
           <Button
             variant="outline"
             onClick={() => window.location.href = "/email"}
+            className="h-7 text-xs py-0"
           >
             Configure Web Enquiry Form
           </Button>
@@ -71,7 +74,7 @@ export const WebEnquiryTab = ({
         <Button 
           onClick={saveWebEnquirySettings}
           disabled={webEnquiryNotifications && (!enquiryEmail || !/^\S+@\S+\.\S+$/.test(enquiryEmail))}
-          className="mt-4"
+          className="h-7 text-xs py-0 mt-4"
         >
           Save Web Enquiry Settings
         </Button>

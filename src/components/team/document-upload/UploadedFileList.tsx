@@ -16,11 +16,11 @@ export function UploadedFileList({ files, onSubmit, isSubmitting, disabled = fal
         ))}
       </ul>
       <Button 
-        className="w-full border-2 border-black" 
+        className="w-full border-2 border-black h-7 text-xs py-0" 
         onClick={onSubmit}
         disabled={isSubmitting || disabled}
       >
-        {isSubmitting ? "Processing..." : "Process Uploaded Files"} <Send className="ml-2 h-4 w-4" />
+        {isSubmitting ? "Processing..." : "Process Uploaded Files"} <Send className="ml-2 h-3 w-3" />
       </Button>
     </div>
   );
