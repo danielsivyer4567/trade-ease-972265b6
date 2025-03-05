@@ -158,7 +158,7 @@ export default function Notifications() {
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="active" className="mt-4">
+          <TabsContent value="active" className="mt-8">
             {activeNotifications.map(notification => (
               <NotificationCard
                 key={notification.id}
@@ -170,7 +170,7 @@ export default function Notifications() {
             ))}
           </TabsContent>
 
-          <TabsContent value="sort-later" className="mt-4">
+          <TabsContent value="sort-later" className="mt-8">
             {sortedLaterNotifications.map(notification => (
               <NotificationCard
                 key={notification.id}
@@ -182,7 +182,7 @@ export default function Notifications() {
             ))}
           </TabsContent>
 
-          <TabsContent value="completed" className="mt-4">
+          <TabsContent value="completed" className="mt-8">
             {completedNotifications.map(notification => (
               <NotificationCard
                 key={notification.id}
@@ -194,7 +194,7 @@ export default function Notifications() {
             ))}
           </TabsContent>
 
-          <TabsContent value="email-settings" className="mt-4">
+          <TabsContent value="email-settings" className="mt-8">
             <Card className="p-6">
               <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
                 <Mail className="h-5 w-5 text-blue-600" />
@@ -235,7 +235,7 @@ export default function Notifications() {
             </Card>
           </TabsContent>
 
-          <TabsContent value="web-enquiry" className="mt-4">
+          <TabsContent value="web-enquiry" className="mt-8">
             <Card className="p-6">
               <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
                 <Globe className="h-5 w-5 text-green-600" />
