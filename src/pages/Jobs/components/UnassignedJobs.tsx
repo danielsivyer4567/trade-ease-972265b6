@@ -6,13 +6,15 @@ import { Link, useNavigate } from "react-router-dom";
 import { TemplateLibrary } from "./TemplateLibrary";
 import { useToast } from "@/hooks/use-toast";
 import { Separator } from "@/components/ui/separator";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, ChevronDown } from "lucide-react";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
 interface UnassignedJobsProps {
   jobs: Job[];
   onAssign: (job: Job) => void;
 }
+
 export function UnassignedJobs({
   jobs,
   onAssign
@@ -52,6 +54,7 @@ export function UnassignedJobs({
     materials: ["Tiles", "Fixtures", "Pipes", "Paint"],
     category: "Residential"
   }];
+
   const handleTemplateSelection = (template: JobTemplate) => {
     toast({
       title: "Template selected",
@@ -59,6 +62,7 @@ export function UnassignedJobs({
     });
     setShowTemplateSearch(false);
   };
+
   return <div className="mb-4 px-0">
       <Tabs defaultValue="unassigned-jobs" className="mt-2 px-0 mx-0 my-0 py-0">
         <div className="flex items-center gap-4 mb-4 px-4 py-2">
@@ -68,8 +72,9 @@ export function UnassignedJobs({
           
           
           
-          <Button size="sm" variant="default" onClick={() => setShowTemplateSearch(true)} className="rounded-lg bg-[#D3E4FD] hover:bg-[#B5D1F8] border-[#A3C0ED] text-[#1E40AF] hover:text-[#1E3A8A] text-xs px-3 py-1">
+          <Button size="sm" variant="default" onClick={() => setShowTemplateSearch(true)} className="rounded-lg bg-[#D3E4FD] hover:bg-[#B5D1F8] border-[#A3C0ED] text-[#1E40AF] hover:text-[#1E3A8A] text-xs px-3 py-1 relative">
             Create New Job
+            <ChevronDown className="h-3 w-3 absolute bottom-1 right-1" />
           </Button>
           
           <TabsList className="flex gap-2">
