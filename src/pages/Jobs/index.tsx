@@ -1,3 +1,4 @@
+
 import { AppLayout } from "@/components/ui/AppLayout";
 import { useState } from "react";
 import { useNavigate, Routes, Route, Outlet } from "react-router-dom";
@@ -124,7 +125,7 @@ function JobsMain() {
   return (
     <div className="space-y-4 p-6">
       <UnassignedJobs jobs={jobs} onAssign={handleAssign} />
-      <Separator className="my-3 bg-gray-200" />
+      <Separator className="my-3 h-[2px] bg-gray-400" />
       <CurrentJobs jobs={jobs} onStatusUpdate={updateJobStatus} />
 
       <JobAssignmentDialog
