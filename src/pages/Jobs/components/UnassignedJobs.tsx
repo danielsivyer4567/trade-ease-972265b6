@@ -84,28 +84,28 @@ export function UnassignedJobs({
       </div>
       
       <Tabs defaultValue="unassigned-jobs" className="mt-6">
-        <TabsList className="w-full justify-start border-b bg-transparent p-0">
+        <TabsList className="w-full mb-6 flex">
           <TabsTrigger 
             value="unassigned-jobs" 
-            className="data-[state=active]:border-b-2 data-[state=active]:border-blue-500 rounded-none border-r border-gray-300 px-6"
+            className="flex-1 bg-[#D3E4FD] hover:bg-[#B5D1F8] text-[#1E40AF] data-[state=active]:bg-[#B5D1F8] data-[state=active]:text-[#1E3A8A] border-r border-[#A3C0ED]"
           >
             Unassigned Jobs
           </TabsTrigger>
           <TabsTrigger 
             value="job-templates" 
-            className="data-[state=active]:border-b-2 data-[state=active]:border-blue-500 rounded-none border-r border-gray-300 px-6"
+            className="flex-1 bg-[#D3E4FD] hover:bg-[#B5D1F8] text-[#1E40AF] data-[state=active]:bg-[#B5D1F8] data-[state=active]:text-[#1E3A8A] border-r border-[#A3C0ED]"
           >
             Job Templates
           </TabsTrigger>
           <TabsTrigger 
             value="service-reminders" 
-            className="data-[state=active]:border-b-2 data-[state=active]:border-blue-500 rounded-none border-r border-gray-300 px-6"
+            className="flex-1 bg-[#D3E4FD] hover:bg-[#B5D1F8] text-[#1E40AF] data-[state=active]:bg-[#B5D1F8] data-[state=active]:text-[#1E3A8A] border-r border-[#A3C0ED]"
           >
             Service Reminders
           </TabsTrigger>
           <TabsTrigger 
             value="recurring-jobs" 
-            className="data-[state=active]:border-b-2 data-[state=active]:border-blue-500 rounded-none px-6"
+            className="flex-1 bg-[#D3E4FD] hover:bg-[#B5D1F8] text-[#1E40AF] data-[state=active]:bg-[#B5D1F8] data-[state=active]:text-[#1E3A8A]"
           >
             Recurring Jobs
           </TabsTrigger>
