@@ -57,6 +57,7 @@ export function UnassignedJobs({
     materials: ["Tiles", "Fixtures", "Pipes", "Paint"],
     category: "Residential"
   }];
+
   const handleTemplateSelection = (template: JobTemplate) => {
     toast({
       title: "Template selected",
@@ -64,13 +65,45 @@ export function UnassignedJobs({
     });
     setShowTemplateSearch(false);
   };
+
   return <div className="mb-4 px-0">
-      <div className="flex items-center gap-4 mb-2 ml-4 mt-4">
-        <Button variant="outline" size="icon" className="rounded-md border border-gray-300" onClick={() => navigate(-1)}>
-          <ArrowLeft className="h-5 w-5" />
-        </Button>
+      <Tabs defaultValue="unassigned-jobs" className="mt-2">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-4 ml-4 mt-4">
+            <Button variant="outline" size="icon" className="rounded-md border border-gray-300" onClick={() => navigate(-1)}>
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
+          </div>
+          
+          <TabsList className="flex gap-2 mr-4">
+            <TabsTrigger 
+              value="unassigned-jobs" 
+              className="rounded-lg bg-[#D3E4FD] hover:bg-[#B5D1F8] border-[#A3C0ED] text-[#1E40AF] hover:text-[#1E3A8A] data-[state=active]:bg-[#B5D1F8] data-[state=active]:text-[#1E3A8A] px-3 py-1 text-xs"
+            >
+              Unassigned Jobs
+            </TabsTrigger>
+            <TabsTrigger 
+              value="job-templates" 
+              className="rounded-lg bg-[#D3E4FD] hover:bg-[#B5D1F8] border-[#A3C0ED] text-[#1E40AF] hover:text-[#1E3A8A] data-[state=active]:bg-[#B5D1F8] data-[state=active]:text-[#1E3A8A] px-3 py-1 text-xs"
+            >
+              Job Templates
+            </TabsTrigger>
+            <TabsTrigger 
+              value="service-reminders" 
+              className="rounded-lg bg-[#D3E4FD] hover:bg-[#B5D1F8] border-[#A3C0ED] text-[#1E40AF] hover:text-[#1E3A8A] data-[state=active]:bg-[#B5D1F8] data-[state=active]:text-[#1E3A8A] px-3 py-1 text-xs"
+            >
+              Service Reminders
+            </TabsTrigger>
+            <TabsTrigger 
+              value="recurring-jobs" 
+              className="rounded-lg bg-[#D3E4FD] hover:bg-[#B5D1F8] border-[#A3C0ED] text-[#1E40AF] hover:text-[#1E3A8A] data-[state=active]:bg-[#B5D1F8] data-[state=active]:text-[#1E3A8A] px-3 py-1 text-xs"
+            >
+              Recurring Jobs
+            </TabsTrigger>
+          </TabsList>
+        </div>
         
-        <div className="flex space-x-2">
+        <div className="flex space-x-2 ml-4 mb-4">
           <Link to="/jobs/new-template">
             <Button variant="default" className="rounded-lg bg-[#D3E4FD] hover:bg-[#B5D1F8] border-[#A3C0ED] text-[#1E40AF] hover:text-[#1E3A8A]">
               Create New Template
@@ -80,38 +113,9 @@ export function UnassignedJobs({
             Create New Job
           </Button>
         </div>
-      </div>
-      
-      <Tabs defaultValue="unassigned-jobs" className="mt-6">
-        <TabsList className="w-full mb-6 flex">
-          <TabsTrigger 
-            value="unassigned-jobs" 
-            className="flex-1 rounded-lg bg-[#D3E4FD] hover:bg-[#B5D1F8] border-[#A3C0ED] text-[#1E40AF] hover:text-[#1E3A8A] data-[state=active]:bg-[#B5D1F8] data-[state=active]:text-[#1E3A8A] border-r border-[#A3C0ED]"
-          >
-            Unassigned Jobs
-          </TabsTrigger>
-          <TabsTrigger 
-            value="job-templates" 
-            className="flex-1 rounded-lg bg-[#D3E4FD] hover:bg-[#B5D1F8] border-[#A3C0ED] text-[#1E40AF] hover:text-[#1E3A8A] data-[state=active]:bg-[#B5D1F8] data-[state=active]:text-[#1E3A8A] border-r border-[#A3C0ED]"
-          >
-            Job Templates
-          </TabsTrigger>
-          <TabsTrigger 
-            value="service-reminders" 
-            className="flex-1 rounded-lg bg-[#D3E4FD] hover:bg-[#B5D1F8] border-[#A3C0ED] text-[#1E40AF] hover:text-[#1E3A8A] data-[state=active]:bg-[#B5D1F8] data-[state=active]:text-[#1E3A8A] border-r border-[#A3C0ED]"
-          >
-            Service Reminders
-          </TabsTrigger>
-          <TabsTrigger 
-            value="recurring-jobs" 
-            className="flex-1 rounded-lg bg-[#D3E4FD] hover:bg-[#B5D1F8] border-[#A3C0ED] text-[#1E40AF] hover:text-[#1E3A8A] data-[state=active]:bg-[#B5D1F8] data-[state=active]:text-[#1E3A8A]"
-          >
-            Recurring Jobs
-          </TabsTrigger>
-        </TabsList>
 
         <TabsContent value="unassigned-jobs">
-          <SectionHeader title="Unassigned Jobs" className="ml-4 mt-8 mb-2" />
+          <SectionHeader title="Unassigned Jobs" className="ml-4 mt-2 mb-2" />
           <Separator className="h-[2px] bg-gray-400 my-[8px]" />
           
           {showTemplateSearch ? <div className="mb-4">
@@ -153,13 +157,13 @@ export function UnassignedJobs({
         </TabsContent>
 
         <TabsContent value="job-templates">
-          <SectionHeader title="Job Templates" className="ml-4 mt-8 mb-2" />
+          <SectionHeader title="Job Templates" className="ml-4 mt-2 mb-2" />
           <Separator className="h-[2px] bg-gray-400 my-[8px]" />
           <TemplateLibrary templates={templates} searchQuery={searchQuery} onSearchChange={setSearchQuery} onAttachToJob={handleTemplateSelection} />
         </TabsContent>
 
         <TabsContent value="service-reminders">
-          <SectionHeader title="Service Reminders" className="ml-4 mt-8 mb-2" />
+          <SectionHeader title="Service Reminders" className="ml-4 mt-2 mb-2" />
           <Separator className="h-[2px] bg-gray-400 my-[8px]" />
           <Card>
             <CardHeader>
@@ -175,7 +179,7 @@ export function UnassignedJobs({
         </TabsContent>
 
         <TabsContent value="recurring-jobs">
-          <SectionHeader title="Recurring Jobs" className="ml-4 mt-8 mb-2" />
+          <SectionHeader title="Recurring Jobs" className="ml-4 mt-2 mb-2" />
           <Separator className="h-[2px] bg-gray-400 my-[8px]" />
           <Card>
             <CardHeader>
