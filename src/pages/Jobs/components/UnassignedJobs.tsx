@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -5,10 +6,13 @@ import { Job, JobTemplate } from "@/types/job";
 import { Link } from "react-router-dom";
 import { TemplateLibrary } from "./TemplateLibrary";
 import { useToast } from "@/hooks/use-toast";
+import { Separator } from "@/components/ui/separator";
+
 interface UnassignedJobsProps {
   jobs: Job[];
   onAssign: (job: Job) => void;
 }
+
 export function UnassignedJobs({
   jobs,
   onAssign
@@ -51,6 +55,7 @@ export function UnassignedJobs({
     materials: ["Tiles", "Fixtures", "Pipes", "Paint"],
     category: "Residential"
   }];
+
   const handleTemplateSelection = (template: JobTemplate) => {
     // In a real app, this would create a new job based on the template
     // and navigate to the job details or edit page
@@ -60,6 +65,7 @@ export function UnassignedJobs({
     });
     setShowTemplateSearch(false);
   };
+
   return <div className="mb-4">
       <div className="flex justify-center items-center mb-2 mx-[7px] px-[10px] py-0">
         <div className="flex space-x-2">
@@ -73,6 +79,8 @@ export function UnassignedJobs({
           </Button>
         </div>
       </div>
+      
+      <Separator className="my-3 h-[2px] bg-gray-400" />
       
       {showTemplateSearch ? <div className="mb-4">
           <div className="flex justify-between items-center mb-2">
