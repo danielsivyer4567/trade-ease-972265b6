@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -62,16 +61,12 @@ export function UnassignedJobs({
   };
   return <div className="mb-4 px-0">
       <Tabs defaultValue="unassigned-jobs" className="mt-2">
-        <div className="flex items-center gap-2 mb-4 px-4 py-2">
+        <div className="flex items-center gap-4 mb-4 px-4 py-2">
           <Button variant="outline" size="sm" onClick={() => navigate(-1)} className="rounded-md border border-gray-300 px-3 py-1">
             <ArrowLeft className="h-5 w-5" />
           </Button>
           
-          <Link to="/jobs/new-template">
-            <Button size="sm" variant="default" className="rounded-lg bg-[#D3E4FD] hover:bg-[#B5D1F8] border-[#A3C0ED] text-[#1E40AF] hover:text-[#1E3A8A] text-xs px-3 py-1">
-              Create New Template
-            </Button>
-          </Link>
+          
           
           <Button size="sm" variant="default" onClick={() => setShowTemplateSearch(true)} className="rounded-lg bg-[#D3E4FD] hover:bg-[#B5D1F8] border-[#A3C0ED] text-[#1E40AF] hover:text-[#1E3A8A] text-xs px-3 py-1">
             Create New Job
@@ -94,8 +89,8 @@ export function UnassignedJobs({
         </div>
 
         <TabsContent value="unassigned-jobs">
+          <SectionHeader title="Unassigned Jobs" className="ml-4 mt-2 mb-2" />
           <Separator className="h-[2px] bg-gray-400 my-[8px]" />
-          <SectionHeader title="Unassigned Jobs" className="ml-4 mt-2 mb-2 bg-gray-100 rounded-2xl px-0 mx-0 my-0 py-0" />
           
           {showTemplateSearch ? <div className="mb-4">
               <div className="flex justify-between items-center mb-2">
@@ -114,7 +109,7 @@ export function UnassignedJobs({
                 </CardHeader>
               </Card> : <div className="space-y-2">
                 {readyJobs.map(job => <Card key={job.id} className="w-full">
-                    <div className="flex justify-between items-center p-2 py-0 my-[10px] px-0">
+                    <div className="flex justify-between items-center p-2 my-[61px]">
                       <div className="flex-1">
                         <div className="flex items-center justify-between">
                           <div>
