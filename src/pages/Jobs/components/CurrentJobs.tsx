@@ -5,10 +5,12 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+
 interface CurrentJobsProps {
   jobs: Job[];
   onStatusUpdate: (jobId: string, newStatus: Job['status']) => void;
 }
+
 export function CurrentJobs({
   jobs,
   onStatusUpdate
@@ -30,8 +32,8 @@ export function CurrentJobs({
         return null;
     }
   };
+
   const handleStatusChange = async (jobId: string, newStatus: Job['status']) => {
-    // If status is changing to clean-required, notify Paul Finch
     if (newStatus === 'clean-required') {
       try {
         const {
@@ -56,16 +58,16 @@ export function CurrentJobs({
       }
     }
 
-    // Call the original status update function
     onStatusUpdate(jobId, newStatus);
   };
+
   return <div>
       <h2 className="font-semibold mb-2 text-2xl">Current Jobs</h2>
       <div className="bg-white rounded-lg shadow">
         <div className="max-h-[450px] overflow-y-auto">
           <table className="w-full divide-y divide-gray-200">
             <thead className="bg-gray-50 sticky top-0">
-              <tr>
+              <tr className="divide-x divide-gray-200">
                 <th className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Job #
                 </th>
@@ -87,7 +89,7 @@ export function CurrentJobs({
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {jobs.map(job => <tr key={job.id} className="hover:bg-gray-50 cursor-pointer" onClick={() => navigate(`/jobs/${job.id}`)}>
+              {jobs.map(job => <tr key={job.id} className="hover:bg-gray-50 cursor-pointer divide-x divide-gray-200" onClick={() => navigate(`/jobs/${job.id}`)}>
                   <td className="px-2 py-2 whitespace-nowrap">
                     <div className="text-xs font-mono text-gray-900">{job.jobNumber}</div>
                   </td>

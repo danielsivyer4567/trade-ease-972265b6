@@ -1,4 +1,3 @@
-
 import { Search, LinkIcon } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -33,7 +32,7 @@ export function TemplateLibrary({
           </div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filteredTemplates.map((template, index) => <Card key={index} className="p-4 hover:shadow-md transition-shadow">
+          {filteredTemplates.map((template, index) => <Card key={index} className="p-4 hover:shadow-md transition-shadow border-l-4 border-l-gray-300">
               <div className="flex justify-between items-start mb-2">
                 <h3 className="font-medium">{template.title}</h3>
                 <Button variant="ghost" size="sm" onClick={() => onAttachToJob(template)} className="text-blue-500 hover:text-blue-700">
