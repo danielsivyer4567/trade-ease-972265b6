@@ -17,7 +17,11 @@ export default function SettingsPageTemplate({ title, icon, children }: Settings
       <div className="p-6 space-y-6">
         <div className="flex items-center gap-2">
           <Link to="/settings">
-            <Button variant="ghost" size="icon" className="rounded-full">
+            <Button 
+              variant="outline" 
+              size="icon" 
+              className="rounded-md border border-gray-300"
+            >
               <ArrowLeft className="h-5 w-5" />
             </Button>
           </Link>

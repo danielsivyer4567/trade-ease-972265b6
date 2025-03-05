@@ -22,7 +22,11 @@ export default function OfficeStaff() {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Link to="/settings">
-              <Button variant="ghost" size="icon" className="rounded-full">
+              <Button 
+                variant="outline" 
+                size="icon" 
+                className="rounded-md border border-gray-300"
+              >
                 <ArrowLeft className="h-5 w-5" />
               </Button>
             </Link>
