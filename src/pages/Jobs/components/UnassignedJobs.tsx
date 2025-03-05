@@ -8,6 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Separator } from "@/components/ui/separator";
 import { ArrowLeft } from "lucide-react";
 import { SectionHeader } from "@/components/ui/SectionHeader";
+
 interface UnassignedJobsProps {
   jobs: Job[];
   onAssign: (job: Job) => void;

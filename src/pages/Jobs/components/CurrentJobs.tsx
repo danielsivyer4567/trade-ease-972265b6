@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { Clock, Loader2, DollarSign, CheckCircle, Brush, MoreHorizontal } from "lucide-react";
 import { Job } from "@/types/job";
@@ -5,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { SectionHeader } from "@/components/ui/SectionHeader";
 
 interface CurrentJobsProps {
   jobs: Job[];
@@ -62,7 +64,7 @@ export function CurrentJobs({
   };
 
   return <div>
-      <h2 className="font-semibold mb-2 text-2xl">Current Jobs</h2>
+      <SectionHeader title="Current Jobs" />
       <div className="bg-white rounded-lg shadow">
         <div className="max-h-[450px] overflow-y-auto">
           <table className="w-full divide-y divide-gray-200">
