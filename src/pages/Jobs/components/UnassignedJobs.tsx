@@ -1,4 +1,4 @@
-
+<lov-codelov-code>
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -95,15 +95,7 @@ export function UnassignedJobs({
           <Separator className="h-[2px] bg-gray-400 my-[8px]" />
           <SectionHeader title="Unassigned Jobs" className="ml-0 mt-2 mb-2" />
           
-          {showTemplateSearch ? <div className="mb-4">
-              <div className="flex justify-between items-center mb-2">
-                <h3 className="text-lg font-semibold">Select a Template</h3>
-                <Button variant="ghost" onClick={() => setShowTemplateSearch(false)} className="bg-[#D3E4FD] hover:bg-[#B5D1F8] text-[#1E40AF] hover:text-[#1E3A8A]">
-                  Close
-                </Button>
-              </div>
-              <TemplateLibrary templates={templates} searchQuery={searchQuery} onSearchChange={setSearchQuery} onAttachToJob={handleTemplateSelection} />
-            </div> : readyJobs.length === 0 ? <Card>
+          {readyJobs.length === 0 ? <Card>
                 <CardHeader>
                   <CardTitle>No unassigned jobs</CardTitle>
                   <CardDescription>
@@ -173,3 +165,4 @@ export function UnassignedJobs({
       </Tabs>
     </div>;
 }
+</lov-code>
