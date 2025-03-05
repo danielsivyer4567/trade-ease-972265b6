@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -64,10 +65,9 @@ export function UnassignedJobs({
     setShowTemplateSearch(false);
   };
 
-  return <div className="p-4 mb-6">
-      <div className="flex justify-between items-center mb-4">
-        
-        <div className="flex space-x-2 px-[240px]">
+  return <div className="mb-4">
+      <div className="flex justify-center items-center mb-2">
+        <div className="flex space-x-2">
           <Link to="/jobs/new-template">
             <Button variant="default" className="mx-0 my-0 rounded-lg bg-[#D3E4FD] hover:bg-[#B5D1F8] border-[#A3C0ED] text-[#1E40AF] hover:text-[#1E3A8A]">
               Create New Template
@@ -83,9 +83,9 @@ export function UnassignedJobs({
         </div>
       </div>
       
-      {showTemplateSearch ? <div className="mb-6">
-          <div className="flex justify-between items-center mb-4">
-            <h3 className="text-xl font-semibold">Select a Template</h3>
+      {showTemplateSearch ? <div className="mb-4">
+          <div className="flex justify-between items-center mb-2">
+            <h3 className="text-lg font-semibold">Select a Template</h3>
             <Button variant="ghost" onClick={() => setShowTemplateSearch(false)}>
               Close
             </Button>
@@ -100,15 +100,15 @@ export function UnassignedJobs({
             </CardHeader>
           </Card> : <div className="space-y-2">
             {readyJobs.map(job => <Card key={job.id} className="w-full">
-                <div className="flex justify-between items-center p-3">
+                <div className="flex justify-between items-center p-2">
                   <div className="flex-1">
                     <div className="flex items-center justify-between">
                       <div>
-                        <h3 className="text-base font-medium">{job.title}</h3>
+                        <h3 className="text-sm font-medium">{job.title}</h3>
                         <p className="text-xs text-gray-500">{job.customer}</p>
                       </div>
                       <div className="flex items-center">
-                        <span className="text-xs font-medium mr-3">{job.jobNumber}</span>
+                        <span className="text-xs font-medium mr-2">{job.jobNumber}</span>
                         <Button size="sm" onClick={() => onAssign(job)}>
                           Assign
                         </Button>
