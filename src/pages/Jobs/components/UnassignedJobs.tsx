@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -99,21 +98,25 @@ export function UnassignedJobs({
                 All jobs have been assigned to teams
               </CardDescription>
             </CardHeader>
-          </Card> : <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {readyJobs.map(job => <Card key={job.id}>
-                <CardHeader className="py-3 px-4">
-                  <CardTitle className="text-base">{job.title}</CardTitle>
-                  <CardDescription className="text-xs">{job.customer}</CardDescription>
-                </CardHeader>
-                <CardContent className="py-2 px-4">
-                  <p className="text-xs mb-2 line-clamp-2">{job.description}</p>
-                  <div className="flex justify-between items-center mt-2">
-                    <span className="text-xs font-medium">{job.jobNumber}</span>
-                    <Button size="sm" onClick={() => onAssign(job)}>
-                      Assign
-                    </Button>
+          </Card> : <div className="space-y-2">
+            {readyJobs.map(job => <Card key={job.id} className="w-full">
+                <div className="flex justify-between items-center p-3">
+                  <div className="flex-1">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h3 className="text-base font-medium">{job.title}</h3>
+                        <p className="text-xs text-gray-500">{job.customer}</p>
+                      </div>
+                      <div className="flex items-center">
+                        <span className="text-xs font-medium mr-3">{job.jobNumber}</span>
+                        <Button size="sm" onClick={() => onAssign(job)}>
+                          Assign
+                        </Button>
+                      </div>
+                    </div>
+                    <p className="text-xs mt-1 line-clamp-1">{job.description}</p>
                   </div>
-                </CardContent>
+                </div>
               </Card>)}
           </div>}
     </div>;
