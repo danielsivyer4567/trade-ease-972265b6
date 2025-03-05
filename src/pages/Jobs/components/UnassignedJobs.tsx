@@ -74,7 +74,7 @@ export function UnassignedJobs({
           
           <Button size="sm" variant="default" onClick={() => setShowTemplateSearch(true)} className="rounded-lg bg-[#D3E4FD] hover:bg-[#B5D1F8] border-[#A3C0ED] text-[#1E40AF] hover:text-[#1E3A8A] text-xs px-3 py-1 relative">
             Create New Job
-            <ChevronDown className="h-3 w-3 absolute bottom-1 right-1" />
+            <ChevronDown className="h-3 w-3 absolute bottom-0.5 right-1" />
           </Button>
           
           <TabsList className="flex gap-2">
