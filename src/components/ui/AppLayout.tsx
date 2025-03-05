@@ -3,6 +3,8 @@ import React, { useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { SidebarProvider } from '../ui/sidebar';
 import { AppSidebar } from './AppSidebar';
+import { QuickTabs } from './QuickTabs';
+import { useLocation } from 'react-router-dom';
 
 interface AppLayoutProps {
   children: React.ReactNode;
@@ -69,6 +71,9 @@ export function AppLayout({
     };
   }, []);
 
+  const location = useLocation();
+  const isMainDashboard = location.pathname === '/' || location.pathname === '/index';
+
   return (
     <SidebarProvider defaultOpen={!window.matchMedia('(max-width: 1024px)').matches}>
       <div className="min-h-screen min-w-full flex bg-transparent">
@@ -80,6 +85,7 @@ export function AppLayout({
           className
         )}>
           <div className="relative mx-auto max-w-7xl glass-card p-3 md:p-6 rounded-lg border-2 border-white/50 shadow-2xl">
+            {isMainDashboard && <QuickTabs />}
             {children}
           </div>
         </main>

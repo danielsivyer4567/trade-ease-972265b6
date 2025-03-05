@@ -9,7 +9,7 @@ import CleaningRequiredJobs from "@/components/dashboard/CleaningRequiredJobs";
 export default function Index() {
   return (
     <AppLayout>
-      <div className="p-6 space-y-8 animate-fadeIn">
+      <div className="space-y-8 animate-fadeIn">
         <div className="grid grid-cols-1 gap-8">
           <div className="glass-effect p-4 rounded-xl animate-slideUp">
             <JobSiteMap />
