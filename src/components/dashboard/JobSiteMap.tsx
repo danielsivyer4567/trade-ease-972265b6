@@ -68,7 +68,7 @@ const JobSiteMap = () => {
     type: "Office",
     jobNumber: "HQ-001"
   }];
-  return <Card className="p-6">
+  return <Card className="p-6 py-0 my-0 mx-[4px]">
       <h2 className="text-xl font-semibold mb-4 text-center">Job Site Map</h2>
       <LoadScript googleMapsApiKey="AIzaSyAnIcvNA_ZjRUnN4aeyl-1MYpBSN-ODIvw" libraries={["marker"]} version="beta">
         <GoogleMap mapContainerStyle={mapContainerStyle} center={center} zoom={13} options={mapOptions} onLoad={map => {
