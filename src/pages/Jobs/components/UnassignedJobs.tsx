@@ -74,7 +74,11 @@ export function UnassignedJobs({
               Create New Template
             </Button>
           </Link>
-          <Button variant="outline" onClick={() => setShowTemplateSearch(true)} className="text-center">
+          <Button 
+            variant="default" 
+            onClick={() => setShowTemplateSearch(true)} 
+            className="mx-0 my-0 rounded-lg bg-[#D3E4FD] hover:bg-[#B5D1F8] border-[#A3C0ED] text-[#1E40AF] hover:text-[#1E3A8A]"
+          >
             Create New Job
           </Button>
         </div>
