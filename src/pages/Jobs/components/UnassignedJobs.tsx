@@ -9,10 +9,12 @@ import { Separator } from "@/components/ui/separator";
 import { ArrowLeft } from "lucide-react";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
 interface UnassignedJobsProps {
   jobs: Job[];
   onAssign: (job: Job) => void;
 }
+
 export function UnassignedJobs({
   jobs,
   onAssign
@@ -52,6 +54,7 @@ export function UnassignedJobs({
     materials: ["Tiles", "Fixtures", "Pipes", "Paint"],
     category: "Residential"
   }];
+
   const handleTemplateSelection = (template: JobTemplate) => {
     toast({
       title: "Template selected",
@@ -59,14 +62,13 @@ export function UnassignedJobs({
     });
     setShowTemplateSearch(false);
   };
+
   return <div className="mb-4 px-0">
       <Tabs defaultValue="unassigned-jobs" className="mt-2">
         <div className="flex items-center gap-4 mb-4 px-4 py-2">
           <Button variant="outline" size="sm" onClick={() => navigate(-1)} className="rounded-md border border-gray-300 px-3 py-1">
             <ArrowLeft className="h-5 w-5" />
           </Button>
-          
-          
           
           <Button size="sm" variant="default" onClick={() => setShowTemplateSearch(true)} className="rounded-lg bg-[#D3E4FD] hover:bg-[#B5D1F8] border-[#A3C0ED] text-[#1E40AF] hover:text-[#1E3A8A] text-xs px-3 py-1">
             Create New Job
@@ -89,7 +91,7 @@ export function UnassignedJobs({
         </div>
 
         <TabsContent value="unassigned-jobs">
-          <SectionHeader title="Unassigned Jobs" className="ml-4 mt-2 mb-2" />
+          <SectionHeader title="Unassigned Jobs" className="ml-0 mt-2 mb-2" />
           <Separator className="h-[2px] bg-gray-400 my-[8px]" />
           
           {showTemplateSearch ? <div className="mb-4">
