@@ -1,4 +1,3 @@
-
 import { AppLayout } from "@/components/ui/AppLayout";
 import { useState } from "react";
 import { useNavigate, Routes, Route, Outlet } from "react-router-dom";
@@ -10,6 +9,7 @@ import { JobAssignmentDialog } from "./components/JobAssignmentDialog";
 import { JobDetails } from "./JobDetails";
 import { TemplateLibrary } from "./components/TemplateLibrary";
 import { TemplateCreation } from "./components/TemplateCreation";
+import { Separator } from "@/components/ui/separator";
 
 const mockJobs: Job[] = [{
   id: "1",
@@ -52,7 +52,6 @@ const teams = [
   { id: '3', name: 'Team Green', color: 'text-green-500' },
 ];
 
-// Main Jobs component that handles all routes
 export default function Jobs() {
   return (
     <AppLayout>
@@ -64,7 +63,6 @@ export default function Jobs() {
   );
 }
 
-// Component for the main jobs listing page
 function JobsMain() {
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -124,8 +122,9 @@ function JobsMain() {
   };
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-4 p-6">
       <UnassignedJobs jobs={jobs} onAssign={handleAssign} />
+      <Separator className="my-3 bg-gray-200" />
       <CurrentJobs jobs={jobs} onStatusUpdate={updateJobStatus} />
 
       <JobAssignmentDialog
