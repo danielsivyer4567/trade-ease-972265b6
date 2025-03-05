@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -70,6 +71,17 @@ export function UnassignedJobs({
             <Button variant="outline" size="icon" className="rounded-md border border-gray-300" onClick={() => navigate(-1)}>
               <ArrowLeft className="h-5 w-5" />
             </Button>
+            
+            <div className="flex space-x-2">
+              <Link to="/jobs/new-template">
+                <Button variant="default" className="rounded-lg bg-[#D3E4FD] hover:bg-[#B5D1F8] border-[#A3C0ED] text-[#1E40AF] hover:text-[#1E3A8A]">
+                  Create New Template
+                </Button>
+              </Link>
+              <Button variant="default" onClick={() => setShowTemplateSearch(true)} className="rounded-lg bg-[#D3E4FD] hover:bg-[#B5D1F8] border-[#A3C0ED] text-[#1E40AF] hover:text-[#1E3A8A]">
+                Create New Job
+              </Button>
+            </div>
           </div>
           
           <TabsList className="flex gap-2 mr-4">
@@ -86,17 +98,6 @@ export function UnassignedJobs({
               Recurring Jobs
             </TabsTrigger>
           </TabsList>
-        </div>
-        
-        <div className="flex space-x-2 ml-4 mb-4 mx-[68px] px-[55px] py-[3px]">
-          <Link to="/jobs/new-template">
-            <Button variant="default" className="rounded-lg bg-[#D3E4FD] hover:bg-[#B5D1F8] border-[#A3C0ED] text-[#1E40AF] hover:text-[#1E3A8A]">
-              Create New Template
-            </Button>
-          </Link>
-          <Button variant="default" onClick={() => setShowTemplateSearch(true)} className="rounded-lg bg-[#D3E4FD] hover:bg-[#B5D1F8] border-[#A3C0ED] text-[#1E40AF] hover:text-[#1E3A8A]">
-            Create New Job
-          </Button>
         </div>
 
         <TabsContent value="unassigned-jobs">
