@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { Clock, Loader2, DollarSign, CheckCircle, Brush, MoreHorizontal } from "lucide-react";
 import { Job } from "@/types/job";
@@ -162,6 +163,8 @@ export function CurrentJobs({
           </table>
         </div>
       </div>
-      <Separator className="my-3 h-[2px] bg-gray-400" />
+      <div className="mt-8 mb-8">
+        <Separator className="h-[2px] bg-gray-400" />
+      </div>
     </div>;
 }
