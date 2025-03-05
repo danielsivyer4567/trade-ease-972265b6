@@ -5,7 +5,6 @@ import { UserPlus, Briefcase, Receipt, FileText, CreditCard } from "lucide-react
 import { Link } from "react-router-dom";
 export const QuickTabs = () => {
   return <div className="mb-6">
-      <h3 className="text-lg font-medium mb-3">Quick Tabs</h3>
       <div className="grid grid-cols-3 sm:grid-cols-5 gap-1 px-0 py-0 mx-0 my-0">
         <Link to="/customers/new" className="w-full">
           <Button variant="outline" className="w-full h-6 bg-[#E5DEFF] hover:bg-[#D3C6FF] border-[#C4B5FF] text-[#4F46E5] hover:text-[#3730A3] flex flex-col items-center justify-center p-0.5 font-normal px-1 mx-0 my-0 py-0 text-[8px]">
@@ -44,4 +43,3 @@ export const QuickTabs = () => {
       </div>
     </div>;
 };
-
