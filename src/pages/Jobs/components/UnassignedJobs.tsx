@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -6,12 +5,10 @@ import { Job, JobTemplate } from "@/types/job";
 import { Link } from "react-router-dom";
 import { TemplateLibrary } from "./TemplateLibrary";
 import { useToast } from "@/hooks/use-toast";
-
 interface UnassignedJobsProps {
   jobs: Job[];
   onAssign: (job: Job) => void;
 }
-
 export function UnassignedJobs({
   jobs,
   onAssign
@@ -54,7 +51,6 @@ export function UnassignedJobs({
     materials: ["Tiles", "Fixtures", "Pipes", "Paint"],
     category: "Residential"
   }];
-
   const handleTemplateSelection = (template: JobTemplate) => {
     // In a real app, this would create a new job based on the template
     // and navigate to the job details or edit page
@@ -64,20 +60,15 @@ export function UnassignedJobs({
     });
     setShowTemplateSearch(false);
   };
-
   return <div className="mb-4">
-      <div className="flex justify-center items-center mb-2">
+      <div className="flex justify-center items-center mb-2 mx-[7px] px-[10px] py-0">
         <div className="flex space-x-2">
           <Link to="/jobs/new-template">
             <Button variant="default" className="mx-0 my-0 rounded-lg bg-[#D3E4FD] hover:bg-[#B5D1F8] border-[#A3C0ED] text-[#1E40AF] hover:text-[#1E3A8A]">
               Create New Template
             </Button>
           </Link>
-          <Button 
-            variant="default" 
-            onClick={() => setShowTemplateSearch(true)} 
-            className="mx-0 my-0 rounded-lg bg-[#D3E4FD] hover:bg-[#B5D1F8] border-[#A3C0ED] text-[#1E40AF] hover:text-[#1E3A8A]"
-          >
+          <Button variant="default" onClick={() => setShowTemplateSearch(true)} className="mx-0 my-0 rounded-lg bg-[#D3E4FD] hover:bg-[#B5D1F8] border-[#A3C0ED] text-[#1E40AF] hover:text-[#1E3A8A]">
             Create New Job
           </Button>
         </div>
