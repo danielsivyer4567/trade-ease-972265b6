@@ -62,7 +62,7 @@ export function UnassignedJobs({
     });
     setShowTemplateSearch(false);
   };
-  return <div className="mb-4">
+  return <div className="mb-4 px-0">
       <div className="flex items-center gap-4 mb-2 ml-4 mt-4">
         <Button variant="outline" size="icon" className="rounded-md border border-gray-300" onClick={() => navigate(-1)}>
           <ArrowLeft className="h-5 w-5" />
