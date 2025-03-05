@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -66,7 +67,7 @@ export function UnassignedJobs({
   return <div className="mb-4 px-0">
       <Tabs defaultValue="unassigned-jobs" className="mt-2">
         <div className="flex items-center gap-4 mb-4 px-4 py-2">
-          <Button variant="outline" size="sm" onClick={() => navigate(-1)} className="rounded-md border border-gray-300 px-3 py-1">
+          <Button variant="outline" size="sm" onClick={() => navigate(-1)} className="rounded-md border border-gray-300 px-3 py-1 bg-[#D3E4FD] hover:bg-[#B5D1F8] text-[#1E40AF] hover:text-[#1E3A8A]">
             <ArrowLeft className="h-5 w-5" />
           </Button>
           
@@ -97,7 +98,7 @@ export function UnassignedJobs({
           {showTemplateSearch ? <div className="mb-4">
               <div className="flex justify-between items-center mb-2">
                 <h3 className="text-lg font-semibold">Select a Template</h3>
-                <Button variant="ghost" onClick={() => setShowTemplateSearch(false)}>
+                <Button variant="ghost" onClick={() => setShowTemplateSearch(false)} className="bg-[#D3E4FD] hover:bg-[#B5D1F8] text-[#1E40AF] hover:text-[#1E3A8A]">
                   Close
                 </Button>
               </div>
@@ -120,7 +121,7 @@ export function UnassignedJobs({
                           </div>
                           <div className="flex items-center">
                             <span className="text-xs font-medium mr-2">{job.jobNumber}</span>
-                            <Button size="sm" onClick={() => onAssign(job)}>
+                            <Button size="sm" onClick={() => onAssign(job)} className="bg-[#D3E4FD] hover:bg-[#B5D1F8] text-[#1E40AF] hover:text-[#1E3A8A]">
                               Assign
                             </Button>
                           </div>
