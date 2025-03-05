@@ -6,10 +6,13 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { SectionHeader } from "@/components/ui/SectionHeader";
+import { Separator } from "@/components/ui/separator";
+
 interface CurrentJobsProps {
   jobs: Job[];
   onStatusUpdate: (jobId: string, newStatus: Job['status']) => void;
 }
+
 export function CurrentJobs({
   jobs,
   onStatusUpdate
@@ -31,6 +34,7 @@ export function CurrentJobs({
         return null;
     }
   };
+
   const handleStatusChange = async (jobId: string, newStatus: Job['status']) => {
     if (newStatus === 'clean-required') {
       try {
@@ -57,6 +61,7 @@ export function CurrentJobs({
     }
     onStatusUpdate(jobId, newStatus);
   };
+
   return <div>
       <SectionHeader title="Current Jobs" />
       <div className="bg-white rounded-lg shadow">
@@ -157,5 +162,6 @@ export function CurrentJobs({
           </table>
         </div>
       </div>
+      <Separator className="my-3 h-[2px] bg-gray-400" />
     </div>;
 }
