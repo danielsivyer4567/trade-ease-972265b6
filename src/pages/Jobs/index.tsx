@@ -1,4 +1,3 @@
-
 import { AppLayout } from "@/components/ui/AppLayout";
 import { useState } from "react";
 import { useNavigate, Routes, Route, Outlet } from "react-router-dom";
@@ -8,7 +7,6 @@ import { UnassignedJobs } from "./components/UnassignedJobs";
 import { CurrentJobs } from "./components/CurrentJobs";
 import { JobAssignmentDialog } from "./components/JobAssignmentDialog";
 import { JobDetails } from "./JobDetails";
-import { TemplateCreation } from "./components/TemplateCreation";
 import { Separator } from "@/components/ui/separator";
 
 const mockJobs: Job[] = [{
@@ -66,9 +64,7 @@ export default function Jobs() {
 function JobsMain() {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [generatedTemplates, setGeneratedTemplates] = useState<JobTemplate[]>([]);
   const [jobs, setJobs] = useState<Job[]>(mockJobs);
-  const [searchQuery, setSearchQuery] = useState("");
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
   const [selectedTeam, setSelectedTeam] = useState<string>('');
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
@@ -112,15 +108,6 @@ function JobsMain() {
     });
   };
 
-  const handleAttachToJob = (template: JobTemplate) => {
-    toast({
-      title: "Template Attached",
-      description: `Template "${template.title}" has been attached to a new job. Redirecting to job creation...`
-    });
-    localStorage.setItem('selectedTemplate', JSON.stringify(template));
-    navigate('/jobs/new');
-  };
-
   return (
     <div className="space-y-4 p-6">
       <UnassignedJobs jobs={jobs} onAssign={handleAssign} />
@@ -137,10 +124,6 @@ function JobsMain() {
         setSelectedDate={setSelectedDate}
         onAssign={handleAssignSubmit}
         teams={teams}
-      />
-
-      <TemplateCreation
-        onTemplateCreate={(template) => setGeneratedTemplates([template, ...generatedTemplates])}
       />
     </div>
   );
