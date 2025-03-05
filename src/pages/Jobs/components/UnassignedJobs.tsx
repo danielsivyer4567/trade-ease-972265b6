@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -87,25 +86,25 @@ export function UnassignedJobs({
         <TabsList className="w-full mb-6 flex">
           <TabsTrigger 
             value="unassigned-jobs" 
-            className="flex-1 bg-[#D3E4FD] hover:bg-[#B5D1F8] text-[#1E40AF] data-[state=active]:bg-[#B5D1F8] data-[state=active]:text-[#1E3A8A] border-r border-[#A3C0ED]"
+            className="flex-1 rounded-lg bg-[#D3E4FD] hover:bg-[#B5D1F8] border-[#A3C0ED] text-[#1E40AF] hover:text-[#1E3A8A] data-[state=active]:bg-[#B5D1F8] data-[state=active]:text-[#1E3A8A] border-r border-[#A3C0ED]"
           >
             Unassigned Jobs
           </TabsTrigger>
           <TabsTrigger 
             value="job-templates" 
-            className="flex-1 bg-[#D3E4FD] hover:bg-[#B5D1F8] text-[#1E40AF] data-[state=active]:bg-[#B5D1F8] data-[state=active]:text-[#1E3A8A] border-r border-[#A3C0ED]"
+            className="flex-1 rounded-lg bg-[#D3E4FD] hover:bg-[#B5D1F8] border-[#A3C0ED] text-[#1E40AF] hover:text-[#1E3A8A] data-[state=active]:bg-[#B5D1F8] data-[state=active]:text-[#1E3A8A] border-r border-[#A3C0ED]"
           >
             Job Templates
           </TabsTrigger>
           <TabsTrigger 
             value="service-reminders" 
-            className="flex-1 bg-[#D3E4FD] hover:bg-[#B5D1F8] text-[#1E40AF] data-[state=active]:bg-[#B5D1F8] data-[state=active]:text-[#1E3A8A] border-r border-[#A3C0ED]"
+            className="flex-1 rounded-lg bg-[#D3E4FD] hover:bg-[#B5D1F8] border-[#A3C0ED] text-[#1E40AF] hover:text-[#1E3A8A] data-[state=active]:bg-[#B5D1F8] data-[state=active]:text-[#1E3A8A] border-r border-[#A3C0ED]"
           >
             Service Reminders
           </TabsTrigger>
           <TabsTrigger 
             value="recurring-jobs" 
-            className="flex-1 bg-[#D3E4FD] hover:bg-[#B5D1F8] text-[#1E40AF] data-[state=active]:bg-[#B5D1F8] data-[state=active]:text-[#1E3A8A]"
+            className="flex-1 rounded-lg bg-[#D3E4FD] hover:bg-[#B5D1F8] border-[#A3C0ED] text-[#1E40AF] hover:text-[#1E3A8A] data-[state=active]:bg-[#B5D1F8] data-[state=active]:text-[#1E3A8A]"
           >
             Recurring Jobs
           </TabsTrigger>
