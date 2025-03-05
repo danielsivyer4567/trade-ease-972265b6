@@ -92,8 +92,8 @@ export function UnassignedJobs({
         </div>
 
         <TabsContent value="unassigned-jobs">
-          <SectionHeader title="Unassigned Jobs" className="ml-0 mt-2 mb-2" />
           <Separator className="h-[2px] bg-gray-400 my-[8px]" />
+          <SectionHeader title="Unassigned Jobs" className="ml-0 mt-2 mb-2" />
           
           {showTemplateSearch ? <div className="mb-4">
               <div className="flex justify-between items-center mb-2">
@@ -134,14 +134,14 @@ export function UnassignedJobs({
         </TabsContent>
 
         <TabsContent value="job-templates">
-          <SectionHeader title="Job Templates" className="ml-4 mt-2 mb-2" />
           <Separator className="h-[2px] bg-gray-400 my-[8px]" />
+          <SectionHeader title="Job Templates" className="ml-0 mt-2 mb-2" />
           <TemplateLibrary templates={templates} searchQuery={searchQuery} onSearchChange={setSearchQuery} onAttachToJob={handleTemplateSelection} />
         </TabsContent>
 
         <TabsContent value="service-reminders">
-          <SectionHeader title="Service Reminders" className="ml-4 mt-2 mb-2" />
           <Separator className="h-[2px] bg-gray-400 my-[8px]" />
+          <SectionHeader title="Service Reminders" className="ml-0 mt-2 mb-2" />
           <Card>
             <CardHeader>
               <CardTitle>Service Reminders</CardTitle>
@@ -156,8 +156,8 @@ export function UnassignedJobs({
         </TabsContent>
 
         <TabsContent value="recurring-jobs">
-          <SectionHeader title="Recurring Jobs" className="ml-4 mt-2 mb-2" />
           <Separator className="h-[2px] bg-gray-400 my-[8px]" />
+          <SectionHeader title="Recurring Jobs" className="ml-0 mt-2 mb-2" />
           <Card>
             <CardHeader>
               <CardTitle>Recurring Jobs</CardTitle>
