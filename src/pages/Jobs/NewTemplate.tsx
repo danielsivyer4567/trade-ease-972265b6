@@ -13,9 +13,9 @@ export default function NewTemplate() {
       <div className="p-6">
         <div className="flex items-center mb-6">
           <Button 
-            variant="ghost" 
+            variant="outline" 
             size="icon" 
-            className="mr-2 rounded-full" 
+            className="mr-2 rounded-full border border-gray-300" 
             onClick={() => navigate("/jobs")}
           >
             <ArrowLeft className="h-5 w-5" />
