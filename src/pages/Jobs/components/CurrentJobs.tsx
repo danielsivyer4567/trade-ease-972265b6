@@ -115,7 +115,7 @@ export function CurrentJobs({
                           <MoreHorizontal className="h-4 w-4" />
                         </Button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="w-40">
+                      <DropdownMenuContent align="end" className="w-40 bg-slate-200">
                         <DropdownMenuItem className="flex items-center gap-1 text-xs py-1" onClick={e => {
                       e.stopPropagation();
                       handleStatusChange(job.id, 'ready');
