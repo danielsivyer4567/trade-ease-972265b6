@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -65,7 +66,7 @@ export function UnassignedJobs({
 
   return <div className="mb-4 px-0">
       <Tabs defaultValue="unassigned-jobs" className="mt-2 px-0 mx-0 my-0 py-0">
-        <div className="flex items-center gap-4 mb-4 px-4 py-2">
+        <div className="flex items-center gap-2 mb-4 px-4 py-2">
           <Button variant="outline" size="sm" onClick={() => navigate(-1)} className="rounded-md border border-gray-300 px-3 py-1">
             <ArrowLeft className="h-5 w-5" />
           </Button>
