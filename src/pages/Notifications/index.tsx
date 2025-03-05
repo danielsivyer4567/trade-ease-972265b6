@@ -135,10 +135,10 @@ export default function Notifications() {
         
         <Tabs defaultValue="active" className="w-full">
           <TabsList className="grid w-full grid-cols-5">
-            <TabsTrigger value="active" className="border-2 border-black m-1">
+            <TabsTrigger value="active" className="border-2 border-black m-1 py-1 h-9">
               Active ({activeNotifications.length})
             </TabsTrigger>
-            <TabsTrigger value="sort-later" className="relative border-2 border-black m-1">
+            <TabsTrigger value="sort-later" className="relative border-2 border-black m-1 py-1 h-9">
               Sort Later 
               {sortedLaterNotifications.length > 0 && (
                 <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
@@ -146,14 +146,14 @@ export default function Notifications() {
                 </span>
               )}
             </TabsTrigger>
-            <TabsTrigger value="completed" className="border-2 border-black m-1">
+            <TabsTrigger value="completed" className="border-2 border-black m-1 py-1 h-9">
               Completed ({completedNotifications.length})
             </TabsTrigger>
-            <TabsTrigger value="email-settings" className="border-2 border-black m-1">
+            <TabsTrigger value="email-settings" className="border-2 border-black m-1 py-1 h-9">
               <Mail className="h-4 w-4 mr-2" />
               Email
             </TabsTrigger>
-            <TabsTrigger value="web-enquiry" className="border-2 border-black m-1">
+            <TabsTrigger value="web-enquiry" className="border-2 border-black m-1 py-1 h-9">
               <Globe className="h-4 w-4 mr-2" />
               Web Enquiry
             </TabsTrigger>
