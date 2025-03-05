@@ -7,7 +7,6 @@ import { TemplateLibrary } from "./TemplateLibrary";
 import { useToast } from "@/hooks/use-toast";
 import { Separator } from "@/components/ui/separator";
 import { ArrowLeft } from "lucide-react";
-
 interface UnassignedJobsProps {
   jobs: Job[];
   onAssign: (job: Job) => void;
@@ -64,12 +63,7 @@ export function UnassignedJobs({
   };
   return <div className="mb-4">
       <div className="flex items-center gap-4 mb-2 ml-4 mt-4">
-        <Button 
-          variant="outline" 
-          size="icon" 
-          className="rounded-md border border-gray-300"
-          onClick={() => navigate(-1)}
-        >
+        <Button variant="outline" size="icon" className="rounded-md border border-gray-300" onClick={() => navigate(-1)}>
           <ArrowLeft className="h-5 w-5" />
         </Button>
         
@@ -85,7 +79,7 @@ export function UnassignedJobs({
         </div>
       </div>
       
-      <Separator className="my-3 h-[2px] bg-gray-400" />
+      <Separator className="h-[2px] bg-gray-400 my-[63px]" />
       
       {showTemplateSearch ? <div className="mb-4">
           <div className="flex justify-between items-center mb-2">
@@ -104,7 +98,7 @@ export function UnassignedJobs({
             </CardHeader>
           </Card> : <div className="space-y-2">
             {readyJobs.map(job => <Card key={job.id} className="w-full">
-                <div className="flex justify-between items-center p-2">
+                <div className="flex justify-between items-center p-2 my-[61px]">
                   <div className="flex-1">
                     <div className="flex items-center justify-between">
                       <div>
