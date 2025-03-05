@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { AppLayout } from "@/components/ui/AppLayout";
 import { Card } from "@/components/ui/card";
@@ -29,7 +30,7 @@ const NotificationCard = ({
   onSortLater: (id: number) => void;
   onNotificationClick: (id: number) => void;
 }) => (
-  <Card key={notification.id} className="p-3 mb-3 cursor-pointer hover:bg-gray-50 border-2 border-black">
+  <Card key={notification.id} className="p-3 mb-3 cursor-pointer hover:bg-gray-50 border border-gray-300">
     <div className="flex items-start gap-2">
       <div className="flex-1" onClick={() => onNotificationClick(notification.id)}>
         <h3 className="font-medium text-sm">{notification.title}</h3>
