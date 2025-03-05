@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -96,14 +97,14 @@ export function UnassignedJobs({
             </CardHeader>
           </Card> : <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {readyJobs.map(job => <Card key={job.id}>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-lg">{job.title}</CardTitle>
-                  <CardDescription>{job.customer}</CardDescription>
+                <CardHeader className="py-3 px-4">
+                  <CardTitle className="text-base">{job.title}</CardTitle>
+                  <CardDescription className="text-xs">{job.customer}</CardDescription>
                 </CardHeader>
-                <CardContent>
-                  <p className="text-sm mb-2">{job.description}</p>
-                  <div className="flex justify-between items-center mt-4">
-                    <span className="text-sm font-medium">{job.jobNumber}</span>
+                <CardContent className="py-2 px-4">
+                  <p className="text-xs mb-2 line-clamp-2">{job.description}</p>
+                  <div className="flex justify-between items-center mt-2">
+                    <span className="text-xs font-medium">{job.jobNumber}</span>
                     <Button size="sm" onClick={() => onAssign(job)}>
                       Assign
                     </Button>
