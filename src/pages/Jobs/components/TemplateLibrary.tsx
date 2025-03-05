@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import type { JobTemplate } from "@/types/job";
 import { Separator } from "@/components/ui/separator";
-import { SectionHeader } from "@/components/ui/SectionHeader";
 
 interface TemplateLibraryProps {
   templates: JobTemplate[];
@@ -25,7 +24,6 @@ export function TemplateLibrary({
   });
   return <div>
       <Separator className="my-3 h-[2px] bg-gray-400" />
-      <SectionHeader title="Template Library" />
       <div className="bg-white rounded-lg p-4 shadow-sm mb-4 px-[5px] py-0">
         <div className="max-w-md mb-4">
           <div className="relative">
