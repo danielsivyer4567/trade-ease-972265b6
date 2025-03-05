@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { Clock, Loader2, DollarSign, CheckCircle, Brush, MoreHorizontal } from "lucide-react";
 import { Job } from "@/types/job";
@@ -7,12 +6,10 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { SectionHeader } from "@/components/ui/SectionHeader";
-
 interface CurrentJobsProps {
   jobs: Job[];
   onStatusUpdate: (jobId: string, newStatus: Job['status']) => void;
 }
-
 export function CurrentJobs({
   jobs,
   onStatusUpdate
@@ -34,7 +31,6 @@ export function CurrentJobs({
         return null;
     }
   };
-
   const handleStatusChange = async (jobId: string, newStatus: Job['status']) => {
     if (newStatus === 'clean-required') {
       try {
@@ -59,10 +55,8 @@ export function CurrentJobs({
         toast.error("Failed to send notification. Using fallback notification system.");
       }
     }
-
     onStatusUpdate(jobId, newStatus);
   };
-
   return <div>
       <SectionHeader title="Current Jobs" />
       <div className="bg-white rounded-lg shadow">
@@ -70,22 +64,22 @@ export function CurrentJobs({
           <table className="w-full divide-y divide-gray-200">
             <thead className="bg-gray-50 sticky top-0">
               <tr className="divide-x divide-gray-200">
-                <th className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-slate-200">
                   Job #
                 </th>
-                <th className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-slate-200">
                   Job
                 </th>
-                <th className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-slate-200">
                   Customer
                 </th>
-                <th className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-slate-200">
                   Date
                 </th>
-                <th className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-slate-200">
                   Status
                 </th>
-                <th className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-slate-200">
                   Actions
                 </th>
               </tr>
