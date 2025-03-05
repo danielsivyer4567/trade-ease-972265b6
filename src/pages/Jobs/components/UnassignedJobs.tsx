@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,6 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Separator } from "@/components/ui/separator";
 import { ArrowLeft } from "lucide-react";
 import { SectionHeader } from "@/components/ui/SectionHeader";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface UnassignedJobsProps {
   jobs: Job[];
@@ -81,44 +83,113 @@ export function UnassignedJobs({
         </div>
       </div>
       
-      <SectionHeader title="Unassigned Jobs" className="ml-4 mt-8 mb-2" />
-      <Separator className="h-[2px] bg-gray-400 my-[8px]" />
-      
-      {showTemplateSearch ? <div className="mb-4">
-          <div className="flex justify-between items-center mb-2">
-            <h3 className="text-lg font-semibold">Select a Template</h3>
-            <Button variant="ghost" onClick={() => setShowTemplateSearch(false)}>
-              Close
-            </Button>
-          </div>
-          <TemplateLibrary templates={templates} searchQuery={searchQuery} onSearchChange={setSearchQuery} onAttachToJob={handleTemplateSelection} />
-        </div> : readyJobs.length === 0 ? <Card>
-            <CardHeader>
-              <CardTitle>No unassigned jobs</CardTitle>
-              <CardDescription>
-                All jobs have been assigned to teams
-              </CardDescription>
-            </CardHeader>
-          </Card> : <div className="space-y-2">
-            {readyJobs.map(job => <Card key={job.id} className="w-full">
-                <div className="flex justify-between items-center p-2 my-[61px]">
-                  <div className="flex-1">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h3 className="text-sm font-medium">{job.title}</h3>
-                        <p className="text-xs text-gray-500">{job.customer}</p>
-                      </div>
-                      <div className="flex items-center">
-                        <span className="text-xs font-medium mr-2">{job.jobNumber}</span>
-                        <Button size="sm" onClick={() => onAssign(job)}>
-                          Assign
-                        </Button>
+      <Tabs defaultValue="unassigned-jobs" className="mt-6">
+        <TabsList className="w-full justify-start border-b bg-transparent p-0">
+          <TabsTrigger 
+            value="unassigned-jobs" 
+            className="data-[state=active]:border-b-2 data-[state=active]:border-blue-500 rounded-none border-r border-gray-300 px-6"
+          >
+            Unassigned Jobs
+          </TabsTrigger>
+          <TabsTrigger 
+            value="job-templates" 
+            className="data-[state=active]:border-b-2 data-[state=active]:border-blue-500 rounded-none border-r border-gray-300 px-6"
+          >
+            Job Templates
+          </TabsTrigger>
+          <TabsTrigger 
+            value="service-reminders" 
+            className="data-[state=active]:border-b-2 data-[state=active]:border-blue-500 rounded-none border-r border-gray-300 px-6"
+          >
+            Service Reminders
+          </TabsTrigger>
+          <TabsTrigger 
+            value="recurring-jobs" 
+            className="data-[state=active]:border-b-2 data-[state=active]:border-blue-500 rounded-none px-6"
+          >
+            Recurring Jobs
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="unassigned-jobs">
+          <SectionHeader title="Unassigned Jobs" className="ml-4 mt-8 mb-2" />
+          <Separator className="h-[2px] bg-gray-400 my-[8px]" />
+          
+          {showTemplateSearch ? <div className="mb-4">
+              <div className="flex justify-between items-center mb-2">
+                <h3 className="text-lg font-semibold">Select a Template</h3>
+                <Button variant="ghost" onClick={() => setShowTemplateSearch(false)}>
+                  Close
+                </Button>
+              </div>
+              <TemplateLibrary templates={templates} searchQuery={searchQuery} onSearchChange={setSearchQuery} onAttachToJob={handleTemplateSelection} />
+            </div> : readyJobs.length === 0 ? <Card>
+                <CardHeader>
+                  <CardTitle>No unassigned jobs</CardTitle>
+                  <CardDescription>
+                    All jobs have been assigned to teams
+                  </CardDescription>
+                </CardHeader>
+              </Card> : <div className="space-y-2">
+                {readyJobs.map(job => <Card key={job.id} className="w-full">
+                    <div className="flex justify-between items-center p-2 my-[61px]">
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <h3 className="text-sm font-medium">{job.title}</h3>
+                            <p className="text-xs text-gray-500">{job.customer}</p>
+                          </div>
+                          <div className="flex items-center">
+                            <span className="text-xs font-medium mr-2">{job.jobNumber}</span>
+                            <Button size="sm" onClick={() => onAssign(job)}>
+                              Assign
+                            </Button>
+                          </div>
+                        </div>
+                        <p className="text-xs mt-1 line-clamp-1">{job.description}</p>
                       </div>
                     </div>
-                    <p className="text-xs mt-1 line-clamp-1">{job.description}</p>
-                  </div>
-                </div>
-              </Card>)}
-          </div>}
+                  </Card>)}
+              </div>}
+        </TabsContent>
+
+        <TabsContent value="job-templates">
+          <SectionHeader title="Job Templates" className="ml-4 mt-8 mb-2" />
+          <Separator className="h-[2px] bg-gray-400 my-[8px]" />
+          <TemplateLibrary templates={templates} searchQuery={searchQuery} onSearchChange={setSearchQuery} onAttachToJob={handleTemplateSelection} />
+        </TabsContent>
+
+        <TabsContent value="service-reminders">
+          <SectionHeader title="Service Reminders" className="ml-4 mt-8 mb-2" />
+          <Separator className="h-[2px] bg-gray-400 my-[8px]" />
+          <Card>
+            <CardHeader>
+              <CardTitle>Service Reminders</CardTitle>
+              <CardDescription>
+                Set up recurring service reminders for your customers
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <p className="text-gray-500">No service reminders have been set up yet.</p>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="recurring-jobs">
+          <SectionHeader title="Recurring Jobs" className="ml-4 mt-8 mb-2" />
+          <Separator className="h-[2px] bg-gray-400 my-[8px]" />
+          <Card>
+            <CardHeader>
+              <CardTitle>Recurring Jobs</CardTitle>
+              <CardDescription>
+                Set up jobs that automatically repeat on a schedule
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <p className="text-gray-500">No recurring jobs have been set up yet.</p>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>;
 }

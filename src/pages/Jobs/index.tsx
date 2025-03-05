@@ -8,7 +8,6 @@ import { UnassignedJobs } from "./components/UnassignedJobs";
 import { CurrentJobs } from "./components/CurrentJobs";
 import { JobAssignmentDialog } from "./components/JobAssignmentDialog";
 import { JobDetails } from "./JobDetails";
-import { TemplateLibrary } from "./components/TemplateLibrary";
 import { TemplateCreation } from "./components/TemplateCreation";
 import { Separator } from "@/components/ui/separator";
 
@@ -138,13 +137,6 @@ function JobsMain() {
         setSelectedDate={setSelectedDate}
         onAssign={handleAssignSubmit}
         teams={teams}
-      />
-
-      <TemplateLibrary
-        templates={generatedTemplates}
-        searchQuery={searchQuery}
-        onSearchChange={setSearchQuery}
-        onAttachToJob={handleAttachToJob}
       />
 
       <TemplateCreation
