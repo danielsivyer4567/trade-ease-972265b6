@@ -36,14 +36,14 @@ export function JobAssignmentDialog({
 }: JobAssignmentDialogProps) {
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg">
-        <DialogHeader>
+      <DialogContent className="max-w-lg bg-white border-2 shadow-xl">
+        <DialogHeader className="bg-background">
           <DialogTitle>Assign Job {selectedJob?.jobNumber}</DialogTitle>
           <DialogDescription>
             Select a date and team to assign this job
           </DialogDescription>
         </DialogHeader>
-        <div className="space-y-6 py-4">
+        <div className="space-y-6 py-4 bg-background">
           <div className="space-y-2">
             <label className="text-sm font-medium flex items-center gap-2">
               <CalendarDays className="h-5 w-5 text-primary" />
@@ -80,7 +80,7 @@ export function JobAssignmentDialog({
             </div>
           </div>
         </div>
-        <DialogFooter>
+        <DialogFooter className="bg-background pt-2 border-t">
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Cancel
           </Button>
