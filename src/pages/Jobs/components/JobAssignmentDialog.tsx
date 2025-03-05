@@ -1,5 +1,5 @@
 
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Users, CalendarDays } from "lucide-react";
@@ -36,22 +36,25 @@ export function JobAssignmentDialog({
 }: JobAssignmentDialogProps) {
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-lg">
         <DialogHeader>
           <DialogTitle>Assign Job {selectedJob?.jobNumber}</DialogTitle>
+          <DialogDescription>
+            Select a date and team to assign this job
+          </DialogDescription>
         </DialogHeader>
         <div className="space-y-6 py-4">
           <div className="space-y-2">
             <label className="text-sm font-medium flex items-center gap-2">
-              <CalendarDays className="h-4 w-4 text-primary" />
-              Select Date
+              <CalendarDays className="h-5 w-5 text-primary" />
+              <span className="text-base">Select Date</span>
             </label>
-            <div className="border rounded-md p-2 shadow-sm">
+            <div className="border-2 rounded-lg p-3 shadow-md bg-white">
               <Calendar
                 mode="single"
                 selected={selectedDate}
                 onSelect={setSelectedDate}
-                className="rounded-md w-full"
+                className="mx-auto"
                 initialFocus
               />
             </div>
@@ -59,8 +62,8 @@ export function JobAssignmentDialog({
           
           <div className="space-y-2">
             <label className="text-sm font-medium flex items-center gap-2">
-              <Users className="h-4 w-4 text-primary" />
-              Select Team
+              <Users className="h-5 w-5 text-primary" />
+              <span className="text-base">Select Team</span>
             </label>
             <div className="grid grid-cols-3 gap-2">
               {teams.map(team => (
