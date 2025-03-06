@@ -220,6 +220,24 @@ export type Database = {
         }
         Relationships: []
       }
+      todos: {
+        Row: {
+          created_at: string
+          id: number
+          text: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: number
+          text?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: number
+          text?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

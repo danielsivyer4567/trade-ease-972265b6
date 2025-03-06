@@ -4,14 +4,22 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { ArrowLeft, ArrowRight, Settings, Database, Globe, CreditCard, Smartphone } from "lucide-react";
+import { ArrowLeft, ArrowRight, Settings, Database, Globe, CreditCard, Smartphone, Link } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 
 export default function Integrations() {
   const navigate = useNavigate();
   const [leadAutoEnabled, setLeadAutoEnabled] = useState(false);
+  const [cyberSourceDialogOpen, setCyberSourceDialogOpen] = useState(false);
+  const [cyberSourceConfig, setCyberSourceConfig] = useState({
+    merchantId: "",
+    apiKeyId: "",
+    secretKey: ""
+  });
 
   const handleToggleAutoLead = (checked: boolean) => {
     setLeadAutoEnabled(checked);
@@ -19,6 +27,22 @@ export default function Integrations() {
       toast.success("Auto lead purchase enabled");
     } else {
       toast.info("Auto lead purchase disabled");
+    }
+  };
+
+  const handleCyberSourceConnectClick = () => {
+    setCyberSourceDialogOpen(true);
+  };
+
+  const handleCyberSourceConfigSubmit = async () => {
+    try {
+      // Here we would normally validate and save the CyberSource configuration
+      // For this demo, we'll just show a success toast
+      toast.success("CyberSource integration configured successfully");
+      setCyberSourceDialogOpen(false);
+    } catch (error) {
+      console.error("Error configuring CyberSource:", error);
+      toast.error("Failed to configure CyberSource integration");
     }
   };
 
@@ -99,6 +123,15 @@ export default function Integrations() {
                   </div>
                   <Button variant="outline" size="sm">Connect</Button>
                 </div>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className="bg-green-100 p-1 rounded-full">
+                      <CreditCard className="h-5 w-5 text-green-600" />
+                    </div>
+                    <span>CyberSource</span>
+                  </div>
+                  <Button variant="outline" size="sm" onClick={handleCyberSourceConnectClick}>Connect</Button>
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -151,6 +184,59 @@ export default function Integrations() {
             </CardContent>
           </Card>
         </div>
+
+        {/* CyberSource Config Dialog */}
+        <Dialog open={cyberSourceDialogOpen} onOpenChange={setCyberSourceDialogOpen}>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>Configure CyberSource Integration</DialogTitle>
+              <DialogDescription>
+                Enter your CyberSource API credentials below.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="merchantId" className="text-right">
+                  Merchant ID
+                </Label>
+                <Input
+                  id="merchantId"
+                  value={cyberSourceConfig.merchantId}
+                  onChange={(e) => setCyberSourceConfig({...cyberSourceConfig, merchantId: e.target.value})}
+                  className="col-span-3"
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="apiKeyId" className="text-right">
+                  API Key ID
+                </Label>
+                <Input
+                  id="apiKeyId"
+                  value={cyberSourceConfig.apiKeyId}
+                  onChange={(e) => setCyberSourceConfig({...cyberSourceConfig, apiKeyId: e.target.value})}
+                  className="col-span-3"
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="secretKey" className="text-right">
+                  Secret Key
+                </Label>
+                <Input
+                  id="secretKey"
+                  type="password"
+                  value={cyberSourceConfig.secretKey}
+                  onChange={(e) => setCyberSourceConfig({...cyberSourceConfig, secretKey: e.target.value})}
+                  className="col-span-3"
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button type="submit" onClick={handleCyberSourceConfigSubmit}>
+                Save Configuration
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </AppLayout>
   );
