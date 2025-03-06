@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { AppLayout } from "@/components/ui/AppLayout";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { PlusCircle, Search, Filter, Clock } from "lucide-react";
+import { PlusCircle, Search, Filter, Clock, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { QuotesList } from "./components/QuotesList";
 import { QuoteSearch } from "./components/QuoteSearch";
@@ -21,7 +21,15 @@ export default function Quotes() {
     <AppLayout>
       <div className="p-6 max-w-7xl mx-auto w-full">
         <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
-          <div>
+          <div className="flex items-center gap-2">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => navigate(-1)} 
+              className="rounded-md border border-gray-300 px-3 py-1 bg-[#D3E4FD] hover:bg-[#B5D1F8] text-[#1E40AF] hover:text-[#1E3A8A]"
+            >
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
             <h1 className="text-3xl font-bold">Quotes</h1>
             <p className="text-gray-500 mt-1">Manage and create customer quotes</p>
           </div>
