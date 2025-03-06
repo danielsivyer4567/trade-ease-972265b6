@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { AppLayout } from "@/components/ui/AppLayout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -139,6 +138,18 @@ export default function NewPayment() {
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <h1 className="text-2xl font-bold">New Payment</h1>
+        </div>
+
+        <div className="mb-6">
+          <Card>
+            <CardContent className="p-4 flex justify-start">
+              <img 
+                src="/lovable-uploads/ae10fa3d-7775-4ca4-88a6-7755f3022211.png" 
+                alt="Payment processing" 
+                className="max-w-full rounded-lg max-h-40"
+              />
+            </CardContent>
+          </Card>
         </div>
 
         <div className="grid md:grid-cols-2 gap-6">
@@ -364,20 +375,6 @@ export default function NewPayment() {
                 </div>
               </CardContent>
             </Card>
-            
-            <div className="mt-6">
-              <Card>
-                <CardContent className="p-4">
-                  <div className="flex justify-center">
-                    <img 
-                      src="/lovable-uploads/ae10fa3d-7775-4ca4-88a6-7755f3022211.png" 
-                      alt="Payment processing" 
-                      className="max-w-full rounded-lg" 
-                    />
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
           </div>
         </div>
       </div>
