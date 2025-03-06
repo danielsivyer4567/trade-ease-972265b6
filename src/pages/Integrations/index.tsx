@@ -4,11 +4,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { ArrowRight, Settings, Database, Globe, CreditCard, Smartphone } from "lucide-react";
+import { ArrowLeft, ArrowRight, Settings, Database, Globe, CreditCard, Smartphone } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
 
 export default function Integrations() {
+  const navigate = useNavigate();
   const [leadAutoEnabled, setLeadAutoEnabled] = useState(false);
 
   const handleToggleAutoLead = (checked: boolean) => {
@@ -23,7 +25,17 @@ export default function Integrations() {
   return (
     <AppLayout>
       <div className="p-6 space-y-6">
-        <h1 className="text-2xl font-bold">Integrations</h1>
+        <div className="flex items-center gap-2">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={() => navigate(-1)} 
+            className="rounded-md border border-gray-300 px-3 py-1 bg-[#D3E4FD] hover:bg-[#B5D1F8] text-[#1E40AF] hover:text-[#1E3A8A]"
+          >
+            <ArrowLeft className="h-5 w-5" />
+          </Button>
+          <h1 className="text-2xl font-bold">Integrations</h1>
+        </div>
         <p className="text-gray-600">Connect your account with these services to enhance your workflow.</p>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
