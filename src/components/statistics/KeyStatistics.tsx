@@ -85,9 +85,9 @@ export function KeyStatistics() {
   return (
     <div className="space-y-8">
       <div className="space-y-4">
-        <h2 className="text-xl font-semibold text-gray-900">Key Statistics</h2>
+        <h2 className="text-xl font-semibold text-gray-900">Google My Business Analytics</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {keyStatistics.map((stat) => (
+          {googleBusinessStats.map((stat) => (
             <Card key={stat.title} className="hover:shadow-md transition-shadow">
               <CardHeader className="space-y-0 pb-2">
                 <div className="flex justify-between items-start">
@@ -114,9 +114,9 @@ export function KeyStatistics() {
       </div>
 
       <div className="space-y-4">
-        <h2 className="text-xl font-semibold text-gray-900">Google My Business Analytics</h2>
+        <h2 className="text-xl font-semibold text-gray-900">Key Statistics</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {googleBusinessStats.map((stat) => (
+          {keyStatistics.map((stat) => (
             <Card key={stat.title} className="hover:shadow-md transition-shadow">
               <CardHeader className="space-y-0 pb-2">
                 <div className="flex justify-between items-start">
