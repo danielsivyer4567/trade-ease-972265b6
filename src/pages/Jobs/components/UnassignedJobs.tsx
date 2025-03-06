@@ -1,4 +1,4 @@
-<lov-codelov-code>
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -165,4 +165,3 @@ export function UnassignedJobs({
       </Tabs>
     </div>;
 }
-</lov-code>
