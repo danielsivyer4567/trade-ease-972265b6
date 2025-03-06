@@ -1,9 +1,8 @@
-
 import React from 'react';
 import { AppLayout } from "@/components/ui/AppLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { TeamCalendar } from '@/components/team/TeamCalendar';
-import { Plus } from 'lucide-react';
+import { Plus, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
@@ -19,18 +18,15 @@ export default function Calendar() {
     { name: 'Green Team', color: 'green' }
   ]);
 
-  // Check for new team from localStorage (would be set in TeamNew component)
   React.useEffect(() => {
     const newTeamData = localStorage.getItem('newTeam');
     if (newTeamData) {
       try {
         const newTeam = JSON.parse(newTeamData);
-        // Only add if team with this name doesn't already exist
         if (!teams.some(team => team.name === newTeam.name)) {
           setTeams(prevTeams => [...prevTeams, newTeam]);
           toast.success(`${newTeam.name} has been added to your calendar view`);
         }
-        // Clear localStorage after adding
         localStorage.removeItem('newTeam');
       } catch (error) {
         console.error('Error parsing new team data:', error);
@@ -83,7 +79,17 @@ export default function Calendar() {
     <AppLayout>
       <div className="space-y-4 md:space-y-6 animate-fadeIn p-4 md:p-6">
         <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold">Team Calendars</h1>
+          <div className="flex items-center gap-2">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => navigate(-1)} 
+              className="rounded-md border border-gray-300 px-3 py-1 bg-[#D3E4FD] hover:bg-[#B5D1F8] text-[#1E40AF] hover:text-[#1E3A8A]"
+            >
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
+            <h1 className="text-2xl font-bold">Team Calendars</h1>
+          </div>
           <Button 
             variant="outline" 
             size="sm" 
