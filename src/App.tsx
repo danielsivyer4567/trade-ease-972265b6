@@ -31,6 +31,7 @@ import NotificationsSettings from "@/pages/Settings/Notifications";
 import TradeDash from './pages/TradeDash';
 import NewTemplate from "./pages/Jobs/NewTemplate";
 import NewQuote from "./pages/Quotes/NewQuote";
+import NewPayment from "./pages/Payments/NewPayment";
 
 import { Toaster } from "@/components/ui/toaster";
 
@@ -66,6 +67,7 @@ function App() {
         <Route path="/settings/ai-assistant-settings" element={<AIAssistantSettings />} />
         <Route path="/settings/notifications" element={<NotificationsSettings />} />
         <Route path="/trade-dash" element={<TradeDash />} />
+        <Route path="/payments/new" element={<NewPayment />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
       <Toaster />

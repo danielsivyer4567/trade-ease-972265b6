@@ -6,7 +6,7 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// This is a simplified TypeScript implementation of the Python code
+// This is a TypeScript implementation of the provided Python code
 // In a real implementation, you would use the CyberSource SDK for JavaScript/TypeScript
 serve(async (req) => {
   // Handle CORS preflight requests
@@ -39,13 +39,17 @@ serve(async (req) => {
     console.log(`Amount: ${totalAmount} ${currency}`);
     console.log(`Capture Payment: ${capturePayment}`);
     
-    // In a real implementation, this would call the CyberSource API
-    // For now, we'll simulate a successful payment response
+    // In a real implementation, this would call the CyberSource API similar to the Python code:
+    // 1. Create client reference information (clientReferenceInformation)
+    // 2. Set processing information (processingInformation)
+    // 3. Set payment information (paymentInformation)
+    // 4. Set order information (orderInformation)
+    // 5. Create and send payment request
     
     // Simulating API call delay
     await new Promise(resolve => setTimeout(resolve, 1000));
     
-    // Mock response data
+    // Mock response data - simulating the response from the Python implementation
     const responseData = {
       id: `payment_${Date.now()}`,
       status: "AUTHORIZED",

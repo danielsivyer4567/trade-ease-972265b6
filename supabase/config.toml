@@ -12,3 +12,6 @@ verify_jwt = false
 
 [functions.notify-team-leader]
 verify_jwt = false
+
+[functions.cybersource-payment]
+verify_jwt = false
