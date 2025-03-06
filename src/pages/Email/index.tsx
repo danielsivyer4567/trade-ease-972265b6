@@ -5,11 +5,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Mail, Globe, Copy, CheckCircle, Clipboard } from "lucide-react";
+import { Mail, Globe, Copy, CheckCircle, Clipboard, ArrowLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
 
 export default function Email() {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [forwardingEmail, setForwardingEmail] = useState("");
   const [formFields, setFormFields] = useState([
     { id: "name", label: "Name", required: true },
@@ -122,6 +124,14 @@ export default function Email() {
     <AppLayout>
       <div className="p-6 space-y-8">
         <div className="flex items-center gap-2">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={() => navigate(-1)} 
+            className="rounded-md border border-gray-300 px-3 py-1 bg-[#D3E4FD] hover:bg-[#B5D1F8] text-[#1E40AF] hover:text-[#1E3A8A]"
+          >
+            <ArrowLeft className="h-5 w-5" />
+          </Button>
           <Mail className="h-8 w-8 text-gray-700" />
           <h1 className="text-3xl font-bold">Email Settings</h1>
         </div>
