@@ -2,7 +2,7 @@ import { AppLayout } from "@/components/ui/AppLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, User, Phone, Mail, MapPin, FileText, Image, Clock, DollarSign, UserPlus, Upload } from "lucide-react";
+import { Search, User, Phone, Mail, MapPin, FileText, Image, Clock, DollarSign, UserPlus, Upload, ArrowLeft } from "lucide-react";
 import { useState } from "react";
 import { ImagesGrid } from "@/components/tasks/ImagesGrid";
 import { useNavigate } from "react-router-dom";
@@ -98,10 +98,20 @@ export default function CustomersPage() {
       <div className="p-6 space-y-6">
         <div className="flex flex-col space-y-4">
           <div className="flex justify-between items-center">
-            <h1 className="text-3xl font-bold flex items-center gap-2">
-              <User className="h-8 w-8" />
-              Customers
-            </h1>
+            <div className="flex items-center gap-2">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => navigate(-1)} 
+                className="rounded-md border border-gray-300 px-3 py-1 bg-[#D3E4FD] hover:bg-[#B5D1F8] text-[#1E40AF] hover:text-[#1E3A8A]"
+              >
+                <ArrowLeft className="h-5 w-5" />
+              </Button>
+              <h1 className="text-3xl font-bold flex items-center gap-2">
+                <User className="h-8 w-8" />
+                Customers
+              </h1>
+            </div>
             <div className="flex gap-2">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
