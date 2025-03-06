@@ -1,6 +1,5 @@
 
 import { Card, CardContent } from "@/components/ui/card";
-import { Player } from "@lottiefiles/react-lottie-player";
 
 export function PaymentInfoCard() {
   return <div className="mb-6">
@@ -12,7 +11,11 @@ export function PaymentInfoCard() {
               <p className="text-gray-600">Open the app, type the amount, ask the customer to tap – it's that simple.</p>
             </div>
             <div className="flex justify-start mx-0 my-0 py-0 px-0">
-              <Player src="https://assets10.lottiefiles.com/packages/lf20_M9p23l.json" className="w-[300px] h-[300px]" loop autoplay background="transparent" speed={1} />
+              <img 
+                src="/file-Ckt7RhAcT345qRhFkib3VN" 
+                alt="Tap on Mobile animation" 
+                className="w-[300px] h-auto" 
+              />
             </div>
           </div>
         </CardContent>
