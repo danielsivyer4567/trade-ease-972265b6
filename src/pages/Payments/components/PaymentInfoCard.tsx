@@ -10,7 +10,7 @@ export function PaymentInfoCard() {
           <div className="flex flex-col gap-4">
             <div className="flex items-center gap-4">
               <Player
-                src="https://assets8.lottiefiles.com/packages/lf20_dzn9x3zo.json"
+                src="https://assets5.lottiefiles.com/private_files/lf30_p1tbbgxp.json"
                 className="w-[300px] h-[300px]"
                 loop
                 autoplay
