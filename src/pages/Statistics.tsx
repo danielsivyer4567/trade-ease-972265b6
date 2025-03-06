@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Line, ComposedChart } from 'recharts';
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
+import { GlassCard } from "@/components/ui/GlassCard";
 
 const teamData = [
   {
@@ -54,6 +55,10 @@ export default function StatisticsPage() {
             <h1 className="text-3xl font-bold">Business Statistics</h1>
           </div>
         </div>
+
+        <GlassCard className="animate-slideUp">
+          <KeyStatistics />
+        </GlassCard>
 
         <Card>
           <CardHeader>
@@ -134,8 +139,6 @@ export default function StatisticsPage() {
             </Card>
           ))}
         </div>
-
-        <KeyStatistics />
       </div>
     </AppLayout>
   );

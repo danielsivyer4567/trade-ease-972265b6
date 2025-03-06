@@ -1,6 +1,5 @@
 
 import { AppLayout } from "@/components/ui/AppLayout";
-import { KeyStatistics } from "@/components/statistics/KeyStatistics";
 import JobSiteMap from "@/components/dashboard/JobSiteMap";
 import RecentActivity from "@/components/dashboard/RecentActivity";
 import UpcomingJobs from "@/components/dashboard/UpcomingJobs";
@@ -13,10 +12,6 @@ export default function Index() {
         <div className="grid grid-cols-1 gap-8">
           <div className="glass-effect p-4 rounded-xl animate-slideUp">
             <JobSiteMap />
-          </div>
-          
-          <div className="glass-effect p-4 rounded-xl animate-slideUp" style={{ animationDelay: '0.1s' }}>
-            <KeyStatistics />
           </div>
           
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
