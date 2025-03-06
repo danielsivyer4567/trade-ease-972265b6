@@ -1,9 +1,11 @@
 
 import { AppLayout } from "@/components/ui/AppLayout";
-import { BarChart as BarChartIcon } from "lucide-react";
+import { BarChart as BarChartIcon, ArrowLeft } from "lucide-react";
 import { KeyStatistics } from "@/components/statistics/KeyStatistics";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Line, ComposedChart } from 'recharts';
+import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
 
 const teamData = [
   {
@@ -33,11 +35,21 @@ const teamData = [
 ];
 
 export default function StatisticsPage() {
+  const navigate = useNavigate();
+  
   return (
     <AppLayout>
       <div className="p-6 space-y-8">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => navigate(-1)} 
+              className="rounded-md border border-gray-300 px-3 py-1 bg-[#D3E4FD] hover:bg-[#B5D1F8] text-[#1E40AF] hover:text-[#1E3A8A]"
+            >
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
             <BarChartIcon className="h-8 w-8 text-gray-700" />
             <h1 className="text-3xl font-bold">Business Statistics</h1>
           </div>
