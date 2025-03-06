@@ -3,7 +3,7 @@ import { Player } from "@lottiefiles/react-lottie-player";
 export function PaymentInfoCard() {
   return <div className="mb-6">
       <Card>
-        <CardContent className="p-4">
+        <CardContent className="p-4 py-0">
           <div className="flex flex-col gap-4 py-0 px-px">
             <div className="mx-px py-[2px] my-0 px-[240px]">
               <h3 className="text-xl font-medium px-[2px] mx-[2px] my-0 py-0">How Tap on Mobile works</h3>
