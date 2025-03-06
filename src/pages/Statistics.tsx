@@ -56,10 +56,6 @@ export default function StatisticsPage() {
           </div>
         </div>
 
-        <GlassCard className="animate-slideUp">
-          <KeyStatistics />
-        </GlassCard>
-
         <Card>
           <CardHeader>
             <CardTitle>Team Performance Overview</CardTitle>
@@ -100,6 +96,10 @@ export default function StatisticsPage() {
             </div>
           </CardContent>
         </Card>
+
+        <GlassCard className="animate-slideUp">
+          <KeyStatistics />
+        </GlassCard>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {teamData.map((team) => (
