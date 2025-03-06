@@ -1,15 +1,14 @@
+
 import { useState } from "react";
 import { AppLayout } from "@/components/ui/AppLayout";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { ArrowLeft, CreditCard, DollarSign } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { z } from "zod";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { z } from "zod";
-import { Player } from "@lottiefiles/react-lottie-player";
+import { PaymentHeader } from "./components/PaymentHeader";
+import { PaymentInfoCard } from "./components/PaymentInfoCard";
+import { PaymentForm } from "./components/PaymentForm";
+import { BillingForm } from "./components/BillingForm";
+import { PaymentFormData, ValidatedPaymentData } from "./types";
 
 // Define a schema for payment data validation
 const paymentSchema = z.object({
@@ -31,9 +30,8 @@ const paymentSchema = z.object({
 });
 
 export default function NewPayment() {
-  const navigate = useNavigate();
   const [isProcessing, setIsProcessing] = useState(false);
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<PaymentFormData>({
     cardNumber: "4111111111111111",
     cardHolderName: "John Doe",
     expirationMonth: "12",
@@ -70,7 +68,7 @@ export default function NewPayment() {
       const validatedData = paymentSchema.parse(formData);
       
       // Prepare data for the edge function
-      const paymentData = {
+      const paymentData: ValidatedPaymentData = {
         cardNumber: validatedData.cardNumber,
         expirationMonth: validatedData.expirationMonth,
         expirationYear: validatedData.expirationYear,
@@ -129,269 +127,24 @@ export default function NewPayment() {
   return (
     <AppLayout>
       <div className="p-6 max-w-4xl mx-auto">
-        <div className="flex items-center gap-2 mb-6">
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={() => navigate(-1)} 
-            className="rounded-md border border-gray-300 px-3 py-1 bg-[#D3E4FD] hover:bg-[#B5D1F8] text-[#1E40AF] hover:text-[#1E3A8A]"
-          >
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
-          <h1 className="text-2xl font-bold">New Payment</h1>
-        </div>
-
-        <div className="mb-6">
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex flex-col gap-4">
-                <div className="flex items-center gap-4">
-                  <Player
-                    src="/content/dam/anzworldline/images/website-development/LOTTIE_TAPONMOBILE.json"
-                    className="w-full max-w-[300px]"
-                    loop
-                    autoplay
-                    background="transparent"
-                    speed={1}
-                  />
-                  <div>
-                    <h3 className="text-xl font-medium">How Tap on Mobile works</h3>
-                    <p className="text-gray-600">Open the app, type the amount, ask the customer to tap – it's that simple.</p>
-                  </div>
-                </div>
-                <img 
-                  src="/lovable-uploads/ae10fa3d-7775-4ca4-88a6-7755f3022211.png" 
-                  alt="Payment processing" 
-                  className="max-w-full rounded-lg max-h-40"
-                />
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+        <PaymentHeader />
+        <PaymentInfoCard />
 
         <div className="grid md:grid-cols-2 gap-6">
           <div>
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <CreditCard className="h-5 w-5" />
-                  Payment Details
-                </CardTitle>
-                <CardDescription>
-                  Enter credit card information to process payment
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <form onSubmit={handleSubmit} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="cardNumber">Card Number</Label>
-                    <Input
-                      id="cardNumber"
-                      name="cardNumber"
-                      type="text"
-                      value={formData.cardNumber}
-                      onChange={handleInputChange}
-                      placeholder="Card Number"
-                      maxLength={19}
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="cardHolderName">Cardholder Name</Label>
-                    <Input
-                      id="cardHolderName"
-                      name="cardHolderName"
-                      type="text"
-                      value={formData.cardHolderName}
-                      onChange={handleInputChange}
-                      placeholder="Cardholder Name"
-                    />
-                  </div>
-                  
-                  <div className="grid grid-cols-3 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="expirationMonth">Month</Label>
-                      <Input
-                        id="expirationMonth"
-                        name="expirationMonth"
-                        type="text"
-                        value={formData.expirationMonth}
-                        onChange={handleInputChange}
-                        placeholder="MM"
-                        maxLength={2}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="expirationYear">Year</Label>
-                      <Input
-                        id="expirationYear"
-                        name="expirationYear"
-                        type="text"
-                        value={formData.expirationYear}
-                        onChange={handleInputChange}
-                        placeholder="YYYY"
-                        maxLength={4}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="cvv">CVV</Label>
-                      <Input
-                        id="cvv"
-                        name="cvv"
-                        type="text"
-                        value={formData.cvv}
-                        onChange={handleInputChange}
-                        placeholder="CVV"
-                        maxLength={4}
-                      />
-                    </div>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="totalAmount">Amount</Label>
-                    <div className="relative">
-                      <DollarSign className="absolute left-3 top-2.5 h-4 w-4 text-gray-500" />
-                      <Input
-                        id="totalAmount"
-                        name="totalAmount"
-                        type="text"
-                        value={formData.totalAmount}
-                        onChange={handleInputChange}
-                        className="pl-10"
-                        placeholder="0.00"
-                      />
-                    </div>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="capturePayment" className="flex items-center gap-2">
-                      <input
-                        id="capturePayment"
-                        name="capturePayment"
-                        type="checkbox"
-                        checked={formData.capturePayment}
-                        onChange={handleInputChange}
-                        className="rounded"
-                      />
-                      Capture Payment (authorize and capture)
-                    </Label>
-                  </div>
-                  
-                  <Button 
-                    type="submit" 
-                    disabled={isProcessing}
-                    className="w-full"
-                  >
-                    {isProcessing ? "Processing..." : "Process Payment"}
-                  </Button>
-                </form>
-              </CardContent>
-            </Card>
+            <PaymentForm 
+              formData={formData} 
+              isProcessing={isProcessing} 
+              handleInputChange={handleInputChange} 
+              handleSubmit={handleSubmit}
+            />
           </div>
           
           <div>
-            <Card>
-              <CardHeader>
-                <CardTitle>Billing Information</CardTitle>
-                <CardDescription>Enter customer billing information</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="firstName">First Name</Label>
-                      <Input
-                        id="firstName"
-                        name="firstName"
-                        value={formData.firstName}
-                        onChange={handleInputChange}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="lastName">Last Name</Label>
-                      <Input
-                        id="lastName"
-                        name="lastName"
-                        value={formData.lastName}
-                        onChange={handleInputChange}
-                      />
-                    </div>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="email">Email</Label>
-                    <Input
-                      id="email"
-                      name="email"
-                      type="email"
-                      value={formData.email}
-                      onChange={handleInputChange}
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="address1">Address</Label>
-                    <Input
-                      id="address1"
-                      name="address1"
-                      value={formData.address1}
-                      onChange={handleInputChange}
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="locality">City</Label>
-                    <Input
-                      id="locality"
-                      name="locality"
-                      value={formData.locality}
-                      onChange={handleInputChange}
-                    />
-                  </div>
-                  
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="administrativeArea">State</Label>
-                      <Input
-                        id="administrativeArea"
-                        name="administrativeArea"
-                        value={formData.administrativeArea}
-                        onChange={handleInputChange}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="postalCode">Postal Code</Label>
-                      <Input
-                        id="postalCode"
-                        name="postalCode"
-                        value={formData.postalCode}
-                        onChange={handleInputChange}
-                      />
-                    </div>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="country">Country</Label>
-                    <Input
-                      id="country"
-                      name="country"
-                      value={formData.country}
-                      onChange={handleInputChange}
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="phoneNumber">Phone Number</Label>
-                    <Input
-                      id="phoneNumber"
-                      name="phoneNumber"
-                      value={formData.phoneNumber}
-                      onChange={handleInputChange}
-                    />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            <BillingForm 
+              formData={formData} 
+              handleInputChange={handleInputChange} 
+            />
           </div>
         </div>
       </div>
