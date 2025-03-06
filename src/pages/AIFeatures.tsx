@@ -4,16 +4,18 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
-import { Brain, Sparkles, Zap, Network } from "lucide-react";
+import { Brain, Sparkles, Zap, Network, ArrowLeft } from "lucide-react";
 import { useState } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { useNavigate } from "react-router-dom";
 
 export default function AIFeatures() {
   const [prompt, setPrompt] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
   const [response, setResponse] = useState("");
   const { toast } = useToast();
+  const navigate = useNavigate();
   
   const handleOpenAIGenerate = async () => {
     setIsGenerating(true);
@@ -64,6 +66,14 @@ export default function AIFeatures() {
     <AppLayout>
       <div className="p-6 space-y-6">
         <div className="flex items-center gap-2">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={() => navigate(-1)} 
+            className="rounded-md border border-gray-300 px-3 py-1 bg-[#D3E4FD] hover:bg-[#B5D1F8] text-[#1E40AF] hover:text-[#1E3A8A]"
+          >
+            <ArrowLeft className="h-5 w-5" />
+          </Button>
           <Zap className="h-8 w-8 text-blue-500" />
           <h1 className="text-3xl font-bold">AI Features</h1>
         </div>
