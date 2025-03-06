@@ -11,7 +11,7 @@ export function PaymentInfoCard() {
             <div className="flex items-center gap-4">
               <Player
                 src="/content/dam/anzworldline/images/website-development/LOTTIE_TAPONMOBILE.json"
-                className="w-full max-w-[300px]"
+                className="w-[300px] h-[300px]"
                 loop
                 autoplay
                 background="transparent"
