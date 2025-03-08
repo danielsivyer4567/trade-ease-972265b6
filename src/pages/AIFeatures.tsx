@@ -1,4 +1,3 @@
-
 import { AppLayout } from "@/components/ui/AppLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -9,69 +8,64 @@ import { useState } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
-
 export default function AIFeatures() {
   const [prompt, setPrompt] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
   const [response, setResponse] = useState("");
-  const { toast } = useToast();
+  const {
+    toast
+  } = useToast();
   const navigate = useNavigate();
-  
   const handleOpenAIGenerate = async () => {
     setIsGenerating(true);
     try {
-      const { data, error } = await supabase.functions.invoke('generate-with-openai', {
-        body: { prompt }
+      const {
+        data,
+        error
+      } = await supabase.functions.invoke('generate-with-openai', {
+        body: {
+          prompt
+        }
       });
-
       if (error) throw error;
-
       setResponse(data.generatedText);
       toast({
         title: "Generation Complete",
-        description: "Your content has been generated successfully!",
+        description: "Your content has been generated successfully!"
       });
     } catch (error) {
       console.error('Error generating content:', error);
       toast({
         title: "Error",
         description: "Failed to generate content. Please try again.",
-        variant: "destructive",
+        variant: "destructive"
       });
     } finally {
       setIsGenerating(false);
     }
   };
-
   const handleGeminiGenerate = async () => {
     setIsGenerating(true);
     try {
       toast({
         title: "Processing with Gemini",
-        description: "Your request is being processed...",
+        description: "Your request is being processed..."
       });
       // Gemini integration will be added here
     } catch (error) {
       toast({
         title: "Error",
         description: "Failed to process your request",
-        variant: "destructive",
+        variant: "destructive"
       });
     } finally {
       setIsGenerating(false);
     }
   };
-
-  return (
-    <AppLayout>
+  return <AppLayout>
       <div className="p-6 space-y-6">
         <div className="flex items-center gap-2">
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={() => navigate(-1)} 
-            className="rounded-md border border-gray-300 px-3 py-1 bg-[#D3E4FD] hover:bg-[#B5D1F8] text-[#1E40AF] hover:text-[#1E3A8A]"
-          >
+          <Button variant="outline" size="sm" onClick={() => navigate(-1)} className="rounded-md border border-gray-300 px-3 py-1 bg-[#D3E4FD] hover:bg-[#B5D1F8] text-[#1E40AF] hover:text-[#1E3A8A]">
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <Zap className="h-8 w-8 text-blue-500" />
@@ -79,7 +73,7 @@ export default function AIFeatures() {
         </div>
         
         <Tabs defaultValue="openai" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
+          <TabsList className="grid w-full grid-cols-2 bg-slate-300">
             <TabsTrigger value="openai" className="flex items-center gap-2">
               <Network className="h-4 w-4" />
               OpenAI
@@ -91,44 +85,29 @@ export default function AIFeatures() {
           </TabsList>
           
           <TabsContent value="openai">
-            <Card>
-              <CardHeader>
+            <Card className="bg-slate-300">
+              <CardHeader className="bg-slate-300">
                 <CardTitle>OpenAI Integration</CardTitle>
                 <CardDescription>
                   Leverage OpenAI's powerful language models for your tasks
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <Textarea
-                  placeholder="Enter your prompt here..."
-                  value={prompt}
-                  onChange={(e) => setPrompt(e.target.value)}
-                  className="min-h-[100px]"
-                />
-                <Button
-                  onClick={handleOpenAIGenerate}
-                  disabled={isGenerating || !prompt}
-                  className="w-full"
-                >
-                  {isGenerating ? (
-                    "Generating..."
-                  ) : (
-                    <span className="flex items-center gap-2">
+              <CardContent className="space-y-4 bg-slate-300">
+                <Textarea placeholder="Enter your prompt here..." value={prompt} onChange={e => setPrompt(e.target.value)} className="min-h-[100px]" />
+                <Button onClick={handleOpenAIGenerate} disabled={isGenerating || !prompt} className="w-full">
+                  {isGenerating ? "Generating..." : <span className="flex items-center gap-2">
                       <Network className="h-4 w-4" />
                       Generate with OpenAI
-                    </span>
-                  )}
+                    </span>}
                 </Button>
-                {response && (
-                  <Card className="mt-4">
+                {response && <Card className="mt-4">
                     <CardHeader>
                       <CardTitle className="text-lg">Generated Response</CardTitle>
                     </CardHeader>
                     <CardContent>
                       <p className="whitespace-pre-wrap">{response}</p>
                     </CardContent>
-                  </Card>
-                )}
+                  </Card>}
               </CardContent>
             </Card>
           </TabsContent>
@@ -154,25 +133,12 @@ export default function AIFeatures() {
                       </CardDescription>
                     </CardHeader>
                     <CardContent>
-                      <Textarea
-                        placeholder="Enter your prompt for Flash Thinking..."
-                        value={prompt}
-                        onChange={(e) => setPrompt(e.target.value)}
-                        className="min-h-[100px]"
-                      />
-                      <Button
-                        onClick={handleGeminiGenerate}
-                        disabled={isGenerating || !prompt}
-                        className="w-full mt-4"
-                      >
-                        {isGenerating ? (
-                          "Processing..."
-                        ) : (
-                          <span className="flex items-center gap-2">
+                      <Textarea placeholder="Enter your prompt for Flash Thinking..." value={prompt} onChange={e => setPrompt(e.target.value)} className="min-h-[100px]" />
+                      <Button onClick={handleGeminiGenerate} disabled={isGenerating || !prompt} className="w-full mt-4">
+                        {isGenerating ? "Processing..." : <span className="flex items-center gap-2">
                             <Brain className="h-4 w-4" />
                             Generate with Flash Thinking
-                          </span>
-                        )}
+                          </span>}
                       </Button>
                     </CardContent>
                   </Card>
@@ -182,6 +148,5 @@ export default function AIFeatures() {
           </TabsContent>
         </Tabs>
       </div>
-    </AppLayout>
-  );
+    </AppLayout>;
 }
