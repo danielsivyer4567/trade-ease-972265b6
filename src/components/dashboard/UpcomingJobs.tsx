@@ -1,14 +1,10 @@
-
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Calendar } from "lucide-react";
-
 const UpcomingJobs = () => {
   const navigate = useNavigate();
-  
-  return (
-    <Card className="p-6">
+  return <Card className="p-6 bg-slate-200">
       <h2 className="text-xl font-semibold mb-4 flex items-center">
         <Calendar className="mr-2 h-5 w-5 text-green-500" />
         Upcoming Jobs
@@ -32,8 +28,6 @@ const UpcomingJobs = () => {
           </Button>
         </div>
       </div>
-    </Card>
-  );
+    </Card>;
 };
-
 export default UpcomingJobs;
