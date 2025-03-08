@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { AppLayout } from "@/components/ui/AppLayout";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -21,12 +22,12 @@ export default function Quotes() {
               <ArrowLeft className="h-5 w-5" />
             </Button>
             
-            
+            <Button onClick={handleCreateQuote} className="md:w-auto w-full px-4 py-2 text-[#000a0e]/[0.91] rounded-sm text-lg border-2 border-[#333333] text-center">
+              <PlusCircle className="mr-2 h-4 w-4" />
+              Create New Quote
+            </Button>
           </div>
-          <Button onClick={handleCreateQuote} className="md:w-auto w-full mx-[240px] px-[189px] py-0 text-[#000a0e]/[0.91] rounded-sm text-2xl border-2 border-[#333333] text-center">
-            <PlusCircle className="mr-2 h-4 w-4" />
-            Create New Quote
-          </Button>
+          
         </div>
 
         <div className="rounded-lg shadow-sm border p-1 mb-6 bg-slate-200">
