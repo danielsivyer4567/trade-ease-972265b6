@@ -23,7 +23,7 @@ export default function Quotes() {
             <h1 className="text-3xl font-bold">Quotes</h1>
             <p className="text-gray-500 mt-1">Manage and create customer quotes</p>
           </div>
-          <Button onClick={handleCreateQuote} className="md:w-auto w-full">
+          <Button onClick={handleCreateQuote} className="md:w-auto w-full text-slate-200">
             <PlusCircle className="mr-2 h-4 w-4" />
             Create New Quote
           </Button>
