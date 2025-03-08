@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { AppLayout } from "@/components/ui/AppLayout";
 import { Button } from "@/components/ui/button";
@@ -47,7 +48,9 @@ export default function Referrals() {
                 </Button>
               </div>
               <Button className="w-full mt-2" onClick={copyToClipboard}>
-                {copied ? "Copied!" : "Copy Referral Link"}
+                <span className="border border-slate-300 rounded px-2 py-1">
+                  {copied ? "Copied!" : "Copy Referral Link"}
+                </span>
               </Button>
             </CardContent>
           </Card>
