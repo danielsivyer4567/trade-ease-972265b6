@@ -79,7 +79,7 @@ export default function Calendar() {
             </Button>
             <h1 className="text-2xl font-bold">Team Calendars</h1>
           </div>
-          <Button variant="outline" size="sm" onClick={handleAddTeam}>
+          <Button variant="outline" size="sm" onClick={handleAddTeam} className="text-slate-950 bg-slate-300 hover:bg-slate-200 px-[64px] text-left">
             <Plus className="w-4 h-4 mr-2" />
             Add Team
           </Button>
@@ -87,7 +87,7 @@ export default function Calendar() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {teams.map((team, index) => <Card key={`${team.name}-${index}`}>
-              <CardHeader>
+              <CardHeader className="bg-slate-200">
                 <CardTitle className="text-lg">{team.name}</CardTitle>
                 <CardDescription>View and manage team schedule</CardDescription>
               </CardHeader>
