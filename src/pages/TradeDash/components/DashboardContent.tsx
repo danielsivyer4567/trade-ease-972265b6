@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DashboardStats } from "./DashboardStats";
@@ -21,22 +20,27 @@ interface UserStats {
   isTopTen: boolean;
   freeLeadsAvailable: number;
 }
-
 interface DashboardContentProps {
   userStats: UserStats;
   creditsBalance: number;
 }
-
-export const DashboardContent: React.FC<DashboardContentProps> = ({ 
-  userStats, 
-  creditsBalance 
+export const DashboardContent: React.FC<DashboardContentProps> = ({
+  userStats,
+  creditsBalance
 }) => {
-  const { filters, savedFilters, handleFilterChange, toggleSavedFilter } = useLeadFilters();
-  const { freeLeads, claimFreeLead, buyLead } = useLeadActions(userStats.freeLeadsAvailable);
-  
+  const {
+    filters,
+    savedFilters,
+    handleFilterChange,
+    toggleSavedFilter
+  } = useLeadFilters();
+  const {
+    freeLeads,
+    claimFreeLead,
+    buyLead
+  } = useLeadActions(userStats.freeLeadsAvailable);
   const availableLeads = mockLeads.filter(lead => lead.status === "available").length;
   const purchasedLeads = mockLeads.filter(lead => lead.status === "purchased").length;
-  
   const filteredLeads = mockLeads.filter(lead => {
     if (filters.postcode && !lead.postcode.includes(filters.postcode)) return false;
     if (filters.minSize && lead.size < parseInt(filters.minSize)) return false;
@@ -44,25 +48,16 @@ export const DashboardContent: React.FC<DashboardContentProps> = ({
     if (filters.leadType === "purchased" && lead.status !== "purchased") return false;
     return true;
   });
-
-  return (
-    <div className="space-y-4 md:space-y-6">
-      <DashboardStats 
-        availableLeads={availableLeads}
-        purchasedLeads={purchasedLeads}
-        userStats={userStats}
-        creditsBalance={creditsBalance}
-      />
+  return <div className="space-y-4 md:space-y-6">
+      <DashboardStats availableLeads={availableLeads} purchasedLeads={purchasedLeads} userStats={userStats} creditsBalance={creditsBalance} />
       
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 bg-slate-200">
         <RatingStats userStats={userStats} />
       </div>
       
-      {userStats.isTopTen && (
-        <TopPerformerCard />
-      )}
+      {userStats.isTopTen && <TopPerformerCard />}
 
-      <Tabs defaultValue="marketplace" className="w-full">
+      <Tabs defaultValue="marketplace" className="w-full bg-slate-200">
         <TabsList className="w-full mb-2 overflow-x-auto flex-nowrap">
           <TabsTrigger value="marketplace" className="flex-1">Lead Marketplace</TabsTrigger>
           <TabsTrigger value="my-leads" className="flex-1">My Leads</TabsTrigger>
@@ -70,28 +65,16 @@ export const DashboardContent: React.FC<DashboardContentProps> = ({
         </TabsList>
         
         <TabsContent value="marketplace">
-          <MarketplaceTab 
-            leads={filteredLeads}
-            freeLeads={freeLeads}
-            filters={filters}
-            savedFilters={savedFilters}
-            onFilterChange={handleFilterChange}
-            onSavedFilterToggle={toggleSavedFilter}
-            onClaimFreeLead={claimFreeLead}
-            onBuyLead={buyLead}
-          />
+          <MarketplaceTab leads={filteredLeads} freeLeads={freeLeads} filters={filters} savedFilters={savedFilters} onFilterChange={handleFilterChange} onSavedFilterToggle={toggleSavedFilter} onClaimFreeLead={claimFreeLead} onBuyLead={buyLead} />
         </TabsContent>
         
         <TabsContent value="my-leads">
-          <PurchasedLeadsTab 
-            purchasedLeads={mockLeads.filter(lead => lead.status === "purchased")}
-          />
+          <PurchasedLeadsTab purchasedLeads={mockLeads.filter(lead => lead.status === "purchased")} />
         </TabsContent>
         
         <TabsContent value="rankings">
           <RankingsTab rankings={mockRankings} />
         </TabsContent>
       </Tabs>
-    </div>
-  );
+    </div>;
 };
