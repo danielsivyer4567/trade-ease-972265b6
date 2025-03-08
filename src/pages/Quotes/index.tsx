@@ -15,15 +15,15 @@ export default function Quotes() {
   };
   return <AppLayout>
       <div className="p-6 max-w-7xl mx-auto w-full">
-        <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
-          <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" onClick={() => navigate(-1)} className="rounded-md border border-gray-300 px-3 py-1 bg-[#D3E4FD] hover:bg-[#B5D1F8] text-[#1E40AF] hover:text-[#1E3A8A]">
+        <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4 px-0 py-0 my-0 mx-0">
+          <div className="flex items-center gap-2 mx-0 px-0">
+            <Button variant="outline" size="sm" onClick={() => navigate(-1)} className="rounded-md border border-gray-300 bg-[#D3E4FD] hover:bg-[#B5D1F8] text-[#1E40AF] hover:text-[#1E3A8A] text-left px-0 py-[3px] my-0 mx-0">
               <ArrowLeft className="h-5 w-5" />
             </Button>
             <h1 className="text-3xl font-bold">Quotes</h1>
-            <p className="text-gray-500 mt-1">Manage and create customer quotes</p>
+            
           </div>
-          <Button onClick={handleCreateQuote} className="md:w-auto w-full text-slate-200">
+          <Button onClick={handleCreateQuote} className="md:w-auto w-full text-slate-200 mx-[240px] px-[189px] py-0 text-center">
             <PlusCircle className="mr-2 h-4 w-4" />
             Create New Quote
           </Button>
