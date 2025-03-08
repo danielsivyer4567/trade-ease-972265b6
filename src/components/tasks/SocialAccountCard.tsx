@@ -29,13 +29,13 @@ export function SocialAccountCard({
   accounts,
   onConnect
 }: SocialAccountCardProps) {
-  return <Card>
+  return <Card className="bg-slate-200">
       <CardHeader>
         <CardTitle>Connected Accounts</CardTitle>
         <CardDescription>Link your social media accounts to post content</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        {accounts.map(account => <div key={account.id} className="flex items-center justify-between p-3 border rounded-lg bg-slate-200">
+        {accounts.map(account => <div key={account.id} className="flex items-center justify-between p-3 border rounded-lg bg-slate-300">
             <div className="flex items-center gap-3">
               {getPlatformIcon(account.platform)}
               <div>
