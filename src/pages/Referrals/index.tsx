@@ -27,7 +27,9 @@ export default function Referrals() {
   return <AppLayout>
       <div className="p-6 space-y-6">
         <h1 className="text-2xl font-bold">Referrals</h1>
-        <p className="text-gray-600">Share Trade Ease with your friends and colleagues, and earn rewards!</p>
+        <p className="text-gray-600 border border-slate-300 rounded-md p-3 inline-block">
+          Share Trade Ease with your friends and colleagues, and earn rewards!
+        </p>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <Card className="bg-slate-200">
