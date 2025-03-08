@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { Clock, Loader2, DollarSign, CheckCircle, Brush, MoreHorizontal } from "lucide-react";
 import { Job } from "@/types/job";
@@ -8,12 +7,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 import { Separator } from "@/components/ui/separator";
-
 interface CurrentJobsProps {
   jobs: Job[];
   onStatusUpdate: (jobId: string, newStatus: Job['status']) => void;
 }
-
 export function CurrentJobs({
   jobs,
   onStatusUpdate
@@ -35,7 +32,6 @@ export function CurrentJobs({
         return null;
     }
   };
-
   const handleStatusChange = async (jobId: string, newStatus: Job['status']) => {
     if (newStatus === 'clean-required') {
       try {
@@ -62,7 +58,6 @@ export function CurrentJobs({
     }
     onStatusUpdate(jobId, newStatus);
   };
-
   return <div>
       <SectionHeader title="Current Jobs" />
       <div className="bg-white rounded-lg shadow">
@@ -104,7 +99,7 @@ export function CurrentJobs({
                   <td className="px-2 py-2 whitespace-nowrap">
                     <div className="text-xs text-gray-500">{job.date}</div>
                   </td>
-                  <td className="px-2 py-2 whitespace-nowrap">
+                  <td className="px-2 py-2 whitespace-nowrap bg-slate-200">
                     <div className="flex items-center">
                       {getStatusIcon(job.status)}
                       <span className="ml-1 text-xs text-gray-500">

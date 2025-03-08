@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,12 +9,10 @@ import { Separator } from "@/components/ui/separator";
 import { ArrowLeft } from "lucide-react";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-
 interface UnassignedJobsProps {
   jobs: Job[];
   onAssign: (job: Job) => void;
 }
-
 export function UnassignedJobs({
   jobs,
   onAssign
@@ -55,7 +52,6 @@ export function UnassignedJobs({
     materials: ["Tiles", "Fixtures", "Pipes", "Paint"],
     category: "Residential"
   }];
-
   const handleTemplateSelection = (template: JobTemplate) => {
     toast({
       title: "Template selected",
@@ -63,7 +59,6 @@ export function UnassignedJobs({
     });
     setShowTemplateSearch(false);
   };
-
   return <div className="mb-4 px-0">
       <Tabs defaultValue="unassigned-jobs" className="mt-2">
         <div className="flex items-center gap-4 mb-4 px-4 py-2">
@@ -91,7 +86,7 @@ export function UnassignedJobs({
           </TabsList>
         </div>
 
-        <TabsContent value="unassigned-jobs">
+        <TabsContent value="unassigned-jobs" className="bg-slate-300">
           <Separator className="h-[2px] bg-gray-400 my-[8px]" />
           <SectionHeader title="Unassigned Jobs" className="ml-0 mt-2 mb-2" />
           
@@ -103,7 +98,7 @@ export function UnassignedJobs({
                   </CardDescription>
                 </CardHeader>
               </Card> : <div className="space-y-2">
-                {readyJobs.map(job => <Card key={job.id} className="w-full">
+                {readyJobs.map(job => <Card key={job.id} className="w-full bg-slate-200">
                     <div className="flex justify-between items-center p-2 my-[61px]">
                       <div className="flex-1">
                         <div className="flex items-center justify-between">
