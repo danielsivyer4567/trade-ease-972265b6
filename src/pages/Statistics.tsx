@@ -43,7 +43,7 @@ export default function StatisticsPage() {
         </div>
 
         <Card>
-          <CardHeader>
+          <CardHeader className="bg-slate-200">
             <CardTitle>Team Performance Overview</CardTitle>
             <CardDescription>Financial metrics and quality indicators by team</CardDescription>
           </CardHeader>
