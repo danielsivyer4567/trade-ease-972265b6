@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { AppLayout } from "@/components/ui/AppLayout";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -8,26 +7,17 @@ import { QuotesList } from "./components/QuotesList";
 import { QuoteSearch } from "./components/QuoteSearch";
 import { RecentQuotes } from "./components/RecentQuotes";
 import { useNavigate } from "react-router-dom";
-
 export default function Quotes() {
   const [activeTab, setActiveTab] = useState("all");
   const navigate = useNavigate();
-  
   const handleCreateQuote = () => {
     navigate("/quotes/new");
   };
-
-  return (
-    <AppLayout>
+  return <AppLayout>
       <div className="p-6 max-w-7xl mx-auto w-full">
         <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
           <div className="flex items-center gap-2">
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={() => navigate(-1)} 
-              className="rounded-md border border-gray-300 px-3 py-1 bg-[#D3E4FD] hover:bg-[#B5D1F8] text-[#1E40AF] hover:text-[#1E3A8A]"
-            >
+            <Button variant="outline" size="sm" onClick={() => navigate(-1)} className="rounded-md border border-gray-300 px-3 py-1 bg-[#D3E4FD] hover:bg-[#B5D1F8] text-[#1E40AF] hover:text-[#1E3A8A]">
               <ArrowLeft className="h-5 w-5" />
             </Button>
             <h1 className="text-3xl font-bold">Quotes</h1>
@@ -39,7 +29,7 @@ export default function Quotes() {
           </Button>
         </div>
 
-        <div className="bg-white rounded-lg shadow-sm border p-1 mb-6">
+        <div className="rounded-lg shadow-sm border p-1 mb-6 bg-slate-200">
           <Tabs defaultValue="all" value={activeTab} onValueChange={setActiveTab}>
             <TabsList className="grid grid-cols-4 mb-4">
               <TabsTrigger value="all">All Quotes</TabsTrigger>
@@ -86,7 +76,7 @@ export default function Quotes() {
             <RecentQuotes />
           </div>
           <div>
-            <div className="bg-white rounded-lg shadow-sm border p-4">
+            <div className="rounded-lg shadow-sm border p-4 bg-slate-200">
               <h2 className="text-lg font-semibold mb-4">Quick Stats</h2>
               <div className="grid grid-cols-2 gap-4">
                 <div className="bg-blue-50 p-3 rounded-lg">
@@ -110,6 +100,5 @@ export default function Quotes() {
           </div>
         </div>
       </div>
-    </AppLayout>
-  );
+    </AppLayout>;
 }
