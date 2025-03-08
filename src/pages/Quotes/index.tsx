@@ -16,7 +16,7 @@ export default function Quotes() {
   return <AppLayout>
       <div className="p-6 max-w-7xl mx-auto w-full">
         <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4 px-0 py-0 my-0 mx-0">
-          <div className="flex items-center gap-2 ml-0 pl-0 px-[6px] py-0 mx-[31px]">
+          <div className="flex items-center gap-2 ml-0 pl-0 px-0 py-0 mx-0">
             <Button variant="outline" size="sm" onClick={() => navigate(-1)} className="rounded-md border border-gray-300 bg-[#D3E4FD] hover:bg-[#B5D1F8] text-[#1E40AF] hover:text-[#1E3A8A] text-left px-0 py-[3px] my-0 mx-0">
               <ArrowLeft className="h-5 w-5" />
             </Button>
