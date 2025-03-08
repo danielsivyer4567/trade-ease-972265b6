@@ -1,9 +1,7 @@
-
 import { AppLayout } from "@/components/ui/AppLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Settings, DollarSign, Receipt, Clock, Users, Shield, FileText, Calendar, List, CreditCard, User, Bot, Briefcase, Network, Mail, FileJson, Building, Share, Zap, Search, Link2, Bell, Globe } from "lucide-react";
 import { Link } from "react-router-dom";
-
 const settingsSections = [{
   title: "Notifications",
   icon: Bell,
@@ -125,7 +123,6 @@ const settingsSections = [{
   description: "Configure AI assistant",
   path: "/settings/ai-assistant-settings"
 }];
-
 export default function SettingsPage() {
   return <AppLayout>
       <div className="p-6 space-y-8">
@@ -138,14 +135,9 @@ export default function SettingsPage() {
         <div className="space-y-4">
           <h2 className="text-xl font-semibold text-gray-900">Configuration</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {settingsSections.map(section => (
-              <Link 
-                key={section.title} 
-                to={section.path} 
-                className="block"
-              >
+            {settingsSections.map(section => <Link key={section.title} to={section.path} className="block">
                 <Card className="hover:shadow-md transition-shadow">
-                  <CardHeader>
+                  <CardHeader className="bg-slate-200">
                     <div className="flex items-center gap-2">
                       <section.icon className="h-5 w-5 text-gray-600" />
                       <CardTitle className="text-lg">{section.title}</CardTitle>
@@ -153,8 +145,7 @@ export default function SettingsPage() {
                     <CardDescription>{section.description}</CardDescription>
                   </CardHeader>
                 </Card>
-              </Link>
-            ))}
+              </Link>)}
           </div>
         </div>
       </div>
