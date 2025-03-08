@@ -33,6 +33,7 @@ import NewTemplate from "./pages/Jobs/NewTemplate";
 import NewJob from "./pages/Jobs/NewJob";
 import NewQuote from "./pages/Quotes/NewQuote";
 import NewPayment from "./pages/Payments/NewPayment";
+import Workflow from "./pages/Workflow";
 
 import { Toaster } from "@/components/ui/toaster";
 
@@ -70,6 +71,7 @@ function App() {
         <Route path="/settings/notifications" element={<NotificationsSettings />} />
         <Route path="/trade-dash" element={<TradeDash />} />
         <Route path="/payments/new" element={<NewPayment />} />
+        <Route path="/workflow" element={<Workflow />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
       <Toaster />

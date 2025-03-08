@@ -1,10 +1,11 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Briefcase, Users, FileText, Settings, Menu, Calendar, Network, Share, Bot, Mail, MessageSquare, Link as LinkIcon, Database, Hammer, Plus, BarChart, ListTodo, Bell, ChevronLeft, ChevronRight, Gauge } from 'lucide-react';
+import { LayoutDashboard, Briefcase, Users, FileText, Settings, Menu, Calendar, Network, Share, Bot, Mail, MessageSquare, Link as LinkIcon, Database, Hammer, Plus, BarChart, ListTodo, Bell, ChevronLeft, ChevronRight, Gauge, GitBranch } from 'lucide-react';
 import { useSidebar } from './sidebar';
 import { cn } from '@/lib/utils';
 import { Button } from './button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./tooltip";
+
 export function AppSidebar() {
   const [teams] = React.useState([{
     name: 'Red Team',
@@ -27,6 +28,7 @@ export function AppSidebar() {
   const location = useLocation();
   const notificationCount = 3;
   const isCollapsed = state === "collapsed";
+
   const renderNavLink = (icon: React.ReactNode, label: string, path: string) => {
     const isActive = location.pathname === path || path !== '/' && location.pathname.startsWith(path);
     const content = <Link to={path} className={cn("flex items-center gap-2 p-2 rounded-lg hover:bg-gray-100 text-gray-700 hover:text-gray-900 text-sm", isActive && "bg-gray-100 text-gray-900 font-medium")}>
@@ -44,6 +46,7 @@ export function AppSidebar() {
         </TooltipContent>
       </Tooltip> : content;
   };
+
   return <>
       <Button variant="outline" size="icon" className="fixed left-4 top-4 z-40 lg:hidden" onClick={toggleSidebar}>
         <Menu className="h-4 w-4" />
@@ -75,6 +78,10 @@ export function AppSidebar() {
               icon: Gauge,
               label: 'Easy Lead Dashboard',
               path: '/trade-dash'
+            }, {
+              icon: GitBranch,
+              label: 'Workflow Builder',
+              path: '/workflow'
             }, {
               icon: BarChart,
               label: 'Statistics',
@@ -138,7 +145,6 @@ export function AppSidebar() {
             }) => renderNavLink(<Icon className="w-4 h-4 flex-shrink-0 bg-slate-200" />, label, path))}
             </TooltipProvider>
 
-            {/* Teams Section */}
             <div className={cn("pt-8", isCollapsed && "hidden lg:hidden")}>
               <div className="mb-2 text-sm font-bold text-black px-2">
                 Teams view
