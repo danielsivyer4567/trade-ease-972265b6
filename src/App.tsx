@@ -30,6 +30,7 @@ import AIAssistantSettings from "@/pages/Settings/AIAssistantSettings";
 import NotificationsSettings from "@/pages/Settings/Notifications";
 import TradeDash from './pages/TradeDash';
 import NewTemplate from "./pages/Jobs/NewTemplate";
+import NewJob from "./pages/Jobs/NewJob";
 import NewQuote from "./pages/Quotes/NewQuote";
 import NewPayment from "./pages/Payments/NewPayment";
 
@@ -45,6 +46,7 @@ function App() {
         <Route path="/quotes/new" element={<NewQuote />} />
         <Route path="/jobs/*" element={<Jobs />} />
         <Route path="/jobs/new-template" element={<NewTemplate />} />
+        <Route path="/jobs/new" element={<NewJob />} />
         <Route path="/email/*" element={<Email />} />
         <Route path="/messaging/*" element={<Messaging />} />
         <Route path="/social/*" element={<Social />} />

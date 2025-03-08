@@ -71,7 +71,7 @@ export function UnassignedJobs({
             <ArrowLeft className="h-5 w-5" />
           </Button>
           
-          <Button size="sm" variant="default" onClick={() => setShowTemplateSearch(true)} className="rounded-lg bg-[#D3E4FD] hover:bg-[#B5D1F8] border-[#A3C0ED] text-[#1E40AF] hover:text-[#1E3A8A] text-xs px-3 py-1">
+          <Button size="sm" variant="default" onClick={() => navigate("/jobs/new")} className="rounded-lg bg-[#D3E4FD] hover:bg-[#B5D1F8] border-[#A3C0ED] text-[#1E40AF] hover:text-[#1E3A8A] text-xs px-3 py-1">
             Create New Job
           </Button>
           
