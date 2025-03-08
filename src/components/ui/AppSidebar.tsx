@@ -51,7 +51,7 @@ export function AppSidebar() {
 
       <div data-state={state} className={cn("fixed inset-y-0 left-0 z-30 bg-white border-r transition-all duration-300 ease-in-out peer", isCollapsed ? "w-[60px]" : "w-[240px]", "lg:translate-x-0", state === "collapsed" && "-translate-x-full lg:translate-x-0")}>
         <div className="flex flex-col h-full">
-          <div className="p-4 flex items-center justify-between">
+          <div className="p-4 flex items-center justify-between bg-slate-200">
             <div className="flex items-center gap-3">
               <img src="/lovable-uploads/6a07dd00-f2c7-49da-8b00-48d960c13610.png" alt="Trade Ease Logo" className="w-8 h-8" />
               <span className={cn("font-semibold text-lg text-gray-900 transition-opacity duration-200", isCollapsed && "opacity-0 lg:hidden")}>
