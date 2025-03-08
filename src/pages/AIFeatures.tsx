@@ -97,7 +97,7 @@ export default function AIFeatures() {
                 <Button onClick={handleOpenAIGenerate} disabled={isGenerating || !prompt} className="w-full">
                   {isGenerating ? "Generating..." : <span className="flex items-center gap-2">
                       <Network className="h-4 w-4" />
-                      Generate with OpenAI
+                      <span className="border border-gray-700 px-2 py-1 rounded">Generate with OpenAI</span>
                     </span>}
                 </Button>
                 {response && <Card className="mt-4">
@@ -137,7 +137,7 @@ export default function AIFeatures() {
                       <Button onClick={handleGeminiGenerate} disabled={isGenerating || !prompt} className="w-full mt-4">
                         {isGenerating ? "Processing..." : <span className="flex items-center gap-2">
                             <Brain className="h-4 w-4" />
-                            Generate with Flash Thinking
+                            <span className="border border-gray-700 px-2 py-1 rounded">Generate with Flash Thinking</span>
                           </span>}
                       </Button>
                     </CardContent>
