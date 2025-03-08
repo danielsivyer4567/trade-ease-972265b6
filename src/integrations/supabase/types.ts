@@ -220,6 +220,30 @@ export type Database = {
         }
         Relationships: []
       }
+      statistics_history: {
+        Row: {
+          count: number
+          count_date: string
+          created_at: string
+          entity_type: string
+          id: string
+        }
+        Insert: {
+          count: number
+          count_date?: string
+          created_at?: string
+          entity_type: string
+          id?: string
+        }
+        Update: {
+          count?: number
+          count_date?: string
+          created_at?: string
+          entity_type?: string
+          id?: string
+        }
+        Relationships: []
+      }
       todos: {
         Row: {
           created_at: string
@@ -243,7 +267,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      calculate_database_statistics: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never
