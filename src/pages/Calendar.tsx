@@ -8,16 +8,19 @@ import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
 import type { Job } from '@/types/job';
-
 export default function Calendar() {
   const [sharedDate, setSharedDate] = React.useState<Date | undefined>(new Date());
   const navigate = useNavigate();
-  const [teams, setTeams] = React.useState([
-    { name: 'Red Team', color: 'red' },
-    { name: 'Blue Team', color: 'blue' },
-    { name: 'Green Team', color: 'green' }
-  ]);
-
+  const [teams, setTeams] = React.useState([{
+    name: 'Red Team',
+    color: 'red'
+  }, {
+    name: 'Blue Team',
+    color: 'blue'
+  }, {
+    name: 'Green Team',
+    color: 'green'
+  }]);
   React.useEffect(() => {
     const newTeamData = localStorage.getItem('newTeam');
     if (newTeamData) {
@@ -33,7 +36,6 @@ export default function Calendar() {
       }
     }
   }, [teams]);
-
   const mockJobs: Job[] = [{
     id: "1",
     customer: "John Smith",
@@ -57,69 +59,43 @@ export default function Calendar() {
     description: "Regular maintenance check",
     assignedTeam: "Blue Team"
   }];
-
   const getColorForTeam = (teamIndex: number) => {
-    const baseColors = [
-      'red', 'blue', 'green', 'purple', 'orange', 'pink', 'teal', 'yellow', 'indigo', 'rose'
-    ];
-    
+    const baseColors = ['red', 'blue', 'green', 'purple', 'orange', 'pink', 'teal', 'yellow', 'indigo', 'rose'];
     const colorIndex = teamIndex % baseColors.length;
     return baseColors[colorIndex];
   };
-
   const handleAddTeam = () => {
     navigate('/team-new');
   };
-
   const handleJobAssign = (jobId: string, date: Date) => {
     toast.success(`Job ${jobId} has been scheduled for ${format(date, 'PPP')}`);
   };
-
-  return (
-    <AppLayout>
-      <div className="space-y-4 md:space-y-6 animate-fadeIn p-4 md:p-6">
+  return <AppLayout>
+      <div className="space-y-4 md:space-y-6 animate-fadeIn p-4 md:p-6 py-[126px]">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={() => navigate(-1)} 
-              className="rounded-md border border-gray-300 px-3 py-1 bg-[#D3E4FD] hover:bg-[#B5D1F8] text-[#1E40AF] hover:text-[#1E3A8A]"
-            >
+            <Button variant="outline" size="sm" onClick={() => navigate(-1)} className="rounded-md border border-gray-300 px-3 py-1 bg-[#D3E4FD] hover:bg-[#B5D1F8] text-[#1E40AF] hover:text-[#1E3A8A]">
               <ArrowLeft className="h-5 w-5" />
             </Button>
             <h1 className="text-2xl font-bold">Team Calendars</h1>
           </div>
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={handleAddTeam}
-          >
+          <Button variant="outline" size="sm" onClick={handleAddTeam}>
             <Plus className="w-4 h-4 mr-2" />
             Add Team
           </Button>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {teams.map((team, index) => (
-            <Card key={`${team.name}-${index}`}>
+          {teams.map((team, index) => <Card key={`${team.name}-${index}`}>
               <CardHeader>
                 <CardTitle className="text-lg">{team.name}</CardTitle>
                 <CardDescription>View and manage team schedule</CardDescription>
               </CardHeader>
               <CardContent>
-                <TeamCalendar 
-                  date={sharedDate} 
-                  setDate={setSharedDate} 
-                  teamColor={team.color}
-                  onJobAssign={handleJobAssign}
-                  assignedJobs={mockJobs.filter(job => job.assignedTeam === team.name)}
-                />
+                <TeamCalendar date={sharedDate} setDate={setSharedDate} teamColor={team.color} onJobAssign={handleJobAssign} assignedJobs={mockJobs.filter(job => job.assignedTeam === team.name)} />
               </CardContent>
-            </Card>
-          ))}
+            </Card>)}
         </div>
       </div>
-    </AppLayout>
-  );
+    </AppLayout>;
 }
