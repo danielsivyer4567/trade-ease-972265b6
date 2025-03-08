@@ -95,10 +95,12 @@ export default function AIFeatures() {
               <CardContent className="space-y-4 bg-slate-300">
                 <Textarea placeholder="Enter your prompt here..." value={prompt} onChange={e => setPrompt(e.target.value)} className="min-h-[100px]" />
                 <Button onClick={handleOpenAIGenerate} disabled={isGenerating || !prompt} className="w-full">
-                  {isGenerating ? "Generating..." : <span className="flex items-center gap-2">
+                  {isGenerating ? "Generating..." : 
+                    <span className="border border-gray-700 px-2 py-1 rounded flex items-center gap-2">
                       <Network className="h-4 w-4" />
-                      <span className="border border-gray-700 px-2 py-1 rounded">Generate with OpenAI</span>
-                    </span>}
+                      Generate with OpenAI
+                    </span>
+                  }
                 </Button>
                 {response && <Card className="mt-4">
                     <CardHeader>
@@ -135,10 +137,12 @@ export default function AIFeatures() {
                     <CardContent>
                       <Textarea placeholder="Enter your prompt for Flash Thinking..." value={prompt} onChange={e => setPrompt(e.target.value)} className="min-h-[100px]" />
                       <Button onClick={handleGeminiGenerate} disabled={isGenerating || !prompt} className="w-full mt-4">
-                        {isGenerating ? "Processing..." : <span className="flex items-center gap-2">
+                        {isGenerating ? "Processing..." : 
+                          <span className="border border-gray-700 px-2 py-1 rounded flex items-center gap-2">
                             <Brain className="h-4 w-4" />
-                            <span className="border border-gray-700 px-2 py-1 rounded">Generate with Flash Thinking</span>
-                          </span>}
+                            Generate with Flash Thinking
+                          </span>
+                        }
                       </Button>
                     </CardContent>
                   </Card>
