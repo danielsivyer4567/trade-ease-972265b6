@@ -8,7 +8,7 @@ export function SectionHeader({
   title,
   className
 }: SectionHeaderProps) {
-  return <h2 className="">
+  return <h2 className="text-slate-400">
       {title}
     </h2>;
 }
