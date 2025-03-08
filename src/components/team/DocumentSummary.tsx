@@ -1,7 +1,5 @@
-
 import React from 'react';
 import { Card } from '@/components/ui/card';
-
 interface DocumentSummaryProps {
   documentCount: {
     insurance: number;
@@ -10,10 +8,11 @@ interface DocumentSummaryProps {
   };
   teamColor: string;
 }
-
-export function DocumentSummary({ documentCount, teamColor }: DocumentSummaryProps) {
-  return (
-    <Card className="p-4">
+export function DocumentSummary({
+  documentCount,
+  teamColor
+}: DocumentSummaryProps) {
+  return <Card className="p-4 bg-slate-200">
       <h3 className="text-lg font-semibold mb-3 text-zinc-950">Document Summary</h3>
       <div className="space-y-4">
         <div className="border rounded-lg p-4">
@@ -32,6 +31,5 @@ export function DocumentSummary({ documentCount, teamColor }: DocumentSummaryPro
           <p className="text-sm text-gray-500">documents uploaded</p>
         </div>
       </div>
-    </Card>
-  );
+    </Card>;
 }
