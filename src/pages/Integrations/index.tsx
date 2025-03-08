@@ -1,4 +1,3 @@
-
 import { AppLayout } from "@/components/ui/AppLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -10,7 +9,6 @@ import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-
 export default function Integrations() {
   const navigate = useNavigate();
   const [leadAutoEnabled, setLeadAutoEnabled] = useState(false);
@@ -20,7 +18,6 @@ export default function Integrations() {
     apiKeyId: "",
     secretKey: ""
   });
-
   const handleToggleAutoLead = (checked: boolean) => {
     setLeadAutoEnabled(checked);
     if (checked) {
@@ -29,11 +26,9 @@ export default function Integrations() {
       toast.info("Auto lead purchase disabled");
     }
   };
-
   const handleCyberSourceConnectClick = () => {
     setCyberSourceDialogOpen(true);
   };
-
   const handleCyberSourceConfigSubmit = async () => {
     try {
       // Here we would normally validate and save the CyberSource configuration
@@ -45,17 +40,10 @@ export default function Integrations() {
       toast.error("Failed to configure CyberSource integration");
     }
   };
-
-  return (
-    <AppLayout>
+  return <AppLayout>
       <div className="p-6 space-y-6">
         <div className="flex items-center gap-2">
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={() => navigate(-1)} 
-            className="rounded-md border border-gray-300 px-3 py-1 bg-[#D3E4FD] hover:bg-[#B5D1F8] text-[#1E40AF] hover:text-[#1E3A8A]"
-          >
+          <Button variant="outline" size="sm" onClick={() => navigate(-1)} className="rounded-md border border-gray-300 px-3 py-1 bg-[#D3E4FD] hover:bg-[#B5D1F8] text-[#1E40AF] hover:text-[#1E3A8A]">
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <h1 className="text-2xl font-bold">Integrations</h1>
@@ -63,8 +51,8 @@ export default function Integrations() {
         <p className="text-gray-600">Connect your account with these services to enhance your workflow.</p>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <Card className="glass-card">
-            <CardHeader>
+          <Card className="glass-card bg-slate-200">
+            <CardHeader className="bg-slate-200">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <div className="bg-blue-100 p-2 rounded-full">
@@ -72,10 +60,7 @@ export default function Integrations() {
                   </div>
                   <CardTitle>Auto Lead Purchase</CardTitle>
                 </div>
-                <Switch 
-                  checked={leadAutoEnabled} 
-                  onCheckedChange={handleToggleAutoLead}
-                />
+                <Switch checked={leadAutoEnabled} onCheckedChange={handleToggleAutoLead} />
               </div>
               <CardDescription>
                 Automatically purchase leads that match your criteria
@@ -86,7 +71,7 @@ export default function Integrations() {
                 When enabled, the system will automatically purchase leads that match your specified criteria,
                 up to your weekly limit. Configure your preferences to control which leads are purchased.
               </p>
-              <Button variant="outline" size="sm" className="flex items-center gap-1">
+              <Button variant="outline" size="sm" className="flex items-center gap-1 bg-slate-400 hover:bg-slate-300">
                 <Settings className="h-4 w-4" />
                 Configure Preferences
               </Button>
@@ -94,7 +79,7 @@ export default function Integrations() {
           </Card>
           
           <Card className="glass-card">
-            <CardHeader>
+            <CardHeader className="bg-slate-200">
               <div className="flex items-center gap-2">
                 <div className="bg-green-100 p-2 rounded-full">
                   <CreditCard className="h-5 w-5 text-green-600" />
@@ -105,23 +90,21 @@ export default function Integrations() {
                 Connect payment processing services
               </CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="bg-slate-200">
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/b/ba/Stripe_Logo%2C_revised_2016.svg" 
-                      alt="Stripe" className="h-6 w-auto" />
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/b/ba/Stripe_Logo%2C_revised_2016.svg" alt="Stripe" className="h-6 w-auto" />
                     <span>Stripe</span>
                   </div>
-                  <Button variant="outline" size="sm">Connect</Button>
+                  <Button variant="outline" size="sm" className="bg-slate-400 hover:bg-slate-300">Connect</Button>
                 </div>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/b/b5/PayPal.svg" 
-                      alt="PayPal" className="h-6 w-auto" />
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/b/b5/PayPal.svg" alt="PayPal" className="h-6 w-auto" />
                     <span>PayPal</span>
                   </div>
-                  <Button variant="outline" size="sm">Connect</Button>
+                  <Button variant="outline" size="sm" className="bg-slate-400 hover:bg-slate-300">Connect</Button>
                 </div>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
@@ -130,14 +113,14 @@ export default function Integrations() {
                     </div>
                     <span>CyberSource</span>
                   </div>
-                  <Button variant="outline" size="sm" onClick={handleCyberSourceConnectClick}>Connect</Button>
+                  <Button variant="outline" size="sm" onClick={handleCyberSourceConnectClick} className="bg-slate-400 hover:bg-slate-300">Connect</Button>
                 </div>
               </div>
             </CardContent>
           </Card>
           
           <Card className="glass-card">
-            <CardHeader>
+            <CardHeader className="bg-slate-200">
               <div className="flex items-center gap-2">
                 <div className="bg-purple-100 p-2 rounded-full">
                   <Smartphone className="h-5 w-5 text-purple-600" />
@@ -148,12 +131,12 @@ export default function Integrations() {
                 Sync data with the mobile application
               </CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="bg-slate-200">
               <p className="text-sm text-gray-600 mb-4">
                 Configure how data is synchronized between the web platform and mobile applications.
                 Control frequency and which data types are synced.
               </p>
-              <Button className="w-full flex items-center justify-center gap-1">
+              <Button className="w-full flex items-center justify-center gap-1 bg-slate-400 hover:bg-slate-300">
                 Configure Sync Settings
                 <ArrowRight className="h-4 w-4" />
               </Button>
@@ -161,7 +144,7 @@ export default function Integrations() {
           </Card>
           
           <Card className="glass-card">
-            <CardHeader>
+            <CardHeader className="bg-slate-200">
               <div className="flex items-center gap-2">
                 <div className="bg-orange-100 p-2 rounded-full">
                   <Globe className="h-5 w-5 text-orange-600" />
@@ -172,14 +155,14 @@ export default function Integrations() {
                 Manage API keys and access
               </CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="bg-slate-200">
               <p className="text-sm text-gray-600 mb-4">
                 Generate and manage API keys to allow external services to access your data.
                 View request logs and control permissions.
               </p>
               <div className="flex items-center gap-2">
-                <Button variant="outline" className="flex-1">Generate Key</Button>
-                <Button variant="outline" className="flex-1">View Logs</Button>
+                <Button variant="outline" className="flex-1 bg-slate-400 hover:bg-slate-300">Generate Key</Button>
+                <Button variant="outline" className="flex-1 bg-slate-400 hover:bg-slate-300">View Logs</Button>
               </div>
             </CardContent>
           </Card>
@@ -199,35 +182,28 @@ export default function Integrations() {
                 <Label htmlFor="merchantId" className="text-right">
                   Merchant ID
                 </Label>
-                <Input
-                  id="merchantId"
-                  value={cyberSourceConfig.merchantId}
-                  onChange={(e) => setCyberSourceConfig({...cyberSourceConfig, merchantId: e.target.value})}
-                  className="col-span-3"
-                />
+                <Input id="merchantId" value={cyberSourceConfig.merchantId} onChange={e => setCyberSourceConfig({
+                ...cyberSourceConfig,
+                merchantId: e.target.value
+              })} className="col-span-3" />
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="apiKeyId" className="text-right">
                   API Key ID
                 </Label>
-                <Input
-                  id="apiKeyId"
-                  value={cyberSourceConfig.apiKeyId}
-                  onChange={(e) => setCyberSourceConfig({...cyberSourceConfig, apiKeyId: e.target.value})}
-                  className="col-span-3"
-                />
+                <Input id="apiKeyId" value={cyberSourceConfig.apiKeyId} onChange={e => setCyberSourceConfig({
+                ...cyberSourceConfig,
+                apiKeyId: e.target.value
+              })} className="col-span-3" />
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="secretKey" className="text-right">
                   Secret Key
                 </Label>
-                <Input
-                  id="secretKey"
-                  type="password"
-                  value={cyberSourceConfig.secretKey}
-                  onChange={(e) => setCyberSourceConfig({...cyberSourceConfig, secretKey: e.target.value})}
-                  className="col-span-3"
-                />
+                <Input id="secretKey" type="password" value={cyberSourceConfig.secretKey} onChange={e => setCyberSourceConfig({
+                ...cyberSourceConfig,
+                secretKey: e.target.value
+              })} className="col-span-3" />
               </div>
             </div>
             <DialogFooter>
@@ -238,6 +214,5 @@ export default function Integrations() {
           </DialogContent>
         </Dialog>
       </div>
-    </AppLayout>
-  );
+    </AppLayout>;
 }
