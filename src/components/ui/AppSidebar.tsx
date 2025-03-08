@@ -135,7 +135,7 @@ export function AppSidebar() {
               icon: Icon,
               label,
               path
-            }) => renderNavLink(<Icon className="w-4 h-4 flex-shrink-0" />, label, path))}
+            }) => renderNavLink(<Icon className="w-4 h-4 flex-shrink-0 bg-slate-200" />, label, path))}
             </TooltipProvider>
 
             {/* Teams Section */}
