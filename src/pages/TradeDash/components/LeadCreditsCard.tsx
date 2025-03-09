@@ -21,7 +21,7 @@ export const LeadCreditsCard = ({
       <CardContent className="bg-slate-200">
         <div className="text-2xl font-bold">{creditsBalance}</div>
         <div className="flex flex-col gap-2 mt-2">
-          <Button size="sm" className="w-full">
+          <Button size="sm" className="w-full bg-slate-400 hover:bg-slate-300 rounded-md">
             Buy More Credits
           </Button>
           <div className="flex gap-2">
