@@ -164,12 +164,12 @@ export default function CustomersPage() {
         <div className="grid grid-cols-1 gap-4">
           {filteredCustomers.map(customer => <Card key={customer.id} className={`hover:shadow-md transition-all cursor-pointer`} onClick={() => navigate(`/customers/${customer.id}`)}>
               <CardHeader className="py-3 bg-slate-200">
-                <CardTitle className="text-lg flex items-center justify-between">
+                <CardTitle className="text-lg flex items-center justify-between text-[#16de16]">
                   <div className="flex items-center gap-2">
                     <User className="h-5 w-5 text-gray-500" />
                     {customer.name}
                   </div>
-                  <span className={`text-sm ${customer.status === 'active' ? 'text-green-600' : 'text-gray-500'}`}>
+                  <span className="">
                     {customer.status === 'active' ? 'Active' : 'Inactive'}
                   </span>
                 </CardTitle>
