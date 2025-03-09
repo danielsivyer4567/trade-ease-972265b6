@@ -7,7 +7,7 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-type ServiceType = 'twilio' | 'sms' | 'email' | 'voicemail' | 'whatsapp' | 'messenger' | 'custom';
+type ServiceType = 'twilio' | 'sms' | 'email' | 'voicemail' | 'whatsapp' | 'messenger' | 'custom' | 'gcpvision';
 
 interface ConnectRequest {
   serviceType: ServiceType;
@@ -16,6 +16,9 @@ interface ConnectRequest {
     accountSid?: string;
     authToken?: string;
     phoneNumber?: string;
+    
+    // GCP Vision specific
+    gcpVisionKey?: string;
     
     // Generic
     apiKey?: string;
@@ -54,21 +57,10 @@ serve(async (req) => {
       if (!connectionDetails.accountSid || !connectionDetails.authToken || !connectionDetails.phoneNumber) {
         throw new Error('Missing required Twilio connection parameters');
       }
-      
-      // In a real implementation, you would verify the Twilio credentials here
-      // For example:
-      // const twilioResponse = await fetch(
-      //   `https://api.twilio.com/2010-04-01/Accounts/${connectionDetails.accountSid}.json`,
-      //   {
-      //     headers: {
-      //       Authorization: `Basic ${btoa(`${connectionDetails.accountSid}:${connectionDetails.authToken}`)}`
-      //     }
-      //   }
-      // );
-      
-      // if (!twilioResponse.ok) {
-      //   throw new Error('Invalid Twilio credentials');
-      // }
+    } else if (serviceType === 'gcpvision') {
+      if (!connectionDetails.gcpVisionKey) {
+        throw new Error('Missing required Google Cloud Vision API key');
+      }
     } else if (serviceType !== 'email' && (!connectionDetails.apiKey || !connectionDetails.accountId)) {
       throw new Error('Missing required connection parameters');
     }
@@ -83,7 +75,8 @@ serve(async (req) => {
         api_key: connectionDetails.apiKey || null,
         phone_number: connectionDetails.phoneNumber || null,
         account_sid: connectionDetails.accountSid || null,
-        auth_token: connectionDetails.authToken || null
+        auth_token: connectionDetails.authToken || null,
+        gcp_vision_key: connectionDetails.gcpVisionKey || null
       })
       .select('id')
       .single();
