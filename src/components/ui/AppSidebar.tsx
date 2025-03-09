@@ -5,7 +5,6 @@ import { useSidebar } from './sidebar';
 import { cn } from '@/lib/utils';
 import { Button } from './button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./tooltip";
-
 export function AppSidebar() {
   const [teams] = React.useState([{
     name: 'Red Team',
@@ -28,7 +27,6 @@ export function AppSidebar() {
   const location = useLocation();
   const notificationCount = 3;
   const isCollapsed = state === "collapsed";
-
   const renderNavLink = (icon: React.ReactNode, label: string, path: string) => {
     const isActive = location.pathname === path || path !== '/' && location.pathname.startsWith(path);
     const content = <Link to={path} className={cn("flex items-center gap-2 p-2 rounded-lg hover:bg-gray-100 text-gray-700 hover:text-gray-900 text-sm", isActive && "bg-gray-100 text-gray-900 font-medium")}>
@@ -46,14 +44,13 @@ export function AppSidebar() {
         </TooltipContent>
       </Tooltip> : content;
   };
-
   return <>
       <Button variant="outline" size="icon" className="fixed left-4 top-4 z-40 lg:hidden" onClick={toggleSidebar}>
         <Menu className="h-4 w-4" />
       </Button>
 
-      <div data-state={state} className={cn("fixed inset-y-0 left-0 z-30 bg-white border-r transition-all duration-300 ease-in-out peer", isCollapsed ? "w-[60px]" : "w-[240px]", "lg:translate-x-0", state === "collapsed" && "-translate-x-full lg:translate-x-0")}>
-        <div className="flex flex-col h-full">
+      <div data-state={state} className="#181835">
+        <div className="flex flex-col h-full bg-[#181835]">
           <div className="p-4 flex items-center justify-between bg-slate-200">
             <div className="flex items-center gap-3">
               <img src="/lovable-uploads/6a07dd00-f2c7-49da-8b00-48d960c13610.png" alt="Trade Ease Logo" className="w-8 h-8" />
