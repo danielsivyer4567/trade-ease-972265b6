@@ -148,7 +148,7 @@ export default function CustomersPage() {
               <Input placeholder="Search customers by name, email, or phone..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="pl-10 bg-slate-200" />
             </div>
             <div className="flex gap-2">
-              <Button variant={selectedFilter === "all" ? "default" : "outline"} onClick={() => setSelectedFilter("all")} className="text-gray-950 bg-slate-400 hover:bg-slate-300">
+              <Button variant={selectedFilter === "all" ? "default" : "outline"} onClick={() => setSelectedFilter("all")} className="bg-slate-400 hover:bg-slate-300">
                 All
               </Button>
               <Button variant={selectedFilter === "active" ? "default" : "outline"} onClick={() => setSelectedFilter("active")} className="bg-slate-400 hover:bg-slate-300">
