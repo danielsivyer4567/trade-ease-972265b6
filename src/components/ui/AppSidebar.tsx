@@ -46,7 +46,7 @@ export function AppSidebar() {
   };
   return <>
       <Button variant="outline" size="icon" className="fixed left-4 top-4 z-40 lg:hidden" onClick={toggleSidebar}>
-        <Menu className="h-4 w-4" />
+        <Menu className="#000b20" />
       </Button>
 
       <div data-state={state} className="#181835">
