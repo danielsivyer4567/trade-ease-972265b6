@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { useToast } from "@/hooks/use-toast";
 import { Notification } from '../types';
 import { supabase } from "@/integrations/supabase/client";
+import { Json } from "@/integrations/supabase/types";
 
 export const useNotifications = () => {
   const { toast } = useToast();
@@ -56,15 +57,18 @@ export const useNotifications = () => {
         
         if (data && data.length > 0) {
           data.forEach(automation => {
+            // Type guard to ensure settings is an object
+            const settings = automation.settings as { enabled?: boolean; email?: string } | null;
+            
             if (automation.automation_type === 'web_enquiry_notifications') {
-              if (automation.settings) {
-                setWebEnquiryNotifications(automation.settings.enabled || false);
-                setEnquiryEmail(automation.settings.email || '');
+              if (settings && typeof settings === 'object') {
+                setWebEnquiryNotifications(settings.enabled ?? false);
+                setEnquiryEmail(settings.email ?? '');
               }
             } else if (automation.automation_type === 'email_notifications') {
-              if (automation.settings) {
-                setEmailNotificationsEnabled(automation.settings.enabled || false);
-                setForwardingEmail(automation.settings.email || '');
+              if (settings && typeof settings === 'object') {
+                setEmailNotificationsEnabled(settings.enabled ?? false);
+                setForwardingEmail(settings.email ?? '');
               }
             }
           });

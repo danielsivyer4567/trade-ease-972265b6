@@ -1,3 +1,4 @@
+
 import { AppLayout } from "@/components/ui/AppLayout";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
@@ -9,6 +10,7 @@ import { Mail, Globe, Copy, CheckCircle, Clipboard, ArrowLeft } from "lucide-rea
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { Json } from "@/integrations/supabase/types";
 
 export default function Email() {
   const { toast } = useToast();
@@ -43,8 +45,12 @@ export default function Email() {
           return;
         }
         
-        if (data && data.settings && data.settings.email) {
-          setForwardingEmail(data.settings.email);
+        if (data && data.settings) {
+          // Safely access email from settings JSON
+          const settings = data.settings as { email?: string };
+          if (settings && typeof settings === 'object' && 'email' in settings) {
+            setForwardingEmail(settings.email || '');
+          }
         }
       } catch (error) {
         console.error('Error:', error);
