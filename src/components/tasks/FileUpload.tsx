@@ -85,12 +85,20 @@ export function FileUpload({
       reader.readAsDataURL(file);
       reader.onload = async () => {
         const base64Image = reader.result as string;
+        const apiKey = accounts.gcp_vision_key || accounts.api_key;
+        
+        if (!apiKey) {
+          toast.error('No GCP Vision API key found');
+          onFileUpload(originalEvent);
+          setIsAnalyzing(false);
+          return;
+        }
         
         // Call the Supabase edge function to analyze the image
         const { data, error } = await supabase.functions.invoke('gcp-vision-analyze', {
           body: {
             imageBase64: base64Image,
-            apiKey: accounts.api_key || accounts.gcpVisionKey
+            apiKey: apiKey
           }
         });
         

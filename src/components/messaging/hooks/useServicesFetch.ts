@@ -24,7 +24,7 @@ export const useServicesFetch = () => {
         phoneNumber: account.phone_number,
         accountSid: account.account_sid,
         authToken: account.auth_token,
-        gcpVisionKey: account.gcp_vision_key
+        gcpVisionKey: account.gcp_vision_key || null
       }
     };
   };
@@ -70,7 +70,7 @@ export const useServicesFetch = () => {
               phoneNumber: matchingAccount.phone_number,
               accountSid: matchingAccount.account_sid,
               authToken: matchingAccount.auth_token,
-              gcpVisionKey: matchingAccount.gcp_vision_key
+              gcpVisionKey: matchingAccount.gcp_vision_key || null
             };
           }
         });
