@@ -23,7 +23,7 @@ const UpcomingJobs = () => {
           <p className="text-sm text-gray-500">Saturday, 10:00 AM</p>
         </div>
         <div className="flex justify-end">
-          <Button variant="outline" size="sm" onClick={() => navigate("/calendar")}>
+          <Button variant="outline" size="sm" onClick={() => navigate("/calendar")} className="bg-slate-400 hover:bg-slate-300">
             View Calendar
           </Button>
         </div>

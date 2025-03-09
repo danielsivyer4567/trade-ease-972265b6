@@ -23,7 +23,7 @@ const RecentActivity = () => {
           <p className="text-sm text-gray-500">Scheduled for tomorrow</p>
         </div>
         <div className="flex justify-end">
-          <Button variant="outline" size="sm" onClick={() => navigate("/jobs")}>
+          <Button variant="outline" size="sm" onClick={() => navigate("/jobs")} className="bg-slate-400 hover:bg-slate-300">
             View All
           </Button>
         </div>

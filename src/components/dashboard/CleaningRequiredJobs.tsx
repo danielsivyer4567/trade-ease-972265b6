@@ -15,7 +15,7 @@ const CleaningRequiredJobs = () => {
             <p className="font-medium">HVAC Installation - Smith Residence</p>
             <p className="text-sm text-gray-500">Assigned to Paul Finch</p>
           </div>
-          <Button size="sm" variant="outline" className="text-orange-500 border-orange-500 hover:bg-orange-50">
+          <Button size="sm" variant="outline" className="border-black-500 text-slate-950 bg-slate-400 hover:bg-slate-300">
             Details
           </Button>
         </div>
@@ -24,12 +24,12 @@ const CleaningRequiredJobs = () => {
             <p className="font-medium">Bathroom Remodel - Johnson Property</p>
             <p className="text-sm text-gray-500">Assigned to Paul Finch</p>
           </div>
-          <Button size="sm" variant="outline" className="text-orange-500 border-orange-500 hover:bg-orange-50">
+          <Button size="sm" variant="outline" className="border-black-500 text-gray-950 bg-slate-400 hover:bg-slate-300">
             Details
           </Button>
         </div>
         <div className="flex justify-end mt-2">
-          <Button variant="outline" size="sm" onClick={() => navigate("/jobs")}>
+          <Button variant="outline" size="sm" onClick={() => navigate("/jobs")} className="text-gray-950 bg-slate-400 hover:bg-slate-300">
             View All Jobs
           </Button>
         </div>
