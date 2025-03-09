@@ -1,17 +1,26 @@
+
 import React, { useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { SidebarProvider } from '../ui/sidebar';
 import { AppSidebar } from './AppSidebar';
 import { QuickTabs } from './QuickTabs';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { Button } from './button';
+import { LogOut } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+
 interface AppLayoutProps {
   children: React.ReactNode;
   className?: string;
 }
+
 export function AppLayout({
   children,
   className
 }: AppLayoutProps) {
+  const navigate = useNavigate();
+  
   // Save active tab states when component unmounts
   useEffect(() => {
     // Save all tab states when the window unloads
@@ -61,8 +70,23 @@ export function AppLayout({
       window.removeEventListener('beforeunload', saveTabStates);
     };
   }, []);
+  
   const location = useLocation();
   const isMainDashboard = location.pathname === '/' || location.pathname === '/index';
+  
+  const handleLogout = async () => {
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      
+      toast.success("Logged out successfully");
+      navigate('/auth');
+    } catch (error) {
+      console.error('Error logging out:', error);
+      toast.error("Failed to log out");
+    }
+  };
+  
   return <SidebarProvider defaultOpen={!window.matchMedia('(max-width: 1024px)').matches}>
       <div className="min-h-screen min-w-full flex bg-transparent">
         <AppSidebar />
@@ -70,6 +94,19 @@ export function AppLayout({
       // Smaller padding on mobile
       "peer-data-[state=expanded]:ml-[240px] peer-data-[state=collapsed]:ml-[60px]", className)}>
           <div className="relative mx-auto max-w-7xl glass-card p-3 md:p-6 rounded-lg border-2 border-white/50 shadow-2xl bg-slate-200">
+            {/* Logout button in top right corner */}
+            <div className="absolute top-3 right-3 z-10">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={handleLogout}
+                className="flex items-center gap-2 bg-slate-300 hover:bg-slate-400 text-gray-700"
+              >
+                <LogOut className="h-4 w-4" />
+                <span className="hidden sm:inline">Logout</span>
+              </Button>
+            </div>
+            
             {isMainDashboard && <QuickTabs />}
             {children}
           </div>

@@ -34,6 +34,7 @@ import NewJob from "./pages/Jobs/NewJob";
 import NewQuote from "./pages/Quotes/NewQuote";
 import NewPayment from "./pages/Payments/NewPayment";
 import Workflow from "./pages/Workflow";
+import Auth from "./pages/Auth";
 
 import { Toaster } from "@/components/ui/toaster";
 
@@ -41,6 +42,7 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
+        <Route path="/auth" element={<Auth />} />
         <Route path="/" element={<Index />} />
         <Route path="/customers/*" element={<Customers />} />
         <Route path="/quotes/*" element={<Quotes />} />
