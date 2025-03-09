@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { AppLayout } from "@/components/ui/AppLayout";
@@ -77,12 +78,10 @@ export default function NewQuote() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="md:col-span-2">
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList className="grid grid-cols-5 mb-6">
-                
-                
+              <TabsList className="grid grid-cols-3 mb-6">
+                <TabsTrigger value="preview" className="bg-slate-400 hover:bg-slate-300 mx-[2px]">Preview</TabsTrigger>
                 <TabsTrigger value="price-list" className="bg-slate-400 hover:bg-slate-300 mx-0">Price List</TabsTrigger>
                 <TabsTrigger value="terms" className="bg-slate-400 hover:bg-slate-300 mx-[13px]">Terms & Notes</TabsTrigger>
-                <TabsTrigger value="preview" className="bg-slate-400 hover:bg-slate-300 mx-[2px]">Preview</TabsTrigger>
               </TabsList>
               
               <Card className="bg-slate-200">
