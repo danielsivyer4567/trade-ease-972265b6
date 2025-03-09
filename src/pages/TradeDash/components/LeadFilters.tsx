@@ -147,7 +147,7 @@ export const LeadFilters: React.FC<FiltersProps> = ({
             </div>
           </Tabs>
           
-          <div className="flex justify-end gap-2 pt-2 border-t border-gray-200">
+          <div className="flex justify-end gap-2 pt-2 border-t border-gray-200 bg-slate-300">
             <Button variant="outline" size="sm" onClick={() => {
           setSearchQuery("");
           setSelectedPostcodes([]);
@@ -156,7 +156,7 @@ export const LeadFilters: React.FC<FiltersProps> = ({
         }}>
               Clear All
             </Button>
-            <Button size="sm">Apply Filters</Button>
+            <Button size="sm" className="flex justify-end gap-2 pt-2 border-t border-gray-200 bg-slate-300">Apply Filters</Button>
           </div>
         </div>}
     </div>;
