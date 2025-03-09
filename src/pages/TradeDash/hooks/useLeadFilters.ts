@@ -7,6 +7,10 @@ export interface LeadFilter {
   maxBudget: string;
   leadType: string;
   tradeType: string;
+  includeResold?: boolean;
+  includeContractorLeads?: boolean;
+  searchTerm?: string;
+  selectedPostcodes?: string[];
 }
 
 export interface SavedFilter {
@@ -20,13 +24,19 @@ export const useLeadFilters = () => {
     minSize: "",
     maxBudget: "",
     leadType: "all",
-    tradeType: "All Trades"
+    tradeType: "All Trades",
+    includeResold: false,
+    includeContractorLeads: false,
+    searchTerm: "",
+    selectedPostcodes: []
   });
   
   const [savedFilters, setSavedFilters] = useState<SavedFilter[]>([
     { name: "Sydney CBD Jobs", active: true },
     { name: "Large Renovations", active: false },
     { name: "Small Quick Jobs", active: false },
+    { name: "Emergency Calls", active: false },
+    { name: "High-Value Projects", active: false },
   ]);
   
   const handleFilterChange = (field: string, value: string) => {
@@ -48,6 +58,10 @@ export const useLeadFilters = () => {
         setFilters({...filters, minSize: "100"});
       } else if (index === 2) { // Small Quick Jobs
         setFilters({...filters, maxBudget: "2000"});
+      } else if (index === 3) { // Emergency Calls
+        setFilters({...filters, leadType: "emergency"});
+      } else if (index === 4) { // High-Value Projects
+        setFilters({...filters, maxBudget: "50000"});
       }
     }
   };
