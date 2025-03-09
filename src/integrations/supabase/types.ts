@@ -77,6 +77,7 @@ export type Database = {
           auth_token: string | null
           created_at: string | null
           enabled: boolean | null
+          gcp_vision_key: string | null
           id: string
           phone_number: string | null
           service_type: string
@@ -90,6 +91,7 @@ export type Database = {
           auth_token?: string | null
           created_at?: string | null
           enabled?: boolean | null
+          gcp_vision_key?: string | null
           id?: string
           phone_number?: string | null
           service_type: string
@@ -103,6 +105,7 @@ export type Database = {
           auth_token?: string | null
           created_at?: string | null
           enabled?: boolean | null
+          gcp_vision_key?: string | null
           id?: string
           phone_number?: string | null
           service_type?: string
