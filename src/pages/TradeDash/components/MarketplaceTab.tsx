@@ -1,10 +1,8 @@
-
 import React from "react";
 import { LeadCard } from "./LeadCard";
 import { LeadFilters } from "./LeadFilters";
 import { GlassCard } from "@/components/ui/GlassCard";
 import { SectionHeader } from "@/components/ui/SectionHeader";
-
 interface Lead {
   id: number;
   title: string;
@@ -18,7 +16,6 @@ interface Lead {
   customerName: string;
   contactTime: string;
 }
-
 interface MarketplaceTabProps {
   leads: Lead[];
   freeLeads: number;
@@ -38,7 +35,6 @@ interface MarketplaceTabProps {
   onClaimFreeLead: (leadId: number) => void;
   onBuyLead: (leadId: number) => void;
 }
-
 export const MarketplaceTab: React.FC<MarketplaceTabProps> = ({
   leads,
   freeLeads,
@@ -50,33 +46,17 @@ export const MarketplaceTab: React.FC<MarketplaceTabProps> = ({
   onBuyLead
 }) => {
   const availableLeads = leads.filter(lead => lead.status === "available");
-
-  return (
-    <div className="space-y-4">
+  return <div className="space-y-4 bg-slate-300">
       <SectionHeader title="Lead Marketplace" />
       
       <GlassCard>
-        <LeadFilters
-          filters={filters}
-          savedFilters={savedFilters}
-          onFilterChange={onFilterChange}
-          onSavedFilterToggle={onSavedFilterToggle}
-        />
+        <LeadFilters filters={filters} savedFilters={savedFilters} onFilterChange={onFilterChange} onSavedFilterToggle={onSavedFilterToggle} />
       </GlassCard>
       
       <SectionHeader title={`Available Leads (${availableLeads.length})`} />
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {availableLeads.map(lead => (
-          <LeadCard
-            key={lead.id}
-            lead={lead}
-            freeLeads={freeLeads}
-            onClaimFreeLead={onClaimFreeLead}
-            onBuyLead={onBuyLead}
-          />
-        ))}
+        {availableLeads.map(lead => <LeadCard key={lead.id} lead={lead} freeLeads={freeLeads} onClaimFreeLead={onClaimFreeLead} onBuyLead={onBuyLead} />)}
       </div>
-    </div>
-  );
+    </div>;
 };

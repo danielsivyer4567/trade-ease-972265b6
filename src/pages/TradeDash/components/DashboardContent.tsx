@@ -58,11 +58,7 @@ export const DashboardContent: React.FC<DashboardContentProps> = ({
       {userStats.isTopTen && <TopPerformerCard />}
 
       <Tabs defaultValue="marketplace" className="w-full bg-slate-200">
-        <TabsList className="w-full mb-2 overflow-x-auto flex-nowrap">
-          <TabsTrigger value="marketplace" className="flex-1">Lead Marketplace</TabsTrigger>
-          <TabsTrigger value="my-leads" className="flex-1">My Leads</TabsTrigger>
-          <TabsTrigger value="rankings" className="flex-1">Rankings</TabsTrigger>
-        </TabsList>
+        
         
         <TabsContent value="marketplace">
           <MarketplaceTab leads={filteredLeads} freeLeads={freeLeads} filters={filters} savedFilters={savedFilters} onFilterChange={handleFilterChange} onSavedFilterToggle={toggleSavedFilter} onClaimFreeLead={claimFreeLead} onBuyLead={buyLead} />

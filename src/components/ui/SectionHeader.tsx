@@ -8,7 +8,7 @@ export function SectionHeader({
   title,
   className
 }: SectionHeaderProps) {
-  return <h2 className="text-slate-400">
+  return <h2 className="text-gray-950 text-center my-[3px] mx-[2px] px-[4px] py-[12px]">
       {title}
     </h2>;
 }
