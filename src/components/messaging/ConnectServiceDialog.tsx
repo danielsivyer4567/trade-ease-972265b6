@@ -160,7 +160,7 @@ export const ConnectServiceDialog = ({
                 placeholder="Enter your Google Cloud Vision API key" 
               />
               <p className="text-xs text-gray-500">
-                Your API key can be found in the Google Cloud Console under APIs & Services > Credentials
+                Your API key can be found in the Google Cloud Console under APIs &amp; Services {'->'} Credentials
               </p>
             </div>
           ) : (
@@ -218,3 +218,4 @@ export const ConnectServiceDialog = ({
     </Dialog>
   );
 };
+
