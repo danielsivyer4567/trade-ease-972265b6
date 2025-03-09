@@ -27,6 +27,7 @@ export const ConnectServiceDialog = ({
   const [accountSid, setAccountSid] = useState('');
   const [authToken, setAuthToken] = useState('');
   const [twilioPhoneNumber, setTwilioPhoneNumber] = useState('');
+  const [gcpVisionKey, setGcpVisionKey] = useState('');
 
   const handleSubmit = () => {
     setIsSubmitting(true);
@@ -37,6 +38,12 @@ export const ConnectServiceDialog = ({
         setIsSubmitting(false);
         return;
       }
+    } else if (serviceType === 'gcpvision') {
+      if (!gcpVisionKey) {
+        toast.error("Please enter your Google Cloud Vision API key");
+        setIsSubmitting(false);
+        return;
+      }
     } else if (!apiKey || (serviceType !== 'email' && !accountId)) {
       toast.error("Please fill in all required fields");
       setIsSubmitting(false);
@@ -44,17 +51,25 @@ export const ConnectServiceDialog = ({
     }
 
     setTimeout(() => {
-      const connectionDetails = serviceType === 'twilio' 
-        ? {
-            accountSid,
-            authToken,
-            phoneNumber: twilioPhoneNumber
-          } 
-        : {
-            apiKey,
-            accountId,
-            url: serviceUrl || undefined
-          };
+      let connectionDetails;
+      
+      if (serviceType === 'twilio') {
+        connectionDetails = {
+          accountSid,
+          authToken,
+          phoneNumber: twilioPhoneNumber
+        };
+      } else if (serviceType === 'gcpvision') {
+        connectionDetails = {
+          gcpVisionKey
+        };
+      } else {
+        connectionDetails = {
+          apiKey,
+          accountId,
+          url: serviceUrl || undefined
+        };
+      }
       
       onConnect(serviceType, connectionDetails);
       
@@ -65,6 +80,7 @@ export const ConnectServiceDialog = ({
       setAccountSid('');
       setAuthToken('');
       setTwilioPhoneNumber('');
+      setGcpVisionKey('');
       setIsSubmitting(false);
       onClose();
     }, 1000);
@@ -74,9 +90,9 @@ export const ConnectServiceDialog = ({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[425px] bg-slate-200">
         <DialogHeader>
-          <DialogTitle>Connect Messaging Service</DialogTitle>
+          <DialogTitle>Connect Service</DialogTitle>
           <DialogDescription>
-            Add your API keys and account details to connect an external messaging platform.
+            Add your API keys and account details to connect an external service.
           </DialogDescription>
         </DialogHeader>
         
@@ -94,6 +110,7 @@ export const ConnectServiceDialog = ({
                 <SelectItem value="whatsapp">WhatsApp Business</SelectItem>
                 <SelectItem value="messenger">Facebook Messenger</SelectItem>
                 <SelectItem value="twilio">Twilio SMS</SelectItem>
+                <SelectItem value="gcpvision">Google Cloud Vision API</SelectItem>
                 <SelectItem value="custom">Custom API</SelectItem>
               </SelectContent>
             </Select>
@@ -132,6 +149,20 @@ export const ConnectServiceDialog = ({
                 />
               </div>
             </>
+          ) : serviceType === 'gcpvision' ? (
+            <div className="space-y-2">
+              <Label htmlFor="gcp-vision-key">Google Cloud Vision API Key</Label>
+              <Input 
+                id="gcp-vision-key" 
+                type="password" 
+                value={gcpVisionKey} 
+                onChange={e => setGcpVisionKey(e.target.value)} 
+                placeholder="Enter your Google Cloud Vision API key" 
+              />
+              <p className="text-xs text-gray-500">
+                Your API key can be found in the Google Cloud Console under APIs & Services > Credentials
+              </p>
+            </div>
           ) : (
             <>
               <div className="space-y-2">

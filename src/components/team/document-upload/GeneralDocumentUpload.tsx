@@ -39,6 +39,7 @@ export function GeneralDocumentUpload({
       <FileUpload
         onFileUpload={(e) => handleFileUpload(e, type)}
         label="Drag and drop files or click to upload"
+        allowGcpVision={true}
       />
       <UploadedFileList 
         files={uploadedFiles}
@@ -47,6 +48,9 @@ export function GeneralDocumentUpload({
       />
       <p className="text-xs text-gray-500 mt-2">
         Supported formats: PDF, DOC, DOCX, JPG, JPEG, PNG, MP4, MOV. Max file size: 100MB
+      </p>
+      <p className="text-xs text-blue-500 mt-1">
+        <strong>Google Cloud Vision</strong>: Image files will be automatically analyzed for text and content.
       </p>
     </div>
   );

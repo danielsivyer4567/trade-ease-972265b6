@@ -15,3 +15,6 @@ verify_jwt = false
 
 [functions.cybersource-payment]
 verify_jwt = false
+
+[functions.gcp-vision-analyze]
+verify_jwt = false
