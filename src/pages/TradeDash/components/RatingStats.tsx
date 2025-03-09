@@ -56,7 +56,7 @@ export const RatingStats = ({
           </div>
           <div className="p-3 rounded-md bg-slate-300">
             <div className="text-lg font-bold">{userStats.totalJobs}</div>
-            <div className="text-xs text-gray-500 bg-slate-300">Jobs Completed</div>
+            <div className="text-xs text-black-500 bg-slate-300">Jobs Completed</div>
           </div>
         </div>
       </CardContent>
