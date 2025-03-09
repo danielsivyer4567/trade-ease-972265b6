@@ -85,7 +85,7 @@ export default function NewQuote() {
                 <TabsTrigger value="preview" className="bg-slate-400 hover:bg-slate-300 mx-[2px]">Preview</TabsTrigger>
               </TabsList>
               
-              <Card>
+              <Card className="bg-slate-200">
                 <CardContent className="p-6">
                   <TabsContent value="details" className="mt-0">
                     <CustomerForm onNextTab={() => setActiveTab("items")} />
