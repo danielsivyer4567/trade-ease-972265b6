@@ -21,6 +21,9 @@ interface ServiceInfo {
     apiKey?: string;
     accountId?: string;
     url?: string;
+    accountSid?: string;
+    authToken?: string;
+    phoneNumber?: string;
   };
 }
 
@@ -36,28 +39,43 @@ const ConnectServiceDialog = ({ isOpen, onClose, onConnect }: ConnectDialogProps
   const [accountId, setAccountId] = useState('');
   const [serviceUrl, setServiceUrl] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // Twilio specific fields
+  const [accountSid, setAccountSid] = useState('');
+  const [authToken, setAuthToken] = useState('');
+  const [twilioPhoneNumber, setTwilioPhoneNumber] = useState('');
 
   const handleSubmit = () => {
     setIsSubmitting(true);
     
-    // Validate fields
-    if (!apiKey || (serviceType !== 'email' && !accountId)) {
+    // Validate fields based on service type
+    if (serviceType === 'twilio') {
+      if (!accountSid || !authToken || !twilioPhoneNumber) {
+        toast.error("Please fill in all required Twilio fields");
+        setIsSubmitting(false);
+        return;
+      }
+    } else if (!apiKey || (serviceType !== 'email' && !accountId)) {
       toast.error("Please fill in all required fields");
       setIsSubmitting(false);
       return;
     }
     
     setTimeout(() => {
-      onConnect(serviceType, {
-        apiKey,
-        accountId,
-        url: serviceUrl || undefined
-      });
+      // Prepare connection details based on service type
+      const connectionDetails = serviceType === 'twilio' 
+        ? { accountSid, authToken, phoneNumber: twilioPhoneNumber }
+        : { apiKey, accountId, url: serviceUrl || undefined };
+      
+      onConnect(serviceType, connectionDetails);
       
       // Reset form
       setApiKey('');
       setAccountId('');
       setServiceUrl('');
+      setAccountSid('');
+      setAuthToken('');
+      setTwilioPhoneNumber('');
       setIsSubmitting(false);
       onClose();
     }, 1000);
@@ -86,44 +104,84 @@ const ConnectServiceDialog = ({ isOpen, onClose, onConnect }: ConnectDialogProps
                 <SelectItem value="email">Email Service</SelectItem>
                 <SelectItem value="whatsapp">WhatsApp Business</SelectItem>
                 <SelectItem value="messenger">Facebook Messenger</SelectItem>
+                <SelectItem value="twilio">Twilio SMS</SelectItem>
                 <SelectItem value="custom">Custom API</SelectItem>
               </SelectContent>
             </Select>
           </div>
           
-          <div className="space-y-2">
-            <Label htmlFor="api-key">API Key / Token</Label>
-            <Input 
-              id="api-key" 
-              type="password" 
-              value={apiKey} 
-              onChange={(e) => setApiKey(e.target.value)}
-              placeholder="Enter your API key"
-            />
-          </div>
-          
-          {serviceType !== 'email' && (
-            <div className="space-y-2">
-              <Label htmlFor="account-id">Account ID / Phone Number</Label>
-              <Input 
-                id="account-id" 
-                value={accountId} 
-                onChange={(e) => setAccountId(e.target.value)}
-                placeholder="Enter account identifier"
-              />
-            </div>
-          )}
-          
-          {serviceType === 'custom' && (
-            <div className="space-y-2">
-              <Label htmlFor="service-url">Service URL (Optional)</Label>
-              <Input 
-                id="service-url" 
-                value={serviceUrl} 
-                onChange={(e) => setServiceUrl(e.target.value)}
-                placeholder="https://api.yourservice.com"
-              />
-            </div>
+          {serviceType === 'twilio' ? (
+            // Twilio specific fields
+            <>
+              <div className="space-y-2">
+                <Label htmlFor="account-sid">Account SID</Label>
+                <Input 
+                  id="account-sid" 
+                  value={accountSid} 
+                  onChange={(e) => setAccountSid(e.target.value)}
+                  placeholder="Enter your Twilio Account SID"
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="auth-token">Auth Token</Label>
+                <Input 
+                  id="auth-token" 
+                  type="password" 
+                  value={authToken} 
+                  onChange={(e) => setAuthToken(e.target.value)}
+                  placeholder="Enter your Twilio Auth Token"
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="phone-number">Twilio Phone Number</Label>
+                <Input 
+                  id="phone-number" 
+                  value={twilioPhoneNumber} 
+                  onChange={(e) => setTwilioPhoneNumber(e.target.value)}
+                  placeholder="+1234567890"
+                />
+              </div>
+            </>
+          ) : (
+            // Standard fields for other services
+            <>
+              <div className="space-y-2">
+                <Label htmlFor="api-key">API Key / Token</Label>
+                <Input 
+                  id="api-key" 
+                  type="password" 
+                  value={apiKey} 
+                  onChange={(e) => setApiKey(e.target.value)}
+                  placeholder="Enter your API key"
+                />
+              </div>
+              
+              {serviceType !== 'email' && (
+                <div className="space-y-2">
+                  <Label htmlFor="account-id">Account ID / Phone Number</Label>
+                  <Input 
+                    id="account-id" 
+                    value={accountId} 
+                    onChange={(e) => setAccountId(e.target.value)}
+                    placeholder="Enter account identifier"
+                  />
+                </div>
+              )}
+              
+              {serviceType === 'custom' && (
+                <div className="space-y-2">
+                  <Label htmlFor="service-url">Service URL (Optional)</Label>
+                  <Input 
+                    id="service-url" 
+                    value={serviceUrl} 
+                    onChange={(e) => setServiceUrl(e.target.value)}
+                    placeholder="https://api.yourservice.com"
+                  />
+                </div>
+              )}
+            </>
           )}
         </div>
         
@@ -210,6 +268,17 @@ export const ServiceSyncCard = () => {
     let newService: ServiceInfo;
     
     switch (serviceType) {
+      case 'twilio':
+        newService = {
+          id: `twilio-${Date.now()}`,
+          name: "Twilio SMS",
+          icon: <MessageSquare className="h-5 w-5 text-red-500" />,
+          isConnected: true,
+          syncEnabled: true,
+          lastSynced: "Just now",
+          connectionDetails
+        };
+        break;
       case 'whatsapp':
         newService = {
           id: `whatsapp-${Date.now()}`,
@@ -265,6 +334,12 @@ export const ServiceSyncCard = () => {
     
     setServices([...services, newService]);
     toast.success(`New ${newService.name} connection added`);
+    
+    // In a real implementation, you would save the service details to your backend
+    console.log("Service connected:", {
+      type: serviceType,
+      details: connectionDetails
+    });
   };
   
   const handleRemoveService = (serviceId: string) => {
