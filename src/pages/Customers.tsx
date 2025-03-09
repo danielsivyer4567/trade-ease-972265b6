@@ -135,7 +135,7 @@ export default function CustomersPage() {
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
-              <Button onClick={() => navigate('/customers/new')} className="text-zinc-950 bg-slate-500 hover:bg-slate-400">
+              <Button onClick={() => navigate('/customers/new')} className="text-zinc-950 bg-slate-400 hover:bg-slate-300">
                 <UserPlus className="h-4 w-4 mr-2" />
                 Add Customer
               </Button>
@@ -151,10 +151,10 @@ export default function CustomersPage() {
               <Button variant={selectedFilter === "all" ? "default" : "outline"} onClick={() => setSelectedFilter("all")} className="text-gray-950 bg-slate-400 hover:bg-slate-300">
                 All
               </Button>
-              <Button variant={selectedFilter === "active" ? "default" : "outline"} onClick={() => setSelectedFilter("active")} className="bg-slate-500 hover:bg-slate-400">
+              <Button variant={selectedFilter === "active" ? "default" : "outline"} onClick={() => setSelectedFilter("active")} className="bg-slate-400 hover:bg-slate-300">
                 Active
               </Button>
-              <Button variant={selectedFilter === "inactive" ? "default" : "outline"} onClick={() => setSelectedFilter("inactive")} className="bg-slate-500 hover:bg-slate-400">
+              <Button variant={selectedFilter === "inactive" ? "default" : "outline"} onClick={() => setSelectedFilter("inactive")} className="bg-slate-400 hover:bg-slate-300">
                 Inactive
               </Button>
             </div>
