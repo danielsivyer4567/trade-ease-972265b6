@@ -90,7 +90,7 @@ export default function CustomersPage() {
         <div className="flex flex-col space-y-4">
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm" onClick={() => navigate(-1)} className="rounded-md border border-gray-300 px-3 py-1 bg-[#D3E4FD] hover:bg-[#B5D1F8] text-[#1E40AF] hover:text-[#1E3A8A]">
+              <Button variant="outline" size="sm" onClick={() => navigate(-1)} className="rounded-md border border-gray-300 px-3 py-1 bg-[#D3E4FD] hover:bg-[#B5D1F8] text-gray-950">
                 <ArrowLeft className="h-5 w-5" />
               </Button>
               <h1 className="text-3xl font-bold flex items-center gap-2">
@@ -135,7 +135,7 @@ export default function CustomersPage() {
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
-              <Button onClick={() => navigate('/customers/new')} className="bg-slate-200 hover:bg-slate-100 text-zinc-950">
+              <Button onClick={() => navigate('/customers/new')} className="text-zinc-950 bg-slate-500 hover:bg-slate-400">
                 <UserPlus className="h-4 w-4 mr-2" />
                 Add Customer
               </Button>
@@ -151,10 +151,10 @@ export default function CustomersPage() {
               <Button variant={selectedFilter === "all" ? "default" : "outline"} onClick={() => setSelectedFilter("all")} className="text-gray-950 bg-slate-400 hover:bg-slate-300">
                 All
               </Button>
-              <Button variant={selectedFilter === "active" ? "default" : "outline"} onClick={() => setSelectedFilter("active")} className="bg-slate-200 hover:bg-slate-100">
+              <Button variant={selectedFilter === "active" ? "default" : "outline"} onClick={() => setSelectedFilter("active")} className="bg-slate-500 hover:bg-slate-400">
                 Active
               </Button>
-              <Button variant={selectedFilter === "inactive" ? "default" : "outline"} onClick={() => setSelectedFilter("inactive")} className="bg-slate-200 hover:bg-slate-100">
+              <Button variant={selectedFilter === "inactive" ? "default" : "outline"} onClick={() => setSelectedFilter("inactive")} className="bg-slate-500 hover:bg-slate-400">
                 Inactive
               </Button>
             </div>
