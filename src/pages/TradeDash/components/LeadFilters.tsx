@@ -65,7 +65,7 @@ export const LeadFilters: React.FC<FiltersProps> = ({
       <div className="bg-slate-300">
         <h4 className="text-md font-medium text-gray-950">Saved Filters</h4>
         <div className="flex gap-2">
-          {savedFilters.map((filter, index) => <Button key={filter.name} variant={filter.active ? "default" : "outline"} size="sm" onClick={() => onSavedFilterToggle(index)} className="bg-slate-400 hover:bg-slate-300 rounded-sm">
+          {savedFilters.map((filter, index) => <Button key={filter.name} variant={filter.active ? "default" : "outline"} size="sm" onClick={() => onSavedFilterToggle(index)} className="rounded-sm bg-slate-500 hover:bg-slate-400">
               {filter.name}
             </Button>)}
         </div>
