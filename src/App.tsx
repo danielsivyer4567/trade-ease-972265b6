@@ -1,4 +1,3 @@
-
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import './App.css';
 
@@ -35,6 +34,7 @@ import NewQuote from "./pages/Quotes/NewQuote";
 import NewPayment from "./pages/Payments/NewPayment";
 import Workflow from "./pages/Workflow";
 import Auth from "./pages/Auth";
+import TermsOfService from "./pages/Settings/TermsOfService";
 
 import { Toaster } from "@/components/ui/toaster";
 
@@ -74,6 +74,7 @@ function App() {
         <Route path="/trade-dash" element={<TradeDash />} />
         <Route path="/payments/new" element={<NewPayment />} />
         <Route path="/workflow" element={<Workflow />} />
+        <Route path="/settings/terms-of-service" element={<TermsOfService />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
       <Toaster />
