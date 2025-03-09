@@ -1,4 +1,3 @@
-
 import { AppLayout } from "@/components/ui/AppLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,6 +9,8 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { ServiceSyncCard } from "@/components/messaging/ServiceSyncCard";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
 
 export default function Messaging() {
   const [phoneNumber, setPhoneNumber] = useState("");
@@ -17,23 +18,26 @@ export default function Messaging() {
   const [connectedNumbers, setConnectedNumbers] = useState<string[]>([]);
   const [userConfig, setUserConfig] = useState<{ messaging_enabled: boolean }>({ messaging_enabled: false });
   const navigate = useNavigate();
+  
+  const [twilioDialogOpen, setTwilioDialogOpen] = useState(false);
+  const [twilioConfig, setTwilioConfig] = useState({
+    accountSid: "",
+    authToken: "",
+    phoneNumber: ""
+  });
 
-  // Load user configuration and connected phone numbers
   useEffect(() => {
     const loadUserData = async () => {
       try {
-        // Get current user session
         const { data: { session } } = await supabase.auth.getSession();
         
         if (!session) {
           console.log('No user session found');
-          // In a production app, you might want to redirect to login
           return;
         }
         
         const userId = session.user.id;
         
-        // Fetch user configuration
         const { data: configData, error: configError } = await supabase
           .from('users_configuration')
           .select('messaging_enabled')
@@ -46,7 +50,6 @@ export default function Messaging() {
           setUserConfig(configData);
         }
         
-        // Fetch phone numbers from messaging_accounts
         const { data: phoneAccounts, error: phoneError } = await supabase
           .from('messaging_accounts')
           .select('phone_number')
@@ -81,7 +84,6 @@ export default function Messaging() {
   const handleConnect = async () => {
     setIsConnecting(true);
     try {
-      // Get current user session
       const { data: { session } } = await supabase.auth.getSession();
       
       if (!session) {
@@ -95,7 +97,6 @@ export default function Messaging() {
       
       console.log('Connecting phone number:', cleanNumber);
       
-      // First validate the number with GHL function
       const validationResponse = await supabase.functions.invoke('validate-ghl-number', {
         body: {
           phoneNumber: cleanNumber
@@ -110,7 +111,6 @@ export default function Messaging() {
         );
       }
       
-      // Then store the phone number in the messaging_accounts table
       const { data: accountData, error: accountError } = await supabase
         .from('messaging_accounts')
         .insert({
@@ -126,23 +126,20 @@ export default function Messaging() {
         throw accountError;
       }
       
-      // Enable messaging in user configuration
-      const { error: configError } = await supabase
-        .from('users_configuration')
-        .update({ messaging_enabled: true })
-        .eq('id', userId);
-      
-      if (configError) {
-        console.error('Error updating messaging configuration:', configError);
-        // We don't fail the whole operation if just this update fails
-      } else {
-        setUserConfig({ messaging_enabled: true });
+      if (!userConfig.messaging_enabled) {
+        const { error: configError } = await supabase
+          .from('users_configuration')
+          .update({ messaging_enabled: true })
+          .eq('id', userId);
+        
+        if (configError) {
+          console.error('Error updating messaging configuration:', configError);
+        } else {
+          setUserConfig({ messaging_enabled: true });
+        }
       }
       
-      // Update local state
       setConnectedNumbers([...connectedNumbers, phoneNumber]);
-      
-      // Reset the input
       setPhoneNumber('');
       
       toast.success("Phone number connected successfully");
@@ -158,7 +155,6 @@ export default function Messaging() {
     const numberToRemove = connectedNumbers[index];
     
     try {
-      // Get current user session
       const { data: { session } } = await supabase.auth.getSession();
       
       if (!session) {
@@ -168,7 +164,6 @@ export default function Messaging() {
       
       const userId = session.user.id;
       
-      // Remove the phone number from the database
       const { error } = await supabase
         .from('messaging_accounts')
         .delete()
@@ -179,7 +174,6 @@ export default function Messaging() {
         throw error;
       }
       
-      // Update local state
       const updatedNumbers = [...connectedNumbers];
       updatedNumbers.splice(index, 1);
       setConnectedNumbers(updatedNumbers);
@@ -188,6 +182,72 @@ export default function Messaging() {
     } catch (error) {
       console.error('Error removing phone number:', error);
       toast.error('Failed to remove phone number');
+    }
+  };
+  
+  const handleTwilioConnect = async () => {
+    setIsConnecting(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        toast.error('You must be logged in to connect Twilio');
+        setIsConnecting(false);
+        return;
+      }
+      
+      const userId = session.user.id;
+      
+      console.log('Connecting Twilio account', twilioConfig);
+      
+      const { data, error } = await supabase.functions.invoke('connect-messaging-service', {
+        body: {
+          serviceType: 'twilio',
+          connectionDetails: {
+            accountSid: twilioConfig.accountSid,
+            authToken: twilioConfig.authToken,
+            phoneNumber: twilioConfig.phoneNumber
+          },
+          userId
+        }
+      });
+      
+      if (error) {
+        throw error;
+      }
+      
+      if (!data.success) {
+        throw new Error(data.message || 'Failed to connect Twilio account');
+      }
+      
+      setConnectedNumbers([...connectedNumbers, twilioConfig.phoneNumber]);
+      
+      setTwilioConfig({
+        accountSid: "",
+        authToken: "",
+        phoneNumber: ""
+      });
+      setTwilioDialogOpen(false);
+      
+      toast.success("Twilio account connected successfully");
+      
+      if (!userConfig.messaging_enabled) {
+        const { error: configError } = await supabase
+          .from('users_configuration')
+          .update({ messaging_enabled: true })
+          .eq('id', userId);
+        
+        if (configError) {
+          console.error('Error updating messaging configuration:', configError);
+        } else {
+          setUserConfig({ messaging_enabled: true });
+        }
+      }
+    } catch (error) {
+      console.error('Error connecting Twilio account:', error);
+      toast.error(error.message || "Failed to connect Twilio account");
+    } finally {
+      setIsConnecting(false);
     }
   };
   
@@ -225,7 +285,18 @@ export default function Messaging() {
                 </div>
 
                 <div className="rounded-lg border p-4 mt-6">
-                  <h3 className="font-medium mb-2">Connected Phone Numbers</h3>
+                  <div className="flex justify-between items-center mb-4">
+                    <h3 className="font-medium">Connected Phone Numbers</h3>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={() => setTwilioDialogOpen(true)}
+                      className="flex items-center gap-2 text-sm bg-slate-400 hover:bg-slate-300"
+                    >
+                      <Plus className="h-3 w-3" />
+                      Add Twilio Account
+                    </Button>
+                  </div>
                   {connectedNumbers.length > 0 ? <ul className="space-y-2">
                       {connectedNumbers.map((number, index) => <li key={index} className="flex justify-between items-center p-2 bg-gray-50 rounded">
                           <span>{number}</span>
@@ -241,9 +312,72 @@ export default function Messaging() {
             </CardContent>
           </Card>
           
-          {/* Service Sync Card */}
           <ServiceSyncCard />
         </div>
       </div>
+
+      <Dialog open={twilioDialogOpen} onOpenChange={setTwilioDialogOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>Connect Twilio Account</DialogTitle>
+            <DialogDescription>
+              Enter your Twilio credentials to integrate with our messaging system.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="account-sid">Account SID</Label>
+              <Input 
+                id="account-sid" 
+                value={twilioConfig.accountSid} 
+                onChange={(e) => setTwilioConfig({ ...twilioConfig, accountSid: e.target.value })}
+                placeholder="Enter your Twilio Account SID"
+              />
+              <p className="text-xs text-gray-500">
+                You can find this in your Twilio Console Dashboard
+              </p>
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="auth-token">Auth Token</Label>
+              <Input 
+                id="auth-token" 
+                type="password" 
+                value={twilioConfig.authToken} 
+                onChange={(e) => setTwilioConfig({ ...twilioConfig, authToken: e.target.value })}
+                placeholder="Enter your Twilio Auth Token"
+              />
+              <p className="text-xs text-gray-500">
+                This is found in your Twilio Console Dashboard next to your Account SID
+              </p>
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="twilio-phone">Twilio Phone Number</Label>
+              <Input 
+                id="twilio-phone" 
+                value={twilioConfig.phoneNumber} 
+                onChange={(e) => setTwilioConfig({ ...twilioConfig, phoneNumber: e.target.value })}
+                placeholder="+1XXXXXXXXXX (include country code)"
+              />
+              <p className="text-xs text-gray-500">
+                This must be a phone number purchased through your Twilio account
+              </p>
+            </div>
+          </div>
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setTwilioDialogOpen(false)}>Cancel</Button>
+            <Button 
+              onClick={handleTwilioConnect} 
+              disabled={isConnecting || !twilioConfig.accountSid || !twilioConfig.authToken || !twilioConfig.phoneNumber}
+              className="bg-slate-400 hover:bg-slate-300"
+            >
+              {isConnecting ? "Connecting..." : "Connect Twilio Account"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </AppLayout>;
 }
