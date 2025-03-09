@@ -51,12 +51,12 @@ export const LeadFilters: React.FC<FiltersProps> = ({
       </div>
       
       <div className="flex items-center gap-4 rounded-lg bg-slate-300">
-        <Label htmlFor="leadType" className="rounded-lg bg-slate-400 px-[20px] py-[8px]">Lead Type</Label>
+        <Label htmlFor="leadType" className="rounded-lg bg-slate-400 px-[27px] py-[9px] mx-[3px]">Lead Type</Label>
         <div className="flex items-center space-x-2">
-          <Button variant="outline" size="sm" onClick={() => onFilterChange("leadType", "available")} className="px-[3px] bg-slate-500 hover:bg-slate-400">
+          <Button variant="outline" size="sm" onClick={() => onFilterChange("leadType", "available")} className="bg-slate-500 hover:bg-slate-400 px-[11px] text-center mx-[3px]">
             Available
           </Button>
-          <Button variant="outline" size="sm" onClick={() => onFilterChange("leadType", "purchased")} className="px-[7px] bg-slate-500 hover:bg-slate-400">
+          <Button variant="outline" size="sm" onClick={() => onFilterChange("leadType", "purchased")} className="px-[7px] bg-slate-500 hover:bg-slate-400 mx-[15px]">
             Purchased
           </Button>
         </div>
@@ -65,7 +65,7 @@ export const LeadFilters: React.FC<FiltersProps> = ({
       <div className="bg-slate-300">
         <h4 className="text-md font-medium text-gray-950">Saved Filters</h4>
         <div className="flex gap-2">
-          {savedFilters.map((filter, index) => <Button key={filter.name} variant={filter.active ? "default" : "outline"} size="sm" onClick={() => onSavedFilterToggle(index)} className="rounded-sm bg-slate-500 hover:bg-slate-400">
+          {savedFilters.map((filter, index) => <Button key={filter.name} variant={filter.active ? "default" : "outline"} size="sm" onClick={() => onSavedFilterToggle(index)} className="bg-slate-400 hover:bg-slate-300 rounded-sm">
               {filter.name}
             </Button>)}
         </div>
