@@ -141,7 +141,7 @@ export const QuotePreview = ({
         </div>
         
         <div className="mt-8 border-t pt-4">
-          <h3 className="font-medium mb-2">Terms & Conditions</h3>
+          <h3 className="font-medium mb-2 bg-slate-400 hover:bg-slate-300">Terms & Conditions</h3>
           <p className="text-sm">Payment due within 14 days of quote acceptance. This quote is valid for 30 days from the date of issue.</p>
         </div>
       </div>
