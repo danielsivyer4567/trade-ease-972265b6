@@ -78,8 +78,8 @@ export default function NewQuote() {
           <div className="md:col-span-2">
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
               <TabsList className="grid grid-cols-5 mb-6">
-                <TabsTrigger value="details" className="bg-slate-400 hover:bg-slate-300">Customer Details</TabsTrigger>
-                <TabsTrigger value="items" className="bg-slate-400 hover:bg-slate-300 px-0 mx-[12px]">Quote Items</TabsTrigger>
+                
+                
                 <TabsTrigger value="price-list" className="bg-slate-400 hover:bg-slate-300 mx-0">Price List</TabsTrigger>
                 <TabsTrigger value="terms" className="bg-slate-400 hover:bg-slate-300 mx-[13px]">Terms & Notes</TabsTrigger>
                 <TabsTrigger value="preview" className="bg-slate-400 hover:bg-slate-300 mx-[2px]">Preview</TabsTrigger>
