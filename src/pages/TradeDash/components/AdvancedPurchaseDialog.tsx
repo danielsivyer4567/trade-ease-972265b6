@@ -86,7 +86,7 @@ export const AdvancedPurchaseDialog = ({
   };
   return <>
       <DialogTrigger asChild>
-        <Button size="sm" variant="outline" className="w-full flex items-center gap-1 border-back-300 text-gray-950 bg-slate-400 hover:bg-slate-300">
+        <Button size="sm" variant="outline" className="w-full flex items-center gap-1 bg-slate-400 hover:bg-slate-300">
           <Sliders className="h-4 w-4" />
           Advanced Auto-Purchase
         </Button>
