@@ -1,9 +1,13 @@
-
 import { useState, useEffect } from 'react';
 import { MessageSquare } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { ServiceInfo } from "../types";
+
+const createIconProps = (color: string) => ({
+  icon: MessageSquare,
+  props: { className: `h-5 w-5 text-${color}-500` }
+});
 
 export const useMessagingServices = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -11,7 +15,7 @@ export const useMessagingServices = () => {
     {
       id: "sms",
       name: "SMS Messages",
-      icon: <MessageSquare className="h-5 w-5 text-blue-500" />,
+      icon: createIconProps("blue"),
       isConnected: false,
       syncEnabled: false,
       serviceType: "sms"
@@ -19,7 +23,7 @@ export const useMessagingServices = () => {
     {
       id: "voicemail",
       name: "Voicemail",
-      icon: <MessageSquare className="h-5 w-5 text-green-500" />,
+      icon: createIconProps("green"),
       isConnected: false,
       syncEnabled: false,
       serviceType: "voicemail"
@@ -27,12 +31,53 @@ export const useMessagingServices = () => {
     {
       id: "email",
       name: "Email Inquiries",
-      icon: <MessageSquare className="h-5 w-5 text-purple-500" />,
+      icon: createIconProps("purple"),
       isConnected: false,
       syncEnabled: false,
       serviceType: "email"
     }
   ]);
+
+  const updateServicesWithAccount = (updatedServices, account) => {
+    let iconProps;
+    switch (account.service_type) {
+      case 'twilio':
+        iconProps = createIconProps("red");
+        break;
+      case 'whatsapp':
+        iconProps = createIconProps("green");
+        break;
+      case 'messenger':
+        iconProps = createIconProps("blue");
+        break;
+      default:
+        iconProps = createIconProps("amber");
+        break;
+    }
+    
+    return {
+      id: account.id,
+      name: account.service_type === 'twilio' 
+        ? "Twilio SMS" 
+        : account.service_type === 'whatsapp' 
+          ? "WhatsApp Business" 
+          : account.service_type === 'messenger' 
+            ? "Facebook Messenger" 
+            : "Custom API Integration",
+      icon: iconProps,
+      isConnected: true,
+      syncEnabled: account.enabled,
+      lastSynced: 'Recently',
+      serviceType: account.service_type,
+      connectionDetails: {
+        apiKey: account.api_key,
+        accountId: account.account_id,
+        phoneNumber: account.phone_number,
+        accountSid: account.account_sid,
+        authToken: account.auth_token
+      }
+    };
+  };
 
   const fetchMessagingAccounts = async () => {
     setIsLoading(true);
@@ -86,44 +131,7 @@ export const useMessagingServices = () => {
           );
           
           if (!existingService) {
-            let icon;
-            switch (account.service_type) {
-              case 'twilio':
-                icon = <MessageSquare className="h-5 w-5 text-red-500" />;
-                break;
-              case 'whatsapp':
-                icon = <MessageSquare className="h-5 w-5 text-green-500" />;
-                break;
-              case 'messenger':
-                icon = <MessageSquare className="h-5 w-5 text-blue-500" />;
-                break;
-              default:
-                icon = <MessageSquare className="h-5 w-5 text-amber-500" />;
-                break;
-            }
-            
-            updatedServices.push({
-              id: account.id,
-              name: account.service_type === 'twilio' 
-                ? "Twilio SMS" 
-                : account.service_type === 'whatsapp' 
-                  ? "WhatsApp Business" 
-                  : account.service_type === 'messenger' 
-                    ? "Facebook Messenger" 
-                    : "Custom API Integration",
-              icon,
-              isConnected: true,
-              syncEnabled: account.enabled,
-              lastSynced: 'Recently',
-              serviceType: account.service_type,
-              connectionDetails: {
-                apiKey: account.api_key,
-                accountId: account.account_id,
-                phoneNumber: account.phone_number,
-                accountSid: account.account_sid,
-                authToken: account.auth_token
-              }
-            });
+            updatedServices.push(updateServicesWithAccount(updatedServices, account));
           }
         });
         

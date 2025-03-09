@@ -1,82 +1,67 @@
 
 import React from 'react';
-import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
-import { Loader2, X } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { ServiceInfo } from "./types";
 
 interface ServiceItemProps {
-  id: string;
-  name: string;
-  icon: React.ReactNode;
-  isConnected: boolean;
-  syncEnabled: boolean;
-  lastSynced?: string;
+  service: ServiceInfo;
+  onToggleSync: (serviceId: string) => void;
+  onConnect: (serviceId: string) => void;
+  onRemove: (serviceId: string) => void;
   isLoading: boolean;
-  onToggleSync: (id: string) => void;
-  onConnect: (id: string) => void;
-  onRemove: (id: string) => void;
-  isDefault: boolean;
 }
 
-export const ServiceItem = ({
-  id,
-  name,
-  icon,
-  isConnected,
-  syncEnabled,
-  lastSynced,
-  isLoading,
+export const ServiceItem: React.FC<ServiceItemProps> = ({
+  service,
   onToggleSync,
   onConnect,
   onRemove,
-  isDefault
-}: ServiceItemProps) => {
+  isLoading
+}) => {
+  const IconComponent = service.icon.icon;
+  
   return (
-    <div className="flex items-center justify-between p-3 border rounded-lg bg-slate-300">
-      <div className="flex items-center gap-3">
-        {icon}
+    <div className="flex items-center justify-between border-b border-gray-200 py-3">
+      <div className="flex items-center space-x-3">
+        <IconComponent {...service.icon.props} />
         <div>
-          <p className="font-medium">{name}</p>
-          {isConnected && (
+          <h4 className="text-sm font-medium">{service.name}</h4>
+          {service.isConnected && (
             <p className="text-xs text-gray-500">
-              {lastSynced ? `Last synced: ${lastSynced}` : 'Not synced yet'}
+              {service.lastSynced ? `Last synced: ${service.lastSynced}` : 'Never synced'}
             </p>
           )}
         </div>
       </div>
       
-      <div className="flex items-center gap-3">
-        {isConnected ? (
+      <div className="flex items-center space-x-2">
+        {service.isConnected ? (
           <>
-            <div className="flex items-center gap-2">
-              <Switch 
-                checked={syncEnabled} 
-                onCheckedChange={() => onToggleSync(id)} 
-                disabled={isLoading} 
-              />
-              <Label className="text-xs">Auto Sync</Label>
-            </div>
-            {!isDefault && (
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                onClick={() => onRemove(id)} 
-                className="text-red-500 hover:text-red-700 hover:bg-red-50 h-6 w-6 p-0"
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            )}
+            <Switch
+              id={`sync-toggle-${service.id}`}
+              checked={service.syncEnabled}
+              onCheckedChange={() => onToggleSync(service.id)}
+              disabled={isLoading}
+            />
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => onRemove(service.id)}
+              disabled={isLoading}
+              className="border-red-300 text-red-600 hover:bg-red-50"
+            >
+              Disconnect
+            </Button>
           </>
         ) : (
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={() => onConnect(id)} 
-            disabled={isLoading} 
-            className="bg-slate-400 hover:bg-slate-500"
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => onConnect(service.id)}
+            disabled={isLoading}
           >
-            {isLoading ? <Loader2 className="h-3 w-3 animate-spin" /> : "Connect"}
+            Connect
           </Button>
         )}
       </div>

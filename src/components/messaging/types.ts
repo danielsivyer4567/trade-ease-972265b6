@@ -1,8 +1,13 @@
 
+import { LucideIcon } from 'lucide-react';
+
 export interface ServiceInfo {
   id: string;
   name: string;
-  icon: React.ReactNode;
+  icon: {
+    icon: LucideIcon;
+    props: { className: string };
+  };
   isConnected: boolean;
   syncEnabled: boolean;
   lastSynced?: string;
