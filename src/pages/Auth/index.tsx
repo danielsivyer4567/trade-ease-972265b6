@@ -5,9 +5,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from 'sonner';
+import { Mail, AlertCircle, CheckCircle } from 'lucide-react';
 
 export default function Auth() {
   const [email, setEmail] = useState('');
@@ -17,8 +18,12 @@ export default function Auth() {
   const [demoRequestName, setDemoRequestName] = useState('');
   const [demoRequestEmail, setDemoRequestEmail] = useState('');
   const [demoRequestCompany, setDemoRequestCompany] = useState('');
+  const [verificationSent, setVerificationSent] = useState(false);
+  const [verificationStatus, setVerificationStatus] = useState<'idle' | 'success' | 'error'>('idle');
+  const [verificationMessage, setVerificationMessage] = useState('');
   
   const navigate = useNavigate();
+  const location = useLocation();
 
   // Check if user is already logged in
   useEffect(() => {
@@ -31,6 +36,46 @@ export default function Auth() {
     checkUser();
   }, [navigate]);
 
+  // Check for verification token in URL
+  useEffect(() => {
+    const handleEmailVerification = async () => {
+      const hashParams = new URLSearchParams(window.location.hash.substring(1));
+      const accessToken = hashParams.get('access_token');
+      const refreshToken = hashParams.get('refresh_token');
+      const type = hashParams.get('type');
+      
+      if (type === 'recovery' || type === 'signup') {
+        setVerificationStatus('success');
+        setVerificationMessage('Your email has been verified! You can now sign in.');
+        
+        // If we have tokens, we can set the session directly
+        if (accessToken && refreshToken) {
+          try {
+            const { error } = await supabase.auth.setSession({
+              access_token: accessToken,
+              refresh_token: refreshToken
+            });
+            
+            if (error) {
+              console.error('Error setting session:', error);
+              throw error;
+            } else {
+              // Successfully set session, redirect to home
+              toast.success('Successfully verified and logged in!');
+              navigate('/');
+            }
+          } catch (error) {
+            console.error('Error during verification process:', error);
+            setVerificationStatus('error');
+            setVerificationMessage('There was an error verifying your email. Please try signing in manually.');
+          }
+        }
+      }
+    };
+    
+    handleEmailVerification();
+  }, [location, navigate]);
+
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -41,10 +86,17 @@ export default function Auth() {
         password,
       });
       
-      if (error) throw error;
-      
-      toast.success('Signed in successfully!');
-      navigate('/');
+      if (error) {
+        if (error.message === 'Email not confirmed') {
+          toast.error('Please verify your email before signing in. Check your inbox for a verification link.');
+          setVerificationSent(true);
+        } else {
+          throw error;
+        }
+      } else {
+        toast.success('Signed in successfully!');
+        navigate('/');
+      }
     } catch (error) {
       console.error('Error signing in:', error);
       toast.error(error.message || 'Failed to sign in');
@@ -67,15 +119,45 @@ export default function Auth() {
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
+        options: {
+          emailRedirectTo: window.location.origin + '/auth'
+        }
       });
       
       if (error) throw error;
       
+      setVerificationSent(true);
       toast.success('Signed up successfully! Please check your email for verification.');
-      // In a real app, you might want to navigate to a confirmation page
     } catch (error) {
       console.error('Error signing up:', error);
       toast.error(error.message || 'Failed to sign up');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleResendVerification = async () => {
+    if (!email) {
+      toast.error('Please enter your email address');
+      return;
+    }
+    
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.resend({
+        type: 'signup',
+        email,
+        options: {
+          emailRedirectTo: window.location.origin + '/auth'
+        }
+      });
+      
+      if (error) throw error;
+      
+      toast.success('Verification email resent! Please check your inbox.');
+    } catch (error) {
+      console.error('Error resending verification:', error);
+      toast.error(error.message || 'Failed to resend verification email');
     } finally {
       setLoading(false);
     }
@@ -104,6 +186,47 @@ export default function Auth() {
     }
   };
 
+  // Show verification success/error UI
+  if (verificationStatus !== 'idle') {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-100 p-4">
+        <Card className="w-full max-w-md">
+          <CardHeader>
+            <div className="flex justify-center mb-4">
+              <img src="/lovable-uploads/6a07dd00-f2c7-49da-8b00-48d960c13610.png" alt="Trade Ease Logo" className="w-16 h-16" />
+            </div>
+            <CardTitle className="text-center">Email Verification</CardTitle>
+          </CardHeader>
+          <CardContent className="flex flex-col items-center justify-center p-6">
+            {verificationStatus === 'success' ? (
+              <div className="text-center">
+                <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
+                <p className="text-xl font-semibold">{verificationMessage}</p>
+                <Button 
+                  onClick={() => navigate('/auth')} 
+                  className="mt-6 bg-slate-700 hover:bg-slate-800"
+                >
+                  Go to Sign In
+                </Button>
+              </div>
+            ) : (
+              <div className="text-center">
+                <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
+                <p className="text-xl font-semibold">{verificationMessage}</p>
+                <Button 
+                  onClick={() => navigate('/auth')} 
+                  className="mt-6 bg-slate-700 hover:bg-slate-800"
+                >
+                  Go to Sign In
+                </Button>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-100 p-4">
       <div className="w-full max-w-md">
@@ -129,6 +252,28 @@ export default function Auth() {
                 <CardDescription>Enter your credentials below to access your account</CardDescription>
               </CardHeader>
               <CardContent>
+                {verificationSent && (
+                  <div className="bg-blue-50 border-l-4 border-blue-500 p-4 mb-4 rounded">
+                    <div className="flex items-start">
+                      <Mail className="h-5 w-5 text-blue-500 mr-2 mt-0.5" />
+                      <div>
+                        <p className="font-medium text-blue-800">Verification Required</p>
+                        <p className="text-blue-700 text-sm mt-1">
+                          Please check your email for a verification link. 
+                          Once verified, you'll be able to sign in.
+                        </p>
+                        <Button
+                          variant="link"
+                          className="text-blue-600 p-0 h-auto mt-1 font-medium"
+                          onClick={handleResendVerification}
+                          disabled={loading}
+                        >
+                          Resend verification email
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                )}
                 <form onSubmit={handleSignIn} className="space-y-4">
                   <div className="space-y-2">
                     <Label htmlFor="signin-email">Email</Label>
@@ -170,6 +315,28 @@ export default function Auth() {
                 <CardDescription>Create a new account to get started</CardDescription>
               </CardHeader>
               <CardContent>
+                {verificationSent && (
+                  <div className="bg-green-50 border-l-4 border-green-500 p-4 mb-4 rounded">
+                    <div className="flex items-start">
+                      <Mail className="h-5 w-5 text-green-500 mr-2 mt-0.5" />
+                      <div>
+                        <p className="font-medium text-green-800">Verification Email Sent</p>
+                        <p className="text-green-700 text-sm mt-1">
+                          We've sent a verification link to your email.
+                          Please check your inbox and click the link to activate your account.
+                        </p>
+                        <Button
+                          variant="link"
+                          className="text-green-600 p-0 h-auto mt-1 font-medium"
+                          onClick={handleResendVerification}
+                          disabled={loading}
+                        >
+                          Resend verification email
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                )}
                 <form onSubmit={handleSignUp} className="space-y-4">
                   <div className="space-y-2">
                     <Label htmlFor="signup-email">Email</Label>
