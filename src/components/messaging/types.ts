@@ -19,5 +19,6 @@ export interface ServiceInfo {
     accountSid?: string;
     authToken?: string;
     phoneNumber?: string;
+    gcpVisionKey?: string;
   };
 }
