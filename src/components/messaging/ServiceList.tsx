@@ -23,17 +23,11 @@ export const ServiceList = ({
       {services.map(service => (
         <ServiceItem
           key={service.id}
-          id={service.id}
-          name={service.name}
-          icon={service.icon}
-          isConnected={service.isConnected}
-          syncEnabled={service.syncEnabled}
-          lastSynced={service.lastSynced}
+          service={service}
           isLoading={isLoading}
           onToggleSync={onToggleSync}
           onConnect={onConnect}
           onRemove={onRemove}
-          isDefault={["sms", "voicemail", "email"].includes(service.id)}
         />
       ))}
     </div>
