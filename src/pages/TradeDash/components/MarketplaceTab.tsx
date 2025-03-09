@@ -46,7 +46,7 @@ export const MarketplaceTab: React.FC<MarketplaceTabProps> = ({
   onBuyLead
 }) => {
   const availableLeads = leads.filter(lead => lead.status === "available");
-  return <div className="space-y-4 bg-slate-400">
+  return <div className="space-y-4 bg-slate-200">
       <SectionHeader title="Lead Marketplace" />
       
       <GlassCard>

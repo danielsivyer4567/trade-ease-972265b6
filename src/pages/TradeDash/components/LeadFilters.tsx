@@ -26,18 +26,18 @@ export const LeadFilters: React.FC<FiltersProps> = ({
   onFilterChange,
   onSavedFilterToggle
 }) => {
-  return <div className="rounded-md p-4 space-y-4 bg-slate-200">
+  return <div className="w-full flex items-center gap-1 bg-slate-400 hover:bg-slate-300 py-[10px]">
       <h3 className="text-lg font-medium">Filter Leads</h3>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div>
+        <div className="px-[27px] bg-slate-400">
           <Label htmlFor="postcode">Postcode</Label>
           <Input type="text" id="postcode" placeholder="Enter postcode" value={filters.postcode} onChange={e => onFilterChange("postcode", e.target.value)} />
         </div>
-        <div>
+        <div className="bg-slate-400">
           <Label htmlFor="minSize">Min. Size (sqm)</Label>
           <Input type="number" id="minSize" placeholder="Enter minimum size" value={filters.minSize} onChange={e => onFilterChange("minSize", e.target.value)} />
         </div>
-        <div>
+        <div className="bg-slate-400">
           <Label htmlFor="tradeType">Trade Type</Label>
           <Select value={filters.tradeType} onValueChange={value => onFilterChange("tradeType", value)}>
             <SelectTrigger id="tradeType">
@@ -50,22 +50,22 @@ export const LeadFilters: React.FC<FiltersProps> = ({
         </div>
       </div>
       
-      <div className="flex items-center gap-4">
-        <Label htmlFor="leadType">Lead Type</Label>
+      <div className="flex items-center gap-4 rounded-lg bg-slate-300">
+        <Label htmlFor="leadType" className="rounded-lg bg-slate-400 px-[20px] py-[8px]">Lead Type</Label>
         <div className="flex items-center space-x-2">
-          <Button variant="outline" size="sm" onClick={() => onFilterChange("leadType", "available")}>
+          <Button variant="outline" size="sm" onClick={() => onFilterChange("leadType", "available")} className="px-[3px] bg-slate-500 hover:bg-slate-400">
             Available
           </Button>
-          <Button variant="outline" size="sm" onClick={() => onFilterChange("leadType", "purchased")}>
+          <Button variant="outline" size="sm" onClick={() => onFilterChange("leadType", "purchased")} className="px-[7px] bg-slate-500 hover:bg-slate-400">
             Purchased
           </Button>
         </div>
       </div>
       
-      <div>
-        <h4 className="text-md font-medium">Saved Filters</h4>
+      <div className="bg-slate-300">
+        <h4 className="text-md font-medium text-gray-950">Saved Filters</h4>
         <div className="flex gap-2">
-          {savedFilters.map((filter, index) => <Button key={filter.name} variant={filter.active ? "default" : "outline"} size="sm" onClick={() => onSavedFilterToggle(index)}>
+          {savedFilters.map((filter, index) => <Button key={filter.name} variant={filter.active ? "default" : "outline"} size="sm" onClick={() => onSavedFilterToggle(index)} className="rounded-sm bg-slate-500 hover:bg-slate-400">
               {filter.name}
             </Button>)}
         </div>
