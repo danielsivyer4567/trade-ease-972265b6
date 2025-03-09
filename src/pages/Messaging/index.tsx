@@ -1,3 +1,4 @@
+
 import { AppLayout } from "@/components/ui/AppLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,6 +9,8 @@ import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
+import { ServiceSyncCard } from "@/components/messaging/ServiceSyncCard";
+
 export default function Messaging() {
   const [phoneNumber, setPhoneNumber] = useState("");
   const [isConnecting, setIsConnecting] = useState(false);
@@ -22,6 +25,7 @@ export default function Messaging() {
       setConnectedNumbers(JSON.parse(savedNumbers));
     }
   }, []);
+  
   const handlePhoneNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.replace(/\D/g, '');
     let formattedValue = value;
@@ -30,6 +34,7 @@ export default function Messaging() {
     }
     setPhoneNumber(formattedValue);
   };
+  
   const handleConnect = async () => {
     setIsConnecting(true);
     try {
@@ -64,6 +69,7 @@ export default function Messaging() {
       setIsConnecting(false);
     }
   };
+  
   const handleRemoveNumber = (index: number) => {
     const updatedNumbers = [...connectedNumbers];
     updatedNumbers.splice(index, 1);
@@ -71,54 +77,60 @@ export default function Messaging() {
     localStorage.setItem('connectedPhoneNumbers', JSON.stringify(updatedNumbers));
     toast.success("Phone number removed");
   };
+  
   return <AppLayout>
       <div className="p-6 max-w-4xl mx-auto">
-        <Card>
-          <CardHeader className="bg-slate-200">
-            <CardTitle className="flex items-center gap-2">
-              <div className="flex items-center gap-2">
-                <Button variant="outline" size="sm" onClick={() => navigate(-1)} className="rounded-md border border-gray-300 px-3 py-1 text-[#1E40AF] hover:text-[#1E3A8A] bg-slate-400 hover:bg-slate-300">
-                  <ArrowLeft className="h-5 w-5" />
-                </Button>
-                <MessageSquare className="h-6 w-6" />
-                Message Synchronization
-              </div>
-            </CardTitle>
-            <CardDescription>
-              Connect your phone number to sync messages from Go High Level
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="bg-slate-200">
-            <div className="space-y-6">
-              <div className="space-y-2">
-                <Label htmlFor="phone">Phone Number</Label>
-                <div className="flex gap-4">
-                  <Input id="phone" type="tel" placeholder="Enter your phone number (XXX-XXX-XXXX)" value={phoneNumber} onChange={handlePhoneNumberChange} className="flex-1" maxLength={12} />
-                  <Button onClick={handleConnect} disabled={!phoneNumber || isConnecting || phoneNumber.replace(/\D/g, '').length !== 10} className="flex items-center gap-2 px-[17px] bg-slate-400 hover:bg-slate-300">
-                    {isConnecting ? <>Loading...</> : <>
-                        <Plus className="h-4 w-4" />
-                        Connect
-                      </>}
+        <div className="space-y-6">
+          <Card>
+            <CardHeader className="bg-slate-200">
+              <CardTitle className="flex items-center gap-2">
+                <div className="flex items-center gap-2">
+                  <Button variant="outline" size="sm" onClick={() => navigate(-1)} className="rounded-md border border-gray-300 px-3 py-1 text-[#1E40AF] hover:text-[#1E3A8A] bg-slate-400 hover:bg-slate-300">
+                    <ArrowLeft className="h-5 w-5" />
                   </Button>
+                  <MessageSquare className="h-6 w-6" />
+                  Message Synchronization
+                </div>
+              </CardTitle>
+              <CardDescription>
+                Connect your phone number to sync messages from Go High Level
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="bg-slate-200">
+              <div className="space-y-6">
+                <div className="space-y-2">
+                  <Label htmlFor="phone">Phone Number</Label>
+                  <div className="flex gap-4">
+                    <Input id="phone" type="tel" placeholder="Enter your phone number (XXX-XXX-XXXX)" value={phoneNumber} onChange={handlePhoneNumberChange} className="flex-1" maxLength={12} />
+                    <Button onClick={handleConnect} disabled={!phoneNumber || isConnecting || phoneNumber.replace(/\D/g, '').length !== 10} className="flex items-center gap-2 px-[17px] bg-slate-400 hover:bg-slate-300">
+                      {isConnecting ? <>Loading...</> : <>
+                          <Plus className="h-4 w-4" />
+                          Connect
+                        </>}
+                    </Button>
+                  </div>
+                </div>
+
+                <div className="rounded-lg border p-4 mt-6">
+                  <h3 className="font-medium mb-2">Connected Phone Numbers</h3>
+                  {connectedNumbers.length > 0 ? <ul className="space-y-2">
+                      {connectedNumbers.map((number, index) => <li key={index} className="flex justify-between items-center p-2 bg-gray-50 rounded">
+                          <span>{number}</span>
+                          <Button variant="ghost" size="sm" onClick={() => handleRemoveNumber(index)} className="text-red-500 hover:text-red-700 hover:bg-red-50">
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </li>)}
+                    </ul> : <p className="text-sm text-gray-500">
+                      No phone numbers connected yet. Connect a number to start syncing messages.
+                    </p>}
                 </div>
               </div>
-
-              <div className="rounded-lg border p-4 mt-6">
-                <h3 className="font-medium mb-2">Connected Phone Numbers</h3>
-                {connectedNumbers.length > 0 ? <ul className="space-y-2">
-                    {connectedNumbers.map((number, index) => <li key={index} className="flex justify-between items-center p-2 bg-gray-50 rounded">
-                        <span>{number}</span>
-                        <Button variant="ghost" size="sm" onClick={() => handleRemoveNumber(index)} className="text-red-500 hover:text-red-700 hover:bg-red-50">
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </li>)}
-                  </ul> : <p className="text-sm text-gray-500">
-                    No phone numbers connected yet. Connect a number to start syncing messages.
-                  </p>}
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+          
+          {/* New Service Sync Card */}
+          <ServiceSyncCard />
+        </div>
       </div>
     </AppLayout>;
 }
