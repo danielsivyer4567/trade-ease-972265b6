@@ -15,15 +15,58 @@ export default function Messaging() {
   const [phoneNumber, setPhoneNumber] = useState("");
   const [isConnecting, setIsConnecting] = useState(false);
   const [connectedNumbers, setConnectedNumbers] = useState<string[]>([]);
+  const [userConfig, setUserConfig] = useState<{ messaging_enabled: boolean }>({ messaging_enabled: false });
   const navigate = useNavigate();
 
-  // Simulate fetching connected numbers
+  // Load user configuration and connected phone numbers
   useEffect(() => {
-    // In a real implementation, you would fetch this from your database
-    const savedNumbers = localStorage.getItem('connectedPhoneNumbers');
-    if (savedNumbers) {
-      setConnectedNumbers(JSON.parse(savedNumbers));
-    }
+    const loadUserData = async () => {
+      try {
+        // Get current user session
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        if (!session) {
+          console.log('No user session found');
+          // In a production app, you might want to redirect to login
+          return;
+        }
+        
+        const userId = session.user.id;
+        
+        // Fetch user configuration
+        const { data: configData, error: configError } = await supabase
+          .from('users_configuration')
+          .select('messaging_enabled')
+          .eq('id', userId)
+          .single();
+        
+        if (configError) {
+          console.error('Error fetching user configuration:', configError);
+        } else if (configData) {
+          setUserConfig(configData);
+        }
+        
+        // Fetch phone numbers from messaging_accounts
+        const { data: phoneAccounts, error: phoneError } = await supabase
+          .from('messaging_accounts')
+          .select('phone_number')
+          .eq('user_id', userId)
+          .not('phone_number', 'is', null);
+        
+        if (phoneError) {
+          console.error('Error fetching phone numbers:', phoneError);
+        } else if (phoneAccounts && phoneAccounts.length > 0) {
+          const numbers = phoneAccounts
+            .map(account => account.phone_number)
+            .filter(Boolean) as string[];
+          setConnectedNumbers(numbers);
+        }
+      } catch (error) {
+        console.error('Error loading user data:', error);
+      }
+    };
+    
+    loadUserData();
   }, []);
   
   const handlePhoneNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -38,30 +81,71 @@ export default function Messaging() {
   const handleConnect = async () => {
     setIsConnecting(true);
     try {
-      console.log('Connecting phone number:', phoneNumber);
-      const {
-        data,
-        error
-      } = await supabase.functions.invoke('validate-ghl-number', {
+      // Get current user session
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        toast.error('You must be logged in to connect a phone number');
+        setIsConnecting(false);
+        return;
+      }
+      
+      const userId = session.user.id;
+      const cleanNumber = phoneNumber.replace(/\D/g, '');
+      
+      console.log('Connecting phone number:', cleanNumber);
+      
+      // First validate the number with GHL function
+      const validationResponse = await supabase.functions.invoke('validate-ghl-number', {
         body: {
-          phoneNumber: phoneNumber.replace(/\D/g, '')
+          phoneNumber: cleanNumber
         }
       });
-      console.log('Response from edge function:', data, error);
-      if (error) throw error;
-      if (data.success) {
-        toast.success("Phone number connected successfully");
-
-        // Save to local storage (in a real app, you'd save to a database)
-        const newConnectedNumbers = [...connectedNumbers, phoneNumber];
-        setConnectedNumbers(newConnectedNumbers);
-        localStorage.setItem('connectedPhoneNumbers', JSON.stringify(newConnectedNumbers));
-
-        // Reset the input
-        setPhoneNumber('');
-      } else {
-        throw new Error(data.error || 'Failed to connect phone number');
+      
+      if (validationResponse.error || !validationResponse.data.success) {
+        throw new Error(
+          validationResponse.error?.message || 
+          validationResponse.data?.error || 
+          'Failed to validate phone number'
+        );
       }
+      
+      // Then store the phone number in the messaging_accounts table
+      const { data: accountData, error: accountError } = await supabase
+        .from('messaging_accounts')
+        .insert({
+          user_id: userId,
+          service_type: 'sms',
+          phone_number: phoneNumber,
+          enabled: true
+        })
+        .select('id')
+        .single();
+      
+      if (accountError) {
+        throw accountError;
+      }
+      
+      // Enable messaging in user configuration
+      const { error: configError } = await supabase
+        .from('users_configuration')
+        .update({ messaging_enabled: true })
+        .eq('id', userId);
+      
+      if (configError) {
+        console.error('Error updating messaging configuration:', configError);
+        // We don't fail the whole operation if just this update fails
+      } else {
+        setUserConfig({ messaging_enabled: true });
+      }
+      
+      // Update local state
+      setConnectedNumbers([...connectedNumbers, phoneNumber]);
+      
+      // Reset the input
+      setPhoneNumber('');
+      
+      toast.success("Phone number connected successfully");
     } catch (error) {
       console.error('Error connecting phone number:', error);
       toast.error(error.message || "Failed to connect to messaging system");
@@ -70,12 +154,41 @@ export default function Messaging() {
     }
   };
   
-  const handleRemoveNumber = (index: number) => {
-    const updatedNumbers = [...connectedNumbers];
-    updatedNumbers.splice(index, 1);
-    setConnectedNumbers(updatedNumbers);
-    localStorage.setItem('connectedPhoneNumbers', JSON.stringify(updatedNumbers));
-    toast.success("Phone number removed");
+  const handleRemoveNumber = async (index: number) => {
+    const numberToRemove = connectedNumbers[index];
+    
+    try {
+      // Get current user session
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        toast.error('You must be logged in to remove a phone number');
+        return;
+      }
+      
+      const userId = session.user.id;
+      
+      // Remove the phone number from the database
+      const { error } = await supabase
+        .from('messaging_accounts')
+        .delete()
+        .eq('user_id', userId)
+        .eq('phone_number', numberToRemove);
+      
+      if (error) {
+        throw error;
+      }
+      
+      // Update local state
+      const updatedNumbers = [...connectedNumbers];
+      updatedNumbers.splice(index, 1);
+      setConnectedNumbers(updatedNumbers);
+      
+      toast.success("Phone number removed");
+    } catch (error) {
+      console.error('Error removing phone number:', error);
+      toast.error('Failed to remove phone number');
+    }
   };
   
   return <AppLayout>
@@ -128,7 +241,7 @@ export default function Messaging() {
             </CardContent>
           </Card>
           
-          {/* New Service Sync Card */}
+          {/* Service Sync Card */}
           <ServiceSyncCard />
         </div>
       </div>

@@ -69,6 +69,48 @@ export type Database = {
         }
         Relationships: []
       }
+      messaging_accounts: {
+        Row: {
+          account_id: string | null
+          account_sid: string | null
+          api_key: string | null
+          auth_token: string | null
+          created_at: string | null
+          enabled: boolean | null
+          id: string
+          phone_number: string | null
+          service_type: string
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          account_id?: string | null
+          account_sid?: string | null
+          api_key?: string | null
+          auth_token?: string | null
+          created_at?: string | null
+          enabled?: boolean | null
+          id?: string
+          phone_number?: string | null
+          service_type: string
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          account_id?: string | null
+          account_sid?: string | null
+          api_key?: string | null
+          auth_token?: string | null
+          created_at?: string | null
+          enabled?: boolean | null
+          id?: string
+          phone_number?: string | null
+          service_type?: string
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       payments: {
         Row: {
           amount: number
@@ -259,6 +301,60 @@ export type Database = {
           created_at?: string
           id?: number
           text?: string | null
+        }
+        Relationships: []
+      }
+      user_automations: {
+        Row: {
+          automation_type: string
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          settings: Json | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          automation_type: string
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          settings?: Json | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          automation_type?: string
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          settings?: Json | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      users_configuration: {
+        Row: {
+          automation_enabled: boolean | null
+          created_at: string | null
+          id: string
+          messaging_enabled: boolean | null
+          updated_at: string | null
+        }
+        Insert: {
+          automation_enabled?: boolean | null
+          created_at?: string | null
+          id: string
+          messaging_enabled?: boolean | null
+          updated_at?: string | null
+        }
+        Update: {
+          automation_enabled?: boolean | null
+          created_at?: string | null
+          id?: string
+          messaging_enabled?: boolean | null
+          updated_at?: string | null
         }
         Relationships: []
       }

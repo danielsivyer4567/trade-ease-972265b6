@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -9,6 +8,7 @@ import { MessageSquare, Phone, Loader2, Check, Inbox, RefreshCw, Plus, X } from 
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { supabase } from "@/integrations/supabase/client";
 
 interface ServiceInfo {
   id: string;
@@ -17,6 +17,7 @@ interface ServiceInfo {
   isConnected: boolean;
   syncEnabled: boolean;
   lastSynced?: string;
+  serviceType: string;
   connectionDetails?: {
     apiKey?: string;
     accountId?: string;
@@ -40,7 +41,6 @@ const ConnectServiceDialog = ({ isOpen, onClose, onConnect }: ConnectDialogProps
   const [serviceUrl, setServiceUrl] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   
-  // Twilio specific fields
   const [accountSid, setAccountSid] = useState('');
   const [authToken, setAuthToken] = useState('');
   const [twilioPhoneNumber, setTwilioPhoneNumber] = useState('');
@@ -48,7 +48,6 @@ const ConnectServiceDialog = ({ isOpen, onClose, onConnect }: ConnectDialogProps
   const handleSubmit = () => {
     setIsSubmitting(true);
     
-    // Validate fields based on service type
     if (serviceType === 'twilio') {
       if (!accountSid || !authToken || !twilioPhoneNumber) {
         toast.error("Please fill in all required Twilio fields");
@@ -62,14 +61,12 @@ const ConnectServiceDialog = ({ isOpen, onClose, onConnect }: ConnectDialogProps
     }
     
     setTimeout(() => {
-      // Prepare connection details based on service type
       const connectionDetails = serviceType === 'twilio' 
         ? { accountSid, authToken, phoneNumber: twilioPhoneNumber }
         : { apiKey, accountId, url: serviceUrl || undefined };
       
       onConnect(serviceType, connectionDetails);
       
-      // Reset form
       setApiKey('');
       setAccountId('');
       setServiceUrl('');
@@ -111,7 +108,6 @@ const ConnectServiceDialog = ({ isOpen, onClose, onConnect }: ConnectDialogProps
           </div>
           
           {serviceType === 'twilio' ? (
-            // Twilio specific fields
             <>
               <div className="space-y-2">
                 <Label htmlFor="account-sid">Account SID</Label>
@@ -145,7 +141,6 @@ const ConnectServiceDialog = ({ isOpen, onClose, onConnect }: ConnectDialogProps
               </div>
             </>
           ) : (
-            // Standard fields for other services
             <>
               <div className="space-y-2">
                 <Label htmlFor="api-key">API Key / Token</Label>
@@ -211,156 +206,314 @@ export const ServiceSyncCard = () => {
       id: "sms",
       name: "SMS Messages",
       icon: <MessageSquare className="h-5 w-5 text-blue-500" />,
-      isConnected: true,
-      syncEnabled: true,
-      lastSynced: "10 minutes ago"
+      isConnected: false,
+      syncEnabled: false,
+      serviceType: "sms"
     },
     {
       id: "voicemail",
       name: "Voicemail",
       icon: <Phone className="h-5 w-5 text-green-500" />,
-      isConnected: true,
-      syncEnabled: false
+      isConnected: false,
+      syncEnabled: false,
+      serviceType: "voicemail"
     },
     {
       id: "email",
       name: "Email Inquiries",
       icon: <Inbox className="h-5 w-5 text-purple-500" />,
       isConnected: false,
-      syncEnabled: false
+      syncEnabled: false,
+      serviceType: "email"
     }
   ]);
   
-  const handleToggleSync = (serviceId: string) => {
-    setServices(services.map(service => 
-      service.id === serviceId 
-        ? { ...service, syncEnabled: !service.syncEnabled }
-        : service
-    ));
-    
-    const service = services.find(s => s.id === serviceId);
-    if (service) {
-      toast.success(`${service.syncEnabled ? "Disabled" : "Enabled"} sync for ${service.name}`);
-    }
-  };
+  useEffect(() => {
+    fetchMessagingAccounts();
+  }, []);
   
-  const handleConnectService = (serviceId: string) => {
+  const fetchMessagingAccounts = async () => {
     setIsLoading(true);
     
-    // Simulate API call to connect service
-    setTimeout(() => {
-      setServices(services.map(service => 
-        service.id === serviceId 
-          ? { ...service, isConnected: true, lastSynced: "Just now" }
-          : service
-      ));
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
       
-      const service = services.find(s => s.id === serviceId);
-      if (service) {
-        toast.success(`${service.name} connected successfully`);
+      if (!session) {
+        console.log('No user session found');
+        setIsLoading(false);
+        return;
       }
       
+      const userId = session.user.id;
+      
+      const { data: accounts, error } = await supabase
+        .from('messaging_accounts')
+        .select('*')
+        .eq('user_id', userId);
+      
+      if (error) {
+        console.error('Error fetching messaging accounts:', error);
+        toast.error('Failed to load messaging accounts');
+        setIsLoading(false);
+        return;
+      }
+      
+      if (accounts && accounts.length > 0) {
+        const updatedServices = [...services];
+        
+        updatedServices.forEach(service => {
+          const matchingAccount = accounts.find(a => a.service_type === service.serviceType);
+          if (matchingAccount) {
+            service.id = matchingAccount.id;
+            service.isConnected = true;
+            service.syncEnabled = matchingAccount.enabled;
+            service.lastSynced = 'Recently';
+            service.connectionDetails = {
+              apiKey: matchingAccount.api_key,
+              accountId: matchingAccount.account_id,
+              phoneNumber: matchingAccount.phone_number,
+              accountSid: matchingAccount.account_sid,
+              authToken: matchingAccount.auth_token
+            };
+          }
+        });
+        
+        accounts.forEach(account => {
+          const existingService = updatedServices.find(
+            s => s.serviceType === account.service_type || s.id === account.id
+          );
+          
+          if (!existingService) {
+            let icon;
+            switch (account.service_type) {
+              case 'twilio':
+                icon = <MessageSquare className="h-5 w-5 text-red-500" />;
+                break;
+              case 'whatsapp':
+                icon = <MessageSquare className="h-5 w-5 text-green-500" />;
+                break;
+              case 'messenger':
+                icon = <MessageSquare className="h-5 w-5 text-blue-500" />;
+                break;
+              default:
+                icon = <MessageSquare className="h-5 w-5 text-amber-500" />;
+                break;
+            }
+            
+            updatedServices.push({
+              id: account.id,
+              name: account.service_type === 'twilio' 
+                ? "Twilio SMS" 
+                : account.service_type === 'whatsapp'
+                  ? "WhatsApp Business"
+                  : account.service_type === 'messenger'
+                    ? "Facebook Messenger"
+                    : "Custom API Integration",
+              icon,
+              isConnected: true,
+              syncEnabled: account.enabled,
+              lastSynced: 'Recently',
+              serviceType: account.service_type,
+              connectionDetails: {
+                apiKey: account.api_key,
+                accountId: account.account_id,
+                phoneNumber: account.phone_number,
+                accountSid: account.account_sid,
+                authToken: account.auth_token
+              }
+            });
+          }
+        });
+        
+        setServices(updatedServices);
+      }
+    } catch (error) {
+      console.error('Error in fetchMessagingAccounts:', error);
+      toast.error('Failed to load messaging accounts');
+    } finally {
       setIsLoading(false);
-    }, 1500);
-  };
-  
-  const handleAddNewService = (serviceType: string, connectionDetails: any) => {
-    let newService: ServiceInfo;
-    
-    switch (serviceType) {
-      case 'twilio':
-        newService = {
-          id: `twilio-${Date.now()}`,
-          name: "Twilio SMS",
-          icon: <MessageSquare className="h-5 w-5 text-red-500" />,
-          isConnected: true,
-          syncEnabled: true,
-          lastSynced: "Just now",
-          connectionDetails
-        };
-        break;
-      case 'whatsapp':
-        newService = {
-          id: `whatsapp-${Date.now()}`,
-          name: "WhatsApp Business",
-          icon: <MessageSquare className="h-5 w-5 text-green-500" />,
-          isConnected: true,
-          syncEnabled: true,
-          lastSynced: "Just now",
-          connectionDetails
-        };
-        break;
-      case 'messenger':
-        newService = {
-          id: `messenger-${Date.now()}`,
-          name: "Facebook Messenger",
-          icon: <MessageSquare className="h-5 w-5 text-blue-500" />,
-          isConnected: true,
-          syncEnabled: true,
-          lastSynced: "Just now",
-          connectionDetails
-        };
-        break;
-      case 'custom':
-        newService = {
-          id: `custom-${Date.now()}`,
-          name: "Custom API Integration",
-          icon: <MessageSquare className="h-5 w-5 text-amber-500" />,
-          isConnected: true,
-          syncEnabled: true,
-          lastSynced: "Just now",
-          connectionDetails
-        };
-        break;
-      default:
-        newService = {
-          id: `${serviceType}-${Date.now()}`,
-          name: serviceType === 'sms' 
-            ? "SMS Provider" 
-            : serviceType === 'email' 
-              ? "Email Service" 
-              : "Voicemail Service",
-          icon: serviceType === 'sms' 
-            ? <MessageSquare className="h-5 w-5 text-blue-500" />
-            : serviceType === 'email'
-              ? <Inbox className="h-5 w-5 text-purple-500" />
-              : <Phone className="h-5 w-5 text-green-500" />,
-          isConnected: true,
-          syncEnabled: true,
-          lastSynced: "Just now",
-          connectionDetails
-        };
     }
-    
-    setServices([...services, newService]);
-    toast.success(`New ${newService.name} connection added`);
-    
-    // In a real implementation, you would save the service details to your backend
-    console.log("Service connected:", {
-      type: serviceType,
-      details: connectionDetails
-    });
   };
   
-  const handleRemoveService = (serviceId: string) => {
+  const handleToggleSync = async (serviceId: string) => {
     const service = services.find(s => s.id === serviceId);
     if (!service) return;
     
-    // Don't allow removing the original three services
-    if (["sms", "voicemail", "email"].includes(serviceId)) {
-      toast.error("Default services cannot be removed");
+    setIsLoading(true);
+    
+    try {
+      const { error } = await supabase
+        .from('messaging_accounts')
+        .update({ enabled: !service.syncEnabled })
+        .eq('id', serviceId);
+      
+      if (error) {
+        throw error;
+      }
+      
+      setServices(services.map(service => 
+        service.id === serviceId 
+          ? { ...service, syncEnabled: !service.syncEnabled }
+          : service
+      ));
+      
+      toast.success(`${service.syncEnabled ? "Disabled" : "Enabled"} sync for ${service.name}`);
+    } catch (error) {
+      console.error('Error toggling sync status:', error);
+      toast.error('Failed to update sync settings');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
+  const handleConnectService = async (serviceId: string) => {
+    setIsLoading(true);
+    
+    const service = services.find(s => s.id === serviceId);
+    if (!service) {
+      setIsLoading(false);
       return;
     }
     
-    setServices(services.filter(s => s.id !== serviceId));
-    toast.success(`${service.name} connection removed`);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        toast.error('You must be logged in to connect services');
+        setIsLoading(false);
+        return;
+      }
+      
+      const userId = session.user.id;
+      
+      const connectionDetails = {
+        apiKey: '',
+        accountId: service.serviceType,
+      };
+      
+      const { data, error } = await supabase.functions.invoke('connect-messaging-service', {
+        body: {
+          serviceType: service.serviceType,
+          connectionDetails,
+          userId
+        }
+      });
+      
+      if (error) {
+        throw error;
+      }
+      
+      if (!data.success) {
+        throw new Error(data.message || 'Failed to connect service');
+      }
+      
+      setServices(services.map(s => 
+        s.id === serviceId 
+          ? { 
+              ...s, 
+              id: data.serviceId || s.id,
+              isConnected: true, 
+              syncEnabled: true,
+              lastSynced: "Just now" 
+            }
+          : s
+      ));
+      
+      toast.success(`${service.name} connected successfully`);
+      
+      fetchMessagingAccounts();
+    } catch (error) {
+      console.error('Error connecting service:', error);
+      toast.error('Failed to connect service');
+    } finally {
+      setIsLoading(false);
+    }
   };
   
-  const handleSyncAll = () => {
+  const handleAddNewService = async (serviceType: string, connectionDetails: any) => {
     setIsLoading(true);
     
-    // Simulate API call to sync all services
-    setTimeout(() => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        toast.error('You must be logged in to add services');
+        setIsLoading(false);
+        return;
+      }
+      
+      const userId = session.user.id;
+      
+      const { data, error } = await supabase.functions.invoke('connect-messaging-service', {
+        body: {
+          serviceType,
+          connectionDetails,
+          userId
+        }
+      });
+      
+      if (error) {
+        throw error;
+      }
+      
+      if (!data.success) {
+        throw new Error(data.message || 'Failed to connect service');
+      }
+      
+      toast.success(`New ${serviceType} connection added`);
+      
+      fetchMessagingAccounts();
+    } catch (error) {
+      console.error('Error adding service:', error);
+      toast.error('Failed to add new service');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
+  const handleRemoveService = async (serviceId: string) => {
+    const service = services.find(s => s.id === serviceId);
+    if (!service) return;
+    
+    if (["sms", "voicemail", "email"].includes(serviceId)) {
+      toast.error("Default services cannot be removed, only disconnected");
+      return;
+    }
+    
+    setIsLoading(true);
+    
+    try {
+      const { error } = await supabase
+        .from('messaging_accounts')
+        .delete()
+        .eq('id', serviceId);
+      
+      if (error) {
+        throw error;
+      }
+      
+      setServices(services.filter(s => s.id !== serviceId));
+      toast.success(`${service.name} connection removed`);
+    } catch (error) {
+      console.error('Error removing service:', error);
+      toast.error('Failed to remove service');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
+  const handleSyncAll = async () => {
+    setIsLoading(true);
+    
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        toast.error('You must be logged in to sync services');
+        setIsLoading(false);
+        return;
+      }
+      
       setServices(services.map(service => 
         service.isConnected && service.syncEnabled
           ? { ...service, lastSynced: "Just now" }
@@ -368,8 +521,12 @@ export const ServiceSyncCard = () => {
       ));
       
       toast.success("All services synchronized successfully");
+    } catch (error) {
+      console.error('Error syncing services:', error);
+      toast.error('Failed to sync services');
+    } finally {
       setIsLoading(false);
-    }, 2000);
+    }
   };
   
   return (
