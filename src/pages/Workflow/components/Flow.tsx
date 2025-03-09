@@ -117,7 +117,7 @@ export function Flow({ onInit }) {
     >
       <Controls />
       <MiniMap />
-      <Background variant={BackgroundVariant.DOTS} gap={12} size={1} />
+      <Background variant={BackgroundVariant.Dots} gap={12} size={1} />
       <Panel position="top-right">
         <div className="bg-white p-2 rounded shadow-md text-xs">
           Drag nodes from the sidebar to create your workflow
