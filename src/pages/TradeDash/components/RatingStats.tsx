@@ -50,11 +50,11 @@ export const RatingStats = ({
         </div>
         
         <div className="grid grid-cols-2 gap-4 mt-4">
-          <div className="p-3 rounded-md bg-slate-300">
+          <div className="p-3 rounded-md bg-slate-400">
             <div className="text-lg font-bold">{userStats.ranking}</div>
             <div className="text-xs text-gray-500">Your Ranking</div>
           </div>
-          <div className="p-3 rounded-md bg-slate-300">
+          <div className="p-3 rounded-md bg-slate-400">
             <div className="text-lg font-bold">{userStats.totalJobs}</div>
             <div className="text-xs text-gray-500">Jobs Completed</div>
           </div>
