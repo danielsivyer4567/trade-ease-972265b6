@@ -3,21 +3,24 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { ArrowLeft, ArrowRight, Settings, Database, Globe, CreditCard, Smartphone, Link } from "lucide-react";
+import { ArrowLeft, ArrowRight, Settings, Database, Globe, CreditCard, Smartphone, Link, Copy } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+
 export default function Integrations() {
   const navigate = useNavigate();
   const [leadAutoEnabled, setLeadAutoEnabled] = useState(false);
   const [cyberSourceDialogOpen, setCyberSourceDialogOpen] = useState(false);
+  const [generatedApiKey, setGeneratedApiKey] = useState<string | null>(null);
   const [cyberSourceConfig, setCyberSourceConfig] = useState({
     merchantId: "",
     apiKeyId: "",
     secretKey: ""
   });
+  
   const handleToggleAutoLead = (checked: boolean) => {
     setLeadAutoEnabled(checked);
     if (checked) {
@@ -26,9 +29,11 @@ export default function Integrations() {
       toast.info("Auto lead purchase disabled");
     }
   };
+  
   const handleCyberSourceConnectClick = () => {
     setCyberSourceDialogOpen(true);
   };
+  
   const handleCyberSourceConfigSubmit = async () => {
     try {
       // Here we would normally validate and save the CyberSource configuration
@@ -40,6 +45,26 @@ export default function Integrations() {
       toast.error("Failed to configure CyberSource integration");
     }
   };
+
+  const generateApiKey = () => {
+    // Generate a random API key
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    const prefix = 'api_';
+    let result = prefix;
+    
+    for (let i = 0; i < 32; i++) {
+      result += characters.charAt(Math.floor(Math.random() * characters.length));
+    }
+    
+    setGeneratedApiKey(result);
+    toast.success("API key generated successfully");
+  };
+
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+    toast.success("API key copied to clipboard");
+  };
+  
   return <AppLayout>
       <div className="p-6 space-y-6">
         <div className="flex items-center gap-2">
@@ -160,15 +185,27 @@ export default function Integrations() {
                 Generate and manage API keys to allow external services to access your data.
                 View request logs and control permissions.
               </p>
+              {generatedApiKey && (
+                <div className="mb-4 p-2 bg-slate-300 rounded flex items-center justify-between">
+                  <code className="text-xs overflow-hidden text-ellipsis">{generatedApiKey}</code>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={() => copyToClipboard(generatedApiKey)}
+                    className="ml-2"
+                  >
+                    <Copy className="h-4 w-4" />
+                  </Button>
+                </div>
+              )}
               <div className="flex items-center gap-2">
-                <Button variant="outline" className="flex-1 bg-slate-400 hover:bg-slate-300">Generate Key</Button>
+                <Button variant="outline" className="flex-1 bg-slate-400 hover:bg-slate-300" onClick={generateApiKey}>Generate Key</Button>
                 <Button variant="outline" className="flex-1 bg-slate-400 hover:bg-slate-300">View Logs</Button>
               </div>
             </CardContent>
           </Card>
         </div>
 
-        {/* CyberSource Config Dialog */}
         <Dialog open={cyberSourceDialogOpen} onOpenChange={setCyberSourceDialogOpen}>
           <DialogContent className="sm:max-w-[425px]">
             <DialogHeader>
