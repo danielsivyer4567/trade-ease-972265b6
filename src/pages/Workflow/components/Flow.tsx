@@ -8,7 +8,8 @@ import {
   addEdge,
   useNodesState,
   useEdgesState,
-  Panel
+  Panel,
+  BackgroundVariant
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { TaskNode } from './nodes/TaskNode';
@@ -116,7 +117,7 @@ export function Flow({ onInit }) {
     >
       <Controls />
       <MiniMap />
-      <Background variant="dots" gap={12} size={1} />
+      <Background variant="lines" gap={12} size={1} />
       <Panel position="top-right">
         <div className="bg-white p-2 rounded shadow-md text-xs">
           Drag nodes from the sidebar to create your workflow
