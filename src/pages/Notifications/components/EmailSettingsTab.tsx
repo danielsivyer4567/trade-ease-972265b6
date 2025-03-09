@@ -5,7 +5,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Mail } from "lucide-react";
+import { Mail, Loader2 } from "lucide-react";
 
 interface EmailSettingsTabProps {
   emailNotificationsEnabled: boolean;
@@ -13,6 +13,7 @@ interface EmailSettingsTabProps {
   forwardingEmail: string;
   setForwardingEmail: (email: string) => void;
   saveEmailSettings: () => void;
+  isLoading?: boolean;
 }
 
 export const EmailSettingsTab = ({
@@ -21,6 +22,7 @@ export const EmailSettingsTab = ({
   forwardingEmail,
   setForwardingEmail,
   saveEmailSettings,
+  isLoading = false,
 }: EmailSettingsTabProps) => {
   return (
     <Card className="p-6">
@@ -32,35 +34,46 @@ export const EmailSettingsTab = ({
       <div className="space-y-4">
         <div className="flex items-center gap-2">
           <Checkbox 
-            id="email-notifications-enabled" 
+            id="email-notifications" 
             checked={emailNotificationsEnabled}
             onCheckedChange={(checked) => setEmailNotificationsEnabled(checked as boolean)}
             className="h-3 w-3"
+            disabled={isLoading}
           />
-          <Label htmlFor="email-notifications-enabled">Enable email notifications</Label>
+          <Label htmlFor="email-notifications">
+            Enable email notifications
+          </Label>
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="forwarding-email">Forward notifications to email</Label>
+          <Label htmlFor="email-forwarding">Forward notifications to email</Label>
           <Input 
-            id="forwarding-email" 
+            id="email-forwarding" 
             type="email" 
             placeholder="your@tradeease.com.au" 
             value={forwardingEmail}
             onChange={(e) => setForwardingEmail(e.target.value)}
             className="h-7 text-sm"
+            disabled={isLoading || !emailNotificationsEnabled}
           />
           <p className="text-sm text-gray-500">
-            All system notifications will be forwarded to this email address
+            Important notifications will be sent to this email address
           </p>
         </div>
         
         <Button 
           onClick={saveEmailSettings}
-          disabled={emailNotificationsEnabled && (!forwardingEmail || !/^\S+@\S+\.\S+$/.test(forwardingEmail))}
-          className="h-7 text-xs py-0"
+          disabled={isLoading || (emailNotificationsEnabled && (!forwardingEmail || !/^\S+@\S+\.\S+$/.test(forwardingEmail)))}
+          className="h-7 text-xs py-0 mt-4"
         >
-          Save Email Settings
+          {isLoading ? (
+            <>
+              <Loader2 className="h-3 w-3 animate-spin mr-1" />
+              Saving...
+            </>
+          ) : (
+            'Save Email Settings'
+          )}
         </Button>
       </div>
     </Card>

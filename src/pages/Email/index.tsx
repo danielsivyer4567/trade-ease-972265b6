@@ -8,29 +8,18 @@ import { Textarea } from "@/components/ui/textarea";
 import { Mail, Globe, Copy, CheckCircle, Clipboard, ArrowLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+
 export default function Email() {
-  const {
-    toast
-  } = useToast();
+  const { toast } = useToast();
   const navigate = useNavigate();
   const [forwardingEmail, setForwardingEmail] = useState("");
-  const [formFields, setFormFields] = useState([{
-    id: "name",
-    label: "Name",
-    required: true
-  }, {
-    id: "email",
-    label: "Email",
-    required: true
-  }, {
-    id: "phone",
-    label: "Phone",
-    required: false
-  }, {
-    id: "message",
-    label: "Message",
-    required: true
-  }]);
+  const [formFields, setFormFields] = useState([
+    { id: "name", label: "Name", required: true },
+    { id: "email", label: "Email", required: true },
+    { id: "phone", label: "Phone", required: false },
+    { id: "message", label: "Message", required: true }
+  ]);
   const [formStyleOptions, setFormStyleOptions] = useState({
     primaryColor: "#3b82f6",
     formWidth: "600px",
@@ -38,6 +27,8 @@ export default function Email() {
   });
   const [copiedCode, setCopiedCode] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const handleAddField = () => {
     const newId = `field_${formFields.length + 1}`;
     setFormFields([...formFields, {
@@ -46,20 +37,19 @@ export default function Email() {
       required: false
     }]);
   };
-  const handleUpdateField = (index: number, field: {
-    id: string;
-    label: string;
-    required: boolean;
-  }) => {
+
+  const handleUpdateField = (index, field) => {
     const updatedFields = [...formFields];
     updatedFields[index] = field;
     setFormFields(updatedFields);
   };
-  const handleRemoveField = (index: number) => {
+
+  const handleRemoveField = (index) => {
     const updatedFields = [...formFields];
     updatedFields.splice(index, 1);
     setFormFields(updatedFields);
   };
+
   const generateFormCode = () => {
     const formId = "trade-ease-enquiry-form";
     return `
@@ -68,7 +58,9 @@ export default function Email() {
   ${formFields.map(field => `
   <div style="margin-bottom: 15px;">
     <label for="${field.id}" style="display: block; margin-bottom: 5px; font-weight: 600;">${field.label}${field.required ? ' *' : ''}</label>
-    ${field.id === "message" ? `<textarea id="${field.id}" name="${field.id}" rows="4" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;" ${field.required ? 'required' : ''}></textarea>` : `<input type="${field.id === "email" ? "email" : field.id === "phone" ? "tel" : "text"}" id="${field.id}" name="${field.id}" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;" ${field.required ? 'required' : ''}>`}
+    ${field.id === "message" ? 
+      `<textarea id="${field.id}" name="${field.id}" rows="4" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;" ${field.required ? 'required' : ''}></textarea>` : 
+      `<input type="${field.id === "email" ? "email" : field.id === "phone" ? "tel" : "text"}" id="${field.id}" name="${field.id}" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;" ${field.required ? 'required' : ''}>`}
   </div>`).join('')}
   <button type="submit" style="background-color: ${formStyleOptions.primaryColor}; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-weight: 500;">${formStyleOptions.buttonText}</button>
 </form>
@@ -81,18 +73,24 @@ export default function Email() {
       data[key] = value;
     });
     
-    // Replace this URL with your actual endpoint
-    fetch("https://api.trade-ease.com/enquiry", {
+    fetch("https://wxwbxupdisbofesaygqj.supabase.co/functions/v1/web-enquiry-submit", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(data)
+      body: JSON.stringify({
+        formData: data,
+        targetEmail: "${forwardingEmail}"
+      })
     })
     .then(response => response.json())
     .then(data => {
-      alert("Thank you for your enquiry! We will get back to you shortly.");
-      document.getElementById("${formId}").reset();
+      if(data.success) {
+        alert("Thank you for your enquiry! We will get back to you shortly.");
+        document.getElementById("${formId}").reset();
+      } else {
+        alert("There was an error submitting your enquiry. Please try again later.");
+      }
     })
     .catch(error => {
       console.error("Error:", error);
@@ -103,10 +101,12 @@ export default function Email() {
 <!-- End Trade Ease Enquiry Form -->
 `;
   };
+
   const getFormLink = () => {
     return "https://trade-ease.com/enquiry-form/12345";
   };
-  const copyToClipboard = (text: string, type: 'code' | 'link') => {
+
+  const copyToClipboard = (text, type) => {
     navigator.clipboard.writeText(text).then(() => {
       if (type === 'code') {
         setCopiedCode(true);
@@ -127,7 +127,38 @@ export default function Email() {
       });
     });
   };
-  return <AppLayout>
+
+  const handleSaveForwardingEmail = async () => {
+    setIsSubmitting(true);
+    try {
+      // Save email forwarding preference
+      const { error } = await supabase
+        .from('user_settings')
+        .upsert({
+          setting_name: 'web_enquiry_forwarding_email',
+          setting_value: forwardingEmail
+        });
+
+      if (error) throw error;
+
+      toast({
+        title: "Forwarding email updated",
+        description: `Enquiries will now be sent to ${forwardingEmail}`
+      });
+    } catch (error) {
+      console.error('Error saving forwarding email:', error);
+      toast({
+        title: "Failed to update settings",
+        description: "Please try again later",
+        variant: "destructive"
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <AppLayout>
       <div className="p-6 space-y-8">
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm" onClick={() => navigate(-1)} className="rounded-md border border-gray-300 px-3 py-1 bg-[#D3E4FD] hover:bg-[#B5D1F8] text-[#1E40AF] hover:text-[#1E3A8A]">
@@ -156,13 +187,11 @@ export default function Email() {
               </div>
               
               <div className="pt-2">
-                <Button onClick={() => {
-                toast({
-                  title: "Forwarding email updated",
-                  description: `Enquiries will now be sent to ${forwardingEmail}`
-                });
-              }} disabled={!forwardingEmail || !/^\S+@\S+\.\S+$/.test(forwardingEmail)}>
-                  Save Forwarding Settings
+                <Button 
+                  onClick={handleSaveForwardingEmail} 
+                  disabled={!forwardingEmail || !/^\S+@\S+\.\S+$/.test(forwardingEmail) || isSubmitting}
+                >
+                  {isSubmitting ? 'Saving...' : 'Save Forwarding Settings'}
                 </Button>
               </div>
             </CardContent>
@@ -219,22 +248,24 @@ export default function Email() {
                 </div>
                 
                 <div className="space-y-3 mt-2">
-                  {formFields.map((field, index) => <div key={index} className="flex items-center gap-2">
+                  {formFields.map((field, index) => (
+                    <div key={index} className="flex items-center gap-2">
                       <Input value={field.label} onChange={e => handleUpdateField(index, {
-                    ...field,
-                    label: e.target.value
-                  })} className="flex-1" />
+                        ...field,
+                        label: e.target.value
+                      })} className="flex-1" />
                       <div className="flex items-center whitespace-nowrap">
                         <input type="checkbox" id={`required-${index}`} checked={field.required} onChange={e => handleUpdateField(index, {
-                      ...field,
-                      required: e.target.checked
-                    })} className="mr-1" />
+                          ...field,
+                          required: e.target.checked
+                        })} className="mr-1" />
                         <Label htmlFor={`required-${index}`} className="text-sm">Required</Label>
                       </div>
                       <Button variant="destructive" size="sm" onClick={() => handleRemoveField(index)} disabled={formFields.length <= 1}>
                         Remove
                       </Button>
-                    </div>)}
+                    </div>
+                  ))}
                 </div>
               </div>
             </CardContent>
@@ -254,13 +285,17 @@ export default function Email() {
               <div className="flex justify-between items-center">
                 <Label htmlFor="form-code">HTML Code</Label>
                 <Button variant="ghost" size="sm" onClick={() => copyToClipboard(generateFormCode(), 'code')} className="flex items-center gap-1 text-neutral-50 bg-slate-400 hover:bg-slate-300 px-[17px] mx-[4px] py-0 my-[14px]">
-                  {copiedCode ? <>
+                  {copiedCode ? (
+                    <>
                       <CheckCircle className="w-4 h-4" />
                       <span>Copied!</span>
-                    </> : <>
+                    </>
+                  ) : (
+                    <>
                       <Copy className="w-4 h-4" />
                       <span>Copy Code</span>
-                    </>}
+                    </>
+                  )}
                 </Button>
               </div>
               <Textarea id="form-code" value={generateFormCode()} readOnly className="font-mono text-sm h-64" />
@@ -270,13 +305,17 @@ export default function Email() {
               <div className="flex justify-between items-center">
                 <Label htmlFor="form-link">Direct Form Link</Label>
                 <Button variant="ghost" size="sm" onClick={() => copyToClipboard(getFormLink(), 'link')} className="flex items-center gap-1">
-                  {copiedLink ? <>
+                  {copiedLink ? (
+                    <>
                       <CheckCircle className="w-4 h-4" />
                       <span>Copied!</span>
-                    </> : <>
+                    </>
+                  ) : (
+                    <>
                       <Clipboard className="w-4 h-4" />
                       <span>Copy Link</span>
-                    </>}
+                    </>
+                  )}
                 </Button>
               </div>
               <div className="flex items-center">
@@ -289,5 +328,6 @@ export default function Email() {
           </CardContent>
         </Card>
       </div>
-    </AppLayout>;
+    </AppLayout>
+  );
 }

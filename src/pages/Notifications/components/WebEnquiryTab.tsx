@@ -5,7 +5,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Globe, MessageSquare } from "lucide-react";
+import { Globe, MessageSquare, Loader2 } from "lucide-react";
 
 interface WebEnquiryTabProps {
   webEnquiryNotifications: boolean;
@@ -13,6 +13,7 @@ interface WebEnquiryTabProps {
   enquiryEmail: string;
   setEnquiryEmail: (email: string) => void;
   saveWebEnquirySettings: () => void;
+  isLoading?: boolean;
 }
 
 export const WebEnquiryTab = ({
@@ -21,6 +22,7 @@ export const WebEnquiryTab = ({
   enquiryEmail,
   setEnquiryEmail,
   saveWebEnquirySettings,
+  isLoading = false,
 }: WebEnquiryTabProps) => {
   return (
     <Card className="p-6">
@@ -36,6 +38,7 @@ export const WebEnquiryTab = ({
             checked={webEnquiryNotifications}
             onCheckedChange={(checked) => setWebEnquiryNotifications(checked as boolean)}
             className="h-3 w-3"
+            disabled={isLoading}
           />
           <Label htmlFor="web-enquiry-notifications">
             Receive notifications for web enquiry form submissions
@@ -51,6 +54,7 @@ export const WebEnquiryTab = ({
             value={enquiryEmail}
             onChange={(e) => setEnquiryEmail(e.target.value)}
             className="h-7 text-sm"
+            disabled={isLoading}
           />
           <p className="text-sm text-gray-500">
             Web enquiry form submissions will create notifications and be sent to this email
@@ -66,6 +70,7 @@ export const WebEnquiryTab = ({
             variant="outline"
             onClick={() => window.location.href = "/email"}
             className="h-7 text-xs py-0"
+            disabled={isLoading}
           >
             Configure Web Enquiry Form
           </Button>
@@ -73,10 +78,17 @@ export const WebEnquiryTab = ({
 
         <Button 
           onClick={saveWebEnquirySettings}
-          disabled={webEnquiryNotifications && (!enquiryEmail || !/^\S+@\S+\.\S+$/.test(enquiryEmail))}
+          disabled={isLoading || (webEnquiryNotifications && (!enquiryEmail || !/^\S+@\S+\.\S+$/.test(enquiryEmail)))}
           className="h-7 text-xs py-0 mt-4"
         >
-          Save Web Enquiry Settings
+          {isLoading ? (
+            <>
+              <Loader2 className="h-3 w-3 animate-spin mr-1" />
+              Saving...
+            </>
+          ) : (
+            'Save Web Enquiry Settings'
+          )}
         </Button>
       </div>
     </Card>
