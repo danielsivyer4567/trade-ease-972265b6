@@ -1,5 +1,5 @@
 import { AppLayout } from "@/components/ui/AppLayout";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -28,6 +28,31 @@ export default function Email() {
   const [copiedCode, setCopiedCode] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    const loadForwardingEmail = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('user_automations')
+          .select('*')
+          .eq('automation_type', 'web_enquiry_notifications')
+          .single();
+        
+        if (error && error.code !== 'PGRST116') {
+          console.error('Error loading forwarding email:', error);
+          return;
+        }
+        
+        if (data && data.settings && data.settings.email) {
+          setForwardingEmail(data.settings.email);
+        }
+      } catch (error) {
+        console.error('Error:', error);
+      }
+    };
+    
+    loadForwardingEmail();
+  }, []);
 
   const handleAddField = () => {
     const newId = `field_${formFields.length + 1}`;
@@ -131,12 +156,14 @@ export default function Email() {
   const handleSaveForwardingEmail = async () => {
     setIsSubmitting(true);
     try {
-      // Save email forwarding preference
       const { error } = await supabase
-        .from('user_settings')
+        .from('user_automations')
         .upsert({
-          setting_name: 'web_enquiry_forwarding_email',
-          setting_value: forwardingEmail
+          automation_type: 'web_enquiry_notifications',
+          settings: {
+            enabled: true,
+            email: forwardingEmail
+          }
         });
 
       if (error) throw error;
@@ -169,7 +196,6 @@ export default function Email() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Email Forwarding Setup */}
           <Card className="bg-slate-200">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -197,7 +223,6 @@ export default function Email() {
             </CardContent>
           </Card>
 
-          {/* Web Enquiry Form Setup */}
           <Card>
             <CardHeader className="bg-slate-200">
               <CardTitle className="flex items-center gap-2">
@@ -272,7 +297,6 @@ export default function Email() {
           </Card>
         </div>
 
-        {/* Form Preview & Export */}
         <Card className="mt-8">
           <CardHeader className="bg-slate-200">
             <CardTitle>Get Your Enquiry Form</CardTitle>

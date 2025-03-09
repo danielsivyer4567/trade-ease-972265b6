@@ -43,27 +43,29 @@ export const useNotifications = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    // Load user settings from database
+    // Load user settings from user automations table
     const loadSettings = async () => {
       setIsLoading(true);
       try {
         const { data, error } = await supabase
-          .from('user_settings')
+          .from('user_automations')
           .select('*')
-          .in('setting_name', ['web_enquiry_notifications_enabled', 'web_enquiry_email', 'email_notifications_enabled', 'email_forwarding']);
+          .in('automation_type', ['web_enquiry_notifications', 'email_notifications']);
         
         if (error) throw error;
         
-        if (data) {
-          data.forEach(setting => {
-            if (setting.setting_name === 'web_enquiry_notifications_enabled') {
-              setWebEnquiryNotifications(setting.setting_value === 'true');
-            } else if (setting.setting_name === 'web_enquiry_email') {
-              setEnquiryEmail(setting.setting_value);
-            } else if (setting.setting_name === 'email_notifications_enabled') {
-              setEmailNotificationsEnabled(setting.setting_value === 'true');
-            } else if (setting.setting_name === 'email_forwarding') {
-              setForwardingEmail(setting.setting_value);
+        if (data && data.length > 0) {
+          data.forEach(automation => {
+            if (automation.automation_type === 'web_enquiry_notifications') {
+              if (automation.settings) {
+                setWebEnquiryNotifications(automation.settings.enabled || false);
+                setEnquiryEmail(automation.settings.email || '');
+              }
+            } else if (automation.automation_type === 'email_notifications') {
+              if (automation.settings) {
+                setEmailNotificationsEnabled(automation.settings.enabled || false);
+                setForwardingEmail(automation.settings.email || '');
+              }
             }
           });
         }
@@ -100,25 +102,18 @@ export const useNotifications = () => {
   const saveEmailSettings = async () => {
     setIsLoading(true);
     try {
-      // Update email notifications settings
-      const { error: error1 } = await supabase
-        .from('user_settings')
+      // Update email notifications settings in user_automations table
+      const { error } = await supabase
+        .from('user_automations')
         .upsert({
-          setting_name: 'email_notifications_enabled',
-          setting_value: emailNotificationsEnabled.toString()
+          automation_type: 'email_notifications',
+          settings: {
+            enabled: emailNotificationsEnabled,
+            email: forwardingEmail
+          }
         });
 
-      if (error1) throw error1;
-
-      // Update email forwarding
-      const { error: error2 } = await supabase
-        .from('user_settings')
-        .upsert({
-          setting_name: 'email_forwarding',
-          setting_value: forwardingEmail
-        });
-
-      if (error2) throw error2;
+      if (error) throw error;
 
       toast({
         title: "Email notification settings saved",
@@ -139,25 +134,18 @@ export const useNotifications = () => {
   const saveWebEnquirySettings = async () => {
     setIsLoading(true);
     try {
-      // Update web enquiry notifications enabled setting
-      const { error: error1 } = await supabase
-        .from('user_settings')
+      // Update web enquiry notifications in user_automations table
+      const { error } = await supabase
+        .from('user_automations')
         .upsert({
-          setting_name: 'web_enquiry_notifications_enabled',
-          setting_value: webEnquiryNotifications.toString()
+          automation_type: 'web_enquiry_notifications',
+          settings: {
+            enabled: webEnquiryNotifications,
+            email: enquiryEmail
+          }
         });
 
-      if (error1) throw error1;
-
-      // Update web enquiry email
-      const { error: error2 } = await supabase
-        .from('user_settings')
-        .upsert({
-          setting_name: 'web_enquiry_email',
-          setting_value: enquiryEmail
-        });
-
-      if (error2) throw error2;
+      if (error) throw error;
 
       toast({
         title: "Web enquiry notification settings saved",
