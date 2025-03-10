@@ -106,12 +106,12 @@ export const TwilioConnectButton = () => {
       }
     }} className="w-full">
         <TabsList className="grid w-full grid-cols-2 mb-4">
-          <TabsTrigger value="connect">Connect </TabsTrigger>
-          <TabsTrigger value="buy">Buy Phone Numbers</TabsTrigger>
+          <TabsTrigger value="connect" className="text-gray-950 bg-slate-400 hover:bg-slate-300 mx-[14px]">Connect </TabsTrigger>
+          <TabsTrigger value="buy" className="bg-slate-400 hover:bg-slate-300">Buy Phone Numbers</TabsTrigger>
         </TabsList>
         
         <TabsContent value="connect" className="w-full">
-          <p className="text-sm text-gray-700 mb-4">Connect with phone integration</p>
+          <p className="mb-4 text-gray-950 text-lg text-center">Connect with phone integration</p>
           <style type="text/css">
             {`.twilio-connect-button { display: flex; justify-content: center; align-items: center; background: #F22F46; width: 180px; height: 36px; padding-right: 5px; color: white; border: none; border-radius: 4px; text-decoration: none; font-size: 14px; font-weight: 600; line-height: 20px; }
             .icon { margin-top: 4px; width: 40px; }`}
@@ -119,9 +119,7 @@ export const TwilioConnectButton = () => {
           
           
           <div className="flex flex-col items-center mt-3">
-            <p className="text-xs text-gray-500 mb-2">
-              Securely authorize your Twilio account without sharing credentials
-            </p>
+            <p className="mb-2 text-gray-950 text-base font-medium">Securely authorize your account without sharing credentials</p>
             
             <Button variant="outline" size="sm" onClick={handleOrderNumber} className="mt-2 text-sm bg-slate-400 hover:bg-slate-300">Browse &amp; Order Phone Numbers</Button>
           </div>
