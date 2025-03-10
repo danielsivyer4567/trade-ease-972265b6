@@ -4,22 +4,18 @@ import { supabase } from "@/integrations/supabase/client";
 export interface EmailOptions {
   to: string;
   subject: string;
-  htmlContent?: string;
-  textContent?: string;
-  templateId?: number;
-  params?: Record<string, any>;
-  sender?: {
-    name?: string;
-    email?: string;
-  };
+  html?: string;
+  text?: string;
+  from?: string;
+  templateVariables?: Record<string, any>;
 }
 
 /**
- * Sends an email using the Brevo service via Supabase Edge Function
+ * Sends an email using the Mailgun service via Supabase Edge Function
  */
 export const sendEmail = async (options: EmailOptions): Promise<{ success: boolean; error?: string }> => {
   try {
-    const { data, error } = await supabase.functions.invoke('brevo-email-sender', {
+    const { data, error } = await supabase.functions.invoke('mailgun-email-sender', {
       body: options
     });
 
@@ -42,7 +38,7 @@ export const sendVerificationEmail = async (email: string, verificationLink: str
   return sendEmail({
     to: email,
     subject: "Verify your Trade Ease account",
-    htmlContent: `
+    html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <h1 style="color: #333; text-align: center;">Welcome to Trade Ease!</h1>
         <p>Thank you for signing up. To complete your registration, please verify your email address by clicking the button below:</p>
@@ -68,7 +64,7 @@ export const sendWelcomeEmail = async (email: string, name?: string): Promise<{ 
   return sendEmail({
     to: email,
     subject: "Welcome to Trade Ease!",
-    htmlContent: `
+    html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <h1 style="color: #333; text-align: center;">Welcome to Trade Ease!</h1>
         <p>Hello ${name || 'there'},</p>
@@ -99,7 +95,7 @@ export const sendPasswordResetEmail = async (email: string, resetLink: string): 
   return sendEmail({
     to: email,
     subject: "Reset your Trade Ease password",
-    htmlContent: `
+    html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <h1 style="color: #333; text-align: center;">Reset Your Password</h1>
         <p>We received a request to reset your password for your Trade Ease account. Click the button below to set a new password:</p>

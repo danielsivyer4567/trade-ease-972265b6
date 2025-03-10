@@ -33,3 +33,6 @@ verify_jwt = false
 
 [functions.brevo-email-sender]
 verify_jwt = false
+
+[functions.mailgun-email-sender]
+verify_jwt = false
