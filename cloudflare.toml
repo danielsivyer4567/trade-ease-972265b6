@@ -6,6 +6,8 @@
 
 [build.environment]
   NODE_VERSION = "18"
+  NPM_FLAGS = "--no-package-lock"
+  BUN_ENABLED = "false"
 
 [build.processing]
   skip_on_error = false
