@@ -1,4 +1,3 @@
-
 import { AppLayout } from "@/components/ui/AppLayout";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
@@ -134,7 +133,7 @@ export default function Email() {
   };
 
   const getFormLink = () => {
-    return "https://trade-ease.com/enquiry-form/12345";
+    return "https://tradeease.app/enquiry-form";
   };
 
   const copyToClipboard = (text, type) => {

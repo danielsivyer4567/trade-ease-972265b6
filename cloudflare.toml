@@ -25,3 +25,8 @@
 
 [build.processing.images]
   compress = true
+
+# Custom domain configuration
+[routes]
+  pattern = "tradeease.app/*"
+  zone_name = "tradeease.app"
