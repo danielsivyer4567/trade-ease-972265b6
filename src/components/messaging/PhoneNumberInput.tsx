@@ -20,7 +20,17 @@ export const PhoneNumberInput = ({
 }: PhoneNumberInputProps) => {
   return (
     <div className="space-y-2">
-      <Label htmlFor="phone">Phone Number</Label>
+      <div className="flex justify-between">
+        <Label htmlFor="phone">Phone Number</Label>
+        <a 
+          href="https://preview.twilio.com/AvailableNumbers" 
+          target="_blank" 
+          rel="noopener noreferrer"
+          className="text-xs text-blue-600 hover:text-blue-800"
+        >
+          Find available Twilio numbers
+        </a>
+      </div>
       <div className="flex gap-4">
         <Input 
           id="phone" 
