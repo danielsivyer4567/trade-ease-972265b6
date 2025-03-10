@@ -2,7 +2,7 @@
 # Netlify configuration file
 [build]
   # The command to build your site
-  command = "npm install && npm run build"
+  command = "npm install && npm install terser && npm run build"
   
   # Directory to publish (output of the build)
   publish = "dist"

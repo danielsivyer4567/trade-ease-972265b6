@@ -20,7 +20,7 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
-  // Optimize for Cloudflare Pages deployment
+  // Optimize for Netlify deployment
   build: {
     target: 'es2020',
     assetsInlineLimit: 4096,
