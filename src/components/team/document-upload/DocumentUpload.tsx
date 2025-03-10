@@ -85,6 +85,14 @@ export function DocumentUpload({
     }
   };
   
+  const handleDeleteFile = (type: 'insurance' | 'general' | 'jobRelated', index: number) => {
+    setUploadedFiles(prev => ({
+      ...prev,
+      [type]: prev[type].filter((_, i) => i !== index)
+    }));
+    toast.success("File removed successfully");
+  };
+  
   const handleSubmitFiles = (type: 'insurance' | 'general' | 'jobRelated') => {
     setIsSubmitting(true);
 
@@ -209,7 +217,8 @@ export function DocumentUpload({
             isDragging={isDragging} 
             handleDragOver={handleDragOver} 
             handleDragLeave={handleDragLeave} 
-            handleDrop={handleDrop} 
+            handleDrop={handleDrop}
+            handleDeleteFile={(index) => handleDeleteFile('general', index)}
           />
         </TabsContent>
 
@@ -226,7 +235,8 @@ export function DocumentUpload({
             isDragging={isDragging} 
             handleDragOver={handleDragOver} 
             handleDragLeave={handleDragLeave} 
-            handleDrop={handleDrop} 
+            handleDrop={handleDrop}
+            handleDeleteFile={(index) => handleDeleteFile('insurance', index)}
           />
         </TabsContent>
 
@@ -248,6 +258,7 @@ export function DocumentUpload({
             handleDrop={handleDrop}
             extractedText={extractedText}
             setExtractedText={setExtractedText}
+            handleDeleteFile={(index) => handleDeleteFile('jobRelated', index)}
           />
         </TabsContent>
       </Tabs>

@@ -16,7 +16,8 @@ export function InsuranceDocumentUpload({
   isDragging,
   handleDragOver,
   handleDragLeave,
-  handleDrop
+  handleDrop,
+  handleDeleteFile
 }: UploadSectionProps) {
   return (
     <div 
@@ -44,6 +45,7 @@ export function InsuranceDocumentUpload({
         files={uploadedFiles}
         onSubmit={() => handleSubmitFiles(type)}
         isSubmitting={isSubmitting}
+        onDeleteFile={handleDeleteFile}
       />
       <p className="text-xs text-gray-500 mt-2">
         Supported formats: PDF, DOC, DOCX. Max file size: 100MB

@@ -23,10 +23,12 @@ export function JobRelatedDocumentUpload({
   handleDragLeave,
   handleDrop,
   extractedText,
-  setExtractedText
+  setExtractedText,
+  handleDeleteFile
 }: UploadSectionProps & {
   extractedText?: string;
   setExtractedText?: (text: string) => void;
+  handleDeleteFile?: (index: number) => void;
 }) {
   const handleTextExtracted = (text: string, filename: string) => {
     if (setExtractedText) {
@@ -86,6 +88,7 @@ export function JobRelatedDocumentUpload({
           onSubmit={() => handleSubmitFiles(type)}
           isSubmitting={isSubmitting}
           disabled={!jobNumber}
+          onDeleteFile={handleDeleteFile}
         />
         <p className="text-xs text-gray-500 mt-2">
           Supported formats: PDF, DOC, DOCX, JPG, JPEG, PNG, MP4, MOV. Max file size: 100MB

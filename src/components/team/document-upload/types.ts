@@ -1,6 +1,4 @@
 
-import { FileWithPreview } from '@/components/tasks/types';
-
 export interface TeamMember {
   id: string;
   name: string;
@@ -32,4 +30,13 @@ export interface UploadSectionProps {
   handleDrop: (e: React.DragEvent<HTMLDivElement>, type: 'insurance' | 'general' | 'jobRelated') => void;
   extractedText?: string;
   setExtractedText?: (text: string) => void;
+  handleDeleteFile?: (index: number) => void;
+}
+
+export interface UploadedFileListProps {
+  files: File[];
+  onSubmit: () => void;
+  isSubmitting: boolean;
+  disabled?: boolean;
+  onDeleteFile?: (index: number) => void;
 }
