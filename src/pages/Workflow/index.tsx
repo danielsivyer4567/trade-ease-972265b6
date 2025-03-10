@@ -23,14 +23,14 @@ import {
 export default function WorkflowPage() {
   const navigate = useNavigate();
   const [flowInstance, setFlowInstance] = useState(null);
-  const [apiKeyDialogOpen, setApiKeyDialogOpen] = useState(false);
-  const [apiKey, setApiKey] = useState('');
+  const [gcpVisionKeyDialogOpen, setGcpVisionKeyDialogOpen] = useState(false);
+  const [gcpVisionKey, setGcpVisionKey] = useState('');
 
   useEffect(() => {
-    // Load API key from localStorage on component mount
-    const savedApiKey = localStorage.getItem('workflow-ai-api-key');
-    if (savedApiKey) {
-      setApiKey(savedApiKey);
+    // Load GCP Vision API key from localStorage on component mount
+    const savedGcpVisionKey = localStorage.getItem('gcp-vision-api-key');
+    if (savedGcpVisionKey) {
+      setGcpVisionKey(savedGcpVisionKey);
     }
   }, []);
 
@@ -42,22 +42,22 @@ export default function WorkflowPage() {
     toast.success('Workflow saved successfully!');
   }, [flowInstance]);
 
-  const handleSaveApiKey = useCallback(() => {
-    if (!apiKey.trim()) {
-      toast.error('Please enter a valid API key');
+  const handleSaveGcpVisionKey = useCallback(() => {
+    if (!gcpVisionKey.trim()) {
+      toast.error('Please enter a valid Google Cloud Vision API key');
       return;
     }
     
-    // Save API key to localStorage
-    localStorage.setItem('workflow-ai-api-key', apiKey);
-    toast.success('API key saved successfully!');
-    setApiKeyDialogOpen(false);
-  }, [apiKey]);
+    // Save GCP Vision API key to localStorage
+    localStorage.setItem('gcp-vision-api-key', gcpVisionKey);
+    toast.success('Google Cloud Vision API key saved successfully!');
+    setGcpVisionKeyDialogOpen(false);
+  }, [gcpVisionKey]);
 
-  const handleClearApiKey = useCallback(() => {
-    setApiKey('');
-    localStorage.removeItem('workflow-ai-api-key');
-    toast.info('API key cleared');
+  const handleClearGcpVisionKey = useCallback(() => {
+    setGcpVisionKey('');
+    localStorage.removeItem('gcp-vision-api-key');
+    toast.info('Google Cloud Vision API key cleared');
   }, []);
 
   return (
@@ -71,37 +71,37 @@ export default function WorkflowPage() {
             <h1 className="text-2xl font-bold">Workflow Builder</h1>
           </div>
           <div className="flex items-center gap-2">
-            <Dialog open={apiKeyDialogOpen} onOpenChange={setApiKeyDialogOpen}>
+            <Dialog open={gcpVisionKeyDialogOpen} onOpenChange={setGcpVisionKeyDialogOpen}>
               <DialogTrigger asChild>
                 <Button variant="outline" className="flex items-center gap-2">
-                  <Key className="h-4 w-4" /> Configure API Key
+                  <Key className="h-4 w-4" /> Configure GCP Vision API Key
                 </Button>
               </DialogTrigger>
               <DialogContent className="sm:max-w-[425px]">
                 <DialogHeader>
-                  <DialogTitle>AI API Key Configuration</DialogTitle>
+                  <DialogTitle>Google Cloud Vision API Configuration</DialogTitle>
                   <DialogDescription>
-                    Enter your AI service API key to enable AI features in the workflow.
+                    Enter your Google Cloud Vision API key to enable document text extraction and image analysis.
                   </DialogDescription>
                 </DialogHeader>
                 <div className="grid gap-4 py-4">
                   <div className="grid grid-cols-4 items-center gap-4">
-                    <Label htmlFor="api-key" className="text-right">
-                      API Key
+                    <Label htmlFor="gcp-vision-key" className="text-right">
+                      GCP Vision Key
                     </Label>
                     <Input
-                      id="api-key"
+                      id="gcp-vision-key"
                       type="password"
-                      value={apiKey}
-                      onChange={(e) => setApiKey(e.target.value)}
-                      placeholder="Enter your API key"
+                      value={gcpVisionKey}
+                      onChange={(e) => setGcpVisionKey(e.target.value)}
+                      placeholder="Enter your Google Cloud Vision API key"
                       className="col-span-3"
                     />
                   </div>
                 </div>
                 <DialogFooter>
-                  <Button variant="outline" onClick={handleClearApiKey}>Clear</Button>
-                  <Button onClick={handleSaveApiKey}>Save Key</Button>
+                  <Button variant="outline" onClick={handleClearGcpVisionKey}>Clear</Button>
+                  <Button onClick={handleSaveGcpVisionKey}>Save Key</Button>
                 </DialogFooter>
               </DialogContent>
             </Dialog>
@@ -118,17 +118,17 @@ export default function WorkflowPage() {
           </div>
         </div>
 
-        {apiKey && (
+        {gcpVisionKey && (
           <Card className="mt-4">
             <CardHeader className="py-2">
               <CardTitle className="text-sm flex items-center gap-2">
                 <Key className="h-4 w-4 text-green-500" />
-                AI Configuration Status
+                Google Cloud Vision API Status
               </CardTitle>
             </CardHeader>
             <CardContent className="py-2">
               <p className="text-sm text-green-600">
-                AI API key is configured and ready to use
+                Google Cloud Vision API key is configured and ready to use
               </p>
             </CardContent>
           </Card>
