@@ -35,6 +35,15 @@ export default defineConfig(({ mode }) => ({
       output: {
         manualChunks: {
           vendor: ['react', 'react-dom', 'react-router-dom'],
+          ui: [
+            '@radix-ui/react-dialog',
+            '@radix-ui/react-label',
+            '@radix-ui/react-switch',
+            'lucide-react',
+            'class-variance-authority',
+            'clsx',
+            'tailwind-merge'
+          ],
         },
       },
     },
