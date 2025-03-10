@@ -6,6 +6,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Link } from "react-router-dom";
+import { useState } from "react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useToast } from "@/components/ui/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { useUserConfig } from "@/components/messaging/hooks/useUserConfig";
 
 // Example data - would come from an API in a real app
 const staffMembers = [
@@ -16,6 +22,73 @@ const staffMembers = [
 ];
 
 export default function OfficeStaff() {
+  const { toast } = useToast();
+  const { userConfig } = useUserConfig();
+  const [isInviteDialogOpen, setIsInviteDialogOpen] = useState(false);
+  const [inviteEmail, setInviteEmail] = useState("");
+  const [inviteRole, setInviteRole] = useState("staff");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleInvite = async (e) => {
+    e.preventDefault();
+    if (!inviteEmail) {
+      toast({
+        title: "Email required",
+        description: "Please enter an email address to send the invitation.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      // Get current user's organization
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        throw new Error("You must be logged in to invite team members");
+      }
+
+      if (!userConfig?.organization_id) {
+        throw new Error("You must be part of an organization to invite members");
+      }
+
+      // Send the invitation using the edge function
+      const response = await supabase.functions.invoke('organization-invite', {
+        body: {
+          organizationId: userConfig.organization_id,
+          email: inviteEmail,
+          role: inviteRole,
+          inviterEmail: session.user.email
+        }
+      });
+
+      if (response.error) throw new Error(response.error.message);
+      
+      const result = response.data;
+      
+      if (result.success) {
+        toast({
+          title: "Invitation sent!",
+          description: `An invitation has been sent to ${inviteEmail}`
+        });
+        setInviteEmail("");
+        setIsInviteDialogOpen(false);
+      } else {
+        throw new Error(result.message || "Failed to send invitation");
+      }
+    } catch (error) {
+      console.error("Error sending invitation:", error);
+      toast({
+        title: "Invitation failed",
+        description: error.message,
+        variant: "destructive"
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <AppLayout>
       <div className="p-6 space-y-6">
@@ -35,7 +108,10 @@ export default function OfficeStaff() {
               <h1 className="text-2xl font-bold">Office Staff</h1>
             </div>
           </div>
-          <Button className="flex items-center gap-1">
+          <Button 
+            className="flex items-center gap-1"
+            onClick={() => setIsInviteDialogOpen(true)}
+          >
             <Plus className="h-4 w-4" />
             <span>Add Staff Member</span>
           </Button>
@@ -85,6 +161,77 @@ export default function OfficeStaff() {
           ))}
         </div>
       </div>
+
+      {/* Team Invitation Dialog */}
+      <Dialog open={isInviteDialogOpen} onOpenChange={setIsInviteDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Invite Team Member</DialogTitle>
+            <DialogDescription>
+              Send an invitation to join your organization.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <form onSubmit={handleInvite} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="email">Email Address</Label>
+              <Input
+                id="email"
+                type="email" 
+                placeholder="colleague@example.com"
+                value={inviteEmail}
+                onChange={(e) => setInviteEmail(e.target.value)}
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="role">Role</Label>
+              <Select
+                value={inviteRole}
+                onValueChange={setInviteRole}
+              >
+                <SelectTrigger id="role">
+                  <SelectValue placeholder="Select role" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="staff">Staff</SelectItem>
+                  <SelectItem value="admin">Admin</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div className="bg-slate-100 p-3 rounded-md text-sm">
+              <h4 className="font-medium mb-2">Role Permissions:</h4>
+              <ul className="space-y-1">
+                <li className="flex items-start gap-2">
+                  <span className="font-semibold min-w-16">Staff:</span> 
+                  <span>Can view and work with jobs, customers, and day-to-day operations</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="font-semibold min-w-16">Admin:</span> 
+                  <span>Can manage team members, billing, company settings, and all staff permissions</span>
+                </li>
+              </ul>
+            </div>
+
+            <div className="flex justify-end gap-2 pt-2">
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={() => setIsInviteDialogOpen(false)}
+              >
+                Cancel
+              </Button>
+              <Button 
+                type="submit" 
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? "Sending..." : "Send Invitation"}
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
     </AppLayout>
   );
 }
