@@ -1,5 +1,6 @@
 
 import { serve } from 'https://deno.land/std@0.177.0/http/server.ts'
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.7.1'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -13,7 +14,35 @@ serve(async (req) => {
   }
   
   try {
-    const { imageBase64, apiKey } = await req.json();
+    let { imageBase64, apiKey } = await req.json();
+    
+    // If no API key provided, try to get it from the database using the authorization header
+    if (!apiKey) {
+      const authHeader = req.headers.get('Authorization')?.split(' ')[1];
+      if (authHeader) {
+        const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
+        const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
+        const supabase = createClient(supabaseUrl, supabaseServiceKey);
+        
+        // Verify the token and get the user
+        const { data: { user }, error: authError } = await supabase.auth.getUser(authHeader);
+        if (!authError && user) {
+          const userId = user.id;
+          
+          // Get the API key from the database
+          const { data, error } = await supabase
+            .from('user_api_keys')
+            .select('api_key')
+            .eq('user_id', userId)
+            .eq('service', 'gcp_vision')
+            .single();
+            
+          if (!error && data) {
+            apiKey = data.api_key;
+          }
+        }
+      }
+    }
     
     if (!imageBase64 || !apiKey) {
       return new Response(

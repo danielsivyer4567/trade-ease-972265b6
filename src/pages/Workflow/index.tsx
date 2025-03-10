@@ -4,10 +4,8 @@ import { AppLayout } from "@/components/ui/AppLayout";
 import { Flow } from './components/Flow';
 import { NodeSidebar } from './components/NodeSidebar';
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Share2, Settings, Save, Key } from "lucide-react";
+import { ArrowLeft, Save, Key, Check } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -19,20 +17,55 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { supabase } from "@/integrations/supabase/client";
+import { GCPVisionForm } from "@/components/messaging/dialog-sections/GCPVisionForm";
 
 export default function WorkflowPage() {
   const navigate = useNavigate();
   const [flowInstance, setFlowInstance] = useState(null);
   const [gcpVisionKeyDialogOpen, setGcpVisionKeyDialogOpen] = useState(false);
   const [gcpVisionKey, setGcpVisionKey] = useState('');
+  const [hasGcpVisionKey, setHasGcpVisionKey] = useState(false);
+  const [isLoadingKey, setIsLoadingKey] = useState(true);
 
   useEffect(() => {
-    // Load GCP Vision API key from localStorage on component mount
-    const savedGcpVisionKey = localStorage.getItem('gcp-vision-api-key');
-    if (savedGcpVisionKey) {
-      setGcpVisionKey(savedGcpVisionKey);
-    }
+    // Check if GCP Vision API key is configured in Supabase
+    checkGcpVisionApiKey();
   }, []);
+
+  const checkGcpVisionApiKey = async () => {
+    setIsLoadingKey(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        setIsLoadingKey(false);
+        return;
+      }
+
+      const { data, error } = await supabase.functions.invoke('gcp-vision-key', {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${session.access_token}`
+        }
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      if (data.apiKey) {
+        setGcpVisionKey(data.apiKey);
+        setHasGcpVisionKey(true);
+      } else {
+        setHasGcpVisionKey(false);
+      }
+    } catch (error) {
+      console.error('Error checking GCP Vision API key:', error);
+      setHasGcpVisionKey(false);
+    } finally {
+      setIsLoadingKey(false);
+    }
+  };
 
   const handleSaveFlow = useCallback(() => {
     if (!flowInstance) return;
@@ -41,24 +74,6 @@ export default function WorkflowPage() {
     localStorage.setItem('workflow-data', JSON.stringify(flow));
     toast.success('Workflow saved successfully!');
   }, [flowInstance]);
-
-  const handleSaveGcpVisionKey = useCallback(() => {
-    if (!gcpVisionKey.trim()) {
-      toast.error('Please enter a valid Google Cloud Vision API key');
-      return;
-    }
-    
-    // Save GCP Vision API key to localStorage
-    localStorage.setItem('gcp-vision-api-key', gcpVisionKey);
-    toast.success('Google Cloud Vision API key saved successfully!');
-    setGcpVisionKeyDialogOpen(false);
-  }, [gcpVisionKey]);
-
-  const handleClearGcpVisionKey = useCallback(() => {
-    setGcpVisionKey('');
-    localStorage.removeItem('gcp-vision-api-key');
-    toast.info('Google Cloud Vision API key cleared');
-  }, []);
 
   return (
     <AppLayout>
@@ -82,26 +97,19 @@ export default function WorkflowPage() {
                   <DialogTitle>Google Cloud Vision API Configuration</DialogTitle>
                   <DialogDescription>
                     Enter your Google Cloud Vision API key to enable document text extraction and image analysis.
+                    <p className="mt-2 text-xs text-muted-foreground">
+                      This key will be securely stored in your Supabase database.
+                    </p>
                   </DialogDescription>
                 </DialogHeader>
-                <div className="grid gap-4 py-4">
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <Label htmlFor="gcp-vision-key" className="text-right">
-                      GCP Vision Key
-                    </Label>
-                    <Input
-                      id="gcp-vision-key"
-                      type="password"
-                      value={gcpVisionKey}
-                      onChange={(e) => setGcpVisionKey(e.target.value)}
-                      placeholder="Enter your Google Cloud Vision API key"
-                      className="col-span-3"
-                    />
-                  </div>
-                </div>
-                <DialogFooter>
-                  <Button variant="outline" onClick={handleClearGcpVisionKey}>Clear</Button>
-                  <Button onClick={handleSaveGcpVisionKey}>Save Key</Button>
+                <GCPVisionForm 
+                  gcpVisionKey={gcpVisionKey} 
+                  setGcpVisionKey={setGcpVisionKey} 
+                />
+                <DialogFooter className="mt-4">
+                  <Button variant="outline" onClick={() => setGcpVisionKeyDialogOpen(false)}>
+                    Close
+                  </Button>
                 </DialogFooter>
               </DialogContent>
             </Dialog>
@@ -118,7 +126,7 @@ export default function WorkflowPage() {
           </div>
         </div>
 
-        {gcpVisionKey && (
+        {!isLoadingKey && hasGcpVisionKey && (
           <Card className="mt-4">
             <CardHeader className="py-2">
               <CardTitle className="text-sm flex items-center gap-2">
@@ -127,7 +135,8 @@ export default function WorkflowPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="py-2">
-              <p className="text-sm text-green-600">
+              <p className="text-sm text-green-600 flex items-center">
+                <Check className="h-4 w-4 mr-1" />
                 Google Cloud Vision API key is configured and ready to use
               </p>
             </CardContent>
