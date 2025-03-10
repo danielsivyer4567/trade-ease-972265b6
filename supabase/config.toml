@@ -42,3 +42,6 @@ verify_jwt = false
 
 [functions.twilio-available-numbers]
 verify_jwt = false
+
+[functions.admin-manage-numbers]
+verify_jwt = false
