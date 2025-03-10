@@ -25,3 +25,5 @@ verify_jwt = false
 [functions.organization-invite]
 verify_jwt = true
 
+[functions.hello-world]
+verify_jwt = false
