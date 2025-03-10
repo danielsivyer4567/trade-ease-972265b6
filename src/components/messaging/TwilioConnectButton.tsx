@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { TwilioOrderNumberDialog } from './TwilioOrderNumberDialog';
@@ -106,7 +107,7 @@ export const TwilioConnectButton = () => {
       }
     }} className="w-full">
         <TabsList className="grid w-full grid-cols-2 mb-4">
-          
+          <TabsTrigger value="connect">Connect Twilio</TabsTrigger>
           <TabsTrigger value="buy">Buy Phone Numbers</TabsTrigger>
         </TabsList>
         
