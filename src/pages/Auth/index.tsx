@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -8,7 +7,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from 'sonner';
-import { Mail, AlertCircle, CheckCircle } from 'lucide-react';
+import { Mail, AlertCircle, CheckCircle, Building, Users } from 'lucide-react';
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 export default function Auth() {
   const [email, setEmail] = useState('');
@@ -22,10 +22,14 @@ export default function Auth() {
   const [verificationStatus, setVerificationStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [verificationMessage, setVerificationMessage] = useState('');
   
+  const [organizationType, setOrganizationType] = useState<'create' | 'join'>('create');
+  const [organizationName, setOrganizationName] = useState('');
+  const [organizationCode, setOrganizationCode] = useState('');
+  const [organizationError, setOrganizationError] = useState('');
+  
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Check if user is already logged in
   useEffect(() => {
     const checkUser = async () => {
       const { data } = await supabase.auth.getSession();
@@ -36,7 +40,6 @@ export default function Auth() {
     checkUser();
   }, [navigate]);
 
-  // Check for verification token in URL
   useEffect(() => {
     const handleEmailVerification = async () => {
       const hashParams = new URLSearchParams(window.location.hash.substring(1));
@@ -48,7 +51,6 @@ export default function Auth() {
         setVerificationStatus('success');
         setVerificationMessage('Your email has been verified! You can now sign in.');
         
-        // If we have tokens, we can set the session directly
         if (accessToken && refreshToken) {
           try {
             const { error } = await supabase.auth.setSession({
@@ -60,7 +62,6 @@ export default function Auth() {
               console.error('Error setting session:', error);
               throw error;
             } else {
-              // Successfully set session, redirect to home
               toast.success('Successfully verified and logged in!');
               navigate('/');
             }
@@ -105,9 +106,94 @@ export default function Auth() {
     }
   };
 
+  const createOrganization = async (name: string, userId: string) => {
+    try {
+      const { data: orgData, error: orgError } = await supabase
+        .from('organizations')
+        .insert({ name })
+        .select('id')
+        .single();
+        
+      if (orgError) throw orgError;
+      if (!orgData?.id) throw new Error('Failed to create organization');
+      
+      const { error: memberError } = await supabase
+        .from('organization_members')
+        .insert({
+          organization_id: orgData.id,
+          user_id: userId,
+          role: 'owner'
+        });
+        
+      if (memberError) throw memberError;
+      
+      const { error: configError } = await supabase
+        .from('users_configuration')
+        .update({ organization_id: orgData.id })
+        .eq('id', userId);
+        
+      if (configError) throw configError;
+      
+      return orgData.id;
+    } catch (error) {
+      console.error('Error creating organization:', error);
+      throw error;
+    }
+  };
+
+  const joinOrganization = async (inviteCode: string, userId: string) => {
+    try {
+      const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+      if (!uuidRegex.test(inviteCode)) {
+        setOrganizationError('Invalid organization code format');
+        return null;
+      }
+      
+      const { data: orgData, error: orgError } = await supabase
+        .from('organizations')
+        .select('id, name')
+        .eq('id', inviteCode)
+        .single();
+        
+      if (orgError || !orgData) {
+        setOrganizationError('Organization not found. Please check the code and try again.');
+        return null;
+      }
+      
+      const { error: memberError } = await supabase
+        .from('organization_members')
+        .insert({
+          organization_id: orgData.id,
+          user_id: userId,
+          role: 'member'
+        });
+        
+      if (memberError) {
+        if (memberError.code === '23505') {
+          setOrganizationError('You are already a member of this organization');
+        } else {
+          throw memberError;
+        }
+      }
+      
+      const { error: configError } = await supabase
+        .from('users_configuration')
+        .update({ organization_id: orgData.id })
+        .eq('id', userId);
+        
+      if (configError) throw configError;
+      
+      return orgData.id;
+    } catch (error) {
+      console.error('Error joining organization:', error);
+      throw error;
+    }
+  };
+
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setOrganizationError('');
     
     if (password !== confirmPassword) {
       toast.error('Passwords do not match');
@@ -126,9 +212,31 @@ export default function Auth() {
       
       if (error) throw error;
       
+      if (!data.user) {
+        throw new Error('User creation failed');
+      }
+      
+      const userId = data.user.id;
+      
+      if (organizationType === 'create' && organizationName) {
+        try {
+          await createOrganization(organizationName, userId);
+          toast.success('Organization created successfully!');
+        } catch (orgError: any) {
+          console.error('Error creating organization:', orgError);
+        }
+      } else if (organizationType === 'join' && organizationCode) {
+        try {
+          await joinOrganization(organizationCode, userId);
+          toast.success('Joined organization successfully!');
+        } catch (orgError: any) {
+          console.error('Error joining organization:', orgError);
+        }
+      }
+      
       setVerificationSent(true);
       toast.success('Signed up successfully! Please check your email for verification.');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error signing up:', error);
       toast.error(error.message || 'Failed to sign up');
     } finally {
@@ -168,13 +276,10 @@ export default function Auth() {
     setLoading(true);
     
     try {
-      // In a real app, you'd submit this to your backend
-      // For now, we'll just show a success message
       console.log('Demo request:', { demoRequestName, demoRequestEmail, demoRequestCompany });
       
       toast.success('Demo request submitted successfully! Our team will contact you shortly.');
       
-      // Reset form
       setDemoRequestName('');
       setDemoRequestEmail('');
       setDemoRequestCompany('');
@@ -186,7 +291,6 @@ export default function Auth() {
     }
   };
 
-  // Show verification success/error UI
   if (verificationStatus !== 'idle') {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-100 p-4">
@@ -369,6 +473,61 @@ export default function Auth() {
                       required
                     />
                   </div>
+                  
+                  <div className="pt-4 border-t">
+                    <Label className="mb-2 block">Organization Options</Label>
+                    
+                    <RadioGroup 
+                      value={organizationType} 
+                      onValueChange={(value) => setOrganizationType(value as 'create' | 'join')}
+                      className="mb-4"
+                    >
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="create" id="create-org" />
+                        <Label htmlFor="create-org" className="flex items-center gap-2 cursor-pointer">
+                          <Building className="h-4 w-4" />
+                          Create a new organization
+                        </Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="join" id="join-org" />
+                        <Label htmlFor="join-org" className="flex items-center gap-2 cursor-pointer">
+                          <Users className="h-4 w-4" />
+                          Join an existing organization
+                        </Label>
+                      </div>
+                    </RadioGroup>
+                    
+                    {organizationType === 'create' && (
+                      <div className="space-y-2">
+                        <Label htmlFor="org-name">Organization Name</Label>
+                        <Input 
+                          id="org-name" 
+                          type="text" 
+                          placeholder="Your Company" 
+                          value={organizationName}
+                          onChange={(e) => setOrganizationName(e.target.value)}
+                        />
+                      </div>
+                    )}
+                    
+                    {organizationType === 'join' && (
+                      <div className="space-y-2">
+                        <Label htmlFor="org-code">Organization Code</Label>
+                        <Input 
+                          id="org-code" 
+                          type="text" 
+                          placeholder="Enter invitation code" 
+                          value={organizationCode}
+                          onChange={(e) => setOrganizationCode(e.target.value)}
+                        />
+                        {organizationError && (
+                          <p className="text-sm text-red-500 mt-1">{organizationError}</p>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                  
                   <Button 
                     type="submit" 
                     className="w-full bg-slate-700 hover:bg-slate-800"
