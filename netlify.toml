@@ -1,0 +1,27 @@
+
+# Netlify configuration file
+[build]
+  # The command to build your site
+  command = "npm install && npm run build"
+  
+  # Directory to publish (output of the build)
+  publish = "dist"
+  
+  # Base directory for build commands
+  base = "/"
+
+[build.environment]
+  # Specify Node.js version
+  NODE_VERSION = "18"
+
+# Handle SPA routing for React Router
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+  
+# Cache control for static assets
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
