@@ -43,24 +43,25 @@ export const TwilioConnectButton = () => {
         return;
       }
       
-      // In a real implementation, this would fetch from your database
-      // of numbers you have for sale
+      // Use type assertion to work around TypeScript limitations with the Supabase SDK
+      // This is a temporary solution until we can regenerate the types that include our new table
       const { data, error } = await supabase
         .from('phone_numbers_for_sale')
         .select('*')
-        .eq('status', 'available');
+        .eq('status', 'available') as any;
         
       if (error) throw error;
       
-      // Mock data if the table doesn't exist yet
       if (!data || data.length === 0) {
+        // Use mock data if no numbers are available
         setAvailableForSale([
           '+1234567890',
           '+1987654321',
           '+1555123456'
         ]);
       } else {
-        setAvailableForSale(data.map(item => item.phone_number));
+        // Map the data to extract just the phone numbers
+        setAvailableForSale(data.map((item: any) => item.phone_number));
       }
     } catch (error) {
       console.error('Error loading numbers for sale:', error);

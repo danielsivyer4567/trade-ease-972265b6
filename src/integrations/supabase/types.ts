@@ -294,6 +294,36 @@ export type Database = {
         }
         Relationships: []
       }
+      phone_numbers_for_sale: {
+        Row: {
+          created_at: string
+          id: string
+          phone_number: string
+          price: number
+          status: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          phone_number: string
+          price: number
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          phone_number?: string
+          price?: number
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       price_list_items: {
         Row: {
           category: string
