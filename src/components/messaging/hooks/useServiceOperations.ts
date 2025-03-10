@@ -18,7 +18,7 @@ export const useServiceOperations = (
       const { error } = await supabase
         .from('messaging_accounts')
         .update({ enabled: !service.syncEnabled })
-        .eq('id', serviceId);
+        .eq('id', serviceId as string);
         
       if (error) {
         throw error;
@@ -31,7 +31,7 @@ export const useServiceOperations = (
       ));
       
       toast.success(`${service.syncEnabled ? "Disabled" : "Enabled"} sync for ${service.name}`);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error toggling sync status:', error);
       toast.error('Failed to update sync settings');
     } finally {
@@ -91,7 +91,7 @@ export const useServiceOperations = (
       
       toast.success(`${service.name} connected successfully`);
       fetchMessagingAccounts();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error connecting service:', error);
       toast.error('Failed to connect service');
     } finally {
@@ -129,7 +129,7 @@ export const useServiceOperations = (
       
       toast.success(`New ${serviceType} connection added`);
       fetchMessagingAccounts();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error adding service:', error);
       toast.error('Failed to add new service');
     } finally {
@@ -151,7 +151,7 @@ export const useServiceOperations = (
       const { error } = await supabase
         .from('messaging_accounts')
         .delete()
-        .eq('id', serviceId);
+        .eq('id', serviceId as string);
         
       if (error) {
         throw error;
@@ -159,7 +159,7 @@ export const useServiceOperations = (
       
       setServices(services.filter(s => s.id !== serviceId));
       toast.success(`${service.name} connection removed`);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error removing service:', error);
       toast.error('Failed to remove service');
     } finally {
@@ -184,7 +184,7 @@ export const useServiceOperations = (
       ));
       
       toast.success("All services synchronized successfully");
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error syncing services:', error);
       toast.error('Failed to sync services');
     } finally {

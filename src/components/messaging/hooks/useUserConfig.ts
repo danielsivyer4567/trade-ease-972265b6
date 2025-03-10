@@ -29,13 +29,16 @@ export const useUserConfig = () => {
       const { data: configData, error: configError } = await supabase
         .from('users_configuration')
         .select('messaging_enabled')
-        .eq('id', userId)
+        .eq('id', userId as string)
         .single();
         
       if (configError) {
         console.error('Error fetching user configuration:', configError);
       } else if (configData) {
-        setUserConfig(configData);
+        // Type-safe update of userConfig
+        setUserConfig({
+          messaging_enabled: Boolean(configData.messaging_enabled)
+        });
       }
     } catch (error) {
       console.error('Error loading user configuration:', error);

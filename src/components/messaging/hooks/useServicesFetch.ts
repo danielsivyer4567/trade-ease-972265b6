@@ -44,7 +44,7 @@ export const useServicesFetch = () => {
       const { data: accounts, error } = await supabase
         .from('messaging_accounts')
         .select('*')
-        .eq('user_id', userId);
+        .eq('user_id', userId as string);
         
       if (error) {
         console.error('Error fetching messaging accounts:', error);
@@ -62,7 +62,7 @@ export const useServicesFetch = () => {
           if (matchingAccount) {
             service.id = matchingAccount.id;
             service.isConnected = true;
-            service.syncEnabled = matchingAccount.enabled;
+            service.syncEnabled = matchingAccount.enabled || false;
             service.lastSynced = 'Recently';
             service.connectionDetails = {
               apiKey: matchingAccount.api_key,

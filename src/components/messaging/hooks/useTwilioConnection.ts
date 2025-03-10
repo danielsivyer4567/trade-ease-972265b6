@@ -66,7 +66,7 @@ export const useTwilioConnection = (
       
       // Enable messaging if not already enabled
       await updateMessagingEnabled(userId);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error connecting Twilio account:', error);
       toast.error(error.message || "Failed to connect Twilio account");
     } finally {
@@ -79,7 +79,7 @@ export const useTwilioConnection = (
       const { data: configData, error: configError } = await supabase
         .from('users_configuration')
         .select('messaging_enabled')
-        .eq('id', userId)
+        .eq('id', userId as string)
         .single();
         
       if (configError) {
@@ -87,11 +87,11 @@ export const useTwilioConnection = (
         return;
       }
       
-      if (!configData.messaging_enabled) {
+      if (configData && !configData.messaging_enabled) {
         const { error: updateError } = await supabase
           .from('users_configuration')
-          .update({ messaging_enabled: true })
-          .eq('id', userId);
+          .update({ messaging_enabled: true } as any) // Type cast to work around type error
+          .eq('id', userId as string);
           
         if (updateError) {
           console.error('Error updating messaging configuration:', updateError);

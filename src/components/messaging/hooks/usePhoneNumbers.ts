@@ -25,7 +25,7 @@ export const usePhoneNumbers = () => {
       const { data: phoneAccounts, error: phoneError } = await supabase
         .from('messaging_accounts')
         .select('phone_number')
-        .eq('user_id', userId)
+        .eq('user_id', userId as string)
         .not('phone_number', 'is', null);
         
       if (phoneError) {
@@ -78,11 +78,11 @@ export const usePhoneNumbers = () => {
         );
       }
       
-      // Insert the phone number into messaging_accounts
+      // Insert the phone number into messaging_accounts with type cast for userId
       const { data: accountData, error: accountError } = await supabase
         .from('messaging_accounts')
         .insert({
-          user_id: userId,
+          user_id: userId as string,
           service_type: 'sms',
           phone_number: phoneNumber,
           enabled: true
@@ -100,7 +100,7 @@ export const usePhoneNumbers = () => {
       setConnectedNumbers([...connectedNumbers, phoneNumber]);
       setPhoneNumber('');
       toast.success("Phone number connected successfully");
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error connecting phone number:', error);
       toast.error(error.message || "Failed to connect to messaging system");
     } finally {
@@ -122,8 +122,8 @@ export const usePhoneNumbers = () => {
       const { error } = await supabase
         .from('messaging_accounts')
         .delete()
-        .eq('user_id', userId)
-        .eq('phone_number', numberToRemove);
+        .eq('user_id', userId as string)
+        .eq('phone_number', numberToRemove as string);
         
       if (error) {
         throw error;
@@ -133,7 +133,7 @@ export const usePhoneNumbers = () => {
       updatedNumbers.splice(index, 1);
       setConnectedNumbers(updatedNumbers);
       toast.success("Phone number removed");
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error removing phone number:', error);
       toast.error('Failed to remove phone number');
     }
@@ -144,7 +144,7 @@ export const usePhoneNumbers = () => {
       const { data: configData, error: configError } = await supabase
         .from('users_configuration')
         .select('messaging_enabled')
-        .eq('id', userId)
+        .eq('id', userId as string)
         .single();
         
       if (configError) {
@@ -152,11 +152,11 @@ export const usePhoneNumbers = () => {
         return;
       }
       
-      if (!configData.messaging_enabled) {
+      if (configData && !configData.messaging_enabled) {
         const { error: updateError } = await supabase
           .from('users_configuration')
           .update({ messaging_enabled: true })
-          .eq('id', userId);
+          .eq('id', userId as string);
           
         if (updateError) {
           console.error('Error updating messaging configuration:', updateError);
