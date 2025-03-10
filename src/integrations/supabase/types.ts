@@ -439,7 +439,7 @@ export type Database = {
       }
       has_organization_access: {
         Args: {
-          object_organization_id: string
+          org_id: string
         }
         Returns: boolean
       }

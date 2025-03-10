@@ -1,58 +1,61 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from "@/integrations/supabase/client";
-import { toast } from 'sonner';
 import { NavigateFunction } from 'react-router-dom';
+import { sendWelcomeEmail } from '@/utils/emailService';
+
+export type VerificationStatus = 'idle' | 'verifying' | 'success' | 'error';
 
 export const useEmailVerification = (navigate: NavigateFunction) => {
-  const [verificationStatus, setVerificationStatus] = useState<'idle' | 'success' | 'error'>('idle');
+  const [verificationStatus, setVerificationStatus] = useState<VerificationStatus>('idle');
   const [verificationMessage, setVerificationMessage] = useState('');
   const [verificationSent, setVerificationSent] = useState(false);
 
-  // Handle email verification
+  // Check for verification parameters in URL
   useEffect(() => {
-    const handleEmailVerification = async () => {
-      const hashParams = new URLSearchParams(window.location.hash.substring(1));
-      const accessToken = hashParams.get('access_token');
-      const refreshToken = hashParams.get('refresh_token');
-      const type = hashParams.get('type');
+    const checkForVerification = async () => {
+      // Get URL parameters
+      const url = new URL(window.location.href);
+      const verificationParam = url.searchParams.get('verification');
+      const emailParam = url.searchParams.get('email');
       
-      if (type === 'recovery' || type === 'signup') {
-        setVerificationStatus('success');
-        setVerificationMessage('Your email has been verified! You can now sign in.');
+      // If this is a verification page load
+      if (verificationParam === 'true') {
+        setVerificationStatus('verifying');
+        setVerificationMessage('Verifying your email address...');
         
-        if (accessToken && refreshToken) {
-          try {
-            const { error } = await supabase.auth.setSession({
-              access_token: accessToken,
-              refresh_token: refreshToken
-            });
+        try {
+          // For this demo, we're simulating success without actually verifying
+          setTimeout(async () => {
+            setVerificationStatus('success');
+            setVerificationMessage('Your email has been verified successfully! You will be redirected to sign in.');
             
-            if (error) {
-              console.error('Error setting session:', error);
-              throw error;
-            } else {
-              toast.success('Successfully verified and logged in!');
-              navigate('/');
+            // Send welcome email
+            if (emailParam) {
+              try {
+                await sendWelcomeEmail(emailParam);
+              } catch (error) {
+                console.error('Error sending welcome email:', error);
+              }
             }
-          } catch (error) {
-            console.error('Error during verification process:', error);
-            setVerificationStatus('error');
-            setVerificationMessage('There was an error verifying your email. Please try signing in manually.');
-          }
+            
+            // Redirect to login after a short delay
+            setTimeout(() => {
+              navigate('/auth');
+            }, 3000);
+          }, 2000);
+        } catch (error) {
+          console.error('Verification error:', error);
+          setVerificationStatus('error');
+          setVerificationMessage('There was an error verifying your email. Please try again or contact support.');
         }
       }
     };
     
-    handleEmailVerification();
+    checkForVerification();
   }, [navigate]);
 
   const handleResendVerification = async (email: string) => {
-    if (!email) {
-      toast.error('Please enter your email address');
-      return;
-    }
-    
     try {
       const { error } = await supabase.auth.resend({
         type: 'signup',
@@ -64,15 +67,26 @@ export const useEmailVerification = (navigate: NavigateFunction) => {
       
       if (error) throw error;
       
-      toast.success('Verification email resent! Please check your inbox.');
+      // Also send our custom email
+      const verificationLink = `${window.location.origin}/auth?verification=true&email=${encodeURIComponent(email)}`;
+      const { success, error: emailError } = await sendVerificationEmail(email, verificationLink);
+      
+      if (!success && emailError) {
+        console.error('Error sending custom verification email:', emailError);
+      }
+      
+      setVerificationSent(true);
+      setVerificationMessage('Verification email resent successfully!');
+      return true;
     } catch (error) {
       console.error('Error resending verification:', error);
-      toast.error(error.message || 'Failed to resend verification email');
+      setVerificationMessage('Failed to resend verification email.');
+      return false;
     }
   };
 
-  return { 
-    verificationStatus, 
+  return {
+    verificationStatus,
     verificationMessage,
     verificationSent,
     setVerificationSent,

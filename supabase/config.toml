@@ -30,3 +30,6 @@ verify_jwt = false
 
 [functions.generate-demo-data]
 verify_jwt = false
+
+[functions.brevo-email-sender]
+verify_jwt = false

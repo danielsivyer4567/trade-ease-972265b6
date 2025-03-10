@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from 'sonner';
@@ -7,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { sendVerificationEmail } from '@/utils/emailService';
 
 interface SignUpFormProps {
   email: string;
@@ -18,7 +18,7 @@ interface SignUpFormProps {
   loading: boolean;
   setLoading: (loading: boolean) => void;
   verificationSent: boolean;
-  setVerificationSent: (sent: boolean) => void;  // This prop was missing in usage
+  setVerificationSent: (sent: boolean) => void;
   handleResendVerification: () => Promise<void>;
 }
 
@@ -32,7 +32,7 @@ const SignUpForm: React.FC<SignUpFormProps> = ({
   loading,
   setLoading,
   verificationSent,
-  setVerificationSent,  // Added this to the destructuring
+  setVerificationSent,
   handleResendVerification
 }) => {
   const [organizationType, setOrganizationType] = useState<'create' | 'join'>('create');
@@ -169,6 +169,22 @@ const SignUpForm: React.FC<SignUpFormProps> = ({
       }
       
       setVerificationSent(true);
+      
+      if (data.user && !data.session) {
+        const verificationLink = `${window.location.origin}/auth?verification=true&email=${encodeURIComponent(email)}`;
+        
+        try {
+          const { success, error } = await sendVerificationEmail(email, verificationLink);
+          if (success) {
+            console.log('Custom verification email sent successfully');
+          } else {
+            console.error('Error sending custom verification email:', error);
+          }
+        } catch (emailError) {
+          console.error('Exception sending custom verification email:', emailError);
+        }
+      }
+      
       toast.success('Signed up successfully! Please check your email for verification.');
     } catch (error: any) {
       console.error('Error signing up:', error);
