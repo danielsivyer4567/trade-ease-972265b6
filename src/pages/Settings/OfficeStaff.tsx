@@ -1,4 +1,3 @@
-
 import { ArrowLeft, Plus, Search, Users } from "lucide-react";
 import { AppLayout } from "@/components/ui/AppLayout";
 import { Button } from "@/components/ui/button";
@@ -14,22 +13,43 @@ import { supabase } from "@/integrations/supabase/client";
 import { useUserConfig } from "@/components/messaging/hooks/useUserConfig";
 
 // Example data - would come from an API in a real app
-const staffMembers = [
-  { id: 1, name: "Jane Smith", email: "jane.smith@tradeease.com", role: "Office Manager", phone: "555-123-4567" },
-  { id: 2, name: "John Doe", email: "john.doe@tradeease.com", role: "Administrative Assistant", phone: "555-987-6543" },
-  { id: 3, name: "Sarah Johnson", email: "sarah.johnson@tradeease.com", role: "Bookkeeper", phone: "555-456-7890" },
-  { id: 4, name: "Michael Brown", email: "michael.brown@tradeease.com", role: "Customer Service", phone: "555-789-0123" },
-];
-
+const staffMembers = [{
+  id: 1,
+  name: "Jane Smith",
+  email: "jane.smith@tradeease.com",
+  role: "Office Manager",
+  phone: "555-123-4567"
+}, {
+  id: 2,
+  name: "John Doe",
+  email: "john.doe@tradeease.com",
+  role: "Administrative Assistant",
+  phone: "555-987-6543"
+}, {
+  id: 3,
+  name: "Sarah Johnson",
+  email: "sarah.johnson@tradeease.com",
+  role: "Bookkeeper",
+  phone: "555-456-7890"
+}, {
+  id: 4,
+  name: "Michael Brown",
+  email: "michael.brown@tradeease.com",
+  role: "Customer Service",
+  phone: "555-789-0123"
+}];
 export default function OfficeStaff() {
-  const { toast } = useToast();
-  const { userConfig } = useUserConfig();
+  const {
+    toast
+  } = useToast();
+  const {
+    userConfig
+  } = useUserConfig();
   const [isInviteDialogOpen, setIsInviteDialogOpen] = useState(false);
   const [inviteEmail, setInviteEmail] = useState("");
   const [inviteRole, setInviteRole] = useState("staff");
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const handleInvite = async (e) => {
+  const handleInvite = async e => {
     e.preventDefault();
     if (!inviteEmail) {
       toast({
@@ -39,16 +59,17 @@ export default function OfficeStaff() {
       });
       return;
     }
-
     setIsSubmitting(true);
-
     try {
       // Get current user's organization
-      const { data: { session } } = await supabase.auth.getSession();
+      const {
+        data: {
+          session
+        }
+      } = await supabase.auth.getSession();
       if (!session) {
         throw new Error("You must be logged in to invite team members");
       }
-
       if (!userConfig?.organization_id) {
         throw new Error("You must be part of an organization to invite members");
       }
@@ -62,11 +83,8 @@ export default function OfficeStaff() {
           inviterEmail: session.user.email
         }
       });
-
       if (response.error) throw new Error(response.error.message);
-      
       const result = response.data;
-      
       if (result.success) {
         toast({
           title: "Invitation sent!",
@@ -88,18 +106,12 @@ export default function OfficeStaff() {
       setIsSubmitting(false);
     }
   };
-
-  return (
-    <AppLayout>
+  return <AppLayout>
       <div className="p-6 space-y-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Link to="/settings">
-              <Button 
-                variant="outline" 
-                size="icon" 
-                className="rounded-md border border-gray-300"
-              >
+              <Button variant="outline" size="icon" className="rounded-md border border-gray-300">
                 <ArrowLeft className="h-5 w-5" />
               </Button>
             </Link>
@@ -108,16 +120,13 @@ export default function OfficeStaff() {
               <h1 className="text-2xl font-bold">Office Staff</h1>
             </div>
           </div>
-          <Button 
-            className="flex items-center gap-1"
-            onClick={() => setIsInviteDialogOpen(true)}
-          >
+          <Button className="flex items-center gap-1" onClick={() => setIsInviteDialogOpen(true)}>
             <Plus className="h-4 w-4" />
-            <span>Add Staff Member</span>
+            <span className="text-center px-[228px] mx-px my-[7px] py-[3px]">Add Staff Member</span>
           </Button>
         </div>
 
-        <div className="flex justify-between items-center">
+        <div className="flex justify-between items-center py-[6px] px-[34px]">
           <div className="relative max-w-md w-full">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
             <Input className="pl-9" placeholder="Search staff members..." />
@@ -134,8 +143,7 @@ export default function OfficeStaff() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {staffMembers.map(staff => (
-            <Card key={staff.id} className="hover:shadow-md transition-shadow">
+          {staffMembers.map(staff => <Card key={staff.id} className="hover:shadow-md transition-shadow">
               <CardHeader>
                 <CardTitle className="text-lg">{staff.name}</CardTitle>
               </CardHeader>
@@ -157,8 +165,7 @@ export default function OfficeStaff() {
                   <Button variant="outline" size="sm" className="text-red-500 hover:text-red-600">Remove</Button>
                 </div>
               </CardContent>
-            </Card>
-          ))}
+            </Card>)}
         </div>
       </div>
 
@@ -175,21 +182,12 @@ export default function OfficeStaff() {
           <form onSubmit={handleInvite} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="email">Email Address</Label>
-              <Input
-                id="email"
-                type="email" 
-                placeholder="colleague@example.com"
-                value={inviteEmail}
-                onChange={(e) => setInviteEmail(e.target.value)}
-              />
+              <Input id="email" type="email" placeholder="colleague@example.com" value={inviteEmail} onChange={e => setInviteEmail(e.target.value)} />
             </div>
             
             <div className="space-y-2">
               <Label htmlFor="role">Role</Label>
-              <Select
-                value={inviteRole}
-                onValueChange={setInviteRole}
-              >
+              <Select value={inviteRole} onValueChange={setInviteRole}>
                 <SelectTrigger id="role">
                   <SelectValue placeholder="Select role" />
                 </SelectTrigger>
@@ -215,23 +213,15 @@ export default function OfficeStaff() {
             </div>
 
             <div className="flex justify-end gap-2 pt-2">
-              <Button 
-                type="button" 
-                variant="outline" 
-                onClick={() => setIsInviteDialogOpen(false)}
-              >
+              <Button type="button" variant="outline" onClick={() => setIsInviteDialogOpen(false)}>
                 Cancel
               </Button>
-              <Button 
-                type="submit" 
-                disabled={isSubmitting}
-              >
+              <Button type="submit" disabled={isSubmitting}>
                 {isSubmitting ? "Sending..." : "Send Invitation"}
               </Button>
             </div>
           </form>
         </DialogContent>
       </Dialog>
-    </AppLayout>
-  );
+    </AppLayout>;
 }

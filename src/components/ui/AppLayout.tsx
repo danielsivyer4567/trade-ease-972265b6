@@ -91,7 +91,7 @@ export function AppLayout({
           <div className="relative mx-auto max-w-7xl glass-card p-3 md:p-6 rounded-lg border-2 border-white/50 shadow-2xl bg-slate-200">
             {/* Logout button in top right corner */}
             <div className="absolute top-3 right-3 z-10">
-              <Button variant="outline" size="sm" onClick={handleLogout} className="flex items-center gap-2 bg-slate-300 hover:bg-slate-400 text-gray-700 px-[21px]">
+              <Button variant="outline" size="sm" onClick={handleLogout} className="flex items-center gap-2 bg-slate-300 hover:bg-slate-400 text-gray-700 my-0 mx-[4px] py-[4px] px-[15px]">
                 <LogOut className="h-4 w-4" />
                 <span className="hidden sm:inline">Logout</span>
               </Button>
