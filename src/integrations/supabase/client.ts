@@ -119,3 +119,23 @@ export const checkAndAutoPurchaseLeads = async (userId: string, organizationId?:
     console.error("Error in auto-purchase process:", error);
   }
 };
+
+// Helper function to generate sample organizations and members
+export const generateDemoData = async () => {
+  try {
+    console.log("Generating demo organizations and members...");
+    
+    const { data, error } = await supabase.functions.invoke('generate-demo-data');
+    
+    if (error) {
+      console.error("Error generating demo data:", error);
+      throw error;
+    }
+    
+    return data;
+  } catch (error) {
+    console.error("Error in demo data generation:", error);
+    throw error;
+  }
+};
+
