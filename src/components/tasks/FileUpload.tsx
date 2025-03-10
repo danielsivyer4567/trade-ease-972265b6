@@ -1,5 +1,5 @@
 
-import { Upload, Image } from "lucide-react";
+import { Upload, Image, FileText } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -9,12 +9,14 @@ interface FileUploadProps {
   onFileUpload: (event: React.ChangeEvent<HTMLInputElement>) => void;
   label: string;
   allowGcpVision?: boolean;
+  onTextExtracted?: (text: string, filename: string) => void;
 }
 
 export function FileUpload({
   onFileUpload,
   label,
-  allowGcpVision = false
+  allowGcpVision = false,
+  onTextExtracted
 }: FileUploadProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -51,6 +53,10 @@ export function FileUpload({
 
   const isImageFile = (file: File) => {
     return file.type.startsWith('image/');
+  };
+  
+  const isPdfFile = (file: File) => {
+    return file.type === 'application/pdf';
   };
 
   const analyzeImageWithVision = async (file: File, originalEvent: React.ChangeEvent<HTMLInputElement>) => {
@@ -107,12 +113,12 @@ export function FileUpload({
           toast.error('Failed to analyze image with Google Cloud Vision');
         } else if (data.success) {
           toast.success('Image analyzed with Google Cloud Vision');
-          console.log('Vision API results:', data.data);
           
           if (data.data.responses && data.data.responses[0].textAnnotations) {
             const extractedText = data.data.responses[0].textAnnotations[0]?.description;
-            if (extractedText) {
-              toast.info(`Extracted text: ${extractedText.substring(0, 100)}${extractedText.length > 100 ? '...' : ''}`);
+            if (extractedText && onTextExtracted) {
+              onTextExtracted(extractedText, file.name);
+              toast.info(`Text extracted and added to financials`);
             }
           }
           
@@ -151,10 +157,12 @@ export function FileUpload({
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
     
-    if (files.length > 0 && allowGcpVision && isImageFile(files[0])) {
-      analyzeImageWithVision(files[0], e);
-    } else {
-      onFileUpload(e);
+    if (files.length > 0) {
+      if (allowGcpVision && (isImageFile(files[0]) || isPdfFile(files[0]))) {
+        analyzeImageWithVision(files[0], e);
+      } else {
+        onFileUpload(e);
+      }
     }
   };
 
@@ -177,12 +185,12 @@ export function FileUpload({
         </span>
         <span className="text-xs text-gray-500">
           Drag & drop or click to browse
-          {allowGcpVision && " (Google Cloud Vision enabled)"}
+          {allowGcpVision && " (Text extraction enabled)"}
         </span>
         {isAnalyzing && (
           <div className="mt-2 flex items-center justify-center">
             <div className="h-4 w-4 rounded-full border-2 border-blue-500 border-t-transparent animate-spin"></div>
-            <span className="ml-2 text-xs text-blue-500">Processing image...</span>
+            <span className="ml-2 text-xs text-blue-500">Processing file...</span>
           </div>
         )}
       </div>

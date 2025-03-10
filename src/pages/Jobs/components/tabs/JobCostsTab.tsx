@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { Textarea } from "@/components/ui/textarea";
 
 interface JobCostsTabProps {
   tabNotes: Record<string, string>;
@@ -41,6 +42,28 @@ export const JobCostsTab = ({ tabNotes, setTabNotes, onUpdateTotals }: JobCostsT
       description: `${newFiles.length} files have been uploaded.`
     });
   };
+  
+  const handleTextExtracted = (text: string, filename: string) => {
+    // Automatically update notes with the extracted text
+    setTabNotes({ 
+      ...tabNotes, 
+      costs: tabNotes.costs ? 
+        `${tabNotes.costs}\n\n--- Extracted from ${filename} ---\n${text}` : 
+        `--- Extracted from ${filename} ---\n${text}` 
+    });
+    
+    // Try to extract amount information from the text
+    const amountMatch = text.match(/\$?\s*(\d{1,3}(,\d{3})*(\.\d{2})?)/);
+    if (amountMatch && amountMatch[1]) {
+      const cleanAmount = amountMatch[1].replace(/,/g, '');
+      setAmount(cleanAmount);
+      onUpdateTotals(parseFloat(cleanAmount));
+      toast({
+        title: "Amount detected",
+        description: `Extracted amount: $${cleanAmount}`
+      });
+    }
+  };
 
   return (
     <TabsContent value="costs" className="space-y-4">
@@ -60,13 +83,18 @@ export const JobCostsTab = ({ tabNotes, setTabNotes, onUpdateTotals }: JobCostsT
           </div>
           <div>
             <Label>Upload Costs</Label>
-            <FileUpload onFileUpload={handleFileUpload} label="Upload costs" />
+            <FileUpload 
+              onFileUpload={handleFileUpload} 
+              label="Upload costs" 
+              allowGcpVision={true}
+              onTextExtracted={handleTextExtracted}
+            />
           </div>
           <div>
             <Label htmlFor="notes">Notes</Label>
-            <textarea
+            <Textarea
               id="notes"
-              className="w-full min-h-[100px] p-3 border rounded-lg mt-1"
+              className="w-full min-h-[100px]"
               placeholder="Add notes about this cost..."
               value={tabNotes.costs || ""}
               onChange={(e) => setTabNotes({ ...tabNotes, costs: e.target.value })}

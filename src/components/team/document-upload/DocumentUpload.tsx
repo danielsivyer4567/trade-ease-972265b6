@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
@@ -7,6 +8,7 @@ import { DocumentUploadProps } from './types';
 import { GeneralDocumentUpload } from './GeneralDocumentUpload';
 import { InsuranceDocumentUpload } from './InsuranceDocumentUpload';
 import { JobRelatedDocumentUpload } from './JobRelatedDocumentUpload';
+
 export function DocumentUpload({
   teamMembers,
   selectedTeamMember,
@@ -17,6 +19,7 @@ export function DocumentUpload({
 }: DocumentUploadProps) {
   const navigate = useNavigate();
   const [isDragging, setIsDragging] = useState(false);
+  const [extractedText, setExtractedText] = useState<string>("");
   const [uploadedFiles, setUploadedFiles] = useState<{
     general: File[];
     insurance: File[];
@@ -27,14 +30,17 @@ export function DocumentUpload({
     jobRelated: []
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     setIsDragging(true);
   };
+  
   const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     setIsDragging(false);
   };
+  
   const handleDrop = (e: React.DragEvent<HTMLDivElement>, type: 'insurance' | 'general' | 'jobRelated') => {
     e.preventDefault();
     setIsDragging(false);
@@ -60,6 +66,7 @@ export function DocumentUpload({
       toast.success(`${files.length} file(s) uploaded successfully`);
     }
   };
+  
   const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>, type: 'insurance' | 'general' | 'jobRelated') => {
     if (type === 'jobRelated' && !jobNumber) {
       toast.error("Please enter a job number first");
@@ -77,6 +84,7 @@ export function DocumentUpload({
       toast.success(`${e.target.files.length} file(s) uploaded successfully`);
     }
   };
+  
   const handleSubmitFiles = (type: 'insurance' | 'general' | 'jobRelated') => {
     setIsSubmitting(true);
 
@@ -135,7 +143,7 @@ export function DocumentUpload({
             const parsedNotes = existingNotes ? JSON.parse(existingNotes) : [];
             const newNote = {
               id: Date.now().toString(),
-              text: `Files uploaded by ${memberName}: ${fileNames}`,
+              text: `Files uploaded by ${memberName}: ${fileNames}${extractedText ? `\n\nExtracted Text:\n${extractedText}` : ''}`,
               timestamp: new Date().toLocaleString(),
               important: true,
               files: uploadedFiles[type].map(file => ({
@@ -149,7 +157,6 @@ export function DocumentUpload({
             localStorage.setItem(`job_notes_${job.id}`, JSON.stringify(updatedNotes));
             successMessage = `${uploadedFiles[type].length} file(s) processed, added to job #${jobNumber} notes, and sent to ${memberName}`;
 
-            // Fixed toast implementation to use the correct Sonner API
             toast.success("Files uploaded to job #" + jobNumber, {
               action: {
                 label: "View Job",
@@ -169,10 +176,18 @@ export function DocumentUpload({
         ...prev,
         [type]: []
       }));
+      
+      // Clear extracted text after submission
+      if (type === 'jobRelated') {
+        setExtractedText("");
+      }
+      
       setIsSubmitting(false);
     }, 1500);
   };
-  return <Card className="p-4 bg-slate-200">
+  
+  return (
+    <Card className="p-4 bg-slate-200">
       <h3 className="text-lg font-semibold mb-3 text-zinc-950">Document Upload</h3>
       <Tabs defaultValue="general" className="space-y-4">
         <TabsList className="grid w-full grid-cols-3 bg-slate-400">
@@ -182,16 +197,60 @@ export function DocumentUpload({
         </TabsList>
         
         <TabsContent value="general" className="space-y-4">
-          <GeneralDocumentUpload type="general" teamMembers={teamMembers} selectedTeamMember={selectedTeamMember} setSelectedTeamMember={setSelectedTeamMember} handleFileUpload={handleFileInputChange} uploadedFiles={uploadedFiles.general} handleSubmitFiles={handleSubmitFiles} isSubmitting={isSubmitting} isDragging={isDragging} handleDragOver={handleDragOver} handleDragLeave={handleDragLeave} handleDrop={handleDrop} />
+          <GeneralDocumentUpload 
+            type="general" 
+            teamMembers={teamMembers} 
+            selectedTeamMember={selectedTeamMember} 
+            setSelectedTeamMember={setSelectedTeamMember} 
+            handleFileUpload={handleFileInputChange} 
+            uploadedFiles={uploadedFiles.general} 
+            handleSubmitFiles={handleSubmitFiles} 
+            isSubmitting={isSubmitting} 
+            isDragging={isDragging} 
+            handleDragOver={handleDragOver} 
+            handleDragLeave={handleDragLeave} 
+            handleDrop={handleDrop} 
+          />
         </TabsContent>
 
         <TabsContent value="insurance" className="space-y-4">
-          <InsuranceDocumentUpload type="insurance" teamMembers={teamMembers} selectedTeamMember={selectedTeamMember} setSelectedTeamMember={setSelectedTeamMember} handleFileUpload={handleFileInputChange} uploadedFiles={uploadedFiles.insurance} handleSubmitFiles={handleSubmitFiles} isSubmitting={isSubmitting} isDragging={isDragging} handleDragOver={handleDragOver} handleDragLeave={handleDragLeave} handleDrop={handleDrop} />
+          <InsuranceDocumentUpload 
+            type="insurance" 
+            teamMembers={teamMembers} 
+            selectedTeamMember={selectedTeamMember} 
+            setSelectedTeamMember={setSelectedTeamMember} 
+            handleFileUpload={handleFileInputChange} 
+            uploadedFiles={uploadedFiles.insurance} 
+            handleSubmitFiles={handleSubmitFiles} 
+            isSubmitting={isSubmitting} 
+            isDragging={isDragging} 
+            handleDragOver={handleDragOver} 
+            handleDragLeave={handleDragLeave} 
+            handleDrop={handleDrop} 
+          />
         </TabsContent>
 
         <TabsContent value="job" className="space-y-4">
-          <JobRelatedDocumentUpload type="jobRelated" teamMembers={teamMembers} selectedTeamMember={selectedTeamMember} setSelectedTeamMember={setSelectedTeamMember} jobNumber={jobNumber} setJobNumber={setJobNumber} handleFileUpload={handleFileInputChange} uploadedFiles={uploadedFiles.jobRelated} handleSubmitFiles={handleSubmitFiles} isSubmitting={isSubmitting} isDragging={isDragging} handleDragOver={handleDragOver} handleDragLeave={handleDragLeave} handleDrop={handleDrop} />
+          <JobRelatedDocumentUpload 
+            type="jobRelated" 
+            teamMembers={teamMembers} 
+            selectedTeamMember={selectedTeamMember} 
+            setSelectedTeamMember={setSelectedTeamMember} 
+            jobNumber={jobNumber} 
+            setJobNumber={setJobNumber} 
+            handleFileUpload={handleFileInputChange} 
+            uploadedFiles={uploadedFiles.jobRelated} 
+            handleSubmitFiles={handleSubmitFiles} 
+            isSubmitting={isSubmitting} 
+            isDragging={isDragging} 
+            handleDragOver={handleDragOver} 
+            handleDragLeave={handleDragLeave} 
+            handleDrop={handleDrop}
+            extractedText={extractedText}
+            setExtractedText={setExtractedText}
+          />
         </TabsContent>
       </Tabs>
-    </Card>;
+    </Card>
+  );
 }

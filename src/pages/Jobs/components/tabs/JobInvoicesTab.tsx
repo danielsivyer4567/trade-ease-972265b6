@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Search } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
 
 // Mock data for demonstration - in a real app this would come from your database
 const mockCustomerQuotes = [
@@ -62,6 +63,46 @@ export const JobInvoicesTab = ({ tabNotes, setTabNotes, onUpdateTotals }: JobInv
       title: "Files uploaded successfully",
       description: `${newFiles.length} files have been uploaded.`
     });
+  };
+  
+  const handleTextExtracted = (text: string, filename: string) => {
+    // Automatically update notes with the extracted text
+    setTabNotes({ 
+      ...tabNotes, 
+      invoices: tabNotes.invoices ? 
+        `${tabNotes.invoices}\n\n--- Extracted from ${filename} ---\n${text}` : 
+        `--- Extracted from ${filename} ---\n${text}` 
+    });
+    
+    // Try to extract amount information from the text
+    const amountMatch = text.match(/\$?\s*(\d{1,3}(,\d{3})*(\.\d{2})?)/);
+    if (amountMatch && amountMatch[1]) {
+      const cleanAmount = amountMatch[1].replace(/,/g, '');
+      setAmount(cleanAmount);
+      onUpdateTotals(parseFloat(cleanAmount));
+      toast({
+        title: "Amount detected",
+        description: `Extracted amount: $${cleanAmount}`
+      });
+    }
+    
+    // Try to extract quote ID if present
+    const quoteMatch = text.match(/quote[:\s]*(#*\w+[-]?\d+)/i);
+    if (quoteMatch && quoteMatch[1]) {
+      const quoteId = quoteMatch[1];
+      // Check if the extracted quote ID matches any in our mock data
+      const matchedQuote = mockCustomerQuotes.find(q => 
+        q.id.toLowerCase().includes(quoteId.toLowerCase())
+      );
+      
+      if (matchedQuote) {
+        setSelectedQuoteId(matchedQuote.id);
+        toast({
+          title: "Quote ID detected",
+          description: `Found matching quote: ${matchedQuote.id}`
+        });
+      }
+    }
   };
 
   return (
@@ -122,14 +163,19 @@ export const JobInvoicesTab = ({ tabNotes, setTabNotes, onUpdateTotals }: JobInv
 
           <div>
             <Label>Upload Invoices</Label>
-            <FileUpload onFileUpload={handleFileUpload} label="Upload invoices" />
+            <FileUpload 
+              onFileUpload={handleFileUpload} 
+              label="Upload invoices" 
+              allowGcpVision={true}
+              onTextExtracted={handleTextExtracted}
+            />
           </div>
 
           <div>
             <Label htmlFor="notes">Notes</Label>
-            <textarea
+            <Textarea
               id="notes"
-              className="w-full min-h-[100px] p-3 border rounded-lg mt-1"
+              className="w-full min-h-[100px]"
               placeholder="Add notes about this invoice..."
               value={tabNotes.invoices || ""}
               onChange={(e) => setTabNotes({ ...tabNotes, invoices: e.target.value })}
