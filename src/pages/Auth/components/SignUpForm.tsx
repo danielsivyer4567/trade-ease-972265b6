@@ -18,7 +18,7 @@ interface SignUpFormProps {
   loading: boolean;
   setLoading: (loading: boolean) => void;
   verificationSent: boolean;
-  setVerificationSent: (sent: boolean) => void;
+  setVerificationSent: (sent: boolean) => void;  // This prop was missing in usage
   handleResendVerification: () => Promise<void>;
 }
 
@@ -32,6 +32,7 @@ const SignUpForm: React.FC<SignUpFormProps> = ({
   loading,
   setLoading,
   verificationSent,
+  setVerificationSent,  // Added this to the destructuring
   handleResendVerification
 }) => {
   const [organizationType, setOrganizationType] = useState<'create' | 'join'>('create');

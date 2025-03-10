@@ -15,7 +15,7 @@ interface SignInFormProps {
   loading: boolean;
   setLoading: (loading: boolean) => void;
   verificationSent: boolean;
-  setVerificationSent: (sent: boolean) => void;
+  setVerificationSent: (sent: boolean) => void; // This prop was missing in usage
   handleResendVerification: () => Promise<void>;
   navigate: (path: string) => void;
 }
@@ -28,6 +28,7 @@ const SignInForm: React.FC<SignInFormProps> = ({
   loading,
   setLoading,
   verificationSent,
+  setVerificationSent, // Added this to the destructuring
   handleResendVerification,
   navigate
 }) => {
