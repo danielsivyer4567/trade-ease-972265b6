@@ -50,7 +50,7 @@ export const TwilioConnectButton = () => {
           onClick={handleOrderNumber}
           className="mt-2 text-sm bg-slate-400 hover:bg-slate-300"
         >
-          Order Twilio Number
+          Browse & Order Twilio Numbers
         </Button>
       </div>
       

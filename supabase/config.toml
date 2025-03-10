@@ -39,3 +39,6 @@ verify_jwt = false
 
 [functions.twilio-order-number]
 verify_jwt = false
+
+[functions.twilio-available-numbers]
+verify_jwt = false
