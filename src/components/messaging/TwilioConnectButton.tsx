@@ -1,7 +1,30 @@
 
-import React from 'react';
+import React, { useState } from 'react';
+import { Button } from "@/components/ui/button";
+import { TwilioOrderNumberDialog } from './TwilioOrderNumberDialog';
 
 export const TwilioConnectButton = () => {
+  const [orderDialogOpen, setOrderDialogOpen] = useState(false);
+  const [twilioCredentials, setTwilioCredentials] = useState({
+    accountSid: '',
+    authToken: ''
+  });
+  
+  // Function to handle opening dialog with correct credentials
+  const handleOrderNumber = () => {
+    // In a real app, you might want to get these from a stored location or context
+    const accountSid = prompt('Enter your Twilio Account SID:');
+    const authToken = prompt('Enter your Twilio Auth Token:');
+    
+    if (accountSid && authToken) {
+      setTwilioCredentials({
+        accountSid,
+        authToken
+      });
+      setOrderDialogOpen(true);
+    }
+  };
+
   return (
     <div className="flex flex-col items-center p-4 border rounded-lg bg-slate-100">
       <p className="text-sm text-gray-700 mb-4">Connect with Twilio's official integration:</p>
@@ -15,9 +38,28 @@ export const TwilioConnectButton = () => {
         </span>
         Twilio Connect App
       </a>
-      <p className="text-xs text-gray-500 mt-3">
-        Securely authorize your Twilio account without sharing credentials
-      </p>
+      
+      <div className="flex flex-col items-center mt-3">
+        <p className="text-xs text-gray-500 mb-2">
+          Securely authorize your Twilio account without sharing credentials
+        </p>
+        
+        <Button 
+          variant="outline" 
+          size="sm" 
+          onClick={handleOrderNumber}
+          className="mt-2 text-sm bg-slate-400 hover:bg-slate-300"
+        >
+          Order Twilio Number
+        </Button>
+      </div>
+      
+      <TwilioOrderNumberDialog 
+        isOpen={orderDialogOpen}
+        onOpenChange={setOrderDialogOpen}
+        accountSid={twilioCredentials.accountSid}
+        authToken={twilioCredentials.authToken}
+      />
     </div>
   );
 };

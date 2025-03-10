@@ -36,3 +36,6 @@ verify_jwt = false
 
 [functions.mailgun-email-sender]
 verify_jwt = false
+
+[functions.twilio-order-number]
+verify_jwt = false
