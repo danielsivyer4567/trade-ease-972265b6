@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { TwilioOrderNumberDialog } from './TwilioOrderNumberDialog';
@@ -5,6 +6,18 @@ import { Phone, DollarSign } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+
+// Define a type for the phone number record
+interface PhoneNumberForSale {
+  id: string;
+  phone_number: string;
+  price: number;
+  status: string;
+  user_id: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
 export const TwilioConnectButton = () => {
   const [orderDialogOpen, setOrderDialogOpen] = useState(false);
   const [twilioCredentials, setTwilioCredentials] = useState({
@@ -43,19 +56,22 @@ export const TwilioConnectButton = () => {
         return;
       }
 
-      // Use type assertion to work around TypeScript limitations with the Supabase SDK
-      // This is a temporary solution until we can regenerate the types that include our new table
-      const {
-        data,
-        error
-      } = (await supabase.from('phone_numbers_for_sale').select('*').eq('status', 'available')) as any;
+      // Use proper type assertion for the PhoneNumberForSale table
+      const { data, error } = await supabase
+        .from('phone_numbers_for_sale')
+        .select('*')
+        .eq('status', 'available') as { 
+          data: PhoneNumberForSale[] | null; 
+          error: any 
+        };
+
       if (error) throw error;
       if (!data || data.length === 0) {
         // Use mock data if no numbers are available
         setAvailableForSale(['+1234567890', '+1987654321', '+1555123456']);
       } else {
         // Map the data to extract just the phone numbers
-        setAvailableForSale(data.map((item: any) => item.phone_number));
+        setAvailableForSale(data.map(item => item.phone_number));
       }
     } catch (error) {
       console.error('Error loading numbers for sale:', error);
