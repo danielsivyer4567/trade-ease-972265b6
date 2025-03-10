@@ -114,6 +114,62 @@ export type Database = {
         }
         Relationships: []
       }
+      organization_members: {
+        Row: {
+          created_at: string
+          id: string
+          organization_id: string
+          role: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          organization_id: string
+          role?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          organization_id?: string
+          role?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_members_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      organizations: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       payments: {
         Row: {
           amount: number
@@ -343,6 +399,7 @@ export type Database = {
           created_at: string | null
           id: string
           messaging_enabled: boolean | null
+          organization_id: string | null
           updated_at: string | null
         }
         Insert: {
@@ -350,6 +407,7 @@ export type Database = {
           created_at?: string | null
           id: string
           messaging_enabled?: boolean | null
+          organization_id?: string | null
           updated_at?: string | null
         }
         Update: {
@@ -357,9 +415,18 @@ export type Database = {
           created_at?: string | null
           id?: string
           messaging_enabled?: boolean | null
+          organization_id?: string | null
           updated_at?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "users_configuration_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
@@ -369,6 +436,12 @@ export type Database = {
       calculate_database_statistics: {
         Args: Record<PropertyKey, never>
         Returns: undefined
+      }
+      has_organization_access: {
+        Args: {
+          object_organization_id: string
+        }
+        Returns: boolean
       }
     }
     Enums: {

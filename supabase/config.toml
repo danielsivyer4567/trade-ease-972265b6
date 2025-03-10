@@ -21,3 +21,7 @@ verify_jwt = false
 
 [functions.web-enquiry-submit]
 verify_jwt = false
+
+[functions.organization-invite]
+verify_jwt = true
+

@@ -22,10 +22,10 @@ export const supabase = createClient<Database>(
   }
 );
 
-// Helper function to auto-purchase leads (mocked version for now)
-export const checkAndAutoPurchaseLeads = async (userId: string) => {
+// Helper function to auto-purchase leads (updated to support organizations)
+export const checkAndAutoPurchaseLeads = async (userId: string, organizationId?: string) => {
   try {
-    console.log(`Checking auto-purchase leads for user: ${userId}`);
+    console.log(`Checking auto-purchase leads for user: ${userId}, organization: ${organizationId || 'N/A'}`);
     
     // This is a mock function that simulates the auto-purchase flow
     // In a real implementation, this would interact with database tables
@@ -35,7 +35,7 @@ export const checkAndAutoPurchaseLeads = async (userId: string) => {
     const autoLeadEnabled = Math.random() > 0.5; // Randomly enabled/disabled for demo
     
     if (!autoLeadEnabled) {
-      console.log("Auto-purchase not enabled for this user");
+      console.log("Auto-purchase not enabled for this user/organization");
       return;
     }
     
@@ -49,13 +49,13 @@ export const checkAndAutoPurchaseLeads = async (userId: string) => {
     
     // Mock check for already purchased leads this week
     const purchasedThisWeek = Math.floor(Math.random() * 3); // 0-2 already purchased
-    console.log(`User has already purchased ${purchasedThisWeek} leads this week`);
+    console.log(`User/Organization has already purchased ${purchasedThisWeek} leads this week`);
     
     // Mock maximum per week from preferences
     const maxPerWeek = mockPreferences.maxPerWeek;
     
     if (purchasedThisWeek >= maxPerWeek) {
-      console.log("User has reached their weekly limit");
+      console.log("User/Organization has reached their weekly limit");
       return;
     }
     
@@ -107,7 +107,10 @@ export const checkAndAutoPurchaseLeads = async (userId: string) => {
       console.log(`Auto-purchasing lead: ${leadToPurchase.id}`);
       
       // In a real implementation, this would update the lead status in the database
-      // and record the purchase
+      // and record the purchase with the organization ID if provided
+      if (organizationId) {
+        console.log(`Lead purchased for organization: ${organizationId}`);
+      }
       
       console.log("Lead auto-purchased successfully");
     } else {
