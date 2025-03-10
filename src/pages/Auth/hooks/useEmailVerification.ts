@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from "@/integrations/supabase/client";
 import { NavigateFunction } from 'react-router-dom';
-import { sendWelcomeEmail } from '@/utils/emailService';
+import { sendVerificationEmail, sendWelcomeEmail } from '@/utils/emailService';
 
 export type VerificationStatus = 'idle' | 'verifying' | 'success' | 'error';
 

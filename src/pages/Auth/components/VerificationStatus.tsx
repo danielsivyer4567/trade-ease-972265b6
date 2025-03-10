@@ -2,10 +2,10 @@
 import React from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { CheckCircle, AlertCircle } from 'lucide-react';
+import { CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
 
 interface VerificationStatusProps {
-  status: 'idle' | 'success' | 'error';
+  status: 'idle' | 'verifying' | 'success' | 'error';
   message: string;
   navigate: (path: string) => void;
 }
@@ -35,6 +35,11 @@ const VerificationStatus: React.FC<VerificationStatusProps> = ({ status, message
               >
                 Go to Sign In
               </Button>
+            </div>
+          ) : status === 'verifying' ? (
+            <div className="text-center">
+              <Loader2 className="w-16 h-16 text-blue-500 mx-auto mb-4 animate-spin" />
+              <p className="text-xl font-semibold">{message}</p>
             </div>
           ) : (
             <div className="text-center">
