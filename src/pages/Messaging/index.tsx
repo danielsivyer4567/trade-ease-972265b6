@@ -49,15 +49,7 @@ export default function Messaging() {
             </CardDescription>
             </CardHeader>
             
-            <CardContent className="bg-slate-200 mx-[9px] py-[159px]">
-              <div className="space-y-6">
-                <PhoneNumberInput phoneNumber={phoneNumber} isConnecting={isConnectingPhone} onChange={handlePhoneNumberChange} onConnect={handleConnect} />
-
-                <ConnectedPhonesList connectedNumbers={connectedNumbers} onRemoveNumber={handleRemoveNumber} onAddTwilioAccount={() => setTwilioDialogOpen(true)} />
-
-                <TwilioConnectButton />
-              </div>
-            </CardContent>
+            
           </Card>
           
           <ServiceSyncCard />
