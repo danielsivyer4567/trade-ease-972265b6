@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { TwilioOrderNumberDialog } from './TwilioOrderNumberDialog';
@@ -23,7 +24,7 @@ export const TwilioConnectButton = () => {
     authToken: ''
   });
   const [activeTab, setActiveTab] = useState<"connect" | "buy">("connect");
-  const [availableForSale, setAvailableForSale] = useState<string[]>([]);
+  const [availableNumber, setAvailableNumber] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
   // Function to handle opening dialog with correct credentials
@@ -63,19 +64,20 @@ export const TwilioConnectButton = () => {
         error: any;
       };
       if (error) throw error;
+      
       if (!data || data.length === 0) {
-        // Use mock data if no numbers are available
-        setAvailableForSale(['+1234567890', '+1987654321', '+1555123456']);
+        // Use a single authentic-looking number if no numbers are available in DB
+        setAvailableNumber('+1(415)555-0123');
       } else {
-        // Map the data to extract just the phone numbers
-        setAvailableForSale(data.map(item => item.phone_number));
+        // Take the first available phone number
+        setAvailableNumber(data[0].phone_number);
       }
     } catch (error) {
       console.error('Error loading numbers for sale:', error);
       toast.error('Failed to load available numbers');
 
-      // Fallback to mock data
-      setAvailableForSale(['+1234567890', '+1987654321', '+1555123456']);
+      // Fallback to a single authentic-looking number
+      setAvailableNumber('+1(415)555-0123');
     } finally {
       setIsLoading(false);
     }
@@ -103,8 +105,8 @@ export const TwilioConnectButton = () => {
         toast.dismiss();
         toast.success(`Successfully purchased ${phoneNumber}`);
 
-        // Remove from available list
-        setAvailableForSale(prev => prev.filter(num => num !== phoneNumber));
+        // Clear the available number
+        setAvailableNumber(null);
       }, 2000);
     } catch (error) {
       console.error('Error purchasing number:', error);
@@ -141,31 +143,37 @@ export const TwilioConnectButton = () => {
         <TabsContent value="buy" className="w-full">
           <div className="space-y-4">
             <div className="flex justify-between items-center">
-              <h3 className="font-medium">Phone Numbers For Sale</h3>
+              <h3 className="font-medium">Phone Number For Sale</h3>
               <Button variant="outline" size="sm" onClick={loadAvailableForSale} disabled={isLoading} className="text-sm bg-slate-400 hover:bg-slate-300">
                 Refresh
               </Button>
             </div>
             
-            {isLoading ? <div className="text-center py-4">Loading available numbers...</div> : availableForSale.length > 0 ? <ul className="space-y-2">
-                {availableForSale.map((number, index) => <li key={index} className="flex justify-between items-center p-3 bg-white rounded-md border">
-                    <div className="flex items-center">
-                      <Phone className="h-4 w-4 mr-2" />
-                      <span>{number}</span>
-                    </div>
-                    <Button size="sm" className="bg-green-500 hover:bg-green-600" onClick={() => handlePurchaseNumber(number)}>
-                      <DollarSign className="h-3.5 w-3.5 mr-1" />
-                      Purchase
-                    </Button>
-                  </li>)}
-              </ul> : <div className="text-center py-4 text-gray-500">
+            {isLoading ? (
+              <div className="text-center py-4">Loading available number...</div>
+            ) : availableNumber ? (
+              <div className="space-y-2">
+                <div className="flex justify-between items-center p-3 bg-white rounded-md border">
+                  <div className="flex items-center">
+                    <Phone className="h-4 w-4 mr-2" />
+                    <span>{availableNumber}</span>
+                  </div>
+                  <Button size="sm" className="bg-green-500 hover:bg-green-600" onClick={() => handlePurchaseNumber(availableNumber)}>
+                    <DollarSign className="h-3.5 w-3.5 mr-1" />
+                    Purchase
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <div className="text-center py-4 text-gray-500">
                 No phone numbers available for sale at the moment.
-              </div>}
+              </div>
+            )}
             
             <div className="mt-4 bg-blue-50 p-3 rounded-md text-sm">
               <p className="font-medium">How it works:</p>
               <ol className="list-decimal pl-5 mt-2 space-y-1 text-gray-700">
-                <li>Select a phone number from the list above</li>
+                <li>Select the phone number above</li>
                 <li>Complete the purchase process</li>
                 <li>The number will be assigned to your account</li>
                 <li>You can start using it immediately for messaging</li>
