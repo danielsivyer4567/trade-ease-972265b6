@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { TwilioOrderNumberDialog } from './TwilioOrderNumberDialog';
@@ -17,7 +16,6 @@ interface PhoneNumberForSale {
   created_at: string;
   updated_at: string;
 }
-
 export const TwilioConnectButton = () => {
   const [orderDialogOpen, setOrderDialogOpen] = useState(false);
   const [twilioCredentials, setTwilioCredentials] = useState({
@@ -57,14 +55,13 @@ export const TwilioConnectButton = () => {
       }
 
       // Use proper type assertion for the PhoneNumberForSale table
-      const { data, error } = await supabase
-        .from('phone_numbers_for_sale')
-        .select('*')
-        .eq('status', 'available') as { 
-          data: PhoneNumberForSale[] | null; 
-          error: any 
-        };
-
+      const {
+        data,
+        error
+      } = (await supabase.from('phone_numbers_for_sale').select('*').eq('status', 'available')) as {
+        data: PhoneNumberForSale[] | null;
+        error: any;
+      };
       if (error) throw error;
       if (!data || data.length === 0) {
         // Use mock data if no numbers are available
@@ -123,7 +120,7 @@ export const TwilioConnectButton = () => {
     }} className="w-full">
         <TabsList className="grid w-full grid-cols-2 mb-4">
           <TabsTrigger value="connect" className="text-gray-950 bg-slate-400 hover:bg-slate-300 mx-[14px]">Connect </TabsTrigger>
-          <TabsTrigger value="buy" className="bg-slate-400 hover:bg-slate-300">Buy Phone Numbers</TabsTrigger>
+          <TabsTrigger value="buy" className="bg-slate-400 hover:bg-slate-300">Purchase A Phone Number</TabsTrigger>
         </TabsList>
         
         <TabsContent value="connect" className="w-full">
