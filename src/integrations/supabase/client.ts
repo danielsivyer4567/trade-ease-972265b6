@@ -12,3 +12,10 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     autoRefreshToken: true
   }
 });
+
+// This is a stub function that will be implemented when needed
+// It's referenced in DemoDataGenerator.tsx
+export const generateDemoData = async () => {
+  console.log("Demo data generation function called");
+  return { success: true, message: "Demo data generation is not implemented in this client." };
+};
