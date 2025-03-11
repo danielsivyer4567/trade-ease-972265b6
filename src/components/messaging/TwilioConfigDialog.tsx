@@ -12,24 +12,24 @@ interface TwilioConfig {
 }
 
 interface TwilioConfigDialogProps {
-  isOpen: boolean;
+  open: boolean;
   onOpenChange: (open: boolean) => void;
-  twilioConfig: TwilioConfig;
-  setTwilioConfig: (config: TwilioConfig) => void;
+  config: TwilioConfig;
+  setConfig: (config: TwilioConfig) => void;
   onConnect: () => void;
   isConnecting: boolean;
 }
 
 export const TwilioConfigDialog = ({
-  isOpen,
+  open,
   onOpenChange,
-  twilioConfig,
-  setTwilioConfig,
+  config,
+  setConfig,
   onConnect,
   isConnecting
 }: TwilioConfigDialogProps) => {
   return (
-    <Dialog open={isOpen} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px] bg-slate-200">
         <DialogHeader>
           <DialogTitle>Connect Twilio Account</DialogTitle>
@@ -43,9 +43,9 @@ export const TwilioConfigDialog = ({
             <Label htmlFor="account-sid">Account SID</Label>
             <Input 
               id="account-sid" 
-              value={twilioConfig.accountSid} 
-              onChange={e => setTwilioConfig({
-                ...twilioConfig,
+              value={config.accountSid} 
+              onChange={e => setConfig({
+                ...config,
                 accountSid: e.target.value
               })} 
               placeholder="Enter your Twilio Account SID" 
@@ -60,9 +60,9 @@ export const TwilioConfigDialog = ({
             <Input 
               id="auth-token" 
               type="password" 
-              value={twilioConfig.authToken} 
-              onChange={e => setTwilioConfig({
-                ...twilioConfig,
+              value={config.authToken} 
+              onChange={e => setConfig({
+                ...config,
                 authToken: e.target.value
               })} 
               placeholder="Enter your Twilio Auth Token" 
@@ -76,9 +76,9 @@ export const TwilioConfigDialog = ({
             <Label htmlFor="twilio-phone">Twilio Phone Number</Label>
             <Input 
               id="twilio-phone" 
-              value={twilioConfig.phoneNumber} 
-              onChange={e => setTwilioConfig({
-                ...twilioConfig,
+              value={config.phoneNumber} 
+              onChange={e => setConfig({
+                ...config,
                 phoneNumber: e.target.value
               })} 
               placeholder="+1XXXXXXXXXX (include country code)" 
@@ -93,7 +93,7 @@ export const TwilioConfigDialog = ({
           <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
           <Button 
             onClick={onConnect} 
-            disabled={isConnecting || !twilioConfig.accountSid || !twilioConfig.authToken || !twilioConfig.phoneNumber} 
+            disabled={isConnecting || !config.accountSid || !config.authToken || !config.phoneNumber} 
             className="bg-slate-400 hover:bg-slate-300"
           >
             {isConnecting ? "Connecting..." : "Connect Twilio Account"}
