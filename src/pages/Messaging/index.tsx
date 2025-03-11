@@ -1,4 +1,3 @@
-
 import { AppLayout } from "@/components/ui/AppLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
@@ -16,10 +15,11 @@ import { SectionHeader } from "@/components/ui/SectionHeader";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ConnectedAppsOverview } from "@/components/messaging/crm/ConnectedAppsOverview";
 import { CrmPipeline } from "@/components/messaging/crm/CrmPipeline";
-
 export default function Messaging() {
   const navigate = useNavigate();
-  const { userConfig } = useUserConfig();
+  const {
+    userConfig
+  } = useUserConfig();
   const {
     phoneNumber,
     isConnecting: isConnectingPhone,
@@ -28,11 +28,9 @@ export default function Messaging() {
     handleConnect,
     handleRemoveNumber
   } = usePhoneNumbers();
-  
   const updateConnectedNumbers = (newNumber: string) => {
     connectedNumbers.push(newNumber);
   };
-  
   const {
     twilioDialogOpen,
     setTwilioDialogOpen,
@@ -41,9 +39,7 @@ export default function Messaging() {
     isConnecting: isConnectingTwilio,
     handleTwilioConnect
   } = useTwilioConnection(updateConnectedNumbers);
-
-  return (
-    <AppLayout>
+  return <AppLayout>
       <div className="w-full h-full px-3 md:px-4">
         <div className="space-y-4">
           <Card>
@@ -60,15 +56,12 @@ export default function Messaging() {
 
           <Tabs defaultValue="crm" className="w-full">
             <TabsList className="grid grid-cols-2 mb-4">
-              <TabsTrigger value="crm">CRM Pipeline</TabsTrigger>
+              <TabsTrigger value="crm">Pipeline</TabsTrigger>
               <TabsTrigger value="connections">Connections</TabsTrigger>
             </TabsList>
             
             <TabsContent value="crm" className="space-y-4">
-              <ConnectedAppsOverview 
-                connectedNumbers={connectedNumbers} 
-                services={[]} 
-              />
+              <ConnectedAppsOverview connectedNumbers={connectedNumbers} services={[]} />
               <CrmPipeline />
             </TabsContent>
             
@@ -80,18 +73,9 @@ export default function Messaging() {
                     <CardDescription>Manage your connected phone numbers</CardDescription>
                   </CardHeader>
                   <CardContent className="pt-4 bg-slate-200">
-                    <PhoneNumberInput
-                      phoneNumber={phoneNumber}
-                      isConnecting={isConnectingPhone}
-                      onChange={handlePhoneNumberChange}
-                      onConnect={handleConnect}
-                    />
+                    <PhoneNumberInput phoneNumber={phoneNumber} isConnecting={isConnectingPhone} onChange={handlePhoneNumberChange} onConnect={handleConnect} />
                     <div className="mt-4">
-                      <ConnectedPhonesList
-                        connectedNumbers={connectedNumbers}
-                        onRemoveNumber={handleRemoveNumber}
-                        onAddTwilioAccount={() => setTwilioDialogOpen(true)}
-                      />
+                      <ConnectedPhonesList connectedNumbers={connectedNumbers} onRemoveNumber={handleRemoveNumber} onAddTwilioAccount={() => setTwilioDialogOpen(true)} />
                     </div>
                   </CardContent>
                 </Card>
@@ -99,18 +83,10 @@ export default function Messaging() {
                 <ServiceSyncCard />
               </div>
               
-              <TwilioConfigDialog
-                open={twilioDialogOpen}
-                onOpenChange={setTwilioDialogOpen}
-                config={twilioConfig}
-                setConfig={setTwilioConfig}
-                onConnect={handleTwilioConnect}
-                isConnecting={isConnectingTwilio}
-              />
+              <TwilioConfigDialog open={twilioDialogOpen} onOpenChange={setTwilioDialogOpen} config={twilioConfig} setConfig={setTwilioConfig} onConnect={handleTwilioConnect} isConnecting={isConnectingTwilio} />
             </TabsContent>
           </Tabs>
         </div>
       </div>
-    </AppLayout>
-  );
+    </AppLayout>;
 }
