@@ -30,11 +30,11 @@ export function DatabaseStatistics() {
 
         if (error) throw error;
         
-        // Explicitly transform the data to match the StatisticItem type
         if (data) {
+          // Explicitly transform the data to match the StatisticItem type
           const typedStatistics: StatisticItem[] = data.map(item => ({
-            entity_type: item.entity_type,
-            count: item.count
+            entity_type: item.entity_type as string,
+            count: item.count as number
           }));
           setStatistics(typedStatistics);
         }

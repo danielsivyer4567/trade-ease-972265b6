@@ -44,7 +44,7 @@ export const useServicesFetch = () => {
       const { data: accounts, error } = await supabase
         .from('messaging_accounts')
         .select('*')
-        .eq('user_id', userId as string);
+        .eq('user_id', userId);
         
       if (error) {
         console.error('Error fetching messaging accounts:', error);

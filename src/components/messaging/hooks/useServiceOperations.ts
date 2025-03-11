@@ -17,8 +17,8 @@ export const useServiceOperations = (
     try {
       const { error } = await supabase
         .from('messaging_accounts')
-        .update({ enabled: !service.syncEnabled })
-        .eq('id', serviceId as string);
+        .update({ enabled: !service.syncEnabled } as any)
+        .eq('id', serviceId);
         
       if (error) {
         throw error;
@@ -151,7 +151,7 @@ export const useServiceOperations = (
       const { error } = await supabase
         .from('messaging_accounts')
         .delete()
-        .eq('id', serviceId as string);
+        .eq('id', serviceId);
         
       if (error) {
         throw error;

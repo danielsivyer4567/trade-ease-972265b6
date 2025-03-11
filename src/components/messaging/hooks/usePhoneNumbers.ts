@@ -25,7 +25,7 @@ export const usePhoneNumbers = () => {
       const { data: phoneAccounts, error: phoneError } = await supabase
         .from('messaging_accounts')
         .select('phone_number')
-        .eq('user_id', userId as string)
+        .eq('user_id', userId)
         .not('phone_number', 'is', null);
         
       if (phoneError) {
@@ -78,15 +78,15 @@ export const usePhoneNumbers = () => {
         );
       }
       
-      // Insert the phone number into messaging_accounts with type cast for userId
+      // Insert the phone number into messaging_accounts with type safe insertion
       const { data: accountData, error: accountError } = await supabase
         .from('messaging_accounts')
         .insert({
-          user_id: userId as string,
+          user_id: userId,
           service_type: 'sms',
           phone_number: phoneNumber,
           enabled: true
-        })
+        } as any)
         .select('id')
         .single();
         
@@ -122,8 +122,8 @@ export const usePhoneNumbers = () => {
       const { error } = await supabase
         .from('messaging_accounts')
         .delete()
-        .eq('user_id', userId as string)
-        .eq('phone_number', numberToRemove as string);
+        .eq('user_id', userId)
+        .eq('phone_number', numberToRemove);
         
       if (error) {
         throw error;
@@ -144,7 +144,7 @@ export const usePhoneNumbers = () => {
       const { data: configData, error: configError } = await supabase
         .from('users_configuration')
         .select('messaging_enabled')
-        .eq('id', userId as string)
+        .eq('id', userId)
         .single();
         
       if (configError) {
@@ -155,8 +155,8 @@ export const usePhoneNumbers = () => {
       if (configData && !configData.messaging_enabled) {
         const { error: updateError } = await supabase
           .from('users_configuration')
-          .update({ messaging_enabled: true })
-          .eq('id', userId as string);
+          .update({ messaging_enabled: true } as any)
+          .eq('id', userId);
           
         if (updateError) {
           console.error('Error updating messaging configuration:', updateError);

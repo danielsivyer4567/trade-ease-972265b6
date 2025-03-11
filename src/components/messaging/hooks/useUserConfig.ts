@@ -53,14 +53,14 @@ export const useUserConfig = () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
         console.log('No user session found');
-        return;
+        return false;
       }
 
       const userId = session.user.id;
       
       const { error } = await supabase
         .from('users_configuration')
-        .update({ organization_id: organizationId })
+        .update({ organization_id: organizationId } as any)
         .eq('id', userId);
         
       if (error) {
