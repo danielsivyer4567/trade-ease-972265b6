@@ -1,3 +1,4 @@
+
 import { AppLayout } from "@/components/ui/AppLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -11,6 +12,8 @@ import { TwilioConfigDialog } from "@/components/messaging/TwilioConfigDialog";
 import { usePhoneNumbers } from "@/components/messaging/hooks/usePhoneNumbers";
 import { useTwilioConnection } from "@/components/messaging/hooks/useTwilioConnection";
 import { useUserConfig } from "@/components/messaging/hooks/useUserConfig";
+import { SectionHeader } from "@/components/ui/SectionHeader";
+
 export default function Messaging() {
   const navigate = useNavigate();
   const {
@@ -39,7 +42,15 @@ export default function Messaging() {
       <div className="p-6 max-w-4xl mx-auto">
         <div className="space-y-6">
           <Card>
-            
+            <CardHeader className="bg-slate-200 pb-2">
+              <CardTitle className="text-lg flex items-center gap-2">
+                <MessageSquare className="h-5 w-5 text-blue-600" />
+                Multiple Messaging
+              </CardTitle>
+              <CardDescription>
+                Connect and manage your messaging services
+              </CardDescription>
+            </CardHeader>
             
             <CardContent className="bg-slate-200 mx-[9px] py-[159px]">
               <div className="space-y-6">
