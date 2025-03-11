@@ -79,7 +79,7 @@ export const useTwilioConnection = (
       const { data: configData, error: configError } = await supabase
         .from('users_configuration')
         .select('messaging_enabled')
-        .eq('id', userId)
+        .eq('id', userId as any)
         .single();
         
       if (configError) {
@@ -91,7 +91,7 @@ export const useTwilioConnection = (
         const { error: updateError } = await supabase
           .from('users_configuration')
           .update({ messaging_enabled: true } as any)
-          .eq('id', userId);
+          .eq('id', userId as any);
           
         if (updateError) {
           console.error('Error updating messaging configuration:', updateError);

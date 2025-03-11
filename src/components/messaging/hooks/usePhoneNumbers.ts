@@ -25,7 +25,7 @@ export const usePhoneNumbers = () => {
       const { data: phoneAccounts, error: phoneError } = await supabase
         .from('messaging_accounts')
         .select('phone_number')
-        .eq('user_id', userId)
+        .eq('user_id', userId as any)
         .not('phone_number', 'is', null);
         
       if (phoneError) {
@@ -122,8 +122,8 @@ export const usePhoneNumbers = () => {
       const { error } = await supabase
         .from('messaging_accounts')
         .delete()
-        .eq('user_id', userId)
-        .eq('phone_number', numberToRemove);
+        .eq('user_id', userId as any)
+        .eq('phone_number', numberToRemove as any);
         
       if (error) {
         throw error;
@@ -144,7 +144,7 @@ export const usePhoneNumbers = () => {
       const { data: configData, error: configError } = await supabase
         .from('users_configuration')
         .select('messaging_enabled')
-        .eq('id', userId)
+        .eq('id', userId as any)
         .single();
         
       if (configError) {
@@ -156,7 +156,7 @@ export const usePhoneNumbers = () => {
         const { error: updateError } = await supabase
           .from('users_configuration')
           .update({ messaging_enabled: true } as any)
-          .eq('id', userId);
+          .eq('id', userId as any);
           
         if (updateError) {
           console.error('Error updating messaging configuration:', updateError);

@@ -31,7 +31,7 @@ export const useUserConfig = () => {
       const { data: configData, error: configError } = await supabase
         .from('users_configuration')
         .select('messaging_enabled, organization_id')
-        .eq('id', userId)
+        .eq('id', userId as any)
         .single();
         
       if (configError) {
@@ -61,7 +61,7 @@ export const useUserConfig = () => {
       const { error } = await supabase
         .from('users_configuration')
         .update({ organization_id: organizationId } as any)
-        .eq('id', userId);
+        .eq('id', userId as any);
         
       if (error) {
         console.error('Error updating user organization:', error);
