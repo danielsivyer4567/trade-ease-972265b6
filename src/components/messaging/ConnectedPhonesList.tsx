@@ -9,11 +9,11 @@ interface ConnectedPhonesListProps {
   onAddTwilioAccount: () => void;
 }
 
-export const ConnectedPhonesList = ({
+export const ConnectedPhonesList: React.FC<ConnectedPhonesListProps> = ({
   connectedNumbers,
   onRemoveNumber,
   onAddTwilioAccount
-}: ConnectedPhonesListProps) => {
+}) => {
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center mb-2">

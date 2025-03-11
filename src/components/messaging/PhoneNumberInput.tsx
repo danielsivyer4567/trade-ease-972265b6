@@ -12,12 +12,12 @@ interface PhoneNumberInputProps {
   onConnect: () => void;
 }
 
-export const PhoneNumberInput = ({
+export const PhoneNumberInput: React.FC<PhoneNumberInputProps> = ({
   phoneNumber,
   isConnecting,
   onChange,
   onConnect
-}: PhoneNumberInputProps) => {
+}) => {
   return (
     <div className="flex flex-col space-y-4">
       <div className="space-y-2">
