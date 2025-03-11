@@ -16,6 +16,7 @@ import { SectionHeader } from "@/components/ui/SectionHeader";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ConnectedAppsOverview } from "@/components/messaging/crm/ConnectedAppsOverview";
 import { CrmPipeline } from "@/components/messaging/crm/CrmPipeline";
+import { useServicesFetch } from "@/components/messaging/hooks/useServicesFetch";
 
 export default function Messaging() {
   const navigate = useNavigate();
@@ -42,6 +43,8 @@ export default function Messaging() {
     handleTwilioConnect
   } = useTwilioConnection(updateConnectedNumbers);
   
+  const { services } = useServicesFetch();
+  
   return <AppLayout>
       <div className="w-full h-full px-3 md:px-4">
         <div className="space-y-4">
@@ -64,7 +67,7 @@ export default function Messaging() {
             </TabsList>
             
             <TabsContent value="crm" className="space-y-4">
-              <ConnectedAppsOverview connectedNumbers={connectedNumbers} services={[]} />
+              <ConnectedAppsOverview connectedNumbers={connectedNumbers} services={services} />
               <CrmPipeline />
             </TabsContent>
             

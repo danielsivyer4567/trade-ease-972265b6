@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -8,7 +7,7 @@ import {
   Bell, AlertTriangle, Plus
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 // Mock pipelines
 const PIPELINES = [
@@ -194,25 +193,20 @@ export const CrmPipeline: React.FC = () => {
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <div className="flex items-center gap-4">
-          <Select value={activePipeline} onValueChange={handlePipelineChange}>
-            <SelectTrigger className="w-[220px]">
-              <SelectValue placeholder="Select pipeline" />
-            </SelectTrigger>
-            <SelectContent>
+          <Tabs value={activePipeline} onValueChange={handlePipelineChange} className="w-full">
+            <TabsList>
               {PIPELINES.map(pipeline => (
-                <SelectItem key={pipeline.id} value={pipeline.id}>
-                  <div className="flex items-center gap-2">
-                    {pipeline.name}
-                    {pipeline.attentionCount > 0 && (
-                      <Badge variant="destructive" className="ml-1 flex items-center justify-center h-5 w-5 p-0 rounded-full">
-                        <span className="text-[11px]">{pipeline.attentionCount}</span>
-                      </Badge>
-                    )}
-                  </div>
-                </SelectItem>
+                <TabsTrigger key={pipeline.id} value={pipeline.id} className="relative">
+                  {pipeline.name}
+                  {pipeline.attentionCount > 0 && (
+                    <Badge variant="destructive" className="ml-1 absolute -top-2 -right-2 flex items-center justify-center h-5 w-5 p-0 rounded-full">
+                      <span className="text-[11px]">{pipeline.attentionCount}</span>
+                    </Badge>
+                  )}
+                </TabsTrigger>
               ))}
-            </SelectContent>
-          </Select>
+            </TabsList>
+          </Tabs>
           <span className="text-sm text-gray-500">
             {getAttentionCount(activePipeline) > 0 && (
               <div className="flex items-center">
