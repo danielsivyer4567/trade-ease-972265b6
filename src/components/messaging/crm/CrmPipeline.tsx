@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -72,7 +73,7 @@ const MOCK_CUSTOMERS = [{
   phone: '+1 555-678-9012',
   lastMessage: "I'll send the signed contract tomorrow",
   timestamp: '2d ago',
-  stage: 'accepted',
+  stage: 'followUp',
   pipelineId: 'sales',
   needsAttention: false
 }, {
@@ -90,7 +91,7 @@ const MOCK_CUSTOMERS = [{
   phone: '+1 555-432-1098',
   lastMessage: "I've decided to go with another company",
   timestamp: '5d ago',
-  stage: 'denied',
+  stage: 'followUp',
   pipelineId: 'support',
   needsAttention: false
 }, {
@@ -208,9 +209,6 @@ export const CrmPipeline: React.FC = () => {
 
           {/* Auto Follow Up */}
           <PipelineStage title="Auto Follow Up" icon={<Clock className="h-5 w-5 text-amber-600" />} count={getCustomersByStage('followUp').length} attentionCount={getCustomersByStage('followUp').filter(c => c.needsAttention).length} color="bg-amber-100" customers={getCustomersByStage('followUp')} stageName="followUp" onDragStart={handleDragStart} onDragOver={handleDragOver} onDrop={handleDrop} />
-
-          {/* Quote Denied */}
-          <PipelineStage title="Quote Denied" icon={<X className="h-5 w-5 text-orange-600" />} count={getCustomersByStage('denied').length} attentionCount={getCustomersByStage('denied').filter(c => c.needsAttention).length} color="bg-orange-100" customers={getCustomersByStage('denied')} stageName="denied" onDragStart={handleDragStart} onDragOver={handleDragOver} onDrop={handleDrop} />
         </div>
       </div>
     </div>;
@@ -267,10 +265,6 @@ const PipelineStage: React.FC<PipelineStageProps> = ({
       }}>
           <div className="space-y-2">
             {customers.map(customer => <CustomerCard key={customer.id} customer={customer} onDragStart={() => onDragStart(customer.id)} />)}
-            <Button variant="ghost" size="sm" className="w-full border border-dashed border-gray-300 text-gray-500 hover:text-gray-700 hover:border-gray-400 mt-2">
-              <PlusCircle className="h-4 w-4 mr-1" />
-              Add Customer
-            </Button>
           </div>
         </CardContent>
       </Card>
@@ -314,3 +308,4 @@ const CustomerCard: React.FC<CustomerCardProps> = ({
       </div>
     </div>;
 };
+
