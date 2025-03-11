@@ -1,3 +1,4 @@
+
 import { AppLayout } from "@/components/ui/AppLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -40,16 +41,31 @@ export default function Messaging() {
       <div className="p-6 max-w-4xl mx-auto">
         <div className="space-y-6">
           <Card>
-            <CardHeader className="bg-slate-200 pb-2">
-              <CardTitle className="flex items-center gap-2 text-5xl">
-                <MessageSquare className="h-5 w-5 text-blue-600" />
-                Multiple Messaging
+            <CardHeader className="rounded-t-lg py-8 text-center" 
+                style={{
+                  backgroundImage: "url('/lovable-uploads/824c69db-92ac-4d63-9330-fa01e53bcf9a.png')",
+                  backgroundSize: "cover",
+                  backgroundPosition: "center",
+                }}>
+              <CardTitle className="text-3xl font-bold text-slate-900 mb-1">
+                Multiple Messaging Platform
               </CardTitle>
-              <CardDescription className="py-[8px]">Connect and manage your messaging platforms into one place!
-            </CardDescription>
+              <CardDescription className="text-slate-800 text-lg font-medium mb-6">
+                Connect and manage your messaging platforms into one place!
+              </CardDescription>
+              
+              <div className="flex justify-center mt-8">
+                <div className="flex flex-wrap gap-6 justify-center items-center max-w-xl">
+                  {/* Social media icons can be added here if desired */}
+                </div>
+              </div>
+              
+              <p className="text-slate-800 text-lg font-medium mt-16 mb-2">
+                Connect and manage your messaging platforms all in one place!
+              </p>
             </CardHeader>
             
-            <CardContent className="bg-slate-200 mx-[9px] py-[159px]">
+            <CardContent className="bg-white py-8">
               <div className="space-y-6">
                 <PhoneNumberInput phoneNumber={phoneNumber} isConnecting={isConnectingPhone} onChange={handlePhoneNumberChange} onConnect={handleConnect} />
 
