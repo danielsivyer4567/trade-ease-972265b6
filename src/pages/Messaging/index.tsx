@@ -43,17 +43,19 @@ export default function Messaging() {
       <div className="p-6 max-w-4xl mx-auto">
         <div className="space-y-6">
           <Card>
-            <CardHeader className="rounded-t-lg py-8 text-center" 
+            <CardHeader 
+                className="rounded-t-lg py-8 text-center relative"
                 style={{
-                  backgroundImage: "url('/lovable-uploads/517868f0-c176-4d53-9ff5-69aec8574f56.png')",
+                  background: "linear-gradient(rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.85)), url('/lovable-uploads/6a07dd00-f2c7-49da-8b00-48d960c13610.png')",
                   backgroundSize: "cover",
                   backgroundPosition: "center",
+                  height: "380px"
                 }}>
               <CardTitle className="text-3xl font-bold text-slate-900 mb-1">
                 Multiple Messaging Platform
               </CardTitle>
               <CardDescription className="text-slate-800 text-lg font-medium mb-6">
-                Connect and manage your lessagin platforms onte place.a
+                Connect and manage your messaging platforms in one place.
               </CardDescription>
               
               <div className="flex justify-center mt-8">
@@ -63,7 +65,7 @@ export default function Messaging() {
               </div>
               
               <p className="text-slate-800 text-lg font-medium mt-16 mb-2">
-                Connect and managaen your messeng platforms biroms in/into one place!
+                Connect and manage your messaging platforms in one place!
               </p>
             </CardHeader>
             
