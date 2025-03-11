@@ -77,6 +77,7 @@ const MOCK_CUSTOMERS = [
 
 export const CrmPipeline: React.FC = () => {
   const [customers, setCustomers] = useState(MOCK_CUSTOMERS);
+  const [draggedCustomer, setDraggedCustomer] = useState<string | null>(null);
 
   const moveCustomer = (customerId: string, targetStage: string) => {
     setCustomers(prev => 
@@ -93,6 +94,22 @@ export const CrmPipeline: React.FC = () => {
     return customers.filter(customer => customer.stage === stage);
   };
 
+  const handleDragStart = (customerId: string) => {
+    setDraggedCustomer(customerId);
+  };
+
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault(); // Necessary to allow drop
+  };
+
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>, targetStage: string) => {
+    e.preventDefault();
+    if (draggedCustomer) {
+      moveCustomer(draggedCustomer, targetStage);
+      setDraggedCustomer(null);
+    }
+  };
+
   return (
     <div className="overflow-x-auto pb-4">
       <div className="flex gap-4 min-w-[1200px]">
@@ -105,6 +122,10 @@ export const CrmPipeline: React.FC = () => {
           customers={getCustomersByStage('new')}
           onMoveCustomer={(id) => moveCustomer(id, 'quoteBooked')}
           targetStageName="Quote Booked"
+          stageName="new"
+          onDragStart={handleDragStart}
+          onDragOver={handleDragOver}
+          onDrop={handleDrop}
         />
 
         {/* Quote Booked */}
@@ -116,8 +137,12 @@ export const CrmPipeline: React.FC = () => {
           customers={getCustomersByStage('quoteBooked')}
           onMoveCustomer={(id) => moveCustomer(id, 'quoteSent')}
           targetStageName="Quote Sent"
+          stageName="quoteBooked"
           onMoveToAlternative={(id) => moveCustomer(id, 'notServiceable')}
           alternativeStageName="Not Serviceable"
+          onDragStart={handleDragStart}
+          onDragOver={handleDragOver}
+          onDrop={handleDrop}
         />
 
         {/* Not Serviceable */}
@@ -129,6 +154,10 @@ export const CrmPipeline: React.FC = () => {
           customers={getCustomersByStage('notServiceable')}
           onMoveCustomer={(id) => moveCustomer(id, 'new')}
           targetStageName="Reopen"
+          stageName="notServiceable"
+          onDragStart={handleDragStart}
+          onDragOver={handleDragOver}
+          onDrop={handleDrop}
         />
 
         {/* Quote Sent */}
@@ -140,6 +169,10 @@ export const CrmPipeline: React.FC = () => {
           customers={getCustomersByStage('quoteSent')}
           onMoveCustomer={(id) => moveCustomer(id, 'followUp')}
           targetStageName="Follow Up"
+          stageName="quoteSent"
+          onDragStart={handleDragStart}
+          onDragOver={handleDragOver}
+          onDrop={handleDrop}
         />
 
         {/* Auto Follow Up */}
@@ -151,8 +184,12 @@ export const CrmPipeline: React.FC = () => {
           customers={getCustomersByStage('followUp')}
           onMoveCustomer={(id) => moveCustomer(id, 'accepted')}
           targetStageName="Accepted"
+          stageName="followUp"
           onMoveToAlternative={(id) => moveCustomer(id, 'denied')}
           alternativeStageName="Denied"
+          onDragStart={handleDragStart}
+          onDragOver={handleDragOver}
+          onDrop={handleDrop}
         />
 
         {/* Quote Denied */}
@@ -164,6 +201,10 @@ export const CrmPipeline: React.FC = () => {
           customers={getCustomersByStage('denied')}
           onMoveCustomer={(id) => moveCustomer(id, 'new')}
           targetStageName="Reopen"
+          stageName="denied"
+          onDragStart={handleDragStart}
+          onDragOver={handleDragOver}
+          onDrop={handleDrop}
         />
 
         {/* Quote Accepted */}
@@ -175,6 +216,10 @@ export const CrmPipeline: React.FC = () => {
           customers={getCustomersByStage('accepted')}
           onMoveCustomer={(id) => moveCustomer(id, 'new')}
           targetStageName="New Quote"
+          stageName="accepted"
+          onDragStart={handleDragStart}
+          onDragOver={handleDragOver}
+          onDrop={handleDrop}
         />
       </div>
     </div>
@@ -195,8 +240,12 @@ interface PipelineStageProps {
   }>;
   onMoveCustomer: (id: string) => void;
   targetStageName: string;
+  stageName: string;
   onMoveToAlternative?: (id: string) => void;
   alternativeStageName?: string;
+  onDragStart: (customerId: string) => void;
+  onDragOver: (e: React.DragEvent<HTMLDivElement>) => void;
+  onDrop: (e: React.DragEvent<HTMLDivElement>, stageName: string) => void;
 }
 
 const PipelineStage: React.FC<PipelineStageProps> = ({
@@ -207,11 +256,19 @@ const PipelineStage: React.FC<PipelineStageProps> = ({
   customers,
   onMoveCustomer,
   targetStageName,
+  stageName,
   onMoveToAlternative,
-  alternativeStageName
+  alternativeStageName,
+  onDragStart,
+  onDragOver,
+  onDrop
 }) => {
   return (
-    <div className="w-[250px] flex-shrink-0">
+    <div 
+      className="w-[250px] flex-shrink-0"
+      onDragOver={onDragOver}
+      onDrop={(e) => onDrop(e, stageName)}
+    >
       <Card className="h-full">
         <CardHeader className={`${color} py-2 px-3`}>
           <CardTitle className="text-sm flex items-center justify-between">
@@ -234,6 +291,7 @@ const PipelineStage: React.FC<PipelineStageProps> = ({
                 targetStageName={targetStageName}
                 onMoveToAlternative={onMoveToAlternative ? () => onMoveToAlternative(customer.id) : undefined}
                 alternativeStageName={alternativeStageName}
+                onDragStart={() => onDragStart(customer.id)}
               />
             ))}
             <Button 
@@ -263,6 +321,7 @@ interface CustomerCardProps {
   targetStageName: string;
   onMoveToAlternative?: () => void;
   alternativeStageName?: string;
+  onDragStart: () => void;
 }
 
 const CustomerCard: React.FC<CustomerCardProps> = ({
@@ -270,13 +329,20 @@ const CustomerCard: React.FC<CustomerCardProps> = ({
   onMoveCustomer,
   targetStageName,
   onMoveToAlternative,
-  alternativeStageName
+  alternativeStageName,
+  onDragStart
 }) => {
   return (
-    <div className="bg-white border rounded-lg shadow-sm p-2 hover:shadow-md transition-shadow">
+    <div 
+      className="bg-white border rounded-lg shadow-sm p-2 hover:shadow-md transition-shadow cursor-move"
+      draggable
+      onDragStart={onDragStart}
+    >
       <div className="flex items-start justify-between">
         <div className="flex items-center gap-2">
-          <div className="bg-gray-100 rounded-full p-1">
+          <div 
+            className="bg-gray-100 rounded-full p-1 cursor-grab"
+          >
             <User className="h-4 w-4 text-gray-600" />
           </div>
           <div>
