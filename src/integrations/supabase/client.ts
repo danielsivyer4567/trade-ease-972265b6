@@ -1,21 +1,19 @@
 
 import { createClient } from '@supabase/supabase-js';
 
-// Initialize the Supabase client with your project credentials
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
+// Set default environment variables if they're not defined
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://wxwbxupdisbofesaygqj.supabase.co';
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind4d2J4dXBkaXNib2Zlc2F5Z3FqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDAwMDI0OTgsImV4cCI6MjA1NTU3ODQ5OH0.xhjkVsi9XZMwobUMsdYE0e1FXQeT_uNLaTHquGvRxjI';
 
-// Configure and export the Supabase client
-export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-  auth: {
-    persistSession: true,
-    autoRefreshToken: true
-  }
-});
+export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-// This is a stub function that will be implemented when needed
-// It's referenced in DemoDataGenerator.tsx
+// Needed for demo data generation
 export const generateDemoData = async () => {
-  console.log("Demo data generation function called");
-  return { success: true, message: "Demo data generation is not implemented in this client." };
+  try {
+    const { data, error } = await supabase.functions.invoke('generate-demo-data');
+    return { data, error };
+  } catch (error) {
+    console.error('Error generating demo data:', error);
+    return { data: null, error: error };
+  }
 };
