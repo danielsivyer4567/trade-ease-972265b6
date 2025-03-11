@@ -8,21 +8,20 @@ import { Button } from './button';
 import { LogOut } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+
 interface AppLayoutProps {
   children: React.ReactNode;
   className?: string;
 }
+
 export function AppLayout({
   children,
   className
 }: AppLayoutProps) {
   const navigate = useNavigate();
 
-  // Save active tab states when component unmounts
   useEffect(() => {
-    // Save all tab states when the window unloads
     const saveTabStates = () => {
-      // Find all elements with data-state="active" that are tab triggers
       const activeTabs = document.querySelectorAll('[role="tab"][data-state="active"]');
       const tabStates: Record<string, string> = {};
       activeTabs.forEach(tab => {
@@ -35,17 +34,14 @@ export function AppLayout({
       localStorage.setItem('tabStates', JSON.stringify(tabStates));
     };
 
-    // Add event listener for when the page unloads
     window.addEventListener('beforeunload', saveTabStates);
 
-    // Restore tab states when component mounts
     const restoreTabStates = () => {
       try {
         const savedStates = localStorage.getItem('tabStates');
         if (savedStates) {
           const tabStates = JSON.parse(savedStates);
 
-          // Apply saved states after a short delay to ensure DOM is ready
           setTimeout(() => {
             Object.entries(tabStates).forEach(([groupId, tabId]) => {
               const tabsList = document.getElementById(groupId);
@@ -67,8 +63,10 @@ export function AppLayout({
       window.removeEventListener('beforeunload', saveTabStates);
     };
   }, []);
+
   const location = useLocation();
   const isMainDashboard = location.pathname === '/' || location.pathname === '/index';
+
   const handleLogout = async () => {
     try {
       const {
@@ -82,14 +80,13 @@ export function AppLayout({
       toast.error("Failed to log out");
     }
   };
+
   return <SidebarProvider defaultOpen={!window.matchMedia('(max-width: 1024px)').matches}>
       <div className="min-h-screen min-w-full flex bg-transparent">
         <AppSidebar />
         <main className={cn("flex-1 overflow-auto transition-[margin] duration-300 ease-in-out", "p-2 md:p-4 lg:p-6",
-      // Smaller padding on mobile
       "peer-data-[state=expanded]:ml-[240px] peer-data-[state=collapsed]:ml-[60px]", className)}>
-          <div className="relative max-w-7xl glass-card p-3 md:p-6 border-2 border-white/50 shadow-2xl bg-slate-200 py-[26px] rounded-3xl my-[5px] mx-[115px] px-0">
-            {/* Logout button in top right corner */}
+          <div className="relative w-full h-full glass-card p-3 md:p-6 border-2 border-white/50 shadow-2xl bg-slate-200 rounded-xl">
             <div className="absolute top-3 right-3 z-10">
               <Button variant="outline" size="sm" onClick={handleLogout} className="flex items-center gap-2 bg-slate-300 hover:bg-slate-400 text-gray-700 my-0 mx-[4px] py-[4px] px-[15px]">
                 <LogOut className="h-4 w-4" />

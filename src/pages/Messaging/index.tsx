@@ -44,7 +44,7 @@ export default function Messaging() {
 
   return (
     <AppLayout>
-      <div className="p-4 max-w-7xl mx-auto">
+      <div className="w-full h-full px-3 md:px-4">
         <div className="space-y-4">
           <Card>
             <CardHeader className="bg-slate-200 pb-2">

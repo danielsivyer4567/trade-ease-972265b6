@@ -21,7 +21,7 @@ const MOCK_CUSTOMERS = [
     id: '2', 
     name: 'Sarah Johnson', 
     phone: '+1 555-987-6543', 
-    lastMessage: 'What\'s your availability next week?',
+    lastMessage: "What's your availability next week?",
     timestamp: '4h ago',
     stage: 'new'
   },
@@ -29,7 +29,7 @@ const MOCK_CUSTOMERS = [
     id: '3', 
     name: 'Michael Brown', 
     phone: '+1 555-321-7654', 
-    lastMessage: 'I\'d like to schedule a consultation',
+    lastMessage: "I'd like to schedule a consultation",
     timestamp: '6h ago',
     stage: 'quoteBooked'
   },
@@ -53,7 +53,7 @@ const MOCK_CUSTOMERS = [
     id: '6', 
     name: 'Emily Taylor', 
     phone: '+1 555-678-9012', 
-    lastMessage: 'I\'ll send the signed contract tomorrow',
+    lastMessage: "I'll send the signed contract tomorrow",
     timestamp: '2d ago',
     stage: 'accepted'
   },
@@ -61,7 +61,7 @@ const MOCK_CUSTOMERS = [
     id: '7', 
     name: 'Robert Martinez', 
     phone: '+1 555-234-5678', 
-    lastMessage: 'We\'re outside your service area',
+    lastMessage: "We're outside your service area",
     timestamp: '3d ago',
     stage: 'notServiceable'
   },
@@ -69,7 +69,7 @@ const MOCK_CUSTOMERS = [
     id: '8', 
     name: 'Amanda Clark', 
     phone: '+1 555-432-1098', 
-    lastMessage: 'I\'ve decided to go with another company',
+    lastMessage: "I've decided to go with another company",
     timestamp: '5d ago',
     stage: 'denied'
   }
