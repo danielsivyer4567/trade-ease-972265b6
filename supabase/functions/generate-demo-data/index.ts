@@ -150,9 +150,12 @@ serve(async (req) => {
     
     return new Response(
       JSON.stringify({ 
-        success: true, 
-        message: "Demo data generated successfully",
-        organizations: createdOrganizations
+        data: { 
+          success: true, 
+          message: "Demo data generated successfully",
+          organizations: createdOrganizations
+        },
+        error: null
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
@@ -161,8 +164,10 @@ serve(async (req) => {
     
     return new Response(
       JSON.stringify({ 
-        success: false, 
-        message: error.message 
+        data: null,
+        error: { 
+          message: error.message 
+        }
       }),
       { 
         status: 500,
