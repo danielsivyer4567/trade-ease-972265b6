@@ -298,11 +298,9 @@ export const CrmPipeline: React.FC = () => {
             attentionCount={getCustomersByStage('followUp').filter(c => c.needsAttention).length}
             color="bg-amber-100"
             customers={getCustomersByStage('followUp')}
-            onMoveCustomer={(id) => moveCustomer(id, 'accepted')}
-            targetStageName="Accepted"
+            onMoveCustomer={(id) => moveCustomer(id, 'denied')}
+            targetStageName="Denied"
             stageName="followUp"
-            onMoveToAlternative={(id) => moveCustomer(id, 'denied')}
-            alternativeStageName="Denied"
             onDragStart={handleDragStart}
             onDragOver={handleDragOver}
             onDrop={handleDrop}
@@ -319,22 +317,6 @@ export const CrmPipeline: React.FC = () => {
             onMoveCustomer={(id) => moveCustomer(id, 'new')}
             targetStageName="Reopen"
             stageName="denied"
-            onDragStart={handleDragStart}
-            onDragOver={handleDragOver}
-            onDrop={handleDrop}
-          />
-
-          {/* Quote Accepted */}
-          <PipelineStage 
-            title="Quote Accepted" 
-            icon={<CheckCircle className="h-5 w-5 text-green-600" />}
-            count={getCustomersByStage('accepted').length}
-            attentionCount={getCustomersByStage('accepted').filter(c => c.needsAttention).length}
-            color="bg-green-100"
-            customers={getCustomersByStage('accepted')}
-            onMoveCustomer={(id) => moveCustomer(id, 'new')}
-            targetStageName="New Quote"
-            stageName="accepted"
             onDragStart={handleDragStart}
             onDragOver={handleDragOver}
             onDrop={handleDrop}
