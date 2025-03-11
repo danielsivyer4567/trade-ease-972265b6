@@ -48,7 +48,7 @@ const ConnectedAppCard: React.FC<ConnectedAppCardProps> = ({
   color
 }) => {
   return <Card className="overflow-hidden">
-      <CardContent className="px-[25px]">
+      <CardContent className="px-[22px] rounded-sm">
         <div className="flex items-center gap-2">
           {icon}
           <span className="font-medium">{title}</span>
