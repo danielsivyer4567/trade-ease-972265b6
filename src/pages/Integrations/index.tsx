@@ -17,6 +17,7 @@ import { usePhoneNumbers } from "@/components/messaging/hooks/usePhoneNumbers";
 import { useTwilioConnection } from "@/components/messaging/hooks/useTwilioConnection";
 import { useUserConfig } from "@/components/messaging/hooks/useUserConfig";
 import { ServiceSyncCard } from "@/components/messaging/ServiceSyncCard";
+
 export default function Integrations() {
   const navigate = useNavigate();
   const [leadAutoEnabled, setLeadAutoEnabled] = useState(false);
@@ -28,7 +29,6 @@ export default function Integrations() {
     secretKey: ""
   });
 
-  // Messaging functionality
   const {
     userConfig
   } = useUserConfig();
@@ -51,6 +51,7 @@ export default function Integrations() {
     isConnecting: isConnectingTwilio,
     handleTwilioConnect
   } = useTwilioConnection(updateConnectedNumbers);
+
   const handleToggleAutoLead = (checked: boolean) => {
     setLeadAutoEnabled(checked);
     if (checked) {
@@ -59,13 +60,13 @@ export default function Integrations() {
       toast.info("Auto lead purchase disabled");
     }
   };
+
   const handleCyberSourceConnectClick = () => {
     setCyberSourceDialogOpen(true);
   };
+
   const handleCyberSourceConfigSubmit = async () => {
     try {
-      // Here we would normally validate and save the CyberSource configuration
-      // For this demo, we'll just show a success toast
       toast.success("CyberSource integration configured successfully");
       setCyberSourceDialogOpen(false);
     } catch (error) {
@@ -73,8 +74,8 @@ export default function Integrations() {
       toast.error("Failed to configure CyberSource integration");
     }
   };
+
   const generateApiKey = () => {
-    // Generate a random API key
     const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     const prefix = 'api_';
     let result = prefix;
@@ -84,10 +85,12 @@ export default function Integrations() {
     setGeneratedApiKey(result);
     toast.success("API key generated successfully");
   };
+
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
     toast.success("API key copied to clipboard");
   };
+
   return <AppLayout>
       <div className="p-6 space-y-6">
         <div className="flex items-center gap-2">
@@ -98,7 +101,6 @@ export default function Integrations() {
         </div>
         <p className="text-gray-600">Connect your account with these services to enhance your workflow.</p>
         
-        {/* Messaging Integration Card */}
         <Card>
           <CardHeader className="bg-slate-200 pb-2">
             
@@ -106,8 +108,8 @@ export default function Integrations() {
             </CardDescription>
           </CardHeader>
           
-          <CardContent className="bg-slate-200 mx-[9px] py-0">
-            <div className="space-y-6">
+          <CardContent className="bg-slate-200 mx-[4px] py-0 px-4 max-w-[95%]">
+            <div className="space-y-4">
               <PhoneNumberInput phoneNumber={phoneNumber} isConnecting={isConnectingPhone} onChange={handlePhoneNumberChange} onConnect={handleConnect} />
 
               <ConnectedPhonesList connectedNumbers={connectedNumbers} onRemoveNumber={handleRemoveNumber} onAddTwilioAccount={() => setTwilioDialogOpen(true)} />
