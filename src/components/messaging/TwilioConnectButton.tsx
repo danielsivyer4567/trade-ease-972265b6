@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { TwilioOrderNumberDialog } from './TwilioOrderNumberDialog';
+import { TwilioOrderNumberDialog } from './twilio/TwilioOrderNumberDialog';
 import { ConnectSection } from './twilio/ConnectSection';
 import { BuyNumberSection } from './twilio/BuyNumberSection';
 import { TermsAndConditionsDialog } from './twilio/TermsAndConditionsDialog';
