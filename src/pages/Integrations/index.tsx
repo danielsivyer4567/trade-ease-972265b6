@@ -1,4 +1,3 @@
-
 import { AppLayout } from "@/components/ui/AppLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -18,7 +17,6 @@ import { usePhoneNumbers } from "@/components/messaging/hooks/usePhoneNumbers";
 import { useTwilioConnection } from "@/components/messaging/hooks/useTwilioConnection";
 import { useUserConfig } from "@/components/messaging/hooks/useUserConfig";
 import { ServiceSyncCard } from "@/components/messaging/ServiceSyncCard";
-
 export default function Integrations() {
   const navigate = useNavigate();
   const [leadAutoEnabled, setLeadAutoEnabled] = useState(false);
@@ -29,7 +27,7 @@ export default function Integrations() {
     apiKeyId: "",
     secretKey: ""
   });
-  
+
   // Messaging functionality
   const {
     userConfig
@@ -53,7 +51,6 @@ export default function Integrations() {
     isConnecting: isConnectingTwilio,
     handleTwilioConnect
   } = useTwilioConnection(updateConnectedNumbers);
-  
   const handleToggleAutoLead = (checked: boolean) => {
     setLeadAutoEnabled(checked);
     if (checked) {
@@ -62,11 +59,9 @@ export default function Integrations() {
       toast.info("Auto lead purchase disabled");
     }
   };
-  
   const handleCyberSourceConnectClick = () => {
     setCyberSourceDialogOpen(true);
   };
-  
   const handleCyberSourceConfigSubmit = async () => {
     try {
       // Here we would normally validate and save the CyberSource configuration
@@ -78,26 +73,21 @@ export default function Integrations() {
       toast.error("Failed to configure CyberSource integration");
     }
   };
-
   const generateApiKey = () => {
     // Generate a random API key
     const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     const prefix = 'api_';
     let result = prefix;
-    
     for (let i = 0; i < 32; i++) {
       result += characters.charAt(Math.floor(Math.random() * characters.length));
     }
-    
     setGeneratedApiKey(result);
     toast.success("API key generated successfully");
   };
-
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
     toast.success("API key copied to clipboard");
   };
-  
   return <AppLayout>
       <div className="p-6 space-y-6">
         <div className="flex items-center gap-2">
@@ -111,15 +101,12 @@ export default function Integrations() {
         {/* Messaging Integration Card */}
         <Card>
           <CardHeader className="bg-slate-200 pb-2">
-            <CardTitle className="flex items-center gap-2 text-5xl">
-              <MessageSquare className="h-5 w-5 text-blue-600" />
-              Multiple Messaging
-            </CardTitle>
+            
             <CardDescription className="py-[8px]">Connect and manage your messaging platforms into one place!
             </CardDescription>
           </CardHeader>
           
-          <CardContent className="bg-slate-200 mx-[9px] py-[159px]">
+          <CardContent className="bg-slate-200 mx-[9px] py-0">
             <div className="space-y-6">
               <PhoneNumberInput phoneNumber={phoneNumber} isConnecting={isConnectingPhone} onChange={handlePhoneNumberChange} onConnect={handleConnect} />
 
@@ -242,19 +229,12 @@ export default function Integrations() {
                 Generate and manage API keys to allow external services to access your data.
                 View request logs and control permissions.
               </p>
-              {generatedApiKey && (
-                <div className="mb-4 p-2 bg-slate-300 rounded flex items-center justify-between">
+              {generatedApiKey && <div className="mb-4 p-2 bg-slate-300 rounded flex items-center justify-between">
                   <code className="text-xs overflow-hidden text-ellipsis">{generatedApiKey}</code>
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    onClick={() => copyToClipboard(generatedApiKey)}
-                    className="ml-2"
-                  >
+                  <Button variant="ghost" size="sm" onClick={() => copyToClipboard(generatedApiKey)} className="ml-2">
                     <Copy className="h-4 w-4" />
                   </Button>
-                </div>
-              )}
+                </div>}
               <div className="flex items-center gap-2">
                 <Button variant="outline" className="flex-1 bg-slate-400 hover:bg-slate-300" onClick={generateApiKey}>Generate Key</Button>
                 <Button variant="outline" className="flex-1 bg-slate-400 hover:bg-slate-300">View Logs</Button>
@@ -308,14 +288,7 @@ export default function Integrations() {
           </DialogContent>
         </Dialog>
         
-        <TwilioConfigDialog
-          open={twilioDialogOpen}
-          onOpenChange={setTwilioDialogOpen}
-          config={twilioConfig}
-          setConfig={setTwilioConfig}
-          onConnect={handleTwilioConnect}
-          isConnecting={isConnectingTwilio}
-        />
+        <TwilioConfigDialog open={twilioDialogOpen} onOpenChange={setTwilioDialogOpen} config={twilioConfig} setConfig={setTwilioConfig} onConnect={handleTwilioConnect} isConnecting={isConnectingTwilio} />
       </div>
     </AppLayout>;
 }
