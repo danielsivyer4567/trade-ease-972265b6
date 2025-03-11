@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -172,7 +171,7 @@ export const CrmPipeline: React.FC = () => {
         <div className="flex items-center gap-4">
           <Tabs value={activePipeline} onValueChange={handlePipelineChange} className="w-full">
             <TabsList>
-              {PIPELINES.map(pipeline => <TabsTrigger key={pipeline.id} value={pipeline.id} className="relative">
+              {PIPELINES.map(pipeline => <TabsTrigger key={pipeline.id} value={pipeline.id} className="relative text-gray-950 bg-slate-400 hover:bg-slate-300 mx-[9px]">
                   {pipeline.name}
                   {pipeline.attentionCount > 0 && <Badge variant="destructive" className="ml-1 absolute -top-2 -right-2 flex items-center justify-center h-5 w-5 p-0 rounded-full">
                       <span className="text-[11px]">{pipeline.attentionCount}</span>
@@ -308,4 +307,3 @@ const CustomerCard: React.FC<CustomerCardProps> = ({
       </div>
     </div>;
 };
-
