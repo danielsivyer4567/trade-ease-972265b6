@@ -39,20 +39,9 @@ export default function Messaging() {
       <div className="p-6 max-w-4xl mx-auto">
         <div className="space-y-6">
           <Card>
-            <CardHeader className="bg-slate-200">
-              <CardTitle className="flex items-center gap-2">
-                <div className="flex items-center gap-2">
-                  <Button variant="outline" size="sm" onClick={() => navigate(-1)} className="rounded-md border border-gray-300 px-3 py-1 text-[#1E40AF] hover:text-[#1E3A8A] bg-slate-400 hover:bg-slate-300">
-                    <ArrowLeft className="h-5 w-5" />
-                  </Button>
-                  <MessageSquare className="h-6 w-6" />
-                  Message Synchronization
-                </div>
-              </CardTitle>
-              <CardDescription>With no additional phone needed Connect your new additional phone number to sync all messages whilst using your number as normal.</CardDescription>
-            </CardHeader>
             
-            <CardContent className="bg-slate-200">
+            
+            <CardContent className="bg-slate-200 mx-[9px] py-[159px]">
               <div className="space-y-6">
                 <PhoneNumberInput phoneNumber={phoneNumber} isConnecting={isConnectingPhone} onChange={handlePhoneNumberChange} onConnect={handleConnect} />
 
