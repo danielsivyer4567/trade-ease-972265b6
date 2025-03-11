@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { TwilioOrderNumberDialog } from './TwilioOrderNumberDialog';
@@ -64,7 +63,6 @@ export const TwilioConnectButton = () => {
         error: any;
       };
       if (error) throw error;
-      
       if (!data || data.length === 0) {
         // Use a single authentic-looking number if no numbers are available in DB
         setAvailableNumber('+1(415)555-0123');
@@ -122,7 +120,7 @@ export const TwilioConnectButton = () => {
     }} className="w-full">
         <TabsList className="grid w-full grid-cols-2 mb-4">
           <TabsTrigger value="connect" className="text-gray-950 bg-slate-400 hover:bg-slate-300 mx-[14px]">Connect </TabsTrigger>
-          <TabsTrigger value="buy" className="bg-slate-400 hover:bg-slate-300">Purchase A Phone Number</TabsTrigger>
+          <TabsTrigger value="buy" className="text-gray-950 bg-slate-500 hover:bg-slate-400 my-0 py-0">Purchase A Phone Number</TabsTrigger>
         </TabsList>
         
         <TabsContent value="connect" className="w-full">
@@ -141,34 +139,28 @@ export const TwilioConnectButton = () => {
         </TabsContent>
         
         <TabsContent value="buy" className="w-full">
-          <div className="space-y-4">
+          <div className="space-y-4 my-[41px]">
             <div className="flex justify-between items-center">
               <h3 className="font-medium">Phone Number For Sale</h3>
-              <Button variant="outline" size="sm" onClick={loadAvailableForSale} disabled={isLoading} className="text-sm bg-slate-400 hover:bg-slate-300">
+              <Button variant="outline" size="sm" onClick={loadAvailableForSale} disabled={isLoading} className="text-sm bg-slate-500 hover:bg-slate-400 mx-[28px] px-[24px]">
                 Refresh
               </Button>
             </div>
             
-            {isLoading ? (
-              <div className="text-center py-4">Loading available number...</div>
-            ) : availableNumber ? (
-              <div className="space-y-2">
+            {isLoading ? <div className="text-center py-4">Loading available number...</div> : availableNumber ? <div className="space-y-2">
                 <div className="flex justify-between items-center p-3 bg-white rounded-md border">
                   <div className="flex items-center">
                     <Phone className="h-4 w-4 mr-2" />
                     <span>{availableNumber}</span>
                   </div>
-                  <Button size="sm" className="bg-green-500 hover:bg-green-600" onClick={() => handlePurchaseNumber(availableNumber)}>
+                  <Button size="sm" onClick={() => handlePurchaseNumber(availableNumber)} className="bg-green-500 hover:bg-green-600 mx-[16px] px-[9px]">
                     <DollarSign className="h-3.5 w-3.5 mr-1" />
                     Purchase
                   </Button>
                 </div>
-              </div>
-            ) : (
-              <div className="text-center py-4 text-gray-500">
+              </div> : <div className="text-center py-4 text-gray-500">
                 No phone numbers available for sale at the moment.
-              </div>
-            )}
+              </div>}
             
             <div className="mt-4 bg-blue-50 p-3 rounded-md text-sm">
               <p className="font-medium">How it works:</p>
