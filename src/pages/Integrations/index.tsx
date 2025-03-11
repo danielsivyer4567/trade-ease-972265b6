@@ -1,14 +1,23 @@
+
 import { AppLayout } from "@/components/ui/AppLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { ArrowLeft, ArrowRight, Settings, Database, Globe, CreditCard, Smartphone, Link, Copy } from "lucide-react";
+import { ArrowLeft, ArrowRight, Settings, Database, Globe, CreditCard, Smartphone, Link, Copy, MessageSquare } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { PhoneNumberInput } from "@/components/messaging/PhoneNumberInput";
+import { ConnectedPhonesList } from "@/components/messaging/ConnectedPhonesList";
+import { TwilioConnectButton } from "@/components/messaging/TwilioConnectButton";
+import { TwilioConfigDialog } from "@/components/messaging/TwilioConfigDialog";
+import { usePhoneNumbers } from "@/components/messaging/hooks/usePhoneNumbers";
+import { useTwilioConnection } from "@/components/messaging/hooks/useTwilioConnection";
+import { useUserConfig } from "@/components/messaging/hooks/useUserConfig";
+import { ServiceSyncCard } from "@/components/messaging/ServiceSyncCard";
 
 export default function Integrations() {
   const navigate = useNavigate();
@@ -20,6 +29,30 @@ export default function Integrations() {
     apiKeyId: "",
     secretKey: ""
   });
+  
+  // Messaging functionality
+  const {
+    userConfig
+  } = useUserConfig();
+  const {
+    phoneNumber,
+    isConnecting: isConnectingPhone,
+    connectedNumbers,
+    handlePhoneNumberChange,
+    handleConnect,
+    handleRemoveNumber
+  } = usePhoneNumbers();
+  const updateConnectedNumbers = (newNumber: string) => {
+    connectedNumbers.push(newNumber);
+  };
+  const {
+    twilioDialogOpen,
+    setTwilioDialogOpen,
+    twilioConfig,
+    setTwilioConfig,
+    isConnecting: isConnectingTwilio,
+    handleTwilioConnect
+  } = useTwilioConnection(updateConnectedNumbers);
   
   const handleToggleAutoLead = (checked: boolean) => {
     setLeadAutoEnabled(checked);
@@ -74,6 +107,30 @@ export default function Integrations() {
           <h1 className="text-2xl font-bold">Integrations</h1>
         </div>
         <p className="text-gray-600">Connect your account with these services to enhance your workflow.</p>
+        
+        {/* Messaging Integration Card */}
+        <Card>
+          <CardHeader className="bg-slate-200 pb-2">
+            <CardTitle className="flex items-center gap-2 text-5xl">
+              <MessageSquare className="h-5 w-5 text-blue-600" />
+              Multiple Messaging
+            </CardTitle>
+            <CardDescription className="py-[8px]">Connect and manage your messaging platforms into one place!
+            </CardDescription>
+          </CardHeader>
+          
+          <CardContent className="bg-slate-200 mx-[9px] py-[159px]">
+            <div className="space-y-6">
+              <PhoneNumberInput phoneNumber={phoneNumber} isConnecting={isConnectingPhone} onChange={handlePhoneNumberChange} onConnect={handleConnect} />
+
+              <ConnectedPhonesList connectedNumbers={connectedNumbers} onRemoveNumber={handleRemoveNumber} onAddTwilioAccount={() => setTwilioDialogOpen(true)} />
+
+              <TwilioConnectButton />
+            </div>
+          </CardContent>
+        </Card>
+        
+        <ServiceSyncCard />
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <Card className="glass-card bg-slate-200">
@@ -250,6 +307,15 @@ export default function Integrations() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
+        
+        <TwilioConfigDialog
+          open={twilioDialogOpen}
+          onOpenChange={setTwilioDialogOpen}
+          config={twilioConfig}
+          setConfig={setTwilioConfig}
+          onConnect={handleTwilioConnect}
+          isConnecting={isConnectingTwilio}
+        />
       </div>
     </AppLayout>;
 }
