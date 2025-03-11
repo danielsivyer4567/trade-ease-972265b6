@@ -1,3 +1,4 @@
+
 import { AppLayout } from "@/components/ui/AppLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
@@ -15,6 +16,7 @@ import { SectionHeader } from "@/components/ui/SectionHeader";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ConnectedAppsOverview } from "@/components/messaging/crm/ConnectedAppsOverview";
 import { CrmPipeline } from "@/components/messaging/crm/CrmPipeline";
+
 export default function Messaging() {
   const navigate = useNavigate();
   const {
@@ -39,6 +41,7 @@ export default function Messaging() {
     isConnecting: isConnectingTwilio,
     handleTwilioConnect
   } = useTwilioConnection(updateConnectedNumbers);
+  
   return <AppLayout>
       <div className="w-full h-full px-3 md:px-4">
         <div className="space-y-4">
@@ -56,7 +59,7 @@ export default function Messaging() {
 
           <Tabs defaultValue="crm" className="w-full">
             <TabsList className="grid grid-cols-2 mb-4">
-              <TabsTrigger value="crm">Pipeline</TabsTrigger>
+              <TabsTrigger value="crm">Pipelines</TabsTrigger>
               <TabsTrigger value="connections">Connections</TabsTrigger>
             </TabsList>
             
