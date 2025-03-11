@@ -17,7 +17,6 @@ import { usePhoneNumbers } from "@/components/messaging/hooks/usePhoneNumbers";
 import { useTwilioConnection } from "@/components/messaging/hooks/useTwilioConnection";
 import { useUserConfig } from "@/components/messaging/hooks/useUserConfig";
 import { ServiceSyncCard } from "@/components/messaging/ServiceSyncCard";
-
 export default function Integrations() {
   const navigate = useNavigate();
   const [leadAutoEnabled, setLeadAutoEnabled] = useState(false);
@@ -28,7 +27,6 @@ export default function Integrations() {
     apiKeyId: "",
     secretKey: ""
   });
-
   const {
     userConfig
   } = useUserConfig();
@@ -51,7 +49,6 @@ export default function Integrations() {
     isConnecting: isConnectingTwilio,
     handleTwilioConnect
   } = useTwilioConnection(updateConnectedNumbers);
-
   const handleToggleAutoLead = (checked: boolean) => {
     setLeadAutoEnabled(checked);
     if (checked) {
@@ -60,11 +57,9 @@ export default function Integrations() {
       toast.info("Auto lead purchase disabled");
     }
   };
-
   const handleCyberSourceConnectClick = () => {
     setCyberSourceDialogOpen(true);
   };
-
   const handleCyberSourceConfigSubmit = async () => {
     try {
       toast.success("CyberSource integration configured successfully");
@@ -74,7 +69,6 @@ export default function Integrations() {
       toast.error("Failed to configure CyberSource integration");
     }
   };
-
   const generateApiKey = () => {
     const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     const prefix = 'api_';
@@ -85,12 +79,10 @@ export default function Integrations() {
     setGeneratedApiKey(result);
     toast.success("API key generated successfully");
   };
-
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
     toast.success("API key copied to clipboard");
   };
-
   return <AppLayout>
       <div className="p-6 space-y-6">
         <div className="flex items-center gap-2">
@@ -102,11 +94,7 @@ export default function Integrations() {
         <p className="text-gray-600">Connect your account with these services to enhance your workflow.</p>
         
         <Card>
-          <CardHeader className="bg-slate-200 pb-2">
-            
-            <CardDescription className="py-[8px]">Connect and manage your messaging platforms into one place!
-            </CardDescription>
-          </CardHeader>
+          
           
           <CardContent className="bg-slate-200 mx-[4px] py-0 px-4 max-w-[95%]">
             <div className="space-y-4">
