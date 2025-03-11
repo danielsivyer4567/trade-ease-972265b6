@@ -14,7 +14,7 @@ const DemoDataGenerator: React.FC = () => {
       const { generateDemoData } = await import("@/integrations/supabase/client");
       const result = await generateDemoData();
       
-      if (result?.success) {
+      if (result?.data && !result.error) {
         toast.success('Demo organizations and users created successfully!');
       } else {
         throw new Error('Failed to create demo data');
