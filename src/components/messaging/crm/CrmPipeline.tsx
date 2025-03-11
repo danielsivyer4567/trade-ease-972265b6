@@ -195,22 +195,22 @@ export const CrmPipeline: React.FC = () => {
       <div className="overflow-x-auto pb-4">
         <div className="flex gap-4 min-w-[1200px]">
           {/* New Enquiry */}
-          <PipelineStage title="New Enquiry" icon={<Inbox className="h-5 w-5 text-blue-600" />} count={getCustomersByStage('new').length} attentionCount={getCustomersByStage('new').filter(c => c.needsAttention).length} color="bg-blue-100" customers={getCustomersByStage('new')} onMoveCustomer={id => moveCustomer(id, 'quoteBooked')} targetStageName="Quote Booked" stageName="new" onDragStart={handleDragStart} onDragOver={handleDragOver} onDrop={handleDrop} />
+          <PipelineStage title="New Enquiry" icon={<Inbox className="h-5 w-5 text-blue-600" />} count={getCustomersByStage('new').length} attentionCount={getCustomersByStage('new').filter(c => c.needsAttention).length} color="bg-blue-100" customers={getCustomersByStage('new')} stageName="new" onDragStart={handleDragStart} onDragOver={handleDragOver} onDrop={handleDrop} />
 
           {/* Quote Booked */}
-          <PipelineStage title="Quote Booked" icon={<Calendar className="h-5 w-5 text-purple-600" />} count={getCustomersByStage('quoteBooked').length} attentionCount={getCustomersByStage('quoteBooked').filter(c => c.needsAttention).length} color="bg-purple-100" customers={getCustomersByStage('quoteBooked')} onMoveCustomer={id => moveCustomer(id, 'quoteSent')} targetStageName="Quote Sent" stageName="quoteBooked" onMoveToAlternative={id => moveCustomer(id, 'notServiceable')} alternativeStageName="Not Serviceable" onDragStart={handleDragStart} onDragOver={handleDragOver} onDrop={handleDrop} />
+          <PipelineStage title="Quote Booked" icon={<Calendar className="h-5 w-5 text-purple-600" />} count={getCustomersByStage('quoteBooked').length} attentionCount={getCustomersByStage('quoteBooked').filter(c => c.needsAttention).length} color="bg-purple-100" customers={getCustomersByStage('quoteBooked')} stageName="quoteBooked" onDragStart={handleDragStart} onDragOver={handleDragOver} onDrop={handleDrop} />
 
           {/* Not Serviceable */}
-          <PipelineStage title="Not Serviceable" icon={<X className="h-5 w-5 text-red-600" />} count={getCustomersByStage('notServiceable').length} attentionCount={getCustomersByStage('notServiceable').filter(c => c.needsAttention).length} color="bg-red-100" customers={getCustomersByStage('notServiceable')} onMoveCustomer={id => moveCustomer(id, 'new')} targetStageName="Reopen" stageName="notServiceable" onDragStart={handleDragStart} onDragOver={handleDragOver} onDrop={handleDrop} />
+          <PipelineStage title="Not Serviceable" icon={<X className="h-5 w-5 text-red-600" />} count={getCustomersByStage('notServiceable').length} attentionCount={getCustomersByStage('notServiceable').filter(c => c.needsAttention).length} color="bg-red-100" customers={getCustomersByStage('notServiceable')} stageName="notServiceable" onDragStart={handleDragStart} onDragOver={handleDragOver} onDrop={handleDrop} />
 
           {/* Quote Sent */}
-          <PipelineStage title="Quote Sent" icon={<FileText className="h-5 w-5 text-indigo-600" />} count={getCustomersByStage('quoteSent').length} attentionCount={getCustomersByStage('quoteSent').filter(c => c.needsAttention).length} color="bg-indigo-100" customers={getCustomersByStage('quoteSent')} onMoveCustomer={id => moveCustomer(id, 'followUp')} targetStageName="Follow Up" stageName="quoteSent" onDragStart={handleDragStart} onDragOver={handleDragOver} onDrop={handleDrop} />
+          <PipelineStage title="Quote Sent" icon={<FileText className="h-5 w-5 text-indigo-600" />} count={getCustomersByStage('quoteSent').length} attentionCount={getCustomersByStage('quoteSent').filter(c => c.needsAttention).length} color="bg-indigo-100" customers={getCustomersByStage('quoteSent')} stageName="quoteSent" onDragStart={handleDragStart} onDragOver={handleDragOver} onDrop={handleDrop} />
 
           {/* Auto Follow Up */}
-          <PipelineStage title="Auto Follow Up" icon={<Clock className="h-5 w-5 text-amber-600" />} count={getCustomersByStage('followUp').length} attentionCount={getCustomersByStage('followUp').filter(c => c.needsAttention).length} color="bg-amber-100" customers={getCustomersByStage('followUp')} onMoveCustomer={id => moveCustomer(id, 'denied')} targetStageName="Denied" stageName="followUp" onDragStart={handleDragStart} onDragOver={handleDragOver} onDrop={handleDrop} />
+          <PipelineStage title="Auto Follow Up" icon={<Clock className="h-5 w-5 text-amber-600" />} count={getCustomersByStage('followUp').length} attentionCount={getCustomersByStage('followUp').filter(c => c.needsAttention).length} color="bg-amber-100" customers={getCustomersByStage('followUp')} stageName="followUp" onDragStart={handleDragStart} onDragOver={handleDragOver} onDrop={handleDrop} />
 
           {/* Quote Denied */}
-          <PipelineStage title="Quote Denied" icon={<X className="h-5 w-5 text-orange-600" />} count={getCustomersByStage('denied').length} attentionCount={getCustomersByStage('denied').filter(c => c.needsAttention).length} color="bg-orange-100" customers={getCustomersByStage('denied')} onMoveCustomer={id => moveCustomer(id, 'new')} targetStageName="Reopen" stageName="denied" onDragStart={handleDragStart} onDragOver={handleDragOver} onDrop={handleDrop} />
+          <PipelineStage title="Quote Denied" icon={<X className="h-5 w-5 text-orange-600" />} count={getCustomersByStage('denied').length} attentionCount={getCustomersByStage('denied').filter(c => c.needsAttention).length} color="bg-orange-100" customers={getCustomersByStage('denied')} stageName="denied" onDragStart={handleDragStart} onDragOver={handleDragOver} onDrop={handleDrop} />
         </div>
       </div>
     </div>;
@@ -229,11 +229,7 @@ interface PipelineStageProps {
     timestamp: string;
     needsAttention?: boolean;
   }>;
-  onMoveCustomer: (id: string) => void;
-  targetStageName: string;
   stageName: string;
-  onMoveToAlternative?: (id: string) => void;
-  alternativeStageName?: string;
   onDragStart: (customerId: string) => void;
   onDragOver: (e: React.DragEvent<HTMLDivElement>) => void;
   onDrop: (e: React.DragEvent<HTMLDivElement>, stageName: string) => void;
@@ -245,11 +241,7 @@ const PipelineStage: React.FC<PipelineStageProps> = ({
   attentionCount,
   color,
   customers,
-  onMoveCustomer,
-  targetStageName,
   stageName,
-  onMoveToAlternative,
-  alternativeStageName,
   onDragStart,
   onDragOver,
   onDrop
@@ -274,7 +266,7 @@ const PipelineStage: React.FC<PipelineStageProps> = ({
         maxHeight: '500px'
       }}>
           <div className="space-y-2">
-            {customers.map(customer => <CustomerCard key={customer.id} customer={customer} onMoveCustomer={() => onMoveCustomer(customer.id)} targetStageName={targetStageName} onMoveToAlternative={onMoveToAlternative ? () => onMoveToAlternative(customer.id) : undefined} alternativeStageName={alternativeStageName} onDragStart={() => onDragStart(customer.id)} />)}
+            {customers.map(customer => <CustomerCard key={customer.id} customer={customer} onDragStart={() => onDragStart(customer.id)} />)}
             <Button variant="ghost" size="sm" className="w-full border border-dashed border-gray-300 text-gray-500 hover:text-gray-700 hover:border-gray-400 mt-2">
               <PlusCircle className="h-4 w-4 mr-1" />
               Add Customer
@@ -293,21 +285,13 @@ interface CustomerCardProps {
     timestamp: string;
     needsAttention?: boolean;
   };
-  onMoveCustomer: () => void;
-  targetStageName: string;
-  onMoveToAlternative?: () => void;
-  alternativeStageName?: string;
   onDragStart: () => void;
 }
 const CustomerCard: React.FC<CustomerCardProps> = ({
   customer,
-  onMoveCustomer,
-  targetStageName,
-  onMoveToAlternative,
-  alternativeStageName,
   onDragStart
 }) => {
-  return <div draggable onDragStart={onDragStart} className="px-0 py-0 my-0">
+  return <div draggable onDragStart={onDragStart} className="px-3 py-2 my-1 bg-white rounded-md shadow-sm hover:shadow-md transition-shadow border border-gray-100">
       <div className="flex items-start justify-between">
         <div className="flex items-center gap-2">
           <div className="bg-gray-100 rounded-full p-1 cursor-grab">
@@ -327,18 +311,6 @@ const CustomerCard: React.FC<CustomerCardProps> = ({
       <div className="mt-2 flex items-start gap-1">
         <MessageSquare className="h-3.5 w-3.5 text-gray-400 mt-0.5 flex-shrink-0" />
         <p className="text-xs text-gray-600 line-clamp-2">{customer.lastMessage}</p>
-      </div>
-      
-      <div className="mt-2 flex flex-wrap gap-1">
-        <Button variant="outline" size="sm" className="text-xs h-6 py-0 px-2 bg-slate-200 hover:bg-slate-300" onClick={onMoveCustomer}>
-          {targetStageName}
-          <ChevronRight className="h-3 w-3 ml-1" />
-        </Button>
-        
-        {onMoveToAlternative && alternativeStageName && <Button variant="outline" size="sm" className="text-xs h-6 py-0 px-2 bg-slate-200 hover:bg-slate-300" onClick={onMoveToAlternative}>
-            {alternativeStageName}
-            <ChevronRight className="h-3 w-3 ml-1" />
-          </Button>}
       </div>
     </div>;
 };
