@@ -1,7 +1,7 @@
 
 import React from 'react';
 
-interface DefaultNodesProps {
+export interface DefaultNodesProps {
   onDragStart: (event: React.DragEvent<HTMLDivElement>, nodeType: string, data?: any) => void;
 }
 

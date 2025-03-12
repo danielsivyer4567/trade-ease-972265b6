@@ -3,7 +3,7 @@ import React from 'react';
 import { CustomNodeItem } from './CustomNodeItem';
 import { CustomNodeCreator } from './CustomNodeCreator';
 
-interface CustomNodesProps {
+export interface CustomNodesProps {
   customNodes: Array<{
     id: string;
     name: string;
