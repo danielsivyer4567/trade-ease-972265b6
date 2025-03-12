@@ -16,12 +16,14 @@ import { TaskNode } from './nodes/TaskNode';
 import { CustomerNode } from './nodes/CustomerNode';
 import { JobNode } from './nodes/JobNode';
 import { QuoteNode } from './nodes/QuoteNode';
+import { CustomNode } from './nodes/CustomNode';
 
 const nodeTypes = {
   taskNode: TaskNode,
   customerNode: CustomerNode,
   jobNode: JobNode,
-  quoteNode: QuoteNode
+  quoteNode: QuoteNode,
+  customNode: CustomNode
 };
 
 // Initial nodes and edges if no saved state
