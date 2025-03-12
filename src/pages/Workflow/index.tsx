@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback, useEffect } from 'react';
 import { AppLayout } from "@/components/ui/AppLayout";
 import { Flow } from './components/Flow';
@@ -8,18 +7,9 @@ import { ArrowLeft, Save, Key, Check } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { GCPVisionForm } from "@/components/messaging/dialog-sections/GCPVisionForm";
-
 export default function WorkflowPage() {
   const navigate = useNavigate();
   const [flowInstance, setFlowInstance] = useState(null);
@@ -27,32 +17,34 @@ export default function WorkflowPage() {
   const [gcpVisionKey, setGcpVisionKey] = useState('');
   const [hasGcpVisionKey, setHasGcpVisionKey] = useState(false);
   const [isLoadingKey, setIsLoadingKey] = useState(true);
-
   useEffect(() => {
     // Check if GCP Vision API key is configured in Supabase
     checkGcpVisionApiKey();
   }, []);
-
   const checkGcpVisionApiKey = async () => {
     setIsLoadingKey(true);
     try {
-      const { data: { session } } = await supabase.auth.getSession();
+      const {
+        data: {
+          session
+        }
+      } = await supabase.auth.getSession();
       if (!session) {
         setIsLoadingKey(false);
         return;
       }
-
-      const { data, error } = await supabase.functions.invoke('gcp-vision-key', {
+      const {
+        data,
+        error
+      } = await supabase.functions.invoke('gcp-vision-key', {
         method: 'GET',
         headers: {
           Authorization: `Bearer ${session.access_token}`
         }
       });
-
       if (error) {
         throw error;
       }
-
       if (data.apiKey) {
         setGcpVisionKey(data.apiKey);
         setHasGcpVisionKey(true);
@@ -66,17 +58,13 @@ export default function WorkflowPage() {
       setIsLoadingKey(false);
     }
   };
-
   const handleSaveFlow = useCallback(() => {
     if (!flowInstance) return;
-    
     const flow = flowInstance.toObject();
     localStorage.setItem('workflow-data', JSON.stringify(flow));
     toast.success('Workflow saved successfully!');
   }, [flowInstance]);
-
-  return (
-    <AppLayout>
+  return <AppLayout>
       <div className="p-4 h-full">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
@@ -92,7 +80,7 @@ export default function WorkflowPage() {
                   <Key className="h-4 w-4" /> Configure GCP Vision API Key
                 </Button>
               </DialogTrigger>
-              <DialogContent className="sm:max-w-[425px]">
+              <DialogContent className="sm:max-w-[425px] bg-slate-200">
                 <DialogHeader>
                   <DialogTitle>Google Cloud Vision API Configuration</DialogTitle>
                   <DialogDescription>
@@ -102,10 +90,7 @@ export default function WorkflowPage() {
                     </p>
                   </DialogDescription>
                 </DialogHeader>
-                <GCPVisionForm 
-                  gcpVisionKey={gcpVisionKey} 
-                  setGcpVisionKey={setGcpVisionKey} 
-                />
+                <GCPVisionForm gcpVisionKey={gcpVisionKey} setGcpVisionKey={setGcpVisionKey} />
                 <DialogFooter className="mt-4">
                   <Button variant="outline" onClick={() => setGcpVisionKeyDialogOpen(false)}>
                     Close
@@ -126,8 +111,7 @@ export default function WorkflowPage() {
           </div>
         </div>
 
-        {!isLoadingKey && hasGcpVisionKey && (
-          <Card className="mt-4">
+        {!isLoadingKey && hasGcpVisionKey && <Card className="mt-4">
             <CardHeader className="py-2">
               <CardTitle className="text-sm flex items-center gap-2">
                 <Key className="h-4 w-4 text-green-500" />
@@ -140,9 +124,7 @@ export default function WorkflowPage() {
                 Google Cloud Vision API key is configured and ready to use
               </p>
             </CardContent>
-          </Card>
-        )}
+          </Card>}
       </div>
-    </AppLayout>
-  );
+    </AppLayout>;
 }
