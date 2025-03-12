@@ -42,12 +42,9 @@ export function CustomNode({ data, id, selected }) {
   };
 
   return (
-    <div 
-      className="bg-white rounded-md shadow-md p-2 w-40 border-2 relative"
-      style={{ borderColor }}
-    >
+    <>
       {selected && (
-        <div className="absolute -top-10 left-1/2 transform -translate-x-1/2 flex gap-2 bg-white p-1 rounded shadow-md border border-gray-200 z-10">
+        <div className="absolute -top-14 left-1/2 transform -translate-x-1/2 flex gap-2 bg-white p-1 rounded shadow-md border border-gray-200 z-20">
           <Popover open={isEditing} onOpenChange={setIsEditing}>
             <PopoverTrigger asChild>
               <Button variant="outline" size="sm" className="h-8 w-8 p-0">
@@ -94,20 +91,25 @@ export function CustomNode({ data, id, selected }) {
           </Button>
         </div>
       )}
-      <Handle type="target" position={Position.Top} className="!bg-gray-400" />
-      <div className="flex items-center">
-        <div 
-          className="w-6 h-6 rounded-full flex items-center justify-center mr-2"
-          style={{ backgroundColor: bgColor }}
-        >
-          <span className="text-xs">{data.icon || '⚙️'}</span>
+      <div 
+        className="bg-white rounded-md shadow-md p-2 w-40 border-2 relative"
+        style={{ borderColor }}
+      >
+        <Handle type="target" position={Position.Top} className="!bg-gray-400" />
+        <div className="flex items-center">
+          <div 
+            className="w-6 h-6 rounded-full flex items-center justify-center mr-2"
+            style={{ backgroundColor: bgColor }}
+          >
+            <span className="text-xs">{data.icon || '⚙️'}</span>
+          </div>
+          <div>
+            <div className="font-semibold text-xs">Custom</div>
+            <div className="text-xs text-gray-500">{data.label || 'Node'}</div>
+          </div>
         </div>
-        <div>
-          <div className="font-semibold text-xs">Custom</div>
-          <div className="text-xs text-gray-500">{data.label || 'Node'}</div>
-        </div>
+        <Handle type="source" position={Position.Bottom} className="!bg-gray-400" />
       </div>
-      <Handle type="source" position={Position.Bottom} className="!bg-gray-400" />
-    </div>
+    </>
   );
 }
