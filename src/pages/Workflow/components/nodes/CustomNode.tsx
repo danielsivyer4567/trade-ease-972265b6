@@ -1,16 +1,99 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Handle, Position } from '@xyflow/react';
+import { Trash, Edit } from 'lucide-react';
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
 
-export function CustomNode({ data }) {
+export function CustomNode({ data, id, selected }) {
+  const [isEditing, setIsEditing] = useState(false);
+  const [nodeLabel, setNodeLabel] = useState(data.label || 'Node');
+  const [nodeIcon, setNodeIcon] = useState(data.icon || '⚙️');
+  
   const bgColor = data.color ? `${data.color}25` : '#f0f9ff'; // Default light blue with 25% opacity
   const borderColor = data.color || '#3b82f6'; // Default blue
+  
+  const iconOptions = ['👤', '🔧', '💰', '📋', '🏠', '📱', '🚗', '⚙️', '📝', '🔔'];
+  
+  const handleDelete = () => {
+    if (window.confirm('Are you sure you want to delete this node?')) {
+      document.dispatchEvent(
+        new CustomEvent('delete-node', { detail: { id } })
+      );
+    }
+  };
+  
+  const handleSave = () => {
+    document.dispatchEvent(
+      new CustomEvent('update-node', { 
+        detail: { 
+          id,
+          data: {
+            ...data,
+            label: nodeLabel,
+            icon: nodeIcon
+          }
+        }
+      })
+    );
+    setIsEditing(false);
+  };
 
   return (
     <div 
-      className="bg-white rounded-md shadow-md p-2 w-40 border-2"
+      className="bg-white rounded-md shadow-md p-2 w-40 border-2 relative"
       style={{ borderColor }}
     >
+      {selected && (
+        <div className="absolute -top-8 right-0 flex gap-1">
+          <Popover open={isEditing} onOpenChange={setIsEditing}>
+            <PopoverTrigger asChild>
+              <Button variant="outline" size="icon" className="h-6 w-6">
+                <Edit className="h-3 w-3" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-60 p-4">
+              <div className="space-y-3">
+                <div>
+                  <Label className="text-xs">Node Label</Label>
+                  <Input 
+                    value={nodeLabel} 
+                    onChange={(e) => setNodeLabel(e.target.value)}
+                    className="h-8 text-xs"
+                  />
+                </div>
+                <div>
+                  <Label className="text-xs">Icon</Label>
+                  <div className="flex flex-wrap gap-1 mt-1">
+                    {iconOptions.map((icon) => (
+                      <button
+                        key={icon}
+                        type="button"
+                        onClick={() => setNodeIcon(icon)}
+                        className={`w-6 h-6 flex items-center justify-center rounded hover:bg-gray-100 ${nodeIcon === icon ? 'bg-gray-200' : ''}`}
+                      >
+                        {icon}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <Button 
+                  className="w-full h-8 text-xs" 
+                  size="sm" 
+                  onClick={handleSave}
+                >
+                  Save Changes
+                </Button>
+              </div>
+            </PopoverContent>
+          </Popover>
+          <Button variant="outline" size="icon" className="h-6 w-6" onClick={handleDelete}>
+            <Trash className="h-3 w-3" />
+          </Button>
+        </div>
+      )}
       <Handle type="target" position={Position.Top} className="!bg-gray-400" />
       <div className="flex items-center">
         <div 

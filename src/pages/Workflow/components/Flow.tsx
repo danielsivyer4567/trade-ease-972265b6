@@ -70,6 +70,33 @@ export function Flow({ onInit }) {
     }
   }, [setNodes, setEdges]);
 
+  // Handle node deletion event
+  useEffect(() => {
+    const handleDeleteNode = (event) => {
+      const { id } = event.detail;
+      setNodes((nds) => nds.filter((node) => node.id !== id));
+      setEdges((eds) => eds.filter((edge) => edge.source !== id && edge.target !== id));
+    };
+
+    // Handle node updating event
+    const handleUpdateNode = (event) => {
+      const { id, data } = event.detail;
+      setNodes((nds) => 
+        nds.map((node) => 
+          node.id === id ? { ...node, data: { ...node.data, ...data } } : node
+        )
+      );
+    };
+
+    document.addEventListener('delete-node', handleDeleteNode);
+    document.addEventListener('update-node', handleUpdateNode);
+
+    return () => {
+      document.removeEventListener('delete-node', handleDeleteNode);
+      document.removeEventListener('update-node', handleUpdateNode);
+    };
+  }, [setNodes, setEdges]);
+
   const onDragOver = useCallback((event) => {
     event.preventDefault();
     event.dataTransfer.dropEffect = 'move';
@@ -115,6 +142,7 @@ export function Flow({ onInit }) {
       onDrop={onDrop}
       onDragOver={onDragOver}
       nodeTypes={nodeTypes}
+      deleteKeyCode="Delete"
       fitView
     >
       <Controls />
