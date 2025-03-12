@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Handle, Position } from '@xyflow/react';
 import { Trash, Edit } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -11,12 +11,20 @@ export function CustomNode({ data, id, selected }) {
   const [isEditing, setIsEditing] = useState(false);
   const [nodeLabel, setNodeLabel] = useState(data.label || 'Node');
   const [nodeIcon, setNodeIcon] = useState(data.icon || '⚙️');
+  const [isClicked, setIsClicked] = useState(false);
   
   const bgColor = data.color ? `${data.color}25` : '#f0f9ff'; // Default light blue with 25% opacity
   const borderColor = data.color || '#3b82f6'; // Default blue
   
   const iconOptions = ['👤', '🔧', '💰', '📋', '🏠', '📱', '🚗', '⚙️', '📝', '🔔'];
   
+  // Reset click state when selection changes
+  useEffect(() => {
+    if (selected) {
+      setIsClicked(true);
+    }
+  }, [selected]);
+
   const handleDelete = () => {
     if (window.confirm('Are you sure you want to delete this node?')) {
       document.dispatchEvent(
@@ -41,9 +49,15 @@ export function CustomNode({ data, id, selected }) {
     setIsEditing(false);
   };
 
+  const handleNodeClick = (e) => {
+    // Prevent click event from propagating to the canvas
+    e.stopPropagation();
+    setIsClicked(true);
+  };
+
   return (
     <>
-      {selected && (
+      {(selected || isClicked) && (
         <div className="absolute -top-14 left-1/2 transform -translate-x-1/2 flex gap-2 bg-white p-1 rounded shadow-md border border-gray-200 z-20">
           <Popover open={isEditing} onOpenChange={setIsEditing}>
             <PopoverTrigger asChild>
@@ -94,6 +108,7 @@ export function CustomNode({ data, id, selected }) {
       <div 
         className="bg-white rounded-md shadow-md p-2 w-40 border-2 relative"
         style={{ borderColor }}
+        onClick={handleNodeClick}
       >
         <Handle type="target" position={Position.Top} className="!bg-gray-400" />
         <div className="flex items-center">
