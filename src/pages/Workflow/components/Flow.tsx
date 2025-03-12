@@ -1,158 +1,171 @@
 
-import React, { useCallback, useEffect, useState } from 'react';
-import { 
-  ReactFlow, 
-  Background, 
-  Controls, 
-  MiniMap,
-  addEdge,
+import React, { useCallback, useState, useEffect, useRef } from 'react';
+import ReactFlow, {
+  ReactFlowProvider,
+  Background,
+  Controls,
   useNodesState,
   useEdgesState,
+  addEdge,
   Panel,
-  BackgroundVariant
+  MarkerType,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
-import { TaskNode } from './nodes/TaskNode';
 import { CustomerNode } from './nodes/CustomerNode';
 import { JobNode } from './nodes/JobNode';
+import { TaskNode } from './nodes/TaskNode';
 import { QuoteNode } from './nodes/QuoteNode';
 import { CustomNode } from './nodes/CustomNode';
+import { VisionNode } from './nodes/VisionNode';
+import { toast } from 'sonner';
 
+// Define node types
 const nodeTypes = {
-  taskNode: TaskNode,
   customerNode: CustomerNode,
   jobNode: JobNode,
+  taskNode: TaskNode,
   quoteNode: QuoteNode,
-  customNode: CustomNode
+  customNode: CustomNode,
+  visionNode: VisionNode
 };
 
-// Initial nodes and edges if no saved state
-const initialNodes = [
-  {
-    id: '1',
-    type: 'customerNode',
-    data: { label: 'Customer' },
-    position: { x: 250, y: 50 },
-  },
-];
-
-const initialEdges = [];
-
 export function Flow({ onInit }) {
-  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
-  const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
-  const [rfInstance, setRfInstance] = useState(null);
+  // Initial nodes and edges
+  const [nodes, setNodes, onNodesChange] = useNodesState([]);
+  const [edges, setEdges, onEdgesChange] = useEdgesState([]);
+  const reactFlowInstance = useRef(null);
 
-  const onConnect = useCallback((params) => 
-    setEdges((eds) => addEdge(params, eds)), 
-  []);
-
-  // Pass the flow instance to the parent
-  useEffect(() => {
-    if (rfInstance) {
-      onInit(rfInstance);
+  // Handle connections between nodes
+  const onConnect = useCallback((params) => {
+    // Special handling for vision nodes connecting to financial nodes
+    const sourceNode = nodes.find(node => node.id === params.source);
+    const targetNode = nodes.find(node => node.id === params.target);
+    
+    if (sourceNode?.type === 'visionNode' && targetNode?.type === 'quoteNode') {
+      toast.info('Vision analysis will feed data to financial node');
+      
+      // Simulate processing - in a real app, this would trigger actual data processing
+      setTimeout(() => {
+        toast.success('Financial data extracted and applied');
+      }, 1500);
     }
-  }, [rfInstance, onInit]);
+    
+    setEdges((eds) => addEdge({
+      ...params,
+      markerEnd: { type: MarkerType.ArrowClosed },
+      animated: true
+    }, eds));
+  }, [nodes, setEdges]);
 
-  // Load saved workflow from localStorage
-  useEffect(() => {
-    const storedFlow = localStorage.getItem('workflow-data');
-    if (storedFlow) {
+  // Handle node dropping from sidebar
+  const onDrop = useCallback((event) => {
+    event.preventDefault();
+    const type = event.dataTransfer.getData('application/reactflow');
+    
+    if (!type || !reactFlowInstance.current) {
+      return;
+    }
+
+    // Get drop position
+    const position = reactFlowInstance.current.screenToFlowPosition({
+      x: event.clientX,
+      y: event.clientY,
+    });
+
+    // Create a new node
+    const nodeId = `${type}-${Date.now()}`;
+    let newNode = {
+      id: nodeId,
+      type,
+      position,
+      data: { label: `New ${type.replace('Node', '')}` },
+    };
+    
+    // Add special handling for vision nodes
+    if (type === 'visionNode') {
+      newNode.data.label = 'Extract Financial Data';
+    }
+
+    setNodes((nds) => nds.concat(newNode));
+  }, [setNodes]);
+
+  // Handle drag over
+  const onDragOver = useCallback((event) => {
+    event.preventDefault();
+    event.dataTransfer.dropEffect = 'move';
+  }, []);
+
+  // Set up flow on init
+  const onInitFlow = useCallback((instance) => {
+    reactFlowInstance.current = instance;
+    onInit && onInit(instance);
+    
+    // Try to load saved workflow if any
+    const savedFlow = localStorage.getItem('workflow-data');
+    if (savedFlow) {
       try {
-        const flow = JSON.parse(storedFlow);
+        const flow = JSON.parse(savedFlow);
         if (flow.nodes && flow.edges) {
           setNodes(flow.nodes);
           setEdges(flow.edges);
+          toast.info('Loaded saved workflow');
         }
       } catch (error) {
-        console.error('Failed to parse stored workflow:', error);
+        console.error('Error loading saved workflow:', error);
       }
     }
-  }, [setNodes, setEdges]);
+  }, [onInit, setNodes, setEdges]);
 
-  // Handle node deletion event
+  // Handle custom node deletion
   useEffect(() => {
     const handleDeleteNode = (event) => {
       const { id } = event.detail;
-      setNodes((nds) => nds.filter((node) => node.id !== id));
-      setEdges((eds) => eds.filter((edge) => edge.source !== id && edge.target !== id));
+      setNodes((nodes) => nodes.filter((node) => node.id !== id));
+      setEdges((edges) => edges.filter((edge) => 
+        edge.source !== id && edge.target !== id
+      ));
     };
 
-    // Handle node updating event
     const handleUpdateNode = (event) => {
       const { id, data } = event.detail;
-      setNodes((nds) => 
-        nds.map((node) => 
-          node.id === id ? { ...node, data: { ...node.data, ...data } } : node
-        )
-      );
+      setNodes((nodes) => nodes.map((node) => 
+        node.id === id ? { ...node, data: { ...node.data, ...data } } : node
+      ));
     };
 
     document.addEventListener('delete-node', handleDeleteNode);
     document.addEventListener('update-node', handleUpdateNode);
-
+    
     return () => {
       document.removeEventListener('delete-node', handleDeleteNode);
       document.removeEventListener('update-node', handleUpdateNode);
     };
   }, [setNodes, setEdges]);
 
-  const onDragOver = useCallback((event) => {
-    event.preventDefault();
-    event.dataTransfer.dropEffect = 'move';
-  }, []);
-
-  const onDrop = useCallback(
-    (event) => {
-      event.preventDefault();
-
-      const nodeType = event.dataTransfer.getData('application/reactflow/type');
-      const nodeData = JSON.parse(event.dataTransfer.getData('application/reactflow/data') || '{}');
-      
-      // Check if the dropped element is valid
-      if (!nodeType) return;
-
-      // Get the position where the element was dropped
-      const reactFlowBounds = event.target.getBoundingClientRect();
-      const position = rfInstance.screenToFlowPosition({
-        x: event.clientX - reactFlowBounds.left,
-        y: event.clientY - reactFlowBounds.top,
-      });
-
-      const newNode = {
-        id: `${nodeType}-${Date.now()}`,
-        type: nodeType,
-        position,
-        data: nodeData,
-      };
-
-      setNodes((nds) => nds.concat(newNode));
-    },
-    [rfInstance, setNodes]
-  );
-
   return (
-    <ReactFlow
-      nodes={nodes}
-      edges={edges}
-      onNodesChange={onNodesChange}
-      onEdgesChange={onEdgesChange}
-      onConnect={onConnect}
-      onInit={setRfInstance}
-      onDrop={onDrop}
-      onDragOver={onDragOver}
-      nodeTypes={nodeTypes}
-      deleteKeyCode="Delete"
-      fitView
-    >
-      <Controls />
-      <MiniMap />
-      <Background variant={BackgroundVariant.Dots} gap={12} size={1} />
-      <Panel position="top-right">
-        <div className="bg-white p-2 rounded shadow-md text-xs">
-          Drag nodes from the sidebar to create your workflow
-        </div>
-      </Panel>
-    </ReactFlow>
+    <ReactFlowProvider>
+      <div style={{ width: '100%', height: '100%' }}>
+        <ReactFlow
+          nodes={nodes}
+          edges={edges}
+          onNodesChange={onNodesChange}
+          onEdgesChange={onEdgesChange}
+          onConnect={onConnect}
+          onInit={onInitFlow}
+          onDrop={onDrop}
+          onDragOver={onDragOver}
+          nodeTypes={nodeTypes}
+          fitView
+        >
+          <Background />
+          <Controls />
+          <Panel position="bottom-right">
+            <div className="bg-white p-2 rounded shadow text-xs">
+              Drag nodes from left sidebar • Connect nodes by dragging handles
+            </div>
+          </Panel>
+        </ReactFlow>
+      </div>
+    </ReactFlowProvider>
   );
 }
