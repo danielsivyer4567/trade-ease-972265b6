@@ -3,8 +3,9 @@ import { TabsContent } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useState } from "react";
-import { Search } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Search, FileText, AlertCircle } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 // Mock data for demonstration - in a real app this would come from your database
 const mockCustomerQuotes = [
@@ -31,19 +32,75 @@ export const JobFinancialsTab = ({
 }: JobFinancialsTabProps) => {
   const [quoteAmount, setQuoteAmount] = useState(0);
   const [searchTerm, setSearchTerm] = useState("");
+  const [extractedFinancialData, setExtractedFinancialData] = useState<any[]>([]);
+  const [hasAppliedExtractedData, setHasAppliedExtractedData] = useState(false);
+  
   const laborCost = (jobTimer / 3600) * 50; // Assuming $50/hour labor rate
   const totalCostsWithLabor = totalCosts + laborCost;
   const netProfitWithLabor = quoteAmount - totalCostsWithLabor;
+
+  // Fetch any extracted financial data from the workflow
+  useEffect(() => {
+    const storedData = JSON.parse(localStorage.getItem('vision-financial-data') || '[]');
+    if (storedData.length > 0) {
+      setExtractedFinancialData(storedData);
+      
+      // Auto-apply the most recent extracted amount if we haven't applied one yet
+      if (!hasAppliedExtractedData && storedData.length > 0) {
+        const mostRecentData = storedData[storedData.length - 1];
+        setQuoteAmount(mostRecentData.amount);
+        setHasAppliedExtractedData(true);
+      }
+    }
+  }, [hasAppliedExtractedData]);
 
   const filteredQuotes = mockCustomerQuotes.filter(quote => 
     quote.customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
     quote.id.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const applyExtractedAmount = (data) => {
+    setQuoteAmount(data.amount);
+    setTabNotes({ 
+      ...tabNotes, 
+      financials: `${tabNotes.financials || ''}\n\nApplied extracted amount of $${data.amount} from vision analysis on ${new Date(data.timestamp).toLocaleString()}`
+    });
+  };
+
   return (
     <TabsContent value="financials" className="space-y-4">
       <div className="border rounded-lg p-4">
         <div className="space-y-4">
+          {extractedFinancialData.length > 0 && (
+            <Alert className="bg-blue-50 border-blue-200">
+              <FileText className="h-4 w-4 text-blue-600" />
+              <AlertTitle>Vision Analysis Data Available</AlertTitle>
+              <AlertDescription className="mt-2">
+                {extractedFinancialData.length} financial data point(s) extracted from your documents
+                
+                <div className="mt-2 space-y-2">
+                  {extractedFinancialData.map((data, index) => (
+                    <div 
+                      key={index} 
+                      className="flex justify-between items-center p-2 bg-white rounded border border-blue-100 hover:bg-blue-50 cursor-pointer"
+                      onClick={() => applyExtractedAmount(data)}
+                    >
+                      <div className="text-sm">
+                        <span className="font-medium">${data.amount}</span>
+                        <span className="text-gray-500 ml-2 text-xs">
+                          {new Date(data.timestamp).toLocaleString()}
+                        </span>
+                      </div>
+                      <button className="text-xs text-blue-600 hover:text-blue-800">
+                        Apply
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </AlertDescription>
+            </Alert>
+          )}
+
           <div>
             <Label htmlFor="search">Search Customer Quotes</Label>
             <div className="relative">

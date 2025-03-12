@@ -15,6 +15,11 @@ export function QuoteNode({ data }) {
           <div className="text-xs text-gray-500">{data.label}</div>
         </div>
       </div>
+      {data.extractedAmount && (
+        <div className="mt-1 p-1 bg-green-50 rounded text-xs text-green-700">
+          ${data.extractedAmount}
+        </div>
+      )}
       <Handle type="source" position={Position.Bottom} className="!bg-yellow-500" />
     </div>
   );

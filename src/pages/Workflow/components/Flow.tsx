@@ -47,6 +47,19 @@ export function Flow({ onInit }) {
       
       // Simulate processing - in a real app, this would trigger actual data processing
       setTimeout(() => {
+        // Extract the financial data from the vision node
+        const extractedData = {
+          timestamp: new Date().toISOString(),
+          amount: Math.floor(Math.random() * 5000) + 1000, // Simulated amount between $1000-$6000
+          jobId: targetNode?.data?.jobId || null,
+          sourceNodeId: sourceNode.id,
+          targetNodeId: targetNode.id
+        };
+        
+        // Store the extracted data in localStorage for use in the financials section
+        const existingData = JSON.parse(localStorage.getItem('vision-financial-data') || '[]');
+        localStorage.setItem('vision-financial-data', JSON.stringify([...existingData, extractedData]));
+        
         toast.success('Financial data extracted and applied');
       }, 1500);
     }
