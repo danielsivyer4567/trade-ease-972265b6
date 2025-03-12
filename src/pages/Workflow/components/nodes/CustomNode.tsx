@@ -47,7 +47,7 @@ export function CustomNode({ data, id, selected }) {
       style={{ borderColor }}
     >
       {selected && (
-        <div className="absolute -top-12 right-0 flex gap-2 bg-white p-1 rounded shadow-md border border-gray-200">
+        <div className="absolute -top-10 left-1/2 transform -translate-x-1/2 flex gap-2 bg-white p-1 rounded shadow-md border border-gray-200 z-10">
           <Popover open={isEditing} onOpenChange={setIsEditing}>
             <PopoverTrigger asChild>
               <Button variant="outline" size="sm" className="h-8 w-8 p-0">
