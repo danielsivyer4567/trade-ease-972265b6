@@ -1,16 +1,9 @@
 
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { FileText, Calendar, Clock, Receipt, DollarSign, ScrollText, Calculator, Wallet } from "lucide-react";
-import { JobDetailsTab } from "./tabs/JobDetailsTab";
-import { JobNotesTab } from "./tabs/JobNotesTab";
-import { JobCalendarTab } from "./tabs/JobCalendarTab";
-import { JobTimerTab } from "./tabs/JobTimerTab";
-import { JobFinancialsTab } from "./tabs/JobFinancialsTab";
-import { JobBillsTab } from "./tabs/JobBillsTab";
-import { JobCostsTab } from "./tabs/JobCostsTab";
-import { JobInvoicesTab } from "./tabs/JobInvoicesTab";
+import { Tabs, TabsList, TabsContent } from "@/components/ui/tabs";
 import type { Job } from "@/types/job";
-import { useState } from "react";
+import { StandardTabs } from "./tabs/StandardTabs";
+import { ManagerTabs } from "./tabs/ManagerTabs";
+import { useJobFinancials } from "../hooks/useJobFinancials";
 
 interface JobTabsProps {
   job: Job;
@@ -45,99 +38,46 @@ export const JobTabs = ({
   isOnBreak,
   extractedFinancialData = []
 }: JobTabsProps) => {
-  const [totalRevenue, setTotalRevenue] = useState(0);
-  const [totalCosts, setTotalCosts] = useState(0);
-  const [totalBills, setTotalBills] = useState(0);
-
-  const handleUpdateInvoiceTotals = (amount: number) => {
-    setTotalRevenue(prev => prev + amount);
-  };
-
-  const handleUpdateCostsTotals = (amount: number) => {
-    setTotalCosts(prev => prev + amount);
-  };
-
-  const handleUpdateBillsTotals = (amount: number) => {
-    setTotalBills(prev => prev + amount);
-  };
+  const {
+    totalRevenue,
+    totalCosts,
+    totalBills,
+    handleUpdateInvoiceTotals,
+    handleUpdateCostsTotals,
+    handleUpdateBillsTotals
+  } = useJobFinancials();
 
   return (
     <Tabs defaultValue="details" className="w-full">
-      <TabsList className="grid grid-cols-4 lg:grid-cols-8 mb-4">
-        <TabsTrigger value="details">Details</TabsTrigger>
-        <TabsTrigger value="notes">
-          <FileText className="w-4 h-4 mr-2" />
-          Notes
-        </TabsTrigger>
-        <TabsTrigger value="calendar">
-          <Calendar className="w-4 h-4 mr-2" />
-          Calendar
-        </TabsTrigger>
-        <TabsTrigger value="timer">
-          <Clock className="w-4 h-4 mr-2" />
-          Timer
-        </TabsTrigger>
+      <TabsList className={`grid ${isManager ? 'grid-cols-4 lg:grid-cols-8' : 'grid-cols-4'} mb-4`}>
+        <StandardTabs 
+          job={job}
+          jobTimer={jobTimer}
+          jobNotes={jobNotes}
+          setJobNotes={setJobNotes}
+          locationHistory={locationHistory}
+          hasLocationPermission={hasLocationPermission}
+          handleTimerToggle={handleTimerToggle}
+          handleBreakToggle={handleBreakToggle}
+          isTimerRunning={isTimerRunning}
+          isOnBreak={isOnBreak}
+        />
+        
         {isManager && (
-          <>
-            <TabsTrigger value="bills">
-              <Receipt className="w-4 h-4 mr-2" />
-              Bills
-            </TabsTrigger>
-            <TabsTrigger value="costs">
-              <Calculator className="w-4 h-4 mr-2" />
-              Costs
-            </TabsTrigger>
-            <TabsTrigger value="invoices">
-              <ScrollText className="w-4 h-4 mr-2" />
-              Invoices
-            </TabsTrigger>
-            <TabsTrigger value="financials">
-              <Wallet className="w-4 h-4 mr-2" />
-              Financials
-            </TabsTrigger>
-          </>
-        )}
-      </TabsList>
-
-      <JobDetailsTab job={job} />
-      <JobNotesTab notes={jobNotes} setNotes={setJobNotes} />
-      <JobCalendarTab job={job} />
-      <JobTimerTab 
-        jobTimer={jobTimer}
-        hasLocationPermission={hasLocationPermission}
-        handleTimerToggle={handleTimerToggle}
-        handleBreakToggle={handleBreakToggle}
-        isTimerRunning={isTimerRunning}
-        isOnBreak={isOnBreak}
-        locationHistory={locationHistory}
-      />
-      {isManager && (
-        <>
-          <JobBillsTab
-            tabNotes={tabNotes}
-            setTabNotes={setTabNotes}
-            onUpdateTotals={handleUpdateBillsTotals}
-          />
-          <JobCostsTab
-            tabNotes={tabNotes}
-            setTabNotes={setTabNotes}
-            onUpdateTotals={handleUpdateCostsTotals}
-          />
-          <JobInvoicesTab
-            tabNotes={tabNotes}
-            setTabNotes={setTabNotes}
-            onUpdateTotals={handleUpdateInvoiceTotals}
-          />
-          <JobFinancialsTab
+          <ManagerTabs 
             jobTimer={jobTimer}
             tabNotes={tabNotes}
             setTabNotes={setTabNotes}
             totalRevenue={totalRevenue}
-            totalCosts={totalCosts + totalBills}
+            totalCosts={totalCosts}
+            totalBills={totalBills}
             extractedFinancialData={extractedFinancialData}
+            onUpdateBillsTotals={handleUpdateBillsTotals}
+            onUpdateCostsTotals={handleUpdateCostsTotals}
+            onUpdateInvoiceTotals={handleUpdateInvoiceTotals}
           />
-        </>
-      )}
+        )}
+      </TabsList>
     </Tabs>
   );
-}
+};
