@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { WOOD_TYPES, LOAD_TYPES } from "./constants";
-import { useBeamCalculator, CalculationResult } from "./hooks/useBeamCalculator";
+import { CalculationResult } from "./hooks/useBeamCalculator";
 
 interface BeamCalculatorProps {
   beamWidth: string;
@@ -21,6 +21,7 @@ interface BeamCalculatorProps {
   setSpan: (value: string) => void;
   calculatedResult: CalculationResult | null;
   setCalculatedResult: (result: CalculationResult | null) => void;
+  calculateStress: () => void;
 }
 
 export const BeamCalculator: React.FC<BeamCalculatorProps> = ({
@@ -35,12 +36,8 @@ export const BeamCalculator: React.FC<BeamCalculatorProps> = ({
   span,
   setSpan,
   calculatedResult,
-  setCalculatedResult,
+  calculateStress
 }) => {
-  // We're using the hook in the index.tsx file and passing props to this component
-  // for consistency with the current implementation pattern
-  const { calculateStress } = useBeamCalculator();
-
   return (
     <>
       <Card>
@@ -134,34 +131,7 @@ export const BeamCalculator: React.FC<BeamCalculatorProps> = ({
           </div>
 
           <Button 
-            onClick={() => {
-              // Call the function from parent component state
-              const width = parseFloat(beamWidth);
-              const depth = parseFloat(beamDepth);
-              const spanLength = parseFloat(span);
-              
-              // Find wood and load factors
-              const selectedWood = WOOD_TYPES.find(wood => wood.name === woodType) || WOOD_TYPES[0];
-              const selectedLoad = LOAD_TYPES.find(load => load.name === loadType) || LOAD_TYPES[0];
-              
-              // Simple beam calculations (this is a simplified model)
-              const inertia = (width * Math.pow(depth, 3)) / 12;
-              const maxLoad = (inertia * selectedWood.strengthFactor) / (spanLength * 1000);
-              
-              // Safe load is calculated with a safety factor of 2.5
-              const safeLoad = maxLoad / 2.5;
-              
-              // Deflection in mm = (5 * loadFactor * span³) / (384 * E * I)
-              // Using simplified approach
-              const deflection = (5 * selectedLoad.factor * Math.pow(spanLength, 3)) / 
-                               (384 * selectedWood.strengthFactor * inertia / 1000);
-              
-              setCalculatedResult({
-                maxLoad: Number(maxLoad.toFixed(2)),
-                safeLoad: Number(safeLoad.toFixed(2)),
-                deflection: Number(deflection.toFixed(2)),
-              });
-            }} 
+            onClick={calculateStress} 
             className="w-full mt-4 bg-amber-500 hover:bg-amber-600"
           >
             Calculate

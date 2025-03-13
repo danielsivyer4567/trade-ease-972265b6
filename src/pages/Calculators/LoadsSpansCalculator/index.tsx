@@ -66,6 +66,7 @@ const LoadsSpansCalculator = () => {
               setSpan={setSpan}
               calculatedResult={calculatedResult}
               setCalculatedResult={setCalculatedResult}
+              calculateStress={calculateStress}
             />
           </TabsContent>
 
