@@ -8,6 +8,7 @@ import { BeamCalculator } from "./BeamCalculator";
 import { SpanTableCalculator } from "./SpanTableCalculator";
 import { AboutCalculator } from "./AboutCalculator";
 import { JamesHardieCalculator } from "./JamesHardieCalculator";
+import { RafterRoofCalculator } from "./RafterRoofCalculator";
 import { useBeamCalculator } from "./hooks/useBeamCalculator";
 import { useSpanTableCalculator } from "./hooks/useSpanTableCalculator";
 import { useJamesHardieCalculator } from "./hooks/useJamesHardieCalculator";
@@ -58,10 +59,11 @@ const LoadsSpansCalculator = () => {
         </div>
 
         <Tabs defaultValue="beam-calculator" className="w-full">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="beam-calculator">Beam Calculator</TabsTrigger>
             <TabsTrigger value="span-table">Span Table</TabsTrigger>
             <TabsTrigger value="james-hardie">James Hardie</TabsTrigger>
+            <TabsTrigger value="rafter-roof">Rafter Roof</TabsTrigger>
             <TabsTrigger value="about">About</TabsTrigger>
           </TabsList>
 
@@ -121,6 +123,10 @@ const LoadsSpansCalculator = () => {
               setHardieResult={setHardieResult}
               calculateHardieRequirements={calculateHardieRequirements}
             />
+          </TabsContent>
+
+          <TabsContent value="rafter-roof" className="space-y-6">
+            <RafterRoofCalculator />
           </TabsContent>
 
           <TabsContent value="about">
