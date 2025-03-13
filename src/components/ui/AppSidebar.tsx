@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { LayoutDashboard, Briefcase, Users, FileText, Settings, Menu, Calendar, Network, Share, Bot, Mail, MessageSquare, Link as LinkIcon, Database, Hammer, Plus, BarChart, ListTodo, Bell, ChevronLeft, ChevronRight, Gauge, GitBranch, Calculator, Percent } from 'lucide-react';
@@ -6,6 +5,7 @@ import { useSidebar } from './sidebar';
 import { cn } from '@/lib/utils';
 import { Button } from './button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./tooltip";
+
 export function AppSidebar() {
   const [teams] = React.useState([{
     name: 'Red Team',
@@ -28,7 +28,7 @@ export function AppSidebar() {
   const location = useLocation();
   const notificationCount = 3;
   const isCollapsed = state === "collapsed";
-  
+
   const renderNavLink = (icon: React.ReactNode, label: string, path: string, openInNewTab: boolean = false) => {
     const isActive = location.pathname === path || path !== '/' && location.pathname.startsWith(path);
     
@@ -49,6 +49,7 @@ export function AppSidebar() {
         </TooltipContent>
       </Tooltip> : content;
   };
+
   return <>
       <Button variant="outline" size="icon" className="fixed left-4 top-4 z-40 lg:hidden" onClick={toggleSidebar}>
         <Menu className="#000b20" />
@@ -123,8 +124,7 @@ export function AppSidebar() {
             }, {
               icon: Calculator,
               label: 'Calculators',
-              path: '/calculators',
-              openInNewTab: true
+              path: '/calculators'
             }, {
               icon: Network,
               label: 'Integrations',
