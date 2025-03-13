@@ -1,15 +1,28 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { FileText, Upload, Check, FileCheck } from "lucide-react";
+import { FileText, Upload, Check, FileCheck, AlertCircle } from "lucide-react";
 import { FileUpload } from "@/components/tasks/FileUpload";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Progress } from "@/components/ui/progress";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 interface DocumentApprovalProps {
   jobId: string;
   onFinancialDataExtracted: (data: any) => void;
+}
+
+interface FinancialData {
+  amount: number;
+  vendor?: string;
+  date?: string;
+  description?: string;
+  source: string;
+  timestamp: string;
+  jobId: string;
+  category?: string;
+  status?: string;
 }
 
 export function DocumentApproval({ jobId, onFinancialDataExtracted }: DocumentApprovalProps) {
@@ -18,11 +31,13 @@ export function DocumentApproval({ jobId, onFinancialDataExtracted }: DocumentAp
   const [isProcessing, setIsProcessing] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [isUploading, setIsUploading] = useState(false);
+  const [extractionError, setExtractionError] = useState<string | null>(null);
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files[0]) {
       setCurrentFile(event.target.files[0]);
       setExtractedText(null); // Reset extracted text when a new file is selected
+      setExtractionError(null); // Reset any previous errors
     }
   };
 
@@ -35,6 +50,87 @@ export function DocumentApproval({ jobId, onFinancialDataExtracted }: DocumentAp
     });
   };
 
+  const extractFinancialData = (text: string, docName: string): FinancialData | null => {
+    try {
+      // Get the full text from OCR
+      const fullText = text.toLowerCase();
+      
+      // Advanced regex patterns to extract financial information
+      const currencyRegex = /\$\s*(\d{1,3}(,\d{3})*(\.\d{2})?)/g;
+      const dateRegex = /\b(0?[1-9]|1[0-2])[\/\-](0?[1-9]|[12]\d|3[01])[\/\-](19|20)?\d{2}\b/g;
+      const vendorKeywords = ["from:", "vendor:", "supplier:", "bill from:", "company:", "business:"];
+      
+      // Extract amounts
+      const amounts: number[] = [];
+      let match;
+      while ((match = currencyRegex.exec(fullText)) !== null) {
+        amounts.push(parseFloat(match[1].replace(/,/g, '')));
+      }
+      
+      if (amounts.length === 0) {
+        throw new Error("No financial amounts found in the document");
+      }
+      
+      // Find the largest amount (likely the total)
+      const maxAmount = Math.max(...amounts);
+      
+      // Try to extract date (use the first one found)
+      const dates = fullText.match(dateRegex);
+      const date = dates ? dates[0] : null;
+      
+      // Try to extract vendor name
+      let vendor = null;
+      for (const keyword of vendorKeywords) {
+        const keywordIndex = fullText.indexOf(keyword);
+        if (keywordIndex !== -1) {
+          // Extract the text after the keyword until a newline or period
+          const afterKeyword = fullText.substring(keywordIndex + keyword.length).trim();
+          vendor = afterKeyword.split(/[\n\r\.,]/)[0].trim();
+          break;
+        }
+      }
+      
+      // Try to extract description based on contextual clues
+      const descriptionKeywords = ["description:", "details:", "item:", "service:"];
+      let description = null;
+      for (const keyword of descriptionKeywords) {
+        const keywordIndex = fullText.indexOf(keyword);
+        if (keywordIndex !== -1) {
+          const afterKeyword = fullText.substring(keywordIndex + keyword.length).trim();
+          description = afterKeyword.split(/[\n\r\.,]/)[0].trim();
+          break;
+        }
+      }
+      
+      // Determine if this is an invoice, receipt, quote, or other document type
+      let category = "unknown";
+      if (fullText.includes("invoice") || fullText.includes("inv#")) {
+        category = "invoice";
+      } else if (fullText.includes("receipt")) {
+        category = "receipt";
+      } else if (fullText.includes("quote") || fullText.includes("estimate")) {
+        category = "quote";
+      } else if (fullText.includes("bill") || fullText.includes("statement")) {
+        category = "bill";
+      }
+      
+      return {
+        amount: maxAmount,
+        vendor: vendor || undefined,
+        date: date || undefined,
+        description: description || undefined,
+        source: docName,
+        timestamp: new Date().toISOString(),
+        jobId: jobId,
+        category: category
+      };
+    } catch (error) {
+      console.error("Error extracting financial data:", error);
+      setExtractionError(error.message);
+      return null;
+    }
+  };
+
   const handleApproveDocument = async (asDraft = false) => {
     if (!currentFile) {
       toast.error("Please select a document first");
@@ -43,6 +139,7 @@ export function DocumentApproval({ jobId, onFinancialDataExtracted }: DocumentAp
 
     setIsProcessing(true);
     setIsUploading(true);
+    setExtractionError(null);
     
     try {
       // 1. Upload file to Supabase Storage
@@ -86,11 +183,32 @@ export function DocumentApproval({ jobId, onFinancialDataExtracted }: DocumentAp
           throw new Error(`Error processing document: ${visionError.message}`);
         }
         
-        setUploadProgress(100); // Processing complete
+        setUploadProgress(80); // OCR processing complete
         
         // 3. Handle the extracted data
-        if (visionData.success && visionData.data.extractedFinancialData) {
-          const extractedData = visionData.data.extractedFinancialData;
+        let extractedData: FinancialData | null = null;
+        
+        if (visionData.success && visionData.data.visionResult?.responses?.[0]?.fullTextAnnotation) {
+          // Extract the full text from the OCR result
+          const fullText = visionData.data.visionResult.responses[0].fullTextAnnotation.text;
+          setExtractedText(fullText);
+          
+          // Use the advanced extraction logic to get financial data
+          extractedData = extractFinancialData(fullText, currentFile.name);
+          
+          // If we couldn't extract structured data but we have raw OCR text, 
+          // create a basic record with just the amount from the API response
+          if (!extractedData && visionData.data.extractedFinancialData) {
+            extractedData = visionData.data.extractedFinancialData;
+          }
+        } else if (visionData.data.extractedFinancialData) {
+          // Use the basic extraction from the edge function if available
+          extractedData = visionData.data.extractedFinancialData;
+        }
+        
+        if (extractedData) {
+          // Add the approval status
+          extractedData.status = asDraft ? 'draft' : 'approved';
           
           // 4. Update local storage for compatibility with existing code
           const storageKey = `job-${jobId}-financial-data`;
@@ -99,7 +217,7 @@ export function DocumentApproval({ jobId, onFinancialDataExtracted }: DocumentAp
           
           onFinancialDataExtracted(extractedData);
           
-          toast.success(`Financial data extracted: $${extractedData.amount.toFixed(2)}`);
+          toast.success(`Financial data extracted: $${extractedData.amount.toFixed(2)}${extractedData.vendor ? ` from ${extractedData.vendor}` : ''}`);
           
           // Create a record in the database with the appropriate status
           const { error: statusError } = await supabase
@@ -109,6 +227,10 @@ export function DocumentApproval({ jobId, onFinancialDataExtracted }: DocumentAp
               file_path: filePath,
               status: asDraft ? 'draft' : 'approved',
               extracted_amount: extractedData.amount,
+              extracted_vendor: extractedData.vendor,
+              extracted_date: extractedData.date,
+              extracted_description: extractedData.description,
+              extracted_category: extractedData.category,
               document_name: currentFile.name
             });
             
@@ -117,6 +239,8 @@ export function DocumentApproval({ jobId, onFinancialDataExtracted }: DocumentAp
           }
         } else {
           // Just save the document reference even if no financial data was extracted
+          setExtractionError("Couldn't extract financial data. The document has been saved.");
+          
           const { error: docError } = await supabase
             .from('job_document_approvals')
             .insert({
@@ -147,19 +271,24 @@ export function DocumentApproval({ jobId, onFinancialDataExtracted }: DocumentAp
           console.error('Error saving document reference:', docError);
         }
         
-        setUploadProgress(100);
-        toast.success("Document saved successfully");
+        toast.info("Document saved successfully but not processed for financial data (unsupported file type)");
       }
       
+      setUploadProgress(100); // Process complete
+      
       // Reset state after successful processing
-      setCurrentFile(null);
+      setTimeout(() => {
+        setCurrentFile(null);
+        setUploadProgress(0);
+        setIsUploading(false);
+      }, 1500);
+      
     } catch (error) {
       console.error('Error in document approval process:', error);
       toast.error(error.message || "An error occurred during document processing");
+      setExtractionError(error.message || "An error occurred during processing");
     } finally {
       setIsProcessing(false);
-      setIsUploading(false);
-      setUploadProgress(0);
     }
   };
 
@@ -194,6 +323,16 @@ export function DocumentApproval({ jobId, onFinancialDataExtracted }: DocumentAp
               </div>
               <Progress value={uploadProgress} className="h-2" />
             </div>
+          )}
+          
+          {extractionError && (
+            <Alert variant="destructive" className="mt-4">
+              <AlertCircle className="h-4 w-4" />
+              <AlertTitle>Extraction Error</AlertTitle>
+              <AlertDescription>
+                {extractionError}
+              </AlertDescription>
+            </Alert>
           )}
         </div>
         

@@ -4,7 +4,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useState, useEffect } from "react";
-import { Search, FileText, Upload, AlertCircle } from "lucide-react";
+import { Search, FileText, Upload, AlertCircle, Calendar, DollarSign, Building } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -37,10 +37,28 @@ export const JobFinancialsTab = ({
   const [quoteAmount, setQuoteAmount] = useState(0);
   const [searchTerm, setSearchTerm] = useState("");
   const [hasAppliedExtractedData, setHasAppliedExtractedData] = useState(false);
+  const [groupedFinancialData, setGroupedFinancialData] = useState<Record<string, any[]>>({});
   
   const laborCost = (jobTimer / 3600) * 50; // Assuming $50/hour labor rate
   const totalCostsWithLabor = totalCosts + laborCost;
   const netProfitWithLabor = quoteAmount - totalCostsWithLabor;
+
+  // Group extracted financial data by category
+  useEffect(() => {
+    if (extractedFinancialData.length > 0) {
+      const grouped: Record<string, any[]> = {};
+      
+      extractedFinancialData.forEach(data => {
+        const category = data.category || 'uncategorized';
+        if (!grouped[category]) {
+          grouped[category] = [];
+        }
+        grouped[category].push(data);
+      });
+      
+      setGroupedFinancialData(grouped);
+    }
+  }, [extractedFinancialData]);
 
   // Auto-apply the most recent extracted amount if we haven't applied one yet
   useEffect(() => {
@@ -70,6 +88,12 @@ export const JobFinancialsTab = ({
     toast.success(`Applied amount: $${data.amount}`);
   };
 
+  // Calculate total extracted by category
+  const calculateTotalByCategory = (category: string) => {
+    if (!groupedFinancialData[category]) return 0;
+    return groupedFinancialData[category].reduce((total, item) => total + item.amount, 0);
+  };
+
   return (
     <TabsContent value="financials" className="space-y-4">
       <div className="border rounded-lg p-4">
@@ -81,32 +105,61 @@ export const JobFinancialsTab = ({
               <AlertDescription className="mt-2">
                 {extractedFinancialData.length} financial data point(s) extracted from your documents
                 
-                <div className="mt-2 space-y-2">
-                  {extractedFinancialData.map((data, index) => (
-                    <div 
-                      key={index} 
-                      className="flex justify-between items-center p-2 bg-white rounded border border-blue-100 hover:bg-blue-50 cursor-pointer"
-                      onClick={() => applyExtractedAmount(data)}
-                    >
-                      <div className="text-sm">
-                        <span className="font-medium">${data.amount.toFixed(2)}</span>
-                        <span className="text-gray-500 ml-2 text-xs">
-                          {data.source && `from "${data.source}"`} {new Date(data.timestamp).toLocaleString()}
+                <div className="mt-3 space-y-4">
+                  {Object.keys(groupedFinancialData).map(category => (
+                    <div key={category} className="space-y-2">
+                      <h4 className="text-sm font-medium capitalize flex items-center">
+                        {category === 'invoice' && <FileText className="h-4 w-4 mr-1" />}
+                        {category === 'quote' && <DollarSign className="h-4 w-4 mr-1" />}
+                        {category === 'receipt' && <Receipt className="h-4 w-4 mr-1" />}
+                        {category === 'bill' && <Building className="h-4 w-4 mr-1" />}
+                        {category} Documents 
+                        <span className="text-xs ml-2 bg-blue-100 text-blue-800 px-2 py-0.5 rounded">
+                          Total: ${calculateTotalByCategory(category).toFixed(2)}
                         </span>
-                      </div>
-                      <div className="flex items-center">
-                        {data.status && (
-                          <span className={`text-xs px-2 py-1 rounded mr-2 ${
-                            data.status === 'approved' ? 'bg-green-100 text-green-800' : 
-                            'bg-yellow-100 text-yellow-800'
-                          }`}>
-                            {data.status === 'approved' ? 'Approved' : 'Draft'}
-                          </span>
-                        )}
-                        <button className="text-xs text-blue-600 hover:text-blue-800">
-                          Apply
-                        </button>
-                      </div>
+                      </h4>
+                      
+                      {groupedFinancialData[category].map((data, index) => (
+                        <div 
+                          key={index} 
+                          className="flex justify-between items-center p-2 bg-white rounded border border-blue-100 hover:bg-blue-50 cursor-pointer"
+                          onClick={() => applyExtractedAmount(data)}
+                        >
+                          <div className="text-sm space-y-1">
+                            <div className="font-medium">${data.amount.toFixed(2)}</div>
+                            <div className="text-xs text-gray-500 flex items-center space-x-2">
+                              {data.vendor && (
+                                <span className="flex items-center">
+                                  <Building className="h-3 w-3 mr-1" />
+                                  {data.vendor}
+                                </span>
+                              )}
+                              {data.date && (
+                                <span className="flex items-center">
+                                  <Calendar className="h-3 w-3 mr-1" />
+                                  {data.date}
+                                </span>
+                              )}
+                              <span>
+                                {data.source && `from "${data.source}"`}
+                              </span>
+                            </div>
+                          </div>
+                          <div className="flex items-center">
+                            {data.status && (
+                              <span className={`text-xs px-2 py-1 rounded mr-2 ${
+                                data.status === 'approved' ? 'bg-green-100 text-green-800' : 
+                                'bg-yellow-100 text-yellow-800'
+                              }`}>
+                                {data.status === 'approved' ? 'Approved' : 'Draft'}
+                              </span>
+                            )}
+                            <button className="text-xs text-blue-600 hover:text-blue-800">
+                              Apply
+                            </button>
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   ))}
                 </div>

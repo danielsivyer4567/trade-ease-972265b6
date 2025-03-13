@@ -41,6 +41,20 @@ serve(async (req) => {
           if (!error && data) {
             gcpVisionKey = data.api_key;
           }
+          
+          // If not found in user_api_keys, try messaging_accounts
+          if (!gcpVisionKey) {
+            const { data: msgData, error: msgError } = await supabase
+              .from('messaging_accounts')
+              .select('gcp_vision_key, api_key')
+              .eq('user_id', userId)
+              .eq('service_type', 'gcpvision')
+              .single();
+              
+            if (!msgError && msgData) {
+              gcpVisionKey = msgData.gcp_vision_key || msgData.api_key;
+            }
+          }
         }
       }
     }
@@ -64,7 +78,8 @@ serve(async (req) => {
             content: fileBase64.split(',')[1], // Remove data URL prefix if present
           },
           features: [
-            { type: 'DOCUMENT_TEXT_DETECTION' }
+            { type: 'DOCUMENT_TEXT_DETECTION' },
+            { type: 'TEXT_DETECTION' }
           ],
         }],
       }),
@@ -79,7 +94,10 @@ serve(async (req) => {
       
       // Simple regex to find dollar amounts (can be improved based on document formats)
       const currencyRegex = /\$\s*(\d{1,3}(,\d{3})*(\.\d{2})?)/g;
+      const dateRegex = /\b(0?[1-9]|1[0-2])[\/\-](0?[1-9]|[12]\d|3[01])[\/\-](19|20)?\d{2}\b/g;
+      
       const matches = [...fullText.matchAll(currencyRegex)];
+      const dates = [...fullText.matchAll(dateRegex)];
       
       if (matches.length > 0) {
         // Take the largest amount as the quote amount (this is a simple heuristic)
@@ -89,8 +107,30 @@ serve(async (req) => {
         
         const maxAmount = Math.max(...amounts);
         
+        // Try to identify vendor/supplier information
+        // This is a simple approach that looks for common terms near the beginning of the document
+        let vendor = null;
+        const vendorKeywords = ['from:', 'vendor:', 'supplier:', 'bill from:', 'company:'];
+        for (const keyword of vendorKeywords) {
+          const keywordIndex = fullText.toLowerCase().indexOf(keyword);
+          if (keywordIndex !== -1) {
+            // Extract the text after the keyword until a newline
+            const afterKeyword = fullText.substring(keywordIndex + keyword.length).trim();
+            vendor = afterKeyword.split(/[\n\r]/)[0].trim();
+            break;
+          }
+        }
+        
+        // Try to extract a date
+        let extractedDate = null;
+        if (dates.length > 0) {
+          extractedDate = dates[0][0]; // Get the first date found
+        }
+        
         extractedFinancialData = {
           amount: maxAmount,
+          vendor: vendor,
+          date: extractedDate,
           source: documentName,
           timestamp: new Date().toISOString(),
           jobId: jobId
