@@ -79,9 +79,11 @@ export const JobDetailsTab = ({ job }: JobDetailsTabProps) => {
         </div>
       </div>
 
-      <div className="w-full h-[200px] rounded-lg overflow-hidden border border-gray-200">
-        <JobMap jobs={[job]} />
-      </div>
+      {job.location && job.location.length === 2 && (
+        <div className="w-full h-[200px] rounded-lg overflow-hidden border border-gray-200">
+          <JobMap jobs={[job]} />
+        </div>
+      )}
 
       <div className="mt-6 border rounded-lg p-4 bg-white shadow-sm">
         <div className="flex items-center justify-between mb-3">
