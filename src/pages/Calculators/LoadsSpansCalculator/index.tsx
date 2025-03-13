@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+
+import React from "react";
 import { AppLayout } from "@/components/ui/AppLayout";
 import { Link } from "react-router-dom";
 import { ArrowLeft, Ruler } from "lucide-react";
@@ -7,6 +8,7 @@ import { BeamCalculator } from "./BeamCalculator";
 import { SpanTableCalculator } from "./SpanTableCalculator";
 import { AboutCalculator } from "./AboutCalculator";
 import { useBeamCalculator } from "./hooks/useBeamCalculator";
+import { useSpanTableCalculator } from "./hooks/useSpanTableCalculator";
 
 const LoadsSpansCalculator = () => {
   const {
@@ -15,16 +17,22 @@ const LoadsSpansCalculator = () => {
     woodType, setWoodType,
     loadType, setLoadType,
     span, setSpan,
-    calculatedResult, setCalculatedResult
+    calculatedResult, setCalculatedResult,
+    calculateStress
   } = useBeamCalculator();
 
-  const [material, setMaterial] = useState("Timber");
-  const [grade, setGrade] = useState("MGP10");
-  const [dimension, setDimension] = useState("140x45");
-  const [spacing, setSpacing] = useState("450mm");
-  const [load, setLoad] = useState("2.0");
-  const [spanType, setSpanType] = useState("Single span");
-  const [spanResult, setSpanResult] = useState<string | null>(null);
+  const {
+    material, setMaterial,
+    grade, setGrade,
+    dimension, setDimension,
+    spacing, setSpacing,
+    load, setLoad,
+    spanType, setSpanType,
+    spanResult, setSpanResult,
+    getAvailableGrades,
+    getAvailableDimensions,
+    calculateSpanFromTable
+  } = useSpanTableCalculator();
 
   return (
     <AppLayout>
@@ -77,6 +85,9 @@ const LoadsSpansCalculator = () => {
               setSpanType={setSpanType}
               spanResult={spanResult}
               setSpanResult={setSpanResult}
+              getAvailableGrades={getAvailableGrades}
+              getAvailableDimensions={getAvailableDimensions}
+              calculateSpanFromTable={calculateSpanFromTable}
             />
           </TabsContent>
 
