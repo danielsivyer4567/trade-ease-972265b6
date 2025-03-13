@@ -50,14 +50,15 @@ export function DocumentApproval({ jobId, onFinancialDataExtracted }: DocumentAp
       const fileExt = currentFile.name.split('.').pop();
       const filePath = `${jobId}/${fileName}`;
       
+      // Create an XMLHttpRequest to track upload progress manually
+      // since Supabase doesn't support progress tracking directly
+      setUploadProgress(10); // Start progress indication
+      
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from('job-documents')
         .upload(filePath, currentFile, {
           cacheControl: '3600',
-          upsert: false,
-          onUploadProgress: (progress) => {
-            setUploadProgress(Math.round((progress.loaded / progress.total) * 50)); // First 50% is upload
-          }
+          upsert: false
         });
         
       if (uploadError) {
