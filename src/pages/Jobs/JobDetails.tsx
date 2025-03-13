@@ -1,12 +1,12 @@
-
 import { useParams, useNavigate } from 'react-router-dom';
 import { JobHeader } from './components/JobHeader';
 import { JobTabs } from './components/JobTabs';
 import { useState, useEffect } from 'react';
 import type { Job } from '@/types/job';
 import { DocumentApproval } from './components/DocumentApproval';
-import { supabase } from '@/integrations/supabase/client';
-import { toast } from 'sonner';
+import { useJobTimer } from './hooks/useJobTimer';
+import { useJobLocation } from './hooks/useJobLocation';
+import { useJobFinancialData } from './hooks/useJobFinancialData';
 
 const mockJobs: Job[] = [
   {
@@ -49,182 +49,38 @@ export function JobDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
   const job = mockJobs.find(j => j.id === id);
-  const [jobTimer, setJobTimer] = useState(0);
-  const [hasLocationPermission, setHasLocationPermission] = useState<boolean | null>(null);
-  const [isTimerRunning, setIsTimerRunning] = useState(false);
-  const [isOnBreak, setIsOnBreak] = useState(false);
-  const [locationHistory, setLocationHistory] = useState<Array<{timestamp: number; coords: [number, number]}>>([]);
   const [jobNotes, setJobNotes] = useState("");
-  const [tabNotes, setTabNotes] = useState<Record<string, string>>({});
-  const [extractedFinancialData, setExtractedFinancialData] = useState<any[]>([]);
   const isManager = true;
+
+  const { 
+    jobTimer, 
+    isTimerRunning, 
+    isOnBreak, 
+    setIsTimerRunning,
+    handleBreakToggle 
+  } = useJobTimer();
+
+  const { 
+    hasLocationPermission, 
+    locationHistory, 
+    handleTimerToggle: locationHandleTimerToggle 
+  } = useJobLocation();
+
+  const { 
+    extractedFinancialData, 
+    tabNotes, 
+    setTabNotes, 
+    handleFinancialDataExtracted 
+  } = useJobFinancialData(id);
 
   useEffect(() => {
     if (!job) {
       navigate('/jobs');
     }
-    
-    // Fetch any existing financial data for this job
-    const loadFinancialData = async () => {
-      try {
-        if (id) {
-          const storageKey = `job-${id}-financial-data`;
-          const storedData = JSON.parse(localStorage.getItem(storageKey) || '[]');
-          if (storedData.length > 0) {
-            setExtractedFinancialData(storedData);
-          }
-          
-          // Also check Supabase for any stored financial data
-          const { data, error } = await supabase
-            .from('job_financial_data')
-            .select('*')
-            .eq('job_id', id);
-            
-          if (!error && data && data.length > 0) {
-            // Format the data to match our expected structure
-            const formattedData = data.map(item => ({
-              ...item.extracted_data,
-              id: item.id,
-              status: item.status
-            }));
-            
-            // Merge with local storage data
-            const mergedData = [...storedData];
-            
-            // Add any items from Supabase that aren't in localStorage
-            formattedData.forEach(item => {
-              if (!mergedData.some(m => m.timestamp === item.timestamp)) {
-                mergedData.push(item);
-              }
-            });
-            
-            setExtractedFinancialData(mergedData);
-            localStorage.setItem(storageKey, JSON.stringify(mergedData));
-          }
-        }
-      } catch (error) {
-        console.error("Error loading financial data:", error);
-      }
-    };
-    
-    loadFinancialData();
-  }, [job, navigate, id]);
+  }, [job, navigate]);
 
-  useEffect(() => {
-    let timerInterval: number | null = null;
-    
-    if (isTimerRunning) {
-      timerInterval = window.setInterval(() => {
-        setJobTimer(prev => prev + 1);
-      }, 1000);
-    }
-    
-    return () => {
-      if (timerInterval !== null) {
-        clearInterval(timerInterval);
-      }
-    };
-  }, [isTimerRunning]);
-
-  const getLocation = () => {
-    return new Promise<[number, number]>((resolve, reject) => {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          const { latitude, longitude } = position.coords;
-          resolve([longitude, latitude]);
-        },
-        (error) => {
-          console.error("Error getting location:", error);
-          reject(error);
-        }
-      );
-    });
-  };
-
-  const handleTimerToggle = async () => {
-    if (hasLocationPermission === null) {
-      try {
-        const coords = await getLocation();
-        setHasLocationPermission(true);
-        setIsTimerRunning(true);
-        
-        setLocationHistory([{
-          timestamp: Date.now(),
-          coords: coords
-        }]);
-      } catch (error) {
-        console.error("Error getting location permission:", error);
-        setHasLocationPermission(false);
-      }
-    } else if (hasLocationPermission === false) {
-      try {
-        const coords = await getLocation();
-        setHasLocationPermission(true);
-        setIsTimerRunning(true);
-        
-        setLocationHistory([{
-          timestamp: Date.now(),
-          coords: coords
-        }]);
-      } catch (error) {
-        console.error("Error getting location permission:", error);
-        alert("Location permission is required to use the timer.");
-      }
-    } else {
-      const newTimerState = !isTimerRunning;
-      setIsTimerRunning(newTimerState);
-      
-      if (isTimerRunning) {
-        try {
-          const coords = await getLocation();
-          setLocationHistory(prev => [
-            ...prev,
-            {
-              timestamp: Date.now(),
-              coords: coords
-            }
-          ]);
-        } catch (error) {
-          console.error("Error getting stop location:", error);
-        }
-      } else {
-        try {
-          const coords = await getLocation();
-          setLocationHistory(prev => [
-            ...prev,
-            {
-              timestamp: Date.now(),
-              coords: coords
-            }
-          ]);
-        } catch (error) {
-          console.error("Error getting start location:", error);
-        }
-      }
-    }
-  };
-
-  const handleBreakToggle = () => {
-    setIsOnBreak(!isOnBreak);
-  };
-  
-  const handleFinancialDataExtracted = (newData: any) => {
-    setExtractedFinancialData(prev => [...prev, newData]);
-    
-    // Update localStorage
-    if (id) {
-      const storageKey = `job-${id}-financial-data`;
-      const storedData = JSON.parse(localStorage.getItem(storageKey) || '[]');
-      localStorage.setItem(storageKey, JSON.stringify([...storedData, newData]));
-    }
-    
-    // Update job notes with the extracted financial data
-    setTabNotes(prev => ({
-      ...prev,
-      financials: `${prev.financials || ''}\n\nExtracted amount of $${newData.amount.toFixed(2)} from document "${newData.source}" on ${new Date().toLocaleString()}`
-    }));
-    
-    toast.success(`Financial data has been extracted and added to the job`);
+  const handleTimerToggle = () => {
+    locationHandleTimerToggle(isTimerRunning, setIsTimerRunning);
   };
 
   if (!job) {
