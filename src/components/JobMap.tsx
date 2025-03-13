@@ -5,10 +5,16 @@ import type { Job } from '@/types/job';
 import { Briefcase } from 'lucide-react';
 
 interface JobMapProps {
-  jobs: Job[];
+  jobs?: Job[];
+  center?: [number, number];
+  zoom?: number;
+  markers?: Array<{
+    position: [number, number];
+    title: string;
+  }>;
 }
 
-const JobMap = ({ jobs }: JobMapProps) => {
+const JobMap = ({ jobs = [], center, zoom = 14, markers = [] }: JobMapProps) => {
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
 
   const mapContainerStyle = {
@@ -17,11 +23,15 @@ const JobMap = ({ jobs }: JobMapProps) => {
     borderRadius: '0.5rem'
   };
 
-  // Updated coordinates for Gold Coast, Queensland
-  const center = {
+  // Default coordinates for Gold Coast, Queensland if no center provided
+  const defaultCenter = {
     lat: -28.017112731933594,
     lng: 153.4014129638672
   };
+
+  const mapCenter = center 
+    ? { lat: center[1], lng: center[0] } 
+    : defaultCenter;
 
   const options = {
     mapTypeId: 'satellite',
@@ -31,46 +41,72 @@ const JobMap = ({ jobs }: JobMapProps) => {
   };
 
   const onLoad = (map: google.maps.Map) => {
-    jobs.forEach((job) => {
-      // Create marker element
-      const markerElement = document.createElement('div');
-      markerElement.className = 'marker';
-      markerElement.innerHTML = `
-        <div class="flex items-center gap-2 font-semibold text-white bg-black/50 backdrop-blur-sm px-2 py-1 rounded-lg shadow-lg border border-white/20">
-          <img src="/lovable-uploads/34bca7f1-d63b-45a0-b1ca-a562443686ad.png" alt="Trade Ease Logo" width="20" height="20" class="object-contain" />
-          <span>${job.jobNumber || 'N/A'}</span>
+    // Add markers from jobs if provided
+    if (jobs.length > 0) {
+      jobs.forEach((job) => {
+        // Create marker element
+        const markerElement = document.createElement('div');
+        markerElement.className = 'marker';
+        markerElement.innerHTML = `
+          <div class="flex items-center gap-2 font-semibold text-white bg-black/50 backdrop-blur-sm px-2 py-1 rounded-lg shadow-lg border border-white/20">
+            <img src="/lovable-uploads/34bca7f1-d63b-45a0-b1ca-a562443686ad.png" alt="Trade Ease Logo" width="20" height="20" class="object-contain" />
+            <span>${job.jobNumber || 'N/A'}</span>
+          </div>
+        `;
+
+        // Create the advanced marker
+        const marker = new google.maps.marker.AdvancedMarkerElement({
+          position: { lat: job.location[1], lng: job.location[0] },
+          map,
+          content: markerElement,
+          title: job.customer
+        });
+
+        // Add click listener using the recommended 'gmp-click' event
+        marker.addListener('gmp-click', () => {
+          setSelectedJob(job);
+        });
+      });
+    }
+
+    // Add markers from the markers prop if provided
+    if (markers.length > 0) {
+      markers.forEach(marker => {
+        const markerElement = document.createElement('div');
+        markerElement.className = 'marker';
+        markerElement.innerHTML = `
+          <div class="flex items-center gap-2 font-semibold text-white bg-black/50 backdrop-blur-sm px-2 py-1 rounded-lg shadow-lg border border-white/20">
+            <img src="/lovable-uploads/34bca7f1-d63b-45a0-b1ca-a562443686ad.png" alt="Trade Ease Logo" width="20" height="20" class="object-contain" />
+            <span>${marker.title || 'N/A'}</span>
+          </div>
+        `;
+
+        new google.maps.marker.AdvancedMarkerElement({
+          position: { lat: marker.position[0], lng: marker.position[1] },
+          map,
+          content: markerElement,
+          title: marker.title
+        });
+      });
+    }
+
+    // Add a marker for the center location if no other markers are provided
+    if (jobs.length === 0 && markers.length === 0) {
+      const centerMarkerElement = document.createElement('div');
+      centerMarkerElement.className = 'marker';
+      centerMarkerElement.innerHTML = `
+        <div class="text-white bg-blue-500/70 backdrop-blur-sm px-2 py-1 rounded-lg shadow-lg border border-white/20 font-semibold">
+          Location
         </div>
       `;
 
-      // Create the advanced marker
-      const marker = new google.maps.marker.AdvancedMarkerElement({
-        position: { lat: job.location[1], lng: job.location[0] },
+      new google.maps.marker.AdvancedMarkerElement({
+        position: mapCenter,
         map,
-        content: markerElement,
-        title: job.customer
+        content: centerMarkerElement,
+        title: "Location"
       });
-
-      // Add click listener using the recommended 'gmp-click' event
-      marker.addListener('gmp-click', () => {
-        setSelectedJob(job);
-      });
-    });
-
-    // Add a marker for the center location
-    const centerMarkerElement = document.createElement('div');
-    centerMarkerElement.className = 'marker';
-    centerMarkerElement.innerHTML = `
-      <div class="text-white bg-blue-500/70 backdrop-blur-sm px-2 py-1 rounded-lg shadow-lg border border-white/20 font-semibold">
-        Gold Coast
-      </div>
-    `;
-
-    new google.maps.marker.AdvancedMarkerElement({
-      position: center,
-      map,
-      content: centerMarkerElement,
-      title: "Gold Coast"
-    });
+    }
   };
 
   return (
@@ -81,8 +117,8 @@ const JobMap = ({ jobs }: JobMapProps) => {
     >
       <GoogleMap
         mapContainerStyle={mapContainerStyle}
-        center={center}
-        zoom={14}
+        center={mapCenter}
+        zoom={zoom}
         options={options}
         onLoad={onLoad}
       >
