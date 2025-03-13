@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { AppLayout } from "@/components/ui/AppLayout";
 import { Link } from "react-router-dom";
@@ -7,24 +6,18 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BeamCalculator } from "./BeamCalculator";
 import { SpanTableCalculator } from "./SpanTableCalculator";
 import { AboutCalculator } from "./AboutCalculator";
-
-// Type for calculation result
-interface CalculationResult {
-  maxLoad: number;
-  safeLoad: number;
-  deflection: number;
-}
+import { useBeamCalculator } from "./hooks/useBeamCalculator";
 
 const LoadsSpansCalculator = () => {
-  // Beam calculator state
-  const [beamWidth, setBeamWidth] = useState("200");
-  const [beamDepth, setBeamDepth] = useState("300");
-  const [loadType, setLoadType] = useState("Residential - Light");
-  const [woodType, setWoodType] = useState("Pine");
-  const [span, setSpan] = useState("4");
-  const [calculatedResult, setCalculatedResult] = useState<CalculationResult | null>(null);
+  const {
+    beamWidth, setBeamWidth,
+    beamDepth, setBeamDepth,
+    woodType, setWoodType,
+    loadType, setLoadType,
+    span, setSpan,
+    calculatedResult, setCalculatedResult
+  } = useBeamCalculator();
 
-  // Span table calculator state
   const [material, setMaterial] = useState("Timber");
   const [grade, setGrade] = useState("MGP10");
   const [dimension, setDimension] = useState("140x45");
