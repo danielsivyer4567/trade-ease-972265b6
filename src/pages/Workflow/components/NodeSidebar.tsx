@@ -50,11 +50,11 @@ export function NodeSidebar() {
               </div>
               <div>
                 <div className="font-semibold text-xs">Vision Analysis</div>
-                <div className="text-xs text-gray-500">Available in Jobs</div>
+                <div className="text-xs text-gray-500">Available in Multiple Sections</div>
               </div>
             </div>
             <p className="text-xs mt-2 text-purple-700">
-              Vision Analysis is now available directly in each job's financials tab for easier document processing.
+              Vision Analysis is now available directly in Jobs, Quotes, and Messaging sections for easier document processing.
             </p>
           </div>
         </div>
