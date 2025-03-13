@@ -4,8 +4,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useState, useEffect } from "react";
-import { Search, FileText, AlertCircle } from "lucide-react";
+import { Search, FileText, Upload, AlertCircle } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 // Mock data for demonstration - in a real app this would come from your database
 const mockCustomerQuotes = [
@@ -34,6 +36,8 @@ export const JobFinancialsTab = ({
   const [searchTerm, setSearchTerm] = useState("");
   const [extractedFinancialData, setExtractedFinancialData] = useState<any[]>([]);
   const [hasAppliedExtractedData, setHasAppliedExtractedData] = useState(false);
+  const [fileToUpload, setFileToUpload] = useState<File | null>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
   
   const laborCost = (jobTimer / 3600) * 50; // Assuming $50/hour labor rate
   const totalCostsWithLabor = totalCosts + laborCost;
@@ -67,10 +71,79 @@ export const JobFinancialsTab = ({
     });
   };
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setFileToUpload(e.target.files[0]);
+    }
+  };
+
+  const processDocument = async () => {
+    if (!fileToUpload) {
+      toast.error("Please select a document to analyze first");
+      return;
+    }
+
+    setIsProcessing(true);
+    
+    // Simulate document processing - in a real app, you would call a proper API
+    setTimeout(() => {
+      // Extract the financial data (simulated)
+      const extractedData = {
+        timestamp: new Date().toISOString(),
+        amount: Math.floor(Math.random() * 5000) + 1000, // Simulated amount between $1000-$6000
+        source: fileToUpload.name
+      };
+      
+      // Store the extracted data
+      const existingData = JSON.parse(localStorage.getItem('vision-financial-data') || '[]');
+      localStorage.setItem('vision-financial-data', JSON.stringify([...existingData, extractedData]));
+      
+      // Update state
+      setExtractedFinancialData([...existingData, extractedData]);
+      setIsProcessing(false);
+      setFileToUpload(null);
+      
+      toast.success('Financial data extracted from document');
+    }, 2000);
+  };
+
   return (
     <TabsContent value="financials" className="space-y-4">
       <div className="border rounded-lg p-4">
         <div className="space-y-4">
+          <div className="p-4 border border-blue-200 rounded-lg bg-blue-50">
+            <h3 className="font-medium mb-2 flex items-center">
+              <FileText className="h-4 w-4 mr-2 text-blue-600" />
+              <span>Document Analysis</span>
+            </h3>
+            <p className="text-sm text-gray-600 mb-4">
+              Extract financial data directly from invoices, quotes, or other documents to automatically
+              fill in financial values.
+            </p>
+            
+            <div className="flex items-center gap-3 mb-4">
+              <label className="flex-1">
+                <div className="relative cursor-pointer rounded-md bg-white px-4 py-2 border border-dashed border-gray-300 hover:bg-gray-50 flex items-center justify-center">
+                  <input 
+                    type="file" 
+                    className="hidden" 
+                    accept="image/jpeg,image/png,application/pdf"
+                    onChange={handleFileChange} 
+                  />
+                  <Upload className="h-4 w-4 mr-2 text-gray-500" />
+                  <span className="text-sm">{fileToUpload ? fileToUpload.name : "Choose a document to analyze"}</span>
+                </div>
+              </label>
+              <Button 
+                onClick={processDocument} 
+                disabled={!fileToUpload || isProcessing}
+                className="h-9"
+              >
+                {isProcessing ? "Processing..." : "Extract Data"}
+              </Button>
+            </div>
+          </div>
+
           {extractedFinancialData.length > 0 && (
             <Alert className="bg-blue-50 border-blue-200">
               <FileText className="h-4 w-4 text-blue-600" />

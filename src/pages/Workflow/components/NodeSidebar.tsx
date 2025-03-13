@@ -40,25 +40,22 @@ export function NodeSidebar() {
         {/* Default nodes section */}
         <DefaultNodes onDragStart={handleDragStart} />
         
-        {/* Vision Analysis node section */}
+        {/* Note about Vision Analysis feature */}
         <div className="mt-4">
-          <h4 className="text-xs font-medium text-gray-500 mb-2">INTEGRATIONS</h4>
-          <div 
-            className="border border-purple-300 bg-purple-50 p-2 rounded-md mb-2 cursor-grab"
-            draggable
-            onDragStart={(event) => {
-              event.dataTransfer.setData('application/reactflow', 'visionNode');
-            }}
-          >
+          <h4 className="text-xs font-medium text-gray-500 mb-2">VISION ANALYSIS</h4>
+          <div className="border border-purple-300 bg-purple-50 p-3 rounded-md mb-2">
             <div className="flex items-center">
               <div className="w-6 h-6 bg-purple-100 rounded-full flex items-center justify-center mr-2">
                 <span className="text-purple-600 text-xs">🔍</span>
               </div>
               <div>
                 <div className="font-semibold text-xs">Vision Analysis</div>
-                <div className="text-xs text-gray-500">Extract Data</div>
+                <div className="text-xs text-gray-500">Available in Jobs</div>
               </div>
             </div>
+            <p className="text-xs mt-2 text-purple-700">
+              Vision Analysis is now available directly in each job's financials tab for easier document processing.
+            </p>
           </div>
         </div>
 
