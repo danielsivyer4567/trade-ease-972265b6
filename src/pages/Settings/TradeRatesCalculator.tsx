@@ -1,3 +1,4 @@
+
 import { AppLayout } from "@/components/ui/AppLayout";
 import { Link } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -131,7 +132,7 @@ export default function TradeRatesCalculator() {
       <div className="p-6 space-y-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Link to="/settings" className="hover:text-blue-500">
+            <Link to="/calculators" className="hover:text-blue-500">
               <ArrowLeft className="h-6 w-6" />
             </Link>
             <DollarSign className="h-8 w-8 text-gray-700" />
