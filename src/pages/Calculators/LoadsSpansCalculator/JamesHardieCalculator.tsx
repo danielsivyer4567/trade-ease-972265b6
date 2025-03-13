@@ -1,11 +1,12 @@
 
 import React from "react";
-import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
+import { Card, CardHeader, CardContent, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { HARDIE_PRODUCT_TYPES, HARDIE_THICKNESSES, HARDIE_APPLICATION_AREAS } from "./constants";
+import { Separator } from "@/components/ui/separator";
+import { HARDIE_PRODUCT_TYPES, HARDIE_THICKNESSES, HARDIE_APPLICATION_AREAS, WIND_LOAD_CATEGORIES } from "./constants";
 import { HardieResult } from "./hooks/useJamesHardieCalculator";
 
 interface JamesHardieCalculatorProps {
@@ -38,11 +39,17 @@ export const JamesHardieCalculator: React.FC<JamesHardieCalculatorProps> = ({
   hardieResult,
   calculateHardieRequirements
 }) => {
+  // Get selected product details for additional information
+  const selectedProduct = HARDIE_PRODUCT_TYPES.find(p => p.name === productType) || HARDIE_PRODUCT_TYPES[0];
+  
   return (
     <>
       <Card>
         <CardHeader>
           <CardTitle>James Hardie Product Selection</CardTitle>
+          <CardDescription>
+            James Hardie is a leading manufacturer of fiber cement products, widely used in construction
+          </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -60,6 +67,9 @@ export const JamesHardieCalculator: React.FC<JamesHardieCalculatorProps> = ({
                   ))}
                 </SelectContent>
               </Select>
+              {selectedProduct && (
+                <p className="text-sm text-gray-500 mt-1">{selectedProduct.description}</p>
+              )}
             </div>
             <div className="space-y-2">
               <Label htmlFor="thickness">Thickness</Label>
@@ -75,6 +85,9 @@ export const JamesHardieCalculator: React.FC<JamesHardieCalculatorProps> = ({
                   ))}
                 </SelectContent>
               </Select>
+              <p className="text-sm text-gray-500 mt-1">
+                Thickness affects load capacity, fire rating, and acoustic properties
+              </p>
             </div>
           </div>
         </CardContent>
@@ -100,6 +113,11 @@ export const JamesHardieCalculator: React.FC<JamesHardieCalculatorProps> = ({
                   ))}
                 </SelectContent>
               </Select>
+              <p className="text-sm text-gray-500 mt-1">
+                {applicationArea === "Wet Areas" && "Requires special waterproofing to meet AS 3740"}
+                {applicationArea === "Flooring" && "Suitable for tile, vinyl, and carpet applications"}
+                {applicationArea === "Exterior Wall" && "Requires weather-resistant products"}
+              </p>
             </div>
             <div className="space-y-2">
               <Label htmlFor="support-spacing">Support Spacing (mm)</Label>
@@ -112,6 +130,9 @@ export const JamesHardieCalculator: React.FC<JamesHardieCalculatorProps> = ({
                 max="900"
                 step="50"
               />
+              <p className="text-sm text-gray-500 mt-1">
+                Standard spacings are 450mm or 600mm for studs/joists
+              </p>
             </div>
           </div>
         </CardContent>
@@ -124,15 +145,38 @@ export const JamesHardieCalculator: React.FC<JamesHardieCalculatorProps> = ({
         <CardContent className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="wind-load">Wind Load (kPa)</Label>
-            <Input
-              id="wind-load"
-              type="number"
-              value={windLoad}
-              onChange={(e) => setWindLoad(e.target.value)}
-              min="0.5"
-              max="7"
-              step="0.5"
-            />
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div className="md:col-span-1">
+                <Input
+                  id="wind-load"
+                  type="number"
+                  value={windLoad}
+                  onChange={(e) => setWindLoad(e.target.value)}
+                  min="0.5"
+                  max="7"
+                  step="0.5"
+                />
+              </div>
+              <div className="md:col-span-3">
+                <Select 
+                  onValueChange={(val) => setWindLoad(WIND_LOAD_CATEGORIES.find(w => w.name === val)?.kPa.toString() || windLoad)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Or select wind category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {WIND_LOAD_CATEGORIES.map((category) => (
+                      <SelectItem key={category.name} value={category.name}>
+                        {category.name} - {category.description} ({category.kPa} kPa)
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <p className="text-sm text-gray-500 mt-1">
+              Wind load affects fastening requirements and support spacing
+            </p>
           </div>
 
           <Button 
@@ -168,6 +212,52 @@ export const JamesHardieCalculator: React.FC<JamesHardieCalculatorProps> = ({
             <div className="p-4 bg-white rounded-lg shadow-sm mt-2">
               <p className="text-sm font-medium text-gray-500">Installation Notes</p>
               <p className="text-md text-gray-800 mt-1">{hardieResult.notes}</p>
+            </div>
+            
+            <Separator className="my-4" />
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-3">
+                <h3 className="font-semibold text-amber-800">Technical Properties</h3>
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="p-3 bg-white rounded-lg shadow-sm">
+                    <p className="text-xs font-medium text-gray-500">Fire Rating</p>
+                    <p className="text-sm font-semibold">{hardieResult.fireRating}</p>
+                  </div>
+                  <div className="p-3 bg-white rounded-lg shadow-sm">
+                    <p className="text-xs font-medium text-gray-500">Bushfire Rating</p>
+                    <p className="text-sm font-semibold">{hardieResult.bushfireRating}</p>
+                  </div>
+                  <div className="p-3 bg-white rounded-lg shadow-sm">
+                    <p className="text-xs font-medium text-gray-500">Sound Rating (STC)</p>
+                    <p className="text-sm font-semibold">{hardieResult.soundRating} dB</p>
+                  </div>
+                  <div className="p-3 bg-white rounded-lg shadow-sm">
+                    <p className="text-xs font-medium text-gray-500">Thermal R-Value</p>
+                    <p className="text-sm font-semibold">{hardieResult.thermalRValue} m²·K/W</p>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="space-y-3">
+                <h3 className="font-semibold text-amber-800">Standards Compliance</h3>
+                <div className="p-3 bg-white rounded-lg shadow-sm">
+                  <ul className="text-sm space-y-1">
+                    <li>✓ AS 1530.1: Non-combustibility</li>
+                    <li>✓ AS 1684: Timber framing compatibility</li>
+                    <li>✓ AS 1170: Structural design loads</li>
+                    {applicationArea === "Wet Areas" && (
+                      <li>✓ AS 3740: Waterproofing in wet areas</li>
+                    )}
+                    {parseFloat(windLoad) > 2.5 && (
+                      <li>✓ AS 4055: Wind loads for housing</li>
+                    )}
+                    {hardieResult.bushfireRating !== "BAL-12.5" && (
+                      <li>✓ AS 3959: Construction in bushfire-prone areas</li>
+                    )}
+                  </ul>
+                </div>
+              </div>
             </div>
           </CardContent>
         </Card>
