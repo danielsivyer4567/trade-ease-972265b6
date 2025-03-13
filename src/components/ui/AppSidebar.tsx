@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { LayoutDashboard, Briefcase, Users, FileText, Settings, Menu, Calendar, Network, Share, Bot, Mail, MessageSquare, Link as LinkIcon, Database, Hammer, Plus, BarChart, ListTodo, Bell, ChevronLeft, ChevronRight, Gauge, GitBranch, Calculator, Percent } from 'lucide-react';
@@ -5,6 +6,14 @@ import { useSidebar } from './sidebar';
 import { cn } from '@/lib/utils';
 import { Button } from './button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./tooltip";
+
+// Define a type for the navigation links
+type NavLink = {
+  icon: React.ComponentType<any>;
+  label: string;
+  path: string;
+  openInNewTab?: boolean;
+};
 
 export function AppSidebar() {
   const [teams] = React.useState([{
@@ -73,7 +82,7 @@ export function AppSidebar() {
             <TooltipProvider delayDuration={0}>
               {renderNavLink(<Bell className="w-4 h-4 flex-shrink-0" />, "Notifications", "/notifications")}
 
-              {[{
+              {([{
               icon: LayoutDashboard,
               label: 'Dashboard',
               path: '/'
@@ -145,7 +154,7 @@ export function AppSidebar() {
               icon: Settings,
               label: 'Settings',
               path: '/settings'
-            }].map(({
+            }] as NavLink[]).map(({
               icon: Icon,
               label,
               path,
