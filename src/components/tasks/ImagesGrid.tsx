@@ -3,6 +3,7 @@ import { useState } from "react";
 import { ImagePreview } from "./ImagePreview";
 import { Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface ImagesGridProps {
   images: string[];
@@ -11,6 +12,7 @@ interface ImagesGridProps {
 
 export function ImagesGrid({ images, title }: ImagesGridProps) {
   const [completedImages, setCompletedImages] = useState<Record<string, boolean>>({});
+  const isMobile = useIsMobile();
 
   const handleMarkCompleted = (imageUrl: string) => {
     setCompletedImages(prev => ({

@@ -4,6 +4,7 @@ import {
   DialogContent,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface ImagePreviewProps {
   src: string;
@@ -11,6 +12,8 @@ interface ImagePreviewProps {
 }
 
 export function ImagePreview({ src, alt }: ImagePreviewProps) {
+  const isMobile = useIsMobile();
+  
   return (
     <Dialog>
       <DialogTrigger asChild>
@@ -26,7 +29,7 @@ export function ImagePreview({ src, alt }: ImagePreviewProps) {
           />
         </div>
       </DialogTrigger>
-      <DialogContent className="max-w-4xl h-[80vh] flex items-center justify-center p-0">
+      <DialogContent className={`max-w-4xl ${isMobile ? 'w-[90vw] p-2' : 'h-[80vh]'} flex items-center justify-center p-0`}>
         <img 
           src={src} 
           alt={alt} 
