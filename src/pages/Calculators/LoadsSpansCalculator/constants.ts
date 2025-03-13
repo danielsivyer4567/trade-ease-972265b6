@@ -57,3 +57,30 @@ export const JOIST_SPACINGS = ["450mm", "600mm"];
 
 // Span types
 export const SPAN_TYPES = ["Single span", "Continuous span", "Cantilever"];
+
+// James Hardie product types
+export const HARDIE_PRODUCT_TYPES = [
+  { name: "HardiePlank®", premium: false, weatherResistant: true },
+  { name: "HardiePanel®", premium: false, weatherResistant: true },
+  { name: "HardieBoard®", premium: true, weatherResistant: true },
+  { name: "HardieBacker®", premium: true, weatherResistant: false },
+  { name: "HardieZone®", premium: true, weatherResistant: true },
+];
+
+// James Hardie thickness options
+export const HARDIE_THICKNESSES = [
+  "6mm",
+  "8mm",
+  "9mm",
+  "12mm",
+  "18mm"
+];
+
+// James Hardie application areas
+export const HARDIE_APPLICATION_AREAS = [
+  "Exterior Wall",
+  "Interior Wall",
+  "Wet Areas",
+  "Flooring",
+  "Ceiling"
+];

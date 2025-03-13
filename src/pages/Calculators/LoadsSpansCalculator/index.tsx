@@ -7,8 +7,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BeamCalculator } from "./BeamCalculator";
 import { SpanTableCalculator } from "./SpanTableCalculator";
 import { AboutCalculator } from "./AboutCalculator";
+import { JamesHardieCalculator } from "./JamesHardieCalculator";
 import { useBeamCalculator } from "./hooks/useBeamCalculator";
 import { useSpanTableCalculator } from "./hooks/useSpanTableCalculator";
+import { useJamesHardieCalculator } from "./hooks/useJamesHardieCalculator";
 
 const LoadsSpansCalculator = () => {
   const {
@@ -34,6 +36,16 @@ const LoadsSpansCalculator = () => {
     calculateSpanFromTable
   } = useSpanTableCalculator();
 
+  const {
+    productType, setProductType,
+    thickness, setThickness,
+    applicationArea, setApplicationArea,
+    supportSpacing, setSupportSpacing,
+    windLoad, setWindLoad,
+    hardieResult, setHardieResult,
+    calculateHardieRequirements
+  } = useJamesHardieCalculator();
+
   return (
     <AppLayout>
       <div className="container mx-auto p-6 space-y-6">
@@ -46,10 +58,11 @@ const LoadsSpansCalculator = () => {
         </div>
 
         <Tabs defaultValue="beam-calculator" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="beam-calculator">Beam Calculator</TabsTrigger>
             <TabsTrigger value="span-table">Span Table</TabsTrigger>
-            <TabsTrigger value="about">About This Calculator</TabsTrigger>
+            <TabsTrigger value="james-hardie">James Hardie</TabsTrigger>
+            <TabsTrigger value="about">About</TabsTrigger>
           </TabsList>
 
           <TabsContent value="beam-calculator" className="space-y-6">
@@ -89,6 +102,24 @@ const LoadsSpansCalculator = () => {
               getAvailableGrades={getAvailableGrades}
               getAvailableDimensions={getAvailableDimensions}
               calculateSpanFromTable={calculateSpanFromTable}
+            />
+          </TabsContent>
+
+          <TabsContent value="james-hardie" className="space-y-6">
+            <JamesHardieCalculator
+              productType={productType}
+              setProductType={setProductType}
+              thickness={thickness}
+              setThickness={setThickness}
+              applicationArea={applicationArea}
+              setApplicationArea={setApplicationArea}
+              supportSpacing={supportSpacing}
+              setSupportSpacing={setSupportSpacing}
+              windLoad={windLoad}
+              setWindLoad={setWindLoad}
+              hardieResult={hardieResult}
+              setHardieResult={setHardieResult}
+              calculateHardieRequirements={calculateHardieRequirements}
             />
           </TabsContent>
 
