@@ -43,6 +43,11 @@ export const useDocumentApproval = (
         });
         
       if (uploadError) {
+        console.error("Upload error:", uploadError);
+        // More specific error message based on the type of error
+        if (uploadError.message.includes("bucket") || uploadError.statusCode === 404) {
+          throw new Error("Storage system not available. Please contact your administrator.");
+        }
         throw new Error(`Error uploading document: ${uploadError.message}`);
       }
       
@@ -66,6 +71,7 @@ export const useDocumentApproval = (
           });
           
         if (visionError) {
+          console.error("Vision API error:", visionError);
           throw new Error(`Error processing document: ${visionError.message}`);
         }
         
@@ -121,6 +127,7 @@ export const useDocumentApproval = (
           
         if (statusError) {
           console.error('Error saving approval status:', statusError);
+          toast.error("Financial data was extracted but could not be saved to the database");
         }
       } else {
         // Just save the document reference even if no financial data was extracted
@@ -137,9 +144,10 @@ export const useDocumentApproval = (
           
         if (docError) {
           console.error('Error saving document reference:', docError);
+          toast.error("Document was uploaded but details could not be saved to the database");
+        } else {
+          toast.info("Document saved, but no financial data could be extracted");
         }
-        
-        toast.info("Document saved, but no financial data could be extracted");
       }
       
       setUploadProgress(100); // Process complete
@@ -155,8 +163,15 @@ export const useDocumentApproval = (
       console.error('Error in document approval process:', error);
       toast.error(error.message || "An error occurred during document processing");
       setExtractionError(error.message || "An error occurred during processing");
+      setUploadProgress(0);
     } finally {
       setIsProcessing(false);
+      // Make sure to always clean up the uploading state even if there was an error
+      setTimeout(() => {
+        if (isUploading) {
+          setIsUploading(false);
+        }
+      }, 500);
     }
   };
 
