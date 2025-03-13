@@ -34,16 +34,16 @@ export const StandardTabs = ({
 }: StandardTabsProps) => {
   return (
     <>
-      <TabsTrigger value="details">Details</TabsTrigger>
-      <TabsTrigger value="notes">
+      <TabsTrigger value="details" className="min-w-[100px] whitespace-nowrap">Details</TabsTrigger>
+      <TabsTrigger value="notes" className="min-w-[100px] whitespace-nowrap">
         <FileText className="w-4 h-4 mr-2" />
         Notes
       </TabsTrigger>
-      <TabsTrigger value="calendar">
+      <TabsTrigger value="calendar" className="min-w-[100px] whitespace-nowrap">
         <Calendar className="w-4 h-4 mr-2" />
         Calendar
       </TabsTrigger>
-      <TabsTrigger value="timer">
+      <TabsTrigger value="timer" className="min-w-[100px] whitespace-nowrap">
         <Clock className="w-4 h-4 mr-2" />
         Timer
       </TabsTrigger>

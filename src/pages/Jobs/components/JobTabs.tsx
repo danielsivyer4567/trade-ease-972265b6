@@ -49,7 +49,7 @@ export const JobTabs = ({
 
   return (
     <Tabs defaultValue="details" className="w-full">
-      <TabsList className={`grid ${isManager ? 'grid-cols-4 lg:grid-cols-8' : 'grid-cols-4'} mb-4`}>
+      <TabsList className={`flex flex-wrap ${isManager ? 'md:grid md:grid-cols-8' : 'md:grid md:grid-cols-4'} mb-4 gap-1 p-1 overflow-x-auto`}>
         <StandardTabs 
           job={job}
           jobTimer={jobTimer}

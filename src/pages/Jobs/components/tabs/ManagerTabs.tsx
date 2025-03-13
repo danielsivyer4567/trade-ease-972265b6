@@ -33,19 +33,19 @@ export const ManagerTabs = ({
 }: ManagerTabsProps) => {
   return (
     <>
-      <TabsTrigger value="bills">
+      <TabsTrigger value="bills" className="min-w-[100px] whitespace-nowrap">
         <Receipt className="w-4 h-4 mr-2" />
         Bills
       </TabsTrigger>
-      <TabsTrigger value="costs">
+      <TabsTrigger value="costs" className="min-w-[100px] whitespace-nowrap">
         <Calculator className="w-4 h-4 mr-2" />
         Costs
       </TabsTrigger>
-      <TabsTrigger value="invoices">
+      <TabsTrigger value="invoices" className="min-w-[100px] whitespace-nowrap">
         <ScrollText className="w-4 h-4 mr-2" />
         Invoices
       </TabsTrigger>
-      <TabsTrigger value="financials">
+      <TabsTrigger value="financials" className="min-w-[100px] whitespace-nowrap">
         <Wallet className="w-4 h-4 mr-2" />
         Financials
       </TabsTrigger>

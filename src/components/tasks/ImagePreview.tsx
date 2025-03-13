@@ -29,7 +29,7 @@ export function ImagePreview({ src, alt }: ImagePreviewProps) {
           />
         </div>
       </DialogTrigger>
-      <DialogContent className={`max-w-4xl ${isMobile ? 'w-[90vw] p-2' : 'h-[80vh]'} flex items-center justify-center p-0`}>
+      <DialogContent className={`max-w-4xl ${isMobile ? 'w-[95vw] p-2' : 'w-[90%] h-[80vh]'} flex items-center justify-center p-0 z-50`}>
         <img 
           src={src} 
           alt={alt} 
