@@ -28,9 +28,13 @@ export function AppSidebar() {
   const location = useLocation();
   const notificationCount = 3;
   const isCollapsed = state === "collapsed";
-  const renderNavLink = (icon: React.ReactNode, label: string, path: string) => {
+  
+  const renderNavLink = (icon: React.ReactNode, label: string, path: string, openInNewTab: boolean = false) => {
     const isActive = location.pathname === path || path !== '/' && location.pathname.startsWith(path);
-    const content = <Link to={path} className={cn("flex items-center gap-2 p-2 rounded-lg hover:bg-gray-100 text-gray-700 hover:text-gray-900 text-sm", isActive && "bg-gray-100 text-gray-900 font-medium")}>
+    
+    const linkProps = openInNewTab ? { target: "_blank", rel: "noopener noreferrer" } : {};
+    
+    const content = <Link to={path} className={cn("flex items-center gap-2 p-2 rounded-lg hover:bg-gray-100 text-gray-700 hover:text-gray-900 text-sm", isActive && "bg-gray-100 text-gray-900 font-medium")} {...linkProps}>
         {icon}
         <span className={cn("transition-opacity duration-200", isCollapsed && "hidden lg:hidden")}>
           {label}
@@ -119,7 +123,8 @@ export function AppSidebar() {
             }, {
               icon: Calculator,
               label: 'Calculators',
-              path: '/calculators'
+              path: '/calculators',
+              openInNewTab: true
             }, {
               icon: Network,
               label: 'Integrations',
@@ -143,8 +148,9 @@ export function AppSidebar() {
             }].map(({
               icon: Icon,
               label,
-              path
-            }) => renderNavLink(<Icon className="w-4 h-4 flex-shrink-0 bg-slate-200" />, label, path))}
+              path,
+              openInNewTab
+            }) => renderNavLink(<Icon className="w-4 h-4 flex-shrink-0 bg-slate-200" />, label, path, openInNewTab))}
             </TooltipProvider>
 
             <div className={cn("pt-8", isCollapsed && "hidden lg:hidden")}>
