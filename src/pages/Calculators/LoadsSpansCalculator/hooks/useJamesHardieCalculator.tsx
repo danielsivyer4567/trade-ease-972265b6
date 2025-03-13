@@ -20,6 +20,8 @@ export interface HardieResult {
   bushfireRating: string;
   thermalRValue: number;
   densityRating: string;
+  applicationArea: string;
+  windLoad: string;
 }
 
 export const useJamesHardieCalculator = () => {
@@ -140,7 +142,9 @@ export const useJamesHardieCalculator = () => {
         fireRating,
         bushfireRating,
         thermalRValue,
-        densityRating
+        densityRating,
+        applicationArea,
+        windLoad
       });
       
       toast({
