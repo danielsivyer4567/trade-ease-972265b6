@@ -1,6 +1,7 @@
+
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Briefcase, Users, FileText, Settings, Menu, Calendar, Network, Share, Bot, Mail, MessageSquare, Link as LinkIcon, Database, Hammer, Plus, BarChart, ListTodo, Bell, ChevronLeft, ChevronRight, Gauge, GitBranch } from 'lucide-react';
+import { LayoutDashboard, Briefcase, Users, FileText, Settings, Menu, Calendar, Network, Share, Bot, Mail, MessageSquare, Link as LinkIcon, Database, Hammer, Plus, BarChart, ListTodo, Bell, ChevronLeft, ChevronRight, Gauge, GitBranch, Calculator, Percent } from 'lucide-react';
 import { useSidebar } from './sidebar';
 import { cn } from '@/lib/utils';
 import { Button } from './button';
@@ -115,6 +116,10 @@ export function AppSidebar() {
               icon: Bot,
               label: 'AI Features',
               path: '/ai-features'
+            }, {
+              icon: Calculator,
+              label: 'Calculators',
+              path: '/calculators'
             }, {
               icon: Network,
               label: 'Integrations',
