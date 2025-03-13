@@ -29,15 +29,18 @@ export const SPAN_TABLE = {
     },
   },
   "James Hardie": {
+    "6mm": {"450mm": 1.5, "600mm": 1.2},
+    "9mm": {"450mm": 1.7, "600mm": 1.4},
     "10mm": {"450mm": 1.8, "600mm": 1.5},
     "12mm": {"450mm": 2.0, "600mm": 1.8},
+    "18mm": {"450mm": 2.4, "600mm": 2.0},
   },
 };
 
 // Material grades
 export const MATERIAL_GRADES = {
   "Timber": ["MGP10", "MGP12"],
-  "James Hardie": ["10mm", "12mm"],
+  "James Hardie": ["6mm", "9mm", "10mm", "12mm", "18mm"],
 };
 
 // Material dimensions
@@ -47,8 +50,11 @@ export const MATERIAL_DIMENSIONS = {
     "MGP12": ["140x45", "190x45"],
   },
   "James Hardie": {
+    "6mm": ["450mm", "600mm"],
+    "9mm": ["450mm", "600mm"],
     "10mm": ["450mm", "600mm"],
     "12mm": ["450mm", "600mm"],
+    "18mm": ["450mm", "600mm"],
   },
 };
 
