@@ -45,7 +45,7 @@ export const useDocumentApproval = (
       if (uploadError) {
         console.error("Upload error:", uploadError);
         // More specific error message based on the type of error
-        if (uploadError.message.includes("bucket") || uploadError.statusCode === 404) {
+        if (uploadError.message.includes("bucket") || uploadError.message.includes("404")) {
           throw new Error("Storage system not available. Please contact your administrator.");
         }
         throw new Error(`Error uploading document: ${uploadError.message}`);
