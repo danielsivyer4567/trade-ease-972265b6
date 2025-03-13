@@ -1,10 +1,9 @@
-
 import { TabsContent } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useState, useEffect } from "react";
-import { Search, FileText, Upload, AlertCircle, Calendar, DollarSign, Building } from "lucide-react";
+import { Search, FileText, Upload, AlertCircle, Calendar, DollarSign, Building, Receipt } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
