@@ -2,7 +2,7 @@
 import React from "react";
 import { AppLayout } from "@/components/ui/AppLayout";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Calculator, Percent, Gauge } from "lucide-react";
+import { Calculator, Percent, Gauge, Ruler } from "lucide-react";
 import { Link } from "react-router-dom";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 
@@ -25,6 +25,12 @@ const Calculators = () => {
       description: "Estimate total job costs including materials, labor, and overhead",
       icon: <Gauge className="h-6 w-6 text-purple-500" />,
       path: "/calculators/job-cost"
+    },
+    {
+      title: "Loads and Spans Calculator",
+      description: "Calculate timber beam loads and spans for construction projects",
+      icon: <Ruler className="h-6 w-6 text-amber-500" />,
+      path: "/calculators/loads-spans"
     }
   ];
 

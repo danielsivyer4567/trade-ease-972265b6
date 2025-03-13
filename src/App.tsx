@@ -37,6 +37,7 @@ import Workflow from "./pages/Workflow";
 import Auth from "./pages/Auth";
 import TermsOfService from "./pages/Settings/TermsOfService";
 import Calculators from "./pages/Calculators";
+import LoadsSpansCalculator from "./pages/Calculators/LoadsSpansCalculator";
 
 import { Toaster } from "@/components/ui/toaster";
 
@@ -76,6 +77,7 @@ function App() {
         <Route path="/payments/new" element={<NewPayment />} />
         <Route path="/workflow" element={<Workflow />} />
         <Route path="/calculators/*" element={<Calculators />} />
+        <Route path="/calculators/loads-spans" element={<LoadsSpansCalculator />} />
         <Route path="/settings/terms-of-service" element={<TermsOfService />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
