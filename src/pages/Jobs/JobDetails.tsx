@@ -1,8 +1,12 @@
+
 import { useParams, useNavigate } from 'react-router-dom';
 import { JobHeader } from './components/JobHeader';
 import { JobTabs } from './components/JobTabs';
 import { useState, useEffect } from 'react';
 import type { Job } from '@/types/job';
+import { DocumentApproval } from './components/DocumentApproval';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 const mockJobs: Job[] = [
   {
@@ -52,13 +56,59 @@ export function JobDetails() {
   const [locationHistory, setLocationHistory] = useState<Array<{timestamp: number; coords: [number, number]}>>([]);
   const [jobNotes, setJobNotes] = useState("");
   const [tabNotes, setTabNotes] = useState<Record<string, string>>({});
+  const [extractedFinancialData, setExtractedFinancialData] = useState<any[]>([]);
   const isManager = true;
 
   useEffect(() => {
     if (!job) {
       navigate('/jobs');
     }
-  }, [job, navigate]);
+    
+    // Fetch any existing financial data for this job
+    const loadFinancialData = async () => {
+      try {
+        if (id) {
+          const storageKey = `job-${id}-financial-data`;
+          const storedData = JSON.parse(localStorage.getItem(storageKey) || '[]');
+          if (storedData.length > 0) {
+            setExtractedFinancialData(storedData);
+          }
+          
+          // Also check Supabase for any stored financial data
+          const { data, error } = await supabase
+            .from('job_financial_data')
+            .select('*')
+            .eq('job_id', id);
+            
+          if (!error && data && data.length > 0) {
+            // Format the data to match our expected structure
+            const formattedData = data.map(item => ({
+              ...item.extracted_data,
+              id: item.id,
+              status: item.status
+            }));
+            
+            // Merge with local storage data
+            const mergedData = [...storedData];
+            
+            // Add any items from Supabase that aren't in localStorage
+            formattedData.forEach(item => {
+              if (!mergedData.some(m => m.timestamp === item.timestamp)) {
+                mergedData.push(item);
+              }
+            });
+            
+            setExtractedFinancialData(mergedData);
+            localStorage.setItem(storageKey, JSON.stringify(mergedData));
+          }
+        }
+      } catch (error) {
+        console.error("Error loading financial data:", error);
+      }
+    };
+    
+    loadFinancialData();
+  }, [job, navigate, id]);
 
   useEffect(() => {
     let timerInterval: number | null = null;
@@ -157,6 +207,25 @@ export function JobDetails() {
   const handleBreakToggle = () => {
     setIsOnBreak(!isOnBreak);
   };
+  
+  const handleFinancialDataExtracted = (newData: any) => {
+    setExtractedFinancialData(prev => [...prev, newData]);
+    
+    // Update localStorage
+    if (id) {
+      const storageKey = `job-${id}-financial-data`;
+      const storedData = JSON.parse(localStorage.getItem(storageKey) || '[]');
+      localStorage.setItem(storageKey, JSON.stringify([...storedData, newData]));
+    }
+    
+    // Update job notes with the extracted financial data
+    setTabNotes(prev => ({
+      ...prev,
+      financials: `${prev.financials || ''}\n\nExtracted amount of $${newData.amount.toFixed(2)} from document "${newData.source}" on ${new Date().toLocaleString()}`
+    }));
+    
+    toast.success(`Financial data has been extracted and added to the job`);
+  };
 
   if (!job) {
     return null;
@@ -179,7 +248,15 @@ export function JobDetails() {
         handleBreakToggle={handleBreakToggle}
         isTimerRunning={isTimerRunning}
         isOnBreak={isOnBreak}
+        extractedFinancialData={extractedFinancialData}
       />
+      
+      {isManager && (
+        <DocumentApproval 
+          jobId={job.id} 
+          onFinancialDataExtracted={handleFinancialDataExtracted} 
+        />
+      )}
     </div>
   );
 }

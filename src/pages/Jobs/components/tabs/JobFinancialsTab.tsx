@@ -23,6 +23,7 @@ interface JobFinancialsTabProps {
   setTabNotes: (notes: Record<string, string>) => void;
   totalRevenue: number;
   totalCosts: number;
+  extractedFinancialData?: any[];
 }
 
 export const JobFinancialsTab = ({ 
@@ -30,124 +31,53 @@ export const JobFinancialsTab = ({
   tabNotes, 
   setTabNotes, 
   totalRevenue,
-  totalCosts 
+  totalCosts,
+  extractedFinancialData = []
 }: JobFinancialsTabProps) => {
   const [quoteAmount, setQuoteAmount] = useState(0);
   const [searchTerm, setSearchTerm] = useState("");
-  const [extractedFinancialData, setExtractedFinancialData] = useState<any[]>([]);
   const [hasAppliedExtractedData, setHasAppliedExtractedData] = useState(false);
-  const [fileToUpload, setFileToUpload] = useState<File | null>(null);
-  const [isProcessing, setIsProcessing] = useState(false);
   
   const laborCost = (jobTimer / 3600) * 50; // Assuming $50/hour labor rate
   const totalCostsWithLabor = totalCosts + laborCost;
   const netProfitWithLabor = quoteAmount - totalCostsWithLabor;
 
-  // Fetch any extracted financial data from the workflow
+  // Auto-apply the most recent extracted amount if we haven't applied one yet
   useEffect(() => {
-    const storedData = JSON.parse(localStorage.getItem('vision-financial-data') || '[]');
-    if (storedData.length > 0) {
-      setExtractedFinancialData(storedData);
+    if (!hasAppliedExtractedData && extractedFinancialData.length > 0) {
+      const mostRecentData = extractedFinancialData[extractedFinancialData.length - 1];
+      setQuoteAmount(mostRecentData.amount);
+      setHasAppliedExtractedData(true);
       
-      // Auto-apply the most recent extracted amount if we haven't applied one yet
-      if (!hasAppliedExtractedData && storedData.length > 0) {
-        const mostRecentData = storedData[storedData.length - 1];
-        setQuoteAmount(mostRecentData.amount);
-        setHasAppliedExtractedData(true);
-      }
+      setTabNotes({ 
+        ...tabNotes, 
+        financials: `${tabNotes.financials || ''}\n\nAutomatically applied extracted amount of $${mostRecentData.amount} from "${mostRecentData.source}" on ${new Date(mostRecentData.timestamp).toLocaleString()}`
+      });
     }
-  }, [hasAppliedExtractedData]);
+  }, [extractedFinancialData, hasAppliedExtractedData, setTabNotes, tabNotes]);
 
   const filteredQuotes = mockCustomerQuotes.filter(quote => 
     quote.customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
     quote.id.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const applyExtractedAmount = (data) => {
+  const applyExtractedAmount = (data: any) => {
     setQuoteAmount(data.amount);
     setTabNotes({ 
       ...tabNotes, 
-      financials: `${tabNotes.financials || ''}\n\nApplied extracted amount of $${data.amount} from vision analysis on ${new Date(data.timestamp).toLocaleString()}`
+      financials: `${tabNotes.financials || ''}\n\nApplied extracted amount of $${data.amount} from "${data.source}" on ${new Date(data.timestamp).toLocaleString()}`
     });
-  };
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      setFileToUpload(e.target.files[0]);
-    }
-  };
-
-  const processDocument = async () => {
-    if (!fileToUpload) {
-      toast.error("Please select a document to analyze first");
-      return;
-    }
-
-    setIsProcessing(true);
-    
-    // Simulate document processing - in a real app, you would call a proper API
-    setTimeout(() => {
-      // Extract the financial data (simulated)
-      const extractedData = {
-        timestamp: new Date().toISOString(),
-        amount: Math.floor(Math.random() * 5000) + 1000, // Simulated amount between $1000-$6000
-        source: fileToUpload.name
-      };
-      
-      // Store the extracted data
-      const existingData = JSON.parse(localStorage.getItem('vision-financial-data') || '[]');
-      localStorage.setItem('vision-financial-data', JSON.stringify([...existingData, extractedData]));
-      
-      // Update state
-      setExtractedFinancialData([...existingData, extractedData]);
-      setIsProcessing(false);
-      setFileToUpload(null);
-      
-      toast.success('Financial data extracted from document');
-    }, 2000);
+    toast.success(`Applied amount: $${data.amount}`);
   };
 
   return (
     <TabsContent value="financials" className="space-y-4">
       <div className="border rounded-lg p-4">
         <div className="space-y-4">
-          <div className="p-4 border border-blue-200 rounded-lg bg-blue-50">
-            <h3 className="font-medium mb-2 flex items-center">
-              <FileText className="h-4 w-4 mr-2 text-blue-600" />
-              <span>Document Analysis</span>
-            </h3>
-            <p className="text-sm text-gray-600 mb-4">
-              Extract financial data directly from invoices, quotes, or other documents to automatically
-              fill in financial values.
-            </p>
-            
-            <div className="flex items-center gap-3 mb-4">
-              <label className="flex-1">
-                <div className="relative cursor-pointer rounded-md bg-white px-4 py-2 border border-dashed border-gray-300 hover:bg-gray-50 flex items-center justify-center">
-                  <input 
-                    type="file" 
-                    className="hidden" 
-                    accept="image/jpeg,image/png,application/pdf"
-                    onChange={handleFileChange} 
-                  />
-                  <Upload className="h-4 w-4 mr-2 text-gray-500" />
-                  <span className="text-sm">{fileToUpload ? fileToUpload.name : "Choose a document to analyze"}</span>
-                </div>
-              </label>
-              <Button 
-                onClick={processDocument} 
-                disabled={!fileToUpload || isProcessing}
-                className="h-9"
-              >
-                {isProcessing ? "Processing..." : "Extract Data"}
-              </Button>
-            </div>
-          </div>
-
           {extractedFinancialData.length > 0 && (
             <Alert className="bg-blue-50 border-blue-200">
               <FileText className="h-4 w-4 text-blue-600" />
-              <AlertTitle>Vision Analysis Data Available</AlertTitle>
+              <AlertTitle>Document Analysis Data Available</AlertTitle>
               <AlertDescription className="mt-2">
                 {extractedFinancialData.length} financial data point(s) extracted from your documents
                 
@@ -159,14 +89,24 @@ export const JobFinancialsTab = ({
                       onClick={() => applyExtractedAmount(data)}
                     >
                       <div className="text-sm">
-                        <span className="font-medium">${data.amount}</span>
+                        <span className="font-medium">${data.amount.toFixed(2)}</span>
                         <span className="text-gray-500 ml-2 text-xs">
-                          {new Date(data.timestamp).toLocaleString()}
+                          {data.source && `from "${data.source}"`} {new Date(data.timestamp).toLocaleString()}
                         </span>
                       </div>
-                      <button className="text-xs text-blue-600 hover:text-blue-800">
-                        Apply
-                      </button>
+                      <div className="flex items-center">
+                        {data.status && (
+                          <span className={`text-xs px-2 py-1 rounded mr-2 ${
+                            data.status === 'approved' ? 'bg-green-100 text-green-800' : 
+                            'bg-yellow-100 text-yellow-800'
+                          }`}>
+                            {data.status === 'approved' ? 'Approved' : 'Draft'}
+                          </span>
+                        )}
+                        <button className="text-xs text-blue-600 hover:text-blue-800">
+                          Apply
+                        </button>
+                      </div>
                     </div>
                   ))}
                 </div>

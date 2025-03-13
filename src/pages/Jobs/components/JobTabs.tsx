@@ -26,6 +26,7 @@ interface JobTabsProps {
   handleBreakToggle: () => void;
   isTimerRunning: boolean;
   isOnBreak: boolean;
+  extractedFinancialData?: any[];
 }
 
 export const JobTabs = ({
@@ -41,7 +42,8 @@ export const JobTabs = ({
   handleTimerToggle,
   handleBreakToggle,
   isTimerRunning,
-  isOnBreak
+  isOnBreak,
+  extractedFinancialData = []
 }: JobTabsProps) => {
   const [totalRevenue, setTotalRevenue] = useState(0);
   const [totalCosts, setTotalCosts] = useState(0);
@@ -132,9 +134,10 @@ export const JobTabs = ({
             setTabNotes={setTabNotes}
             totalRevenue={totalRevenue}
             totalCosts={totalCosts + totalBills}
+            extractedFinancialData={extractedFinancialData}
           />
         </>
       )}
     </Tabs>
   );
-};
+}
