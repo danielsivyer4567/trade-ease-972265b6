@@ -6,6 +6,7 @@ export const useConcreteCalculator = () => {
   const [width, setWidth] = useState<number>(0);
   const [thickness, setThickness] = useState<number>(0);
   const [unit, setUnit] = useState<string>("meters");
+  const [thicknessUnit, setThicknessUnit] = useState<string>("mm"); // Add thickness unit state
   const [waste, setWaste] = useState<number>(10); // Default 10% waste
   const [calculatedVolume, setCalculatedVolume] = useState<number | null>(null);
 
@@ -26,8 +27,12 @@ export const useConcreteCalculator = () => {
       // Convert inches to meters
       thicknessInMeters = thickness * 0.0254;
     } else {
-      // Convert mm to meters
-      thicknessInMeters = thickness / 1000;
+      // For metric units, convert thickness based on the thickness unit
+      if (thicknessUnit === "mm") {
+        thicknessInMeters = thickness / 1000; // mm to meters
+      } else {
+        thicknessInMeters = thickness; // Already in meters
+      }
     }
 
     // Calculate volume in cubic meters
@@ -50,6 +55,8 @@ export const useConcreteCalculator = () => {
     setThickness,
     unit,
     setUnit,
+    thicknessUnit,
+    setThicknessUnit,
     waste,
     setWaste,
     calculatedVolume,

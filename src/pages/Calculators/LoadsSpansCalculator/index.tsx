@@ -54,6 +54,7 @@ const LoadsSpansCalculator = () => {
     width, setWidth,
     thickness: concreteThickness, setThickness: setConcreteThickness,
     unit, setUnit,
+    thicknessUnit, setThicknessUnit,
     waste, setWaste,
     calculatedVolume, 
     calculateConcreteVolume
@@ -152,6 +153,8 @@ const LoadsSpansCalculator = () => {
               setThickness={setConcreteThickness}
               unit={unit}
               setUnit={setUnit}
+              thicknessUnit={thicknessUnit}
+              setThicknessUnit={setThicknessUnit}
               waste={waste}
               setWaste={setWaste}
               calculatedVolume={calculatedVolume}

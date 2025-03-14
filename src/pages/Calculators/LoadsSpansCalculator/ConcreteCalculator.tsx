@@ -16,6 +16,8 @@ export const ConcreteCalculator = ({
   setThickness,
   unit,
   setUnit,
+  thicknessUnit,
+  setThicknessUnit,
   waste,
   setWaste,
   calculatedVolume,
@@ -29,6 +31,8 @@ export const ConcreteCalculator = ({
   setThickness: (value: number) => void;
   unit: string;
   setUnit: (value: string) => void;
+  thicknessUnit: string;
+  setThicknessUnit: (value: string) => void;
   waste: number;
   setWaste: (value: number) => void;
   calculatedVolume: number | null;
@@ -43,7 +47,7 @@ export const ConcreteCalculator = ({
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="unit">Measurement Units</Label>
+            <Label htmlFor="unit">Length & Width Units</Label>
             <Select value={unit} onValueChange={(value) => setUnit(value)}>
               <SelectTrigger id="unit">
                 <SelectValue placeholder="Select unit" />
@@ -82,17 +86,34 @@ export const ConcreteCalculator = ({
           </div>
 
           <div className="space-y-2">
+            <Label htmlFor="thicknessUnit">Thickness Unit</Label>
+            <Select 
+              value={thicknessUnit} 
+              onValueChange={(value) => setThicknessUnit(value)}
+              disabled={unit === "feet"}
+            >
+              <SelectTrigger id="thicknessUnit">
+                <SelectValue placeholder="Select thickness unit" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="mm">Millimeters (mm)</SelectItem>
+                <SelectItem value="m">Meters (m)</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
             <Label htmlFor="thickness">
-              Thickness ({unit === "meters" ? "mm" : "inches"})
+              Thickness ({unit === "feet" ? "inches" : thicknessUnit})
             </Label>
             <Input
               id="thickness"
               type="number"
               min="0"
-              step="1"
+              step={thicknessUnit === "mm" ? "1" : "0.01"}
               value={thickness || ""}
               onChange={(e) => setThickness(parseFloat(e.target.value) || 0)}
-              placeholder={`Enter thickness in ${unit === "meters" ? "mm" : "inches"}`}
+              placeholder={`Enter thickness in ${unit === "feet" ? "inches" : thicknessUnit}`}
             />
           </div>
 
