@@ -30,11 +30,11 @@ interface GateRequirements {
   screws: number;
 }
 
-// Gate materials requirements based on gate type
+// Gate materials requirements based on gate type - updated according to the provided image
 const GATE_MATERIALS: Record<GateType, GateRequirements> = {
   "1.2m x 1m Single Gate": {
-    palings: 0,
-    adjustableGateStile: 0,
+    palings: 10,
+    adjustableGateStile: 1,
     nailHardend32mm: 50,
     hardwoodPostHeight: "1800mm",
     hardwoodPostQty: 2,
@@ -45,8 +45,8 @@ const GATE_MATERIALS: Record<GateType, GateRequirements> = {
     screws: 0
   },
   "1.5m x 1m Single Gate": {
-    palings: 0,
-    adjustableGateStile: 0,
+    palings: 10,
+    adjustableGateStile: 1,
     nailHardend32mm: 50,
     hardwoodPostHeight: "2100mm",
     hardwoodPostQty: 2,
@@ -57,20 +57,20 @@ const GATE_MATERIALS: Record<GateType, GateRequirements> = {
     screws: 0
   },
   "1.8m x 1m Single Gate": {
-    palings: 10,
+    palings: 0,
     adjustableGateStile: 1,
-    nailHardend32mm: 50,
+    nailHardend32mm: 0,
     hardwoodPostHeight: "2400mm",
-    hardwoodPostQty: 2,
-    rapidSet: 2,
-    hinges: 2,
-    dLatch: 1,
+    hardwoodPostQty: 0,
+    rapidSet: 0,
+    hinges: 0,
+    dLatch: 0,
     dropBolts: 0,
-    screws: 10
+    screws: 0
   },
   "2.1m x 1m Single Gate": {
-    palings: 0,
-    adjustableGateStile: 0,
+    palings: 10,
+    adjustableGateStile: 1,
     nailHardend32mm: 50,
     hardwoodPostHeight: "2700mm",
     hardwoodPostQty: 2,
@@ -81,8 +81,8 @@ const GATE_MATERIALS: Record<GateType, GateRequirements> = {
     screws: 0
   },
   "1.2m x 1.5m Double Gate": {
-    palings: 0,
-    adjustableGateStile: 0,
+    palings: 30,
+    adjustableGateStile: 2,
     nailHardend32mm: 50,
     hardwoodPostHeight: "1800mm",
     hardwoodPostQty: 2,
@@ -93,8 +93,8 @@ const GATE_MATERIALS: Record<GateType, GateRequirements> = {
     screws: 0
   },
   "1.5m x 1.5m Double Gate": {
-    palings: 0,
-    adjustableGateStile: 0,
+    palings: 30,
+    adjustableGateStile: 2,
     nailHardend32mm: 50,
     hardwoodPostHeight: "2100mm",
     hardwoodPostQty: 2,
@@ -105,20 +105,20 @@ const GATE_MATERIALS: Record<GateType, GateRequirements> = {
     screws: 0
   },
   "1.8m x 1.5m Double Gate": {
-    palings: 0,
-    adjustableGateStile: 0,
+    palings: 30,
+    adjustableGateStile: 2,
     nailHardend32mm: 50,
     hardwoodPostHeight: "2400mm",
     hardwoodPostQty: 2,
     rapidSet: 2,
-    hinges: 0,
+    hinges: 2,
     dLatch: 1,
     dropBolts: 1,
-    screws: 0
+    screws: 10
   },
   "2.1m x 1.5m Double Gate": {
-    palings: 0,
-    adjustableGateStile: 0,
+    palings: 30,
+    adjustableGateStile: 2,
     nailHardend32mm: 50,
     hardwoodPostHeight: "2700mm",
     hardwoodPostQty: 2,
@@ -135,7 +135,7 @@ interface GateCalculatorProps {
 }
 
 export const GateCalculator: React.FC<GateCalculatorProps> = ({ unit }) => {
-  const [gateType, setGateType] = useState<GateType>("1.8m x 1m Single Gate");
+  const [gateType, setGateType] = useState<GateType>("1.8m x 1.5m Double Gate");
   const [gateCount, setGateCount] = useState<number>(1);
   const [calculationResult, setCalculationResult] = useState<Record<string, number | string> | null>(null);
 
@@ -211,64 +211,68 @@ export const GateCalculator: React.FC<GateCalculatorProps> = ({ unit }) => {
             <div className="bg-white p-4 rounded-lg border border-gray-200">
               <h4 className="font-medium mb-2">Materials Required for {gateCount} {gateType}{gateCount > 1 ? 's' : ''}</h4>
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
-                {calculationResult.palings > 0 && (
+                {Number(calculationResult.palings) > 0 && (
                   <div className="bg-emerald-50 p-2 rounded">
                     <div className="text-sm text-gray-600">Palings</div>
                     <div className="font-bold">{calculationResult.palings}</div>
                   </div>
                 )}
                 
-                {calculationResult.adjustableGateStile > 0 && (
+                {Number(calculationResult.adjustableGateStile) > 0 && (
                   <div className="bg-emerald-50 p-2 rounded">
                     <div className="text-sm text-gray-600">Gate Stile</div>
                     <div className="font-bold">{calculationResult.adjustableGateStile}</div>
                   </div>
                 )}
                 
-                <div className="bg-emerald-50 p-2 rounded">
-                  <div className="text-sm text-gray-600">32mm Nails</div>
-                  <div className="font-bold">{calculationResult.nailHardend32mm}</div>
-                </div>
+                {Number(calculationResult.nailHardend32mm) > 0 && (
+                  <div className="bg-emerald-50 p-2 rounded">
+                    <div className="text-sm text-gray-600">32mm Nails</div>
+                    <div className="font-bold">{calculationResult.nailHardend32mm}</div>
+                  </div>
+                )}
                 
                 <div className="bg-emerald-50 p-2 rounded">
                   <div className="text-sm text-gray-600">Post Height</div>
                   <div className="font-bold">{calculationResult.hardwoodPostHeight}</div>
                 </div>
                 
-                <div className="bg-emerald-50 p-2 rounded">
-                  <div className="text-sm text-gray-600">Posts</div>
-                  <div className="font-bold">{calculationResult.hardwoodPostQty}</div>
-                </div>
+                {Number(calculationResult.hardwoodPostQty) > 0 && (
+                  <div className="bg-emerald-50 p-2 rounded">
+                    <div className="text-sm text-gray-600">Posts</div>
+                    <div className="font-bold">{calculationResult.hardwoodPostQty}</div>
+                  </div>
+                )}
                 
-                {calculationResult.rapidSet > 0 && (
+                {Number(calculationResult.rapidSet) > 0 && (
                   <div className="bg-emerald-50 p-2 rounded">
                     <div className="text-sm text-gray-600">Rapid Set</div>
                     <div className="font-bold">{calculationResult.rapidSet}</div>
                   </div>
                 )}
                 
-                {calculationResult.hinges > 0 && (
+                {Number(calculationResult.hinges) > 0 && (
                   <div className="bg-emerald-50 p-2 rounded">
                     <div className="text-sm text-gray-600">Hinges</div>
                     <div className="font-bold">{calculationResult.hinges}</div>
                   </div>
                 )}
                 
-                {calculationResult.dLatch > 0 && (
+                {Number(calculationResult.dLatch) > 0 && (
                   <div className="bg-emerald-50 p-2 rounded">
                     <div className="text-sm text-gray-600">D-Latch</div>
                     <div className="font-bold">{calculationResult.dLatch}</div>
                   </div>
                 )}
                 
-                {calculationResult.dropBolts > 0 && (
+                {Number(calculationResult.dropBolts) > 0 && (
                   <div className="bg-emerald-50 p-2 rounded">
                     <div className="text-sm text-gray-600">Drop Bolts</div>
                     <div className="font-bold">{calculationResult.dropBolts}</div>
                   </div>
                 )}
                 
-                {calculationResult.screws > 0 && (
+                {Number(calculationResult.screws) > 0 && (
                   <div className="bg-emerald-50 p-2 rounded">
                     <div className="text-sm text-gray-600">Screws</div>
                     <div className="font-bold">{calculationResult.screws}</div>
