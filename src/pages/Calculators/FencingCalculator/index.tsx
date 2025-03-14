@@ -7,6 +7,7 @@ import { FencingInputForm } from "./components/FencingInputForm";
 import { FencingResultsCard } from "./components/FencingResultsCard";
 import { FencingReferenceTable } from "./components/FencingReferenceTable";
 import { FencingTips } from "./components/FencingTips";
+import { GateCalculator } from "./components/GateCalculator";
 
 const FencingCalculator = () => {
   const {
@@ -60,6 +61,9 @@ const FencingCalculator = () => {
             gateCount={gateCount}
           />
         </div>
+
+        {/* Gate Calculator */}
+        <GateCalculator unit={unit} />
 
         {/* Fence Types Reference Table */}
         <FencingReferenceTable FENCING_COMPONENTS_PER_10M={FENCING_COMPONENTS_PER_10M} />
