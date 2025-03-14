@@ -1,7 +1,8 @@
+
 import React from "react";
 import { AppLayout } from "@/components/ui/AppLayout";
 import { Link } from "react-router-dom";
-import { ArrowLeft, Ruler } from "lucide-react";
+import { ArrowLeft, Ruler, Square } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BeamCalculator } from "./BeamCalculator";
 import { SpanTableCalculator } from "./SpanTableCalculator";
@@ -9,10 +10,13 @@ import { AboutCalculator } from "./AboutCalculator";
 import { JamesHardieCalculator } from "./JamesHardieCalculator";
 import { RafterRoofCalculator } from "./RafterRoofCalculator";
 import { ConcreteCalculator } from "./ConcreteCalculator";
+import { SquaringCalculator } from "./SquaringCalculator";
 import { useBeamCalculator } from "./hooks/useBeamCalculator";
 import { useSpanTableCalculator } from "./hooks/useSpanTableCalculator";
 import { useJamesHardieCalculator } from "./hooks/useJamesHardieCalculator";
 import { useConcreteCalculator } from "./hooks/useConcreteCalculator";
+import { useSquaringCalculator } from "./hooks/useSquaringCalculator";
+
 const LoadsSpansCalculator = () => {
   const {
     beamWidth,
@@ -29,6 +33,7 @@ const LoadsSpansCalculator = () => {
     setCalculatedResult,
     calculateStress
   } = useBeamCalculator();
+  
   const {
     material,
     setMaterial,
@@ -48,6 +53,7 @@ const LoadsSpansCalculator = () => {
     getAvailableDimensions,
     calculateSpanFromTable
   } = useSpanTableCalculator();
+  
   const {
     productType,
     setProductType,
@@ -63,6 +69,7 @@ const LoadsSpansCalculator = () => {
     setHardieResult,
     calculateHardieRequirements
   } = useJamesHardieCalculator();
+  
   const {
     length,
     setLength,
@@ -79,6 +86,23 @@ const LoadsSpansCalculator = () => {
     calculatedVolume,
     calculateConcreteVolume
   } = useConcreteCalculator();
+
+  const {
+    width: squaringWidth,
+    setWidth: setSquaringWidth,
+    length: squaringLength,
+    setLength: setSquaringLength,
+    diagonalA,
+    setDiagonalA,
+    diagonalB,
+    setDiagonalB,
+    unit: squaringUnit,
+    setUnit: setSquaringUnit,
+    squaringResult,
+    calculateSquaring,
+    reset: resetSquaring
+  } = useSquaringCalculator();
+
   return <AppLayout>
       <div className="container mx-auto p-6 space-y-6">
         <div className="flex items-center gap-2 mb-6">
@@ -90,12 +114,13 @@ const LoadsSpansCalculator = () => {
         </div>
 
         <Tabs defaultValue="beam-calculator" className="w-full">
-          <TabsList className="grid w-full grid-cols-6 px-[4px] rounded-2xl py-[49px] my-0 mx-0 bg-slate-100">
+          <TabsList className="grid w-full grid-cols-7 px-[4px] rounded-2xl py-[49px] my-0 mx-0 bg-slate-100">
             <TabsTrigger value="beam-calculator" className="bg-slate-400 hover:bg-slate-300">Beam Calculator</TabsTrigger>
             <TabsTrigger value="span-table" className="bg-slate-400 hover:bg-slate-300">Span Table</TabsTrigger>
             <TabsTrigger value="james-hardie" className="bg-slate-400 hover:bg-slate-300">James Hardie</TabsTrigger>
             <TabsTrigger value="rafter-roof" className="bg-slate-400 hover:bg-slate-300">Rafter Roof</TabsTrigger>
             <TabsTrigger value="concrete" className="bg-slate-400 hover:bg-slate-300">Concrete</TabsTrigger>
+            <TabsTrigger value="squaring" className="bg-slate-400 hover:bg-slate-300">Squaring</TabsTrigger>
             <TabsTrigger value="about" className="bg-slate-400 hover:bg-slate-300">About</TabsTrigger>
           </TabsList>
 
@@ -117,6 +142,24 @@ const LoadsSpansCalculator = () => {
 
           <TabsContent value="concrete" className="space-y-6">
             <ConcreteCalculator length={length} setLength={setLength} width={width} setWidth={setWidth} thickness={concreteThickness} setThickness={setConcreteThickness} unit={unit} setUnit={setUnit} thicknessUnit={thicknessUnit} setThicknessUnit={setThicknessUnit} waste={waste} setWaste={setWaste} calculatedVolume={calculatedVolume} calculateConcreteVolume={calculateConcreteVolume} />
+          </TabsContent>
+
+          <TabsContent value="squaring" className="space-y-6">
+            <SquaringCalculator
+              width={squaringWidth}
+              setWidth={setSquaringWidth}
+              length={squaringLength}
+              setLength={setSquaringLength}
+              diagonalA={diagonalA}
+              setDiagonalA={setDiagonalA}
+              diagonalB={diagonalB}
+              setDiagonalB={setDiagonalB}
+              unit={squaringUnit}
+              setUnit={setSquaringUnit}
+              squaringResult={squaringResult}
+              calculateSquaring={calculateSquaring}
+              reset={resetSquaring}
+            />
           </TabsContent>
 
           <TabsContent value="about">
