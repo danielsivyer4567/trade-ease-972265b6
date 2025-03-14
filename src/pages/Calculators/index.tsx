@@ -2,7 +2,7 @@
 import React from "react";
 import { AppLayout } from "@/components/ui/AppLayout";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Calculator, Percent, Gauge, Ruler, Construction, Compass } from "lucide-react";
+import { Calculator, Percent, Gauge, Ruler, Construction, Compass, Stairs } from "lucide-react";
 import { Link } from "react-router-dom";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 
@@ -43,6 +43,12 @@ const Calculators = () => {
       description: "Calculate angles and slopes using various measurement methods",
       icon: <Compass className="h-6 w-6 text-indigo-500" />,
       path: "/calculators/loads-spans?tab=degree"
+    },
+    {
+      title: "Stairs Calculator",
+      description: "Calculate stair dimensions, risers, and treads for building projects",
+      icon: <Stairs className="h-6 w-6 text-orange-500" />,
+      path: "/calculators/loads-spans?tab=stairs"
     }
   ];
 

@@ -2,7 +2,7 @@
 import React from "react";
 import { AppLayout } from "@/components/ui/AppLayout";
 import { Link } from "react-router-dom";
-import { ArrowLeft, Ruler, Square, Compass } from "lucide-react";
+import { ArrowLeft, Ruler, Square, Compass, Stairs } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BeamCalculator } from "./BeamCalculator";
 import { SpanTableCalculator } from "./SpanTableCalculator";
@@ -12,12 +12,14 @@ import { RafterRoofCalculator } from "./RafterRoofCalculator";
 import { ConcreteCalculator } from "./ConcreteCalculator";
 import { SquaringCalculator } from "./SquaringCalculator";
 import { DegreeCalculator } from "./DegreeCalculator";
+import { StairsCalculator } from "./StairsCalculator";
 import { useBeamCalculator } from "./hooks/useBeamCalculator";
 import { useSpanTableCalculator } from "./hooks/useSpanTableCalculator";
 import { useJamesHardieCalculator } from "./hooks/useJamesHardieCalculator";
 import { useConcreteCalculator } from "./hooks/useConcreteCalculator";
 import { useSquaringCalculator } from "./hooks/useSquaringCalculator";
 import { useDegreeCalculator } from "./hooks/useDegreeCalculator";
+import { useStairsCalculator } from "./hooks/useStairsCalculator";
 
 const LoadsSpansCalculator = () => {
   const {
@@ -127,6 +129,29 @@ const LoadsSpansCalculator = () => {
     reset: resetDegree
   } = useDegreeCalculator();
 
+  // Add stairs calculator hook
+  const {
+    totalRise,
+    setTotalRise,
+    floorToFloor,
+    setFloorToFloor,
+    availableRun,
+    setAvailableRun,
+    stairType,
+    setStairType,
+    targetRiser,
+    setTargetRiser,
+    targetTread,
+    setTargetTread,
+    unit: stairsUnit,
+    setUnit: setStairsUnit,
+    headroomHeight,
+    setHeadroomHeight,
+    result: stairsResult,
+    calculateStairs,
+    resetStairs
+  } = useStairsCalculator();
+
   return <AppLayout>
       <div className="container mx-auto p-6 space-y-6">
         <div className="flex items-center gap-2 mb-6">
@@ -138,7 +163,7 @@ const LoadsSpansCalculator = () => {
         </div>
 
         <Tabs defaultValue="beam-calculator" className="w-full">
-          <TabsList className="grid w-full grid-cols-8 px-[4px] rounded-2xl py-[49px] my-0 mx-0 bg-slate-100">
+          <TabsList className="grid w-full grid-cols-9 px-[4px] rounded-2xl py-[49px] my-0 mx-0 bg-slate-100">
             <TabsTrigger value="beam-calculator" className="bg-slate-400 hover:bg-slate-300">Beam Calculator</TabsTrigger>
             <TabsTrigger value="span-table" className="bg-slate-400 hover:bg-slate-300">Span Table</TabsTrigger>
             <TabsTrigger value="james-hardie" className="bg-slate-400 hover:bg-slate-300">James Hardie</TabsTrigger>
@@ -146,6 +171,7 @@ const LoadsSpansCalculator = () => {
             <TabsTrigger value="concrete" className="bg-slate-400 hover:bg-slate-300">Concrete</TabsTrigger>
             <TabsTrigger value="squaring" className="bg-slate-400 hover:bg-slate-300">Squaring</TabsTrigger>
             <TabsTrigger value="degree" className="bg-slate-400 hover:bg-slate-300">Angle</TabsTrigger>
+            <TabsTrigger value="stairs" className="bg-slate-400 hover:bg-slate-300">Stairs</TabsTrigger>
             <TabsTrigger value="about" className="bg-slate-400 hover:bg-slate-300">About</TabsTrigger>
           </TabsList>
 
@@ -208,6 +234,30 @@ const LoadsSpansCalculator = () => {
               result={degreeResult}
               calculateAngle={calculateAngle}
               reset={resetDegree}
+            />
+          </TabsContent>
+
+          <TabsContent value="stairs" className="space-y-6">
+            <StairsCalculator
+              totalRise={totalRise}
+              setTotalRise={setTotalRise}
+              floorToFloor={floorToFloor}
+              setFloorToFloor={setFloorToFloor}
+              availableRun={availableRun}
+              setAvailableRun={setAvailableRun}
+              stairType={stairType}
+              setStairType={setStairType}
+              targetRiser={targetRiser}
+              setTargetRiser={setTargetRiser}
+              targetTread={targetTread}
+              setTargetTread={setTargetTread}
+              unit={stairsUnit}
+              setUnit={setStairsUnit}
+              headroomHeight={headroomHeight}
+              setHeadroomHeight={setHeadroomHeight}
+              result={stairsResult}
+              calculateStairs={calculateStairs}
+              resetStairs={resetStairs}
             />
           </TabsContent>
 
