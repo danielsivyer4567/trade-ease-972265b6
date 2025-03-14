@@ -23,18 +23,18 @@ export const drawBarChart = (
   ctx.clearRect(0, 0, displayWidth, displayHeight);
   
   // Chart margins
-  const margin = { top: 20, right: 15, bottom: 30, left: 40 };
+  const margin = { top: 20, right: 30, bottom: 30, left: 50 };
   const chartWidth = displayWidth - margin.left - margin.right;
   const chartHeight = displayHeight - margin.top - margin.bottom;
   
   // Calculate max values for scaling
   const maxHeight = Math.max(...sections.map(s => parseFloat(s.height) || 0));
   const maxLength = Math.max(...sections.map(s => parseFloat(s.length) || 0));
-  const maxValue = Math.max(maxHeight, maxLength);
+  const maxValue = Math.max(maxHeight, maxLength, 0.1); // Add minimum to avoid division by zero
   
   // Calculate bar width and spacing
   const barCount = sections.length;
-  const barWidth = chartWidth / (barCount * 3); // Each section has 2 bars + spacing
+  const barWidth = Math.min(50, chartWidth / (barCount * 3)); // Each section has 2 bars + spacing
   const groupSpacing = barWidth / 2;
   
   // Draw chart title
@@ -70,7 +70,7 @@ export const drawBarChart = (
     ctx.stroke();
     
     // Draw labels
-    ctx.fillText(value.toFixed(1), margin.left - 8, y + 4);
+    ctx.fillText(value.toFixed(1) + 'm', margin.left - 8, y + 4);
   }
   
   // Draw legend
@@ -89,13 +89,17 @@ export const drawBarChart = (
   ctx.fillStyle = '#333';
   ctx.fillText('Length (m)', margin.left + 130, margin.top - 5);
   
+  // Calculate the starting point for the bars to center them
+  const totalBarsWidth = barCount * (barWidth * 2 + groupSpacing);
+  const startX = margin.left + (chartWidth - totalBarsWidth) / 2;
+  
   // Draw bars
   sections.forEach((section, index) => {
     const height = parseFloat(section.height) || 0;
     const length = parseFloat(section.length) || 0;
     
     if (height && length) {
-      const x = margin.left + (index * 3 + 1) * barWidth + groupSpacing * index;
+      const x = startX + (index * (barWidth * 2 + groupSpacing));
       
       // Calculate heights (scaled)
       const heightBarHeight = (height / maxValue) * chartHeight;
