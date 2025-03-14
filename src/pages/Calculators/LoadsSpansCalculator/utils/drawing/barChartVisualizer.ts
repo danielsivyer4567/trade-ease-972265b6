@@ -15,17 +15,17 @@ export const drawBarChart = (
   const ctx = canvas.getContext('2d');
   if (!ctx) return;
   
-  // Clear canvas
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  // Get the display size of the canvas (as set by CSS)
+  const displayWidth = canvas.clientWidth;
+  const displayHeight = canvas.clientHeight;
   
-  // Set canvas size
-  const canvasWidth = canvas.width;
-  const canvasHeight = canvas.height;
+  // Clear canvas
+  ctx.clearRect(0, 0, displayWidth, displayHeight);
   
   // Chart margins
-  const margin = { top: 8, right: 4, bottom: 10, left: 12 }; // All values reduced 5x
-  const chartWidth = canvasWidth - margin.left - margin.right;
-  const chartHeight = canvasHeight - margin.top - margin.bottom;
+  const margin = { top: 20, right: 15, bottom: 30, left: 40 };
+  const chartWidth = displayWidth - margin.left - margin.right;
+  const chartHeight = displayHeight - margin.top - margin.bottom;
   
   // Calculate max values for scaling
   const maxHeight = Math.max(...sections.map(s => parseFloat(s.height) || 0));
@@ -38,56 +38,56 @@ export const drawBarChart = (
   const groupSpacing = barWidth / 2;
   
   // Draw chart title
-  ctx.font = 'bold 5px Arial'; // Reduced from 16px
+  ctx.font = 'bold 14px Arial';
   ctx.fillStyle = '#333';
   ctx.textAlign = 'center';
-  ctx.fillText('Roof Dimensions', canvasWidth / 2, margin.top / 2);
+  ctx.fillText('Roof Dimensions', displayWidth / 2, margin.top / 2);
   
   // Draw Y-axis
   ctx.beginPath();
   ctx.moveTo(margin.left, margin.top);
-  ctx.lineTo(margin.left, canvasHeight - margin.bottom);
+  ctx.lineTo(margin.left, displayHeight - margin.bottom);
   ctx.stroke();
   
   // Draw X-axis
   ctx.beginPath();
-  ctx.moveTo(margin.left, canvasHeight - margin.bottom);
-  ctx.lineTo(canvasWidth - margin.right, canvasHeight - margin.bottom);
+  ctx.moveTo(margin.left, displayHeight - margin.bottom);
+  ctx.lineTo(displayWidth - margin.right, displayHeight - margin.bottom);
   ctx.stroke();
   
-  // Draw Y-axis labels (reduced to just 3 ticks)
-  const yTickCount = 2;
+  // Draw Y-axis labels
+  const yTickCount = 5;
   ctx.textAlign = 'right';
-  ctx.font = '4px Arial'; // Reduced from 12px
+  ctx.font = '12px Arial';
   for (let i = 0; i <= yTickCount; i++) {
     const value = maxValue * (i / yTickCount);
-    const y = canvasHeight - margin.bottom - (i / yTickCount) * chartHeight;
+    const y = displayHeight - margin.bottom - (i / yTickCount) * chartHeight;
     
     // Draw tick marks
     ctx.beginPath();
-    ctx.moveTo(margin.left - 1, y); // Reduced from -5
+    ctx.moveTo(margin.left - 5, y);
     ctx.lineTo(margin.left, y);
     ctx.stroke();
     
     // Draw labels
-    ctx.fillText(value.toFixed(1), margin.left - 2, y + 1); // Reduced spacing and simplified
+    ctx.fillText(value.toFixed(1), margin.left - 8, y + 4);
   }
   
-  // Draw legend (simplified)
-  ctx.font = '4px Arial'; // Reduced from 12px
+  // Draw legend
+  ctx.font = '12px Arial';
   ctx.textAlign = 'left';
   
   // Height legend
   ctx.fillStyle = 'rgba(59, 130, 246, 0.7)'; // Blue
-  ctx.fillRect(margin.left + 2, margin.top - 5, 3, 3); // Reduced from 10,15,15,15
+  ctx.fillRect(margin.left + 10, margin.top - 15, 15, 15);
   ctx.fillStyle = '#333';
-  ctx.fillText('H(m)', margin.left + 6, margin.top - 3); // Reduced space and simplified
+  ctx.fillText('Height (m)', margin.left + 30, margin.top - 5);
   
   // Length legend
   ctx.fillStyle = 'rgba(245, 158, 11, 0.7)'; // Amber
-  ctx.fillRect(margin.left + 22, margin.top - 5, 3, 3); // Reduced from 110,25,15,15
+  ctx.fillRect(margin.left + 110, margin.top - 15, 15, 15);
   ctx.fillStyle = '#333';
-  ctx.fillText('L(m)', margin.left + 26, margin.top - 3); // Reduced space and simplified
+  ctx.fillText('Length (m)', margin.left + 130, margin.top - 5);
   
   // Draw bars
   sections.forEach((section, index) => {
@@ -105,7 +105,7 @@ export const drawBarChart = (
       ctx.fillStyle = 'rgba(59, 130, 246, 0.7)'; // Blue
       ctx.fillRect(
         x, 
-        canvasHeight - margin.bottom - heightBarHeight,
+        displayHeight - margin.bottom - heightBarHeight,
         barWidth,
         heightBarHeight
       );
@@ -113,37 +113,35 @@ export const drawBarChart = (
       // Draw length bar
       ctx.fillStyle = 'rgba(245, 158, 11, 0.7)'; // Amber
       ctx.fillRect(
-        x + barWidth + 1, // Reduced from +5
-        canvasHeight - margin.bottom - lengthBarHeight,
+        x + barWidth + 5,
+        displayHeight - margin.bottom - lengthBarHeight,
         barWidth,
         lengthBarHeight
       );
       
-      // Draw section label (simplified)
+      // Draw section label
       ctx.fillStyle = '#333';
       ctx.textAlign = 'center';
-      if (index < 3) { // Only show for first 3 sections to avoid clutter
-        ctx.fillText(
-          `S${index + 1}`,
-          x + barWidth + 0.5, // Reduced from +2.5
-          canvasHeight - margin.bottom + 3 // Reduced from +15
-        );
-      }
+      ctx.fillText(
+        `Section ${index + 1}`,
+        x + barWidth + 2.5,
+        displayHeight - margin.bottom + 15
+      );
       
       // Draw values above bars (only if there's enough space)
-      if (heightBarHeight > 4) {
+      if (heightBarHeight > 15) {
         ctx.fillText(
           height.toFixed(1),
           x + barWidth / 2,
-          canvasHeight - margin.bottom - heightBarHeight - 1 // Reduced from -5
+          displayHeight - margin.bottom - heightBarHeight - 5
         );
       }
       
-      if (lengthBarHeight > 4) {
+      if (lengthBarHeight > 15) {
         ctx.fillText(
           length.toFixed(1),
-          x + barWidth + 1 + barWidth / 2, // Reduced spacing
-          canvasHeight - margin.bottom - lengthBarHeight - 1 // Reduced from -5
+          x + barWidth * 1.5 + 5,
+          displayHeight - margin.bottom - lengthBarHeight - 5
         );
       }
     }

@@ -38,11 +38,29 @@ export const RoofVisualization: React.FC<RoofVisualizationProps> = ({
       // Set canvas size based on container
       const container = canvas.parentElement;
       if (container) {
-        canvas.width = container.clientWidth;
-        canvas.height = 220; // Optimal height for clear visibility
+        // Get the container dimensions
+        const containerWidth = container.clientWidth;
         
-        chartCanvas.width = container.clientWidth;
-        chartCanvas.height = 180;
+        // For high DPI displays, we need to account for the device pixel ratio
+        const dpr = window.devicePixelRatio || 1;
+        
+        // Set the canvas dimensions with the device pixel ratio factored in
+        canvas.width = containerWidth * dpr;
+        canvas.height = 220 * dpr;
+        canvas.style.width = `${containerWidth}px`;
+        canvas.style.height = `220px`;
+        
+        chartCanvas.width = containerWidth * dpr;
+        chartCanvas.height = 180 * dpr;
+        chartCanvas.style.width = `${containerWidth}px`;
+        chartCanvas.style.height = `180px`;
+        
+        // Scale the canvas context to account for the device pixel ratio
+        const ctx = canvas.getContext('2d');
+        const chartCtx = chartCanvas.getContext('2d');
+        
+        if (ctx) ctx.scale(dpr, dpr);
+        if (chartCtx) chartCtx.scale(dpr, dpr);
       }
 
       // Initial drawing
@@ -59,11 +77,31 @@ export const RoofVisualization: React.FC<RoofVisualizationProps> = ({
       const chartCanvas = chartCanvasRef.current;
       const container = canvas?.parentElement;
       if (canvas && chartCanvas && container) {
-        canvas.width = container.clientWidth;
-        canvas.height = 220;
-
-        chartCanvas.width = container.clientWidth;
-        chartCanvas.height = 180;
+        const containerWidth = container.clientWidth;
+        const dpr = window.devicePixelRatio || 1;
+        
+        // Update dimensions with device pixel ratio
+        canvas.width = containerWidth * dpr;
+        canvas.height = 220 * dpr;
+        canvas.style.width = `${containerWidth}px`;
+        canvas.style.height = `220px`;
+        
+        chartCanvas.width = containerWidth * dpr;
+        chartCanvas.height = 180 * dpr;
+        chartCanvas.style.width = `${containerWidth}px`;
+        chartCanvas.style.height = `180px`;
+        
+        // Rescale the contexts
+        const ctx = canvas.getContext('2d');
+        const chartCtx = chartCanvas.getContext('2d');
+        
+        if (ctx) {
+          ctx.scale(dpr, dpr);
+        }
+        if (chartCtx) {
+          chartCtx.scale(dpr, dpr);
+        }
+        
         if (viewMode === "stack") {
           drawRoofVisualization(canvasRef, sections, totalArea);
         } else {
@@ -114,7 +152,6 @@ export const RoofVisualization: React.FC<RoofVisualizationProps> = ({
           <canvas 
             ref={chartCanvasRef} 
             className="w-full border rounded-md bg-white" 
-            height="180" 
           />
         )}
       </div>
