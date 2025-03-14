@@ -40,10 +40,10 @@ export const RoofVisualization: React.FC<RoofVisualizationProps> = ({
       const container = canvas.parentElement;
       if (container) {
         canvas.width = container.clientWidth;
-        canvas.height = 220; // Reduced from 300 to 220
+        canvas.height = 280; // Increased from 220 to 280 for the new visualization
         
         chartCanvas.width = container.clientWidth;
-        chartCanvas.height = 250; // Reduced from 350 to 250
+        chartCanvas.height = 250;
       }
       
       // Initial drawing
@@ -62,10 +62,10 @@ export const RoofVisualization: React.FC<RoofVisualizationProps> = ({
       
       if (canvas && chartCanvas && container) {
         canvas.width = container.clientWidth;
-        canvas.height = 220; // Reduced from 300 to 220
+        canvas.height = 280; // Increased from 220 to 280 for the new visualization
         
         chartCanvas.width = container.clientWidth;
-        chartCanvas.height = 250; // Reduced from 350 to 250
+        chartCanvas.height = 250;
         
         if (viewMode === "stack") {
           drawRoofVisualization(canvasRef, sections, totalArea);
@@ -91,7 +91,7 @@ export const RoofVisualization: React.FC<RoofVisualizationProps> = ({
             onClick={() => setViewMode("stack")}
           >
             <SquareStack className="h-3 w-3" />
-            <span className="hidden sm:inline">Stack View</span>
+            <span className="hidden sm:inline">Triangular View</span>
           </Button>
           <Button
             variant={viewMode === "chart" ? "default" : "outline"}
@@ -110,7 +110,7 @@ export const RoofVisualization: React.FC<RoofVisualizationProps> = ({
           <canvas 
             ref={canvasRef} 
             className="w-full border rounded-md bg-white"
-            height="220"
+            height="280"
           />
         ) : (
           <canvas 

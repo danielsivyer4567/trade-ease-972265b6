@@ -1,4 +1,3 @@
-
 import { RoofSection } from "../types/rafterRoof";
 
 export const drawRoofVisualization = (
@@ -19,69 +18,189 @@ export const drawRoofVisualization = (
   const canvasWidth = canvas.width;
   const canvasHeight = canvas.height;
   
-  // Find max height and length for scaling
+  // Calculate dimensions for the roof
+  const padding = 30;
+  const roofWidth = canvasWidth - (padding * 2);
   const maxHeight = Math.max(...sections.map(s => parseFloat(s.height) || 0));
-  const totalLength = sections.reduce((sum, s) => sum + (parseFloat(s.length) || 0), 0);
+  const roofHeight = Math.min(canvasHeight - (padding * 2), maxHeight * 20);
   
-  // Scale factors
-  const heightScale = (canvasHeight - 60) / (maxHeight || 1);
-  const lengthScale = (canvasWidth - 60) / (totalLength || 1);
+  // Set starting positions
+  const baseY = canvasHeight - padding;
+  const leftX = padding;
+  const rightX = canvasWidth - padding;
+  const peakY = baseY - roofHeight;
+  const peakX = canvasWidth / 2;
   
-  // Start position
-  let x = 30;
-  const baseY = canvasHeight - 30;
+  // Draw roof outline
+  ctx.lineWidth = 3;
+  ctx.strokeStyle = '#5c3d2e'; // Brown color for roof outline
   
-  // Draw sections
-  ctx.lineWidth = 2;
-  ctx.strokeStyle = '#333';
-  ctx.fillStyle = 'rgba(255, 193, 7, 0.2)';
-  
-  // Draw baseline
+  // Draw roof triangle
   ctx.beginPath();
-  ctx.moveTo(30, baseY);
-  ctx.lineTo(canvasWidth - 30, baseY);
+  ctx.moveTo(leftX, baseY);
+  ctx.lineTo(peakX, peakY);
+  ctx.lineTo(rightX, baseY);
   ctx.stroke();
   
-  // Draw roof sections
-  for (const section of sections) {
-    const height = parseFloat(section.height) || 0;
-    const length = parseFloat(section.length) || 0;
+  // Draw horizontal base (beam) with thicker line
+  ctx.lineWidth = 6;
+  ctx.beginPath();
+  ctx.moveTo(leftX - 10, baseY);
+  ctx.lineTo(rightX + 10, baseY);
+  ctx.stroke();
+  
+  // Draw small vertical supports at ends
+  ctx.beginPath();
+  ctx.moveTo(leftX, baseY);
+  ctx.lineTo(leftX, baseY + 10);
+  ctx.moveTo(rightX, baseY);
+  ctx.lineTo(rightX, baseY + 10);
+  ctx.stroke();
+  
+  // Reset line width for other elements
+  ctx.lineWidth = 1;
+  
+  // Draw angle lines from base corners to peak
+  const anglesToShow = [20, 25, 30, 35, 40, 45, 50];
+  const colors = ['#333', '#555', '#777', '#999', '#555', '#333', '#111'];
+  
+  // Draw angle lines
+  anglesToShow.forEach((angle, index) => {
+    // Calculate angle in radians
+    const radian = (angle * Math.PI) / 180;
+    const heightRatio = index / (anglesToShow.length - 1);
+    const lineHeight = roofHeight * (0.3 + (heightRatio * 0.7));
     
-    if (height && length) {
-      const scaledHeight = height * heightScale;
-      const scaledLength = length * lengthScale;
-      
-      // Draw the section
-      ctx.beginPath();
-      ctx.moveTo(x, baseY);
-      ctx.lineTo(x, baseY - scaledHeight);
-      ctx.lineTo(x + scaledLength, baseY - scaledHeight);
-      ctx.lineTo(x + scaledLength, baseY);
-      ctx.closePath();
-      ctx.fill();
-      ctx.stroke();
-      
-      // Draw area label
-      ctx.fillStyle = '#333';
-      ctx.font = '12px Arial';
-      ctx.fillText(
-        `${section.area.toFixed(1)} m²`, 
-        x + scaledLength / 2 - 20, 
-        baseY - scaledHeight / 2
-      );
-      
-      x += scaledLength;
+    // Draw left angle line
+    ctx.beginPath();
+    ctx.strokeStyle = colors[index % colors.length];
+    ctx.moveTo(leftX, baseY);
+    const leftEndX = leftX + (Math.tan(radian) * lineHeight);
+    const leftEndY = baseY - lineHeight;
+    ctx.lineTo(leftEndX, leftEndY);
+    
+    // Draw right angle line
+    ctx.moveTo(rightX, baseY);
+    const rightEndX = rightX - (Math.tan(radian) * lineHeight);
+    const rightEndY = baseY - lineHeight;
+    ctx.lineTo(rightEndX, rightEndY);
+    ctx.stroke();
+    
+    // Draw angle text in the middle top
+    ctx.fillStyle = '#000';
+    ctx.font = '12px Arial';
+    ctx.textAlign = 'center';
+    const textX = canvasWidth / 2;
+    const textY = baseY - lineHeight + 15;
+    ctx.fillText(`${angle}°`, textX, textY);
+  });
+  
+  // Draw horizontal height markers on left side
+  const heightMarkers = [1, 2, 2.5, 3];
+  
+  heightMarkers.forEach((height, index) => {
+    const markerY = baseY - (height * (roofHeight / maxHeight) * 0.8);
+    
+    // Draw dashed line across
+    ctx.beginPath();
+    ctx.setLineDash([5, 3]);
+    ctx.strokeStyle = '#555';
+    ctx.moveTo(leftX - 5, markerY);
+    ctx.lineTo(rightX, markerY);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    
+    // Draw height text
+    ctx.fillStyle = '#000';
+    ctx.font = '12px Arial';
+    ctx.textAlign = 'right';
+    ctx.fillText(`${height} M`, leftX - 10, markerY + 4);
+  });
+  
+  // Draw width measurements at bottom with arrows
+  const widthMarkers = sections.map(s => parseFloat(s.length) || 0);
+  const totalWidth = widthMarkers.reduce((a, b) => a + b, 0);
+  const scale = roofWidth / totalWidth;
+  
+  let currentX = leftX;
+  widthMarkers.forEach((width, index) => {
+    const scaledWidth = width * scale;
+    const nextX = currentX + scaledWidth;
+    const arrowY = baseY + 25;
+    
+    // Draw arrow line
+    ctx.beginPath();
+    ctx.strokeStyle = '#000';
+    ctx.moveTo(currentX, arrowY);
+    ctx.lineTo(nextX, arrowY);
+    ctx.stroke();
+    
+    // Draw arrow heads
+    drawArrowHead(ctx, currentX, arrowY, 'left');
+    drawArrowHead(ctx, nextX, arrowY, 'right');
+    
+    // Draw width text
+    ctx.fillStyle = '#000';
+    ctx.font = '12px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText(`${width.toFixed(2)} M`, (currentX + nextX) / 2, arrowY + 15);
+    
+    // Draw vertical dotted lines from base to arrow
+    ctx.beginPath();
+    ctx.setLineDash([2, 2]);
+    ctx.moveTo(currentX, baseY);
+    ctx.lineTo(currentX, arrowY + 20);
+    if (index === widthMarkers.length - 1) {
+      ctx.moveTo(nextX, baseY);
+      ctx.lineTo(nextX, arrowY + 20);
     }
-  }
+    ctx.stroke();
+    ctx.setLineDash([]);
+    
+    currentX = nextX;
+  });
   
-  // Reset fill style for next drawing
-  ctx.fillStyle = 'rgba(255, 193, 7, 0.2)';
+  // Draw total width at the bottom
+  const totalArrowY = baseY + 50;
+  ctx.beginPath();
+  ctx.strokeStyle = '#000';
+  ctx.lineWidth = 1.5;
+  ctx.moveTo(leftX, totalArrowY);
+  ctx.lineTo(rightX, totalArrowY);
+  ctx.stroke();
   
-  // Draw total area
-  ctx.font = '14px Arial';
+  // Draw total width arrow heads
+  drawArrowHead(ctx, leftX, totalArrowY, 'left');
+  drawArrowHead(ctx, rightX, totalArrowY, 'right');
+  
+  // Draw total width text
   ctx.fillStyle = '#000';
-  ctx.fillText(`Total Area: ${totalArea.toFixed(2)} m²`, 30, 20);
+  ctx.font = 'bold 14px Arial';
+  ctx.textAlign = 'center';
+  ctx.fillText(`${totalWidth.toFixed(2)} M`, (leftX + rightX) / 2, totalArrowY + 16);
+  
+  // Draw total area at the top
+  ctx.font = 'bold 14px Arial';
+  ctx.fillStyle = '#000';
+  ctx.textAlign = 'left';
+  ctx.fillText(`Total Area: ${totalArea.toFixed(2)} m²`, leftX, padding - 10);
 };
+
+// Helper function to draw arrow heads
+function drawArrowHead(ctx: CanvasRenderingContext2D, x: number, y: number, direction: 'left' | 'right') {
+  const arrowSize = 6;
+  ctx.beginPath();
+  if (direction === 'right') {
+    ctx.moveTo(x - arrowSize, y - arrowSize);
+    ctx.lineTo(x, y);
+    ctx.lineTo(x - arrowSize, y + arrowSize);
+  } else {
+    ctx.moveTo(x + arrowSize, y - arrowSize);
+    ctx.lineTo(x, y);
+    ctx.lineTo(x + arrowSize, y + arrowSize);
+  }
+  ctx.stroke();
+}
 
 export const drawBarChart = (
   canvasRef: React.RefObject<HTMLCanvasElement>,
