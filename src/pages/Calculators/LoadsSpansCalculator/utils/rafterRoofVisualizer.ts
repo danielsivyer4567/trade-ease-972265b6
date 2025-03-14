@@ -1,3 +1,4 @@
+
 import { RoofSection } from "../types/rafterRoof";
 
 export const drawRoofVisualization = (
@@ -19,10 +20,10 @@ export const drawRoofVisualization = (
   const canvasHeight = canvas.height;
   
   // Calculate dimensions for the roof
-  const padding = 30;
+  const padding = 6; // Reduced 5x from 30
   const roofWidth = canvasWidth - (padding * 2);
   const maxHeight = Math.max(...sections.map(s => parseFloat(s.height) || 0));
-  const roofHeight = Math.min(canvasHeight - (padding * 2), maxHeight * 20);
+  const roofHeight = Math.min(canvasHeight - (padding * 2), maxHeight * 4); // Reduced 5x from 20 to 4
   
   // Set starting positions
   const baseY = canvasHeight - padding;
@@ -32,7 +33,7 @@ export const drawRoofVisualization = (
   const peakX = canvasWidth / 2;
   
   // Draw roof outline
-  ctx.lineWidth = 3;
+  ctx.lineWidth = 1; // Reduced 3x from 3
   ctx.strokeStyle = '#5c3d2e'; // Brown color for roof outline
   
   // Draw roof triangle
@@ -43,26 +44,26 @@ export const drawRoofVisualization = (
   ctx.stroke();
   
   // Draw horizontal base (beam) with thicker line
-  ctx.lineWidth = 6;
+  ctx.lineWidth = 1.2; // Reduced 5x from 6
   ctx.beginPath();
-  ctx.moveTo(leftX - 10, baseY);
-  ctx.lineTo(rightX + 10, baseY);
+  ctx.moveTo(leftX - 2, baseY); // Reduced 5x from -10
+  ctx.lineTo(rightX + 2, baseY); // Reduced 5x from +10
   ctx.stroke();
   
   // Draw small vertical supports at ends
   ctx.beginPath();
   ctx.moveTo(leftX, baseY);
-  ctx.lineTo(leftX, baseY + 10);
+  ctx.lineTo(leftX, baseY + 2); // Reduced 5x from 10
   ctx.moveTo(rightX, baseY);
-  ctx.lineTo(rightX, baseY + 10);
+  ctx.lineTo(rightX, baseY + 2); // Reduced 5x from 10
   ctx.stroke();
   
   // Reset line width for other elements
-  ctx.lineWidth = 1;
+  ctx.lineWidth = 0.5; // Reduced from 1
   
   // Draw angle lines from base corners to peak
-  const anglesToShow = [20, 25, 30, 35, 40, 45, 50];
-  const colors = ['#333', '#555', '#777', '#999', '#555', '#333', '#111'];
+  const anglesToShow = [30, 45]; // Reduced number of angles to show
+  const colors = ['#333', '#777'];
   
   // Draw angle lines
   anglesToShow.forEach((angle, index) => {
@@ -86,35 +87,37 @@ export const drawRoofVisualization = (
     ctx.lineTo(rightEndX, rightEndY);
     ctx.stroke();
     
-    // Draw angle text in the middle top
-    ctx.fillStyle = '#000';
-    ctx.font = '12px Arial';
-    ctx.textAlign = 'center';
-    const textX = canvasWidth / 2;
-    const textY = baseY - lineHeight + 15;
-    ctx.fillText(`${angle}°`, textX, textY);
+    // Only show angle text for smaller number of angles
+    if (index < 2) {
+      ctx.fillStyle = '#000';
+      ctx.font = '7px Arial'; // Reduced from 12px
+      ctx.textAlign = 'center';
+      const textX = canvasWidth / 2;
+      const textY = baseY - lineHeight + 3; // Reduced from 15
+      ctx.fillText(`${angle}°`, textX, textY);
+    }
   });
   
   // Draw horizontal height markers on left side
-  const heightMarkers = [1, 2, 2.5, 3];
+  const heightMarkers = [2, 3]; // Reduced number of markers
   
   heightMarkers.forEach((height, index) => {
     const markerY = baseY - (height * (roofHeight / maxHeight) * 0.8);
     
     // Draw dashed line across
     ctx.beginPath();
-    ctx.setLineDash([5, 3]);
+    ctx.setLineDash([2, 1]); // Reduced from [5, 3]
     ctx.strokeStyle = '#555';
-    ctx.moveTo(leftX - 5, markerY);
+    ctx.moveTo(leftX - 1, markerY); // Reduced from -5
     ctx.lineTo(rightX, markerY);
     ctx.stroke();
     ctx.setLineDash([]);
     
     // Draw height text
     ctx.fillStyle = '#000';
-    ctx.font = '12px Arial';
+    ctx.font = '6px Arial'; // Reduced from 12px
     ctx.textAlign = 'right';
-    ctx.fillText(`${height} M`, leftX - 10, markerY + 4);
+    ctx.fillText(`${height}M`, leftX - 2, markerY + 1); // Reduced space and position
   });
   
   // Draw width measurements at bottom with arrows
@@ -126,7 +129,7 @@ export const drawRoofVisualization = (
   widthMarkers.forEach((width, index) => {
     const scaledWidth = width * scale;
     const nextX = currentX + scaledWidth;
-    const arrowY = baseY + 25;
+    const arrowY = baseY + 5; // Reduced from 25
     
     // Draw arrow line
     ctx.beginPath();
@@ -139,20 +142,22 @@ export const drawRoofVisualization = (
     drawArrowHead(ctx, currentX, arrowY, 'left');
     drawArrowHead(ctx, nextX, arrowY, 'right');
     
-    // Draw width text
-    ctx.fillStyle = '#000';
-    ctx.font = '12px Arial';
-    ctx.textAlign = 'center';
-    ctx.fillText(`${width.toFixed(2)} M`, (currentX + nextX) / 2, arrowY + 15);
+    // Only show width text for sections with sufficient width
+    if (scaledWidth > 30) {
+      ctx.fillStyle = '#000';
+      ctx.font = '5px Arial'; // Reduced from 12px
+      ctx.textAlign = 'center';
+      ctx.fillText(`${width.toFixed(1)}`, (currentX + nextX) / 2, arrowY + 3); // Reduced space and simplified text
+    }
     
     // Draw vertical dotted lines from base to arrow
     ctx.beginPath();
-    ctx.setLineDash([2, 2]);
+    ctx.setLineDash([1, 1]); // Reduced from [2, 2]
     ctx.moveTo(currentX, baseY);
-    ctx.lineTo(currentX, arrowY + 20);
+    ctx.lineTo(currentX, arrowY + 4); // Reduced from +20
     if (index === widthMarkers.length - 1) {
       ctx.moveTo(nextX, baseY);
-      ctx.lineTo(nextX, arrowY + 20);
+      ctx.lineTo(nextX, arrowY + 4); // Reduced from +20
     }
     ctx.stroke();
     ctx.setLineDash([]);
@@ -161,10 +166,10 @@ export const drawRoofVisualization = (
   });
   
   // Draw total width at the bottom
-  const totalArrowY = baseY + 50;
+  const totalArrowY = baseY + 10; // Reduced from 50
   ctx.beginPath();
   ctx.strokeStyle = '#000';
-  ctx.lineWidth = 1.5;
+  ctx.lineWidth = 0.3; // Reduced from 1.5
   ctx.moveTo(leftX, totalArrowY);
   ctx.lineTo(rightX, totalArrowY);
   ctx.stroke();
@@ -175,20 +180,20 @@ export const drawRoofVisualization = (
   
   // Draw total width text
   ctx.fillStyle = '#000';
-  ctx.font = 'bold 14px Arial';
+  ctx.font = 'bold 6px Arial'; // Reduced from 14px
   ctx.textAlign = 'center';
-  ctx.fillText(`${totalWidth.toFixed(2)} M`, (leftX + rightX) / 2, totalArrowY + 16);
+  ctx.fillText(`${totalWidth.toFixed(1)}M`, (leftX + rightX) / 2, totalArrowY + 4); // Reduced space and simplified text
   
   // Draw total area at the top
-  ctx.font = 'bold 14px Arial';
+  ctx.font = 'bold 6px Arial'; // Reduced from 14px
   ctx.fillStyle = '#000';
   ctx.textAlign = 'left';
-  ctx.fillText(`Total Area: ${totalArea.toFixed(2)} m²`, leftX, padding - 10);
+  ctx.fillText(`Area: ${totalArea.toFixed(1)}m²`, leftX, padding - 1); // Reduced space and simplified text
 };
 
 // Helper function to draw arrow heads
 function drawArrowHead(ctx: CanvasRenderingContext2D, x: number, y: number, direction: 'left' | 'right') {
-  const arrowSize = 6;
+  const arrowSize = 1.2; // Reduced 5x from 6
   ctx.beginPath();
   if (direction === 'right') {
     ctx.moveTo(x - arrowSize, y - arrowSize);
@@ -221,7 +226,7 @@ export const drawBarChart = (
   const canvasHeight = canvas.height;
   
   // Chart margins
-  const margin = { top: 40, right: 20, bottom: 50, left: 60 };
+  const margin = { top: 8, right: 4, bottom: 10, left: 12 }; // All values reduced 5x
   const chartWidth = canvasWidth - margin.left - margin.right;
   const chartHeight = canvasHeight - margin.top - margin.bottom;
   
@@ -236,10 +241,10 @@ export const drawBarChart = (
   const groupSpacing = barWidth / 2;
   
   // Draw chart title
-  ctx.font = 'bold 16px Arial';
+  ctx.font = 'bold 5px Arial'; // Reduced from 16px
   ctx.fillStyle = '#333';
   ctx.textAlign = 'center';
-  ctx.fillText('Roof Section Dimensions', canvasWidth / 2, margin.top / 2);
+  ctx.fillText('Roof Dimensions', canvasWidth / 2, margin.top / 2);
   
   // Draw Y-axis
   ctx.beginPath();
@@ -253,43 +258,39 @@ export const drawBarChart = (
   ctx.lineTo(canvasWidth - margin.right, canvasHeight - margin.bottom);
   ctx.stroke();
   
-  // Draw Y-axis labels
-  const yTickCount = 5;
+  // Draw Y-axis labels (reduced to just 3 ticks)
+  const yTickCount = 2;
   ctx.textAlign = 'right';
-  ctx.font = '12px Arial';
+  ctx.font = '4px Arial'; // Reduced from 12px
   for (let i = 0; i <= yTickCount; i++) {
     const value = maxValue * (i / yTickCount);
     const y = canvasHeight - margin.bottom - (i / yTickCount) * chartHeight;
     
     // Draw tick marks
     ctx.beginPath();
-    ctx.moveTo(margin.left - 5, y);
+    ctx.moveTo(margin.left - 1, y); // Reduced from -5
     ctx.lineTo(margin.left, y);
     ctx.stroke();
     
     // Draw labels
-    ctx.fillText(value.toFixed(1) + 'm', margin.left - 10, y + 4);
+    ctx.fillText(value.toFixed(1), margin.left - 2, y + 1); // Reduced spacing and simplified
   }
   
-  // Draw X-axis labels
-  ctx.textAlign = 'center';
-  ctx.font = '12px Arial';
-  
-  // Draw legend
-  ctx.font = '12px Arial';
+  // Draw legend (simplified)
+  ctx.font = '4px Arial'; // Reduced from 12px
   ctx.textAlign = 'left';
   
   // Height legend
   ctx.fillStyle = 'rgba(59, 130, 246, 0.7)'; // Blue
-  ctx.fillRect(margin.left + 10, margin.top - 25, 15, 15);
+  ctx.fillRect(margin.left + 2, margin.top - 5, 3, 3); // Reduced from 10,15,15,15
   ctx.fillStyle = '#333';
-  ctx.fillText('Height (m)', margin.left + 30, margin.top - 15);
+  ctx.fillText('H(m)', margin.left + 6, margin.top - 3); // Reduced space and simplified
   
   // Length legend
   ctx.fillStyle = 'rgba(245, 158, 11, 0.7)'; // Amber
-  ctx.fillRect(margin.left + 110, margin.top - 25, 15, 15);
+  ctx.fillRect(margin.left + 22, margin.top - 5, 3, 3); // Reduced from 110,25,15,15
   ctx.fillStyle = '#333';
-  ctx.fillText('Length (m)', margin.left + 130, margin.top - 15);
+  ctx.fillText('L(m)', margin.left + 26, margin.top - 3); // Reduced space and simplified
   
   // Draw bars
   sections.forEach((section, index) => {
@@ -315,47 +316,42 @@ export const drawBarChart = (
       // Draw length bar
       ctx.fillStyle = 'rgba(245, 158, 11, 0.7)'; // Amber
       ctx.fillRect(
-        x + barWidth + 5,
+        x + barWidth + 1, // Reduced from +5
         canvasHeight - margin.bottom - lengthBarHeight,
         barWidth,
         lengthBarHeight
       );
       
-      // Draw section label
+      // Draw section label (simplified)
       ctx.fillStyle = '#333';
       ctx.textAlign = 'center';
-      ctx.fillText(
-        `Section ${index + 1}`,
-        x + barWidth + 2.5, 
-        canvasHeight - margin.bottom + 15
-      );
+      if (index < 3) { // Only show for first 3 sections to avoid clutter
+        ctx.fillText(
+          `S${index + 1}`,
+          x + barWidth + 0.5, // Reduced from +2.5
+          canvasHeight - margin.bottom + 3 // Reduced from +15
+        );
+      }
       
-      // Draw values above bars
-      ctx.fillText(
-        height.toFixed(1),
-        x + barWidth / 2,
-        canvasHeight - margin.bottom - heightBarHeight - 5
-      );
+      // Draw values above bars (only if there's enough space)
+      if (heightBarHeight > 4) {
+        ctx.fillText(
+          height.toFixed(1),
+          x + barWidth / 2,
+          canvasHeight - margin.bottom - heightBarHeight - 1 // Reduced from -5
+        );
+      }
       
-      ctx.fillText(
-        length.toFixed(1),
-        x + barWidth + 5 + barWidth / 2,
-        canvasHeight - margin.bottom - lengthBarHeight - 5
-      );
+      if (lengthBarHeight > 4) {
+        ctx.fillText(
+          length.toFixed(1),
+          x + barWidth + 1 + barWidth / 2, // Reduced spacing
+          canvasHeight - margin.bottom - lengthBarHeight - 1 // Reduced from -5
+        );
+      }
     }
   });
   
-  // Draw Y-axis title
-  ctx.save();
-  ctx.translate(15, canvasHeight / 2);
-  ctx.rotate(-Math.PI / 2);
-  ctx.textAlign = 'center';
-  ctx.font = '14px Arial';
-  ctx.fillText('Measurements (m)', 0, 0);
-  ctx.restore();
-  
-  // Draw X-axis title
-  ctx.textAlign = 'center';
-  ctx.font = '14px Arial';
-  ctx.fillText('Roof Sections', canvasWidth / 2, canvasHeight - 10);
+  // Simplify by removing axis titles - they take too much space in mini version
 };
+
