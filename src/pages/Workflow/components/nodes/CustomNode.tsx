@@ -119,7 +119,7 @@ export function CustomNode({ data, id, selected }) {
             <span className="text-xs">{data.icon || '⚙️'}</span>
           </div>
           <div>
-            <div className="font-semibold text-xs">Custom</div>
+            <div className="font-semibold text-xs">Node</div>
             <div className="text-xs text-gray-500">{data.label || 'Node'}</div>
           </div>
         </div>
@@ -128,3 +128,4 @@ export function CustomNode({ data, id, selected }) {
     </>
   );
 }
+
