@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React from "react";
 import { AppLayout } from "@/components/ui/AppLayout";
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Link } from "react-router-dom";
 import { ArrowLeft, Square } from "lucide-react";
-import { useFencingCalculator } from "./hooks/useFencingCalculator";
+import { useFencingCalculator, FenceType, Unit } from "./hooks/useFencingCalculator";
 
 const FencingCalculator = () => {
   const {
@@ -28,6 +28,7 @@ const FencingCalculator = () => {
     setUnit,
     calculateFencingMaterials,
     result,
+    FENCING_COMPONENTS_PER_10M
   } = useFencingCalculator();
 
   return (
@@ -50,7 +51,10 @@ const FencingCalculator = () => {
             <CardContent className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="unit">Unit of Measurement</Label>
-                <Select value={unit} onValueChange={setUnit}>
+                <Select 
+                  value={unit} 
+                  onValueChange={(value: Unit) => setUnit(value)}
+                >
                   <SelectTrigger id="unit">
                     <SelectValue placeholder="Select unit" />
                   </SelectTrigger>
@@ -76,41 +80,32 @@ const FencingCalculator = () => {
 
               <div className="space-y-2">
                 <Label htmlFor="fenceType">Fence Type</Label>
-                <Select value={fenceType} onValueChange={setFenceType}>
+                <Select 
+                  value={fenceType} 
+                  onValueChange={(value: FenceType) => setFenceType(value)}
+                >
                   <SelectTrigger id="fenceType">
                     <SelectValue placeholder="Select fence type" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="max-h-[300px]">
+                    <SelectItem value="1.8m butted up with a sleeper">1.8m Butted Up with Sleeper</SelectItem>
+                    <SelectItem value="1.8m butted up and capped with a sleeper">1.8m Butted Up and Capped with Sleeper</SelectItem>
+                    <SelectItem value="1.8m lapped">1.8m Lapped</SelectItem>
+                    <SelectItem value="1.8m lapped and capped">1.8m Lapped and Capped</SelectItem>
+                    <SelectItem value="1.8m lapped with a sleeper">1.8m Lapped with Sleeper</SelectItem>
+                    <SelectItem value="1.8m lapped and capped with a sleeper">1.8m Lapped and Capped with Sleeper</SelectItem>
+                    <SelectItem value="2.1m butted up">2.1m Butted Up</SelectItem>
+                    <SelectItem value="2.1m butted up and capped">2.1m Butted Up and Capped</SelectItem>
+                    <SelectItem value="2.1m butted up with a sleeper">2.1m Butted Up with Sleeper</SelectItem>
+                    <SelectItem value="2.1m butted up and capped with a sleeper">2.1m Butted Up and Capped with Sleeper</SelectItem>
+                    <SelectItem value="2.1m lapped">2.1m Lapped</SelectItem>
+                    <SelectItem value="2.1m lapped and capped">2.1m Lapped and Capped</SelectItem>
+                    <SelectItem value="2.1m lapped with a sleeper">2.1m Lapped with Sleeper</SelectItem>
+                    <SelectItem value="2.1m lapped and capped with a sleeper">2.1m Lapped and Capped with Sleeper</SelectItem>
                     <SelectItem value="picket">Picket Fence</SelectItem>
                     <SelectItem value="privacy">Privacy Fence</SelectItem>
                     <SelectItem value="chain-link">Chain Link</SelectItem>
                     <SelectItem value="post-rail">Post and Rail</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="fenceHeight">Fence Height ({unit === "meters" ? "m" : "ft"})</Label>
-                <Select value={fenceHeight} onValueChange={setFenceHeight}>
-                  <SelectTrigger id="fenceHeight">
-                    <SelectValue placeholder="Select fence height" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {unit === "meters" ? (
-                      <>
-                        <SelectItem value="1.2">1.2m (4ft)</SelectItem>
-                        <SelectItem value="1.5">1.5m (5ft)</SelectItem>
-                        <SelectItem value="1.8">1.8m (6ft)</SelectItem>
-                        <SelectItem value="2.1">2.1m (7ft)</SelectItem>
-                      </>
-                    ) : (
-                      <>
-                        <SelectItem value="4">4ft (1.2m)</SelectItem>
-                        <SelectItem value="5">5ft (1.5m)</SelectItem>
-                        <SelectItem value="6">6ft (1.8m)</SelectItem>
-                        <SelectItem value="7">7ft (2.1m)</SelectItem>
-                      </>
-                    )}
                   </SelectContent>
                 </Select>
               </div>
@@ -188,10 +183,52 @@ const FencingCalculator = () => {
                         <span className="text-lg font-bold text-emerald-700">{result.panels} panels</span>
                       </div>
                       
-                      {result.railsPerSection && (
+                      {result.palings !== undefined && result.palings > 0 && (
                         <div className="flex justify-between items-center pb-2 border-b border-emerald-100">
-                          <span className="font-medium">Rails:</span>
+                          <span className="font-medium">Palings (100x16mm):</span>
+                          <span className="text-lg font-bold text-emerald-700">{result.palings} palings</span>
+                        </div>
+                      )}
+                      
+                      {result.totalRails !== undefined && (
+                        <div className="flex justify-between items-center pb-2 border-b border-emerald-100">
+                          <span className="font-medium">Rails (75x38mm):</span>
                           <span className="text-lg font-bold text-emerald-700">{result.totalRails} rails</span>
+                        </div>
+                      )}
+                      
+                      {result.nails !== undefined && result.nails > 0 && (
+                        <div className="flex justify-between items-center pb-2 border-b border-emerald-100">
+                          <span className="font-medium">Nails:</span>
+                          <span className="text-lg font-bold text-emerald-700">{result.nails} nails</span>
+                        </div>
+                      )}
+                      
+                      {result.screws !== undefined && (
+                        <div className="flex justify-between items-center pb-2 border-b border-emerald-100">
+                          <span className="font-medium">Screws:</span>
+                          <span className="text-lg font-bold text-emerald-700">{result.screws} screws</span>
+                        </div>
+                      )}
+                      
+                      {result.rapidSets !== undefined && (
+                        <div className="flex justify-between items-center pb-2 border-b border-emerald-100">
+                          <span className="font-medium">Rapid Set (30kg):</span>
+                          <span className="text-lg font-bold text-emerald-700">{result.rapidSets} bags</span>
+                        </div>
+                      )}
+                      
+                      {result.caps !== undefined && result.caps > 0 && (
+                        <div className="flex justify-between items-center pb-2 border-b border-emerald-100">
+                          <span className="font-medium">Caps:</span>
+                          <span className="text-lg font-bold text-emerald-700">{result.caps} caps</span>
+                        </div>
+                      )}
+                      
+                      {result.sleepers !== undefined && result.sleepers > 0 && (
+                        <div className="flex justify-between items-center pb-2 border-b border-emerald-100">
+                          <span className="font-medium">2.4m Sleepers:</span>
+                          <span className="text-lg font-bold text-emerald-700">{result.sleepers} sleepers</span>
                         </div>
                       )}
                       
@@ -218,8 +255,9 @@ const FencingCalculator = () => {
                       <ul className="space-y-2 text-sm">
                         <li>• Post hole depth should be about 1/3 of the post height</li>
                         <li>• Add 10% extra materials for waste</li>
-                        <li>• Concrete estimate is based on standard 60lb bags</li>
-                        <li>• For {fenceType} fence, recommended post diameter is {result.postDiameter}"</li>
+                        <li>• Concrete estimate is based on standard 20kg bags</li>
+                        <li>• Post height for {fenceType}: {FENCING_COMPONENTS_PER_10M[fenceType]?.postHeight}</li>
+                        <li>• Recommended post diameter: {result.postDiameter}"</li>
                       </ul>
                     </div>
                     
@@ -242,6 +280,56 @@ const FencingCalculator = () => {
             </CardContent>
           </Card>
         </div>
+
+        {/* Fence Types Reference Table */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-xl">Fence Types Reference</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="bg-emerald-50">
+                    <th className="p-2 text-left border">Fence Type</th>
+                    <th className="p-2 text-center border">Palings (100x16mm)</th>
+                    <th className="p-2 text-center border">Panels</th>
+                    <th className="p-2 text-center border">Post Height</th>
+                    <th className="p-2 text-center border">Posts</th>
+                    <th className="p-2 text-center border">Rails (75x38mm)</th>
+                    <th className="p-2 text-center border">Nails</th>
+                    <th className="p-2 text-center border">Screws</th>
+                    <th className="p-2 text-center border">Rapid Set</th>
+                    <th className="p-2 text-center border">Caps</th>
+                    <th className="p-2 text-center border">Sleepers</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {Object.entries(FENCING_COMPONENTS_PER_10M)
+                    .filter(([key]) => !["picket", "privacy", "chain-link", "post-rail"].includes(key))
+                    .map(([type, data], index) => (
+                      <tr key={index} className={index % 2 === 0 ? "bg-white" : "bg-gray-50"}>
+                        <td className="p-2 border">{type}</td>
+                        <td className="p-2 text-center border">{data.palings}</td>
+                        <td className="p-2 text-center border">{data.panels}</td>
+                        <td className="p-2 text-center border">{data.postHeight}</td>
+                        <td className="p-2 text-center border">{data.posts}</td>
+                        <td className="p-2 text-center border">{data.rails}</td>
+                        <td className="p-2 text-center border">{data.nails}</td>
+                        <td className="p-2 text-center border">{data.screws}</td>
+                        <td className="p-2 text-center border">{data.rapidSets}</td>
+                        <td className="p-2 text-center border">{data.caps || "-"}</td>
+                        <td className="p-2 text-center border">{data.sleepers || "-"}</td>
+                      </tr>
+                    ))}
+                </tbody>
+              </table>
+              <p className="text-xs text-gray-500 mt-2">
+                Note: The values above are for 10 meters of fencing. The calculator will scale these values based on your fence length.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Tips and Considerations Card */}
         <Card>
