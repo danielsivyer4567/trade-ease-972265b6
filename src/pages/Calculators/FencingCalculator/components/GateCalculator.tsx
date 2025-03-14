@@ -23,7 +23,8 @@ interface GateRequirements {
   nailHardend32mm: number;
   hardwoodPostHeight: string;
   hardwoodPostQty: number;
-  rapidSet: number;
+  rapidSet30kg: number;
+  rapidSet20kg: number;
   hinges: number;
   dLatch: number;
   dropBolts: number;
@@ -38,7 +39,8 @@ const GATE_MATERIALS: Record<GateType, GateRequirements> = {
     nailHardend32mm: 50,
     hardwoodPostHeight: "1800mm",
     hardwoodPostQty: 2,
-    rapidSet: 0,
+    rapidSet30kg: 6,
+    rapidSet20kg: 9,
     hinges: 0,
     dLatch: 1,
     dropBolts: 0,
@@ -50,7 +52,8 @@ const GATE_MATERIALS: Record<GateType, GateRequirements> = {
     nailHardend32mm: 50,
     hardwoodPostHeight: "2100mm",
     hardwoodPostQty: 2,
-    rapidSet: 0,
+    rapidSet30kg: 6,
+    rapidSet20kg: 9,
     hinges: 0,
     dLatch: 1,
     dropBolts: 0,
@@ -62,7 +65,8 @@ const GATE_MATERIALS: Record<GateType, GateRequirements> = {
     nailHardend32mm: 0,
     hardwoodPostHeight: "2400mm",
     hardwoodPostQty: 0,
-    rapidSet: 0,
+    rapidSet30kg: 6,
+    rapidSet20kg: 9,
     hinges: 0,
     dLatch: 0,
     dropBolts: 0,
@@ -74,7 +78,8 @@ const GATE_MATERIALS: Record<GateType, GateRequirements> = {
     nailHardend32mm: 50,
     hardwoodPostHeight: "2700mm",
     hardwoodPostQty: 2,
-    rapidSet: 0,
+    rapidSet30kg: 6,
+    rapidSet20kg: 9,
     hinges: 0,
     dLatch: 1,
     dropBolts: 0,
@@ -86,7 +91,8 @@ const GATE_MATERIALS: Record<GateType, GateRequirements> = {
     nailHardend32mm: 50,
     hardwoodPostHeight: "1800mm",
     hardwoodPostQty: 2,
-    rapidSet: 2,
+    rapidSet30kg: 6,
+    rapidSet20kg: 9,
     hinges: 0,
     dLatch: 1,
     dropBolts: 1,
@@ -98,7 +104,8 @@ const GATE_MATERIALS: Record<GateType, GateRequirements> = {
     nailHardend32mm: 50,
     hardwoodPostHeight: "2100mm",
     hardwoodPostQty: 2,
-    rapidSet: 2,
+    rapidSet30kg: 6,
+    rapidSet20kg: 9,
     hinges: 0,
     dLatch: 1,
     dropBolts: 1,
@@ -110,7 +117,8 @@ const GATE_MATERIALS: Record<GateType, GateRequirements> = {
     nailHardend32mm: 50,
     hardwoodPostHeight: "2400mm",
     hardwoodPostQty: 2,
-    rapidSet: 2,
+    rapidSet30kg: 6,
+    rapidSet20kg: 9,
     hinges: 2,
     dLatch: 1,
     dropBolts: 1,
@@ -122,7 +130,8 @@ const GATE_MATERIALS: Record<GateType, GateRequirements> = {
     nailHardend32mm: 50,
     hardwoodPostHeight: "2700mm",
     hardwoodPostQty: 2,
-    rapidSet: 2,
+    rapidSet30kg: 6,
+    rapidSet20kg: 9,
     hinges: 0,
     dLatch: 1,
     dropBolts: 1,
@@ -153,7 +162,8 @@ export const GateCalculator: React.FC<GateCalculatorProps> = ({ unit }) => {
       nailHardend32mm: gateMaterials.nailHardend32mm * gateCount,
       hardwoodPostHeight: gateMaterials.hardwoodPostHeight,
       hardwoodPostQty: gateMaterials.hardwoodPostQty * gateCount,
-      rapidSet: gateMaterials.rapidSet * gateCount,
+      rapidSet30kg: gateMaterials.rapidSet30kg * gateCount,
+      rapidSet20kg: gateMaterials.rapidSet20kg * gateCount,
       hinges: gateMaterials.hinges * gateCount,
       dLatch: gateMaterials.dLatch * gateCount,
       dropBolts: gateMaterials.dropBolts * gateCount,
@@ -244,10 +254,17 @@ export const GateCalculator: React.FC<GateCalculatorProps> = ({ unit }) => {
                   </div>
                 )}
                 
-                {Number(calculationResult.rapidSet) > 0 && (
+                {Number(calculationResult.rapidSet30kg) > 0 && (
                   <div className="bg-emerald-50 p-2 rounded">
-                    <div className="text-sm text-gray-600">Rapid Set</div>
-                    <div className="font-bold">{calculationResult.rapidSet}</div>
+                    <div className="text-sm text-gray-600">Rapid Set (30kg)</div>
+                    <div className="font-bold">{calculationResult.rapidSet30kg}</div>
+                  </div>
+                )}
+                
+                {Number(calculationResult.rapidSet20kg) > 0 && (
+                  <div className="bg-emerald-50 p-2 rounded">
+                    <div className="text-sm text-gray-600">Rapid Set (20kg)</div>
+                    <div className="font-bold">{calculationResult.rapidSet20kg}</div>
                   </div>
                 )}
                 
