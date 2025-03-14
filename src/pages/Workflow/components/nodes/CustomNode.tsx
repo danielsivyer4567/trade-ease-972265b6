@@ -23,8 +23,8 @@ export function CustomNode({ data, id, selected }) {
   
   // Reset click state when selection changes
   useEffect(() => {
-    if (selected) {
-      setIsClicked(true);
+    if (!selected) {
+      setIsClicked(false);
     }
   }, [selected]);
 
@@ -62,7 +62,7 @@ export function CustomNode({ data, id, selected }) {
 
   return (
     <>
-      {(selected || isClicked) && (
+      {isClicked && (
         <div className="absolute -top-14 left-1/2 transform -translate-x-1/2 flex gap-2 bg-white p-1 rounded shadow-md border border-gray-200 z-20">
           <Popover open={isEditing} onOpenChange={setIsEditing}>
             <PopoverTrigger asChild>
