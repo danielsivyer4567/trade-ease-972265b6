@@ -103,11 +103,13 @@ export const RoofVisualization: React.FC<RoofVisualizationProps> = ({
       
       <div className="w-full">
         {viewMode === "stack" ? (
-          <canvas 
-            ref={canvasRef} 
-            height="220" 
-            className="w-full border rounded-md bg-white" 
-          />
+          <div className="w-full border rounded-md bg-white p-2 flex justify-center">
+            <img 
+              src="/lovable-uploads/ae3d67e8-3620-4069-b805-8133fef2a567.png" 
+              alt="Roof visualization diagram" 
+              className="max-w-full max-h-[220px] object-contain"
+            />
+          </div>
         ) : (
           <canvas 
             ref={chartCanvasRef} 
