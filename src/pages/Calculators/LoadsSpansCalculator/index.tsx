@@ -1,8 +1,7 @@
-
 import React from "react";
 import { AppLayout } from "@/components/ui/AppLayout";
 import { Link } from "react-router-dom";
-import { ArrowLeft, Ruler, Square, Compass, Stairs } from "lucide-react";
+import { ArrowLeft, Ruler, Square, Compass, ArrowUpDown } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BeamCalculator } from "./BeamCalculator";
 import { SpanTableCalculator } from "./SpanTableCalculator";
@@ -129,7 +128,6 @@ const LoadsSpansCalculator = () => {
     reset: resetDegree
   } = useDegreeCalculator();
 
-  // Add stairs calculator hook
   const {
     totalRise,
     setTotalRise,

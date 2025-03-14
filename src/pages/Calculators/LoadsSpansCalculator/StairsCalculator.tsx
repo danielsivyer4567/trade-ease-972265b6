@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Stairs, ArrowDown, ScanLine } from "lucide-react";
+import { ArrowUpDown, ArrowDown, ScanLine } from "lucide-react";
 import { StairsCalculatorResult, useStairsCalculator } from "./hooks/useStairsCalculator";
 
 interface StairsCalculatorProps {
@@ -56,7 +56,7 @@ export const StairsCalculator: React.FC<StairsCalculatorProps> = ({
       <Card>
         <CardHeader className="bg-orange-400 text-white">
           <CardTitle className="flex items-center gap-2">
-            <Stairs className="h-5 w-5" />
+            <ArrowUpDown className="h-5 w-5" />
             Stairs Calculator
           </CardTitle>
           <CardDescription className="text-white opacity-90">
