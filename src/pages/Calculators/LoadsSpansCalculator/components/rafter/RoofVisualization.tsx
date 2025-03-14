@@ -40,10 +40,10 @@ export const RoofVisualization: React.FC<RoofVisualizationProps> = ({
       const container = canvas.parentElement;
       if (container) {
         canvas.width = container.clientWidth;
-        canvas.height = 300;
+        canvas.height = 220; // Reduced from 300 to 220
         
         chartCanvas.width = container.clientWidth;
-        chartCanvas.height = 350;
+        chartCanvas.height = 250; // Reduced from 350 to 250
       }
       
       // Initial drawing
@@ -62,10 +62,10 @@ export const RoofVisualization: React.FC<RoofVisualizationProps> = ({
       
       if (canvas && chartCanvas && container) {
         canvas.width = container.clientWidth;
-        canvas.height = 300;
+        canvas.height = 220; // Reduced from 300 to 220
         
         chartCanvas.width = container.clientWidth;
-        chartCanvas.height = 350;
+        chartCanvas.height = 250; // Reduced from 350 to 250
         
         if (viewMode === "stack") {
           drawRoofVisualization(canvasRef, sections, totalArea);
@@ -81,25 +81,25 @@ export const RoofVisualization: React.FC<RoofVisualizationProps> = ({
 
   return (
     <>
-      <div className="flex justify-between items-center mb-4">
-        <h3 className="text-lg font-medium">Roof Visualization</h3>
+      <div className="flex justify-between items-center mb-2">
+        <h3 className="text-md font-medium">Roof Visualization</h3>
         <div className="flex gap-2">
           <Button
             variant={viewMode === "stack" ? "default" : "outline"}
             size="sm"
-            className="flex items-center gap-1"
+            className="flex items-center gap-1 h-7 text-xs"
             onClick={() => setViewMode("stack")}
           >
-            <SquareStack className="h-4 w-4" />
+            <SquareStack className="h-3 w-3" />
             <span className="hidden sm:inline">Stack View</span>
           </Button>
           <Button
             variant={viewMode === "chart" ? "default" : "outline"}
             size="sm"
-            className="flex items-center gap-1"
+            className="flex items-center gap-1 h-7 text-xs"
             onClick={() => setViewMode("chart")}
           >
-            <BarChart2 className="h-4 w-4" />
+            <BarChart2 className="h-3 w-3" />
             <span className="hidden sm:inline">Chart View</span>
           </Button>
         </div>
@@ -110,13 +110,13 @@ export const RoofVisualization: React.FC<RoofVisualizationProps> = ({
           <canvas 
             ref={canvasRef} 
             className="w-full border rounded-md bg-white"
-            height="300"
+            height="220"
           />
         ) : (
           <canvas 
             ref={chartCanvasRef} 
             className="w-full border rounded-md bg-white"
-            height="350"
+            height="250"
           />
         )}
       </div>
