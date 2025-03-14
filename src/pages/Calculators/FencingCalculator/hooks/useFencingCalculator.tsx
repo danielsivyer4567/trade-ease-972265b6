@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 
 export type FenceType = 
@@ -22,7 +23,7 @@ export type FenceType =
 
 export type Unit = "meters" | "feet";
 
-interface FencingResult {
+export interface FencingResult {
   posts: number;
   panels: number;
   postDiameter: number;
