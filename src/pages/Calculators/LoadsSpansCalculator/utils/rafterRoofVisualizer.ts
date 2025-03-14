@@ -1,4 +1,3 @@
-
 import { RoofSection } from "../types/rafterRoof";
 
 export const drawRoofVisualization = (
@@ -20,193 +19,203 @@ export const drawRoofVisualization = (
   const canvasHeight = canvas.height;
   
   // Calculate dimensions for the roof
-  const padding = 6; // Reduced 5x from 30
+  const padding = 20;
   const roofWidth = canvasWidth - (padding * 2);
   const maxHeight = Math.max(...sections.map(s => parseFloat(s.height) || 0));
-  const roofHeight = Math.min(canvasHeight - (padding * 2), maxHeight * 4); // Reduced 5x from 20 to 4
+  const roofHeight = Math.min(canvasHeight - (padding * 2), maxHeight * 15);
   
   // Set starting positions
-  const baseY = canvasHeight - padding;
+  const baseY = canvasHeight - padding - 10; // Move up a bit for dimensions below
   const leftX = padding;
   const rightX = canvasWidth - padding;
   const peakY = baseY - roofHeight;
   const peakX = canvasWidth / 2;
   
-  // Draw roof outline
-  ctx.lineWidth = 1; // Reduced 3x from 3
+  // Draw roof outline - thicker brown outline like in reference
+  ctx.lineWidth = 3;
   ctx.strokeStyle = '#5c3d2e'; // Brown color for roof outline
   
-  // Draw roof triangle
+  // Draw roof triangle - thick outline
   ctx.beginPath();
   ctx.moveTo(leftX, baseY);
   ctx.lineTo(peakX, peakY);
   ctx.lineTo(rightX, baseY);
   ctx.stroke();
   
-  // Draw horizontal base (beam) with thicker line
-  ctx.lineWidth = 1.2; // Reduced 5x from 6
-  ctx.beginPath();
-  ctx.moveTo(leftX - 2, baseY); // Reduced 5x from -10
-  ctx.lineTo(rightX + 2, baseY); // Reduced 5x from +10
-  ctx.stroke();
+  // Draw horizontal base (beam) with wood-like appearance
+  ctx.fillStyle = '#8B4513'; // Saddle brown for the beam
+  ctx.fillRect(leftX - 10, baseY, roofWidth + 20, 15); // Beam below the roof
   
-  // Draw small vertical supports at ends
-  ctx.beginPath();
-  ctx.moveTo(leftX, baseY);
-  ctx.lineTo(leftX, baseY + 2); // Reduced 5x from 10
-  ctx.moveTo(rightX, baseY);
-  ctx.lineTo(rightX, baseY + 2); // Reduced 5x from 10
-  ctx.stroke();
+  // Draw small vertical supports at ends - wood-like appearance
+  ctx.fillStyle = '#8B4513'; // Same brown color
+  ctx.fillRect(leftX - 10, baseY, 15, 18); // Left support
+  ctx.fillRect(rightX - 5, baseY, 15, 18); // Right support
   
-  // Reset line width for other elements
-  ctx.lineWidth = 0.5; // Reduced from 1
-  
-  // Draw angle lines from base corners to peak
-  const anglesToShow = [30, 45]; // Reduced number of angles to show
-  const colors = ['#333', '#777'];
+  // Add more angle lines to match reference image
+  const anglesToShow = [20, 25, 30, 40, 45, 50, 55]; // All angles from reference image
   
   // Draw angle lines
-  anglesToShow.forEach((angle, index) => {
+  ctx.lineWidth = 1;
+  anglesToShow.forEach((angle) => {
     // Calculate angle in radians
     const radian = (angle * Math.PI) / 180;
-    const heightRatio = index / (anglesToShow.length - 1);
-    const lineHeight = roofHeight * (0.3 + (heightRatio * 0.7));
+    const angleHeight = roofHeight * 0.9; // All angles go almost to the peak
     
     // Draw left angle line
     ctx.beginPath();
-    ctx.strokeStyle = colors[index % colors.length];
+    ctx.strokeStyle = '#000';
     ctx.moveTo(leftX, baseY);
-    const leftEndX = leftX + (Math.tan(radian) * lineHeight);
-    const leftEndY = baseY - lineHeight;
+    const leftEndX = leftX + (Math.tan(radian) * angleHeight);
+    const leftEndY = baseY - angleHeight;
     ctx.lineTo(leftEndX, leftEndY);
     
     // Draw right angle line
     ctx.moveTo(rightX, baseY);
-    const rightEndX = rightX - (Math.tan(radian) * lineHeight);
-    const rightEndY = baseY - lineHeight;
+    const rightEndX = rightX - (Math.tan(radian) * angleHeight);
+    const rightEndY = baseY - angleHeight;
     ctx.lineTo(rightEndX, rightEndY);
     ctx.stroke();
     
-    // Only show angle text for smaller number of angles
-    if (index < 2) {
-      ctx.fillStyle = '#000';
-      ctx.font = '7px Arial'; // Reduced from 12px
-      ctx.textAlign = 'center';
-      const textX = canvasWidth / 2;
-      const textY = baseY - lineHeight + 3; // Reduced from 15
-      ctx.fillText(`${angle}°`, textX, textY);
-    }
+    // Show angle text at peak of each angle line
+    const textX = angle < 35 ? leftEndX + (rightEndX - leftEndX) / 2 : leftEndX + (rightEndX - leftEndX) / 2;
+    const textY = leftEndY - 5; // Position slightly above the line
+    
+    ctx.fillStyle = '#000';
+    ctx.font = 'bold 12px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText(`${angle}°`, textX, textY);
   });
   
-  // Draw horizontal height markers on left side
-  const heightMarkers = [2, 3]; // Reduced number of markers
+  // Draw horizontal height markers on left side - match reference with multiple levels
+  const heightMarkers = [1, 2, 2.5, 3]; // Height markers from reference image
   
-  heightMarkers.forEach((height, index) => {
-    const markerY = baseY - (height * (roofHeight / maxHeight) * 0.8);
+  heightMarkers.forEach((height) => {
+    const markerY = baseY - (height * (roofHeight / maxHeight) * 0.7);
     
     // Draw dashed line across
     ctx.beginPath();
-    ctx.setLineDash([2, 1]); // Reduced from [5, 3]
-    ctx.strokeStyle = '#555';
-    ctx.moveTo(leftX - 1, markerY); // Reduced from -5
+    ctx.setLineDash([5, 3]);
+    ctx.strokeStyle = '#000';
+    ctx.moveTo(leftX - 5, markerY);
     ctx.lineTo(rightX, markerY);
     ctx.stroke();
     ctx.setLineDash([]);
     
     // Draw height text
     ctx.fillStyle = '#000';
-    ctx.font = '6px Arial'; // Reduced from 12px
+    ctx.font = 'bold 12px Arial';
     ctx.textAlign = 'right';
-    ctx.fillText(`${height}M`, leftX - 2, markerY + 1); // Reduced space and position
+    ctx.fillText(`${height} M`, leftX - 10, markerY + 4);
   });
   
-  // Draw width measurements at bottom with arrows
+  // Draw vertical dotted lines - match the reference image pattern
+  const verticalLinePositions = [0.25, 0.375, 0.5, 0.625, 0.75]; // Positions for vertical lines
+  
+  verticalLinePositions.forEach((pos) => {
+    const x = leftX + (roofWidth * pos);
+    
+    ctx.beginPath();
+    ctx.setLineDash([3, 3]);
+    ctx.strokeStyle = '#000';
+    ctx.moveTo(x, baseY);
+    ctx.lineTo(x, baseY - roofHeight * 0.9); // Go up to meet the angle lines
+    ctx.stroke();
+    ctx.setLineDash([]);
+  });
+  
+  // Draw width measurements at bottom with arrows - multiple measurements like reference
+  // Calculate total width based on sections
   const widthMarkers = sections.map(s => parseFloat(s.length) || 0);
   const totalWidth = widthMarkers.reduce((a, b) => a + b, 0);
-  const scale = roofWidth / totalWidth;
   
-  let currentX = leftX;
-  widthMarkers.forEach((width, index) => {
-    const scaledWidth = width * scale;
-    const nextX = currentX + scaledWidth;
-    const arrowY = baseY + 5; // Reduced from 25
+  // Draw measurements at different levels below the beam
+  const widthMeasurements = [
+    { label: "2.40 M", width: totalWidth * 0.25 },
+    { label: "3.55 M", width: totalWidth * 0.375 },
+    { label: "4.55 M", width: totalWidth * 0.5 },
+    { label: `${totalWidth.toFixed(2)} M`, width: totalWidth }
+  ];
+  
+  let currentYOffset = 10; // Start below the beam
+  widthMeasurements.forEach((measurement, index) => {
+    const arrowY = baseY + 30 + (currentYOffset * index);
+    const scaledWidth = (measurement.width / totalWidth) * roofWidth;
     
     // Draw arrow line
     ctx.beginPath();
     ctx.strokeStyle = '#000';
-    ctx.moveTo(currentX, arrowY);
-    ctx.lineTo(nextX, arrowY);
+    ctx.lineWidth = 1.5;
+    ctx.moveTo(peakX - (scaledWidth / 2), arrowY);
+    ctx.lineTo(peakX + (scaledWidth / 2), arrowY);
     ctx.stroke();
     
     // Draw arrow heads
-    drawArrowHead(ctx, currentX, arrowY, 'left');
-    drawArrowHead(ctx, nextX, arrowY, 'right');
+    drawArrowHead(ctx, peakX - (scaledWidth / 2), arrowY, 'left');
+    drawArrowHead(ctx, peakX + (scaledWidth / 2), arrowY, 'right');
     
-    // Only show width text for sections with sufficient width
-    if (scaledWidth > 30) {
-      ctx.fillStyle = '#000';
-      ctx.font = '5px Arial'; // Reduced from 12px
-      ctx.textAlign = 'center';
-      ctx.fillText(`${width.toFixed(1)}`, (currentX + nextX) / 2, arrowY + 3); // Reduced space and simplified text
-    }
+    // Draw measurement text
+    ctx.fillStyle = '#000';
+    ctx.font = 'bold 12px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText(measurement.label, peakX, arrowY - 5);
     
-    // Draw vertical dotted lines from base to arrow
+    // Connect to vertical lines
     ctx.beginPath();
-    ctx.setLineDash([1, 1]); // Reduced from [2, 2]
-    ctx.moveTo(currentX, baseY);
-    ctx.lineTo(currentX, arrowY + 4); // Reduced from +20
-    if (index === widthMarkers.length - 1) {
-      ctx.moveTo(nextX, baseY);
-      ctx.lineTo(nextX, arrowY + 4); // Reduced from +20
-    }
+    ctx.setLineDash([3, 2]);
+    ctx.strokeStyle = '#000';
+    ctx.moveTo(peakX - (scaledWidth / 2), baseY);
+    ctx.lineTo(peakX - (scaledWidth / 2), arrowY);
+    ctx.moveTo(peakX + (scaledWidth / 2), baseY);
+    ctx.lineTo(peakX + (scaledWidth / 2), arrowY);
     ctx.stroke();
     ctx.setLineDash([]);
-    
-    currentX = nextX;
   });
   
-  // Draw total width at the bottom
-  const totalArrowY = baseY + 10; // Reduced from 50
+  // Add a silhouette of a person to give scale like in the reference image
+  const personHeight = roofHeight * 0.15;
+  const personWidth = personHeight * 0.4;
+  const personX = peakX;
+  const personY = baseY - personHeight;
+  
+  ctx.fillStyle = '#333';
+  // Draw simplified person silhouette
   ctx.beginPath();
-  ctx.strokeStyle = '#000';
-  ctx.lineWidth = 0.3; // Reduced from 1.5
-  ctx.moveTo(leftX, totalArrowY);
-  ctx.lineTo(rightX, totalArrowY);
-  ctx.stroke();
+  // Head
+  ctx.arc(personX, personY, personWidth * 0.3, 0, Math.PI * 2);
+  ctx.fill();
+  // Body
+  ctx.fillRect(personX - personWidth * 0.25, personY, personWidth * 0.5, personHeight * 0.7);
+  // Arms
+  ctx.fillRect(personX - personWidth * 0.6, personY + personHeight * 0.2, personWidth * 0.4, personWidth * 0.2);
+  ctx.fillRect(personX + personWidth * 0.2, personY + personHeight * 0.2, personWidth * 0.4, personWidth * 0.2);
+  // Legs
+  ctx.fillRect(personX - personWidth * 0.2, personY + personHeight * 0.7, personWidth * 0.15, personHeight * 0.3);
+  ctx.fillRect(personX + personWidth * 0.05, personY + personHeight * 0.7, personWidth * 0.15, personHeight * 0.3);
   
-  // Draw total width arrow heads
-  drawArrowHead(ctx, leftX, totalArrowY, 'left');
-  drawArrowHead(ctx, rightX, totalArrowY, 'right');
-  
-  // Draw total width text
+  // Draw area text at the top
+  ctx.font = 'bold 12px Arial';
   ctx.fillStyle = '#000';
-  ctx.font = 'bold 6px Arial'; // Reduced from 14px
-  ctx.textAlign = 'center';
-  ctx.fillText(`${totalWidth.toFixed(1)}M`, (leftX + rightX) / 2, totalArrowY + 4); // Reduced space and simplified text
-  
-  // Draw total area at the top
-  ctx.font = 'bold 6px Arial'; // Reduced from 14px
-  ctx.fillStyle = '#000';
-  ctx.textAlign = 'left';
-  ctx.fillText(`Area: ${totalArea.toFixed(1)}m²`, leftX, padding - 1); // Reduced space and simplified text
+  ctx.textAlign = 'right';
+  ctx.fillText(`Total Area: ${totalArea.toFixed(2)}m²`, rightX, padding + 15);
 };
 
 // Helper function to draw arrow heads
 function drawArrowHead(ctx: CanvasRenderingContext2D, x: number, y: number, direction: 'left' | 'right') {
-  const arrowSize = 1.2; // Reduced 5x from 6
+  const arrowSize = 6;
   ctx.beginPath();
   if (direction === 'right') {
-    ctx.moveTo(x - arrowSize, y - arrowSize);
+    ctx.moveTo(x - arrowSize, y - arrowSize / 2);
     ctx.lineTo(x, y);
-    ctx.lineTo(x - arrowSize, y + arrowSize);
+    ctx.lineTo(x - arrowSize, y + arrowSize / 2);
   } else {
-    ctx.moveTo(x + arrowSize, y - arrowSize);
+    ctx.moveTo(x + arrowSize, y - arrowSize / 2);
     ctx.lineTo(x, y);
-    ctx.lineTo(x + arrowSize, y + arrowSize);
+    ctx.lineTo(x + arrowSize, y + arrowSize / 2);
   }
   ctx.stroke();
 }
 
+// Keep the existing drawBarChart function
 export const drawBarChart = (
   canvasRef: React.RefObject<HTMLCanvasElement>,
   sections: RoofSection[],
@@ -354,4 +363,3 @@ export const drawBarChart = (
   
   // Simplify by removing axis titles - they take too much space in mini version
 };
-
