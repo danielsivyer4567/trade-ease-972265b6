@@ -2,7 +2,7 @@
 import React from "react";
 import { AppLayout } from "@/components/ui/AppLayout";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Calculator, Percent, Gauge, Ruler, Construction, Compass, ArrowUpDown, Square } from "lucide-react";
+import { Calculator, Percent, Gauge, Ruler, Construction, Compass, ArrowUpDown, Square, FileCode } from "lucide-react";
 import { Link } from "react-router-dom";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 
@@ -55,6 +55,12 @@ const Calculators = () => {
       description: "Calculate materials needed for fencing projects including posts, panels, and gates",
       icon: <Square className="h-6 w-6 text-emerald-500" />,
       path: "/calculators/fencing"
+    },
+    {
+      title: "NCC Codes Reference",
+      description: "Search and reference National Construction Code clauses for building compliance",
+      icon: <FileCode className="h-6 w-6 text-red-500" />,
+      path: "/calculators/ncc-codes"
     }
   ];
 
