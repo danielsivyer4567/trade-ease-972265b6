@@ -90,13 +90,13 @@ const LoadsSpansCalculator = () => {
         </div>
 
         <Tabs defaultValue="beam-calculator" className="w-full">
-          <TabsList className="grid w-full grid-cols-6">
-            <TabsTrigger value="beam-calculator">Beam Calculator</TabsTrigger>
-            <TabsTrigger value="span-table">Span Table</TabsTrigger>
-            <TabsTrigger value="james-hardie">James Hardie</TabsTrigger>
-            <TabsTrigger value="rafter-roof">Rafter Roof</TabsTrigger>
-            <TabsTrigger value="concrete">Concrete</TabsTrigger>
-            <TabsTrigger value="about">About</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-6 px-[4px] rounded-2xl py-[49px] my-0 mx-0 bg-slate-100">
+            <TabsTrigger value="beam-calculator" className="bg-slate-400 hover:bg-slate-300">Beam Calculator</TabsTrigger>
+            <TabsTrigger value="span-table" className="bg-slate-400 hover:bg-slate-300">Span Table</TabsTrigger>
+            <TabsTrigger value="james-hardie" className="bg-slate-400 hover:bg-slate-300">James Hardie</TabsTrigger>
+            <TabsTrigger value="rafter-roof" className="bg-slate-400 hover:bg-slate-300">Rafter Roof</TabsTrigger>
+            <TabsTrigger value="concrete" className="bg-slate-400 hover:bg-slate-300">Concrete</TabsTrigger>
+            <TabsTrigger value="about" className="bg-slate-400 hover:bg-slate-300">About</TabsTrigger>
           </TabsList>
 
           <TabsContent value="beam-calculator" className="space-y-6">

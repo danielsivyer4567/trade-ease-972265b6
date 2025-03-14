@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -7,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { WOOD_TYPES, LOAD_TYPES } from "./constants";
 import { CalculationResult } from "./hooks/useBeamCalculator";
-
 interface BeamCalculatorProps {
   beamWidth: string;
   setBeamWidth: (value: string) => void;
@@ -23,7 +21,6 @@ interface BeamCalculatorProps {
   setCalculatedResult: (result: CalculationResult | null) => void;
   calculateStress: () => void;
 }
-
 export const BeamCalculator: React.FC<BeamCalculatorProps> = ({
   beamWidth,
   setBeamWidth,
@@ -38,8 +35,7 @@ export const BeamCalculator: React.FC<BeamCalculatorProps> = ({
   calculatedResult,
   calculateStress
 }) => {
-  return (
-    <>
+  return <>
       <Card>
         <CardHeader>
           <CardTitle>Beam Dimensions</CardTitle>
@@ -48,25 +44,11 @@ export const BeamCalculator: React.FC<BeamCalculatorProps> = ({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="beam-width">Beam Width (mm)</Label>
-              <Input
-                id="beam-width"
-                type="number"
-                value={beamWidth}
-                onChange={(e) => setBeamWidth(e.target.value)}
-                min="50"
-                max="1000"
-              />
+              <Input id="beam-width" type="number" value={beamWidth} onChange={e => setBeamWidth(e.target.value)} min="50" max="1000" className="bg-slate-400" />
             </div>
             <div className="space-y-2">
               <Label htmlFor="beam-depth">Beam Depth (mm)</Label>
-              <Input
-                id="beam-depth"
-                type="number"
-                value={beamDepth}
-                onChange={(e) => setBeamDepth(e.target.value)}
-                min="50"
-                max="1000"
-              />
+              <Input id="beam-depth" type="number" value={beamDepth} onChange={e => setBeamDepth(e.target.value)} min="50" max="1000" className="bg-slate-400" />
             </div>
           </div>
         </CardContent>
@@ -85,11 +67,9 @@ export const BeamCalculator: React.FC<BeamCalculatorProps> = ({
                   <SelectValue placeholder="Select wood type" />
                 </SelectTrigger>
                 <SelectContent>
-                  {WOOD_TYPES.map((wood) => (
-                    <SelectItem key={wood.name} value={wood.name}>
+                  {WOOD_TYPES.map(wood => <SelectItem key={wood.name} value={wood.name}>
                       {wood.name}
-                    </SelectItem>
-                  ))}
+                    </SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
@@ -100,11 +80,9 @@ export const BeamCalculator: React.FC<BeamCalculatorProps> = ({
                   <SelectValue placeholder="Select load type" />
                 </SelectTrigger>
                 <SelectContent>
-                  {LOAD_TYPES.map((load) => (
-                    <SelectItem key={load.name} value={load.name}>
+                  {LOAD_TYPES.map(load => <SelectItem key={load.name} value={load.name}>
                       {load.name}
-                    </SelectItem>
-                  ))}
+                    </SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
@@ -119,28 +97,16 @@ export const BeamCalculator: React.FC<BeamCalculatorProps> = ({
         <CardContent className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="span-length">Span Length (meters)</Label>
-            <Input
-              id="span-length"
-              type="number"
-              value={span}
-              onChange={(e) => setSpan(e.target.value)}
-              min="1"
-              max="20"
-              step="0.1"
-            />
+            <Input id="span-length" type="number" value={span} onChange={e => setSpan(e.target.value)} min="1" max="20" step="0.1" className="bg-slate-400" />
           </div>
 
-          <Button 
-            onClick={calculateStress} 
-            className="w-full mt-4 bg-amber-500 hover:bg-amber-600"
-          >
+          <Button onClick={calculateStress} className="w-full mt-4 bg-amber-500 hover:bg-amber-600">
             Calculate
           </Button>
         </CardContent>
       </Card>
 
-      {calculatedResult && (
-        <Card className="bg-amber-50 border-amber-200">
+      {calculatedResult && <Card className="bg-amber-50 border-amber-200">
           <CardHeader>
             <CardTitle className="text-amber-800">Calculation Results</CardTitle>
           </CardHeader>
@@ -160,8 +126,6 @@ export const BeamCalculator: React.FC<BeamCalculatorProps> = ({
               </div>
             </div>
           </CardContent>
-        </Card>
-      )}
-    </>
-  );
+        </Card>}
+    </>;
 };
