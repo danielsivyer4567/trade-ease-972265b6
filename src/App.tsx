@@ -1,4 +1,3 @@
-
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import './App.css';
 
@@ -38,6 +37,7 @@ import Auth from "./pages/Auth";
 import TermsOfService from "./pages/Settings/TermsOfService";
 import Calculators from "./pages/Calculators";
 import LoadsSpansCalculator from "./pages/Calculators/LoadsSpansCalculator";
+import FencingCalculator from "./pages/Calculators/FencingCalculator";
 
 import { Toaster } from "@/components/ui/toaster";
 
@@ -78,6 +78,7 @@ function App() {
         <Route path="/workflow" element={<Workflow />} />
         <Route path="/calculators/*" element={<Calculators />} />
         <Route path="/calculators/loads-spans" element={<LoadsSpansCalculator />} />
+        <Route path="/calculators/fencing" element={<FencingCalculator />} />
         <Route path="/settings/terms-of-service" element={<TermsOfService />} />
         <Route path="*" element={<NotFound />} />
       </Routes>

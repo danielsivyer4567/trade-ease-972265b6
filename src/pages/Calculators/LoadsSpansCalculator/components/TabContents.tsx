@@ -1,4 +1,3 @@
-
 import React from "react";
 import { TabsContent } from "@/components/ui/tabs";
 import { BeamCalculator } from "../BeamCalculator";
@@ -11,6 +10,7 @@ import { SquaringCalculator } from "../SquaringCalculator";
 import { DegreeCalculator } from "../DegreeCalculator";
 import { StairsCalculator } from "../StairsCalculator";
 import { CalculationResult } from "../hooks/useBeamCalculator";
+import { CalculationType } from "../hooks/useDegreeCalculator";
 
 // Props for the BeamCalculatorTab component
 interface BeamCalculatorTabProps {
@@ -153,8 +153,8 @@ export const SquaringTab: React.FC<SquaringTabProps> = (props) => {
 
 // Props for the DegreeTab component
 interface DegreeTabProps {
-  calculationType: string;
-  setCalculationType: (type: any) => void;
+  calculationType: CalculationType;
+  setCalculationType: (type: CalculationType) => void;
   adjacent: string;
   setAdjacent: (value: string) => void;
   opposite: string;
