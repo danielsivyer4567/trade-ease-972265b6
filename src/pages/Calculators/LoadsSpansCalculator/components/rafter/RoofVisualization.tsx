@@ -1,3 +1,4 @@
+
 import React, { useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { BarChart2, SquareStack } from "lucide-react";
@@ -91,7 +92,7 @@ export const RoofVisualization: React.FC<RoofVisualizationProps> = ({
         {viewMode === "stack" ? <div className="w-full border rounded-md bg-white p-2 flex justify-center">
             <img src="/lovable-uploads/ae3d67e8-3620-4069-b805-8133fef2a567.png" alt="Roof visualization diagram" className="max-w-full max-h-[220px] object-contain" />
           </div> : <div className="w-full border rounded-md bg-white p-0 my-0 h-[220px]">
-            
+            <canvas ref={chartCanvasRef} className="w-full h-full" />
           </div>}
       </div>
     </>;

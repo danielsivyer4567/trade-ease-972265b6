@@ -2,7 +2,7 @@
 import React from "react";
 import { AppLayout } from "@/components/ui/AppLayout";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Calculator, Percent, Gauge, Ruler } from "lucide-react";
+import { Calculator, Percent, Gauge, Ruler, Construction } from "lucide-react";
 import { Link } from "react-router-dom";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 
@@ -31,6 +31,12 @@ const Calculators = () => {
       description: "Calculate timber beam loads and spans for construction projects",
       icon: <Ruler className="h-6 w-6 text-amber-500" />,
       path: "/calculators/loads-spans"
+    },
+    {
+      title: "Concrete Calculator",
+      description: "Calculate concrete volume needed based on area and thickness measurements",
+      icon: <Construction className="h-6 w-6 text-gray-500" />,
+      path: "/calculators/loads-spans?tab=concrete"
     }
   ];
 

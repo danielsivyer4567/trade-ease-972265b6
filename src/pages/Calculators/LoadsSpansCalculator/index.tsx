@@ -9,9 +9,11 @@ import { SpanTableCalculator } from "./SpanTableCalculator";
 import { AboutCalculator } from "./AboutCalculator";
 import { JamesHardieCalculator } from "./JamesHardieCalculator";
 import { RafterRoofCalculator } from "./RafterRoofCalculator";
+import { ConcreteCalculator } from "./ConcreteCalculator";
 import { useBeamCalculator } from "./hooks/useBeamCalculator";
 import { useSpanTableCalculator } from "./hooks/useSpanTableCalculator";
 import { useJamesHardieCalculator } from "./hooks/useJamesHardieCalculator";
+import { useConcreteCalculator } from "./hooks/useConcreteCalculator";
 
 const LoadsSpansCalculator = () => {
   const {
@@ -47,6 +49,16 @@ const LoadsSpansCalculator = () => {
     calculateHardieRequirements
   } = useJamesHardieCalculator();
 
+  const {
+    length, setLength,
+    width, setWidth,
+    thickness: concreteThickness, setThickness: setConcreteThickness,
+    unit, setUnit,
+    waste, setWaste,
+    calculatedVolume, 
+    calculateConcreteVolume
+  } = useConcreteCalculator();
+
   return (
     <AppLayout>
       <div className="container mx-auto p-6 space-y-6">
@@ -59,11 +71,12 @@ const LoadsSpansCalculator = () => {
         </div>
 
         <Tabs defaultValue="beam-calculator" className="w-full">
-          <TabsList className="grid w-full grid-cols-5">
+          <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="beam-calculator">Beam Calculator</TabsTrigger>
             <TabsTrigger value="span-table">Span Table</TabsTrigger>
             <TabsTrigger value="james-hardie">James Hardie</TabsTrigger>
             <TabsTrigger value="rafter-roof">Rafter Roof</TabsTrigger>
+            <TabsTrigger value="concrete">Concrete</TabsTrigger>
             <TabsTrigger value="about">About</TabsTrigger>
           </TabsList>
 
@@ -127,6 +140,23 @@ const LoadsSpansCalculator = () => {
 
           <TabsContent value="rafter-roof" className="space-y-6">
             <RafterRoofCalculator />
+          </TabsContent>
+
+          <TabsContent value="concrete" className="space-y-6">
+            <ConcreteCalculator 
+              length={length}
+              setLength={setLength}
+              width={width}
+              setWidth={setWidth}
+              thickness={concreteThickness}
+              setThickness={setConcreteThickness}
+              unit={unit}
+              setUnit={setUnit}
+              waste={waste}
+              setWaste={setWaste}
+              calculatedVolume={calculatedVolume}
+              calculateConcreteVolume={calculateConcreteVolume}
+            />
           </TabsContent>
 
           <TabsContent value="about">
