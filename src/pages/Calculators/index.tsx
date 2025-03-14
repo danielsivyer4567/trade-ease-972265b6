@@ -2,7 +2,7 @@
 import React from "react";
 import { AppLayout } from "@/components/ui/AppLayout";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Calculator, Percent, Gauge, Ruler, Construction } from "lucide-react";
+import { Calculator, Percent, Gauge, Ruler, Construction, Compass } from "lucide-react";
 import { Link } from "react-router-dom";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 
@@ -37,6 +37,12 @@ const Calculators = () => {
       description: "Calculate concrete volume needed based on area and thickness measurements",
       icon: <Construction className="h-6 w-6 text-gray-500" />,
       path: "/calculators/loads-spans?tab=concrete"
+    },
+    {
+      title: "Angle Calculator",
+      description: "Calculate angles and slopes using various measurement methods",
+      icon: <Compass className="h-6 w-6 text-indigo-500" />,
+      path: "/calculators/loads-spans?tab=degree"
     }
   ];
 
