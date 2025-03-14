@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -8,7 +7,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { CalculationType, DegreeCalculatorResult, useDegreeCalculator } from "./hooks/useDegreeCalculator";
 import { Compass, ArrowRightLeft, Ruler, CornerUpLeft } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-
 interface DegreeCalculatorProps {
   calculationType: CalculationType;
   setCalculationType: (type: CalculationType) => void;
@@ -30,7 +28,6 @@ interface DegreeCalculatorProps {
   calculateAngle: () => void;
   reset: () => void;
 }
-
 export const DegreeCalculator: React.FC<DegreeCalculatorProps> = ({
   calculationType,
   setCalculationType,
@@ -52,22 +49,18 @@ export const DegreeCalculator: React.FC<DegreeCalculatorProps> = ({
   calculateAngle,
   reset
 }) => {
-  return (
-    <>
+  return <>
       <Card>
-        <CardHeader>
+        <CardHeader className="bg-slate-400">
           <CardTitle className="flex items-center gap-2">
             <Compass className="h-5 w-5" />
             Angle Calculator
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-4 bg-slate-100">
           <div className="space-y-2">
             <Label htmlFor="calculation-type">Calculation Method</Label>
-            <Select 
-              value={calculationType} 
-              onValueChange={(value) => setCalculationType(value as CalculationType)}
-            >
+            <Select value={calculationType} onValueChange={value => setCalculationType(value as CalculationType)}>
               <SelectTrigger id="calculation-type">
                 <SelectValue placeholder="Select calculation method" />
               </SelectTrigger>
@@ -80,30 +73,16 @@ export const DegreeCalculator: React.FC<DegreeCalculatorProps> = ({
             </Select>
           </div>
 
-          <Tabs defaultValue={calculationType} value={calculationType} onValueChange={(v) => setCalculationType(v as CalculationType)}>
+          <Tabs defaultValue={calculationType} value={calculationType} onValueChange={v => setCalculationType(v as CalculationType)}>
             <TabsContent value="adjacent-opposite" className="space-y-4 mt-4 border p-4 rounded-md">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="adjacent">Adjacent Side</Label>
-                  <Input
-                    id="adjacent"
-                    type="number"
-                    value={adjacent}
-                    onChange={(e) => setAdjacent(e.target.value)}
-                    placeholder="Enter adjacent side length"
-                    className="bg-slate-400"
-                  />
+                  <Input id="adjacent" type="number" value={adjacent} onChange={e => setAdjacent(e.target.value)} placeholder="Enter adjacent side length" className="bg-slate-400" />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="opposite">Opposite Side</Label>
-                  <Input
-                    id="opposite"
-                    type="number"
-                    value={opposite}
-                    onChange={(e) => setOpposite(e.target.value)}
-                    placeholder="Enter opposite side length"
-                    className="bg-slate-400"
-                  />
+                  <Input id="opposite" type="number" value={opposite} onChange={e => setOpposite(e.target.value)} placeholder="Enter opposite side length" className="bg-slate-400" />
                 </div>
               </div>
             </TabsContent>
@@ -112,25 +91,11 @@ export const DegreeCalculator: React.FC<DegreeCalculatorProps> = ({
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="rise">Rise</Label>
-                  <Input
-                    id="rise"
-                    type="number"
-                    value={rise}
-                    onChange={(e) => setRise(e.target.value)}
-                    placeholder="Enter rise"
-                    className="bg-slate-400"
-                  />
+                  <Input id="rise" type="number" value={rise} onChange={e => setRise(e.target.value)} placeholder="Enter rise" className="bg-slate-400" />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="run">Run</Label>
-                  <Input
-                    id="run"
-                    type="number"
-                    value={run}
-                    onChange={(e) => setRun(e.target.value)}
-                    placeholder="Enter run"
-                    className="bg-slate-400"
-                  />
+                  <Input id="run" type="number" value={run} onChange={e => setRun(e.target.value)} placeholder="Enter run" className="bg-slate-400" />
                 </div>
               </div>
             </TabsContent>
@@ -138,14 +103,7 @@ export const DegreeCalculator: React.FC<DegreeCalculatorProps> = ({
             <TabsContent value="percentage" className="space-y-4 mt-4 border p-4 rounded-md">
               <div className="space-y-2">
                 <Label htmlFor="percentage">Percentage Slope (%)</Label>
-                <Input
-                  id="percentage"
-                  type="number"
-                  value={percentage}
-                  onChange={(e) => setPercentage(e.target.value)}
-                  placeholder="Enter percentage slope"
-                  className="bg-slate-400"
-                />
+                <Input id="percentage" type="number" value={percentage} onChange={e => setPercentage(e.target.value)} placeholder="Enter percentage slope" className="bg-slate-400" />
               </div>
             </TabsContent>
 
@@ -154,14 +112,7 @@ export const DegreeCalculator: React.FC<DegreeCalculatorProps> = ({
                 <Label htmlFor="gradient">Gradient (1 in X)</Label>
                 <div className="flex items-center gap-2">
                   <span className="text-lg font-medium">1:</span>
-                  <Input
-                    id="gradient"
-                    type="number"
-                    value={gradient}
-                    onChange={(e) => setGradient(e.target.value)}
-                    placeholder="Enter gradient value"
-                    className="bg-slate-400"
-                  />
+                  <Input id="gradient" type="number" value={gradient} onChange={e => setGradient(e.target.value)} placeholder="Enter gradient value" className="bg-slate-400" />
                 </div>
               </div>
             </TabsContent>
@@ -193,8 +144,7 @@ export const DegreeCalculator: React.FC<DegreeCalculatorProps> = ({
         </CardContent>
       </Card>
 
-      {result && (
-        <Card className="mt-4 bg-amber-50 border-amber-200">
+      {result && <Card className="mt-4 bg-amber-50 border-amber-200">
           <CardHeader>
             <CardTitle className="text-amber-800">Angle Results</CardTitle>
           </CardHeader>
@@ -239,8 +189,6 @@ export const DegreeCalculator: React.FC<DegreeCalculatorProps> = ({
               </ul>
             </div>
           </CardContent>
-        </Card>
-      )}
-    </>
-  );
+        </Card>}
+    </>;
 };
