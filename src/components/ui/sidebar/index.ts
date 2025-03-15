@@ -11,3 +11,6 @@ export * from "./SidebarMenu";
 export * from "./SidebarMenuSub";
 export * from "./constants";
 export * from "./types";
+export * from "./SidebarNavLinks";
+export * from "./SidebarTeamSection";
+export * from "./MobileSidebarToggle";

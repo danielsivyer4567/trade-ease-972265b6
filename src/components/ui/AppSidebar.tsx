@@ -3,14 +3,16 @@ import React from 'react';
 import { cn } from '@/lib/utils';
 import { useSidebar } from './sidebar';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { SidebarHeader } from './sidebar/SidebarHeader';
-import { SidebarNavLinks } from './sidebar/SidebarNavLinks';
-import { SidebarTeamSection, Team } from './sidebar/SidebarTeamSection';
-import { MobileSidebarToggle } from './sidebar/MobileSidebarToggle';
+import { 
+  SidebarHeader, 
+  SidebarNavLinks, 
+  SidebarTeamSection,
+  MobileSidebarToggle 
+} from './sidebar';
 import { SIDEBAR_CONSTANTS } from './sidebar/constants';
 
 export function AppSidebar() {
-  const [teams] = React.useState<Team[]>([{
+  const [teams] = React.useState([{
     name: 'Red Team',
     color: 'red',
     path: '/team-red'
