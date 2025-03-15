@@ -1,0 +1,10 @@
+
+// Define breakpoints and z-index values as constants
+export const SIDEBAR_CONSTANTS = {
+  MOBILE_SIDEBAR_Z_INDEX: 40,
+  DESKTOP_SIDEBAR_Z_INDEX: 30,
+  MOBILE_BREAKPOINT: 768,
+  ANIMATION_DURATION: 300,
+  SIDEBAR_WIDTH: 240,
+  SIDEBAR_WIDTH_COLLAPSED: 60
+};
