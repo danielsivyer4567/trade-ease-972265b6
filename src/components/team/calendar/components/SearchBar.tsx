@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Search, Plus, CalendarRange, Clock } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -8,7 +7,6 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Calendar } from "@/components/ui/calendar";
 import { Textarea } from "@/components/ui/textarea";
-
 interface SearchBarProps {
   jobSearchQuery: string;
   setJobSearchQuery: (value: string) => void;
@@ -23,7 +21,6 @@ interface SearchBarProps {
   onToggleQuoteSearch: () => void;
   onCreateJob: () => void;
 }
-
 export const SearchBar: React.FC<SearchBarProps> = ({
   jobSearchQuery,
   setJobSearchQuery,
@@ -49,11 +46,8 @@ export const SearchBar: React.FC<SearchBarProps> = ({
     }
     return options;
   };
-
   const timeOptions = generateTimeOptions();
-  
-  return (
-    <div className="w-full py-1 px-2">
+  return <div className="w-full py-1 px-2">
       <div className="grid grid-cols-1 gap-1">
         {/* Combined Date and Time row */}
         <div className="grid grid-cols-2 gap-2">
@@ -76,16 +70,14 @@ export const SearchBar: React.FC<SearchBarProps> = ({
               
               {/* Start Time */}
               <Select value={startTime} onValueChange={setStartTime}>
-                <SelectTrigger className="w-full border-gray-300 h-7 text-xs">
+                <SelectTrigger className="w-full border-gray-300 h-7 text-xs bg-slate-400 hover:bg-slate-300">
                   <Clock className="mr-1 h-3 w-3 text-gray-500" />
                   <SelectValue placeholder="Time" />
                 </SelectTrigger>
                 <SelectContent>
-                  {timeOptions.map(time => (
-                    <SelectItem key={time} value={time}>
+                  {timeOptions.map(time => <SelectItem key={time} value={time}>
                       {time}
-                    </SelectItem>
-                  ))}
+                    </SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
@@ -115,11 +107,9 @@ export const SearchBar: React.FC<SearchBarProps> = ({
                   <SelectValue placeholder="Time" />
                 </SelectTrigger>
                 <SelectContent>
-                  {timeOptions.map(time => (
-                    <SelectItem key={time} value={time}>
+                  {timeOptions.map(time => <SelectItem key={time} value={time}>
                       {time}
-                    </SelectItem>
-                  ))}
+                    </SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
@@ -132,12 +122,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
           <div className="flex">
             <div className="relative w-full">
               <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-3 w-3 text-gray-400" />
-              <Input 
-                placeholder="Search jobs..." 
-                value={jobSearchQuery} 
-                onChange={e => setJobSearchQuery(e.target.value)} 
-                className="pl-7 w-full border-gray-300 h-7 text-xs" 
-              />
+              <Input placeholder="Search jobs..." value={jobSearchQuery} onChange={e => setJobSearchQuery(e.target.value)} className="pl-7 w-full border-gray-300 h-7 text-xs" />
             </div>
             <Button variant="outline" className="ml-1 border-gray-300 h-7 w-7 p-0" size="sm">
               <Plus className="h-3 w-3" />
@@ -149,10 +134,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
         <div>
           <label className="block text-xs font-medium mb-1 text-gray-500">Staff & Connections *</label>
           <div className="flex">
-            <Input 
-              placeholder="Add staff members or connections..." 
-              className="w-full border-gray-300 h-7 text-xs" 
-            />
+            <Input placeholder="Add staff members or connections..." className="w-full border-gray-300 h-7 text-xs" />
             <Button variant="outline" className="ml-1 border-gray-300 h-7 w-7 p-0" size="sm">
               <Plus className="h-3 w-3" />
             </Button>
@@ -162,12 +144,8 @@ export const SearchBar: React.FC<SearchBarProps> = ({
         {/* Notes section - The last section */}
         <div className="mb-1">
           <label className="block text-xs font-medium mb-1 text-gray-500">Notes</label>
-          <Textarea 
-            placeholder="Add notes here..." 
-            className="w-full h-10 px-3 py-1 border border-gray-300 rounded-md text-xs"
-          />
+          <Textarea placeholder="Add notes here..." className="w-full h-10 px-3 py-1 border border-gray-300 rounded-md text-xs" />
         </div>
       </div>
-    </div>
-  );
+    </div>;
 };
