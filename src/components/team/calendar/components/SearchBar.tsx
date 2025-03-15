@@ -89,7 +89,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
                     className="w-full justify-start text-left"
                   >
                     <CalendarRange className="mr-2 h-4 w-4" />
-                    {startDate ? format(startDate, 'MMM d, yyyy') : <span>Select date</span>}
+                    {startDate ? format(startDate, 'MMM d, yyyy') : "Select date"}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0">
@@ -114,7 +114,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
                     className="w-full justify-start text-left"
                   >
                     <CalendarRange className="mr-2 h-4 w-4" />
-                    {endDate ? format(endDate, 'MMM d, yyyy') : <span>Select date</span>}
+                    {endDate ? format(endDate, 'MMM d, yyyy') : "Select date"}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0">
