@@ -1,10 +1,15 @@
 
-// Define breakpoints and z-index values as constants
+// Define sidebar constants
 export const SIDEBAR_CONSTANTS = {
-  MOBILE_SIDEBAR_Z_INDEX: 40,
-  DESKTOP_SIDEBAR_Z_INDEX: 30,
+  SIDEBAR_COOKIE_NAME: "sidebar:state",
+  SIDEBAR_COOKIE_MAX_AGE: 60 * 60 * 24 * 7,
+  SIDEBAR_WIDTH: "16rem",
+  SIDEBAR_WIDTH_MOBILE: "18rem",
+  SIDEBAR_WIDTH_ICON: "3rem",
+  SIDEBAR_KEYBOARD_SHORTCUT: "b",
   MOBILE_BREAKPOINT: 768,
-  ANIMATION_DURATION: 300,
-  SIDEBAR_WIDTH: 240,
-  SIDEBAR_WIDTH_COLLAPSED: 60
+  Z_INDEX: {
+    SIDEBAR: 10,
+    TRIGGER: 20
+  }
 };
