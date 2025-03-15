@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Search, Plus, ClipboardList, CalendarRange, Clock } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -6,6 +7,7 @@ import { format } from 'date-fns';
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Calendar } from "@/components/ui/calendar";
+
 interface SearchBarProps {
   jobSearchQuery: string;
   setJobSearchQuery: (value: string) => void;
@@ -20,6 +22,7 @@ interface SearchBarProps {
   onToggleQuoteSearch: () => void;
   onCreateJob: () => void;
 }
+
 export const SearchBar: React.FC<SearchBarProps> = ({
   jobSearchQuery,
   setJobSearchQuery,
@@ -45,97 +48,126 @@ export const SearchBar: React.FC<SearchBarProps> = ({
     }
     return options;
   };
+
   const timeOptions = generateTimeOptions();
   const today = new Date();
   const currentDay = today.getDate();
-  return <div className="bg-white p-6 rounded-lg shadow-md max-w-md w-full px-[11px] my-0 mx-0 py-0">
+  
+  return (
+    <div className="w-full p-4">
       <div className="grid grid-cols-1 gap-5">
-        <div className="text-center">
-          <h3 className="font-medium mb-3 text-lg">Job Search</h3>
-          <div className="relative w-full mb-4">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-            <Input placeholder="Search jobs or quotes..." value={jobSearchQuery} onChange={e => setJobSearchQuery(e.target.value)} className="pl-10 w-full" />
-          </div>
-        
-          {/* Date and Time Selection */}
-          <div className="grid grid-cols-2 gap-4 mb-4">
-            {/* Start Date */}
-            <div>
-              <label className="block text-sm font-medium mb-1">Start Date</label>
+        <div>
+          {/* Start section */}
+          <div className="mb-4">
+            <label className="block text-sm font-medium mb-1 text-gray-500">Start *</label>
+            <div className="grid grid-cols-2 gap-2">
+              {/* Start Date */}
               <Popover>
                 <PopoverTrigger asChild>
-                  <Button variant={"outline"} className="w-full justify-start text-left">
-                    <CalendarRange className="mr-2 h-4 w-4" />
-                    {startDate ? format(startDate, 'MMM d, yyyy') : currentDay}
+                  <Button variant={"outline"} className="w-full justify-start text-left border-gray-300">
+                    <CalendarRange className="mr-2 h-4 w-4 text-gray-500" />
+                    {startDate ? format(startDate, 'd MMM yyyy') : new Date().getDate().toString()}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0">
                   <Calendar mode="single" selected={startDate} onSelect={setStartDate} initialFocus className="p-3 pointer-events-auto" />
                 </PopoverContent>
               </Popover>
+              
+              {/* Start Time */}
+              <Select value={startTime} onValueChange={setStartTime}>
+                <SelectTrigger className="w-full border-gray-300">
+                  <Clock className="mr-2 h-4 w-4 text-gray-500" />
+                  <SelectValue placeholder="Select time" />
+                </SelectTrigger>
+                <SelectContent>
+                  {timeOptions.map(time => (
+                    <SelectItem key={time} value={time}>
+                      {time}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
-            
-            {/* End Date */}
-            <div>
-              <label className="block text-sm font-medium mb-1">End Date</label>
+          </div>
+          
+          {/* End section */}
+          <div className="mb-4">
+            <label className="block text-sm font-medium mb-1 text-gray-500">End *</label>
+            <div className="grid grid-cols-2 gap-2">
+              {/* End Date */}
               <Popover>
                 <PopoverTrigger asChild>
-                  <Button variant={"outline"} className="w-full justify-start text-left">
-                    <CalendarRange className="mr-2 h-4 w-4" />
-                    {endDate ? format(endDate, 'MMM d, yyyy') : currentDay}
+                  <Button variant={"outline"} className="w-full justify-start text-left border-gray-300">
+                    <CalendarRange className="mr-2 h-4 w-4 text-gray-500" />
+                    {endDate ? format(endDate, 'd MMM yyyy') : new Date().getDate().toString()}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0">
                   <Calendar mode="single" selected={endDate} onSelect={setEndDate} initialFocus className="p-3 pointer-events-auto" />
                 </PopoverContent>
               </Popover>
-            </div>
-            
-            {/* Start Time */}
-            <div>
-              <label className="block text-sm font-medium mb-1">Start Time</label>
-              <Select value={startTime} onValueChange={setStartTime}>
-                <SelectTrigger className="w-full">
-                  <Clock className="mr-2 h-4 w-4" />
-                  <SelectValue placeholder="Select time" />
-                </SelectTrigger>
-                <SelectContent>
-                  {timeOptions.map(time => <SelectItem key={time} value={time}>
-                      {time}
-                    </SelectItem>)}
-                </SelectContent>
-              </Select>
-            </div>
-            
-            {/* End Time */}
-            <div>
-              <label className="block text-sm font-medium mb-1">End Time</label>
+              
+              {/* End Time */}
               <Select value={endTime} onValueChange={setEndTime}>
-                <SelectTrigger className="w-full">
-                  <Clock className="mr-2 h-4 w-4" />
+                <SelectTrigger className="w-full border-gray-300">
+                  <Clock className="mr-2 h-4 w-4 text-gray-500" />
                   <SelectValue placeholder="Select time" />
                 </SelectTrigger>
                 <SelectContent>
-                  {timeOptions.map(time => <SelectItem key={time} value={time}>
+                  {timeOptions.map(time => (
+                    <SelectItem key={time} value={time}>
                       {time}
-                    </SelectItem>)}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
           </div>
           
-          {/* Action Buttons */}
-          <div className="flex justify-center gap-3 mt-2">
-            <Button onClick={onToggleQuoteSearch} variant="secondary">
-              <ClipboardList className="mr-2 h-4 w-4" />
-              Find Quote
-            </Button>
-            <Button onClick={onCreateJob}>
-              <Plus className="mr-2 h-4 w-4" />
-              Add Job
-            </Button>
+          {/* Job section */}
+          <div className="mb-4">
+            <label className="block text-sm font-medium mb-1 text-gray-500">Job</label>
+            <div className="flex">
+              <div className="relative w-full">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Input 
+                  placeholder="Search jobs..." 
+                  value={jobSearchQuery} 
+                  onChange={e => setJobSearchQuery(e.target.value)} 
+                  className="pl-10 w-full border-gray-300" 
+                />
+              </div>
+              <Button variant="outline" className="ml-2 border-gray-300" size="icon">
+                <Plus className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+          
+          {/* Staff & Connections section */}
+          <div className="mb-4">
+            <label className="block text-sm font-medium mb-1 text-gray-500">Staff & Connections *</label>
+            <div className="flex">
+              <Input 
+                placeholder="Add staff members or connections..." 
+                className="w-full border-gray-300" 
+              />
+              <Button variant="outline" className="ml-2 border-gray-300" size="icon">
+                <Plus className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+          
+          {/* Notes section */}
+          <div className="mb-4">
+            <label className="block text-sm font-medium mb-1 text-gray-500">Notes *</label>
+            <textarea 
+              placeholder="Add notes here..." 
+              className="w-full h-24 px-3 py-2 border border-gray-300 rounded-md"
+            />
           </div>
         </div>
       </div>
-    </div>;
+    </div>
+  );
 };
