@@ -1,5 +1,5 @@
 
-import { AppLayout } from "@/components/ui/AppLayout";
+import { BaseLayout } from "@/components/ui/BaseLayout";
 import JobSiteMap from "@/components/dashboard/JobSiteMap";
 import RecentActivity from "@/components/dashboard/RecentActivity";
 import UpcomingJobs from "@/components/dashboard/UpcomingJobs";
@@ -7,7 +7,7 @@ import CleaningRequiredJobs from "@/components/dashboard/CleaningRequiredJobs";
 
 export default function Index() {
   return (
-    <AppLayout>
+    <BaseLayout showQuickTabs={true}>
       <div className="space-y-8 animate-fadeIn">
         <div className="grid grid-cols-1 gap-8">
           <div className="glass-effect p-4 rounded-xl animate-slideUp">
@@ -28,6 +28,6 @@ export default function Index() {
           </div>
         </div>
       </div>
-    </AppLayout>
+    </BaseLayout>
   );
 }

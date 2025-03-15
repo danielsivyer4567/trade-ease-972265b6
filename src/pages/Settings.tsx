@@ -1,6 +1,6 @@
 
-import { AppLayout } from "@/components/ui/AppLayout";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { BaseLayout } from "@/components/ui/BaseLayout";
+import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Settings, DollarSign, Receipt, Clock, Users, Shield, FileText, Calendar, List, CreditCard, User, Bot, Briefcase, Network, Mail, FileJson, Building, Share, Zap, Search, Link2, Bell, Globe, FileLock } from "lucide-react";
 import { Link } from "react-router-dom";
 
@@ -159,7 +159,7 @@ const settingsSections = [
 
 export default function SettingsPage() {
   return (
-    <AppLayout>
+    <BaseLayout>
       <div className="space-y-6 h-full">
         <div className="flex items-center gap-2">
           <Settings className="h-8 w-8 text-gray-700" />
@@ -186,6 +186,6 @@ export default function SettingsPage() {
           </div>
         </div>
       </div>
-    </AppLayout>
+    </BaseLayout>
   );
 }

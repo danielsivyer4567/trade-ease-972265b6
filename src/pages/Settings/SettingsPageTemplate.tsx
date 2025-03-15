@@ -1,6 +1,6 @@
 
 import { ArrowLeft } from "lucide-react";
-import { AppLayout } from "@/components/ui/AppLayout";
+import { BaseLayout } from "@/components/ui/BaseLayout";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { ReactNode } from "react";
@@ -13,7 +13,7 @@ interface SettingsPageTemplateProps {
 
 export default function SettingsPageTemplate({ title, icon, children }: SettingsPageTemplateProps) {
   return (
-    <AppLayout>
+    <BaseLayout>
       <div className="p-6 space-y-6">
         <div className="flex items-center gap-2">
           <Link to="/settings">
@@ -33,6 +33,6 @@ export default function SettingsPageTemplate({ title, icon, children }: Settings
         
         {children}
       </div>
-    </AppLayout>
+    </BaseLayout>
   );
 }
