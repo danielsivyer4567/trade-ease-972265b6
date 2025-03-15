@@ -93,7 +93,7 @@ const settingsSections = [
     title: "API Integrations",
     icon: Link2,
     description: "Configure external API integrations",
-    path: "/settings/api-integrations"
+    path: "/settings/integrations"
   },
   {
     title: "Jobs",
