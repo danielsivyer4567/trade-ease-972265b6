@@ -69,7 +69,7 @@ export const DayDetailDrawer: React.FC<DayDetailDrawerProps> = ({
     // Here you would typically create a new job
   };
   return <Drawer open={Boolean(selectedDay)} onOpenChange={onClose}>
-      <DrawerContent className="fixed inset-x-0 top-1/2 transform -translate-y-1/2 max-w-2xl mx-auto h-auto border shadow-lg rounded-xl bg-slate-50">
+      <DrawerContent className="fixed inset-x-0 top-1/2 transform -translate-y-1/2 max-w-2xl h-auto border shadow-lg rounded-xl bg-slate-50 px-[15px] py-0 mx-[240px] my-[14px]">
         <DrawerHeader className="border-b">
           <DrawerTitle className="text-center flex items-center justify-center gap-2">
             <CalendarIcon className="h-5 w-5" />
