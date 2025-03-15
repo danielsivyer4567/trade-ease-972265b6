@@ -72,8 +72,8 @@ export const DayDetailDrawer: React.FC<DayDetailDrawerProps> = ({
   };
 
   return <Drawer open={Boolean(selectedDay)} onOpenChange={onClose}>
-      <DrawerContent className="fixed inset-x-0 top-20 transform max-w-2xl h-auto border shadow-lg rounded-xl bg-slate-50 px-[15px] py-0 mx-auto my-0 max-h-[50vh] overflow-auto">
-        <DrawerHeader className="border-b py-2">
+      <DrawerContent className="fixed inset-x-0 top-20 transform max-w-2xl h-auto border shadow-lg rounded-xl bg-slate-50 px-[10px] py-0 mx-auto my-0 max-h-[45vh] overflow-auto">
+        <DrawerHeader className="border-b py-1">
           <DrawerTitle className="text-center flex items-center justify-center gap-2">
             <CalendarIcon className="h-5 w-5" />
             New Appointment
@@ -107,7 +107,7 @@ export const DayDetailDrawer: React.FC<DayDetailDrawerProps> = ({
           </div>
         </div>
         
-        <DrawerFooter className="flex flex-row justify-between border-t gap-4 p-3">
+        <DrawerFooter className="flex flex-row justify-between border-t gap-3 p-2">
           <Button onClick={onClose} variant="outline" className="flex-1">Cancel</Button>
           <Button onClick={handleCreateJob} className="flex-1">Save</Button>
         </DrawerFooter>
