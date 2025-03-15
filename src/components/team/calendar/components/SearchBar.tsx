@@ -53,9 +53,9 @@ export const SearchBar: React.FC<SearchBarProps> = ({
   const timeOptions = generateTimeOptions();
   
   return (
-    <div className="w-full py-2 px-3">
-      <div className="grid grid-cols-1 gap-2">
-        {/* Start and End row - combined in a single row */}
+    <div className="w-full py-1 px-2">
+      <div className="grid grid-cols-1 gap-1">
+        {/* Combined Date and Time row */}
         <div className="grid grid-cols-2 gap-2">
           {/* Start section */}
           <div>
@@ -64,7 +64,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
               {/* Start Date */}
               <Popover>
                 <PopoverTrigger asChild>
-                  <Button variant={"outline"} className="w-full justify-start text-left border-gray-300 h-8 text-xs">
+                  <Button variant={"outline"} className="w-full justify-start text-left border-gray-300 h-7 text-xs">
                     <CalendarRange className="mr-1 h-3 w-3 text-gray-500" />
                     {startDate ? format(startDate, 'd MMM') : format(new Date(), 'd MMM')}
                   </Button>
@@ -76,7 +76,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
               
               {/* Start Time */}
               <Select value={startTime} onValueChange={setStartTime}>
-                <SelectTrigger className="w-full border-gray-300 h-8 text-xs">
+                <SelectTrigger className="w-full border-gray-300 h-7 text-xs">
                   <Clock className="mr-1 h-3 w-3 text-gray-500" />
                   <SelectValue placeholder="Time" />
                 </SelectTrigger>
@@ -98,7 +98,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
               {/* End Date */}
               <Popover>
                 <PopoverTrigger asChild>
-                  <Button variant={"outline"} className="w-full justify-start text-left border-gray-300 h-8 text-xs">
+                  <Button variant={"outline"} className="w-full justify-start text-left border-gray-300 h-7 text-xs">
                     <CalendarRange className="mr-1 h-3 w-3 text-gray-500" />
                     {endDate ? format(endDate, 'd MMM') : format(new Date(), 'd MMM')}
                   </Button>
@@ -110,7 +110,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
               
               {/* End Time */}
               <Select value={endTime} onValueChange={setEndTime}>
-                <SelectTrigger className="w-full border-gray-300 h-8 text-xs">
+                <SelectTrigger className="w-full border-gray-300 h-7 text-xs">
                   <Clock className="mr-1 h-3 w-3 text-gray-500" />
                   <SelectValue placeholder="Time" />
                 </SelectTrigger>
@@ -136,10 +136,10 @@ export const SearchBar: React.FC<SearchBarProps> = ({
                 placeholder="Search jobs..." 
                 value={jobSearchQuery} 
                 onChange={e => setJobSearchQuery(e.target.value)} 
-                className="pl-7 w-full border-gray-300 h-8 text-xs" 
+                className="pl-7 w-full border-gray-300 h-7 text-xs" 
               />
             </div>
-            <Button variant="outline" className="ml-1 border-gray-300 h-8 w-8 p-0" size="sm">
+            <Button variant="outline" className="ml-1 border-gray-300 h-7 w-7 p-0" size="sm">
               <Plus className="h-3 w-3" />
             </Button>
           </div>
@@ -151,20 +151,20 @@ export const SearchBar: React.FC<SearchBarProps> = ({
           <div className="flex">
             <Input 
               placeholder="Add staff members or connections..." 
-              className="w-full border-gray-300 h-8 text-xs" 
+              className="w-full border-gray-300 h-7 text-xs" 
             />
-            <Button variant="outline" className="ml-1 border-gray-300 h-8 w-8 p-0" size="sm">
+            <Button variant="outline" className="ml-1 border-gray-300 h-7 w-7 p-0" size="sm">
               <Plus className="h-3 w-3" />
             </Button>
           </div>
         </div>
         
         {/* Notes section - The last section */}
-        <div>
+        <div className="mb-1">
           <label className="block text-xs font-medium mb-1 text-gray-500">Notes</label>
           <Textarea 
             placeholder="Add notes here..." 
-            className="w-full h-12 px-3 py-1 border border-gray-300 rounded-md text-xs"
+            className="w-full h-10 px-3 py-1 border border-gray-300 rounded-md text-xs"
           />
         </div>
       </div>

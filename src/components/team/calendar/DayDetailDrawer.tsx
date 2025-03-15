@@ -7,7 +7,6 @@ import { Button } from '@/components/ui/button';
 import { CalendarIcon } from 'lucide-react';
 import { SearchQuotes } from '@/pages/Jobs/components/tabs/financials/SearchQuotes';
 import { SearchBar } from './components/SearchBar';
-import { JobsList } from './components/JobsList';
 
 interface DayDetailDrawerProps {
   selectedDay: {
@@ -53,13 +52,6 @@ export const DayDetailDrawer: React.FC<DayDetailDrawerProps> = ({
     amount: 950
   }];
 
-  const filteredJobs = jobSearchQuery ? jobs.filter(job => 
-    job.title?.toLowerCase().includes(jobSearchQuery.toLowerCase()) || 
-    job.jobNumber.toLowerCase().includes(jobSearchQuery.toLowerCase()) || 
-    job.customer.toLowerCase().includes(jobSearchQuery.toLowerCase()) || 
-    job.type.toLowerCase().includes(jobSearchQuery.toLowerCase())
-  ) : jobs;
-
   const handleQuoteSelect = (amount: number) => {
     console.log("Selected quote with amount:", amount);
     setShowQuoteSearch(false);
@@ -80,7 +72,7 @@ export const DayDetailDrawer: React.FC<DayDetailDrawerProps> = ({
   };
 
   return <Drawer open={Boolean(selectedDay)} onOpenChange={onClose}>
-      <DrawerContent className="fixed inset-x-0 top-20 transform max-w-2xl h-auto border shadow-lg rounded-xl bg-slate-50 px-[15px] py-0 mx-auto my-0 max-h-[70vh] overflow-auto">
+      <DrawerContent className="fixed inset-x-0 top-20 transform max-w-2xl h-auto border shadow-lg rounded-xl bg-slate-50 px-[15px] py-0 mx-auto my-0 max-h-[50vh] overflow-auto">
         <DrawerHeader className="border-b py-2">
           <DrawerTitle className="text-center flex items-center justify-center gap-2">
             <CalendarIcon className="h-5 w-5" />
