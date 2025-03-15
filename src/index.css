@@ -14,6 +14,16 @@ body {
   overscroll-behavior: none;
 }
 
+/* Hide scrollbars but keep functionality */
+::-webkit-scrollbar {
+  display: none;
+}
+
+* {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
 /* Improve touch targets for mobile */
 button, a, [role="button"] {
   min-height: 44px;

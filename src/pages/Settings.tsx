@@ -160,7 +160,7 @@ const settingsSections = [
 export default function SettingsPage() {
   return (
     <AppLayout>
-      <div className="space-y-6 h-full overflow-auto">
+      <div className="space-y-6 h-full">
         <div className="flex items-center gap-2">
           <Settings className="h-8 w-8 text-gray-700" />
           <h1 className="text-3xl font-bold">Settings</h1>

@@ -92,7 +92,7 @@ export function AppLayout({
       <div className="flex h-screen w-full overflow-hidden bg-slate-100">
         <AppSidebar />
         <main className={cn(
-          "flex-1 h-full overflow-auto transition-all duration-300 ease-in-out", 
+          "flex-1 h-full transition-all duration-300 ease-in-out", 
           isMobile ? "p-2 pt-16" : "p-3 md:p-4 lg:p-6",
           !isMobile && "ml-[var(--sidebar-width-value)]",
           className
@@ -119,7 +119,7 @@ export function AppLayout({
             </div>
             
             {isMainDashboard && <QuickTabs />}
-            <div className="pt-10 h-full overflow-auto">
+            <div className="pt-10 h-full">
               {children}
             </div>
           </div>
