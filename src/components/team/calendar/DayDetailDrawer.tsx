@@ -29,15 +29,15 @@ export const DayDetailDrawer: React.FC<DayDetailDrawerProps> = ({
   
   return (
     <Drawer open={Boolean(selectedDay)} onOpenChange={onClose}>
-      <DrawerContent className="max-h-[80vh]">
-        <DrawerHeader>
+      <DrawerContent className="max-h-[80vh] bg-slate-300">
+        <DrawerHeader className="bg-slate-300">
           <DrawerTitle className="text-center flex items-center justify-center gap-2">
             <Calendar className="h-5 w-5" />
             Jobs for {format(date, 'MMMM d, yyyy')}
           </DrawerTitle>
         </DrawerHeader>
         
-        <div className="p-4 overflow-auto">
+        <div className="p-4 overflow-auto bg-slate-300">
           {jobs.length === 0 ? (
             <div className="text-center py-6 text-muted-foreground">
               No jobs scheduled for this day
@@ -48,7 +48,7 @@ export const DayDetailDrawer: React.FC<DayDetailDrawerProps> = ({
                 <div 
                   key={job.id}
                   onClick={(e) => onJobClick(job.id, e)}
-                  className="border p-3 rounded-lg hover:bg-slate-100 cursor-pointer transition-colors"
+                  className="border p-3 rounded-lg hover:bg-slate-100 cursor-pointer transition-colors bg-white"
                 >
                   <h3 className="font-medium">{job.title || `Job #${job.jobNumber}`}</h3>
                   <div className="grid grid-cols-2 gap-2 mt-2 text-sm text-muted-foreground">
@@ -73,7 +73,7 @@ export const DayDetailDrawer: React.FC<DayDetailDrawerProps> = ({
           )}
         </div>
         
-        <DrawerFooter>
+        <DrawerFooter className="bg-slate-300">
           <Button onClick={onClose} variant="outline" className="w-full">Close</Button>
         </DrawerFooter>
       </DrawerContent>
