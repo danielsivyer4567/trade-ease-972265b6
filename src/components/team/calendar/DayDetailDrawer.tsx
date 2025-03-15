@@ -25,7 +25,8 @@ export const DayDetailDrawer: React.FC<DayDetailDrawerProps> = ({
   onClose, 
   onJobClick 
 }) => {
-  const [searchQuery, setSearchQuery] = useState("");
+  const [jobSearchQuery, setJobSearchQuery] = useState("");
+  const [quoteSearchQuery, setQuoteSearchQuery] = useState("");
   const [showQuoteSearch, setShowQuoteSearch] = useState(false);
   
   if (!selectedDay) return null;
@@ -39,12 +40,12 @@ export const DayDetailDrawer: React.FC<DayDetailDrawerProps> = ({
     { id: "Q003", customerName: "Mike Brown", amount: 950 }
   ];
 
-  const filteredJobs = searchQuery 
+  const filteredJobs = jobSearchQuery 
     ? jobs.filter(job => 
-        job.title?.toLowerCase().includes(searchQuery.toLowerCase()) || 
-        job.jobNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        job.customer.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        job.type.toLowerCase().includes(searchQuery.toLowerCase())
+        job.title?.toLowerCase().includes(jobSearchQuery.toLowerCase()) || 
+        job.jobNumber.toLowerCase().includes(jobSearchQuery.toLowerCase()) ||
+        job.customer.toLowerCase().includes(jobSearchQuery.toLowerCase()) ||
+        job.type.toLowerCase().includes(jobSearchQuery.toLowerCase())
       )
     : jobs;
 
@@ -68,31 +69,49 @@ export const DayDetailDrawer: React.FC<DayDetailDrawerProps> = ({
         
         <div className="p-4 overflow-auto bg-slate-300">
           <div className="space-y-4">
-            <div className="flex justify-between items-center gap-2">
+            {/* Jobs search section */}
+            <div className="bg-white p-4 rounded-lg">
+              <h3 className="font-medium mb-2">Search existing jobs</h3>
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                 <Input
-                  placeholder="Search jobs..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 w-full bg-white"
+                  placeholder="Search jobs to add to this day..."
+                  value={jobSearchQuery}
+                  onChange={(e) => setJobSearchQuery(e.target.value)}
+                  className="pl-10 w-full"
                 />
               </div>
-              <Button 
-                onClick={() => setShowQuoteSearch(!showQuoteSearch)} 
-                variant="secondary"
-                className="shrink-0"
-              >
-                <ClipboardList className="mr-1" />
-                Quotes
-              </Button>
-              <Button 
-                onClick={() => console.log("Create new job for", format(date, 'yyyy-MM-dd'))} 
-                className="shrink-0"
-              >
-                <Plus className="mr-1" />
-                Add Job
-              </Button>
+            </div>
+            
+            {/* Quotes search section */}
+            <div className="bg-white p-4 rounded-lg">
+              <h3 className="font-medium mb-2">Create job from quote</h3>
+              <div className="flex gap-2">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <Input
+                    placeholder="Search quotes..."
+                    value={quoteSearchQuery}
+                    onChange={(e) => setQuoteSearchQuery(e.target.value)}
+                    className="pl-10 w-full"
+                  />
+                </div>
+                <Button 
+                  onClick={() => setShowQuoteSearch(!showQuoteSearch)} 
+                  variant="secondary"
+                  className="shrink-0"
+                >
+                  <ClipboardList className="mr-1" />
+                  Search
+                </Button>
+                <Button 
+                  onClick={() => console.log("Create new job for", format(date, 'yyyy-MM-dd'))} 
+                  className="shrink-0"
+                >
+                  <Plus className="mr-1" />
+                  Add Job
+                </Button>
+              </div>
             </div>
             
             {showQuoteSearch && (
@@ -104,43 +123,47 @@ export const DayDetailDrawer: React.FC<DayDetailDrawerProps> = ({
               </div>
             )}
             
-            {searchQuery && filteredJobs.length === 0 ? (
-              <div className="text-center py-6 text-muted-foreground bg-white rounded-lg">
-                No jobs found matching "{searchQuery}"
-              </div>
-            ) : filteredJobs.length === 0 ? (
-              <div className="text-center py-6 text-muted-foreground bg-white rounded-lg">
-                No jobs scheduled for this day
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {filteredJobs.map(job => (
-                  <div 
-                    key={job.id}
-                    onClick={(e) => onJobClick(job.id, e)}
-                    className="border p-3 rounded-lg hover:bg-slate-100 cursor-pointer transition-colors bg-white"
-                  >
-                    <h3 className="font-medium">{job.title || `Job #${job.jobNumber}`}</h3>
-                    <div className="grid grid-cols-2 gap-2 mt-2 text-sm text-muted-foreground">
-                      <div className="flex items-center gap-1">
-                        <User className="h-3.5 w-3.5" />
-                        <span>{job.customer}</span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <Clock className="h-3.5 w-3.5" />
-                        <span>{job.type}</span>
-                      </div>
-                      {job.location && (
-                        <div className="flex items-center gap-1 col-span-2">
-                          <MapPin className="h-3.5 w-3.5" />
-                          <span>Coordinates: {job.location.join(', ')}</span>
+            {/* Jobs list section */}
+            <div className="bg-white p-4 rounded-lg">
+              <h3 className="font-medium mb-2">Jobs for this day</h3>
+              {jobSearchQuery && filteredJobs.length === 0 ? (
+                <div className="text-center py-6 text-muted-foreground">
+                  No jobs found matching "{jobSearchQuery}"
+                </div>
+              ) : filteredJobs.length === 0 ? (
+                <div className="text-center py-6 text-muted-foreground">
+                  No jobs scheduled for this day
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {filteredJobs.map(job => (
+                    <div 
+                      key={job.id}
+                      onClick={(e) => onJobClick(job.id, e)}
+                      className="border p-3 rounded-lg hover:bg-slate-100 cursor-pointer transition-colors"
+                    >
+                      <h3 className="font-medium">{job.title || `Job #${job.jobNumber}`}</h3>
+                      <div className="grid grid-cols-2 gap-2 mt-2 text-sm text-muted-foreground">
+                        <div className="flex items-center gap-1">
+                          <User className="h-3.5 w-3.5" />
+                          <span>{job.customer}</span>
                         </div>
-                      )}
+                        <div className="flex items-center gap-1">
+                          <Clock className="h-3.5 w-3.5" />
+                          <span>{job.type}</span>
+                        </div>
+                        {job.location && (
+                          <div className="flex items-center gap-1 col-span-2">
+                            <MapPin className="h-3.5 w-3.5" />
+                            <span>Coordinates: {job.location.join(', ')}</span>
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                ))}
-              </div>
-            )}
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         </div>
         
