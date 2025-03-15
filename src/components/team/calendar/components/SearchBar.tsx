@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Search, Plus, ClipboardList, CalendarRange, Clock } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -47,7 +46,6 @@ export const SearchBar: React.FC<SearchBarProps> = ({
   onToggleQuoteSearch,
   onCreateJob
 }) => {
-  // Generate time options
   const generateTimeOptions = () => {
     const options = [];
     for (let hour = 0; hour < 24; hour++) {
@@ -61,6 +59,9 @@ export const SearchBar: React.FC<SearchBarProps> = ({
   };
 
   const timeOptions = generateTimeOptions();
+
+  const today = new Date();
+  const currentDay = today.getDate();
 
   return (
     <div className="bg-white p-6 rounded-lg shadow-md max-w-md w-full mx-auto">
@@ -89,7 +90,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
                     className="w-full justify-start text-left"
                   >
                     <CalendarRange className="mr-2 h-4 w-4" />
-                    {startDate ? format(startDate, 'MMM d, yyyy') : "Select date"}
+                    {startDate ? format(startDate, 'MMM d, yyyy') : currentDay}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0">
@@ -114,7 +115,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
                     className="w-full justify-start text-left"
                   >
                     <CalendarRange className="mr-2 h-4 w-4" />
-                    {endDate ? format(endDate, 'MMM d, yyyy') : "Select date"}
+                    {endDate ? format(endDate, 'MMM d, yyyy') : currentDay}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0">
