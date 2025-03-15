@@ -9,6 +9,7 @@ import { useWeatherData } from './calendar/useWeatherData';
 import { useCalendarHandlers } from './calendar/useCalendarHandlers';
 import { getCalendarClassNames, getCalendarModifiers, getCalendarModifiersStyles } from './calendar/calendarStyles';
 import { getJobsForDate } from './calendar/calendarUtils';
+import { DayDetailDrawer } from './calendar/DayDetailDrawer';
 
 interface TeamCalendarProps {
   date: Date | undefined;
@@ -26,7 +27,13 @@ export function TeamCalendar({
   assignedJobs = []
 }: TeamCalendarProps) {
   const { weatherDates } = useWeatherData();
-  const { handleDrop, handleJobClick } = useCalendarHandlers(onJobAssign);
+  const { 
+    handleDrop, 
+    handleJobClick, 
+    handleDayClick, 
+    selectedDayJobs, 
+    closeDayDetail 
+  } = useCalendarHandlers(onJobAssign);
 
   return (
     <section>
@@ -55,6 +62,7 @@ export function TeamCalendar({
                   jobsForDate={jobsForDate}
                   onJobClick={handleJobClick}
                   onDrop={handleDrop}
+                  onDayClick={handleDayClick}
                   teamColor={teamColor}
                 />
               );
@@ -64,6 +72,12 @@ export function TeamCalendar({
           className="w-full bg-slate-200"
         />
       </div>
+
+      <DayDetailDrawer 
+        selectedDay={selectedDayJobs} 
+        onClose={closeDayDetail} 
+        onJobClick={handleJobClick}
+      />
     </section>
   );
 }

@@ -3,10 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
 import { Job } from '@/types/job';
+import { useState } from 'react';
 
 export const useCalendarHandlers = (onJobAssign?: (jobId: string, date: Date) => void) => {
   const { toast } = useToast();
   const navigate = useNavigate();
+  const [selectedDayJobs, setSelectedDayJobs] = useState<{ date: Date, jobs: Job[] } | null>(null);
 
   const handleDrop = (e: React.DragEvent<HTMLDivElement>, targetDate: Date) => {
     e.preventDefault();
@@ -25,8 +27,19 @@ export const useCalendarHandlers = (onJobAssign?: (jobId: string, date: Date) =>
     navigate(`/jobs/${jobId}`);
   };
 
+  const handleDayClick = (date: Date, jobs: Job[]) => {
+    setSelectedDayJobs({ date, jobs });
+  };
+
+  const closeDayDetail = () => {
+    setSelectedDayJobs(null);
+  };
+
   return {
     handleDrop,
-    handleJobClick
+    handleJobClick,
+    handleDayClick,
+    selectedDayJobs,
+    closeDayDetail
   };
 };

@@ -11,6 +11,7 @@ interface CalendarDayContentProps {
   jobsForDate: Job[];
   onJobClick: (jobId: string, e: React.MouseEvent) => void;
   onDrop: (e: React.DragEvent<HTMLDivElement>, date: Date) => void;
+  onDayClick: (date: Date, jobs: Job[]) => void;
   teamColor: string;
 }
 
@@ -20,13 +21,15 @@ export const CalendarDayContent: React.FC<CalendarDayContentProps> = ({
   jobsForDate,
   onJobClick,
   onDrop,
+  onDayClick,
   teamColor
 }) => {
   return (
     <div 
-      className="relative w-full h-full flex items-center justify-center" 
+      className="relative w-full h-full flex items-center justify-center cursor-pointer" 
       onDragOver={e => e.preventDefault()} 
       onDrop={e => onDrop(e, date)}
+      onClick={() => onDayClick(date, jobsForDate)}
     >
       <span className="absolute top-1">{date.getDate()}</span>
       
