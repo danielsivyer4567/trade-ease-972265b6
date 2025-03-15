@@ -1,15 +1,18 @@
 
 import { AppLayout } from "@/components/ui/AppLayout";
 import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { AutoLeadPurchaseCard } from "@/components/integrations/AutoLeadPurchaseCard";
 import { PaymentGatewaysCard } from "@/components/integrations/PaymentGatewaysCard";
 import { MobileAppSyncCard } from "@/components/integrations/MobileAppSyncCard";
 import { ApiAccessCard } from "@/components/integrations/ApiAccessCard";
 import { ServiceSyncCard } from "@/components/messaging/ServiceSyncCard";
+import { GoogleCalendarCard } from "@/components/integrations/GoogleCalendarCard";
 
 export default function Integrations() {
+  const navigate = useNavigate();
+  
   return (
     <AppLayout>
       <div className="p-6 space-y-6">
@@ -24,6 +27,7 @@ export default function Integrations() {
         <ServiceSyncCard />
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <GoogleCalendarCard />
           <AutoLeadPurchaseCard />
           <PaymentGatewaysCard />
           <MobileAppSyncCard />
