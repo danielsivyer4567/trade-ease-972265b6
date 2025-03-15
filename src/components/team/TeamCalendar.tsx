@@ -6,6 +6,7 @@ import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { useNavigate } from 'react-router-dom';
 
 interface TeamCalendarProps {
   date: Date | undefined;
@@ -37,6 +38,7 @@ export function TeamCalendar({
 }: TeamCalendarProps) {
   const { toast } = useToast();
   const [syncPopoverOpen, setSyncPopoverOpen] = useState(false);
+  const navigate = useNavigate();
   
   const [weatherDates, setWeatherDates] = useState<RainData[]>([{
     date: '2024-03-18',
@@ -101,6 +103,11 @@ export function TeamCalendar({
         description: `Job has been rescheduled to ${format(targetDate, 'PPP')}`
       });
     }
+  };
+
+  const handleJobClick = (jobId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    navigate(`/jobs/${jobId}`);
   };
 
   const modifiers = {
@@ -330,6 +337,27 @@ export function TeamCalendar({
                       )}
                     </>
                   )}
+                  
+                  {jobsForDate && jobsForDate.length > 0 && (
+                    <div className="absolute bottom-5 left-0 right-0 px-1">
+                      {jobsForDate.slice(0, 2).map((job, idx) => (
+                        <div 
+                          key={`${job.id}-${idx}`}
+                          onClick={(e) => handleJobClick(job.id, e)}
+                          className={`text-[9px] truncate rounded mb-[2px] px-1 cursor-pointer hover:opacity-80 bg-${teamColor}-500 text-white`}
+                          title={job.title || job.jobNumber}
+                        >
+                          {job.title || `Job #${job.jobNumber}`}
+                        </div>
+                      ))}
+                      {jobsForDate.length > 2 && (
+                        <div className="text-[9px] text-center text-gray-600 font-semibold">
+                          +{jobsForDate.length - 2} more
+                        </div>
+                      )}
+                    </div>
+                  )}
+                  
                   {jobsForDate && jobsForDate.length > 0 && (
                     <div className="absolute bottom-1 right-1 bg-blue-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">
                       {jobsForDate.length}
