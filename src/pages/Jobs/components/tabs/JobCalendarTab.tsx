@@ -9,7 +9,7 @@ interface JobCalendarTabProps {
 }
 
 export const JobCalendarTab = ({ job }: JobCalendarTabProps) => {
-  const [date, setDate] = useState<Date | undefined>(undefined);
+  const [date, setDate] = useState<Date | undefined>(job.date ? new Date(job.date) : undefined);
 
   return (
     <TabsContent value="calendar" className="space-y-4">

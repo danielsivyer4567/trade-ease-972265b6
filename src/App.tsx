@@ -40,6 +40,7 @@ import Calculators from "./pages/Calculators";
 import LoadsSpansCalculator from "./pages/Calculators/LoadsSpansCalculator";
 import FencingCalculator from "./pages/Calculators/FencingCalculator";
 import NCCCodesCalculator from "./pages/Calculators/NCCCodesCalculator";
+import CalendarSync from "./pages/Calendar/CalendarSync";
 
 import { Toaster } from "@/components/ui/toaster";
 
@@ -58,6 +59,7 @@ function App() {
         <Route path="/messaging/*" element={<Messaging />} />
         <Route path="/social/*" element={<Social />} />
         <Route path="/calendar/*" element={<Calendar />} />
+        <Route path="/calendar/sync" element={<CalendarSync />} />
         <Route path="/database/*" element={<Database />} />
         <Route path="/ai-features/*" element={<AIFeatures />} />
         <Route path="/integrations/*" element={<Integrations />} />
