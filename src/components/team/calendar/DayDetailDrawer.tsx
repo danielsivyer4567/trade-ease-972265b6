@@ -69,48 +69,55 @@ export const DayDetailDrawer: React.FC<DayDetailDrawerProps> = ({
         
         <div className="p-4 overflow-auto bg-slate-300">
           <div className="space-y-4">
-            {/* Jobs search section */}
+            {/* Search and Actions Section */}
             <div className="bg-white p-4 rounded-lg">
-              <h3 className="font-medium mb-2">Search existing jobs</h3>
-              <div className="relative w-1/4 mx-auto">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                <Input
-                  placeholder="Search jobs to add to this day..."
-                  value={jobSearchQuery}
-                  onChange={(e) => setJobSearchQuery(e.target.value)}
-                  className="pl-10 w-full"
-                />
-              </div>
-            </div>
-            
-            {/* Quotes search section */}
-            <div className="bg-white p-4 rounded-lg">
-              <h3 className="font-medium mb-2">Create job from quote</h3>
-              <div className="flex gap-2 items-center justify-center">
-                <div className="relative w-1/4">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                  <Input
-                    placeholder="Search quotes..."
-                    value={quoteSearchQuery}
-                    onChange={(e) => setQuoteSearchQuery(e.target.value)}
-                    className="pl-10 w-full"
-                  />
+              <div className="grid grid-cols-1 gap-4">
+                {/* Jobs search section */}
+                <div>
+                  <h3 className="font-medium mb-2">Search existing jobs</h3>
+                  <div className="flex items-center gap-3">
+                    <div className="relative w-1/4">
+                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                      <Input
+                        placeholder="Search jobs..."
+                        value={jobSearchQuery}
+                        onChange={(e) => setJobSearchQuery(e.target.value)}
+                        className="pl-10 w-full"
+                      />
+                    </div>
+                  </div>
                 </div>
-                <Button 
-                  onClick={() => setShowQuoteSearch(!showQuoteSearch)} 
-                  variant="secondary"
-                  className="shrink-0"
-                >
-                  <ClipboardList className="mr-1" />
-                  Search
-                </Button>
-                <Button 
-                  onClick={() => console.log("Create new job for", format(date, 'yyyy-MM-dd'))} 
-                  className="shrink-0"
-                >
-                  <Plus className="mr-1" />
-                  Add Job
-                </Button>
+                
+                {/* Quotes search section */}
+                <div>
+                  <h3 className="font-medium mb-2">Create job from quote</h3>
+                  <div className="flex items-center gap-3">
+                    <div className="relative w-1/4">
+                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                      <Input
+                        placeholder="Search quotes..."
+                        value={quoteSearchQuery}
+                        onChange={(e) => setQuoteSearchQuery(e.target.value)}
+                        className="pl-10 w-full"
+                      />
+                    </div>
+                    <Button 
+                      onClick={() => setShowQuoteSearch(!showQuoteSearch)} 
+                      variant="secondary"
+                      className="shrink-0"
+                    >
+                      <ClipboardList className="mr-1" />
+                      Search
+                    </Button>
+                    <Button 
+                      onClick={() => console.log("Create new job for", format(date, 'yyyy-MM-dd'))} 
+                      className="shrink-0"
+                    >
+                      <Plus className="mr-1" />
+                      Add Job
+                    </Button>
+                  </div>
+                </div>
               </div>
             </div>
             
