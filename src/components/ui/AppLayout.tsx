@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { SidebarProvider } from '../ui/sidebar';
@@ -22,6 +21,13 @@ export function AppLayout({
 }: AppLayoutProps) {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
+  const location = useLocation();
+  const isMainDashboard = location.pathname === '/' || location.pathname === '/index';
+
+  // Mobile detection logging
+  React.useEffect(() => {
+    console.log('📱 Mobile Detection:', { isMobile });
+  }, [isMobile]);
 
   useEffect(() => {
     const saveTabStates = () => {
@@ -67,14 +73,9 @@ export function AppLayout({
     };
   }, []);
 
-  const location = useLocation();
-  const isMainDashboard = location.pathname === '/' || location.pathname === '/index';
-
   const handleLogout = async () => {
     try {
-      const {
-        error
-      } = await supabase.auth.signOut();
+      const { error } = await supabase.auth.signOut();
       if (error) throw error;
       toast.success("Logged out successfully");
       navigate('/auth');
@@ -84,13 +85,15 @@ export function AppLayout({
     }
   };
 
-  return <SidebarProvider defaultOpen={!window.matchMedia('(max-width: 1024px)').matches}>
+  return (
+    <SidebarProvider defaultOpen={!isMobile}>
       <div className="min-h-screen min-w-full flex bg-transparent">
         <AppSidebar />
         <main className={cn(
           "flex-1 overflow-auto transition-[margin] duration-300 ease-in-out", 
-          isMobile ? "p-1 pt-16" : "p-2 md:p-4 lg:p-6",
-          "peer-data-[state=expanded]:ml-[240px] peer-data-[state=collapsed]:ml-[60px]", 
+          isMobile ? "p-2 pt-16" : "p-3 md:p-4 lg:p-6",
+          "peer-data-[state=expanded]:ml-[240px] peer-data-[state=collapsed]:ml-[60px]",
+          isMobile && "peer-data-[state=expanded]:ml-0 peer-data-[state=collapsed]:ml-0",
           className
         )}>
           <div className="relative w-full h-full glass-card p-2 md:p-4 lg:p-6 border-2 border-white/50 shadow-2xl bg-slate-200 rounded-xl">
@@ -111,5 +114,6 @@ export function AppLayout({
           </div>
         </main>
       </div>
-    </SidebarProvider>;
+    </SidebarProvider>
+  );
 }
