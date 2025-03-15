@@ -2,10 +2,10 @@
 import * as React from "react";
 import { TooltipProvider } from "../tooltip";
 import { SIDEBAR_CONSTANTS } from "./constants";
-import { SidebarContext, SidebarProviderProps, SidebarState } from "./types";
+import { SidebarContext as SidebarContextType, SidebarProviderProps, SidebarState } from "./types";
 import { useIsMobile } from "@/hooks/use-mobile";
 
-const SidebarContext = React.createContext<SidebarContext | null>(null);
+const SidebarContext = React.createContext<SidebarContextType | null>(null);
 
 export function useSidebar() {
   const context = React.useContext(SidebarContext);
@@ -56,7 +56,7 @@ export const SidebarProvider = React.forwardRef<HTMLDivElement, SidebarProviderP
 
     const state: SidebarState = open ? "expanded" : "collapsed";
 
-    const contextValue = React.useMemo<SidebarContext>(
+    const contextValue = React.useMemo<SidebarContextType>(
       () => ({
         state,
         open,

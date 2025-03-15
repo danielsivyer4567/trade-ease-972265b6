@@ -2,14 +2,14 @@
 import * as React from "react";
 import { cn } from "@/lib/utils";
 
-export const SidebarHeader = React.forwardRef<HTMLDivElement, React.ComponentProps<"div">>(
+export const SidebarFooter = React.forwardRef<HTMLDivElement, React.ComponentProps<"div">>(
   ({ className, ...props }, ref) => (
     <div
       ref={ref}
-      data-sidebar="header"
+      data-sidebar="footer"
       className={cn("flex flex-col gap-2 p-2", className)}
       {...props}
     />
   )
 );
-SidebarHeader.displayName = "SidebarHeader";
+SidebarFooter.displayName = "SidebarFooter";
