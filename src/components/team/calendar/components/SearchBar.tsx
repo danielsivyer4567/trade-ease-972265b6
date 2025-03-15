@@ -58,7 +58,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
               {/* Start Date */}
               <Popover>
                 <PopoverTrigger asChild>
-                  <Button variant={"outline"} className="w-full justify-start text-left border-gray-300 h-7 text-xs bg-slate-400 hover:bg-slate-300">
+                  <Button variant={"outline"} className="w-full justify-start text-left border-gray-300 h-7 bg-slate-400 hover:bg-slate-300 text-gray-950 text-base font-medium">
                     <CalendarRange className="mr-1 h-3 w-3 text-gray-500" />
                     {startDate ? format(startDate, 'd MMM') : format(new Date(), 'd MMM')}
                   </Button>
