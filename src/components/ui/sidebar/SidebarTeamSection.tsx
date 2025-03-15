@@ -17,16 +17,18 @@ interface SidebarTeamSectionProps {
 }
 
 export function SidebarTeamSection({ teams }: SidebarTeamSectionProps) {
-  const { state } = useSidebar();
-  const isCollapsed = state === "collapsed";
+  const { state, isCollapsed } = useSidebar();
   const isMobileDevice = useIsMobile();
 
-  if (isCollapsed) {
+  // If isCollapsed is not available directly, fallback to checking state
+  const collapsed = isCollapsed ?? (state === "collapsed");
+
+  if (collapsed) {
     return null;
   }
 
   return (
-    <div className={cn("pt-8", isCollapsed && "hidden lg:hidden")}>
+    <div className={cn("pt-8", collapsed && "hidden lg:hidden")}>
       <div className="mb-2 text-sm font-bold text-black px-2">
         Teams view
       </div>
@@ -41,7 +43,7 @@ export function SidebarTeamSection({ teams }: SidebarTeamSectionProps) {
           )}
         >
           <Hammer className="w-4 h-4 flex-shrink-0" />
-          <span className={cn("transition-opacity duration-200", isCollapsed && "hidden lg:hidden")}>
+          <span className={cn("transition-opacity duration-200", collapsed && "hidden lg:hidden")}>
             {team.name}
           </span>
         </Link>
@@ -50,7 +52,7 @@ export function SidebarTeamSection({ teams }: SidebarTeamSectionProps) {
         to="/team-new" 
         className={cn(
           "flex items-center gap-2 p-2 rounded-lg hover:bg-gray-100 text-gray-600 hover:text-gray-700 text-sm mt-1", 
-          isCollapsed && "hidden lg:hidden", 
+          collapsed && "hidden lg:hidden", 
           isMobileDevice && "p-3 min-h-[48px]"
         )}
       >

@@ -9,3 +9,11 @@ export * from "./constants";
 export * from "./types";
 export * from "./SidebarNavLinks";
 export * from "./SidebarTeamSection";
+
+// Add a simple useSidebar hook for backwards compatibility
+export function useSidebar() {
+  return {
+    state: "expanded", // Default state
+    isCollapsed: false
+  };
+}

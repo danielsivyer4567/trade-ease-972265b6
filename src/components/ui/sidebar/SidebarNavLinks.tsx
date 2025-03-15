@@ -48,8 +48,8 @@ interface NavLinkItemProps {
 
 export function NavLinkItem({ link }: NavLinkItemProps) {
   const location = useLocation();
-  const { state } = useSidebar();
-  const isCollapsed = state === "collapsed";
+  const { state, isCollapsed } = useSidebar();
+  const collapsed = isCollapsed ?? (state === "collapsed");
   const isMobileDevice = useIsMobile();
   const { icon: Icon, label, path, openInNewTab = false } = link;
   
@@ -67,13 +67,13 @@ export function NavLinkItem({ link }: NavLinkItemProps) {
       {...linkProps}
     >
       <Icon className="w-4 h-4 flex-shrink-0" />
-      <span className={cn("transition-opacity duration-200", isCollapsed && "hidden lg:hidden")}>
+      <span className={cn("transition-opacity duration-200", collapsed && "hidden lg:hidden")}>
         {label}
       </span>
     </Link>
   );
   
-  return isCollapsed && !isMobileDevice ? (
+  return collapsed && !isMobileDevice ? (
     <Tooltip>
       <TooltipTrigger asChild>
         {content}
