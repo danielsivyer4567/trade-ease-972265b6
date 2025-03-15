@@ -80,7 +80,7 @@ export const DayDetailDrawer: React.FC<DayDetailDrawerProps> = ({
   };
 
   return <Drawer open={Boolean(selectedDay)} onOpenChange={onClose}>
-      <DrawerContent className="fixed inset-x-0 top-20 transform max-w-2xl h-auto border shadow-lg rounded-xl bg-slate-50 px-[15px] py-0 mx-auto my-0 max-h-[80vh] overflow-auto">
+      <DrawerContent className="fixed inset-x-0 top-20 transform max-w-2xl h-auto border shadow-lg rounded-xl bg-slate-50 px-[15px] py-0 mx-auto my-0 max-h-[70vh] overflow-auto">
         <DrawerHeader className="border-b py-2">
           <DrawerTitle className="text-center flex items-center justify-center gap-2">
             <CalendarIcon className="h-5 w-5" />
@@ -90,7 +90,7 @@ export const DayDetailDrawer: React.FC<DayDetailDrawerProps> = ({
         
         <div className="overflow-auto">
           <div className="flex flex-col items-center">
-            {/* Search Bar Component */}
+            {/* Search Bar Component - This is the main content we want to show */}
             <SearchBar 
               jobSearchQuery={jobSearchQuery} 
               setJobSearchQuery={setJobSearchQuery} 
@@ -106,20 +106,11 @@ export const DayDetailDrawer: React.FC<DayDetailDrawerProps> = ({
               onCreateJob={handleCreateJob} 
             />
             
-            {/* Quote Search section */}
+            {/* We're not showing these sections by default to make the menu shorter */}
             {showQuoteSearch && (
               <div className="max-w-md w-full mx-auto">
                 <SearchQuotes onSelectQuote={handleQuoteSelect} customerQuotes={mockCustomerQuotes} />
               </div>
-            )}
-            
-            {/* Jobs List Component - only show if not searching for quotes and we have jobs */}
-            {!showQuoteSearch && filteredJobs.length > 0 && (
-              <JobsList 
-                jobSearchQuery={jobSearchQuery} 
-                filteredJobs={filteredJobs} 
-                onJobClick={onJobClick} 
-              />
             )}
           </div>
         </div>
