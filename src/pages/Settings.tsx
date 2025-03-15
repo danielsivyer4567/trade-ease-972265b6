@@ -140,8 +140,8 @@ const settingsSections = [
   {
     title: "Refer a Friend",
     icon: Share,
-    description: "Share Trade Ease",
-    path: "/settings/refer-a-friend"
+    description: "Share Trade Ease with friends",
+    path: "/referrals"
   },
   {
     title: "AI Assistant Settings",

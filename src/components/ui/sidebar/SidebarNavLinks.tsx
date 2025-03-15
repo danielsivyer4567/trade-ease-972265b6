@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { 
@@ -36,8 +35,6 @@ export const primaryNavLinks: NavLink[] = [
   { icon: Bot, label: 'AI Features', path: '/ai-features' },
   { icon: Calculator, label: 'Calculators', path: '/calculators' },
   { icon: Network, label: 'Integrations', path: '/integrations' },
-  { icon: Share, label: 'Social', path: '/social' },
-  { icon: LinkIcon, label: 'Refer a Friend', path: '/referrals' },
   { icon: Database, label: 'Database', path: '/database' },
   { icon: Settings, label: 'Settings', path: '/settings' }
 ];
