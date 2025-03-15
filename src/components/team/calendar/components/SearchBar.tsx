@@ -90,7 +90,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
               {/* End Date */}
               <Popover>
                 <PopoverTrigger asChild>
-                  <Button variant={"outline"} className="w-full justify-start text-left border-gray-300 h-7 text-xs bg-slate-400 hover:bg-slate-300">
+                  <Button variant={"outline"} className="w-full justify-start text-left border-gray-300 h-7 bg-slate-400 hover:bg-slate-300 text-base font-medium">
                     <CalendarRange className="mr-1 h-3 w-3 text-gray-500" />
                     {endDate ? format(endDate, 'd MMM') : format(new Date(), 'd MMM')}
                   </Button>
@@ -102,7 +102,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
               
               {/* End Time */}
               <Select value={endTime} onValueChange={setEndTime}>
-                <SelectTrigger className="w-full border-gray-300 h-7 text-xs bg-slate-400 hover:bg-slate-300">
+                <SelectTrigger className="w-full border-gray-300 h-7 bg-slate-400 hover:bg-slate-300 font-medium text-lg">
                   <Clock className="mr-1 h-3 w-3 text-gray-500" />
                   <SelectValue placeholder="Time" />
                 </SelectTrigger>
