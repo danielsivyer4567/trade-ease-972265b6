@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { format } from 'date-fns';
 import { Job } from '@/types/job';
 import { 
@@ -79,15 +79,15 @@ export const DayDetailDrawer: React.FC<DayDetailDrawerProps> = ({
   
   return (
     <Drawer open={Boolean(selectedDay)} onOpenChange={onClose}>
-      <DrawerContent className="max-h-[80vh] bg-slate-300">
-        <DrawerHeader className="bg-slate-300">
+      <DrawerContent className="max-h-[80vh]">
+        <DrawerHeader>
           <DrawerTitle className="text-center flex items-center justify-center gap-2">
             <CalendarIcon className="h-5 w-5" />
             Jobs for {format(date, 'MMMM d, yyyy')}
           </DrawerTitle>
         </DrawerHeader>
         
-        <div className="p-4 overflow-auto bg-slate-300">
+        <div className="p-4 overflow-auto">
           <div className="space-y-4 flex flex-col items-center">
             {/* Search Bar Component */}
             <SearchBar 
@@ -124,7 +124,7 @@ export const DayDetailDrawer: React.FC<DayDetailDrawerProps> = ({
           </div>
         </div>
         
-        <DrawerFooter className="bg-slate-300">
+        <DrawerFooter>
           <Button onClick={onClose} variant="outline" className="w-full">Close</Button>
         </DrawerFooter>
       </DrawerContent>
