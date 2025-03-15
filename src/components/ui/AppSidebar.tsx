@@ -33,13 +33,9 @@ export function AppSidebar() {
   
   const isMobileDevice = useIsMobile();
 
-  // Log current state for debugging
+  // Simplified effect to avoid potential async issues
   React.useEffect(() => {
-    console.log('🧭 Sidebar State:', { 
-      state, 
-      isMobileContext,
-      isMobileDevice
-    });
+    console.log('Sidebar State:', state, isMobileContext, isMobileDevice);
   }, [state, isMobileContext, isMobileDevice]);
 
   return (

@@ -60,6 +60,6 @@ export interface SidebarGroupLabelProps extends React.ComponentProps<"div"> {
   asChild?: boolean;
 }
 
-export interface SidebarGroupActionProps extends React.Component<"button"> {
+export interface SidebarGroupActionProps extends React.ComponentProps<"button"> {
   asChild?: boolean;
 }
