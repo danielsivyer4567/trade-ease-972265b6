@@ -79,7 +79,7 @@ export const SidebarProvider = React.forwardRef<HTMLDivElement, SidebarProviderP
               "--sidebar-width-icon": SIDEBAR_CONSTANTS.SIDEBAR_WIDTH_ICON,
               ...style,
             } as React.CSSProperties}
-            className="group/sidebar-wrapper flex min-h-svh w-full has-[[data-variant=inset]]:bg-sidebar"
+            className="group/sidebar-wrapper flex min-h-screen h-screen w-full has-[[data-variant=inset]]:bg-sidebar"
             ref={ref}
             {...props}
           >

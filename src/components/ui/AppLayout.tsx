@@ -89,7 +89,7 @@ export function AppLayout({
 
   return (
     <SidebarProvider defaultOpen={!isMobile}>
-      <div className="min-h-screen min-w-full flex bg-transparent">
+      <div className="min-h-screen h-screen w-full flex bg-transparent overflow-hidden">
         <AppSidebar />
         <main className={cn(
           "flex-1 overflow-auto transition-all duration-300 ease-in-out", 

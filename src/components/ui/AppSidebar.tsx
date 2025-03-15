@@ -45,7 +45,7 @@ export function AppSidebar() {
       <div 
         data-state={state} 
         className={cn(
-          "peer z-30 fixed h-full",
+          "peer z-30 fixed h-screen",
           state === "expanded" ? `w-[${SIDEBAR_CONSTANTS.SIDEBAR_WIDTH}]` : `w-[${SIDEBAR_CONSTANTS.SIDEBAR_WIDTH_ICON}]`,
           "transition-all duration-300 ease-in-out",
           isMobileDevice && "transition-transform",
