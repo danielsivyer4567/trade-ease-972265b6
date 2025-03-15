@@ -70,7 +70,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
               
               {/* Start Time */}
               <Select value={startTime} onValueChange={setStartTime}>
-                <SelectTrigger className="w-full border-gray-300 h-7 bg-slate-400 hover:bg-slate-300 text-base font-semibold">
+                <SelectTrigger className="w-full border-gray-300 h-7 bg-slate-400 hover:bg-slate-300 font-medium text-lg">
                   <Clock className="mr-1 h-3 w-3 text-gray-500" />
                   <SelectValue placeholder="Time" />
                 </SelectTrigger>
@@ -124,7 +124,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
               <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-3 w-3 text-gray-400" />
               <Input placeholder="Search jobs..." value={jobSearchQuery} onChange={e => setJobSearchQuery(e.target.value)} className="pl-7 w-full border-gray-300 h-7 text-xs bg-slate-300 py-[22px] mx-0 my-0 px-[22px]" />
             </div>
-            <Button variant="outline" size="sm" className="ml-1 border-gray-300 h-7 w-7 p-0 bg-slate-400 hover:bg-slate-300 px-[22px] py-[21px] my-[2px] mx-[7px]">
+            <Button variant="outline" size="sm" className="ml-1 border-gray-300 h-7 w-7 p-0 bg-slate-400 hover:bg-slate-300 px-[22px] py-[21px] mx-[7px] my-[3px]">
               <Plus className="h-3 w-3" />
             </Button>
           </div>
