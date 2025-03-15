@@ -42,11 +42,19 @@ export function AppSidebar() {
     <>
       <MobileSidebarToggle />
 
-      <div data-state={state} className={cn(
-        "peer z-30",
-        isMobileDevice && "transition-transform duration-300",
-        isMobileDevice && state === "collapsed" && "-translate-x-full"
-      )}>
+      <div 
+        data-state={state} 
+        className={cn(
+          "peer z-30 fixed h-full",
+          state === "expanded" ? `w-[${SIDEBAR_CONSTANTS.SIDEBAR_WIDTH}]` : `w-[${SIDEBAR_CONSTANTS.SIDEBAR_WIDTH_ICON}]`,
+          "transition-all duration-300 ease-in-out",
+          isMobileDevice && "transition-transform",
+          isMobileDevice && state === "collapsed" && "-translate-x-full"
+        )}
+        style={{
+          width: state === "expanded" ? SIDEBAR_CONSTANTS.SIDEBAR_WIDTH : SIDEBAR_CONSTANTS.SIDEBAR_WIDTH_ICON
+        }}
+      >
         <div className="flex flex-col h-full bg-slate-200">
           <SidebarHeader 
             logoSrc="/lovable-uploads/6a07dd00-f2c7-49da-8b00-48d960c13610.png" 

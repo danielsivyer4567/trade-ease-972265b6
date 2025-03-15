@@ -1,3 +1,4 @@
+
 import React, { useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { SidebarProvider } from '../ui/sidebar';
@@ -9,6 +10,7 @@ import { LogOut } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { SIDEBAR_CONSTANTS } from './sidebar/constants';
 
 interface AppLayoutProps {
   children: React.ReactNode;
@@ -90,12 +92,19 @@ export function AppLayout({
       <div className="min-h-screen min-w-full flex bg-transparent">
         <AppSidebar />
         <main className={cn(
-          "flex-1 overflow-auto transition-[margin] duration-300 ease-in-out", 
+          "flex-1 overflow-auto transition-all duration-300 ease-in-out", 
           isMobile ? "p-2 pt-16" : "p-3 md:p-4 lg:p-6",
-          "peer-data-[state=expanded]:ml-[240px] peer-data-[state=collapsed]:ml-[60px]",
-          isMobile && "peer-data-[state=expanded]:ml-0 peer-data-[state=collapsed]:ml-0",
+          !isMobile && "ml-[var(--sidebar-width-value)]",
           className
-        )}>
+        )}
+        style={{
+          '--sidebar-width-value': isMobile 
+            ? '0px' 
+            : (location.pathname.includes('/team') 
+                ? SIDEBAR_CONSTANTS.SIDEBAR_WIDTH 
+                : SIDEBAR_CONSTANTS.SIDEBAR_WIDTH)
+        } as React.CSSProperties}
+        >
           <div className="relative w-full h-full glass-card p-2 md:p-4 lg:p-6 border-2 border-white/50 shadow-2xl bg-slate-200 rounded-xl">
             <div className="absolute top-3 right-3 z-10">
               <Button 

@@ -75,6 +75,7 @@ export const SidebarProvider = React.forwardRef<HTMLDivElement, SidebarProviderP
           <div
             style={{
               "--sidebar-width": SIDEBAR_CONSTANTS.SIDEBAR_WIDTH,
+              "--sidebar-width-mobile": SIDEBAR_CONSTANTS.SIDEBAR_WIDTH_MOBILE,
               "--sidebar-width-icon": SIDEBAR_CONSTANTS.SIDEBAR_WIDTH_ICON,
               ...style,
             } as React.CSSProperties}
