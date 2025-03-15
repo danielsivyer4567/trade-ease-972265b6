@@ -72,7 +72,7 @@ export const DayDetailDrawer: React.FC<DayDetailDrawerProps> = ({
             {/* Jobs search section */}
             <div className="bg-white p-4 rounded-lg">
               <h3 className="font-medium mb-2">Search existing jobs</h3>
-              <div className="relative flex-1">
+              <div className="relative w-1/4 mx-auto">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                 <Input
                   placeholder="Search jobs to add to this day..."
@@ -86,8 +86,8 @@ export const DayDetailDrawer: React.FC<DayDetailDrawerProps> = ({
             {/* Quotes search section */}
             <div className="bg-white p-4 rounded-lg">
               <h3 className="font-medium mb-2">Create job from quote</h3>
-              <div className="flex gap-2">
-                <div className="relative flex-1">
+              <div className="flex gap-2 items-center justify-center">
+                <div className="relative w-1/4">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                   <Input
                     placeholder="Search quotes..."
