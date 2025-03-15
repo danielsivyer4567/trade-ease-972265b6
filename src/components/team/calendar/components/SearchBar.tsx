@@ -70,7 +70,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
               
               {/* Start Time */}
               <Select value={startTime} onValueChange={setStartTime}>
-                <SelectTrigger className="w-full border-gray-300 h-7 text-xs bg-slate-400 hover:bg-slate-300">
+                <SelectTrigger className="w-full border-gray-300 h-7 bg-slate-400 hover:bg-slate-300 text-base font-semibold">
                   <Clock className="mr-1 h-3 w-3 text-gray-500" />
                   <SelectValue placeholder="Time" />
                 </SelectTrigger>
