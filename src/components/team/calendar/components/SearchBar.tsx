@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Search, Plus, CalendarRange, Clock } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -7,6 +8,8 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Calendar } from "@/components/ui/calendar";
 import { Textarea } from "@/components/ui/textarea";
+import { useIsMobile } from '@/hooks/use-mobile';
+
 interface SearchBarProps {
   jobSearchQuery: string;
   setJobSearchQuery: (value: string) => void;
@@ -21,6 +24,7 @@ interface SearchBarProps {
   onToggleQuoteSearch: () => void;
   onCreateJob: () => void;
 }
+
 export const SearchBar: React.FC<SearchBarProps> = ({
   jobSearchQuery,
   setJobSearchQuery,
@@ -35,6 +39,8 @@ export const SearchBar: React.FC<SearchBarProps> = ({
   onToggleQuoteSearch,
   onCreateJob
 }) => {
+  const isMobile = useIsMobile();
+  
   const generateTimeOptions = () => {
     const options = [];
     for (let hour = 0; hour < 24; hour++) {
@@ -46,11 +52,14 @@ export const SearchBar: React.FC<SearchBarProps> = ({
     }
     return options;
   };
+  
   const timeOptions = generateTimeOptions();
-  return <div className="w-full py-1 px-2">
+  
+  return (
+    <div className={`w-full ${isMobile ? 'py-0.5 px-1' : 'py-1 px-2'}`}>
       <div className="grid grid-cols-1 gap-1 my-0">
         {/* Combined Date and Time row */}
-        <div className="grid grid-cols-2 gap-2">
+        <div className={`grid ${isMobile ? 'grid-cols-1' : 'grid-cols-2'} gap-2`}>
           {/* Start section */}
           <div>
             <label className="block text-xs font-medium mb-1 text-gray-500">Start *</label>
@@ -64,7 +73,13 @@ export const SearchBar: React.FC<SearchBarProps> = ({
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0">
-                  <Calendar mode="single" selected={startDate} onSelect={setStartDate} initialFocus className="p-2" />
+                  <Calendar 
+                    mode="single" 
+                    selected={startDate} 
+                    onSelect={setStartDate} 
+                    initialFocus 
+                    className={`p-2 ${isMobile ? 'scale-75 origin-top-left' : ''}`} 
+                  />
                 </PopoverContent>
               </Popover>
               
@@ -74,7 +89,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
                   <Clock className="mr-1 h-3 w-3 text-gray-500" />
                   <SelectValue placeholder="Time" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className={isMobile ? "max-h-32" : ""}>
                   {timeOptions.map(time => <SelectItem key={time} value={time}>
                       {time}
                     </SelectItem>)}
@@ -84,7 +99,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
           </div>
           
           {/* End section */}
-          <div>
+          <div className={isMobile ? "mt-1" : ""}>
             <label className="block text-xs font-medium mb-1 text-gray-500">End *</label>
             <div className="grid grid-cols-2 gap-1">
               {/* End Date */}
@@ -96,7 +111,13 @@ export const SearchBar: React.FC<SearchBarProps> = ({
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0">
-                  <Calendar mode="single" selected={endDate} onSelect={setEndDate} initialFocus className="p-2" />
+                  <Calendar 
+                    mode="single" 
+                    selected={endDate} 
+                    onSelect={setEndDate} 
+                    initialFocus 
+                    className={`p-2 ${isMobile ? 'scale-75 origin-top-left' : ''}`} 
+                  />
                 </PopoverContent>
               </Popover>
               
@@ -106,7 +127,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
                   <Clock className="mr-1 h-3 w-3 text-gray-500" />
                   <SelectValue placeholder="Time" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className={isMobile ? "max-h-32" : ""}>
                   {timeOptions.map(time => <SelectItem key={time} value={time}>
                       {time}
                     </SelectItem>)}
@@ -147,5 +168,6 @@ export const SearchBar: React.FC<SearchBarProps> = ({
           <Textarea placeholder="Add notes here..." className="w-full h-10 px-3 py-1 border border-gray-300 rounded-md text-xs bg-slate-300" />
         </div>
       </div>
-    </div>;
+    </div>
+  );
 };

@@ -11,6 +11,7 @@ body {
   background-size: cover;
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
+  overscroll-behavior: none;
 }
 
 /* Improve touch targets for mobile */
@@ -53,9 +54,97 @@ input, textarea, [contenteditable="true"] {
   .mobile-full-width {
     width: 100% !important;
   }
+
+  /* Optimize touch targets for mobile */
+  button, a, [role="button"] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* Larger hit areas for mobile UI elements */
+  .mobile-touch-target {
+    min-height: 48px;
+    min-width: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Improve tap gestures on mobile */
+  .mobile-tap-highlight {
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
+  }
+
+  /* Prevent Safari from zooming in on inputs */
+  input[type="text"],
+  input[type="number"],
+  input[type="email"],
+  input[type="password"],
+  input[type="search"],
+  input[type="tel"],
+  input[type="url"],
+  textarea,
+  select {
+    font-size: 16px !important;
+  }
+
+  /* Better mobile spacing */
+  .mobile-spacing {
+    padding-top: 0.5rem !important;
+    padding-bottom: 0.5rem !important;
+    margin-top: 0.5rem !important;
+    margin-bottom: 0.5rem !important;
+  }
+
+  /* Optimized glassmorphism for mobile - less blur for better performance */
+  .glass-card {
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+  }
 }
 
 /* Fix for iOS momentum scrolling */
 .overflow-auto, .overflow-y-auto, .overflow-x-auto {
   -webkit-overflow-scrolling: touch;
+}
+
+/* Create responsive containers */
+.container-responsive {
+  width: 100%;
+  padding-right: 0.5rem;
+  padding-left: 0.5rem;
+  margin-right: auto;
+  margin-left: auto;
+}
+
+@media (min-width: 640px) {
+  .container-responsive {
+    padding-right: 1rem;
+    padding-left: 1rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .container-responsive {
+    padding-right: 1.5rem;
+    padding-left: 1.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .container-responsive {
+    padding-right: 2rem;
+    padding-left: 2rem;
+  }
+}
+
+/* Better touch feedback */
+.touch-feedback:active {
+  opacity: 0.8;
+  transform: scale(0.98);
+}
+
+/* Disable pull-to-refresh on mobile browsers */
+html, body {
+  overscroll-behavior-y: contain;
 }

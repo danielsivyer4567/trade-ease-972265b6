@@ -1,3 +1,4 @@
+
 import React, { useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { SidebarProvider } from '../ui/sidebar';
@@ -8,6 +9,7 @@ import { Button } from './button';
 import { LogOut } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface AppLayoutProps {
   children: React.ReactNode;
@@ -19,6 +21,7 @@ export function AppLayout({
   className
 }: AppLayoutProps) {
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     const saveTabStates = () => {
@@ -84,11 +87,20 @@ export function AppLayout({
   return <SidebarProvider defaultOpen={!window.matchMedia('(max-width: 1024px)').matches}>
       <div className="min-h-screen min-w-full flex bg-transparent">
         <AppSidebar />
-        <main className={cn("flex-1 overflow-auto transition-[margin] duration-300 ease-in-out", "p-2 md:p-4 lg:p-6",
-      "peer-data-[state=expanded]:ml-[240px] peer-data-[state=collapsed]:ml-[60px]", className)}>
-          <div className="relative w-full h-full glass-card p-3 md:p-6 border-2 border-white/50 shadow-2xl bg-slate-200 rounded-xl">
+        <main className={cn(
+          "flex-1 overflow-auto transition-[margin] duration-300 ease-in-out", 
+          isMobile ? "p-1 pt-16" : "p-2 md:p-4 lg:p-6",
+          "peer-data-[state=expanded]:ml-[240px] peer-data-[state=collapsed]:ml-[60px]", 
+          className
+        )}>
+          <div className="relative w-full h-full glass-card p-2 md:p-4 lg:p-6 border-2 border-white/50 shadow-2xl bg-slate-200 rounded-xl">
             <div className="absolute top-3 right-3 z-10">
-              <Button variant="outline" size="sm" onClick={handleLogout} className="flex items-center gap-2 bg-slate-300 hover:bg-slate-400 text-gray-700 my-0 mx-[4px] py-[4px] px-[15px]">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={handleLogout} 
+                className="flex items-center gap-2 bg-slate-300 hover:bg-slate-400 text-gray-700 my-0 mx-[4px] py-[4px] px-[15px]"
+              >
                 <LogOut className="h-4 w-4" />
                 <span className="hidden sm:inline">Logout</span>
               </Button>
