@@ -10,7 +10,7 @@ import {
   DrawerFooter
 } from '@/components/ui/drawer';
 import { Button } from '@/components/ui/button';
-import { Calendar, Clock, MapPin, User, Plus, Search, ClipboardList, CalendarRange } from 'lucide-react';
+import { Calendar as CalendarIcon, Clock, MapPin, User, Plus, Search, ClipboardList, CalendarRange } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { SearchQuotes } from '@/pages/Jobs/components/tabs/financials/SearchQuotes';
 import { 
@@ -25,6 +25,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Calendar } from "@/components/ui/calendar";
 
 interface DayDetailDrawerProps {
   selectedDay: { date: Date, jobs: Job[] } | null;
@@ -93,7 +94,7 @@ export const DayDetailDrawer: React.FC<DayDetailDrawerProps> = ({
       <DrawerContent className="max-h-[80vh] bg-slate-300">
         <DrawerHeader className="bg-slate-300">
           <DrawerTitle className="text-center flex items-center justify-center gap-2">
-            <Calendar className="h-5 w-5" />
+            <CalendarIcon className="h-5 w-5" />
             Jobs for {format(date, 'MMMM d, yyyy')}
           </DrawerTitle>
         </DrawerHeader>
@@ -231,6 +232,7 @@ export const DayDetailDrawer: React.FC<DayDetailDrawerProps> = ({
               </div>
             </div>
             
+            {/* Quote Search section - moved below the main search bar */}
             {showQuoteSearch && (
               <div className="bg-white p-3 rounded-lg max-w-md w-full mx-auto">
                 <SearchQuotes 
