@@ -79,7 +79,7 @@ export const DayDetailDrawer: React.FC<DayDetailDrawerProps> = ({
   
   return (
     <Drawer open={Boolean(selectedDay)} onOpenChange={onClose}>
-      <DrawerContent className="max-h-[80vh]">
+      <DrawerContent className="max-h-[80vh] top-1/2 transform -translate-y-1/2 rounded-lg h-auto">
         <DrawerHeader>
           <DrawerTitle className="text-center flex items-center justify-center gap-2">
             <CalendarIcon className="h-5 w-5" />
