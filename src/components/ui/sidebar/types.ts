@@ -47,6 +47,11 @@ export interface SidebarProps extends React.ComponentProps<"div"> {
   collapsible?: "offcanvas" | "icon" | "none";
 }
 
+export interface SidebarHeaderProps extends React.ComponentProps<"div"> {
+  logoSrc?: string;
+  title?: string;
+}
+
 export interface SidebarMenuSkeletonProps extends React.ComponentProps<"div"> {
   showIcon?: boolean;
 }
