@@ -1,5 +1,5 @@
 
-import React, { useState, useCallback } from 'react';
+import React, { useState } from 'react';
 import { format } from 'date-fns';
 import { Job } from '@/types/job';
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerFooter } from '@/components/ui/drawer';
@@ -8,6 +8,7 @@ import { CalendarIcon } from 'lucide-react';
 import { SearchQuotes } from '@/pages/Jobs/components/tabs/financials/SearchQuotes';
 import { SearchBar } from './components/SearchBar';
 import { JobsList } from './components/JobsList';
+
 interface DayDetailDrawerProps {
   selectedDay: {
     date: Date;
@@ -16,6 +17,7 @@ interface DayDetailDrawerProps {
   onClose: () => void;
   onJobClick: (jobId: string, e: React.MouseEvent) => void;
 }
+
 export const DayDetailDrawer: React.FC<DayDetailDrawerProps> = ({
   selectedDay,
   onClose,
@@ -28,7 +30,9 @@ export const DayDetailDrawer: React.FC<DayDetailDrawerProps> = ({
   const [endDate, setEndDate] = useState<Date | undefined>(undefined);
   const [startTime, setStartTime] = useState("09:00");
   const [endTime, setEndTime] = useState("17:00");
+
   if (!selectedDay) return null;
+  
   const {
     date,
     jobs
@@ -48,17 +52,23 @@ export const DayDetailDrawer: React.FC<DayDetailDrawerProps> = ({
     customerName: "Mike Brown",
     amount: 950
   }];
-  const filteredJobs = jobSearchQuery ? jobs.filter(job => job.title?.toLowerCase().includes(jobSearchQuery.toLowerCase()) || job.jobNumber.toLowerCase().includes(jobSearchQuery.toLowerCase()) || job.customer.toLowerCase().includes(jobSearchQuery.toLowerCase()) || job.type.toLowerCase().includes(jobSearchQuery.toLowerCase())) : jobs;
+
+  const filteredJobs = jobSearchQuery ? jobs.filter(job => 
+    job.title?.toLowerCase().includes(jobSearchQuery.toLowerCase()) || 
+    job.jobNumber.toLowerCase().includes(jobSearchQuery.toLowerCase()) || 
+    job.customer.toLowerCase().includes(jobSearchQuery.toLowerCase()) || 
+    job.type.toLowerCase().includes(jobSearchQuery.toLowerCase())
+  ) : jobs;
+
   const handleQuoteSelect = (amount: number) => {
     console.log("Selected quote with amount:", amount);
-    // Here you would typically create a job from the quote
-    // For now, we'll just close the quote search
     setShowQuoteSearch(false);
-    // Show a toast notification that a job has been created
   };
+
   const handleToggleQuoteSearch = () => {
     setShowQuoteSearch(!showQuoteSearch);
   };
+
   const handleCreateJob = () => {
     console.log("Create new job", {
       date: format(date, 'yyyy-MM-dd'),
@@ -67,11 +77,11 @@ export const DayDetailDrawer: React.FC<DayDetailDrawerProps> = ({
       startTime,
       endTime
     });
-    // Here you would typically create a new job
   };
+
   return <Drawer open={Boolean(selectedDay)} onOpenChange={onClose}>
-      <DrawerContent className="fixed inset-x-0 top-20 transform max-w-2xl h-auto border shadow-lg rounded-xl bg-slate-50 px-[15px] py-0 mx-auto my-0">
-        <DrawerHeader className="border-b">
+      <DrawerContent className="fixed inset-x-0 top-20 transform max-w-2xl h-auto border shadow-lg rounded-xl bg-slate-50 px-[15px] py-0 mx-auto my-0 max-h-[80vh] overflow-auto">
+        <DrawerHeader className="border-b py-2">
           <DrawerTitle className="text-center flex items-center justify-center gap-2">
             <CalendarIcon className="h-5 w-5" />
             New Appointment
@@ -81,19 +91,40 @@ export const DayDetailDrawer: React.FC<DayDetailDrawerProps> = ({
         <div className="overflow-auto">
           <div className="flex flex-col items-center">
             {/* Search Bar Component */}
-            <SearchBar jobSearchQuery={jobSearchQuery} setJobSearchQuery={setJobSearchQuery} startDate={startDate} setStartDate={setStartDate} endDate={endDate} setEndDate={setEndDate} startTime={startTime} setStartTime={setStartTime} endTime={endTime} setEndTime={setEndTime} onToggleQuoteSearch={handleToggleQuoteSearch} onCreateJob={handleCreateJob} />
+            <SearchBar 
+              jobSearchQuery={jobSearchQuery} 
+              setJobSearchQuery={setJobSearchQuery} 
+              startDate={startDate} 
+              setStartDate={setStartDate} 
+              endDate={endDate} 
+              setEndDate={setEndDate} 
+              startTime={startTime} 
+              setStartTime={setStartTime} 
+              endTime={endTime} 
+              setEndTime={setEndTime} 
+              onToggleQuoteSearch={handleToggleQuoteSearch} 
+              onCreateJob={handleCreateJob} 
+            />
             
             {/* Quote Search section */}
-            {showQuoteSearch && <div className="max-w-md w-full mx-auto">
+            {showQuoteSearch && (
+              <div className="max-w-md w-full mx-auto">
                 <SearchQuotes onSelectQuote={handleQuoteSelect} customerQuotes={mockCustomerQuotes} />
-              </div>}
+              </div>
+            )}
             
-            {/* Jobs List Component */}
-            {!showQuoteSearch && filteredJobs.length > 0 && <JobsList jobSearchQuery={jobSearchQuery} filteredJobs={filteredJobs} onJobClick={onJobClick} />}
+            {/* Jobs List Component - only show if not searching for quotes and we have jobs */}
+            {!showQuoteSearch && filteredJobs.length > 0 && (
+              <JobsList 
+                jobSearchQuery={jobSearchQuery} 
+                filteredJobs={filteredJobs} 
+                onJobClick={onJobClick} 
+              />
+            )}
           </div>
         </div>
         
-        <DrawerFooter className="flex flex-row justify-between border-t gap-4 p-4">
+        <DrawerFooter className="flex flex-row justify-between border-t gap-4 p-3">
           <Button onClick={onClose} variant="outline" className="flex-1">Cancel</Button>
           <Button onClick={handleCreateJob} className="flex-1">Save</Button>
         </DrawerFooter>
