@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Calendar } from "@/components/ui/calendar";
 import { Textarea } from "@/components/ui/textarea";
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useNavigate } from 'react-router-dom';
 
 interface SearchBarProps {
   jobSearchQuery: string;
@@ -40,6 +41,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
   onCreateJob
 }) => {
   const isMobile = useIsMobile();
+  const navigate = useNavigate();
   
   const generateTimeOptions = () => {
     const options = [];
@@ -54,6 +56,10 @@ export const SearchBar: React.FC<SearchBarProps> = ({
   };
   
   const timeOptions = generateTimeOptions();
+  
+  const handleNewJobClick = () => {
+    navigate('/jobs/new');
+  };
   
   return (
     <div className={`w-full ${isMobile ? 'py-0.5 px-1' : 'py-1 px-2'}`}>
@@ -139,7 +145,16 @@ export const SearchBar: React.FC<SearchBarProps> = ({
         
         {/* Job section */}
         <div className="px-0 mx-0">
-          <label className="block text-xs font-medium mb-1 text-gray-500">Job</label>
+          <div className="flex justify-between items-center mb-1">
+            <label className="block text-xs font-medium text-gray-500">Job</label>
+            <Button 
+              onClick={handleNewJobClick}
+              className="h-6 px-2 text-xs bg-slate-500 hover:bg-slate-400 text-white flex items-center gap-1"
+            >
+              <Plus className="h-3 w-3" />
+              New Job
+            </Button>
+          </div>
           <div className="flex py-px px-0 my-0 mx-[4px]">
             <div className="relative w-full py-[3px] px-px my-0">
               <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-3 w-3 text-gray-400" />
