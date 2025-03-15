@@ -160,14 +160,14 @@ const settingsSections = [
 export default function SettingsPage() {
   return (
     <AppLayout>
-      <div className="p-6 space-y-8">
+      <div className="space-y-6 h-full overflow-auto">
         <div className="flex items-center gap-2">
           <Settings className="h-8 w-8 text-gray-700" />
           <h1 className="text-3xl font-bold">Settings</h1>
         </div>
 
         {/* Settings Grid */}
-        <div className="space-y-4">
+        <div className="space-y-4 pb-6">
           <h2 className="text-xl font-semibold text-gray-900">Configuration</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {settingsSections.map(section => (

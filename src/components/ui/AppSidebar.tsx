@@ -42,7 +42,7 @@ export function AppSidebar() {
     <>
       <MobileSidebarToggle />
 
-      <div 
+      <aside 
         data-state={state} 
         className={cn(
           "peer z-30 fixed h-screen",
@@ -55,7 +55,7 @@ export function AppSidebar() {
           width: state === "expanded" ? SIDEBAR_CONSTANTS.SIDEBAR_WIDTH : SIDEBAR_CONSTANTS.SIDEBAR_WIDTH_ICON
         }}
       >
-        <div className="flex flex-col h-full bg-slate-200">
+        <div className="flex flex-col h-full bg-slate-200 border-r border-slate-300">
           <SidebarHeader 
             logoSrc="/lovable-uploads/6a07dd00-f2c7-49da-8b00-48d960c13610.png" 
             title="Trade Ease" 
@@ -65,7 +65,7 @@ export function AppSidebar() {
           
           <SidebarTeamSection teams={teams} />
         </div>
-      </div>
+      </aside>
     </>
   );
 }

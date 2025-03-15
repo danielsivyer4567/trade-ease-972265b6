@@ -89,10 +89,10 @@ export function AppLayout({
 
   return (
     <SidebarProvider defaultOpen={!isMobile}>
-      <div className="min-h-screen h-screen w-full flex bg-transparent overflow-hidden">
+      <div className="flex h-screen w-full overflow-hidden bg-slate-100">
         <AppSidebar />
         <main className={cn(
-          "flex-1 overflow-auto transition-all duration-300 ease-in-out", 
+          "flex-1 h-full overflow-auto transition-all duration-300 ease-in-out", 
           isMobile ? "p-2 pt-16" : "p-3 md:p-4 lg:p-6",
           !isMobile && "ml-[var(--sidebar-width-value)]",
           className
@@ -105,7 +105,7 @@ export function AppLayout({
                 : SIDEBAR_CONSTANTS.SIDEBAR_WIDTH)
         } as React.CSSProperties}
         >
-          <div className="relative w-full h-full glass-card p-2 md:p-4 lg:p-6 border-2 border-white/50 shadow-2xl bg-slate-200 rounded-xl">
+          <div className="relative w-full h-full glass-card p-2 md:p-4 lg:p-6 border border-white/50 shadow-lg bg-slate-200 rounded-xl">
             <div className="absolute top-3 right-3 z-10">
               <Button 
                 variant="outline" 
@@ -119,7 +119,9 @@ export function AppLayout({
             </div>
             
             {isMainDashboard && <QuickTabs />}
-            {children}
+            <div className="pt-10 h-full overflow-auto">
+              {children}
+            </div>
           </div>
         </main>
       </div>
