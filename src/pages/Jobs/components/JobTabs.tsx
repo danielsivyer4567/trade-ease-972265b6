@@ -86,7 +86,7 @@ export const JobTabs = ({
         </TabsList>
       </div>
       
-      <div className="w-full mt-2 overflow-x-auto">
+      <div className="w-full mt-4 overflow-hidden bg-white z-10 relative">
         {/* TabsContent components are rendered within StandardTabs and ManagerTabs */}
       </div>
     </Tabs>

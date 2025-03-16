@@ -22,7 +22,7 @@ export function DocumentApproval({
   const isMobile = useIsMobile();
   
   return (
-    <div className="border-t-2 sm:border-t-4 border-gray-200 pt-6 sm:pt-10 mt-8 sm:mt-16 mb-16 sm:mb-24">
+    <div className="border-t-2 sm:border-t-4 border-gray-200 pt-6 sm:pt-8">
       <h3 className="text-lg sm:text-xl font-medium mb-4 sm:mb-6 px-2">Document Approval</h3>
       
       <div className={`grid ${isMobile ? 'grid-cols-1 gap-4' : 'grid-cols-1 md:grid-cols-3 gap-6'} items-start`}>

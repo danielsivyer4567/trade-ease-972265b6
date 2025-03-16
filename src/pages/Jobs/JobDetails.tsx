@@ -1,3 +1,4 @@
+
 import { useParams, useNavigate } from 'react-router-dom';
 import { JobHeader } from './components/JobHeader';
 import { JobTabs } from './components/JobTabs';
@@ -107,7 +108,7 @@ export function JobDetails() {
           extractedFinancialData={extractedFinancialData}
         />
         
-        {isManager && <div className="mt-10 sm:mt-16 mb-8">
+        {isManager && <div className="mt-8 mb-8">
             <DocumentApproval jobId={job.id} onFinancialDataExtracted={handleFinancialDataExtracted} />
           </div>}
       </div>
