@@ -53,7 +53,7 @@ export function MainContent({
           : (sidebarOpen ? SIDEBAR_CONSTANTS.SIDEBAR_WIDTH : '0px')
       } as React.CSSProperties}
     >
-      <div className="relative w-full h-full glass-card p-2 md:p-4 lg:p-6 border border-white/50 shadow-lg bg-slate-200 rounded-xl">
+      <div className="relative w-full min-h-full overflow-visible glass-card p-2 md:p-4 lg:p-6 border border-white/50 shadow-lg bg-slate-200 rounded-xl">
         {/* Logout Button */}
         <div className="absolute top-3 right-3 z-10">
           <Button 
@@ -71,7 +71,7 @@ export function MainContent({
         {showQuickTabs && <QuickTabs />}
         
         {/* Main Content */}
-        <div className="pt-10 h-full">
+        <div className="pt-10 min-h-full pb-10">
           {children}
         </div>
       </div>
