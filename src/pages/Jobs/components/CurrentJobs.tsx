@@ -99,7 +99,7 @@ export function CurrentJobs({
                   <td className="px-2 py-2 whitespace-nowrap">
                     <div className="text-xs text-gray-500">{job.date}</div>
                   </td>
-                  <td className="px-2 py-2 whitespace-nowrap bg-slate-200">
+                  <td className="px-2 py-2 whitespace-nowrap bg-slate-100">
                     <div className="flex items-center">
                       {getStatusIcon(job.status)}
                       <span className="ml-1 text-xs text-gray-500">
