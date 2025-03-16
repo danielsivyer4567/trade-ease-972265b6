@@ -2,6 +2,7 @@
 import { FileText, Calendar, DollarSign, Building, Receipt } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface ExtractedDataDisplayProps {
   extractedFinancialData: any[];
@@ -16,6 +17,8 @@ export const ExtractedDataDisplay = ({
   calculateTotalByCategory,
   applyExtractedAmount
 }: ExtractedDataDisplayProps) => {
+  const isMobile = useIsMobile();
+  
   if (extractedFinancialData.length === 0) {
     return null;
   }
@@ -41,47 +44,56 @@ export const ExtractedDataDisplay = ({
                 </span>
               </h4>
               
-              {groupedFinancialData[category].map((data, index) => (
-                <div 
-                  key={index} 
-                  className="flex justify-between items-center p-2 bg-white rounded border border-blue-100 hover:bg-blue-50 cursor-pointer"
-                  onClick={() => applyExtractedAmount(data)}
-                >
-                  <div className="text-sm space-y-1">
-                    <div className="font-medium">${data.amount.toFixed(2)}</div>
-                    <div className="text-xs text-gray-500 flex items-center space-x-2">
-                      {data.vendor && (
-                        <span className="flex items-center">
-                          <Building className="h-3 w-3 mr-1" />
-                          {data.vendor}
+              <div className={`space-y-2 ${isMobile ? 'w-full' : ''}`}>
+                {groupedFinancialData[category].map((data, index) => (
+                  <div 
+                    key={index} 
+                    className={`flex ${isMobile ? 'flex-col' : 'justify-between'} items-start sm:items-center p-2 bg-white rounded border border-blue-100 hover:bg-blue-50`}
+                  >
+                    <div className="text-sm space-y-1 w-full">
+                      <div className="font-medium">${data.amount.toFixed(2)}</div>
+                      <div className="text-xs text-gray-500 flex flex-wrap gap-2">
+                        {data.vendor && (
+                          <span className="flex items-center">
+                            <Building className="h-3 w-3 mr-1" />
+                            {data.vendor}
+                          </span>
+                        )}
+                        {data.date && (
+                          <span className="flex items-center">
+                            <Calendar className="h-3 w-3 mr-1" />
+                            {data.date}
+                          </span>
+                        )}
+                        {data.source && (
+                          <span className="flex items-center truncate max-w-full sm:max-w-[180px]">
+                            <FileText className="h-3 w-3 mr-1" />
+                            "{data.source}"
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    <div className={`flex items-center ${isMobile ? 'w-full justify-between mt-2' : 'ml-2'}`}>
+                      {data.status && (
+                        <span className={`text-xs px-2 py-1 rounded mr-2 ${
+                          data.status === 'approved' ? 'bg-green-100 text-green-800' : 
+                          'bg-yellow-100 text-yellow-800'
+                        }`}>
+                          {data.status === 'approved' ? 'Approved' : 'Draft'}
                         </span>
                       )}
-                      {data.date && (
-                        <span className="flex items-center">
-                          <Calendar className="h-3 w-3 mr-1" />
-                          {data.date}
-                        </span>
-                      )}
-                      <span>
-                        {data.source && `from "${data.source}"`}
-                      </span>
+                      <Button 
+                        size="sm" 
+                        variant="outline" 
+                        className="text-xs text-blue-600 hover:text-blue-800 hover:bg-blue-50"
+                        onClick={() => applyExtractedAmount(data)}
+                      >
+                        Apply Amount
+                      </Button>
                     </div>
                   </div>
-                  <div className="flex items-center">
-                    {data.status && (
-                      <span className={`text-xs px-2 py-1 rounded mr-2 ${
-                        data.status === 'approved' ? 'bg-green-100 text-green-800' : 
-                        'bg-yellow-100 text-yellow-800'
-                      }`}>
-                        {data.status === 'approved' ? 'Approved' : 'Draft'}
-                      </span>
-                    )}
-                    <button className="text-xs text-blue-600 hover:text-blue-800">
-                      Apply
-                    </button>
-                  </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           ))}
         </div>

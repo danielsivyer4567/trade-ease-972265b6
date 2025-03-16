@@ -7,6 +7,7 @@ import { SearchQuotes } from "./financials/SearchQuotes";
 import { QuoteAmountInput } from "./financials/QuoteAmountInput";
 import { FinancialSummary } from "./financials/FinancialSummary";
 import { FinancialNotes } from "./financials/FinancialNotes";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 // Mock data for demonstration - in a real app this would come from your database
 const mockCustomerQuotes = [
@@ -36,6 +37,7 @@ export const JobFinancialsTab = ({
   const [quoteAmount, setQuoteAmount] = useState(0);
   const [hasAppliedExtractedData, setHasAppliedExtractedData] = useState(false);
   const [groupedFinancialData, setGroupedFinancialData] = useState<Record<string, any[]>>({});
+  const isMobile = useIsMobile();
   
   const laborCost = (jobTimer / 3600) * 50; // Assuming $50/hour labor rate
   const totalCostsWithLabor = totalCosts + laborCost;
@@ -89,8 +91,8 @@ export const JobFinancialsTab = ({
 
   return (
     <TabsContent value="financials" className="space-y-4">
-      <div className="border rounded-lg p-4">
-        <div className="space-y-4">
+      <div className={`border rounded-lg p-4 ${isMobile ? 'overflow-x-hidden' : ''}`}>
+        <div className={`space-y-4 ${isMobile ? 'w-full' : 'max-w-full'}`}>
           <ExtractedDataDisplay 
             extractedFinancialData={extractedFinancialData}
             groupedFinancialData={groupedFinancialData}
