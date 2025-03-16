@@ -1,14 +1,12 @@
-
 import { User } from "lucide-react";
 import type { Job } from "@/types/job";
-
 interface CustomerDetailsProps {
   job: Job;
 }
-
-export const CustomerDetails = ({ job }: CustomerDetailsProps) => {
-  return (
-    <div className="bg-white shadow rounded-lg p-4">
+export const CustomerDetails = ({
+  job
+}: CustomerDetailsProps) => {
+  return <div className="bg-white shadow rounded-lg p-4 px-0 my-0 mx-0">
       <h3 className="text-lg font-medium flex items-center mb-3">
         <User className="mr-2 h-5 w-5 text-gray-500" />
         Customer Details
@@ -19,6 +17,5 @@ export const CustomerDetails = ({ job }: CustomerDetailsProps) => {
         <p className="text-sm"><span className="font-semibold">Job Type:</span> {job.type}</p>
         <p className="text-sm"><span className="font-semibold">Assigned Team:</span> {job.assignedTeam}</p>
       </div>
-    </div>
-  );
+    </div>;
 };
