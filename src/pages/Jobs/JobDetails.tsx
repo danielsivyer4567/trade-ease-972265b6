@@ -4,7 +4,7 @@ import { JobHeader } from './components/JobHeader';
 import { JobTabs } from './components/JobTabs';
 import { useState, useEffect } from 'react';
 import type { Job } from '@/types/job';
-import { DocumentApproval } from './components/DocumentApproval';
+import { DocumentApproval } from './components/document-approval/DocumentApproval';
 import { useJobTimer } from './hooks/useJobTimer';
 import { useJobLocation } from './hooks/useJobLocation';
 import { useJobFinancialData } from './hooks/useJobFinancialData';
@@ -95,7 +95,7 @@ export function JobDetails() {
       <div className="space-y-4 sm:space-y-6 p-2 sm:p-4 max-w-7xl mx-auto">
         <JobHeader job={job} />
         
-        <div className="mb-6 sm:mb-10">
+        <div className="mb-6 sm:mb-10 bg-white rounded-lg shadow p-4 overflow-hidden">
           <JobTabs
             job={job}
             isManager={isManager}
@@ -115,7 +115,7 @@ export function JobDetails() {
         </div>
         
         {isManager && (
-          <div className="mt-6 sm:mt-10">
+          <div className="mt-10 sm:mt-16">
             <DocumentApproval 
               jobId={job.id} 
               onFinancialDataExtracted={handleFinancialDataExtracted} 

@@ -55,35 +55,41 @@ export const JobTabs = ({
   
   return (
     <Tabs defaultValue="details" className="w-full">
-      <TabsList className={`${isMobile ? 'overflow-x-auto flex w-full' : ''}`}>
-        <StandardTabs 
-          job={job} 
-          jobTimer={jobTimer} 
-          jobNotes={jobNotes} 
-          setJobNotes={setJobNotes} 
-          locationHistory={locationHistory} 
-          hasLocationPermission={hasLocationPermission} 
-          handleTimerToggle={handleTimerToggle} 
-          handleBreakToggle={handleBreakToggle} 
-          isTimerRunning={isTimerRunning} 
-          isOnBreak={isOnBreak} 
-        />
-        
-        {isManager && (
-          <ManagerTabs 
+      <div className="w-full overflow-x-auto">
+        <TabsList className={`${isMobile ? 'flex w-full max-w-full' : 'flex w-full'} mb-4`}>
+          <StandardTabs 
+            job={job} 
             jobTimer={jobTimer} 
-            tabNotes={tabNotes} 
-            setTabNotes={setTabNotes} 
-            totalRevenue={totalRevenue} 
-            totalCosts={totalCosts} 
-            totalBills={totalBills} 
-            extractedFinancialData={extractedFinancialData} 
-            onUpdateBillsTotals={handleUpdateBillsTotals} 
-            onUpdateCostsTotals={handleUpdateCostsTotals} 
-            onUpdateInvoiceTotals={handleUpdateInvoiceTotals} 
+            jobNotes={jobNotes} 
+            setJobNotes={setJobNotes} 
+            locationHistory={locationHistory} 
+            hasLocationPermission={hasLocationPermission} 
+            handleTimerToggle={handleTimerToggle} 
+            handleBreakToggle={handleBreakToggle} 
+            isTimerRunning={isTimerRunning} 
+            isOnBreak={isOnBreak} 
           />
-        )}
-      </TabsList>
+          
+          {isManager && (
+            <ManagerTabs 
+              jobTimer={jobTimer} 
+              tabNotes={tabNotes} 
+              setTabNotes={setTabNotes} 
+              totalRevenue={totalRevenue} 
+              totalCosts={totalCosts} 
+              totalBills={totalBills} 
+              extractedFinancialData={extractedFinancialData} 
+              onUpdateBillsTotals={handleUpdateBillsTotals} 
+              onUpdateCostsTotals={handleUpdateCostsTotals} 
+              onUpdateInvoiceTotals={handleUpdateInvoiceTotals} 
+            />
+          )}
+        </TabsList>
+      </div>
+      
+      <div className="w-full mt-4">
+        {/* TabsContent will be rendered here, separated from TabsList */}
+      </div>
     </Tabs>
   );
 };

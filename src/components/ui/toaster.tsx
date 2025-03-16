@@ -30,7 +30,9 @@ export function Toaster() {
           </Toast>
         )
       })}
-      <ToastViewport className={`${isMobile ? 'bottom-0 p-2 w-full' : 'bottom-0 right-0'} top-auto flex-col md:max-w-[420px] z-50`} />
+      <ToastViewport 
+        className={`${isMobile ? 'bottom-0 p-2 w-full' : 'bottom-0 right-0'} top-auto flex-col md:max-w-[420px] z-50 fixed`} 
+      />
     </ToastProvider>
   )
 }

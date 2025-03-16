@@ -5,6 +5,7 @@ import { JobBillsTab } from "./JobBillsTab";
 import { JobCostsTab } from "./JobCostsTab";
 import { JobInvoicesTab } from "./JobInvoicesTab";
 import { JobFinancialsTab } from "./JobFinancialsTab";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface ManagerTabsProps {
   jobTimer: number;
@@ -31,22 +32,24 @@ export const ManagerTabs = ({
   onUpdateCostsTotals,
   onUpdateInvoiceTotals
 }: ManagerTabsProps) => {
+  const isMobile = useIsMobile();
+  
   return (
     <>
-      <TabsTrigger value="bills" className="min-w-[100px] whitespace-nowrap">
-        <Receipt className="w-4 h-4 mr-2" />
+      <TabsTrigger value="bills" className="min-w-[80px] sm:min-w-[100px] whitespace-nowrap flex-shrink-0">
+        {!isMobile && <Receipt className="w-4 h-4 mr-2" />}
         Bills
       </TabsTrigger>
-      <TabsTrigger value="costs" className="min-w-[100px] whitespace-nowrap">
-        <Calculator className="w-4 h-4 mr-2" />
+      <TabsTrigger value="costs" className="min-w-[80px] sm:min-w-[100px] whitespace-nowrap flex-shrink-0">
+        {!isMobile && <Calculator className="w-4 h-4 mr-2" />}
         Costs
       </TabsTrigger>
-      <TabsTrigger value="invoices" className="min-w-[100px] whitespace-nowrap">
-        <ScrollText className="w-4 h-4 mr-2" />
+      <TabsTrigger value="invoices" className="min-w-[80px] sm:min-w-[100px] whitespace-nowrap flex-shrink-0">
+        {!isMobile && <ScrollText className="w-4 h-4 mr-2" />}
         Invoices
       </TabsTrigger>
-      <TabsTrigger value="financials" className="min-w-[100px] whitespace-nowrap">
-        <Wallet className="w-4 h-4 mr-2" />
+      <TabsTrigger value="financials" className="min-w-[80px] sm:min-w-[100px] whitespace-nowrap flex-shrink-0">
+        {!isMobile && <Wallet className="w-4 h-4 mr-2" />}
         Financials
       </TabsTrigger>
 
