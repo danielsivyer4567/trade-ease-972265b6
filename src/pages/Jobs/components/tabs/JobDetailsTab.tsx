@@ -10,8 +10,8 @@ interface JobDetailsTabProps {
 
 export const JobDetailsTab = ({ job }: JobDetailsTabProps) => {
   return (
-    <TabsContent value="details" className="space-y-4 p-4">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <TabsContent value="details" className="space-y-6 p-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-full">
         <LeftColumn job={job} />
         <RightColumn job={job} />
       </div>
