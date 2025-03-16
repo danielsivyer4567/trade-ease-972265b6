@@ -92,7 +92,7 @@ export function JobDetails() {
 
   return (
     <div className="container-responsive mx-auto">
-      <div className="space-y-4 sm:space-y-6 p-2 sm:p-4 max-w-7xl mx-auto">
+      <div className="space-y-4 sm:space-y-6 p-2 sm:p-4 max-w-7xl mx-auto pb-24">
         <JobHeader job={job} />
         
         <div className="mb-6 sm:mb-10 bg-white rounded-lg shadow p-4 overflow-hidden">
@@ -115,7 +115,7 @@ export function JobDetails() {
         </div>
         
         {isManager && (
-          <div className="mt-10 sm:mt-16">
+          <div className="mt-10 sm:mt-16 mb-8">
             <DocumentApproval 
               jobId={job.id} 
               onFinancialDataExtracted={handleFinancialDataExtracted} 

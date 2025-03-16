@@ -14,14 +14,28 @@ body {
   overscroll-behavior: none;
 }
 
-/* Hide scrollbars but keep functionality */
+/* Modify scrollbar appearance but keep functionality */
 ::-webkit-scrollbar {
-  display: none;
+  width: 5px;
+  height: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.3);
 }
 
 * {
-  -ms-overflow-style: none;  /* IE and Edge */
-  scrollbar-width: none;  /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: thin; /* Firefox */
 }
 
 /* Improve touch targets for mobile */
@@ -33,6 +47,7 @@ button, a, [role="button"] {
 /* Add smooth scrolling */
 html {
   scroll-behavior: smooth;
+  height: 100%;
 }
 
 /* Disable text selection during tap on mobile */

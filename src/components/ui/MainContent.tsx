@@ -42,7 +42,7 @@ export function MainContent({
   return (
     <main 
       className={cn(
-        "flex-1 h-full transition-all duration-300 ease-in-out", 
+        "flex-1 transition-all duration-300 ease-in-out overflow-y-auto", 
         isMobile ? "p-2 pt-16" : "p-3 md:p-4 lg:p-6",
         !isMobile && sidebarOpen && "ml-[var(--sidebar-width-value)]",
         className
@@ -50,10 +50,11 @@ export function MainContent({
       style={{
         '--sidebar-width-value': isMobile 
           ? '0px' 
-          : (sidebarOpen ? SIDEBAR_CONSTANTS.SIDEBAR_WIDTH : '0px')
+          : (sidebarOpen ? SIDEBAR_CONSTANTS.SIDEBAR_WIDTH : '0px'),
+        'maxHeight': '100vh'
       } as React.CSSProperties}
     >
-      <div className="relative w-full min-h-full overflow-visible glass-card p-2 md:p-4 lg:p-6 border border-white/50 shadow-lg bg-slate-200 rounded-xl">
+      <div className="relative w-full min-h-full overflow-auto glass-card p-2 md:p-4 lg:p-6 border border-white/50 shadow-lg bg-slate-200 rounded-xl">
         {/* Logout Button */}
         <div className="absolute top-3 right-3 z-10">
           <Button 
@@ -71,7 +72,7 @@ export function MainContent({
         {showQuickTabs && <QuickTabs />}
         
         {/* Main Content */}
-        <div className="pt-10 min-h-full pb-10">
+        <div className="pt-10 min-h-full pb-16">
           {children}
         </div>
       </div>
