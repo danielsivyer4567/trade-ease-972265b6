@@ -1,4 +1,3 @@
-
 import { useParams, useNavigate } from 'react-router-dom';
 import { JobHeader } from './components/JobHeader';
 import { JobTabs } from './components/JobTabs';
@@ -8,6 +7,7 @@ import { DocumentApproval } from './components/DocumentApproval';
 import { useJobTimer } from './hooks/useJobTimer';
 import { useJobLocation } from './hooks/useJobLocation';
 import { useJobFinancialData } from './hooks/useJobFinancialData';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const mockJobs: Job[] = [
   {
@@ -52,6 +52,7 @@ export function JobDetails() {
   const job = mockJobs.find(j => j.id === id);
   const [jobNotes, setJobNotes] = useState("");
   const isManager = true;
+  const isMobile = useIsMobile();
 
   const { 
     jobTimer, 
@@ -89,7 +90,7 @@ export function JobDetails() {
   }
 
   return (
-    <div className="space-y-4 md:space-y-6 p-4 md:p-6 max-w-7xl mx-auto">
+    <div className="space-y-4 md:space-y-6 p-3 md:p-6 max-w-7xl mx-auto">
       <JobHeader job={job} />
       <JobTabs
         job={job}

@@ -3,15 +3,17 @@ import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Coffee, PackageX } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface ActionButtonsProps {
-  onSmoko: () => void;
-  onPackUp: () => void;
+  onSmoko?: () => void;
+  onPackUp?: () => void;
 }
 
-export const ActionButtons = () => {
+export const ActionButtons = ({ onSmoko, onPackUp }: ActionButtonsProps) => {
   const [isOnSmoko, setIsOnSmoko] = useState(false);
   const { toast } = useToast();
+  const isMobile = useIsMobile();
 
   const handleSmoko = () => {
     setIsOnSmoko(!isOnSmoko);
@@ -19,6 +21,10 @@ export const ActionButtons = () => {
       title: isOnSmoko ? "Break Ended" : "Break Started",
       description: isOnSmoko ? "Back to work!" : "Enjoy your break!"
     });
+    
+    if (onSmoko) {
+      onSmoko();
+    }
   };
 
   const handlePackUp = () => {
@@ -26,24 +32,34 @@ export const ActionButtons = () => {
       title: "Packing Up",
       description: "End of work day recorded. Good job!"
     });
+    
+    if (onPackUp) {
+      onPackUp();
+    }
   };
 
   return (
-    <>
+    <div className="flex items-center gap-2 mt-2 md:mt-0">
       <Button 
-        className={`bg-red-500 hover:bg-red-600 text-white font-bold uppercase tracking-wider flex items-center gap-2 min-w-[150px] h-12 ${isOnSmoko ? 'animate-pulse' : ''}`} 
+        className={`bg-red-500 hover:bg-red-600 text-white font-bold uppercase tracking-wider flex items-center gap-2 h-10 ${
+          isMobile ? "px-3 text-xs" : "min-w-[150px] h-12"
+        } ${isOnSmoko ? 'animate-pulse' : ''}`}
         onClick={handleSmoko}
+        aria-label="Take a break"
       >
-        <Coffee className={isOnSmoko ? 'animate-bounce' : ''} />
-        SMOKO
+        <Coffee className={`${isOnSmoko ? 'animate-bounce' : ''} w-5 h-5`} />
+        {!isMobile && "SMOKO"}
       </Button>
       <Button 
-        className="bg-red-700 hover:bg-red-800 text-white font-bold uppercase tracking-wider flex items-center gap-2 min-w-[150px] h-12" 
+        className={`bg-red-700 hover:bg-red-800 text-white font-bold uppercase tracking-wider flex items-center gap-2 h-10 ${
+          isMobile ? "px-3 text-xs" : "min-w-[150px] h-12"
+        }`}
         onClick={handlePackUp}
+        aria-label="End work day"
       >
-        <PackageX />
-        PACK HER UP
+        <PackageX className="w-5 h-5" />
+        {!isMobile && "PACK HER UP"}
       </Button>
-    </>
+    </div>
   );
 };
