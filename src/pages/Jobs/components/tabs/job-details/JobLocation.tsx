@@ -26,7 +26,7 @@ export const JobLocation = ({ job }: JobLocationProps) => {
       >
         <div className="flex items-center">
           <MapPin className="mr-2 h-4 w-4 text-gray-500" />
-          <span className="font-medium text-sm">Job Location</span>
+          <span className="font-medium text-sm">Job Location Details</span>
         </div>
         <span className="text-xs text-gray-500">{lat}, {lng}</span>
       </Button>
@@ -51,16 +51,8 @@ export const JobLocation = ({ job }: JobLocationProps) => {
             </Button>
           </div>
 
-          {/* Map Component */}
-          {job.location && Array.isArray(job.location) && job.location.length === 2 && (
-            <div className="h-48 overflow-hidden rounded-md">
-              <JobMap 
-                center={[job.location[0], job.location[1]]} 
-                zoom={14} 
-                markers={[{ position: [job.location[1], job.location[0]], title: job.title }]}
-              />
-            </div>
-          )}
+          {/* We don't need a map here anymore since we have one at the top of the page */}
+          <p className="text-xs text-gray-500">See the full map at the top of this page</p>
         </div>
       )}
     </div>

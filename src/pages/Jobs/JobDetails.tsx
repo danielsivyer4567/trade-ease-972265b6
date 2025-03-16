@@ -1,3 +1,4 @@
+
 import { useParams, useNavigate } from 'react-router-dom';
 import { JobHeader } from './components/JobHeader';
 import { JobTabs } from './components/JobTabs';
@@ -8,6 +9,8 @@ import { useJobTimer } from './hooks/useJobTimer';
 import { useJobLocation } from './hooks/useJobLocation';
 import { useJobFinancialData } from './hooks/useJobFinancialData';
 import { useIsMobile } from '@/hooks/use-mobile';
+import JobMap from '@/components/JobMap';
+
 const mockJobs: Job[] = [{
   id: "1",
   customer: "John Smith",
@@ -42,15 +45,15 @@ const mockJobs: Job[] = [{
   description: "Upgrade main electrical panel",
   assignedTeam: "Green Team"
 }];
+
 export function JobDetails() {
-  const {
-    id
-  } = useParams();
+  const { id } = useParams();
   const navigate = useNavigate();
   const job = mockJobs.find(j => j.id === id);
   const [jobNotes, setJobNotes] = useState("");
   const isManager = true;
   const isMobile = useIsMobile();
+  
   const {
     jobTimer,
     isTimerRunning,
@@ -58,33 +61,68 @@ export function JobDetails() {
     setIsTimerRunning,
     handleBreakToggle
   } = useJobTimer();
+  
   const {
     hasLocationPermission,
     locationHistory,
     handleTimerToggle: locationHandleTimerToggle
   } = useJobLocation();
+  
   const {
     extractedFinancialData,
     tabNotes,
     setTabNotes,
     handleFinancialDataExtracted
   } = useJobFinancialData(id);
+  
   useEffect(() => {
     if (!job) {
       navigate('/jobs');
     }
   }, [job, navigate]);
+  
   const handleTimerToggle = () => {
     locationHandleTimerToggle(isTimerRunning, setIsTimerRunning);
   };
+  
   if (!job) {
     return null;
   }
+  
   return <div className="container-responsive mx-auto">
       <div className="space-y-4 sm:space-y-6 p-2 sm:p-4 max-w-7xl mx-auto pb-24 bg-slate-200">
+        {/* Job Location Map */}
+        <div className="bg-white rounded-lg shadow-sm overflow-hidden mb-4">
+          <div className="p-4 border-b">
+            <h2 className="text-lg font-medium">Job Location</h2>
+          </div>
+          <div className="h-[300px] w-full">
+            <JobMap 
+              center={[job.location[0], job.location[1]]}
+              zoom={15}
+              markers={[{ position: [job.location[1], job.location[0]], title: job.title }]}
+            />
+          </div>
+        </div>
+        
         <JobHeader job={job} />
         
-        <JobTabs job={job} isManager={isManager} jobTimer={jobTimer} jobNotes={jobNotes} setJobNotes={setJobNotes} tabNotes={tabNotes} setTabNotes={setTabNotes} locationHistory={locationHistory} hasLocationPermission={hasLocationPermission} handleTimerToggle={handleTimerToggle} handleBreakToggle={handleBreakToggle} isTimerRunning={isTimerRunning} isOnBreak={isOnBreak} extractedFinancialData={extractedFinancialData} />
+        <JobTabs 
+          job={job} 
+          isManager={isManager} 
+          jobTimer={jobTimer} 
+          jobNotes={jobNotes} 
+          setJobNotes={setJobNotes} 
+          tabNotes={tabNotes} 
+          setTabNotes={setTabNotes} 
+          locationHistory={locationHistory} 
+          hasLocationPermission={hasLocationPermission} 
+          handleTimerToggle={handleTimerToggle} 
+          handleBreakToggle={handleBreakToggle} 
+          isTimerRunning={isTimerRunning} 
+          isOnBreak={isOnBreak} 
+          extractedFinancialData={extractedFinancialData} 
+        />
         
         {isManager && <div className="mt-8 mb-8">
             <DocumentApproval jobId={job.id} onFinancialDataExtracted={handleFinancialDataExtracted} />
