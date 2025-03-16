@@ -1,8 +1,8 @@
 
 import { AppLayout } from "@/components/ui/AppLayout";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, RefreshCcw } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -30,6 +30,28 @@ export default function NewJob() {
   const [dateUndecided, setDateUndecided] = useState(false);
   const [showTemplateSearch, setShowTemplateSearch] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+
+  // Function to generate a new job number
+  const generateJobNumber = () => {
+    const prefix = "JOB";
+    const timestamp = new Date().getTime().toString().slice(-6);
+    const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+    return `${prefix}-${timestamp}-${random}`;
+  };
+
+  // Generate job number on component mount
+  useEffect(() => {
+    setJobNumber(generateJobNumber());
+  }, []);
+
+  // Function to handle refreshing the job number
+  const handleRefreshJobNumber = () => {
+    setJobNumber(generateJobNumber());
+    toast({
+      title: "Job Number Generated",
+      description: "A new job number has been generated."
+    });
+  };
 
   // Mock templates for the template search
   const templates = [
@@ -149,13 +171,25 @@ export default function NewJob() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
                     <Label htmlFor="jobNumber">Job Number *</Label>
-                    <Input 
-                      id="jobNumber" 
-                      value={jobNumber} 
-                      onChange={e => setJobNumber(e.target.value)} 
-                      placeholder="e.g., JOB-001" 
-                      required 
-                    />
+                    <div className="flex">
+                      <Input 
+                        id="jobNumber" 
+                        value={jobNumber} 
+                        onChange={e => setJobNumber(e.target.value)} 
+                        placeholder="Auto-generated" 
+                        className="flex-1"
+                        readOnly 
+                      />
+                      <Button 
+                        type="button" 
+                        variant="outline" 
+                        onClick={handleRefreshJobNumber}
+                        className="ml-2 h-10 w-10 p-0 flex items-center justify-center bg-slate-300 hover:bg-slate-400"
+                        title="Generate new job number"
+                      >
+                        <RefreshCcw className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </div>
                   
                   <div className="space-y-2">
