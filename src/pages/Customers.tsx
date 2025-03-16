@@ -1,3 +1,4 @@
+
 import { AppLayout } from "@/components/ui/AppLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -8,14 +9,13 @@ import { ImagesGrid } from "@/components/tasks/ImagesGrid";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+
 export default function CustomersPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedFilter, setSelectedFilter] = useState("all");
-  const [expandedCustomerId, setExpandedCustomerId] = useState<number | null>(null);
   const navigate = useNavigate();
-  const {
-    toast
-  } = useToast();
+  const { toast } = useToast();
+  
   const customers = [{
     id: 1,
     name: "John Smith",
@@ -70,6 +70,7 @@ export default function CustomersPage() {
     totalSpent: "2,100.00",
     lastService: "2024-01-25"
   }];
+
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -80,12 +81,21 @@ export default function CustomersPage() {
       });
     }
   };
+
   const filteredCustomers = customers.filter(customer => {
-    const matchesSearch = customer.name.toLowerCase().includes(searchQuery.toLowerCase()) || customer.email.toLowerCase().includes(searchQuery.toLowerCase()) || customer.phone.includes(searchQuery);
+    const matchesSearch = customer.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                         customer.email.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                         customer.phone.includes(searchQuery);
     if (selectedFilter === "all") return matchesSearch;
     return matchesSearch && customer.status === selectedFilter;
   });
-  return <AppLayout>
+
+  const handleCustomerClick = (customerId: number) => {
+    navigate(`/customers/${customerId}`);
+  };
+
+  return (
+    <AppLayout>
       <div className="p-6 space-y-6">
         <div className="flex flex-col space-y-4">
           <div className="flex justify-between items-center">
@@ -162,7 +172,12 @@ export default function CustomersPage() {
         </div>
 
         <div className="grid grid-cols-1 gap-4">
-          {filteredCustomers.map(customer => <Card key={customer.id} className={`hover:shadow-md transition-all cursor-pointer`} onClick={() => navigate(`/customers/${customer.id}`)}>
+          {filteredCustomers.map(customer => (
+            <Card 
+              key={customer.id} 
+              className="hover:shadow-md transition-all cursor-pointer"
+              onClick={() => handleCustomerClick(customer.id)}
+            >
               <CardHeader className="py-3 bg-slate-200">
                 <CardTitle className="text-lg flex items-center justify-between text-slate-950">
                   <div className="flex items-center gap-2">
@@ -190,8 +205,10 @@ export default function CustomersPage() {
                   </div>
                 </div>
               </CardContent>
-            </Card>)}
+            </Card>
+          ))}
         </div>
       </div>
-    </AppLayout>;
+    </AppLayout>
+  );
 }

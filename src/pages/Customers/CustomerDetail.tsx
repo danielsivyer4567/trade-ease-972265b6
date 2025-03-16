@@ -3,9 +3,10 @@ import { AppLayout } from "@/components/ui/AppLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { ArrowLeft, Phone, Mail, MapPin, FileText, Briefcase, Receipt, ListCheck, Plus } from "lucide-react";
+import { ArrowLeft, Phone, Mail, MapPin, FileText, Briefcase, Receipt, ListCheck, Plus, ExternalLink } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
+import { useState } from "react";
 
 // This would normally come from an API or database
 const customers = [
@@ -31,6 +32,7 @@ export default function CustomerDetail() {
   const { id } = useParams();
   const customer = customers.find(c => c.id === Number(id));
   const { toast } = useToast();
+  const [activeTab, setActiveTab] = useState("jobs");
 
   if (!customer) {
     return (
@@ -47,6 +49,10 @@ export default function CustomerDetail() {
       </AppLayout>
     );
   }
+
+  const handleJobClick = (jobId: string) => {
+    navigate(`/jobs/${jobId}`);
+  };
 
   return (
     <AppLayout>
@@ -79,7 +85,7 @@ export default function CustomerDetail() {
           </CardContent>
         </Card>
 
-        <Tabs defaultValue="quotes" className="w-full">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="quotes" className="flex items-center gap-2">
               <FileText className="h-4 w-4" />
@@ -108,7 +114,7 @@ export default function CustomerDetail() {
                     <Plus className="h-4 w-4 mr-2" />
                     From Template
                   </Button>
-                  <Button size="sm" onClick={() => toast({ title: "Creating new quote", description: "This feature is coming soon!" })}>
+                  <Button size="sm" onClick={() => navigate("/quotes/new")}>
                     <Plus className="h-4 w-4 mr-2" />
                     New Quote
                   </Button>
@@ -129,7 +135,7 @@ export default function CustomerDetail() {
                     <Plus className="h-4 w-4 mr-2" />
                     From Template
                   </Button>
-                  <Button size="sm" onClick={() => toast({ title: "Creating new job", description: "This feature is coming soon!" })}>
+                  <Button size="sm" onClick={() => navigate("/jobs/new")}>
                     <Plus className="h-4 w-4 mr-2" />
                     New Job
                   </Button>
@@ -138,9 +144,17 @@ export default function CustomerDetail() {
               <CardContent>
                 <div className="space-y-4">
                   {customer.recentJobs.map(job => (
-                    <div key={job.id} className="flex justify-between items-center">
-                      <span>{job.title}</span>
-                      <span className="text-sm text-gray-500">{job.date}</span>
+                    <div key={job.id} 
+                         className="flex justify-between items-center p-2 rounded-md hover:bg-gray-100 cursor-pointer"
+                         onClick={() => handleJobClick(job.id)}>
+                      <div className="flex items-center gap-2">
+                        <span>{job.title}</span>
+                        <span className="text-sm text-gray-500">({job.status})</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm text-gray-500">{job.date}</span>
+                        <ExternalLink className="h-4 w-4 text-gray-400" />
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -157,7 +171,7 @@ export default function CustomerDetail() {
                     <Plus className="h-4 w-4 mr-2" />
                     From Template
                   </Button>
-                  <Button size="sm" onClick={() => toast({ title: "Creating new invoice", description: "This feature is coming soon!" })}>
+                  <Button size="sm" onClick={() => navigate("/invoices/new")}>
                     <Plus className="h-4 w-4 mr-2" />
                     New Invoice
                   </Button>
@@ -178,7 +192,7 @@ export default function CustomerDetail() {
                     <Plus className="h-4 w-4 mr-2" />
                     From Template
                   </Button>
-                  <Button size="sm" onClick={() => toast({ title: "Creating new task", description: "This feature is coming soon!" })}>
+                  <Button size="sm" onClick={() => navigate("/tasks/new")}>
                     <Plus className="h-4 w-4 mr-2" />
                     New Task
                   </Button>

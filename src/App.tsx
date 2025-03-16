@@ -5,6 +5,8 @@ import './App.css';
 import NotFound from "@/pages/NotFound";
 import Jobs from "@/pages/Jobs";
 import Customers from "@/pages/Customers";
+import CustomerDetail from "@/pages/Customers/CustomerDetail";
+import NewCustomer from "@/pages/Customers/NewCustomer";
 import Quotes from "@/pages/Quotes";
 import Email from "@/pages/Email";
 import Messaging from "@/pages/Messaging";
@@ -52,7 +54,9 @@ function App() {
       <Routes>
         <Route path="/auth" element={<Auth />} />
         <Route path="/" element={<Index />} />
-        <Route path="/customers/*" element={<Customers />} />
+        <Route path="/customers" element={<Customers />} />
+        <Route path="/customers/new" element={<NewCustomer />} />
+        <Route path="/customers/:id" element={<CustomerDetail />} />
         <Route path="/quotes/*" element={<Quotes />} />
         <Route path="/jobs/*" element={<Jobs />} />
         <Route path="/jobs/new-template" element={<NewTemplate />} />
