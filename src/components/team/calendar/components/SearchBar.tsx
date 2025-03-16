@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Search, Plus, CalendarRange, Clock } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -11,7 +10,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useNavigate } from 'react-router-dom';
 import { Job } from '@/types/job';
-
 interface SearchBarProps {
   jobSearchQuery: string;
   setJobSearchQuery: (value: string) => void;
@@ -28,14 +26,37 @@ interface SearchBarProps {
 }
 
 // Mock jobs data - in a real app, this would come from an API or parent component
-const mockJobs = [
-  { id: "1", jobNumber: "PLM-001", customer: "John Smith", address: "123 Main St", title: "Water Heater Installation" },
-  { id: "2", jobNumber: "HVAC-001", customer: "Sarah Johnson", address: "456 Elm Ave", title: "HVAC Maintenance" },
-  { id: "3", jobNumber: "ELE-001", customer: "Mike Brown", address: "789 Oak Dr", title: "Electrical Panel Upgrade" },
-  { id: "4", jobNumber: "PLM-002", customer: "Jessica Lee", address: "321 Pine Rd", title: "Bathroom Renovation" },
-  { id: "5", jobNumber: "ROOF-001", customer: "David Miller", address: "654 Cedar Ln", title: "Roof Repair" },
-];
-
+const mockJobs = [{
+  id: "1",
+  jobNumber: "PLM-001",
+  customer: "John Smith",
+  address: "123 Main St",
+  title: "Water Heater Installation"
+}, {
+  id: "2",
+  jobNumber: "HVAC-001",
+  customer: "Sarah Johnson",
+  address: "456 Elm Ave",
+  title: "HVAC Maintenance"
+}, {
+  id: "3",
+  jobNumber: "ELE-001",
+  customer: "Mike Brown",
+  address: "789 Oak Dr",
+  title: "Electrical Panel Upgrade"
+}, {
+  id: "4",
+  jobNumber: "PLM-002",
+  customer: "Jessica Lee",
+  address: "321 Pine Rd",
+  title: "Bathroom Renovation"
+}, {
+  id: "5",
+  jobNumber: "ROOF-001",
+  customer: "David Miller",
+  address: "654 Cedar Ln",
+  title: "Roof Repair"
+}];
 export const SearchBar: React.FC<SearchBarProps> = ({
   jobSearchQuery,
   setJobSearchQuery,
@@ -52,20 +73,19 @@ export const SearchBar: React.FC<SearchBarProps> = ({
 }) => {
   const isMobile = useIsMobile();
   const navigate = useNavigate();
-  
   const [filteredJobs, setFilteredJobs] = useState(mockJobs);
   const [isJobDropdownOpen, setIsJobDropdownOpen] = useState(false);
-  const [selectedJob, setSelectedJob] = useState<{ id: string; jobNumber: string; customer: string; address: string; title: string } | null>(null);
-  
+  const [selectedJob, setSelectedJob] = useState<{
+    id: string;
+    jobNumber: string;
+    customer: string;
+    address: string;
+    title: string;
+  } | null>(null);
   useEffect(() => {
     if (jobSearchQuery) {
       const lowercaseQuery = jobSearchQuery.toLowerCase();
-      const filtered = mockJobs.filter(job => 
-        job.jobNumber.toLowerCase().includes(lowercaseQuery) ||
-        job.customer.toLowerCase().includes(lowercaseQuery) ||
-        job.address.toLowerCase().includes(lowercaseQuery) ||
-        job.title.toLowerCase().includes(lowercaseQuery)
-      );
+      const filtered = mockJobs.filter(job => job.jobNumber.toLowerCase().includes(lowercaseQuery) || job.customer.toLowerCase().includes(lowercaseQuery) || job.address.toLowerCase().includes(lowercaseQuery) || job.title.toLowerCase().includes(lowercaseQuery));
       setFilteredJobs(filtered);
       setIsJobDropdownOpen(filtered.length > 0);
     } else {
@@ -73,13 +93,17 @@ export const SearchBar: React.FC<SearchBarProps> = ({
       setIsJobDropdownOpen(false);
     }
   }, [jobSearchQuery]);
-  
-  const handleJobSelect = (job: { id: string; jobNumber: string; customer: string; address: string; title: string }) => {
+  const handleJobSelect = (job: {
+    id: string;
+    jobNumber: string;
+    customer: string;
+    address: string;
+    title: string;
+  }) => {
     setSelectedJob(job);
     setJobSearchQuery(job.title || job.jobNumber);
     setIsJobDropdownOpen(false);
   };
-  
   const generateTimeOptions = () => {
     const options = [];
     for (let hour = 0; hour < 24; hour++) {
@@ -91,44 +115,34 @@ export const SearchBar: React.FC<SearchBarProps> = ({
     }
     return options;
   };
-  
   const timeOptions = generateTimeOptions();
-  
   const handleNewJobClick = () => {
     navigate('/jobs/new');
   };
-  
-  return (
-    <div className={`w-full ${isMobile ? 'py-0.5 px-1' : 'py-1 px-2'}`}>
-      <div className="grid grid-cols-1 gap-1 my-0">
+  return <div className={`w-full ${isMobile ? 'py-0.5 px-1' : 'py-1 px-2'}`}>
+      <div className="grid grid-cols-1 gap-1 my-0 px-0">
         {/* Combined Date and Time row */}
         <div className={`grid ${isMobile ? 'grid-cols-1' : 'grid-cols-2'} gap-2`}>
           {/* Start section */}
-          <div>
+          <div className="mx-0">
             <label className="block text-xs font-medium mb-1 text-gray-500">Start *</label>
-            <div className="grid grid-cols-2 gap-1">
+            <div className="grid grid-cols-2 gap-1 mx-[7px] px-0">
               {/* Start Date */}
               <Popover>
                 <PopoverTrigger asChild>
-                  <Button variant={"outline"} className="w-full justify-start text-left border-gray-300 h-7 bg-slate-400 hover:bg-slate-300 text-gray-950 text-base font-medium">
+                  <Button variant={"outline"} className="w-full justify-start text-left border-gray-300 h-7 bg-slate-400 hover:bg-slate-300 text-gray-950 text-base font-medium px-[29px] mx-[15px]">
                     <CalendarRange className="mr-1 h-3 w-3 text-gray-500" />
                     {startDate ? format(startDate, 'd MMM') : format(new Date(), 'd MMM')}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0 bg-slate-300">
-                  <Calendar 
-                    mode="single" 
-                    selected={startDate} 
-                    onSelect={setStartDate} 
-                    initialFocus 
-                    className={`p-2 bg-slate-300 pointer-events-auto ${isMobile ? 'scale-75 origin-top-left' : ''}`} 
-                  />
+                  <Calendar mode="single" selected={startDate} onSelect={setStartDate} initialFocus className={`p-2 bg-slate-300 pointer-events-auto ${isMobile ? 'scale-75 origin-top-left' : ''}`} />
                 </PopoverContent>
               </Popover>
               
               {/* Start Time */}
               <Select value={startTime} onValueChange={setStartTime}>
-                <SelectTrigger className="w-full border-gray-300 h-7 bg-slate-400 hover:bg-slate-300 font-medium text-lg">
+                <SelectTrigger className="w-full border-gray-300 h-7 bg-slate-400 hover:bg-slate-300 font-medium text-lg mx-[15px] px-[15px]">
                   <Clock className="mr-1 h-3 w-3 text-gray-500" />
                   <SelectValue placeholder="Time" />
                 </SelectTrigger>
@@ -148,19 +162,13 @@ export const SearchBar: React.FC<SearchBarProps> = ({
               {/* End Date */}
               <Popover>
                 <PopoverTrigger asChild>
-                  <Button variant={"outline"} className="w-full justify-start text-left border-gray-300 h-7 bg-slate-400 hover:bg-slate-300 text-base font-medium">
+                  <Button variant={"outline"} className="w-full justify-start text-left border-gray-300 h-7 bg-slate-400 hover:bg-slate-300 text-base font-medium mx-[3px]">
                     <CalendarRange className="mr-1 h-3 w-3 text-gray-500" />
                     {endDate ? format(endDate, 'd MMM') : format(new Date(), 'd MMM')}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0 bg-slate-300">
-                  <Calendar 
-                    mode="single" 
-                    selected={endDate} 
-                    onSelect={setEndDate} 
-                    initialFocus 
-                    className={`p-2 bg-slate-300 pointer-events-auto ${isMobile ? 'scale-75 origin-top-left' : ''}`} 
-                  />
+                  <Calendar mode="single" selected={endDate} onSelect={setEndDate} initialFocus className={`p-2 bg-slate-300 pointer-events-auto ${isMobile ? 'scale-75 origin-top-left' : ''}`} />
                 </PopoverContent>
               </Popover>
               
@@ -184,10 +192,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
         <div className="px-0 mx-0">
           <div className="flex justify-between items-center mb-1">
             <label className="block text-xs font-medium text-gray-500">Job</label>
-            <Button 
-              onClick={handleNewJobClick}
-              className="h-6 px-2 text-xs bg-slate-500 hover:bg-slate-400 text-white flex items-center gap-1"
-            >
+            <Button onClick={handleNewJobClick} className="h-6 text-xs bg-slate-500 hover:bg-slate-400 text-white flex items-center gap-1 mx-[240px] px-[62px]">
               <Plus className="h-3 w-3" />
               New Job
             </Button>
@@ -195,32 +200,17 @@ export const SearchBar: React.FC<SearchBarProps> = ({
           <div className="flex py-px px-0 my-0 mx-[4px]">
             <div className="relative w-full py-[3px] px-px my-0">
               <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-3 w-3 text-gray-400" />
-              <Input 
-                placeholder="Search by job #, customer name, address..." 
-                value={jobSearchQuery} 
-                onChange={e => setJobSearchQuery(e.target.value)} 
-                className="pl-7 w-full border-gray-300 h-7 text-xs bg-slate-300 py-[22px] mx-0 my-0 px-[22px]" 
-                onFocus={() => jobSearchQuery && setIsJobDropdownOpen(filteredJobs.length > 0)}
-                onBlur={() => setTimeout(() => setIsJobDropdownOpen(false), 200)}
-              />
+              <Input placeholder="Search by job #, customer name, address..." value={jobSearchQuery} onChange={e => setJobSearchQuery(e.target.value)} className="pl-7 w-full border-gray-300 h-7 text-xs bg-slate-300 py-[22px] mx-0 my-0 px-[22px]" onFocus={() => jobSearchQuery && setIsJobDropdownOpen(filteredJobs.length > 0)} onBlur={() => setTimeout(() => setIsJobDropdownOpen(false), 200)} />
               
               {/* Dropdown for job search results */}
-              {isJobDropdownOpen && (
-                <div className="absolute z-10 mt-1 w-full bg-white border border-gray-200 rounded-md shadow-lg max-h-40 overflow-y-auto">
-                  {filteredJobs.map(job => (
-                    <div 
-                      key={job.id} 
-                      className="px-3 py-2 hover:bg-slate-100 cursor-pointer text-xs"
-                      onClick={() => handleJobSelect(job)}
-                    >
+              {isJobDropdownOpen && <div className="absolute z-10 mt-1 w-full bg-white border border-gray-200 rounded-md shadow-lg max-h-40 overflow-y-auto">
+                  {filteredJobs.map(job => <div key={job.id} className="px-3 py-2 hover:bg-slate-100 cursor-pointer text-xs" onClick={() => handleJobSelect(job)}>
                       <div className="font-medium">{job.jobNumber} - {job.title}</div>
                       <div className="text-gray-500">
                         {job.customer} | {job.address}
                       </div>
-                    </div>
-                  ))}
-                </div>
-              )}
+                    </div>)}
+                </div>}
             </div>
             <Button variant="outline" size="sm" className="ml-1 border-gray-300 h-7 w-7 p-0 bg-slate-400 hover:bg-slate-300 px-[22px] py-[21px] mx-[7px] my-[3px]">
               <Plus className="h-3 w-3" />
@@ -245,6 +235,5 @@ export const SearchBar: React.FC<SearchBarProps> = ({
           <Textarea placeholder="Add notes here..." className="w-full h-10 px-3 py-1 border border-gray-300 rounded-md text-xs bg-slate-300" />
         </div>
       </div>
-    </div>
-  );
+    </div>;
 };
