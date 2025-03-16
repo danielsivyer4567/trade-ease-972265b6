@@ -60,7 +60,7 @@ export default function Messaging() {
 
           <Tabs defaultValue="crm" className="w-full">
             <TabsList className="grid grid-cols-2 mb-4">
-              <TabsTrigger value="crm" className="mx-[18px] bg-slate-500 hover:bg-slate-400">Pipelines</TabsTrigger>
+              <TabsTrigger value="crm" className="mx-[18px] bg-slate-500 hover:bg-slate-400 text-gray-950">Pipelines</TabsTrigger>
               <TabsTrigger value="connections" className="bg-slate-400 hover:bg-slate-300 px-0 mx-[35px]">Connections</TabsTrigger>
             </TabsList>
             
