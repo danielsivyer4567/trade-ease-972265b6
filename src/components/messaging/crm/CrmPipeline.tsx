@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -315,3 +316,4 @@ const CustomerCard: React.FC<CustomerCardProps> = ({
         <p className="text-xs text-gray-600 line-clamp-2">{customer.lastMessage}</p>
       </div>
     </div>;
+};
