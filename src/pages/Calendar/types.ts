@@ -1,18 +1,10 @@
 
+import { Job as GlobalJob } from '@/types/job';
+
 export interface Team {
   name: string;
   color: string;
 }
 
-export interface Job {
-  id: string;
-  customer: string;
-  type: string;
-  status: 'ready' | 'in-progress' | 'to-invoice' | 'invoiced' | 'clean-required';
-  date: string;
-  location: [number, number];
-  jobNumber: string;
-  title: string;
-  description: string;
-  assignedTeam: string;
-}
+// Export the Job interface from the global type to ensure consistency
+export type Job = GlobalJob;

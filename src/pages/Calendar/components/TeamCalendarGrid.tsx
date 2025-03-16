@@ -2,7 +2,8 @@
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { TeamCalendar } from '@/components/team/TeamCalendar';
-import type { Team, Job } from '../types';
+import type { Team } from '../types';
+import type { Job } from '@/types/job';
 
 interface TeamCalendarGridProps {
   teams: Team[];
