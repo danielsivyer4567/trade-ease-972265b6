@@ -8,6 +8,7 @@ import { useJobTimer } from './hooks/useJobTimer';
 import { useJobLocation } from './hooks/useJobLocation';
 import { useJobFinancialData } from './hooks/useJobFinancialData';
 import { useIsMobile } from '@/hooks/use-mobile';
+
 const mockJobs: Job[] = [{
   id: "1",
   customer: "John Smith",
@@ -42,6 +43,7 @@ const mockJobs: Job[] = [{
   description: "Upgrade main electrical panel",
   assignedTeam: "Green Team"
 }];
+
 export function JobDetails() {
   const {
     id
@@ -69,22 +71,41 @@ export function JobDetails() {
     setTabNotes,
     handleFinancialDataExtracted
   } = useJobFinancialData(id);
+
   useEffect(() => {
     if (!job) {
       navigate('/jobs');
     }
   }, [job, navigate]);
+
   const handleTimerToggle = () => {
     locationHandleTimerToggle(isTimerRunning, setIsTimerRunning);
   };
+
   if (!job) {
     return null;
   }
+
   return <div className="container-responsive mx-auto">
       <div className="space-y-4 sm:space-y-6 p-2 sm:p-4 max-w-7xl mx-auto pb-24">
         <JobHeader job={job} />
         
-        
+        <JobTabs 
+          job={job}
+          isManager={isManager}
+          jobTimer={jobTimer}
+          jobNotes={jobNotes}
+          setJobNotes={setJobNotes}
+          tabNotes={tabNotes}
+          setTabNotes={setTabNotes}
+          locationHistory={locationHistory}
+          hasLocationPermission={hasLocationPermission}
+          handleTimerToggle={handleTimerToggle}
+          handleBreakToggle={handleBreakToggle}
+          isTimerRunning={isTimerRunning}
+          isOnBreak={isOnBreak}
+          extractedFinancialData={extractedFinancialData}
+        />
         
         {isManager && <div className="mt-10 sm:mt-16 mb-8">
             <DocumentApproval jobId={job.id} onFinancialDataExtracted={handleFinancialDataExtracted} />
