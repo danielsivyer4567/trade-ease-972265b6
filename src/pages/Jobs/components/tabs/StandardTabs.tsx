@@ -71,19 +71,19 @@ export const StandardTabs = ({
         Timer
       </TabsTrigger>
 
-      <TabsContent value="details" className="mt-4 px-1">
+      <TabsContent value="details" className="mt-4 px-1 relative">
         <JobDetailsTab job={job} />
       </TabsContent>
       
-      <TabsContent value="notes" className="mt-4 px-1">
+      <TabsContent value="notes" className="mt-4 px-1 relative">
         <JobNotesTab notes={jobNotes} setNotes={setJobNotes} />
       </TabsContent>
       
-      <TabsContent value="calendar" className="mt-4 px-1">
+      <TabsContent value="calendar" className="mt-4 px-1 relative">
         <JobCalendarTab job={job} />
       </TabsContent>
       
-      <TabsContent value="timer" className="mt-4 px-1">
+      <TabsContent value="timer" className="mt-4 px-1 relative">
         <JobTimerTab 
           jobTimer={jobTimer} 
           hasLocationPermission={hasLocationPermission} 

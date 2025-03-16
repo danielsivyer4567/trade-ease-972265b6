@@ -15,7 +15,7 @@ export const JobDetailsTab = ({
   const isMobile = useIsMobile();
   
   return (
-    <TabsContent value="details" className="p-3 sm:p-6 mb-6 sm:mb-16">
+    <div className="p-3 sm:p-6 mb-6 sm:mb-16 relative">
       <div className="flex flex-col space-y-6">
         <div className={`grid ${isMobile ? 'grid-cols-1 gap-4' : 'grid-cols-1 lg:grid-cols-2 gap-6'} w-full`}>
           <div className="h-full">
@@ -26,6 +26,6 @@ export const JobDetailsTab = ({
           </div>
         </div>
       </div>
-    </TabsContent>
+    </div>
   );
 };

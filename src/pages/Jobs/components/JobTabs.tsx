@@ -55,7 +55,7 @@ export const JobTabs = ({
   
   return (
     <Tabs defaultValue="details" className="w-full flex flex-col">
-      <div className="w-full overflow-hidden mb-2">
+      <div className="w-full overflow-hidden mb-2 sticky top-0 z-30 bg-white">
         <TabsList className="flex w-full mb-0 overflow-x-auto">
           <StandardTabs 
             job={job} 
