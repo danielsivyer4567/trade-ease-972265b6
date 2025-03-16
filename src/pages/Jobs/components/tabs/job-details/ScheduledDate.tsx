@@ -9,7 +9,7 @@ interface ScheduledDateProps {
 }
 
 export const ScheduledDate = ({ job }: ScheduledDateProps) => {
-  const [isExpanded, setIsExpanded] = useState(true);
+  const [isExpanded, setIsExpanded] = useState(false);
   
   const date = new Date(job.date);
   const formattedDate = date.toLocaleDateString('en-US', {
@@ -18,22 +18,29 @@ export const ScheduledDate = ({ job }: ScheduledDateProps) => {
     month: 'long',
     day: 'numeric'
   });
+  
+  // Format a shortened date for the button display
+  const shortDate = date.toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric'
+  });
 
   return (
-    <div className="bg-white shadow rounded-lg overflow-hidden">
+    <div className="rounded-lg overflow-hidden border border-gray-200 bg-white">
       <Button 
         variant="ghost" 
-        className="w-full flex justify-between items-center p-3 rounded-none hover:bg-gray-50"
+        className="w-full flex justify-between items-center px-3 py-2 rounded-none hover:bg-gray-50"
         onClick={() => setIsExpanded(!isExpanded)}
       >
         <div className="flex items-center">
-          <Calendar className="mr-2 h-5 w-5 text-gray-500" />
-          <span className="font-medium">Scheduled Date</span>
+          <Calendar className="mr-2 h-4 w-4 text-gray-500" />
+          <span className="font-medium text-sm">Scheduled Date</span>
         </div>
+        <span className="text-xs text-gray-500">{shortDate}</span>
       </Button>
       
       {isExpanded && (
-        <div className="p-3 pt-0 border-t">
+        <div className="p-3 pt-2 border-t">
           <p className="text-sm">{formattedDate}</p>
         </div>
       )}
