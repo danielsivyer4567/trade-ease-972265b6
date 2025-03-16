@@ -18,30 +18,33 @@ export function TeamCalendarGrid({
   setSharedDate, 
   onJobAssign 
 }: TeamCalendarGridProps) {
-  // Mock jobs data for calendar display with proper status type
-  const mockJobs: Job[] = [{
-    id: "1",
-    customer: "John Smith",
-    type: "Plumbing",
-    status: "ready",
-    date: "2024-03-15",
-    location: [151.2093, -33.8688],
-    jobNumber: "PLM-001",
-    title: "Water Heater Installation",
-    description: "Install new water heater system",
-    assignedTeam: "Red Team"
-  }, {
-    id: "2",
-    customer: "Sarah Johnson",
-    type: "HVAC",
-    status: "in-progress",
-    date: "2024-03-14",
-    location: [151.2543, -33.8688],
-    jobNumber: "HVAC-001",
-    title: "HVAC Maintenance",
-    description: "Regular maintenance check",
-    assignedTeam: "Blue Team"
-  }];
+  // Mock jobs data for calendar display with proper status type specification
+  const mockJobs: Job[] = [
+    {
+      id: "1",
+      customer: "John Smith",
+      type: "Plumbing",
+      status: "ready" as const, // Use const assertion to ensure it's the literal type
+      date: "2024-03-15",
+      location: [151.2093, -33.8688],
+      jobNumber: "PLM-001",
+      title: "Water Heater Installation",
+      description: "Install new water heater system",
+      assignedTeam: "Red Team"
+    }, 
+    {
+      id: "2",
+      customer: "Sarah Johnson",
+      type: "HVAC",
+      status: "in-progress" as const, // Use const assertion to ensure it's the literal type
+      date: "2024-03-14",
+      location: [151.2543, -33.8688],
+      jobNumber: "HVAC-001",
+      title: "HVAC Maintenance",
+      description: "Regular maintenance check",
+      assignedTeam: "Blue Team"
+    }
+  ];
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
