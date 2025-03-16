@@ -1,5 +1,5 @@
 
-import { Tabs, TabsList, TabsContent } from "@/components/ui/tabs";
+import { Tabs, TabsList } from "@/components/ui/tabs";
 import type { Job } from "@/types/job";
 import { StandardTabs } from "./tabs/StandardTabs";
 import { ManagerTabs } from "./tabs/ManagerTabs";
@@ -54,9 +54,9 @@ export const JobTabs = ({
   } = useJobFinancials();
   
   return (
-    <Tabs defaultValue="details" className="w-full">
-      <div className="w-full overflow-x-auto">
-        <TabsList className={`${isMobile ? 'flex w-full max-w-full' : 'flex w-full'} mb-4`}>
+    <Tabs defaultValue="details" className="w-full flex flex-col">
+      <div className="w-full overflow-hidden mb-2">
+        <TabsList className="flex w-full mb-0 overflow-x-auto">
           <StandardTabs 
             job={job} 
             jobTimer={jobTimer} 
@@ -87,8 +87,8 @@ export const JobTabs = ({
         </TabsList>
       </div>
       
-      <div className="w-full mt-4">
-        {/* TabsContent will be rendered here, separated from TabsList */}
+      <div className="w-full mt-2 overflow-x-auto">
+        {/* TabsContent components are rendered within StandardTabs and ManagerTabs */}
       </div>
     </Tabs>
   );

@@ -42,14 +42,14 @@ export const StandardTabs = ({
     <>
       <TabsTrigger 
         value="details" 
-        className="min-w-[80px] sm:min-w-[100px] whitespace-nowrap text-slate-950 bg-slate-400 hover:bg-slate-300 flex-shrink-0"
+        className="min-w-[80px] sm:min-w-[100px] whitespace-nowrap flex-shrink-0 bg-slate-400 hover:bg-slate-300"
       >
         Details
       </TabsTrigger>
       
       <TabsTrigger 
         value="notes" 
-        className="min-w-[80px] sm:min-w-[100px] whitespace-nowrap bg-slate-400 hover:bg-slate-300 flex-shrink-0"
+        className="min-w-[80px] sm:min-w-[100px] whitespace-nowrap flex-shrink-0 bg-slate-400 hover:bg-slate-300"
       >
         {!isMobile && <FileText className="w-4 h-4 mr-2" />}
         Notes
@@ -57,7 +57,7 @@ export const StandardTabs = ({
       
       <TabsTrigger 
         value="calendar" 
-        className="min-w-[80px] sm:min-w-[100px] whitespace-nowrap bg-slate-400 hover:bg-slate-300 flex-shrink-0"
+        className="min-w-[80px] sm:min-w-[100px] whitespace-nowrap flex-shrink-0 bg-slate-400 hover:bg-slate-300"
       >
         {!isMobile && <Calendar className="w-4 h-4 mr-2" />}
         Calendar
@@ -65,24 +65,35 @@ export const StandardTabs = ({
       
       <TabsTrigger 
         value="timer" 
-        className="min-w-[80px] sm:min-w-[100px] whitespace-nowrap bg-slate-400 hover:bg-slate-300 flex-shrink-0"
+        className="min-w-[80px] sm:min-w-[100px] whitespace-nowrap flex-shrink-0 bg-slate-400 hover:bg-slate-300"
       >
         {!isMobile && <Clock className="w-4 h-4 mr-2" />}
         Timer
       </TabsTrigger>
 
-      <JobDetailsTab job={job} />
-      <JobNotesTab notes={jobNotes} setNotes={setJobNotes} />
-      <JobCalendarTab job={job} />
-      <JobTimerTab 
-        jobTimer={jobTimer} 
-        hasLocationPermission={hasLocationPermission} 
-        handleTimerToggle={handleTimerToggle} 
-        handleBreakToggle={handleBreakToggle} 
-        isTimerRunning={isTimerRunning} 
-        isOnBreak={isOnBreak} 
-        locationHistory={locationHistory} 
-      />
+      <TabsContent value="details" className="mt-4 px-1">
+        <JobDetailsTab job={job} />
+      </TabsContent>
+      
+      <TabsContent value="notes" className="mt-4 px-1">
+        <JobNotesTab notes={jobNotes} setNotes={setJobNotes} />
+      </TabsContent>
+      
+      <TabsContent value="calendar" className="mt-4 px-1">
+        <JobCalendarTab job={job} />
+      </TabsContent>
+      
+      <TabsContent value="timer" className="mt-4 px-1">
+        <JobTimerTab 
+          jobTimer={jobTimer} 
+          hasLocationPermission={hasLocationPermission} 
+          handleTimerToggle={handleTimerToggle} 
+          handleBreakToggle={handleBreakToggle} 
+          isTimerRunning={isTimerRunning} 
+          isOnBreak={isOnBreak} 
+          locationHistory={locationHistory} 
+        />
+      </TabsContent>
     </>
   );
 };
