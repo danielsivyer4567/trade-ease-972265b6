@@ -1,25 +1,15 @@
 
+import { useState } from "react";
 import { AppLayout } from "@/components/ui/AppLayout";
-import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, RefreshCcw } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useToast } from "@/hooks/use-toast";
-import { Job } from "@/types/job";
+import { JobForm } from "./components/JobForm";
 import { TemplateLibrary } from "./components/TemplateLibrary";
-import { Checkbox } from "@/components/ui/checkbox";
-
-const JOB_TYPES = ["Plumbing", "Electrical", "HVAC", "Carpentry", "Painting", "Roofing", "Landscaping", "General Repair", "Flooring", "Tiling", "Concrete", "Other"];
 
 export default function NewJob() {
   const navigate = useNavigate();
-  const { toast } = useToast();
-
+  
   // State for the new job form
   const [jobNumber, setJobNumber] = useState("");
   const [title, setTitle] = useState("");
@@ -30,28 +20,6 @@ export default function NewJob() {
   const [dateUndecided, setDateUndecided] = useState(false);
   const [showTemplateSearch, setShowTemplateSearch] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-
-  // Function to generate a new job number
-  const generateJobNumber = () => {
-    const prefix = "JOB";
-    const timestamp = new Date().getTime().toString().slice(-6);
-    const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
-    return `${prefix}-${timestamp}-${random}`;
-  };
-
-  // Generate job number on component mount
-  useEffect(() => {
-    setJobNumber(generateJobNumber());
-  }, []);
-
-  // Function to handle refreshing the job number
-  const handleRefreshJobNumber = () => {
-    setJobNumber(generateJobNumber());
-    toast({
-      title: "Job Number Generated",
-      description: "A new job number has been generated."
-    });
-  };
 
   // Mock templates for the template search
   const templates = [
@@ -92,43 +60,7 @@ export default function NewJob() {
     setTitle(template.title);
     setDescription(template.description);
     setType(template.type);
-    toast({
-      title: "Template Applied",
-      description: `Applied template: ${template.title}`
-    });
     setShowTemplateSearch(false);
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    
-    if (!jobNumber || !title || !customer || !type || (!date && !dateUndecided)) {
-      toast({
-        title: "Missing fields",
-        description: "Please fill in all required fields",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    // Create new job object
-    const newJob = {
-      id: crypto.randomUUID(),
-      jobNumber,
-      title,
-      customer,
-      description,
-      type,
-      date: dateUndecided ? "Yet to be decided" : date,
-      status: "ready",
-      location: [151.2093, -33.8688] // Default location for demo
-    };
-
-    toast({
-      title: "Job Created",
-      description: `Job "${title}" has been created successfully`
-    });
-    navigate("/jobs");
   };
 
   return (
@@ -162,145 +94,23 @@ export default function NewJob() {
             />
           </div>
         ) : (
-          <Card className="max-w-3xl mx-auto">
-            <CardHeader className="bg-slate-300">
-              <CardTitle>Job Details</CardTitle>
-            </CardHeader>
-            <form onSubmit={handleSubmit}>
-              <CardContent className="space-y-6 bg-slate-100">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                    <Label htmlFor="jobNumber">Job Number *</Label>
-                    <div className="flex">
-                      <Input 
-                        id="jobNumber" 
-                        value={jobNumber} 
-                        onChange={e => setJobNumber(e.target.value)} 
-                        placeholder="Auto-generated" 
-                        className="flex-1"
-                        readOnly 
-                      />
-                      <Button 
-                        type="button" 
-                        variant="outline" 
-                        onClick={handleRefreshJobNumber}
-                        className="ml-2 h-10 w-10 p-0 flex items-center justify-center bg-slate-300 hover:bg-slate-400"
-                        title="Generate new job number"
-                      >
-                        <RefreshCcw className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="date">Job Date *</Label>
-                    <div className="space-y-2">
-                      <Input 
-                        id="date" 
-                        type="date" 
-                        value={date} 
-                        onChange={e => setDate(e.target.value)} 
-                        disabled={dateUndecided}
-                        required={!dateUndecided} 
-                      />
-                      <div className="flex items-center space-x-2 mt-1">
-                        <Checkbox 
-                          id="dateUndecided" 
-                          checked={dateUndecided}
-                          onCheckedChange={(checked) => {
-                            setDateUndecided(checked === true);
-                            if (checked) {
-                              setDate("");
-                            }
-                          }}
-                        />
-                        <label 
-                          htmlFor="dateUndecided" 
-                          className="text-sm font-medium cursor-pointer"
-                        >
-                          Yet to be decided
-                        </label>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="title">Job Title *</Label>
-                    <Input 
-                      id="title" 
-                      value={title} 
-                      onChange={e => setTitle(e.target.value)} 
-                      placeholder="e.g., Water Heater Installation" 
-                      required 
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="customer">Customer Name *</Label>
-                    <Input 
-                      id="customer" 
-                      value={customer} 
-                      onChange={e => setCustomer(e.target.value)} 
-                      placeholder="e.g., John Smith" 
-                      required 
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="type">Job Type *</Label>
-                    <Select value={type} onValueChange={setType} required>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select job type" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {JOB_TYPES.map(jobType => (
-                          <SelectItem key={jobType} value={jobType}>
-                            {jobType}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  
-                  <div className="space-y-2 flex items-end">
-                    <Button 
-                      type="button" 
-                      variant="outline" 
-                      onClick={() => setShowTemplateSearch(true)} 
-                      className="text-gray-950 bg-slate-400 hover:bg-slate-300"
-                    >
-                      Search Templates
-                    </Button>
-                  </div>
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="description">Description</Label>
-                  <Textarea 
-                    id="description" 
-                    value={description} 
-                    onChange={e => setDescription(e.target.value)} 
-                    placeholder="Detailed description of the job" 
-                    rows={4} 
-                  />
-                </div>
-              </CardContent>
-              
-              <CardFooter className="flex justify-between">
-                <Button 
-                  type="button" 
-                  variant="outline" 
-                  onClick={() => navigate("/jobs")} 
-                  className="bg-slate-400 hover:bg-slate-300"
-                >
-                  Cancel
-                </Button>
-                <Button type="submit" className="bg-slate-400 hover:bg-slate-300">
-                  Create Job
-                </Button>
-              </CardFooter>
-            </form>
-          </Card>
+          <JobForm
+            onShowTemplateSearch={() => setShowTemplateSearch(true)}
+            jobNumber={jobNumber}
+            setJobNumber={setJobNumber}
+            title={title}
+            setTitle={setTitle}
+            customer={customer}
+            setCustomer={setCustomer}
+            description={description}
+            setDescription={setDescription}
+            type={type}
+            setType={setType}
+            date={date}
+            setDate={setDate}
+            dateUndecided={dateUndecided}
+            setDateUndecided={setDateUndecided}
+          />
         )}
       </div>
     </AppLayout>
