@@ -98,7 +98,7 @@ export function UnassignedJobs({
                   </CardDescription>
                 </CardHeader>
               </Card> : <div className="space-y-2">
-                {readyJobs.map(job => <Card key={job.id} className="w-full bg-slate-200">
+                {readyJobs.map(job => <Card key={job.id} className="w-full bg-neutral-50">
                     <div className="flex justify-between items-center p-2 my-[61px]">
                       <div className="flex-1">
                         <div className="flex items-center justify-between">
