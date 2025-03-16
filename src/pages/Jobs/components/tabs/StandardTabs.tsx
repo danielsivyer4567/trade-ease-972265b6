@@ -39,7 +39,7 @@ export const StandardTabs = ({
         Details
       </TabsTrigger>
       
-      <TabsTrigger value="notes" className="min-w-[80px] sm:min-w-[100px] whitespace-nowrap flex-shrink-0 bg-slate-200 hover:bg-slate-100">
+      <TabsTrigger value="notes" className="min-w-[80px] sm:min-w-[100px] whitespace-nowrap flex-shrink-0 bg-slate-500 hover:bg-slate-400">
         {!isMobile && <FileText className="w-4 h-4 mr-2" />}
         Notes
       </TabsTrigger>
