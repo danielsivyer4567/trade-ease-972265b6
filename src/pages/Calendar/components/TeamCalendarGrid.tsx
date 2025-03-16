@@ -18,13 +18,13 @@ export function TeamCalendarGrid({
   setSharedDate, 
   onJobAssign 
 }: TeamCalendarGridProps) {
-  // Mock jobs data for calendar display with proper status type specification
+  // Mock jobs data with properly typed status values
   const mockJobs: Job[] = [
     {
       id: "1",
       customer: "John Smith",
       type: "Plumbing",
-      status: "ready" as const, // Use const assertion to ensure it's the literal type
+      status: "ready" as const,
       date: "2024-03-15",
       location: [151.2093, -33.8688],
       jobNumber: "PLM-001",
@@ -36,7 +36,7 @@ export function TeamCalendarGrid({
       id: "2",
       customer: "Sarah Johnson",
       type: "HVAC",
-      status: "in-progress" as const, // Use const assertion to ensure it's the literal type
+      status: "in-progress" as const,
       date: "2024-03-14",
       location: [151.2543, -33.8688],
       jobNumber: "HVAC-001",

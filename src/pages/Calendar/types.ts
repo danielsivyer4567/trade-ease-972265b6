@@ -6,5 +6,5 @@ export interface Team {
   color: string;
 }
 
-// Export the Job interface from the global type to ensure consistency
-export type Job = GlobalJob;
+// Export the Job type directly from the global type for consistency
+export type { GlobalJob as Job };

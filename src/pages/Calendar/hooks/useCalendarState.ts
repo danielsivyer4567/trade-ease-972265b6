@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
-import type { Team, Job } from '../types';
+import type { Team } from '../types';
 
 export function useCalendarState() {
   const [sharedDate, setSharedDate] = useState<Date | undefined>(new Date());
