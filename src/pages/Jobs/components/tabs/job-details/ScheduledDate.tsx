@@ -1,12 +1,16 @@
 
 import { Calendar } from "lucide-react";
 import type { Job } from "@/types/job";
+import { Button } from "@/components/ui/button";
+import { useState } from "react";
 
 interface ScheduledDateProps {
   job: Job;
 }
 
 export const ScheduledDate = ({ job }: ScheduledDateProps) => {
+  const [isExpanded, setIsExpanded] = useState(true);
+  
   const date = new Date(job.date);
   const formattedDate = date.toLocaleDateString('en-US', {
     weekday: 'long',
@@ -16,12 +20,23 @@ export const ScheduledDate = ({ job }: ScheduledDateProps) => {
   });
 
   return (
-    <div className="bg-white shadow rounded-lg p-4">
-      <h3 className="text-lg font-medium flex items-center mb-3">
-        <Calendar className="mr-2 h-5 w-5 text-gray-500" />
-        Scheduled Date
-      </h3>
-      <p className="text-sm">{formattedDate}</p>
+    <div className="bg-white shadow rounded-lg overflow-hidden">
+      <Button 
+        variant="ghost" 
+        className="w-full flex justify-between items-center p-3 rounded-none hover:bg-gray-50"
+        onClick={() => setIsExpanded(!isExpanded)}
+      >
+        <div className="flex items-center">
+          <Calendar className="mr-2 h-5 w-5 text-gray-500" />
+          <span className="font-medium">Scheduled Date</span>
+        </div>
+      </Button>
+      
+      {isExpanded && (
+        <div className="p-3 pt-0 border-t">
+          <p className="text-sm">{formattedDate}</p>
+        </div>
+      )}
     </div>
   );
 };

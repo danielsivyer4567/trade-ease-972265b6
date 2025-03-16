@@ -9,7 +9,7 @@ interface RightColumnProps {
 
 export const RightColumn = ({ job }: RightColumnProps) => {
   return (
-    <div className="flex flex-col space-y-4">
+    <div className="grid grid-cols-1 gap-4">
       <ScheduledDate job={job} />
       <JobLocation job={job} />
     </div>

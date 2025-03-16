@@ -10,7 +10,7 @@ interface LeftColumnProps {
 
 export const LeftColumn = ({ job }: LeftColumnProps) => {
   return (
-    <div className="flex flex-col space-y-4">
+    <div className="grid grid-cols-1 gap-4">
       <CustomerDetails job={job} />
       <JobDescription description={job.description} />
       <AdditionalNotes />
