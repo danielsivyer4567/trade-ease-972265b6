@@ -16,6 +16,7 @@ export default function Calendar() {
     handleJobAssign,
     handleCalendarIntegration,
     redirectToCalendarProvider,
+    handleAddTeam
   } = useCalendarState();
 
   return (
@@ -23,7 +24,7 @@ export default function Calendar() {
       <div className="space-y-4 md:space-y-6 animate-fadeIn p-4 md:p-6 py-[126px]">
         <CalendarHeader 
           onCalendarIntegration={handleCalendarIntegration}
-          onAddTeam={() => {}} // Will be implemented in useCalendarState
+          onAddTeam={handleAddTeam}
         />
         
         <TeamCalendarGrid 
