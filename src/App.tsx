@@ -42,6 +42,7 @@ import LoadsSpansCalculator from "./pages/Calculators/LoadsSpansCalculator";
 import FencingCalculator from "./pages/Calculators/FencingCalculator";
 import NCCCodesCalculator from "./pages/Calculators/NCCCodesCalculator";
 import CalendarSync from "./pages/Calendar/CalendarSync";
+import NewInvoice from "./pages/Invoices/NewInvoice";
 
 import { Toaster } from "@/components/ui/toaster";
 
@@ -80,6 +81,7 @@ function App() {
         <Route path="/settings/notifications" element={<NotificationsSettings />} />
         <Route path="/settings/integrations" element={<IntegrationsSettings />} />
         <Route path="/trade-dash" element={<TradeDash />} />
+        <Route path="/invoices/new" element={<NewInvoice />} />
         <Route path="/payments/new" element={<NewPayment />} />
         <Route path="/workflow" element={<Workflow />} />
         <Route path="/calculators/*" element={<Calculators />} />
