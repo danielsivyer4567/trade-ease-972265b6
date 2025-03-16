@@ -1,8 +1,11 @@
+
 import { Tabs, TabsList, TabsContent } from "@/components/ui/tabs";
 import type { Job } from "@/types/job";
 import { StandardTabs } from "./tabs/StandardTabs";
 import { ManagerTabs } from "./tabs/ManagerTabs";
 import { useJobFinancials } from "../hooks/useJobFinancials";
+import { useIsMobile } from "@/hooks/use-mobile";
+
 interface JobTabsProps {
   job: Job;
   isManager: boolean;
@@ -22,6 +25,7 @@ interface JobTabsProps {
   isOnBreak: boolean;
   extractedFinancialData?: any[];
 }
+
 export const JobTabs = ({
   job,
   isManager,
@@ -38,6 +42,8 @@ export const JobTabs = ({
   isOnBreak,
   extractedFinancialData = []
 }: JobTabsProps) => {
+  const isMobile = useIsMobile();
+  
   const {
     totalRevenue,
     totalCosts,
@@ -46,11 +52,38 @@ export const JobTabs = ({
     handleUpdateCostsTotals,
     handleUpdateBillsTotals
   } = useJobFinancials();
-  return <Tabs defaultValue="details" className="w-full">
-      <TabsList className="">
-        <StandardTabs job={job} jobTimer={jobTimer} jobNotes={jobNotes} setJobNotes={setJobNotes} locationHistory={locationHistory} hasLocationPermission={hasLocationPermission} handleTimerToggle={handleTimerToggle} handleBreakToggle={handleBreakToggle} isTimerRunning={isTimerRunning} isOnBreak={isOnBreak} />
+  
+  return (
+    <Tabs defaultValue="details" className="w-full">
+      <TabsList className={`${isMobile ? 'overflow-x-auto flex w-full' : ''}`}>
+        <StandardTabs 
+          job={job} 
+          jobTimer={jobTimer} 
+          jobNotes={jobNotes} 
+          setJobNotes={setJobNotes} 
+          locationHistory={locationHistory} 
+          hasLocationPermission={hasLocationPermission} 
+          handleTimerToggle={handleTimerToggle} 
+          handleBreakToggle={handleBreakToggle} 
+          isTimerRunning={isTimerRunning} 
+          isOnBreak={isOnBreak} 
+        />
         
-        {isManager && <ManagerTabs jobTimer={jobTimer} tabNotes={tabNotes} setTabNotes={setTabNotes} totalRevenue={totalRevenue} totalCosts={totalCosts} totalBills={totalBills} extractedFinancialData={extractedFinancialData} onUpdateBillsTotals={handleUpdateBillsTotals} onUpdateCostsTotals={handleUpdateCostsTotals} onUpdateInvoiceTotals={handleUpdateInvoiceTotals} />}
+        {isManager && (
+          <ManagerTabs 
+            jobTimer={jobTimer} 
+            tabNotes={tabNotes} 
+            setTabNotes={setTabNotes} 
+            totalRevenue={totalRevenue} 
+            totalCosts={totalCosts} 
+            totalBills={totalBills} 
+            extractedFinancialData={extractedFinancialData} 
+            onUpdateBillsTotals={handleUpdateBillsTotals} 
+            onUpdateCostsTotals={handleUpdateCostsTotals} 
+            onUpdateInvoiceTotals={handleUpdateInvoiceTotals} 
+          />
+        )}
       </TabsList>
-    </Tabs>;
+    </Tabs>
+  );
 };

@@ -91,34 +91,38 @@ export function JobDetails() {
   }
 
   return (
-    <div className="space-y-6 md:space-y-10 p-3 md:p-6 max-w-7xl mx-auto">
-      <JobHeader job={job} />
-      
-      <div className="mb-16">
-        <JobTabs
-          job={job}
-          isManager={isManager}
-          jobTimer={jobTimer}
-          jobNotes={jobNotes}
-          setJobNotes={setJobNotes}
-          tabNotes={tabNotes}
-          setTabNotes={setTabNotes}
-          locationHistory={locationHistory}
-          hasLocationPermission={hasLocationPermission}
-          handleTimerToggle={handleTimerToggle}
-          handleBreakToggle={handleBreakToggle}
-          isTimerRunning={isTimerRunning}
-          isOnBreak={isOnBreak}
-          extractedFinancialData={extractedFinancialData}
-        />
+    <div className="container-responsive mx-auto">
+      <div className="space-y-4 sm:space-y-6 p-2 sm:p-4 max-w-7xl mx-auto">
+        <JobHeader job={job} />
+        
+        <div className="mb-6 sm:mb-10">
+          <JobTabs
+            job={job}
+            isManager={isManager}
+            jobTimer={jobTimer}
+            jobNotes={jobNotes}
+            setJobNotes={setJobNotes}
+            tabNotes={tabNotes}
+            setTabNotes={setTabNotes}
+            locationHistory={locationHistory}
+            hasLocationPermission={hasLocationPermission}
+            handleTimerToggle={handleTimerToggle}
+            handleBreakToggle={handleBreakToggle}
+            isTimerRunning={isTimerRunning}
+            isOnBreak={isOnBreak}
+            extractedFinancialData={extractedFinancialData}
+          />
+        </div>
+        
+        {isManager && (
+          <div className="mt-6 sm:mt-10">
+            <DocumentApproval 
+              jobId={job.id} 
+              onFinancialDataExtracted={handleFinancialDataExtracted} 
+            />
+          </div>
+        )}
       </div>
-      
-      {isManager && (
-        <DocumentApproval 
-          jobId={job.id} 
-          onFinancialDataExtracted={handleFinancialDataExtracted} 
-        />
-      )}
     </div>
   );
 }

@@ -3,6 +3,7 @@ import { DocumentApprovalProps } from "./types";
 import { FileUploadSection } from "./FileUploadSection";
 import { ActionButtons } from "./ActionButtons";
 import { useDocumentApproval } from "./useDocumentApproval";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export function DocumentApproval({
   jobId,
@@ -18,11 +19,13 @@ export function DocumentApproval({
     handleApproveDocument
   } = useDocumentApproval(jobId, onFinancialDataExtracted);
   
+  const isMobile = useIsMobile();
+  
   return (
-    <div className="border-t-4 border-gray-300 pt-12 mt-20">
-      <h3 className="text-xl font-medium mb-6">Document Approval</h3>
+    <div className="border-t-2 sm:border-t-4 border-gray-200 pt-6 sm:pt-10 mt-8 sm:mt-16">
+      <h3 className="text-lg sm:text-xl font-medium mb-4 sm:mb-6 px-2">Document Approval</h3>
       
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
+      <div className={`grid ${isMobile ? 'grid-cols-1 gap-4' : 'grid-cols-1 md:grid-cols-3 gap-6'} items-start`}>
         <FileUploadSection
           currentFile={currentFile}
           setCurrentFile={setCurrentFile}
@@ -40,4 +43,4 @@ export function DocumentApproval({
       </div>
     </div>
   );
-}
+};
