@@ -104,6 +104,35 @@ serve(async (req) => {
         }
       );
     }
+
+    if (integration === 'Facebook') {
+      if (!apiKey) {
+        return new Response(
+          JSON.stringify({ error: 'Invalid Facebook API key' }),
+          {
+            status: 400,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          }
+        );
+      }
+
+      const { supabaseClient } = req;
+      await supabaseClient
+        .from('integration_configs')
+        .upsert({
+          integration_name: 'Facebook',
+          api_key: apiKey,
+          status: 'connected'
+        });
+
+      return new Response(
+        JSON.stringify({ message: 'Facebook integration configured successfully' }),
+        {
+          status: 200,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      );
+    }
   
     if (integration === 'Stripe') {
       if (!apiKey) {

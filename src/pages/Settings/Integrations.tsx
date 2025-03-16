@@ -1,6 +1,6 @@
 import { AppLayout } from "@/components/ui/AppLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Link2, MessageSquare, CreditCard, Mail, Calendar, Key, FileText, Phone } from "lucide-react";
+import { Link2, MessageSquare, CreditCard, Mail, Calendar, Key, FileText, Phone, Facebook } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { Input } from "@/components/ui/input";
@@ -27,6 +27,13 @@ const availableIntegrations = [
     icon: Phone,
     description: "Connect with customers via WhatsApp Business API",
     path: "/settings/integrations/whatsapp",
+    apiKeyRequired: true
+  },
+  {
+    title: "Facebook",
+    icon: Facebook,
+    description: "Connect with Facebook for messaging and social media",
+    path: "/settings/integrations/facebook",
     apiKeyRequired: true
   },
   {
@@ -69,6 +76,9 @@ const fetchConfigs = async () => {
       status: "not_connected"
     }, {
       integration_name: "WhatsApp Business",
+      status: "not_connected"
+    }, {
+      integration_name: "Facebook",
       status: "not_connected"
     }];
   } catch (error) {

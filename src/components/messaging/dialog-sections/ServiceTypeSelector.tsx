@@ -25,6 +25,7 @@ export const ServiceTypeSelector = ({
           <SelectItem value="email">Email Service</SelectItem>
           <SelectItem value="whatsapp">WhatsApp Business</SelectItem>
           <SelectItem value="messenger">Facebook Messenger</SelectItem>
+          <SelectItem value="facebook">Facebook</SelectItem>
           <SelectItem value="twilio">Twilio SMS</SelectItem>
           <SelectItem value="gcpvision">Google Cloud Vision API</SelectItem>
           <SelectItem value="custom">Custom API</SelectItem>
