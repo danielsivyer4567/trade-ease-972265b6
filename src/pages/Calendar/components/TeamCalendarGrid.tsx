@@ -17,7 +17,7 @@ export function TeamCalendarGrid({
   setSharedDate, 
   onJobAssign 
 }: TeamCalendarGridProps) {
-  // Mock jobs data for calendar display
+  // Mock jobs data for calendar display with proper status type
   const mockJobs: Job[] = [{
     id: "1",
     customer: "John Smith",

@@ -8,7 +8,7 @@ export interface Job {
   id: string;
   customer: string;
   type: string;
-  status: string;
+  status: 'ready' | 'in-progress' | 'to-invoice' | 'invoiced' | 'clean-required';
   date: string;
   location: [number, number];
   jobNumber: string;
