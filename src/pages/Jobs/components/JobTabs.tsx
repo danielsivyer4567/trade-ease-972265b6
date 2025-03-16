@@ -1,11 +1,9 @@
-
 import { Tabs, TabsList } from "@/components/ui/tabs";
 import type { Job } from "@/types/job";
 import { StandardTabs } from "./tabs/StandardTabs";
 import { ManagerTabs } from "./tabs/ManagerTabs";
 import { useJobFinancials } from "../hooks/useJobFinancials";
 import { useIsMobile } from "@/hooks/use-mobile";
-
 interface JobTabsProps {
   job: Job;
   isManager: boolean;
@@ -25,7 +23,6 @@ interface JobTabsProps {
   isOnBreak: boolean;
   extractedFinancialData?: any[];
 }
-
 export const JobTabs = ({
   job,
   isManager,
@@ -43,7 +40,6 @@ export const JobTabs = ({
   extractedFinancialData = []
 }: JobTabsProps) => {
   const isMobile = useIsMobile();
-  
   const {
     totalRevenue,
     totalCosts,
@@ -52,44 +48,13 @@ export const JobTabs = ({
     handleUpdateCostsTotals,
     handleUpdateBillsTotals
   } = useJobFinancials();
-  
-  return (
-    <Tabs defaultValue="details" className="w-full flex flex-col">
+  return <Tabs defaultValue="details" className="w-full flex flex-col">
       <div className="w-full overflow-hidden mb-2 sticky top-0 z-30 bg-white">
-        <TabsList className="flex w-full mb-0 overflow-x-auto">
-          <StandardTabs 
-            job={job} 
-            jobTimer={jobTimer} 
-            jobNotes={jobNotes} 
-            setJobNotes={setJobNotes} 
-            locationHistory={locationHistory} 
-            hasLocationPermission={hasLocationPermission} 
-            handleTimerToggle={handleTimerToggle} 
-            handleBreakToggle={handleBreakToggle} 
-            isTimerRunning={isTimerRunning} 
-            isOnBreak={isOnBreak} 
-          />
-          
-          {isManager && (
-            <ManagerTabs 
-              jobTimer={jobTimer} 
-              tabNotes={tabNotes} 
-              setTabNotes={setTabNotes} 
-              totalRevenue={totalRevenue} 
-              totalCosts={totalCosts} 
-              totalBills={totalBills} 
-              extractedFinancialData={extractedFinancialData} 
-              onUpdateBillsTotals={handleUpdateBillsTotals} 
-              onUpdateCostsTotals={handleUpdateCostsTotals} 
-              onUpdateInvoiceTotals={handleUpdateInvoiceTotals} 
-            />
-          )}
-        </TabsList>
+        
       </div>
       
       <div className="w-full mt-2 overflow-x-auto">
         {/* TabsContent components are rendered within StandardTabs and ManagerTabs */}
       </div>
-    </Tabs>
-  );
+    </Tabs>;
 };
