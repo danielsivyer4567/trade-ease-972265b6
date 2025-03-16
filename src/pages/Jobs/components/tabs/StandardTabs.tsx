@@ -35,22 +35,22 @@ export const StandardTabs = ({
 }: StandardTabsProps) => {
   const isMobile = useIsMobile();
   return <>
-      <TabsTrigger value="details" className="min-w-[80px] sm:min-w-[100px] whitespace-nowrap flex-shrink-0 bg-slate-400 hover:bg-slate-300">
+      <TabsTrigger value="details" className="min-w-[80px] sm:min-w-[100px] whitespace-nowrap flex-shrink-0 bg-slate-400 hover:bg-slate-300 px-[26px] mx-0">
         Details
       </TabsTrigger>
       
-      <TabsTrigger value="notes" className="min-w-[80px] sm:min-w-[100px] whitespace-nowrap flex-shrink-0 bg-slate-500 hover:bg-slate-400">
+      <TabsTrigger value="notes" className="min-w-[80px] sm:min-w-[100px] whitespace-nowrap flex-shrink-0 bg-slate-500 hover:bg-slate-400 px-[29px] mx-[22px]">
         {!isMobile && <FileText className="w-4 h-4 mr-2" />}
         Notes
       </TabsTrigger>
       
-      <TabsTrigger value="calendar" className="min-w-[80px] sm:min-w-[100px] whitespace-nowrap flex-shrink-0 bg-slate-400 hover:bg-slate-300">
+      <TabsTrigger value="calendar" className="min-w-[80px] sm:min-w-[100px] whitespace-nowrap flex-shrink-0 bg-slate-400 hover:bg-slate-300 px-[30px] mx-[5px]">
         {!isMobile && <Calendar className="w-4 h-4 mr-2" />}
         Calendar
       </TabsTrigger>
       
-      <TabsTrigger value="timer" className="min-w-[80px] sm:min-w-[100px] whitespace-nowrap flex-shrink-0 bg-slate-400 hover:bg-slate-300">
-        {!isMobile && <Clock className="w-4 h-4 mr-2" />}
+      <TabsTrigger value="timer" className="min-w-[80px] sm:min-w-[100px] whitespace-nowrap flex-shrink-0 bg-slate-400 hover:bg-slate-300 px-[23px] mx-[23px]">
+        {!isMobile && <Clock className="w-4 h-4 mr-2 px-0" />}
         Timer
       </TabsTrigger>
     </>;
