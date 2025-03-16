@@ -9,7 +9,7 @@ interface RightColumnProps {
 
 export const RightColumn = ({ job }: RightColumnProps) => {
   return (
-    <div className="space-y-4 bg-background rounded-md">
+    <div className="space-y-5 bg-background rounded-md">
       <ScheduledDate job={job} />
       <JobLocation job={job} />
     </div>
