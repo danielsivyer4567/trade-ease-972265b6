@@ -12,12 +12,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { FileUpload } from "@/components/tasks/FileUpload";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-
 export default function NewInvoice() {
   const [selectedTab, setSelectedTab] = useState("blank");
-
-  return (
-    <AppLayout>
+  return <AppLayout>
       <div className="p-6 space-y-6">
         <div className="flex items-center gap-2">
           <Link to="/" className="hover:text-blue-500">
@@ -32,7 +29,7 @@ export default function NewInvoice() {
         <Card className="p-6">
           <Tabs defaultValue="blank" value={selectedTab} onValueChange={setSelectedTab}>
             <TabsList className="grid grid-cols-4 w-full">
-              <TabsTrigger value="blank">Blank Invoice</TabsTrigger>
+              <TabsTrigger value="blank" className="bg-slate-400 hover:bg-slate-300">Blank Invoice</TabsTrigger>
               <TabsTrigger value="template">From Template</TabsTrigger>
               <TabsTrigger value="quote">From Quote</TabsTrigger>
               <TabsTrigger value="timesheet">From Timesheet</TabsTrigger>
@@ -56,13 +53,10 @@ export default function NewInvoice() {
           </Tabs>
         </Card>
       </div>
-    </AppLayout>
-  );
+    </AppLayout>;
 }
-
 function BlankInvoiceForm() {
   const [loading, setLoading] = useState(false);
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -75,9 +69,7 @@ function BlankInvoiceForm() {
       setLoading(false);
     }
   };
-
-  return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+  return <form onSubmit={handleSubmit} className="space-y-4">
       <div>
         <Label htmlFor="customer">Customer</Label>
         <Input id="customer" placeholder="Select customer" required />
@@ -101,15 +93,12 @@ function BlankInvoiceForm() {
       <Button type="submit" disabled={loading}>
         {loading ? "Creating Invoice..." : "Create Invoice"}
       </Button>
-    </form>
-  );
+    </form>;
 }
-
 function TemplateInvoiceForm() {
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
     if (!files || files.length === 0) return;
-
     try {
       // Handle the uploaded files here
       toast.success(`File "${files[0].name}" uploaded successfully`);
@@ -118,27 +107,19 @@ function TemplateInvoiceForm() {
       console.error("Upload error:", error);
     }
   };
-
-  return (
-    <div className="space-y-4">
+  return <div className="space-y-4">
       <div className="text-center p-8 border-2 border-dashed rounded-lg">
         <p className="text-muted-foreground mb-4">Select an invoice template to get started</p>
-        <FileUpload 
-          onFileUpload={handleFileUpload}
-          label="Upload Invoice Template"
-        />
+        <FileUpload onFileUpload={handleFileUpload} label="Upload Invoice Template" />
         <Button variant="outline" className="mt-4">
           Browse Templates
         </Button>
       </div>
-    </div>
-  );
+    </div>;
 }
-
 function QuoteInvoiceForm() {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
-
   const handleSearch = (query: string) => {
     setSearchQuery(query);
     if (query.length > 2) {
@@ -147,9 +128,7 @@ function QuoteInvoiceForm() {
       });
     }
   };
-
-  return (
-    <div className="space-y-4">
+  return <div className="space-y-4">
       <div className="text-center p-8 border-2 border-dashed rounded-lg">
         <p className="text-muted-foreground">Select a quote to convert to invoice</p>
         <Sheet>
@@ -168,39 +147,27 @@ function QuoteInvoiceForm() {
             <div className="mt-6 space-y-4">
               <div className="relative">
                 <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                <Input
-                  placeholder="Enter customer name or quote number..."
-                  value={searchQuery}
-                  onChange={(e) => handleSearch(e.target.value)}
-                  className="pl-10"
-                />
+                <Input placeholder="Enter customer name or quote number..." value={searchQuery} onChange={e => handleSearch(e.target.value)} className="pl-10" />
               </div>
               <div className="mt-4">
-                {searchQuery.length > 2 && (
-                  <div className="text-sm text-muted-foreground">
+                {searchQuery.length > 2 && <div className="text-sm text-muted-foreground">
                     Searching for quotes matching "{searchQuery}"...
-                  </div>
-                )}
+                  </div>}
                 <div className="mt-2 space-y-2">
-                  {searchResults.length === 0 && searchQuery.length > 2 && (
-                    <div className="text-sm text-muted-foreground">
+                  {searchResults.length === 0 && searchQuery.length > 2 && <div className="text-sm text-muted-foreground">
                       No quotes found matching your search.
-                    </div>
-                  )}
+                    </div>}
                 </div>
               </div>
             </div>
           </SheetContent>
         </Sheet>
       </div>
-    </div>
-  );
+    </div>;
 }
-
 function TimesheetInvoiceForm() {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
-
   const handleSearch = (query: string) => {
     setSearchQuery(query);
     if (query.length > 2) {
@@ -209,9 +176,7 @@ function TimesheetInvoiceForm() {
       });
     }
   };
-
-  return (
-    <div className="space-y-4">
+  return <div className="space-y-4">
       <div className="text-center p-8 border-2 border-dashed rounded-lg">
         <p className="text-muted-foreground">Select timesheets to generate invoice</p>
         <Sheet>
@@ -230,31 +195,21 @@ function TimesheetInvoiceForm() {
             <div className="mt-6 space-y-4">
               <div className="relative">
                 <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                <Input
-                  placeholder="Enter employee name or timesheet number..."
-                  value={searchQuery}
-                  onChange={(e) => handleSearch(e.target.value)}
-                  className="pl-10"
-                />
+                <Input placeholder="Enter employee name or timesheet number..." value={searchQuery} onChange={e => handleSearch(e.target.value)} className="pl-10" />
               </div>
               <div className="mt-4">
-                {searchQuery.length > 2 && (
-                  <div className="text-sm text-muted-foreground">
+                {searchQuery.length > 2 && <div className="text-sm text-muted-foreground">
                     Searching for timesheets matching "{searchQuery}"...
-                  </div>
-                )}
+                  </div>}
                 <div className="mt-2 space-y-2">
-                  {searchResults.length === 0 && searchQuery.length > 2 && (
-                    <div className="text-sm text-muted-foreground">
+                  {searchResults.length === 0 && searchQuery.length > 2 && <div className="text-sm text-muted-foreground">
                       No timesheets found matching your search.
-                    </div>
-                  )}
+                    </div>}
                 </div>
               </div>
             </div>
           </SheetContent>
         </Sheet>
       </div>
-    </div>
-  );
+    </div>;
 }
