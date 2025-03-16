@@ -32,8 +32,7 @@ export const AdditionalNotes = () => {
           onClick={() => setIsEditingNotes(true)}
           className="h-8 px-2"
         >
-          <Edit className="h-4 w-4 mr-1" />
-          Edit
+          <Edit className="h-4 w-4" />
         </Button>
       </div>
       
@@ -42,7 +41,7 @@ export const AdditionalNotes = () => {
           <Textarea
             value={additionalNotes}
             onChange={(e) => setAdditionalNotes(e.target.value)}
-            className="min-h-[100px]"
+            className="min-h-[80px]"
           />
           <div className="flex justify-end space-x-2">
             <Button

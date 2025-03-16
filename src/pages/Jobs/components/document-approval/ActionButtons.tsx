@@ -16,13 +16,13 @@ export function ActionButtons({
   onSaveDraft 
 }: ActionButtonsProps) {
   return (
-    <div className="space-y-3 bg-gray-50 p-4 rounded border">
+    <div className="space-y-3 bg-gray-50 p-4 rounded-lg border">
       <h4 className="font-medium text-sm">Document Actions</h4>
       
       <div className="space-y-2">
         <Button
           variant="default"
-          className="w-full justify-start"
+          className="w-full justify-start bg-blue-600 hover:bg-blue-700"
           disabled={!currentFile || isProcessing}
           onClick={onApprove}
         >

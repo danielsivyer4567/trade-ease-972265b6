@@ -19,23 +19,21 @@ export const JobLocation = ({ job }: JobLocationProps) => {
           Job Location
         </h3>
         <div className="space-y-2">
-          <p className="text-sm mb-2">
+          <p className="text-sm">
             <span className="font-semibold">Coordinates:</span> {job.location[1]}, {job.location[0]}
           </p>
 
-          {!isMobile && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => {
-                window.open(`https://www.google.com/maps/search/?api=1&query=${job.location[1]},${job.location[0]}`, '_blank');
-              }}
-              className="w-full"
-            >
-              <Navigation className="h-4 w-4 mr-2" />
-              Open in Google Maps
-            </Button>
-          )}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              window.open(`https://www.google.com/maps/search/?api=1&query=${job.location[1]},${job.location[0]}`, '_blank');
+            }}
+            className="w-full"
+          >
+            <Navigation className="h-4 w-4 mr-2" />
+            Open in Google Maps
+          </Button>
         </div>
       </div>
 

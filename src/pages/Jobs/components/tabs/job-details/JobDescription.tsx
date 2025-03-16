@@ -36,8 +36,7 @@ export const JobDescription = ({ description }: JobDescriptionProps) => {
           onClick={() => setIsEditingDescription(true)}
           className="h-8 px-2"
         >
-          <Edit className="h-4 w-4 mr-1" />
-          Edit
+          <Edit className="h-4 w-4" />
         </Button>
       </div>
       
@@ -46,7 +45,7 @@ export const JobDescription = ({ description }: JobDescriptionProps) => {
           <Textarea
             value={descriptionText}
             onChange={(e) => setDescriptionText(e.target.value)}
-            className="min-h-[100px]"
+            className="min-h-[80px]"
           />
           <div className="flex justify-end space-x-2">
             <Button
