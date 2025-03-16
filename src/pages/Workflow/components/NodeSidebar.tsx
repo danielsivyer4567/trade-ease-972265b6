@@ -1,9 +1,7 @@
-
 import React, { useState } from 'react';
 import { CustomNodes } from './sidebar/CustomNodes';
 import { DefaultNodes } from './sidebar/DefaultNodes';
 import { WorkflowInstructions } from './sidebar/WorkflowInstructions';
-
 export function NodeSidebar() {
   // State for custom nodes
   const [customNodes, setCustomNodes] = useState([]);
@@ -20,20 +18,16 @@ export function NodeSidebar() {
   // Function to add a custom node
   const handleAddCustomNode = () => {
     if (!newNodeName.trim()) return;
-    
     const newNode = {
       id: `custom-${Date.now()}`,
       name: newNodeName,
       icon: newNodeIcon,
-      color: newNodeColor,
+      color: newNodeColor
     };
-    
     setCustomNodes([...customNodes, newNode]);
     setNewNodeName('');
   };
-
-  return (
-    <div className="w-64 bg-gray-50 border-r border-gray-200 overflow-y-auto">
+  return <div className="w-64 bg-gray-50 border-r border-gray-200 overflow-y-auto">
       <div className="p-4">
         <h3 className="font-medium text-sm mb-3">Workflow Nodes</h3>
         
@@ -43,37 +37,13 @@ export function NodeSidebar() {
         {/* Note about Vision Analysis feature */}
         <div className="mt-4">
           <h4 className="text-xs font-medium text-gray-500 mb-2">VISION ANALYSIS</h4>
-          <div className="border border-purple-300 bg-purple-50 p-3 rounded-md mb-2">
-            <div className="flex items-center">
-              <div className="w-6 h-6 bg-purple-100 rounded-full flex items-center justify-center mr-2">
-                <span className="text-purple-600 text-xs">🔍</span>
-              </div>
-              <div>
-                <div className="font-semibold text-xs">Vision Analysis</div>
-                <div className="text-xs text-gray-500">Available in Multiple Sections</div>
-              </div>
-            </div>
-            <p className="text-xs mt-2 text-purple-700">
-              Vision Analysis is now available directly in Jobs, Quotes, and Messaging sections for easier document processing.
-            </p>
-          </div>
+          
         </div>
 
         {/* Custom nodes section */}
-        <CustomNodes 
-          customNodes={customNodes}
-          newNodeName={newNodeName}
-          setNewNodeName={setNewNodeName}
-          newNodeIcon={newNodeIcon}
-          setNewNodeIcon={setNewNodeIcon}
-          newNodeColor={newNodeColor}
-          setNewNodeColor={setNewNodeColor}
-          addCustomNode={handleAddCustomNode}
-          onDragStart={handleDragStart}
-        />
+        <CustomNodes customNodes={customNodes} newNodeName={newNodeName} setNewNodeName={setNewNodeName} newNodeIcon={newNodeIcon} setNewNodeIcon={setNewNodeIcon} newNodeColor={newNodeColor} setNewNodeColor={setNewNodeColor} addCustomNode={handleAddCustomNode} onDragStart={handleDragStart} />
         
         <WorkflowInstructions />
       </div>
-    </div>
-  );
+    </div>;
 }
