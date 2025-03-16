@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Search, Plus, CalendarRange, Clock } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -10,6 +11,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useNavigate } from 'react-router-dom';
 import { Job } from '@/types/job';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+
 interface SearchBarProps {
   jobSearchQuery: string;
   setJobSearchQuery: (value: string) => void;
@@ -57,6 +61,7 @@ const mockJobs = [{
   address: "654 Cedar Ln",
   title: "Roof Repair"
 }];
+
 export const SearchBar: React.FC<SearchBarProps> = ({
   jobSearchQuery,
   setJobSearchQuery,
@@ -82,17 +87,64 @@ export const SearchBar: React.FC<SearchBarProps> = ({
     address: string;
     title: string;
   } | null>(null);
+  const [jobs, setJobs] = useState<any[]>([]);
+  const [syncToUserCalendar, setSyncToUserCalendar] = useState(false);
+  const [userId, setUserId] = useState<string | null>(null);
+  const [calendarConnections, setCalendarConnections] = useState<any[]>([]);
+
+  useEffect(() => {
+    // Fetch user data to check if they're logged in
+    const getUserData = async () => {
+      const { data } = await supabase.auth.getUser();
+      if (data.user) {
+        setUserId(data.user.id);
+        // Fetch the user's calendar connections
+        const { data: connections, error } = await supabase
+          .from('user_calendar_connections')
+          .select('*')
+          .eq('user_id', data.user.id)
+          .eq('sync_enabled', true);
+          
+        if (!error && connections) {
+          setCalendarConnections(connections);
+        }
+      }
+    };
+    
+    getUserData();
+    
+    // Fetch real jobs from API or use mock data
+    const fetchJobs = async () => {
+      // In a real app, you would fetch from your API
+      // const { data, error } = await supabase.from('jobs').select('*');
+      // if (!error && data) {
+      //   setJobs(data);
+      // }
+      
+      // For now, use mock data
+      setJobs(mockJobs);
+    };
+    
+    fetchJobs();
+  }, []);
+
   useEffect(() => {
     if (jobSearchQuery) {
       const lowercaseQuery = jobSearchQuery.toLowerCase();
-      const filtered = mockJobs.filter(job => job.jobNumber.toLowerCase().includes(lowercaseQuery) || job.customer.toLowerCase().includes(lowercaseQuery) || job.address.toLowerCase().includes(lowercaseQuery) || job.title.toLowerCase().includes(lowercaseQuery));
+      const filtered = jobs.filter(job => 
+        job.jobNumber.toLowerCase().includes(lowercaseQuery) || 
+        job.customer.toLowerCase().includes(lowercaseQuery) || 
+        job.address.toLowerCase().includes(lowercaseQuery) || 
+        job.title.toLowerCase().includes(lowercaseQuery)
+      );
       setFilteredJobs(filtered);
       setIsJobDropdownOpen(filtered.length > 0);
     } else {
       setFilteredJobs([]);
       setIsJobDropdownOpen(false);
     }
-  }, [jobSearchQuery]);
+  }, [jobSearchQuery, jobs]);
+
   const handleJobSelect = (job: {
     id: string;
     jobNumber: string;
@@ -103,7 +155,52 @@ export const SearchBar: React.FC<SearchBarProps> = ({
     setSelectedJob(job);
     setJobSearchQuery(job.title || job.jobNumber);
     setIsJobDropdownOpen(false);
+    
+    // If sync is enabled and user has calendar connections, sync this job
+    if (syncToUserCalendar && calendarConnections.length > 0 && startDate) {
+      syncJobToUserCalendars(job);
+    }
   };
+  
+  const syncJobToUserCalendars = async (job: any) => {
+    if (!userId || !startDate) return;
+    
+    try {
+      // For each calendar connection, create a sync event
+      for (const connection of calendarConnections) {
+        const eventStart = new Date(startDate);
+        if (startTime) {
+          const [hours, minutes] = startTime.split(':').map(Number);
+          eventStart.setHours(hours, minutes);
+        }
+        
+        const eventEnd = endDate ? new Date(endDate) : new Date(eventStart);
+        if (endTime) {
+          const [hours, minutes] = endTime.split(':').map(Number);
+          eventEnd.setHours(hours, minutes);
+        } else {
+          // Default to 2 hours later if no end time/date
+          eventEnd.setHours(eventStart.getHours() + 2);
+        }
+        
+        await supabase.from('calendar_sync_events').insert({
+          user_id: userId,
+          connection_id: connection.id,
+          trade_event_id: job.id,
+          event_title: job.title || `Job #${job.jobNumber}`,
+          event_start: eventStart.toISOString(),
+          event_end: eventEnd.toISOString(),
+          sync_status: 'pending'
+        });
+      }
+      
+      toast.success('Job scheduled and synced to your calendars');
+    } catch (error) {
+      console.error('Error syncing to calendars:', error);
+      toast.error('Failed to sync with your calendars');
+    }
+  };
+
   const generateTimeOptions = () => {
     const options = [];
     for (let hour = 0; hour < 24; hour++) {
@@ -115,10 +212,13 @@ export const SearchBar: React.FC<SearchBarProps> = ({
     }
     return options;
   };
+  
   const timeOptions = generateTimeOptions();
+  
   const handleNewJobClick = () => {
     navigate('/jobs/new');
   };
+
   return <div className={`w-full ${isMobile ? 'py-0.5 px-1' : 'py-1 px-2'}`}>
       <div className="grid grid-cols-1 gap-1 my-0 px-0">
         {/* Combined Date and Time row */}
@@ -216,6 +316,22 @@ export const SearchBar: React.FC<SearchBarProps> = ({
               <Plus className="h-3 w-3" />
             </Button>
           </div>
+          
+          {/* Calendar sync option for jobs */}
+          {userId && calendarConnections.length > 0 && (
+            <div className="flex items-center gap-2 mt-1 ml-1">
+              <input 
+                type="checkbox" 
+                id="syncToCalendar" 
+                checked={syncToUserCalendar} 
+                onChange={() => setSyncToUserCalendar(!syncToUserCalendar)}
+                className="h-3 w-3"
+              />
+              <label htmlFor="syncToCalendar" className="text-xs text-gray-500">
+                Sync this job to my calendars
+              </label>
+            </div>
+          )}
         </div>
         
         {/* Staff & Connections section */}

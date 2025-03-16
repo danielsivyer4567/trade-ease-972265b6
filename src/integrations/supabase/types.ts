@@ -36,6 +36,59 @@ export type Database = {
         }
         Relationships: []
       }
+      calendar_sync_events: {
+        Row: {
+          connection_id: string
+          created_at: string | null
+          event_end: string
+          event_start: string
+          event_title: string
+          id: string
+          last_synced_at: string | null
+          provider_event_id: string | null
+          sync_status: string | null
+          trade_event_id: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          connection_id: string
+          created_at?: string | null
+          event_end: string
+          event_start: string
+          event_title: string
+          id?: string
+          last_synced_at?: string | null
+          provider_event_id?: string | null
+          sync_status?: string | null
+          trade_event_id?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          connection_id?: string
+          created_at?: string | null
+          event_end?: string
+          event_start?: string
+          event_title?: string
+          id?: string
+          last_synced_at?: string | null
+          provider_event_id?: string | null
+          sync_status?: string | null
+          trade_event_id?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "calendar_sync_events_connection_id_fkey"
+            columns: ["connection_id"]
+            isOneToOne: false
+            referencedRelation: "user_calendar_connections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       invoices: {
         Row: {
           amount: number
@@ -420,6 +473,48 @@ export type Database = {
           settings?: Json | null
           updated_at?: string | null
           user_id?: string | null
+        }
+        Relationships: []
+      }
+      user_calendar_connections: {
+        Row: {
+          access_token: string | null
+          calendar_id: string | null
+          created_at: string | null
+          id: string
+          provider: string
+          provider_id: string | null
+          refresh_token: string | null
+          sync_enabled: boolean | null
+          token_expires_at: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          access_token?: string | null
+          calendar_id?: string | null
+          created_at?: string | null
+          id?: string
+          provider: string
+          provider_id?: string | null
+          refresh_token?: string | null
+          sync_enabled?: boolean | null
+          token_expires_at?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          access_token?: string | null
+          calendar_id?: string | null
+          created_at?: string | null
+          id?: string
+          provider?: string
+          provider_id?: string | null
+          refresh_token?: string | null
+          sync_enabled?: boolean | null
+          token_expires_at?: string | null
+          updated_at?: string | null
+          user_id?: string
         }
         Relationships: []
       }
