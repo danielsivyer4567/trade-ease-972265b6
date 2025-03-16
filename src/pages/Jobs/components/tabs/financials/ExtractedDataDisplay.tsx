@@ -24,13 +24,13 @@ export const ExtractedDataDisplay = ({
   }
 
   return (
-    <Alert className="bg-blue-50 border-blue-200">
+    <Alert className="bg-blue-50 border-blue-200 mb-8">
       <FileText className="h-4 w-4 text-blue-600" />
       <AlertTitle>Document Analysis Data Available</AlertTitle>
       <AlertDescription className="mt-2">
         {extractedFinancialData.length} financial data point(s) extracted from your documents
         
-        <div className="mt-3 space-y-4">
+        <div className="mt-3 space-y-4 max-h-[600px] overflow-y-auto pb-4">
           {Object.keys(groupedFinancialData).map(category => (
             <div key={category} className="space-y-2">
               <h4 className="text-sm font-medium capitalize flex items-center">

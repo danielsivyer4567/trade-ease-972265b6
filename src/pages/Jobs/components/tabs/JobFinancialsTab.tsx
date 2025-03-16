@@ -92,7 +92,7 @@ export const JobFinancialsTab = ({
   return (
     <TabsContent value="financials" className="space-y-4">
       <div className={`border rounded-lg p-4 ${isMobile ? 'overflow-x-hidden' : ''}`}>
-        <div className={`space-y-4 ${isMobile ? 'w-full' : 'max-w-full'}`}>
+        <div className={`space-y-8 ${isMobile ? 'w-full' : 'max-w-full'}`}>
           <ExtractedDataDisplay 
             extractedFinancialData={extractedFinancialData}
             groupedFinancialData={groupedFinancialData}
@@ -100,10 +100,12 @@ export const JobFinancialsTab = ({
             applyExtractedAmount={applyExtractedAmount}
           />
 
-          <SearchQuotes 
-            onSelectQuote={setQuoteAmount} 
-            customerQuotes={mockCustomerQuotes} 
-          />
+          <div className="mt-12 pt-4">
+            <SearchQuotes 
+              onSelectQuote={setQuoteAmount} 
+              customerQuotes={mockCustomerQuotes} 
+            />
+          </div>
 
           <QuoteAmountInput 
             quoteAmount={quoteAmount} 
