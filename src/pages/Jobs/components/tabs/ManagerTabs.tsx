@@ -1,10 +1,6 @@
 
-import { TabsContent, TabsTrigger } from "@/components/ui/tabs";
+import { TabsTrigger } from "@/components/ui/tabs";
 import { Receipt, Calculator, ScrollText, Wallet } from "lucide-react";
-import { JobBillsTab } from "./JobBillsTab";
-import { JobCostsTab } from "./JobCostsTab";
-import { JobInvoicesTab } from "./JobInvoicesTab";
-import { JobFinancialsTab } from "./JobFinancialsTab";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 interface ManagerTabsProps {
@@ -52,41 +48,6 @@ export const ManagerTabs = ({
         {!isMobile && <Wallet className="w-4 h-4 mr-2" />}
         Financials
       </TabsTrigger>
-
-      <TabsContent value="bills" className="mt-4 px-1">
-        <JobBillsTab
-          tabNotes={tabNotes}
-          setTabNotes={setTabNotes}
-          onUpdateTotals={onUpdateBillsTotals}
-        />
-      </TabsContent>
-      
-      <TabsContent value="costs" className="mt-4 px-1">
-        <JobCostsTab
-          tabNotes={tabNotes}
-          setTabNotes={setTabNotes}
-          onUpdateTotals={onUpdateCostsTotals}
-        />
-      </TabsContent>
-      
-      <TabsContent value="invoices" className="mt-4 px-1">
-        <JobInvoicesTab
-          tabNotes={tabNotes}
-          setTabNotes={setTabNotes}
-          onUpdateTotals={onUpdateInvoiceTotals}
-        />
-      </TabsContent>
-      
-      <TabsContent value="financials" className="mt-4 px-1">
-        <JobFinancialsTab
-          jobTimer={jobTimer}
-          tabNotes={tabNotes}
-          setTabNotes={setTabNotes}
-          totalRevenue={totalRevenue}
-          totalCosts={totalCosts + totalBills}
-          extractedFinancialData={extractedFinancialData}
-        />
-      </TabsContent>
     </>
   );
 };

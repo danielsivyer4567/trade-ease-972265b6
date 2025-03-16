@@ -70,30 +70,6 @@ export const StandardTabs = ({
         {!isMobile && <Clock className="w-4 h-4 mr-2" />}
         Timer
       </TabsTrigger>
-
-      <TabsContent value="details" className="mt-4 px-1 relative">
-        <JobDetailsTab job={job} />
-      </TabsContent>
-      
-      <TabsContent value="notes" className="mt-4 px-1 relative">
-        <JobNotesTab notes={jobNotes} setNotes={setJobNotes} />
-      </TabsContent>
-      
-      <TabsContent value="calendar" className="mt-4 px-1 relative">
-        <JobCalendarTab job={job} />
-      </TabsContent>
-      
-      <TabsContent value="timer" className="mt-4 px-1 relative">
-        <JobTimerTab 
-          jobTimer={jobTimer} 
-          hasLocationPermission={hasLocationPermission} 
-          handleTimerToggle={handleTimerToggle} 
-          handleBreakToggle={handleBreakToggle} 
-          isTimerRunning={isTimerRunning} 
-          isOnBreak={isOnBreak} 
-          locationHistory={locationHistory} 
-        />
-      </TabsContent>
     </>
   );
 };
