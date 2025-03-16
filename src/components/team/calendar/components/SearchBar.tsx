@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Search, Plus, CalendarRange, Clock } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -10,6 +10,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { Textarea } from "@/components/ui/textarea";
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useNavigate } from 'react-router-dom';
+import { Job } from '@/types/job';
 
 interface SearchBarProps {
   jobSearchQuery: string;
@@ -25,6 +26,15 @@ interface SearchBarProps {
   onToggleQuoteSearch: () => void;
   onCreateJob: () => void;
 }
+
+// Mock jobs data - in a real app, this would come from an API or parent component
+const mockJobs = [
+  { id: "1", jobNumber: "PLM-001", customer: "John Smith", address: "123 Main St", title: "Water Heater Installation" },
+  { id: "2", jobNumber: "HVAC-001", customer: "Sarah Johnson", address: "456 Elm Ave", title: "HVAC Maintenance" },
+  { id: "3", jobNumber: "ELE-001", customer: "Mike Brown", address: "789 Oak Dr", title: "Electrical Panel Upgrade" },
+  { id: "4", jobNumber: "PLM-002", customer: "Jessica Lee", address: "321 Pine Rd", title: "Bathroom Renovation" },
+  { id: "5", jobNumber: "ROOF-001", customer: "David Miller", address: "654 Cedar Ln", title: "Roof Repair" },
+];
 
 export const SearchBar: React.FC<SearchBarProps> = ({
   jobSearchQuery,
@@ -42,6 +52,33 @@ export const SearchBar: React.FC<SearchBarProps> = ({
 }) => {
   const isMobile = useIsMobile();
   const navigate = useNavigate();
+  
+  const [filteredJobs, setFilteredJobs] = useState(mockJobs);
+  const [isJobDropdownOpen, setIsJobDropdownOpen] = useState(false);
+  const [selectedJob, setSelectedJob] = useState<{ id: string; jobNumber: string; customer: string; address: string; title: string } | null>(null);
+  
+  useEffect(() => {
+    if (jobSearchQuery) {
+      const lowercaseQuery = jobSearchQuery.toLowerCase();
+      const filtered = mockJobs.filter(job => 
+        job.jobNumber.toLowerCase().includes(lowercaseQuery) ||
+        job.customer.toLowerCase().includes(lowercaseQuery) ||
+        job.address.toLowerCase().includes(lowercaseQuery) ||
+        job.title.toLowerCase().includes(lowercaseQuery)
+      );
+      setFilteredJobs(filtered);
+      setIsJobDropdownOpen(filtered.length > 0);
+    } else {
+      setFilteredJobs([]);
+      setIsJobDropdownOpen(false);
+    }
+  }, [jobSearchQuery]);
+  
+  const handleJobSelect = (job: { id: string; jobNumber: string; customer: string; address: string; title: string }) => {
+    setSelectedJob(job);
+    setJobSearchQuery(job.title || job.jobNumber);
+    setIsJobDropdownOpen(false);
+  };
   
   const generateTimeOptions = () => {
     const options = [];
@@ -158,7 +195,32 @@ export const SearchBar: React.FC<SearchBarProps> = ({
           <div className="flex py-px px-0 my-0 mx-[4px]">
             <div className="relative w-full py-[3px] px-px my-0">
               <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-3 w-3 text-gray-400" />
-              <Input placeholder="Search jobs..." value={jobSearchQuery} onChange={e => setJobSearchQuery(e.target.value)} className="pl-7 w-full border-gray-300 h-7 text-xs bg-slate-300 py-[22px] mx-0 my-0 px-[22px]" />
+              <Input 
+                placeholder="Search by job #, customer name, address..." 
+                value={jobSearchQuery} 
+                onChange={e => setJobSearchQuery(e.target.value)} 
+                className="pl-7 w-full border-gray-300 h-7 text-xs bg-slate-300 py-[22px] mx-0 my-0 px-[22px]" 
+                onFocus={() => jobSearchQuery && setIsJobDropdownOpen(filteredJobs.length > 0)}
+                onBlur={() => setTimeout(() => setIsJobDropdownOpen(false), 200)}
+              />
+              
+              {/* Dropdown for job search results */}
+              {isJobDropdownOpen && (
+                <div className="absolute z-10 mt-1 w-full bg-white border border-gray-200 rounded-md shadow-lg max-h-40 overflow-y-auto">
+                  {filteredJobs.map(job => (
+                    <div 
+                      key={job.id} 
+                      className="px-3 py-2 hover:bg-slate-100 cursor-pointer text-xs"
+                      onClick={() => handleJobSelect(job)}
+                    >
+                      <div className="font-medium">{job.jobNumber} - {job.title}</div>
+                      <div className="text-gray-500">
+                        {job.customer} | {job.address}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
             <Button variant="outline" size="sm" className="ml-1 border-gray-300 h-7 w-7 p-0 bg-slate-400 hover:bg-slate-300 px-[22px] py-[21px] mx-[7px] my-[3px]">
               <Plus className="h-3 w-3" />
@@ -186,4 +248,3 @@ export const SearchBar: React.FC<SearchBarProps> = ({
     </div>
   );
 };
-
