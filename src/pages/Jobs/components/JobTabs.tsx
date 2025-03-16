@@ -1,10 +1,8 @@
-
 import { Tabs, TabsList, TabsContent } from "@/components/ui/tabs";
 import type { Job } from "@/types/job";
 import { StandardTabs } from "./tabs/StandardTabs";
 import { ManagerTabs } from "./tabs/ManagerTabs";
 import { useJobFinancials } from "../hooks/useJobFinancials";
-
 interface JobTabsProps {
   job: Job;
   isManager: boolean;
@@ -13,7 +11,10 @@ interface JobTabsProps {
   setJobNotes: (notes: string) => void;
   tabNotes: Record<string, string>;
   setTabNotes: (notes: Record<string, string>) => void;
-  locationHistory: Array<{timestamp: number; coords: [number, number]}>;
+  locationHistory: Array<{
+    timestamp: number;
+    coords: [number, number];
+  }>;
   hasLocationPermission: boolean | null;
   handleTimerToggle: () => void;
   handleBreakToggle: () => void;
@@ -21,7 +22,6 @@ interface JobTabsProps {
   isOnBreak: boolean;
   extractedFinancialData?: any[];
 }
-
 export const JobTabs = ({
   job,
   isManager,
@@ -46,38 +46,11 @@ export const JobTabs = ({
     handleUpdateCostsTotals,
     handleUpdateBillsTotals
   } = useJobFinancials();
-
-  return (
-    <Tabs defaultValue="details" className="w-full">
-      <TabsList className={`flex flex-wrap ${isManager ? 'md:grid md:grid-cols-8' : 'md:grid md:grid-cols-4'} mb-4 gap-1 p-1 overflow-x-auto`}>
-        <StandardTabs 
-          job={job}
-          jobTimer={jobTimer}
-          jobNotes={jobNotes}
-          setJobNotes={setJobNotes}
-          locationHistory={locationHistory}
-          hasLocationPermission={hasLocationPermission}
-          handleTimerToggle={handleTimerToggle}
-          handleBreakToggle={handleBreakToggle}
-          isTimerRunning={isTimerRunning}
-          isOnBreak={isOnBreak}
-        />
+  return <Tabs defaultValue="details" className="w-full">
+      <TabsList className="">
+        <StandardTabs job={job} jobTimer={jobTimer} jobNotes={jobNotes} setJobNotes={setJobNotes} locationHistory={locationHistory} hasLocationPermission={hasLocationPermission} handleTimerToggle={handleTimerToggle} handleBreakToggle={handleBreakToggle} isTimerRunning={isTimerRunning} isOnBreak={isOnBreak} />
         
-        {isManager && (
-          <ManagerTabs 
-            jobTimer={jobTimer}
-            tabNotes={tabNotes}
-            setTabNotes={setTabNotes}
-            totalRevenue={totalRevenue}
-            totalCosts={totalCosts}
-            totalBills={totalBills}
-            extractedFinancialData={extractedFinancialData}
-            onUpdateBillsTotals={handleUpdateBillsTotals}
-            onUpdateCostsTotals={handleUpdateCostsTotals}
-            onUpdateInvoiceTotals={handleUpdateInvoiceTotals}
-          />
-        )}
+        {isManager && <ManagerTabs jobTimer={jobTimer} tabNotes={tabNotes} setTabNotes={setTabNotes} totalRevenue={totalRevenue} totalCosts={totalCosts} totalBills={totalBills} extractedFinancialData={extractedFinancialData} onUpdateBillsTotals={handleUpdateBillsTotals} onUpdateCostsTotals={handleUpdateCostsTotals} onUpdateInvoiceTotals={handleUpdateInvoiceTotals} />}
       </TabsList>
-    </Tabs>
-  );
+    </Tabs>;
 };
