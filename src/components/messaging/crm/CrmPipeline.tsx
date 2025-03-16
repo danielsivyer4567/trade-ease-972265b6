@@ -179,14 +179,14 @@ export const CrmPipeline: React.FC = () => {
                 </TabsTrigger>)}
             </TabsList>
           </Tabs>
-          <span className="text-sm text-gray-500">
-            {getAttentionCount(activePipeline) > 0 && <div className="flex items-center">
+          <span className="text-sm text-gray-950">
+            {getAttentionCount(activePipeline) > 0 && <div className="flex items-center bg-slate-300">
                 <AlertTriangle className="h-4 w-4 text-red-500 mr-1" />
                 <span>{getAttentionCount(activePipeline)} customers need attention</span>
               </div>}
           </span>
         </div>
-        <Button variant="outline" size="sm" className="gap-1">
+        <Button variant="outline" size="sm" className="gap-1 bg-slate-500 hover:bg-slate-400">
           <Plus className="h-4 w-4" />
           New Pipeline
         </Button>
