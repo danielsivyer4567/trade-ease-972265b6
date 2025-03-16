@@ -19,10 +19,10 @@ export function DocumentApproval({
   } = useDocumentApproval(jobId, onFinancialDataExtracted);
   
   return (
-    <div className="border-t-2 pt-8 mt-16">
-      <h3 className="text-lg font-medium mb-4">Document Approval</h3>
+    <div className="border-t-4 border-gray-300 pt-12 mt-20">
+      <h3 className="text-xl font-medium mb-6">Document Approval</h3>
       
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-start">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
         <FileUploadSection
           currentFile={currentFile}
           setCurrentFile={setCurrentFile}

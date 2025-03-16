@@ -1,3 +1,4 @@
+
 import { useParams, useNavigate } from 'react-router-dom';
 import { JobHeader } from './components/JobHeader';
 import { JobTabs } from './components/JobTabs';
@@ -90,24 +91,27 @@ export function JobDetails() {
   }
 
   return (
-    <div className="space-y-4 md:space-y-6 p-3 md:p-6 max-w-7xl mx-auto">
+    <div className="space-y-6 md:space-y-10 p-3 md:p-6 max-w-7xl mx-auto">
       <JobHeader job={job} />
-      <JobTabs
-        job={job}
-        isManager={isManager}
-        jobTimer={jobTimer}
-        jobNotes={jobNotes}
-        setJobNotes={setJobNotes}
-        tabNotes={tabNotes}
-        setTabNotes={setTabNotes}
-        locationHistory={locationHistory}
-        hasLocationPermission={hasLocationPermission}
-        handleTimerToggle={handleTimerToggle}
-        handleBreakToggle={handleBreakToggle}
-        isTimerRunning={isTimerRunning}
-        isOnBreak={isOnBreak}
-        extractedFinancialData={extractedFinancialData}
-      />
+      
+      <div className="mb-16">
+        <JobTabs
+          job={job}
+          isManager={isManager}
+          jobTimer={jobTimer}
+          jobNotes={jobNotes}
+          setJobNotes={setJobNotes}
+          tabNotes={tabNotes}
+          setTabNotes={setTabNotes}
+          locationHistory={locationHistory}
+          hasLocationPermission={hasLocationPermission}
+          handleTimerToggle={handleTimerToggle}
+          handleBreakToggle={handleBreakToggle}
+          isTimerRunning={isTimerRunning}
+          isOnBreak={isOnBreak}
+          extractedFinancialData={extractedFinancialData}
+        />
+      </div>
       
       {isManager && (
         <DocumentApproval 
