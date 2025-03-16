@@ -1,3 +1,4 @@
+
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const corsHeaders = {
@@ -68,6 +69,35 @@ serve(async (req) => {
 
       return new Response(
         JSON.stringify({ message: 'Go High Level integration configured successfully' }),
+        {
+          status: 200,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      );
+    }
+    
+    if (integration === 'WhatsApp Business') {
+      if (!apiKey) {
+        return new Response(
+          JSON.stringify({ error: 'Invalid WhatsApp Business API key' }),
+          {
+            status: 400,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          }
+        );
+      }
+
+      const { supabaseClient } = req;
+      await supabaseClient
+        .from('integration_configs')
+        .upsert({
+          integration_name: 'WhatsApp Business',
+          api_key: apiKey,
+          status: 'connected'
+        });
+
+      return new Response(
+        JSON.stringify({ message: 'WhatsApp Business integration configured successfully' }),
         {
           status: 200,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }

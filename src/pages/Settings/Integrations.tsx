@@ -1,7 +1,6 @@
-
 import { AppLayout } from "@/components/ui/AppLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Link2, MessageSquare, CreditCard, Mail, Calendar, Key, FileText } from "lucide-react";
+import { Link2, MessageSquare, CreditCard, Mail, Calendar, Key, FileText, Phone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { Input } from "@/components/ui/input";
@@ -21,6 +20,13 @@ const availableIntegrations = [
     icon: MessageSquare,
     description: "Sync messages and communication with Go High Level",
     path: "/messaging",
+    apiKeyRequired: true
+  },
+  {
+    title: "WhatsApp Business",
+    icon: Phone,
+    description: "Connect with customers via WhatsApp Business API",
+    path: "/settings/integrations/whatsapp",
     apiKeyRequired: true
   },
   {
@@ -60,6 +66,9 @@ const fetchConfigs = async () => {
       status: "not_connected"
     }, {
       integration_name: "Xero",
+      status: "not_connected"
+    }, {
+      integration_name: "WhatsApp Business",
       status: "not_connected"
     }];
   } catch (error) {
