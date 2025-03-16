@@ -130,6 +130,7 @@ const MOCK_CUSTOMERS = [{
   pipelineId: 'support',
   needsAttention: true
 }];
+
 export const CrmPipeline: React.FC = () => {
   const [customers, setCustomers] = useState(MOCK_CUSTOMERS);
   const [draggedCustomer, setDraggedCustomer] = useState<string | null>(null);
@@ -216,6 +217,7 @@ export const CrmPipeline: React.FC = () => {
       </div>
     </div>;
 };
+
 interface PipelineStageProps {
   title: string;
   icon: React.ReactNode;
@@ -235,6 +237,7 @@ interface PipelineStageProps {
   onDragOver: (e: React.DragEvent<HTMLDivElement>) => void;
   onDrop: (e: React.DragEvent<HTMLDivElement>, stageName: string) => void;
 }
+
 const PipelineStage: React.FC<PipelineStageProps> = ({
   title,
   icon,
@@ -273,6 +276,7 @@ const PipelineStage: React.FC<PipelineStageProps> = ({
       </Card>
     </div>;
 };
+
 interface CustomerCardProps {
   customer: {
     id: string;
@@ -284,6 +288,7 @@ interface CustomerCardProps {
   };
   onDragStart: () => void;
 }
+
 const CustomerCard: React.FC<CustomerCardProps> = ({
   customer,
   onDragStart
