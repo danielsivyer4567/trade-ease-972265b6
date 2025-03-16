@@ -78,13 +78,13 @@ export const SearchBar: React.FC<SearchBarProps> = ({
                     {startDate ? format(startDate, 'd MMM') : format(new Date(), 'd MMM')}
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-auto p-0">
+                <PopoverContent className="w-auto p-0 bg-slate-300">
                   <Calendar 
                     mode="single" 
                     selected={startDate} 
                     onSelect={setStartDate} 
                     initialFocus 
-                    className={`p-2 ${isMobile ? 'scale-75 origin-top-left' : ''}`} 
+                    className={`p-2 bg-slate-300 pointer-events-auto ${isMobile ? 'scale-75 origin-top-left' : ''}`} 
                   />
                 </PopoverContent>
               </Popover>
@@ -95,7 +95,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
                   <Clock className="mr-1 h-3 w-3 text-gray-500" />
                   <SelectValue placeholder="Time" />
                 </SelectTrigger>
-                <SelectContent className={isMobile ? "max-h-32" : ""}>
+                <SelectContent className={`bg-slate-300 ${isMobile ? "max-h-32" : ""}`}>
                   {timeOptions.map(time => <SelectItem key={time} value={time}>
                       {time}
                     </SelectItem>)}
@@ -116,13 +116,13 @@ export const SearchBar: React.FC<SearchBarProps> = ({
                     {endDate ? format(endDate, 'd MMM') : format(new Date(), 'd MMM')}
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-auto p-0">
+                <PopoverContent className="w-auto p-0 bg-slate-300">
                   <Calendar 
                     mode="single" 
                     selected={endDate} 
                     onSelect={setEndDate} 
                     initialFocus 
-                    className={`p-2 ${isMobile ? 'scale-75 origin-top-left' : ''}`} 
+                    className={`p-2 bg-slate-300 pointer-events-auto ${isMobile ? 'scale-75 origin-top-left' : ''}`} 
                   />
                 </PopoverContent>
               </Popover>
@@ -133,7 +133,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
                   <Clock className="mr-1 h-3 w-3 text-gray-500" />
                   <SelectValue placeholder="Time" />
                 </SelectTrigger>
-                <SelectContent className={isMobile ? "max-h-32" : ""}>
+                <SelectContent className={`bg-slate-300 ${isMobile ? "max-h-32" : ""}`}>
                   {timeOptions.map(time => <SelectItem key={time} value={time}>
                       {time}
                     </SelectItem>)}
@@ -186,3 +186,4 @@ export const SearchBar: React.FC<SearchBarProps> = ({
     </div>
   );
 };
+

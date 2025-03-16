@@ -87,12 +87,12 @@ export function JobAssignmentDialog({
                 <CalendarDays className="h-5 w-5 text-primary" />
                 <span className="text-base">Select Date</span>
               </label>
-              <div className="border-2 rounded-lg p-3 shadow-md bg-white">
+              <div className="border-2 rounded-lg p-3 shadow-md bg-slate-300">
                 <Calendar
                   mode="single"
                   selected={selectedDate}
                   onSelect={handleDateSelect}
-                  className="mx-auto pointer-events-auto"
+                  className="mx-auto pointer-events-auto bg-slate-300"
                   initialFocus
                 />
               </div>
