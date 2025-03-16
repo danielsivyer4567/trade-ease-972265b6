@@ -1,3 +1,4 @@
+
 import { AppLayout } from "@/components/ui/AppLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Link2, MessageSquare, CreditCard, Mail, Calendar, Key, FileText, Phone, Facebook } from "lucide-react";
@@ -141,22 +142,22 @@ export default function IntegrationsPage() {
 
   return (
     <AppLayout>
-      <div className="p-6 max-w-6xl mx-auto space-y-6">
+      <div className="p-4 md:p-6 max-w-7xl mx-auto space-y-4 md:space-y-6">
         <div className="flex items-center gap-2">
-          <Link2 className="h-8 w-8 text-gray-700" />
-          <h1 className="text-3xl font-bold">API Integrations</h1>
+          <Link2 className="h-6 w-6 md:h-8 md:w-8 text-gray-700" />
+          <h1 className="text-2xl md:text-3xl font-bold">API Integrations</h1>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
           {availableIntegrations.map((integration) => (
-            <Card key={integration.title}>
-              <CardHeader>
+            <Card key={integration.title} className="flex flex-col h-full">
+              <CardHeader className="pb-2">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <integration.icon className="h-5 w-5 text-gray-600" />
-                    <CardTitle>{integration.title}</CardTitle>
+                    <CardTitle className="text-lg md:text-xl">{integration.title}</CardTitle>
                   </div>
-                  <span className={`text-sm px-2 py-1 rounded-full ${
+                  <span className={`text-xs md:text-sm px-2 py-1 rounded-full ${
                     integrationStatuses[integration.title] === "connected"
                       ? "bg-green-100 text-green-800"
                       : "bg-gray-100 text-gray-800"
@@ -165,13 +166,13 @@ export default function IntegrationsPage() {
                      integrationStatuses[integration.title]?.slice(1) || 'Not Connected'}
                   </span>
                 </div>
-                <CardDescription>{integration.description}</CardDescription>
+                <CardDescription className="text-xs md:text-sm mt-1">{integration.description}</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-3 pt-0 flex-grow flex flex-col justify-end">
                 {integration.apiKeyRequired && (
                   <div className="space-y-2">
-                    <Label htmlFor={`${integration.title}-api-key`}>API Key</Label>
-                    <div className="flex gap-2">
+                    <Label htmlFor={`${integration.title}-api-key`} className="text-sm">API Key</Label>
+                    <div className="flex flex-col sm:flex-row gap-2">
                       <Input
                         id={`${integration.title}-api-key`}
                         type="password"
@@ -181,21 +182,25 @@ export default function IntegrationsPage() {
                           ...prev,
                           [integration.title]: e.target.value
                         }))}
+                        className="text-sm h-9"
                       />
                       <Button 
                         onClick={() => handleApiKeySubmit(integration.title)}
                         disabled={loading[integration.title] || !apiKeys[integration.title]}
+                        className="h-9 text-xs whitespace-nowrap"
+                        size="sm"
                       >
-                        <Key className="h-4 w-4 mr-2" />
+                        <Key className="h-3 w-3 mr-1" />
                         {loading[integration.title] ? 'Saving...' : 'Save Key'}
                       </Button>
                     </div>
                   </div>
                 )}
-                <Link to={integration.path}>
+                <Link to={integration.path} className="w-full mt-auto">
                   <Button 
-                    className="w-full" 
+                    className="w-full h-9 text-sm" 
                     variant={integrationStatuses[integration.title] === "connected" ? "default" : "outline"}
+                    size="sm"
                   >
                     {integrationStatuses[integration.title] === "connected" ? "Manage Integration" : "Connect"}
                   </Button>
