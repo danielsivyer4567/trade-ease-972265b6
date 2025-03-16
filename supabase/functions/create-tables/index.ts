@@ -18,6 +18,8 @@ serve(async (req) => {
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
     
+    console.log("Creating necessary tables...");
+    
     // Create job_financial_data table if it doesn't exist
     const { error: financialDataError } = await supabase.rpc('create_job_financial_data_table_if_not_exists');
     
@@ -39,6 +41,23 @@ serve(async (req) => {
               created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
               updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
             );
+            
+            ALTER TABLE public.job_financial_data ENABLE ROW LEVEL SECURITY;
+            
+            CREATE POLICY "Users can view job financial data"
+            ON public.job_financial_data
+            FOR SELECT
+            USING (auth.uid() IS NOT NULL);
+            
+            CREATE POLICY "Users can insert job financial data"
+            ON public.job_financial_data
+            FOR INSERT
+            WITH CHECK (auth.uid() IS NOT NULL);
+            
+            CREATE POLICY "Users can update job financial data"
+            ON public.job_financial_data
+            FOR UPDATE
+            USING (auth.uid() IS NOT NULL);
           `
         }
       );
@@ -46,6 +65,25 @@ serve(async (req) => {
       if (sqlError) {
         throw new Error(`Failed to create tables: ${sqlError.message}`);
       }
+    }
+    
+    // Create storage bucket if it doesn't exist
+    try {
+      const { data: buckets } = await supabase.storage.listBuckets();
+      if (!buckets.some(bucket => bucket.name === 'job-documents')) {
+        const { error: bucketError } = await supabase.storage.createBucket('job-documents', {
+          public: false,
+          fileSizeLimit: 10485760, // 10MB
+        });
+        
+        if (bucketError) {
+          console.error('Error creating bucket:', bucketError);
+        } else {
+          console.log('Created job-documents bucket');
+        }
+      }
+    } catch (bucketError) {
+      console.error('Error checking/creating bucket:', bucketError);
     }
     
     // Create job_document_approvals table if it doesn't exist
@@ -67,6 +105,23 @@ serve(async (req) => {
             created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
             updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
           );
+          
+          ALTER TABLE public.job_document_approvals ENABLE ROW LEVEL SECURITY;
+          
+          CREATE POLICY "Users can view job document approvals"
+          ON public.job_document_approvals
+          FOR SELECT
+          USING (auth.uid() IS NOT NULL);
+          
+          CREATE POLICY "Users can insert job document approvals"
+          ON public.job_document_approvals
+          FOR INSERT
+          WITH CHECK (auth.uid() IS NOT NULL);
+          
+          CREATE POLICY "Users can update job document approvals"
+          ON public.job_document_approvals
+          FOR UPDATE
+          USING (auth.uid() IS NOT NULL);
         `
       }
     );

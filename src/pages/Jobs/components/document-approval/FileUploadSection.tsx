@@ -1,12 +1,8 @@
 
-import { useState } from "react";
-import { FileText, AlertTriangle, Upload } from "lucide-react";
 import { FileUpload } from "@/components/tasks/FileUpload";
 import { Progress } from "@/components/ui/progress";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { AlertCircle } from "lucide-react";
-import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
+import { AlertCircle, FileText } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface FileUploadSectionProps {
   currentFile: File | null;
@@ -24,69 +20,55 @@ export function FileUploadSection({
   extractionError
 }: FileUploadSectionProps) {
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (event.target.files && event.target.files[0]) {
-      setCurrentFile(event.target.files[0]);
+    const files = event.target.files;
+    if (files && files.length > 0) {
+      setCurrentFile(files[0]);
     }
   };
 
-  const handleClearSelection = () => {
-    setCurrentFile(null);
-  };
-
   return (
-    <div className="md:col-span-2 border border-dashed border-blue-300 rounded-lg p-6 bg-blue-50/30 flex flex-col items-center justify-center text-center">
+    <div className="col-span-2 space-y-3">
       {!currentFile ? (
-        <>
-          <div className="mb-4 bg-blue-100 p-4 rounded-full">
-            <Upload className="h-8 w-8 text-blue-500" />
-          </div>
-          <h4 className="text-base font-medium mb-2">Upload invoice, quote, or other financial document</h4>
-          <p className="text-sm text-gray-500 mb-4">Drag & drop or click to browse (Text extraction enabled)</p>
-          <FileUpload 
-            onFileUpload={handleFileUpload}
-            label=""
-            allowGcpVision={true}
-            onTextExtracted={(text, filename) => {
-              toast.info(`Text extracted from ${filename}`);
-            }}
-          />
-        </>
+        <FileUpload 
+          onFileUpload={handleFileUpload}
+          label="Upload an invoice, receipt or financial document"
+          allowGcpVision={true} // Enable Vision API text extraction
+        />
       ) : (
-        <div className="w-full">
-          <div className="flex items-center justify-between space-x-2 bg-blue-100 p-3 rounded-lg mb-3">
-            <div className="flex items-center space-x-2">
-              <FileText className="h-5 w-5 text-blue-600" />
-              <span className="text-sm text-blue-800 font-medium truncate">{currentFile.name}</span>
+        <div className="bg-white p-4 rounded-md border border-gray-200">
+          <div className="flex items-center gap-3">
+            <FileText className="h-8 w-8 text-blue-500" />
+            <div className="flex-1 overflow-hidden">
+              <p className="font-medium text-sm truncate">{currentFile.name}</p>
+              <p className="text-xs text-gray-500">{Math.round(currentFile.size / 1024)} KB</p>
             </div>
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={handleClearSelection} 
-              className="h-6 px-2 text-xs"
+            <button
+              onClick={() => setCurrentFile(null)}
+              className="text-xs text-gray-500 hover:text-gray-800"
             >
-              Clear
-            </Button>
+              Remove
+            </button>
           </div>
-          
+
           {isUploading && (
-            <div className="mt-2">
-              <div className="flex justify-between text-sm mb-1">
-                <span>{uploadProgress === 100 ? 'Processing complete' : `Uploading and processing... ${uploadProgress}%`}</span>
-                <span>{uploadProgress}%</span>
-              </div>
+            <div className="mt-3">
+              <p className="text-xs text-gray-500 mb-1">
+                {uploadProgress < 50 
+                  ? "Uploading document..." 
+                  : uploadProgress < 80 
+                    ? "Processing with Google Cloud Vision..." 
+                    : "Extracting financial data..."}
+              </p>
               <Progress value={uploadProgress} className="h-2" />
             </div>
           )}
         </div>
       )}
-      
+
       {extractionError && (
-        <Alert variant="destructive" className="mt-4">
+        <Alert variant="destructive" className="mt-3">
           <AlertCircle className="h-4 w-4" />
-          <AlertTitle>Extraction Error</AlertTitle>
-          <AlertDescription>
-            {extractionError}
-          </AlertDescription>
+          <AlertDescription>{extractionError}</AlertDescription>
         </Alert>
       )}
     </div>
