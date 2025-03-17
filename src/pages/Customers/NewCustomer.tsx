@@ -6,7 +6,7 @@ import { Card } from "@/components/ui/card";
 import { Link, useNavigate } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea"; 
-import { Input } from "@/components/ui/input"; // Add the missing Input import
+import { Input } from "@/components/ui/input";
 import { 
   Form,
   FormControl,
@@ -48,6 +48,8 @@ export default function NewCustomer() {
   });
 
   const onSubmit = async (data: z.infer<typeof formSchema>) => {
+    console.log("Submitting customer data:", data);
+    
     const customerData: CustomerFormValues = {
       name: data.name,
       email: data.email,

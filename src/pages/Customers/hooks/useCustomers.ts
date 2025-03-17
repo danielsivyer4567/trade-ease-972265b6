@@ -53,8 +53,14 @@ export function useCustomers() {
         return [];
       }
 
-      setCustomers(data || []);
-      return data;
+      // Map database fields to our interface format
+      const formattedData = data.map(customer => ({
+        ...customer,
+        zipCode: customer.zipcode // Map zipcode from DB to zipCode in our interface
+      }));
+
+      setCustomers(formattedData);
+      return formattedData;
     } catch (error: any) {
       console.error("Exception fetching customers:", error);
       toast({
@@ -82,8 +88,10 @@ export function useCustomers() {
       }
       
       // Add user_id and status to the customer data
+      // Also map zipCode to zipcode for the database
       const customerWithUserId = {
         ...customerData,
+        zipcode: customerData.zipCode, // Map zipCode from our interface to zipcode for DB
         status: 'active',
         user_id: session.session.user.id
       };
