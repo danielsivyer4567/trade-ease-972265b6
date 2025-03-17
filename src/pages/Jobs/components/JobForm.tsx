@@ -27,7 +27,7 @@ interface JobFormProps {
   setDateUndecided: (undecided: boolean) => void;
   team: string;
   setTeam: (team: string) => void;
-  saveJobToDatabase: (jobData: any) => Promise<boolean>;
+  saveJobToDatabase: (jobData: any) => Promise<{success: boolean, data: any}>;
   isSaving: boolean;
 }
 
@@ -62,7 +62,7 @@ export function JobForm({
       return;
     }
 
-    const newJob = prepareJobData(
+    const jobData = prepareJobData(
       jobNumber, 
       title, 
       customer, 
@@ -73,10 +73,10 @@ export function JobForm({
       team
     );
     
-    const success = await saveJobToDatabase(newJob);
+    const { success, data } = await saveJobToDatabase(jobData);
     
-    if (success) {
-      handleSuccessfulSubmit();
+    if (success && data) {
+      handleSuccessfulSubmit(data);
     }
   };
 

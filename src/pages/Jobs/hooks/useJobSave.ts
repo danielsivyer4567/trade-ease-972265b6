@@ -1,79 +1,64 @@
 
 import { useState } from "react";
-import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { useNavigate } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
 
 export function useJobSave() {
-  const { toast } = useToast();
-  const navigate = useNavigate();
   const [isSaving, setIsSaving] = useState(false);
-  
+  const { toast } = useToast();
+
   const saveJobToDatabase = async (jobData: any) => {
+    setIsSaving(true);
+    
     try {
-      setIsSaving(true);
-      
-      const { data: session, error: sessionError } = await supabase.auth.getSession();
-      
-      if (sessionError || !session?.session) {
-        console.error("Error getting session:", sessionError);
+      const { data: session } = await supabase.auth.getSession();
+      if (!session?.session?.user) {
         toast({
           title: "Authentication Error",
-          description: "You need to be logged in to create jobs. Please sign in and try again.",
+          description: "You must be logged in to save jobs",
           variant: "destructive"
         });
-        
-        // Redirect to login page after a short delay
-        setTimeout(() => navigate("/auth"), 2000);
-        return false;
+        return { success: false, data: null };
       }
       
-      // Fix: Convert camelCase field names to snake_case for Supabase
-      const dataToSave = {
-        job_number: jobData.jobNumber,
-        title: jobData.title,
-        customer: jobData.customer,
-        description: jobData.description,
-        type: jobData.type,
-        date: jobData.date,
-        date_undecided: jobData.date_undecided, 
-        status: jobData.status,
-        location: jobData.location,
-        assigned_team: jobData.assigned_team
+      // Add user_id to the job data
+      const jobWithUserId = {
+        ...jobData,
+        user_id: session.session.user.id
       };
       
       const { data, error } = await supabase
-        .from('jobs')
-        .insert({
-          ...dataToSave,
-          user_id: session.session.user.id
-        })
-        .select();
-        
+        .from("jobs")
+        .insert(jobWithUserId)
+        .select()
+        .single();
+      
       if (error) {
         console.error("Error saving job:", error);
         toast({
           title: "Error",
-          description: "Failed to save job to database: " + error.message,
+          description: error.message || "Failed to save job",
           variant: "destructive"
         });
-        return false;
+        return { success: false, data: null };
       }
       
-      console.log("Job saved successfully:", data);
-      return true;
-    } catch (error) {
+      return { success: true, data };
+    } catch (error: any) {
       console.error("Exception saving job:", error);
       toast({
         title: "Error",
-        description: "An unexpected error occurred: " + (error.message || "Unknown error"),
+        description: error.message || "An unexpected error occurred",
         variant: "destructive"
       });
-      return false;
+      return { success: false, data: null };
     } finally {
       setIsSaving(false);
     }
   };
-  
-  return { saveJobToDatabase, isSaving };
+
+  return {
+    saveJobToDatabase,
+    isSaving
+  };
 }

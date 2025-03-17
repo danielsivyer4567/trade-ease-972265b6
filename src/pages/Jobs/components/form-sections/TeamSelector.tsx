@@ -1,8 +1,9 @@
 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { Users } from "lucide-react";
+import { Users, CalendarDays } from "lucide-react";
 import { TEAMS } from "../../constants/teams";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface TeamSelectorProps {
   team: string;
@@ -15,6 +16,16 @@ export function TeamSelector({ team, setTeam }: TeamSelectorProps) {
       <Label htmlFor="team" className="flex items-center gap-1">
         <Users className="h-4 w-4" />
         <span>Allocate Team</span>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <CalendarDays className="h-4 w-4 ml-1 text-muted-foreground cursor-help" />
+            </TooltipTrigger>
+            <TooltipContent>
+              <p className="text-xs">Jobs will appear on the team's calendar</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
       </Label>
       <Select value={team} onValueChange={setTeam}>
         <SelectTrigger>
