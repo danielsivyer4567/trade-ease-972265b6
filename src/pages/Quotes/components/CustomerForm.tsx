@@ -105,4 +105,4 @@ export const CustomerForm = ({ onNextTab }: CustomerFormProps) => {
       </div>
     </div>
   );
-};
+}

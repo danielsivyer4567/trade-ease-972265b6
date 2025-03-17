@@ -87,14 +87,23 @@ export function useCustomers() {
         return { success: false, data: null };
       }
       
+      console.log("Customer data being submitted:", customerData);
+      
       // Add user_id and status to the customer data
       // Also map zipCode to zipcode for the database
       const customerWithUserId = {
-        ...customerData,
-        zipcode: customerData.zipCode, // Map zipCode from our interface to zipcode for DB
+        name: customerData.name,
+        email: customerData.email,
+        phone: customerData.phone,
+        address: customerData.address,
+        city: customerData.city,
+        state: customerData.state,
+        zipcode: customerData.zipCode, // Explicitly map zipCode to zipcode for DB
         status: 'active',
         user_id: session.session.user.id
       };
+      
+      console.log("Transformed data for Supabase:", customerWithUserId);
       
       const { data, error } = await supabase
         .from('customers')
@@ -122,6 +131,8 @@ export function useCustomers() {
         ...data,
         zipCode: data.zipcode
       };
+      
+      console.log("Formatted data after creation:", formattedData);
       
       return { success: true, data: formattedData };
     } catch (error: any) {
