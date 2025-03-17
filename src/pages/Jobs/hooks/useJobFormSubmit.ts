@@ -77,7 +77,7 @@ export function useJobFormSubmit() {
       customer: customer,
       description: description,
       type: type,
-      date: dateUndecided ? "Yet to be decided" : date,
+      date: dateUndecided ? null : date, // Fixed to null instead of a string when date is undecided
       date_undecided: dateUndecided,
       status: "ready",
       location: [151.2093, -33.8688],

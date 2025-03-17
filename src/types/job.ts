@@ -12,6 +12,7 @@ export interface Job {
   description?: string;
   assignedTeam?: string;
   assignedMemberId?: string;
+  date_undecided?: boolean; // Add this property
 }
 
 export interface JobTemplate {
