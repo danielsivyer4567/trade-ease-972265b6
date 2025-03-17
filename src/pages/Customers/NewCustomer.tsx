@@ -6,6 +6,7 @@ import { Card } from "@/components/ui/card";
 import { Link, useNavigate } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea"; 
+import { Input } from "@/components/ui/input"; // Add the missing Input import
 import { 
   Form,
   FormControl,

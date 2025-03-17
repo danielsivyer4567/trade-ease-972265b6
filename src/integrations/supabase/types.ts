@@ -89,6 +89,48 @@ export type Database = {
           },
         ]
       }
+      customers: {
+        Row: {
+          address: string
+          city: string
+          created_at: string
+          email: string
+          id: string
+          name: string
+          phone: string
+          state: string
+          status: string
+          user_id: string
+          zipcode: string
+        }
+        Insert: {
+          address: string
+          city: string
+          created_at?: string
+          email: string
+          id?: string
+          name: string
+          phone: string
+          state: string
+          status?: string
+          user_id: string
+          zipcode: string
+        }
+        Update: {
+          address?: string
+          city?: string
+          created_at?: string
+          email?: string
+          id?: string
+          name?: string
+          phone?: string
+          state?: string
+          status?: string
+          user_id?: string
+          zipcode?: string
+        }
+        Relationships: []
+      }
       invoices: {
         Row: {
           amount: number
