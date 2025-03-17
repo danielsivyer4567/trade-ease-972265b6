@@ -4,16 +4,41 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"; 
 import { useEffect, useState } from "react";
 import { useCustomers } from "../../../Customers/hooks/useCustomers";
+import { Form } from "@/components/ui/form";
+import { useForm } from "react-hook-form";
+import { AddressFields } from "../../../Customers/components/AddressFields";
+import * as z from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 interface CustomerDetailsProps {
   customer: string;
   setCustomer: (customer: string) => void;
 }
 
+// Define schema for the form
+const formSchema = z.object({
+  address: z.string().optional(),
+  city: z.string().optional(),
+  state: z.string().optional(),
+  zipCode: z.string().optional()
+});
+
 export function CustomerDetails({ customer, setCustomer }: CustomerDetailsProps) {
   const { customers, fetchCustomers } = useCustomers();
   const [useExistingCustomer, setUseExistingCustomer] = useState<boolean>(false);
   const [selectedCustomerId, setSelectedCustomerId] = useState<string>("");
+  const [showAddressFields, setShowAddressFields] = useState<boolean>(false);
+  
+  // Initialize the form
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      address: "",
+      city: "",
+      state: "",
+      zipCode: ""
+    }
+  });
 
   useEffect(() => {
     fetchCustomers();
@@ -25,6 +50,15 @@ export function CustomerDetails({ customer, setCustomer }: CustomerDetailsProps)
       const selectedCustomer = customers.find(c => c.id === selectedCustomerId);
       if (selectedCustomer) {
         setCustomer(selectedCustomer.name);
+        
+        // Set the address fields values
+        form.setValue("address", selectedCustomer.address || "");
+        form.setValue("city", selectedCustomer.city || "");
+        form.setValue("state", selectedCustomer.state || "");
+        form.setValue("zipCode", selectedCustomer.zipCode || "");
+        
+        // Show address fields when a customer is selected
+        setShowAddressFields(true);
       }
     }
   }, [selectedCustomerId, useExistingCustomer, customers]);
@@ -57,6 +91,14 @@ export function CustomerDetails({ customer, setCustomer }: CustomerDetailsProps)
               ))}
             </SelectContent>
           </Select>
+          
+          {showAddressFields && (
+            <Form {...form}>
+              <div className="mt-4">
+                <AddressFields form={form} className="mt-4" />
+              </div>
+            </Form>
+          )}
         </div>
       ) : (
         <div className="space-y-2">
