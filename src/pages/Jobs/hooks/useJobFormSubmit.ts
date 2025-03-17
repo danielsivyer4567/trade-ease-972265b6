@@ -1,5 +1,4 @@
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { syncSingleJobToCalendars } from "@/integrations/calendar/syncEvents";
@@ -12,7 +11,7 @@ export function useJobFormSubmit() {
   const [calendarConnections, setCalendarConnections] = useState<CalendarConnection[]>([]);
 
   // Fetch calendar connections when hook is initialized
-  useState(() => {
+  useEffect(() => {
     const fetchCalendarConnections = async () => {
       try {
         const { data: session } = await supabase.auth.getSession();
@@ -70,14 +69,13 @@ export function useJobFormSubmit() {
     dateUndecided: boolean,
     team: string
   ) => {
-    // Prepare the data with camelCase to snake_case mapping for database
     return {
       job_number: jobNumber,
       title: title,
       customer: customer,
       description: description,
       type: type,
-      date: dateUndecided ? null : date, // Fixed to null instead of a string when date is undecided
+      date: dateUndecided ? null : date,
       date_undecided: dateUndecided,
       status: "ready",
       location: [151.2093, -33.8688],
@@ -91,12 +89,10 @@ export function useJobFormSubmit() {
       description: `Job has been created successfully`
     });
     
-    // If the job has a team assigned and a date, sync to calendar
     if (jobData.assigned_team && jobData.date && !jobData.date_undecided) {
       try {
         const { data: session } = await supabase.auth.getSession();
         if (session?.session?.user && calendarConnections.length > 0) {
-          // Convert to Job type expected by calendar sync
           const jobForCalendar = {
             id: jobData.id,
             jobNumber: jobData.job_number,
@@ -123,7 +119,6 @@ export function useJobFormSubmit() {
         }
       } catch (error) {
         console.error('Error syncing to calendar:', error);
-        // Don't show error to user, calendar sync is a background operation
       }
     }
     
