@@ -109,10 +109,24 @@ export default function NewJob() {
         return false;
       }
       
+      // Fix: Convert camelCase field names to snake_case for Supabase
+      const dataToSave = {
+        job_number: jobData.jobNumber, // Changed from jobNumber to job_number
+        title: jobData.title,
+        customer: jobData.customer,
+        description: jobData.description,
+        type: jobData.type,
+        date: jobData.date,
+        date_undecided: jobData.date_undecided, 
+        status: jobData.status,
+        location: jobData.location,
+        assigned_team: jobData.assigned_team
+      };
+      
       const { data, error } = await supabase
         .from('jobs')
         .insert({
-          ...jobData,
+          ...dataToSave,
           user_id: session.session.user.id
         })
         .select();
