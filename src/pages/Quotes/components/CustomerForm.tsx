@@ -1,36 +1,62 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { ChevronRight } from "lucide-react";
+import { useCustomers, Customer } from "../../Customers/hooks/useCustomers";
 
 interface CustomerFormProps {
   onNextTab: () => void;
 }
 
 export const CustomerForm = ({ onNextTab }: CustomerFormProps) => {
-  const [customer, setCustomer] = useState<string>("");
+  const [selectedCustomerId, setSelectedCustomerId] = useState<string>("");
   const [email, setEmail] = useState<string>("");
   const [phone, setPhone] = useState<string>("");
   const [address, setAddress] = useState<string>("");
   const [quoteNumber] = useState<string>("Q-2024-009");
+  
+  const { customers, fetchCustomers } = useCustomers();
+  
+  useEffect(() => {
+    fetchCustomers();
+  }, []);
+  
+  useEffect(() => {
+    // If a customer is selected, populate their details
+    if (selectedCustomerId) {
+      const selectedCustomer = customers.find(c => c.id === selectedCustomerId);
+      if (selectedCustomer) {
+        setEmail(selectedCustomer.email || '');
+        setPhone(selectedCustomer.phone || '');
+        setAddress(`${selectedCustomer.address}, ${selectedCustomer.city}, ${selectedCustomer.state} ${selectedCustomer.zipCode}`);
+      }
+    } else {
+      // Clear fields if no customer selected
+      setEmail('');
+      setPhone('');
+      setAddress('');
+    }
+  }, [selectedCustomerId, customers]);
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
       <div className="space-y-4">
         <div>
           <Label htmlFor="customer">Customer</Label>
-          <Select value={customer} onValueChange={setCustomer}>
+          <Select value={selectedCustomerId} onValueChange={setSelectedCustomerId}>
             <SelectTrigger>
               <SelectValue placeholder="Select a customer" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="john-smith">John Smith</SelectItem>
-              <SelectItem value="sarah-johnson">Sarah Johnson</SelectItem>
-              <SelectItem value="michael-williams">Michael Williams</SelectItem>
+              {customers.map(customer => (
+                <SelectItem key={customer.id} value={customer.id}>
+                  {customer.name}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>

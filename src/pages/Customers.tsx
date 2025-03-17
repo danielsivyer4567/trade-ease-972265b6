@@ -3,78 +3,27 @@ import { AppLayout } from "@/components/ui/AppLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, User, Phone, Mail, MapPin, FileText, Image, Clock, DollarSign, UserPlus, Upload, ArrowLeft } from "lucide-react";
-import { useState } from "react";
-import { ImagesGrid } from "@/components/tasks/ImagesGrid";
+import { Search, User, Phone, Mail, MapPin, UserPlus, Upload, ArrowLeft } from "lucide-react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { useCustomers } from "./Customers/hooks/useCustomers";
 
 export default function CustomersPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedFilter, setSelectedFilter] = useState("all");
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { customers, isLoading, fetchCustomers } = useCustomers();
   
-  const customers = [{
-    id: 1,
-    name: "John Smith",
-    phone: "+1 234 567 8901",
-    email: "john.smith@email.com",
-    address: "123 Main St, City",
-    status: "active",
-    recentJobs: [{
-      id: "j1",
-      title: "Bathroom Renovation",
-      status: "completed",
-      date: "2024-02-15"
-    }, {
-      id: "j2",
-      title: "Kitchen Plumbing",
-      status: "in-progress",
-      date: "2024-02-20"
-    }],
-    projectImages: ["/lovable-uploads/147b0371-94bb-403e-a449-f6fc081c4d6c.png", "/lovable-uploads/6a07dd00-f2c7-49da-8b00-48d960c13610.png"],
-    totalSpent: "5,280.00",
-    lastService: "2024-02-20"
-  }, {
-    id: 2,
-    name: "Sarah Johnson",
-    phone: "+1 234 567 8902",
-    email: "sarah.j@email.com",
-    address: "456 Park Ave, City",
-    status: "inactive",
-    recentJobs: [{
-      id: "j3",
-      title: "Electrical Repair",
-      status: "completed",
-      date: "2024-01-10"
-    }],
-    projectImages: [],
-    totalSpent: "850.00",
-    lastService: "2024-01-10"
-  }, {
-    id: 3,
-    name: "Michael Brown",
-    phone: "+1 234 567 8903",
-    email: "michael.b@email.com",
-    address: "789 Oak Rd, City",
-    status: "active",
-    recentJobs: [{
-      id: "j4",
-      title: "Garden Landscaping",
-      status: "pending",
-      date: "2024-03-01"
-    }],
-    projectImages: [],
-    totalSpent: "2,100.00",
-    lastService: "2024-01-25"
-  }];
+  useEffect(() => {
+    fetchCustomers();
+  }, []);
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      // This is a placeholder for actual file processing
       toast({
         title: "File received",
         description: `Processing ${file.name}. This feature is coming soon!`
@@ -90,7 +39,7 @@ export default function CustomersPage() {
     return matchesSearch && customer.status === selectedFilter;
   });
 
-  const handleCustomerClick = (customerId: number) => {
+  const handleCustomerClick = (customerId: string) => {
     navigate(`/customers/${customerId}`);
   };
 
@@ -171,43 +120,55 @@ export default function CustomersPage() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 gap-4">
-          {filteredCustomers.map(customer => (
-            <Card 
-              key={customer.id} 
-              className="hover:shadow-md transition-all cursor-pointer"
-              onClick={() => handleCustomerClick(customer.id)}
-            >
-              <CardHeader className="py-3 bg-slate-200">
-                <CardTitle className="text-lg flex items-center justify-between text-slate-950">
-                  <div className="flex items-center gap-2">
-                    <User className="h-5 w-5 text-gray-500" />
-                    {customer.name}
+        {isLoading ? (
+          <div className="flex justify-center py-8">
+            <p className="text-gray-500">Loading customers...</p>
+          </div>
+        ) : filteredCustomers.length > 0 ? (
+          <div className="grid grid-cols-1 gap-4">
+            {filteredCustomers.map(customer => (
+              <Card 
+                key={customer.id} 
+                className="hover:shadow-md transition-all cursor-pointer"
+                onClick={() => handleCustomerClick(customer.id)}
+              >
+                <CardHeader className="py-3 bg-slate-200">
+                  <CardTitle className="text-lg flex items-center justify-between text-slate-950">
+                    <div className="flex items-center gap-2">
+                      <User className="h-5 w-5 text-gray-500" />
+                      {customer.name}
+                    </div>
+                    <span className="">
+                      {customer.status === 'active' ? 'Active' : 'Inactive'}
+                    </span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2 text-sm">
+                      <Phone className="h-4 w-4 text-gray-500" />
+                      {customer.phone}
+                    </div>
+                    <div className="flex items-center gap-2 text-sm">
+                      <Mail className="h-4 w-4 text-gray-500" />
+                      {customer.email}
+                    </div>
+                    <div className="flex items-center gap-2 text-sm">
+                      <MapPin className="h-4 w-4 text-gray-500" />
+                      {customer.address}, {customer.city}, {customer.state} {customer.zipCode}
+                    </div>
                   </div>
-                  <span className="">
-                    {customer.status === 'active' ? 'Active' : 'Inactive'}
-                  </span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2 text-sm">
-                    <Phone className="h-4 w-4 text-gray-500" />
-                    {customer.phone}
-                  </div>
-                  <div className="flex items-center gap-2 text-sm">
-                    <Mail className="h-4 w-4 text-gray-500" />
-                    {customer.email}
-                  </div>
-                  <div className="flex items-center gap-2 text-sm">
-                    <MapPin className="h-4 w-4 text-gray-500" />
-                    {customer.address}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        ) : (
+          <div className="flex justify-center py-8">
+            <p className="text-gray-500">
+              {searchQuery ? `No customers found matching '${searchQuery}'` : "No customers yet. Add your first customer!"}
+            </p>
+          </div>
+        )}
       </div>
     </AppLayout>
   );

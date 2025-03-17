@@ -1,14 +1,11 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { AppLayout } from "@/components/ui/AppLayout";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Link, useNavigate } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
-import { toast } from "sonner";
 import { Textarea } from "@/components/ui/textarea"; 
-import { Label } from "@/components/ui/label";
 import { 
   Form,
   FormControl,
@@ -20,6 +17,7 @@ import {
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
+import { CustomerFormValues, useCustomers } from './hooks/useCustomers';
 
 const formSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -31,11 +29,11 @@ const formSchema = z.object({
   zipCode: z.string().min(3, "Zip/Postal code is required")
 });
 
-type CustomerFormValues = z.infer<typeof formSchema>;
-
 export default function NewCustomer() {
   const navigate = useNavigate();
-  const form = useForm<CustomerFormValues>({
+  const { createCustomer } = useCustomers();
+
+  const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
@@ -48,11 +46,21 @@ export default function NewCustomer() {
     }
   });
 
-  const onSubmit = (data: CustomerFormValues) => {
-    // TODO: Implement customer creation logic
-    console.log("Customer data:", data);
-    toast.success("Customer created successfully");
-    navigate("/customers");
+  const onSubmit = async (data: z.infer<typeof formSchema>) => {
+    const customerData: CustomerFormValues = {
+      name: data.name,
+      email: data.email,
+      phone: data.phone,
+      address: data.address,
+      city: data.city,
+      state: data.state,
+      zipCode: data.zipCode
+    };
+
+    const result = await createCustomer(customerData);
+    if (result.success) {
+      navigate("/customers");
+    }
   };
 
   return (
@@ -178,7 +186,9 @@ export default function NewCustomer() {
                 >
                   Cancel
                 </Button>
-                <Button type="submit">Add Customer</Button>
+                <Button type="submit" disabled={form.formState.isSubmitting}>
+                  {form.formState.isSubmitting ? "Adding..." : "Add Customer"}
+                </Button>
               </div>
             </form>
           </Form>
