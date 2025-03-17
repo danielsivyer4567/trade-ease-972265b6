@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { ChevronDown, ListChecks } from "lucide-react";
+import { ChevronDown, ListChecks, Users } from "lucide-react";
 import { JobNumberGenerator } from "./JobNumberGenerator";
 import { JobDateSelector } from "./JobDateSelector";
 import { useNavigate } from "react-router-dom";
@@ -29,6 +29,8 @@ interface JobFormProps {
   setDate: (date: string) => void;
   dateUndecided: boolean;
   setDateUndecided: (undecided: boolean) => void;
+  team: string;
+  setTeam: (team: string) => void;
 }
 
 const JOB_TYPES = [
@@ -51,7 +53,13 @@ const JOB_TYPES = [
   "Other"
 ];
 
-// Sample templates for the dropdown
+const TEAMS = [
+  { id: "tba", name: "TBA (To Be Allocated)" },
+  { id: "red", name: "Team Red" },
+  { id: "blue", name: "Team Blue" },
+  { id: "green", name: "Team Green" }
+];
+
 const QUICK_TEMPLATES: JobTemplate[] = [{
   id: "t1",
   title: "Basic Maintenance",
@@ -93,7 +101,9 @@ export function JobForm({
   date,
   setDate,
   dateUndecided,
-  setDateUndecided
+  setDateUndecided,
+  team,
+  setTeam
 }: JobFormProps) {
   const navigate = useNavigate();
   const {
@@ -111,7 +121,6 @@ export function JobForm({
       return;
     }
 
-    // Create new job object
     const newJob = {
       id: crypto.randomUUID(),
       jobNumber,
@@ -121,7 +130,8 @@ export function JobForm({
       type,
       date: dateUndecided ? "Yet to be decided" : date,
       status: "ready",
-      location: [151.2093, -33.8688] // Default location for demo
+      location: [151.2093, -33.8688],
+      assignedTeam: team !== "tba" ? TEAMS.find(t => t.id === team)?.name : undefined
     };
     toast({
       title: "Job Created",
@@ -151,8 +161,6 @@ export function JobForm({
             
             <JobDateSelector date={date} setDate={setDate} dateUndecided={dateUndecided} setDateUndecided={setDateUndecided} />
             
-            
-            
             <div className="space-y-2">
               <Label htmlFor="customer">Customer Name *</Label>
               <Input id="customer" value={customer} onChange={e => setCustomer(e.target.value)} placeholder="e.g., John Smith" required />
@@ -168,6 +176,25 @@ export function JobForm({
                   {JOB_TYPES.map(jobType => <SelectItem key={jobType} value={jobType}>
                       {jobType}
                     </SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="team" className="flex items-center gap-1">
+                <Users className="h-4 w-4" />
+                <span>Allocate Team</span>
+              </Label>
+              <Select value={team} onValueChange={setTeam}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select team or TBA" />
+                </SelectTrigger>
+                <SelectContent>
+                  {TEAMS.map(team => (
+                    <SelectItem key={team.id} value={team.id}>
+                      {team.name}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>

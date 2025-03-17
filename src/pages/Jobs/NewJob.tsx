@@ -18,6 +18,7 @@ export default function NewJob() {
   const [type, setType] = useState("");
   const [date, setDate] = useState("");
   const [dateUndecided, setDateUndecided] = useState(false);
+  const [team, setTeam] = useState("tba"); // default to TBA
   const [showTemplateSearch, setShowTemplateSearch] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -110,6 +111,8 @@ export default function NewJob() {
             setDate={setDate}
             dateUndecided={dateUndecided}
             setDateUndecided={setDateUndecided}
+            team={team}
+            setTeam={setTeam}
           />
         )}
       </div>
