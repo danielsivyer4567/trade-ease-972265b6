@@ -117,7 +117,13 @@ export function useCustomers() {
         description: "Customer created successfully"
       });
       
-      return { success: true, data };
+      // Map the returned data to match our interface, ensuring zipCode is properly set
+      const formattedData = {
+        ...data,
+        zipCode: data.zipcode
+      };
+      
+      return { success: true, data: formattedData };
     } catch (error: any) {
       console.error("Exception creating customer:", error);
       toast({

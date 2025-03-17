@@ -32,6 +32,7 @@ export const CustomerForm = ({ onNextTab }: CustomerFormProps) => {
       if (selectedCustomer) {
         setEmail(selectedCustomer.email || '');
         setPhone(selectedCustomer.phone || '');
+        // Make sure we're using the correctly mapped zipCode field (camelCase)
         setAddress(`${selectedCustomer.address}, ${selectedCustomer.city}, ${selectedCustomer.state} ${selectedCustomer.zipCode}`);
       }
     } else {
