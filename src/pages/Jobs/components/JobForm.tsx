@@ -12,6 +12,7 @@ import { JobDateSelector } from "./JobDateSelector";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { Job, JobTemplate } from "@/types/job";
+
 interface JobFormProps {
   onShowTemplateSearch: () => void;
   jobNumber: string;
@@ -29,7 +30,26 @@ interface JobFormProps {
   dateUndecided: boolean;
   setDateUndecided: (undecided: boolean) => void;
 }
-const JOB_TYPES = ["Plumbing", "Electrical", "HVAC", "Carpentry", "Painting", "Roofing", "Landscaping", "General Repair", "Flooring", "Tiling", "Concrete", "Other"];
+
+const JOB_TYPES = [
+  "Plumbing", 
+  "Electrical", 
+  "HVAC", 
+  "Carpentry", 
+  "Painting", 
+  "Roofing", 
+  "Landscaping", 
+  "General Repair", 
+  "Flooring", 
+  "Tiling", 
+  "Concrete", 
+  "Fencing", 
+  "Yard Maintenance", 
+  "Shed Building", 
+  "Shop Fitouts", 
+  "Cabinet Making",
+  "Other"
+];
 
 // Sample templates for the dropdown
 const QUICK_TEMPLATES: JobTemplate[] = [{
@@ -57,6 +77,7 @@ const QUICK_TEMPLATES: JobTemplate[] = [{
   price: 150,
   materials: ["Testing equipment"]
 }];
+
 export function JobForm({
   onShowTemplateSearch,
   jobNumber,
@@ -78,6 +99,7 @@ export function JobForm({
   const {
     toast
   } = useToast();
+
   const handleSubmit = e => {
     e.preventDefault();
     if (!jobNumber || !title || !customer || !type || !date && !dateUndecided) {
@@ -107,6 +129,7 @@ export function JobForm({
     });
     navigate("/jobs");
   };
+
   const applyTemplate = (template: JobTemplate) => {
     setTitle(template.title);
     setDescription(template.description);
@@ -116,6 +139,7 @@ export function JobForm({
       description: `Applied template: ${template.title}`
     });
   };
+
   return <Card className="max-w-3xl mx-auto">
       <CardHeader className="bg-slate-300">
         <CardTitle>Job Details</CardTitle>
