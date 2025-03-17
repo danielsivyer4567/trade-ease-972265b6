@@ -8,6 +8,8 @@ import { Form } from "@/components/ui/form";
 import { AddressFields } from "../../../../Customers/components/AddressFields";
 import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 interface CustomerDetailsProps {
   job: Job;
@@ -24,17 +26,45 @@ const formSchema = z.object({
 export const CustomerDetails = ({ job }: CustomerDetailsProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  const { toast } = useToast();
   
   // Initialize the form with job data if available
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       address: job.address || "",
-      city: "",
-      state: "",
-      zipCode: ""
+      city: job.city || "",
+      state: job.state || "",
+      zipCode: job.zipCode || ""
     }
   });
+
+  const onSave = async (data: z.infer<typeof formSchema>) => {
+    try {
+      await supabase
+        .from('jobs')
+        .update({
+          address: data.address,
+          city: data.city,
+          state: data.state,
+          zipCode: data.zipCode
+        })
+        .eq('id', job.id);
+      
+      toast({
+        title: "Address updated",
+        description: "The customer address has been successfully updated."
+      });
+      
+      setIsEditing(false);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update the address. Please try again.",
+        variant: "destructive"
+      });
+    }
+  };
   
   return (
     <div className="rounded-lg overflow-hidden border border-gray-200 bg-white">
@@ -59,14 +89,33 @@ export const CustomerDetails = ({ job }: CustomerDetailsProps) => {
             <p><span className="font-semibold">Assigned Team:</span> {job.assignedTeam}</p>
           </div>
           
-          {job.address && (
-            <div className="mt-4">
-              <h3 className="text-sm font-semibold mb-2">Address Information</h3>
-              <Form {...form}>
-                <AddressFields form={form} className="mt-2" />
-              </Form>
+          <div className="mt-4">
+            <div className="flex justify-between items-center mb-2">
+              <h3 className="text-sm font-semibold">Address Information</h3>
+              {!isEditing && (
+                <Button variant="outline" size="sm" onClick={() => setIsEditing(true)}>
+                  Edit
+                </Button>
+              )}
             </div>
-          )}
+            
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSave)}>
+                <AddressFields form={form} className={isEditing ? "mt-2" : "mt-2 opacity-70 pointer-events-none"} />
+                
+                {isEditing && (
+                  <div className="flex justify-end gap-2 mt-4">
+                    <Button type="button" variant="outline" size="sm" onClick={() => setIsEditing(false)}>
+                      Cancel
+                    </Button>
+                    <Button type="submit" size="sm">
+                      Save
+                    </Button>
+                  </div>
+                )}
+              </form>
+            </Form>
+          </div>
         </div>
       )}
     </div>
