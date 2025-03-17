@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -24,7 +25,7 @@ export function JobDateSelector({
           if (checked) {
             setDate("");
           }
-        }} className="py-0 px-0 mx-[4px]" />
+        }} className="h-3 w-3 mx-[4px]" />
           <label htmlFor="dateUndecided" className="text-sm font-medium cursor-pointer">
             Yet to be decided
           </label>
