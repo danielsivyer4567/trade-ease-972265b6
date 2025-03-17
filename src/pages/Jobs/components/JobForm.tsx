@@ -14,6 +14,7 @@ import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { JobTemplate } from "@/types/job";
 import { TEAMS } from "../constants/teams";
+import { Loader2 } from "lucide-react";
 
 interface JobFormProps {
   onShowTemplateSearch: () => void;
@@ -33,6 +34,8 @@ interface JobFormProps {
   setDateUndecided: (undecided: boolean) => void;
   team: string;
   setTeam: (team: string) => void;
+  saveJobToDatabase: (jobData: any) => Promise<boolean>;
+  isSaving: boolean;
 }
 
 export function JobForm({
@@ -52,12 +55,14 @@ export function JobForm({
   dateUndecided,
   setDateUndecided,
   team,
-  setTeam
+  setTeam,
+  saveJobToDatabase,
+  isSaving
 }: JobFormProps) {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  const handleSubmit = e => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!jobNumber || !title || !customer || !type || (!date && !dateUndecided)) {
       toast({
@@ -69,23 +74,27 @@ export function JobForm({
     }
 
     const newJob = {
-      id: crypto.randomUUID(),
       jobNumber,
       title,
       customer,
       description,
       type,
       date: dateUndecided ? "Yet to be decided" : date,
+      date_undecided: dateUndecided,
       status: "ready",
       location: [151.2093, -33.8688],
-      assignedTeam: team !== "tba" ? TEAMS.find(t => t.id === team)?.name : undefined
+      assigned_team: team !== "tba" ? team : null
     };
     
-    toast({
-      title: "Job Created",
-      description: `Job "${title}" has been created successfully`
-    });
-    navigate("/jobs");
+    const success = await saveJobToDatabase(newJob);
+    
+    if (success) {
+      toast({
+        title: "Job Created",
+        description: `Job "${title}" has been created successfully`
+      });
+      navigate("/jobs");
+    }
   };
 
   const applyTemplate = (template: JobTemplate) => {
@@ -148,14 +157,23 @@ export function JobForm({
             variant="outline" 
             onClick={() => navigate("/jobs")} 
             className="bg-slate-400 hover:bg-slate-300"
+            disabled={isSaving}
           >
             Cancel
           </Button>
           <Button 
             type="submit" 
             className="bg-slate-400 hover:bg-slate-300"
+            disabled={isSaving}
           >
-            Create Job
+            {isSaving ? (
+              <>
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                Saving...
+              </>
+            ) : (
+              'Create Job'
+            )}
           </Button>
         </CardFooter>
       </form>

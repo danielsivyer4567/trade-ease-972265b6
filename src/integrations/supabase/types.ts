@@ -122,6 +122,57 @@ export type Database = {
         }
         Relationships: []
       }
+      jobs: {
+        Row: {
+          assigned_team: string | null
+          created_at: string | null
+          customer: string
+          date: string | null
+          date_undecided: boolean | null
+          description: string | null
+          id: string
+          job_number: string
+          location: number[] | null
+          status: string | null
+          title: string
+          type: string
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          assigned_team?: string | null
+          created_at?: string | null
+          customer: string
+          date?: string | null
+          date_undecided?: boolean | null
+          description?: string | null
+          id?: string
+          job_number: string
+          location?: number[] | null
+          status?: string | null
+          title: string
+          type: string
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          assigned_team?: string | null
+          created_at?: string | null
+          customer?: string
+          date?: string | null
+          date_undecided?: boolean | null
+          description?: string | null
+          id?: string
+          job_number?: string
+          location?: number[] | null
+          status?: string | null
+          title?: string
+          type?: string
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       messaging_accounts: {
         Row: {
           account_id: string | null

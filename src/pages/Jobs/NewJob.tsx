@@ -9,6 +9,7 @@ import { TemplateLibrary } from "./components/TemplateLibrary";
 import { useToast } from "@/hooks/use-toast";
 import { JobTemplate } from "@/types/job";
 import { QUICK_TEMPLATES } from "./constants/templates";
+import { supabase } from "@/integrations/supabase/client";
 
 export default function NewJob() {
   const navigate = useNavigate();
@@ -26,6 +27,7 @@ export default function NewJob() {
   const [showTemplateSearch, setShowTemplateSearch] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [allTemplates, setAllTemplates] = useState<JobTemplate[]>([]);
+  const [isSaving, setIsSaving] = useState(false);
   
   // Initialize with both quick templates and user templates
   useEffect(() => {
@@ -58,6 +60,55 @@ export default function NewJob() {
     });
     
     setShowTemplateSearch(false);
+  };
+  
+  const saveJobToDatabase = async (jobData) => {
+    try {
+      setIsSaving(true);
+      
+      const { data: session, error: sessionError } = await supabase.auth.getSession();
+      
+      if (sessionError || !session?.session) {
+        console.error("Error getting session:", sessionError);
+        toast({
+          title: "Authentication Error",
+          description: "You need to be logged in to create jobs.",
+          variant: "destructive"
+        });
+        return false;
+      }
+      
+      const { data, error } = await supabase
+        .from('jobs')
+        .insert({
+          ...jobData,
+          user_id: session.session.user.id
+        })
+        .select();
+        
+      if (error) {
+        console.error("Error saving job:", error);
+        toast({
+          title: "Error",
+          description: "Failed to save job to database",
+          variant: "destructive"
+        });
+        return false;
+      }
+      
+      console.log("Job saved successfully:", data);
+      return true;
+    } catch (error) {
+      console.error("Exception saving job:", error);
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred",
+        variant: "destructive"
+      });
+      return false;
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -109,6 +160,8 @@ export default function NewJob() {
             setDateUndecided={setDateUndecided}
             team={team}
             setTeam={setTeam}
+            saveJobToDatabase={saveJobToDatabase}
+            isSaving={isSaving}
           />
         )}
       </div>
