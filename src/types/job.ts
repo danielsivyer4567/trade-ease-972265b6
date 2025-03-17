@@ -7,12 +7,15 @@ export interface Job {
   date: string;
   location: [number, number];
   address?: string;
+  city?: string;
+  state?: string;
+  zipCode?: string;
   jobNumber: string;
   title: string;
   description?: string;
   assignedTeam?: string;
   assignedMemberId?: string;
-  date_undecided?: boolean; // Add this property
+  date_undecided?: boolean;
 }
 
 export interface JobTemplate {
