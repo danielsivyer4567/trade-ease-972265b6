@@ -6,11 +6,13 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { ChevronDown, ListChecks } from "lucide-react";
 import { JobNumberGenerator } from "./JobNumberGenerator";
 import { JobDateSelector } from "./JobDateSelector";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
-import { Job } from "@/types/job";
+import { Job, JobTemplate } from "@/types/job";
 
 interface JobFormProps {
   onShowTemplateSearch: () => void;
@@ -31,6 +33,37 @@ interface JobFormProps {
 }
 
 const JOB_TYPES = ["Plumbing", "Electrical", "HVAC", "Carpentry", "Painting", "Roofing", "Landscaping", "General Repair", "Flooring", "Tiling", "Concrete", "Other"];
+
+// Sample templates for the dropdown
+const QUICK_TEMPLATES: JobTemplate[] = [
+  {
+    id: "t1",
+    title: "Basic Maintenance",
+    description: "Standard maintenance service",
+    type: "General Repair",
+    estimatedDuration: 1,
+    price: 100,
+    materials: ["Basic tools"]
+  },
+  {
+    id: "t2",
+    title: "Emergency Plumbing",
+    description: "Urgent plumbing repair for leaks or blockages",
+    type: "Plumbing",
+    estimatedDuration: 2,
+    price: 200,
+    materials: ["Pipes", "Fittings"]
+  },
+  {
+    id: "t3",
+    title: "Electrical Inspection",
+    description: "Safety inspection of electrical systems",
+    type: "Electrical",
+    estimatedDuration: 1.5,
+    price: 150,
+    materials: ["Testing equipment"]
+  }
+];
 
 export function JobForm({ 
   onShowTemplateSearch,
@@ -82,6 +115,17 @@ export function JobForm({
       description: `Job "${title}" has been created successfully`
     });
     navigate("/jobs");
+  };
+
+  const applyTemplate = (template: JobTemplate) => {
+    setTitle(template.title);
+    setDescription(template.description);
+    setType(template.type);
+    
+    toast({
+      title: "Template Applied",
+      description: `Applied template: ${template.title}`
+    });
   };
 
   return (
@@ -142,15 +186,38 @@ export function JobForm({
               </Select>
             </div>
             
-            <div className="space-y-2 flex items-end">
-              <Button 
-                type="button" 
-                variant="outline" 
-                onClick={onShowTemplateSearch} 
-                className="text-gray-950 bg-slate-400 hover:bg-slate-300"
-              >
-                Search Templates
-              </Button>
+            <div className="space-y-2 flex flex-col justify-end">
+              <Label>Templates</Label>
+              <div className="flex gap-2">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" className="w-full text-gray-950 bg-slate-400 hover:bg-slate-300">
+                      <ListChecks className="h-4 w-4 mr-2" />
+                      Quick Templates
+                      <ChevronDown className="h-4 w-4 ml-2" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="bg-white w-56">
+                    {QUICK_TEMPLATES.map(template => (
+                      <DropdownMenuItem 
+                        key={template.id}
+                        onClick={() => applyTemplate(template)}
+                      >
+                        {template.title}
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+                
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  onClick={onShowTemplateSearch} 
+                  className="text-gray-950 bg-slate-400 hover:bg-slate-300"
+                >
+                  Browse All
+                </Button>
+              </div>
             </div>
           </div>
           
