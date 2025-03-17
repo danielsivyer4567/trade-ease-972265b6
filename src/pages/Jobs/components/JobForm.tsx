@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -13,7 +12,6 @@ import { JobDateSelector } from "./JobDateSelector";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { Job, JobTemplate } from "@/types/job";
-
 interface JobFormProps {
   onShowTemplateSearch: () => void;
   jobNumber: string;
@@ -31,41 +29,35 @@ interface JobFormProps {
   dateUndecided: boolean;
   setDateUndecided: (undecided: boolean) => void;
 }
-
 const JOB_TYPES = ["Plumbing", "Electrical", "HVAC", "Carpentry", "Painting", "Roofing", "Landscaping", "General Repair", "Flooring", "Tiling", "Concrete", "Other"];
 
 // Sample templates for the dropdown
-const QUICK_TEMPLATES: JobTemplate[] = [
-  {
-    id: "t1",
-    title: "Basic Maintenance",
-    description: "Standard maintenance service",
-    type: "General Repair",
-    estimatedDuration: 1,
-    price: 100,
-    materials: ["Basic tools"]
-  },
-  {
-    id: "t2",
-    title: "Emergency Plumbing",
-    description: "Urgent plumbing repair for leaks or blockages",
-    type: "Plumbing",
-    estimatedDuration: 2,
-    price: 200,
-    materials: ["Pipes", "Fittings"]
-  },
-  {
-    id: "t3",
-    title: "Electrical Inspection",
-    description: "Safety inspection of electrical systems",
-    type: "Electrical",
-    estimatedDuration: 1.5,
-    price: 150,
-    materials: ["Testing equipment"]
-  }
-];
-
-export function JobForm({ 
+const QUICK_TEMPLATES: JobTemplate[] = [{
+  id: "t1",
+  title: "Basic Maintenance",
+  description: "Standard maintenance service",
+  type: "General Repair",
+  estimatedDuration: 1,
+  price: 100,
+  materials: ["Basic tools"]
+}, {
+  id: "t2",
+  title: "Emergency Plumbing",
+  description: "Urgent plumbing repair for leaks or blockages",
+  type: "Plumbing",
+  estimatedDuration: 2,
+  price: 200,
+  materials: ["Pipes", "Fittings"]
+}, {
+  id: "t3",
+  title: "Electrical Inspection",
+  description: "Safety inspection of electrical systems",
+  type: "Electrical",
+  estimatedDuration: 1.5,
+  price: 150,
+  materials: ["Testing equipment"]
+}];
+export function JobForm({
   onShowTemplateSearch,
   jobNumber,
   setJobNumber,
@@ -83,12 +75,12 @@ export function JobForm({
   setDateUndecided
 }: JobFormProps) {
   const navigate = useNavigate();
-  const { toast } = useToast();
-
-  const handleSubmit = (e) => {
+  const {
+    toast
+  } = useToast();
+  const handleSubmit = e => {
     e.preventDefault();
-    
-    if (!jobNumber || !title || !customer || !type || (!date && !dateUndecided)) {
+    if (!jobNumber || !title || !customer || !type || !date && !dateUndecided) {
       toast({
         title: "Missing fields",
         description: "Please fill in all required fields",
@@ -109,65 +101,37 @@ export function JobForm({
       status: "ready",
       location: [151.2093, -33.8688] // Default location for demo
     };
-
     toast({
       title: "Job Created",
       description: `Job "${title}" has been created successfully`
     });
     navigate("/jobs");
   };
-
   const applyTemplate = (template: JobTemplate) => {
     setTitle(template.title);
     setDescription(template.description);
     setType(template.type);
-    
     toast({
       title: "Template Applied",
       description: `Applied template: ${template.title}`
     });
   };
-
-  return (
-    <Card className="max-w-3xl mx-auto">
+  return <Card className="max-w-3xl mx-auto">
       <CardHeader className="bg-slate-300">
         <CardTitle>Job Details</CardTitle>
       </CardHeader>
       <form onSubmit={handleSubmit}>
         <CardContent className="space-y-6 bg-slate-100">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <JobNumberGenerator 
-              jobNumber={jobNumber} 
-              setJobNumber={setJobNumber} 
-            />
+            <JobNumberGenerator jobNumber={jobNumber} setJobNumber={setJobNumber} />
             
-            <JobDateSelector 
-              date={date}
-              setDate={setDate}
-              dateUndecided={dateUndecided}
-              setDateUndecided={setDateUndecided}
-            />
+            <JobDateSelector date={date} setDate={setDate} dateUndecided={dateUndecided} setDateUndecided={setDateUndecided} />
             
-            <div className="space-y-2">
-              <Label htmlFor="title">Job Title *</Label>
-              <Input 
-                id="title" 
-                value={title} 
-                onChange={e => setTitle(e.target.value)} 
-                placeholder="e.g., Water Heater Installation" 
-                required 
-              />
-            </div>
+            
             
             <div className="space-y-2">
               <Label htmlFor="customer">Customer Name *</Label>
-              <Input 
-                id="customer" 
-                value={customer} 
-                onChange={e => setCustomer(e.target.value)} 
-                placeholder="e.g., John Smith" 
-                required 
-              />
+              <Input id="customer" value={customer} onChange={e => setCustomer(e.target.value)} placeholder="e.g., John Smith" required />
             </div>
             
             <div className="space-y-2">
@@ -177,11 +141,9 @@ export function JobForm({
                   <SelectValue placeholder="Select job type" />
                 </SelectTrigger>
                 <SelectContent>
-                  {JOB_TYPES.map(jobType => (
-                    <SelectItem key={jobType} value={jobType}>
+                  {JOB_TYPES.map(jobType => <SelectItem key={jobType} value={jobType}>
                       {jobType}
-                    </SelectItem>
-                  ))}
+                    </SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
@@ -198,23 +160,13 @@ export function JobForm({
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent className="bg-white w-56">
-                    {QUICK_TEMPLATES.map(template => (
-                      <DropdownMenuItem 
-                        key={template.id}
-                        onClick={() => applyTemplate(template)}
-                      >
+                    {QUICK_TEMPLATES.map(template => <DropdownMenuItem key={template.id} onClick={() => applyTemplate(template)}>
                         {template.title}
-                      </DropdownMenuItem>
-                    ))}
+                      </DropdownMenuItem>)}
                   </DropdownMenuContent>
                 </DropdownMenu>
                 
-                <Button 
-                  type="button" 
-                  variant="outline" 
-                  onClick={onShowTemplateSearch} 
-                  className="text-gray-950 bg-slate-400 hover:bg-slate-300"
-                >
+                <Button type="button" variant="outline" onClick={onShowTemplateSearch} className="text-gray-950 bg-slate-400 hover:bg-slate-300">
                   Browse All
                 </Button>
               </div>
@@ -223,23 +175,12 @@ export function JobForm({
           
           <div className="space-y-2">
             <Label htmlFor="description">Description</Label>
-            <Textarea 
-              id="description" 
-              value={description} 
-              onChange={e => setDescription(e.target.value)} 
-              placeholder="Detailed description of the job" 
-              rows={4} 
-            />
+            <Textarea id="description" value={description} onChange={e => setDescription(e.target.value)} placeholder="Detailed description of the job" rows={4} />
           </div>
         </CardContent>
         
         <CardFooter className="flex justify-between">
-          <Button 
-            type="button" 
-            variant="outline" 
-            onClick={() => navigate("/jobs")} 
-            className="bg-slate-400 hover:bg-slate-300"
-          >
+          <Button type="button" variant="outline" onClick={() => navigate("/jobs")} className="bg-slate-400 hover:bg-slate-300">
             Cancel
           </Button>
           <Button type="submit" className="bg-slate-400 hover:bg-slate-300">
@@ -247,6 +188,5 @@ export function JobForm({
           </Button>
         </CardFooter>
       </form>
-    </Card>
-  );
+    </Card>;
 }
