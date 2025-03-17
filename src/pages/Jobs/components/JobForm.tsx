@@ -1,20 +1,13 @@
 
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { JobNumberGenerator } from "./JobNumberGenerator";
-import { JobDateSelector } from "./JobDateSelector";
-import { CustomerDetails } from "./form-sections/CustomerDetails";
-import { JobTypeSelector } from "./form-sections/JobTypeSelector";
-import { TeamSelector } from "./form-sections/TeamSelector";
-import { TemplateSelector } from "./form-sections/TemplateSelector";
-import { JobDescription } from "./form-sections/JobDescription";
-import { useNavigate } from "react-router-dom";
+import React from "react";
+import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { JobTemplate } from "@/types/job";
-import { TEAMS } from "../constants/teams";
-import { Loader2 } from "lucide-react";
+import { FormHeader } from "./form-sections/FormHeader";
+import { FormFooter } from "./form-sections/FormFooter";
+import { MainFormFields } from "./form-sections/MainFormFields";
+import { JobDescription } from "./form-sections/JobDescription";
+import { useJobFormSubmit } from "../hooks/useJobFormSubmit";
 
 interface JobFormProps {
   onShowTemplateSearch: () => void;
@@ -59,41 +52,31 @@ export function JobForm({
   saveJobToDatabase,
   isSaving
 }: JobFormProps) {
-  const navigate = useNavigate();
   const { toast } = useToast();
+  const { validateJobForm, prepareJobData, handleSuccessfulSubmit } = useJobFormSubmit();
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!jobNumber || !title || !customer || !type || (!date && !dateUndecided)) {
-      toast({
-        title: "Missing fields",
-        description: "Please fill in all required fields",
-        variant: "destructive"
-      });
+    
+    if (!validateJobForm(jobNumber, title, customer, type, date, dateUndecided)) {
       return;
     }
 
-    const newJob = {
-      jobNumber,
-      title,
-      customer,
-      description,
-      type,
-      date: dateUndecided ? "Yet to be decided" : date,
-      date_undecided: dateUndecided,
-      status: "ready",
-      location: [151.2093, -33.8688],
-      assigned_team: team !== "tba" ? team : null
-    };
+    const newJob = prepareJobData(
+      jobNumber, 
+      title, 
+      customer, 
+      description, 
+      type, 
+      date, 
+      dateUndecided, 
+      team
+    );
     
     const success = await saveJobToDatabase(newJob);
     
     if (success) {
-      toast({
-        title: "Job Created",
-        description: `Job "${title}" has been created successfully`
-      });
-      navigate("/jobs");
+      handleSuccessfulSubmit();
     }
   };
 
@@ -110,72 +93,32 @@ export function JobForm({
 
   return (
     <Card className="max-w-3xl mx-auto">
-      <CardHeader className="bg-slate-300">
-        <CardTitle>Job Details</CardTitle>
-      </CardHeader>
+      <FormHeader />
       <form onSubmit={handleSubmit}>
         <CardContent className="space-y-6 bg-slate-100">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <JobNumberGenerator jobNumber={jobNumber} setJobNumber={setJobNumber} />
-            
-            <JobDateSelector 
-              date={date} 
-              setDate={setDate} 
-              dateUndecided={dateUndecided} 
-              setDateUndecided={setDateUndecided} 
-            />
-            
-            <CustomerDetails customer={customer} setCustomer={setCustomer} />
-            
-            <div className="space-y-2">
-              <Label htmlFor="title">Job Title *</Label>
-              <Input 
-                id="title" 
-                value={title} 
-                onChange={e => setTitle(e.target.value)} 
-                placeholder="e.g., Kitchen Renovation" 
-                required 
-              />
-            </div>
-            
-            <JobTypeSelector type={type} setType={setType} />
-            
-            <TeamSelector team={team} setTeam={setTeam} />
-            
-            <TemplateSelector 
-              onShowTemplateSearch={onShowTemplateSearch} 
-              applyTemplate={applyTemplate} 
-            />
-          </div>
+          <MainFormFields
+            jobNumber={jobNumber}
+            setJobNumber={setJobNumber}
+            title={title}
+            setTitle={setTitle}
+            customer={customer}
+            setCustomer={setCustomer}
+            type={type}
+            setType={setType}
+            date={date}
+            setDate={setDate}
+            dateUndecided={dateUndecided}
+            setDateUndecided={setDateUndecided}
+            team={team}
+            setTeam={setTeam}
+            onShowTemplateSearch={onShowTemplateSearch}
+            applyTemplate={applyTemplate}
+          />
           
           <JobDescription description={description} setDescription={setDescription} />
         </CardContent>
         
-        <CardFooter className="flex justify-between">
-          <Button 
-            type="button" 
-            variant="outline" 
-            onClick={() => navigate("/jobs")} 
-            className="bg-slate-400 hover:bg-slate-300"
-            disabled={isSaving}
-          >
-            Cancel
-          </Button>
-          <Button 
-            type="submit" 
-            className="bg-slate-400 hover:bg-slate-300"
-            disabled={isSaving}
-          >
-            {isSaving ? (
-              <>
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                Saving...
-              </>
-            ) : (
-              'Create Job'
-            )}
-          </Button>
-        </CardFooter>
+        <FormFooter isSaving={isSaving} onSubmit={handleSubmit} />
       </form>
     </Card>
   );

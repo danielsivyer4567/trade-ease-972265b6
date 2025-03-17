@@ -1,7 +1,6 @@
 
 import { useState } from "react";
 import { AppLayout } from "@/components/ui/AppLayout";
-import { useNavigate } from "react-router-dom";
 import { JobForm } from "./components/JobForm";
 import { TemplateSearch } from "./components/TemplateSearch";
 import { LoadingState } from "./components/LoadingState";
@@ -13,7 +12,6 @@ import { useJobTemplates } from "./hooks/useJobTemplates";
 import { useJobSave } from "./hooks/useJobSave";
 
 export default function NewJob() {
-  const navigate = useNavigate();
   const { toast } = useToast();
   const { isAuthenticated, isCheckingAuth } = useAuthentication();
   const { allTemplates } = useJobTemplates();
