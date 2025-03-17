@@ -28,6 +28,34 @@ export default function NewJob() {
   const [searchQuery, setSearchQuery] = useState("");
   const [allTemplates, setAllTemplates] = useState<JobTemplate[]>([]);
   const [isSaving, setIsSaving] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+  
+  // Check authentication status on component mount
+  useEffect(() => {
+    const checkAuth = async () => {
+      setIsCheckingAuth(true);
+      const { data, error } = await supabase.auth.getSession();
+      if (error) {
+        console.error("Error checking authentication:", error);
+      }
+      setIsAuthenticated(!!data.session);
+      setIsCheckingAuth(false);
+    };
+    
+    checkAuth();
+    
+    // Set up auth state change listener
+    const { data: authListener } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        setIsAuthenticated(!!session);
+      }
+    );
+    
+    return () => {
+      authListener.subscription.unsubscribe();
+    };
+  }, []);
   
   // Initialize with both quick templates and user templates
   useEffect(() => {
@@ -72,9 +100,12 @@ export default function NewJob() {
         console.error("Error getting session:", sessionError);
         toast({
           title: "Authentication Error",
-          description: "You need to be logged in to create jobs.",
+          description: "You need to be logged in to create jobs. Please sign in and try again.",
           variant: "destructive"
         });
+        
+        // Redirect to login page after a short delay
+        setTimeout(() => navigate("/auth"), 2000);
         return false;
       }
       
@@ -90,7 +121,7 @@ export default function NewJob() {
         console.error("Error saving job:", error);
         toast({
           title: "Error",
-          description: "Failed to save job to database",
+          description: "Failed to save job to database: " + error.message,
           variant: "destructive"
         });
         return false;
@@ -102,7 +133,7 @@ export default function NewJob() {
       console.error("Exception saving job:", error);
       toast({
         title: "Error",
-        description: "An unexpected error occurred",
+        description: "An unexpected error occurred: " + (error.message || "Unknown error"),
         variant: "destructive"
       });
       return false;
@@ -110,6 +141,36 @@ export default function NewJob() {
       setIsSaving(false);
     }
   };
+
+  // Redirect to login if not authenticated
+  useEffect(() => {
+    if (!isCheckingAuth && !isAuthenticated) {
+      toast({
+        title: "Authentication Required",
+        description: "You need to be logged in to create jobs",
+        variant: "destructive"
+      });
+      navigate("/auth");
+    }
+  }, [isAuthenticated, isCheckingAuth, navigate, toast]);
+
+  if (isCheckingAuth) {
+    return (
+      <AppLayout>
+        <div className="p-6 flex items-center justify-center h-full">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto mb-4"></div>
+            <p className="text-lg">Checking authentication...</p>
+          </div>
+        </div>
+      </AppLayout>
+    );
+  }
+
+  // Only render the form if authenticated
+  if (!isAuthenticated) {
+    return null; // Will redirect via useEffect
+  }
 
   return (
     <AppLayout>
