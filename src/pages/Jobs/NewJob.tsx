@@ -1,14 +1,18 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { AppLayout } from "@/components/ui/AppLayout";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { JobForm } from "./components/JobForm";
 import { TemplateLibrary } from "./components/TemplateLibrary";
+import { useToast } from "@/hooks/use-toast";
+import { JobTemplate } from "@/types/job";
+import { QUICK_TEMPLATES } from "./constants/templates";
 
 export default function NewJob() {
   const navigate = useNavigate();
+  const { toast } = useToast();
   
   // State for the new job form
   const [jobNumber, setJobNumber] = useState("");
@@ -21,46 +25,38 @@ export default function NewJob() {
   const [team, setTeam] = useState("tba"); // default to TBA
   const [showTemplateSearch, setShowTemplateSearch] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-
-  // Mock templates for the template search
-  const templates = [
-    {
-      id: "1",
-      title: "Basic Plumbing Fix",
-      description: "Standard plumbing repair service",
-      type: "Plumbing",
-      estimatedDuration: 2,
-      price: 150,
-      materials: ["Pipes", "Fixtures", "Sealant"],
-      category: "Residential"
-    },
-    {
-      id: "2",
-      title: "Electrical Wiring",
-      description: "Basic electrical wiring service",
-      type: "Electrical",
-      estimatedDuration: 3,
-      price: 200,
-      materials: ["Wires", "Switches", "Junction boxes"],
-      category: "Commercial"
-    },
-    {
-      id: "3",
-      title: "Bathroom Renovation",
-      description: "Complete bathroom renovation",
-      type: "Renovation",
-      estimatedDuration: 40,
-      price: 5000,
-      materials: ["Tiles", "Fixtures", "Pipes", "Paint"],
-      category: "Residential"
+  const [allTemplates, setAllTemplates] = useState<JobTemplate[]>([]);
+  
+  // Initialize with both quick templates and user templates
+  useEffect(() => {
+    // Start with the quick templates
+    const templates = [...QUICK_TEMPLATES];
+    
+    // Add user templates if they exist
+    try {
+      const savedTemplates = localStorage.getItem('userJobTemplates');
+      if (savedTemplates) {
+        const parsedTemplates = JSON.parse(savedTemplates);
+        templates.push(...parsedTemplates);
+      }
+    } catch (err) {
+      console.error("Error loading templates:", err);
     }
-  ];
+    
+    setAllTemplates(templates);
+  }, []);
 
-  const handleTemplateSelection = (template) => {
+  const handleTemplateSelection = (template: JobTemplate) => {
     // Fill form with template data
     setTitle(template.title);
     setDescription(template.description);
     setType(template.type);
+    
+    toast({
+      title: "Template Applied",
+      description: `Template "${template.title}" has been applied to your job`
+    });
+    
     setShowTemplateSearch(false);
   };
 
@@ -88,7 +84,7 @@ export default function NewJob() {
               </Button>
             </div>
             <TemplateLibrary 
-              templates={templates} 
+              templates={allTemplates} 
               searchQuery={searchQuery} 
               onSearchChange={setSearchQuery} 
               onAttachToJob={handleTemplateSelection} 

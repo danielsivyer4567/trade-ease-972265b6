@@ -1,146 +1,113 @@
 
 import { useState } from "react";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { supabase } from "@/integrations/supabase/client";
-import { JobTemplate } from "@/types/job";
-import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
-
-// Job types for the dropdown
-const JOB_TYPES = [
-  "Plumbing",
-  "Electrical",
-  "HVAC",
-  "Carpentry",
-  "Painting",
-  "Roofing",
-  "Landscaping",
-  "General Repair",
-  "Flooring",
-  "Tiling",
-  "Concrete",
-  "Other"
-];
+import { useToast } from "@/hooks/use-toast";
+import { JOB_TYPES } from "../../constants/jobTypes";
+import { JobTemplate } from "@/types/job";
 
 export function NewTemplateForm() {
-  const { toast } = useToast();
   const navigate = useNavigate();
-  
+  const { toast } = useToast();
+
   // Form state
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [type, setType] = useState("");
-  const [estimatedDuration, setEstimatedDuration] = useState<number>(0);
-  const [price, setPrice] = useState<number>(0);
-  const [rateType, setRateType] = useState<"hourly" | "squareMeter" | "linearMeter">("hourly");
-  const [materialsList, setMaterialsList] = useState("");
-  const [category, setCategory] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [duration, setDuration] = useState("1");
+  const [price, setPrice] = useState("0");
+  const [category, setCategory] = useState("Residential");
+  const [materials, setMaterials] = useState("");
   
-  // Rates state
-  const [hourlyRate, setHourlyRate] = useState<number>(0);
-  const [squareMeterRate, setSquareMeterRate] = useState<number>(0);
-  const [linearMeterRate, setLinearMeterRate] = useState<number>(0);
-  const [materialsMarkup, setMaterialsMarkup] = useState<number>(0);
-
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!title || !description || !type) {
+    // Basic validation
+    if (!title || !type) {
       toast({
         title: "Missing fields",
         description: "Please fill in all required fields",
-        variant: "destructive",
+        variant: "destructive"
       });
       return;
     }
     
-    setIsSubmitting(true);
+    // Create template object
+    const newTemplate: JobTemplate = {
+      id: crypto.randomUUID(),
+      title,
+      description,
+      type,
+      estimatedDuration: parseFloat(duration) || 0,
+      price: parseFloat(price) || 0,
+      materials: materials.split(',').map(m => m.trim()).filter(Boolean),
+      category
+    };
     
+    // Save to localStorage (in a real app, we'd save to a database)
     try {
-      const materials = materialsList
-        .split(',')
-        .map(item => item.trim())
-        .filter(item => item.length > 0);
-        
-      const newTemplate: JobTemplate = {
-        id: crypto.randomUUID(),
-        title,
-        description,
-        type,
-        estimatedDuration,
-        price,
-        materials,
-        category: category || undefined,
-        rateType,
-        rates: {
-          hourly: hourlyRate,
-          squareMeter: squareMeterRate,
-          linearMeter: linearMeterRate,
-          materialsMarkup: materialsMarkup
-        }
-      };
+      const existingTemplates = localStorage.getItem('userJobTemplates');
+      const templates = existingTemplates ? JSON.parse(existingTemplates) : [];
+      templates.push(newTemplate);
+      localStorage.setItem('userJobTemplates', JSON.stringify(templates));
       
-      // In a real app, you would save this to a database
-      // For now, we'll just show a success toast
       toast({
-        title: "Template created",
-        description: `Job template "${title}" has been created successfully`,
+        title: "Template Created",
+        description: `Template "${title}" has been created successfully`
       });
       
-      // Navigate back to jobs page after successful creation
       navigate("/jobs");
-    } catch (error) {
-      console.error("Error creating template:", error);
+    } catch (err) {
+      console.error("Error saving template:", err);
       toast({
         title: "Error",
-        description: "There was a problem creating the template",
-        variant: "destructive",
+        description: "Failed to save template",
+        variant: "destructive"
       });
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
   return (
-    <Card className="max-w-3xl mx-auto">
-      <CardHeader>
-        <CardTitle>Create New Job Template</CardTitle>
-      </CardHeader>
+    <Card>
       <form onSubmit={handleSubmit}>
-        <CardContent className="space-y-6">
+        <CardContent className="space-y-6 pt-6">
+          <div className="space-y-2">
+            <Label htmlFor="title">Template Title *</Label>
+            <Input 
+              id="title" 
+              value={title}
+              onChange={e => setTitle(e.target.value)}
+              placeholder="e.g., Basic Plumbing Fix" 
+              required
+            />
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="description">Description</Label>
+            <Textarea 
+              id="description" 
+              value={description}
+              onChange={e => setDescription(e.target.value)}
+              placeholder="Describe what this job template includes..."
+              rows={3}
+            />
+          </div>
+          
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
-              <Label htmlFor="title">Template Title *</Label>
-              <Input 
-                id="title" 
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                placeholder="Water Heater Installation"
-                required
-              />
-            </div>
-            
-            <div className="space-y-2">
               <Label htmlFor="type">Job Type *</Label>
-              <Select 
-                value={type} 
-                onValueChange={setType}
-                required
-              >
-                <SelectTrigger>
+              <Select value={type} onValueChange={setType} required>
+                <SelectTrigger id="type">
                   <SelectValue placeholder="Select job type" />
                 </SelectTrigger>
                 <SelectContent>
                   {JOB_TYPES.map(jobType => (
-                    <SelectItem key={jobType} value={jobType}>
-                      {jobType}
-                    </SelectItem>
+                    <SelectItem key={jobType} value={jobType}>{jobType}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -148,23 +115,29 @@ export function NewTemplateForm() {
             
             <div className="space-y-2">
               <Label htmlFor="category">Category</Label>
-              <Input 
-                id="category" 
-                value={category}
-                onChange={(e) => setCategory(e.target.value)}
-                placeholder="Residential, Commercial, etc."
-              />
+              <Select value={category} onValueChange={setCategory}>
+                <SelectTrigger id="category">
+                  <SelectValue placeholder="Select category" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Residential">Residential</SelectItem>
+                  <SelectItem value="Commercial">Commercial</SelectItem>
+                  <SelectItem value="Industrial">Industrial</SelectItem>
+                  <SelectItem value="Emergency">Emergency</SelectItem>
+                  <SelectItem value="Maintenance">Maintenance</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="estimatedDuration">Estimated Duration (hours)</Label>
+              <Label htmlFor="duration">Estimated Duration (hours)</Label>
               <Input 
-                id="estimatedDuration" 
-                type="number"
-                min="0"
-                step="0.5"
-                value={estimatedDuration}
-                onChange={(e) => setEstimatedDuration(Number(e.target.value))}
+                id="duration" 
+                type="number" 
+                min="0.25"
+                step="0.25"
+                value={duration}
+                onChange={e => setDuration(e.target.value)}
               />
             </div>
             
@@ -173,122 +146,40 @@ export function NewTemplateForm() {
               <Input 
                 id="price" 
                 type="number"
-                min="0"
+                min="0" 
                 step="0.01"
                 value={price}
-                onChange={(e) => setPrice(Number(e.target.value))}
+                onChange={e => setPrice(e.target.value)}
               />
             </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="rateType">Rate Type</Label>
-              <Select 
-                value={rateType} 
-                onValueChange={(value: "hourly" | "squareMeter" | "linearMeter") => setRateType(value)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select rate type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="hourly">Hourly</SelectItem>
-                  <SelectItem value="squareMeter">Square Meter</SelectItem>
-                  <SelectItem value="linearMeter">Linear Meter</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="description">Description *</Label>
-            <Textarea 
-              id="description" 
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="Detailed description of the job template"
-              rows={4}
-              required
-            />
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="materials">Materials (comma separated)</Label>
+            <Label htmlFor="materials">Required Materials (comma-separated)</Label>
             <Textarea 
               id="materials" 
-              value={materialsList}
-              onChange={(e) => setMaterialsList(e.target.value)}
-              placeholder="Water heater, copper pipe, fittings, solder, etc."
-              rows={3}
+              value={materials}
+              onChange={e => setMaterials(e.target.value)}
+              placeholder="e.g., Pipes, Fittings, Sealant"
+              rows={2}
             />
-          </div>
-          
-          <div className="bg-accent/30 p-4 rounded-md">
-            <h3 className="text-lg font-medium mb-3">Rates Configuration</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="hourlyRate">Hourly Rate ($)</Label>
-                <Input 
-                  id="hourlyRate" 
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  value={hourlyRate}
-                  onChange={(e) => setHourlyRate(Number(e.target.value))}
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="squareMeterRate">Square Meter Rate ($)</Label>
-                <Input 
-                  id="squareMeterRate" 
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  value={squareMeterRate}
-                  onChange={(e) => setSquareMeterRate(Number(e.target.value))}
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="linearMeterRate">Linear Meter Rate ($)</Label>
-                <Input 
-                  id="linearMeterRate" 
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  value={linearMeterRate}
-                  onChange={(e) => setLinearMeterRate(Number(e.target.value))}
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="materialsMarkup">Materials Markup (%)</Label>
-                <Input 
-                  id="materialsMarkup" 
-                  type="number"
-                  min="0"
-                  max="100"
-                  step="1"
-                  value={materialsMarkup}
-                  onChange={(e) => setMaterialsMarkup(Number(e.target.value))}
-                />
-              </div>
-            </div>
           </div>
         </CardContent>
         
         <CardFooter className="flex justify-between">
           <Button 
-            type="button" 
-            variant="outline" 
+            type="button"
+            variant="outline"
             onClick={() => navigate("/jobs")}
+            className="bg-slate-400 hover:bg-slate-300"
           >
             Cancel
           </Button>
           <Button 
             type="submit"
-            disabled={isSubmitting}
+            className="bg-slate-400 hover:bg-slate-300"
           >
-            {isSubmitting ? "Creating..." : "Create Template"}
+            Save Template
           </Button>
         </CardFooter>
       </form>

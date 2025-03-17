@@ -1,6 +1,8 @@
 
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { JobNumberGenerator } from "./JobNumberGenerator";
 import { JobDateSelector } from "./JobDateSelector";
 import { CustomerDetails } from "./form-sections/CustomerDetails";
@@ -57,7 +59,7 @@ export function JobForm({
 
   const handleSubmit = e => {
     e.preventDefault();
-    if (!jobNumber || !title || !customer || !type || !date && !dateUndecided) {
+    if (!jobNumber || !title || !customer || !type || (!date && !dateUndecided)) {
       toast({
         title: "Missing fields",
         description: "Please fill in all required fields",
@@ -78,6 +80,7 @@ export function JobForm({
       location: [151.2093, -33.8688],
       assignedTeam: team !== "tba" ? TEAMS.find(t => t.id === team)?.name : undefined
     };
+    
     toast({
       title: "Job Created",
       description: `Job "${title}" has been created successfully`
@@ -89,6 +92,7 @@ export function JobForm({
     setTitle(template.title);
     setDescription(template.description);
     setType(template.type);
+    
     toast({
       title: "Template Applied",
       description: `Applied template: ${template.title}`
@@ -113,6 +117,17 @@ export function JobForm({
             />
             
             <CustomerDetails customer={customer} setCustomer={setCustomer} />
+            
+            <div className="space-y-2">
+              <Label htmlFor="title">Job Title *</Label>
+              <Input 
+                id="title" 
+                value={title} 
+                onChange={e => setTitle(e.target.value)} 
+                placeholder="e.g., Kitchen Renovation" 
+                required 
+              />
+            </div>
             
             <JobTypeSelector type={type} setType={setType} />
             

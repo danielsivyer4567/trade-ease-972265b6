@@ -1,10 +1,11 @@
 
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { ChevronDown, ListChecks } from "lucide-react";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { ChevronDown, ListChecks, Star } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { QUICK_TEMPLATES } from "../../constants/templates";
 import { JobTemplate } from "@/types/job";
+import { useState, useEffect } from "react";
 
 interface TemplateSelectorProps {
   onShowTemplateSearch: () => void;
@@ -12,6 +13,21 @@ interface TemplateSelectorProps {
 }
 
 export function TemplateSelector({ onShowTemplateSearch, applyTemplate }: TemplateSelectorProps) {
+  const [userTemplates, setUserTemplates] = useState<JobTemplate[]>([]);
+  
+  // Load user templates from localStorage for demo purposes
+  // In a real app, this would fetch from an API/database
+  useEffect(() => {
+    const savedTemplates = localStorage.getItem('userJobTemplates');
+    if (savedTemplates) {
+      try {
+        setUserTemplates(JSON.parse(savedTemplates));
+      } catch (err) {
+        console.error("Error loading user templates:", err);
+      }
+    }
+  }, []);
+
   return (
     <div className="space-y-2 flex flex-col justify-end">
       <Label>Templates</Label>
@@ -30,6 +46,25 @@ export function TemplateSelector({ onShowTemplateSearch, applyTemplate }: Templa
                 {template.title}
               </DropdownMenuItem>
             ))}
+            
+            {userTemplates.length > 0 && (
+              <>
+                <DropdownMenuSeparator />
+                <div className="px-2 py-1 text-sm font-medium text-gray-500">
+                  My Templates
+                </div>
+                {userTemplates.map(template => (
+                  <DropdownMenuItem 
+                    key={template.id} 
+                    onClick={() => applyTemplate(template)}
+                    className="flex items-center"
+                  >
+                    <Star className="h-3 w-3 mr-2 text-yellow-500" />
+                    {template.title}
+                  </DropdownMenuItem>
+                ))}
+              </>
+            )}
           </DropdownMenuContent>
         </DropdownMenu>
         
