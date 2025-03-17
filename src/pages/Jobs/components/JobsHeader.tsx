@@ -6,18 +6,26 @@ import { useNavigate } from "react-router-dom";
 import { TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface JobsHeaderProps {
-  navigateTo?: string;
+  navigateTo?: string | number;
 }
 
 export function JobsHeader({ navigateTo = -1 }: JobsHeaderProps) {
   const navigate = useNavigate();
+
+  const handleNavigation = () => {
+    if (typeof navigateTo === 'number') {
+      navigate(navigateTo);
+    } else {
+      navigate(navigateTo);
+    }
+  };
 
   return (
     <div className="flex items-center gap-4 mb-4 px-4 py-2">
       <Button 
         variant="outline" 
         size="sm" 
-        onClick={() => navigate(navigateTo === -1 ? -1 : navigateTo)} 
+        onClick={handleNavigation} 
         className="rounded-md border border-gray-300 px-3 py-1 bg-[#D3E4FD] hover:bg-[#B5D1F8] text-[#1E40AF] hover:text-[#1E3A8A]"
       >
         <ArrowLeft className="h-5 w-5" />
