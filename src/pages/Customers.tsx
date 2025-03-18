@@ -1,21 +1,53 @@
-
 import { AppLayout } from "@/components/ui/AppLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, User, Phone, Mail, MapPin, UserPlus, Upload, ArrowLeft } from "lucide-react";
+import { Search, User, Phone, Mail, MapPin, UserPlus, Upload, ArrowLeft, Edit } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useCustomers } from "./Customers/hooks/useCustomers";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Form } from "@/components/ui/form";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import { CustomerContactFields } from "./Customers/components/CustomerContactFields";
+import { AddressFields } from "./Customers/components/AddressFields";
+import { supabase } from "@/integrations/supabase/client";
+
+const formSchema = z.object({
+  name: z.string().min(1, "Name is required"),
+  email: z.string().email("Invalid email format").optional().or(z.literal("")),
+  phone: z.string().optional().or(z.literal("")),
+  address: z.string().optional().or(z.literal("")),
+  city: z.string().optional().or(z.literal("")),
+  state: z.string().optional().or(z.literal("")),
+  zipCode: z.string().optional().or(z.literal(""))
+});
 
 export default function CustomersPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedFilter, setSelectedFilter] = useState("all");
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [selectedCustomer, setSelectedCustomer] = useState(null);
   const navigate = useNavigate();
   const { toast } = useToast();
   const { customers, isLoading, fetchCustomers } = useCustomers();
+  
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      name: "",
+      email: "",
+      phone: "",
+      address: "",
+      city: "",
+      state: "",
+      zipCode: ""
+    }
+  });
   
   useEffect(() => {
     fetchCustomers();
@@ -41,6 +73,75 @@ export default function CustomersPage() {
 
   const handleCustomerClick = (customerId: string) => {
     navigate(`/customers/${customerId}`);
+  };
+  
+  const handleEditClick = (e: React.MouseEvent, customer: any) => {
+    e.stopPropagation();
+    setSelectedCustomer(customer);
+    form.reset({
+      name: customer.name,
+      email: customer.email,
+      phone: customer.phone,
+      address: customer.address,
+      city: customer.city,
+      state: customer.state,
+      zipCode: customer.zipCode
+    });
+    setEditModalOpen(true);
+  };
+  
+  const onSubmit = async (data: z.infer<typeof formSchema>) => {
+    try {
+      const { data: session } = await supabase.auth.getSession();
+      if (!session?.session?.user) {
+        toast({
+          title: "Authentication Error",
+          description: "You must be logged in to update customer information",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      const customerData = {
+        name: data.name,
+        email: data.email,
+        phone: data.phone,
+        address: data.address,
+        city: data.city,
+        state: data.state,
+        zipcode: data.zipCode
+      };
+
+      const { error } = await supabase
+        .from('customers')
+        .update(customerData)
+        .eq('id', selectedCustomer.id);
+
+      if (error) {
+        console.error("Error updating customer:", error);
+        toast({
+          title: "Error",
+          description: "Failed to update customer information",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      toast({
+        title: "Success",
+        description: "Customer information updated successfully"
+      });
+      
+      setEditModalOpen(false);
+      fetchCustomers();
+    } catch (error) {
+      console.error("Exception updating customer:", error);
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred",
+        variant: "destructive"
+      });
+    }
   };
 
   return (
@@ -138,9 +239,17 @@ export default function CustomersPage() {
                       <User className="h-5 w-5 text-gray-500" />
                       <span className="cursor-pointer hover:text-blue-600 hover:underline">{customer.name}</span>
                     </div>
-                    <span className="">
-                      {customer.status === 'active' ? 'Active' : 'Inactive'}
-                    </span>
+                    <div className="flex items-center gap-2">
+                      <span>{customer.status === 'active' ? 'Active' : 'Inactive'}</span>
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        onClick={(e) => handleEditClick(e, customer)}
+                        className="ml-2 p-1"
+                      >
+                        <Edit className="h-4 w-4 text-gray-600" />
+                      </Button>
+                    </div>
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -170,6 +279,30 @@ export default function CustomersPage() {
           </div>
         )}
       </div>
+      
+      <Dialog open={editModalOpen} onOpenChange={setEditModalOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Edit Customer</DialogTitle>
+          </DialogHeader>
+          
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <CustomerContactFields form={form} />
+              <AddressFields form={form} />
+
+              <DialogFooter>
+                <Button type="button" variant="outline" onClick={() => setEditModalOpen(false)}>
+                  Cancel
+                </Button>
+                <Button type="submit">
+                  Save Changes
+                </Button>
+              </DialogFooter>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
     </AppLayout>
   );
 }
