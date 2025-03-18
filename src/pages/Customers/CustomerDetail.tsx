@@ -1,4 +1,3 @@
-
 import { AppLayout } from "@/components/ui/AppLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -11,30 +10,28 @@ import { supabase } from "@/integrations/supabase/client";
 import { Customer } from "../Customers/hooks/useCustomers";
 import { RecurringJobsTab } from "../Jobs/components/tabs/RecurringJobsTab";
 import { ServiceRemindersTab } from "../Jobs/components/tabs/ServiceRemindersTab";
-
 export default function CustomerDetail() {
   const navigate = useNavigate();
-  const { id } = useParams();
-  const { toast } = useToast();
+  const {
+    id
+  } = useParams();
+  const {
+    toast
+  } = useToast();
   const [activeTab, setActiveTab] = useState("jobs");
   const [customer, setCustomer] = useState<Customer | null>(null);
   const [loading, setLoading] = useState(true);
   const [jobData, setJobData] = useState<any[]>([]);
-
   useEffect(() => {
     const fetchCustomer = async () => {
       setLoading(true);
       if (!id) return;
-      
       try {
-        const { data, error } = await supabase
-          .from('customers')
-          .select('*')
-          .eq('id', id)
-          .single();
-
+        const {
+          data,
+          error
+        } = await supabase.from('customers').select('*').eq('id', id).single();
         if (error) throw error;
-        
         if (data) {
           // Fix case of zipcode -> zipCode for frontend consistency
           const customerData = {
@@ -42,13 +39,12 @@ export default function CustomerDetail() {
             zipCode: data.zipcode // Map zipcode to zipCode for frontend
           };
           setCustomer(customerData as Customer);
-          
+
           // Fetch related jobs for this customer
-          const { data: jobsData, error: jobsError } = await supabase
-            .from('jobs')
-            .select('*')
-            .eq('customer', customerData.name);
-            
+          const {
+            data: jobsData,
+            error: jobsError
+          } = await supabase.from('jobs').select('*').eq('customer', customerData.name);
           if (jobsError) throw jobsError;
           setJobData(jobsData || []);
         }
@@ -63,17 +59,13 @@ export default function CustomerDetail() {
         setLoading(false);
       }
     };
-
     fetchCustomer();
   }, [id, toast]);
-
   const handleJobClick = (jobId: string) => {
     navigate(`/jobs/${jobId}`);
   };
-
   if (loading) {
-    return (
-      <AppLayout>
+    return <AppLayout>
         <div className="p-6">
           <Button variant="outline" onClick={() => navigate('/customers')}>
             <ArrowLeft className="h-4 w-4 mr-2" />
@@ -83,13 +75,10 @@ export default function CustomerDetail() {
             <p className="text-gray-500">Loading customer details...</p>
           </div>
         </div>
-      </AppLayout>
-    );
+      </AppLayout>;
   }
-
   if (!customer) {
-    return (
-      <AppLayout>
+    return <AppLayout>
         <div className="p-6">
           <Button variant="outline" onClick={() => navigate('/customers')}>
             <ArrowLeft className="h-4 w-4 mr-2" />
@@ -99,12 +88,9 @@ export default function CustomerDetail() {
             <h2 className="text-2xl font-semibold">Customer not found</h2>
           </div>
         </div>
-      </AppLayout>
-    );
+      </AppLayout>;
   }
-
-  return (
-    <AppLayout>
+  return <AppLayout>
       <div className="p-6 space-y-6">
         <div className="flex items-center gap-4">
           <Button variant="outline" onClick={() => navigate('/customers')}>
@@ -136,35 +122,35 @@ export default function CustomerDetail() {
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-4 md:grid-cols-8 overflow-x-auto">
-            <TabsTrigger value="notes" className="flex items-center gap-2">
+            <TabsTrigger value="notes" className="flex items-center gap-2 bg-slate-400 hover:bg-slate-300 text-slate-950">
               <Clipboard className="h-4 w-4" />
               <span className="hidden md:inline">Notes</span>
             </TabsTrigger>
-            <TabsTrigger value="sites" className="flex items-center gap-2">
+            <TabsTrigger value="sites" className="flex items-center gap-2 bg-slate-400 hover:bg-slate-300">
               <MapPin className="h-4 w-4" />
               <span className="hidden md:inline">Sites</span>
             </TabsTrigger>
-            <TabsTrigger value="jobs" className="flex items-center gap-2">
+            <TabsTrigger value="jobs" className="flex items-center gap-2 bg-slate-400 hover:bg-slate-300">
               <Briefcase className="h-4 w-4" />
               <span className="hidden md:inline">Jobs</span>
             </TabsTrigger>
-            <TabsTrigger value="recurring-jobs" className="flex items-center gap-2">
+            <TabsTrigger value="recurring-jobs" className="flex items-center gap-2 text-slate-950 bg-slate-400 hover:bg-slate-300">
               <Repeat className="h-4 w-4" />
               <span className="hidden md:inline">Recurring Jobs</span>
             </TabsTrigger>
-            <TabsTrigger value="service-reminders" className="flex items-center gap-2">
+            <TabsTrigger value="service-reminders" className="flex items-center gap-2 bg-slate-400 hover:bg-slate-300">
               <Bell className="h-4 w-4" />
               <span className="hidden md:inline">Service Reminders</span>
             </TabsTrigger>
-            <TabsTrigger value="invoices" className="flex items-center gap-2">
+            <TabsTrigger value="invoices" className="flex items-center gap-2 text-slate-950 bg-slate-400 hover:bg-slate-300">
               <Receipt className="h-4 w-4" />
               <span className="hidden md:inline">Invoices</span>
             </TabsTrigger>
-            <TabsTrigger value="quotes" className="flex items-center gap-2">
+            <TabsTrigger value="quotes" className="flex items-center gap-2 bg-slate-400 hover:bg-slate-300">
               <FileText className="h-4 w-4" />
               <span className="hidden md:inline">Quotes</span>
             </TabsTrigger>
-            <TabsTrigger value="recurring-invoices" className="flex items-center gap-2">
+            <TabsTrigger value="recurring-invoices" className="flex items-center gap-2 bg-slate-400 hover:bg-slate-300">
               <Repeat className="h-4 w-4" />
               <span className="hidden md:inline">Recurring Invoices</span>
             </TabsTrigger>
@@ -174,7 +160,10 @@ export default function CustomerDetail() {
             <Card>
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle>Notes</CardTitle>
-                <Button size="sm" onClick={() => toast({ title: "Adding note", description: "This feature is coming soon!" })}>
+                <Button size="sm" onClick={() => toast({
+                title: "Adding note",
+                description: "This feature is coming soon!"
+              })}>
                   <Plus className="h-4 w-4 mr-2" />
                   Add Note
                 </Button>
@@ -189,7 +178,10 @@ export default function CustomerDetail() {
             <Card>
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle>Sites</CardTitle>
-                <Button size="sm" onClick={() => toast({ title: "Adding site", description: "This feature is coming soon!" })}>
+                <Button size="sm" onClick={() => toast({
+                title: "Adding site",
+                description: "This feature is coming soon!"
+              })}>
                   <Plus className="h-4 w-4 mr-2" />
                   Add Site
                 </Button>
@@ -205,7 +197,10 @@ export default function CustomerDetail() {
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle>Jobs</CardTitle>
                 <div className="flex gap-2">
-                  <Button size="sm" variant="outline" onClick={() => toast({ title: "Creating from template", description: "This feature is coming soon!" })}>
+                  <Button size="sm" variant="outline" onClick={() => toast({
+                  title: "Creating from template",
+                  description: "This feature is coming soon!"
+                })}>
                     <Plus className="h-4 w-4 mr-2" />
                     From Template
                   </Button>
@@ -216,12 +211,8 @@ export default function CustomerDetail() {
                 </div>
               </CardHeader>
               <CardContent>
-                {jobData.length > 0 ? (
-                  <div className="space-y-4">
-                    {jobData.map(job => (
-                      <div key={job.id} 
-                           className="flex justify-between items-center p-2 rounded-md hover:bg-gray-100 cursor-pointer"
-                           onClick={() => handleJobClick(job.id)}>
+                {jobData.length > 0 ? <div className="space-y-4">
+                    {jobData.map(job => <div key={job.id} className="flex justify-between items-center p-2 rounded-md hover:bg-gray-100 cursor-pointer" onClick={() => handleJobClick(job.id)}>
                         <div className="flex items-center gap-2">
                           <span>{job.title || job.job_number}</span>
                           <span className="text-sm text-gray-500">({job.status})</span>
@@ -230,12 +221,8 @@ export default function CustomerDetail() {
                           <span className="text-sm text-gray-500">{job.date}</span>
                           <ExternalLink className="h-4 w-4 text-gray-400" />
                         </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-gray-500">No jobs available</p>
-                )}
+                      </div>)}
+                  </div> : <p className="text-gray-500">No jobs available</p>}
               </CardContent>
             </Card>
           </TabsContent>
@@ -253,7 +240,10 @@ export default function CustomerDetail() {
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle>Invoices</CardTitle>
                 <div className="flex gap-2">
-                  <Button size="sm" variant="outline" onClick={() => toast({ title: "Creating from template", description: "This feature is coming soon!" })}>
+                  <Button size="sm" variant="outline" onClick={() => toast({
+                  title: "Creating from template",
+                  description: "This feature is coming soon!"
+                })}>
                     <Plus className="h-4 w-4 mr-2" />
                     From Template
                   </Button>
@@ -274,7 +264,10 @@ export default function CustomerDetail() {
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle>Quotes</CardTitle>
                 <div className="flex gap-2">
-                  <Button size="sm" variant="outline" onClick={() => toast({ title: "Creating from template", description: "This feature is coming soon!" })}>
+                  <Button size="sm" variant="outline" onClick={() => toast({
+                  title: "Creating from template",
+                  description: "This feature is coming soon!"
+                })}>
                     <Plus className="h-4 w-4 mr-2" />
                     From Template
                   </Button>
@@ -294,7 +287,10 @@ export default function CustomerDetail() {
             <Card>
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle>Recurring Invoices</CardTitle>
-                <Button size="sm" onClick={() => toast({ title: "Add recurring invoice", description: "This feature is coming soon!" })}>
+                <Button size="sm" onClick={() => toast({
+                title: "Add recurring invoice",
+                description: "This feature is coming soon!"
+              })}>
                   <Plus className="h-4 w-4 mr-2" />
                   Add Recurring Invoice
                 </Button>
@@ -306,6 +302,5 @@ export default function CustomerDetail() {
           </TabsContent>
         </Tabs>
       </div>
-    </AppLayout>
-  );
+    </AppLayout>;
 }
