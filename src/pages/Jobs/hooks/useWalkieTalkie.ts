@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+
+import { useState, useEffect, useRef } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useAudioHandling } from "./walkie-talkie/useAudioHandling";
 import { useWebSocket } from "./walkie-talkie/useWebSocket";
@@ -9,21 +10,21 @@ export const useWalkieTalkie = (jobId: string) => {
   const [isListening, setIsListening] = useState(false);
   const [isConnected, setIsConnected] = useState(false);
   const { toast } = useToast();
+  const audioChunks = useRef<Blob[]>([]);
+  const audioQueue = useRef<Blob[]>([]);
 
-  const socketRef = useWebSocket(
-    jobId,
-    isListening,
-    setIsConnected
-  );
+  // Initialize WebSocket first
+  const socketRef = useWebSocket(jobId, isListening, setIsConnected);
 
+  // Then initialize audio handling with the socket reference
   const {
     audio,
     mediaRecorder,
-    audioQueue,
     playNextInQueue,
     initializeAudio
-  } = useAudioHandling(jobId, socketRef);
+  } = useAudioHandling(jobId, socketRef, audioChunks, audioQueue);
 
+  // Handle WebSocket messages for audio
   useEffect(() => {
     if (socketRef.current) {
       socketRef.current.onmessage = event => {
@@ -47,7 +48,7 @@ export const useWalkieTalkie = (jobId: string) => {
         }
       };
     }
-  }, [socketRef, jobId, isListening, audioQueue, playNextInQueue]);
+  }, [socketRef, jobId, isListening, playNextInQueue]);
 
   const { startRecording, stopRecording } = useTransmission(
     jobId,

@@ -1,24 +1,21 @@
 
-import { useState, useRef } from 'react';
+import { useState, useRef, MutableRefObject } from 'react';
 import { useToast } from "@/hooks/use-toast";
 
 export const useAudioHandling = (
   jobId: string, 
-  socketRef: React.MutableRefObject<WebSocket | null>
+  socketRef: React.MutableRefObject<WebSocket | null>,
+  audioChunks: MutableRefObject<Blob[]>,
+  audioQueue: MutableRefObject<Blob[]>
 ) => {
   const [audio] = useState(new Audio("/ringtone.mp3"));
   const mediaRecorder = useRef<MediaRecorder | null>(null);
-  const audioChunks = useRef<Blob[]>([]);
-  const audioQueue = useRef<Array<Blob>>([]);
-  const isPlayingRef = useRef(false);
   const { toast } = useToast();
 
   const playNextInQueue = async () => {
     if (audioQueue.current.length === 0) {
-      isPlayingRef.current = false;
       return;
     }
-    isPlayingRef.current = true;
     const nextAudio = audioQueue.current.shift();
     if (!nextAudio) return;
     const audioUrl = URL.createObjectURL(nextAudio);
@@ -67,7 +64,7 @@ export const useAudioHandling = (
             }
           };
           audioQueue.current.push(audioBlob);
-          if (!isPlayingRef.current) {
+          if (!audioQueue.current.length) {
             playNextInQueue();
           }
           audioChunks.current = [];
@@ -85,7 +82,6 @@ export const useAudioHandling = (
   return {
     audio,
     mediaRecorder,
-    audioQueue,
     playNextInQueue,
     initializeAudio
   };
