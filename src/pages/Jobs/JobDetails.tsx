@@ -135,12 +135,15 @@ export function JobDetails() {
 
   return <div className="container-responsive mx-auto">
       <div className="space-y-4 sm:space-y-6 p-2 sm:p-4 max-w-7xl mx-auto pb-24 bg-slate-200">
+        {/* Job Number Display */}
+        <div className="bg-white rounded-lg shadow-sm overflow-hidden mb-4">
+          <div className="p-4 border-b bg-slate-300 flex justify-center">
+            <h2 className="text-lg font-medium">{job.jobNumber}</h2>
+          </div>
+        </div>
+        
         {/* Job Location Map */}
         <div className="bg-white rounded-lg shadow-sm overflow-hidden mb-4">
-          <div className="p-4 border-b bg-slate-300">
-            <h2 className="text-lg font-medium">Job Location</h2>
-            <p className="text-sm text-gray-600 mt-1">{job.jobNumber}</p>
-          </div>
           <div className="h-[300px] w-full">
             <JobMap center={[job.location[0], job.location[1]]} zoom={15} markers={[{
             position: [job.location[1], job.location[0]],
