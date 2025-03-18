@@ -1,3 +1,4 @@
+
 import { useParams, useNavigate } from 'react-router-dom';
 import { JobHeader } from './components/JobHeader';
 import { JobTabs } from './components/JobTabs';
@@ -130,13 +131,16 @@ export function JobDetails() {
     </div>;
   }
 
+  // Extract the job number part safely
+  const jobNumberDisplay = job.jobNumber ? job.jobNumber.split('-')[1] : '';
+
   return <div className="container-responsive mx-auto">
       <div className="space-y-4 sm:space-y-6 p-2 sm:p-4 max-w-7xl mx-auto pb-24 bg-slate-200">
         <div className="bg-white rounded-lg shadow-sm overflow-hidden mb-4">
           <div className="p-4 border-b bg-slate-300 flex items-center justify-start">
             <div className="flex items-baseline">
               <span className="text-2xl font-bold mr-2">Job</span>
-              <span className="text-lg font-medium">{job.jobNumber.split('-')[1]}</span>
+              <span className="text-lg font-medium">{jobNumberDisplay}</span>
             </div>
           </div>
         </div>
