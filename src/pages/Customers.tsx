@@ -136,7 +136,7 @@ export default function CustomersPage() {
                   <CardTitle className="text-lg flex items-center justify-between text-slate-950">
                     <div className="flex items-center gap-2">
                       <User className="h-5 w-5 text-gray-500" />
-                      {customer.name}
+                      <span className="cursor-pointer hover:text-blue-600 hover:underline">{customer.name}</span>
                     </div>
                     <span className="">
                       {customer.status === 'active' ? 'Active' : 'Inactive'}
