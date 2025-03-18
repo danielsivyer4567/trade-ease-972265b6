@@ -1,10 +1,10 @@
-
 import { useState, useEffect, useRef } from "react";
 import { useToast } from "@/hooks/use-toast";
 
 export const useWalkieTalkie = (jobId: string) => {
   const [isTransmitting, setIsTransmitting] = useState(false);
-  const [isListening, setIsListening] = useState(true);
+  const [isListening, setIsListening] = useState(false);
+  const [isConnected, setIsConnected] = useState(false);
   const [audio] = useState(new Audio("/ringtone.mp3"));
   const { toast } = useToast();
   const mediaRecorder = useRef<MediaRecorder | null>(null);
@@ -13,19 +13,14 @@ export const useWalkieTalkie = (jobId: string) => {
   const isPlayingRef = useRef(false);
   const socketRef = useRef<WebSocket | null>(null);
 
-  // Initialize WebSocket connection
   useEffect(() => {
-    // Create a WebSocket connection with a more specific URL
-    // In a production app, you would use an environment variable for the base URL
     const WEBSOCKET_BASE_URL = "wss://api.yourcompany.com/ws";
-    const userId = "user-123"; // In production, get this from your auth system
-    const authToken = "your-auth-token"; // In production, get this from your auth system
+    const userId = "user-123";
+    const authToken = "your-auth-token";
 
-    // Construct the WebSocket URL with job ID and authentication
     const socket = new WebSocket(`${WEBSOCKET_BASE_URL}/jobs/${jobId}?userId=${userId}&token=${authToken}`);
     socket.onopen = () => {
       console.log('WebSocket connected');
-      // Join the job channel with authentication
       socket.send(JSON.stringify({
         type: 'join',
         jobId: jobId,
@@ -37,7 +32,6 @@ export const useWalkieTalkie = (jobId: string) => {
       try {
         const data = JSON.parse(event.data);
         if (data.type === 'audio' && data.jobId === jobId && isListening) {
-          // Convert base64 audio data to a Blob
           const audioData = atob(data.audioData);
           const arrayBuffer = new ArrayBuffer(audioData.length);
           const uint8Array = new Uint8Array(arrayBuffer);
@@ -48,7 +42,6 @@ export const useWalkieTalkie = (jobId: string) => {
             type: 'audio/wav'
           });
 
-          // Add to queue and play if not already playing
           audioQueue.current.push(audioBlob);
           if (!isPlayingRef.current) {
             playNextInQueue();
@@ -68,18 +61,15 @@ export const useWalkieTalkie = (jobId: string) => {
     };
     socket.onclose = () => {
       console.log('WebSocket disconnected');
-      // Attempt to reconnect in a real implementation
       setTimeout(() => {
         toast({
           title: "Reconnecting",
           description: "Attempting to reconnect to the team communication..."
         });
-        // In a real implementation, you would recall this effect to reconnect
       }, 5000);
     };
     socketRef.current = socket;
 
-    // Clean up WebSocket on unmount
     return () => {
       if (socket.readyState === WebSocket.OPEN) {
         socket.close();
@@ -87,7 +77,6 @@ export const useWalkieTalkie = (jobId: string) => {
     };
   }, [jobId, toast]);
 
-  // Set up audio recording
   useEffect(() => {
     navigator.mediaDevices.getUserMedia({
       audio: true
@@ -101,15 +90,13 @@ export const useWalkieTalkie = (jobId: string) => {
           type: 'audio/wav'
         });
 
-        // Send the audio data over WebSocket
         if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
-          // Convert Blob to base64
           const reader = new FileReader();
           reader.readAsDataURL(audioBlob);
           reader.onloadend = () => {
-            const base64Audio = reader.result?.toString().split(',')[1]; // Remove data URL prefix
+            const base64Audio = reader.result?.toString().split(',')[1];
             if (base64Audio) {
-              const userId = "user-123"; // In production, get this from your auth system
+              const userId = "user-123";
 
               socketRef.current?.send(JSON.stringify({
                 type: 'audio',
@@ -122,10 +109,8 @@ export const useWalkieTalkie = (jobId: string) => {
           };
         }
 
-        // Add to local queue for playback as well (for testing)
         audioQueue.current.push(audioBlob);
 
-        // If not already playing, start playing audio messages
         if (!isPlayingRef.current) {
           playNextInQueue();
         }
@@ -158,15 +143,13 @@ export const useWalkieTalkie = (jobId: string) => {
     const audioUrl = URL.createObjectURL(nextAudio);
     const playbackAudio = new Audio(audioUrl);
 
-    // When this message finishes playing, play the next one if available
     playbackAudio.onended = () => {
-      URL.revokeObjectURL(audioUrl); // Clean up
+      URL.revokeObjectURL(audioUrl);
       playNextInQueue();
     };
     try {
       await playbackAudio.play();
 
-      // Show toast when a new transmission is received
       if (isListening) {
         toast({
           title: "Incoming Transmission",
@@ -175,7 +158,7 @@ export const useWalkieTalkie = (jobId: string) => {
       }
     } catch (error) {
       console.error("Error playing audio:", error);
-      playNextInQueue(); // Try the next one if this one fails
+      playNextInQueue();
     }
   };
 
@@ -184,15 +167,12 @@ export const useWalkieTalkie = (jobId: string) => {
       audioChunks.current = [];
       setIsTransmitting(true);
 
-      // Play the ringtone to indicate start of transmission
       audio.play().catch(console.error);
 
-      // Start recording
       mediaRecorder.current?.start();
 
-      // Notify team members through WebSocket that you're starting transmission
       if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
-        const userId = "user-123"; // In production, get this from your auth system
+        const userId = "user-123";
 
         socketRef.current.send(JSON.stringify({
           type: 'transmission_started',
@@ -215,9 +195,8 @@ export const useWalkieTalkie = (jobId: string) => {
       audio.pause();
       audio.currentTime = 0;
 
-      // Notify team members through WebSocket that you've stopped transmission
       if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
-        const userId = "user-123"; // In production, get this from your auth system
+        const userId = "user-123";
 
         socketRef.current.send(JSON.stringify({
           type: 'transmission_ended',
@@ -234,33 +213,43 @@ export const useWalkieTalkie = (jobId: string) => {
   };
 
   const toggleListening = () => {
-    setIsListening(!isListening);
-    toast({
-      title: isListening ? "Walkie-Talkie Muted" : "Walkie-Talkie Unmuted",
-      description: isListening ? "You won't receive transmissions" : "You will receive transmissions"
-    });
+    if (!isConnected && !isListening) {
+      if (socketRef.current?.readyState === WebSocket.OPEN) {
+        setIsConnected(true);
+        setIsListening(true);
+        toast({
+          title: "Connected to Team",
+          description: "You will now receive team transmissions"
+        });
+      }
+    } else {
+      setIsListening(!isListening);
+      toast({
+        title: isListening ? "Walkie-Talkie Muted" : "Walkie-Talkie Active",
+        description: isListening ? "You won't receive transmissions" : "You will receive transmissions"
+      });
 
-    // Clear the audio queue when muting
-    if (isListening) {
-      audioQueue.current = [];
-    }
+      if (isListening) {
+        audioQueue.current = [];
+      }
 
-    // Notify system about listening state change
-    if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
-      const userId = "user-123"; // In production, get this from your auth system
+      if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
+        const userId = "user-123";
 
-      socketRef.current.send(JSON.stringify({
-        type: isListening ? 'mute' : 'unmute',
-        jobId: jobId,
-        userId: userId,
-        timestamp: new Date().toISOString()
-      }));
+        socketRef.current.send(JSON.stringify({
+          type: isListening ? 'mute' : 'unmute',
+          jobId: jobId,
+          userId: userId,
+          timestamp: new Date().toISOString()
+        }));
+      }
     }
   };
 
   return {
     isTransmitting,
     isListening,
+    isConnected,
     startRecording,
     stopRecording,
     toggleListening
