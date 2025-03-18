@@ -4,6 +4,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { TeamCalendar } from '@/components/team/TeamCalendar';
 import type { Team } from '../types';
 import type { Job } from '@/types/job';
+import { supabase } from "@/integrations/supabase/client";
+import { useQuery } from "@tanstack/react-query";
 
 interface TeamCalendarGridProps {
   teams: Team[];
@@ -18,33 +20,33 @@ export function TeamCalendarGrid({
   setSharedDate, 
   onJobAssign 
 }: TeamCalendarGridProps) {
-  // Mock jobs data with properly typed status values
-  const mockJobs: Job[] = [
-    {
-      id: "1",
-      customer: "John Smith",
-      type: "Plumbing",
-      status: "ready" as const,
-      date: "2024-03-15",
-      location: [151.2093, -33.8688],
-      jobNumber: "PLM-001",
-      title: "Water Heater Installation",
-      description: "Install new water heater system",
-      assignedTeam: "Red Team"
-    }, 
-    {
-      id: "2",
-      customer: "Sarah Johnson",
-      type: "HVAC",
-      status: "in-progress" as const,
-      date: "2024-03-14",
-      location: [151.2543, -33.8688],
-      jobNumber: "HVAC-001",
-      title: "HVAC Maintenance",
-      description: "Regular maintenance check",
-      assignedTeam: "Blue Team"
-    }
-  ];
+  // Fetch jobs from Supabase
+  const { data: jobs = [] } = useQuery({
+    queryKey: ['teamJobs'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('jobs')
+        .select('*');
+        
+      if (error) {
+        console.error('Error fetching jobs:', error);
+        return [];
+      }
+      
+      return data.map(job => ({
+        id: job.id,
+        customer: job.customer,
+        type: job.type,
+        status: job.status,
+        date: job.date,
+        location: job.location,
+        jobNumber: job.job_number,
+        title: job.title,
+        description: job.description,
+        assignedTeam: job.assigned_team
+      }));
+    },
+  });
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -60,7 +62,9 @@ export function TeamCalendarGrid({
               setDate={setSharedDate} 
               teamColor={team.color} 
               onJobAssign={onJobAssign} 
-              assignedJobs={mockJobs.filter(job => job.assignedTeam === team.name)} 
+              assignedJobs={jobs.filter(job => 
+                job.assignedTeam?.toLowerCase() === team.name.toLowerCase()
+              )} 
             />
           </CardContent>
         </Card>
