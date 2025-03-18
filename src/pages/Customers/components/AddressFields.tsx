@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
@@ -14,10 +15,10 @@ export function AddressFields({
   form,
   className
 }: AddressFieldsProps) {
-  return <div className={className}>
+  return <div className={`bg-white p-4 rounded-md shadow-sm ${className}`}>
       <FormField control={form.control} name="address" render={({
       field
-    }) => <FormItem className="md:col-span-2 bg-slate-300">
+    }) => <FormItem className="md:col-span-2">
             <FormLabel>Street Address</FormLabel>
             <FormControl>
               <Textarea placeholder="Enter street address" {...field} />
@@ -25,13 +26,13 @@ export function AddressFields({
             <FormMessage />
           </FormItem>} />
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
         <FormField control={form.control} name="city" render={({
         field
       }) => <FormItem>
               <FormLabel>City</FormLabel>
               <FormControl>
-                <Input placeholder="Enter city" className="bg-slate-400" />
+                <Input placeholder="Enter city" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>} />

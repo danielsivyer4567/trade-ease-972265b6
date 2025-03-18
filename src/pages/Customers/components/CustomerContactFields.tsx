@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
@@ -10,7 +11,7 @@ export function CustomerContactFields({
   form,
   className
 }: CustomerContactFieldsProps) {
-  return <div className="bg-slate-300">
+  return <div className={`bg-white p-4 rounded-md shadow-sm ${className}`}>
       <FormField control={form.control} name="name" render={({
       field
     }) => <FormItem>
