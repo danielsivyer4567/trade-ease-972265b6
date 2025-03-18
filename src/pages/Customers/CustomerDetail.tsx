@@ -101,10 +101,10 @@ export default function CustomerDetail() {
         </div>
 
         <Card>
-          <CardHeader>
+          <CardHeader className="bg-slate-400">
             <CardTitle>Contact Information</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-2">
+          <CardContent className="space-y-2 bg-slate-300">
             <div className="flex items-center gap-2">
               <Mail className="h-4 w-4 text-gray-500" />
               <span>{customer.email}</span>
