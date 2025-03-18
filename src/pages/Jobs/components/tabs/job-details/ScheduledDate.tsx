@@ -1,8 +1,13 @@
 
-import { Calendar } from "lucide-react";
+import { Calendar as CalendarIcon } from "lucide-react";
 import type { Job } from "@/types/job";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { format } from "date-fns";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 interface ScheduledDateProps {
   job: Job;
@@ -10,20 +15,26 @@ interface ScheduledDateProps {
 
 export const ScheduledDate = ({ job }: ScheduledDateProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date(job.date));
   
-  const date = new Date(job.date);
-  const formattedDate = date.toLocaleDateString('en-US', {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric'
-  });
-  
-  // Format a shortened date for the button display
-  const shortDate = date.toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric'
-  });
+  const handleDateChange = async (date: Date | undefined) => {
+    if (!date) return;
+    
+    try {
+      const { error } = await supabase
+        .from('jobs')
+        .update({ date: format(date, 'yyyy-MM-dd') })
+        .eq('id', job.id);
+        
+      if (error) throw error;
+      
+      setSelectedDate(date);
+      toast.success("Job date updated successfully");
+    } catch (error) {
+      console.error('Error updating job date:', error);
+      toast.error("Failed to update job date");
+    }
+  };
 
   return (
     <div className="rounded-lg overflow-hidden border border-gray-200 bg-white">
@@ -33,15 +44,36 @@ export const ScheduledDate = ({ job }: ScheduledDateProps) => {
         onClick={() => setIsExpanded(!isExpanded)}
       >
         <div className="flex items-center">
-          <Calendar className="mr-2 h-4 w-4 text-gray-500" />
+          <CalendarIcon className="mr-2 h-4 w-4 text-gray-500" />
           <span className="font-medium text-sm">Scheduled Date</span>
         </div>
-        <span className="text-xs text-gray-500">{shortDate}</span>
+        <span className="text-xs text-gray-500">
+          {format(selectedDate, 'd MMM')}
+        </span>
       </Button>
       
       {isExpanded && (
         <div className="p-3 pt-2 border-t">
-          <p className="text-sm">{formattedDate}</p>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                className="w-full justify-start text-left font-normal"
+              >
+                <CalendarIcon className="mr-2 h-4 w-4" />
+                {format(selectedDate, 'PPP')}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="start">
+              <Calendar
+                mode="single"
+                selected={selectedDate}
+                onSelect={handleDateChange}
+                initialFocus
+                className="p-3 pointer-events-auto"
+              />
+            </PopoverContent>
+          </Popover>
         </div>
       )}
     </div>
