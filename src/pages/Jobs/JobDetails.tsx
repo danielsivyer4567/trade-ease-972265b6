@@ -1,4 +1,3 @@
-
 import { useParams, useNavigate } from 'react-router-dom';
 import { JobHeader } from './components/JobHeader';
 import { JobTabs } from './components/JobTabs';
@@ -12,7 +11,6 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import JobMap from '@/components/JobMap';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-
 const mockJobs: Job[] = [{
   id: "1",
   customer: "John Smith",
@@ -47,16 +45,16 @@ const mockJobs: Job[] = [{
   description: "Upgrade main electrical panel",
   assignedTeam: "Green Team"
 }];
-
 export function JobDetails() {
-  const { id } = useParams();
+  const {
+    id
+  } = useParams();
   const navigate = useNavigate();
   const [job, setJob] = useState<Job | null>(null);
   const [jobNotes, setJobNotes] = useState("");
   const [loading, setLoading] = useState(true);
   const isManager = true;
   const isMobile = useIsMobile();
-  
   const {
     jobTimer,
     isTimerRunning,
@@ -64,33 +62,30 @@ export function JobDetails() {
     setIsTimerRunning,
     handleBreakToggle
   } = useJobTimer();
-  
   const {
     hasLocationPermission,
     locationHistory,
     handleTimerToggle: locationHandleTimerToggle
   } = useJobLocation();
-  
   const {
     extractedFinancialData,
     tabNotes,
     setTabNotes,
     handleFinancialDataExtracted
   } = useJobFinancialData(id);
-  
   useEffect(() => {
     console.log("JobDetails mounted with id:", id);
     const fetchJob = async () => {
       // First try to fetch from Supabase if available
       try {
-        const { data: session } = await supabase.auth.getSession();
+        const {
+          data: session
+        } = await supabase.auth.getSession();
         if (session?.session?.user) {
-          const { data, error } = await supabase
-            .from('jobs')
-            .select('*')
-            .eq('id', id)
-            .single();
-            
+          const {
+            data,
+            error
+          } = await supabase.from('jobs').select('*').eq('id', id).single();
           if (data && !error) {
             console.log("Job fetched from Supabase:", data);
             setJob(data as Job);
@@ -103,74 +98,51 @@ export function JobDetails() {
       } catch (err) {
         console.error("Exception fetching job:", err);
       }
-      
+
       // Fallback to mock data
       const foundJob = mockJobs.find(j => j.id === id);
       console.log("Using mock job data:", foundJob);
-      
       if (foundJob) {
         setJob(foundJob);
       } else {
         toast.error("Job not found");
         navigate('/jobs');
       }
-      
       setLoading(false);
     };
-    
     fetchJob();
   }, [id, navigate]);
-  
   const handleTimerToggle = () => {
     locationHandleTimerToggle(isTimerRunning, setIsTimerRunning);
   };
-  
   if (loading) {
     return <div className="container-responsive mx-auto p-8">
       <div className="text-center">Loading job details...</div>
     </div>;
   }
-  
   if (!job) {
     return <div className="container-responsive mx-auto p-8">
       <div className="text-center">Job not found. Please try again.</div>
     </div>;
   }
-  
   return <div className="container-responsive mx-auto">
       <div className="space-y-4 sm:space-y-6 p-2 sm:p-4 max-w-7xl mx-auto pb-24 bg-slate-200">
         {/* Job Location Map */}
         <div className="bg-white rounded-lg shadow-sm overflow-hidden mb-4">
-          <div className="p-4 border-b">
+          <div className="p-4 border-b bg-slate-300">
             <h2 className="text-lg font-medium">Job Location</h2>
           </div>
           <div className="h-[300px] w-full">
-            <JobMap 
-              center={[job.location[0], job.location[1]]}
-              zoom={15}
-              markers={[{ position: [job.location[1], job.location[0]], title: job.title }]}
-            />
+            <JobMap center={[job.location[0], job.location[1]]} zoom={15} markers={[{
+            position: [job.location[1], job.location[0]],
+            title: job.title
+          }]} />
           </div>
         </div>
         
         <JobHeader job={job} />
         
-        <JobTabs 
-          job={job} 
-          isManager={isManager} 
-          jobTimer={jobTimer} 
-          jobNotes={jobNotes} 
-          setJobNotes={setJobNotes} 
-          tabNotes={tabNotes} 
-          setTabNotes={setTabNotes} 
-          locationHistory={locationHistory} 
-          hasLocationPermission={hasLocationPermission} 
-          handleTimerToggle={handleTimerToggle} 
-          handleBreakToggle={handleBreakToggle} 
-          isTimerRunning={isTimerRunning} 
-          isOnBreak={isOnBreak} 
-          extractedFinancialData={extractedFinancialData} 
-        />
+        <JobTabs job={job} isManager={isManager} jobTimer={jobTimer} jobNotes={jobNotes} setJobNotes={setJobNotes} tabNotes={tabNotes} setTabNotes={setTabNotes} locationHistory={locationHistory} hasLocationPermission={hasLocationPermission} handleTimerToggle={handleTimerToggle} handleBreakToggle={handleBreakToggle} isTimerRunning={isTimerRunning} isOnBreak={isOnBreak} extractedFinancialData={extractedFinancialData} />
         
         {isManager && <div className="mt-8 mb-8">
             <DocumentApproval jobId={job.id} onFinancialDataExtracted={handleFinancialDataExtracted} />
