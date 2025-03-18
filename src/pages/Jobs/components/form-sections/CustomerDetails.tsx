@@ -41,6 +41,7 @@ export function CustomerDetails({ customer, setCustomer }: CustomerDetailsProps)
   });
 
   useEffect(() => {
+    console.log("Fetching customers");
     fetchCustomers();
   }, []);
 
@@ -49,13 +50,14 @@ export function CustomerDetails({ customer, setCustomer }: CustomerDetailsProps)
     if (selectedCustomerId && useExistingCustomer) {
       const selectedCustomer = customers.find(c => c.id === selectedCustomerId);
       if (selectedCustomer) {
+        console.log("Selected customer:", selectedCustomer);
         setCustomer(selectedCustomer.name);
         
         // Set the address fields values
         form.setValue("address", selectedCustomer.address || "");
         form.setValue("city", selectedCustomer.city || "");
         form.setValue("state", selectedCustomer.state || "");
-        form.setValue("zipCode", selectedCustomer.zipCode || "");
+        form.setValue("zipCode", selectedCustomer.zipCode || ""); // Make sure it uses zipCode not zipcode
         
         // Show address fields when a customer is selected
         setShowAddressFields(true);

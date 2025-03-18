@@ -10,6 +10,8 @@ import { useJobLocation } from './hooks/useJobLocation';
 import { useJobFinancialData } from './hooks/useJobFinancialData';
 import { useIsMobile } from '@/hooks/use-mobile';
 import JobMap from '@/components/JobMap';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 const mockJobs: Job[] = [{
   id: "1",
@@ -49,8 +51,9 @@ const mockJobs: Job[] = [{
 export function JobDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const job = mockJobs.find(j => j.id === id);
+  const [job, setJob] = useState<Job | null>(null);
   const [jobNotes, setJobNotes] = useState("");
+  const [loading, setLoading] = useState(true);
   const isManager = true;
   const isMobile = useIsMobile();
   
@@ -76,17 +79,62 @@ export function JobDetails() {
   } = useJobFinancialData(id);
   
   useEffect(() => {
-    if (!job) {
-      navigate('/jobs');
-    }
-  }, [job, navigate]);
+    console.log("JobDetails mounted with id:", id);
+    const fetchJob = async () => {
+      // First try to fetch from Supabase if available
+      try {
+        const { data: session } = await supabase.auth.getSession();
+        if (session?.session?.user) {
+          const { data, error } = await supabase
+            .from('jobs')
+            .select('*')
+            .eq('id', id)
+            .single();
+            
+          if (data && !error) {
+            console.log("Job fetched from Supabase:", data);
+            setJob(data as Job);
+            setLoading(false);
+            return;
+          } else if (error) {
+            console.error("Error fetching job from Supabase:", error);
+          }
+        }
+      } catch (err) {
+        console.error("Exception fetching job:", err);
+      }
+      
+      // Fallback to mock data
+      const foundJob = mockJobs.find(j => j.id === id);
+      console.log("Using mock job data:", foundJob);
+      
+      if (foundJob) {
+        setJob(foundJob);
+      } else {
+        toast.error("Job not found");
+        navigate('/jobs');
+      }
+      
+      setLoading(false);
+    };
+    
+    fetchJob();
+  }, [id, navigate]);
   
   const handleTimerToggle = () => {
     locationHandleTimerToggle(isTimerRunning, setIsTimerRunning);
   };
   
+  if (loading) {
+    return <div className="container-responsive mx-auto p-8">
+      <div className="text-center">Loading job details...</div>
+    </div>;
+  }
+  
   if (!job) {
-    return null;
+    return <div className="container-responsive mx-auto p-8">
+      <div className="text-center">Job not found. Please try again.</div>
+    </div>;
   }
   
   return <div className="container-responsive mx-auto">

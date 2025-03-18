@@ -65,6 +65,7 @@ export function CurrentJobs({
   };
   
   const handleRowClick = (jobId: string) => {
+    console.log("Navigating to job details:", jobId);
     navigate(`/jobs/${jobId}`);
   };
 

@@ -12,7 +12,7 @@ interface CustomerFormProps {
   onNextTab: () => void;
 }
 
-export const CustomerForm = ({ onNextTab }: CustomerFormProps) => {
+export function CustomerForm({ onNextTab }: CustomerFormProps) {
   const [selectedCustomerId, setSelectedCustomerId] = useState<string>("");
   const [email, setEmail] = useState<string>("");
   const [phone, setPhone] = useState<string>("");
@@ -22,6 +22,7 @@ export const CustomerForm = ({ onNextTab }: CustomerFormProps) => {
   const { customers, fetchCustomers } = useCustomers();
   
   useEffect(() => {
+    console.log("CustomerForm - Fetching customers");
     fetchCustomers();
   }, []);
   
@@ -30,6 +31,7 @@ export const CustomerForm = ({ onNextTab }: CustomerFormProps) => {
     if (selectedCustomerId) {
       const selectedCustomer = customers.find(c => c.id === selectedCustomerId);
       if (selectedCustomer) {
+        console.log("Selected customer in quotes:", selectedCustomer);
         setEmail(selectedCustomer.email || '');
         setPhone(selectedCustomer.phone || '');
         // Make sure we're using the correctly mapped zipCode field (camelCase)
