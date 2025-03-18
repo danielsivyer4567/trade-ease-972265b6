@@ -1,3 +1,4 @@
+
 import { useParams, useNavigate } from 'react-router-dom';
 import { JobHeader } from './components/JobHeader';
 import { JobTabs } from './components/JobTabs';
@@ -19,7 +20,7 @@ const mockJobs: Job[] = [{
   status: "ready",
   date: "2024-03-15",
   location: [151.2093, -33.8688],
-  jobNumber: "PLM-001",
+  jobNumber: "JOB-1234",
   title: "Water Heater Installation",
   description: "Install new water heater system",
   assignedTeam: "Red Team"
@@ -30,7 +31,7 @@ const mockJobs: Job[] = [{
   status: "in-progress",
   date: "2024-03-14",
   location: [151.2543, -33.8688],
-  jobNumber: "HVAC-001",
+  jobNumber: "JOB-5678",
   title: "HVAC Maintenance",
   description: "Regular maintenance check",
   assignedTeam: "Blue Team"
@@ -41,7 +42,7 @@ const mockJobs: Job[] = [{
   status: "to-invoice",
   date: "2024-03-13",
   location: [151.1943, -33.8788],
-  jobNumber: "ELE-001",
+  jobNumber: "JOB-9012",
   title: "Electrical Panel Upgrade",
   description: "Upgrade main electrical panel",
   assignedTeam: "Green Team"
