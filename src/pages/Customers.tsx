@@ -281,17 +281,17 @@ export default function CustomersPage() {
       </div>
       
       <Dialog open={editModalOpen} onOpenChange={setEditModalOpen}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-md bg-slate-50 border-0">
           <DialogHeader>
             <DialogTitle>Edit Customer</DialogTitle>
           </DialogHeader>
           
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              <CustomerContactFields form={form} />
-              <AddressFields form={form} />
+              <CustomerContactFields form={form} className="mt-2" />
+              <AddressFields form={form} className="mt-4" />
 
-              <DialogFooter>
+              <DialogFooter className="mt-6">
                 <Button type="button" variant="outline" onClick={() => setEditModalOpen(false)}>
                   Cancel
                 </Button>
