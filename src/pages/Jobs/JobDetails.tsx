@@ -131,8 +131,8 @@ export function JobDetails() {
     </div>;
   }
 
-  // Extract the job number part safely
-  const jobNumberDisplay = job.jobNumber ? job.jobNumber.split('-')[1] : '';
+  // Use the full job number instead of just the part after the hyphen
+  const jobNumberDisplay = job.jobNumber || '';
 
   return <div className="container-responsive mx-auto">
       <div className="space-y-4 sm:space-y-6 p-2 sm:p-4 max-w-7xl mx-auto pb-24 bg-slate-200">
