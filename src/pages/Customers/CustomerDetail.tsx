@@ -93,7 +93,7 @@ export default function CustomerDetail() {
   return <AppLayout>
       <div className="p-6 space-y-6">
         <div className="flex items-center gap-4">
-          <Button variant="outline" onClick={() => navigate('/customers')}>
+          <Button variant="outline" onClick={() => navigate('/customers')} className="bg-slate-400 hover:bg-slate-300">
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Customers
           </Button>
@@ -194,23 +194,23 @@ export default function CustomerDetail() {
 
           <TabsContent value="jobs">
             <Card>
-              <CardHeader className="flex flex-row items-center justify-between">
+              <CardHeader className="flex flex-row items-center justify-between bg-slate-300">
                 <CardTitle>Jobs</CardTitle>
                 <div className="flex gap-2">
                   <Button size="sm" variant="outline" onClick={() => toast({
                   title: "Creating from template",
                   description: "This feature is coming soon!"
-                })}>
+                })} className="bg-slate-500 hover:bg-slate-400">
                     <Plus className="h-4 w-4 mr-2" />
                     From Template
                   </Button>
-                  <Button size="sm" onClick={() => navigate("/jobs/new")}>
+                  <Button size="sm" onClick={() => navigate("/jobs/new")} className="bg-slate-500 hover:bg-slate-400">
                     <Plus className="h-4 w-4 mr-2" />
                     New Job
                   </Button>
                 </div>
               </CardHeader>
-              <CardContent>
+              <CardContent className="bg-slate-300">
                 {jobData.length > 0 ? <div className="space-y-4">
                     {jobData.map(job => <div key={job.id} className="flex justify-between items-center p-2 rounded-md hover:bg-gray-100 cursor-pointer" onClick={() => handleJobClick(job.id)}>
                         <div className="flex items-center gap-2">
