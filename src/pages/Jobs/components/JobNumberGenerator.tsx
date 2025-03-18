@@ -14,12 +14,12 @@ interface JobNumberGeneratorProps {
 export function JobNumberGenerator({ jobNumber, setJobNumber }: JobNumberGeneratorProps) {
   const { toast } = useToast();
 
-  // Function to generate a new job number
+  // Function to generate a new job number with 4 digits
   const generateJobNumber = () => {
     const prefix = "JOB";
-    const timestamp = new Date().getTime().toString().slice(-6);
-    const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
-    return `${prefix}-${timestamp}-${random}`;
+    // Generate a random 4-digit number between 1000 and 9999
+    const fourDigitNumber = Math.floor(1000 + Math.random() * 9000);
+    return `${prefix}-${fourDigitNumber}`;
   };
 
   // Generate job number on component mount
