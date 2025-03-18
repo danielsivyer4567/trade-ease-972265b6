@@ -11,6 +11,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import JobMap from '@/components/JobMap';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+
 const mockJobs: Job[] = [{
   id: "1",
   customer: "John Smith",
@@ -45,6 +46,7 @@ const mockJobs: Job[] = [{
   description: "Upgrade main electrical panel",
   assignedTeam: "Green Team"
 }];
+
 export function JobDetails() {
   const {
     id
@@ -73,6 +75,7 @@ export function JobDetails() {
     setTabNotes,
     handleFinancialDataExtracted
   } = useJobFinancialData(id);
+
   useEffect(() => {
     console.log("JobDetails mounted with id:", id);
     const fetchJob = async () => {
@@ -112,25 +115,30 @@ export function JobDetails() {
     };
     fetchJob();
   }, [id, navigate]);
+
   const handleTimerToggle = () => {
     locationHandleTimerToggle(isTimerRunning, setIsTimerRunning);
   };
+
   if (loading) {
     return <div className="container-responsive mx-auto p-8">
       <div className="text-center">Loading job details...</div>
     </div>;
   }
+
   if (!job) {
     return <div className="container-responsive mx-auto p-8">
       <div className="text-center">Job not found. Please try again.</div>
     </div>;
   }
+
   return <div className="container-responsive mx-auto">
       <div className="space-y-4 sm:space-y-6 p-2 sm:p-4 max-w-7xl mx-auto pb-24 bg-slate-200">
         {/* Job Location Map */}
         <div className="bg-white rounded-lg shadow-sm overflow-hidden mb-4">
           <div className="p-4 border-b bg-slate-300">
             <h2 className="text-lg font-medium">Job Location</h2>
+            <p className="text-sm text-gray-600 mt-1">{job.jobNumber}</p>
           </div>
           <div className="h-[300px] w-full">
             <JobMap center={[job.location[0], job.location[1]]} zoom={15} markers={[{
@@ -139,11 +147,11 @@ export function JobDetails() {
           }]} />
           </div>
         </div>
-        
+
         <JobHeader job={job} />
-        
+
         <JobTabs job={job} isManager={isManager} jobTimer={jobTimer} jobNotes={jobNotes} setJobNotes={setJobNotes} tabNotes={tabNotes} setTabNotes={setTabNotes} locationHistory={locationHistory} hasLocationPermission={hasLocationPermission} handleTimerToggle={handleTimerToggle} handleBreakToggle={handleBreakToggle} isTimerRunning={isTimerRunning} isOnBreak={isOnBreak} extractedFinancialData={extractedFinancialData} />
-        
+
         {isManager && <div className="mt-8 mb-8">
             <DocumentApproval jobId={job.id} onFinancialDataExtracted={handleFinancialDataExtracted} />
           </div>}
