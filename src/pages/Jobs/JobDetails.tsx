@@ -1,4 +1,3 @@
-
 import { useParams, useNavigate } from 'react-router-dom';
 import { JobHeader } from './components/JobHeader';
 import { JobTabs } from './components/JobTabs';
@@ -12,7 +11,6 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import JobMap from '@/components/JobMap';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-
 const mockJobs: Job[] = [{
   id: "1",
   customer: "John Smith",
@@ -47,7 +45,6 @@ const mockJobs: Job[] = [{
   description: "Upgrade main electrical panel",
   assignedTeam: "Green Team"
 }];
-
 export function JobDetails() {
   const {
     id
@@ -76,7 +73,6 @@ export function JobDetails() {
     setTabNotes,
     handleFinancialDataExtracted
   } = useJobFinancialData(id);
-
   useEffect(() => {
     console.log("JobDetails mounted with id:", id);
     const fetchJob = async () => {
@@ -101,7 +97,6 @@ export function JobDetails() {
       } catch (err) {
         console.error("Exception fetching job:", err);
       }
-
       const foundJob = mockJobs.find(j => j.id === id);
       console.log("Using mock job data:", foundJob);
       if (foundJob) {
@@ -114,17 +109,14 @@ export function JobDetails() {
     };
     fetchJob();
   }, [id, navigate]);
-
   const handleTimerToggle = () => {
     locationHandleTimerToggle(isTimerRunning, setIsTimerRunning);
   };
-
   if (loading) {
     return <div className="container-responsive mx-auto p-8">
       <div className="text-center">Loading job details...</div>
     </div>;
   }
-
   if (!job) {
     return <div className="container-responsive mx-auto p-8">
       <div className="text-center">Job not found. Please try again.</div>
@@ -133,25 +125,9 @@ export function JobDetails() {
 
   // Use the full job number instead of just the part after the hyphen
   const jobNumberDisplay = job.jobNumber || '';
-
   return <div className="container-responsive mx-auto">
-      {/* Fixed job number display at the top left */}
-      <div className="fixed top-0 left-0 z-50 bg-slate-800 text-white px-4 py-2 shadow-md">
-        <div className="flex items-baseline">
-          <span className="text-xl font-bold mr-1">Job</span>
-          <span className="text-md font-medium">{jobNumberDisplay}</span>
-        </div>
-      </div>
-      
       <div className="space-y-4 sm:space-y-6 p-2 sm:p-4 max-w-7xl mx-auto pb-24 bg-slate-200">
-        <div className="bg-white rounded-lg shadow-sm overflow-hidden mb-4">
-          <div className="p-4 border-b bg-slate-300 flex items-center justify-start">
-            <div className="flex items-baseline">
-              <span className="text-2xl font-bold mr-2">Job</span>
-              <span className="text-lg font-medium">{jobNumberDisplay}</span>
-            </div>
-          </div>
-        </div>
+        
         
         <div className="bg-white rounded-lg shadow-sm overflow-hidden mb-4">
           <div className="h-[300px] w-full">
