@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useAudioHandling } from "./walkie-talkie/useAudioHandling";
@@ -11,6 +10,12 @@ export const useWalkieTalkie = (jobId: string) => {
   const [isConnected, setIsConnected] = useState(false);
   const { toast } = useToast();
 
+  const socketRef = useWebSocket(
+    jobId,
+    isListening,
+    setIsConnected
+  );
+
   const {
     audio,
     mediaRecorder,
@@ -19,13 +24,30 @@ export const useWalkieTalkie = (jobId: string) => {
     initializeAudio
   } = useAudioHandling(jobId, socketRef);
 
-  const socketRef = useWebSocket(
-    jobId,
-    isListening,
-    audioQueue,
-    playNextInQueue,
-    setIsConnected
-  );
+  useEffect(() => {
+    if (socketRef.current) {
+      socketRef.current.onmessage = event => {
+        try {
+          const data = JSON.parse(event.data);
+          if (data.type === 'audio' && data.jobId === jobId && isListening) {
+            const audioData = atob(data.audioData);
+            const arrayBuffer = new ArrayBuffer(audioData.length);
+            const uint8Array = new Uint8Array(arrayBuffer);
+            for (let i = 0; i < audioData.length; i++) {
+              uint8Array[i] = audioData.charCodeAt(i);
+            }
+            const audioBlob = new Blob([uint8Array], { type: 'audio/wav' });
+            audioQueue.current.push(audioBlob);
+            if (!isListening) {
+              playNextInQueue();
+            }
+          }
+        } catch (error) {
+          console.error('Error processing WebSocket message:', error);
+        }
+      };
+    }
+  }, [socketRef, jobId, isListening, audioQueue, playNextInQueue]);
 
   const { startRecording, stopRecording } = useTransmission(
     jobId,

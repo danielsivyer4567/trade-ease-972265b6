@@ -5,8 +5,6 @@ import { useToast } from "@/hooks/use-toast";
 export const useWebSocket = (
   jobId: string, 
   isListening: boolean,
-  audioQueue: React.MutableRefObject<Blob[]>,
-  playNextInQueue: () => void,
   setIsConnected: (connected: boolean) => void
 ) => {
   const socketRef = useRef<WebSocket | null>(null);
@@ -27,27 +25,6 @@ export const useWebSocket = (
         userId: userId,
         authToken: authToken
       }));
-    };
-
-    socket.onmessage = event => {
-      try {
-        const data = JSON.parse(event.data);
-        if (data.type === 'audio' && data.jobId === jobId && isListening) {
-          const audioData = atob(data.audioData);
-          const arrayBuffer = new ArrayBuffer(audioData.length);
-          const uint8Array = new Uint8Array(arrayBuffer);
-          for (let i = 0; i < audioData.length; i++) {
-            uint8Array[i] = audioData.charCodeAt(i);
-          }
-          const audioBlob = new Blob([uint8Array], { type: 'audio/wav' });
-          audioQueue.current.push(audioBlob);
-          if (!isListening) {
-            playNextInQueue();
-          }
-        }
-      } catch (error) {
-        console.error('Error processing WebSocket message:', error);
-      }
     };
 
     socket.onerror = error => {
@@ -77,7 +54,7 @@ export const useWebSocket = (
         socket.close();
       }
     };
-  }, [jobId, isListening, toast, audioQueue, playNextInQueue, setIsConnected]);
+  }, [jobId, toast, setIsConnected]);
 
   return socketRef;
 };

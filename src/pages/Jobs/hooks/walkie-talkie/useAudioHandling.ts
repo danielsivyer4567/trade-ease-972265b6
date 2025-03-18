@@ -2,7 +2,10 @@
 import { useState, useRef } from 'react';
 import { useToast } from "@/hooks/use-toast";
 
-export const useAudioHandling = (jobId: string, socketRef: React.MutableRefObject<WebSocket | null>) => {
+export const useAudioHandling = (
+  jobId: string, 
+  socketRef: React.MutableRefObject<WebSocket | null>
+) => {
   const [audio] = useState(new Audio("/ringtone.mp3"));
   const mediaRecorder = useRef<MediaRecorder | null>(null);
   const audioChunks = useRef<Blob[]>([]);
