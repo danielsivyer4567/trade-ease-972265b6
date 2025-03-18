@@ -135,6 +135,14 @@ export function JobDetails() {
   const jobNumberDisplay = job.jobNumber || '';
 
   return <div className="container-responsive mx-auto">
+      {/* Fixed job number display at the top left */}
+      <div className="fixed top-0 left-0 z-50 bg-slate-800 text-white px-4 py-2 shadow-md">
+        <div className="flex items-baseline">
+          <span className="text-xl font-bold mr-1">Job</span>
+          <span className="text-md font-medium">{jobNumberDisplay}</span>
+        </div>
+      </div>
+      
       <div className="space-y-4 sm:space-y-6 p-2 sm:p-4 max-w-7xl mx-auto pb-24 bg-slate-200">
         <div className="bg-white rounded-lg shadow-sm overflow-hidden mb-4">
           <div className="p-4 border-b bg-slate-300 flex items-center justify-start">
