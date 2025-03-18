@@ -218,7 +218,7 @@ export default function CustomerDetail() {
                           <span className="text-sm text-gray-500">({job.status})</span>
                         </div>
                         <div className="flex items-center gap-2">
-                          <span className="text-sm text-gray-500">{job.date}</span>
+                          <span className="text-gray-950 text-xl">{job.date}</span>
                           <ExternalLink className="h-4 w-4 text-gray-400" />
                         </div>
                       </div>)}
