@@ -11,6 +11,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import JobMap from '@/components/JobMap';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+
 const mockJobs: Job[] = [{
   id: "1",
   customer: "John Smith",
@@ -45,6 +46,7 @@ const mockJobs: Job[] = [{
   description: "Upgrade main electrical panel",
   assignedTeam: "Green Team"
 }];
+
 export function JobDetails() {
   const {
     id
@@ -73,10 +75,10 @@ export function JobDetails() {
     setTabNotes,
     handleFinancialDataExtracted
   } = useJobFinancialData(id);
+
   useEffect(() => {
     console.log("JobDetails mounted with id:", id);
     const fetchJob = async () => {
-      // First try to fetch from Supabase if available
       try {
         const {
           data: session
@@ -99,7 +101,6 @@ export function JobDetails() {
         console.error("Exception fetching job:", err);
       }
 
-      // Fallback to mock data
       const foundJob = mockJobs.find(j => j.id === id);
       console.log("Using mock job data:", foundJob);
       if (foundJob) {
@@ -112,29 +113,34 @@ export function JobDetails() {
     };
     fetchJob();
   }, [id, navigate]);
+
   const handleTimerToggle = () => {
     locationHandleTimerToggle(isTimerRunning, setIsTimerRunning);
   };
+
   if (loading) {
     return <div className="container-responsive mx-auto p-8">
       <div className="text-center">Loading job details...</div>
     </div>;
   }
+
   if (!job) {
     return <div className="container-responsive mx-auto p-8">
       <div className="text-center">Job not found. Please try again.</div>
     </div>;
   }
+
   return <div className="container-responsive mx-auto">
       <div className="space-y-4 sm:space-y-6 p-2 sm:p-4 max-w-7xl mx-auto pb-24 bg-slate-200">
-        {/* Job Number Display */}
         <div className="bg-white rounded-lg shadow-sm overflow-hidden mb-4">
-          <div className="p-4 border-b bg-slate-300 flex justify-center py-[47px]">
-            <h2 className="text-lg font-medium">{job.jobNumber}</h2>
+          <div className="p-4 border-b bg-slate-300 flex items-center justify-start">
+            <div className="flex items-baseline">
+              <span className="text-2xl font-bold mr-2">Job</span>
+              <span className="text-lg font-medium">{job.jobNumber.split('-')[1]}</span>
+            </div>
           </div>
         </div>
         
-        {/* Job Location Map */}
         <div className="bg-white rounded-lg shadow-sm overflow-hidden mb-4">
           <div className="h-[300px] w-full">
             <JobMap center={[job.location[0], job.location[1]]} zoom={15} markers={[{
