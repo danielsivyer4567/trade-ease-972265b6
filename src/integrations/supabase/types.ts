@@ -521,6 +521,48 @@ export type Database = {
         }
         Relationships: []
       }
+      tasks: {
+        Row: {
+          assigned_team: string
+          attached_files: Json | null
+          created_at: string | null
+          description: string | null
+          due_date: string
+          id: string
+          manager_id: string | null
+          status: string
+          team_leader_id: string | null
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          assigned_team: string
+          attached_files?: Json | null
+          created_at?: string | null
+          description?: string | null
+          due_date: string
+          id?: string
+          manager_id?: string | null
+          status?: string
+          team_leader_id?: string | null
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          assigned_team?: string
+          attached_files?: Json | null
+          created_at?: string | null
+          description?: string | null
+          due_date?: string
+          id?: string
+          manager_id?: string | null
+          status?: string
+          team_leader_id?: string | null
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       todos: {
         Row: {
           created_at: string
