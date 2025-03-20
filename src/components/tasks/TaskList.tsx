@@ -12,11 +12,13 @@ import { FileUpload } from "./FileUpload";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+
 interface TeamMember {
   id: string;
   name: string;
   role: 'team_leader' | 'manager';
 }
+
 interface Task {
   id: string;
   title: string;
@@ -35,10 +37,12 @@ interface Task {
   attachedFiles?: string[];
   assignedMemberId?: string;
 }
+
 interface TaskImage {
   url: string;
   note: string;
 }
+
 interface TaskListProps {
   tasks: Task[];
   teamName: string;
@@ -46,6 +50,7 @@ interface TaskListProps {
   onAcknowledge: (taskId: string, note: string) => void;
   onComplete: (taskId: string, note: string, images: string[]) => void;
 }
+
 export function TaskList({
   tasks,
   teamName,
@@ -67,6 +72,7 @@ export function TaskList({
   const {
     toast
   } = useToast();
+
   const handleAssignMember = (taskId: string, memberId: string) => {
     setAssignedMembers(prev => ({
       ...prev,
@@ -77,6 +83,7 @@ export function TaskList({
       description: `Task assigned to ${teamMembers.find(m => m.id === memberId)?.name}`
     });
   };
+
   const handleTaskImageUpload = (event: React.ChangeEvent<HTMLInputElement>, taskId: string) => {
     const files = event.target.files;
     if (files) {
@@ -94,6 +101,7 @@ export function TaskList({
       });
     }
   };
+
   const handleImageNoteChange = (taskId: string, imageIndex: number, note: string) => {
     setTaskImages(prev => {
       const taskImagesCopy = [...(prev[taskId] || [])];
@@ -107,6 +115,7 @@ export function TaskList({
       };
     });
   };
+
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>, isProgress: boolean) => {
     const files = event.target.files;
     if (files) {
@@ -134,6 +143,7 @@ export function TaskList({
       });
     }
   };
+
   const handleAcknowledge = (taskId: string) => {
     onAcknowledge(taskId, "Task acknowledged by team");
     toast({
@@ -141,6 +151,7 @@ export function TaskList({
       description: "Dashboard manager has been notified"
     });
   };
+
   const handleInProgress = (taskId: string) => {
     if (progressNote.length > 500) {
       toast({
@@ -159,6 +170,7 @@ export function TaskList({
       });
     }
   };
+
   const handleComplete = (taskId: string) => {
     if (completionNote.length > 500) {
       toast({
@@ -176,12 +188,14 @@ export function TaskList({
       description: "Dashboard manager and team leader have been notified"
     });
   };
+
   const isTaskInProgressOrCompleted = (task: Task) => {
     return task.status === 'in_progress' || task.status === 'completed';
   };
+
   return <div className="grid gap-4">
       {tasks.filter(task => task.assignedTeam === teamName).map((task, index) => <Collapsible key={task.id} open={openTaskId === task.id} onOpenChange={isOpen => setOpenTaskId(isOpen ? task.id : null)}>
-            <Card className="bg-slate-300">
+            <Card className="bg-slate-300 border-b-2 border-black mb-6">
               <CardHeader className="relative px-[43px] my-px bg-slate-300">
                 <CollapsibleTrigger className="w-full text-left flex items-center justify-between">
                   <div className="flex flex-col gap-2">
