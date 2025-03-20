@@ -47,10 +47,6 @@ export const CurrentJobs = ({ jobs, onStatusUpdate }: CurrentJobsProps) => {
     toast.success(`Navigating to ${job.title || `Job #${job.jobNumber}`} in calendar`);
   };
 
-  const navigateToJob = (jobId: string) => {
-    navigate(`/jobs/${jobId}`);
-  };
-
   return (
     <div>
       <h2 className="text-xl font-bold mb-4">Current Jobs</h2>
@@ -82,11 +78,7 @@ export const CurrentJobs = ({ jobs, onStatusUpdate }: CurrentJobsProps) => {
           <tbody className="bg-white divide-y divide-gray-200">
             {jobs.length > 0 ? (
               jobs.map((job) => (
-                <tr 
-                  key={job.id} 
-                  className="hover:bg-gray-50 cursor-pointer"
-                  onClick={() => navigateToJob(job.id)}
-                >
+                <tr key={job.id} className="hover:bg-gray-50">
                   <td className="px-2 py-2 whitespace-nowrap">
                     <div className="flex items-center">
                       <div className="text-sm font-medium text-gray-900">
@@ -108,15 +100,12 @@ export const CurrentJobs = ({ jobs, onStatusUpdate }: CurrentJobsProps) => {
                       {job.status}
                     </Badge>
                   </td>
-                  <td className="px-2 py-2 whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
+                  <td className="px-2 py-2 whitespace-nowrap">
                     <div className="flex space-x-2">
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          navigate(`/jobs/${job.id}`);
-                        }}
+                        onClick={() => navigate(`/jobs/${job.id}`)}
                       >
                         View
                       </Button>
@@ -125,10 +114,7 @@ export const CurrentJobs = ({ jobs, onStatusUpdate }: CurrentJobsProps) => {
                         <Button 
                           variant="outline" 
                           size="sm"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleStatusChange(job.id, 'to-invoice');
-                          }}
+                          onClick={() => handleStatusChange(job.id, 'to-invoice')}
                           disabled={actionLoading === job.id}
                         >
                           {actionLoading === job.id ? (
@@ -144,10 +130,7 @@ export const CurrentJobs = ({ jobs, onStatusUpdate }: CurrentJobsProps) => {
                         <Button 
                           variant="outline" 
                           size="sm"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleStatusChange(job.id, 'invoiced');
-                          }}
+                          onClick={() => handleStatusChange(job.id, 'invoiced')}
                           disabled={actionLoading === job.id}
                         >
                           {actionLoading === job.id ? (
@@ -162,10 +145,7 @@ export const CurrentJobs = ({ jobs, onStatusUpdate }: CurrentJobsProps) => {
                         <Button 
                           variant="outline" 
                           size="sm"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            viewInCalendar(job);
-                          }}
+                          onClick={() => viewInCalendar(job)}
                           className="text-blue-600 border-blue-300 hover:bg-blue-50"
                         >
                           <CalendarIcon className="h-4 w-4 mr-1" />
@@ -177,10 +157,7 @@ export const CurrentJobs = ({ jobs, onStatusUpdate }: CurrentJobsProps) => {
                         <Button 
                           variant="outline" 
                           size="sm"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleStatusChange(job.id, 'clean-required');
-                          }}
+                          onClick={() => handleStatusChange(job.id, 'clean-required')}
                           disabled={actionLoading === job.id}
                           className="text-red-600 border-red-300 hover:bg-red-50"
                         >

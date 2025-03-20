@@ -1,12 +1,13 @@
 
 import { AppLayout } from "@/components/ui/AppLayout";
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Routes, Route, Outlet } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import type { JobTemplate, Job } from "@/types/job";
 import { UnassignedJobs } from "./components/UnassignedJobs";
 import { CurrentJobs } from "./components/CurrentJobs";
 import { JobAssignmentDialog } from "./components/JobAssignmentDialog";
+import { JobDetails } from "./JobDetails";
 import { Separator } from "@/components/ui/separator";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2 } from "lucide-react";
@@ -18,6 +19,17 @@ const teams = [
 ];
 
 export default function Jobs() {
+  return (
+    <AppLayout>
+      <Routes>
+        <Route index element={<JobsMain />} />
+        <Route path=":id" element={<JobDetails />} />
+      </Routes>
+    </AppLayout>
+  );
+}
+
+function JobsMain() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [jobs, setJobs] = useState<Job[]>([]);
@@ -173,33 +185,31 @@ export default function Jobs() {
   };
 
   return (
-    <AppLayout>
-      <div className="space-y-4 p-6">
-        {loading ? (
-          <div className="flex items-center justify-center py-10">
-            <Loader2 className="h-8 w-8 animate-spin text-gray-600" />
-            <span className="ml-2 text-gray-600">Loading jobs...</span>
-          </div>
-        ) : (
-          <>
-            <UnassignedJobs jobs={jobs.filter(job => job.status === 'ready')} onAssign={handleAssign} />
-            <Separator className="my-3 h-[2px] bg-gray-400" />
-            <CurrentJobs jobs={jobs.filter(job => job.status !== 'ready')} onStatusUpdate={updateJobStatus} />
-          </>
-        )}
+    <div className="space-y-4 p-6">
+      {loading ? (
+        <div className="flex items-center justify-center py-10">
+          <Loader2 className="h-8 w-8 animate-spin text-gray-600" />
+          <span className="ml-2 text-gray-600">Loading jobs...</span>
+        </div>
+      ) : (
+        <>
+          <UnassignedJobs jobs={jobs.filter(job => job.status === 'ready')} onAssign={handleAssign} />
+          <Separator className="my-3 h-[2px] bg-gray-400" />
+          <CurrentJobs jobs={jobs.filter(job => job.status !== 'ready')} onStatusUpdate={updateJobStatus} />
+        </>
+      )}
 
-        <JobAssignmentDialog
-          isOpen={isAssignDialogOpen}
-          onOpenChange={setIsAssignDialogOpen}
-          selectedJob={selectedJob}
-          selectedTeam={selectedTeam}
-          setSelectedTeam={setSelectedTeam}
-          selectedDate={selectedDate}
-          setSelectedDate={setSelectedDate}
-          onAssign={handleAssignSubmit}
-          teams={teams}
-        />
-      </div>
-    </AppLayout>
+      <JobAssignmentDialog
+        isOpen={isAssignDialogOpen}
+        onOpenChange={setIsAssignDialogOpen}
+        selectedJob={selectedJob}
+        selectedTeam={selectedTeam}
+        setSelectedTeam={setSelectedTeam}
+        selectedDate={selectedDate}
+        setSelectedDate={setSelectedDate}
+        onAssign={handleAssignSubmit}
+        teams={teams}
+      />
+    </div>
   );
 }

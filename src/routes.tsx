@@ -11,7 +11,6 @@ import Calendar from './pages/Calendar';
 import CalendarSync from './pages/Calendar/CalendarSync';
 import TasksPage from './pages/Tasks';
 import Jobs from './pages/Jobs';
-import { JobDetails } from './pages/Jobs/JobDetails';
 import TeamRed from './pages/TeamRed';
 import TeamBlue from './pages/TeamBlue';
 import TeamGreen from './pages/TeamGreen';
@@ -47,10 +46,6 @@ export const routes: RouteConfig[] = [
   {
     path: '/jobs',
     element: <Jobs />
-  },
-  {
-    path: '/jobs/:id',
-    element: <JobDetails />
   },
   {
     path: '/calendar',
