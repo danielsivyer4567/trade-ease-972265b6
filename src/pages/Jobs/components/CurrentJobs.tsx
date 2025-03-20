@@ -1,199 +1,188 @@
 
-import { Button } from "@/components/ui/button";
-import { Clock, Loader2, DollarSign, CheckCircle, Brush, MoreHorizontal } from "lucide-react";
-import { Job } from "@/types/job";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import type { Job } from "@/types/job";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Loader2, Calendar as CalendarIcon, CheckCircle, XCircle } from "lucide-react";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { SectionHeader } from "@/components/ui/SectionHeader";
-import { Separator } from "@/components/ui/separator";
 
 interface CurrentJobsProps {
   jobs: Job[];
-  onStatusUpdate: (jobId: string, newStatus: Job['status']) => void;
+  onStatusUpdate: (jobId: string, newStatus: Job['status']) => Promise<void>;
 }
 
-export function CurrentJobs({
-  jobs,
-  onStatusUpdate
-}: CurrentJobsProps) {
+export const CurrentJobs = ({ jobs, onStatusUpdate }: CurrentJobsProps) => {
   const navigate = useNavigate();
-  
-  const getStatusIcon = (status: Job['status']) => {
-    switch (status) {
-      case 'ready':
-        return <Clock className="h-5 w-5 text-blue-500" />;
-      case 'in-progress':
-        return <Loader2 className="h-5 w-5 text-yellow-500" />;
-      case 'to-invoice':
-        return <CheckCircle className="h-6 w-6 text-green-500" />;
-      case 'invoiced':
-        return <CheckCircle className="h-5 w-5 text-green-500" />;
-      case 'clean-required':
-        return <Brush className="h-5 w-5 text-orange-500" />;
-      default:
-        return null;
-    }
-  };
-  
+  const [actionLoading, setActionLoading] = useState<string | null>(null);
+
   const handleStatusChange = async (jobId: string, newStatus: Job['status']) => {
-    if (newStatus === 'clean-required') {
-      try {
-        const { data, error } = await supabase.functions.invoke('notify-team-leader', {
-          body: {
-            phoneNumber: '0430388131',
-            name: 'Paul Finch',
-            message: `Job ${jobId} requires cleaning. Please check the dashboard for details.`
-          }
-        });
-        
-        if (error) throw error;
-        
-        if (data.success) {
-          toast.success("Paul Finch has been notified about the cleaning requirement");
-        } else {
-          toast.error("Failed to send notification to Paul Finch");
-        }
-      } catch (error) {
-        console.error('Error sending notification:', error);
-        toast.error("Failed to send notification. Using fallback notification system.");
-      }
+    setActionLoading(jobId);
+    try {
+      await onStatusUpdate(jobId, newStatus);
+    } catch (error) {
+      console.error("Error updating status:", error);
+    } finally {
+      setActionLoading(null);
     }
-    
-    onStatusUpdate(jobId, newStatus);
   };
-  
-  const handleRowClick = (jobId: string) => {
-    console.log("Navigating to job details:", jobId);
-    navigate(`/jobs/${jobId}`);
+
+  const getStatusBadgeColor = (status: Job['status']) => {
+    switch (status) {
+      case 'in-progress':
+        return 'bg-blue-500 hover:bg-blue-600';
+      case 'completed':
+        return 'bg-green-500 hover:bg-green-600';
+      case 'invoiced':
+        return 'bg-purple-500 hover:bg-purple-600';
+      case 'cancelled':
+        return 'bg-red-500 hover:bg-red-600';
+      default:
+        return 'bg-gray-500 hover:bg-gray-600';
+    }
+  };
+
+  const viewInCalendar = (job: Job) => {
+    navigate(`/calendar?job=${job.id}&date=${job.date}`);
+    toast.success(`Navigating to ${job.title || `Job #${job.jobNumber}`} in calendar`);
   };
 
   return (
     <div>
-      <SectionHeader title="Current Jobs" />
-      <div className="bg-white rounded-lg shadow">
-        <div className="max-h-[450px] overflow-y-auto">
-          <table className="w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50 sticky top-0">
-              <tr className="divide-x divide-gray-200">
-                <th className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-slate-200">
-                  Job #
-                </th>
-                <th className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-slate-200">
-                  Job
-                </th>
-                <th className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-slate-200">
-                  Customer
-                </th>
-                <th className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-slate-200">
-                  Date
-                </th>
-                <th className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-slate-200">
-                  Status
-                </th>
-                <th className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-slate-200">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {jobs.map(job => (
-                <tr 
-                  key={job.id} 
-                  className="hover:bg-gray-50 cursor-pointer divide-x divide-gray-200" 
-                  onClick={() => handleRowClick(job.id)}
-                >
+      <h2 className="text-xl font-bold mb-4">Current Jobs</h2>
+      
+      <div className="overflow-x-auto">
+        <table className="min-w-full divide-y divide-gray-200">
+          <thead className="bg-gray-100">
+            <tr>
+              <th scope="col" className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Job Number
+              </th>
+              <th scope="col" className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Customer
+              </th>
+              <th scope="col" className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Date
+              </th>
+              <th scope="col" className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Team
+              </th>
+              <th scope="col" className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Status
+              </th>
+              <th scope="col" className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Actions
+              </th>
+            </tr>
+          </thead>
+          <tbody className="bg-white divide-y divide-gray-200">
+            {jobs.length > 0 ? (
+              jobs.map((job) => (
+                <tr key={job.id} className="hover:bg-gray-50">
                   <td className="px-2 py-2 whitespace-nowrap">
-                    <div className="text-xs font-mono text-gray-900">{job.jobNumber}</div>
-                  </td>
-                  <td className="px-2 py-2 whitespace-nowrap">
-                    <div className="text-xs font-medium text-gray-900">{job.title || job.type}</div>
-                  </td>
-                  <td className="px-2 py-2 whitespace-nowrap">
-                    <div className="text-xs text-gray-500">{job.customer}</div>
-                  </td>
-                  <td className="px-2 py-2 whitespace-nowrap">
-                    <div className="text-xs text-gray-500">{job.date}</div>
-                  </td>
-                  <td className="px-2 py-2 whitespace-nowrap bg-slate-100">
                     <div className="flex items-center">
-                      {getStatusIcon(job.status)}
-                      <span className="ml-1 text-xs text-gray-500">
-                        {job.status === 'invoiced' ? 'Completed' : job.status === 'clean-required' ? 'Clean Req.' : job.status.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
-                      </span>
+                      <div className="text-sm font-medium text-gray-900">
+                        #{job.jobNumber}
+                      </div>
                     </div>
                   </td>
                   <td className="px-2 py-2 whitespace-nowrap">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild onClick={e => e.stopPropagation()}>
-                        <Button variant="ghost" size="icon" className="h-6 w-6 p-0">
-                          <MoreHorizontal className="h-4 w-4" />
+                    <div className="text-sm text-gray-900">{job.customer}</div>
+                  </td>
+                  <td className="px-2 py-2 whitespace-nowrap">
+                    <div className="text-sm text-gray-900">{job.date || 'Not scheduled'}</div>
+                  </td>
+                  <td className="px-2 py-2 whitespace-nowrap">
+                    <div className="text-sm text-gray-900">{job.assignedTeam || 'Unassigned'}</div>
+                  </td>
+                  <td className="px-2 py-2 whitespace-nowrap">
+                    <Badge className={`${getStatusBadgeColor(job.status)}`}>
+                      {job.status}
+                    </Badge>
+                  </td>
+                  <td className="px-2 py-2 whitespace-nowrap">
+                    <div className="flex space-x-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => navigate(`/jobs/${job.id}`)}
+                      >
+                        View
+                      </Button>
+                      
+                      {job.status === 'in-progress' && (
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => handleStatusChange(job.id, 'completed')}
+                          disabled={actionLoading === job.id}
+                        >
+                          {actionLoading === job.id ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <CheckCircle className="h-4 w-4 mr-1" />
+                          )}
+                          <span>Complete</span>
                         </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="w-40 bg-slate-200">
-                        <DropdownMenuItem 
-                          className="flex items-center gap-1 text-xs py-1" 
-                          onClick={e => {
-                            e.stopPropagation();
-                            handleStatusChange(job.id, 'ready');
-                          }}
+                      )}
+                      
+                      {job.status === 'completed' && (
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => handleStatusChange(job.id, 'invoiced')}
+                          disabled={actionLoading === job.id}
                         >
-                          <Clock className="h-3 w-3 text-blue-500" />
-                          <span>Set Ready</span>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem 
-                          className="flex items-center gap-1 text-xs py-1" 
-                          onClick={e => {
-                            e.stopPropagation();
-                            handleStatusChange(job.id, 'in-progress');
-                          }}
+                          {actionLoading === job.id ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <span>Invoice</span>
+                          )}
+                        </Button>
+                      )}
+                      
+                      {job.date && job.status !== 'cancelled' && (
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => viewInCalendar(job)}
+                          className="text-blue-600 border-blue-300 hover:bg-blue-50"
                         >
-                          <Loader2 className="h-3 w-3 text-yellow-500" />
-                          <span>Set In Progress</span>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem 
-                          className="flex items-center gap-1 text-xs py-1" 
-                          onClick={e => {
-                            e.stopPropagation();
-                            handleStatusChange(job.id, 'clean-required');
-                          }}
+                          <CalendarIcon className="h-4 w-4 mr-1" />
+                          <span>Calendar</span>
+                        </Button>
+                      )}
+                      
+                      {job.status !== 'cancelled' && job.status !== 'invoiced' && (
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => handleStatusChange(job.id, 'cancelled')}
+                          disabled={actionLoading === job.id}
+                          className="text-red-600 border-red-300 hover:bg-red-50"
                         >
-                          <Brush className="h-3 w-3 text-orange-500" />
-                          <span>Set Clean Required</span>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem 
-                          className="flex items-center gap-1 text-xs py-1" 
-                          onClick={e => {
-                            e.stopPropagation();
-                            handleStatusChange(job.id, 'to-invoice');
-                          }}
-                        >
-                          <DollarSign className="h-3 w-3 text-green-500" />
-                          <span>Set To Invoice</span>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem 
-                          className="flex items-center gap-1 text-xs py-1" 
-                          onClick={e => {
-                            e.stopPropagation();
-                            handleStatusChange(job.id, 'invoiced');
-                          }}
-                        >
-                          <CheckCircle className="h-3 w-3 text-green-500" />
-                          <span>Mark Complete</span>
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+                          {actionLoading === job.id ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <XCircle className="h-4 w-4 mr-1" />
+                          )}
+                          <span>Cancel</span>
+                        </Button>
+                      )}
+                    </div>
                   </td>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-      <div className="mt-8 mb-8">
-        <Separator className="h-[2px] bg-gray-400" />
+              ))
+            ) : (
+              <tr>
+                <td colSpan={6} className="px-2 py-4 text-center text-sm text-gray-500">
+                  No active jobs found
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
       </div>
     </div>
   );
-}
+};
