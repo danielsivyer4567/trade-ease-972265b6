@@ -50,25 +50,30 @@ export function TeamCalendarGrid({
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {teams.map((team, index) => (
-        <Card key={`${team.name}-${index}`}>
-          <CardHeader className="bg-slate-200">
-            <CardTitle className="text-lg">{team.name}</CardTitle>
-            <CardDescription>View and manage team schedule</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <TeamCalendar 
-              date={sharedDate} 
-              setDate={setSharedDate} 
-              teamColor={team.color} 
-              onJobAssign={onJobAssign} 
-              assignedJobs={jobs.filter(job => 
-                job.assignedTeam?.toLowerCase() === team.name.toLowerCase()
-              )} 
-            />
-          </CardContent>
-        </Card>
-      ))}
+      {teams.map((team, index) => {
+        // Filter jobs for this specific team only
+        const teamJobs = jobs.filter(job => 
+          job.assignedTeam?.toLowerCase() === team.name.toLowerCase()
+        );
+        
+        return (
+          <Card key={`${team.name}-${index}`}>
+            <CardHeader className="bg-slate-200">
+              <CardTitle className="text-lg">{team.name}</CardTitle>
+              <CardDescription>View and manage team schedule</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <TeamCalendar 
+                date={sharedDate} 
+                setDate={setSharedDate} 
+                teamColor={team.color} 
+                onJobAssign={onJobAssign} 
+                assignedJobs={teamJobs} 
+              />
+            </CardContent>
+          </Card>
+        );
+      })}
     </div>
   );
 }
