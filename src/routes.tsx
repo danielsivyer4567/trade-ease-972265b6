@@ -19,6 +19,7 @@ import Integrations from './pages/Integrations';
 import Calculators from './pages/Calculators';
 import AIFeatures from './pages/AIFeatures';
 import Email from './pages/Email';
+import Messaging from './pages/Messaging';
 import SettingsPage from './pages/Settings';
 
 // Define the route type
@@ -79,7 +80,7 @@ export const routes: RouteConfig[] = [
   },
   {
     path: '/messaging',
-    element: <div className="p-6"><h1 className="text-2xl font-bold">Messaging</h1></div>
+    element: <Messaging />
   },
   {
     path: '/email',
