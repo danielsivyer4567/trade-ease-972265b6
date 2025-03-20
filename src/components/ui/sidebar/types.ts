@@ -22,6 +22,7 @@ export interface SidebarMenuButtonProps
   asChild?: boolean;
   isActive?: boolean;
   tooltip?: string | React.ComponentProps<typeof TooltipContent>;
+  href?: string; // Add href for Link navigation
 }
 
 export interface SidebarMenuActionProps extends React.ComponentProps<"button"> {
@@ -33,6 +34,7 @@ export interface SidebarMenuSubButtonProps extends React.ComponentProps<"a"> {
   asChild?: boolean;
   size?: "sm" | "md";
   isActive?: boolean;
+  href?: string; // Add href for Link navigation
 }
 
 export interface SidebarProviderProps extends React.ComponentProps<"div"> {

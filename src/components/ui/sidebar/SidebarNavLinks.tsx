@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { 
@@ -45,13 +46,12 @@ interface NavLinkItemProps {
 
 export function NavLinkItem({ link }: NavLinkItemProps) {
   const location = useLocation();
-  const { state, isCollapsed } = useSidebar();
-  const collapsed = isCollapsed ?? (state === "collapsed");
+  const { state } = useSidebar();
+  const collapsed = state === "collapsed";
   const isMobileDevice = useIsMobile();
   const { icon: Icon, label, path, openInNewTab = false } = link;
   
   const isActive = location.pathname === path || (path !== '/' && location.pathname.startsWith(path));
-  const linkProps = openInNewTab ? { target: "_blank", rel: "noopener noreferrer" } : {};
   
   const content = (
     <Link 
@@ -61,7 +61,8 @@ export function NavLinkItem({ link }: NavLinkItemProps) {
         isActive && "bg-gray-100 text-gray-900 font-medium",
         isMobileDevice && "p-3 min-h-[48px]" // Larger touch target on mobile
       )} 
-      {...linkProps}
+      target={openInNewTab ? "_blank" : undefined}
+      rel={openInNewTab ? "noopener noreferrer" : undefined}
     >
       <Icon className="w-4 h-4 flex-shrink-0" />
       <span className={cn("transition-opacity duration-200", collapsed && "hidden lg:hidden")}>

@@ -7,6 +7,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "../tooltip";
 import { useSidebar } from "./SidebarProvider";
 import { SidebarMenuButtonProps, SidebarMenuActionProps, SidebarMenuSkeletonProps } from "./types";
 import { Skeleton } from "../skeleton";
+import { Link } from "react-router-dom";
 
 export const sidebarMenuButtonVariants = cva(
   "peer/menu-button flex w-full items-center gap-2 overflow-hidden rounded-md p-2 text-left text-sm outline-none ring-sidebar-ring transition-[width,height,padding] hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 active:bg-sidebar-accent active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 group-has-[[data-sidebar=menu-action]]/menu-item:pr-8 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-[active=true]:bg-sidebar-accent data-[active=true]:font-medium data-[active=true]:text-sidebar-accent-foreground data-[state=open]:hover:bg-sidebar-accent data-[state=open]:hover:text-sidebar-accent-foreground group-data-[collapsible=icon]:!size-8 group-data-[collapsible=icon]:!p-2 [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0",
@@ -55,9 +56,12 @@ export const SidebarMenuItem = React.forwardRef<HTMLLIElement, React.ComponentPr
 SidebarMenuItem.displayName = "SidebarMenuItem";
 
 export const SidebarMenuButton = React.forwardRef<HTMLButtonElement, SidebarMenuButtonProps>(
-  ({ asChild = false, isActive = false, variant = "default", size = "default", tooltip, className, ...props }, ref) => {
-    const Comp = asChild ? Slot : "button";
+  ({ asChild = false, isActive = false, variant = "default", size = "default", tooltip, className, href, ...props }, ref) => {
+    const Comp = asChild ? Slot : (href ? Link : "button");
     const { isMobile, state } = useSidebar();
+    
+    // For Link component, we need to convert href to 'to' prop
+    const linkProps = (Comp === Link) ? { to: href } : {};
 
     const button = (
       <Comp
@@ -66,6 +70,7 @@ export const SidebarMenuButton = React.forwardRef<HTMLButtonElement, SidebarMenu
         data-size={size}
         data-active={isActive}
         className={cn(sidebarMenuButtonVariants({ variant, size }), className)}
+        {...linkProps}
         {...props}
       />
     );

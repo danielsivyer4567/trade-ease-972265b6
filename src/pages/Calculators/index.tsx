@@ -1,9 +1,11 @@
+
 import React from "react";
 import { AppLayout } from "@/components/ui/AppLayout";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Calculator, Percent, Gauge, Ruler, Construction, Compass, ArrowUpDown, Square, FileCode } from "lucide-react";
 import { Link } from "react-router-dom";
 import { SectionHeader } from "@/components/ui/SectionHeader";
+
 const Calculators = () => {
   const calculators = [{
     title: "Trade Rate Calculator",
@@ -51,7 +53,9 @@ const Calculators = () => {
     icon: <FileCode className="h-6 w-6 text-red-500" />,
     path: "/calculators/ncc-codes"
   }];
-  return <AppLayout>
+  
+  return (
+    <AppLayout>
       <div className="container mx-auto py-6 space-y-6">
         <SectionHeader title="Trade Calculators" />
         
@@ -60,7 +64,8 @@ const Calculators = () => {
         </p>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {calculators.map((calculator, index) => <Card key={index} className="hover:shadow-md transition-shadow">
+          {calculators.map((calculator, index) => (
+            <Card key={index} className="hover:shadow-md transition-shadow">
               <CardHeader className="bg-slate-300">
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-xl">{calculator.title}</CardTitle>
@@ -69,13 +74,19 @@ const Calculators = () => {
                 <CardDescription>{calculator.description}</CardDescription>
               </CardHeader>
               <CardFooter className="bg-slate-300">
-                <Link to={calculator.path} className="w-full bg-blue-50 text-blue-600 py-2 rounded-md text-center hover:bg-blue-100 transition-colors">
+                <Link 
+                  to={calculator.path} 
+                  className="w-full bg-blue-50 text-blue-600 py-2 rounded-md text-center hover:bg-blue-100 transition-colors"
+                >
                   Open Calculator
                 </Link>
               </CardFooter>
-            </Card>)}
+            </Card>
+          ))}
         </div>
       </div>
-    </AppLayout>;
+    </AppLayout>
+  );
 };
+
 export default Calculators;

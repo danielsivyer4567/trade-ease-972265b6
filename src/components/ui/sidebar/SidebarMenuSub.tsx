@@ -3,6 +3,7 @@ import * as React from "react";
 import { Slot } from "@radix-ui/react-slot";
 import { cn } from "@/lib/utils";
 import { SidebarMenuSubButtonProps } from "./types";
+import { Link } from "react-router-dom";
 
 export const SidebarMenuSub = React.forwardRef<HTMLUListElement, React.ComponentProps<"ul">>(
   ({ className, ...props }, ref) => (
@@ -26,8 +27,11 @@ export const SidebarMenuSubItem = React.forwardRef<HTMLLIElement, React.Componen
 SidebarMenuSubItem.displayName = "SidebarMenuSubItem";
 
 export const SidebarMenuSubButton = React.forwardRef<HTMLAnchorElement, SidebarMenuSubButtonProps>(
-  ({ asChild = false, size = "md", isActive, className, ...props }, ref) => {
-    const Comp = asChild ? Slot : "a";
+  ({ asChild = false, size = "md", isActive, className, href, ...props }, ref) => {
+    const Comp = asChild ? Slot : Link;
+    
+    // For Link component, we need to convert href to 'to' prop
+    const linkProps = asChild ? {} : { to: href || "#" };
 
     return (
       <Comp
@@ -43,6 +47,7 @@ export const SidebarMenuSubButton = React.forwardRef<HTMLAnchorElement, SidebarM
           "group-data-[collapsible=icon]:hidden",
           className
         )}
+        {...linkProps}
         {...props}
       />
     );
