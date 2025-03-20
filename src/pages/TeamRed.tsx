@@ -58,7 +58,7 @@ export default function TeamRed() {
         <JobsOverview />
 
         <section>
-          <h2 className="text-xl font-semibold mb-4 text-zinc-950">Team members</h2>
+          
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <DocumentUpload teamMembers={teamMembers} selectedTeamMember={selectedTeamMember} setSelectedTeamMember={setSelectedTeamMember} jobNumber={jobNumber} setJobNumber={setJobNumber} handleFileUpload={handleFileUpload} />
             <DocumentSummary documentCount={documentCount} teamColor="red" />
