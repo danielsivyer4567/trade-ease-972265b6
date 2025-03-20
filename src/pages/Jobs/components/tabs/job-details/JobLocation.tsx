@@ -17,14 +17,6 @@ export const JobLocation = ({ job }: JobLocationProps) => {
   const lat = job.location[1].toFixed(4);
   const lng = job.location[0].toFixed(4);
 
-  // Format address for display
-  const formattedAddress = [
-    job.address,
-    job.city,
-    job.state,
-    job.zipCode
-  ].filter(Boolean).join(', ');
-
   return (
     <div className="rounded-lg overflow-hidden border border-gray-200 bg-white">
       <Button 
@@ -36,19 +28,12 @@ export const JobLocation = ({ job }: JobLocationProps) => {
           <MapPin className="mr-2 h-4 w-4 text-gray-500" />
           <span className="font-medium text-sm">Job Location Details</span>
         </div>
-        <span className="text-xs text-gray-500 truncate max-w-[200px]">
-          {formattedAddress || `${lat}, ${lng}`}
-        </span>
+        <span className="text-xs text-gray-500">{lat}, {lng}</span>
       </Button>
       
       {isExpanded && (
         <div className="space-y-3 border-t p-3 pt-2">
           <div className="space-y-2">
-            {formattedAddress && (
-              <p className="text-sm break-words">
-                <span className="font-semibold">Address:</span> {formattedAddress}
-              </p>
-            )}
             <p className="text-sm">
               <span className="font-semibold">Coordinates:</span> {job.location[1]}, {job.location[0]}
             </p>
