@@ -2,7 +2,7 @@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { Users, CalendarDays } from "lucide-react";
-import { TEAMS } from "../../constants/teams";
+import { teams } from "../../constants/teams";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface TeamSelectorProps {
@@ -32,7 +32,7 @@ export function TeamSelector({ team, setTeam }: TeamSelectorProps) {
           <SelectValue placeholder="Select team or TBA" />
         </SelectTrigger>
         <SelectContent>
-          {TEAMS.map(team => (
+          {teams.map(team => (
             <SelectItem key={team.id} value={team.id}>
               {team.name}
             </SelectItem>
