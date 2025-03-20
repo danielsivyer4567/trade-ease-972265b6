@@ -19,6 +19,8 @@ interface SearchBarProps {
   setEndTime: (time: string) => void;
   onToggleQuoteSearch: () => void;
   onCreateJob: () => void;
+  onSelectJob?: (job: any) => void;
+  onSelectStaff?: (staff: any) => void;
 }
 
 export const SearchBar: React.FC<SearchBarProps> = ({
@@ -33,7 +35,9 @@ export const SearchBar: React.FC<SearchBarProps> = ({
   endTime,
   setEndTime,
   onToggleQuoteSearch,
-  onCreateJob
+  onCreateJob,
+  onSelectJob,
+  onSelectStaff
 }) => {
   const isMobile = useIsMobile();
 
@@ -60,10 +64,11 @@ export const SearchBar: React.FC<SearchBarProps> = ({
           startTime={startTime}
           endDate={endDate}
           endTime={endTime}
+          onSelectJob={onSelectJob}
         />
         
         {/* Staff & Connections section */}
-        <StaffConnections />
+        <StaffConnections onSelectStaff={onSelectStaff} />
         
         {/* Notes section - The last section */}
         <NotesSection />

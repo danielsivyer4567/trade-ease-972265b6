@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { format } from 'date-fns';
 import { Job } from '@/types/job';
@@ -9,6 +10,9 @@ import { SearchBar } from './components/SearchBar';
 import { Input } from '@/components/ui/input';
 import { JobsList } from './components/JobsList';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+
 interface DayDetailDrawerProps {
   selectedDay: {
     date: Date;
@@ -17,6 +21,7 @@ interface DayDetailDrawerProps {
   onClose: () => void;
   onJobClick: (jobId: string, e: React.MouseEvent) => void;
 }
+
 export const DayDetailDrawer: React.FC<DayDetailDrawerProps> = ({
   selectedDay,
   onClose,
@@ -30,6 +35,10 @@ export const DayDetailDrawer: React.FC<DayDetailDrawerProps> = ({
   const [startTime, setStartTime] = useState("09:00");
   const [endTime, setEndTime] = useState("17:00");
   const [showCreateForm, setShowCreateForm] = useState(false);
+  const [selectedJobData, setSelectedJobData] = useState<any>(null);
+  const [selectedStaffMember, setSelectedStaffMember] = useState<any>(null);
+  const [saving, setSaving] = useState(false);
+
   if (!selectedDay) return null;
   const {
     date,
@@ -56,25 +65,94 @@ export const DayDetailDrawer: React.FC<DayDetailDrawerProps> = ({
     customerName: "Mike Brown",
     amount: 950
   }];
+
   const handleQuoteSelect = (amount: number) => {
     console.log("Selected quote with amount:", amount);
     setShowQuoteSearch(false);
   };
+
   const handleToggleQuoteSearch = () => {
     setShowQuoteSearch(!showQuoteSearch);
   };
-  const handleCreateJob = () => {
-    console.log("Create new job", {
-      date: format(date, 'yyyy-MM-dd'),
-      startDate: startDate ? format(startDate, 'yyyy-MM-dd') : null,
-      endDate: endDate ? format(endDate, 'yyyy-MM-dd') : null,
-      startTime,
-      endTime
-    });
+
+  const handleStaffSelect = (staffMember: any) => {
+    setSelectedStaffMember(staffMember);
+    console.log("Selected staff member:", staffMember);
   };
+
+  const handleJobSelect = (jobData: any) => {
+    setSelectedJobData(jobData);
+    console.log("Selected job:", jobData);
+  };
+
+  const handleCreateJob = async () => {
+    setSaving(true);
+    try {
+      if (!selectedJobData) {
+        toast.error("Please select a job");
+        setSaving(false);
+        return;
+      }
+
+      // Format date and time for saving
+      const appointmentDate = startDate || date;
+      const formattedDate = format(appointmentDate, 'yyyy-MM-dd');
+      const formattedDateTime = `${formattedDate}T${startTime}:00`;
+
+      // Create job entry
+      const jobData = {
+        customer: selectedJobData.customer || "Customer Name",
+        title: selectedJobData.title || `Job #${selectedJobData.jobNumber}`,
+        job_number: selectedJobData.jobNumber,
+        date: formattedDateTime,
+        type: 'Appointment',
+        assigned_team: getCurrentTeamColor(),
+        status: 'scheduled',
+        description: `Appointment scheduled by ${selectedStaffMember?.name || 'team member'}`
+      };
+
+      // Save to database
+      const { data, error } = await supabase
+        .from('jobs')
+        .insert(jobData)
+        .select();
+
+      if (error) {
+        console.error("Error saving appointment:", error);
+        toast.error("Failed to save appointment");
+      } else {
+        toast.success("Appointment saved successfully");
+        console.log("Saved appointment:", data);
+        
+        // Close the form and drawer after successful save
+        setShowCreateForm(false);
+        onClose();
+      }
+    } catch (err) {
+      console.error("Error in appointment creation:", err);
+      toast.error("An error occurred while saving");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // Helper function to determine current team color from URL
+  const getCurrentTeamColor = () => {
+    const url = window.location.pathname;
+    if (url.includes('red')) return 'red';
+    if (url.includes('blue')) return 'blue';
+    if (url.includes('green')) return 'green';
+    return 'blue'; // Default team
+  };
+
   const toggleCreateForm = () => {
     setShowCreateForm(!showCreateForm);
+    // Initialize start date to the selected day when opening form
+    if (!showCreateForm) {
+      setStartDate(date);
+    }
   };
+
   return <Drawer open={Boolean(selectedDay)} onOpenChange={onClose}>
       <DrawerContent className="fixed inset-x-0 top-20 transform max-w-2xl h-auto border shadow-lg rounded-xl bg-slate-50 px-[10px] py-0 mx-auto my-0 max-h-[80vh] overflow-auto">
         <DrawerHeader className="border-b py-1">
@@ -119,7 +197,22 @@ export const DayDetailDrawer: React.FC<DayDetailDrawerProps> = ({
               <div className="overflow-auto">
                 <div className="flex flex-col items-center">
                   {/* Search Bar Component */}
-                  <SearchBar jobSearchQuery={jobSearchQuery} setJobSearchQuery={setJobSearchQuery} startDate={startDate} setStartDate={setStartDate} endDate={endDate} setEndDate={setEndDate} startTime={startTime} setStartTime={setStartTime} endTime={endTime} setEndTime={setEndTime} onToggleQuoteSearch={handleToggleQuoteSearch} onCreateJob={handleCreateJob} />
+                  <SearchBar 
+                    jobSearchQuery={jobSearchQuery} 
+                    setJobSearchQuery={setJobSearchQuery} 
+                    startDate={startDate} 
+                    setStartDate={setStartDate} 
+                    endDate={endDate} 
+                    setEndDate={setEndDate} 
+                    startTime={startTime} 
+                    setStartTime={setStartTime} 
+                    endTime={endTime} 
+                    setEndTime={setEndTime}
+                    onToggleQuoteSearch={handleToggleQuoteSearch}
+                    onCreateJob={handleCreateJob}
+                    onSelectJob={handleJobSelect}
+                    onSelectStaff={handleStaffSelect}
+                  />
                   
                   {/* Quote search section (conditionally shown) */}
                   {showQuoteSearch && <div className="max-w-md w-full mx-auto">
@@ -129,8 +222,12 @@ export const DayDetailDrawer: React.FC<DayDetailDrawerProps> = ({
               </div>
               
               <div className="flex justify-end mt-2">
-                <Button onClick={handleCreateJob} className="bg-slate-500 hover:bg-slate-400">
-                  Save Appointment
+                <Button 
+                  onClick={handleCreateJob} 
+                  className="bg-slate-500 hover:bg-slate-400"
+                  disabled={saving || !selectedJobData}
+                >
+                  {saving ? 'Saving...' : 'Save Appointment'}
                 </Button>
               </div>
             </div>}

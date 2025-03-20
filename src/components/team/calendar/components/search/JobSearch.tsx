@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Search, Plus } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -8,6 +9,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { syncSingleJobToCalendars } from '@/integrations/calendar/syncEvents';
 import { useCalendarConnections } from '@/hooks/useCalendarConnections';
 import { toast } from 'sonner';
+
 interface JobSearchProps {
   jobSearchQuery: string;
   setJobSearchQuery: (value: string) => void;
@@ -15,14 +17,17 @@ interface JobSearchProps {
   startTime: string;
   endDate: Date | undefined;
   endTime: string;
+  onSelectJob?: (job: any) => void;
 }
+
 export const JobSearch: React.FC<JobSearchProps> = ({
   jobSearchQuery,
   setJobSearchQuery,
   startDate,
   startTime,
   endDate,
-  endTime
+  endTime,
+  onSelectJob
 }) => {
   const navigate = useNavigate();
   const [filteredJobs, setFilteredJobs] = useState<any[]>([]);
@@ -36,11 +41,13 @@ export const JobSearch: React.FC<JobSearchProps> = ({
   } | null>(null);
   const [jobs, setJobs] = useState<any[]>([]);
   const [syncToUserCalendar, setSyncToUserCalendar] = useState(false);
+  
   const {
     connections,
     userId,
     isConnected
   } = useCalendarConnections();
+  
   useEffect(() => {
     // Fetch real jobs from API or use mock data
     const fetchJobs = async () => {
@@ -83,12 +90,19 @@ export const JobSearch: React.FC<JobSearchProps> = ({
         title: "Roof Repair"
       }]);
     };
+    
     fetchJobs();
   }, []);
+  
   useEffect(() => {
     if (jobSearchQuery) {
       const lowercaseQuery = jobSearchQuery.toLowerCase();
-      const filtered = jobs.filter(job => job.jobNumber.toLowerCase().includes(lowercaseQuery) || job.customer.toLowerCase().includes(lowercaseQuery) || job.address.toLowerCase().includes(lowercaseQuery) || job.title.toLowerCase().includes(lowercaseQuery));
+      const filtered = jobs.filter(job => 
+        job.jobNumber.toLowerCase().includes(lowercaseQuery) || 
+        job.customer.toLowerCase().includes(lowercaseQuery) || 
+        job.address.toLowerCase().includes(lowercaseQuery) || 
+        job.title.toLowerCase().includes(lowercaseQuery)
+      );
       setFilteredJobs(filtered);
       setIsJobDropdownOpen(filtered.length > 0);
     } else {
@@ -96,6 +110,7 @@ export const JobSearch: React.FC<JobSearchProps> = ({
       setIsJobDropdownOpen(false);
     }
   }, [jobSearchQuery, jobs]);
+  
   const handleJobSelect = (job: {
     id: string;
     jobNumber: string;
@@ -107,11 +122,17 @@ export const JobSearch: React.FC<JobSearchProps> = ({
     setJobSearchQuery(job.title || job.jobNumber);
     setIsJobDropdownOpen(false);
 
+    // Pass the selected job to parent component
+    if (onSelectJob) {
+      onSelectJob(job);
+    }
+
     // If sync is enabled and user has calendar connections, sync this job
     if (syncToUserCalendar && connections.length > 0 && startDate) {
       syncJobToUserCalendars(job);
     }
   };
+  
   const syncJobToUserCalendars = async (job: any) => {
     if (!userId || !startDate) return;
     try {
@@ -140,10 +161,13 @@ export const JobSearch: React.FC<JobSearchProps> = ({
       toast.error('Failed to sync with your calendars');
     }
   };
+  
   const handleNewJobClick = () => {
     navigate('/jobs/new');
   };
-  return <div className="px-0 mx-0">
+  
+  return (
+    <div className="px-0 mx-0">
       <div className="flex justify-between items-center mb-1">
         <label className="block text-xs font-medium text-gray-500">Job</label>
         <Button onClick={handleNewJobClick} className="h-6 text-xs bg-slate-500 hover:bg-slate-400 text-white flex items-center gap-1 mx-[240px] px-[62px] my-[16px]">
@@ -154,29 +178,57 @@ export const JobSearch: React.FC<JobSearchProps> = ({
       <div className="flex py-px px-0 my-0 mx-[4px]">
         <div className="relative w-full py-[3px] px-px my-0">
           <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-3 w-3 text-gray-400" />
-          <Input placeholder="Search by job #, customer name, address..." value={jobSearchQuery} onChange={e => setJobSearchQuery(e.target.value)} className="pl-7 w-full border-gray-300 h-7 text-xs bg-slate-300 py-[22px] mx-0 my-0 px-[22px]" onFocus={() => jobSearchQuery && setIsJobDropdownOpen(filteredJobs.length > 0)} onBlur={() => setTimeout(() => setIsJobDropdownOpen(false), 200)} />
+          <Input 
+            placeholder="Search by job #, customer name, address..." 
+            value={jobSearchQuery} 
+            onChange={e => setJobSearchQuery(e.target.value)} 
+            className="pl-7 w-full border-gray-300 h-7 text-xs bg-slate-300 py-[22px] mx-0 my-0 px-[22px]" 
+            onFocus={() => jobSearchQuery && setIsJobDropdownOpen(filteredJobs.length > 0)} 
+            onBlur={() => setTimeout(() => setIsJobDropdownOpen(false), 200)} 
+          />
           
           {/* Dropdown for job search results */}
-          {isJobDropdownOpen && <div className="absolute z-10 mt-1 w-full bg-white border border-gray-200 rounded-md shadow-lg max-h-40 overflow-y-auto">
-              {filteredJobs.map(job => <div key={job.id} className="px-3 py-2 hover:bg-slate-100 cursor-pointer text-xs" onClick={() => handleJobSelect(job)}>
+          {isJobDropdownOpen && (
+            <div className="absolute z-10 mt-1 w-full bg-white border border-gray-200 rounded-md shadow-lg max-h-40 overflow-y-auto">
+              {filteredJobs.map(job => (
+                <div 
+                  key={job.id} 
+                  className={`px-3 py-2 hover:bg-slate-100 cursor-pointer text-xs ${selectedJob?.id === job.id ? 'bg-slate-100' : ''}`}
+                  onClick={() => handleJobSelect(job)}
+                >
                   <div className="font-medium">{job.jobNumber} - {job.title}</div>
                   <div className="text-gray-500">
                     {job.customer} | {job.address}
                   </div>
-                </div>)}
-            </div>}
+                </div>
+              ))}
+            </div>
+          )}
         </div>
-        <Button variant="outline" size="sm" className="ml-1 border-gray-300 h-7 w-7 p-0 bg-slate-400 hover:bg-slate-300 px-[22px] py-[21px] mx-[7px] my-[3px]">
+        <Button 
+          variant="outline" 
+          size="sm" 
+          className="ml-1 border-gray-300 h-7 w-7 p-0 bg-slate-400 hover:bg-slate-300 px-[22px] py-[21px] mx-[7px] my-[3px]"
+        >
           <Plus className="h-3 w-3" />
         </Button>
       </div>
       
       {/* Calendar sync option for jobs */}
-      {userId && connections.length > 0 && <div className="flex items-center gap-2 mt-1 ml-1">
-          <input type="checkbox" id="syncToCalendar" checked={syncToUserCalendar} onChange={() => setSyncToUserCalendar(!syncToUserCalendar)} className="h-3 w-3" />
+      {userId && connections.length > 0 && (
+        <div className="flex items-center gap-2 mt-1 ml-1">
+          <input 
+            type="checkbox" 
+            id="syncToCalendar" 
+            checked={syncToUserCalendar} 
+            onChange={() => setSyncToUserCalendar(!syncToUserCalendar)} 
+            className="h-3 w-3" 
+          />
           <label htmlFor="syncToCalendar" className="text-xs text-gray-500">
             Sync this job to my calendars
           </label>
-        </div>}
-    </div>;
+        </div>
+      )}
+    </div>
+  );
 };
