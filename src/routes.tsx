@@ -10,6 +10,7 @@ import NotFound from './pages/NotFound';
 import Calendar from './pages/Calendar';
 import CalendarSync from './pages/Calendar/CalendarSync';
 import TasksPage from './pages/Tasks';
+import Jobs from './pages/Jobs';
 
 // Define the route type
 export interface RouteConfig {
@@ -41,7 +42,7 @@ export const routes: RouteConfig[] = [
   },
   {
     path: '/jobs',
-    element: <div className="p-6"><h1 className="text-2xl font-bold">Jobs</h1></div>
+    element: <Jobs />
   },
   {
     path: '/calendar',
