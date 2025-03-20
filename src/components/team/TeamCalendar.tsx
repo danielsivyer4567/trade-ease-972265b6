@@ -12,18 +12,22 @@ import { DayDetailDrawer } from './calendar/DayDetailDrawer';
 import { CalendarSyncPopover } from './calendar/CalendarSyncPopover';
 import { calendarStyles } from './calendar/calendarStyles';
 import { Job } from '@/types/job';
-import { mockJobsData } from './calendar/calendarUtils';
+import { mockJobsData, getJobsForDate } from './calendar/calendarUtils';
 
 interface TeamCalendarProps {
   date?: Date;
   setDate?: (date: Date) => void;
   teamColor: string;
+  assignedJobs?: Job[];
+  onJobAssign?: (jobId: string, date: Date) => void;
 }
 
 export const TeamCalendar: React.FC<TeamCalendarProps> = ({ 
   date = new Date(), 
   setDate, 
-  teamColor 
+  teamColor,
+  assignedJobs = [],
+  onJobAssign
 }) => {
   // Initialize dates and weather data
   const [currentDate, setCurrentDate] = useState(date);
@@ -31,6 +35,14 @@ export const TeamCalendar: React.FC<TeamCalendarProps> = ({
   const { weatherData, isWeatherLoading } = useWeatherData();
   
   // Calendar event handlers
+  const calendarHandlers = useCalendarHandlers({
+    currentDate,
+    setCurrentDate,
+    setSelectedDay,
+    weatherData, 
+    mockJobsData
+  });
+  
   const { 
     handlePrevWeek, 
     handleNextWeek,
@@ -39,13 +51,7 @@ export const TeamCalendar: React.FC<TeamCalendarProps> = ({
     handleDrop,
     handleJobClick,
     handleDayClick,
-  } = useCalendarHandlers({
-    currentDate,
-    setCurrentDate,
-    setSelectedDay, 
-    weatherData,
-    mockJobsData
-  });
+  } = calendarHandlers;
   
   // Calculate week range and days for rendering
   const startDate = startOfWeek(currentDate, { weekStartsOn: 1 }); // Start on Monday
@@ -55,6 +61,22 @@ export const TeamCalendar: React.FC<TeamCalendarProps> = ({
   // Get day header style based on team color
   const dayHeaderStyle = calendarStyles.getDayHeaderStyle(teamColor);
   
+  // Jobs to display - use assigned jobs if provided, otherwise use mock data
+  const jobsToDisplay = assignedJobs.length > 0 ? assignedJobs : mockJobsData;
+  
+  // Custom onDrop handler that uses the provided onJobAssign if available
+  const onDropHandler = (e: React.DragEvent<HTMLDivElement>, date: Date) => {
+    if (onJobAssign) {
+      e.preventDefault();
+      const jobId = e.dataTransfer.getData('jobId');
+      if (jobId) {
+        onJobAssign(jobId, date);
+      }
+    } else {
+      handleDrop(e, date);
+    }
+  };
+  
   return (
     <section className="bg-white shadow rounded-lg overflow-hidden mx-auto max-w-7xl">
       <TeamCalendarHeader 
@@ -63,6 +85,8 @@ export const TeamCalendar: React.FC<TeamCalendarProps> = ({
         onNextWeek={handleNextWeek}
         onToday={handleToday}
         teamColor={teamColor}
+        assignedJobs={assignedJobs}
+        date={date}
       />
       
       {/* Calendar Days Grid */}
@@ -79,9 +103,7 @@ export const TeamCalendar: React.FC<TeamCalendarProps> = ({
         
         {/* Calendar day cells */}
         {days.map((day, i) => {
-          const jobsForDate = mockJobsData.filter(
-            job => job.date === format(day, 'yyyy-MM-dd')
-          );
+          const jobsForDate = getJobsForDate(day, jobsToDisplay);
           
           const weatherForDate = weatherData?.find(
             data => format(new Date(data.date), 'yyyy-MM-dd') === format(day, 'yyyy-MM-dd')
@@ -94,7 +116,7 @@ export const TeamCalendar: React.FC<TeamCalendarProps> = ({
                 weatherData={weatherForDate}
                 jobsForDate={jobsForDate}
                 onJobClick={handleJobClick}
-                onDrop={handleDrop}
+                onDrop={onDropHandler}
                 onDayClick={handleDayClick}
                 teamColor={teamColor}
               />
@@ -110,11 +132,6 @@ export const TeamCalendar: React.FC<TeamCalendarProps> = ({
         onJobClick={handleJobClick}
         teamColor={teamColor}
       />
-      
-      {/* Calendar sync popover */}
-      <div className="absolute top-4 right-4">
-        <CalendarSyncPopover />
-      </div>
     </section>
   );
 };
