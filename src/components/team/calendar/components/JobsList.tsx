@@ -56,4 +56,4 @@ export const JobsList: React.FC<JobsListProps> = ({
       )}
     </div>
   );
-};
+}

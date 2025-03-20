@@ -12,7 +12,7 @@ interface JobCardProps {
 
 export function JobCard({ job, onJobClick, onAssign }: JobCardProps) {
   return (
-    <Card key={job.id} className="w-full bg-neutral-50">
+    <Card key={job.id} className="w-full bg-neutral-50 hover:bg-neutral-100 transition-colors">
       <div className="flex justify-between items-center p-4">
         <div 
           className="flex-1 cursor-pointer" 
