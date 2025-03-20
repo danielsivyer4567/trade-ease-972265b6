@@ -1,11 +1,16 @@
+
 import React, { useState } from 'react';
 import { format } from 'date-fns';
 import { Job } from '@/types/job';
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerFooter } from '@/components/ui/drawer';
 import { Button } from '@/components/ui/button';
-import { CalendarIcon } from 'lucide-react';
+import { CalendarIcon, ListFilter, Search } from 'lucide-react';
 import { SearchQuotes } from '@/pages/Jobs/components/tabs/financials/SearchQuotes';
 import { SearchBar } from './components/SearchBar';
+import { Input } from '@/components/ui/input';
+import { JobsList } from './components/JobsList';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+
 interface DayDetailDrawerProps {
   selectedDay: {
     date: Date;
@@ -14,6 +19,7 @@ interface DayDetailDrawerProps {
   onClose: () => void;
   onJobClick: (jobId: string, e: React.MouseEvent) => void;
 }
+
 export const DayDetailDrawer: React.FC<DayDetailDrawerProps> = ({
   selectedDay,
   onClose,
@@ -26,33 +32,39 @@ export const DayDetailDrawer: React.FC<DayDetailDrawerProps> = ({
   const [endDate, setEndDate] = useState<Date | undefined>(undefined);
   const [startTime, setStartTime] = useState("09:00");
   const [endTime, setEndTime] = useState("17:00");
+  const [activeTab, setActiveTab] = useState("new");
+  
   if (!selectedDay) return null;
-  const {
-    date,
-    jobs
-  } = selectedDay;
+  
+  const { date, jobs } = selectedDay;
+
+  // Filter jobs based on search query
+  const filteredJobs = jobs.filter(job => {
+    const searchLower = jobSearchQuery.toLowerCase();
+    return (
+      job.title?.toLowerCase().includes(searchLower) ||
+      job.customer?.toLowerCase().includes(searchLower) ||
+      job.jobNumber?.toLowerCase().includes(searchLower) ||
+      job.type?.toLowerCase().includes(searchLower)
+    );
+  });
 
   // Mock quotes data for the search feature
-  const mockCustomerQuotes = [{
-    id: "Q001",
-    customerName: "John Smith",
-    amount: 750
-  }, {
-    id: "Q002",
-    customerName: "Sarah Johnson",
-    amount: 1200
-  }, {
-    id: "Q003",
-    customerName: "Mike Brown",
-    amount: 950
-  }];
+  const mockCustomerQuotes = [
+    { id: "Q001", customerName: "John Smith", amount: 750 },
+    { id: "Q002", customerName: "Sarah Johnson", amount: 1200 },
+    { id: "Q003", customerName: "Mike Brown", amount: 950 }
+  ];
+  
   const handleQuoteSelect = (amount: number) => {
     console.log("Selected quote with amount:", amount);
     setShowQuoteSearch(false);
   };
+  
   const handleToggleQuoteSearch = () => {
     setShowQuoteSearch(!showQuoteSearch);
   };
+  
   const handleCreateJob = () => {
     console.log("Create new job", {
       date: format(date, 'yyyy-MM-dd'),
@@ -62,31 +74,85 @@ export const DayDetailDrawer: React.FC<DayDetailDrawerProps> = ({
       endTime
     });
   };
-  return <Drawer open={Boolean(selectedDay)} onOpenChange={onClose}>
-      <DrawerContent className="fixed inset-x-0 top-20 transform max-w-2xl h-auto border shadow-lg rounded-xl bg-slate-50 px-[10px] py-0 mx-auto my-0 max-h-[45vh] overflow-auto">
+
+  return (
+    <Drawer open={Boolean(selectedDay)} onOpenChange={onClose}>
+      <DrawerContent className="fixed inset-x-0 top-20 transform max-w-2xl h-auto border shadow-lg rounded-xl bg-slate-50 px-[10px] py-0 mx-auto my-0 max-h-[80vh] overflow-auto">
         <DrawerHeader className="border-b py-1">
           <DrawerTitle className="text-center flex items-center justify-center gap-2">
             <CalendarIcon className="h-5 w-5" />
-            New Appointment
+            {format(date, 'MMMM d, yyyy')}
           </DrawerTitle>
         </DrawerHeader>
         
-        <div className="overflow-auto">
-          <div className="flex flex-col items-center">
-            {/* Search Bar Component - This is the main content we want to show */}
-            <SearchBar jobSearchQuery={jobSearchQuery} setJobSearchQuery={setJobSearchQuery} startDate={startDate} setStartDate={setStartDate} endDate={endDate} setEndDate={setEndDate} startTime={startTime} setStartTime={setStartTime} endTime={endTime} setEndTime={setEndTime} onToggleQuoteSearch={handleToggleQuoteSearch} onCreateJob={handleCreateJob} />
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid grid-cols-2 w-full mt-2">
+            <TabsTrigger value="existing">Existing Jobs ({jobs.length})</TabsTrigger>
+            <TabsTrigger value="new">New Appointment</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="existing" className="pb-4">
+            <div className="flex items-center gap-2 p-2">
+              <Search className="h-4 w-4 text-gray-500" />
+              <Input 
+                placeholder="Search jobs..." 
+                value={jobSearchQuery} 
+                onChange={(e) => setJobSearchQuery(e.target.value)}
+                className="h-8 text-sm"
+              />
+            </div>
             
-            {/* We're not showing these sections by default to make the menu shorter */}
-            {showQuoteSearch && <div className="max-w-md w-full mx-auto">
-                <SearchQuotes onSelectQuote={handleQuoteSelect} customerQuotes={mockCustomerQuotes} />
-              </div>}
-          </div>
-        </div>
+            <JobsList 
+              jobSearchQuery={jobSearchQuery}
+              filteredJobs={filteredJobs}
+              onJobClick={onJobClick}
+            />
+          </TabsContent>
+          
+          <TabsContent value="new">
+            <div className="overflow-auto">
+              <div className="flex flex-col items-center">
+                {/* Search Bar Component */}
+                <SearchBar 
+                  jobSearchQuery={jobSearchQuery} 
+                  setJobSearchQuery={setJobSearchQuery} 
+                  startDate={startDate} 
+                  setStartDate={setStartDate} 
+                  endDate={endDate} 
+                  setEndDate={setEndDate} 
+                  startTime={startTime} 
+                  setStartTime={setStartTime} 
+                  endTime={endTime} 
+                  setEndTime={setEndTime} 
+                  onToggleQuoteSearch={handleToggleQuoteSearch} 
+                  onCreateJob={handleCreateJob} 
+                />
+                
+                {/* Quote search section (conditionally shown) */}
+                {showQuoteSearch && (
+                  <div className="max-w-md w-full mx-auto">
+                    <SearchQuotes 
+                      onSelectQuote={handleQuoteSelect} 
+                      customerQuotes={mockCustomerQuotes} 
+                    />
+                  </div>
+                )}
+              </div>
+            </div>
+          </TabsContent>
+        </Tabs>
         
         <DrawerFooter className="flex flex-row justify-between border-t gap-3 p-2">
-          <Button onClick={onClose} variant="outline" className="flex-1 text-gray-950 bg-slate-400 hover:bg-slate-300">Cancel</Button>
-          <Button onClick={handleCreateJob} className="flex-1 bg-slate-500 hover:bg-slate-400">Save</Button>
+          <Button onClick={onClose} variant="outline" className="flex-1 text-gray-950 bg-slate-400 hover:bg-slate-300">
+            Close
+          </Button>
+          {activeTab === 'new' && (
+            <Button onClick={handleCreateJob} className="flex-1 bg-slate-500 hover:bg-slate-400">
+              Save
+            </Button>
+          )}
         </DrawerFooter>
       </DrawerContent>
-    </Drawer>;
+    </Drawer>
+  );
 };
