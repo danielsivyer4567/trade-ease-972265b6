@@ -81,7 +81,7 @@ export function NavLinkItem({ link }: NavLinkItemProps) {
       </TooltipContent>
     </Tooltip>
   ) : (
-    <React.Fragment>{content}</React.Fragment>
+    content
   );
 }
 

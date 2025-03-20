@@ -23,6 +23,13 @@ import Messaging from './pages/Messaging';
 import SettingsPage from './pages/Settings';
 import Quotes from './pages/Quotes';
 import Statistics from './pages/Statistics';
+import NotificationsSettings from './pages/Settings/Notifications';
+import TradeRatesCalculator from './pages/Settings/TradeRatesCalculator';
+import BillsPurchaseOrders from './pages/Settings/BillsPurchaseOrders';
+import AIAssistantSettings from './pages/Settings/AIAssistantSettings';
+import ContractorsPage from './pages/Settings/Contractors';
+import OfficeStaff from './pages/Settings/OfficeStaff';
+import IntegrationsPage from './pages/Settings/Integrations';
 
 // Define the route type
 export interface RouteConfig {
@@ -107,6 +114,35 @@ export const routes: RouteConfig[] = [
   {
     path: '/settings',
     element: <SettingsPage />
+  },
+  // Settings subpages
+  {
+    path: '/settings/notifications',
+    element: <NotificationsSettings />
+  },
+  {
+    path: '/settings/trade-rates',
+    element: <TradeRatesCalculator />
+  },
+  {
+    path: '/settings/bills-purchase-orders',
+    element: <BillsPurchaseOrders />
+  },
+  {
+    path: '/settings/ai-assistant-settings',
+    element: <AIAssistantSettings />
+  },
+  {
+    path: '/settings/contractors',
+    element: <ContractorsPage />
+  },
+  {
+    path: '/settings/office-staff',
+    element: <OfficeStaff />
+  },
+  {
+    path: '/settings/integrations',
+    element: <IntegrationsPage />
   },
   {
     path: '/notifications',

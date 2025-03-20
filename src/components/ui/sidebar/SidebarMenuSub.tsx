@@ -30,7 +30,7 @@ export const SidebarMenuSubButton = React.forwardRef<HTMLAnchorElement, SidebarM
   ({ asChild = false, size = "md", isActive, className, href, ...props }, ref) => {
     const Comp = asChild ? Slot : Link;
     
-    // For Link component, we need to convert href to 'to' prop
+    // For Link component, we need to use 'to' prop instead of 'href'
     const linkProps = asChild ? {} : { to: href || "#" };
 
     return (
