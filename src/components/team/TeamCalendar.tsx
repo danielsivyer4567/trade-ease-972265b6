@@ -2,7 +2,7 @@
 import React from 'react';
 import { Calendar } from '@/components/ui/calendar';
 import { Job } from '@/types/job';
-import { format } from 'date-fns';
+import { format, isSameDay } from 'date-fns';
 import { TeamCalendarHeader } from './calendar/TeamCalendarHeader';
 import { CalendarDayContent } from './calendar/CalendarDayContent';
 import { useWeatherData } from './calendar/useWeatherData';
@@ -50,20 +50,22 @@ export function TeamCalendar({
           modifiers={getCalendarModifiers(weatherDates)}
           modifiersStyles={getCalendarModifiersStyles()}
           components={{
-            DayContent: ({ date }) => {
-              const dateStr = format(date, 'yyyy-MM-dd');
+            DayContent: ({ date: dayDate }) => {
+              const dateStr = format(dayDate, 'yyyy-MM-dd');
               const weatherData = weatherDates.find(rd => rd.date === dateStr);
-              const jobsForDate = getJobsForDate(date, assignedJobs);
+              const jobsForDate = getJobsForDate(dayDate, assignedJobs);
+              const isSelected = date ? isSameDay(dayDate, date) : false;
 
               return (
                 <CalendarDayContent 
-                  date={date}
+                  date={dayDate}
                   weatherData={weatherData}
                   jobsForDate={jobsForDate}
                   onJobClick={handleJobClick}
                   onDrop={handleDrop}
                   onDayClick={handleDayClick}
                   teamColor={teamColor}
+                  isSelected={isSelected}
                 />
               );
             }

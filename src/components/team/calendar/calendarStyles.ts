@@ -9,9 +9,9 @@ export const getCalendarClassNames = (teamColor: string) => ({
   head_cell: "text-muted-foreground text-center text-sm font-medium p-2",
   row: "grid grid-cols-7",
   cell: "h-16 text-center text-sm p-0 relative hover:bg-gray-100 rounded-md cursor-pointer",
-  day: `h-16 w-full p-2 font-normal aria-selected:bg-${teamColor}-600 aria-selected:text-white hover:bg-gray-100 rounded-md`,
+  day: "h-16 w-full p-2 font-normal hover:bg-gray-100 rounded-md",
   day_range_end: "day-range-end",
-  day_selected: `bg-${teamColor}-600 text-white hover:bg-${teamColor}-600 hover:text-white focus:bg-${teamColor}-600 focus:text-white`,
+  day_selected: "", // We'll handle the selected state in our custom DayContent
   day_today: "bg-blue-100 text-blue-900 hover:bg-blue-200",
   day_outside: "text-gray-400",
   nav: "space-x-1 flex items-center justify-between p-2",
