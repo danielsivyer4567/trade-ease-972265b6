@@ -22,6 +22,7 @@ import Email from './pages/Email';
 import Messaging from './pages/Messaging';
 import SettingsPage from './pages/Settings';
 import Quotes from './pages/Quotes';
+import Statistics from './pages/Statistics';
 
 // Define the route type
 export interface RouteConfig {
@@ -45,7 +46,7 @@ export const routes: RouteConfig[] = [
   },
   {
     path: '/statistics',
-    element: <div className="p-6"><h1 className="text-2xl font-bold">Statistics</h1></div>
+    element: <Statistics />
   },
   {
     path: '/tasks',
