@@ -9,6 +9,7 @@ import Notifications from './pages/Notifications';
 import NotFound from './pages/NotFound';
 import Calendar from './pages/Calendar';
 import CalendarSync from './pages/Calendar/CalendarSync';
+import TasksPage from './pages/Tasks';
 
 // Define the route type
 export interface RouteConfig {
@@ -36,7 +37,7 @@ export const routes: RouteConfig[] = [
   },
   {
     path: '/tasks',
-    element: <div className="p-6"><h1 className="text-2xl font-bold">Task Lists</h1></div>
+    element: <TasksPage />
   },
   {
     path: '/jobs',
