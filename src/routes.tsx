@@ -1,3 +1,4 @@
+
 import { ReactNode } from 'react';
 import Customers from './pages/Customers';
 import NewCustomer from './pages/Customers/NewCustomer';
@@ -16,6 +17,7 @@ import TeamGreen from './pages/TeamGreen';
 import Database from './pages/Database';
 import Integrations from './pages/Integrations';
 import Calculators from './pages/Calculators';
+import AIFeatures from './pages/AIFeatures';
 
 // Define the route type
 export interface RouteConfig {
@@ -83,7 +85,7 @@ export const routes: RouteConfig[] = [
   },
   {
     path: '/ai-features',
-    element: <div className="p-6"><h1 className="text-2xl font-bold">AI Features</h1></div>
+    element: <AIFeatures />
   },
   {
     path: '/calculators',
