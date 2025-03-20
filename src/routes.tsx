@@ -19,6 +19,7 @@ import Integrations from './pages/Integrations';
 import Calculators from './pages/Calculators';
 import AIFeatures from './pages/AIFeatures';
 import Email from './pages/Email';
+import SettingsPage from './pages/Settings';
 
 // Define the route type
 export interface RouteConfig {
@@ -102,7 +103,7 @@ export const routes: RouteConfig[] = [
   },
   {
     path: '/settings',
-    element: <div className="p-6"><h1 className="text-2xl font-bold">Settings</h1></div>
+    element: <SettingsPage />
   },
   {
     path: '/notifications',
