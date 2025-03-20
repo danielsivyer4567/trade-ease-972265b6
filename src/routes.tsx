@@ -18,6 +18,7 @@ import Database from './pages/Database';
 import Integrations from './pages/Integrations';
 import Calculators from './pages/Calculators';
 import AIFeatures from './pages/AIFeatures';
+import Email from './pages/Email';
 
 // Define the route type
 export interface RouteConfig {
@@ -81,7 +82,7 @@ export const routes: RouteConfig[] = [
   },
   {
     path: '/email',
-    element: <div className="p-6"><h1 className="text-2xl font-bold">Email</h1></div>
+    element: <Email />
   },
   {
     path: '/ai-features',

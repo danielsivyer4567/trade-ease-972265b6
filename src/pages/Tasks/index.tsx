@@ -1,6 +1,6 @@
 
 import { AppLayout } from "@/components/ui/AppLayout";
-import TaskManager from "@/components/tasks/TaskManager";
+import { TaskManager } from "@/components/tasks/TaskManager";
 
 export default function Tasks() {
   return (
