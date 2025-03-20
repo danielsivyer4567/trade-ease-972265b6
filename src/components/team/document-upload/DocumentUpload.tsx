@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { GeneralDocumentUpload } from './GeneralDocumentUpload';
@@ -6,18 +5,17 @@ import { InsuranceDocumentUpload } from './InsuranceDocumentUpload';
 import { JobRelatedDocumentUpload } from './JobRelatedDocumentUpload';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { DocumentUploadProps } from './types';
-
-export const DocumentUpload: React.FC<DocumentUploadProps> = ({ 
-  teamMembers, 
-  selectedTeamMember, 
+export const DocumentUpload: React.FC<DocumentUploadProps> = ({
+  teamMembers,
+  selectedTeamMember,
   setSelectedTeamMember,
   jobNumber,
   setJobNumber,
-  handleFileUpload 
+  handleFileUpload
 }) => {
   const [activeTab, setActiveTab] = useState('general');
   const isMobile = useIsMobile();
-  
+
   // State for file uploads
   const [generalFiles, setGeneralFiles] = useState<File[]>([]);
   const [insuranceFiles, setInsuranceFiles] = useState<File[]>([]);
@@ -30,7 +28,7 @@ export const DocumentUpload: React.FC<DocumentUploadProps> = ({
   const handleLocalFileUpload = (e: React.ChangeEvent<HTMLInputElement>, type: 'insurance' | 'general' | 'jobRelated') => {
     if (e.target.files && e.target.files.length > 0) {
       const newFiles = Array.from(e.target.files);
-      
+
       // Update local state
       if (type === 'general') {
         setGeneralFiles([...generalFiles, ...newFiles]);
@@ -39,7 +37,7 @@ export const DocumentUpload: React.FC<DocumentUploadProps> = ({
       } else if (type === 'jobRelated') {
         setJobRelatedFiles([...jobRelatedFiles, ...newFiles]);
       }
-      
+
       // Call parent handler
       handleFileUpload(e, type);
     }
@@ -50,19 +48,15 @@ export const DocumentUpload: React.FC<DocumentUploadProps> = ({
     e.preventDefault();
     setIsDragging(true);
   };
-
   const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     setIsDragging(false);
   };
-
   const handleDrop = (e: React.DragEvent<HTMLDivElement>, type: 'insurance' | 'general' | 'jobRelated') => {
     e.preventDefault();
     setIsDragging(false);
-    
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
       const newFiles = Array.from(e.dataTransfer.files);
-      
       if (type === 'general') {
         setGeneralFiles([...generalFiles, ...newFiles]);
       } else if (type === 'insurance') {
@@ -70,14 +64,13 @@ export const DocumentUpload: React.FC<DocumentUploadProps> = ({
       } else if (type === 'jobRelated') {
         setJobRelatedFiles([...jobRelatedFiles, ...newFiles]);
       }
-      
+
       // Create a synthetic event to pass to the parent handler
       const syntheticEvent = {
         target: {
           files: e.dataTransfer.files
         }
       } as React.ChangeEvent<HTMLInputElement>;
-      
       handleFileUpload(syntheticEvent, type);
     }
   };
@@ -85,7 +78,7 @@ export const DocumentUpload: React.FC<DocumentUploadProps> = ({
   // Handle file submissions
   const handleSubmitFiles = (type: 'insurance' | 'general' | 'jobRelated') => {
     setIsSubmitting(true);
-    
+
     // Simulate API call
     setTimeout(() => {
       if (type === 'general') {
@@ -115,84 +108,35 @@ export const DocumentUpload: React.FC<DocumentUploadProps> = ({
       setJobRelatedFiles(updatedFiles);
     }
   };
-  
-  return (
-    <div className={`w-full ${isMobile ? 'p-2' : 'p-4'} bg-white rounded-lg shadow-md`}>
+  return <div className={`w-full ${isMobile ? 'p-2' : 'p-4'} bg-white rounded-lg shadow-md`}>
       <h2 className={`${isMobile ? 'text-lg mb-2' : 'text-xl mb-4'} font-semibold text-gray-800`}>
         Document Management
       </h2>
       
       <Tabs defaultValue="general" value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className={`grid ${isMobile ? 'grid-cols-1 gap-1' : 'grid-cols-3'} w-full mb-4`}>
-          <TabsTrigger value="general" className={`${isMobile ? 'py-1' : 'py-2'}`}>
+          <TabsTrigger value="general" className="text-gray-950 bg-slate-400 hover:bg-slate-300 px-[30px] mx-[27px]">
             General Documents
           </TabsTrigger>
-          <TabsTrigger value="insurance" className={`${isMobile ? 'py-1' : 'py-2'}`}>
+          <TabsTrigger value="insurance" className="bg-slate-400 hover:bg-slate-300 px-[43px] mx-[17px]">
             Insurance
           </TabsTrigger>
-          <TabsTrigger value="job" className={`${isMobile ? 'py-1' : 'py-2'}`}>
+          <TabsTrigger value="job" className="bg-slate-400 hover:bg-slate-300 mx-[23px]">
             Job Related
           </TabsTrigger>
         </TabsList>
         
         <TabsContent value="general" className="space-y-4">
-          <GeneralDocumentUpload 
-            type="general"
-            teamMembers={teamMembers}
-            selectedTeamMember={selectedTeamMember}
-            setSelectedTeamMember={setSelectedTeamMember}
-            handleFileUpload={handleLocalFileUpload}
-            uploadedFiles={generalFiles}
-            handleSubmitFiles={handleSubmitFiles}
-            isSubmitting={isSubmitting}
-            isDragging={isDragging}
-            handleDragOver={handleDragOver}
-            handleDragLeave={handleDragLeave}
-            handleDrop={handleDrop}
-            handleDeleteFile={(index) => handleDeleteFile(index, 'general')}
-          />
+          <GeneralDocumentUpload type="general" teamMembers={teamMembers} selectedTeamMember={selectedTeamMember} setSelectedTeamMember={setSelectedTeamMember} handleFileUpload={handleLocalFileUpload} uploadedFiles={generalFiles} handleSubmitFiles={handleSubmitFiles} isSubmitting={isSubmitting} isDragging={isDragging} handleDragOver={handleDragOver} handleDragLeave={handleDragLeave} handleDrop={handleDrop} handleDeleteFile={index => handleDeleteFile(index, 'general')} />
         </TabsContent>
         
         <TabsContent value="insurance" className="space-y-4">
-          <InsuranceDocumentUpload 
-            type="insurance"
-            teamMembers={teamMembers}
-            selectedTeamMember={selectedTeamMember}
-            setSelectedTeamMember={setSelectedTeamMember}
-            handleFileUpload={handleLocalFileUpload}
-            uploadedFiles={insuranceFiles}
-            handleSubmitFiles={handleSubmitFiles}
-            isSubmitting={isSubmitting}
-            isDragging={isDragging}
-            handleDragOver={handleDragOver}
-            handleDragLeave={handleDragLeave}
-            handleDrop={handleDrop}
-            handleDeleteFile={(index) => handleDeleteFile(index, 'insurance')}
-          />
+          <InsuranceDocumentUpload type="insurance" teamMembers={teamMembers} selectedTeamMember={selectedTeamMember} setSelectedTeamMember={setSelectedTeamMember} handleFileUpload={handleLocalFileUpload} uploadedFiles={insuranceFiles} handleSubmitFiles={handleSubmitFiles} isSubmitting={isSubmitting} isDragging={isDragging} handleDragOver={handleDragOver} handleDragLeave={handleDragLeave} handleDrop={handleDrop} handleDeleteFile={index => handleDeleteFile(index, 'insurance')} />
         </TabsContent>
         
         <TabsContent value="job" className="space-y-4">
-          <JobRelatedDocumentUpload 
-            type="jobRelated"
-            teamMembers={teamMembers}
-            selectedTeamMember={selectedTeamMember}
-            setSelectedTeamMember={setSelectedTeamMember}
-            jobNumber={jobNumber}
-            setJobNumber={setJobNumber}
-            handleFileUpload={handleLocalFileUpload}
-            uploadedFiles={jobRelatedFiles}
-            handleSubmitFiles={handleSubmitFiles}
-            isSubmitting={isSubmitting}
-            isDragging={isDragging}
-            handleDragOver={handleDragOver}
-            handleDragLeave={handleDragLeave}
-            handleDrop={handleDrop}
-            extractedText={extractedText}
-            setExtractedText={setExtractedText}
-            handleDeleteFile={(index) => handleDeleteFile(index, 'jobRelated')}
-          />
+          <JobRelatedDocumentUpload type="jobRelated" teamMembers={teamMembers} selectedTeamMember={selectedTeamMember} setSelectedTeamMember={setSelectedTeamMember} jobNumber={jobNumber} setJobNumber={setJobNumber} handleFileUpload={handleLocalFileUpload} uploadedFiles={jobRelatedFiles} handleSubmitFiles={handleSubmitFiles} isSubmitting={isSubmitting} isDragging={isDragging} handleDragOver={handleDragOver} handleDragLeave={handleDragLeave} handleDrop={handleDrop} extractedText={extractedText} setExtractedText={setExtractedText} handleDeleteFile={index => handleDeleteFile(index, 'jobRelated')} />
         </TabsContent>
       </Tabs>
-    </div>
-  );
+    </div>;
 };
