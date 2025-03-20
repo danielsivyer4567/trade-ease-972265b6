@@ -7,6 +7,8 @@ import Index from './pages/Index';
 import TradeDash from './pages/TradeDash';
 import Notifications from './pages/Notifications';
 import NotFound from './pages/NotFound';
+import Calendar from './pages/Calendar';
+import CalendarSync from './pages/Calendar/CalendarSync';
 
 // Define the route type
 export interface RouteConfig {
@@ -42,7 +44,11 @@ export const routes: RouteConfig[] = [
   },
   {
     path: '/calendar',
-    element: <div className="p-6"><h1 className="text-2xl font-bold">Calendar</h1></div>
+    element: <Calendar />
+  },
+  {
+    path: '/calendar/sync',
+    element: <CalendarSync />
   },
   {
     path: '/customers',
