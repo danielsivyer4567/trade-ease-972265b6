@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { AppLayout } from "@/components/ui/AppLayout";
 import { DocumentSummary } from "@/components/team/DocumentSummary";
@@ -7,10 +8,13 @@ import { JobsOverview } from "@/components/team/JobsOverview";
 import { TeamCalendar } from "@/components/team/TeamCalendar";
 import { TeamHeader } from "@/components/team/TeamHeader";
 import { TeamTimeOff } from "@/components/team/TeamTimeOff";
+import { TeamMembers } from "@/components/team/TeamMembers";
+
 interface TeamMember {
   id: string;
   name: string;
 }
+
 export default function TeamRed() {
   const [date, setDate] = useState<Date | undefined>(new Date());
   const [selectedTeamMember, setSelectedTeamMember] = useState("");
@@ -27,6 +31,7 @@ export default function TeamRed() {
     date: new Date(),
     severity: ""
   });
+  
   const teamMembers: TeamMember[] = [{
     id: "1",
     name: "John Doe"
@@ -37,10 +42,12 @@ export default function TeamRed() {
     id: "3",
     name: "Bob Johnson"
   }];
+  
   const handleIncidentSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     console.log('Incident Report Submitted:', incidentReport);
   };
+  
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>, type: 'insurance' | 'general' | 'jobRelated') => {
     if (event.target.files && event.target.files.length > 0) {
       setDocumentCount(prev => ({
@@ -49,6 +56,7 @@ export default function TeamRed() {
       }));
     }
   };
+  
   return <AppLayout>
       <div className="space-y-8">
         <TeamHeader teamName="Red Team" />
@@ -56,9 +64,10 @@ export default function TeamRed() {
         <TeamCalendar date={date} setDate={setDate} teamColor="red" />
 
         <JobsOverview />
+        
+        <TeamMembers teamColor="red" teamName="Red Team" />
 
         <section>
-          
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <DocumentUpload teamMembers={teamMembers} selectedTeamMember={selectedTeamMember} setSelectedTeamMember={setSelectedTeamMember} jobNumber={jobNumber} setJobNumber={setJobNumber} handleFileUpload={handleFileUpload} />
             <DocumentSummary documentCount={documentCount} teamColor="red" />
