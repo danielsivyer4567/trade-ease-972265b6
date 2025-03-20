@@ -48,6 +48,7 @@ export const CurrentJobs = ({ jobs, onStatusUpdate }: CurrentJobsProps) => {
   };
 
   const handleJobClick = (jobId: string) => {
+    console.log("Navigating to job details:", jobId);
     navigate(`/jobs/${jobId}`);
   };
 
