@@ -21,6 +21,7 @@ import AIFeatures from './pages/AIFeatures';
 import Email from './pages/Email';
 import Messaging from './pages/Messaging';
 import SettingsPage from './pages/Settings';
+import Quotes from './pages/Quotes';
 
 // Define the route type
 export interface RouteConfig {
@@ -76,7 +77,7 @@ export const routes: RouteConfig[] = [
   },
   {
     path: '/quotes',
-    element: <div className="p-6"><h1 className="text-2xl font-bold">Quotes</h1></div>
+    element: <Quotes />
   },
   {
     path: '/messaging',
