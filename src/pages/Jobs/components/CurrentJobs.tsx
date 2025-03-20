@@ -31,11 +31,11 @@ export const CurrentJobs = ({ jobs, onStatusUpdate }: CurrentJobsProps) => {
     switch (status) {
       case 'in-progress':
         return 'bg-blue-500 hover:bg-blue-600';
-      case 'completed':
+      case 'to-invoice':
         return 'bg-green-500 hover:bg-green-600';
       case 'invoiced':
         return 'bg-purple-500 hover:bg-purple-600';
-      case 'cancelled':
+      case 'clean-required':
         return 'bg-red-500 hover:bg-red-600';
       default:
         return 'bg-gray-500 hover:bg-gray-600';
@@ -114,7 +114,7 @@ export const CurrentJobs = ({ jobs, onStatusUpdate }: CurrentJobsProps) => {
                         <Button 
                           variant="outline" 
                           size="sm"
-                          onClick={() => handleStatusChange(job.id, 'completed')}
+                          onClick={() => handleStatusChange(job.id, 'to-invoice')}
                           disabled={actionLoading === job.id}
                         >
                           {actionLoading === job.id ? (
@@ -126,7 +126,7 @@ export const CurrentJobs = ({ jobs, onStatusUpdate }: CurrentJobsProps) => {
                         </Button>
                       )}
                       
-                      {job.status === 'completed' && (
+                      {job.status === 'to-invoice' && (
                         <Button 
                           variant="outline" 
                           size="sm"
@@ -141,7 +141,7 @@ export const CurrentJobs = ({ jobs, onStatusUpdate }: CurrentJobsProps) => {
                         </Button>
                       )}
                       
-                      {job.date && job.status !== 'cancelled' && (
+                      {job.date && job.status !== 'clean-required' && (
                         <Button 
                           variant="outline" 
                           size="sm"
@@ -153,11 +153,11 @@ export const CurrentJobs = ({ jobs, onStatusUpdate }: CurrentJobsProps) => {
                         </Button>
                       )}
                       
-                      {job.status !== 'cancelled' && job.status !== 'invoiced' && (
+                      {job.status !== 'clean-required' && job.status !== 'invoiced' && (
                         <Button 
                           variant="outline" 
                           size="sm"
-                          onClick={() => handleStatusChange(job.id, 'cancelled')}
+                          onClick={() => handleStatusChange(job.id, 'clean-required')}
                           disabled={actionLoading === job.id}
                           className="text-red-600 border-red-300 hover:bg-red-50"
                         >
@@ -166,7 +166,7 @@ export const CurrentJobs = ({ jobs, onStatusUpdate }: CurrentJobsProps) => {
                           ) : (
                             <XCircle className="h-4 w-4 mr-1" />
                           )}
-                          <span>Cancel</span>
+                          <span>Mark for Cleaning</span>
                         </Button>
                       )}
                     </div>
