@@ -7,7 +7,7 @@ export default function Tasks() {
     <AppLayout>
       <div className="p-6">
         <h1 className="text-2xl font-bold mb-6">Task Management</h1>
-        <TaskManager />
+        <TaskManager teams={[]} teamMembers={[]} />
       </div>
     </AppLayout>
   );
