@@ -24,9 +24,12 @@ export const CalendarDayContent: React.FC<CalendarDayContentProps> = ({
   onDayClick,
   teamColor
 }) => {
+  // Apply red background color when teamColor is 'red'
+  const bgColorClass = teamColor === 'red' ? 'hover:bg-red-100' : 'hover:bg-gray-100';
+  
   return (
     <div 
-      className="relative w-full h-full flex items-center justify-center cursor-pointer" 
+      className={`relative w-full h-full flex items-center justify-center cursor-pointer ${bgColorClass}`}
       onDragOver={e => e.preventDefault()} 
       onDrop={e => onDrop(e, date)}
       onClick={() => onDayClick(date, jobsForDate)}
