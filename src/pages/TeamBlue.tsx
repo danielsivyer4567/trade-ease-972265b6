@@ -8,6 +8,7 @@ import { DocumentUpload } from '@/components/team/DocumentUpload';
 import { DocumentSummary } from '@/components/team/DocumentSummary';
 import { TeamTimeOff } from '@/components/team/TeamTimeOff';
 import { IncidentReports } from '@/components/team/IncidentReports';
+import { TeamMembers } from '@/components/team/TeamMembers';
 
 export default function TeamBlue() {
   const [date, setDate] = React.useState<Date | undefined>(new Date());
@@ -73,6 +74,8 @@ export default function TeamBlue() {
         />
 
         <JobsOverview />
+        
+        <TeamMembers teamColor="blue" teamName="Blue Team" />
 
         <section>
           <h2 className="text-xl font-semibold mb-4 text-zinc-950">Document Management</h2>

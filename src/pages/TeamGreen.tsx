@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { AppLayout } from '@/components/ui/AppLayout';
 import { TeamHeader } from '@/components/team/TeamHeader';
 import { TeamCalendar } from '@/components/team/TeamCalendar';
@@ -8,6 +8,7 @@ import { DocumentUpload } from '@/components/team/DocumentUpload';
 import { DocumentSummary } from '@/components/team/DocumentSummary';
 import { TeamTimeOff } from '@/components/team/TeamTimeOff';
 import { IncidentReports } from '@/components/team/IncidentReports';
+import { TeamMembers } from '@/components/team/TeamMembers';
 
 export default function TeamGreen() {
   const [date, setDate] = React.useState<Date | undefined>(new Date());
@@ -73,6 +74,8 @@ export default function TeamGreen() {
         />
 
         <JobsOverview />
+        
+        <TeamMembers teamColor="green" teamName="Green Team" />
 
         <section>
           <h2 className="text-xl font-semibold mb-4 text-zinc-950">Document Management</h2>
