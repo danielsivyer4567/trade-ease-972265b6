@@ -2,7 +2,8 @@
 import React, { useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Plus, Search, Users } from 'lucide-react';
+import { Plus, Search, Users, Check } from 'lucide-react';
+import { toast } from 'sonner';
 
 // Define interfaces for staff members and teams
 interface TeamMember {
@@ -18,9 +19,14 @@ interface Team {
   color: string;
 }
 
-export const StaffConnections: React.FC = () => {
+interface StaffConnectionsProps {
+  onSelectStaff?: (member: TeamMember) => void;
+}
+
+export const StaffConnections: React.FC<StaffConnectionsProps> = ({ onSelectStaff }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [showResults, setShowResults] = useState(false);
+  const [selectedStaff, setSelectedStaff] = useState<TeamMember | null>(null);
   
   // Sample data for teams (matching the structure in the Calendar page)
   const teams: Team[] = [
@@ -57,6 +63,17 @@ export const StaffConnections: React.FC = () => {
     setShowResults(e.target.value.trim() !== '');
   };
 
+  // Handle staff member selection
+  const handleStaffSelection = (member: TeamMember) => {
+    setSelectedStaff(member);
+    if (onSelectStaff) {
+      onSelectStaff(member);
+    }
+    toast.success(`Selected ${member.name}`);
+    setShowResults(false);
+    setSearchQuery(member.name);
+  };
+
   return (
     <div className="my-[8px] py-0">
       <label className="block text-xs font-medium mb-1 text-gray-500">Staff & Connections</label>
@@ -84,10 +101,13 @@ export const StaffConnections: React.FC = () => {
           <div className="absolute top-full left-0 right-0 mt-1 bg-white border rounded-md shadow-lg z-10 max-h-40 overflow-y-auto">
             {filteredStaff.map((member) => {
               const team = getTeamForMember(member.teamId);
+              const isSelected = selectedStaff?.id === member.id;
+              
               return (
                 <div 
                   key={member.id} 
-                  className="p-2 hover:bg-gray-100 cursor-pointer flex items-center"
+                  className={`p-2 hover:bg-gray-100 cursor-pointer flex items-center ${isSelected ? 'bg-gray-100' : ''}`}
+                  onClick={() => handleStaffSelection(member)}
                 >
                   <div className="flex-grow">
                     <div className="flex items-center">
@@ -101,13 +121,23 @@ export const StaffConnections: React.FC = () => {
                     </div>
                     <span className="text-xs text-gray-500">{member.role}</span>
                   </div>
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    className="ml-2 h-6 flex-shrink-0"
-                  >
-                    <Plus className="h-3 w-3" />
-                  </Button>
+                  <div className="flex-shrink-0">
+                    {isSelected ? (
+                      <Check className="h-4 w-4 text-green-500" />
+                    ) : (
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="ml-2 h-6 flex-shrink-0"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleStaffSelection(member);
+                        }}
+                      >
+                        <Plus className="h-3 w-3" />
+                      </Button>
+                    )}
+                  </div>
                 </div>
               );
             })}
