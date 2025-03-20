@@ -100,7 +100,7 @@ export function TaskCreateForm({
           <Label htmlFor="files">Attach Files</Label>
           <div className="mt-2">
             <label onDragOver={handleDragOver} onDragLeave={handleDragLeave} onDrop={handleDrop} className="cursor-pointer bg-slate-400">
-              <div className={cn("flex items-center gap-2 p-4 border-2 border-dashed rounded-lg transition-colors duration-200", isDragging ? "bg-gray-100 border-gray-400" : "hover:bg-gray-50 border-gray-200")}>
+              <div className="bg-slate-300">
                 <Upload className="h-6 w-6 text-gray-400 bg-slate-200" />
                 <span className="text-sm text-gray-600">
                   {isDragging ? "Drop files here..." : "Upload or drag files (Images and Videos)"}
@@ -116,7 +116,7 @@ export function TaskCreateForm({
             </div>}
         </div>
 
-        <Button type="submit" className="w-full">
+        <Button type="submit" className="w-full px-0 mx-0 py-0">
           Create Task
         </Button>
       </form>
