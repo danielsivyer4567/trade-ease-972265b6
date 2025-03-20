@@ -1,11 +1,10 @@
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
-import { Users, CalendarDays, Check } from "lucide-react";
 import { Job } from "@/types/job";
 import { useState, useEffect } from "react";
-import { Separator } from "@/components/ui/separator";
+import { DateSelectionStep } from "./job-assignment/DateSelectionStep";
+import { TeamSelectionStep } from "./job-assignment/TeamSelectionStep";
 
 interface Team {
   id: string;
@@ -82,65 +81,18 @@ export function JobAssignmentDialog({
         
         <div className="space-y-6 py-4 bg-background">
           {step === 'date' ? (
-            <div className="space-y-2">
-              <label className="text-sm font-medium flex items-center gap-2">
-                <CalendarDays className="h-5 w-5 text-primary" />
-                <span className="text-base">Select Date</span>
-              </label>
-              <div className="border-2 rounded-lg p-3 shadow-md bg-slate-300">
-                <Calendar
-                  mode="single"
-                  selected={selectedDate}
-                  onSelect={handleDateSelect}
-                  className="mx-auto pointer-events-auto bg-slate-300"
-                  initialFocus
-                />
-              </div>
-            </div>
+            <DateSelectionStep 
+              selectedDate={selectedDate}
+              onDateSelect={handleDateSelect}
+            />
           ) : (
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <label className="text-sm font-medium flex items-center gap-2">
-                  <Users className="h-5 w-5 text-primary" />
-                  <span className="text-base">Select Team</span>
-                </label>
-                <div className="text-sm text-gray-500 flex items-center gap-1">
-                  <CalendarDays className="h-4 w-4" />
-                  <span>{selectedDate?.toLocaleDateString()}</span>
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    className="ml-1 h-6 p-0 text-blue-600"
-                    onClick={() => setStep('date')}
-                  >
-                    Change
-                  </Button>
-                </div>
-              </div>
-              
-              <Separator className="my-2" />
-              
-              <div className="grid grid-cols-1 gap-2">
-                {teams.map(team => (
-                  <Button
-                    key={team.id}
-                    variant={selectedTeam === team.id ? "default" : "outline"}
-                    className={`flex items-center justify-between p-4 h-auto ${
-                      selectedTeam === team.id ? "border-2 border-primary" : ""
-                    }`}
-                    onClick={() => handleTeamSelect(team.id)}
-                  >
-                    <div className="flex items-center">
-                      <Users className={`h-5 w-5 mr-3 ${team.color}`} />
-                      <span className="text-base">{team.name}</span>
-                    </div>
-                    {selectedTeam === team.id && (
-                      <Check className="h-5 w-5 text-primary" />
-                    )}
-                  </Button>
-                ))}
-              </div>
-            </div>
+            <TeamSelectionStep 
+              teams={teams}
+              selectedTeam={selectedTeam}
+              onTeamSelect={handleTeamSelect}
+              selectedDate={selectedDate}
+              onChangeDate={() => setStep('date')}
+            />
           )}
         </div>
         
