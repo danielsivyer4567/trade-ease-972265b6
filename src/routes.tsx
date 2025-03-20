@@ -11,6 +11,9 @@ import Calendar from './pages/Calendar';
 import CalendarSync from './pages/Calendar/CalendarSync';
 import TasksPage from './pages/Tasks';
 import Jobs from './pages/Jobs';
+import TeamRed from './pages/TeamRed';
+import TeamBlue from './pages/TeamBlue';
+import TeamGreen from './pages/TeamGreen';
 
 // Define the route type
 export interface RouteConfig {
@@ -99,5 +102,18 @@ export const routes: RouteConfig[] = [
   {
     path: '/notifications',
     element: <Notifications />
+  },
+  // Team routes
+  {
+    path: '/team-red',
+    element: <TeamRed />
+  },
+  {
+    path: '/team-blue',
+    element: <TeamBlue />
+  },
+  {
+    path: '/team-green',
+    element: <TeamGreen />
   }
 ];
