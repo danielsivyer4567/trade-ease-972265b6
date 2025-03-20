@@ -15,6 +15,7 @@ import TeamRed from './pages/TeamRed';
 import TeamBlue from './pages/TeamBlue';
 import TeamGreen from './pages/TeamGreen';
 import Database from './pages/Database';
+import Integrations from './pages/Integrations';
 
 // Define the route type
 export interface RouteConfig {
@@ -90,7 +91,7 @@ export const routes: RouteConfig[] = [
   },
   {
     path: '/integrations',
-    element: <div className="p-6"><h1 className="text-2xl font-bold">Integrations</h1></div>
+    element: <Integrations />
   },
   {
     path: '/database',
