@@ -182,26 +182,26 @@ export function TaskList({
   return <div className="grid gap-4">
       {tasks.filter(task => task.assignedTeam === teamName).map((task, index) => <Collapsible key={task.id} open={openTaskId === task.id} onOpenChange={isOpen => setOpenTaskId(isOpen ? task.id : null)}>
             <Card className="bg-slate-300">
-              <CardHeader className="relative">
+              <CardHeader className="relative px-[43px] my-px bg-slate-300">
                 <CollapsibleTrigger className="w-full text-left flex items-center justify-between">
                   <div className="flex flex-col gap-2">
                     <div className="flex items-center gap-2">
-                      <span className="text-sm font-medium text-gray-500">Task card #{index + 1}</span>
+                      <span className="text-sm font-medium text-gray-950">Task card #{index + 1}</span>
                       <CardTitle>{task.title}</CardTitle>
                     </div>
                     <CardDescription>Due by: {task.dueDate}</CardDescription>
                   </div>
                   <div className="flex items-center gap-4">
                     <TaskStatusBadge status={task.status} />
-                    {openTaskId === task.id ? <ChevronUp className="h-4 w-4 text-gray-500" /> : <ChevronDown className="h-4 w-4 text-gray-500" />}
+                    {openTaskId === task.id ? <ChevronUp className="h-4 w-4 text-gray-500 bg-slate-400" /> : <ChevronDown className="h-4 w-4 text-gray-500" />}
                   </div>
                 </CollapsibleTrigger>
               </CardHeader>
 
               <CollapsibleContent>
                 <CardContent className="space-y-6 bg-slate-300">
-                  <div className="flex items-center justify-between">
-                    <p className="text-gray-700">{task.description}</p>
+                  <div className="flex items-center justify-between px-0 mx-0 my-[19px] bg-slate-300">
+                    <p className="text-slate-950">{task.description}</p>
                     <div className="flex items-center gap-2">
                       <UserPlus className="h-4 w-4 text-gray-500" />
                       <Select value={assignedMembers[task.id] || ''} onValueChange={value => handleAssignMember(task.id, value)}>

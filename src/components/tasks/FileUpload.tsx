@@ -147,7 +147,7 @@ export function FileUpload({
   };
   return <label onDragOver={handleDragOver} onDragLeave={handleDragLeave} onDrop={handleDrop} className="bg-slate-950 rounded-lg">
       <div className="bg-slate-300">
-        {allowGcpVision ? <Image className="h-10 w-10 text-blue-500" /> : <Upload className="h-10 w-10 text-gray-400" />}
+        {allowGcpVision ? <Image className="h-10 w-10 text-blue-500 bg-transparent" /> : <Upload className="h-10 w-10 text-gray-400" />}
         <span className="text-sm text-center text-gray-950">
           {isAnalyzing ? "Analyzing with Google Cloud Vision..." : isDragging ? "Drop files here..." : label}
         </span>
