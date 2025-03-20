@@ -6,7 +6,6 @@ import { useNavigate } from 'react-router-dom';
 import type { Team } from '../types';
 
 export function useCalendarState() {
-  const [sharedDate, setSharedDate] = useState<Date | undefined>(new Date());
   const [integrationDialogOpen, setIntegrationDialogOpen] = useState(false);
   const navigate = useNavigate();
   
@@ -55,8 +54,6 @@ export function useCalendarState() {
   };
 
   return {
-    sharedDate,
-    setSharedDate,
     teams,
     setTeams,
     integrationDialogOpen,

@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { TeamCalendar } from '@/components/team/TeamCalendar';
 import type { Team } from '../types';
@@ -9,17 +9,30 @@ import { useQuery } from "@tanstack/react-query";
 
 interface TeamCalendarGridProps {
   teams: Team[];
-  sharedDate: Date | undefined;
-  setSharedDate: (date: Date | undefined) => void;
   onJobAssign: (jobId: string, date: Date) => void;
 }
 
 export function TeamCalendarGrid({ 
   teams, 
-  sharedDate, 
-  setSharedDate, 
   onJobAssign 
 }: TeamCalendarGridProps) {
+  // Create separate date states for each team
+  const [teamDates, setTeamDates] = useState<Record<string, Date | undefined>>(() => {
+    const initialDates: Record<string, Date | undefined> = {};
+    teams.forEach(team => {
+      initialDates[team.name] = new Date();
+    });
+    return initialDates;
+  });
+
+  // Handler to update a specific team's date
+  const updateTeamDate = (teamName: string, date: Date | undefined) => {
+    setTeamDates(prev => ({
+      ...prev,
+      [teamName]: date
+    }));
+  };
+  
   // Fetch jobs from Supabase
   const { data: jobs = [] } = useQuery({
     queryKey: ['teamJobs'],
@@ -64,8 +77,8 @@ export function TeamCalendarGrid({
             </CardHeader>
             <CardContent>
               <TeamCalendar 
-                date={sharedDate} 
-                setDate={setSharedDate} 
+                date={teamDates[team.name]} 
+                setDate={(date) => updateTeamDate(team.name, date)}
                 teamColor={team.color} 
                 onJobAssign={onJobAssign} 
                 assignedJobs={teamJobs} 

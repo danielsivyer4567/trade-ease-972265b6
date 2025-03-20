@@ -8,8 +8,6 @@ import { CalendarIntegrationDialog } from './components/CalendarIntegrationDialo
 
 export default function Calendar() {
   const {
-    sharedDate,
-    setSharedDate,
     teams,
     integrationDialogOpen,
     setIntegrationDialogOpen,
@@ -29,8 +27,6 @@ export default function Calendar() {
         
         <TeamCalendarGrid 
           teams={teams}
-          sharedDate={sharedDate}
-          setSharedDate={setSharedDate}
           onJobAssign={handleJobAssign}
         />
       </div>
