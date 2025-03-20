@@ -14,6 +14,7 @@ import Jobs from './pages/Jobs';
 import TeamRed from './pages/TeamRed';
 import TeamBlue from './pages/TeamBlue';
 import TeamGreen from './pages/TeamGreen';
+import Database from './pages/Database';
 
 // Define the route type
 export interface RouteConfig {
@@ -93,7 +94,7 @@ export const routes: RouteConfig[] = [
   },
   {
     path: '/database',
-    element: <div className="p-6"><h1 className="text-2xl font-bold">Database</h1></div>
+    element: <Database />
   },
   {
     path: '/settings',
