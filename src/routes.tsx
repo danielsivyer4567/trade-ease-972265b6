@@ -1,4 +1,3 @@
-
 import { ReactNode } from 'react';
 import Customers from './pages/Customers';
 import NewCustomer from './pages/Customers/NewCustomer';
@@ -16,6 +15,7 @@ import TeamBlue from './pages/TeamBlue';
 import TeamGreen from './pages/TeamGreen';
 import Database from './pages/Database';
 import Integrations from './pages/Integrations';
+import Calculators from './pages/Calculators';
 
 // Define the route type
 export interface RouteConfig {
@@ -87,7 +87,7 @@ export const routes: RouteConfig[] = [
   },
   {
     path: '/calculators',
-    element: <div className="p-6"><h1 className="text-2xl font-bold">Calculators</h1></div>
+    element: <Calculators />
   },
   {
     path: '/integrations',
@@ -105,7 +105,6 @@ export const routes: RouteConfig[] = [
     path: '/notifications',
     element: <Notifications />
   },
-  // Team routes
   {
     path: '/team-red',
     element: <TeamRed />
