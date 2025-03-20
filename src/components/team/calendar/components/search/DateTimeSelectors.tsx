@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -7,7 +6,6 @@ import { Calendar } from "@/components/ui/calendar";
 import { format } from 'date-fns';
 import { CalendarRange, Clock } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
-
 interface DateTimeSelectorsProps {
   startDate: Date | undefined;
   setStartDate: (date: Date | undefined) => void;
@@ -18,7 +16,6 @@ interface DateTimeSelectorsProps {
   endTime: string;
   setEndTime: (time: string) => void;
 }
-
 export const DateTimeSelectors: React.FC<DateTimeSelectorsProps> = ({
   startDate,
   setStartDate,
@@ -30,7 +27,6 @@ export const DateTimeSelectors: React.FC<DateTimeSelectorsProps> = ({
   setEndTime
 }) => {
   const isMobile = useIsMobile();
-  
   const generateTimeOptions = () => {
     const options = [];
     for (let hour = 0; hour < 24; hour++) {
@@ -42,11 +38,8 @@ export const DateTimeSelectors: React.FC<DateTimeSelectorsProps> = ({
     }
     return options;
   };
-  
   const timeOptions = generateTimeOptions();
-
-  return (
-    <div className={`grid ${isMobile ? 'grid-cols-1' : 'grid-cols-2'} gap-2`}>
+  return <div className={`grid ${isMobile ? 'grid-cols-1' : 'grid-cols-2'} gap-2`}>
       {/* Start section */}
       <div className="mx-0">
         <label className="block text-xs font-medium mb-1 text-gray-500">Start *</label>
@@ -54,7 +47,7 @@ export const DateTimeSelectors: React.FC<DateTimeSelectorsProps> = ({
           {/* Start Date */}
           <Popover>
             <PopoverTrigger asChild>
-              <Button variant={"outline"} className="w-full justify-start text-left border-gray-300 h-7 bg-slate-400 hover:bg-slate-300 text-gray-950 text-base font-medium px-[29px] mx-[15px]">
+              <Button variant={"outline"} className="w-full justify-start text-left border-gray-300 h-7 bg-slate-400 hover:bg-slate-300 text-gray-950 text-base font-medium mx-[15px] my-0 px-[33px] py-0">
                 <CalendarRange className="mr-1 h-3 w-3 text-gray-500" />
                 {startDate ? format(startDate, 'd MMM') : format(new Date(), 'd MMM')}
               </Button>
@@ -110,6 +103,5 @@ export const DateTimeSelectors: React.FC<DateTimeSelectorsProps> = ({
           </Select>
         </div>
       </div>
-    </div>
-  );
+    </div>;
 };
