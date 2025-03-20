@@ -43,8 +43,6 @@ export const useWeatherData = () => {
   ]);
 
   return {
-    weatherData: weatherDates,
-    isWeatherLoading: false,
     weatherDates,
     setWeatherDates
   };
