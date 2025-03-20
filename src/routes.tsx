@@ -44,7 +44,7 @@ export const routes: RouteConfig[] = [
     element: <TasksPage />
   },
   {
-    path: '/jobs',
+    path: '/jobs/*',
     element: <Jobs />
   },
   {
