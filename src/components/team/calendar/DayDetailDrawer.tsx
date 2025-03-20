@@ -4,7 +4,7 @@ import { format } from 'date-fns';
 import { Job } from '@/types/job';
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerFooter } from '@/components/ui/drawer';
 import { Button } from '@/components/ui/button';
-import { CalendarIcon, ListFilter, Search } from 'lucide-react';
+import { CalendarIcon, ListFilter, Search, Plus } from 'lucide-react';
 import { SearchQuotes } from '@/pages/Jobs/components/tabs/financials/SearchQuotes';
 import { SearchBar } from './components/SearchBar';
 import { Input } from '@/components/ui/input';
@@ -32,7 +32,7 @@ export const DayDetailDrawer: React.FC<DayDetailDrawerProps> = ({
   const [endDate, setEndDate] = useState<Date | undefined>(undefined);
   const [startTime, setStartTime] = useState("09:00");
   const [endTime, setEndTime] = useState("17:00");
-  const [activeTab, setActiveTab] = useState("new");
+  const [showCreateForm, setShowCreateForm] = useState(false);
   
   if (!selectedDay) return null;
   
@@ -75,6 +75,10 @@ export const DayDetailDrawer: React.FC<DayDetailDrawerProps> = ({
     });
   };
 
+  const toggleCreateForm = () => {
+    setShowCreateForm(!showCreateForm);
+  };
+
   return (
     <Drawer open={Boolean(selectedDay)} onOpenChange={onClose}>
       <DrawerContent className="fixed inset-x-0 top-20 transform max-w-2xl h-auto border shadow-lg rounded-xl bg-slate-50 px-[10px] py-0 mx-auto my-0 max-h-[80vh] overflow-auto">
@@ -85,72 +89,107 @@ export const DayDetailDrawer: React.FC<DayDetailDrawerProps> = ({
           </DrawerTitle>
         </DrawerHeader>
         
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid grid-cols-2 w-full mt-2">
-            <TabsTrigger value="existing">Existing Jobs ({jobs.length})</TabsTrigger>
-            <TabsTrigger value="new">New Appointment</TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="existing" className="pb-4">
-            <div className="flex items-center gap-2 p-2">
-              <Search className="h-4 w-4 text-gray-500" />
-              <Input 
-                placeholder="Search jobs..." 
-                value={jobSearchQuery} 
-                onChange={(e) => setJobSearchQuery(e.target.value)}
-                className="h-8 text-sm"
-              />
-            </div>
-            
-            <JobsList 
-              jobSearchQuery={jobSearchQuery}
-              filteredJobs={filteredJobs}
-              onJobClick={onJobClick}
-            />
-          </TabsContent>
-          
-          <TabsContent value="new">
-            <div className="overflow-auto">
-              <div className="flex flex-col items-center">
-                {/* Search Bar Component */}
-                <SearchBar 
-                  jobSearchQuery={jobSearchQuery} 
-                  setJobSearchQuery={setJobSearchQuery} 
-                  startDate={startDate} 
-                  setStartDate={setStartDate} 
-                  endDate={endDate} 
-                  setEndDate={setEndDate} 
-                  startTime={startTime} 
-                  setStartTime={setStartTime} 
-                  endTime={endTime} 
-                  setEndTime={setEndTime} 
-                  onToggleQuoteSearch={handleToggleQuoteSearch} 
-                  onCreateJob={handleCreateJob} 
+        <div className="p-2">
+          {/* Jobs for the day section */}
+          <div className="mb-4">
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="font-medium">Scheduled Jobs ({jobs.length})</h3>
+              <div className="flex items-center gap-2">
+                <Search className="h-4 w-4 text-gray-500" />
+                <Input 
+                  placeholder="Search jobs..." 
+                  value={jobSearchQuery} 
+                  onChange={(e) => setJobSearchQuery(e.target.value)}
+                  className="h-8 text-sm"
                 />
-                
-                {/* Quote search section (conditionally shown) */}
-                {showQuoteSearch && (
-                  <div className="max-w-md w-full mx-auto">
-                    <SearchQuotes 
-                      onSelectQuote={handleQuoteSelect} 
-                      customerQuotes={mockCustomerQuotes} 
-                    />
-                  </div>
-                )}
               </div>
             </div>
-          </TabsContent>
-        </Tabs>
+            
+            {jobSearchQuery && filteredJobs.length === 0 ? (
+              <div className="text-center py-4 text-muted-foreground">
+                No jobs found matching "{jobSearchQuery}"
+              </div>
+            ) : filteredJobs.length === 0 ? (
+              <div className="text-center py-4 text-muted-foreground">
+                No jobs scheduled for this day
+              </div>
+            ) : (
+              <JobsList 
+                jobSearchQuery={jobSearchQuery}
+                filteredJobs={filteredJobs}
+                onJobClick={onJobClick}
+              />
+            )}
+          </div>
+          
+          {/* Create new appointment button */}
+          {!showCreateForm ? (
+            <div className="flex justify-center mt-4 mb-4">
+              <Button 
+                onClick={toggleCreateForm} 
+                className="bg-slate-500 hover:bg-slate-400 flex items-center gap-2"
+              >
+                <Plus className="h-4 w-4" />
+                Create New Appointment
+              </Button>
+            </div>
+          ) : (
+            <div className="mt-4">
+              <div className="flex justify-between items-center mb-2">
+                <h3 className="font-medium">New Appointment</h3>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={toggleCreateForm}
+                  className="text-sm"
+                >
+                  Cancel
+                </Button>
+              </div>
+              
+              <div className="overflow-auto">
+                <div className="flex flex-col items-center">
+                  {/* Search Bar Component */}
+                  <SearchBar 
+                    jobSearchQuery={jobSearchQuery} 
+                    setJobSearchQuery={setJobSearchQuery} 
+                    startDate={startDate} 
+                    setStartDate={setStartDate} 
+                    endDate={endDate} 
+                    setEndDate={setEndDate} 
+                    startTime={startTime} 
+                    setStartTime={setStartTime} 
+                    endTime={endTime} 
+                    setEndTime={setEndTime} 
+                    onToggleQuoteSearch={handleToggleQuoteSearch} 
+                    onCreateJob={handleCreateJob} 
+                  />
+                  
+                  {/* Quote search section (conditionally shown) */}
+                  {showQuoteSearch && (
+                    <div className="max-w-md w-full mx-auto">
+                      <SearchQuotes 
+                        onSelectQuote={handleQuoteSelect} 
+                        customerQuotes={mockCustomerQuotes} 
+                      />
+                    </div>
+                  )}
+                </div>
+              </div>
+              
+              <div className="flex justify-end mt-2">
+                <Button onClick={handleCreateJob} className="bg-slate-500 hover:bg-slate-400">
+                  Save Appointment
+                </Button>
+              </div>
+            </div>
+          )}
+        </div>
         
         <DrawerFooter className="flex flex-row justify-between border-t gap-3 p-2">
           <Button onClick={onClose} variant="outline" className="flex-1 text-gray-950 bg-slate-400 hover:bg-slate-300">
             Close
           </Button>
-          {activeTab === 'new' && (
-            <Button onClick={handleCreateJob} className="flex-1 bg-slate-500 hover:bg-slate-400">
-              Save
-            </Button>
-          )}
         </DrawerFooter>
       </DrawerContent>
     </Drawer>
