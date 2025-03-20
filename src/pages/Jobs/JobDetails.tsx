@@ -11,50 +11,55 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import JobMap from '@/components/JobMap';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-const mockJobs: Job[] = [{
-  id: "1",
-  customer: "John Smith",
-  type: "Plumbing",
-  status: "ready",
-  date: "2024-03-15",
-  location: [151.2093, -33.8688],
-  jobNumber: "JOB-1234",
-  title: "Water Heater Installation",
-  description: "Install new water heater system",
-  assignedTeam: "Red Team"
-}, {
-  id: "2",
-  customer: "Sarah Johnson",
-  type: "HVAC",
-  status: "in-progress",
-  date: "2024-03-14",
-  location: [151.2543, -33.8688],
-  jobNumber: "JOB-5678",
-  title: "HVAC Maintenance",
-  description: "Regular maintenance check",
-  assignedTeam: "Blue Team"
-}, {
-  id: "3",
-  customer: "Mike Brown",
-  type: "Electrical",
-  status: "to-invoice",
-  date: "2024-03-13",
-  location: [151.1943, -33.8788],
-  jobNumber: "JOB-9012",
-  title: "Electrical Panel Upgrade",
-  description: "Upgrade main electrical panel",
-  assignedTeam: "Green Team"
-}];
+import { AppLayout } from '@/components/ui/AppLayout';
+import { JobsHeader } from './components/JobsHeader';
+
+const mockJobs: Job[] = [
+  {
+    id: "1",
+    customer: "John Smith",
+    type: "Plumbing",
+    status: "ready",
+    date: "2024-03-15",
+    location: [151.2093, -33.8688],
+    jobNumber: "JOB-1234",
+    title: "Water Heater Installation",
+    description: "Install new water heater system",
+    assignedTeam: "Red Team"
+  }, {
+    id: "2",
+    customer: "Sarah Johnson",
+    type: "HVAC",
+    status: "in-progress",
+    date: "2024-03-14",
+    location: [151.2543, -33.8688],
+    jobNumber: "JOB-5678",
+    title: "HVAC Maintenance",
+    description: "Regular maintenance check",
+    assignedTeam: "Blue Team"
+  }, {
+    id: "3",
+    customer: "Mike Brown",
+    type: "Electrical",
+    status: "to-invoice",
+    date: "2024-03-13",
+    location: [151.1943, -33.8788],
+    jobNumber: "JOB-9012",
+    title: "Electrical Panel Upgrade",
+    description: "Upgrade main electrical panel",
+    assignedTeam: "Green Team"
+  }
+];
+
 export function JobDetails() {
-  const {
-    id
-  } = useParams();
+  const { id } = useParams();
   const navigate = useNavigate();
   const [job, setJob] = useState<Job | null>(null);
   const [jobNotes, setJobNotes] = useState("");
   const [loading, setLoading] = useState(true);
   const isManager = true;
   const isMobile = useIsMobile();
+  
   const {
     jobTimer,
     isTimerRunning,
@@ -62,29 +67,27 @@ export function JobDetails() {
     setIsTimerRunning,
     handleBreakToggle
   } = useJobTimer();
+  
   const {
     hasLocationPermission,
     locationHistory,
     handleTimerToggle: locationHandleTimerToggle
   } = useJobLocation();
+  
   const {
     extractedFinancialData,
     tabNotes,
     setTabNotes,
     handleFinancialDataExtracted
   } = useJobFinancialData(id);
+  
   useEffect(() => {
     console.log("JobDetails mounted with id:", id);
     const fetchJob = async () => {
       try {
-        const {
-          data: session
-        } = await supabase.auth.getSession();
+        const { data: session } = await supabase.auth.getSession();
         if (session?.session?.user) {
-          const {
-            data,
-            error
-          } = await supabase.from('jobs').select('*').eq('id', id).single();
+          const { data, error } = await supabase.from('jobs').select('*').eq('id', id).single();
           if (data && !error) {
             console.log("Job fetched from Supabase:", data);
             setJob(data as Job);
@@ -97,6 +100,7 @@ export function JobDetails() {
       } catch (err) {
         console.error("Exception fetching job:", err);
       }
+      
       const foundJob = mockJobs.find(j => j.id === id);
       console.log("Using mock job data:", foundJob);
       if (foundJob) {
@@ -107,44 +111,78 @@ export function JobDetails() {
       }
       setLoading(false);
     };
+    
     fetchJob();
   }, [id, navigate]);
+  
   const handleTimerToggle = () => {
     locationHandleTimerToggle(isTimerRunning, setIsTimerRunning);
   };
+  
   if (loading) {
-    return <div className="container-responsive mx-auto p-8">
-      <div className="text-center">Loading job details...</div>
-    </div>;
+    return (
+      <AppLayout>
+        <div className="text-center py-8">Loading job details...</div>
+      </AppLayout>
+    );
   }
+  
   if (!job) {
-    return <div className="container-responsive mx-auto p-8">
-      <div className="text-center">Job not found. Please try again.</div>
-    </div>;
+    return (
+      <AppLayout>
+        <div className="text-center py-8">Job not found. Please try again.</div>
+      </AppLayout>
+    );
   }
 
-  // Use the full job number instead of just the part after the hyphen
   const jobNumberDisplay = job.jobNumber || '';
-  return <div className="container-responsive mx-auto">
+  
+  return (
+    <AppLayout>
       <div className="space-y-4 sm:space-y-6 p-2 sm:p-4 max-w-7xl mx-auto pb-24 bg-slate-200">
-        
+        <JobsHeader navigateTo="/jobs" />
         
         <div className="bg-white rounded-lg shadow-sm overflow-hidden mb-4">
           <div className="h-[300px] w-full">
-            <JobMap center={[job.location[0], job.location[1]]} zoom={15} markers={[{
-            position: [job.location[1], job.location[0]],
-            title: job.title
-          }]} />
+            <JobMap 
+              center={[job.location[0], job.location[1]]} 
+              zoom={15} 
+              markers={[{
+                position: [job.location[1], job.location[0]],
+                title: job.title
+              }]} 
+            />
           </div>
         </div>
 
         <JobHeader job={job} />
 
-        <JobTabs job={job} isManager={isManager} jobTimer={jobTimer} jobNotes={jobNotes} setJobNotes={setJobNotes} tabNotes={tabNotes} setTabNotes={setTabNotes} locationHistory={locationHistory} hasLocationPermission={hasLocationPermission} handleTimerToggle={handleTimerToggle} handleBreakToggle={handleBreakToggle} isTimerRunning={isTimerRunning} isOnBreak={isOnBreak} extractedFinancialData={extractedFinancialData} />
+        <JobTabs 
+          job={job} 
+          isManager={isManager} 
+          jobTimer={jobTimer} 
+          jobNotes={jobNotes} 
+          setJobNotes={setJobNotes} 
+          tabNotes={tabNotes} 
+          setTabNotes={setTabNotes} 
+          locationHistory={locationHistory} 
+          hasLocationPermission={hasLocationPermission} 
+          handleTimerToggle={handleTimerToggle} 
+          handleBreakToggle={handleBreakToggle} 
+          isTimerRunning={isTimerRunning} 
+          isOnBreak={isOnBreak} 
+          extractedFinancialData={extractedFinancialData} 
+        />
 
-        {isManager && <div className="mt-8 mb-8">
-            <DocumentApproval jobId={job.id} onFinancialDataExtracted={handleFinancialDataExtracted} />
-          </div>}
+        {isManager && (
+          <div className="mt-8 mb-8">
+            <DocumentApproval 
+              jobId={job.id} 
+              onFinancialDataExtracted={handleFinancialDataExtracted} 
+            />
+          </div>
+        )}
       </div>
-    </div>;
+    </AppLayout>
+  );
 }
