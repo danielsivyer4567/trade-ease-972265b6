@@ -18,14 +18,12 @@ interface DayDetailDrawerProps {
   } | null;
   onClose: () => void;
   onJobClick: (jobId: string, e: React.MouseEvent) => void;
-  teamColor?: string;
 }
 
 export const DayDetailDrawer: React.FC<DayDetailDrawerProps> = ({
   selectedDay,
   onClose,
-  onJobClick,
-  teamColor = 'gray'
+  onJobClick
 }) => {
   const [jobSearchQuery, setJobSearchQuery] = useState("");
   const [quoteSearchQuery, setQuoteSearchQuery] = useState("");
@@ -81,49 +79,10 @@ export const DayDetailDrawer: React.FC<DayDetailDrawerProps> = ({
     setShowCreateForm(!showCreateForm);
   };
 
-  // Get background color based on team color
-  const getBgColorClass = () => {
-    if (teamColor === 'red') {
-      return 'bg-red-50';
-    } else if (teamColor === 'blue') {
-      return 'bg-blue-50';
-    } else if (teamColor === 'green') {
-      return 'bg-green-50';
-    } else {
-      return 'bg-slate-50';
-    }
-  };
-
-  // Get header color based on team color
-  const getHeaderColorClass = () => {
-    if (teamColor === 'red') {
-      return 'bg-red-100 border-red-200';
-    } else if (teamColor === 'blue') {
-      return 'bg-blue-100 border-blue-200';
-    } else if (teamColor === 'green') {
-      return 'bg-green-100 border-green-200';
-    } else {
-      return 'bg-slate-100 border-slate-200';
-    }
-  };
-
-  // Get button color based on team color
-  const getButtonColorClass = () => {
-    if (teamColor === 'red') {
-      return 'bg-red-500 hover:bg-red-400';
-    } else if (teamColor === 'blue') {
-      return 'bg-blue-500 hover:bg-blue-400';
-    } else if (teamColor === 'green') {
-      return 'bg-green-500 hover:bg-green-400';
-    } else {
-      return 'bg-slate-500 hover:bg-slate-400';
-    }
-  };
-
   return (
     <Drawer open={Boolean(selectedDay)} onOpenChange={onClose}>
-      <DrawerContent className={`fixed inset-x-0 top-20 transform max-w-2xl h-auto border shadow-lg rounded-xl ${getBgColorClass()} px-[10px] py-0 mx-auto my-0 max-h-[80vh] overflow-auto`}>
-        <DrawerHeader className={`border-b py-1 ${getHeaderColorClass()}`}>
+      <DrawerContent className="fixed inset-x-0 top-20 transform max-w-2xl h-auto border shadow-lg rounded-xl bg-slate-50 px-[10px] py-0 mx-auto my-0 max-h-[80vh] overflow-auto">
+        <DrawerHeader className="border-b py-1">
           <DrawerTitle className="text-center flex items-center justify-center gap-2">
             <CalendarIcon className="h-5 w-5" />
             {format(date, 'MMMM d, yyyy')}
@@ -168,7 +127,7 @@ export const DayDetailDrawer: React.FC<DayDetailDrawerProps> = ({
             <div className="flex justify-center mt-4 mb-4">
               <Button 
                 onClick={toggleCreateForm} 
-                className={`flex items-center gap-2 ${getButtonColorClass()}`}
+                className="bg-slate-500 hover:bg-slate-400 flex items-center gap-2"
               >
                 <Plus className="h-4 w-4" />
                 Create New Appointment
@@ -219,7 +178,7 @@ export const DayDetailDrawer: React.FC<DayDetailDrawerProps> = ({
               </div>
               
               <div className="flex justify-end mt-2">
-                <Button onClick={handleCreateJob} className={getButtonColorClass()}>
+                <Button onClick={handleCreateJob} className="bg-slate-500 hover:bg-slate-400">
                   Save Appointment
                 </Button>
               </div>
@@ -227,8 +186,8 @@ export const DayDetailDrawer: React.FC<DayDetailDrawerProps> = ({
           )}
         </div>
         
-        <DrawerFooter className={`flex flex-row justify-between border-t gap-3 p-2 ${getHeaderColorClass()}`}>
-          <Button onClick={onClose} variant="outline" className={`flex-1 text-gray-950 ${getButtonColorClass()} text-white`}>
+        <DrawerFooter className="flex flex-row justify-between border-t gap-3 p-2">
+          <Button onClick={onClose} variant="outline" className="flex-1 text-gray-950 bg-slate-400 hover:bg-slate-300">
             Close
           </Button>
         </DrawerFooter>
