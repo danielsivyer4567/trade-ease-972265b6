@@ -30,6 +30,11 @@ import AIAssistantSettings from './pages/Settings/AIAssistantSettings';
 import ContractorsPage from './pages/Settings/Contractors';
 import OfficeStaff from './pages/Settings/OfficeStaff';
 import IntegrationsPage from './pages/Settings/Integrations';
+import LoadsSpansCalculator from './pages/Calculators/LoadsSpansCalculator';
+import MarkupCalculator from './pages/Calculators/MarkupCalculator';
+import JobCostCalculator from './pages/Calculators/JobCostCalculator';
+import FencingCalculator from './pages/Calculators/FencingCalculator';
+import NCCCodesCalculator from './pages/Calculators/NCCCodesCalculator';
 
 // Define the route type
 export interface RouteConfig {
@@ -102,6 +107,26 @@ export const routes: RouteConfig[] = [
   {
     path: '/calculators',
     element: <Calculators />
+  },
+  {
+    path: '/calculators/loads-spans',
+    element: <LoadsSpansCalculator />
+  },
+  {
+    path: '/calculators/markup',
+    element: <MarkupCalculator />
+  },
+  {
+    path: '/calculators/job-cost',
+    element: <JobCostCalculator />
+  },
+  {
+    path: '/calculators/fencing',
+    element: <FencingCalculator />
+  },
+  {
+    path: '/calculators/ncc-codes',
+    element: <NCCCodesCalculator />
   },
   {
     path: '/integrations',

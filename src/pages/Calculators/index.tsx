@@ -63,12 +63,12 @@ const Calculators = () => {
           Use these calculators to help with your trade business operations
         </p>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {calculators.map((calculator, index) => (
             <Card key={index} className="hover:shadow-md transition-shadow">
               <CardHeader className="bg-slate-200 p-4">
                 <div className="flex items-center justify-between">
-                  <CardTitle className="text-lg md:text-xl">{calculator.title}</CardTitle>
+                  <CardTitle className="text-base md:text-lg">{calculator.title}</CardTitle>
                   {calculator.icon}
                 </div>
                 <CardDescription className="line-clamp-2 min-h-[40px]">{calculator.description}</CardDescription>
