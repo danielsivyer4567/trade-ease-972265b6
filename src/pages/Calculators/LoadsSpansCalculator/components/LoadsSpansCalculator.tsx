@@ -1,80 +1,32 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { AppLayout } from "@/components/ui/AppLayout";
-import { Tabs } from "@/components/ui/tabs";
-import { useBeamCalculator } from "../hooks/useBeamCalculator";
-import { useSpanTableCalculator } from "../hooks/useSpanTableCalculator";
-import { useJamesHardieCalculator } from "../hooks/useJamesHardieCalculator";
-import { useConcreteCalculator } from "../hooks/useConcreteCalculator";
-import { useSquaringCalculator } from "../hooks/useSquaringCalculator";
-import { useDegreeCalculator } from "../hooks/useDegreeCalculator";
-import { useStairsCalculator } from "../hooks/useStairsCalculator";
+import { Link } from "react-router-dom";
+import { ArrowLeft, Ruler } from "lucide-react";
+import { Card } from "@/components/ui/card";
 import { LoadsSpansHeader } from "./LoadsSpansHeader";
 import { LoadsSpansTabs } from "./LoadsSpansTabs";
-import {
-  BeamCalculatorTab,
-  SpanTableTab,
-  JamesHardieTab,
-  RafterRoofTab,
-  ConcreteTab,
-  SquaringTab,
-  DegreeTab,
-  StairsTab,
-  AboutTab
-} from "./TabContents";
-import { useSearchParams } from "react-router-dom";
-import { useEffect } from "react";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const LoadsSpansCalculator = () => {
-  // Get URL params to set the active tab if specified
-  const [searchParams] = useSearchParams();
-  const tabParam = searchParams.get('tab');
-  
-  // Beam calculator hook
-  const beamCalcProps = useBeamCalculator();
-  
-  // Span table calculator hook
-  const spanTableProps = useSpanTableCalculator();
-  
-  // James Hardie calculator hook
-  const hardieProps = useJamesHardieCalculator();
-  
-  // Concrete calculator hook
-  const concreteProps = useConcreteCalculator();
-
-  // Squaring calculator hook
-  const squaringProps = useSquaringCalculator();
-
-  // Degree calculator hook
-  const degreeProps = useDegreeCalculator();
-
-  // Stairs calculator hook
-  const stairsProps = useStairsCalculator();
-
-  // Set default tab based on URL parameter if present
-  const defaultTab = tabParam && [
-    'beam-calculator', 'span-table', 'james-hardie', 'rafter-roof', 
-    'concrete', 'squaring', 'degree', 'stairs', 'about'
-  ].includes(tabParam) ? tabParam : 'beam-calculator';
+  const [activeTab, setActiveTab] = useState("beam");
+  const isMobile = useIsMobile();
 
   return (
     <AppLayout>
-      <div className="container mx-auto p-4 md:p-6 space-y-4 md:space-y-6">
-        <LoadsSpansHeader />
-
-        <Tabs defaultValue={defaultTab} className="w-full">
-          <LoadsSpansTabs />
-
-          <BeamCalculatorTab {...beamCalcProps} />
-          <SpanTableTab {...spanTableProps} />
-          <JamesHardieTab {...hardieProps} />
-          <RafterRoofTab />
-          <ConcreteTab {...concreteProps} />
-          <SquaringTab {...squaringProps} />
-          <DegreeTab {...degreeProps} />
-          <StairsTab {...stairsProps} />
-          <AboutTab />
-        </Tabs>
+      <div className="container mx-auto p-4 md:p-6">
+        <div className="flex items-center gap-2 mb-6">
+          <Link to="/calculators" className="hover:text-blue-500">
+            <ArrowLeft className="h-6 w-6" />
+          </Link>
+          <Ruler className="h-8 w-8 text-blue-500" />
+          <h1 className="text-3xl font-bold">Loads & Spans Calculator</h1>
+        </div>
+        
+        <Card className="bg-white p-4 md:p-6 rounded-lg shadow">
+          <LoadsSpansHeader />
+          <LoadsSpansTabs activeTab={activeTab} setActiveTab={setActiveTab} />
+        </Card>
       </div>
     </AppLayout>
   );
