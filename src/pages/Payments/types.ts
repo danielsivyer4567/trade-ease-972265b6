@@ -7,16 +7,16 @@ export interface PaymentFormData {
   cvv: string;
   totalAmount: string;
   currency: string;
-  email: string;
-  firstName: string;
-  lastName: string;
-  address1: string;
-  locality: string;
-  administrativeArea: string;
-  postalCode: string;
-  country: string;
-  phoneNumber: string;
   capturePayment: boolean;
+  email?: string;
+  firstName?: string;
+  lastName?: string;
+  address1?: string;
+  locality?: string;
+  administrativeArea?: string;
+  postalCode?: string;
+  country?: string;
+  phoneNumber?: string;
 }
 
 export interface ValidatedPaymentData {
@@ -36,18 +36,5 @@ export interface ValidatedPaymentData {
     country: string;
     email: string;
     phoneNumber: string;
-  };
-}
-
-export interface PaymentResponse {
-  id: string;
-  amount: string;
-  currency: string;
-  status: string;
-  timestamp: string;
-  cardInfo: {
-    last4: string;
-    expirationMonth: string;
-    expirationYear: string;
   };
 }
