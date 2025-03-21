@@ -1,167 +1,121 @@
 
 import { useState } from "react";
+import { useToast } from "@/hooks/use-toast";
 
-export interface StairsCalculatorResult {
+export interface StairsResult {
   numberOfRisers: number;
-  numberOfTreads: number;
   riserHeight: number;
   treadDepth: number;
   totalRun: number;
   stairAngle: number;
-  stringerLength: number;
-  recommendations: string[];
+  headroom: number;
+  isCompliant: boolean;
+  complianceNotes: string[];
 }
 
 export const useStairsCalculator = () => {
-  const [totalRise, setTotalRise] = useState<string>("");
-  const [floorToFloor, setFloorToFloor] = useState<string>("");
-  const [availableRun, setAvailableRun] = useState<string>("");
-  const [stairType, setStairType] = useState<string>("straight");
-  const [targetRiser, setTargetRiser] = useState<string>("");
-  const [targetTread, setTargetTread] = useState<string>("");
-  const [unit, setUnit] = useState<string>("mm");
-  const [headroomHeight, setHeadroomHeight] = useState<string>("2000");
-  const [result, setResult] = useState<StairsCalculatorResult | null>(null);
+  const [floorToFloorHeight, setFloorToFloorHeight] = useState<string>("2600");
+  const [availableRun, setAvailableRun] = useState<string>("3000");
+  const [treadThickness, setTreadThickness] = useState<string>("30");
+  const [desiredRiserHeight, setDesiredRiserHeight] = useState<string>("180");
+  const [buildingType, setBuildingType] = useState<string>("residential");
+  const [stairsResult, setStairsResult] = useState<StairsResult | null>(null);
+  
+  const { toast } = useToast();
 
-  // Convert units to millimeters for calculation
-  const convertToMm = (value: number): number => {
-    return unit === "inches" ? value * 25.4 : value;
-  };
-
-  // Convert millimeters back to selected unit for display
-  const convertFromMm = (value: number): number => {
-    return unit === "inches" ? value / 25.4 : value;
-  };
-
-  // Calculate stairs dimensions
   const calculateStairs = () => {
-    // Validate inputs
-    if (!floorToFloor || !availableRun) {
+    if (!floorToFloorHeight || !availableRun || !treadThickness) {
+      toast({
+        title: "Missing Information",
+        description: "Please fill in all required fields",
+        variant: "destructive",
+      });
       return;
     }
 
     // Convert inputs to numbers
-    const rise = parseFloat(floorToFloor);
+    const floorHeight = parseFloat(floorToFloorHeight);
     const run = parseFloat(availableRun);
-    
-    // Set defaults for target dimensions
-    let idealRiser = unit === "mm" ? 175 : 7; // Default ideal riser height
-    let idealTread = unit === "mm" ? 275 : 11; // Default ideal tread depth
-    
-    // Use custom targets if provided
-    if (targetRiser) {
-      idealRiser = parseFloat(targetRiser);
-    }
-    
-    if (targetTread) {
-      idealTread = parseFloat(targetTread);
-    }
+    const treadThick = parseFloat(treadThickness);
+    const targetRiserHeight = desiredRiserHeight ? parseFloat(desiredRiserHeight) : 180;
 
-    // Calculate number of risers
-    let numRisers = Math.round(rise / idealRiser);
-    
-    // Ensure minimum number of risers
-    if (numRisers < 2) numRisers = 2;
+    // Calculate the optimal number of risers
+    const idealRisers = Math.round(floorHeight / targetRiserHeight);
     
     // Calculate actual riser height
-    const actualRiserHeight = rise / numRisers;
+    const actualRiserHeight = floorHeight / idealRisers;
     
-    // Calculate number of treads (always one less than risers)
-    const numTreads = numRisers - 1;
+    // Calculate tread depth (going)
+    const treadDepth = run / (idealRisers - 1);
     
-    // Calculate tread depth
-    let actualTreadDepth = run / numTreads;
+    // Calculate stair angle
+    const stairAngle = Math.atan(actualRiserHeight / treadDepth) * (180 / Math.PI);
     
-    // Adjust if L-shaped or U-shaped stairs
-    let actualTotalRun = run;
-    if (stairType === "l-shaped" || stairType === "u-shaped") {
-      // For L or U-shaped stairs, half treads are used at landings
-      // This is a simplification - real designs need more detail
-      actualTotalRun = actualTreadDepth * numTreads;
+    // Calculate headroom (simplified)
+    const headroom = 2000; // A standard value as a placeholder
+    
+    // Check compliance (based on building codes)
+    const isResidential = buildingType === "residential";
+    const minRiser = isResidential ? 115 : 150;
+    const maxRiser = isResidential ? 190 : 180;
+    const minTread = isResidential ? 240 : 280;
+    const maxAngle = isResidential ? 38 : 36;
+    
+    const isCompliant = (
+      actualRiserHeight >= minRiser &&
+      actualRiserHeight <= maxRiser &&
+      treadDepth >= minTread &&
+      stairAngle <= maxAngle
+    );
+    
+    // Generate compliance notes
+    const complianceNotes = [];
+    if (actualRiserHeight < minRiser) {
+      complianceNotes.push(`Riser height (${actualRiserHeight.toFixed(1)}mm) is below minimum (${minRiser}mm)`);
+    }
+    if (actualRiserHeight > maxRiser) {
+      complianceNotes.push(`Riser height (${actualRiserHeight.toFixed(1)}mm) exceeds maximum (${maxRiser}mm)`);
+    }
+    if (treadDepth < minTread) {
+      complianceNotes.push(`Tread depth (${treadDepth.toFixed(1)}mm) is below minimum (${minTread}mm)`);
+    }
+    if (stairAngle > maxAngle) {
+      complianceNotes.push(`Stair angle (${stairAngle.toFixed(1)}°) exceeds maximum (${maxAngle}°)`);
     }
     
-    // Calculate stair angle in degrees
-    const angleRadians = Math.atan(rise / actualTotalRun);
-    const angleDegrees = angleRadians * (180 / Math.PI);
-    
-    // Calculate stringer length using Pythagorean theorem
-    const stringerLength = Math.sqrt(Math.pow(rise, 2) + Math.pow(actualTotalRun, 2));
-    
-    // Prepare recommendations
-    const recommendations: string[] = [];
-    
-    // Check if riser height is within comfortable range
-    const minRiserHeight = unit === "mm" ? 150 : 6;
-    const maxRiserHeight = unit === "mm" ? 200 : 8;
-    
-    if (actualRiserHeight < minRiserHeight) {
-      recommendations.push(`Riser height (${actualRiserHeight.toFixed(1)} ${unit}) is too low. Consider reducing the number of steps.`);
-    } else if (actualRiserHeight > maxRiserHeight) {
-      recommendations.push(`Riser height (${actualRiserHeight.toFixed(1)} ${unit}) is too high. Consider adding more steps.`);
-    }
-    
-    // Check if tread depth is within comfortable range
-    const minTreadDepth = unit === "mm" ? 240 : 9.5;
-    
-    if (actualTreadDepth < minTreadDepth) {
-      recommendations.push(`Tread depth (${actualTreadDepth.toFixed(1)} ${unit}) is too shallow. Consider increasing the run length or reducing steps.`);
-    }
-    
-    // Check stair angle
-    if (angleDegrees > 40) {
-      recommendations.push(`Stair angle (${angleDegrees.toFixed(1)}°) is steep. Consider increasing the run length.`);
-    }
-    
-    // Check "2R + T" rule (a comfort formula for stairs)
-    const comfort = 2 * actualRiserHeight + actualTreadDepth;
-    const idealComfort = unit === "mm" ? 630 : 25;
-    
-    if (Math.abs(comfort - idealComfort) > (unit === "mm" ? 30 : 1.2)) {
-      recommendations.push(`The 2R+T value (${comfort.toFixed(1)}) is outside the ideal comfort range. Consider adjusting riser/tread dimensions.`);
-    }
-    
-    // Set the results
-    setResult({
-      numberOfRisers: numRisers,
-      numberOfTreads: numTreads,
+    // Set the result
+    setStairsResult({
+      numberOfRisers: idealRisers,
       riserHeight: actualRiserHeight,
-      treadDepth: actualTreadDepth,
-      totalRun: actualTotalRun,
-      stairAngle: angleDegrees,
-      stringerLength: stringerLength,
-      recommendations: recommendations
+      treadDepth: treadDepth,
+      totalRun: run,
+      stairAngle: stairAngle,
+      headroom: headroom,
+      isCompliant: isCompliant,
+      complianceNotes: complianceNotes
+    });
+    
+    toast({
+      title: "Calculation Complete",
+      description: isCompliant 
+        ? "Stair design meets building code requirements" 
+        : "Warning: Stair design does not meet all requirements",
+      variant: isCompliant ? "default" : "destructive",
     });
   };
 
-  // Reset the calculator
-  const resetStairs = () => {
-    setTotalRise("");
-    setFloorToFloor("");
-    setAvailableRun("");
-    setTargetRiser("");
-    setTargetTread("");
-    setResult(null);
-  };
-
   return {
-    totalRise,
-    setTotalRise,
-    floorToFloor,
-    setFloorToFloor,
+    floorToFloorHeight,
+    setFloorToFloorHeight,
     availableRun,
     setAvailableRun,
-    stairType,
-    setStairType,
-    targetRiser,
-    setTargetRiser,
-    targetTread,
-    setTargetTread,
-    unit,
-    setUnit,
-    headroomHeight,
-    setHeadroomHeight,
-    result,
-    calculateStairs,
-    resetStairs
+    treadThickness,
+    setTreadThickness,
+    desiredRiserHeight,
+    setDesiredRiserHeight,
+    buildingType,
+    setBuildingType,
+    stairsResult,
+    calculateStairs
   };
 };

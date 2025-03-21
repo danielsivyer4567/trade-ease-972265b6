@@ -1,19 +1,57 @@
 
 import React from "react";
+import { SpanTableCalculator } from "../SpanTableCalculator";
+import { BeamCalculator } from "../BeamCalculator";
+import { RafterRoofCalculator } from "../RafterRoofCalculator";
+import { ConcreteCalculator } from "../ConcreteCalculator";
+import { SquaringCalculator } from "../SquaringCalculator";
+import { DegreeCalculator } from "../DegreeCalculator";
+import { StairsCalculator } from "../StairsCalculator";
+import { JamesHardieCalculator } from "../JamesHardieCalculator";
+import { useSpanTableCalculator } from "../hooks/useSpanTableCalculator";
+import { useBeamCalculator } from "../hooks/useBeamCalculator";
+import { useConcreteCalculator } from "../hooks/useConcreteCalculator";
+import { useSquaringCalculator } from "../hooks/useSquaringCalculator";
+import { useDegreeCalculator } from "../hooks/useDegreeCalculator";
+import { useStairsCalculator } from "../hooks/useStairsCalculator";
+import { useJamesHardieCalculator } from "../hooks/useJamesHardieCalculator";
 
 interface TabContentsProps {
   tabId: string;
 }
 
-export const TabContents = ({ tabId }: TabContentsProps) => {
-  // For now, we'll return placeholder content
-  return (
-    <div className="p-4 bg-gray-50 rounded-lg">
-      <h2 className="text-xl font-semibold mb-4">{tabId.charAt(0).toUpperCase() + tabId.slice(1)} Calculator</h2>
-      <p className="text-gray-500">
-        This calculator will be implemented soon. It will provide accurate measurements for {tabId} calculations
-        based on Australian building standards.
-      </p>
-    </div>
-  );
+export const TabContents: React.FC<TabContentsProps> = ({ tabId }) => {
+  // Use all the necessary hooks for each calculator
+  const spanTableCalculatorProps = useSpanTableCalculator();
+  const beamCalculatorProps = useBeamCalculator();
+  const concreteCalculatorProps = useConcreteCalculator();
+  const squaringCalculatorProps = useSquaringCalculator();
+  const degreeCalculatorProps = useDegreeCalculator();
+  const stairsCalculatorProps = useStairsCalculator();
+  const hardieCalculatorProps = useJamesHardieCalculator();
+
+  // Render the appropriate calculator based on tabId
+  switch (tabId) {
+    case "beam":
+      return <BeamCalculator {...beamCalculatorProps} />;
+    case "joist":
+    case "rafter":
+      return <SpanTableCalculator {...spanTableCalculatorProps} />;
+    case "concrete":
+      return <ConcreteCalculator {...concreteCalculatorProps} />;
+    case "squaring":
+      return <SquaringCalculator {...squaringCalculatorProps} />;
+    case "degrees":
+      return <DegreeCalculator {...degreeCalculatorProps} />;
+    case "stairs":
+      return <StairsCalculator {...stairsCalculatorProps} />;
+    case "hardie":
+      return <JamesHardieCalculator {...hardieCalculatorProps} />;
+    default:
+      return (
+        <div className="p-6 text-center text-gray-500">
+          Select a calculator from the tabs above.
+        </div>
+      );
+  }
 };
