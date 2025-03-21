@@ -56,24 +56,24 @@ const Calculators = () => {
   
   return (
     <AppLayout>
-      <div className="container mx-auto py-6 space-y-6">
+      <div className="container mx-auto py-6 px-4 space-y-6">
         <SectionHeader title="Trade Calculators" />
         
         <p className="text-center text-gray-600 mb-6">
           Use these calculators to help with your trade business operations
         </p>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
           {calculators.map((calculator, index) => (
             <Card key={index} className="hover:shadow-md transition-shadow">
-              <CardHeader className="bg-slate-300">
+              <CardHeader className="bg-slate-200 p-4">
                 <div className="flex items-center justify-between">
-                  <CardTitle className="text-xl">{calculator.title}</CardTitle>
+                  <CardTitle className="text-lg md:text-xl">{calculator.title}</CardTitle>
                   {calculator.icon}
                 </div>
-                <CardDescription>{calculator.description}</CardDescription>
+                <CardDescription className="line-clamp-2 min-h-[40px]">{calculator.description}</CardDescription>
               </CardHeader>
-              <CardFooter className="bg-slate-300">
+              <CardFooter className="bg-slate-200 p-4">
                 <Link 
                   to={calculator.path} 
                   className="w-full bg-blue-50 text-blue-600 py-2 rounded-md text-center hover:bg-blue-100 transition-colors"

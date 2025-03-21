@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, Save, SendHorizontal, FileImage } from "lucide-react";
@@ -6,21 +7,23 @@ import { useNavigate } from "react-router-dom";
 import { QuoteItem } from "./QuoteItemsForm";
 import { FileUpload } from "@/components/tasks/FileUpload";
 import { ImagesGrid } from "@/components/tasks/ImagesGrid";
+
 interface QuotePreviewProps {
   quoteItems: QuoteItem[];
   onPrevTab: () => void;
 }
+
 export const QuotePreview = ({
   quoteItems,
   onPrevTab
 }: QuotePreviewProps) => {
-  const {
-    toast
-  } = useToast();
+  const { toast } = useToast();
   const navigate = useNavigate();
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
   const [previewImages, setPreviewImages] = useState<string[]>([]);
+
   const totalAmount = quoteItems.reduce((sum, item) => sum + item.total, 0);
+
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       const newFiles = Array.from(e.target.files);
@@ -40,12 +43,14 @@ export const QuotePreview = ({
       });
     }
   };
+
   const handleSaveQuote = async () => {
     toast({
       title: "Quote Saved",
       description: "Quote has been saved successfully"
     });
   };
+
   const handleSendQuote = () => {
     toast({
       title: "Quote Sent",
@@ -53,21 +58,23 @@ export const QuotePreview = ({
     });
     navigate("/quotes");
   };
-  return <div className="space-y-6">
+
+  return (
+    <div className="space-y-6">
       <div className="border p-4 rounded-md bg-slate-100">
-        <div className="flex justify-between">
+        <div className="flex flex-col md:flex-row md:justify-between gap-4">
           <div>
             <h2 className="font-bold text-xl">QUOTE</h2>
             <p className="text-gray-500 text-sm mt-1">Kitchen Renovation</p>
           </div>
-          <div className="text-right">
+          <div className="text-left md:text-right">
             <p className="font-medium">Quote #: Q-2024-009</p>
             <p className="text-sm text-gray-500 mt-1">Date: {new Date().toLocaleDateString()}</p>
             <p className="text-sm text-gray-500">Valid until: {new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toLocaleDateString()}</p>
           </div>
         </div>
         
-        <div className="grid grid-cols-2 gap-6 mt-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
           <div>
             <h3 className="font-medium text-sm text-gray-500 mb-1">FROM</h3>
             <p className="font-medium">Your Company Name</p>
@@ -93,19 +100,23 @@ export const QuotePreview = ({
             Attach Images to Quote
           </h3>
           <FileUpload onFileUpload={handleFileUpload} label="Drag and drop images or click to browse" />
-          {uploadedFiles.length > 0 && <div className="mt-2">
+          {uploadedFiles.length > 0 && (
+            <div className="mt-2">
               <p className="text-sm text-gray-600">
                 {uploadedFiles.length} file(s) attached to quote
               </p>
-            </div>}
+            </div>
+          )}
         </div>
         
-        {previewImages.length > 0 && <div className="mt-4">
+        {previewImages.length > 0 && (
+          <div className="mt-4">
             <h3 className="font-medium mb-2">Attached Photos</h3>
             <ImagesGrid images={previewImages} />
-          </div>}
+          </div>
+        )}
         
-        <div className="mt-8">
+        <div className="mt-8 overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-300">
@@ -116,12 +127,14 @@ export const QuotePreview = ({
               </tr>
             </thead>
             <tbody>
-              {quoteItems.map((item, index) => <tr key={index} className="border-b border-gray-200">
+              {quoteItems.map((item, index) => (
+                <tr key={index} className="border-b border-gray-200">
                   <td className="py-3">{item.description || "Item description"}</td>
                   <td className="py-3 text-center">{item.quantity}</td>
                   <td className="py-3 text-right">${item.rate.toFixed(2)}</td>
                   <td className="py-3 text-right">${item.total.toFixed(2)}</td>
-                </tr>)}
+                </tr>
+              ))}
             </tbody>
             <tfoot>
               <tr>
@@ -141,26 +154,27 @@ export const QuotePreview = ({
         </div>
         
         <div className="mt-8 border-t pt-4">
-          <h3 className="bg-slate-400 hover:bg-slate-300 text-gray-950 text-lg">Terms & Conditions</h3>
-          <p className="text-sm">Payment due within 14 days of quote acceptance. This quote is valid for 30 days from the date of issue.</p>
+          <h3 className="bg-slate-400 hover:bg-slate-300 text-gray-950 text-lg p-2 rounded">Terms & Conditions</h3>
+          <p className="text-sm mt-2">Payment due within 14 days of quote acceptance. This quote is valid for 30 days from the date of issue.</p>
         </div>
       </div>
       
-      <div className="flex justify-between mt-6">
-        <Button variant="outline" onClick={onPrevTab}>
+      <div className="flex flex-col sm:flex-row justify-between gap-4 mt-6">
+        <Button variant="outline" onClick={onPrevTab} className="w-full sm:w-auto">
           <ChevronLeft className="mr-2 h-4 w-4" />
           Back
         </Button>
-        <div className="space-x-2">
-          <Button variant="outline" onClick={handleSaveQuote}>
+        <div className="flex flex-col sm:flex-row gap-2">
+          <Button variant="outline" onClick={handleSaveQuote} className="w-full sm:w-auto">
             <Save className="mr-2 h-4 w-4" />
             Save Quote
           </Button>
-          <Button onClick={handleSendQuote}>
+          <Button onClick={handleSendQuote} className="w-full sm:w-auto">
             <SendHorizontal className="mr-2 h-4 w-4" />
             Send to Customer
           </Button>
         </div>
       </div>
-    </div>;
+    </div>
+  );
 };
