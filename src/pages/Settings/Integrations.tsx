@@ -135,6 +135,15 @@ export default function IntegrationsPage() {
     }
   };
 
+  const handleIntegrationAction = (event: React.MouseEvent, integration: any) => {
+    if (integrationStatuses[integration.title] !== "connected" && 
+        integration.apiKeyRequired && 
+        !apiKeys[integration.title]) {
+      event.preventDefault();
+      toast.error(`Please enter an API key for ${integration.title} first`);
+    }
+  };
+
   return (
     <AppLayout>
       <div className="p-4 md:p-6 max-w-7xl mx-auto space-y-4 md:space-y-6">
@@ -194,15 +203,32 @@ export default function IntegrationsPage() {
                     </div>
                   </div>
                 )}
-                <Link to={integration.path} className="w-full mt-auto">
+                {integrationStatuses[integration.title] !== "connected" && integration.apiKeyRequired ? (
                   <Button 
                     className={`w-full h-9 text-sm ${integration.devMode ? 'bg-violet-500 hover:bg-violet-600' : ''}`}
-                    variant={integrationStatuses[integration.title] === "connected" ? "default" : "outline"}
+                    variant="outline"
                     size="sm"
+                    onClick={() => {
+                      if (apiKeys[integration.title]) {
+                        handleApiKeySubmit(integration.title);
+                      } else {
+                        toast.error(`Please enter an API key for ${integration.title} first`);
+                      }
+                    }}
                   >
-                    {integrationStatuses[integration.title] === "connected" ? "Manage Integration" : "Connect"}
+                    Connect
                   </Button>
-                </Link>
+                ) : (
+                  <Link to={integration.path} className="w-full mt-auto" onClick={(e) => handleIntegrationAction(e, integration)}>
+                    <Button 
+                      className={`w-full h-9 text-sm ${integration.devMode ? 'bg-violet-500 hover:bg-violet-600' : ''}`}
+                      variant={integrationStatuses[integration.title] === "connected" ? "default" : "outline"}
+                      size="sm"
+                    >
+                      {integrationStatuses[integration.title] === "connected" ? "Manage Integration" : "Connect"}
+                    </Button>
+                  </Link>
+                )}
               </CardContent>
             </Card>
           ))}

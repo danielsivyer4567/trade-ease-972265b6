@@ -21,239 +21,85 @@ serve(async (req) => {
     );
 
     const { integration, apiKey } = await req.json();
+    console.log(`Processing integration request for: ${integration}`);
 
-    // Validate Xero API key
-    if (integration === 'Xero') {
-      // Here you would normally validate the API key with Xero's API
-      // For demonstration, we'll just check if it's not empty
-      if (!apiKey) {
-        return new Response(
-          JSON.stringify({ error: 'Invalid Xero API key' }),
-          { 
-            status: 400,
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-          }
-        );
-      }
-
-      // Store the API key securely in Supabase
-      const { error } = await supabaseClient
-        .from('integration_configs')
-        .upsert({
-          integration_name: 'Xero',
-          api_key: apiKey,
-          status: 'connected'
-        });
-
-      if (error) {
-        throw new Error(`Database error: ${error.message}`);
-      }
-
+    // Validate the API key based on the integration
+    if (!apiKey) {
+      console.error(`Invalid API key for ${integration}`);
       return new Response(
-        JSON.stringify({ message: 'Xero integration configured successfully' }),
+        JSON.stringify({ error: `Invalid ${integration} API key` }),
         { 
-          status: 200,
+          status: 400,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         }
       );
     }
 
-    if (integration === 'Go High Level') {
-      if (!apiKey) {
-        return new Response(
-          JSON.stringify({ error: 'Invalid Go High Level API key' }),
-          {
-            status: 400,
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-          }
-        );
+    // Create a map of integration names to their table entries
+    const integrationMap: Record<string, any> = {
+      "Xero": {
+        integration_name: 'Xero',
+        api_key: apiKey,
+        status: 'connected'
+      },
+      "Go High Level": {
+        integration_name: 'Go High Level',
+        api_key: apiKey,
+        status: 'connected'
+      },
+      "WhatsApp Business": {
+        integration_name: 'WhatsApp Business',
+        api_key: apiKey,
+        status: 'connected'
+      },
+      "Facebook": {
+        integration_name: 'Facebook',
+        api_key: apiKey,
+        status: 'connected'
+      },
+      "Stripe": {
+        integration_name: 'Stripe',
+        api_key: apiKey,
+        status: 'connected'
+      },
+      "SendGrid": {
+        integration_name: 'SendGrid',
+        api_key: apiKey,
+        status: 'connected'
+      },
+      "Google Calendar": {
+        integration_name: 'Google Calendar',
+        api_key: apiKey,
+        status: 'connected'
       }
+    };
 
-      const { error } = await supabaseClient
-        .from('integration_configs')
-        .upsert({
-          integration_name: 'Go High Level',
-          api_key: apiKey,
-          status: 'connected'
-        });
-        
-      if (error) {
-        throw new Error(`Database error: ${error.message}`);
-      }
-
+    if (!integrationMap[integration]) {
+      console.error(`Invalid integration: ${integration}`);
       return new Response(
-        JSON.stringify({ message: 'Go High Level integration configured successfully' }),
-        {
-          status: 200,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        }
-      );
-    }
-    
-    if (integration === 'WhatsApp Business') {
-      if (!apiKey) {
-        return new Response(
-          JSON.stringify({ error: 'Invalid WhatsApp Business API key' }),
-          {
-            status: 400,
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-          }
-        );
-      }
-
-      const { error } = await supabaseClient
-        .from('integration_configs')
-        .upsert({
-          integration_name: 'WhatsApp Business',
-          api_key: apiKey,
-          status: 'connected'
-        });
-        
-      if (error) {
-        throw new Error(`Database error: ${error.message}`);
-      }
-
-      return new Response(
-        JSON.stringify({ message: 'WhatsApp Business integration configured successfully' }),
-        {
-          status: 200,
+        JSON.stringify({ error: 'Invalid integration' }),
+        { 
+          status: 400,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         }
       );
     }
 
-    if (integration === 'Facebook') {
-      if (!apiKey) {
-        return new Response(
-          JSON.stringify({ error: 'Invalid Facebook API key' }),
-          {
-            status: 400,
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-          }
-        );
-      }
+    // Store the API key securely in Supabase
+    const { error } = await supabaseClient
+      .from('integration_configs')
+      .upsert(integrationMap[integration]);
 
-      const { error } = await supabaseClient
-        .from('integration_configs')
-        .upsert({
-          integration_name: 'Facebook',
-          api_key: apiKey,
-          status: 'connected'
-        });
-        
-      if (error) {
-        throw new Error(`Database error: ${error.message}`);
-      }
-
-      return new Response(
-        JSON.stringify({ message: 'Facebook integration configured successfully' }),
-        {
-          status: 200,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        }
-      );
-    }
-  
-    if (integration === 'Stripe') {
-      if (!apiKey) {
-        return new Response(
-          JSON.stringify({ error: 'Invalid Stripe API key' }),
-          {
-            status: 400,
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-          }
-        );
-      }
-  
-      const { error } = await supabaseClient
-        .from('integration_configs')
-        .upsert({
-          integration_name: 'Stripe',
-          api_key: apiKey,
-          status: 'connected'
-        });
-        
-      if (error) {
-        throw new Error(`Database error: ${error.message}`);
-      }
-  
-      return new Response(
-        JSON.stringify({ message: 'Stripe integration configured successfully' }),
-        {
-          status: 200,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        }
-      );
-    }
-  
-    if (integration === 'SendGrid') {
-      if (!apiKey) {
-        return new Response(
-          JSON.stringify({ error: 'Invalid SendGrid API key' }),
-          {
-            status: 400,
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-          }
-        );
-      }
-  
-      const { error } = await supabaseClient
-        .from('integration_configs')
-        .upsert({
-          integration_name: 'SendGrid',
-          api_key: apiKey,
-          status: 'connected'
-        });
-        
-      if (error) {
-        throw new Error(`Database error: ${error.message}`);
-      }
-  
-      return new Response(
-        JSON.stringify({ message: 'SendGrid integration configured successfully' }),
-        {
-          status: 200,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        }
-      );
-    }
-  
-    if (integration === 'Google Calendar') {
-      if (!apiKey) {
-        return new Response(
-          JSON.stringify({ error: 'Invalid Google Calendar API key' }),
-          {
-            status: 400,
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-          }
-        );
-      }
-  
-      const { error } = await supabaseClient
-        .from('integration_configs')
-        .upsert({
-          integration_name: 'Google Calendar',
-          api_key: apiKey,
-          status: 'connected'
-        });
-        
-      if (error) {
-        throw new Error(`Database error: ${error.message}`);
-      }
-  
-      return new Response(
-        JSON.stringify({ message: 'Google Calendar integration configured successfully' }),
-        {
-          status: 200,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        }
-      );
+    if (error) {
+      console.error(`Database error: ${error.message}`);
+      throw new Error(`Database error: ${error.message}`);
     }
 
+    console.log(`${integration} integration configured successfully`);
     return new Response(
-      JSON.stringify({ error: 'Invalid integration' }),
+      JSON.stringify({ message: `${integration} integration configured successfully` }),
       { 
-        status: 400,
+        status: 200,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       }
     );
