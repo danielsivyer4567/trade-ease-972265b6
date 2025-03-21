@@ -1,5 +1,4 @@
-
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsContent } from "@/components/ui/tabs";
 import type { Job } from "@/types/job";
 import { StandardTabs } from "./tabs/StandardTabs";
 import { ManagerTabs } from "./tabs/ManagerTabs";
@@ -95,7 +94,6 @@ export const JobTabs = ({
       </div>
       
       <div className="w-full bg-white z-10 relative mb-8">
-        {/* Standard Tab Contents */}
         <TabsContent value="details" className="mt-0 px-1 relative">
           <JobDetailsTab job={job} />
         </TabsContent>
@@ -120,7 +118,6 @@ export const JobTabs = ({
           />
         </TabsContent>
         
-        {/* Manager Tab Contents */}
         {isManager && (
           <>
             <TabsContent value="bills" className="mt-0 px-1 relative">

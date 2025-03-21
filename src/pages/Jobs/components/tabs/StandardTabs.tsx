@@ -1,3 +1,4 @@
+
 import { TabsContent, TabsTrigger } from "@/components/ui/tabs";
 import { FileText, Calendar, Clock } from "lucide-react";
 import { JobDetailsTab } from "./JobDetailsTab";
@@ -6,6 +7,7 @@ import { JobCalendarTab } from "./JobCalendarTab";
 import { JobTimerTab } from "./JobTimerTab";
 import type { Job } from "@/types/job";
 import { useIsMobile } from "@/hooks/use-mobile";
+
 interface StandardTabsProps {
   job: Job;
   jobTimer: number;
@@ -21,6 +23,7 @@ interface StandardTabsProps {
   isTimerRunning: boolean;
   isOnBreak: boolean;
 }
+
 export const StandardTabs = ({
   job,
   jobTimer,
@@ -34,7 +37,9 @@ export const StandardTabs = ({
   isOnBreak
 }: StandardTabsProps) => {
   const isMobile = useIsMobile();
-  return <>
+  
+  return (
+    <>
       <TabsTrigger value="details" className="min-w-[80px] sm:min-w-[100px] whitespace-nowrap flex-shrink-0 bg-slate-400 hover:bg-slate-300 px-[26px] mx-0">
         Details
       </TabsTrigger>
@@ -53,5 +58,6 @@ export const StandardTabs = ({
         {!isMobile && <Clock className="w-4 h-4 mr-2 px-0" />}
         Timer
       </TabsTrigger>
-    </>;
+    </>
+  );
 };

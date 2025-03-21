@@ -26,7 +26,8 @@ const mockJobs: Job[] = [
     title: "Water Heater Installation",
     description: "Install new water heater system",
     assignedTeam: "Red Team"
-  }, {
+  },
+  {
     id: "2",
     customer: "Sarah Johnson",
     type: "HVAC",
@@ -37,7 +38,8 @@ const mockJobs: Job[] = [
     title: "HVAC Maintenance",
     description: "Regular maintenance check",
     assignedTeam: "Blue Team"
-  }, {
+  },
+  {
     id: "3",
     customer: "Mike Brown",
     type: "Electrical",
@@ -91,7 +93,7 @@ export function JobDetails() {
             .from('jobs')
             .select('*')
             .eq('id', id)
-            .single();
+            .maybeSingle();
             
           if (data && !error) {
             console.log("Job fetched from Supabase:", data);
