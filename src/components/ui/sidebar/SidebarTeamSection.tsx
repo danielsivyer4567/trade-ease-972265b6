@@ -3,7 +3,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Hammer, Plus } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useSidebar } from '../sidebar';
+import { useSidebar } from './SidebarProvider';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 export type Team = {
@@ -17,11 +17,11 @@ interface SidebarTeamSectionProps {
 }
 
 export function SidebarTeamSection({ teams }: SidebarTeamSectionProps) {
-  const { state, isCollapsed } = useSidebar();
+  const { state } = useSidebar();
   const isMobileDevice = useIsMobile();
 
-  // If isCollapsed is not available directly, fallback to checking state
-  const collapsed = isCollapsed ?? (state === "collapsed");
+  // Check if sidebar is collapsed
+  const collapsed = state === "collapsed";
 
   if (collapsed) {
     return null;
