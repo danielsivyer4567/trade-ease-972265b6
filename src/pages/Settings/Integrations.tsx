@@ -1,4 +1,3 @@
-
 import { AppLayout } from "@/components/ui/AppLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Link2, MessageSquare, CreditCard, Mail, Calendar, Key, FileText, Phone, Facebook } from "lucide-react";
@@ -61,7 +60,7 @@ const availableIntegrations = [
     description: "Sync invoices, payments and accounting data with Xero",
     path: "/settings/integrations/xero",
     apiKeyRequired: true,
-    devMode: true // Added a devMode property for Xero
+    devMode: true
   }
 ];
 
@@ -114,24 +113,18 @@ export default function IntegrationsPage() {
   const handleApiKeySubmit = async (integration: string) => {
     setLoading(prev => ({ ...prev, [integration]: true }));
     try {
-      const response = await fetch('https://wxwbxupdisbofesaygqj.supabase.co/functions/v1/validate-integration', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
+      const response = await supabase.functions.invoke('validate-integration', {
+        body: {
           integration,
           apiKey: apiKeys[integration]
-        })
+        }
       });
-
-      const data = await response.json();
       
-      if (!response.ok) {
-        throw new Error(data.message || 'Failed to configure integration');
+      if (response.error) {
+        throw new Error(response.error.message || 'Failed to configure integration');
       }
 
-      toast.success(data.message);
+      toast.success(`${integration} configured successfully`);
       await loadIntegrationStatuses();
       setApiKeys(prev => ({ ...prev, [integration]: '' }));
     } catch (error) {

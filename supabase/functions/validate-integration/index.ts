@@ -1,5 +1,6 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.22.0";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -7,11 +8,18 @@ const corsHeaders = {
 };
 
 serve(async (req) => {
+  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
+    // Create a Supabase client with the Auth context of the function
+    const supabaseClient = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+    );
+
     const { integration, apiKey } = await req.json();
 
     // Validate Xero API key
@@ -29,14 +37,17 @@ serve(async (req) => {
       }
 
       // Store the API key securely in Supabase
-      const { supabaseClient } = req;
-      await supabaseClient
+      const { error } = await supabaseClient
         .from('integration_configs')
         .upsert({
           integration_name: 'Xero',
           api_key: apiKey,
           status: 'connected'
         });
+
+      if (error) {
+        throw new Error(`Database error: ${error.message}`);
+      }
 
       return new Response(
         JSON.stringify({ message: 'Xero integration configured successfully' }),
@@ -58,14 +69,17 @@ serve(async (req) => {
         );
       }
 
-      const { supabaseClient } = req;
-      await supabaseClient
+      const { error } = await supabaseClient
         .from('integration_configs')
         .upsert({
           integration_name: 'Go High Level',
           api_key: apiKey,
           status: 'connected'
         });
+        
+      if (error) {
+        throw new Error(`Database error: ${error.message}`);
+      }
 
       return new Response(
         JSON.stringify({ message: 'Go High Level integration configured successfully' }),
@@ -87,14 +101,17 @@ serve(async (req) => {
         );
       }
 
-      const { supabaseClient } = req;
-      await supabaseClient
+      const { error } = await supabaseClient
         .from('integration_configs')
         .upsert({
           integration_name: 'WhatsApp Business',
           api_key: apiKey,
           status: 'connected'
         });
+        
+      if (error) {
+        throw new Error(`Database error: ${error.message}`);
+      }
 
       return new Response(
         JSON.stringify({ message: 'WhatsApp Business integration configured successfully' }),
@@ -116,14 +133,17 @@ serve(async (req) => {
         );
       }
 
-      const { supabaseClient } = req;
-      await supabaseClient
+      const { error } = await supabaseClient
         .from('integration_configs')
         .upsert({
           integration_name: 'Facebook',
           api_key: apiKey,
           status: 'connected'
         });
+        
+      if (error) {
+        throw new Error(`Database error: ${error.message}`);
+      }
 
       return new Response(
         JSON.stringify({ message: 'Facebook integration configured successfully' }),
@@ -145,14 +165,17 @@ serve(async (req) => {
         );
       }
   
-      const { supabaseClient } = req;
-      await supabaseClient
+      const { error } = await supabaseClient
         .from('integration_configs')
         .upsert({
           integration_name: 'Stripe',
           api_key: apiKey,
           status: 'connected'
         });
+        
+      if (error) {
+        throw new Error(`Database error: ${error.message}`);
+      }
   
       return new Response(
         JSON.stringify({ message: 'Stripe integration configured successfully' }),
@@ -174,14 +197,17 @@ serve(async (req) => {
         );
       }
   
-      const { supabaseClient } = req;
-      await supabaseClient
+      const { error } = await supabaseClient
         .from('integration_configs')
         .upsert({
           integration_name: 'SendGrid',
           api_key: apiKey,
           status: 'connected'
         });
+        
+      if (error) {
+        throw new Error(`Database error: ${error.message}`);
+      }
   
       return new Response(
         JSON.stringify({ message: 'SendGrid integration configured successfully' }),
@@ -203,14 +229,17 @@ serve(async (req) => {
         );
       }
   
-      const { supabaseClient } = req;
-      await supabaseClient
+      const { error } = await supabaseClient
         .from('integration_configs')
         .upsert({
           integration_name: 'Google Calendar',
           api_key: apiKey,
           status: 'connected'
         });
+        
+      if (error) {
+        throw new Error(`Database error: ${error.message}`);
+      }
   
       return new Response(
         JSON.stringify({ message: 'Google Calendar integration configured successfully' }),
@@ -229,6 +258,7 @@ serve(async (req) => {
       }
     );
   } catch (error) {
+    console.error(error);
     return new Response(
       JSON.stringify({ error: error.message }),
       { 
