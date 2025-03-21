@@ -2,7 +2,7 @@
 import { DocumentApprovalProps } from "./types";
 import { FileUploadSection } from "./FileUploadSection";
 import { ActionButtons } from "./ActionButtons";
-import { useDocumentApproval } from "./useDocumentApproval";
+import { useDocumentApproval } from "./hooks/useDocumentApproval";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 export function DocumentApproval({
