@@ -35,7 +35,7 @@ export function BaseLayout({
 
   return (
     <div className="flex h-screen w-full overflow-hidden bg-slate-100">
-      {/* Sidebar */}
+      {/* Sidebar - only render one instance */}
       <AppSidebar isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
       
       {/* Main Content */}

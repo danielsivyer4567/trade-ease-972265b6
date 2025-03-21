@@ -9,11 +9,7 @@ export * from "./constants";
 export * from "./types";
 export * from "./SidebarNavLinks";
 export * from "./SidebarTeamSection";
+export * from "./SidebarContent";
+export * from "./SidebarProvider";
 
-// Add a simple useSidebar hook for backwards compatibility
-export function useSidebar() {
-  return {
-    state: "expanded", // Default state
-    isCollapsed: false
-  };
-}
+// Remove this simple useSidebar hook which might be causing conflicts with the real one
