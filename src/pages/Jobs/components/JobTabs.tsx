@@ -12,6 +12,7 @@ import { JobBillsTab } from "./tabs/JobBillsTab";
 import { JobCostsTab } from "./tabs/JobCostsTab";
 import { JobInvoicesTab } from "./tabs/JobInvoicesTab";
 import { JobFinancialsTab } from "./tabs/JobFinancialsTab";
+import { FinancialData } from "../hooks/financial-data/types";
 
 interface JobTabsProps {
   job: Job;
@@ -30,7 +31,7 @@ interface JobTabsProps {
   handleBreakToggle: () => void;
   isTimerRunning: boolean;
   isOnBreak: boolean;
-  extractedFinancialData?: any[];
+  extractedFinancialData?: FinancialData[];
 }
 
 export const JobTabs = ({

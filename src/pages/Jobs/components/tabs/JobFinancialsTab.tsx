@@ -1,4 +1,3 @@
-
 import { TabsContent } from "@/components/ui/tabs";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
@@ -8,6 +7,7 @@ import { QuoteAmountInput } from "./financials/QuoteAmountInput";
 import { FinancialSummary } from "./financials/FinancialSummary";
 import { FinancialNotes } from "./financials/FinancialNotes";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { FinancialData } from "../../hooks/financial-data/types";
 
 // Mock data for demonstration - in a real app this would come from your database
 const mockCustomerQuotes = [
@@ -23,7 +23,7 @@ interface JobFinancialsTabProps {
   setTabNotes: (notes: Record<string, string>) => void;
   totalRevenue: number;
   totalCosts: number;
-  extractedFinancialData?: any[];
+  extractedFinancialData?: FinancialData[];
 }
 
 export const JobFinancialsTab = ({ 

@@ -1,17 +1,7 @@
 
-export interface FinancialData {
-  amount: number;
-  vendor?: string;
-  date?: string;
-  description?: string;
-  source: string;
-  timestamp: string;
-  jobId: string;
-  category?: string;
-  status?: string;
-}
+import { FinancialData } from "../../hooks/financial-data/types";
 
 export interface DocumentApprovalProps {
   jobId: string;
-  onFinancialDataExtracted: (data: any) => void;
+  onFinancialDataExtracted: (data: FinancialData) => void;
 }
