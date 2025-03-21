@@ -31,7 +31,7 @@ export function TaskManager({ initialTasks = [], teams, teamMembers }: TaskManag
     const fetchTasks = async () => {
       try {
         const { data, error } = await supabase
-          .from('tasks')
+          .from('task_cards')
           .select('*');
           
         if (error) {
@@ -56,7 +56,12 @@ export function TaskManager({ initialTasks = [], teams, teamMembers }: TaskManag
             teamLeaderId: task.team_leader_id,
             managerId: task.manager_id,
             assignedManager: task.assigned_manager || '',
-            attachedFiles: task.attached_files ? JSON.parse(task.attached_files) : []
+            attachedFiles: task.attached_files ? task.attached_files : [],
+            acknowledgmentNote: task.acknowledgment_note,
+            completionNote: task.completion_note,
+            completionImages: task.completion_images,
+            progressNote: task.progress_note,
+            progressFiles: task.progress_files
           }));
           
           setTasks(formattedTasks);
@@ -82,65 +87,72 @@ export function TaskManager({ initialTasks = [], teams, teamMembers }: TaskManag
       return;
     }
     
-    // Create the local task object
-    const taskId = crypto.randomUUID();
-    const task: Task = {
-      id: taskId,
-      ...newTask,
-      status: 'pending',
-      attachedFiles: newTask.attachedFiles
-    };
-    
-    // Add to local state immediately for responsive UI
-    setTasks([...tasks, task]);
-    
-    // Reset the form
-    setNewTask({
-      title: '',
-      description: '',
-      dueDate: '',
-      assignedTeam: '',
-      assignedManager: '',
-      teamLeaderId: '',
-      managerId: '',
-      attachedFiles: []
-    });
-    
-    // Save to Supabase
     try {
-      const { error } = await supabase
-        .from('tasks')
+      // Save to Supabase
+      const { data, error } = await supabase
+        .from('task_cards')
         .insert({
-          id: taskId,
-          title: task.title,
-          description: task.description,
-          due_date: task.dueDate,
-          assigned_team: task.assignedTeam,
-          team_leader_id: task.teamLeaderId || null,
-          manager_id: task.managerId || null,
-          attached_files: JSON.stringify(task.attachedFiles),
+          title: newTask.title,
+          description: newTask.description,
+          due_date: newTask.dueDate,
+          assigned_team: newTask.assignedTeam,
+          team_leader_id: newTask.teamLeaderId || null,
+          manager_id: newTask.managerId || null,
+          assigned_manager: newTask.assignedManager || null,
+          attached_files: newTask.attachedFiles,
           status: 'pending'
-        });
+        })
+        .select();
         
       if (error) {
         console.error('Error saving task:', error);
         toast({
           title: "Error Saving Task",
-          description: "Task was created locally but could not be saved to the database.",
+          description: "Task could not be saved to the database.",
           variant: "destructive"
         });
         return;
       }
       
+      // Add to local state with the new ID from Supabase
+      if (data && data.length > 0) {
+        const newTaskWithId: Task = {
+          id: data[0].id,
+          title: newTask.title,
+          description: newTask.description,
+          dueDate: newTask.dueDate,
+          assignedTeam: newTask.assignedTeam,
+          assignedManager: newTask.assignedManager || '',
+          teamLeaderId: newTask.teamLeaderId,
+          managerId: newTask.managerId,
+          status: 'pending',
+          attachedFiles: newTask.attachedFiles
+        };
+        
+        setTasks([...tasks, newTaskWithId]);
+      }
+      
+      // Reset the form
+      setNewTask({
+        title: '',
+        description: '',
+        dueDate: '',
+        assignedTeam: '',
+        assignedManager: '',
+        teamLeaderId: '',
+        managerId: '',
+        attachedFiles: []
+      });
+      
       toast({
         title: "Task Added",
-        description: `New task has been created and assigned to ${task.assignedTeam}`
+        description: `New task has been created and assigned to ${newTask.assignedTeam}`
       });
     } catch (err) {
       console.error('Error in handleAddTask:', err);
       toast({
         title: "Error Saving Task",
-        description: "An unexpected error occurred. Task was created locally but may not be saved.",
+        description: "An unexpected error occurred. Please try again.",
         variant: "destructive"
       });
     }
@@ -166,17 +178,10 @@ export function TaskManager({ initialTasks = [], teams, teamMembers }: TaskManag
   };
   
   const handleTaskAcknowledgment = async (taskId: string, note: string) => {
-    // Update local state
-    setTasks(tasks.map(task => task.id === taskId ? {
-      ...task,
-      status: 'acknowledged',
-      acknowledgmentNote: note
-    } : task));
-    
-    // Update in Supabase
     try {
+      // Update in Supabase
       const { error } = await supabase
-        .from('tasks')
+        .from('task_cards')
         .update({ 
           status: 'acknowledged',
           acknowledgment_note: note,
@@ -188,11 +193,18 @@ export function TaskManager({ initialTasks = [], teams, teamMembers }: TaskManag
         console.error('Error updating task:', error);
         toast({
           title: "Error Updating Task",
-          description: "Task was acknowledged locally but could not be updated in the database.",
+          description: "Task could not be acknowledged. Please try again.",
           variant: "destructive"
         });
         return;
       }
+      
+      // Update local state
+      setTasks(tasks.map(task => task.id === taskId ? {
+        ...task,
+        status: 'acknowledged',
+        acknowledgmentNote: note
+      } : task));
       
       toast({
         title: "Task Acknowledged",
@@ -203,23 +215,55 @@ export function TaskManager({ initialTasks = [], teams, teamMembers }: TaskManag
     }
   };
   
-  const handleTaskCompletion = async (taskId: string, note: string, images: string[]) => {
-    // Update local state
-    setTasks(tasks.map(task => task.id === taskId ? {
-      ...task,
-      status: 'completed',
-      completionNote: note,
-      completionImages: images
-    } : task));
-    
-    // Update in Supabase
+  const handleTaskProgress = async (taskId: string, note: string, files: string[]) => {
     try {
+      // Update in Supabase
       const { error } = await supabase
-        .from('tasks')
+        .from('task_cards')
+        .update({ 
+          status: 'in_progress',
+          progress_note: note,
+          progress_files: files,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', taskId);
+        
+      if (error) {
+        console.error('Error updating task progress:', error);
+        toast({
+          title: "Error Updating Task",
+          description: "Task progress could not be saved. Please try again.",
+          variant: "destructive"
+        });
+        return;
+      }
+      
+      // Update local state
+      setTasks(tasks.map(task => task.id === taskId ? {
+        ...task,
+        status: 'in_progress',
+        progressNote: note,
+        progressFiles: files
+      } : task));
+      
+      toast({
+        title: "Task In Progress",
+        description: "Task has been marked as in progress"
+      });
+    } catch (err) {
+      console.error('Error in handleTaskProgress:', err);
+    }
+  };
+  
+  const handleTaskCompletion = async (taskId: string, note: string, images: string[]) => {
+    try {
+      // Update in Supabase
+      const { error } = await supabase
+        .from('task_cards')
         .update({ 
           status: 'completed',
           completion_note: note,
-          completion_images: JSON.stringify(images),
+          completion_images: images,
           updated_at: new Date().toISOString()
         })
         .eq('id', taskId);
@@ -228,11 +272,19 @@ export function TaskManager({ initialTasks = [], teams, teamMembers }: TaskManag
         console.error('Error completing task:', error);
         toast({
           title: "Error Completing Task",
-          description: "Task was marked as completed locally but could not be updated in the database.",
+          description: "Task could not be marked as completed. Please try again.",
           variant: "destructive"
         });
         return;
       }
+      
+      // Update local state
+      setTasks(tasks.map(task => task.id === taskId ? {
+        ...task,
+        status: 'completed',
+        completionNote: note,
+        completionImages: images
+      } : task));
       
       toast({
         title: "Task Completed",
@@ -254,6 +306,7 @@ export function TaskManager({ initialTasks = [], teams, teamMembers }: TaskManag
       activeTasks={activeTasks}
       teamMembers={teamMembers}
       onAcknowledge={handleTaskAcknowledgment}
+      onProgress={handleTaskProgress}
       onComplete={handleTaskCompletion}
     />
   );

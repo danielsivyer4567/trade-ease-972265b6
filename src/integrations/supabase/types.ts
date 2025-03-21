@@ -521,6 +521,101 @@ export type Database = {
         }
         Relationships: []
       }
+      task_assignments: {
+        Row: {
+          assigned_at: string | null
+          id: string
+          member_id: string
+          member_name: string
+          member_role: string
+          task_id: string
+        }
+        Insert: {
+          assigned_at?: string | null
+          id?: string
+          member_id: string
+          member_name: string
+          member_role: string
+          task_id: string
+        }
+        Update: {
+          assigned_at?: string | null
+          id?: string
+          member_id?: string
+          member_name?: string
+          member_role?: string
+          task_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "task_assignments_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "task_cards"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      task_cards: {
+        Row: {
+          acknowledgment_note: string | null
+          assigned_manager: string | null
+          assigned_team: string
+          attached_files: Json | null
+          completion_images: Json | null
+          completion_note: string | null
+          created_at: string | null
+          description: string | null
+          due_date: string
+          id: string
+          manager_id: string | null
+          progress_files: Json | null
+          progress_note: string | null
+          status: string
+          team_leader_id: string | null
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          acknowledgment_note?: string | null
+          assigned_manager?: string | null
+          assigned_team: string
+          attached_files?: Json | null
+          completion_images?: Json | null
+          completion_note?: string | null
+          created_at?: string | null
+          description?: string | null
+          due_date: string
+          id?: string
+          manager_id?: string | null
+          progress_files?: Json | null
+          progress_note?: string | null
+          status?: string
+          team_leader_id?: string | null
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          acknowledgment_note?: string | null
+          assigned_manager?: string | null
+          assigned_team?: string
+          attached_files?: Json | null
+          completion_images?: Json | null
+          completion_note?: string | null
+          created_at?: string | null
+          description?: string | null
+          due_date?: string
+          id?: string
+          manager_id?: string | null
+          progress_files?: Json | null
+          progress_note?: string | null
+          status?: string
+          team_leader_id?: string | null
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       tasks: {
         Row: {
           assigned_team: string

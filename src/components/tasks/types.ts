@@ -15,6 +15,7 @@ export interface Task {
   assignedManager: string;
   progressNote?: string;
   progressFiles?: string[];
+  assignedMemberId?: string;
 }
 
 export interface TeamMember {
