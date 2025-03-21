@@ -60,7 +60,8 @@ const availableIntegrations = [
     icon: FileText,
     description: "Sync invoices, payments and accounting data with Xero",
     path: "/settings/integrations/xero",
-    apiKeyRequired: true
+    apiKeyRequired: true,
+    devMode: true // Added a devMode property for Xero
   }
 ];
 
@@ -113,7 +114,7 @@ export default function IntegrationsPage() {
   const handleApiKeySubmit = async (integration: string) => {
     setLoading(prev => ({ ...prev, [integration]: true }));
     try {
-      const response = await fetch('/api/validate-integration', {
+      const response = await fetch('https://wxwbxupdisbofesaygqj.supabase.co/functions/v1/validate-integration', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -134,7 +135,8 @@ export default function IntegrationsPage() {
       await loadIntegrationStatuses();
       setApiKeys(prev => ({ ...prev, [integration]: '' }));
     } catch (error) {
-      toast.error(error.message);
+      console.error('Error submitting API key:', error);
+      toast.error(error.message || 'Failed to configure integration');
     } finally {
       setLoading(prev => ({ ...prev, [integration]: false }));
     }
@@ -157,6 +159,9 @@ export default function IntegrationsPage() {
                     <integration.icon className="h-5 w-5 text-gray-600" />
                     <CardTitle className="text-lg md:text-xl">{integration.title}</CardTitle>
                   </div>
+                  {integration.devMode && (
+                    <span className="bg-violet-100 text-violet-800 text-xs px-2 py-1 rounded-full">Dev</span>
+                  )}
                   <span className={`text-xs md:text-sm px-2 py-1 rounded-full ${
                     integrationStatuses[integration.title] === "connected"
                       ? "bg-green-100 text-green-800"
@@ -187,7 +192,7 @@ export default function IntegrationsPage() {
                       <Button 
                         onClick={() => handleApiKeySubmit(integration.title)}
                         disabled={loading[integration.title] || !apiKeys[integration.title]}
-                        className="h-9 text-xs whitespace-nowrap"
+                        className={`h-9 text-xs whitespace-nowrap ${integration.devMode ? 'bg-violet-500 hover:bg-violet-600' : ''}`}
                         size="sm"
                       >
                         <Key className="h-3 w-3 mr-1" />
@@ -198,7 +203,7 @@ export default function IntegrationsPage() {
                 )}
                 <Link to={integration.path} className="w-full mt-auto">
                   <Button 
-                    className="w-full h-9 text-sm" 
+                    className={`w-full h-9 text-sm ${integration.devMode ? 'bg-violet-500 hover:bg-violet-600' : ''}`}
                     variant={integrationStatuses[integration.title] === "connected" ? "default" : "outline"}
                     size="sm"
                   >
