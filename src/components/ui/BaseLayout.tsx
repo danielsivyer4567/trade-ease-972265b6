@@ -5,6 +5,7 @@ import { AppSidebar } from './AppSidebar';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { MainContent } from './MainContent';
 import { SIDEBAR_CONSTANTS } from './sidebar/constants';
+import { SidebarProvider } from './sidebar/SidebarProvider';
 
 interface BaseLayoutProps {
   children: React.ReactNode;
@@ -34,19 +35,21 @@ export function BaseLayout({
   };
 
   return (
-    <div className="flex h-screen w-full overflow-hidden bg-slate-100">
-      {/* Sidebar - only render one instance */}
-      <AppSidebar isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
-      
-      {/* Main Content */}
-      <MainContent 
-        sidebarOpen={sidebarOpen}
-        isMobile={isMobile}
-        showQuickTabs={showQuickTabs}
-        className={className}
-      >
-        {children}
-      </MainContent>
-    </div>
+    <SidebarProvider>
+      <div className="flex h-screen w-full overflow-hidden bg-slate-100">
+        {/* Sidebar - only render one instance */}
+        <AppSidebar isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
+        
+        {/* Main Content */}
+        <MainContent 
+          sidebarOpen={sidebarOpen}
+          isMobile={isMobile}
+          showQuickTabs={showQuickTabs}
+          className={className}
+        >
+          {children}
+        </MainContent>
+      </div>
+    </SidebarProvider>
   );
 }
