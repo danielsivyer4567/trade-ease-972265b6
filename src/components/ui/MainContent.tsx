@@ -48,7 +48,7 @@ export function MainContent({
   return (
     <main
       className={cn(
-        "relative flex flex-col flex-1 overflow-hidden bg-[#EFF2F5]",
+        "relative flex flex-col flex-1 overflow-hidden ",
 
         sidebarOpen &&
         "transition-all duration-300 ease-in-out",
@@ -61,7 +61,7 @@ export function MainContent({
       } as React.CSSProperties}
     >
       {/* Header Section */}
-      <div className="sticky top-0 z-40 flex h-16 items-center gap-4 border-b bg-background px-4 md:px-6">
+      <div className="sticky top-0 z-40 flex h-16 items-center gap-4 border-b border-[#B8C5D5] bg-[#E2E8F0] px-4 md:px-6">
         <div className="flex flex-1 items-center justify-between">
         <div></div>
 
