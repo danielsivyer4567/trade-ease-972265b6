@@ -44,7 +44,7 @@ export function BaseLayout({
 
         {/* Main Content */}
         <main className={cn(
-          "min-h-screen w-full ",
+          "min-h-screen w-full bg-[#EFF2F5]",
           "transition-all duration-300 ease-in-out",
           sidebarOpen ? "pl-[240px]" : "pl-[64px]"
         )}>

@@ -32,7 +32,7 @@ export function Sidebar({ className, children }: SidebarProps) {
     <div
       data-state={state}
       className={cn(
-        "relative hidden h-screen border-r md:flex md:flex-col ",
+        "relative hidden h-screen border-r  md:flex md:flex-col ",
         state === "expanded" ? "w-[240px]" : "w-[60px]",
         "transition-all duration-300 ease-in-out",
         className
