@@ -1,10 +1,8 @@
-
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { cn } from '@/lib/utils';
 import { AppSidebar } from './AppSidebar';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { MainContent } from './MainContent';
-import { SIDEBAR_CONSTANTS } from './sidebar/constants';
 import { SidebarProvider } from './sidebar/SidebarProvider';
 
 interface BaseLayoutProps {
@@ -19,36 +17,45 @@ export function BaseLayout({
   showQuickTabs = false
 }: BaseLayoutProps) {
   const isMobile = useIsMobile();
-  const [sidebarOpen, setSidebarOpen] = useState(!isMobile);
+  const [sidebarOpen, setSidebarOpen] = React.useState(!isMobile);
   
   // Handle sidebar state changes
-  useEffect(() => {
+  React.useEffect(() => {
     // Automatically collapse sidebar on mobile
     if (isMobile) {
       setSidebarOpen(false);
     }
   }, [isMobile]);
-  
-  // Toggle sidebar
-  const toggleSidebar = () => {
-    setSidebarOpen(prev => !prev);
-  };
+
+  const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
 
   return (
     <SidebarProvider>
-      <div className="flex h-screen w-full overflow-hidden bg-slate-100">
-        {/* Sidebar - only render one instance */}
-        <AppSidebar isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
-        
+      <div className={cn(
+        "relative min-h-screen w-full",
+        className
+      )}>
+        {/* Sidebar */}
+        <AppSidebar 
+          isExpanded={sidebarOpen}
+          onToggle={toggleSidebar}
+          className="fixed top-0 left-0 h-full "
+        />
+
         {/* Main Content */}
-        <MainContent 
-          sidebarOpen={sidebarOpen}
-          isMobile={isMobile}
-          showQuickTabs={showQuickTabs}
-          className={className}
-        >
-          {children}
-        </MainContent>
+        <main className={cn(
+          "min-h-screen w-full ",
+          "transition-all duration-300 ease-in-out",
+          sidebarOpen ? "pl-[240px]" : "pl-[64px]"
+        )}>
+          <MainContent 
+            sidebarOpen={sidebarOpen}
+            isMobile={isMobile}
+            showQuickTabs={showQuickTabs}
+          >
+            {children}
+          </MainContent>
+        </main>
       </div>
     </SidebarProvider>
   );

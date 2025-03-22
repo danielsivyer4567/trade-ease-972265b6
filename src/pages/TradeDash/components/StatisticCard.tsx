@@ -1,5 +1,7 @@
 import { ReactNode } from "react";
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
+
 interface StatisticCardProps {
   title: string;
   value: string | number;
@@ -7,6 +9,7 @@ interface StatisticCardProps {
   description?: string;
   className?: string;
 }
+
 export function StatisticCard({
   title,
   value,
@@ -14,18 +17,27 @@ export function StatisticCard({
   description,
   className = ""
 }: StatisticCardProps) {
-  return <Card className={className}>
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 bg-slate-200">
-        <CardTitle className="text-sm font-medium">
+  return (
+    <Card className={cn(
+      "hover:shadow-md transition-shadow overflow-hidden",
+      className
+    )}>
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <CardTitle className="text-sm font-medium text-gray-600">
           {title}
         </CardTitle>
-        {icon}
+        <div className="p-2 rounded-full bg-gray-50">
+          {icon}
+        </div>
       </CardHeader>
-      <CardContent className="bg-slate-200">
-        <div className="text-2xl font-bold">{value}</div>
-        {description && <p className="text-xs text-muted-foreground">
+      <CardContent>
+        <div className="text-2xl font-bold text-gray-900">{value}</div>
+        {description && (
+          <p className="text-sm text-gray-500 mt-1">
             {description}
-          </p>}
+          </p>
+        )}
       </CardContent>
-    </Card>;
+    </Card>
+  );
 }
