@@ -1,13 +1,20 @@
-
 import React from 'react';
 import { cn } from '@/lib/utils';
 import { Button } from './button';
 import { LogOut } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { QuickTabs } from './QuickTabs';
 import { SIDEBAR_CONSTANTS } from './sidebar/constants';
+import { ScrollArea } from './scroll-area';
+import { Separator } from './separator';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from './dropdown-menu';
 
 interface MainContentProps {
   children: React.ReactNode;
@@ -25,8 +32,7 @@ export function MainContent({
   showQuickTabs = false
 }: MainContentProps) {
   const navigate = useNavigate();
-  const location = useLocation();
-  
+
   const handleLogout = async () => {
     try {
       const { error } = await supabase.auth.signOut();
@@ -40,42 +46,51 @@ export function MainContent({
   };
 
   return (
-    <main 
+    <main
       className={cn(
-        "flex-1 transition-all duration-300 ease-in-out overflow-y-auto", 
-        isMobile ? "p-2 pt-16" : "p-3 md:p-4 lg:p-6",
-        !isMobile && sidebarOpen && "ml-[var(--sidebar-width-value)]",
+        "relative flex flex-col flex-1 overflow-hidden bg-[#EFF2F5]",
+
+        sidebarOpen &&
+        "transition-all duration-300 ease-in-out",
         className
       )}
       style={{
-        '--sidebar-width-value': isMobile 
-          ? '0px' 
-          : (sidebarOpen ? SIDEBAR_CONSTANTS.SIDEBAR_WIDTH : '0px'),
-        'maxHeight': '100vh'
+        '--sidebar-width-value': isMobile
+          ? '0px'
+          : (sidebarOpen ? SIDEBAR_CONSTANTS.SIDEBAR_WIDTH : '0px')
       } as React.CSSProperties}
     >
-      <div className="relative w-full min-h-full overflow-auto glass-card p-2 md:p-4 lg:p-6 border border-white/50 shadow-lg bg-slate-200 rounded-xl">
-        {/* Logout Button */}
-        <div className="absolute top-3 right-3 z-10">
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={handleLogout} 
-            className="flex items-center gap-2 bg-slate-300 hover:bg-slate-400 text-gray-700 my-0 mx-[4px] py-[4px] px-[15px]"
-          >
-            <LogOut className="h-4 w-4" />
-            <span className="hidden sm:inline">Logout</span>
-          </Button>
-        </div>
-        
-        {/* Quick Tabs - Only show on main dashboard */}
-        {showQuickTabs && <QuickTabs />}
-        
-        {/* Main Content */}
-        <div className="pt-10 min-h-full pb-16">
-          {children}
+      {/* Header Section */}
+      <div className="sticky top-0 z-40 flex h-16 items-center gap-4 border-b bg-background px-4 md:px-6">
+        <div className="flex flex-1 items-center justify-between">
+        <div></div>
+
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-8 w-8 px-0"
+              >
+                <LogOut className="h-4 w-4" />
+                <span className="sr-only">User menu</span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={handleLogout}>
+                Log out
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
+
+      {/* Main Content Area */}
+      <ScrollArea className="flex flex-col  justify-center items-center ">
+        <div className="relative h-full w-full flex justify-center items-center">
+          <div className="w-full">{children}</div>
+        </div>
+      </ScrollArea>
     </main>
   );
 }

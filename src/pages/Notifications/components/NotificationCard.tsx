@@ -1,9 +1,12 @@
-
 import React from 'react';
-import { Card } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Clock, Check } from "lucide-react";
+import { Clock, Check, Bell } from "lucide-react";
 import { Notification } from "../types";
+import { cn } from "@/lib/utils";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { format } from "date-fns";
 
 interface NotificationCardProps {
   notification: Notification;
@@ -17,28 +20,83 @@ export const NotificationCard = ({
   onComplete,
   onSortLater,
   onNotificationClick,
-}: NotificationCardProps) => (
-  <Card key={notification.id} className="p-3 mb-3 cursor-pointer hover:bg-gray-50 border border-gray-300">
-    <div className="flex items-start gap-2">
-      <div className="flex-1" onClick={() => onNotificationClick(notification.id)}>
-        <h3 className="font-medium text-sm">{notification.title}</h3>
-        <p className="text-xs text-gray-600">{notification.description}</p>
-        <span className="text-xs text-gray-500">{notification.date}</span>
-      </div>
-      <div className="flex gap-2">
-        <div className="flex items-center">
-          <Checkbox id={`sort-later-${notification.id}`} checked={notification.isSortedLater} onCheckedChange={() => onSortLater(notification.id)} className="h-3 w-3" />
-          <label htmlFor={`sort-later-${notification.id}`} className="flex items-center text-xs ml-1">
-            <Clock className="h-2 w-2 mr-1" />Later
-          </label>
+}: NotificationCardProps) => {
+  // Format the date string to a more readable format
+  const formattedDate = format(new Date(notification.date), 'MMM d, yyyy');
+  
+  return (
+    <Card 
+      className={cn(
+        "group relative mb-3 overflow-hidden transition-all duration-200",
+        "hover:shadow-md hover:border-primary/20",
+        notification.isCompleted && "bg-muted/50",
+        notification.isSortedLater && "bg-yellow-50/50 border-yellow-200"
+      )}
+    >
+      <CardContent className="p-4">
+        <div className="flex items-start gap-4">
+          {/* Notification Icon */}
+          <div className="mt-1">
+            <Bell className={cn(
+              "h-4 w-4",
+              notification.isCompleted ? "text-muted-foreground" : "text-primary",
+              "transition-colors duration-200"
+            )} />
+          </div>
+
+          {/* Content Section */}
+          <div 
+            className="flex-1 cursor-pointer space-y-1" 
+            onClick={() => onNotificationClick(notification.id)}
+          >
+            <div className="flex items-start justify-between gap-2">
+              <h3 className={cn(
+                "font-medium line-clamp-1",
+                notification.isCompleted ? "text-muted-foreground" : "text-foreground"
+              )}>
+                {notification.title}
+              </h3>
+              <time className="text-xs text-muted-foreground whitespace-nowrap">
+                {formattedDate}
+              </time>
+            </div>
+            <p className={cn(
+              "text-sm text-muted-foreground line-clamp-2",
+              notification.isCompleted && "text-muted-foreground/70"
+            )}>
+              {notification.description}
+            </p>
+          </div>
         </div>
-        <div className="flex items-center">
-          <Checkbox id={`complete-${notification.id}`} checked={notification.isCompleted} onCheckedChange={() => onComplete(notification.id)} className="h-3 w-3" />
-          <label htmlFor={`complete-${notification.id}`} className="flex items-center text-xs ml-1">
-            <Check className="h-2 w-2 mr-1" />Done
-          </label>
+
+        {/* Actions Section */}
+        <div className="flex items-center justify-end gap-2 mt-3 pt-2 border-t">
+          <Button
+            variant="ghost"
+            size="sm"
+            className={cn(
+              "h-8 px-2 text-xs",
+              notification.isSortedLater && "text-yellow-600 hover:text-yellow-700 hover:bg-yellow-50"
+            )}
+            onClick={() => onSortLater(notification.id)}
+          >
+            <Clock className="h-3.5 w-3.5 mr-1" />
+            {notification.isSortedLater ? "Remove from Later" : "Sort Later"}
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            className={cn(
+              "h-8 px-2 text-xs",
+              notification.isCompleted && "text-green-600 hover:text-green-700 hover:bg-green-50"
+            )}
+            onClick={() => onComplete(notification.id)}
+          >
+            <Check className="h-3.5 w-3.5 mr-1" />
+            {notification.isCompleted ? "Mark Incomplete" : "Mark Complete"}
+          </Button>
         </div>
-      </div>
-    </div>
-  </Card>
-);
+      </CardContent>
+    </Card>
+  );
+};

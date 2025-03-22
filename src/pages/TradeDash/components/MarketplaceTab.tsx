@@ -3,6 +3,9 @@ import { LeadCard } from "./LeadCard";
 import { LeadFilters } from "./LeadFilters";
 import { GlassCard } from "@/components/ui/GlassCard";
 import { SectionHeader } from "@/components/ui/SectionHeader";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Search } from "lucide-react";
 
 interface Lead {
   id: number;
@@ -74,22 +77,39 @@ export const MarketplaceTab: React.FC<MarketplaceTabProps> = ({
   });
 
   return (
-    <div className="space-y-4 bg-slate-100 rounded-md p-4">
-      <SectionHeader title="Lead Marketplace" />
+    <div className="space-y-6">
+      <Card className="border-none shadow-none bg-transparent">
+        <CardContent className="p-0">
+          <div className="flex flex-col gap-6">
+            <div className="relative">
+              <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-500" />
+              <Input
+                placeholder="Search leads by title, description, suburb or postcode..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-9"
+              />
+            </div>
+            
+            <LeadFilters 
+              filters={filters} 
+              savedFilters={savedFilters} 
+              onFilterChange={onFilterChange} 
+              onSavedFilterToggle={onSavedFilterToggle} 
+            />
+          </div>
+        </CardContent>
+      </Card>
       
-      <GlassCard>
-        <LeadFilters 
-          filters={filters} 
-          savedFilters={savedFilters} 
-          onFilterChange={onFilterChange} 
-          onSavedFilterToggle={onSavedFilterToggle} 
-        />
-      </GlassCard>
-      
-      <SectionHeader title={`Available Leads (${filteredLeads.length})`} />
+      <div className="flex items-center justify-between">
+        <SectionHeader title="Available Leads" />
+        <span className="text-sm text-gray-500">
+          {filteredLeads.length} leads found
+        </span>
+      </div>
       
       {filteredLeads.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredLeads.map(lead => (
             <LeadCard 
               key={lead.id} 
@@ -101,10 +121,14 @@ export const MarketplaceTab: React.FC<MarketplaceTabProps> = ({
           ))}
         </div>
       ) : (
-        <div className="bg-white p-8 text-center rounded-md shadow">
-          <p className="text-gray-500">No leads match your current filters.</p>
-          <p className="text-sm text-gray-400 mt-2">Try adjusting your filters or check back later for new leads.</p>
-        </div>
+        <Card className="bg-gray-50">
+          <CardContent className="flex flex-col items-center justify-center py-12">
+            <p className="text-gray-600 font-medium">No leads match your current filters</p>
+            <p className="text-sm text-gray-500 mt-1">
+              Try adjusting your filters or check back later for new leads
+            </p>
+          </CardContent>
+        </Card>
       )}
     </div>
   );

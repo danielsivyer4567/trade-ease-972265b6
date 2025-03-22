@@ -1,3 +1,21 @@
+import { 
+  LayoutDashboard, 
+  Users, 
+  Calendar, 
+  Briefcase, 
+  Calculator,
+  Mail,
+  MessageSquare,
+  Settings,
+  LineChart,
+  Database,
+  Bell,
+  Users2,
+  Brain,
+  Boxes,
+  CheckSquare,
+  BarChart
+} from 'lucide-react';
 
 // Define sidebar constants
 export const SIDEBAR_CONSTANTS = {
@@ -13,3 +31,143 @@ export const SIDEBAR_CONSTANTS = {
     TRIGGER: 20
   }
 };
+
+export const navigationGroups = [
+  {
+    label: "Main",
+    items: [
+      {
+        type: 'link',
+        icon: Bell,
+        label: "Notifications",
+        path: "/notifications"
+      },
+      {
+        type: 'link',
+        icon: LayoutDashboard,
+        label: "Dashboard",
+        path: "/"
+      },
+      {
+        type: 'link',
+        icon: BarChart,
+        label: "TradeDash",
+        path: "/tradedash"
+      }
+    ]
+  },
+  {
+    label: "Work",
+    items: [
+      {
+        type: 'link',
+        icon: Users,
+        label: "Customers",
+        path: "/customers"
+      },
+      {
+        type: 'link',
+        icon: Calendar,
+        label: "Calendar",
+        path: "/calendar"
+      },
+      {
+        type: 'link',
+        icon: Briefcase,
+        label: "Jobs",
+        path: "/jobs"
+      },
+      {
+        type: 'link',
+        icon: CheckSquare,
+        label: "Tasks",
+        path: "/tasks"
+      },
+      {
+        type: 'dropdown',
+        icon: Users2,
+        label: "Teams",
+        items: [
+          {
+            icon: Users2,
+            label: "Team Red",
+            path: "/team-red"
+          },
+          {
+            icon: Users2,
+            label: "Team Blue",
+            path: "/team-blue"
+          },
+          {
+            icon: Users2,
+            label: "Team Green",
+            path: "/team-green"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    label: "Tools",
+    items: [
+      {
+        type: 'link',
+        icon: Calculator,
+        label: "Calculators",
+        path: "/calculators"
+      },
+      {
+        type: 'link',
+        icon: Brain,
+        label: "AI Features",
+        path: "/ai-features"
+      }
+    ]
+  },
+  {
+    label: "Communication",
+    items: [
+      {
+        type: 'link',
+        icon: Mail,
+        label: "Email",
+        path: "/email"
+      },
+      {
+        type: 'link',
+        icon: MessageSquare,
+        label: "Messaging",
+        path: "/messaging"
+      }
+    ]
+  },
+  {
+    label: "System",
+    items: [
+      {
+        type: 'link',
+        icon: LineChart,
+        label: "Statistics",
+        path: "/statistics"
+      },
+      {
+        type: 'link',
+        icon: Database,
+        label: "Database",
+        path: "/database"
+      },
+      {
+        type: 'link',
+        icon: Boxes,
+        label: "Integrations",
+        path: "/integrations"
+      },
+      {
+        type: 'link',
+        icon: Settings,
+        label: "Settings",
+        path: "/settings"
+      }
+    ]
+  }
+];

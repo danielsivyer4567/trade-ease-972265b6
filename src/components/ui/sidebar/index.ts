@@ -1,5 +1,5 @@
-
 // Export all sidebar components from this index file
+export * from "./Sidebar";
 export * from "./SidebarHeader";
 export * from "./SidebarFooter";
 export * from "./SidebarSeparator";
