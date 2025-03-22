@@ -1,29 +1,16 @@
-
-import { BrowserRouter, Route, Routes } from 'react-router-dom';
-import { Toaster } from "@/components/ui/toaster";
-import { QueryProvider } from '@/integrations/query/QueryProvider';
-import { routes } from './routes';
-import NotFound from './pages/NotFound';
+import { BrowserRouter as Router } from 'react-router-dom';
+import { AuthProvider } from '@/contexts/AuthContext';
+import { Toaster } from '@/components/ui/toaster';
+import { Routes } from './routes/index';
 import './App.css';
 
-function App() {
+export default function App() {
   return (
-    <QueryProvider>
-      <BrowserRouter>
-        <Routes>
-          {routes.map((route) => (
-            <Route
-              key={route.path}
-              path={route.path}
-              element={route.element}
-            />
-          ))}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+    <Router>
+      <AuthProvider>
+        <Routes />
         <Toaster />
-      </BrowserRouter>
-    </QueryProvider>
+      </AuthProvider>
+    </Router>
   );
 }
-
-export default App;
