@@ -1,108 +1,144 @@
-
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { 
-  LayoutDashboard, Briefcase, Users, FileText, Settings, Calendar, 
-  Network, Share, Bot, Mail, MessageSquare, Link as LinkIcon, 
+import {
+  LayoutDashboard, Briefcase, Users, FileText, Settings, Calendar,
+  Network, Share, Bot, Mail, MessageSquare, Link as LinkIcon,
   Database, Plus, BarChart, ListTodo, Bell, GitBranch, Gauge, Calculator,
-  LucideIcon
+  LucideIcon, ChevronDown
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useSidebar } from '../sidebar';
+import { useSidebar } from './SidebarProvider';
+import { Button } from '../button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../tooltip";
-import { useIsMobile } from '@/hooks/use-mobile';
+import { ScrollArea } from '../scroll-area';
+import { navigationGroups } from './constants';
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '../collapsible';
 
 // Define a type for the navigation links
 export type NavLink = {
-  icon: React.ComponentType<any>;
+  icon: LucideIcon;
   label: string;
   path: string;
   openInNewTab?: boolean;
 };
 
-// Main navigation links
-export const primaryNavLinks: NavLink[] = [
-  { icon: LayoutDashboard, label: 'Dashboard', path: '/' },
-  { icon: Gauge, label: 'Easy Lead Dashboard', path: '/trade-dash' },
-  { icon: GitBranch, label: 'Workflow Builder', path: '/workflow' },
-  { icon: BarChart, label: 'Statistics', path: '/statistics' },
-  { icon: ListTodo, label: 'Task Lists', path: '/tasks' },
-  { icon: Briefcase, label: 'Jobs', path: '/jobs' },
-  { icon: Calendar, label: 'Calendar', path: '/calendar' },
-  { icon: Users, label: 'Customers', path: '/customers' },
-  { icon: FileText, label: 'Quotes', path: '/quotes' },
-  { icon: MessageSquare, label: 'Messaging', path: '/messaging' },
-  { icon: Mail, label: 'Email', path: '/email' },
-  { icon: Bot, label: 'AI Features', path: '/ai-features' },
-  { icon: Calculator, label: 'Calculators', path: '/calculators' },
-  { icon: Network, label: 'Integrations', path: '/integrations' },
-  { icon: Database, label: 'Database', path: '/database' },
-  { icon: Settings, label: 'Settings', path: '/settings' }
-];
-
-interface NavLinkItemProps {
-  link: NavLink;
-}
-
-export function NavLinkItem({ link }: NavLinkItemProps) {
-  const location = useLocation();
-  const { state } = useSidebar();
-  const collapsed = state === "collapsed";
-  const isMobileDevice = useIsMobile();
-  const { icon: Icon, label, path, openInNewTab = false } = link;
-  
-  const isActive = location.pathname === path || (path !== '/' && location.pathname.startsWith(path));
-  
-  const content = (
-    <Link 
-      to={path} 
-      className={cn(
-        "flex items-center gap-2 p-2 rounded-lg hover:bg-gray-100 text-gray-700 hover:text-gray-900 text-sm transition-colors",
-        isActive && "bg-gray-100 text-gray-900 font-medium",
-        isMobileDevice && "p-3 min-h-[48px]" // Larger touch target on mobile
-      )} 
-      target={openInNewTab ? "_blank" : undefined}
-      rel={openInNewTab ? "noopener noreferrer" : undefined}
-    >
-      <Icon className="w-4 h-4 flex-shrink-0" />
-      <span className={cn("transition-opacity duration-200", collapsed && "hidden lg:hidden")}>
-        {label}
-      </span>
-    </Link>
-  );
-  
-  return collapsed && !isMobileDevice ? (
-    <Tooltip>
-      <TooltipTrigger asChild>
-        {content}
-      </TooltipTrigger>
-      <TooltipContent side="right">
-        {label}
-      </TooltipContent>
-    </Tooltip>
-  ) : (
-    content
-  );
-}
-
 interface SidebarNavLinksProps {
-  additionalLinks?: NavLink[];
+  isExpanded?: boolean;
 }
 
-export function SidebarNavLinks({ additionalLinks = [] }: SidebarNavLinksProps) {
-  const links = [
-    { icon: Bell, label: "Notifications", path: "/notifications" },
-    ...primaryNavLinks,
-    ...additionalLinks
-  ];
+export function SidebarNavLinks({ isExpanded = true }: SidebarNavLinksProps) {
+  const location = useLocation();
 
   return (
-    <nav className="flex-1 p-2 space-y-1 overflow-y-auto">
-      <TooltipProvider delayDuration={0}>
-        {links.map((link) => (
-          <NavLinkItem key={link.path} link={link} />
-        ))}
-      </TooltipProvider>
+    <nav className="grid gap-1 px-2 py-2">
+      {navigationGroups.map((group, index) => (
+        <div key={index} className="grid gap-0.5">
+          {/* Group Label */}
+          {isExpanded && group.label && (
+            <h4 className="mb-1 px-2 text-xs font-semibold text-muted-foreground">
+              {group.label}
+            </h4>
+          )}
+
+          {/* Regular Links */}
+          {group.items.map((item) => {
+            if (item.type === 'link') {
+              const isActive = location.pathname === item.path;
+              const LinkIcon = item.icon;
+
+              const linkButton = (
+                <Button
+                  key={item.path}
+                  asChild
+                  variant={isActive ? "secondary" : "ghost"}
+                  size="sm"
+                  className={cn(
+                    "w-full justify-start h-[0px]",
+                    isExpanded ? "px-2" : "px-2 justify-center",
+                    isActive && "bg-white border border-foreground/10"
+                  )}
+                >
+                  <Link to={item.path}>
+                    <LinkIcon className={cn(
+                      "h-4 w-4",
+                      isActive ? "text-primary" : "text-muted-foreground"
+                    )} />
+                    {isExpanded && (
+                      <span className="ml-2 text-sm">{item.label}</span>
+                    )}
+                  </Link>
+                </Button>
+              );
+
+              return isExpanded ? (
+                linkButton
+              ) : (
+                <Tooltip key={item.path} delayDuration={0}>
+                  <TooltipTrigger asChild>
+                    {linkButton}
+                  </TooltipTrigger>
+                  <TooltipContent side="right" className="font-normal">
+                    {item.label}
+                  </TooltipContent>
+                </Tooltip>
+              );
+            }
+
+            // Dropdown Menu (for Teams)
+            if (item.type === 'dropdown') {
+              return (
+                <Collapsible key={item.label}>
+                  <CollapsibleTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className={cn(
+                        "w-full justify-between h-10",
+                        isExpanded ? "px-2" : "px-2 justify-center"
+                      )}
+                    >
+                      <div className="flex items-center">
+                        <item.icon className="h-4 w-4 text-muted-foreground" />
+                        {isExpanded && (
+                          <span className="ml-2 text-sm">{item.label}</span>
+                        )}
+                      </div>
+                      {isExpanded && <ChevronDown className="h-3 w-3" />}
+                    </Button>
+                  </CollapsibleTrigger>
+                  
+                  <CollapsibleContent className="pl-4 mt-0.5">
+                    {item.items.map((subItem) => {
+                      const isActive = location.pathname === subItem.path;
+                      return (
+                        <Button
+                          key={subItem.path}
+                          asChild
+                          variant={isActive ? "secondary" : "ghost"}
+                          size="sm"
+                          className="w-full justify-start h-10 mb-0.5"
+                        >
+                          <Link to={subItem.path}>
+                            <subItem.icon className={cn(
+                              "h-4 w-4",
+                              isActive ? "text-primary" : "text-muted-foreground"
+                            )} />
+                            <span className="ml-2 text-sm">{subItem.label}</span>
+                          </Link>
+                        </Button>
+                      );
+                    })}
+                  </CollapsibleContent>
+                </Collapsible>
+              );
+            }
+          })}
+        </div>
+      ))}
     </nav>
   );
 }

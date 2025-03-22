@@ -68,10 +68,19 @@ const JobSiteMap = () => {
     type: "Office",
     jobNumber: "HQ-001"
   }];
-  return <Card className="p-6 py-0 my-0 mx-[4px] bg-slate-300">
-      <h2 className="text-xl font-semibold mb-4 text-center">Job Site Map</h2>
-      <LoadScript googleMapsApiKey="AIzaSyAnIcvNA_ZjRUnN4aeyl-1MYpBSN-ODIvw" libraries={["marker"]} version="beta">
-        <GoogleMap mapContainerStyle={mapContainerStyle} center={center} zoom={13} options={mapOptions} onLoad={map => {
+  return <Card className="p-6 py-4 bg-slate-100 flex flex-col">
+    <div className="flex items-center justify-between mb-4">
+      <h2 className="text-xl font-semibold">Job Site Map</h2>
+      <Button 
+        variant="default" 
+        className="bg-primary hover:bg-primary/90" 
+        onClick={() => navigate("/jobs")}
+      >
+        View All Jobs
+      </Button>
+    </div>
+    <LoadScript googleMapsApiKey="AIzaSyAnIcvNA_ZjRUnN4aeyl-1MYpBSN-ODIvw" libraries={["marker"]} version="beta">
+      <GoogleMap mapContainerStyle={mapContainerStyle} center={center} zoom={13} options={mapOptions} onLoad={map => {
         // Set initial tilt for Earth-like view
         map.setTilt(45);
 
@@ -102,15 +111,19 @@ const JobSiteMap = () => {
           });
         });
       }}>
-          {selectedLocation && <InfoWindow position={selectedLocation} onCloseClick={() => setSelectedLocation(null)}>
-              <div className="p-2">
-                <h3 className="font-semibold">
-                  {locations.find(l => l.lat === selectedLocation.lat && l.lng === selectedLocation.lng)?.name || "Location"}
-                </h3>
-                <p className="text-sm text-gray-600">
-                  {locations.find(l => l.lat === selectedLocation.lat && l.lng === selectedLocation.lng)?.type || "Job Site"}
-                </p>
-                <Button size="sm" className="mt-2 w-full" onClick={() => {
+        {selectedLocation && <InfoWindow position={selectedLocation} onCloseClick={() => setSelectedLocation(null)}>
+          <div className="p-2">
+            <h3 className="font-semibold">
+              {locations.find(l => l.lat === selectedLocation.lat && l.lng === selectedLocation.lng)?.name || "Location"}
+            </h3>
+            <p className="text-sm text-gray-600">
+              {locations.find(l => l.lat === selectedLocation.lat && l.lng === selectedLocation.lng)?.type || "Job Site"}
+            </p>
+            <Button 
+              size="sm" 
+              variant="default"
+              className="mt-2 w-full bg-primary hover:bg-primary/90" 
+              onClick={() => {
               const selectedJobInfo = locations.find(l => l.lat === selectedLocation?.lat && l.lng === selectedLocation?.lng);
               if (selectedJobInfo) {
                 // Navigate to the specific job's details page using its ID
@@ -120,17 +133,13 @@ const JobSiteMap = () => {
                 navigate("/jobs");
               }
             }}>
-                  View Job Details
-                </Button>
-              </div>
-            </InfoWindow>}
-        </GoogleMap>
-      </LoadScript>
-      <div className="flex justify-end mt-4">
-        <Button onClick={() => navigate("/jobs")}>
-          View All Jobs
-        </Button>
-      </div>
-    </Card>;
+              View Job Details
+            </Button>
+          </div>
+        </InfoWindow>}
+      </GoogleMap>
+    </LoadScript>
+
+  </Card>;
 };
 export default JobSiteMap;

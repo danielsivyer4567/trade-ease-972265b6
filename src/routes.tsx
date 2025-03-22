@@ -1,4 +1,3 @@
-
 import { ReactNode } from 'react';
 import Customers from './pages/Customers';
 import NewCustomer from './pages/Customers/NewCustomer';
@@ -49,7 +48,7 @@ export const routes: RouteConfig[] = [
     element: <Index />
   },
   {
-    path: '/trade-dash',
+    path: '/tradedash',
     element: <TradeDash />
   },
   {
