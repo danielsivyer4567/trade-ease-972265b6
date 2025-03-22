@@ -34,6 +34,7 @@ import MarkupCalculator from './pages/Calculators/MarkupCalculator';
 import JobCostCalculator from './pages/Calculators/JobCostCalculator';
 import FencingCalculator from './pages/Calculators/FencingCalculator';
 import NCCCodesCalculator from './pages/Calculators/NCCCodesCalculator';
+import Auth from './pages/Auth';
 
 // Define the route type
 export interface RouteConfig {
@@ -43,6 +44,17 @@ export interface RouteConfig {
 
 // Define the application routes
 export const routes: RouteConfig[] = [
+  // Public routes
+  {
+    path: '/auth',
+    element: <Auth />
+  },
+  {
+    path: '/auth/callback',
+    element: <Auth />
+  },
+  
+  // Protected routes
   {
     path: '/',
     element: <Index />
