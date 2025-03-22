@@ -1,14 +1,16 @@
-import React, { createContext, useContext, useEffect, useState } from 'react'
-import { Session, User } from '@supabase/supabase-js'
+import type React from 'react'
+import { createContext, useContext, useEffect, useState } from 'react'
+import type { Session, User } from '@supabase/supabase-js'
 import { supabase } from '@/lib/supabase'
 import { useToast } from '@/hooks/use-toast'
+import { sendVerificationEmail, sendWelcomeEmail, sendPasswordResetEmail } from '@/utils/emailService'
 
 interface AuthContextType {
   session: Session | null
   user: User | null
   loading: boolean
   signIn: (email: string, password: string) => Promise<void>
-  signUp: (email: string, password: string) => Promise<void>
+  signUp: (email: string, password: string, fullName: string) => Promise<void>
   signOut: () => Promise<void>
   resetPassword: (email: string) => Promise<void>
 }
@@ -58,16 +60,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
-  const signUp = async (email: string, password: string) => {
+  const signUp = async (email: string, password: string, fullName: string) => {
     try {
-      const { error } = await supabase.auth.signUp({
+      const { error: signUpError, data } = await supabase.auth.signUp({
         email,
         password,
         options: {
+          data: {
+            full_name: fullName,
+          },
           emailRedirectTo: `${window.location.origin}/auth/callback`,
         },
       })
-      if (error) throw error
+      if (signUpError) throw signUpError
+
+      // Send verification email using Resend
+      const verificationLink = `${window.location.origin}/auth?verification=true&email=${encodeURIComponent(email)}`
+      await sendVerificationEmail(email, verificationLink)
+
+      toast({
+        title: 'Verification email sent',
+        description: 'Please check your email to verify your account.',
+      })
     } catch (error) {
       toast({
         title: 'Error signing up',
@@ -94,10 +108,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const resetPassword = async (email: string) => {
     try {
+      const resetLink = `${window.location.origin}/auth/reset-password`
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/auth/reset-password`,
+        redirectTo: resetLink,
       })
       if (error) throw error
+
+      // Send password reset email using Resend
+      await sendPasswordResetEmail(email, resetLink)
+
       toast({
         title: 'Password reset email sent',
         description: 'Check your email for the password reset link',
