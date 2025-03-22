@@ -1,6 +1,5 @@
 
 import { createClient } from '@supabase/supabase-js'
-import type { Database } from '@/types/supabase'
 
 // Use fallback values if environment variables are not defined
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://wxwbxupdisbofesaygqj.supabase.co';
@@ -8,9 +7,9 @@ const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIU
 const supabaseServiceRoleKey = import.meta.env.VITE_SUPABASE_SERVICE_ROLE_KEY || '';
 
 // Create a single instance of the Supabase client for the entire app
-export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey)
+export const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
 // Create an admin client with the service role key for privileged operations
 export const supabaseAdmin = supabaseServiceRoleKey 
-  ? createClient<Database>(supabaseUrl, supabaseServiceRoleKey)
+  ? createClient(supabaseUrl, supabaseServiceRoleKey)
   : null 

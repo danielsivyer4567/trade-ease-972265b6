@@ -1,3 +1,4 @@
+
 import { Routes as RouterRoutes, Route } from 'react-router-dom'
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute'
 import Auth from '@/pages/Auth'
@@ -7,6 +8,7 @@ import Jobs from '@/pages/Jobs'
 import Customers from '@/pages/Customers'
 import Notifications from '@/pages/Notifications'
 import Teams from '@/pages/Teams'
+import NewPayment from '@/pages/Payments/NewPayment'
 
 export function Routes() {
   return (
@@ -53,6 +55,14 @@ export function Routes() {
         element={
           <ProtectedRoute>
             <Teams />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/payments/new"
+        element={
+          <ProtectedRoute>
+            <NewPayment />
           </ProtectedRoute>
         }
       />
