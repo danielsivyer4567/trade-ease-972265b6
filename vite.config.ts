@@ -30,7 +30,6 @@ export default defineConfig(({ mode }) => ({
       },
     },
     rollupOptions: {
-      external: ['@rollup/rollup-linux-x64-gnu'],
       output: {
         manualChunks: {
           vendor: ['react', 'react-dom', 'react-router-dom'],
