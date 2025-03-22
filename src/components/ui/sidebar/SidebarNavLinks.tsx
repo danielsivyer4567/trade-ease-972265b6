@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, Briefcase, Users, FileText, Settings, Calendar,
   Network, Share, Bot, Mail, MessageSquare, Link as LinkIcon,
@@ -12,6 +12,7 @@ import { Button } from '../button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../tooltip";
 import { ScrollArea } from '../scroll-area';
 import { navigationGroups } from './constants';
+import { useAuth } from '@/contexts/AuthContext';
 import {
   Collapsible,
   CollapsibleContent,
@@ -32,6 +33,17 @@ interface SidebarNavLinksProps {
 
 export function SidebarNavLinks({ isExpanded = true }: SidebarNavLinksProps) {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { signOut } = useAuth();
+
+  const handleLogout = async () => {
+    try {
+      await signOut();
+      navigate('/auth');
+    } catch (error) {
+      console.error('Error signing out:', error);
+    }
+  };
 
   return (
     <nav className="grid gap-1 px-2 py-2">
@@ -77,14 +89,51 @@ export function SidebarNavLinks({ isExpanded = true }: SidebarNavLinksProps) {
               return isExpanded ? (
                 linkButton
               ) : (
-                <Tooltip key={item.path} delayDuration={0}>
-                  <TooltipTrigger asChild>
-                    {linkButton}
-                  </TooltipTrigger>
-                  <TooltipContent side="right" className="font-normal">
-                    {item.label}
-                  </TooltipContent>
-                </Tooltip>
+                <TooltipProvider key={item.path}>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      {linkButton}
+                    </TooltipTrigger>
+                    <TooltipContent side="right" className="flex items-center">
+                      {item.label}
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              );
+            } else if (item.type === 'button' && item.action === 'logout') {
+              const LogoutIcon = item.icon;
+              
+              const logoutButton = (
+                <Button
+                  key="logout"
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleLogout}
+                  className={cn(
+                    "w-full justify-start h-[0px]",
+                    isExpanded ? "px-2" : "px-2 justify-center"
+                  )}
+                >
+                  <LogoutIcon className="h-4 w-4 text-muted-foreground" />
+                  {isExpanded && (
+                    <span className="ml-2 text-sm">{item.label}</span>
+                  )}
+                </Button>
+              );
+
+              return isExpanded ? (
+                logoutButton
+              ) : (
+                <TooltipProvider key="logout">
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      {logoutButton}
+                    </TooltipTrigger>
+                    <TooltipContent side="right" className="flex items-center">
+                      {item.label}
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
               );
             }
 

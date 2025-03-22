@@ -1,62 +1,35 @@
-
-import React from 'react';
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
+import React from 'react'
+import { Mail } from 'lucide-react'
+import { useAuth } from '@/contexts/AuthContext'
 
 interface VerificationStatusProps {
-  status: 'idle' | 'verifying' | 'success' | 'error';
-  message: string;
-  navigate: (path: string) => void;
+  email: string
+  verificationSent: boolean
 }
 
-const VerificationStatus: React.FC<VerificationStatusProps> = ({ status, message, navigate }) => {
-  if (status === 'idle') {
-    return null;
-  }
+export default function VerificationStatus({
+  email,
+  verificationSent
+}: VerificationStatusProps) {
+  const { loading } = useAuth()
+
+  if (!verificationSent) return null
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-100 p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader>
-          <div className="flex justify-center mb-4">
-            <img src="/lovable-uploads/6a07dd00-f2c7-49da-8b00-48d960c13610.png" alt="Trade Ease Logo" className="w-16 h-16" />
-          </div>
-          <CardTitle className="text-center">Email Verification</CardTitle>
-        </CardHeader>
-        <CardContent className="flex flex-col items-center justify-center p-6">
-          {status === 'success' ? (
-            <div className="text-center">
-              <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
-              <p className="text-xl font-semibold">{message}</p>
-              <Button 
-                onClick={() => navigate('/auth')} 
-                className="mt-6 bg-slate-700 hover:bg-slate-800"
-              >
-                Go to Sign In
-              </Button>
-            </div>
-          ) : status === 'verifying' ? (
-            <div className="text-center">
-              <Loader2 className="w-16 h-16 text-blue-500 mx-auto mb-4 animate-spin" />
-              <p className="text-xl font-semibold">{message}</p>
-            </div>
-          ) : (
-            <div className="text-center">
-              <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
-              <p className="text-xl font-semibold">{message}</p>
-              <Button 
-                onClick={() => navigate('/auth')} 
-                className="mt-6 bg-slate-700 hover:bg-slate-800"
-              >
-                Go to Sign In
-              </Button>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+    <div className="bg-green-50 border-l-4 border-green-500 p-4 mt-4 rounded">
+      <div className="flex items-start">
+        <Mail className="h-5 w-5 text-green-500 mr-2 mt-0.5" />
+        <div>
+          <p className="font-medium text-green-800">Verification Email Sent</p>
+          <p className="text-green-700 text-sm mt-1">
+            We've sent a verification link to {email}.
+            Please check your inbox and click the link to activate your account.
+          </p>
+          <p className="text-green-600 text-sm mt-2">
+            {loading ? 'Sending...' : 'Didn\'t receive the email? Check your spam folder.'}
+          </p>
+        </div>
+      </div>
     </div>
-  );
-};
-
-export default VerificationStatus;
+  )
+}
