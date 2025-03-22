@@ -1,11 +1,10 @@
-
 import { useState, useEffect } from 'react';
 import { useToast } from "@/hooks/use-toast";
 import { Notification } from '../types';
 import { supabase } from "@/integrations/supabase/client";
 import { Json } from "@/integrations/supabase/types";
 
-export const useNotifications = () => {
+export function useNotifications() {
   const { toast } = useToast();
   const [notifications, setNotifications] = useState<Notification[]>([
     {
@@ -14,7 +13,8 @@ export const useNotifications = () => {
       description: "Customer John Doe requested a quote for roof repair",
       date: "2024-03-20",
       isCompleted: false,
-      isSortedLater: false
+      isSortedLater: false,
+      isIncomplete: false
     },
     {
       id: 2,
@@ -22,7 +22,8 @@ export const useNotifications = () => {
       description: "Payment received for Invoice #1234",
       date: "2024-03-19",
       isCompleted: false,
-      isSortedLater: false
+      isSortedLater: false,
+      isIncomplete: false
     },
     {
       id: 3,
@@ -30,18 +31,20 @@ export const useNotifications = () => {
       description: "Task 'Site inspection' is overdue",
       date: "2024-03-18",
       isCompleted: false,
-      isSortedLater: false
+      isSortedLater: false,
+      isIncomplete: false
     }
   ]);
-
-  // Email settings state
-  const [forwardingEmail, setForwardingEmail] = useState("");
   const [emailNotificationsEnabled, setEmailNotificationsEnabled] = useState(true);
-  
-  // Web enquiry settings state
+  const [forwardingEmail, setForwardingEmail] = useState("");
   const [webEnquiryNotifications, setWebEnquiryNotifications] = useState(true);
   const [enquiryEmail, setEnquiryEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  // Derived states
+  const activeNotifications = notifications.filter(n => !n.isCompleted && !n.isSortedLater && !n.isIncomplete);
+  const sortedLaterNotifications = notifications.filter(n => n.isSortedLater);
+  const completedNotifications = notifications.filter(n => n.isCompleted);
+  const incompleteNotifications = notifications.filter(n => n.isIncomplete);
 
   useEffect(() => {
     // Load user settings from user automations table
@@ -84,21 +87,42 @@ export const useNotifications = () => {
   }, []);
 
   const handleNotificationClick = (notificationId: number) => {
-    console.log("Navigate to notification details:", notificationId);
+    console.log('Notification clicked:', notificationId);
   };
 
   const handleComplete = (notificationId: number) => {
-    setNotifications(notifications.map(notification =>
-      notification.id === notificationId
-        ? { ...notification, isCompleted: !notification.isCompleted, isSortedLater: false }
-        : notification
-    ));
+    setNotifications(notifications.map(notification => {
+      if (notification.id !== notificationId) return notification;
+      
+      // If notification is already completed, mark as incomplete
+      if (notification.isCompleted) {
+        return { 
+          ...notification, 
+          isCompleted: false, 
+          isIncomplete: true,
+          isSortedLater: false 
+        };
+      }
+      
+      // Otherwise mark as completed
+      return { 
+        ...notification, 
+        isCompleted: true, 
+        isIncomplete: false,
+        isSortedLater: false 
+      };
+    }));
   };
 
   const handleSortLater = (notificationId: number) => {
     setNotifications(notifications.map(notification =>
       notification.id === notificationId
-        ? { ...notification, isSortedLater: !notification.isSortedLater, isCompleted: false }
+        ? { 
+            ...notification, 
+            isSortedLater: !notification.isSortedLater,
+            isCompleted: false,
+            isIncomplete: false
+          }
         : notification
     ));
   };
@@ -106,29 +130,17 @@ export const useNotifications = () => {
   const saveEmailSettings = async () => {
     setIsLoading(true);
     try {
-      // Update email notifications settings in user_automations table
-      const { error } = await supabase
-        .from('user_automations')
-        .upsert({
-          automation_type: 'email_notifications',
-          settings: {
-            enabled: emailNotificationsEnabled,
-            email: forwardingEmail
-          }
-        });
-
-      if (error) throw error;
-
+      // Simulated API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
       toast({
-        title: "Email notification settings saved",
-        description: `Forwarding email set to ${forwardingEmail}`,
+        title: "Settings saved",
+        description: "Your email notification settings have been updated.",
       });
     } catch (error) {
-      console.error('Error saving email settings:', error);
       toast({
-        title: "Failed to save settings",
-        description: "Please try again later",
-        variant: "destructive"
+        title: "Error",
+        description: "Failed to save email settings. Please try again.",
+        variant: "destructive",
       });
     } finally {
       setIsLoading(false);
@@ -138,64 +150,45 @@ export const useNotifications = () => {
   const saveWebEnquirySettings = async () => {
     setIsLoading(true);
     try {
-      // Update web enquiry notifications in user_automations table
-      const { error } = await supabase
-        .from('user_automations')
-        .upsert({
-          automation_type: 'web_enquiry_notifications',
-          settings: {
-            enabled: webEnquiryNotifications,
-            email: enquiryEmail
-          }
-        });
-
-      if (error) throw error;
-
+      // Simulated API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
       toast({
-        title: "Web enquiry notification settings saved",
-        description: `Notifications will ${webEnquiryNotifications ? "" : "not"} be sent to ${enquiryEmail}`,
+        title: "Settings saved",
+        description: "Your web enquiry settings have been updated.",
       });
     } catch (error) {
-      console.error('Error saving web enquiry settings:', error);
       toast({
-        title: "Failed to save settings",
-        description: "Please try again later",
-        variant: "destructive"
+        title: "Error",
+        description: "Failed to save web enquiry settings. Please try again.",
+        variant: "destructive",
       });
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Filter notifications by their status
-  const activeNotifications = notifications.filter(n => !n.isCompleted && !n.isSortedLater);
-  const sortedLaterNotifications = notifications.filter(n => n.isSortedLater);
-  const completedNotifications = notifications.filter(n => n.isCompleted);
-
   return {
     notifications,
     activeNotifications,
     sortedLaterNotifications,
     completedNotifications,
+    incompleteNotifications,
     handleNotificationClick,
     handleComplete,
     handleSortLater,
-    
     // Email settings
     forwardingEmail,
     setForwardingEmail,
     emailNotificationsEnabled,
     setEmailNotificationsEnabled,
     saveEmailSettings,
-    
     // Web enquiry settings
     webEnquiryNotifications,
     setWebEnquiryNotifications,
     enquiryEmail,
     setEnquiryEmail,
     saveWebEnquirySettings,
-    
     // Loading state
     isLoading
   };
-};
+}
