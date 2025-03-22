@@ -2,13 +2,13 @@ import React from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "./button";
 import { LogOut } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { QuickTabs } from "./QuickTabs";
 import { SIDEBAR_CONSTANTS } from "./sidebar/constants";
 import { ScrollArea } from "./scroll-area";
 import { Separator } from "./separator";
+import { useAuth } from "@/contexts/AuthContext";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -32,11 +32,11 @@ export function MainContent({
   showQuickTabs = false,
 }: MainContentProps) {
   const navigate = useNavigate();
+  const { signOut } = useAuth();
 
   const handleLogout = async () => {
     try {
-      const { error } = await supabase.auth.signOut();
-      if (error) throw error;
+      await signOut();
       toast.success("Logged out successfully");
       navigate("/auth");
     } catch (error) {
@@ -49,7 +49,6 @@ export function MainContent({
     <main
       className={cn(
         "relative flex flex-col flex-1 overflow-hidden ",
-
         sidebarOpen && "transition-all duration-300 ease-in-out",
         className
       )}

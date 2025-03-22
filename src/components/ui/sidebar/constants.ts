@@ -14,7 +14,8 @@ import {
   Brain,
   Boxes,
   CheckSquare,
-  BarChart
+  BarChart,
+  LogOut
 } from 'lucide-react';
 
 // Define sidebar constants
@@ -167,6 +168,12 @@ export const navigationGroups = [
         icon: Settings,
         label: "Settings",
         path: "/settings"
+      },
+      {
+        type: 'button',
+        icon: LogOut,
+        label: "Logout",
+        action: 'logout'
       }
     ]
   }

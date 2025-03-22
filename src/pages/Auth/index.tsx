@@ -1,8 +1,8 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
 
 // Components
 import SignInForm from './components/SignInForm';
@@ -21,6 +21,7 @@ export default function Auth() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [verificationSent, setVerificationSent] = useState(false);
   
   // Demo request state
   const [demoRequestName, setDemoRequestName] = useState('');
@@ -29,16 +30,22 @@ export default function Auth() {
 
   const navigate = useNavigate();
   const location = useLocation();
+  const { user, signIn, signUp } = useAuth();
 
-  // Check if user is already logged in and redirect to home
-  useAuthRedirect(navigate);
+  // Redirect if user is already authenticated
+  useEffect(() => {
+    if (user) {
+      const from = location.state?.from?.pathname || '/';
+      navigate(from, { replace: true });
+    }
+  }, [user, navigate, location]);
 
   // Handle email verification process
   const { 
     verificationStatus, 
     verificationMessage, 
-    verificationSent, 
-    setVerificationSent,
+    verificationSent: hookVerificationSent, 
+    setVerificationSent: setHookVerificationSent,
     handleResendVerification 
   } = useEmailVerification(navigate);
 
@@ -47,6 +54,31 @@ export default function Auth() {
     setLoading(true);
     await handleResendVerification(email);
     setLoading(false);
+  };
+
+  const handleSignIn = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      await signIn(email, password);
+      // Navigation will be handled by the useEffect above
+    } catch (error) {
+      setLoading(false);
+    }
+  };
+
+  const handleSignUp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (password !== confirmPassword) {
+      return;
+    }
+    setLoading(true);
+    try {
+      await signUp(email, password);
+      setVerificationSent(true);
+    } catch (error) {
+      setLoading(false);
+    }
   };
 
   // If verification is in progress, show the verification status
@@ -91,11 +123,7 @@ export default function Auth() {
                   password={password}
                   setPassword={setPassword}
                   loading={loading}
-                  setLoading={setLoading}
-                  verificationSent={verificationSent}
-                  setVerificationSent={setVerificationSent}
-                  handleResendVerification={handleResendVerificationClick}
-                  navigate={navigate}
+                  onSubmit={handleSignIn}
                 />
               </CardContent>
             </Card>
@@ -116,11 +144,14 @@ export default function Auth() {
                   confirmPassword={confirmPassword}
                   setConfirmPassword={setConfirmPassword}
                   loading={loading}
-                  setLoading={setLoading}
-                  verificationSent={verificationSent}
-                  setVerificationSent={setVerificationSent}
-                  handleResendVerification={handleResendVerificationClick}
+                  onSubmit={handleSignUp}
                 />
+                {verificationSent && (
+                  <VerificationStatus 
+                    email={email}
+                    verificationSent={verificationSent}
+                  />
+                )}
               </CardContent>
             </Card>
           </TabsContent>
