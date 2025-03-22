@@ -11,7 +11,7 @@ export function SidebarHeader({ isExpanded, onToggle }: SidebarHeaderProps) {
   return (
     <div className={cn(
       "flex h-16 items-center justify-between px-2 py-3",
-      "border-b transition-all duration-300 relative"
+      "border-b border-[#B8C5D5] transition-all duration-300 relative"
     )}>
       <div className="flex items-center gap-2 overflow-hidden">
         {isExpanded && <svg width="140" height="28" viewBox="0 0 140 28" fill="none" xmlns="http://www.w3.org/2000/svg">

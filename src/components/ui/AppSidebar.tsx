@@ -26,7 +26,7 @@ export function AppSidebar({ className, isExpanded, onToggle }: AppSidebarProps)
       {/* Desktop Sidebar */}
       <aside className={cn(
         "relative z-30 flex flex-col",
-        "border-r bg-[#E2E8F0]",
+        "border-r border-[#B8C5D5] bg-[#E2E8F0]",
         "transition-all duration-300 ease-in-out",
         isExpanded ? "w-[240px]" : "w-[64px]",
         className
