@@ -24,13 +24,33 @@ export const NotificationCard = ({
   // Format the date string to a more readable format
   const formattedDate = format(new Date(notification.date), 'MMM d, yyyy');
   
+  const renderStatusBadge = () => {
+    if (notification.isCompleted) {
+      return (
+        <Badge className="bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100">
+          <Check className="h-3 w-3 mr-1" />
+          Completed
+        </Badge>
+      );
+    }
+    if (notification.isSortedLater) {
+      return (
+        <Badge className="bg-amber-50 text-amber-700 border border-amber-200 hover:bg-amber-100">
+          <Clock className="h-3 w-3 mr-1" />
+          Sort Later
+        </Badge>
+      );
+    }
+    return null;
+  };
+  
   return (
     <Card 
       className={cn(
         "group relative mb-3 overflow-hidden transition-all duration-200",
-        "hover:shadow-md hover:border-primary/20",
-        notification.isCompleted && "bg-muted/50",
-        notification.isSortedLater && "bg-yellow-50/50 border-yellow-200"
+        "hover:shadow-md hover:border-primary/20 bg-slate-50/50",
+        notification.isCompleted && "",
+        notification.isSortedLater && " "
       )}
     >
       <CardContent className="p-4">
@@ -50,12 +70,15 @@ export const NotificationCard = ({
             onClick={() => onNotificationClick(notification.id)}
           >
             <div className="flex items-start justify-between gap-2">
-              <h3 className={cn(
-                "font-medium line-clamp-1",
-                notification.isCompleted ? "text-muted-foreground" : "text-foreground"
-              )}>
-                {notification.title}
-              </h3>
+              <div className="flex items-center gap-2">
+                <h3 className={cn(
+                  "font-medium line-clamp-1",
+                  notification.isCompleted ? "text-muted-foreground" : "text-foreground"
+                )}>
+                  {notification.title}
+                </h3>
+                {renderStatusBadge()}
+              </div>
               <time className="text-xs text-muted-foreground whitespace-nowrap">
                 {formattedDate}
               </time>
@@ -70,7 +93,7 @@ export const NotificationCard = ({
         </div>
 
         {/* Actions Section */}
-        <div className="flex items-center justify-end gap-2 mt-3 pt-2 border-t">
+        <div className="flex items-center justify-end gap-2 mt-4">
           <Button
             variant="ghost"
             size="sm"
@@ -88,7 +111,9 @@ export const NotificationCard = ({
             size="sm"
             className={cn(
               "h-8 px-2 text-xs",
-              notification.isCompleted && "text-green-600 hover:text-green-700 hover:bg-green-50"
+              notification.isCompleted 
+                ? "text-red-600 hover:text-red-700 hover:bg-red-50" 
+                : "text-green-600 hover:text-green-700 hover:bg-green-50"
             )}
             onClick={() => onComplete(notification.id)}
           >
