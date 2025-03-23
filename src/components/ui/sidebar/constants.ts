@@ -15,7 +15,8 @@ import {
   Boxes,
   CheckSquare,
   BarChart,
-  LogOut
+  LogOut,
+  ClipboardList
 } from 'lucide-react';
 
 // Define sidebar constants
@@ -77,6 +78,12 @@ export const navigationGroups = [
         icon: Briefcase,
         label: "Jobs",
         path: "/jobs"
+      },
+      {
+        type: 'link',
+        icon: ClipboardList,
+        label: "Job Management",
+        path: "/job-management"
       },
       {
         type: 'link',

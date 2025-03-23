@@ -1,17 +1,22 @@
-
 import React from 'react';
+import { Card, CardContent } from '@/components/ui/card';
+import { Info } from 'lucide-react';
 
 export function WorkflowInstructions() {
   return (
-    <div>
-      <h3 className="text-sm font-semibold mt-2 mb-3">Instructions</h3>
-      <ol className="text-xs space-y-2 text-gray-600 list-decimal pl-4">
-        <li>Drag nodes from above onto the canvas</li>
-        <li>Connect nodes by dragging from the handles</li>
-        <li>Click on nodes to edit their properties</li>
-        <li>Create custom nodes with your own icons and colors</li>
-        <li>Save your workflow when finished</li>
-      </ol>
-    </div>
+    <Card className="mt-6">
+      <CardContent className="p-4">
+        <div className="flex items-center gap-2 mb-2">
+          <Info className="h-4 w-4 text-blue-500" />
+          <h4 className="text-xs font-medium">Instructions</h4>
+        </div>
+        <ol className="text-xs space-y-1 list-decimal pl-4 text-gray-600">
+          <li>Drag nodes from above to create your workflow</li>
+          <li>Connect nodes by dragging from one handle to another</li>
+          <li>Configure Vision Analysis to extract data from documents</li>
+          <li>Save your workflow when finished</li>
+        </ol>
+      </CardContent>
+    </Card>
   );
 }

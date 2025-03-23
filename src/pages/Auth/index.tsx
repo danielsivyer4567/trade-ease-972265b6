@@ -58,7 +58,7 @@ export default function Auth() {
   const handleSignIn = async (email: string, password: string) => {
     try {
       await signIn(email, password);
-      navigate("/dashboard");
+      navigate("/");
     } catch (error) {
       const authError = error as AuthError;
       toast({

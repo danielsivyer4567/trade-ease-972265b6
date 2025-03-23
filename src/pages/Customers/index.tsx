@@ -46,6 +46,7 @@ export default function Customers() {
     }
   });
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
   useEffect(() => {
     fetchCustomers();
   }, []);
