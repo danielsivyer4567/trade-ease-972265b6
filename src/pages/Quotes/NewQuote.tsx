@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { AppLayout } from "@/components/ui/AppLayout";
@@ -10,9 +9,10 @@ import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft } from "lucide-react";
 import { CustomerForm } from "./components/CustomerForm";
 import { QuoteItemsForm, QuoteItem } from "./components/QuoteItemsForm";
-import { PriceListForm, PriceListItem } from "./components/PriceListForm";
+import { PriceListForm } from "./components/PriceListForm";
 import { TermsForm } from "./components/TermsForm";
 import { QuotePreview } from "./components/QuotePreview";
+
 export default function NewQuote() {
   const navigate = useNavigate();
   const {
@@ -26,9 +26,11 @@ export default function NewQuote() {
     total: 0
   }]);
   const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
+
   const handleBack = () => {
     navigate("/quotes");
   };
+
   const handleSelectTemplate = (templateId: string) => {
     setSelectedTemplate(templateId);
     toast({
@@ -52,6 +54,7 @@ export default function NewQuote() {
       total: 200
     }]);
   };
+
   const handleAddPriceListItem = (item: PriceListItem) => {
     const newItem = {
       description: item.name,
@@ -66,6 +69,7 @@ export default function NewQuote() {
     });
     setActiveTab("items");
   };
+
   return <AppLayout>
       <div className="p-6 max-w-7xl mx-auto w-full">
         <div className="flex items-center mb-6">

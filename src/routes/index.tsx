@@ -9,6 +9,7 @@ import Customers from '@/pages/Customers'
 import Notifications from '@/pages/Notifications'
 import Teams from '@/pages/Teams'
 import NewPayment from '@/pages/Payments/NewPayment'
+import Quotes from '@/pages/Quotes'
 
 export function Routes() {
   return (
@@ -63,6 +64,14 @@ export function Routes() {
         element={
           <ProtectedRoute>
             <NewPayment />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/quotes/*"
+        element={
+          <ProtectedRoute>
+            <Quotes />
           </ProtectedRoute>
         }
       />
