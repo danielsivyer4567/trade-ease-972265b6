@@ -12,6 +12,7 @@ import { QuoteItemsForm, QuoteItem } from "./components/QuoteItemsForm";
 import { PriceListForm } from "./components/PriceListForm";
 import { TermsForm } from "./components/TermsForm";
 import { QuotePreview } from "./components/QuotePreview";
+import { PriceListItem } from "./components/PriceList/types";
 
 export default function NewQuote() {
   const navigate = useNavigate();

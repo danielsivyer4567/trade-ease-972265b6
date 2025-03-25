@@ -13,3 +13,16 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey)
 export const supabaseAdmin = supabaseServiceRoleKey 
   ? createClient(supabaseUrl, supabaseServiceRoleKey)
   : null 
+
+// Add the demo data generation function
+export const generateDemoData = async () => {
+  try {
+    const response = await supabase.functions.invoke('generate-demo-data', {
+      method: 'POST',
+    });
+    return response;
+  } catch (error) {
+    console.error('Error generating demo data:', error);
+    return { error };
+  }
+};
