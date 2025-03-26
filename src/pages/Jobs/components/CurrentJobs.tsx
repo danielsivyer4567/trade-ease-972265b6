@@ -65,12 +65,12 @@ export const CurrentJobs = ({ jobs, onStatusUpdate }: CurrentJobsProps) => {
       // Make sure we get exactly 4 digits by padding with leading zeros if necessary
       const last4Digits = baseNumber.slice(-4).padStart(4, '0');
       
-      return `${last4Digits}-${versionPart}`;
+      return `JOB-${last4Digits}-${versionPart}`;
     }
     
     // For regular jobs, extract the numeric part and ensure we get exactly 4 digits
     const numericPart = jobNumber.replace(/\D/g, '');
-    return numericPart.slice(-4).padStart(4, '0');
+    return `JOB-${numericPart.slice(-4).padStart(4, '0')}`;
   };
 
   return (
@@ -112,7 +112,7 @@ export const CurrentJobs = ({ jobs, onStatusUpdate }: CurrentJobsProps) => {
                   <td className="px-2 py-2 whitespace-nowrap">
                     <div className="flex items-center">
                       <div className="text-sm font-medium text-gray-900">
-                        #{formatJobNumber(job.jobNumber)}
+                        {formatJobNumber(job.jobNumber)}
                       </div>
                     </div>
                   </td>
