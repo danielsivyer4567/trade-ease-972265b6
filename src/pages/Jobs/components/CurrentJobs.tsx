@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import type { Job } from "@/types/job";
@@ -62,15 +61,15 @@ export const CurrentJobs = ({ jobs, onStatusUpdate }: CurrentJobsProps) => {
       
       // Get the numerical part before the version
       const baseNumber = parts[0].replace(/\D/g, '');
-      // Make sure we get exactly 4 digits by padding with leading zeros if necessary
-      const last4Digits = baseNumber.slice(-4).padStart(4, '0');
+      // Get exactly 4 digits without leading zeros
+      const last4Digits = baseNumber.slice(-4);
       
       return `JOB-${last4Digits}-${versionPart}`;
     }
     
-    // For regular jobs, extract the numeric part and ensure we get exactly 4 digits
+    // For regular jobs, extract the numeric part and take the last 4 digits
     const numericPart = jobNumber.replace(/\D/g, '');
-    return `JOB-${numericPart.slice(-4).padStart(4, '0')}`;
+    return `JOB-${numericPart.slice(-4)}`;
   };
 
   return (
