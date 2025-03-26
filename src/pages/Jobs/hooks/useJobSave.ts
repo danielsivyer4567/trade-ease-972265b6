@@ -7,7 +7,7 @@ export function useJobSave() {
   const [isSaving, setIsSaving] = useState(false);
   const { toast } = useToast();
 
-  const saveJobToDatabase = async (jobData: any) => {
+  const saveJobToDatabase = async (jobData: any, isEditing = false) => {
     setIsSaving(true);
     
     try {
@@ -27,11 +27,40 @@ export function useJobSave() {
         user_id: session.session.user.id
       };
       
-      const { data, error } = await supabase
-        .from("jobs")
-        .insert(jobWithUserId)
-        .select()
-        .single();
+      // Version the job number if editing an existing job
+      if (isEditing && jobData.jobNumber) {
+        // Check if it already has a version
+        if (jobData.jobNumber.includes('-')) {
+          // Extract the base part and increment the version
+          const parts = jobData.jobNumber.split('-');
+          const baseNumber = parts[0];
+          const currentVersion = parseInt(parts[parts.length - 1], 10) || 0;
+          jobWithUserId.jobNumber = `${baseNumber}-${currentVersion + 1}`;
+        } else {
+          // First version
+          jobWithUserId.jobNumber = `${jobData.jobNumber}-1`;
+        }
+      }
+      
+      let result;
+      if (isEditing && jobData.id) {
+        // Update existing job
+        result = await supabase
+          .from("jobs")
+          .update(jobWithUserId)
+          .eq("id", jobData.id)
+          .select()
+          .single();
+      } else {
+        // Create new job
+        result = await supabase
+          .from("jobs")
+          .insert(jobWithUserId)
+          .select()
+          .single();
+      }
+      
+      const { data, error } = result;
       
       if (error) {
         console.error("Error saving job:", error);

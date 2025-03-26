@@ -32,6 +32,28 @@ export const JobsHeader = ({ navigateTo = "/jobs" }: JobsHeaderProps) => {
     fetchJobNumber();
   }, [id]);
 
+  // Format job number to display only the last 4 digits or version info
+  const formatJobNumber = (jobNumber: string) => {
+    if (!jobNumber) return "";
+    
+    // Check if this is a versioned job (starts with -n where n is version number)
+    if (jobNumber.includes('-')) {
+      const parts = jobNumber.split('-');
+      const versionPart = parts[parts.length - 1];
+      
+      // Get the numerical part before the version
+      const baseNumber = parts[0].replace(/\D/g, '');
+      const last4Digits = baseNumber.slice(-4);
+      
+      // Format as 4 digits with version indicator
+      return `${last4Digits}-${versionPart}`;
+    }
+    
+    // For regular jobs, just show the last 4 digits
+    const numericPart = jobNumber.replace(/\D/g, '');
+    return numericPart.slice(-4);
+  };
+
   return (
     <div className="flex items-center gap-4 p-4 sticky top-0 z-50 bg-white border-b">
       <Button 
@@ -46,7 +68,7 @@ export const JobsHeader = ({ navigateTo = "/jobs" }: JobsHeaderProps) => {
       
       {jobNumber && (
         <span className="text-sm font-medium text-gray-500">
-          Job #{jobNumber}
+          Job #{formatJobNumber(jobNumber)}
         </span>
       )}
     </div>

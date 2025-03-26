@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import type { Job } from "@/types/job";
@@ -52,6 +51,23 @@ export const CurrentJobs = ({ jobs, onStatusUpdate }: CurrentJobsProps) => {
     navigate(`/jobs/${jobId}`);
   };
 
+  const formatJobNumber = (jobNumber: string) => {
+    if (!jobNumber) return "";
+    
+    if (jobNumber.includes('-')) {
+      const parts = jobNumber.split('-');
+      const versionPart = parts[parts.length - 1];
+      
+      const baseNumber = parts[0].replace(/\D/g, '');
+      const last4Digits = baseNumber.slice(-4);
+      
+      return `${last4Digits}-${versionPart}`;
+    }
+    
+    const numericPart = jobNumber.replace(/\D/g, '');
+    return numericPart.slice(-4);
+  };
+
   return (
     <div>
       <h2 className="text-xl font-bold mb-4">Current Jobs</h2>
@@ -91,7 +107,7 @@ export const CurrentJobs = ({ jobs, onStatusUpdate }: CurrentJobsProps) => {
                   <td className="px-2 py-2 whitespace-nowrap">
                     <div className="flex items-center">
                       <div className="text-sm font-medium text-gray-900">
-                        #{job.jobNumber}
+                        #{formatJobNumber(job.jobNumber)}
                       </div>
                     </div>
                   </td>
