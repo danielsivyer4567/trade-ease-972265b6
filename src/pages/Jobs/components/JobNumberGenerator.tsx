@@ -9,9 +9,10 @@ import { useToast } from "@/hooks/use-toast";
 interface JobNumberGeneratorProps {
   jobNumber: string;
   setJobNumber: (jobNumber: string) => void;
+  isEditing?: boolean;
 }
 
-export function JobNumberGenerator({ jobNumber, setJobNumber }: JobNumberGeneratorProps) {
+export function JobNumberGenerator({ jobNumber, setJobNumber, isEditing = false }: JobNumberGeneratorProps) {
   const { toast } = useToast();
 
   // Function to generate a new job number with 4 digits
@@ -19,15 +20,31 @@ export function JobNumberGenerator({ jobNumber, setJobNumber }: JobNumberGenerat
     const prefix = "JOB";
     // Generate a random 4-digit number between 1000 and 9999
     const fourDigitNumber = Math.floor(1000 + Math.random() * 9000);
+    
+    // If we're editing an existing job, add version indicator
+    if (isEditing && jobNumber) {
+      // Check if it already has a version
+      if (jobNumber.includes('-')) {
+        // Extract the base part and increment the version
+        const parts = jobNumber.split('-');
+        const baseNumber = parts[0];
+        const currentVersion = parseInt(parts[parts.length - 1], 10) || 0;
+        return `${baseNumber}-${currentVersion + 1}`;
+      } else {
+        // First version
+        return `${jobNumber}-1`;
+      }
+    }
+    
     return `${prefix}-${fourDigitNumber}`;
   };
 
   // Generate job number on component mount
   useEffect(() => {
-    if (!jobNumber) {
+    if (!jobNumber && !isEditing) {
       setJobNumber(generateJobNumber());
     }
-  }, [jobNumber, setJobNumber]);
+  }, [jobNumber, setJobNumber, isEditing]);
 
   // Function to handle refreshing the job number
   const handleRefreshJobNumber = () => {
