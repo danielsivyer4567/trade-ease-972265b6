@@ -54,20 +54,7 @@ export const CurrentJobs = ({ jobs, onStatusUpdate }: CurrentJobsProps) => {
   const formatJobNumber = (jobNumber: string) => {
     if (!jobNumber) return "";
     
-    // Check if this is a versioned job (starts with -n where n is version number)
-    if (jobNumber.includes('-')) {
-      const parts = jobNumber.split('-');
-      const versionPart = parts[parts.length - 1];
-      
-      // Get the numerical part before the version
-      const baseNumber = parts[0].replace(/\D/g, '');
-      // Get exactly 4 digits without leading zeros
-      const last4Digits = baseNumber.slice(-4);
-      
-      return `JOB-${last4Digits}`;
-    }
-    
-    // For regular jobs, extract the numeric part and take the last 4 digits
+    // For all job numbers, extract the numeric part and take the last 4 digits
     const numericPart = jobNumber.replace(/\D/g, '');
     return `JOB-${numericPart.slice(-4)}`;
   };

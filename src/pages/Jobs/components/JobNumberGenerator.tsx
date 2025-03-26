@@ -21,19 +21,9 @@ export function JobNumberGenerator({ jobNumber, setJobNumber, isEditing = false 
     // Generate a random 4-digit number between 1000 and 9000
     const fourDigitNumber = Math.floor(1000 + Math.random() * 9000);
     
-    // If we're editing an existing job, add version indicator
+    // If we're editing an existing job, maintain the original number
     if (isEditing && jobNumber) {
-      // Check if it already has a version
-      if (jobNumber.includes('-')) {
-        // Extract the base part and increment the version
-        const parts = jobNumber.split('-');
-        const baseNumber = parts[0];
-        const currentVersion = parseInt(parts[parts.length - 1], 10) || 0;
-        return `${baseNumber}-${currentVersion + 1}`;
-      } else {
-        // First version
-        return `${jobNumber}`;
-      }
+      return jobNumber;
     }
     
     return `${prefix}-${fourDigitNumber}`;
