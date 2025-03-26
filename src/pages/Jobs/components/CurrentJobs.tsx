@@ -64,7 +64,7 @@ export const CurrentJobs = ({ jobs, onStatusUpdate }: CurrentJobsProps) => {
       // Get exactly 4 digits without leading zeros
       const last4Digits = baseNumber.slice(-4);
       
-      return `JOB-${last4Digits}-${versionPart}`;
+      return `JOB-${last4Digits}`;
     }
     
     // For regular jobs, extract the numeric part and take the last 4 digits
