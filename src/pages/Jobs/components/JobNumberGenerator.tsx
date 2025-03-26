@@ -18,7 +18,7 @@ export function JobNumberGenerator({ jobNumber, setJobNumber, isEditing = false 
   // Function to generate a new job number with 4 digits
   const generateJobNumber = () => {
     const prefix = "JOB";
-    // Generate a random 4-digit number between 1000 and 9999
+    // Generate a random 4-digit number between 1000 and 9000
     const fourDigitNumber = Math.floor(1000 + Math.random() * 9000);
     
     // If we're editing an existing job, add version indicator
@@ -32,7 +32,7 @@ export function JobNumberGenerator({ jobNumber, setJobNumber, isEditing = false 
         return `${baseNumber}-${currentVersion + 1}`;
       } else {
         // First version
-        return `${jobNumber}-1`;
+        return `${jobNumber}`;
       }
     }
     
