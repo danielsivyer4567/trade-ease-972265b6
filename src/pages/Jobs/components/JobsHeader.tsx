@@ -43,15 +43,15 @@ export const JobsHeader = ({ navigateTo = "/jobs" }: JobsHeaderProps) => {
       
       // Get the numerical part before the version
       const baseNumber = parts[0].replace(/\D/g, '');
-      const last4Digits = baseNumber.slice(-4);
+      // Make sure we get exactly 4 digits by padding with leading zeros if necessary
+      const last4Digits = baseNumber.slice(-4).padStart(4, '0');
       
-      // Format as 4 digits with version indicator
       return `${last4Digits}-${versionPart}`;
     }
     
-    // For regular jobs, just show the last 4 digits
+    // For regular jobs, extract the numeric part and ensure we get exactly 4 digits
     const numericPart = jobNumber.replace(/\D/g, '');
-    return numericPart.slice(-4);
+    return numericPart.slice(-4).padStart(4, '0');
   };
 
   return (
