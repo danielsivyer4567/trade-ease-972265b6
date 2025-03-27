@@ -49,50 +49,50 @@ export default function Index() {
   return (
     <BaseLayout showQuickTabs={true}>
       <div className="px-8 space-y-8 animate-fadeIn py-10">
-        {/* Navigation and Undo Dropdown */}
-        <div className="flex justify-between items-center mb-4">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button 
-                variant="outline" 
-                className="flex items-center gap-2"
-              >
-                <ArrowLeft className="h-4 w-4" />
-                <span>Previous</span>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-56 bg-white">
-              <DropdownMenuLabel>Undo Recent Changes</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              {recentChanges.map((change) => (
-                <DropdownMenuItem 
-                  key={change.id}
-                  onClick={() => handleUndoChange(change.id)}
-                  className="flex items-center cursor-pointer"
-                >
-                  <RotateCcw className="h-4 w-4 mr-2" />
-                  <div className="flex flex-col">
-                    <span className="text-sm">{change.description}</span>
-                    <span className="text-xs text-gray-500">{change.timestamp}</span>
-                  </div>
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
-          
-          <Button 
-            variant="outline" 
-            onClick={() => navigate("/calendar")}
-            className="flex items-center gap-2"
-          >
-            <CalendarDays className="h-4 w-4" />
-            <span>Full Calendar</span>
-          </Button>
-        </div>
-        
         <div className="grid grid-cols-1 gap-8">
           <div className="rounded-xl animate-slideUp">
             <JobSiteMap />
+          </div>
+
+          {/* Navigation and Undo Dropdown */}
+          <div className="flex justify-between items-center mb-4 animate-slideUp" style={{ animationDelay: "0.1s" }}>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button 
+                  variant="outline" 
+                  className="flex items-center gap-2"
+                >
+                  <ArrowLeft className="h-4 w-4" />
+                  <span>Previous</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-56 bg-white">
+                <DropdownMenuLabel>Undo Recent Changes</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                {recentChanges.map((change) => (
+                  <DropdownMenuItem 
+                    key={change.id}
+                    onClick={() => handleUndoChange(change.id)}
+                    className="flex items-center cursor-pointer"
+                  >
+                    <RotateCcw className="h-4 w-4 mr-2" />
+                    <div className="flex flex-col">
+                      <span className="text-sm">{change.description}</span>
+                      <span className="text-xs text-gray-500">{change.timestamp}</span>
+                    </div>
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+            
+            <Button 
+              variant="outline" 
+              onClick={() => navigate("/calendar")}
+              className="flex items-center gap-2"
+            >
+              <CalendarDays className="h-4 w-4" />
+              <span>Full Calendar</span>
+            </Button>
           </div>
 
           {/* Team Calendars Overview Section */}
