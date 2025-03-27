@@ -16,6 +16,14 @@ export interface Job {
   assignedTeam?: string;
   assignedMemberId?: string;
   date_undecided?: boolean;
+  job_steps?: JobStep[];
+}
+
+export interface JobStep {
+  id: number;
+  title: string;
+  tasks: string[];
+  isCompleted: boolean;
 }
 
 export interface JobTemplate {
