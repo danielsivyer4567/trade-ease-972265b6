@@ -330,7 +330,7 @@ export const JobStepProgress = () => {
         <div className="md:w-2/3 bg-gray-100 rounded-lg shadow-sm overflow-hidden">
           <div className="relative aspect-[16/9]">
             <img 
-              src="public/lovable-uploads/30179ed7-1923-4ddf-8af0-c40f3280552e.png" 
+              src="/lovable-uploads/30179ed7-1923-4ddf-8af0-c40f3280552e.png" 
               alt="Job Map" 
               className="w-full h-full object-cover"
             />
