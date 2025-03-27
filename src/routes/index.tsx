@@ -1,4 +1,3 @@
-
 import { Routes as RouterRoutes, Route } from 'react-router-dom'
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute'
 import Auth from '@/pages/Auth'
@@ -15,6 +14,7 @@ import Calendar from '@/pages/Calendar'
 import TeamRed from '@/pages/TeamRed'
 import TeamBlue from '@/pages/TeamBlue'
 import TeamGreen from '@/pages/TeamGreen'
+import TradeDash from '@/pages/TradeDash'
 
 export function Routes() {
   return (
@@ -29,6 +29,14 @@ export function Routes() {
         element={
           <ProtectedRoute>
             <Index />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/tradedash"
+        element={
+          <ProtectedRoute>
+            <TradeDash />
           </ProtectedRoute>
         }
       />
@@ -125,4 +133,4 @@ export function Routes() {
       <Route path="*" element={<NotFound />} />
     </RouterRoutes>
   )
-} 
+}
