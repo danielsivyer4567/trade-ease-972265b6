@@ -1,3 +1,4 @@
+
 import { BaseLayout } from "@/components/ui/BaseLayout";
 import JobSiteMap from "@/components/dashboard/JobSiteMap";
 import RecentActivity from "@/components/dashboard/RecentActivity";
@@ -81,11 +82,6 @@ export default function Index() {
                   </DropdownMenuItem>)}
               </DropdownMenuContent>
             </DropdownMenu>
-            
-            <Button variant="outline" onClick={() => navigate("/calendar")} className="flex items-center gap-2">
-              <CalendarDays className="h-4 w-4" />
-              <span>Full Calendar</span>
-            </Button>
           </div>
 
           {/* Team Calendars Overview Section */}
@@ -94,6 +90,12 @@ export default function Index() {
         }} className="rounded-xl animate-slideUp px-0 mx-[5px]">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-semibold">Team Calendars Overview</h2>
+              
+              {/* Moved Full Calendar button here, directly above the calendar cards */}
+              <Button variant="outline" onClick={() => navigate("/calendar")} className="flex items-center gap-2">
+                <CalendarDays className="h-4 w-4" />
+                <span>Full Calendar</span>
+              </Button>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
