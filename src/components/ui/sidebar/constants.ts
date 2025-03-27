@@ -118,36 +118,10 @@ export const navigationGroups = [
     label: "Social Media",
     items: [
       {
-        type: 'dropdown',
+        type: 'link',
         icon: Share2,
         label: "Social",
-        items: [
-          {
-            icon: Share2,
-            label: "Dashboard",
-            path: "/social"
-          },
-          {
-            icon: Facebook,
-            label: "Facebook",
-            path: "/social/facebook"
-          },
-          {
-            icon: Instagram,
-            label: "Instagram",
-            path: "/social/instagram"
-          },
-          {
-            icon: Youtube,
-            label: "TikTok",
-            path: "/social/tiktok"
-          },
-          {
-            icon: Store,
-            label: "Google Business",
-            path: "/social/google-business"
-          }
-        ]
+        path: "/social"
       }
     ]
   },
