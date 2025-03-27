@@ -89,9 +89,9 @@ export default function Index() {
           </div>
 
           {/* Team Calendars Overview Section */}
-          <div className="rounded-xl animate-slideUp" style={{
+          <div style={{
           animationDelay: "0.15s"
-        }}>
+        }} className="rounded-xl animate-slideUp px-0 mx-[5px]">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-semibold">Team Calendars Overview</h2>
             </div>
