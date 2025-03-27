@@ -1,4 +1,3 @@
-
 import { BaseLayout } from "@/components/ui/BaseLayout";
 import JobSiteMap from "@/components/dashboard/JobSiteMap";
 import RecentActivity from "@/components/dashboard/RecentActivity";
@@ -92,7 +91,7 @@ export default function Index() {
               <h2 className="text-xl font-semibold">Team Calendars Overview</h2>
               
               {/* Moved Full Calendar button here, directly above the calendar cards */}
-              <Button variant="outline" onClick={() => navigate("/calendar")} className="flex items-center gap-2">
+              <Button variant="outline" onClick={() => navigate("/calendar")} className="flex items-center gap-2 text-center">
                 <CalendarDays className="h-4 w-4" />
                 <span>Full Calendar</span>
               </Button>
