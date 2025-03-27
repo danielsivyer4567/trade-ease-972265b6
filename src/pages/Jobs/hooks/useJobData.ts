@@ -3,8 +3,48 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import type { Job } from '@/types/job';
+import type { Job, JobStep } from '@/types/job';
 import { mockJobs } from '../data/mockJobs';
+
+// Default job steps if not present in the database
+const defaultJobSteps: JobStep[] = [
+  {
+    id: 1,
+    title: 'step 1-',
+    tasks: ['-schedule job date', '-allocate staff'],
+    isCompleted: false
+  },
+  {
+    id: 2,
+    title: 'step 2-',
+    tasks: ['-order materials', '-fill out job details', '- management sign off'],
+    isCompleted: false
+  },
+  {
+    id: 3,
+    title: 'step 3-',
+    tasks: ['-start job', '-inductions', '-material count check'],
+    isCompleted: false
+  },
+  {
+    id: 4,
+    title: 'step 4-',
+    tasks: ['- complete job', '- do quality check', '- site clean up', '- add any variations'],
+    isCompleted: false
+  },
+  {
+    id: 5,
+    title: 'step5-',
+    tasks: ['- verify customer is happy', '- customer to sign job is complete as per contract', '-take pics and double check all documents.', '-send invoices with variations'],
+    isCompleted: false
+  },
+  {
+    id: 6,
+    title: 'step 6',
+    tasks: ['- mark invoices paid to finalise job', '-automaticly sync to xero'],
+    isCompleted: false
+  }
+];
 
 export const useJobData = (id: string | undefined) => {
   const [job, setJob] = useState<Job | null>(null);
@@ -37,7 +77,8 @@ export const useJobData = (id: string | undefined) => {
               status: data.status,
               location: data.location,
               assignedTeam: data.assigned_team,
-              date_undecided: data.date_undecided
+              date_undecided: data.date_undecided,
+              job_steps: data.job_steps || defaultJobSteps
             };
             
             setJob(transformedJob);
@@ -54,7 +95,11 @@ export const useJobData = (id: string | undefined) => {
       const foundJob = mockJobs.find(j => j.id === id);
       console.log("Using mock job data:", foundJob);
       if (foundJob) {
-        setJob(foundJob);
+        // Add job steps to the mock job if it doesn't have them
+        setJob({
+          ...foundJob,
+          job_steps: defaultJobSteps
+        });
       } else {
         toast.error("Job not found");
         navigate('/jobs');

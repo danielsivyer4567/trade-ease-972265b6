@@ -1,6 +1,6 @@
 
 import { TabsContent, TabsTrigger } from "@/components/ui/tabs";
-import { FileText, Calendar, Clock } from "lucide-react";
+import { FileText, Calendar, Clock, CheckSquare } from "lucide-react";
 import { JobDetailsTab } from "./JobDetailsTab";
 import { JobNotesTab } from "./JobNotesTab";
 import { JobCalendarTab } from "./JobCalendarTab";
@@ -22,6 +22,7 @@ interface StandardTabsProps {
   handleBreakToggle: () => void;
   isTimerRunning: boolean;
   isOnBreak: boolean;
+  includeProgressTab?: boolean;
 }
 
 export const StandardTabs = ({
@@ -34,7 +35,8 @@ export const StandardTabs = ({
   handleTimerToggle,
   handleBreakToggle,
   isTimerRunning,
-  isOnBreak
+  isOnBreak,
+  includeProgressTab = false
 }: StandardTabsProps) => {
   const isMobile = useIsMobile();
   
@@ -58,6 +60,13 @@ export const StandardTabs = ({
         {!isMobile && <Clock className="w-4 h-4 mr-2 px-0" />}
         Timer
       </TabsTrigger>
+
+      {includeProgressTab && (
+        <TabsTrigger value="progress" className="min-w-[80px] sm:min-w-[100px] whitespace-nowrap flex-shrink-0 bg-slate-400 hover:bg-slate-300 px-[23px] mx-[23px]">
+          {!isMobile && <CheckSquare className="w-4 h-4 mr-2 px-0" />}
+          Progress
+        </TabsTrigger>
+      )}
     </>
   );
 };

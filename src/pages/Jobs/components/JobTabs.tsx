@@ -1,3 +1,4 @@
+
 import { Tabs, TabsList, TabsContent } from "@/components/ui/tabs";
 import type { Job } from "@/types/job";
 import { StandardTabs } from "./tabs/StandardTabs";
@@ -12,6 +13,7 @@ import { JobBillsTab } from "./tabs/JobBillsTab";
 import { JobCostsTab } from "./tabs/JobCostsTab";
 import { JobInvoicesTab } from "./tabs/JobInvoicesTab";
 import { JobFinancialsTab } from "./tabs/JobFinancialsTab";
+import { JobProgressTab } from "./tabs/JobProgressTab";
 import { FinancialData } from "../hooks/financial-data/types";
 
 interface JobTabsProps {
@@ -75,6 +77,7 @@ export const JobTabs = ({
             handleBreakToggle={handleBreakToggle}
             isTimerRunning={isTimerRunning}
             isOnBreak={isOnBreak}
+            includeProgressTab={true}
           />
           
           {isManager && (
@@ -117,6 +120,10 @@ export const JobTabs = ({
             isOnBreak={isOnBreak} 
             locationHistory={locationHistory} 
           />
+        </TabsContent>
+        
+        <TabsContent value="progress" className="mt-0 px-1 relative">
+          <JobProgressTab />
         </TabsContent>
         
         {isManager && (
