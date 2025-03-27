@@ -1,10 +1,11 @@
 
 import React, { useState, useEffect } from 'react';
-import { Check, Square, CheckSquare, Loader } from 'lucide-react';
+import { Check, Square, CheckSquare, Loader, Maximize2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useParams } from 'react-router-dom';
 import { Checkbox } from "@/components/ui/checkbox";
+import { Button } from "@/components/ui/button";
 
 interface JobStep {
   id: number;
@@ -24,6 +25,7 @@ export const JobStepProgress = () => {
   const [loading, setLoading] = useState(false);
   const [savingTaskId, setSavingTaskId] = useState<string | null>(null);
   const [savingStepId, setSavingStepId] = useState<number | null>(null);
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
   useEffect(() => {
     // Get existing job steps from database if available
@@ -206,6 +208,10 @@ export const JobStepProgress = () => {
     setSavingStepId(null);
   };
 
+  const toggleFullscreen = () => {
+    setIsFullscreen(!isFullscreen);
+  };
+
   // Visual progress indicator showing how many steps are complete
   const completedSteps = jobSteps.filter(step => step.isCompleted).length;
   const progressPercentage = jobSteps.length > 0 ? (completedSteps / jobSteps.length) * 100 : 0;
@@ -220,96 +226,135 @@ export const JobStepProgress = () => {
   }
 
   return (
-    <div className="space-y-4">
-      <div className="w-full bg-gray-200 rounded-full h-2.5 mb-6">
-        <div 
-          className="bg-green-500 h-2.5 rounded-full transition-all duration-500 ease-in-out" 
-          style={{ width: `${progressPercentage}%` }}
-        ></div>
+    <div className={`relative ${isFullscreen ? 'fixed inset-0 z-50 bg-white p-4' : ''}`}>
+      {/* Fullscreen toggle button */}
+      <div className="absolute top-2 right-2 z-10">
+        <Button
+          variant="outline"
+          size="sm"
+          className="h-8 w-8 p-0"
+          onClick={toggleFullscreen}
+        >
+          <Maximize2 className="h-4 w-4" />
+        </Button>
       </div>
       
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-medium">Job Progress</h3>
-        <div className="text-sm text-gray-500">
-          {completedSteps} of {jobSteps.length} steps complete
+      {/* Horizontal step progress bar at the top */}
+      <div className="mb-8 px-2">
+        <div className="flex justify-between items-center">
+          {jobSteps.map((step) => (
+            <div key={`step-indicator-${step.id}`} className="flex flex-col items-center">
+              <div 
+                className={`w-8 h-8 rounded-full flex items-center justify-center cursor-pointer 
+                  ${step.isCompleted ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-700'} 
+                  border-2 border-white`}
+                onClick={() => handleStepCompletion(step.id)}
+              >
+                {step.isCompleted ? <Check className="h-5 w-5" /> : step.id}
+              </div>
+              <div className="h-0.5 w-16 bg-gray-200 absolute -z-10" 
+                   style={{ display: step.id === jobSteps.length ? 'none' : 'block' }}></div>
+            </div>
+          ))}
         </div>
       </div>
       
-      <div className="space-y-4">
-        {jobSteps.map((step) => (
-          <div 
-            key={step.id} 
-            className={`border rounded-lg p-4 transition-colors ${
-              step.isCompleted ? 'bg-green-50 border-green-200' : 'bg-white border-gray-200'
-            }`}
-          >
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-3">
-                <div 
-                  className={`w-8 h-8 rounded-full flex items-center justify-center cursor-pointer ${
-                    step.isCompleted ? 'bg-green-500 text-white' : 'bg-gray-100 text-gray-400'
-                  }`}
-                  onClick={() => handleStepCompletion(step.id)}
-                >
-                  {savingStepId === step.id ? (
-                    <Loader className="h-5 w-5 animate-spin" />
-                  ) : step.isCompleted ? (
-                    <Check className="h-5 w-5" />
-                  ) : (
-                    <span>{step.id}</span>
-                  )}
-                </div>
-                <h4 className={`font-bold text-lg ${step.isCompleted ? 'text-green-700' : ''}`}>
-                  {step.title}
-                </h4>
-              </div>
-              <button 
-                onClick={() => handleStepCompletion(step.id)}
-                className={`px-3 py-1 rounded-md text-sm ${
-                  step.isCompleted 
-                    ? 'bg-green-100 text-green-700 hover:bg-green-200' 
-                    : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
+      <div className="flex flex-col md:flex-row gap-4">
+        {/* Left sidebar with detailed steps */}
+        <div className="md:w-1/3 border rounded-lg overflow-hidden shadow-sm">
+          <div className="space-y-1 max-h-[600px] overflow-y-auto">
+            {jobSteps.map((step) => (
+              <div 
+                key={step.id} 
+                className={`border-b last:border-b-0 transition-colors ${
+                  step.isCompleted ? 'bg-green-50' : 'bg-white'
                 }`}
               >
-                {savingStepId === step.id ? (
-                  <span className="flex items-center">
-                    <Loader className="h-3 w-3 animate-spin mr-1" />
-                    Saving...
-                  </span>
-                ) : (
-                  step.isCompleted ? 'Completed' : 'Mark Complete'
-                )}
-              </button>
-            </div>
-            
-            <div className="mt-4 pl-11 space-y-2">
-              {step.tasks.map((task) => (
-                <div key={task.id} className="flex items-center space-x-2">
-                  <div className="relative flex items-center">
-                    {savingTaskId === task.id ? (
-                      <Loader className="h-4 w-4 animate-spin" />
+                <div 
+                  className="px-4 py-3 cursor-pointer hover:bg-gray-50 flex items-start"
+                  onClick={() => handleStepCompletion(step.id)}
+                >
+                  <div className="flex-shrink-0 mt-0.5">
+                    {savingStepId === step.id ? (
+                      <Loader className="h-5 w-5 animate-spin text-blue-500" />
                     ) : (
-                      <Checkbox
-                        id={task.id}
-                        checked={task.isCompleted}
-                        className={task.isCompleted ? "bg-green-500 text-white border-green-500" : ""}
-                        onCheckedChange={() => handleTaskCompletion(step.id, task.id)}
+                      <Checkbox 
+                        id={`step-${step.id}`}
+                        checked={step.isCompleted}
+                        className={step.isCompleted ? "bg-green-500 text-white border-green-500" : ""}
+                        onCheckedChange={() => handleStepCompletion(step.id)}
                       />
                     )}
                   </div>
-                  <label 
-                    htmlFor={task.id}
-                    className={`cursor-pointer ${
-                      task.isCompleted ? 'text-green-600 line-through' : 'text-gray-600'
-                    }`}
-                  >
-                    {task.text}
-                  </label>
+                  <div className="ml-3 flex-1">
+                    <h4 className={`font-bold ${step.isCompleted ? 'text-green-700' : 'text-gray-900'}`}>
+                      {step.title}
+                    </h4>
+                    <ul className="mt-2 space-y-2">
+                      {step.tasks.map((task) => (
+                        <li key={task.id} className="flex items-start">
+                          <div className="flex-shrink-0 mt-0.5">
+                            {savingTaskId === task.id ? (
+                              <Loader className="h-4 w-4 animate-spin text-blue-500" />
+                            ) : (
+                              <Checkbox
+                                id={task.id}
+                                checked={task.isCompleted}
+                                className={`h-4 w-4 ${task.isCompleted ? "bg-green-500 text-white border-green-500" : ""}`}
+                                onCheckedChange={() => handleTaskCompletion(step.id, task.id)}
+                              />
+                            )}
+                          </div>
+                          <label 
+                            htmlFor={task.id}
+                            className={`ml-2 text-sm cursor-pointer ${
+                              task.isCompleted ? 'text-green-600 line-through' : 'text-gray-600'
+                            }`}
+                          >
+                            {task.text}
+                          </label>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                  <div className="flex-shrink-0">
+                    {step.isCompleted && <Check className="h-5 w-5 text-green-500" />}
+                  </div>
                 </div>
-              ))}
+              </div>
+            ))}
+          </div>
+        </div>
+        
+        {/* Right side map placeholder */}
+        <div className="md:w-2/3 bg-gray-100 rounded-lg shadow-sm overflow-hidden">
+          <div className="relative aspect-[16/9]">
+            <img 
+              src="public/lovable-uploads/30179ed7-1923-4ddf-8af0-c40f3280552e.png" 
+              alt="Job Map" 
+              className="w-full h-full object-cover"
+            />
+            <div className="absolute top-2 left-2 bg-white bg-opacity-75 px-3 py-1 rounded-md text-sm font-medium">
+              Basic Maintenance
             </div>
           </div>
-        ))}
+          
+          {/* Progress summary at the bottom */}
+          <div className="p-4 bg-white border-t">
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="font-medium">Overall Progress</h3>
+              <div className="text-sm text-gray-500">
+                {completedSteps} of {jobSteps.length} steps complete ({Math.round(progressPercentage)}%)
+              </div>
+            </div>
+            <div className="w-full bg-gray-200 rounded-full h-2">
+              <div 
+                className="bg-green-500 h-2 rounded-full transition-all duration-500 ease-in-out" 
+                style={{ width: `${progressPercentage}%` }}
+              ></div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
