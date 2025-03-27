@@ -17,6 +17,7 @@ interface TeamCalendarProps {
   teamColor: string;
   onJobAssign?: (jobId: string, date: Date) => void;
   assignedJobs?: Job[];
+  miniView?: boolean;
 }
 
 export function TeamCalendar({
@@ -24,7 +25,8 @@ export function TeamCalendar({
   setDate,
   teamColor,
   onJobAssign,
-  assignedJobs = []
+  assignedJobs = [],
+  miniView = false
 }: TeamCalendarProps) {
   const { weatherDates } = useWeatherData();
   const { 
@@ -36,50 +38,55 @@ export function TeamCalendar({
   } = useCalendarHandlers(onJobAssign);
 
   return (
-    <section>
-      <div className="p-6 rounded-lg shadow-md bg-slate-300 my-[32px] px-0 py-[31px] mx-px">
-        <TeamCalendarHeader 
-          assignedJobs={assignedJobs} 
-          date={date} 
-        />
-        
-        <Calendar 
-          mode="single" 
-          selected={date} 
-          onSelect={setDate} 
-          modifiers={getCalendarModifiers(weatherDates)}
-          modifiersStyles={getCalendarModifiersStyles()}
-          components={{
-            DayContent: ({ date: dayDate }) => {
-              const dateStr = format(dayDate, 'yyyy-MM-dd');
-              const weatherData = weatherDates.find(rd => rd.date === dateStr);
-              const jobsForDate = getJobsForDate(dayDate, assignedJobs);
-              const isSelected = date ? isSameDay(dayDate, date) : false;
+    <section className={miniView ? 'mini-calendar' : ''}>
+      {!miniView && (
+        <div className="p-6 rounded-lg shadow-md bg-slate-300 my-[32px] px-0 py-[31px] mx-px">
+          <TeamCalendarHeader 
+            assignedJobs={assignedJobs} 
+            date={date} 
+          />
+        </div>
+      )}
+      
+      <Calendar 
+        mode="single" 
+        selected={date} 
+        onSelect={setDate} 
+        modifiers={getCalendarModifiers(weatherDates)}
+        modifiersStyles={getCalendarModifiersStyles()}
+        components={{
+          DayContent: ({ date: dayDate }) => {
+            const dateStr = format(dayDate, 'yyyy-MM-dd');
+            const weatherData = weatherDates.find(rd => rd.date === dateStr);
+            const jobsForDate = getJobsForDate(dayDate, assignedJobs);
+            const isSelected = date ? isSameDay(dayDate, date) : false;
 
-              return (
-                <CalendarDayContent 
-                  date={dayDate}
-                  weatherData={weatherData}
-                  jobsForDate={jobsForDate}
-                  onJobClick={handleJobClick}
-                  onDrop={handleDrop}
-                  onDayClick={handleDayClick}
-                  teamColor={teamColor}
-                  isSelected={isSelected}
-                />
-              );
-            }
-          }}
-          classNames={getCalendarClassNames(teamColor)}
-          className="w-full bg-slate-200"
-        />
-      </div>
-
-      <DayDetailDrawer 
-        selectedDay={selectedDayJobs} 
-        onClose={closeDayDetail} 
-        onJobClick={handleJobClick}
+            return (
+              <CalendarDayContent 
+                date={dayDate}
+                weatherData={weatherData}
+                jobsForDate={jobsForDate}
+                onJobClick={handleJobClick}
+                onDrop={handleDrop}
+                onDayClick={handleDayClick}
+                teamColor={teamColor}
+                isSelected={isSelected}
+                miniView={miniView}
+              />
+            );
+          }
+        }}
+        classNames={getCalendarClassNames(teamColor)}
+        className={`${miniView ? 'w-full bg-white' : 'w-full bg-slate-200'}`}
       />
+
+      {!miniView && (
+        <DayDetailDrawer 
+          selectedDay={selectedDayJobs} 
+          onClose={closeDayDetail} 
+          onJobClick={handleJobClick}
+        />
+      )}
     </section>
   );
 }

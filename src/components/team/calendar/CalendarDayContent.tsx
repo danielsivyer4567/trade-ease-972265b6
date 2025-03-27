@@ -14,6 +14,7 @@ interface CalendarDayContentProps {
   onDayClick: (date: Date, jobs: Job[]) => void;
   teamColor: string;
   isSelected: boolean;
+  miniView?: boolean;
 }
 
 export const CalendarDayContent: React.FC<CalendarDayContentProps> = ({
@@ -24,7 +25,8 @@ export const CalendarDayContent: React.FC<CalendarDayContentProps> = ({
   onDrop,
   onDayClick,
   teamColor,
-  isSelected
+  isSelected,
+  miniView = false
 }) => {
   // Generate dynamic background color based on team color and selection state
   const getDayBackground = () => {
@@ -43,6 +45,9 @@ export const CalendarDayContent: React.FC<CalendarDayContentProps> = ({
     }
   };
 
+  // In mini view, show job count with a dot indicator instead of full job information
+  const showJobDot = miniView && jobsForDate && jobsForDate.length > 0;
+
   return (
     <div 
       onDragOver={e => e.preventDefault()} 
@@ -52,9 +57,17 @@ export const CalendarDayContent: React.FC<CalendarDayContentProps> = ({
     >
       <span className={`absolute top-1 ${isSelected ? 'text-white' : ''}`}>{date.getDate()}</span>
       
-      {weatherData && <WeatherDisplay date={date} weatherData={weatherData} />}
+      {!miniView && weatherData && <WeatherDisplay date={date} weatherData={weatherData} />}
       
-      {jobsForDate && jobsForDate.length > 0 && <JobsDisplay jobsForDate={jobsForDate} teamColor={teamColor} onJobClick={onJobClick} />}
+      {miniView ? (
+        showJobDot && (
+          <div className={`absolute bottom-1 right-1 w-2 h-2 rounded-full bg-${teamColor}-500`} 
+               title={`${jobsForDate.length} jobs scheduled`} />
+        )
+      ) : (
+        jobsForDate && jobsForDate.length > 0 && 
+        <JobsDisplay jobsForDate={jobsForDate} teamColor={teamColor} onJobClick={onJobClick} />
+      )}
     </div>
   );
 };
