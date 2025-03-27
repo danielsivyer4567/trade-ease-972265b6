@@ -1,3 +1,4 @@
+
 import { 
   LayoutDashboard, 
   Users, 
@@ -15,7 +16,12 @@ import {
   Boxes,
   CheckSquare,
   BarChart,
-  LogOut
+  LogOut,
+  Facebook,
+  Instagram,
+  Youtube,
+  Store,
+  Share2
 } from 'lucide-react';
 
 // Define sidebar constants
@@ -105,6 +111,41 @@ export const navigationGroups = [
             path: "/team-green"
           }
         ]
+      }
+    ]
+  },
+  {
+    label: "Social Media",
+    items: [
+      {
+        type: 'link',
+        icon: Share2,
+        label: "Social Dashboard",
+        path: "/social"
+      },
+      {
+        type: 'link',
+        icon: Facebook,
+        label: "Facebook",
+        path: "/social/facebook"
+      },
+      {
+        type: 'link',
+        icon: Instagram,
+        label: "Instagram",
+        path: "/social/instagram"
+      },
+      {
+        type: 'link',
+        icon: Youtube,
+        label: "TikTok",
+        path: "/social/tiktok"
+      },
+      {
+        type: 'link',
+        icon: Store,
+        label: "Google Business",
+        path: "/social/google-business"
       }
     ]
   },
