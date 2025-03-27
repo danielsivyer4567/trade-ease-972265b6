@@ -1,10 +1,6 @@
 
-import { JobStepProgress } from "../JobStepProgress";
+import { JobProgressTab as DashboardJobProgressTab } from "@/components/dashboard/JobProgressTab";
 
 export const JobProgressTab = () => {
-  return (
-    <div className="p-2 sm:p-4">
-      <JobStepProgress />
-    </div>
-  );
+  return <DashboardJobProgressTab />;
 };
