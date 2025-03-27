@@ -1,63 +1,35 @@
 
 import React, { useState, useEffect } from 'react';
-import { Check, Square } from 'lucide-react';
+import { Check, Square, CheckSquare, Loader } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useParams } from 'react-router-dom';
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface JobStep {
   id: number;
   title: string;
-  tasks: string[];
+  tasks: {
+    id: string;
+    text: string;
+    isCompleted: boolean;
+  }[];
   isCompleted: boolean;
 }
 
 export const JobStepProgress = () => {
   const { id } = useParams<{ id: string }>();
   const { toast } = useToast();
-  const [jobSteps, setJobSteps] = useState<JobStep[]>([
-    {
-      id: 1,
-      title: 'step 1-',
-      tasks: ['-schedule job date', '-allocate staff'],
-      isCompleted: false
-    },
-    {
-      id: 2,
-      title: 'step 2-',
-      tasks: ['-order materials', '-fill out job details', '- management sign off'],
-      isCompleted: false
-    },
-    {
-      id: 3,
-      title: 'step 3-',
-      tasks: ['-start job', '-inductions', '-material count check'],
-      isCompleted: false
-    },
-    {
-      id: 4,
-      title: 'step 4-',
-      tasks: ['- complete job', '- do quality check', '- site clean up', '- add any variations'],
-      isCompleted: false
-    },
-    {
-      id: 5,
-      title: 'step5-',
-      tasks: ['- verify customer is happy', '- customer to sign job is complete as per contract', '-take pics and double check all documents.', '-send invoices with variations'],
-      isCompleted: false
-    },
-    {
-      id: 6,
-      title: 'step 6',
-      tasks: ['- mark invoices paid to finalise job', '-automaticly sync to xero'],
-      isCompleted: false
-    }
-  ]);
+  const [jobSteps, setJobSteps] = useState<JobStep[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [savingTaskId, setSavingTaskId] = useState<string | null>(null);
+  const [savingStepId, setSavingStepId] = useState<number | null>(null);
 
   useEffect(() => {
     // Get existing job steps from database if available
     const fetchJobSteps = async () => {
       if (id) {
+        setLoading(true);
         const { data, error } = await supabase
           .from('jobs')
           .select('job_steps')
@@ -65,21 +37,90 @@ export const JobStepProgress = () => {
           .single();
 
         if (data && data.job_steps && !error) {
-          setJobSteps(data.job_steps);
+          // Ensure each task has an id and isCompleted property
+          const formattedSteps = data.job_steps.map((step: any) => ({
+            ...step,
+            tasks: step.tasks.map((task: string, index: number) => ({
+              id: `${step.id}-${index}`,
+              text: task,
+              isCompleted: false
+            }))
+          }));
+          setJobSteps(formattedSteps);
+        } else {
+          // Create default job steps
+          const defaultSteps = [
+            {
+              id: 1,
+              title: 'step 1-',
+              tasks: [
+                { id: '1-0', text: '-schedule job date', isCompleted: false },
+                { id: '1-1', text: '-allocate staff', isCompleted: false }
+              ],
+              isCompleted: false
+            },
+            {
+              id: 2,
+              title: 'step 2-',
+              tasks: [
+                { id: '2-0', text: '-order materials', isCompleted: false },
+                { id: '2-1', text: '-fill out job details', isCompleted: false },
+                { id: '2-2', text: '- management sign off', isCompleted: false }
+              ],
+              isCompleted: false
+            },
+            {
+              id: 3,
+              title: 'step 3-',
+              tasks: [
+                { id: '3-0', text: '-start job', isCompleted: false },
+                { id: '3-1', text: '-inductions', isCompleted: false },
+                { id: '3-2', text: '-material count check', isCompleted: false }
+              ],
+              isCompleted: false
+            },
+            {
+              id: 4,
+              title: 'step 4-',
+              tasks: [
+                { id: '4-0', text: '- complete job', isCompleted: false },
+                { id: '4-1', text: '- do quality check', isCompleted: false },
+                { id: '4-2', text: '- site clean up', isCompleted: false },
+                { id: '4-3', text: '- add any variations', isCompleted: false }
+              ],
+              isCompleted: false
+            },
+            {
+              id: 5,
+              title: 'step5-',
+              tasks: [
+                { id: '5-0', text: '- verify customer is happy', isCompleted: false },
+                { id: '5-1', text: '- customer to sign job is complete as per contract', isCompleted: false },
+                { id: '5-2', text: '-take pics and double check all documents.', isCompleted: false },
+                { id: '5-3', text: '-send invoices with variations', isCompleted: false }
+              ],
+              isCompleted: false
+            },
+            {
+              id: 6,
+              title: 'step 6',
+              tasks: [
+                { id: '6-0', text: '- mark invoices paid to finalise job', isCompleted: false },
+                { id: '6-1', text: '-automaticly sync to xero', isCompleted: false }
+              ],
+              isCompleted: false
+            }
+          ];
+          setJobSteps(defaultSteps);
         }
+        setLoading(false);
       }
     };
 
     fetchJobSteps();
   }, [id]);
 
-  const handleStepCompletion = async (stepId: number) => {
-    const updatedSteps = jobSteps.map(step => 
-      step.id === stepId ? { ...step, isCompleted: !step.isCompleted } : step
-    );
-    
-    setJobSteps(updatedSteps);
-    
+  const saveJobSteps = async (updatedSteps: JobStep[]) => {
     if (id) {
       const { error } = await supabase
         .from('jobs')
@@ -89,21 +130,94 @@ export const JobStepProgress = () => {
       if (error) {
         toast({
           title: "Error saving progress",
-          description: error.message
+          description: error.message,
+          variant: "destructive"
         });
-      } else {
-        const completedStep = updatedSteps.find(s => s.id === stepId);
-        toast({
-          title: completedStep?.isCompleted ? "Step completed" : "Step reopened",
-          description: `${completedStep?.title} has been ${completedStep?.isCompleted ? 'marked as complete' : 'reopened'}.`
-        });
+        return false;
       }
+      return true;
     }
+    return false;
+  };
+
+  const handleTaskCompletion = async (stepId: number, taskId: string) => {
+    setSavingTaskId(taskId);
+    
+    const updatedSteps = jobSteps.map(step => {
+      if (step.id === stepId) {
+        const updatedTasks = step.tasks.map(task => 
+          task.id === taskId ? { ...task, isCompleted: !task.isCompleted } : task
+        );
+        
+        // Check if all tasks are completed
+        const allTasksCompleted = updatedTasks.every(task => task.isCompleted);
+        
+        return { 
+          ...step, 
+          tasks: updatedTasks,
+          isCompleted: allTasksCompleted
+        };
+      }
+      return step;
+    });
+    
+    setJobSteps(updatedSteps);
+    
+    const saved = await saveJobSteps(updatedSteps);
+    if (saved) {
+      const task = updatedSteps
+        .find(s => s.id === stepId)?.tasks
+        .find(t => t.id === taskId);
+        
+      toast({
+        title: task?.isCompleted ? "Task completed" : "Task reopened",
+        description: `Task has been ${task?.isCompleted ? 'marked as complete' : 'reopened'}.`
+      });
+    }
+    
+    setSavingTaskId(null);
+  };
+
+  const handleStepCompletion = async (stepId: number) => {
+    setSavingStepId(stepId);
+    
+    const stepToUpdate = jobSteps.find(step => step.id === stepId);
+    const newCompletionState = !stepToUpdate?.isCompleted;
+    
+    const updatedSteps = jobSteps.map(step => 
+      step.id === stepId ? { 
+        ...step, 
+        isCompleted: newCompletionState,
+        tasks: step.tasks.map(task => ({ ...task, isCompleted: newCompletionState }))
+      } : step
+    );
+    
+    setJobSteps(updatedSteps);
+    
+    const saved = await saveJobSteps(updatedSteps);
+    if (saved) {
+      const completedStep = updatedSteps.find(s => s.id === stepId);
+      toast({
+        title: completedStep?.isCompleted ? "Step completed" : "Step reopened",
+        description: `${completedStep?.title} has been ${completedStep?.isCompleted ? 'marked as complete' : 'reopened'}.`
+      });
+    }
+    
+    setSavingStepId(null);
   };
 
   // Visual progress indicator showing how many steps are complete
   const completedSteps = jobSteps.filter(step => step.isCompleted).length;
-  const progressPercentage = (completedSteps / jobSteps.length) * 100;
+  const progressPercentage = jobSteps.length > 0 ? (completedSteps / jobSteps.length) * 100 : 0;
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-40">
+        <Loader className="animate-spin h-8 w-8 text-gray-500" />
+        <span className="ml-2 text-gray-500">Loading job progress...</span>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4">
@@ -121,8 +235,8 @@ export const JobStepProgress = () => {
         </div>
       </div>
       
-      <div className="space-y-2">
-        {jobSteps.map((step, index) => (
+      <div className="space-y-4">
+        {jobSteps.map((step) => (
           <div 
             key={step.id} 
             className={`border rounded-lg p-4 transition-colors ${
@@ -137,7 +251,9 @@ export const JobStepProgress = () => {
                   }`}
                   onClick={() => handleStepCompletion(step.id)}
                 >
-                  {step.isCompleted ? (
+                  {savingStepId === step.id ? (
+                    <Loader className="h-5 w-5 animate-spin" />
+                  ) : step.isCompleted ? (
                     <Check className="h-5 w-5" />
                   ) : (
                     <span>{step.id}</span>
@@ -155,18 +271,40 @@ export const JobStepProgress = () => {
                     : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
                 }`}
               >
-                {step.isCompleted ? 'Completed' : 'Mark Complete'}
+                {savingStepId === step.id ? (
+                  <span className="flex items-center">
+                    <Loader className="h-3 w-3 animate-spin mr-1" />
+                    Saving...
+                  </span>
+                ) : (
+                  step.isCompleted ? 'Completed' : 'Mark Complete'
+                )}
               </button>
             </div>
             
-            <div className="mt-2 pl-11 space-y-1">
-              {step.tasks.map((task, taskIndex) => (
-                <div key={taskIndex} className="flex items-start">
-                  <span 
-                    className={`mr-2 ${step.isCompleted ? 'text-green-600' : 'text-gray-600'}`}
+            <div className="mt-4 pl-11 space-y-2">
+              {step.tasks.map((task) => (
+                <div key={task.id} className="flex items-center space-x-2">
+                  <div className="relative flex items-center">
+                    {savingTaskId === task.id ? (
+                      <Loader className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Checkbox
+                        id={task.id}
+                        checked={task.isCompleted}
+                        className={task.isCompleted ? "bg-green-500 text-white border-green-500" : ""}
+                        onCheckedChange={() => handleTaskCompletion(step.id, task.id)}
+                      />
+                    )}
+                  </div>
+                  <label 
+                    htmlFor={task.id}
+                    className={`cursor-pointer ${
+                      task.isCompleted ? 'text-green-600 line-through' : 'text-gray-600'
+                    }`}
                   >
-                    {task}
-                  </span>
+                    {task.text}
+                  </label>
                 </div>
               ))}
             </div>
