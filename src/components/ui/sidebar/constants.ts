@@ -103,12 +103,6 @@ export const navigationGroups = [
         icon: Calculator,
         label: "Calculators",
         path: "/calculators"
-      },
-      {
-        type: 'link',
-        icon: Brain,
-        label: "AI Features",
-        path: "/ai-features"
       }
     ]
   },
