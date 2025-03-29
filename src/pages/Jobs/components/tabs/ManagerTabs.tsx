@@ -1,4 +1,3 @@
-
 import { TabsTrigger } from "@/components/ui/tabs";
 import { Receipt, Calculator, ScrollText, Wallet, MessageSquare } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -28,7 +27,7 @@ export const ManagerTabs = ({
 }: ManagerTabsProps) => {
   const isMobile = useIsMobile();
   return <>
-      <TabsTrigger value="bills" className="min-w-[80px] sm:min-w-[100px] whitespace-nowrap flex-shrink-0 bg-slate-400 hover:bg-slate-300 mx-0 px-[22px]">
+      <TabsTrigger value="bills" className="min-w-[80px] sm:min-w-[100px] whitespace-nowrap flex-shrink-0 bg-slate-400 hover:bg-slate-300 mx-0 px-0">
         {!isMobile && <Receipt className="w-4 h-4 mr-2 mx-[11px]" />}
         Bills
       </TabsTrigger>
