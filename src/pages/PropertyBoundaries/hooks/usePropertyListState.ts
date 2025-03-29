@@ -11,27 +11,45 @@ export const usePropertyListState = (
   const [addressPreviews, setAddressPreviews] = useState<string[]>([]);
   const [isPreviewVisible, setIsPreviewVisible] = useState(false);
   
-  // Improved address search that properly matches address strings
+  // Completely revised address search for better matching
   const searchAddressMatches = (address: string, query: string): boolean => {
     if (!address || !query) return false;
     
     const addressLower = address.toLowerCase();
     const queryLower = query.toLowerCase().trim();
     
-    // Direct contains check
+    // Direct matching - quickest check first
     if (addressLower.includes(queryLower)) return true;
     
-    // Split query into parts and check if each part exists in address
-    const queryParts = queryLower.split(/\s+/).filter(part => part.length > 0);
+    // Split both address and query into parts for more flexible matching
+    const addressParts = addressLower.split(/[\s,]+/).filter(part => part.length > 1);
+    const queryParts = queryLower.split(/[\s,]+/).filter(part => part.length > 1);
+    
     if (queryParts.length === 0) return false;
     
-    // Count how many parts of the query match the address
-    const matchCount = queryParts.filter(part => 
-      part.length > 1 && addressLower.includes(part)
-    ).length;
+    // Check if any query part is a street number
+    const hasStreetNumber = queryParts.some(part => /^\d+$/.test(part));
     
-    // Match if more than half of the query parts are found
-    return matchCount > 0 && matchCount >= Math.ceil(queryParts.length / 2);
+    // If looking for a specific street number, be more strict in matching
+    if (hasStreetNumber) {
+      // For street numbers, most parts should match
+      const requiredMatches = Math.ceil(queryParts.length * 0.75);
+      const matches = queryParts.filter(part => addressLower.includes(part)).length;
+      return matches >= requiredMatches;
+    }
+    
+    // For general street names, be more flexible
+    // Check if significant parts of the query appear in the address
+    // "Collins Street" should match "123 Collins Street, Melbourne"
+    const significantMatches = queryParts.filter(part => {
+      // Consider words like "street", "road", etc. as significant
+      const isSignificant = part.length > 3 || 
+                          ['st', 'rd', 'ave', 'ln', 'dr', 'ct'].includes(part);
+      return isSignificant && addressLower.includes(part);
+    }).length;
+    
+    // Match if we have significant matches
+    return significantMatches > 0;
   };
   
   // Filter properties based on search query with improved address search
@@ -47,13 +65,8 @@ export const usePropertyListState = (
     // Check if property description includes search query
     const descMatch = prop.description?.toLowerCase().includes(query) || false;
     
-    // More thorough address matching with proper null checking
+    // Enhanced address matching with better recognition of street names
     const addressMatch = prop.address ? searchAddressMatches(prop.address, query) : false;
-    
-    // Debug log to verify address matching
-    if (prop.address) {
-      console.log(`Checking address "${prop.address}" against query "${query}": ${addressMatch}`);
-    }
     
     // Return true if any of the fields match
     return nameMatch || descMatch || addressMatch;
