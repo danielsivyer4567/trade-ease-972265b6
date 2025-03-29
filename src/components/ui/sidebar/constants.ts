@@ -79,16 +79,21 @@ export const navigationGroups = [
         path: "/calendar"
       },
       {
-        type: 'link',
+        type: 'dropdown',
         icon: Briefcase,
         label: "Jobs",
-        path: "/jobs"
-      },
-      {
-        type: 'link',
-        icon: CheckSquare,
-        label: "Tasks",
-        path: "/tasks"
+        items: [
+          {
+            icon: Briefcase,
+            label: "All Jobs",
+            path: "/jobs"
+          },
+          {
+            icon: CheckSquare,
+            label: "Tasks",
+            path: "/tasks"
+          }
+        ]
       },
       {
         type: 'dropdown',
