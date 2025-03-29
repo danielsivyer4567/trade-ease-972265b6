@@ -78,77 +78,121 @@ export function useMapRendering(
       ctx.fillStyle = 'rgba(155, 135, 245, 0.3)';
       ctx.fill();
       
-      // Draw stroke
-      ctx.strokeStyle = '#6E59A5';
+      // Draw stroke with higher contrast
+      ctx.strokeStyle = '#5D4A9C';
       ctx.lineWidth = 3;
       ctx.stroke();
       
       // Store transformed points for edge labels
       const transformedPoints = boundary.points.map(point => transformPoint(point));
       
-      // Draw edges with numbered labels
+      // Draw edges with numbered labels and measurements
       boundary.points.forEach((point, i) => {
         const nextIndex = (i + 1) % boundary.points.length;
         const start = transformedPoints[i];
         const end = transformedPoints[nextIndex];
         
-        // Calculate midpoint
+        // Calculate midpoint for label positioning
         const midpoint = {
           x: (start.x + end.x) / 2,
           y: (start.y + end.y) / 2
         };
         
-        // Draw label background
-        ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
+        // Calculate line angle for better positioning of length label
+        const angle = Math.atan2(end.y - start.y, end.x - start.x);
+        const perpendicular = angle + Math.PI/2;
+        const labelOffset = 20; // Distance from line
+        
+        // Draw edge number label (inside circle)
+        ctx.fillStyle = '#333333';
         ctx.beginPath();
-        ctx.arc(midpoint.x, midpoint.y, 12, 0, Math.PI * 2);
+        ctx.arc(midpoint.x, midpoint.y, 14, 0, Math.PI * 2);
         ctx.fill();
         
-        // Draw label text
         ctx.fillStyle = 'white';
-        ctx.font = '10px Arial';
+        ctx.font = 'bold 12px Arial';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.fillText((i + 1).toString(), midpoint.x, midpoint.y);
-      });
-      
-      // Draw points
-      boundary.points.forEach((point, i) => {
-        const transformed = transformPoint(point);
         
+        // Calculate length between points
+        const dx = end.x - start.x;
+        const dy = end.y - start.y;
+        const length = Math.sqrt(dx * dx + dy * dy);
+        const realLength = length / (autoScale * mapState.scale);
+        const displayLength = realLength.toFixed(2);
+        
+        // Position for length label (offset perpendicular to the line)
+        const labelX = midpoint.x + Math.cos(perpendicular) * labelOffset;
+        const labelY = midpoint.y + Math.sin(perpendicular) * labelOffset;
+        
+        // Draw length label background
+        const textMetrics = ctx.measureText(displayLength + " m");
+        const textWidth = textMetrics.width + 10;
+        const textHeight = 22;
+        
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
         ctx.beginPath();
-        ctx.arc(transformed.x, transformed.y, 4, 0, Math.PI * 2);
-        ctx.fillStyle = '#1A1F2C';
+        ctx.roundRect(
+          labelX - textWidth/2, 
+          labelY - textHeight/2,
+          textWidth,
+          textHeight,
+          5
+        );
         ctx.fill();
-        ctx.strokeStyle = 'white';
+        
+        ctx.strokeStyle = '#5D4A9C';
         ctx.lineWidth = 1;
         ctx.stroke();
         
-        // Draw vertex number
-        ctx.fillStyle = 'white';
-        ctx.font = '10px Arial';
+        // Draw length text
+        ctx.fillStyle = '#333333';
+        ctx.font = '11px Arial';
+        ctx.fillText(displayLength + " m", labelX, labelY);
+      });
+      
+      // Draw vertices as points with letter labels
+      boundary.points.forEach((point, i) => {
+        const transformed = transformPoint(point);
+        
+        // Draw vertex point
+        ctx.beginPath();
+        ctx.arc(transformed.x, transformed.y, 6, 0, Math.PI * 2);
+        ctx.fillStyle = '#222222';
+        ctx.fill();
+        ctx.strokeStyle = 'white';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        
+        // Draw vertex label with letter (A, B, C, etc.)
+        const letter = String.fromCharCode(65 + i);
+        const labelX = transformed.x;
+        const labelY = transformed.y - 18;
+        
+        // Draw label background
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+        ctx.beginPath();
+        ctx.arc(labelX, labelY, 10, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = '#333333';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+        
+        // Draw label text
+        ctx.fillStyle = '#333333';
+        ctx.font = 'bold 11px Arial';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        const pointLabelX = transformed.x;
-        const pointLabelY = transformed.y - 15;
-        
-        // Small background for vertex label
-        ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
-        ctx.beginPath();
-        ctx.arc(pointLabelX, pointLabelY, 8, 0, Math.PI * 2);
-        ctx.fill();
-        
-        // Draw vertex label
-        ctx.fillStyle = 'white';
-        ctx.fillText(String.fromCharCode(65 + i), pointLabelX, pointLabelY); // Use letters A, B, C, etc.
+        ctx.fillText(letter, labelX, labelY);
       });
     });
     
     // Draw center marker if no boundaries are present
-    const markerX = canvas.width / 2 + mapState.offset.x;
-    const markerY = canvas.height / 2 + mapState.offset.y;
-    
     if (propertyBoundaries.length === 0) {
+      const markerX = canvas.width / 2 + mapState.offset.x;
+      const markerY = canvas.height / 2 + mapState.offset.y;
+      
       ctx.beginPath();
       ctx.arc(markerX, markerY - 15, 10, 0, Math.PI * 2);
       ctx.fillStyle = '#9b87f5';
