@@ -13,9 +13,13 @@ const PropertyBoundaries = () => {
     properties,
     selectedProperty,
     uploadedFile,
+    searchQuery,
+    isMeasuring,
     handlePropertySelect,
     handleFileUpload,
-    handleFileRemove
+    handleFileRemove,
+    handleSearchChange,
+    handleToggleMeasurement
   } = usePropertyBoundaries();
   
   const handleFileUploadClick = () => {
@@ -43,8 +47,12 @@ const PropertyBoundaries = () => {
               properties={properties}
               selectedProperty={selectedProperty}
               uploadedFile={uploadedFile}
+              searchQuery={searchQuery}
+              isMeasuring={isMeasuring}
               onPropertySelect={handlePropertySelect}
               onFileRemove={handleFileRemove}
+              onSearchChange={handleSearchChange}
+              onToggleMeasurement={handleToggleMeasurement}
             />
             
             <PropertyInfo property={selectedProperty} />
@@ -57,6 +65,7 @@ const PropertyBoundaries = () => {
               title={selectedProperty.name}
               description={selectedProperty.description}
               centerPoint={selectedProperty.location}
+              measureMode={isMeasuring}
             />
           </div>
         </div>

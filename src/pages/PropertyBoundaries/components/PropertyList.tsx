@@ -1,9 +1,8 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Eye, File, Search } from 'lucide-react';
-import { toast } from "sonner";
+import { Eye, File, Search, Ruler } from 'lucide-react';
 import { Property } from '../types';
 import { Input } from "@/components/ui/input";
 
@@ -11,25 +10,25 @@ interface PropertyListProps {
   properties: Property[];
   selectedProperty: Property;
   uploadedFile: File | null;
+  searchQuery: string;
+  isMeasuring: boolean;
   onPropertySelect: (property: Property) => void;
   onFileRemove: () => void;
+  onSearchChange: (query: string) => void;
+  onToggleMeasurement: () => void;
 }
 
 export const PropertyList: React.FC<PropertyListProps> = ({
   properties,
   selectedProperty,
   uploadedFile,
+  searchQuery,
+  isMeasuring,
   onPropertySelect,
-  onFileRemove
+  onFileRemove,
+  onSearchChange,
+  onToggleMeasurement
 }) => {
-  const [searchQuery, setSearchQuery] = useState('');
-  
-  // Filter properties based on search query
-  const filteredProperties = properties.filter(property => 
-    property.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    property.description.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
   return (
     <Card>
       <CardHeader>
@@ -40,7 +39,7 @@ export const PropertyList: React.FC<PropertyListProps> = ({
           <Input
             placeholder="Search properties..."
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={(e) => onSearchChange(e.target.value)}
             className="pl-8"
           />
           <Search className="h-4 w-4 absolute left-2.5 top-1/2 transform -translate-y-1/2 text-muted-foreground" />
@@ -49,7 +48,7 @@ export const PropertyList: React.FC<PropertyListProps> = ({
               variant="ghost" 
               size="sm" 
               className="absolute right-1 top-1/2 transform -translate-y-1/2 h-6 w-6 p-0"
-              onClick={() => setSearchQuery('')}
+              onClick={() => onSearchChange('')}
             >
               <span className="sr-only">Clear</span>
               <span aria-hidden="true">×</span>
@@ -59,8 +58,18 @@ export const PropertyList: React.FC<PropertyListProps> = ({
       </CardHeader>
       <CardContent>
         <div className="space-y-2">
-          {filteredProperties.length > 0 ? (
-            filteredProperties.map((property) => (
+          <Button 
+            variant={isMeasuring ? "default" : "outline"} 
+            size="sm"
+            className="w-full mb-2 flex items-center justify-center gap-2"
+            onClick={onToggleMeasurement}
+          >
+            <Ruler className="h-4 w-4" />
+            {isMeasuring ? "Stop Measuring" : "Measure Boundaries"}
+          </Button>
+          
+          {properties.length > 0 ? (
+            properties.map((property) => (
               <div 
                 key={property.id} 
                 className={`p-3 rounded-md cursor-pointer border transition-all ${
@@ -75,17 +84,19 @@ export const PropertyList: React.FC<PropertyListProps> = ({
                     <h3 className="font-medium">{property.name}</h3>
                     <p className="text-xs text-muted-foreground">{property.description}</p>
                   </div>
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    className="h-7 w-7"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onPropertySelect(property);
-                    }}
-                  >
-                    <Eye className="h-3.5 w-3.5" />
-                  </Button>
+                  <div className="flex">
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="h-7 w-7"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onPropertySelect(property);
+                      }}
+                    >
+                      <Eye className="h-3.5 w-3.5" />
+                    </Button>
+                  </div>
                 </div>
               </div>
             ))

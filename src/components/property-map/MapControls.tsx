@@ -1,18 +1,20 @@
 
 import React from 'react';
 import { Button } from "@/components/ui/button";
-import { ZoomIn, ZoomOut, RotateCw, Move, Smartphone } from 'lucide-react';
+import { ZoomIn, ZoomOut, RotateCw, Move, Smartphone, Ruler } from 'lucide-react';
 
 interface MapControlsProps {
   onZoomIn: () => void;
   onZoomOut: () => void;
   onReset: () => void;
+  measureMode?: boolean;
 }
 
 export const MapControls: React.FC<MapControlsProps> = ({
   onZoomIn,
   onZoomOut,
-  onReset
+  onReset,
+  measureMode = false
 }) => {
   return (
     <div className="absolute bottom-4 right-4 flex flex-col gap-2">
@@ -43,6 +45,17 @@ export const MapControls: React.FC<MapControlsProps> = ({
       >
         <RotateCw className="h-4 w-4" />
       </Button>
+      
+      {measureMode && (
+        <Button 
+          variant="default" 
+          size="icon" 
+          className="h-10 w-10 animate-pulse"
+          aria-label="Measuring mode active"
+        >
+          <Ruler className="h-4 w-4" />
+        </Button>
+      )}
     </div>
   );
 };

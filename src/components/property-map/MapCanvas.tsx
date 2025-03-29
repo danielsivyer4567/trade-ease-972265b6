@@ -19,13 +19,15 @@ interface MapCanvasProps {
     handleZoomOut: () => void;
     handleReset: () => void;
   };
+  measureMode?: boolean;
 }
 
 export const MapCanvas: React.FC<MapCanvasProps> = ({
   containerRef,
   canvasRef,
   mapEventHandlers,
-  zoomControls
+  zoomControls,
+  measureMode = false
 }) => {
   const {
     handleMouseDown,
@@ -70,7 +72,7 @@ export const MapCanvas: React.FC<MapCanvasProps> = ({
       <div ref={containerRef} className="w-full h-full relative overflow-hidden rounded-lg border border-gray-200">
         <canvas 
           ref={canvasRef} 
-          className="w-full h-full touch-none"
+          className={`w-full h-full touch-none ${measureMode ? 'cursor-crosshair' : ''}`}
           onMouseDown={handleMouseDown}
           onMouseMove={handleMouseMove}
           onMouseUp={handleMouseUp}
@@ -84,12 +86,24 @@ export const MapCanvas: React.FC<MapCanvasProps> = ({
           onZoomIn={handleZoomIn}
           onZoomOut={handleZoomOut}
           onReset={handleReset}
+          measureMode={measureMode}
         />
         
         <div className="absolute top-4 left-4 p-2 bg-white/80 backdrop-blur-sm rounded-md shadow-md">
           <div className="flex items-center gap-2 text-sm">
-            <span className="hidden sm:inline">Drag to pan, pinch to zoom</span>
-            <span className="sm:hidden">Pan & pinch to zoom</span>
+            {measureMode ? (
+              <span className="flex items-center gap-1 text-primary font-medium">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M2 12h20M12 2v20" />
+                </svg>
+                Measurement Mode Active
+              </span>
+            ) : (
+              <>
+                <span className="hidden sm:inline">Drag to pan, pinch to zoom</span>
+                <span className="sm:hidden">Pan & pinch to zoom</span>
+              </>
+            )}
           </div>
         </div>
       </div>
