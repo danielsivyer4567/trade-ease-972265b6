@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { format } from 'date-fns';
 import { Job } from '@/types/job';
@@ -12,6 +11,7 @@ import { JobsList } from './components/JobsList';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { ClientContactNote } from '@/components/team/ClientContactNote';
 
 interface DayDetailDrawerProps {
   selectedDay: {
@@ -38,6 +38,16 @@ export const DayDetailDrawer: React.FC<DayDetailDrawerProps> = ({
   const [selectedJobData, setSelectedJobData] = useState<any>(null);
   const [selectedStaffMember, setSelectedStaffMember] = useState<any>(null);
   const [saving, setSaving] = useState(false);
+  const [activeTab, setActiveTab] = useState('jobs');
+  const [clientNotes, setClientNotes] = useState([
+    {
+      id: '1',
+      date: format(new Date(), 'yyyy-MM-dd'),
+      time: format(new Date(), 'h:mm:ss a'),
+      noteText: 'Hi team, Signed Contract received. Supervisor to provide an update on repairs when ready. Thanks',
+      clientName: 'John Smith'
+    }
+  ]);
 
   if (!selectedDay) return null;
   const {
@@ -45,13 +55,11 @@ export const DayDetailDrawer: React.FC<DayDetailDrawerProps> = ({
     jobs
   } = selectedDay;
 
-  // Filter jobs based on search query
   const filteredJobs = jobs.filter(job => {
     const searchLower = jobSearchQuery.toLowerCase();
     return job.title?.toLowerCase().includes(searchLower) || job.customer?.toLowerCase().includes(searchLower) || job.jobNumber?.toLowerCase().includes(searchLower) || job.type?.toLowerCase().includes(searchLower);
   });
 
-  // Mock quotes data for the search feature
   const mockCustomerQuotes = [{
     id: "Q001",
     customerName: "John Smith",
@@ -94,12 +102,10 @@ export const DayDetailDrawer: React.FC<DayDetailDrawerProps> = ({
         return;
       }
 
-      // Format date and time for saving
       const appointmentDate = startDate || date;
       const formattedDate = format(appointmentDate, 'yyyy-MM-dd');
       const formattedDateTime = `${formattedDate}T${startTime}:00`;
 
-      // Create job entry
       const jobData = {
         customer: selectedJobData.customer || "Customer Name",
         title: selectedJobData.title || `Job #${selectedJobData.jobNumber}`,
@@ -111,7 +117,6 @@ export const DayDetailDrawer: React.FC<DayDetailDrawerProps> = ({
         description: `Appointment scheduled by ${selectedStaffMember?.name || 'team member'}`
       };
 
-      // Save to database
       const { data, error } = await supabase
         .from('jobs')
         .insert(jobData)
@@ -124,7 +129,6 @@ export const DayDetailDrawer: React.FC<DayDetailDrawerProps> = ({
         toast.success("Appointment saved successfully");
         console.log("Saved appointment:", data);
         
-        // Close the form and drawer after successful save
         setShowCreateForm(false);
         onClose();
       }
@@ -136,7 +140,6 @@ export const DayDetailDrawer: React.FC<DayDetailDrawerProps> = ({
     }
   };
 
-  // Helper function to determine current team color from URL
   const getCurrentTeamColor = () => {
     const url = window.location.pathname;
     if (url.includes('red')) return 'red';
@@ -147,7 +150,6 @@ export const DayDetailDrawer: React.FC<DayDetailDrawerProps> = ({
 
   const toggleCreateForm = () => {
     setShowCreateForm(!showCreateForm);
-    // Initialize start date to the selected day when opening form
     if (!showCreateForm) {
       setStartDate(date);
     }
@@ -163,74 +165,148 @@ export const DayDetailDrawer: React.FC<DayDetailDrawerProps> = ({
         </DrawerHeader>
         
         <div className="p-2">
-          {/* Jobs for the day section */}
-          <div className="mb-4">
-            <div className="flex items-center justify-between mb-2 bg-slate-300">
-              <h3 className="font-medium">Scheduled Jobs ({jobs.length})</h3>
-              <div className="flex items-center gap-2">
-                <Search className="h-4 w-4 text-gray-500" />
-                <Input placeholder="Search jobs..." value={jobSearchQuery} onChange={e => setJobSearchQuery(e.target.value)} className="h-8 text-sm" />
-              </div>
-            </div>
+          <Tabs value={activeTab} onValueChange={setActiveTab}>
+            <TabsList className="w-full mb-3">
+              <TabsTrigger value="jobs">Jobs ({jobs.length})</TabsTrigger>
+              <TabsTrigger value="emails">Email Notifications</TabsTrigger>
+              <TabsTrigger value="notes">Client Notes</TabsTrigger>
+            </TabsList>
             
-            {jobSearchQuery && filteredJobs.length === 0 ? <div className="text-center py-4 text-muted-foreground">
-                No jobs found matching "{jobSearchQuery}"
-              </div> : filteredJobs.length === 0 ? <div className="text-center py-4 text-muted-foreground">
-                No jobs scheduled for this day
-              </div> : <JobsList jobSearchQuery={jobSearchQuery} filteredJobs={filteredJobs} onJobClick={onJobClick} />}
-          </div>
-          
-          {/* Create new appointment button */}
-          {!showCreateForm ? <div className="flex justify-center mt-4 mb-4">
-              <Button onClick={toggleCreateForm} className="bg-slate-500 hover:bg-slate-400 flex items-center gap-2">
-                <Plus className="h-4 w-4" />
-                Create New Appointment
-              </Button>
-            </div> : <div className="mt-4">
-              <div className="flex justify-between items-center mb-2">
-                <h3 className="font-medium">New Appointment</h3>
-                <Button variant="outline" size="sm" onClick={toggleCreateForm} className="text-sm bg-slate-400 hover:bg-slate-300">
-                  Cancel
-                </Button>
-              </div>
-              
-              <div className="overflow-auto">
-                <div className="flex flex-col items-center">
-                  {/* Search Bar Component */}
-                  <SearchBar 
-                    jobSearchQuery={jobSearchQuery} 
-                    setJobSearchQuery={setJobSearchQuery} 
-                    startDate={startDate} 
-                    setStartDate={setStartDate} 
-                    endDate={endDate} 
-                    setEndDate={setEndDate} 
-                    startTime={startTime} 
-                    setStartTime={setStartTime} 
-                    endTime={endTime} 
-                    setEndTime={setEndTime}
-                    onToggleQuoteSearch={handleToggleQuoteSearch}
-                    onCreateJob={handleCreateJob}
-                    onSelectJob={handleJobSelect}
-                    onSelectStaff={handleStaffSelect}
-                  />
-                  
-                  {/* Quote search section (conditionally shown) */}
-                  {showQuoteSearch && <div className="max-w-md w-full mx-auto">
-                      <SearchQuotes onSelectQuote={handleQuoteSelect} customerQuotes={mockCustomerQuotes} />
-                    </div>}
+            <TabsContent value="jobs">
+              <div className="mb-4">
+                <div className="flex items-center justify-between mb-2 bg-slate-300">
+                  <h3 className="font-medium">Scheduled Jobs ({jobs.length})</h3>
+                  <div className="flex items-center gap-2">
+                    <Search className="h-4 w-4 text-gray-500" />
+                    <Input placeholder="Search jobs..." value={jobSearchQuery} onChange={e => setJobSearchQuery(e.target.value)} className="h-8 text-sm" />
+                  </div>
                 </div>
+                
+                {jobSearchQuery && filteredJobs.length === 0 ? (
+                  <div className="text-center py-4 text-muted-foreground">
+                    No jobs found matching "{jobSearchQuery}"
+                  </div>
+                ) : filteredJobs.length === 0 ? (
+                  <div className="text-center py-4 text-muted-foreground">
+                    No jobs scheduled for this day
+                  </div>
+                ) : (
+                  <JobsList 
+                    jobSearchQuery={jobSearchQuery} 
+                    filteredJobs={filteredJobs} 
+                    onJobClick={onJobClick} 
+                  />
+                )}
               </div>
               
-              <div className="flex justify-end mt-2">
+              {!showCreateForm ? (
+                <div className="flex justify-center mt-4 mb-4">
+                  <Button onClick={toggleCreateForm} className="bg-slate-500 hover:bg-slate-400 flex items-center gap-2">
+                    <Plus className="h-4 w-4" />
+                    Create New Appointment
+                  </Button>
+                </div>
+              ) : (
+                <div className="mt-4">
+                  <div className="flex justify-between items-center mb-2">
+                    <h3 className="font-medium">New Appointment</h3>
+                    <Button variant="outline" size="sm" onClick={toggleCreateForm} className="text-sm bg-slate-400 hover:bg-slate-300">
+                      Cancel
+                    </Button>
+                  </div>
+                  
+                  <div className="overflow-auto">
+                    <div className="flex flex-col items-center">
+                      <SearchBar 
+                        jobSearchQuery={jobSearchQuery} 
+                        setJobSearchQuery={setJobSearchQuery} 
+                        startDate={startDate} 
+                        setStartDate={setStartDate} 
+                        endDate={endDate} 
+                        setEndDate={setEndDate} 
+                        startTime={startTime} 
+                        setStartTime={setStartTime} 
+                        endTime={endTime} 
+                        setEndTime={setEndTime}
+                        onToggleQuoteSearch={handleToggleQuoteSearch}
+                        onCreateJob={handleCreateJob}
+                        onSelectJob={handleJobSelect}
+                        onSelectStaff={handleStaffSelect}
+                      />
+                      
+                      {showQuoteSearch && (
+                        <div className="max-w-md w-full mx-auto">
+                          <SearchQuotes onSelectQuote={handleQuoteSelect} customerQuotes={mockCustomerQuotes} />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  
+                  <div className="flex justify-end mt-2">
+                    <Button 
+                      onClick={handleCreateJob} 
+                      className="bg-slate-500 hover:bg-slate-400"
+                      disabled={saving || !selectedJobData}
+                    >
+                      {saving ? 'Saving...' : 'Save Appointment'}
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </TabsContent>
+            
+            <TabsContent value="emails">
+              <div className="mb-4">
+                <h3 className="font-medium mb-2">Email Notifications</h3>
+                {selectedDay && (
+                  <div className="space-y-4">
+                    <div className="border rounded-md p-4 bg-blue-50">
+                      <div className="flex items-center gap-2 mb-2">
+                        <h4 className="font-medium text-blue-800">AIB-9068 - New Job Assigned</h4>
+                      </div>
+                      <p className="text-sm mb-2">7th Mar, 2025 4:51:23 pm</p>
+                      <p className="text-sm mb-2">From: kara.phillips@aizer.com.au</p>
+                      <p className="text-sm mb-2">To: rachel.mauger@aizer.com.au; nick.hoffman@aizer.com.au</p>
+                      <p className="text-sm mb-1">A new job has been assigned to you in Prime - please review ASAP.</p>
+                      <div className="mt-3 pt-3 border-t">
+                        <p className="text-sm"><strong>Assigned:</strong> Rachel Mauger</p>
+                        <p className="text-sm"><strong>Case Manager:</strong> Rachel Mauger</p>
+                      </div>
+                      <div className="flex justify-end gap-2 mt-3">
+                        <Button variant="outline" size="sm" className="text-xs">Sync To Endata</Button>
+                        <Button variant="outline" size="sm" className="text-xs">Reply</Button>
+                        <Button variant="outline" size="sm" className="text-xs">Reply All</Button>
+                        <Button variant="outline" size="sm" className="text-xs">Forward</Button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </TabsContent>
+            
+            <TabsContent value="notes">
+              <div className="mb-4">
+                <h3 className="font-medium mb-2">Client Notes</h3>
+                {clientNotes.map(note => (
+                  <ClientContactNote
+                    key={note.id}
+                    id={note.id}
+                    date={note.date}
+                    time={note.time}
+                    noteText={note.noteText}
+                    clientName={note.clientName}
+                  />
+                ))}
                 <Button 
-                  onClick={handleCreateJob} 
-                  className="bg-slate-500 hover:bg-slate-400"
-                  disabled={saving || !selectedJobData}
+                  className="w-full mt-3 bg-slate-500 hover:bg-slate-400 flex items-center justify-center gap-2"
+                  onClick={() => toast.info("Add note feature will be implemented soon")}
                 >
-                  {saving ? 'Saving...' : 'Save Appointment'}
+                  <Plus className="h-4 w-4" />
+                  Add Client Note
                 </Button>
               </div>
-            </div>}
+            </TabsContent>
+          </Tabs>
         </div>
         
         <DrawerFooter className="flex flex-row justify-between border-t gap-3 p-2">
