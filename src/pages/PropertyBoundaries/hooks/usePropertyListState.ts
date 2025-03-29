@@ -11,7 +11,7 @@ export const usePropertyListState = (
   const [addressPreviews, setAddressPreviews] = useState<string[]>([]);
   const [isPreviewVisible, setIsPreviewVisible] = useState(false);
   
-  // Enhanced address search that breaks down addresses into components
+  // Improved address search that properly matches address strings
   const searchAddressMatches = (address: string, query: string): boolean => {
     if (!address || !query) return false;
     
@@ -25,13 +25,10 @@ export const usePropertyListState = (
     const queryParts = queryLower.split(/\s+/).filter(part => part.length > 0);
     if (queryParts.length === 0) return false;
     
-    let matchCount = 0;
-    
-    for (const part of queryParts) {
-      if (part.length > 1 && addressLower.includes(part)) {
-        matchCount++;
-      }
-    }
+    // Count how many parts of the query match the address
+    const matchCount = queryParts.filter(part => 
+      part.length > 1 && addressLower.includes(part)
+    ).length;
     
     // Match if more than half of the query parts are found
     return matchCount > 0 && matchCount >= Math.ceil(queryParts.length / 2);
@@ -50,8 +47,13 @@ export const usePropertyListState = (
     // Check if property description includes search query
     const descMatch = prop.description?.toLowerCase().includes(query) || false;
     
-    // More thorough address matching - check for partial matches in address parts
+    // More thorough address matching with proper null checking
     const addressMatch = prop.address ? searchAddressMatches(prop.address, query) : false;
+    
+    // Debug log to verify address matching
+    if (prop.address) {
+      console.log(`Checking address "${prop.address}" against query "${query}": ${addressMatch}`);
+    }
     
     // Return true if any of the fields match
     return nameMatch || descMatch || addressMatch;
@@ -62,10 +64,7 @@ export const usePropertyListState = (
     if (searchQuery.trim().length > 0) {
       // Extract matching addresses for preview
       const matchingAddresses = properties
-        .filter(prop => {
-          if (!prop.address) return false;
-          return searchAddressMatches(prop.address, searchQuery);
-        })
+        .filter(prop => prop.address && searchAddressMatches(prop.address, searchQuery))
         .map(prop => prop.address as string)
         .filter((address, index, self) => self.indexOf(address) === index) // Remove duplicates
         .slice(0, 5); // Limit to top 5 matches
