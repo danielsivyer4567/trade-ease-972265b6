@@ -28,10 +28,11 @@ export const PropertyList: React.FC<PropertyListProps> = ({
   onSearchChange,
   onToggleMeasurement
 }) => {
-  // Filter properties based on search query
+  // Filter properties based on search query - now including address search
   const filteredProperties = properties.filter(prop => 
     prop.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    prop.description.toLowerCase().includes(searchQuery.toLowerCase())
+    prop.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (prop.address && prop.address.toLowerCase().includes(searchQuery.toLowerCase()))
   );
 
   return (
@@ -66,6 +67,11 @@ export const PropertyList: React.FC<PropertyListProps> = ({
               <p className="text-sm text-muted-foreground truncate">
                 {property.description}
               </p>
+              {property.address && (
+                <p className="text-xs text-muted-foreground mt-1">
+                  <span className="font-medium">Address:</span> {property.address}
+                </p>
+              )}
             </div>
           ))
         ) : (
