@@ -19,6 +19,7 @@ import TradeDash from '@/pages/TradeDash'
 import PropertyBoundaries from '@/pages/PropertyBoundaries'
 import Messaging from '@/pages/Messaging'
 import Referrals from '@/pages/Referrals'
+import Tasks from '@/pages/Tasks' // Added correct import for Tasks page
 
 export function Routes() {
   return (
@@ -121,6 +122,14 @@ export function Routes() {
         element={
           <ProtectedRoute>
             <Referrals />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/tasks"
+        element={
+          <ProtectedRoute>
+            <Tasks />
           </ProtectedRoute>
         }
       />
