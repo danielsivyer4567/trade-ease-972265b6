@@ -17,6 +17,7 @@ import TeamBlue from '@/pages/TeamBlue'
 import TeamGreen from '@/pages/TeamGreen'
 import TradeDash from '@/pages/TradeDash'
 import PropertyBoundaries from '@/pages/PropertyBoundaries'
+import Messaging from '@/pages/Messaging'
 
 export function Routes() {
   return (
@@ -103,6 +104,14 @@ export function Routes() {
         element={
           <ProtectedRoute>
             <Calendar />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/messaging"
+        element={
+          <ProtectedRoute>
+            <Messaging />
           </ProtectedRoute>
         }
       />

@@ -1,3 +1,4 @@
+
 import { AppLayout } from "@/components/ui/AppLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
@@ -16,11 +17,16 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ConnectedAppsOverview } from "@/components/messaging/crm/ConnectedAppsOverview";
 import { CrmPipeline } from "@/components/messaging/crm/CrmPipeline";
 import { useServicesFetch } from "@/components/messaging/hooks/useServicesFetch";
+import { useIsMobile } from "@/hooks/use-mobile";
+
 export default function Messaging() {
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
+  
   const {
     userConfig
   } = useUserConfig();
+  
   const {
     phoneNumber,
     isConnecting: isConnectingPhone,
@@ -29,9 +35,11 @@ export default function Messaging() {
     handleConnect,
     handleRemoveNumber
   } = usePhoneNumbers();
+  
   const updateConnectedNumbers = (newNumber: string) => {
     connectedNumbers.push(newNumber);
   };
+  
   const {
     twilioDialogOpen,
     setTwilioDialogOpen,
@@ -40,15 +48,18 @@ export default function Messaging() {
     isConnecting: isConnectingTwilio,
     handleTwilioConnect
   } = useTwilioConnection(updateConnectedNumbers);
+  
   const {
     services
   } = useServicesFetch();
-  return <AppLayout>
+  
+  return (
+    <AppLayout>
       <div className="w-full h-full px-3 md:px-4">
         <div className="space-y-4">
-          <Card>
+          <Card className="overflow-hidden">
             <CardHeader className="bg-slate-200 pb-2">
-              <CardTitle className="flex items-center gap-2 text-3xl">
+              <CardTitle className="flex items-center gap-2 text-2xl md:text-3xl">
                 <MessageSquare className="h-5 w-5 text-blue-600" />
                 Messaging CRM
               </CardTitle>
@@ -59,9 +70,13 @@ export default function Messaging() {
           </Card>
 
           <Tabs defaultValue="crm" className="w-full">
-            <TabsList className="grid grid-cols-2 mb-4">
-              <TabsTrigger value="crm" className="mx-[18px] bg-slate-500 hover:bg-slate-400 text-gray-950">Pipelines</TabsTrigger>
-              <TabsTrigger value="connections" className="bg-slate-400 hover:bg-slate-300 px-0 mx-[35px]">Connections</TabsTrigger>
+            <TabsList className={`grid ${isMobile ? 'grid-cols-2' : 'w-[400px]'} mb-4`}>
+              <TabsTrigger value="crm" className="mx-[18px] bg-slate-500 hover:bg-slate-400 text-gray-950">
+                Pipelines
+              </TabsTrigger>
+              <TabsTrigger value="connections" className="bg-slate-400 hover:bg-slate-300 px-0 mx-[35px]">
+                Connections
+              </TabsTrigger>
             </TabsList>
             
             <TabsContent value="crm" className="space-y-4">
@@ -92,5 +107,6 @@ export default function Messaging() {
           </Tabs>
         </div>
       </div>
-    </AppLayout>;
+    </AppLayout>
+  );
 }
