@@ -1,8 +1,10 @@
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { GoogleMap, LoadScript, InfoWindow } from '@react-google-maps/api';
+import { MapPin } from "lucide-react";
 
 // Define types for locations and map properties
 type Location = {
@@ -71,13 +73,23 @@ const JobSiteMap = () => {
   return <Card className="p-6 py-4 bg-slate-100 flex flex-col">
     <div className="flex items-center justify-between mb-4">
       <h2 className="text-xl font-semibold">Job Site Map</h2>
-      <Button 
-        variant="default" 
-        className="bg-primary hover:bg-primary/90" 
-        onClick={() => navigate("/jobs")}
-      >
-        View All Jobs
-      </Button>
+      <div className="flex gap-2">
+        <Button 
+          variant="outline" 
+          className="bg-white hover:bg-gray-100" 
+          onClick={() => navigate("/property-boundaries")}
+        >
+          <MapPin className="h-4 w-4 mr-2" />
+          Property Boundaries
+        </Button>
+        <Button 
+          variant="default" 
+          className="bg-primary hover:bg-primary/90" 
+          onClick={() => navigate("/jobs")}
+        >
+          View All Jobs
+        </Button>
+      </div>
     </div>
     <LoadScript googleMapsApiKey="AIzaSyAnIcvNA_ZjRUnN4aeyl-1MYpBSN-ODIvw" libraries={["marker"]} version="beta">
       <GoogleMap mapContainerStyle={mapContainerStyle} center={center} zoom={13} options={mapOptions} onLoad={map => {
