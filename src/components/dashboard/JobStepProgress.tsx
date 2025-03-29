@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Check, Loader, Maximize2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
@@ -28,7 +27,6 @@ export const JobStepProgress = () => {
   const [isFullscreen, setIsFullscreen] = useState(false);
 
   useEffect(() => {
-    // Get existing job steps from database if available
     const fetchJobSteps = async () => {
       if (id) {
         setLoading(true);
@@ -39,7 +37,6 @@ export const JobStepProgress = () => {
           .single();
 
         if (data && data.job_steps && !error) {
-          // Ensure each task has an id and isCompleted property
           const formattedSteps = data.job_steps.map((step: any) => ({
             ...step,
             tasks: step.tasks.map((task: string, index: number) => ({
@@ -50,7 +47,6 @@ export const JobStepProgress = () => {
           }));
           setJobSteps(formattedSteps);
         } else {
-          // Create default job steps
           const defaultSteps = [
             {
               id: 1,
@@ -151,7 +147,6 @@ export const JobStepProgress = () => {
           task.id === taskId ? { ...task, isCompleted: !task.isCompleted } : task
         );
         
-        // Check if all tasks are completed
         const allTasksCompleted = updatedTasks.every(task => task.isCompleted);
         
         return { 
@@ -212,7 +207,6 @@ export const JobStepProgress = () => {
     setIsFullscreen(!isFullscreen);
   };
 
-  // Visual progress indicator showing how many steps are complete
   const completedSteps = jobSteps.filter(step => step.isCompleted).length;
   const progressPercentage = jobSteps.length > 0 ? (completedSteps / jobSteps.length) * 100 : 0;
 
@@ -226,8 +220,7 @@ export const JobStepProgress = () => {
   }
 
   return (
-    <div className={`relative ${isFullscreen ? 'fixed inset-0 z-50 bg-white p-4' : ''}`}>
-      {/* Fullscreen toggle button */}
+    <div className={`${isFullscreen ? 'fixed inset-0 z-50 bg-white p-4' : 'fixed top-20 right-4 z-30 w-80 bg-white shadow-lg rounded-lg border overflow-hidden'}`}>
       <div className="absolute top-2 right-2 z-10">
         <Button
           variant="outline"
@@ -239,123 +232,165 @@ export const JobStepProgress = () => {
         </Button>
       </div>
       
-      {/* Horizontal step progress bar at the top */}
-      <div className="mb-8 px-2">
+      <div className="mb-4 px-2">
         <div className="flex justify-between items-center">
           {jobSteps.map((step) => (
             <div key={`step-indicator-${step.id}`} className="flex flex-col items-center">
               <div 
-                className={`w-8 h-8 rounded-full flex items-center justify-center cursor-pointer 
+                className={`w-6 h-6 rounded-full flex items-center justify-center cursor-pointer 
                   ${step.isCompleted ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-700'} 
                   border-2 border-white`}
                 onClick={() => handleStepCompletion(step.id)}
               >
-                {step.isCompleted ? <Check className="h-5 w-5" /> : step.id}
+                {step.isCompleted ? <Check className="h-3 w-3" /> : step.id}
               </div>
-              <div className="h-0.5 w-16 bg-gray-200 absolute -z-10" 
+              <div className="h-0.5 w-8 bg-gray-200 absolute -z-10" 
                    style={{ display: step.id === jobSteps.length ? 'none' : 'block' }}></div>
             </div>
           ))}
         </div>
       </div>
       
-      <div className="flex flex-col md:flex-row gap-4">
-        {/* Left sidebar with detailed steps */}
-        <div className="md:w-1/3 border rounded-lg overflow-hidden shadow-sm">
-          <div className="space-y-1 max-h-[600px] overflow-y-auto">
+      {isFullscreen ? (
+        <div className="flex flex-col md:flex-row gap-4">
+          <div className="md:w-1/3 border rounded-lg overflow-hidden shadow-sm">
+            <div className="space-y-1 max-h-[600px] overflow-y-auto">
+              {jobSteps.map((step) => (
+                <div 
+                  key={step.id} 
+                  className={`border-b last:border-b-0 transition-colors ${
+                    step.isCompleted ? 'bg-green-50' : 'bg-white'
+                  }`}
+                >
+                  <div 
+                    className="px-4 py-3 cursor-pointer hover:bg-gray-50 flex items-start"
+                    onClick={() => handleStepCompletion(step.id)}
+                  >
+                    <div className="flex-shrink-0 mt-0.5">
+                      {savingStepId === step.id ? (
+                        <Loader className="h-5 w-5 animate-spin text-blue-500" />
+                      ) : (
+                        <Checkbox 
+                          id={`step-${step.id}`}
+                          checked={step.isCompleted}
+                          className={step.isCompleted ? "bg-green-500 text-white border-green-500" : ""}
+                          onCheckedChange={() => handleStepCompletion(step.id)}
+                        />
+                      )}
+                    </div>
+                    <div className="ml-3 flex-1">
+                      <h4 className={`font-bold ${step.isCompleted ? 'text-green-700' : 'text-gray-900'}`}>
+                        {step.title}
+                      </h4>
+                      <ul className="mt-2 space-y-2">
+                        {step.tasks.map((task) => (
+                          <li key={task.id} className="flex items-start">
+                            <div className="flex-shrink-0 mt-0.5">
+                              {savingTaskId === task.id ? (
+                                <Loader className="h-4 w-4 animate-spin text-blue-500" />
+                              ) : (
+                                <Checkbox
+                                  id={task.id}
+                                  checked={task.isCompleted}
+                                  className={`h-4 w-4 ${task.isCompleted ? "bg-green-500 text-white border-green-500" : ""}`}
+                                  onCheckedChange={() => handleTaskCompletion(step.id, task.id)}
+                                />
+                              )}
+                            </div>
+                            <label 
+                              htmlFor={task.id}
+                              className={`ml-2 text-sm cursor-pointer ${
+                                task.isCompleted ? 'text-green-600 line-through' : 'text-gray-600'
+                              }`}
+                            >
+                              {task.text}
+                            </label>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                    <div className="flex-shrink-0">
+                      {step.isCompleted && <Check className="h-5 w-5 text-green-500" />}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+          
+          <div className="md:w-2/3 bg-gray-100 rounded-lg shadow-sm overflow-hidden">
+            <div className="relative aspect-[16/9]">
+              <img 
+                src="/lovable-uploads/30179ed7-1923-4ddf-8af0-c40f3280552e.png" 
+                alt="Job Map" 
+                className="w-full h-full object-cover"
+              />
+              <div className="absolute top-2 left-2 bg-white bg-opacity-75 px-3 py-1 rounded-md text-sm font-medium">
+                Basic Maintenance
+              </div>
+            </div>
+            
+            <div className="p-4 bg-white border-t">
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="font-medium">Overall Progress</h3>
+                <div className="text-sm text-gray-500">
+                  {completedSteps} of {jobSteps.length} steps complete ({Math.round(progressPercentage)}%)
+                </div>
+              </div>
+              <div className="w-full bg-gray-200 rounded-full h-2">
+                <div 
+                  className="bg-green-500 h-2 rounded-full transition-all duration-500 ease-in-out" 
+                  style={{ width: `${progressPercentage}%` }}
+                ></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div className="p-2">
+          <h3 className="font-medium text-sm mb-2">Job Progress</h3>
+          <div className="space-y-2 max-h-[300px] overflow-y-auto">
             {jobSteps.map((step) => (
               <div 
                 key={step.id} 
-                className={`border-b last:border-b-0 transition-colors ${
-                  step.isCompleted ? 'bg-green-50' : 'bg-white'
+                className={`rounded-md border p-2 transition-colors ${
+                  step.isCompleted ? 'bg-green-50 border-green-100' : 'bg-white'
                 }`}
               >
-                <div 
-                  className="px-4 py-3 cursor-pointer hover:bg-gray-50 flex items-start"
-                  onClick={() => handleStepCompletion(step.id)}
-                >
-                  <div className="flex-shrink-0 mt-0.5">
-                    {savingStepId === step.id ? (
-                      <Loader className="h-5 w-5 animate-spin text-blue-500" />
-                    ) : (
-                      <Checkbox 
-                        id={`step-${step.id}`}
-                        checked={step.isCompleted}
-                        className={step.isCompleted ? "bg-green-500 text-white border-green-500" : ""}
-                        onCheckedChange={() => handleStepCompletion(step.id)}
-                      />
-                    )}
-                  </div>
-                  <div className="ml-3 flex-1">
-                    <h4 className={`font-bold ${step.isCompleted ? 'text-green-700' : 'text-gray-900'}`}>
-                      {step.title}
-                    </h4>
-                    <ul className="mt-2 space-y-2">
-                      {step.tasks.map((task) => (
-                        <li key={task.id} className="flex items-start">
-                          <div className="flex-shrink-0 mt-0.5">
-                            {savingTaskId === task.id ? (
-                              <Loader className="h-4 w-4 animate-spin text-blue-500" />
-                            ) : (
-                              <Checkbox
-                                id={task.id}
-                                checked={task.isCompleted}
-                                className={`h-4 w-4 ${task.isCompleted ? "bg-green-500 text-white border-green-500" : ""}`}
-                                onCheckedChange={() => handleTaskCompletion(step.id, task.id)}
-                              />
-                            )}
-                          </div>
-                          <label 
-                            htmlFor={task.id}
-                            className={`ml-2 text-sm cursor-pointer ${
-                              task.isCompleted ? 'text-green-600 line-through' : 'text-gray-600'
-                            }`}
-                          >
-                            {task.text}
-                          </label>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                  <div className="flex-shrink-0">
-                    {step.isCompleted && <Check className="h-5 w-5 text-green-500" />}
-                  </div>
+                <div className="flex items-center">
+                  <Checkbox 
+                    id={`compact-step-${step.id}`}
+                    checked={step.isCompleted}
+                    className={step.isCompleted ? "bg-green-500 text-white border-green-500" : ""}
+                    onCheckedChange={() => handleStepCompletion(step.id)}
+                  />
+                  <label 
+                    htmlFor={`compact-step-${step.id}`}
+                    className={`ml-2 text-xs font-medium cursor-pointer ${
+                      step.isCompleted ? 'text-green-700 line-through' : 'text-gray-900'
+                    }`}
+                  >
+                    {step.title}
+                  </label>
+                  {step.isCompleted && <Check className="h-3 w-3 ml-auto text-green-500" />}
                 </div>
               </div>
             ))}
           </div>
-        </div>
-        
-        {/* Right side map placeholder */}
-        <div className="md:w-2/3 bg-gray-100 rounded-lg shadow-sm overflow-hidden">
-          <div className="relative aspect-[16/9]">
-            <img 
-              src="/lovable-uploads/30179ed7-1923-4ddf-8af0-c40f3280552e.png" 
-              alt="Job Map" 
-              className="w-full h-full object-cover"
-            />
-            <div className="absolute top-2 left-2 bg-white bg-opacity-75 px-3 py-1 rounded-md text-sm font-medium">
-              Basic Maintenance
+          <div className="mt-3">
+            <div className="flex items-center justify-between mb-1">
+              <span className="text-xs text-gray-500">Progress:</span>
+              <span className="text-xs text-gray-500">{Math.round(progressPercentage)}%</span>
             </div>
-          </div>
-          
-          {/* Progress summary at the bottom */}
-          <div className="p-4 bg-white border-t">
-            <div className="flex items-center justify-between mb-2">
-              <h3 className="font-medium">Overall Progress</h3>
-              <div className="text-sm text-gray-500">
-                {completedSteps} of {jobSteps.length} steps complete ({Math.round(progressPercentage)}%)
-              </div>
-            </div>
-            <div className="w-full bg-gray-200 rounded-full h-2">
+            <div className="w-full bg-gray-200 rounded-full h-1.5">
               <div 
-                className="bg-green-500 h-2 rounded-full transition-all duration-500 ease-in-out" 
+                className="bg-green-500 h-1.5 rounded-full transition-all duration-500 ease-in-out" 
                 style={{ width: `${progressPercentage}%` }}
               ></div>
             </div>
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };
