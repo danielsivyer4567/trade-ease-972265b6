@@ -40,19 +40,42 @@ export function SidebarNavLinks({
   return <nav className="grid gap-1 px-2 py-2">
       {navigationGroups.map((group, index) => <div key={index} className="grid gap-0.5">
           {/* Group Label */}
-          {isExpanded && group.label && <h4 className="mb-1 px-2 text-xs font-semibold text-muted-foreground">
+          {isExpanded && group.label && <h4 className={cn(
+            "mb-1 px-2 text-xs font-semibold text-muted-foreground",
+            group.label === "Teams" && "text-blue-600"
+          )}>
               {group.label}
             </h4>}
 
           {/* Regular Links */}
-          {group.items.map(item => {
+          {group.items.map((item, itemIndex) => {
         if (item.type === 'link') {
           const isActive = location.pathname === item.path;
           const LinkIcon = item.icon;
-          const linkButton = <Button key={item.path} asChild variant={isActive ? "secondary" : "ghost"} size="sm" className={cn("w-full justify-start h-[0px]", isExpanded ? "px-2" : "px-2 justify-center", isActive && "bg-white border border-foreground/10")}>
+          
+          // Special styling for team links
+          const isTeamLink = group.label === "Teams" && item.label !== "All Teams";
+          
+          const linkButton = <Button key={item.path} asChild variant={isActive ? "secondary" : "ghost"} size="sm" className={cn(
+            "w-full justify-start h-[0px]", 
+            isExpanded ? "px-2" : "px-2 justify-center", 
+            isActive && "bg-white border border-foreground/10",
+            isTeamLink && "pl-4" // Indent team links
+          )}>
                   <Link to={item.path}>
-                    <LinkIcon className={cn("h-4 w-4", isActive ? "text-primary" : "text-muted-foreground")} />
-                    {isExpanded && <span className="ml-2 text-sm">{item.label}</span>}
+                    <LinkIcon className={cn(
+                      "h-4 w-4", 
+                      isActive ? "text-primary" : "text-muted-foreground",
+                      isTeamLink && item.label.includes("Red") && "text-red-500",
+                      isTeamLink && item.label.includes("Blue") && "text-blue-500",
+                      isTeamLink && item.label.includes("Green") && "text-green-500"
+                    )} />
+                    {isExpanded && <span className={cn(
+                      "ml-2 text-sm",
+                      isTeamLink && item.label.includes("Red") && "text-red-500",
+                      isTeamLink && item.label.includes("Blue") && "text-blue-500",
+                      isTeamLink && item.label.includes("Green") && "text-green-500"
+                    )}>{item.label}</span>}
                   </Link>
                 </Button>;
           return isExpanded ? linkButton : <TooltipProvider key={item.path}>
@@ -83,7 +106,7 @@ export function SidebarNavLinks({
                 </TooltipProvider>;
         }
 
-        // Dropdown Menu (for Teams)
+        // Dropdown Menu (for Jobs and other dropdowns)
         if (item.type === 'dropdown') {
           const DropdownIcon = item.icon;
           return <Collapsible key={item.label}>

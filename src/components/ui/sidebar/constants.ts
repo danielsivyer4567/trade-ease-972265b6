@@ -94,28 +94,35 @@ export const navigationGroups = [
             path: "/tasks"
           }
         ]
+      }
+    ]
+  },
+  {
+    label: "Teams",
+    items: [
+      {
+        type: 'link',
+        icon: Users2,
+        label: "All Teams",
+        path: "/teams"
       },
       {
-        type: 'dropdown',
+        type: 'link',
         icon: Users2,
-        label: "Teams",
-        items: [
-          {
-            icon: Users2,
-            label: "Team Red",
-            path: "/team-red"
-          },
-          {
-            icon: Users2,
-            label: "Team Blue",
-            path: "/team-blue"
-          },
-          {
-            icon: Users2,
-            label: "Team Green",
-            path: "/team-green"
-          }
-        ]
+        label: "Team Red",
+        path: "/team-red"
+      },
+      {
+        type: 'link',
+        icon: Users2,
+        label: "Team Blue",
+        path: "/team-blue"
+      },
+      {
+        type: 'link',
+        icon: Users2,
+        label: "Team Green",
+        path: "/team-green"
       }
     ]
   },
