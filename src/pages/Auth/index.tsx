@@ -10,10 +10,12 @@ import SignUpForm from './components/SignUpForm';
 import DemoRequestForm from './components/DemoRequestForm';
 import VerificationStatus from './components/VerificationStatus';
 import DemoDataGenerator from './components/DemoDataGenerator';
+import OrganizationSetup from './components/OrganizationSetup';
 
 // Hooks
 import { useEmailVerification } from './hooks/useEmailVerification';
 import { useAuthRedirect } from './hooks/useAuthRedirect';
+import { useInviteCode } from './hooks/useInviteCode';
 
 export default function Auth() {
   // Form state
@@ -31,6 +33,7 @@ export default function Auth() {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, signIn, signUp } = useAuth();
+  const { inviteCode } = useInviteCode();
 
   // Redirect if user is already authenticated
   useEffect(() => {
@@ -103,10 +106,11 @@ export default function Auth() {
           <p className="text-gray-600">Simplifying your business operations</p>
         </div>
         
-        <Tabs defaultValue="signin" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
+        <Tabs defaultValue={inviteCode ? "organization" : "signin"} className="w-full">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="signin">Sign In</TabsTrigger>
             <TabsTrigger value="signup">Sign Up</TabsTrigger>
+            <TabsTrigger value="organization">Organization</TabsTrigger>
             <TabsTrigger value="demo">Request Demo</TabsTrigger>
           </TabsList>
           
@@ -152,6 +156,18 @@ export default function Auth() {
                     verificationSent={verificationSent}
                   />
                 )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+          
+          <TabsContent value="organization">
+            <Card>
+              <CardHeader>
+                <CardTitle>Organization Setup</CardTitle>
+                <CardDescription>Create or join an organization</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <OrganizationSetup initialInviteCode={inviteCode} />
               </CardContent>
             </Card>
           </TabsContent>

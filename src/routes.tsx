@@ -37,6 +37,7 @@ import FencingCalculator from './pages/Calculators/FencingCalculator';
 import NCCCodesCalculator from './pages/Calculators/NCCCodesCalculator';
 import Auth from './pages/Auth';
 import PropertyBoundaries from './pages/PropertyBoundaries';
+import Referrals from './pages/Referrals';
 
 // Define the route type
 export interface RouteConfig {
@@ -156,6 +157,10 @@ export const routes: RouteConfig[] = [
   {
     path: '/property-boundaries',
     element: <PropertyBoundaries />
+  },
+  {
+    path: '/referrals',
+    element: <Referrals />
   },
   // Settings subpages
   {
