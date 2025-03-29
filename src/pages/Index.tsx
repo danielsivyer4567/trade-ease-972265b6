@@ -101,7 +101,7 @@ export default function Index() {
               
               <div className="flex items-center gap-2">
                 {/* Full Calendar button */}
-                <Button variant="outline" onClick={() => navigate("/calendar")} className="flex items-center gap-2 text-left">
+                <Button variant="outline" onClick={() => navigate("/calendar")} className="flex items-center gap-2 text-center">
                   <CalendarDays className="h-4 w-4" />
                   <span>Full Calendar</span>
                 </Button>
