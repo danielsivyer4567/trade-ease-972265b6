@@ -14,6 +14,7 @@ import { JobCostsTab } from "./tabs/JobCostsTab";
 import { JobInvoicesTab } from "./tabs/JobInvoicesTab";
 import { JobFinancialsTab } from "./tabs/JobFinancialsTab";
 import { JobProgressTab } from "./tabs/JobProgressTab";
+import { JobCustomerConversationsTab } from "./tabs/JobCustomerConversationsTab";
 import { FinancialData } from "../hooks/financial-data/types";
 
 interface JobTabsProps {
@@ -161,6 +162,10 @@ export const JobTabs = ({
                 totalCosts={totalCosts + totalBills}
                 extractedFinancialData={extractedFinancialData}
               />
+            </TabsContent>
+
+            <TabsContent value="conversations" className="mt-0 px-1 relative">
+              <JobCustomerConversationsTab jobId={job.id} customerName={job.customer} />
             </TabsContent>
           </>
         )}

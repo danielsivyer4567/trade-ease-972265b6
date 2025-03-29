@@ -1,5 +1,6 @@
+
 import { TabsTrigger } from "@/components/ui/tabs";
-import { Receipt, Calculator, ScrollText, Wallet } from "lucide-react";
+import { Receipt, Calculator, ScrollText, Wallet, MessageSquare } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 interface ManagerTabsProps {
   jobTimer: number;
@@ -39,6 +40,10 @@ export const ManagerTabs = ({
       <TabsTrigger value="financials" className="min-w-[80px] sm:min-w-[100px] whitespace-nowrap flex-shrink-0 bg-slate-400 hover:bg-slate-300 px-[27px] mx-[17px]">
         {!isMobile && <Wallet className="w-4 h-4 mr-2" />}
         Financials
+      </TabsTrigger>
+      <TabsTrigger value="conversations" className="min-w-[80px] sm:min-w-[120px] whitespace-nowrap flex-shrink-0 bg-slate-400 hover:bg-slate-300 px-[20px] mx-[17px]">
+        {!isMobile && <MessageSquare className="w-4 h-4 mr-2" />}
+        Conversations
       </TabsTrigger>
     </>;
 };
