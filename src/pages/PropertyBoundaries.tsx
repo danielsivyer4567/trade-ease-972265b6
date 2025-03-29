@@ -1,9 +1,9 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { BaseLayout } from "@/components/ui/BaseLayout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Upload, Map, File, Eye, Plus, MapPin, Ruler, Upload as UploadIcon } from 'lucide-react';
+import { Upload, Map, File, Eye, Plus, MapPin, Ruler, Upload as UploadIcon, AlertCircle } from 'lucide-react';
 import PropertyBoundaryMap from '@/components/PropertyBoundaryMap';
 import { toast } from "sonner";
 
@@ -68,6 +68,14 @@ interface Property {
 const PropertyBoundaries = () => {
   const [selectedProperty, setSelectedProperty] = useState<Property>(sampleProperties[0]);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+  const [mapVisible, setMapVisible] = useState<boolean>(true);
+  
+  useEffect(() => {
+    // Force re-render of map after component is mounted to prevent Google Maps initialization issues
+    setMapVisible(false);
+    const timer = setTimeout(() => setMapVisible(true), 100);
+    return () => clearTimeout(timer);
+  }, []);
   
   const handlePropertySelect = (property: Property) => {
     setSelectedProperty(property);
@@ -88,6 +96,12 @@ const PropertyBoundaries = () => {
         toast.error("Please upload a GeoJSON or JSON file with coordinates");
       }
     }
+  };
+
+  const handleRefreshMap = () => {
+    setMapVisible(false);
+    setTimeout(() => setMapVisible(true), 100);
+    toast.info("Refreshing map view");
   };
 
   return (
@@ -116,6 +130,16 @@ const PropertyBoundaries = () => {
               className="hidden" 
               onChange={handleFileUpload}
             />
+            
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={handleRefreshMap}
+              className="flex items-center gap-1"
+            >
+              <RotateCw className="h-4 w-4" />
+              <span>Refresh Map</span>
+            </Button>
             
             <Button 
               variant="default" 
@@ -222,6 +246,18 @@ const PropertyBoundaries = () => {
                     <h3 className="text-sm font-medium text-muted-foreground">Boundary Points</h3>
                     <p>{selectedProperty.boundaries[0].length} points</p>
                   </div>
+                  
+                  <div className="mt-4">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleRefreshMap}
+                      className="w-full flex items-center justify-center gap-2"
+                    >
+                      <Map className="h-4 w-4" />
+                      <span>Refresh Map View</span>
+                    </Button>
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -229,12 +265,24 @@ const PropertyBoundaries = () => {
           
           {/* Map View */}
           <div className="lg:col-span-3">
-            <PropertyBoundaryMap 
-              center={selectedProperty.location}
-              boundaries={selectedProperty.boundaries}
-              title={selectedProperty.name}
-              description={selectedProperty.description}
-            />
+            {mapVisible ? (
+              <PropertyBoundaryMap 
+                center={selectedProperty.location}
+                boundaries={selectedProperty.boundaries}
+                title={selectedProperty.name}
+                description={selectedProperty.description}
+              />
+            ) : (
+              <Card className="w-full h-[500px] flex items-center justify-center">
+                <div className="text-center p-6">
+                  <RotateCw className="h-12 w-12 text-primary animate-spin mx-auto mb-4" />
+                  <h3 className="text-lg font-medium mb-2">Loading Map View</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Please wait while the map initializes...
+                  </p>
+                </div>
+              </Card>
+            )}
           </div>
         </div>
       </div>
