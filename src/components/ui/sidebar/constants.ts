@@ -71,10 +71,31 @@ export const navigationGroups = [
         path: "/customers"
       },
       {
-        type: 'link',
+        type: 'dropdown',
         icon: Calendar,
         label: "Calendar",
-        path: "/calendar"
+        items: [
+          {
+            icon: Calendar,
+            label: "All Teams",
+            path: "/calendar"
+          },
+          {
+            icon: Users2,
+            label: "Team Red",
+            path: "/team-red"
+          },
+          {
+            icon: Users2,
+            label: "Team Blue",
+            path: "/team-blue"
+          },
+          {
+            icon: Users2,
+            label: "Team Green",
+            path: "/team-green"
+          }
+        ]
       },
       {
         type: 'dropdown',
@@ -92,29 +113,6 @@ export const navigationGroups = [
             path: "/tasks"
           }
         ]
-      }
-    ]
-  },
-  {
-    label: "Teams",
-    items: [
-      {
-        type: 'link',
-        icon: Users2,
-        label: "All Teams",
-        path: "/teams",
-        isTeamLink: true
-      }
-    ]
-  },
-  {
-    label: "Social Media",
-    items: [
-      {
-        type: 'link',
-        icon: Share2,
-        label: "Social",
-        path: "/social"
       }
     ]
   },
@@ -149,6 +147,12 @@ export const navigationGroups = [
         icon: MessageSquare,
         label: "Messaging",
         path: "/messaging"
+      },
+      {
+        type: 'link',
+        icon: Share2,
+        label: "Social",
+        path: "/social"
       }
     ]
   },
