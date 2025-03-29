@@ -51,6 +51,7 @@ export const MapCanvas: React.FC<MapCanvasProps> = ({
     if (!canvas) return;
     
     const preventDefaultTouchAction = (e: TouchEvent) => {
+      // Always prevent default for pinch zoom
       if (e.touches.length > 1) {
         e.preventDefault();
       }
@@ -87,7 +88,8 @@ export const MapCanvas: React.FC<MapCanvasProps> = ({
         
         <div className="absolute top-4 left-4 p-2 bg-white/80 backdrop-blur-sm rounded-md shadow-md">
           <div className="flex items-center gap-2 text-sm">
-            <span>Drag to pan, pinch to zoom</span>
+            <span className="hidden sm:inline">Drag to pan, pinch to zoom</span>
+            <span className="sm:hidden">Pan & pinch to zoom</span>
           </div>
         </div>
       </div>

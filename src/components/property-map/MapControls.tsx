@@ -19,7 +19,7 @@ export const MapControls: React.FC<MapControlsProps> = ({
       <Button 
         variant="outline" 
         size="icon" 
-        className="bg-white shadow-md h-10 w-10"
+        className="bg-white shadow-md h-10 w-10 hover:bg-primary/10"
         onClick={onZoomIn}
         aria-label="Zoom in"
       >
@@ -28,7 +28,7 @@ export const MapControls: React.FC<MapControlsProps> = ({
       <Button 
         variant="outline" 
         size="icon" 
-        className="bg-white shadow-md h-10 w-10"
+        className="bg-white shadow-md h-10 w-10 hover:bg-primary/10"
         onClick={onZoomOut}
         aria-label="Zoom out"
       >
@@ -37,7 +37,7 @@ export const MapControls: React.FC<MapControlsProps> = ({
       <Button 
         variant="outline" 
         size="icon" 
-        className="bg-white shadow-md h-10 w-10"
+        className="bg-white shadow-md h-10 w-10 hover:bg-primary/10"
         onClick={onReset}
         aria-label="Reset view"
       >
