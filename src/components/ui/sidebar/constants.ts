@@ -104,25 +104,8 @@ export const navigationGroups = [
         type: 'link',
         icon: Users2,
         label: "All Teams",
-        path: "/teams"
-      },
-      {
-        type: 'link',
-        icon: Users2,
-        label: "Team Red",
-        path: "/team-red"
-      },
-      {
-        type: 'link',
-        icon: Users2,
-        label: "Team Blue",
-        path: "/team-blue"
-      },
-      {
-        type: 'link',
-        icon: Users2,
-        label: "Team Green",
-        path: "/team-green"
+        path: "/teams",
+        isTeamLink: true
       }
     ]
   },
@@ -199,5 +182,27 @@ export const navigationGroups = [
         action: 'logout'
       }
     ]
+  }
+];
+
+// Define the team links that will be shown only on the Teams page
+export const teamLinks = [
+  {
+    icon: Users2,
+    label: "Team Red",
+    path: "/team-red",
+    color: "red"
+  },
+  {
+    icon: Users2,
+    label: "Team Blue",
+    path: "/team-blue",
+    color: "blue"
+  },
+  {
+    icon: Users2,
+    label: "Team Green",
+    path: "/team-green",
+    color: "green"
   }
 ];

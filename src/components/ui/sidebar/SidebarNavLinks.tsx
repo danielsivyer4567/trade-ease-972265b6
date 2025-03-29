@@ -7,7 +7,7 @@ import { useSidebar } from './SidebarProvider';
 import { Button } from '../button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../tooltip";
 import { ScrollArea } from '../scroll-area';
-import { navigationGroups } from './constants';
+import { navigationGroups, teamLinks } from './constants';
 import { useAuth } from '@/contexts/AuthContext';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '../collapsible';
 
@@ -29,6 +29,9 @@ export function SidebarNavLinks({
   const {
     signOut
   } = useAuth();
+
+  const isTeamsPage = location.pathname === "/teams";
+  
   const handleLogout = async () => {
     try {
       await signOut();
@@ -37,6 +40,7 @@ export function SidebarNavLinks({
       console.error('Error signing out:', error);
     }
   };
+  
   return <nav className="grid gap-1 px-2 py-2">
       {navigationGroups.map((group, index) => <div key={index} className="grid gap-0.5">
           {/* Group Label */}
@@ -54,30 +58,22 @@ export function SidebarNavLinks({
           const LinkIcon = item.icon;
           
           // Special styling for team links
-          const isTeamLink = group.label === "Teams" && item.label !== "All Teams";
+          const isTeamLink = item.isTeamLink;
           
           const linkButton = <Button key={item.path} asChild variant={isActive ? "secondary" : "ghost"} size="sm" className={cn(
             "w-full justify-start h-[0px]", 
             isExpanded ? "px-2" : "px-2 justify-center", 
-            isActive && "bg-white border border-foreground/10",
-            isTeamLink && "pl-4" // Indent team links
+            isActive && "bg-white border border-foreground/10"
           )}>
                   <Link to={item.path}>
                     <LinkIcon className={cn(
                       "h-4 w-4", 
-                      isActive ? "text-primary" : "text-muted-foreground",
-                      isTeamLink && item.label.includes("Red") && "text-red-500",
-                      isTeamLink && item.label.includes("Blue") && "text-blue-500",
-                      isTeamLink && item.label.includes("Green") && "text-green-500"
+                      isActive ? "text-primary" : "text-muted-foreground"
                     )} />
-                    {isExpanded && <span className={cn(
-                      "ml-2 text-sm",
-                      isTeamLink && item.label.includes("Red") && "text-red-500",
-                      isTeamLink && item.label.includes("Blue") && "text-blue-500",
-                      isTeamLink && item.label.includes("Green") && "text-green-500"
-                    )}>{item.label}</span>}
+                    {isExpanded && <span className="ml-2 text-sm">{item.label}</span>}
                   </Link>
                 </Button>;
+                
           return isExpanded ? linkButton : <TooltipProvider key={item.path}>
                   <Tooltip>
                     <TooltipTrigger asChild>
@@ -149,6 +145,44 @@ export function SidebarNavLinks({
         
         return null;
       })}
+
+        {/* Show team links only when on the Teams page */}
+        {isTeamsPage && isExpanded && teamLinks.map((team) => {
+          const isActive = location.pathname === team.path;
+          const TeamIcon = team.icon;
+          
+          return (
+            <Button
+              key={team.path}
+              asChild
+              variant={isActive ? "secondary" : "ghost"}
+              size="sm"
+              className={cn(
+                "w-full justify-start h-[0px] pl-4", 
+                isExpanded ? "px-2" : "px-2 justify-center", 
+                isActive && "bg-white border border-foreground/10"
+              )}
+            >
+              <Link to={team.path}>
+                <TeamIcon className={cn(
+                  "h-4 w-4", 
+                  isActive ? "text-primary" : "text-muted-foreground",
+                  team.color === "red" && "text-red-500",
+                  team.color === "blue" && "text-blue-500",
+                  team.color === "green" && "text-green-500"
+                )} />
+                <span className={cn(
+                  "ml-2 text-sm",
+                  team.color === "red" && "text-red-500",
+                  team.color === "blue" && "text-blue-500",
+                  team.color === "green" && "text-green-500"
+                )}>
+                  {team.label}
+                </span>
+              </Link>
+            </Button>
+          );
+        })}
         </div>)}
     </nav>;
 }
