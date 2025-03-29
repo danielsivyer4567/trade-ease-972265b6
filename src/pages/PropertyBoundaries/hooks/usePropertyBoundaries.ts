@@ -67,6 +67,46 @@ export const usePropertyBoundaries = () => {
     console.log('Selected property:', property);
   }, []);
   
+  // Extract address from GeoJSON properties with better fallbacks
+  const extractAddress = (properties: any): string => {
+    if (!properties) return '';
+    
+    // Try different common address field names
+    const addressFields = [
+      'address',
+      'formatted_address',
+      'location',
+      'addr',
+      'street_address',
+      'full_address',
+      'postal_address'
+    ];
+    
+    // Look for any field containing "address" in its name
+    const addressKey = Object.keys(properties).find(key => 
+      addressFields.includes(key.toLowerCase()) || 
+      key.toLowerCase().includes('address')
+    );
+    
+    if (addressKey && properties[addressKey]) {
+      return properties[addressKey];
+    }
+    
+    // Try to construct address from components if available
+    if (properties.street && properties.city) {
+      let constructedAddress = properties.street;
+      if (properties.number) constructedAddress = `${properties.number} ${constructedAddress}`;
+      if (properties.city) constructedAddress += `, ${properties.city}`;
+      if (properties.state) constructedAddress += ` ${properties.state}`;
+      if (properties.postcode || properties.zip || properties.zipcode || properties.postal_code) {
+        constructedAddress += ` ${properties.postcode || properties.zip || properties.zipcode || properties.postal_code}`;
+      }
+      return constructedAddress;
+    }
+    
+    return '';
+  };
+  
   const handleFileUpload = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -97,16 +137,8 @@ export const usePropertyBoundaries = () => {
               centerLng /= numPoints;
             }
             
-            // Extract address from various possible locations in GeoJSON properties
-            let address = '';
-            if (feature.properties) {
-              address = feature.properties.address || 
-                      feature.properties.location || 
-                      feature.properties.formatted_address ||
-                      feature.properties.addr ||
-                      feature.properties.street_address ||
-                      '';
-            }
+            // Use enhanced address extraction
+            const address = extractAddress(feature.properties);
             
             return {
               id: `uploaded-${index}`,

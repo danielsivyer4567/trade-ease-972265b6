@@ -28,7 +28,7 @@ export const PropertyList: React.FC<PropertyListProps> = ({
   onSearchChange,
   onToggleMeasurement
 }) => {
-  // Filter properties based on search query with more robust search
+  // Filter properties based on search query with improved address search
   const filteredProperties = properties.filter(prop => {
     // If search query is empty, return all properties
     if (!searchQuery.trim()) return true;
@@ -41,12 +41,33 @@ export const PropertyList: React.FC<PropertyListProps> = ({
     // Check if property description includes search query
     const descMatch = prop.description?.toLowerCase().includes(query) || false;
     
-    // Check if property address includes search query
-    const addressMatch = prop.address?.toLowerCase().includes(query) || false;
+    // More thorough address matching - check for partial matches in address parts
+    const addressMatch = prop.address ? searchAddressMatches(prop.address, query) : false;
     
     // Return true if any of the fields match
     return nameMatch || descMatch || addressMatch;
   });
+  
+  // Enhanced address search that breaks down addresses into components
+  const searchAddressMatches = (address: string, query: string): boolean => {
+    const addressLower = address.toLowerCase();
+    
+    // Direct contains check
+    if (addressLower.includes(query)) return true;
+    
+    // Split query into parts and check if each part exists in address
+    const queryParts = query.split(/\s+/);
+    let matchCount = 0;
+    
+    for (const part of queryParts) {
+      if (part.length > 1 && addressLower.includes(part)) {
+        matchCount++;
+      }
+    }
+    
+    // Match if more than half of the query parts are found
+    return matchCount > 0 && matchCount >= Math.ceil(queryParts.length / 2);
+  };
 
   console.log('Search query:', searchQuery);
   console.log('Filtered properties:', filteredProperties);
@@ -71,7 +92,7 @@ export const PropertyList: React.FC<PropertyListProps> = ({
       <div className="relative mb-4">
         <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
         <Input
-          placeholder="Search by name, description or address..."
+          placeholder="Search by address, name, or description..."
           className="pl-8"
           value={searchQuery}
           onChange={onSearchChange}
