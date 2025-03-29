@@ -1,3 +1,4 @@
+
 import { BaseLayout } from "@/components/ui/BaseLayout";
 import JobSiteMap from "@/components/dashboard/JobSiteMap";
 import RecentActivity from "@/components/dashboard/RecentActivity";
@@ -100,12 +101,6 @@ export default function Index() {
               <h2 className="text-xl font-semibold">Team Calendars Overview</h2>
               
               <div className="flex items-center gap-2 px-0 mx-0">
-                {/* Full Calendar button */}
-                <Button variant="outline" onClick={() => navigate("/calendar")} className="flex items-center gap-2 text-center">
-                  <CalendarDays className="h-4 w-4" />
-                  <span>Full Calendar</span>
-                </Button>
-                
                 {/* Expand/Collapse button */}
                 <CollapsibleTrigger asChild>
                   <Button variant="ghost" size="icon" className="h-8 w-8">
@@ -113,6 +108,14 @@ export default function Index() {
                   </Button>
                 </CollapsibleTrigger>
               </div>
+            </div>
+            
+            {/* Full Calendar button centered */}
+            <div className="flex justify-center mb-4">
+              <Button variant="outline" onClick={() => navigate("/calendar")} className="flex items-center gap-2 text-center">
+                <CalendarDays className="h-4 w-4" />
+                <span>Full Calendar</span>
+              </Button>
             </div>
             
             <CollapsibleContent>
