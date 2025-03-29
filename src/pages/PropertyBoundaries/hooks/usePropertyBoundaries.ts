@@ -1,4 +1,3 @@
-
 import { useState, useCallback, useEffect } from 'react';
 import { Property } from '../types';
 import { toast } from 'sonner';
@@ -126,6 +125,61 @@ export const usePropertyBoundaries = () => {
     setSelectedProperty(property);
     console.log('Selected property:', property);
   }, []);
+  
+  // Add new deleteProperty function
+  const handleDeleteProperty = useCallback(async (propertyToDelete: Property) => {
+    try {
+      // Check if user is deleting a property that's currently selected
+      const isSelectedProperty = selectedProperty?.id === propertyToDelete.id;
+      
+      // First check if this is a mock property (has temp- prefix in ID)
+      if (propertyToDelete.id.startsWith('temp-')) {
+        // Just remove from local state
+        setProperties(prev => prev.filter(p => p.id !== propertyToDelete.id));
+        
+        if (isSelectedProperty) {
+          // If deleting the selected property, select another one or null
+          const remainingProperties = properties.filter(p => p.id !== propertyToDelete.id);
+          setSelectedProperty(remainingProperties.length > 0 ? remainingProperties[0] : null);
+        }
+        
+        toast.success(`Deleted property: ${propertyToDelete.name || propertyToDelete.address}`);
+        return;
+      }
+      
+      // Check if user is logged in before trying to delete from Supabase
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (user) {
+        // Delete from Supabase
+        const { error } = await supabase
+          .from('property_boundaries')
+          .delete()
+          .eq('id', propertyToDelete.id)
+          .eq('user_id', user.id); // Ensure user only deletes their own properties
+          
+        if (error) {
+          console.error('Error deleting property:', error);
+          toast.error('Failed to delete property');
+          return;
+        }
+      }
+      
+      // Remove from local state
+      setProperties(prev => prev.filter(p => p.id !== propertyToDelete.id));
+      
+      if (isSelectedProperty) {
+        // If deleting the selected property, select another one or null
+        const remainingProperties = properties.filter(p => p.id !== propertyToDelete.id);
+        setSelectedProperty(remainingProperties.length > 0 ? remainingProperties[0] : null);
+      }
+      
+      toast.success(`Deleted property: ${propertyToDelete.name || propertyToDelete.address}`);
+    } catch (error) {
+      console.error('Error in handleDeleteProperty:', error);
+      toast.error('An error occurred while deleting the property');
+    }
+  }, [selectedProperty, properties]);
   
   // Extract address from GeoJSON properties with better fallbacks
   const extractAddress = (properties: any): string => {
@@ -353,6 +407,7 @@ export const usePropertyBoundaries = () => {
     handleFileRemove,
     handleSearchChange,
     handleToggleMeasurement,
-    savePropertyToSupabase
+    savePropertyToSupabase,
+    handleDeleteProperty
   };
 };
