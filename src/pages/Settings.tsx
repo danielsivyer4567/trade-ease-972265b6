@@ -1,7 +1,7 @@
 
 import { BaseLayout } from "@/components/ui/BaseLayout";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Settings, DollarSign, Receipt, Clock, Users, Shield, FileText, Calendar, List, CreditCard, User, Bot, Briefcase, Network, Mail, FileJson, Building, Share, Zap, Search, Link2, Bell, Globe, FileLock } from "lucide-react";
+import { Settings, DollarSign, Receipt, Clock, Users, Shield, FileText, Calendar, List, CreditCard, User, Bot, Briefcase, Network, Mail, FileJson, Building, Share, Zap, Search, Link2, Bell, Globe, FileLock, Brain } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const settingsSections = [
@@ -10,6 +10,18 @@ const settingsSections = [
     icon: Bell,
     description: "Configure notification settings",
     path: "/settings/notifications"
+  },
+  {
+    title: "AI Features",
+    icon: Brain,
+    description: "Configure and use AI capabilities",
+    path: "/ai-features"
+  },
+  {
+    title: "AI Assistant Settings",
+    icon: Zap,
+    description: "Configure AI assistant",
+    path: "/settings/ai-assistant-settings"
   },
   {
     title: "Trade Rates",
@@ -136,12 +148,6 @@ const settingsSections = [
     icon: Share,
     description: "Share Trade Ease with friends",
     path: "/referrals"
-  },
-  {
-    title: "AI Assistant Settings",
-    icon: Zap,
-    description: "Configure AI assistant",
-    path: "/settings/ai-assistant-settings"
   },
   {
     title: "Terms of Service & Privacy",
