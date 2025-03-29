@@ -1,4 +1,3 @@
-
 import { TabsContent } from "@/components/ui/tabs";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
@@ -13,7 +12,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 import { Briefcase, Box, FilePlus, Receipt, AlertTriangle } from "lucide-react";
 
-// Mock data for demonstration - in a real app this would come from your database
 const mockCustomerQuotes = [
   { id: "qt3455", customerName: "Jess Williams", amount: 2500 },
   { id: "qt3344", customerName: "Jess Williams", amount: 1800 },
@@ -47,7 +45,6 @@ export const JobFinancialsTab = ({
   const totalCostsWithLabor = totalCosts + laborCost;
   const netProfitWithLabor = quoteAmount - totalCostsWithLabor;
 
-  // Financial category totals
   const [financialTotals, setFinancialTotals] = useState({
     invoiced: 0,
     variations: 0,
@@ -56,7 +53,6 @@ export const JobFinancialsTab = ({
     unexpected: 0
   });
 
-  // Group extracted financial data by category
   useEffect(() => {
     if (extractedFinancialData.length > 0) {
       const grouped: Record<string, any[]> = {};
@@ -75,7 +71,6 @@ export const JobFinancialsTab = ({
         }
         grouped[category].push(data);
 
-        // Calculate totals by category
         switch(category.toLowerCase()) {
           case 'invoice':
             totals.invoiced += data.amount || 0;
@@ -102,7 +97,6 @@ export const JobFinancialsTab = ({
     }
   }, [extractedFinancialData]);
 
-  // Auto-apply the most recent extracted amount if we haven't applied one yet
   useEffect(() => {
     if (!hasAppliedExtractedData && extractedFinancialData.length > 0) {
       const mostRecentData = extractedFinancialData[extractedFinancialData.length - 1];
@@ -125,7 +119,6 @@ export const JobFinancialsTab = ({
     toast.success(`Applied amount: $${data.amount}`);
   };
 
-  // Calculate total extracted by category
   const calculateTotalByCategory = (category: string) => {
     if (!groupedFinancialData[category]) return 0;
     return groupedFinancialData[category].reduce((total, item) => total + item.amount, 0);
@@ -135,7 +128,6 @@ export const JobFinancialsTab = ({
     <TabsContent value="financials" className="space-y-4">
       <div className={`border rounded-lg p-4 ${isMobile ? 'overflow-x-hidden' : ''}`}>
         <div className={`space-y-8 ${isMobile ? 'w-full' : 'max-w-full'}`}>
-          {/* Financial Categories Overview Section */}
           <div className="mb-6">
             <SectionHeader 
               title="Financial Overview" 
@@ -143,7 +135,7 @@ export const JobFinancialsTab = ({
             />
             
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 mt-4">
-              <Card className="bg-blue-50">
+              <Card>
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center">
@@ -155,7 +147,7 @@ export const JobFinancialsTab = ({
                 </CardContent>
               </Card>
               
-              <Card className="bg-purple-50">
+              <Card>
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center">
@@ -167,7 +159,7 @@ export const JobFinancialsTab = ({
                 </CardContent>
               </Card>
               
-              <Card className="bg-amber-50">
+              <Card>
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center">
@@ -179,7 +171,7 @@ export const JobFinancialsTab = ({
                 </CardContent>
               </Card>
               
-              <Card className="bg-green-50">
+              <Card>
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center">
@@ -191,7 +183,7 @@ export const JobFinancialsTab = ({
                 </CardContent>
               </Card>
               
-              <Card className="bg-red-50">
+              <Card>
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center">
