@@ -157,10 +157,9 @@ const PropertyBoundaryMap = ({
     }
   };
 
-  const handleMapError = (error: Error) => {
-    console.error("Google Maps error:", error);
-    setMapError(error.message);
-    setIsMapLoaded(false);
+  const handleLoadScriptError = (error: Error) => {
+    console.error("Google Maps script error:", error);
+    setMapError("Failed to load Google Maps script");
   };
 
   const handlePolygonLoad = (polygon: google.maps.Polygon, index: number) => {
@@ -222,10 +221,7 @@ const PropertyBoundaryMap = ({
             googleMapsApiKey="AIzaSyAnIcvNA_ZjRUnN4aeyl-1MYpBSN-ODIvw"
             libraries={["marker", "geometry"]}
             onLoad={() => console.log("Google Maps script loaded")}
-            onError={(error) => {
-              console.error("Google Maps script error:", error);
-              setMapError("Failed to load Google Maps script");
-            }}
+            onError={handleLoadScriptError}
             version="beta"
           >
             <GoogleMap
@@ -241,7 +237,6 @@ const PropertyBoundaryMap = ({
                 mapId: '8f348c1e276da9d5'
               }}
               onLoad={handleMapLoad}
-              onError={handleMapError}
             >
               {polygons.map((polygon, index) => (
                 <Polygon
