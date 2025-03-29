@@ -13,11 +13,17 @@ import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+
 export default function Index() {
   const navigate = useNavigate();
-  const [selectedTeam, setSelectedTeam] = useState<string>("red");
-  const [calendarExpanded, setCalendarExpanded] = useState<boolean>(false);
-  const [expandedTeams, setExpandedTeams] = useState<Record<string, boolean>>({});
+  // Always keep calendar expanded by default
+  const [calendarExpanded, setCalendarExpanded] = useState<boolean>(true);
+  // Default to all teams expanded
+  const [expandedTeams, setExpandedTeams] = useState<Record<string, boolean>>({
+    "Team Red": true,
+    "Team Blue": true,
+    "Team Green": true
+  });
 
   // Team dashboard data
   const teams = [{
@@ -48,18 +54,21 @@ export default function Index() {
     description: "Changed job site map style",
     timestamp: "Yesterday, 4:45 PM"
   }];
+  
   const handleUndoChange = (changeId: number) => {
     // Here you would implement the actual logic to undo specific changes
     console.log(`Undoing change with ID: ${changeId}`);
     // For demonstration purposes, show a toast message
     alert(`Change #${changeId} has been reverted`);
   };
+  
   const toggleTeamCalendar = (teamName: string) => {
     setExpandedTeams(prev => ({
       ...prev,
       [teamName]: !prev[teamName]
     }));
   };
+
   return <BaseLayout showQuickTabs={true}>
       <div className="px-8 space-y-8 animate-fadeIn py-10">
         <div className="grid grid-cols-1 gap-8">
@@ -93,9 +102,7 @@ export default function Index() {
           </div>
 
           {/* Team Calendars Overview Section */}
-          <Collapsible open={calendarExpanded} onOpenChange={setCalendarExpanded} className="rounded-xl animate-slideUp px-0 mx-[5px]" style={{
-          animationDelay: "0.15s"
-        }}>
+          <div className="rounded-xl animate-slideUp px-0 mx-[5px]" style={{animationDelay: "0.15s"}}>
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-semibold">Team Calendars Overview</h2>
               
@@ -105,44 +112,46 @@ export default function Index() {
                   <CalendarDays className="h-4 w-4" />
                   <span>Full Calendar</span>
                 </Button>
-                
-                {/* Expand/Collapse button */}
-                <CollapsibleTrigger asChild>
-                  
-                </CollapsibleTrigger>
               </div>
             </div>
             
-            <CollapsibleContent>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {teams.map(team => <Card key={team.name} className="p-4 shadow-sm">
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="flex items-center gap-2">
-                        <div className={`w-8 h-8 rounded-full bg-${team.color}-500 flex items-center justify-center`}>
-                          <Hammer className="w-4 h-4 text-white" />
-                        </div>
-                        <h3 className={`text-lg font-medium text-${team.color}-700`}>{team.name}</h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {teams.map(team => (
+                <Card key={team.name} className="p-4 shadow-sm">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2">
+                      <div className={`w-8 h-8 rounded-full bg-${team.color}-500 flex items-center justify-center`}>
+                        <Hammer className="w-4 h-4 text-white" />
                       </div>
-                      <div className="flex items-center gap-2">
-                        <Link to={team.path} className="text-sm text-blue-600 hover:underline">
-                          View details
-                        </Link>
-                        <Button variant="ghost" size="icon" className="h-6 w-6" onClick={e => {
-                      e.preventDefault();
-                      toggleTeamCalendar(team.name);
-                    }}>
-                          {expandedTeams[team.name] ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
-                        </Button>
-                      </div>
+                      <h3 className={`text-lg font-medium text-${team.color}-700`}>{team.name}</h3>
                     </div>
-                    
-                    {expandedTeams[team.name] && <div className="overflow-hidden rounded-lg border">
-                        <TeamCalendar date={new Date()} setDate={() => {}} teamColor={team.color.toLowerCase()} miniView={true} />
-                      </div>}
-                  </Card>)}
-              </div>
-            </CollapsibleContent>
-          </Collapsible>
+                    <div className="flex items-center gap-2">
+                      <Link to={team.path} className="text-sm text-blue-600 hover:underline">
+                        View details
+                      </Link>
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        className="h-6 w-6" 
+                        onClick={e => {
+                          e.preventDefault();
+                          toggleTeamCalendar(team.name);
+                        }}
+                      >
+                        {expandedTeams[team.name] ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
+                      </Button>
+                    </div>
+                  </div>
+                  
+                  {expandedTeams[team.name] && (
+                    <div className="overflow-hidden rounded-lg border">
+                      <TeamCalendar date={new Date()} setDate={() => {}} teamColor={team.color.toLowerCase()} miniView={true} />
+                    </div>
+                  )}
+                </Card>
+              ))}
+            </div>
+          </div>
 
           {/* Team Dashboards Section with cards */}
           <div className="rounded-xl animate-slideUp" style={{
@@ -150,9 +159,25 @@ export default function Index() {
         }}>
             <h2 className="text-xl font-semibold mb-4">Team Dashboards</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {teams.map(team => <Link key={`dashboard-${team.name}`} to={team.path} className="block hover:scale-105 transition-transform duration-200">
-                  
-                </Link>)}
+              {teams.map(team => (
+                <Link 
+                  key={`dashboard-${team.name}`} 
+                  to={team.path} 
+                  className="block hover:scale-105 transition-transform duration-200"
+                >
+                  <Card className={`p-4 border-l-4 border-l-${team.color}-500 hover:shadow-md`}>
+                    <div className="flex items-center gap-3">
+                      <div className={`w-10 h-10 rounded-full bg-${team.color}-100 flex items-center justify-center`}>
+                        <Hammer className={`w-5 h-5 text-${team.color}-500`} />
+                      </div>
+                      <div>
+                        <h3 className="font-medium">{team.name} Dashboard</h3>
+                        <p className="text-sm text-gray-500">View team activity and performance</p>
+                      </div>
+                    </div>
+                  </Card>
+                </Link>
+              ))}
             </div>
           </div>
 
