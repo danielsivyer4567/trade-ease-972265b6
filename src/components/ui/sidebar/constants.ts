@@ -8,7 +8,6 @@ import {
   Mail,
   MessageSquare,
   Settings,
-  Database,
   Bell,
   Users2,
   Brain,
@@ -156,12 +155,6 @@ export const navigationGroups = [
   {
     label: "System",
     items: [
-      {
-        type: 'link',
-        icon: Database,
-        label: "Database",
-        path: "/database"
-      },
       {
         type: 'link',
         icon: Settings,
