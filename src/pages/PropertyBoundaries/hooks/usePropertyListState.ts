@@ -11,45 +11,21 @@ export const usePropertyListState = (
   const [addressPreviews, setAddressPreviews] = useState<string[]>([]);
   const [isPreviewVisible, setIsPreviewVisible] = useState(false);
   
-  // Completely revised address search for better matching
+  // Simplified address search with more lenient matching
   const searchAddressMatches = (address: string, query: string): boolean => {
     if (!address || !query) return false;
     
     const addressLower = address.toLowerCase();
     const queryLower = query.toLowerCase().trim();
     
-    // Direct matching - quickest check first
-    if (addressLower.includes(queryLower)) return true;
-    
-    // Split both address and query into parts for more flexible matching
-    const addressParts = addressLower.split(/[\s,]+/).filter(part => part.length > 1);
-    const queryParts = queryLower.split(/[\s,]+/).filter(part => part.length > 1);
-    
-    if (queryParts.length === 0) return false;
-    
-    // Check if any query part is a street number
-    const hasStreetNumber = queryParts.some(part => /^\d+$/.test(part));
-    
-    // If looking for a specific street number, be more strict in matching
-    if (hasStreetNumber) {
-      // For street numbers, most parts should match
-      const requiredMatches = Math.ceil(queryParts.length * 0.75);
-      const matches = queryParts.filter(part => addressLower.includes(part)).length;
-      return matches >= requiredMatches;
+    // If the query is very short (1-2 chars), require it to be at the start of a word
+    if (queryLower.length <= 2) {
+      const addressWords = addressLower.split(/[\s,]+/);
+      return addressWords.some(word => word.startsWith(queryLower));
     }
     
-    // For general street names, be more flexible
-    // Check if significant parts of the query appear in the address
-    // "Collins Street" should match "123 Collins Street, Melbourne"
-    const significantMatches = queryParts.filter(part => {
-      // Consider words like "street", "road", etc. as significant
-      const isSignificant = part.length > 3 || 
-                          ['st', 'rd', 'ave', 'ln', 'dr', 'ct'].includes(part);
-      return isSignificant && addressLower.includes(part);
-    }).length;
-    
-    // Match if we have significant matches
-    return significantMatches > 0;
+    // For longer queries, just check if the address contains the query
+    return addressLower.includes(queryLower);
   };
   
   // Filter properties based on search query with improved address search
@@ -65,7 +41,7 @@ export const usePropertyListState = (
     // Check if property description includes search query
     const descMatch = prop.description?.toLowerCase().includes(query) || false;
     
-    // Enhanced address matching with better recognition of street names
+    // Enhanced address matching with more permissive logic
     const addressMatch = prop.address ? searchAddressMatches(prop.address, query) : false;
     
     // Return true if any of the fields match
@@ -75,7 +51,7 @@ export const usePropertyListState = (
   // Update address previews when search query changes
   useEffect(() => {
     if (searchQuery.trim().length > 0) {
-      // Extract matching addresses for preview
+      // Extract matching addresses for preview with more permissive matching
       const matchingAddresses = properties
         .filter(prop => prop.address && searchAddressMatches(prop.address, searchQuery))
         .map(prop => prop.address as string)
