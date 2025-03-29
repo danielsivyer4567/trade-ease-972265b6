@@ -137,22 +137,26 @@ export const navigationGroups = [
     label: "Communication",
     items: [
       {
-        type: 'link',
-        icon: Mail,
-        label: "Email",
-        path: "/email"
-      },
-      {
-        type: 'link',
+        type: 'dropdown',
         icon: MessageSquare,
         label: "Messaging",
-        path: "/messaging"
-      },
-      {
-        type: 'link',
-        icon: Share2,
-        label: "Social",
-        path: "/social"
+        items: [
+          {
+            icon: MessageSquare,
+            label: "Chat",
+            path: "/messaging"
+          },
+          {
+            icon: Mail,
+            label: "Email",
+            path: "/email"
+          },
+          {
+            icon: Share2,
+            label: "Social",
+            path: "/social"
+          }
+        ]
       }
     ]
   },
