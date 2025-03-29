@@ -73,12 +73,16 @@ export const PropertyList: React.FC<PropertyListProps> = ({
     return nameMatch || descMatch || addressMatch;
   });
 
-  // Update address previews when search query changes
+  // Update address previews when search query changes - fixing the dependency array
   useEffect(() => {
     if (searchQuery.trim().length > 0) {
       // Extract matching addresses for preview
-      const matchingAddresses = filteredProperties
-        .filter(prop => prop.address)
+      const matchingAddresses = properties
+        .filter(prop => {
+          if (!prop.address) return false;
+          const query = searchQuery.toLowerCase().trim();
+          return searchAddressMatches(prop.address, query);
+        })
         .map(prop => prop.address as string)
         .slice(0, 3); // Limit to top 3 matches
       
@@ -88,7 +92,7 @@ export const PropertyList: React.FC<PropertyListProps> = ({
       setAddressPreviews([]);
       setIsPreviewVisible(false);
     }
-  }, [searchQuery, filteredProperties]);
+  }, [searchQuery, properties]); // Only depend on searchQuery and properties, NOT filteredProperties
   
   // Handle Enter key press in search input
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {

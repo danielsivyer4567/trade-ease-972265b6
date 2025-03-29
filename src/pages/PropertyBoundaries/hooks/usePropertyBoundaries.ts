@@ -150,7 +150,7 @@ export const usePropertyBoundaries = () => {
             };
           });
           
-          setProperties([...properties, ...newProperties]);
+          setProperties(prev => [...prev, ...newProperties]);
           if (newProperties.length > 0) {
             setSelectedProperty(newProperties[0]);
             toast.success(`Successfully loaded ${newProperties.length} properties`);
@@ -173,7 +173,6 @@ export const usePropertyBoundaries = () => {
   
   const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
-    console.log('Search query changed:', e.target.value);
   }, []);
   
   const handleToggleMeasurement = useCallback(() => {

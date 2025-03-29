@@ -31,26 +31,47 @@ export function useBoundaryProcessing(boundaries: Array<Array<[number, number]>>
       return;
     }
     
-    const convertedBoundaries = convertBoundariesToPropertyBoundaries(boundaries);
-    setPropertyBoundaries(convertedBoundaries);
-    
-    const { totalLength, totalArea } = calculateBoundaryMeasurements(convertedBoundaries);
-    
-    // Calculate individual boundary measurements
-    const individualMeasurements = convertedBoundaries.map((boundary, index) => {
-      const { length, area } = calculateSingleBoundaryMeasurements(boundary.points);
-      return {
-        name: `Boundary ${index + 1}`,
-        length,
-        area
-      };
-    });
-    
-    setMeasurements({
-      boundaryLength: totalLength,
-      boundaryArea: totalArea,
-      individualBoundaries: individualMeasurements
-    });
+    // Process boundaries and convert to property boundaries format
+    try {
+      const convertedBoundaries = convertBoundariesToPropertyBoundaries(boundaries);
+      setPropertyBoundaries(convertedBoundaries);
+      
+      // Calculate total measurements
+      const { totalLength, totalArea } = calculateBoundaryMeasurements(convertedBoundaries);
+      
+      // Calculate individual boundary measurements
+      const individualMeasurements = convertedBoundaries.map((boundary, index) => {
+        const { length, area } = calculateSingleBoundaryMeasurements(boundary.points);
+        return {
+          name: `Boundary ${index + 1}`,
+          length,
+          area
+        };
+      });
+      
+      // Update measurements state
+      setMeasurements({
+        boundaryLength: totalLength,
+        boundaryArea: totalArea,
+        individualBoundaries: individualMeasurements
+      });
+      
+      console.log('Boundary measurements calculated:', {
+        totalLength,
+        totalArea,
+        individualMeasurements
+      });
+    } catch (error) {
+      console.error('Error processing boundaries:', error);
+      
+      // Set default values on error
+      setPropertyBoundaries([]);
+      setMeasurements({
+        boundaryLength: 0,
+        boundaryArea: 0,
+        individualBoundaries: []
+      });
+    }
   }, [boundaries]);
 
   return {
