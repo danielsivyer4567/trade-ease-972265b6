@@ -67,7 +67,7 @@ export const navigationGroups = [
       {
         type: 'link',
         icon: Users,
-        label: "Customers",
+        label: "Customer Portfolio",
         path: "/customers"
       },
       {
