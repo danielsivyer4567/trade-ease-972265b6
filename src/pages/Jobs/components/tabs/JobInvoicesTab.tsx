@@ -4,17 +4,22 @@ import { FileUpload } from "@/components/tasks/FileUpload";
 import { ImagesGrid } from "@/components/tasks/ImagesGrid";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { Search } from "lucide-react";
+import { Search, FileText, FilePlus, FileCheck } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 
 // Mock data for demonstration - in a real app this would come from your database
 const mockCustomerQuotes = [
-  { id: "qt3455", customerName: "Jess Williams", amount: 2500 },
-  { id: "qt3344", customerName: "Jess Williams", amount: 1800 },
-  { id: "qt3456", customerName: "John Smith", amount: 3200 },
-  { id: "qt3457", customerName: "Sarah Johnson", amount: 4100 }
+  { id: "qt3455", customerName: "Jess Williams", amount: 2500, type: "quote", status: "pending" },
+  { id: "qt3344", customerName: "Jess Williams", amount: 1800, type: "quote", status: "approved" },
+  { id: "inv1001", customerName: "Jess Williams", amount: 2500, type: "invoice", status: "sent" },
+  { id: "var202", customerName: "Jess Williams", amount: 350, type: "variation", status: "pending" },
+  { id: "qt3456", customerName: "John Smith", amount: 3200, type: "quote", status: "pending" },
+  { id: "inv1002", customerName: "John Smith", amount: 3200, type: "invoice", status: "paid" },
+  { id: "qt3457", customerName: "Sarah Johnson", amount: 4100, type: "quote", status: "rejected" }
 ];
 
 interface JobInvoicesTabProps {
@@ -29,11 +34,34 @@ export const JobInvoicesTab = ({ tabNotes, setTabNotes, onUpdateTotals }: JobInv
   const [searchTerm, setSearchTerm] = useState("");
   const [uploadedFiles, setUploadedFiles] = useState<string[]>([]);
   const { toast } = useToast();
+  const [activeFilter, setActiveFilter] = useState<string>("all");
+  const [groupedDocuments, setGroupedDocuments] = useState<Record<string, typeof mockCustomerQuotes>>({});
 
-  const filteredQuotes = mockCustomerQuotes.filter(quote => 
-    quote.customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    quote.id.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  useEffect(() => {
+    // Group documents by type for easier display
+    const grouped = mockCustomerQuotes.reduce((acc, doc) => {
+      const key = doc.type;
+      if (!acc[key]) {
+        acc[key] = [];
+      }
+      acc[key].push(doc);
+      return acc;
+    }, {} as Record<string, typeof mockCustomerQuotes>);
+    
+    setGroupedDocuments(grouped);
+  }, []);
+
+  const filteredQuotes = mockCustomerQuotes.filter(quote => {
+    const matchesSearch = 
+      quote.customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      quote.id.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    const matchesFilter = 
+      activeFilter === "all" || 
+      quote.type === activeFilter;
+    
+    return matchesSearch && matchesFilter;
+  });
 
   const handleQuoteSelect = (quote: typeof mockCustomerQuotes[0]) => {
     setSelectedQuoteId(quote.id);
@@ -105,12 +133,98 @@ export const JobInvoicesTab = ({ tabNotes, setTabNotes, onUpdateTotals }: JobInv
     }
   };
 
+  const getStatusBadgeColor = (status: string) => {
+    switch (status) {
+      case "pending": return "bg-yellow-100 text-yellow-800 hover:bg-yellow-200";
+      case "approved": return "bg-green-100 text-green-800 hover:bg-green-200";
+      case "rejected": return "bg-red-100 text-red-800 hover:bg-red-200";
+      case "sent": return "bg-blue-100 text-blue-800 hover:bg-blue-200";
+      case "paid": return "bg-purple-100 text-purple-800 hover:bg-purple-200";
+      default: return "bg-gray-100 text-gray-800 hover:bg-gray-200";
+    }
+  };
+
+  const getIconForDocumentType = (type: string) => {
+    switch (type) {
+      case "quote": return <FileText className="w-4 h-4 mr-1" />;
+      case "invoice": return <FileCheck className="w-4 h-4 mr-1" />;
+      case "variation": return <FilePlus className="w-4 h-4 mr-1" />;
+      default: return <FileText className="w-4 h-4 mr-1" />;
+    }
+  };
+
   return (
     <TabsContent value="invoices" className="space-y-4">
       <div className="border rounded-lg p-4">
         <div className="space-y-4">
+          {/* Document Type Filter */}
+          <div className="flex flex-wrap gap-2 mb-4">
+            <Badge 
+              variant="outline" 
+              className={`cursor-pointer ${activeFilter === 'all' ? 'bg-blue-100' : ''}`}
+              onClick={() => setActiveFilter('all')}
+            >
+              All
+            </Badge>
+            <Badge 
+              variant="outline" 
+              className={`cursor-pointer ${activeFilter === 'quote' ? 'bg-blue-100' : ''}`}
+              onClick={() => setActiveFilter('quote')}
+            >
+              <FileText className="w-4 h-4 mr-1" /> Quotes
+            </Badge>
+            <Badge 
+              variant="outline" 
+              className={`cursor-pointer ${activeFilter === 'invoice' ? 'bg-blue-100' : ''}`}
+              onClick={() => setActiveFilter('invoice')}
+            >
+              <FileCheck className="w-4 h-4 mr-1" /> Invoices
+            </Badge>
+            <Badge 
+              variant="outline" 
+              className={`cursor-pointer ${activeFilter === 'variation' ? 'bg-blue-100' : ''}`}
+              onClick={() => setActiveFilter('variation')}
+            >
+              <FilePlus className="w-4 h-4 mr-1" /> Variations
+            </Badge>
+          </div>
+
+          {/* Automatically displayed documents */}
+          <div className="mb-6">
+            <h3 className="text-md font-medium mb-2">Customer Documents</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {filteredQuotes.length > 0 ? (
+                filteredQuotes.map(doc => (
+                  <Card 
+                    key={doc.id} 
+                    className={`cursor-pointer hover:shadow-md transition-shadow ${selectedQuoteId === doc.id ? 'ring-2 ring-blue-500' : ''}`}
+                    onClick={() => handleQuoteSelect(doc)}
+                  >
+                    <CardContent className="p-3 flex justify-between items-center">
+                      <div className="flex items-center">
+                        {getIconForDocumentType(doc.type)}
+                        <div>
+                          <p className="font-medium">{doc.id}</p>
+                          <p className="text-sm text-gray-500">{doc.customerName}</p>
+                        </div>
+                      </div>
+                      <div className="flex flex-col items-end">
+                        <span className="font-medium">${doc.amount}</span>
+                        <Badge className={getStatusBadgeColor(doc.status)}>
+                          {doc.status}
+                        </Badge>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))
+              ) : (
+                <p className="text-gray-500 col-span-2 text-center py-4">No documents found matching your criteria</p>
+              )}
+            </div>
+          </div>
+
           <div>
-            <Label htmlFor="search">Select Quote</Label>
+            <Label htmlFor="search">Search Documents</Label>
             <div className="relative">
               <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
               <Input
@@ -118,29 +232,10 @@ export const JobInvoicesTab = ({ tabNotes, setTabNotes, onUpdateTotals }: JobInv
                 type="text"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="Search quotes by customer name or quote number..."
+                placeholder="Search by customer name or document number..."
                 className="pl-10"
               />
             </div>
-            {searchTerm && (
-              <div className="mt-2 border rounded-lg divide-y">
-                {filteredQuotes.map(quote => (
-                  <div 
-                    key={quote.id}
-                    className={`p-2 hover:bg-gray-50 cursor-pointer flex justify-between items-center ${
-                      selectedQuoteId === quote.id ? 'bg-blue-50' : ''
-                    }`}
-                    onClick={() => handleQuoteSelect(quote)}
-                  >
-                    <div>
-                      <span className="font-medium">{quote.customerName}</span>
-                      <span className="text-sm text-gray-500 ml-2">({quote.id})</span>
-                    </div>
-                    <span className="font-medium text-blue-600">${quote.amount}</span>
-                  </div>
-                ))}
-              </div>
-            )}
           </div>
 
           <div>
@@ -156,16 +251,16 @@ export const JobInvoicesTab = ({ tabNotes, setTabNotes, onUpdateTotals }: JobInv
             />
             {selectedQuoteId && (
               <p className="text-sm text-gray-500 mt-1">
-                Attached to Quote: {selectedQuoteId}
+                Selected Document: {selectedQuoteId}
               </p>
             )}
           </div>
 
           <div>
-            <Label>Upload Invoices</Label>
+            <Label>Upload Documents</Label>
             <FileUpload 
               onFileUpload={handleFileUpload} 
-              label="Upload invoices" 
+              label="Upload quotes, invoices, or variations" 
               allowGcpVision={true}
               onTextExtracted={handleTextExtracted}
             />
@@ -176,13 +271,13 @@ export const JobInvoicesTab = ({ tabNotes, setTabNotes, onUpdateTotals }: JobInv
             <Textarea
               id="notes"
               className="w-full min-h-[100px]"
-              placeholder="Add notes about this invoice..."
+              placeholder="Add notes about this document..."
               value={tabNotes.invoices || ""}
               onChange={(e) => setTabNotes({ ...tabNotes, invoices: e.target.value })}
             />
           </div>
 
-          <ImagesGrid images={uploadedFiles} title="Uploaded Invoices" />
+          <ImagesGrid images={uploadedFiles} title="Uploaded Documents" />
         </div>
       </div>
     </TabsContent>
