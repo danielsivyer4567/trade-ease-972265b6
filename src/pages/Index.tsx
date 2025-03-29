@@ -1,4 +1,3 @@
-
 import { BaseLayout } from "@/components/ui/BaseLayout";
 import JobSiteMap from "@/components/dashboard/JobSiteMap";
 import RecentActivity from "@/components/dashboard/RecentActivity";
@@ -14,7 +13,6 @@ import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-
 export default function Index() {
   const navigate = useNavigate();
   const [selectedTeam, setSelectedTeam] = useState<string>("red");
@@ -50,21 +48,18 @@ export default function Index() {
     description: "Changed job site map style",
     timestamp: "Yesterday, 4:45 PM"
   }];
-  
   const handleUndoChange = (changeId: number) => {
     // Here you would implement the actual logic to undo specific changes
     console.log(`Undoing change with ID: ${changeId}`);
     // For demonstration purposes, show a toast message
     alert(`Change #${changeId} has been reverted`);
   };
-
   const toggleTeamCalendar = (teamName: string) => {
     setExpandedTeams(prev => ({
       ...prev,
       [teamName]: !prev[teamName]
     }));
   };
-  
   return <BaseLayout showQuickTabs={true}>
       <div className="px-8 space-y-8 animate-fadeIn py-10">
         <div className="grid grid-cols-1 gap-8">
@@ -98,43 +93,29 @@ export default function Index() {
           </div>
 
           {/* Team Calendars Overview Section */}
-          <Collapsible 
-            open={calendarExpanded} 
-            onOpenChange={setCalendarExpanded}
-            className="rounded-xl animate-slideUp px-0 mx-[5px]"
-            style={{ animationDelay: "0.15s" }}
-          >
+          <Collapsible open={calendarExpanded} onOpenChange={setCalendarExpanded} className="rounded-xl animate-slideUp px-0 mx-[5px]" style={{
+          animationDelay: "0.15s"
+        }}>
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-semibold">Team Calendars Overview</h2>
               
               <div className="flex items-center gap-2">
                 {/* Full Calendar button */}
-                <Button 
-                  variant="outline" 
-                  onClick={() => navigate("/calendar")} 
-                  className="flex items-center gap-2 text-left"
-                >
+                <Button variant="outline" onClick={() => navigate("/calendar")} className="flex items-center gap-2 text-left">
                   <CalendarDays className="h-4 w-4" />
                   <span>Full Calendar</span>
                 </Button>
                 
                 {/* Expand/Collapse button */}
                 <CollapsibleTrigger asChild>
-                  <Button variant="ghost" size="icon" className="h-9 w-9">
-                    {calendarExpanded ? (
-                      <ChevronUp className="h-4 w-4" />
-                    ) : (
-                      <ChevronDown className="h-4 w-4" />
-                    )}
-                  </Button>
+                  
                 </CollapsibleTrigger>
               </div>
             </div>
             
             <CollapsibleContent>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {teams.map(team => (
-                  <Card key={team.name} className="p-4 shadow-sm">
+                {teams.map(team => <Card key={team.name} className="p-4 shadow-sm">
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center gap-2">
                         <div className={`w-8 h-8 rounded-full bg-${team.color}-500 flex items-center justify-center`}>
@@ -146,36 +127,19 @@ export default function Index() {
                         <Link to={team.path} className="text-sm text-blue-600 hover:underline">
                           View details
                         </Link>
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
-                          className="h-6 w-6" 
-                          onClick={(e) => {
-                            e.preventDefault();
-                            toggleTeamCalendar(team.name);
-                          }}
-                        >
-                          {expandedTeams[team.name] ? (
-                            <ChevronUp className="h-3 w-3" />
-                          ) : (
-                            <ChevronDown className="h-3 w-3" />
-                          )}
+                        <Button variant="ghost" size="icon" className="h-6 w-6" onClick={e => {
+                      e.preventDefault();
+                      toggleTeamCalendar(team.name);
+                    }}>
+                          {expandedTeams[team.name] ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
                         </Button>
                       </div>
                     </div>
                     
-                    {expandedTeams[team.name] && (
-                      <div className="overflow-hidden rounded-lg border">
-                        <TeamCalendar 
-                          date={new Date()} 
-                          setDate={() => {}} 
-                          teamColor={team.color.toLowerCase()} 
-                          miniView={true} 
-                        />
-                      </div>
-                    )}
-                  </Card>
-                ))}
+                    {expandedTeams[team.name] && <div className="overflow-hidden rounded-lg border">
+                        <TeamCalendar date={new Date()} setDate={() => {}} teamColor={team.color.toLowerCase()} miniView={true} />
+                      </div>}
+                  </Card>)}
               </div>
             </CollapsibleContent>
           </Collapsible>
