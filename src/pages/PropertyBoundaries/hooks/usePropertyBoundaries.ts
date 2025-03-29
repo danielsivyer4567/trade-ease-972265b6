@@ -6,6 +6,8 @@ import { Property, sampleProperties } from '../types';
 export const usePropertyBoundaries = () => {
   const [selectedProperty, setSelectedProperty] = useState<Property>(sampleProperties[0]);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [isMeasuring, setIsMeasuring] = useState<boolean>(false);
   
   const handlePropertySelect = (property: Property) => {
     setSelectedProperty(property);
@@ -32,12 +34,35 @@ export const usePropertyBoundaries = () => {
     toast.info("File removed");
   };
 
+  const handleSearchChange = (query: string) => {
+    setSearchQuery(query);
+  };
+
+  const handleToggleMeasurement = () => {
+    setIsMeasuring(prev => !prev);
+    if (!isMeasuring) {
+      toast.info("Boundary measurement mode activated. View details in the map section.");
+    } else {
+      toast.info("Boundary measurement mode deactivated.");
+    }
+  };
+
+  // Filter properties based on search query
+  const filteredProperties = sampleProperties.filter(property => 
+    property.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    property.description.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return {
-    properties: sampleProperties,
+    properties: filteredProperties,
     selectedProperty,
     uploadedFile,
+    searchQuery,
+    isMeasuring,
     handlePropertySelect,
     handleFileUpload,
-    handleFileRemove
+    handleFileRemove,
+    handleSearchChange,
+    handleToggleMeasurement
   };
 };

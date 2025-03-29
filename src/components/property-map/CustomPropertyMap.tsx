@@ -12,7 +12,8 @@ const CustomPropertyMap = ({
   boundaries = [],
   title = "Property Boundary Viewer",
   description = "View and measure property boundaries",
-  centerPoint = [0, 0]
+  centerPoint = [0, 0],
+  measureMode = false
 }: CustomPropertyMapProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -35,6 +36,7 @@ const CustomPropertyMap = ({
         description={description}
         boundaries={boundaries}
         onReset={handleReset}
+        measureMode={measureMode}
       />
       
       <CardContent>
@@ -43,11 +45,13 @@ const CustomPropertyMap = ({
           containerRef={containerRef}
           mapEventHandlers={mapEventHandlers}
           zoomControls={zoomControls}
+          measureMode={measureMode}
         />
         
         <MeasurementsDisplay
           boundaryLength={measurements.boundaryLength}
           boundaryArea={measurements.boundaryArea}
+          highlighted={measureMode}
         />
       </CardContent>
     </Card>

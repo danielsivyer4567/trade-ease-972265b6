@@ -14,6 +14,7 @@ export interface CustomPropertyMapProps {
   title?: string;
   description?: string;
   centerPoint?: [number, number];
+  measureMode?: boolean;
 }
 
 export interface MapMeasurements {
