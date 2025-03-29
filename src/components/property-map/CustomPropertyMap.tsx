@@ -1,5 +1,5 @@
 
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { toast } from "sonner";
 import { CustomPropertyMapProps } from './types';
@@ -18,13 +18,18 @@ const CustomPropertyMap = ({
 }: CustomPropertyMapProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const [showEdgeMeasurements, setShowEdgeMeasurements] = useState(false);
+  const [showEdgeMeasurements, setShowEdgeMeasurements] = useState(measureMode);
   
   const {
     measurements,
     mapEventHandlers,
     zoomControls
   } = usePropertyMap(canvasRef, containerRef, boundaries);
+  
+  // Update showEdgeMeasurements when measureMode prop changes
+  useEffect(() => {
+    setShowEdgeMeasurements(measureMode);
+  }, [measureMode]);
   
   const handleReset = () => {
     zoomControls.handleReset();
@@ -63,7 +68,7 @@ const CustomPropertyMap = ({
           boundaryLength={measurements.boundaryLength}
           boundaryArea={measurements.boundaryArea}
           individualBoundaries={measurements.individualBoundaries}
-          highlighted={measureMode}
+          highlighted={measureMode || showEdgeMeasurements}
         />
         
         <BoundaryMeasurements 

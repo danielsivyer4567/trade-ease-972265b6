@@ -27,7 +27,7 @@ export const BoundaryMeasurements: React.FC<BoundaryMeasurementsProps> = ({
   });
   
   return (
-    <div className="mt-6">
+    <div className="mt-6 bg-white p-4 rounded-lg shadow-sm">
       <h3 className="text-lg font-semibold mb-2 flex items-center gap-2">
         <Ruler className="h-5 w-5 text-primary" /> 
         Boundary Measurements
@@ -38,9 +38,12 @@ export const BoundaryMeasurements: React.FC<BoundaryMeasurementsProps> = ({
           <Card key={boundaryIndex} className="p-4">
             <h4 className="text-md font-medium mb-3">Boundary {parseInt(boundaryIndex) + 1}</h4>
             
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
               {boundaryEdges.sort((a, b) => a.edgeIndex - b.edgeIndex).map(edge => (
-                <div key={edge.id} className="bg-secondary/10 p-3 rounded-lg flex flex-col items-center justify-center">
+                <div 
+                  key={edge.id} 
+                  className="bg-secondary/10 p-3 rounded-lg flex flex-col items-center justify-center border border-secondary/20 hover:bg-secondary/20 transition-colors"
+                >
                   <div className="text-sm text-muted-foreground">Side {edge.edgeIndex + 1}</div>
                   <div className="text-xl font-bold">{edge.displayLength} m</div>
                 </div>
