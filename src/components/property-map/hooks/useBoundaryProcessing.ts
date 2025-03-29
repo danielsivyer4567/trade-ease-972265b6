@@ -3,7 +3,8 @@ import { useState, useEffect } from 'react';
 import { PropertyBoundary, MapMeasurements } from '../types';
 import { 
   convertBoundariesToPropertyBoundaries, 
-  calculateBoundaryMeasurements 
+  calculateBoundaryMeasurements,
+  calculateSingleBoundaryMeasurements
 } from '../mapUtils';
 
 /**
@@ -13,7 +14,8 @@ export function useBoundaryProcessing(boundaries: Array<Array<[number, number]>>
   const [propertyBoundaries, setPropertyBoundaries] = useState<PropertyBoundary[]>([]);
   const [measurements, setMeasurements] = useState<MapMeasurements>({
     boundaryLength: 0,
-    boundaryArea: 0
+    boundaryArea: 0,
+    individualBoundaries: []
   });
 
   useEffect(() => {
@@ -23,9 +25,21 @@ export function useBoundaryProcessing(boundaries: Array<Array<[number, number]>>
     setPropertyBoundaries(convertedBoundaries);
     
     const { totalLength, totalArea } = calculateBoundaryMeasurements(convertedBoundaries);
+    
+    // Calculate individual boundary measurements
+    const individualMeasurements = convertedBoundaries.map((boundary, index) => {
+      const { length, area } = calculateSingleBoundaryMeasurements(boundary.points);
+      return {
+        name: `Boundary ${index + 1}`,
+        length,
+        area
+      };
+    });
+    
     setMeasurements({
       boundaryLength: totalLength,
-      boundaryArea: totalArea
+      boundaryArea: totalArea,
+      individualBoundaries: individualMeasurements
     });
   }, [boundaries]);
 

@@ -51,6 +51,7 @@ const CustomPropertyMap = ({
         <MeasurementsDisplay
           boundaryLength={measurements.boundaryLength}
           boundaryArea={measurements.boundaryArea}
+          individualBoundaries={measurements.individualBoundaries}
           highlighted={measureMode}
         />
       </CardContent>

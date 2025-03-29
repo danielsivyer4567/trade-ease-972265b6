@@ -17,9 +17,16 @@ export interface CustomPropertyMapProps {
   measureMode?: boolean;
 }
 
+export interface IndividualBoundaryMeasurement {
+  name: string;
+  length: number;
+  area: number;
+}
+
 export interface MapMeasurements {
   boundaryLength: number;
   boundaryArea: number;
+  individualBoundaries: IndividualBoundaryMeasurement[];
 }
 
 export interface MapState {
