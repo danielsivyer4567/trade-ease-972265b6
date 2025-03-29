@@ -16,7 +16,8 @@ const NewCustomerPage = React.lazy(() => import('@/pages/Customers/NewCustomer')
 const CalendarPage = React.lazy(() => import('@/pages/Calendar'));
 const JobsPage = React.lazy(() => import('@/pages/Jobs'));
 const NewJobPage = React.lazy(() => import('@/pages/Jobs/NewJob'));
-const JobDetailsPage = React.lazy(() => import('@/pages/Jobs/JobDetails'));
+// Fix the import for JobDetailsPage to use default export
+const JobDetailsPage = React.lazy(() => import('@/pages/Jobs/JobDetails').then(module => ({ default: module.JobDetails })));
 const IntegrationsPage = React.lazy(() => import('@/pages/Integrations'));
 const NotificationsPage = React.lazy(() => import('@/pages/Notifications'));
 const EmailPage = React.lazy(() => import('@/pages/Email'));
@@ -47,10 +48,11 @@ const TermsOfServicePage = React.lazy(() => import('@/pages/Settings/TermsOfServ
 const GenericSettingsPage = React.lazy(() => import('@/pages/Settings/GenericSettingsPage'));
 
 export function Routes() {
-  const { user, isLoading } = useAuth();
+  // Fix property name from isLoading to loading to match AuthContext
+  const { user, loading } = useAuth();
 
   // Simplified routing logic for demo
-  if (isLoading) {
+  if (loading) {
     return <div className="h-screen w-screen flex items-center justify-center">Loading...</div>;
   }
 
