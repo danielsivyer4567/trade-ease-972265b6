@@ -27,13 +27,20 @@ export const PropertySearch: React.FC<PropertySearchProps> = ({
   onSearchClick
 }) => {
   const blurTimeoutRef = useRef<number | null>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const handleFocus = () => {
+    // Clear any pending blur timeout
     if (blurTimeoutRef.current) {
       window.clearTimeout(blurTimeoutRef.current);
       blurTimeoutRef.current = null;
     }
-    setIsPreviewVisible(addressPreviews.length > 0);
+    
+    // Only show previews if we have search text and matching addresses
+    if (searchQuery.trim() && addressPreviews.length > 0) {
+      setIsPreviewVisible(true);
+      console.log('Showing previews on focus:', addressPreviews);
+    }
   };
 
   const handleBlur = () => {
@@ -42,6 +49,14 @@ export const PropertySearch: React.FC<PropertySearchProps> = ({
       setIsPreviewVisible(false);
     }, 200);
   };
+  
+  const handleInputClick = () => {
+    // Show previews when clicking on input if we have search text and matching addresses
+    if (searchQuery.trim() && addressPreviews.length > 0) {
+      setIsPreviewVisible(true);
+      console.log('Showing previews on click:', addressPreviews);
+    }
+  };
 
   return (
     <div className="relative mb-4">
@@ -49,6 +64,7 @@ export const PropertySearch: React.FC<PropertySearchProps> = ({
         <div className="relative flex-1">
           <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
+            ref={inputRef}
             placeholder="Search by address, name, or description..."
             className="pl-8"
             value={searchQuery}
@@ -56,6 +72,7 @@ export const PropertySearch: React.FC<PropertySearchProps> = ({
             onKeyDown={onKeyDown}
             onFocus={handleFocus}
             onBlur={handleBlur}
+            onClick={handleInputClick}
             aria-label="Property search"
           />
         </div>
@@ -68,8 +85,8 @@ export const PropertySearch: React.FC<PropertySearchProps> = ({
         </Button>
       </div>
       
-      {/* Address Preview */}
-      {isPreviewVisible && (
+      {/* Address Preview with improved visibility logic */}
+      {isPreviewVisible && addressPreviews.length > 0 && (
         <AddressPreviews 
           addressPreviews={addressPreviews} 
           onAddressClick={onAddressPreviewClick} 

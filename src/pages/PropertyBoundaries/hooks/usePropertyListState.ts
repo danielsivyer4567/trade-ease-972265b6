@@ -11,20 +11,19 @@ export const usePropertyListState = (
   const [addressPreviews, setAddressPreviews] = useState<string[]>([]);
   const [isPreviewVisible, setIsPreviewVisible] = useState(false);
   
-  // Simplified address search with more lenient matching
+  // More generous address matching logic
   const searchAddressMatches = (address: string, query: string): boolean => {
     if (!address || !query) return false;
     
     const addressLower = address.toLowerCase();
     const queryLower = query.toLowerCase().trim();
     
-    // If the query is very short (1-2 chars), require it to be at the start of a word
-    if (queryLower.length <= 2) {
-      const addressWords = addressLower.split(/[\s,]+/);
-      return addressWords.some(word => word.startsWith(queryLower));
+    // Always return true for very short queries to show more options
+    if (queryLower.length === 1) {
+      return true;
     }
     
-    // For longer queries, just check if the address contains the query
+    // For queries of any length, use a simple "contains" check
     return addressLower.includes(queryLower);
   };
   
@@ -51,13 +50,14 @@ export const usePropertyListState = (
   // Update address previews when search query changes
   useEffect(() => {
     if (searchQuery.trim().length > 0) {
-      // Extract matching addresses for preview with more permissive matching
+      // Get all matching addresses with the more permissive matching
       const matchingAddresses = properties
         .filter(prop => prop.address && searchAddressMatches(prop.address, searchQuery))
         .map(prop => prop.address as string)
         .filter((address, index, self) => self.indexOf(address) === index) // Remove duplicates
         .slice(0, 5); // Limit to top 5 matches
       
+      console.log('Matching addresses:', matchingAddresses); // Debugging
       setAddressPreviews(matchingAddresses);
       setIsPreviewVisible(matchingAddresses.length > 0);
     } else {

@@ -15,6 +15,9 @@ export const AddressPreviews: React.FC<AddressPreviewsProps> = ({
   
   return (
     <div className="absolute z-10 left-0 right-0 bg-white border border-slate-200 rounded-md shadow-md mt-1 max-h-60 overflow-y-auto">
+      <div className="p-2 bg-slate-50 border-b border-slate-100 text-xs font-semibold text-slate-500">
+        Found {addressPreviews.length} matching address{addressPreviews.length !== 1 ? 'es' : ''}
+      </div>
       {addressPreviews.map((address, index) => (
         <div 
           key={`address-${index}`}
