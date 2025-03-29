@@ -17,6 +17,7 @@ export interface Job {
   assignedMemberId?: string;
   date_undecided?: boolean;
   job_steps?: JobStep[];
+  boundaries?: Array<Array<[number, number]>>; // Array of polygon coordinates
 }
 
 export interface JobStep {

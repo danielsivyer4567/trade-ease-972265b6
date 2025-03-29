@@ -78,7 +78,8 @@ export const useJobData = (id: string | undefined) => {
               location: data.location,
               assignedTeam: data.assigned_team,
               date_undecided: data.date_undecided,
-              job_steps: data.job_steps || defaultJobSteps
+              job_steps: data.job_steps || defaultJobSteps,
+              boundaries: data.boundaries
             };
             
             setJob(transformedJob);
@@ -92,13 +93,15 @@ export const useJobData = (id: string | undefined) => {
         console.error("Exception fetching job:", err);
       }
       
+      // Fallback to mock data
       const foundJob = mockJobs.find(j => j.id === id);
       console.log("Using mock job data:", foundJob);
       if (foundJob) {
         // Add job steps to the mock job if it doesn't have them
         setJob({
           ...foundJob,
-          job_steps: defaultJobSteps
+          job_steps: defaultJobSteps,
+          boundaries: foundJob.boundaries || [] // Ensure boundaries exists even if undefined in mock data
         });
       } else {
         toast.error("Job not found");

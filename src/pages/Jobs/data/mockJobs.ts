@@ -12,7 +12,16 @@ export const mockJobs: Job[] = [
     jobNumber: "JOB-1234",
     title: "Water Heater Installation",
     description: "Install new water heater system",
-    assignedTeam: "Red Team"
+    assignedTeam: "Red Team",
+    boundaries: [
+      [
+        [151.2073, -33.8668],
+        [151.2113, -33.8668],
+        [151.2113, -33.8708],
+        [151.2073, -33.8708],
+        [151.2073, -33.8668]
+      ]
+    ]
   },
   {
     id: "2",
@@ -24,7 +33,16 @@ export const mockJobs: Job[] = [
     jobNumber: "JOB-5678",
     title: "HVAC Maintenance",
     description: "Regular maintenance check",
-    assignedTeam: "Blue Team"
+    assignedTeam: "Blue Team",
+    boundaries: [
+      [
+        [151.2523, -33.8668],
+        [151.2563, -33.8668],
+        [151.2563, -33.8708],
+        [151.2523, -33.8708],
+        [151.2523, -33.8668]
+      ]
+    ]
   },
   {
     id: "3",
