@@ -51,6 +51,17 @@ export const PropertyList: React.FC<PropertyListProps> = ({
   console.log('Search query:', searchQuery);
   console.log('Filtered properties:', filteredProperties);
   console.log('All properties:', properties);
+  
+  // Handle Enter key press in search input
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      // If we have filtered results, select the first one
+      if (filteredProperties.length > 0) {
+        onPropertySelect(filteredProperties[0]);
+      }
+    }
+  };
 
   return (
     <div className="bg-white rounded-lg shadow-md p-4">
@@ -64,6 +75,7 @@ export const PropertyList: React.FC<PropertyListProps> = ({
           className="pl-8"
           value={searchQuery}
           onChange={onSearchChange}
+          onKeyDown={handleKeyPress}
         />
       </div>
       
