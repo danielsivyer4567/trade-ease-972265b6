@@ -21,7 +21,8 @@ const PropertyBoundaries = () => {
     handleFileUpload,
     handleFileRemove,
     handleSearchChange,
-    handleToggleMeasurement
+    handleToggleMeasurement,
+    handleDeleteProperty
   } = usePropertyBoundaries();
   
   const handleFileUploadClick = () => {
@@ -62,6 +63,7 @@ const PropertyBoundaries = () => {
                   onFileRemove={handleFileRemove}
                   onSearchChange={handleSearchChange}
                   onToggleMeasurement={handleToggleMeasurement}
+                  onPropertyDelete={handleDeleteProperty}
                 />
                 
                 <PropertyInfo property={selectedProperty} />

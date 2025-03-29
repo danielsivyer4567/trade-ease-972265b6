@@ -18,6 +18,7 @@ interface PropertyListProps {
   onFileRemove: () => void;
   onSearchChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onToggleMeasurement: () => void;
+  onPropertyDelete?: (property: Property) => void;
 }
 
 export const PropertyList: React.FC<PropertyListProps> = ({
@@ -29,7 +30,8 @@ export const PropertyList: React.FC<PropertyListProps> = ({
   onPropertySelect,
   onFileRemove,
   onSearchChange,
-  onToggleMeasurement
+  onToggleMeasurement,
+  onPropertyDelete
 }) => {
   const {
     addressPreviews,
@@ -64,6 +66,7 @@ export const PropertyList: React.FC<PropertyListProps> = ({
               property={property}
               isSelected={selectedProperty?.id === property.id}
               onClick={onPropertySelect}
+              onDelete={onPropertyDelete}
             />
           ))
         ) : (
