@@ -1,6 +1,7 @@
 
-import React, { useRef, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { MapControls } from './MapControls';
+import { useCanvasResize } from './hooks';
 
 interface MapCanvasProps {
   containerRef: React.RefObject<HTMLDivElement>;
@@ -41,22 +42,8 @@ export const MapCanvas: React.FC<MapCanvasProps> = ({
     handleReset
   } = zoomControls;
   
-  // Resize handler
-  useEffect(() => {
-    const handleResize = () => {
-      if (!canvasRef.current || !containerRef.current) return;
-      
-      canvasRef.current.width = containerRef.current.clientWidth;
-      canvasRef.current.height = containerRef.current.clientHeight;
-      
-      // Redraw on resize
-      const event = new Event('resize');
-      window.dispatchEvent(event);
-    };
-    
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, [canvasRef, containerRef]);
+  // Use the canvas resize hook
+  useCanvasResize(canvasRef, containerRef);
   
   return (
     <div className="relative w-full bg-gray-50 rounded-lg" style={{ height: '500px' }}>
