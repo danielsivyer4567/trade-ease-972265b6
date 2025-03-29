@@ -3,7 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { GoogleMap, LoadScript, Polygon } from '@react-google-maps/api';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { MapPin, Ruler, Copy, RotateCw } from 'lucide-react';
+import { MapPin, Ruler, Copy, RotateCw, AlertCircle } from 'lucide-react';
 import { toast } from "sonner";
 
 interface PropertyBoundaryMapProps {
@@ -23,13 +23,28 @@ const PropertyBoundaryMap = ({
   const [boundaryLength, setBoundaryLength] = useState<number>(0);
   const [boundaryArea, setBoundaryArea] = useState<number>(0);
   const [isCalculating, setIsCalculating] = useState<boolean>(false);
+  const [mapError, setMapError] = useState<string | null>(null);
+  const [isMapLoaded, setIsMapLoaded] = useState<boolean>(false);
   const polygonRefs = useRef<Array<google.maps.Polygon>>([]);
+  const mapContainerRef = useRef<HTMLDivElement>(null);
 
   const mapContainerStyle = {
     width: '100%',
     height: '500px',
     borderRadius: '0.5rem'
   };
+
+  useEffect(() => {
+    // Check if the map container has rendered properly
+    if (mapContainerRef.current) {
+      const containerHeight = mapContainerRef.current.clientHeight;
+      const containerWidth = mapContainerRef.current.clientWidth;
+      
+      if (containerHeight === 0 || containerWidth === 0) {
+        console.error("Map container has zero height or width", { height: containerHeight, width: containerWidth });
+      }
+    }
+  }, []);
 
   // Convert boundary coordinates to Google Maps format
   const convertBoundariesToPolygons = () => {
@@ -93,7 +108,10 @@ const PropertyBoundaryMap = ({
   };
 
   const handleMapLoad = (map: google.maps.Map) => {
+    console.log("Map loaded successfully");
     setMapInstance(map);
+    setIsMapLoaded(true);
+    setMapError(null);
     
     // Fit map to boundaries if they exist
     if (boundaries.length > 0 && boundaries[0].length > 0) {
@@ -119,13 +137,30 @@ const PropertyBoundaryMap = ({
         </div>
       `;
       
-      new google.maps.marker.AdvancedMarkerElement({
-        position: { lat: center[1], lng: center[0] },
-        map,
-        content: markerElement,
-        title: "Property Location"
-      });
+      try {
+        new google.maps.marker.AdvancedMarkerElement({
+          position: { lat: center[1], lng: center[0] },
+          map,
+          content: markerElement,
+          title: "Property Location"
+        });
+      } catch (error) {
+        console.error("Error creating marker:", error);
+        
+        // Fallback to standard marker if advanced marker fails
+        new google.maps.Marker({
+          position: { lat: center[1], lng: center[0] },
+          map,
+          title: "Property Location"
+        });
+      }
     }
+  };
+
+  const handleMapError = (error: Error) => {
+    console.error("Google Maps error:", error);
+    setMapError(error.message);
+    setIsMapLoaded(false);
   };
 
   const handlePolygonLoad = (polygon: google.maps.Polygon, index: number) => {
@@ -161,7 +196,7 @@ const PropertyBoundaryMap = ({
               variant="outline" 
               size="sm"
               onClick={handleCalculate}
-              disabled={isCalculating}
+              disabled={isCalculating || !isMapLoaded}
               className="flex items-center gap-1"
             >
               {isCalculating ? <RotateCw className="h-4 w-4 animate-spin" /> : <Ruler className="h-4 w-4" />}
@@ -182,35 +217,56 @@ const PropertyBoundaryMap = ({
       </CardHeader>
       
       <CardContent>
-        <LoadScript 
-          googleMapsApiKey="AIzaSyAnIcvNA_ZjRUnN4aeyl-1MYpBSN-ODIvw"
-          libraries={["marker", "geometry"]}
-          version="beta"
-        >
-          <GoogleMap
-            mapContainerStyle={mapContainerStyle}
-            center={{ lat: center[1], lng: center[0] }}
-            zoom={15}
-            options={{
-              mapTypeId: 'satellite',
-              tilt: 0,
-              streetViewControl: false,
-              mapTypeControl: true,
-              fullscreenControl: true,
-              mapId: '8f348c1e276da9d5'
+        <div ref={mapContainerRef} className="relative w-full" style={mapContainerStyle}>
+          <LoadScript 
+            googleMapsApiKey="AIzaSyAnIcvNA_ZjRUnN4aeyl-1MYpBSN-ODIvw"
+            libraries={["marker", "geometry"]}
+            onLoad={() => console.log("Google Maps script loaded")}
+            onError={(error) => {
+              console.error("Google Maps script error:", error);
+              setMapError("Failed to load Google Maps script");
             }}
-            onLoad={handleMapLoad}
+            version="beta"
           >
-            {polygons.map((polygon, index) => (
-              <Polygon
-                key={`boundary-${index}`}
-                paths={polygon}
-                options={polygonOptions}
-                onLoad={(polygon) => handlePolygonLoad(polygon, index)}
-              />
-            ))}
-          </GoogleMap>
-        </LoadScript>
+            <GoogleMap
+              mapContainerStyle={mapContainerStyle}
+              center={{ lat: center[1], lng: center[0] }}
+              zoom={15}
+              options={{
+                mapTypeId: 'satellite',
+                tilt: 0,
+                streetViewControl: false,
+                mapTypeControl: true,
+                fullscreenControl: true,
+                mapId: '8f348c1e276da9d5'
+              }}
+              onLoad={handleMapLoad}
+              onError={handleMapError}
+            >
+              {polygons.map((polygon, index) => (
+                <Polygon
+                  key={`boundary-${index}`}
+                  paths={polygon}
+                  options={polygonOptions}
+                  onLoad={(polygon) => handlePolygonLoad(polygon, index)}
+                />
+              ))}
+            </GoogleMap>
+          </LoadScript>
+          
+          {mapError && (
+            <div className="absolute inset-0 flex items-center justify-center bg-gray-100 bg-opacity-80 rounded-lg">
+              <div className="bg-white p-4 rounded-lg shadow-lg max-w-md text-center">
+                <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-2" />
+                <h3 className="text-lg font-semibold mb-2">Map Error</h3>
+                <p className="text-gray-700">{mapError}</p>
+                <p className="text-sm text-gray-500 mt-2">
+                  Check console for more details. This could be due to API key restrictions, network issues, or script loading errors.
+                </p>
+              </div>
+            </div>
+          )}
+        </div>
         
         {(boundaryLength > 0 || boundaryArea > 0) && (
           <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
