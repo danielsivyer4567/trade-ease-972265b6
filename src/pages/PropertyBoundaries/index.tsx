@@ -48,11 +48,9 @@ const PropertyBoundaries = () => {
               selectedProperty={selectedProperty}
               uploadedFile={uploadedFile}
               searchQuery={searchQuery}
-              isMeasuring={isMeasuring}
               onPropertySelect={handlePropertySelect}
               onFileRemove={handleFileRemove}
               onSearchChange={handleSearchChange}
-              onToggleMeasurement={handleToggleMeasurement}
             />
             
             <PropertyInfo property={selectedProperty} />
