@@ -1,5 +1,7 @@
+
 import { useState, useCallback } from 'react';
 import { Property } from '../types';
+import { toast } from 'sonner';
 
 // Sample mock properties to ensure the component works even without real data
 const mockProperties: Property[] = [
@@ -62,6 +64,7 @@ export const usePropertyBoundaries = () => {
   
   const handlePropertySelect = useCallback((property: Property) => {
     setSelectedProperty(property);
+    console.log('Selected property:', property);
   }, []);
   
   const handleFileUpload = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
@@ -94,7 +97,16 @@ export const usePropertyBoundaries = () => {
               centerLng /= numPoints;
             }
             
-            const address = feature.properties?.address || feature.properties?.location || '';
+            // Extract address from various possible locations in GeoJSON properties
+            let address = '';
+            if (feature.properties) {
+              address = feature.properties.address || 
+                      feature.properties.location || 
+                      feature.properties.formatted_address ||
+                      feature.properties.addr ||
+                      feature.properties.street_address ||
+                      '';
+            }
             
             return {
               id: `uploaded-${index}`,
@@ -109,10 +121,12 @@ export const usePropertyBoundaries = () => {
           setProperties([...properties, ...newProperties]);
           if (newProperties.length > 0) {
             setSelectedProperty(newProperties[0]);
+            toast.success(`Successfully loaded ${newProperties.length} properties`);
           }
         }
       } catch (error) {
         console.error('Error parsing GeoJSON:', error);
+        toast.error('Failed to parse the uploaded file. Please check the format.');
       }
     };
     
@@ -121,13 +135,13 @@ export const usePropertyBoundaries = () => {
   
   const handleFileRemove = useCallback(() => {
     setUploadedFile(null);
-    
     setProperties(mockProperties);
     setSelectedProperty(mockProperties[0] || null);
   }, []);
   
   const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
+    console.log('Search query changed:', e.target.value);
   }, []);
   
   const handleToggleMeasurement = useCallback(() => {
