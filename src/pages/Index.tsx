@@ -1,4 +1,3 @@
-
 import { BaseLayout } from "@/components/ui/BaseLayout";
 import JobSiteMap from "@/components/dashboard/JobSiteMap";
 import RecentActivity from "@/components/dashboard/RecentActivity";
@@ -14,13 +13,11 @@ import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-
 export default function Index() {
   const navigate = useNavigate();
   const [selectedTeam, setSelectedTeam] = useState<string>("red");
   const [calendarExpanded, setCalendarExpanded] = useState<boolean>(false);
   const [expandedTeams, setExpandedTeams] = useState<Record<string, boolean>>({});
-  const [teamCalendarsVisible, setTeamCalendarsVisible] = useState<Record<string, boolean>>({});
 
   // Team dashboard data
   const teams = [{
@@ -51,29 +48,18 @@ export default function Index() {
     description: "Changed job site map style",
     timestamp: "Yesterday, 4:45 PM"
   }];
-  
   const handleUndoChange = (changeId: number) => {
     // Here you would implement the actual logic to undo specific changes
     console.log(`Undoing change with ID: ${changeId}`);
     // For demonstration purposes, show a toast message
     alert(`Change #${changeId} has been reverted`);
   };
-  
   const toggleTeamCalendar = (teamName: string) => {
     setExpandedTeams(prev => ({
       ...prev,
       [teamName]: !prev[teamName]
     }));
   };
-  
-  // New function to toggle calendar visibility for each team card
-  const toggleTeamCardCalendar = (teamName: string) => {
-    setTeamCalendarsVisible(prev => ({
-      ...prev,
-      [teamName]: !prev[teamName]
-    }));
-  };
-
   return <BaseLayout showQuickTabs={true}>
       <div className="px-8 space-y-8 animate-fadeIn py-10">
         <div className="grid grid-cols-1 gap-8">
@@ -166,53 +152,19 @@ export default function Index() {
         }}>
             <h2 className="text-xl font-semibold mb-4">Team Dashboards</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {teams.map(team => (
-                <Card key={`dashboard-${team.name}`} className="overflow-hidden">
-                  <div className="p-4">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className={`w-10 h-10 rounded-full bg-${team.color}-100 flex items-center justify-center`}>
-                          <Hammer className={`w-5 h-5 text-${team.color}-600`} />
-                        </div>
-                        <div>
-                          <h3 className={`text-lg font-semibold text-${team.color}-700`}>{team.name}</h3>
-                        </div>
+              {teams.map(team => <Link key={`dashboard-${team.name}`} to={team.path} className="block hover:scale-105 transition-transform duration-200">
+                  <Card className="">
+                    <div className="flex items-center gap-3">
+                      <div className={`w-10 h-10 rounded-full bg-${team.color}-100 flex items-center justify-center`}>
+                        <Hammer className={`w-5 h-5 text-${team.color}-600`} />
                       </div>
-                      <div className="flex items-center gap-2">
-                        <Link to={team.path} className="text-sm text-blue-600 hover:underline">
-                          View details
-                        </Link>
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
-                          className="h-6 w-6" 
-                          onClick={(e) => {
-                            e.preventDefault();
-                            toggleTeamCardCalendar(team.name);
-                          }}
-                        >
-                          {teamCalendarsVisible[team.name] ? 
-                            <ChevronUp className="h-3 w-3" /> : 
-                            <ChevronDown className="h-3 w-3" />}
-                        </Button>
+                      <div>
+                        <h3 className={`text-lg font-semibold text-${team.color}-700`}>{team.name}</h3>
+                        <p className="text-sm text-gray-500">View dashboard</p>
                       </div>
                     </div>
-                  </div>
-                  
-                  {teamCalendarsVisible[team.name] && (
-                    <div className="border-t p-4">
-                      <div className="overflow-hidden rounded-lg border">
-                        <TeamCalendar 
-                          date={new Date()} 
-                          setDate={() => {}} 
-                          teamColor={team.color.toLowerCase()} 
-                          miniView={true} 
-                        />
-                      </div>
-                    </div>
-                  )}
-                </Card>
-              ))}
+                  </Card>
+                </Link>)}
             </div>
           </div>
 
