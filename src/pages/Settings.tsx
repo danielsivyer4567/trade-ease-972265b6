@@ -3,6 +3,7 @@ import { BaseLayout } from "@/components/ui/BaseLayout";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Settings, DollarSign, Receipt, Clock, Users, Shield, FileText, Calendar, List, CreditCard, User, Bot, Briefcase, Network, Mail, FileJson, Building, Share, Zap, Search, Link2, Bell, Globe, FileLock, Brain } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 const settingsSections = [
   {
@@ -158,7 +159,13 @@ const settingsSections = [
 ];
 
 export default function SettingsPage() {
+  const navigate = useNavigate();
   console.log("Rendering Settings Page");
+
+  const handleCardClick = (path: string) => {
+    navigate(path);
+  };
+
   return (
     <BaseLayout>
       <div className="space-y-6 h-full p-6">
@@ -172,7 +179,11 @@ export default function SettingsPage() {
           <h2 className="text-xl font-semibold text-gray-900">Configuration</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {settingsSections.map(section => (
-              <Link key={section.title} to={section.path} className="block">
+              <div 
+                key={section.title} 
+                onClick={() => handleCardClick(section.path)}
+                className="cursor-pointer"
+              >
                 <Card className="hover:shadow-md transition-shadow">
                   <CardHeader className="bg-slate-200">
                     <div className="flex items-center gap-2">
@@ -182,7 +193,7 @@ export default function SettingsPage() {
                     <CardDescription>{section.description}</CardDescription>
                   </CardHeader>
                 </Card>
-              </Link>
+              </div>
             ))}
           </div>
         </div>

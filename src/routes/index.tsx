@@ -1,182 +1,110 @@
 
-import { Routes as RouterRoutes, Route } from 'react-router-dom'
-import { ProtectedRoute } from '@/components/auth/ProtectedRoute'
-import Auth from '@/pages/Auth'
-import NotFound from '@/pages/NotFound'
-import Index from '@/pages/Index'
-import Jobs from '@/pages/Jobs'
-import Customers from '@/pages/Customers'
-import Notifications from '@/pages/Notifications'
-import Teams from '@/pages/Teams'
-import NewPayment from '@/pages/Payments/NewPayment'
-import Quotes from '@/pages/Quotes'
-import NewQuote from '@/pages/Quotes/NewQuote'
-import Calendar from '@/pages/Calendar'
-import TeamRed from '@/pages/TeamRed'
-import TeamBlue from '@/pages/TeamBlue'
-import TeamGreen from '@/pages/TeamGreen'
-import TradeDash from '@/pages/TradeDash'
-import PropertyBoundaries from '@/pages/PropertyBoundaries'
-import Messaging from '@/pages/Messaging'
-import Referrals from '@/pages/Referrals'
-import Tasks from '@/pages/Tasks'
-import SettingsPage from '@/pages/Settings'
+import React from 'react';
+import { Route, Routes as RouterRoutes, Navigate } from 'react-router-dom';
+import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
+import { useAuth } from '@/contexts/AuthContext';
+
+// Import pages
+const AuthPage = React.lazy(() => import('@/pages/Auth'));
+const DashboardPage = React.lazy(() => import('@/pages/Index'));
+const TradeDashPage = React.lazy(() => import('@/pages/TradeDash'));
+const CalculatorsPage = React.lazy(() => import('@/pages/Calculators'));
+const StatisticsPage = React.lazy(() => import('@/pages/Statistics'));
+const CustomersPage = React.lazy(() => import('@/pages/Customers'));
+const CustomerDetailPage = React.lazy(() => import('@/pages/Customers/CustomerDetail'));
+const NewCustomerPage = React.lazy(() => import('@/pages/Customers/NewCustomer'));
+const CalendarPage = React.lazy(() => import('@/pages/Calendar'));
+const JobsPage = React.lazy(() => import('@/pages/Jobs'));
+const NewJobPage = React.lazy(() => import('@/pages/Jobs/NewJob'));
+const JobDetailsPage = React.lazy(() => import('@/pages/Jobs/JobDetails'));
+const IntegrationsPage = React.lazy(() => import('@/pages/Integrations'));
+const NotificationsPage = React.lazy(() => import('@/pages/Notifications'));
+const EmailPage = React.lazy(() => import('@/pages/Email'));
+const ReferralsPage = React.lazy(() => import('@/pages/Referrals'));
+const DatabasePage = React.lazy(() => import('@/pages/Database'));
+const QuotesPage = React.lazy(() => import('@/pages/Quotes'));
+const NewTemplatePage = React.lazy(() => import('@/pages/Jobs/NewTemplate'));
+const MessagingPage = React.lazy(() => import('@/pages/Messaging'));
+const WorkflowPage = React.lazy(() => import('@/pages/Workflow'));
+const NotFoundPage = React.lazy(() => import('@/pages/NotFound'));
+const TeamsPage = React.lazy(() => import('@/pages/Teams'));
+const TeamRedPage = React.lazy(() => import('@/pages/TeamRed'));
+const TeamBluePage = React.lazy(() => import('@/pages/TeamBlue'));
+const TeamGreenPage = React.lazy(() => import('@/pages/TeamGreen'));
+const TeamNewPage = React.lazy(() => import('@/pages/TeamNew'));
+const SocialPage = React.lazy(() => import('@/pages/Social'));
+const AIFeaturesPage = React.lazy(() => import('@/pages/AIFeatures'));
+
+// Settings Pages
+const SettingsPage = React.lazy(() => import('@/pages/Settings'));
+const NotificationsSettings = React.lazy(() => import('@/pages/Settings/Notifications'));
+const AIAssistantSettings = React.lazy(() => import('@/pages/Settings/AIAssistantSettings'));
+const TradeRatesPage = React.lazy(() => import('@/pages/Settings/TradeRates'));
+const BillsPurchaseOrdersPage = React.lazy(() => import('@/pages/Settings/BillsPurchaseOrders'));
+const OfficeStaffPage = React.lazy(() => import('@/pages/Settings/OfficeStaff'));
+const ContractorsPage = React.lazy(() => import('@/pages/Settings/Contractors'));
+const TermsOfServicePage = React.lazy(() => import('@/pages/Settings/TermsOfService'));
+const GenericSettingsPage = React.lazy(() => import('@/pages/Settings/GenericSettingsPage'));
 
 export function Routes() {
+  const { user, isLoading } = useAuth();
+
+  // Simplified routing logic for demo
+  if (isLoading) {
+    return <div className="h-screen w-screen flex items-center justify-center">Loading...</div>;
+  }
+
   return (
     <RouterRoutes>
-      {/* Public routes */}
-      <Route path="/auth" element={<Auth />} />
-      <Route path="/auth/callback" element={<Auth />} />
+      {/* Auth Routes */}
+      <Route path="/auth/*" element={user ? <Navigate to="/" /> : <AuthPage />} />
       
-      {/* Protected routes */}
-      <Route
-        path="/"
-        element={
-          <ProtectedRoute>
-            <Index />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/tradedash"
-        element={
-          <ProtectedRoute>
-            <TradeDash />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/jobs/*"
-        element={
-          <ProtectedRoute>
-            <Jobs />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/customers/*"
-        element={
-          <ProtectedRoute>
-            <Customers />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/notifications"
-        element={
-          <ProtectedRoute>
-            <Notifications />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/teams/*"
-        element={
-          <ProtectedRoute>
-            <Teams />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/payments/new"
-        element={
-          <ProtectedRoute>
-            <NewPayment />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/quotes"
-        element={
-          <ProtectedRoute>
-            <Quotes />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/quotes/new"
-        element={
-          <ProtectedRoute>
-            <NewQuote />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/calendar"
-        element={
-          <ProtectedRoute>
-            <Calendar />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/messaging"
-        element={
-          <ProtectedRoute>
-            <Messaging />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/referrals"
-        element={
-          <ProtectedRoute>
-            <Referrals />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/tasks"
-        element={
-          <ProtectedRoute>
-            <Tasks />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/team-red"
-        element={
-          <ProtectedRoute>
-            <TeamRed />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/team-blue"
-        element={
-          <ProtectedRoute>
-            <TeamBlue />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/team-green"
-        element={
-          <ProtectedRoute>
-            <TeamGreen />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/property-boundaries"
-        element={
-          <ProtectedRoute>
-            <PropertyBoundaries />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/settings"
-        element={
-          <ProtectedRoute>
-            <SettingsPage />
-          </ProtectedRoute>
-        }
-      />
+      {/* Protected Routes */}
+      <Route element={<ProtectedRoute />}>
+        <Route path="/" element={<DashboardPage />} />
+        <Route path="/tradedash" element={<TradeDashPage />} />
+        <Route path="/calculators/*" element={<CalculatorsPage />} />
+        <Route path="/statistics" element={<StatisticsPage />} />
+        <Route path="/customers" element={<CustomersPage />} />
+        <Route path="/customers/new" element={<NewCustomerPage />} />
+        <Route path="/customers/:id" element={<CustomerDetailPage />} />
+        <Route path="/calendar" element={<CalendarPage />} />
+        <Route path="/jobs" element={<JobsPage />} />
+        <Route path="/jobs/new" element={<NewJobPage />} />
+        <Route path="/jobs/:id" element={<JobDetailsPage />} />
+        <Route path="/integrations" element={<IntegrationsPage />} />
+        <Route path="/email" element={<EmailPage />} />
+        <Route path="/notifications" element={<NotificationsPage />} />
+        <Route path="/referrals" element={<ReferralsPage />} />
+        <Route path="/database" element={<DatabasePage />} />
+        <Route path="/quotes" element={<QuotesPage />} />
+        <Route path="/jobs/templates/new" element={<NewTemplatePage />} />
+        <Route path="/messaging" element={<MessagingPage />} />
+        <Route path="/workflow" element={<WorkflowPage />} />
+        <Route path="/teams" element={<TeamsPage />} />
+        <Route path="/team-red" element={<TeamRedPage />} />
+        <Route path="/team-blue" element={<TeamBluePage />} />
+        <Route path="/team-green" element={<TeamGreenPage />} />
+        <Route path="/team-new" element={<TeamNewPage />} />
+        <Route path="/social" element={<SocialPage />} />
+        <Route path="/ai-features" element={<AIFeaturesPage />} />
+        
+        {/* Settings Routes */}
+        <Route path="/settings" element={<SettingsPage />} />
+        <Route path="/settings/notifications" element={<NotificationsSettings />} />
+        <Route path="/settings/ai-assistant-settings" element={<AIAssistantSettings />} />
+        <Route path="/settings/trade-rates" element={<TradeRatesPage />} />
+        <Route path="/settings/bills-purchase-orders" element={<BillsPurchaseOrdersPage />} />
+        <Route path="/settings/office-staff" element={<OfficeStaffPage />} />
+        <Route path="/settings/contractors" element={<ContractorsPage />} />
+        <Route path="/settings/terms-of-service" element={<TermsOfServicePage />} />
+        
+        {/* Generic settings page for routes that don't have specific components */}
+        <Route path="/settings/:settingType" element={<GenericSettingsPage />} />
+      </Route>
       
-      {/* Catch all */}
-      <Route path="*" element={<NotFound />} />
+      {/* 404 Route */}
+      <Route path="*" element={<NotFoundPage />} />
     </RouterRoutes>
-  )
+  );
 }
