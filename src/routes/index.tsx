@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Route, Routes as RouterRoutes, Navigate } from 'react-router-dom';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
@@ -14,9 +13,10 @@ const CustomersPage = React.lazy(() => import('@/pages/Customers'));
 const CustomerDetailPage = React.lazy(() => import('@/pages/Customers/CustomerDetail'));
 const NewCustomerPage = React.lazy(() => import('@/pages/Customers/NewCustomer'));
 const CalendarPage = React.lazy(() => import('@/pages/Calendar'));
+const TeamCalendarPage = React.lazy(() => import('@/pages/Calendar/TeamCalendarPage'));
+const CalendarSyncPage = React.lazy(() => import('@/pages/Calendar/CalendarSync'));
 const JobsPage = React.lazy(() => import('@/pages/Jobs'));
 const NewJobPage = React.lazy(() => import('@/pages/Jobs/NewJob'));
-// Fix the import for JobDetailsPage to use default export
 const JobDetailsPage = React.lazy(() => import('@/pages/Jobs/JobDetails').then(module => ({ default: module.JobDetails })));
 const IntegrationsPage = React.lazy(() => import('@/pages/Integrations'));
 const NotificationsPage = React.lazy(() => import('@/pages/Notifications'));
@@ -71,6 +71,8 @@ export function Routes() {
         <Route path="/customers/new" element={<NewCustomerPage />} />
         <Route path="/customers/:id" element={<CustomerDetailPage />} />
         <Route path="/calendar" element={<CalendarPage />} />
+        <Route path="/calendar/team/:teamColor" element={<TeamCalendarPage />} />
+        <Route path="/calendar/sync" element={<CalendarSyncPage />} />
         <Route path="/jobs" element={<JobsPage />} />
         <Route path="/jobs/new" element={<NewJobPage />} />
         <Route path="/jobs/:id" element={<JobDetailsPage />} />
