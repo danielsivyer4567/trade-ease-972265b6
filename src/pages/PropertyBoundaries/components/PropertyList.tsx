@@ -82,6 +82,7 @@ export const PropertyList: React.FC<PropertyListProps> = ({
       <PropertyActions 
         isMeasuring={isMeasuring} 
         onToggleMeasurement={onToggleMeasurement}
+        selectedProperty={selectedProperty}
       />
     </div>
   );

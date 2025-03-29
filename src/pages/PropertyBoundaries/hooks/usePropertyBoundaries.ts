@@ -1,9 +1,10 @@
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { Property } from '../types';
 import { toast } from 'sonner';
+import { supabase } from '@/lib/supabase';
 
-// Sample mock properties to ensure the component works even without real data
+// Sample mock properties for initial UI rendering when no data is available
 const mockProperties: Property[] = [
   {
     id: '1',
@@ -56,11 +57,70 @@ const mockProperties: Property[] = [
 ];
 
 export const usePropertyBoundaries = () => {
-  const [properties, setProperties] = useState<Property[]>(mockProperties);
-  const [selectedProperty, setSelectedProperty] = useState<Property | null>(mockProperties[0] || null);
+  const [properties, setProperties] = useState<Property[]>([]);
+  const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [isMeasuring, setIsMeasuring] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  
+  // Fetch properties from Supabase on component mount
+  useEffect(() => {
+    const fetchProperties = async () => {
+      setIsLoading(true);
+      try {
+        // Check if user is logged in
+        const { data: { user } } = await supabase.auth.getUser();
+        
+        if (user) {
+          // Fetch properties from Supabase
+          const { data, error } = await supabase
+            .from('property_boundaries')
+            .select('*');
+            
+          if (error) {
+            console.error('Error fetching properties:', error);
+            toast.error('Failed to load properties');
+            // Fall back to mock data if there's an error
+            setProperties(mockProperties);
+            setSelectedProperty(mockProperties[0] || null);
+          } else if (data && data.length > 0) {
+            // Transform Supabase data to match Property type
+            const transformedData = data.map((item): Property => ({
+              id: item.id,
+              name: item.name,
+              description: item.description || '',
+              address: item.address || '',
+              location: item.location,
+              boundaries: item.boundaries
+            }));
+            
+            setProperties(transformedData);
+            setSelectedProperty(transformedData[0] || null);
+            toast.success('Properties loaded successfully');
+          } else {
+            // If no properties found, use mock data
+            setProperties(mockProperties);
+            setSelectedProperty(mockProperties[0] || null);
+          }
+        } else {
+          // If user is not logged in, use mock data
+          setProperties(mockProperties);
+          setSelectedProperty(mockProperties[0] || null);
+          toast.warning('Using demo data - log in to save your properties');
+        }
+      } catch (error) {
+        console.error('Error loading properties:', error);
+        // Fall back to mock data
+        setProperties(mockProperties);
+        setSelectedProperty(mockProperties[0] || null);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchProperties();
+  }, []);
   
   const handlePropertySelect = useCallback((property: Property) => {
     setSelectedProperty(property);
@@ -107,19 +167,64 @@ export const usePropertyBoundaries = () => {
     return '';
   };
   
-  const handleFileUpload = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+  const savePropertyToSupabase = async (property: Property) => {
+    try {
+      // Check if user is logged in
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        toast.error('You must be logged in to save properties');
+        return false;
+      }
+      
+      // Prepare data for Supabase
+      const propertyData = {
+        name: property.name,
+        description: property.description,
+        address: property.address,
+        location: property.location,
+        boundaries: property.boundaries,
+        user_id: user.id
+      };
+      
+      // Insert data into Supabase
+      const { data, error } = await supabase
+        .from('property_boundaries')
+        .insert([propertyData])
+        .select();
+        
+      if (error) {
+        console.error('Error saving property:', error);
+        toast.error('Failed to save property');
+        return false;
+      }
+      
+      toast.success('Property saved successfully');
+      return data && data[0];
+    } catch (error) {
+      console.error('Error saving property:', error);
+      toast.error('Failed to save property');
+      return false;
+    }
+  };
+  
+  const handleFileUpload = useCallback(async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
     
     setUploadedFile(file);
     
     const reader = new FileReader();
-    reader.onload = (e) => {
+    reader.onload = async (e) => {
       try {
         const data = JSON.parse(e.target?.result as string);
         
         if (data.features && Array.isArray(data.features)) {
-          const newProperties: Property[] = data.features.map((feature: any, index: number) => {
+          let savedPropertiesCount = 0;
+          const newProperties: Property[] = [];
+          
+          for (let index = 0; index < data.features.length; index++) {
+            const feature = data.features[index];
             const coords = feature.geometry.coordinates || [];
             const name = feature.properties?.name || `Property ${properties.length + index + 1}`;
             
@@ -140,20 +245,35 @@ export const usePropertyBoundaries = () => {
             // Use enhanced address extraction
             const address = extractAddress(feature.properties);
             
-            return {
-              id: `uploaded-${index}`,
+            const newProperty: Property = {
+              id: `temp-${Date.now()}-${index}`,
               name,
               description: feature.properties?.description || `Uploaded boundary ${index + 1}`,
               address,
               location: [centerLat, centerLng],
               boundaries: coords
             };
-          });
+            
+            newProperties.push(newProperty);
+            
+            // Try to save to Supabase if user is authenticated
+            const savedProperty = await savePropertyToSupabase(newProperty);
+            if (savedProperty) {
+              savedPropertiesCount++;
+              // Update the ID with the one from Supabase
+              newProperty.id = savedProperty.id;
+            }
+          }
           
-          setProperties(prev => [...prev, ...newProperties]);
           if (newProperties.length > 0) {
+            setProperties(prev => [...prev, ...newProperties]);
             setSelectedProperty(newProperties[0]);
-            toast.success(`Successfully loaded ${newProperties.length} properties`);
+            
+            if (savedPropertiesCount > 0) {
+              toast.success(`Saved ${savedPropertiesCount} properties to your account`);
+            } else {
+              toast.success(`Loaded ${newProperties.length} properties`);
+            }
           }
         }
       } catch (error) {
@@ -167,8 +287,50 @@ export const usePropertyBoundaries = () => {
   
   const handleFileRemove = useCallback(() => {
     setUploadedFile(null);
-    setProperties(mockProperties);
-    setSelectedProperty(mockProperties[0] || null);
+    
+    // Refetch properties from Supabase
+    const fetchProperties = async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        
+        if (user) {
+          const { data, error } = await supabase
+            .from('property_boundaries')
+            .select('*');
+            
+          if (error) {
+            console.error('Error fetching properties:', error);
+            setProperties(mockProperties);
+            setSelectedProperty(mockProperties[0] || null);
+          } else if (data && data.length > 0) {
+            // Transform Supabase data to match Property type
+            const transformedData = data.map((item): Property => ({
+              id: item.id,
+              name: item.name,
+              description: item.description || '',
+              address: item.address || '',
+              location: item.location,
+              boundaries: item.boundaries
+            }));
+            
+            setProperties(transformedData);
+            setSelectedProperty(transformedData[0] || null);
+          } else {
+            setProperties(mockProperties);
+            setSelectedProperty(mockProperties[0] || null);
+          }
+        } else {
+          setProperties(mockProperties);
+          setSelectedProperty(mockProperties[0] || null);
+        }
+      } catch (error) {
+        console.error('Error loading properties:', error);
+        setProperties(mockProperties);
+        setSelectedProperty(mockProperties[0] || null);
+      }
+    };
+    
+    fetchProperties();
   }, []);
   
   const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
@@ -185,10 +347,12 @@ export const usePropertyBoundaries = () => {
     uploadedFile,
     searchQuery,
     isMeasuring,
+    isLoading,
     handlePropertySelect,
     handleFileUpload,
     handleFileRemove,
     handleSearchChange,
-    handleToggleMeasurement
+    handleToggleMeasurement,
+    savePropertyToSupabase
   };
 };

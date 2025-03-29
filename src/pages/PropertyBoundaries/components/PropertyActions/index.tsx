@@ -1,33 +1,51 @@
 
 import React from 'react';
-import { Button } from '@/components/ui/button';
-import { FileUp, Ruler } from 'lucide-react';
+import { Button } from "@/components/ui/button";
+import { Ruler, Save } from 'lucide-react';
+import { usePropertyBoundaries } from '../../hooks/usePropertyBoundaries';
 
 interface PropertyActionsProps {
   isMeasuring: boolean;
   onToggleMeasurement: () => void;
-  onUploadClick?: () => void;
+  selectedProperty?: any; // Using any for simplicity, should use Property type
 }
 
 export const PropertyActions: React.FC<PropertyActionsProps> = ({
   isMeasuring,
   onToggleMeasurement,
-  onUploadClick
+  selectedProperty
 }) => {
+  const { savePropertyToSupabase } = usePropertyBoundaries();
+
+  const handleSaveProperty = async () => {
+    if (selectedProperty) {
+      await savePropertyToSupabase(selectedProperty);
+    }
+  };
+
   return (
-    <div className="flex flex-col gap-2">
-      <Button variant="outline" className="w-full justify-start gap-2" onClick={onUploadClick}>
-        <FileUp className="h-4 w-4" />
-        Upload Property
-      </Button>
-      <Button 
-        variant={isMeasuring ? "default" : "outline"} 
-        className="w-full justify-start gap-2"
+    <div className="flex flex-wrap gap-2 mt-4">
+      <Button
+        variant={isMeasuring ? "default" : "outline"}
+        size="sm"
         onClick={onToggleMeasurement}
+        className="flex items-center gap-2"
       >
         <Ruler className="h-4 w-4" />
-        {isMeasuring ? "Stop Measuring" : "Measure"}
+        {isMeasuring ? "Exit Measure Mode" : "Measure Mode"}
       </Button>
+
+      {selectedProperty && (
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleSaveProperty}
+          className="flex items-center gap-2"
+        >
+          <Save className="h-4 w-4" />
+          Save Property
+        </Button>
+      )}
     </div>
   );
 };

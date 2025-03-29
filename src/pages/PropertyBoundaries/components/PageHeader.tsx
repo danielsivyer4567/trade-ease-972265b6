@@ -1,31 +1,54 @@
 
+import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Upload, Plus } from 'lucide-react';
+import { SectionHeader } from '@/components/ui/SectionHeader';
+import { Upload } from 'lucide-react';
+import { supabase } from '@/lib/supabase';
+import { AuthNotice } from './AuthNotice';
+import { useState, useEffect } from 'react';
 
 interface PageHeaderProps {
   onFileUploadClick: () => void;
 }
 
 export const PageHeader: React.FC<PageHeaderProps> = ({ onFileUploadClick }) => {
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  
+  useEffect(() => {
+    // Check if the user is authenticated
+    const checkAuth = async () => {
+      const { data } = await supabase.auth.getSession();
+      setIsAuthenticated(!!data.session);
+    };
+    
+    checkAuth();
+    
+    // Listen for auth changes
+    const { data: authListener } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        setIsAuthenticated(!!session);
+      }
+    );
+    
+    return () => {
+      authListener?.subscription.unsubscribe();
+    };
+  }, []);
+
   return (
-    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-      <div>
-        <h1 className="text-2xl font-bold">Property Boundaries</h1>
-        <p className="text-muted-foreground">
-          Manage and view your property boundaries
-        </p>
-      </div>
+    <div className="space-y-4">
+      <SectionHeader
+        title="Property Boundaries"
+        description="View and manage property boundaries for your sites."
+        rightElement={
+          <Button onClick={onFileUploadClick} className="gap-2">
+            <Upload className="h-4 w-4" />
+            <span>Upload Boundaries</span>
+          </Button>
+        }
+      />
       
-      <div className="flex gap-2">
-        <Button onClick={onFileUploadClick} className="gap-2">
-          <Upload className="h-4 w-4" />
-          Upload Boundary
-        </Button>
-        <Button variant="outline" className="gap-2">
-          <Plus className="h-4 w-4" />
-          Add Property
-        </Button>
-      </div>
+      {!isAuthenticated && <AuthNotice />}
     </div>
   );
 };

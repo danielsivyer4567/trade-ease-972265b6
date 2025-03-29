@@ -497,6 +497,42 @@ export type Database = {
         }
         Relationships: []
       }
+      property_boundaries: {
+        Row: {
+          address: string | null
+          boundaries: Json
+          created_at: string
+          description: string | null
+          id: string
+          location: number[]
+          name: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          address?: string | null
+          boundaries: Json
+          created_at?: string
+          description?: string | null
+          id?: string
+          location: number[]
+          name: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          address?: string | null
+          boundaries?: Json
+          created_at?: string
+          description?: string | null
+          id?: string
+          location?: number[]
+          name?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       statistics_history: {
         Row: {
           count: number
