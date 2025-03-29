@@ -18,6 +18,7 @@ import TeamGreen from '@/pages/TeamGreen'
 import TradeDash from '@/pages/TradeDash'
 import PropertyBoundaries from '@/pages/PropertyBoundaries'
 import Messaging from '@/pages/Messaging'
+import Referrals from '@/pages/Referrals'
 
 export function Routes() {
   return (
@@ -112,6 +113,14 @@ export function Routes() {
         element={
           <ProtectedRoute>
             <Messaging />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/referrals"
+        element={
+          <ProtectedRoute>
+            <Referrals />
           </ProtectedRoute>
         }
       />
