@@ -1,3 +1,4 @@
+
 import { BaseLayout } from "@/components/ui/BaseLayout";
 import JobSiteMap from "@/components/dashboard/JobSiteMap";
 import RecentActivity from "@/components/dashboard/RecentActivity";
@@ -108,7 +109,9 @@ export default function Index() {
                 
                 {/* Expand/Collapse button */}
                 <CollapsibleTrigger asChild>
-                  
+                  <Button variant="ghost" size="icon" className="h-8 w-8">
+                    {calendarExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                  </Button>
                 </CollapsibleTrigger>
               </div>
             </div>
@@ -151,7 +154,17 @@ export default function Index() {
             <h2 className="text-xl font-semibold mb-4">Team Dashboards</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {teams.map(team => <Link key={`dashboard-${team.name}`} to={team.path} className="block hover:scale-105 transition-transform duration-200">
-                  
+                  <Card className={`p-6 border-l-4 border-${team.color}-500 shadow-md`}>
+                    <div className="flex items-center gap-3">
+                      <div className={`w-10 h-10 rounded-full bg-${team.color}-100 flex items-center justify-center`}>
+                        <Hammer className={`w-5 h-5 text-${team.color}-600`} />
+                      </div>
+                      <div>
+                        <h3 className={`text-lg font-semibold text-${team.color}-700`}>{team.name}</h3>
+                        <p className="text-sm text-gray-500">View dashboard</p>
+                      </div>
+                    </div>
+                  </Card>
                 </Link>)}
             </div>
           </div>
