@@ -28,9 +28,7 @@ export function SidebarNavLinks({
   const {
     signOut
   } = useAuth();
-
   const isTeamsPage = location.pathname === "/teams";
-  
   const handleLogout = async () => {
     try {
       await signOut();
@@ -39,14 +37,10 @@ export function SidebarNavLinks({
       console.error('Error signing out:', error);
     }
   };
-  
   return <nav className="grid gap-1 px-2 py-2">
       {navigationGroups.map((group, index) => <div key={index} className="grid gap-0.5">
           {/* Group Label */}
-          {isExpanded && group.label && <h4 className={cn(
-            "mb-1 px-2 text-xs font-semibold text-muted-foreground",
-            group.label === "Teams" && "text-blue-600"
-          )}>
+          {isExpanded && group.label && <h4 className={cn("mb-1 px-2 text-xs font-semibold text-muted-foreground", group.label === "Teams" && "text-blue-600")}>
               {group.label}
             </h4>}
 
@@ -55,24 +49,15 @@ export function SidebarNavLinks({
         if (item.type === 'link') {
           const isActive = location.pathname === item.path;
           const LinkIcon = item.icon;
-          
+
           // Special styling for team links
           const isTeamLink = item.isTeamLink;
-          
-          const linkButton = <Button key={item.path} asChild variant={isActive ? "secondary" : "ghost"} size="sm" className={cn(
-            "w-full justify-start h-9", 
-            isExpanded ? "px-2" : "px-2 justify-center", 
-            isActive && "bg-white border border-foreground/10"
-          )}>
+          const linkButton = <Button key={item.path} asChild variant={isActive ? "secondary" : "ghost"} size="sm" className={cn("w-full justify-start h-9", isExpanded ? "px-2" : "px-2 justify-center", isActive && "bg-white border border-foreground/10")}>
                   <Link to={item.path}>
-                    <LinkIcon className={cn(
-                      "h-4 w-4", 
-                      isActive ? "text-primary" : "text-muted-foreground"
-                    )} />
+                    <LinkIcon className={cn("h-4 w-4", isActive ? "text-primary" : "text-muted-foreground")} />
                     {isExpanded && <span className="ml-2 text-sm">{item.label}</span>}
                   </Link>
                 </Button>;
-                
           return isExpanded ? linkButton : <TooltipProvider key={item.path}>
                   <Tooltip>
                     <TooltipTrigger asChild>
@@ -85,7 +70,7 @@ export function SidebarNavLinks({
                 </TooltipProvider>;
         } else if (item.type === 'button' && item.action === 'logout') {
           const LogoutIcon = item.icon;
-          const logoutButton = <Button key="logout" variant="ghost" size="sm" onClick={handleLogout} className={cn("w-full justify-start h-9", isExpanded ? "px-2" : "px-2 justify-center")}>
+          const logoutButton = <Button key="logout" variant="ghost" size="sm" onClick={handleLogout} className="">
                   <LogoutIcon className="h-4 w-4 text-muted-foreground" />
                   {isExpanded && <span className="ml-2 text-sm">{item.label}</span>}
                 </Button>;
@@ -116,72 +101,35 @@ export function SidebarNavLinks({
                   </CollapsibleTrigger>
                   
                   <CollapsibleContent>
-                    {isExpanded && item.items && item.items.map((subItem) => {
-                      const isSubActive = location.pathname === subItem.path;
-                      const SubIcon = subItem.icon;
-                      
-                      return (
-                        <Button
-                          key={subItem.path}
-                          asChild
-                          variant={isSubActive ? "secondary" : "ghost"}
-                          size="sm"
-                          className={cn(
-                            "w-full justify-start h-9 pl-8",
-                            isSubActive && "bg-white border border-foreground/10"
-                          )}
-                        >
+                    {isExpanded && item.items && item.items.map(subItem => {
+                const isSubActive = location.pathname === subItem.path;
+                const SubIcon = subItem.icon;
+                return <Button key={subItem.path} asChild variant={isSubActive ? "secondary" : "ghost"} size="sm" className={cn("w-full justify-start h-9 pl-8", isSubActive && "bg-white border border-foreground/10")}>
                           <Link to={subItem.path}>
                             <SubIcon className={cn("h-4 w-4", isSubActive ? "text-primary" : "text-muted-foreground")} />
                             <span className="ml-2 text-sm">{subItem.label}</span>
                           </Link>
-                        </Button>
-                      );
-                    })}
+                        </Button>;
+              })}
                   </CollapsibleContent>
                 </Collapsible>;
         }
-        
         return null;
       })}
 
         {/* Show team links only when on the Teams page */}
-        {isTeamsPage && isExpanded && teamLinks.map((team) => {
-          const isActive = location.pathname === team.path;
-          const TeamIcon = team.icon;
-          
-          return (
-            <Button
-              key={team.path}
-              asChild
-              variant={isActive ? "secondary" : "ghost"}
-              size="sm"
-              className={cn(
-                "w-full justify-start h-9 pl-4", 
-                isExpanded ? "px-2" : "px-2 justify-center", 
-                isActive && "bg-white border border-foreground/10"
-              )}
-            >
+        {isTeamsPage && isExpanded && teamLinks.map(team => {
+        const isActive = location.pathname === team.path;
+        const TeamIcon = team.icon;
+        return <Button key={team.path} asChild variant={isActive ? "secondary" : "ghost"} size="sm" className={cn("w-full justify-start h-9 pl-4", isExpanded ? "px-2" : "px-2 justify-center", isActive && "bg-white border border-foreground/10")}>
               <Link to={team.path}>
-                <TeamIcon className={cn(
-                  "h-4 w-4", 
-                  isActive ? "text-primary" : "text-muted-foreground",
-                  team.color === "red" && "text-red-500",
-                  team.color === "blue" && "text-blue-500",
-                  team.color === "green" && "text-green-500"
-                )} />
-                <span className={cn(
-                  "ml-2 text-sm",
-                  team.color === "red" && "text-red-500",
-                  team.color === "blue" && "text-blue-500",
-                  team.color === "green" && "text-green-500"
-                )}>
+                <TeamIcon className={cn("h-4 w-4", isActive ? "text-primary" : "text-muted-foreground", team.color === "red" && "text-red-500", team.color === "blue" && "text-blue-500", team.color === "green" && "text-green-500")} />
+                <span className={cn("ml-2 text-sm", team.color === "red" && "text-red-500", team.color === "blue" && "text-blue-500", team.color === "green" && "text-green-500")}>
                   {team.label}
                 </span>
               </Link>
-            </Button>
-          );
-        })}
+            </Button>;
+      })}
         </div>)}
     </nav>;
 }
