@@ -90,22 +90,16 @@ const settingsSections = [
     path: "/settings/customer-portfolios"
   },
   {
-    title: "API Integrations",
-    icon: Link2,
-    description: "Configure external API integrations",
-    path: "/settings/integrations"
+    title: "Integrations",
+    icon: Network,
+    description: "Manage third-party integrations",
+    path: "/integrations"
   },
   {
     title: "Jobs",
     icon: Briefcase,
     description: "Job management settings",
     path: "/settings/jobs"
-  },
-  {
-    title: "Integrations",
-    icon: Network,
-    description: "Manage third-party integrations",
-    path: "/settings/integrations"
   },
   {
     title: "Inquiries",

@@ -176,12 +176,6 @@ export const navigationGroups = [
       },
       {
         type: 'link',
-        icon: Boxes,
-        label: "Integrations",
-        path: "/integrations"
-      },
-      {
-        type: 'link',
         icon: Settings,
         label: "Settings",
         path: "/settings"

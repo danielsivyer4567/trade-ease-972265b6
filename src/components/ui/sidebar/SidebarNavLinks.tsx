@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { LayoutDashboard, Briefcase, Users, FileText, Settings, Calendar, Network, Share, Bot, Mail, MessageSquare, Link as LinkIcon, Database, Plus, BarChart, ListTodo, Bell, GitBranch, Gauge, Calculator, LucideIcon, ChevronDown } from 'lucide-react';
@@ -84,20 +85,46 @@ export function SidebarNavLinks({
 
         // Dropdown Menu (for Teams)
         if (item.type === 'dropdown') {
+          const DropdownIcon = item.icon;
           return <Collapsible key={item.label}>
                   <CollapsibleTrigger asChild>
                     <Button variant="ghost" size="sm" className={cn("w-full justify-between h-10", isExpanded ? "px-2" : "px-2 justify-center")}>
                       <div className="flex items-center">
-                        <item.icon className="h-4 w-4 text-muted-foreground" />
+                        <DropdownIcon className="h-4 w-4 text-muted-foreground" />
                         {isExpanded && <span className="ml-2 text-sm">{item.label}</span>}
                       </div>
                       {isExpanded && <ChevronDown className="h-3 w-3" />}
                     </Button>
                   </CollapsibleTrigger>
                   
-                  
+                  <CollapsibleContent>
+                    {isExpanded && item.items && item.items.map((subItem) => {
+                      const isSubActive = location.pathname === subItem.path;
+                      const SubIcon = subItem.icon;
+                      
+                      return (
+                        <Button
+                          key={subItem.path}
+                          asChild
+                          variant={isSubActive ? "secondary" : "ghost"}
+                          size="sm"
+                          className={cn(
+                            "w-full justify-start h-9 pl-8",
+                            isSubActive && "bg-white border border-foreground/10"
+                          )}
+                        >
+                          <Link to={subItem.path}>
+                            <SubIcon className={cn("h-4 w-4", isSubActive ? "text-primary" : "text-muted-foreground")} />
+                            <span className="ml-2 text-sm">{subItem.label}</span>
+                          </Link>
+                        </Button>
+                      );
+                    })}
+                  </CollapsibleContent>
                 </Collapsible>;
         }
+        
+        return null;
       })}
         </div>)}
     </nav>;
