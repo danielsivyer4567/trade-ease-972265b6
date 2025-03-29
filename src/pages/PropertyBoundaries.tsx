@@ -3,7 +3,7 @@ import { BaseLayout } from "@/components/ui/BaseLayout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Upload, Map, File, Eye, Plus, MapPin, Ruler, Upload as UploadIcon, RotateCw, AlertCircle } from 'lucide-react';
-import CustomPropertyMap from '@/components/CustomPropertyMap';
+import CustomPropertyMap from '@/components/property-map';
 import { toast } from "sonner";
 
 // Sample property boundaries data with correct typing
