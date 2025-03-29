@@ -16,7 +16,8 @@ export function useMapState() {
   // Track pinch zoom state
   const [pinchData, setPinchData] = useState({
     initialDistance: 0,
-    isZooming: false
+    isZooming: false,
+    initialScale: 1
   });
 
   const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
@@ -43,7 +44,8 @@ export function useMapState() {
       
       setPinchData({
         initialDistance: distance,
-        isZooming: true
+        isZooming: true,
+        initialScale: mapState.scale
       });
       return;
     }
@@ -87,19 +89,15 @@ export function useMapState() {
       );
       
       // Calculate zoom scale factor
-      const scale = currentDistance / pinchData.initialDistance;
+      const scaleFactor = currentDistance / pinchData.initialDistance;
+      const newScale = pinchData.initialScale * scaleFactor;
       
       // Apply zoom only if the change is significant
-      if (Math.abs(scale - 1) > 0.01) {
+      if (Math.abs(newScale - mapState.scale) > 0.01) {
         setMapState(prev => ({
           ...prev,
-          scale: Math.max(0.5, Math.min(5, prev.scale * scale))
+          scale: Math.max(0.5, Math.min(5, newScale))
         }));
-        
-        setPinchData({
-          initialDistance: currentDistance,
-          isZooming: true
-        });
       }
       
       return;
@@ -129,7 +127,8 @@ export function useMapState() {
     // Reset touch zooming state
     setPinchData({
       initialDistance: 0,
-      isZooming: false
+      isZooming: false,
+      initialScale: mapState.scale
     });
     
     setMapState(prev => ({
@@ -141,14 +140,14 @@ export function useMapState() {
   const handleZoomIn = () => {
     setMapState(prev => ({
       ...prev, 
-      scale: prev.scale * 1.2
+      scale: Math.min(prev.scale * 1.2, 5) // Limit maximum zoom
     }));
   };
   
   const handleZoomOut = () => {
     setMapState(prev => ({
       ...prev,
-      scale: prev.scale / 1.2
+      scale: Math.max(prev.scale / 1.2, 0.5) // Limit minimum zoom
     }));
   };
   
