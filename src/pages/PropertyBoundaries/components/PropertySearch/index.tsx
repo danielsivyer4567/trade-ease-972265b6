@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useRef } from 'react';
 import { Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { AddressPreviews } from './AddressPreviews';
@@ -23,6 +23,23 @@ export const PropertySearch: React.FC<PropertySearchProps> = ({
   setIsPreviewVisible,
   onAddressPreviewClick
 }) => {
+  const blurTimeoutRef = useRef<number | null>(null);
+
+  const handleFocus = () => {
+    if (blurTimeoutRef.current) {
+      window.clearTimeout(blurTimeoutRef.current);
+      blurTimeoutRef.current = null;
+    }
+    setIsPreviewVisible(addressPreviews.length > 0);
+  };
+
+  const handleBlur = () => {
+    // Delay hiding the preview to allow for clicking on it
+    blurTimeoutRef.current = window.setTimeout(() => {
+      setIsPreviewVisible(false);
+    }, 200);
+  };
+
   return (
     <div className="relative mb-4">
       <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -32,12 +49,13 @@ export const PropertySearch: React.FC<PropertySearchProps> = ({
         value={searchQuery}
         onChange={onSearchChange}
         onKeyDown={onKeyDown}
-        onFocus={() => setIsPreviewVisible(addressPreviews.length > 0)}
-        onBlur={() => setTimeout(() => setIsPreviewVisible(false), 200)}
+        onFocus={handleFocus}
+        onBlur={handleBlur}
+        aria-label="Property search"
       />
       
       {/* Address Preview */}
-      {isPreviewVisible && addressPreviews.length > 0 && (
+      {isPreviewVisible && (
         <AddressPreviews 
           addressPreviews={addressPreviews} 
           onAddressClick={onAddressPreviewClick} 

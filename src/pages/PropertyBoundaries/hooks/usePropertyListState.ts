@@ -13,14 +13,18 @@ export const usePropertyListState = (
   
   // Enhanced address search that breaks down addresses into components
   const searchAddressMatches = (address: string, query: string): boolean => {
+    if (!address || !query) return false;
+    
     const addressLower = address.toLowerCase();
-    const queryLower = query.toLowerCase();
+    const queryLower = query.toLowerCase().trim();
     
     // Direct contains check
     if (addressLower.includes(queryLower)) return true;
     
     // Split query into parts and check if each part exists in address
-    const queryParts = queryLower.split(/\s+/);
+    const queryParts = queryLower.split(/\s+/).filter(part => part.length > 0);
+    if (queryParts.length === 0) return false;
+    
     let matchCount = 0;
     
     for (const part of queryParts) {
@@ -60,11 +64,11 @@ export const usePropertyListState = (
       const matchingAddresses = properties
         .filter(prop => {
           if (!prop.address) return false;
-          const query = searchQuery.toLowerCase().trim();
-          return searchAddressMatches(prop.address, query);
+          return searchAddressMatches(prop.address, searchQuery);
         })
         .map(prop => prop.address as string)
-        .slice(0, 3); // Limit to top 3 matches
+        .filter((address, index, self) => self.indexOf(address) === index) // Remove duplicates
+        .slice(0, 5); // Limit to top 5 matches
       
       setAddressPreviews(matchingAddresses);
       setIsPreviewVisible(matchingAddresses.length > 0);
