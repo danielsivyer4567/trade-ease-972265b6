@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { LayoutDashboard, Briefcase, Users, FileText, Settings, Calendar, Network, Share, Bot, Mail, MessageSquare, Link as LinkIcon, Database, Plus, BarChart, ListTodo, Bell, GitBranch, Gauge, Calculator, LucideIcon, ChevronDown } from 'lucide-react';
@@ -61,7 +60,7 @@ export function SidebarNavLinks({
           const isTeamLink = item.isTeamLink;
           
           const linkButton = <Button key={item.path} asChild variant={isActive ? "secondary" : "ghost"} size="sm" className={cn(
-            "w-full justify-start h-[0px]", 
+            "w-full justify-start h-9", 
             isExpanded ? "px-2" : "px-2 justify-center", 
             isActive && "bg-white border border-foreground/10"
           )}>
@@ -86,7 +85,7 @@ export function SidebarNavLinks({
                 </TooltipProvider>;
         } else if (item.type === 'button' && item.action === 'logout') {
           const LogoutIcon = item.icon;
-          const logoutButton = <Button key="logout" variant="ghost" size="sm" onClick={handleLogout} className={cn("w-full justify-start h-[0px]", isExpanded ? "px-2" : "px-2 justify-center")}>
+          const logoutButton = <Button key="logout" variant="ghost" size="sm" onClick={handleLogout} className={cn("w-full justify-start h-9", isExpanded ? "px-2" : "px-2 justify-center")}>
                   <LogoutIcon className="h-4 w-4 text-muted-foreground" />
                   {isExpanded && <span className="ml-2 text-sm">{item.label}</span>}
                 </Button>;
@@ -158,7 +157,7 @@ export function SidebarNavLinks({
               variant={isActive ? "secondary" : "ghost"}
               size="sm"
               className={cn(
-                "w-full justify-start h-[0px] pl-4", 
+                "w-full justify-start h-9 pl-4", 
                 isExpanded ? "px-2" : "px-2 justify-center", 
                 isActive && "bg-white border border-foreground/10"
               )}
