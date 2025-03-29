@@ -57,6 +57,10 @@ const Calendar = () => {
   const navigateToTeam = (path: string) => {
     navigate(path);
   };
+  
+  const handleTeamCalendarOpen = (teamColor: string) => {
+    navigate(`/calendar/team/${teamColor}`);
+  };
 
   return (
     <BaseLayout>
@@ -130,23 +134,37 @@ const Calendar = () => {
                 <CardTitle className="text-lg flex items-center gap-2">
                   <div className={`w-3 h-3 rounded-full bg-${team.color}-500`}></div>
                   <span>{team.name}</span>
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    className="ml-auto"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      navigateToTeam(`/team-${team.color}`);
-                    }}
-                  >
-                    Details
-                  </Button>
+                  <div className="ml-auto flex gap-2">
+                    <Button 
+                      variant="ghost" 
+                      size="sm"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        navigateToTeam(`/team-${team.color}`);
+                      }}
+                    >
+                      Details
+                    </Button>
+                    <Button 
+                      variant="outline"
+                      size="sm"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleTeamCalendarOpen(team.color);
+                      }}
+                    >
+                      Calendar
+                    </Button>
+                  </div>
                 </CardTitle>
               </CardHeader>
             </Card>
           ))}
           
-          <Card className="cursor-pointer hover:shadow-md transition-shadow">
+          <Card 
+            className="cursor-pointer hover:shadow-md transition-shadow"
+            onClick={() => navigate('/calendar/sync')}
+          >
             <CardHeader className="p-4">
               <CardTitle className="text-lg flex items-center gap-2">
                 <RefreshCw className="h-4 w-4" />
