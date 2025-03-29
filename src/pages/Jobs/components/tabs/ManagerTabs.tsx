@@ -31,10 +31,7 @@ export const ManagerTabs = ({
         {!isMobile && <Receipt className="w-4 h-4 mr-2 mx-[11px]" />}
         Bills
       </TabsTrigger>
-      <TabsTrigger value="costs" className="min-w-[80px] sm:min-w-[100px] whitespace-nowrap flex-shrink-0 bg-slate-400 hover:bg-slate-300 px-[27px] mx-[16px]">
-        {!isMobile && <Calculator className="w-4 h-4 mr-2" />}
-        Costs
-      </TabsTrigger>
+      
       <TabsTrigger value="invoices" className="min-w-[80px] sm:min-w-[100px] whitespace-nowrap flex-shrink-0 bg-slate-400 hover:bg-slate-300 mx-0 px-[28px]">
         {!isMobile && <ScrollText className="w-4 h-4 mr-2" />}
         Invoices
