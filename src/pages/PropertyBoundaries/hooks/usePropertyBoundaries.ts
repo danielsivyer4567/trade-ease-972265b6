@@ -6,22 +6,6 @@ import { supabase } from '@/lib/supabase';
 // Sample mock properties for initial UI rendering when no data is available
 const mockProperties: Property[] = [
   {
-    id: '1',
-    name: 'Main Office',
-    description: 'Company headquarters location',
-    address: '123 Collins Street, Melbourne VIC 3000',
-    location: [-37.8136, 144.9631], // Melbourne
-    boundaries: [
-      [
-        [-37.8136, 144.9631],
-        [-37.8140, 144.9640],
-        [-37.8150, 144.9635],
-        [-37.8146, 144.9626],
-        [-37.8136, 144.9631]
-      ]
-    ]
-  },
-  {
     id: '2',
     name: 'Client Site A',
     description: 'Major construction project',
@@ -85,14 +69,17 @@ export const usePropertyBoundaries = () => {
             setSelectedProperty(mockProperties[0] || null);
           } else if (data && data.length > 0) {
             // Transform Supabase data to match Property type
-            const transformedData = data.map((item): Property => ({
-              id: item.id,
-              name: item.name,
-              description: item.description || '',
-              address: item.address || '',
-              location: item.location,
-              boundaries: item.boundaries
-            }));
+            const transformedData = data
+              .map((item): Property => ({
+                id: item.id,
+                name: item.name,
+                description: item.description || '',
+                address: item.address || '',
+                location: item.location,
+                boundaries: item.boundaries
+              }))
+              // Filter out any property with the name "Main Office"
+              .filter(property => property.name !== 'Main Office');
             
             setProperties(transformedData);
             setSelectedProperty(transformedData[0] || null);
@@ -122,11 +109,15 @@ export const usePropertyBoundaries = () => {
   }, []);
   
   const handlePropertySelect = useCallback((property: Property) => {
+    // Don't allow Main Office to be selected
+    if (property.name === 'Main Office') {
+      toast.error('This property cannot be selected');
+      return;
+    }
     setSelectedProperty(property);
     console.log('Selected property:', property);
   }, []);
   
-  // Add new deleteProperty function
   const handleDeleteProperty = useCallback(async (propertyToDelete: Property) => {
     try {
       // Check if user is deleting a property that's currently selected
@@ -181,7 +172,6 @@ export const usePropertyBoundaries = () => {
     }
   }, [selectedProperty, properties]);
   
-  // Extract address from GeoJSON properties with better fallbacks
   const extractAddress = (properties: any): string => {
     if (!properties) return '';
     
@@ -281,6 +271,12 @@ export const usePropertyBoundaries = () => {
             const feature = data.features[index];
             const coords = feature.geometry.coordinates || [];
             const name = feature.properties?.name || `Property ${properties.length + index + 1}`;
+            
+            // Skip properties named "Main Office"
+            if (name === "Main Office") {
+              toast.warning(`Skipped property "Main Office" as it's not allowed`);
+              continue;
+            }
             
             let centerLat = 0, centerLng = 0;
             let numPoints = 0;
@@ -388,7 +384,14 @@ export const usePropertyBoundaries = () => {
   }, []);
   
   const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(e.target.value);
+    // Block searching for "Main Office"
+    const value = e.target.value;
+    if (value.toLowerCase().includes('main office')) {
+      toast.error('This property cannot be searched');
+      setSearchQuery('');
+      return;
+    }
+    setSearchQuery(value);
   }, []);
   
   const handleToggleMeasurement = useCallback(() => {
