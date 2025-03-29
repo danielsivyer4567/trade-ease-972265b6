@@ -1,10 +1,11 @@
 
 import { useState, useEffect } from 'react';
-import { PropertyBoundary, MapMeasurements } from '../types';
+import { PropertyBoundary, MapMeasurements, BoundaryEdge } from '../types';
 import { 
   convertBoundariesToPropertyBoundaries, 
   calculateBoundaryMeasurements,
-  calculateSingleBoundaryMeasurements
+  calculateSingleBoundaryMeasurements,
+  calculateBoundaryEdges
 } from '../mapUtils';
 
 /**
@@ -15,7 +16,8 @@ export function useBoundaryProcessing(boundaries: Array<Array<[number, number]>>
   const [measurements, setMeasurements] = useState<MapMeasurements>({
     boundaryLength: 0,
     boundaryArea: 0,
-    individualBoundaries: []
+    individualBoundaries: [],
+    edges: []
   });
 
   useEffect(() => {
@@ -26,7 +28,8 @@ export function useBoundaryProcessing(boundaries: Array<Array<[number, number]>>
       setMeasurements({
         boundaryLength: 0,
         boundaryArea: 0,
-        individualBoundaries: []
+        individualBoundaries: [],
+        edges: []
       });
       return;
     }
@@ -49,17 +52,24 @@ export function useBoundaryProcessing(boundaries: Array<Array<[number, number]>>
         };
       });
       
+      // Calculate boundary edges with measurements
+      const edges = convertedBoundaries.flatMap((boundary, boundaryIndex) => 
+        calculateBoundaryEdges(boundary.points, boundaryIndex)
+      );
+      
       // Update measurements state
       setMeasurements({
         boundaryLength: totalLength,
         boundaryArea: totalArea,
-        individualBoundaries: individualMeasurements
+        individualBoundaries: individualMeasurements,
+        edges
       });
       
       console.log('Boundary measurements calculated:', {
         totalLength,
         totalArea,
-        individualMeasurements
+        individualMeasurements,
+        edgesCount: edges.length
       });
     } catch (error) {
       console.error('Error processing boundaries:', error);
@@ -69,7 +79,8 @@ export function useBoundaryProcessing(boundaries: Array<Array<[number, number]>>
       setMeasurements({
         boundaryLength: 0,
         boundaryArea: 0,
-        individualBoundaries: []
+        individualBoundaries: [],
+        edges: []
       });
     }
   }, [boundaries]);

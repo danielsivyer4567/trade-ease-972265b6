@@ -1,11 +1,12 @@
 
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { toast } from "sonner";
 import { CustomPropertyMapProps } from './types';
 import { MapCanvas } from './MapCanvas';
 import { MapHeader } from './MapHeader';
 import { MeasurementsDisplay } from './MeasurementsDisplay';
+import { BoundaryMeasurements } from './BoundaryMeasurements';
 import { usePropertyMap } from './usePropertyMap';
 
 const CustomPropertyMap = ({
@@ -17,6 +18,7 @@ const CustomPropertyMap = ({
 }: CustomPropertyMapProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const [showEdgeMeasurements, setShowEdgeMeasurements] = useState(false);
   
   const {
     measurements,
@@ -29,6 +31,13 @@ const CustomPropertyMap = ({
     toast.success("Map view reset");
   };
   
+  const handleToggleEdgeMeasurements = () => {
+    setShowEdgeMeasurements(prev => !prev);
+    toast.success(showEdgeMeasurements 
+      ? "Edge measurements hidden" 
+      : "Edge measurements shown");
+  };
+  
   return (
     <Card className="w-full">
       <MapHeader 
@@ -36,6 +45,8 @@ const CustomPropertyMap = ({
         description={description}
         boundaries={boundaries}
         onReset={handleReset}
+        onToggleEdgeMeasurements={handleToggleEdgeMeasurements}
+        showEdgeMeasurements={showEdgeMeasurements}
         measureMode={measureMode}
       />
       
@@ -45,7 +56,7 @@ const CustomPropertyMap = ({
           containerRef={containerRef}
           mapEventHandlers={mapEventHandlers}
           zoomControls={zoomControls}
-          measureMode={measureMode}
+          measureMode={measureMode || showEdgeMeasurements}
         />
         
         <MeasurementsDisplay
@@ -53,6 +64,11 @@ const CustomPropertyMap = ({
           boundaryArea={measurements.boundaryArea}
           individualBoundaries={measurements.individualBoundaries}
           highlighted={measureMode}
+        />
+        
+        <BoundaryMeasurements 
+          edges={measurements.edges}
+          showMeasurements={showEdgeMeasurements}
         />
       </CardContent>
     </Card>

@@ -1,7 +1,7 @@
 
 import { useEffect } from 'react';
 import { RefObject } from 'react';
-import { PropertyBoundary, MapState } from '../types';
+import { PropertyBoundary, MapState, BoundaryEdge } from '../types';
 
 /**
  * Hook for rendering the map on canvas
@@ -50,18 +50,25 @@ export function useMapRendering(
     const scaleY = rangeY ? (canvas.height * 0.8) / rangeY : 1;
     const autoScale = Math.min(scaleX, scaleY);
     
+    // Transform coordinates based on scale and offset
+    const transformPoint = (point: { x: number, y: number }) => {
+      return {
+        x: (point.x - centerX) * autoScale * mapState.scale + canvas.width / 2 + mapState.offset.x,
+        y: (centerY - point.y) * autoScale * mapState.scale + canvas.height / 2 + mapState.offset.y
+      };
+    };
+    
     // Draw boundaries
-    propertyBoundaries.forEach((boundary) => {
+    propertyBoundaries.forEach((boundary, boundaryIndex) => {
       ctx.beginPath();
       
       boundary.points.forEach((point, i) => {
-        const x = (point.x - centerX) * autoScale * mapState.scale + canvas.width / 2 + mapState.offset.x;
-        const y = (centerY - point.y) * autoScale * mapState.scale + canvas.height / 2 + mapState.offset.y;
+        const transformed = transformPoint(point);
         
         if (i === 0) {
-          ctx.moveTo(x, y);
+          ctx.moveTo(transformed.x, transformed.y);
         } else {
-          ctx.lineTo(x, y);
+          ctx.lineTo(transformed.x, transformed.y);
         }
       });
       
@@ -76,18 +83,64 @@ export function useMapRendering(
       ctx.lineWidth = 3;
       ctx.stroke();
       
+      // Store transformed points for edge labels
+      const transformedPoints = boundary.points.map(point => transformPoint(point));
+      
+      // Draw edges with numbered labels
+      boundary.points.forEach((point, i) => {
+        const nextIndex = (i + 1) % boundary.points.length;
+        const start = transformedPoints[i];
+        const end = transformedPoints[nextIndex];
+        
+        // Calculate midpoint
+        const midpoint = {
+          x: (start.x + end.x) / 2,
+          y: (start.y + end.y) / 2
+        };
+        
+        // Draw label background
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
+        ctx.beginPath();
+        ctx.arc(midpoint.x, midpoint.y, 12, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Draw label text
+        ctx.fillStyle = 'white';
+        ctx.font = '10px Arial';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText((i + 1).toString(), midpoint.x, midpoint.y);
+      });
+      
       // Draw points
-      boundary.points.forEach(point => {
-        const x = (point.x - centerX) * autoScale * mapState.scale + canvas.width / 2 + mapState.offset.x;
-        const y = (centerY - point.y) * autoScale * mapState.scale + canvas.height / 2 + mapState.offset.y;
+      boundary.points.forEach((point, i) => {
+        const transformed = transformPoint(point);
         
         ctx.beginPath();
-        ctx.arc(x, y, 4, 0, Math.PI * 2);
+        ctx.arc(transformed.x, transformed.y, 4, 0, Math.PI * 2);
         ctx.fillStyle = '#1A1F2C';
         ctx.fill();
         ctx.strokeStyle = 'white';
         ctx.lineWidth = 1;
         ctx.stroke();
+        
+        // Draw vertex number
+        ctx.fillStyle = 'white';
+        ctx.font = '10px Arial';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        const pointLabelX = transformed.x;
+        const pointLabelY = transformed.y - 15;
+        
+        // Small background for vertex label
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
+        ctx.beginPath();
+        ctx.arc(pointLabelX, pointLabelY, 8, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Draw vertex label
+        ctx.fillStyle = 'white';
+        ctx.fillText(String.fromCharCode(65 + i), pointLabelX, pointLabelY); // Use letters A, B, C, etc.
       });
     });
     

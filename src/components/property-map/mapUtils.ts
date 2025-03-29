@@ -1,5 +1,5 @@
 
-import { Coordinate, PropertyBoundary } from './types';
+import { Coordinate, PropertyBoundary, BoundaryEdge } from './types';
 
 export const convertBoundariesToPropertyBoundaries = (
   boundaries: Array<Array<[number, number]>> = []
@@ -60,6 +60,38 @@ export const calculateBoundaryMeasurements = (boundaries: PropertyBoundary[]) =>
   });
 
   return { totalLength, totalArea };
+};
+
+export const calculateBoundaryEdges = (points: Coordinate[], boundaryIndex: number): BoundaryEdge[] => {
+  if (!points || points.length < 3) return [];
+  
+  const edges: BoundaryEdge[] = [];
+  
+  for (let i = 0; i < points.length; i++) {
+    const nextIndex = (i + 1) % points.length;
+    const start = points[i];
+    const end = points[nextIndex];
+    const distance = calculateDistance(start, end);
+    
+    // Calculate midpoint for label positioning
+    const midpoint = {
+      x: (start.x + end.x) / 2,
+      y: (start.y + end.y) / 2
+    };
+    
+    edges.push({
+      id: `edge-${boundaryIndex}-${i}`,
+      boundaryIndex,
+      edgeIndex: i,
+      start,
+      end,
+      midpoint,
+      length: distance,
+      displayLength: distance.toFixed(2)
+    });
+  }
+  
+  return edges;
 };
 
 export const formatMeasurements = (length: number, area: number) => {
