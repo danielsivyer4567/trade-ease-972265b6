@@ -28,25 +28,29 @@ export const PropertyList: React.FC<PropertyListProps> = ({
   onSearchChange,
   onToggleMeasurement
 }) => {
-  // Filter properties based on search query with improved address search
+  // Filter properties based on search query with more robust search
   const filteredProperties = properties.filter(prop => {
+    // If search query is empty, return all properties
+    if (!searchQuery.trim()) return true;
+    
     const query = searchQuery.toLowerCase().trim();
     
-    // If no search query, show all properties
-    if (!query) return true;
+    // Check if property name includes search query
+    const nameMatch = prop.name?.toLowerCase().includes(query) || false;
     
-    // Check name
-    if (prop.name.toLowerCase().includes(query)) return true;
+    // Check if property description includes search query
+    const descMatch = prop.description?.toLowerCase().includes(query) || false;
     
-    // Check description
-    if (prop.description.toLowerCase().includes(query)) return true;
+    // Check if property address includes search query
+    const addressMatch = prop.address?.toLowerCase().includes(query) || false;
     
-    // Check address - make sure it exists first and handle different formats
-    if (prop.address && prop.address.toLowerCase().includes(query)) return true;
-    
-    // No match
-    return false;
+    // Return true if any of the fields match
+    return nameMatch || descMatch || addressMatch;
   });
+
+  console.log('Search query:', searchQuery);
+  console.log('Filtered properties:', filteredProperties);
+  console.log('All properties:', properties);
 
   return (
     <div className="bg-white rounded-lg shadow-md p-4">
