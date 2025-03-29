@@ -1,20 +1,19 @@
 
 import React from 'react';
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Eye, File, Search, Ruler } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Trash2, FileUp, Search, Ruler } from 'lucide-react';
 import { Property } from '../types';
-import { Input } from "@/components/ui/input";
 
 interface PropertyListProps {
   properties: Property[];
-  selectedProperty: Property;
+  selectedProperty: Property | null;
   uploadedFile: File | null;
   searchQuery: string;
   isMeasuring: boolean;
   onPropertySelect: (property: Property) => void;
   onFileRemove: () => void;
-  onSearchChange: (query: string) => void;
+  onSearchChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onToggleMeasurement: () => void;
 }
 
@@ -29,106 +28,90 @@ export const PropertyList: React.FC<PropertyListProps> = ({
   onSearchChange,
   onToggleMeasurement
 }) => {
+  // Filter properties based on search query
+  const filteredProperties = properties.filter(prop => 
+    prop.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    prop.description.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-lg">Property List</CardTitle>
-        <CardDescription>Select a property to view</CardDescription>
-        
-        <div className="mt-2 relative">
-          <Input
-            placeholder="Search properties..."
-            value={searchQuery}
-            onChange={(e) => onSearchChange(e.target.value)}
-            className="pl-8"
-          />
-          <Search className="h-4 w-4 absolute left-2.5 top-1/2 transform -translate-y-1/2 text-muted-foreground" />
-          {searchQuery && (
+    <div className="bg-white rounded-lg shadow-md p-4">
+      <h2 className="text-xl font-bold mb-4">Properties</h2>
+      
+      {/* Search Box */}
+      <div className="relative mb-4">
+        <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+        <Input
+          placeholder="Search properties..."
+          className="pl-8"
+          value={searchQuery}
+          onChange={onSearchChange}
+        />
+      </div>
+      
+      {/* Properties List */}
+      <div className="space-y-2 mb-4 max-h-[300px] overflow-y-auto">
+        {filteredProperties.length > 0 ? (
+          filteredProperties.map(property => (
+            <div
+              key={property.id}
+              className={`p-3 rounded-md cursor-pointer transition-colors ${
+                selectedProperty?.id === property.id
+                  ? "bg-primary/10 border border-primary/30"
+                  : "bg-secondary/10 hover:bg-primary/5 border border-transparent"
+              }`}
+              onClick={() => onPropertySelect(property)}
+            >
+              <h3 className="font-medium">{property.name}</h3>
+              <p className="text-sm text-muted-foreground truncate">
+                {property.description}
+              </p>
+            </div>
+          ))
+        ) : (
+          <div className="text-center py-4 text-muted-foreground">
+            No properties found
+          </div>
+        )}
+      </div>
+      
+      {/* Upload Info */}
+      {uploadedFile && (
+        <div className="bg-secondary/20 p-3 rounded-md mb-4">
+          <div className="flex justify-between items-center">
+            <div>
+              <h4 className="font-medium text-sm">Uploaded File</h4>
+              <p className="text-xs text-muted-foreground truncate max-w-[180px]">
+                {uploadedFile.name}
+              </p>
+            </div>
             <Button 
               variant="ghost" 
-              size="sm" 
-              className="absolute right-1 top-1/2 transform -translate-y-1/2 h-6 w-6 p-0"
-              onClick={() => onSearchChange('')}
+              size="icon" 
+              onClick={onFileRemove}
+              className="h-7 w-7"
             >
-              <span className="sr-only">Clear</span>
-              <span aria-hidden="true">×</span>
+              <Trash2 className="h-4 w-4" />
             </Button>
-          )}
+          </div>
         </div>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-2">
-          <Button 
-            variant={isMeasuring ? "default" : "outline"} 
-            size="sm"
-            className="w-full mb-2 flex items-center justify-center gap-2"
-            onClick={onToggleMeasurement}
-          >
-            <Ruler className="h-4 w-4" />
-            {isMeasuring ? "Stop Measuring" : "Measure Boundaries"}
-          </Button>
-          
-          {properties.length > 0 ? (
-            properties.map((property) => (
-              <div 
-                key={property.id} 
-                className={`p-3 rounded-md cursor-pointer border transition-all ${
-                  selectedProperty.id === property.id 
-                    ? 'border-primary bg-primary/5' 
-                    : 'border-border hover:border-primary/40'
-                }`}
-                onClick={() => onPropertySelect(property)}
-              >
-                <div className="flex items-start justify-between">
-                  <div>
-                    <h3 className="font-medium">{property.name}</h3>
-                    <p className="text-xs text-muted-foreground">{property.description}</p>
-                  </div>
-                  <div className="flex">
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
-                      className="h-7 w-7"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onPropertySelect(property);
-                      }}
-                    >
-                      <Eye className="h-3.5 w-3.5" />
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            ))
-          ) : (
-            <div className="py-6 text-center text-sm text-muted-foreground">
-              No properties match your search
-            </div>
-          )}
-          
-          {uploadedFile && (
-            <div className="p-3 rounded-md cursor-pointer border border-dashed border-primary bg-primary/5">
-              <div className="flex items-start justify-between">
-                <div>
-                  <h3 className="font-medium flex items-center">
-                    <File className="h-3.5 w-3.5 mr-1" />
-                    {uploadedFile.name}
-                  </h3>
-                  <p className="text-xs text-muted-foreground">Uploaded GeoJSON file</p>
-                </div>
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  className="h-7 w-7"
-                  onClick={onFileRemove}
-                >
-                  <Eye className="h-3.5 w-3.5" />
-                </Button>
-              </div>
-            </div>
-          )}
-        </div>
-      </CardContent>
-    </Card>
+      )}
+      
+      {/* Action Buttons */}
+      <div className="flex flex-col gap-2">
+        <Button variant="outline" className="w-full justify-start gap-2">
+          <FileUp className="h-4 w-4" />
+          Upload Property
+        </Button>
+        <Button 
+          variant={isMeasuring ? "default" : "outline"} 
+          className="w-full justify-start gap-2"
+          onClick={onToggleMeasurement}
+        >
+          <Ruler className="h-4 w-4" />
+          {isMeasuring ? "Stop Measuring" : "Measure"}
+        </Button>
+      </div>
+    </div>
   );
 };

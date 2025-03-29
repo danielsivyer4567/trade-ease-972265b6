@@ -10,7 +10,7 @@ import {
 /**
  * Hook for processing boundary data
  */
-export function useBoundaryProcessing(boundaries: Array<Array<[number, number]>>) {
+export function useBoundaryProcessing(boundaries: Array<Array<[number, number]>> = []) {
   const [propertyBoundaries, setPropertyBoundaries] = useState<PropertyBoundary[]>([]);
   const [measurements, setMeasurements] = useState<MapMeasurements>({
     boundaryLength: 0,
@@ -19,7 +19,8 @@ export function useBoundaryProcessing(boundaries: Array<Array<[number, number]>>
   });
 
   useEffect(() => {
-    if (!boundaries?.length) {
+    // Check if boundaries is null, undefined, or empty
+    if (!boundaries || !Array.isArray(boundaries) || boundaries.length === 0) {
       // Set default values when no boundaries are present
       setPropertyBoundaries([]);
       setMeasurements({

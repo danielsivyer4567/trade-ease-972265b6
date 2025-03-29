@@ -1,3 +1,4 @@
+
 import React from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "./button";
@@ -7,7 +8,6 @@ import { useNavigate } from "react-router-dom";
 import { QuickTabs } from "./QuickTabs";
 import { SIDEBAR_CONSTANTS } from "./sidebar/constants";
 import { ScrollArea } from "./scroll-area";
-import { Separator } from "./separator";
 import { useAuth } from "@/contexts/AuthContext";
 import {
   DropdownMenu,
@@ -48,7 +48,7 @@ export function MainContent({
   return (
     <main
       className={cn(
-        "relative flex flex-col flex-1 overflow-hidden ",
+        "relative flex flex-col flex-1 overflow-hidden",
         sidebarOpen && "transition-all duration-300 ease-in-out",
         className
       )}
@@ -85,13 +85,9 @@ export function MainContent({
       </div>
 
       {/* Main Content Area */}
-      <ScrollArea className="flex overflow-hidden h-full, flex-col  pl-none pt-none justify-center items-center ">
-        <div className="relative h-full w-full flex justify-center items-center pl-[60px] pt-[40px] ">
-          <div className="w-full h-full flex flex-col gap-4">
-            <div className="flex flex-col gap-4 bg-white  border border-[#B8C5D5]/50 rounded-tl-2xl">
-              {children}
-            </div>
-          </div>
+      <ScrollArea className="flex-1">
+        <div className="relative w-full">
+          {children}
         </div>
       </ScrollArea>
     </main>

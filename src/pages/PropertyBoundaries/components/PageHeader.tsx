@@ -1,7 +1,6 @@
 
-import React from 'react';
-import { Button } from "@/components/ui/button";
-import { Upload as UploadIcon, Plus } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Upload, Plus } from 'lucide-react';
 
 interface PageHeaderProps {
   onFileUploadClick: () => void;
@@ -9,30 +8,22 @@ interface PageHeaderProps {
 
 export const PageHeader: React.FC<PageHeaderProps> = ({ onFileUploadClick }) => {
   return (
-    <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-4">
+    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
       <div>
-        <h1 className="text-2xl font-bold">Property Boundary Viewer</h1>
-        <p className="text-muted-foreground">View and measure property boundaries for job sites</p>
+        <h1 className="text-2xl font-bold">Property Boundaries</h1>
+        <p className="text-muted-foreground">
+          Manage and view your property boundaries
+        </p>
       </div>
       
-      <div className="flex items-center gap-2">
-        <Button 
-          variant="outline" 
-          size="sm"
-          onClick={onFileUploadClick}
-          className="flex items-center gap-1"
-        >
-          <UploadIcon className="h-4 w-4" />
-          <span>Upload GeoJSON</span>
+      <div className="flex gap-2">
+        <Button onClick={onFileUploadClick} className="gap-2">
+          <Upload className="h-4 w-4" />
+          Upload Boundary
         </Button>
-        
-        <Button 
-          variant="default" 
-          size="sm"
-          className="flex items-center gap-1"
-        >
+        <Button variant="outline" className="gap-2">
           <Plus className="h-4 w-4" />
-          <span>New Boundary</span>
+          Add Property
         </Button>
       </div>
     </div>
