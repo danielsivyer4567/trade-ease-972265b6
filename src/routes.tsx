@@ -1,3 +1,4 @@
+
 import { ReactNode } from 'react';
 import Customers from './pages/Customers';
 import NewCustomer from './pages/Customers/NewCustomer';
@@ -35,6 +36,7 @@ import JobCostCalculator from './pages/Calculators/JobCostCalculator';
 import FencingCalculator from './pages/Calculators/FencingCalculator';
 import NCCCodesCalculator from './pages/Calculators/NCCCodesCalculator';
 import Auth from './pages/Auth';
+import PropertyBoundaries from './pages/PropertyBoundaries';
 
 // Define the route type
 export interface RouteConfig {
@@ -150,6 +152,10 @@ export const routes: RouteConfig[] = [
   {
     path: '/settings',
     element: <SettingsPage />
+  },
+  {
+    path: '/property-boundaries',
+    element: <PropertyBoundaries />
   },
   // Settings subpages
   {

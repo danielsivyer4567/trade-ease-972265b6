@@ -1,3 +1,4 @@
+
 import { Routes as RouterRoutes, Route } from 'react-router-dom'
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute'
 import Auth from '@/pages/Auth'
@@ -15,6 +16,7 @@ import TeamRed from '@/pages/TeamRed'
 import TeamBlue from '@/pages/TeamBlue'
 import TeamGreen from '@/pages/TeamGreen'
 import TradeDash from '@/pages/TradeDash'
+import PropertyBoundaries from '@/pages/PropertyBoundaries'
 
 export function Routes() {
   return (
@@ -125,6 +127,14 @@ export function Routes() {
         element={
           <ProtectedRoute>
             <TeamGreen />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/property-boundaries"
+        element={
+          <ProtectedRoute>
+            <PropertyBoundaries />
           </ProtectedRoute>
         }
       />
