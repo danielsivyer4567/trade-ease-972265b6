@@ -2,8 +2,10 @@
 import { Coordinate, PropertyBoundary } from './types';
 
 export const convertBoundariesToPropertyBoundaries = (
-  boundaries: Array<Array<[number, number]>>
+  boundaries: Array<Array<[number, number]>> = []
 ): PropertyBoundary[] => {
+  if (!boundaries || !Array.isArray(boundaries)) return [];
+  
   return boundaries.map((boundary, index) => {
     return {
       name: `Boundary ${index + 1}`,

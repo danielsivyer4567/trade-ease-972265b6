@@ -1,3 +1,4 @@
 
-export { default } from './CustomPropertyMap';
-export * from './types';
+import CustomPropertyMap from './CustomPropertyMap';
+
+export default CustomPropertyMap;
