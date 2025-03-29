@@ -9,7 +9,7 @@ interface JobMapViewProps {
 }
 
 export const JobMapView = ({ job }: JobMapViewProps) => {
-  // Check if job has boundary data
+  // Safely check if job has boundary data
   const hasBoundaries = job.boundaries && job.boundaries.length > 0;
   
   return (
