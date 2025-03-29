@@ -152,9 +152,10 @@ const settingsSections = [
 ];
 
 export default function SettingsPage() {
+  console.log("Rendering Settings Page");
   return (
     <BaseLayout>
-      <div className="space-y-6 h-full">
+      <div className="space-y-6 h-full p-6">
         <div className="flex items-center gap-2">
           <Settings className="h-8 w-8 text-gray-700" />
           <h1 className="text-3xl font-bold">Settings</h1>
