@@ -7,60 +7,69 @@ import { Upload, Map, File, Eye, Plus, MapPin, Ruler, Upload as UploadIcon } fro
 import PropertyBoundaryMap from '@/components/PropertyBoundaryMap';
 import { toast } from "sonner";
 
-// Sample property boundaries data
+// Sample property boundaries data with correct typing
 const sampleProperties = [
   {
     id: 1,
     name: "Residential Property",
-    location: [151.209900, -33.865143], // Long, Lat
+    location: [151.209900, -33.865143] as [number, number], // Explicitly typed as [number, number]
     description: "Single family home with backyard",
     boundaries: [
       [
-        [151.209300, -33.864743],
-        [151.210300, -33.864843],
-        [151.210400, -33.865443],
-        [151.209400, -33.865543],
-        [151.209300, -33.864743],
+        [151.209300, -33.864743] as [number, number],
+        [151.210300, -33.864843] as [number, number],
+        [151.210400, -33.865443] as [number, number],
+        [151.209400, -33.865543] as [number, number],
+        [151.209300, -33.864743] as [number, number],
       ]
     ]
   },
   {
     id: 2,
     name: "Commercial Lot",
-    location: [151.211000, -33.863000],
+    location: [151.211000, -33.863000] as [number, number],
     description: "Commercial property with parking",
     boundaries: [
       [
-        [151.210600, -33.862600],
-        [151.211400, -33.862700],
-        [151.211500, -33.863300],
-        [151.210700, -33.863400],
-        [151.210600, -33.862600],
+        [151.210600, -33.862600] as [number, number],
+        [151.211400, -33.862700] as [number, number],
+        [151.211500, -33.863300] as [number, number],
+        [151.210700, -33.863400] as [number, number],
+        [151.210600, -33.862600] as [number, number],
       ]
     ]
   },
   {
     id: 3,
     name: "Construction Site",
-    location: [151.208000, -33.866000],
+    location: [151.208000, -33.866000] as [number, number],
     description: "New development project",
     boundaries: [
       [
-        [151.207600, -33.865600],
-        [151.208400, -33.865500],
-        [151.208600, -33.866200],
-        [151.207800, -33.866300],
-        [151.207600, -33.865600],
+        [151.207600, -33.865600] as [number, number],
+        [151.208400, -33.865500] as [number, number],
+        [151.208600, -33.866200] as [number, number],
+        [151.207800, -33.866300] as [number, number],
+        [151.207600, -33.865600] as [number, number],
       ]
     ]
   }
 ];
 
+// Type definition for a property
+interface Property {
+  id: number;
+  name: string;
+  location: [number, number]; // Tuple type for location
+  description: string;
+  boundaries: Array<Array<[number, number]>>; // Correct type for boundaries
+}
+
 const PropertyBoundaries = () => {
-  const [selectedProperty, setSelectedProperty] = useState(sampleProperties[0]);
+  const [selectedProperty, setSelectedProperty] = useState<Property>(sampleProperties[0]);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   
-  const handlePropertySelect = (property: typeof sampleProperties[0]) => {
+  const handlePropertySelect = (property: Property) => {
     setSelectedProperty(property);
     toast.success(`Selected: ${property.name}`);
   };
