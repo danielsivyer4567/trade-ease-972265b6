@@ -60,17 +60,23 @@ export const MeasurementsDisplay: React.FC<MeasurementsDisplayProps> = ({
           </h3>
           
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {individualBoundaries.map((boundary, index) => (
-              <div key={index} className="bg-white/50 p-3 rounded-md border border-gray-200">
-                <h4 className="text-sm font-medium mb-1">{boundary.name}</h4>
-                <div className="text-lg font-semibold">
-                  {boundary.length.toFixed(2)} m
+            {individualBoundaries.map((boundary, index) => {
+              const formattedArea = boundary.area.toFixed(2);
+              const formattedLength = boundary.length.toFixed(2);
+              
+              return (
+                <div key={index} className="bg-white/50 p-3 rounded-md border border-gray-200">
+                  <h4 className="text-sm font-medium mb-1">{boundary.name}</h4>
+                  <div className="flex items-center gap-1">
+                    <Ruler className="h-3 w-3 text-muted-foreground" /> 
+                    <span className="text-lg font-semibold">{formattedLength} m</span>
+                  </div>
+                  <div className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
+                    <MapPin className="h-3 w-3" /> Area: {formattedArea} m²
+                  </div>
                 </div>
-                <div className="text-xs text-muted-foreground mt-1">
-                  Area: {boundary.area.toFixed(2)} m²
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       )}
