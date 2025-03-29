@@ -29,6 +29,7 @@ export const usePropertyBoundaries = () => {
   
   const handleFileRemove = () => {
     setUploadedFile(null);
+    toast.info("File removed");
   };
 
   return {
