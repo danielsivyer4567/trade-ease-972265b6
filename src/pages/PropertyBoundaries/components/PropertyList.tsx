@@ -28,26 +28,6 @@ export const PropertyList: React.FC<PropertyListProps> = ({
   onSearchChange,
   onToggleMeasurement
 }) => {
-  // Filter properties based on search query with improved address search
-  const filteredProperties = properties.filter(prop => {
-    // If search query is empty, return all properties
-    if (!searchQuery.trim()) return true;
-    
-    const query = searchQuery.toLowerCase().trim();
-    
-    // Check if property name includes search query
-    const nameMatch = prop.name?.toLowerCase().includes(query) || false;
-    
-    // Check if property description includes search query
-    const descMatch = prop.description?.toLowerCase().includes(query) || false;
-    
-    // More thorough address matching - check for partial matches in address parts
-    const addressMatch = prop.address ? searchAddressMatches(prop.address, query) : false;
-    
-    // Return true if any of the fields match
-    return nameMatch || descMatch || addressMatch;
-  });
-  
   // Enhanced address search that breaks down addresses into components
   const searchAddressMatches = (address: string, query: string): boolean => {
     const addressLower = address.toLowerCase();
@@ -68,6 +48,26 @@ export const PropertyList: React.FC<PropertyListProps> = ({
     // Match if more than half of the query parts are found
     return matchCount > 0 && matchCount >= Math.ceil(queryParts.length / 2);
   };
+  
+  // Filter properties based on search query with improved address search
+  const filteredProperties = properties.filter(prop => {
+    // If search query is empty, return all properties
+    if (!searchQuery.trim()) return true;
+    
+    const query = searchQuery.toLowerCase().trim();
+    
+    // Check if property name includes search query
+    const nameMatch = prop.name?.toLowerCase().includes(query) || false;
+    
+    // Check if property description includes search query
+    const descMatch = prop.description?.toLowerCase().includes(query) || false;
+    
+    // More thorough address matching - check for partial matches in address parts
+    const addressMatch = prop.address ? searchAddressMatches(prop.address, query) : false;
+    
+    // Return true if any of the fields match
+    return nameMatch || descMatch || addressMatch;
+  });
 
   console.log('Search query:', searchQuery);
   console.log('Filtered properties:', filteredProperties);
