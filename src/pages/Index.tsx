@@ -119,7 +119,7 @@ export default function Index() {
             
             <CollapsibleContent>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {teams.map(team => <Card key={team.name} className="p-4 shadow-sm">
+                {teams.map(team => <Card key={team.name} className="p-4 shadow-sm bg-slate-300">
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center gap-2">
                         <div className={`w-8 h-8 rounded-full bg-${team.color}-500 flex items-center justify-center`}>
