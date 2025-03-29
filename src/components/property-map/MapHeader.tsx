@@ -2,7 +2,7 @@
 import React from 'react';
 import { CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Copy, MapPin, RotateCw, Ruler, RulerSquare } from 'lucide-react';
+import { Copy, MapPin, RotateCw, Ruler } from 'lucide-react';
 import { toast } from "sonner";
 
 interface MapHeaderProps {
@@ -52,7 +52,7 @@ export const MapHeader: React.FC<MapHeaderProps> = ({
               onClick={onToggleEdgeMeasurements}
               className="flex items-center gap-1"
             >
-              <RulerSquare className="h-4 w-4" />
+              <Ruler className="h-4 w-4" />
               <span>{showEdgeMeasurements ? "Hide" : "Show"} Edge Measurements</span>
             </Button>
           )}
