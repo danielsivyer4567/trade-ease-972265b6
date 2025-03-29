@@ -4,9 +4,20 @@ import { BaseLayout } from "@/components/ui/BaseLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { TeamCalendar } from "@/components/team/TeamCalendar";
 import { Button } from "@/components/ui/button";
-import { CalendarIcon, ChevronLeft, ChevronRight, Filter, Plus, RefreshCw } from "lucide-react";
+import { 
+  CalendarIcon, ChevronLeft, ChevronRight, Filter, 
+  Plus, RefreshCw, Users2, ChevronDown 
+} from "lucide-react";
 import { TeamCalendarGrid } from "./components/TeamCalendarGrid";
 import { useNavigate } from 'react-router-dom';
+import { 
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuTrigger
+} from "@/components/ui/dropdown-menu";
+import { calendarTeamLinks } from "@/components/ui/sidebar/constants";
 
 const Calendar = () => {
   const [date, setDate] = useState<Date | undefined>(new Date());
@@ -56,7 +67,36 @@ const Calendar = () => {
             <h1 className="text-2xl font-bold">Team Calendar</h1>
           </div>
           
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
+            {/* Team Selection Dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" className="flex items-center gap-2">
+                  <Users2 className="h-4 w-4" />
+                  Teams
+                  <ChevronDown className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48 bg-white">
+                <DropdownMenuGroup>
+                  {calendarTeamLinks.map((team) => (
+                    <DropdownMenuItem 
+                      key={team.path}
+                      className="cursor-pointer"
+                      onClick={() => navigateToTeam(team.path)}
+                    >
+                      <team.icon className={`h-4 w-4 mr-2 ${
+                        team.color === "red" ? "text-red-500" :
+                        team.color === "blue" ? "text-blue-500" :
+                        team.color === "green" ? "text-green-500" : ""
+                      }`} />
+                      <span>{team.label}</span>
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuGroup>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
             <Button variant="outline" size="sm" onClick={handlePrevMonth}>
               <ChevronLeft className="h-4 w-4" />
             </Button>

@@ -71,31 +71,10 @@ export const navigationGroups = [
         path: "/customers"
       },
       {
-        type: 'dropdown',
+        type: 'link',
         icon: Calendar,
         label: "Calendar",
-        items: [
-          {
-            icon: Calendar,
-            label: "All Teams",
-            path: "/calendar"
-          },
-          {
-            icon: Users2,
-            label: "Team Red",
-            path: "/team-red"
-          },
-          {
-            icon: Users2,
-            label: "Team Blue",
-            path: "/team-blue"
-          },
-          {
-            icon: Users2,
-            label: "Team Green",
-            path: "/team-green"
-          }
-        ]
+        path: "/calendar"
       },
       {
         type: 'dropdown',
@@ -181,6 +160,34 @@ export const navigationGroups = [
 
 // Define the team links that will be shown only on the Teams page
 export const teamLinks = [
+  {
+    icon: Users2,
+    label: "Team Red",
+    path: "/team-red",
+    color: "red"
+  },
+  {
+    icon: Users2,
+    label: "Team Blue",
+    path: "/team-blue",
+    color: "blue"
+  },
+  {
+    icon: Users2,
+    label: "Team Green",
+    path: "/team-green",
+    color: "green"
+  }
+];
+
+// Calendar team links that will be shown only on the Calendar page
+export const calendarTeamLinks = [
+  {
+    icon: Users2,
+    label: "All Teams",
+    path: "/calendar",
+    color: "gray"
+  },
   {
     icon: Users2,
     label: "Team Red",
