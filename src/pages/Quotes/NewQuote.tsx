@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { AppLayout } from "@/components/ui/AppLayout";
@@ -12,13 +13,21 @@ import { QuoteItemsForm, QuoteItem } from "./components/QuoteItemsForm";
 import { PriceListForm } from "./components/PriceListForm";
 import { TermsForm } from "./components/TermsForm";
 import { QuotePreview } from "./components/QuotePreview";
-import { PriceListItem } from "./components/PriceList/types";
+import { ErrorBoundary } from "react-error-boundary";
+
+function ErrorFallback({ error, resetErrorBoundary }) {
+  return (
+    <div className="p-6 text-center">
+      <h2 className="text-lg font-semibold text-red-600">Something went wrong:</h2>
+      <pre className="mt-2 text-sm overflow-auto p-4 bg-gray-100 rounded">{error.message}</pre>
+      <Button onClick={resetErrorBoundary} className="mt-4">Try again</Button>
+    </div>
+  );
+}
 
 export default function NewQuote() {
   const navigate = useNavigate();
-  const {
-    toast
-  } = useToast();
+  const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("details");
   const [quoteItems, setQuoteItems] = useState<QuoteItem[]>([{
     description: "",
@@ -56,7 +65,7 @@ export default function NewQuote() {
     }]);
   };
 
-  const handleAddPriceListItem = (item: PriceListItem) => {
+  const handleAddPriceListItem = (item: any) => {
     const newItem = {
       description: item.name,
       quantity: 1,
@@ -71,54 +80,60 @@ export default function NewQuote() {
     setActiveTab("items");
   };
 
-  return <AppLayout>
-      <div className="p-6 max-w-7xl mx-auto w-full">
-        <div className="flex items-center mb-6">
-          <Button variant="outline" size="icon" className="mr-4 rounded-md border border-gray-300" onClick={handleBack}>
-            <ArrowLeft className="h-4 w-4" />
-          </Button>
-          <h1 className="text-2xl font-bold">Create New Quote</h1>
-        </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="md:col-span-2">
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList className="grid grid-cols-3 mb-6">
-                <TabsTrigger value="preview" className="bg-slate-400 hover:bg-slate-300 mx-[2px]">Preview</TabsTrigger>
-                <TabsTrigger value="price-list" className="bg-slate-400 hover:bg-slate-300 mx-0">Price List</TabsTrigger>
-                <TabsTrigger value="terms" className="bg-slate-400 hover:bg-slate-300 mx-[13px]">Terms & Notes</TabsTrigger>
-              </TabsList>
-              
-              <Card className="bg-slate-200">
-                <CardContent className="p-6">
-                  <TabsContent value="details" className="mt-0">
-                    <CustomerForm onNextTab={() => setActiveTab("items")} />
-                  </TabsContent>
-                  
-                  <TabsContent value="items" className="mt-0">
-                    <QuoteItemsForm quoteItems={quoteItems} setQuoteItems={setQuoteItems} onPrevTab={() => setActiveTab("details")} onNextTab={() => setActiveTab("terms")} />
-                  </TabsContent>
-                  
-                  <TabsContent value="price-list" className="mt-0">
-                    <PriceListForm onAddItemToQuote={handleAddPriceListItem} onChangeTab={tab => setActiveTab(tab)} />
-                  </TabsContent>
-                  
-                  <TabsContent value="terms" className="mt-0">
-                    <TermsForm onPrevTab={() => setActiveTab("items")} onNextTab={() => setActiveTab("preview")} />
-                  </TabsContent>
-                  
-                  <TabsContent value="preview" className="mt-0">
-                    <QuotePreview quoteItems={quoteItems} onPrevTab={() => setActiveTab("terms")} />
-                  </TabsContent>
-                </CardContent>
-              </Card>
-            </Tabs>
+  return (
+    <ErrorBoundary FallbackComponent={ErrorFallback}>
+      <AppLayout>
+        <div className="p-6 max-w-7xl mx-auto w-full">
+          <div className="flex items-center mb-6">
+            <Button variant="outline" size="icon" className="mr-4 rounded-md border border-gray-300" onClick={handleBack}>
+              <ArrowLeft className="h-4 w-4" />
+            </Button>
+            <h1 className="text-2xl font-bold">Create New Quote</h1>
           </div>
           
-          <div>
-            <QuoteTemplateSelector onSelectTemplate={handleSelectTemplate} selectedTemplate={selectedTemplate} />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="md:col-span-2">
+              <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+                <TabsList className="grid grid-cols-5 mb-6">
+                  <TabsTrigger value="details">Customer</TabsTrigger>
+                  <TabsTrigger value="items">Items</TabsTrigger>
+                  <TabsTrigger value="price-list">Price List</TabsTrigger>
+                  <TabsTrigger value="terms">Terms</TabsTrigger>
+                  <TabsTrigger value="preview">Preview</TabsTrigger>
+                </TabsList>
+                
+                <Card className="bg-white">
+                  <CardContent className="p-6">
+                    <TabsContent value="details" className="mt-0">
+                      <CustomerForm onNextTab={() => setActiveTab("items")} />
+                    </TabsContent>
+                    
+                    <TabsContent value="items" className="mt-0">
+                      <QuoteItemsForm quoteItems={quoteItems} setQuoteItems={setQuoteItems} onPrevTab={() => setActiveTab("details")} onNextTab={() => setActiveTab("terms")} />
+                    </TabsContent>
+                    
+                    <TabsContent value="price-list" className="mt-0">
+                      <PriceListForm onAddItemToQuote={handleAddPriceListItem} onChangeTab={tab => setActiveTab(tab)} />
+                    </TabsContent>
+                    
+                    <TabsContent value="terms" className="mt-0">
+                      <TermsForm onPrevTab={() => setActiveTab("items")} onNextTab={() => setActiveTab("preview")} />
+                    </TabsContent>
+                    
+                    <TabsContent value="preview" className="mt-0">
+                      <QuotePreview quoteItems={quoteItems} onPrevTab={() => setActiveTab("terms")} />
+                    </TabsContent>
+                  </CardContent>
+                </Card>
+              </Tabs>
+            </div>
+            
+            <div>
+              <QuoteTemplateSelector onSelectTemplate={handleSelectTemplate} selectedTemplate={selectedTemplate} />
+            </div>
           </div>
         </div>
-      </div>
-    </AppLayout>;
+      </AppLayout>
+    </ErrorBoundary>
+  );
 }

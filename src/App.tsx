@@ -6,13 +6,16 @@ import { Routes } from './routes/index';
 import { Analytics } from '@vercel/analytics/react';
 import { QueryProvider } from '@/integrations/query/QueryProvider';
 import './App.css';
+import { Suspense } from 'react';
 
 export default function App() {
   return (
     <Router>
       <AuthProvider>
         <QueryProvider>
-          <Routes />
+          <Suspense fallback={<div className="h-screen w-full flex items-center justify-center">Loading...</div>}>
+            <Routes />
+          </Suspense>
           <Toaster />
           <Analytics />
         </QueryProvider>

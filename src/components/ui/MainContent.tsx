@@ -46,9 +46,9 @@ export function MainContent({
   };
 
   return (
-    <main
+    <div
       className={cn(
-        "relative flex flex-col flex-1 overflow-hidden",
+        "relative flex flex-col flex-1 overflow-x-hidden",
         sidebarOpen && "transition-all duration-300 ease-in-out",
         className
       )}
@@ -63,9 +63,9 @@ export function MainContent({
       }
     >
       {/* Header Section */}
-      <div className="sticky top-0 z-40 flex h-16 items-center gap-4 border-b border-[#B8C5D5] bg-[#E2E8F0] px-4 md:px-6">
-        <div className="flex pl-10 flex-1 items-center justify-between">
-          <div className="flex items-center gap-2 w-full pr-10">
+      <div className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b border-[#B8C5D5] bg-[#E2E8F0] px-4 md:px-6">
+        <div className="flex flex-1 items-center justify-between">
+          <div className="flex items-center gap-2 w-full">
             <QuickTabs />
           </div>
           <DropdownMenu>
@@ -85,11 +85,11 @@ export function MainContent({
       </div>
 
       {/* Main Content Area */}
-      <ScrollArea className="flex-1">
+      <ScrollArea className="flex-1 w-full">
         <div className="relative w-full">
           {children}
         </div>
       </ScrollArea>
-    </main>
+    </div>
   );
 }

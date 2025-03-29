@@ -40,14 +40,15 @@ export function BaseLayout({
         <AppSidebar 
           isExpanded={sidebarOpen}
           onToggle={toggleSidebar}
-          className="fixed top-0 left-0 h-full"
+          className="fixed top-0 left-0 h-full z-40"
         />
 
         {/* Main Content */}
         <main className={cn(
           "min-h-screen w-full bg-[#EFF2F5]",
           "transition-all duration-300 ease-in-out",
-          sidebarOpen ? "pl-[240px]" : "pl-[64px]"
+          sidebarOpen ? "pl-[240px]" : "pl-[64px]",
+          isMobile ? "pl-0" : ""
         )}>
           <MainContent 
             sidebarOpen={sidebarOpen}
