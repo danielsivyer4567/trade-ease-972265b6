@@ -99,7 +99,7 @@ export default function Index() {
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-semibold">Team Calendars Overview</h2>
               
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 px-0 mx-0">
                 {/* Full Calendar button */}
                 <Button variant="outline" onClick={() => navigate("/calendar")} className="flex items-center gap-2 text-center">
                   <CalendarDays className="h-4 w-4" />
