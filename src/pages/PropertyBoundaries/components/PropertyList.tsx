@@ -1,8 +1,8 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Trash2, FileUp, Search, Ruler } from 'lucide-react';
+import { Trash2, FileUp, Search, Ruler, MapPin } from 'lucide-react';
 import { Property } from '../types';
 
 interface PropertyListProps {
@@ -28,6 +28,10 @@ export const PropertyList: React.FC<PropertyListProps> = ({
   onSearchChange,
   onToggleMeasurement
 }) => {
+  // Track matching addresses for preview
+  const [addressPreviews, setAddressPreviews] = useState<string[]>([]);
+  const [isPreviewVisible, setIsPreviewVisible] = useState(false);
+  
   // Enhanced address search that breaks down addresses into components
   const searchAddressMatches = (address: string, query: string): boolean => {
     const addressLower = address.toLowerCase();
@@ -69,9 +73,22 @@ export const PropertyList: React.FC<PropertyListProps> = ({
     return nameMatch || descMatch || addressMatch;
   });
 
-  console.log('Search query:', searchQuery);
-  console.log('Filtered properties:', filteredProperties);
-  console.log('All properties:', properties);
+  // Update address previews when search query changes
+  useEffect(() => {
+    if (searchQuery.trim().length > 0) {
+      // Extract matching addresses for preview
+      const matchingAddresses = filteredProperties
+        .filter(prop => prop.address)
+        .map(prop => prop.address as string)
+        .slice(0, 3); // Limit to top 3 matches
+      
+      setAddressPreviews(matchingAddresses);
+      setIsPreviewVisible(matchingAddresses.length > 0);
+    } else {
+      setAddressPreviews([]);
+      setIsPreviewVisible(false);
+    }
+  }, [searchQuery, filteredProperties]);
   
   // Handle Enter key press in search input
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -81,6 +98,16 @@ export const PropertyList: React.FC<PropertyListProps> = ({
       if (filteredProperties.length > 0) {
         onPropertySelect(filteredProperties[0]);
       }
+    }
+  };
+  
+  // Handle address preview click
+  const handleAddressPreviewClick = (address: string) => {
+    // Find property with this address
+    const property = properties.find(p => p.address === address);
+    if (property) {
+      onPropertySelect(property);
+      setIsPreviewVisible(false);
     }
   };
 
@@ -97,7 +124,25 @@ export const PropertyList: React.FC<PropertyListProps> = ({
           value={searchQuery}
           onChange={onSearchChange}
           onKeyDown={handleKeyPress}
+          onFocus={() => setIsPreviewVisible(addressPreviews.length > 0)}
+          onBlur={() => setTimeout(() => setIsPreviewVisible(false), 200)}
         />
+        
+        {/* Address Preview */}
+        {isPreviewVisible && addressPreviews.length > 0 && (
+          <div className="absolute z-10 left-0 right-0 bg-white border border-slate-200 rounded-md shadow-md mt-1 max-h-48 overflow-y-auto">
+            {addressPreviews.map((address, index) => (
+              <div 
+                key={`address-${index}`}
+                className="p-2 hover:bg-slate-100 cursor-pointer flex items-start gap-2"
+                onClick={() => handleAddressPreviewClick(address)}
+              >
+                <MapPin className="h-4 w-4 mt-0.5 text-primary flex-shrink-0" />
+                <span className="text-sm">{address}</span>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
       
       {/* Properties List */}
