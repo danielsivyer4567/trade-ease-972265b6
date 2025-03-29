@@ -9,6 +9,17 @@ export interface PropertyBoundary {
   name: string;
 }
 
+export interface BoundaryEdge {
+  id: string;
+  boundaryIndex: number;
+  edgeIndex: number;
+  start: Coordinate;
+  end: Coordinate;
+  midpoint: Coordinate;
+  length: number;
+  displayLength: string;
+}
+
 export interface CustomPropertyMapProps {
   boundaries: Array<Array<[number, number]>>; // Array of polygon coordinates
   title?: string;
@@ -27,6 +38,7 @@ export interface MapMeasurements {
   boundaryLength: number;
   boundaryArea: number;
   individualBoundaries: IndividualBoundaryMeasurement[];
+  edges: BoundaryEdge[];
 }
 
 export interface MapState {

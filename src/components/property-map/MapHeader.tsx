@@ -2,7 +2,7 @@
 import React from 'react';
 import { CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { MapPin, Copy, RotateCw, Ruler } from 'lucide-react';
+import { Copy, MapPin, RotateCw, Ruler, RulerSquare } from 'lucide-react';
 import { toast } from "sonner";
 
 interface MapHeaderProps {
@@ -10,6 +10,8 @@ interface MapHeaderProps {
   description: string;
   boundaries: Array<Array<[number, number]>>;
   onReset: () => void;
+  onToggleEdgeMeasurements?: () => void;
+  showEdgeMeasurements?: boolean;
   measureMode?: boolean;
 }
 
@@ -18,6 +20,8 @@ export const MapHeader: React.FC<MapHeaderProps> = ({
   description,
   boundaries,
   onReset,
+  onToggleEdgeMeasurements,
+  showEdgeMeasurements = false,
   measureMode = false
 }) => {
   const handleCopyCoordinates = () => {
@@ -36,17 +40,23 @@ export const MapHeader: React.FC<MapHeaderProps> = ({
           <CardTitle className="flex items-center gap-2">
             <MapPin className="h-5 w-5 text-primary" />
             {title}
-            {measureMode && (
-              <span className="ml-2 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary">
-                <Ruler className="h-3 w-3 mr-1" />
-                Measuring
-              </span>
-            )}
           </CardTitle>
           <CardDescription>{description}</CardDescription>
         </div>
         
         <div className="flex flex-wrap gap-2">
+          {onToggleEdgeMeasurements && (
+            <Button
+              variant={showEdgeMeasurements ? "default" : "outline"}
+              size="sm"
+              onClick={onToggleEdgeMeasurements}
+              className="flex items-center gap-1"
+            >
+              <RulerSquare className="h-4 w-4" />
+              <span>{showEdgeMeasurements ? "Hide" : "Show"} Edge Measurements</span>
+            </Button>
+          )}
+          
           <Button 
             variant="outline" 
             size="sm"
