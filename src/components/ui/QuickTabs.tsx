@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -92,19 +93,19 @@ export const QuickTabs = () => {
 
   return (
     <TooltipProvider>
-      <div className="">
-        <div className="flex flex-nowrap gap-2 ">
+      <div className="w-full overflow-x-auto">
+        <div className="flex flex-nowrap gap-2">
           {quickActions.map((action) => (
             <Tooltip key={action.to}>
               <TooltipTrigger asChild>
-                <Link to={action.to} className="w-full">
+                <Link to={action.to} className="shrink-0">
                   <Button
-                    size="default"
+                    size="sm"
                     variant="outline"
                     className={cn(
-                      "w-full  border transition-all duration-200",
-                      "flex md:flex-col items-center justify-center gap-1.5 sm:gap-2",
-                      "shadow-sm hover:shadow-md px-6 hover:opacity-90",
+                      "border transition-all duration-200",
+                      "flex items-center justify-center gap-1.5",
+                      "shadow-sm hover:shadow-md px-3 py-1 h-8",
                       action.bgColor,
                       action.hoverBgColor,
                       action.borderColor,
@@ -114,7 +115,9 @@ export const QuickTabs = () => {
                   >
                     <div className="flex items-center gap-1">
                       {action.icon}
-                      <p>{action.label}</p>
+                      <span className={isMobile ? "hidden" : "inline"}>
+                        {isMobile ? action.mobileLabel : action.label}
+                      </span>
                     </div>
                   </Button>
                 </Link>
@@ -128,4 +131,4 @@ export const QuickTabs = () => {
       </div>
     </TooltipProvider>
   );
-};
+}
