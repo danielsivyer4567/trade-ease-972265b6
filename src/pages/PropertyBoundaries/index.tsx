@@ -61,10 +61,10 @@ const PropertyBoundaries = () => {
           {/* Map View */}
           <div className="lg:col-span-3">
             <CustomPropertyMap 
-              boundaries={selectedProperty.boundaries}
-              title={selectedProperty.name}
-              description={selectedProperty.description}
-              centerPoint={selectedProperty.location}
+              boundaries={selectedProperty?.boundaries || []}
+              title={selectedProperty?.name || "No Property Selected"}
+              description={selectedProperty?.description || "Please select a property to view details"}
+              centerPoint={selectedProperty?.location || [0, 0]}
               measureMode={isMeasuring}
             />
           </div>

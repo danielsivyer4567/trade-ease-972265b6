@@ -19,7 +19,16 @@ export function useBoundaryProcessing(boundaries: Array<Array<[number, number]>>
   });
 
   useEffect(() => {
-    if (!boundaries.length) return;
+    if (!boundaries?.length) {
+      // Set default values when no boundaries are present
+      setPropertyBoundaries([]);
+      setMeasurements({
+        boundaryLength: 0,
+        boundaryArea: 0,
+        individualBoundaries: []
+      });
+      return;
+    }
     
     const convertedBoundaries = convertBoundariesToPropertyBoundaries(boundaries);
     setPropertyBoundaries(convertedBoundaries);

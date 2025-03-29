@@ -14,7 +14,7 @@ interface MeasurementsDisplayProps {
 export const MeasurementsDisplay: React.FC<MeasurementsDisplayProps> = ({
   boundaryLength,
   boundaryArea,
-  individualBoundaries,
+  individualBoundaries = [],
   highlighted = false
 }) => {
   const formattedMeasurements = formatMeasurements(boundaryLength, boundaryArea);
@@ -52,7 +52,7 @@ export const MeasurementsDisplay: React.FC<MeasurementsDisplayProps> = ({
         </div>
       </div>
       
-      {individualBoundaries.length > 0 && (
+      {individualBoundaries && individualBoundaries.length > 0 && (
         <div className={`${baseClasses} ${highlightedClasses} transition-all`}>
           <h3 className="text-sm font-medium mb-3 flex items-center gap-2">
             <Ruler className={`h-4 w-4 ${highlighted ? "text-primary" : ""}`} />
