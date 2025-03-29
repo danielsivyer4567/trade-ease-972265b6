@@ -111,12 +111,22 @@ export const usePropertyListState = (
     }
   }, [properties, onPropertySelect]);
   
+  // Handle search button click
+  const handleSearchClick = useCallback(() => {
+    // If we have filtered results, select the first one
+    if (filteredProperties.length > 0) {
+      onPropertySelect(filteredProperties[0]);
+    }
+    setIsPreviewVisible(false);
+  }, [filteredProperties, onPropertySelect]);
+  
   return {
     addressPreviews,
     isPreviewVisible,
     setIsPreviewVisible,
     filteredProperties,
     handleKeyPress,
-    handleAddressPreviewClick
+    handleAddressPreviewClick,
+    handleSearchClick
   };
 };

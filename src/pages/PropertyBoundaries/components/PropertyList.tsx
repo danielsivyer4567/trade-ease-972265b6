@@ -39,7 +39,8 @@ export const PropertyList: React.FC<PropertyListProps> = ({
     setIsPreviewVisible,
     filteredProperties,
     handleKeyPress,
-    handleAddressPreviewClick
+    handleAddressPreviewClick,
+    handleSearchClick
   } = usePropertyListState(properties, searchQuery, selectedProperty, onPropertySelect);
 
   return (
@@ -55,6 +56,7 @@ export const PropertyList: React.FC<PropertyListProps> = ({
         isPreviewVisible={isPreviewVisible}
         setIsPreviewVisible={setIsPreviewVisible}
         onAddressPreviewClick={handleAddressPreviewClick}
+        onSearchClick={handleSearchClick}
       />
       
       {/* Properties List */}
