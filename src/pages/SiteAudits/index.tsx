@@ -3,13 +3,15 @@ import React, { useState, useRef } from 'react';
 import { BaseLayout } from '@/components/ui/BaseLayout';
 import { SectionHeader } from '@/components/ui/SectionHeader';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { FileSearch, Clipboard, Calendar, CheckSquare, Camera, Upload, User } from 'lucide-react';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { FileSearch, Clipboard, Calendar, CheckSquare, Camera, Upload, User, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { AuditPhotoCapture } from './components/AuditPhotoCapture';
 import { CustomerSelector } from './components/CustomerSelector';
+import { DailyAuditList } from './components/DailyAuditList';
 import { useAuditData } from './hooks/useAuditData';
 import { useToast } from '@/hooks/use-toast';
+import { format } from 'date-fns';
 
 export default function SiteAudits() {
   const [activeTab, setActiveTab] = useState('active');
@@ -23,7 +25,11 @@ export default function SiteAudits() {
     customers, 
     isLoading, 
     uploadAuditPhoto, 
-    createNewAudit 
+    createNewAudit,
+    auditsByDay,
+    currentWeekStart,
+    goToPreviousWeek,
+    goToNextWeek
   } = useAuditData();
 
   const handleCustomerSelect = (customerId: string) => {
@@ -143,6 +149,49 @@ export default function SiteAudits() {
           />
         )}
         
+        <div className="bg-white rounded-lg shadow-sm p-4 mb-6">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-xl font-medium">Weekly Audit Schedule</h2>
+            <div className="flex items-center gap-2">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={goToPreviousWeek}
+                className="flex items-center gap-1"
+              >
+                <ChevronLeft className="h-4 w-4" />
+                <span>Previous Week</span>
+              </Button>
+              <span className="text-sm font-medium">
+                Week of {format(currentWeekStart, 'MMM d, yyyy')}
+              </span>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={goToNextWeek}
+                className="flex items-center gap-1"
+              >
+                <span>Next Week</span>
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+          
+          {isLoading ? (
+            <div className="flex justify-center p-8">
+              <p>Loading audits...</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+              {auditsByDay.map((dayData, index) => (
+                <div key={index} className="border rounded-lg overflow-hidden">
+                  <DailyAuditList dayData={dayData} />
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+        
         <Tabs defaultValue="active" value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid grid-cols-4 max-w-lg">
             <TabsTrigger value="active">Active Audits</TabsTrigger>
@@ -157,39 +206,41 @@ export default function SiteAudits() {
                 <p>Loading audits...</p>
               </div>
             ) : audits.filter(a => a.status === 'in_progress').length > 0 ? (
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {audits.filter(a => a.status === 'in_progress').map((audit) => (
                   <Card key={audit.id} className="border border-border hover:shadow-md transition-shadow">
-                    <CardHeader className="pb-2">
-                      <div className="flex justify-between">
-                        <CardTitle className="text-lg">{audit.title}</CardTitle>
-                        <span className="text-xs px-2 py-1 rounded-full bg-blue-100 text-blue-700">In Progress</span>
+                    <CardContent className="p-4">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <h3 className="font-medium text-lg">{audit.title}</h3>
+                          <p className="text-sm text-muted-foreground">{audit.location}</p>
+                        </div>
+                        <span className="text-xs px-2 py-1 rounded-full bg-blue-100 text-blue-700">
+                          In Progress
+                        </span>
                       </div>
-                      <CardDescription>{audit.location}</CardDescription>
-                    </CardHeader>
-                    <CardContent className="text-sm pb-2">
-                      <div className="flex justify-between items-center text-sm text-muted-foreground">
+                      
+                      <div className="mt-4 flex justify-between items-center text-sm">
                         <div className="flex items-center gap-1">
-                          <Calendar className="h-3 w-3" />
+                          <Calendar className="h-4 w-4" />
                           <span>Started: {new Date(audit.startDate).toLocaleDateString()}</span>
                         </div>
                         <div className="flex items-center gap-1">
-                          <CheckSquare className="h-3 w-3" />
+                          <CheckSquare className="h-4 w-4" />
                           <span>{audit.completedItems}/{audit.totalItems} completed</span>
                         </div>
                       </div>
-                    </CardContent>
-                    <CardFooter className="pt-2 border-t text-sm">
-                      <div className="flex justify-between w-full">
-                        <div className="flex items-center gap-1">
-                          <User className="h-3 w-3" />
+                      
+                      <div className="mt-4 pt-2 border-t flex justify-between items-center">
+                        <div className="flex items-center gap-1 text-sm">
+                          <User className="h-4 w-4" />
                           <span>{audit.assignedTo}</span>
                         </div>
                         <Button size="sm" variant="link" className="text-primary hover:underline">
                           View details
                         </Button>
                       </div>
-                    </CardFooter>
+                    </CardContent>
                   </Card>
                 ))}
               </div>

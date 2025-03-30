@@ -26,3 +26,10 @@ export interface Audit {
   totalItems: number;
   photos: Photo[];
 }
+
+export interface AuditsByDay {
+  date: Date;
+  formattedDate: string;
+  dayName: string;
+  audits: Audit[];
+}
