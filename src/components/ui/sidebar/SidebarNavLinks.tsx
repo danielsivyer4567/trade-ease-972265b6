@@ -40,7 +40,7 @@ export function SidebarNavLinks({
   return <nav className="grid gap-1 px-2 py-2">
       {navigationGroups.map((group, index) => <div key={index} className="grid gap-0.5 my-[25px] rounded-full">
           {/* Group Label */}
-          {isExpanded && group.label && <h4 className={cn("mb-1 px-2 text-xs font-semibold text-muted-foreground", group.label === "Teams" && "text-blue-600")}>
+          {isExpanded && group.label && <h4 className="text-gray-950 font-extrabold text-base">
               {group.label}
             </h4>}
 
