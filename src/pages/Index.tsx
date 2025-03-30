@@ -66,9 +66,6 @@ export default function Index() {
   
   return (
     <BaseLayout showQuickTabs={true}>
-      {/* Add the trade dashboard content at the top */}
-      <TradeDashboardContent />
-      
       <div className="px-8 space-y-8 animate-fadeIn py-10">
         <div className="grid grid-cols-1 gap-8">
           <div className="rounded-xl animate-slideUp">
@@ -190,6 +187,9 @@ export default function Index() {
           </div>
         </div>
       </div>
+      
+      {/* Trade Dashboard Content moved below the bottom div */}
+      <TradeDashboardContent />
     </BaseLayout>
   );
 }
