@@ -1,3 +1,4 @@
+
 import { ReactNode } from 'react';
 import Customers from './pages/Customers';
 import NewCustomer from './pages/Customers/NewCustomer';
@@ -40,6 +41,7 @@ import PropertyBoundaries from './pages/PropertyBoundaries';
 import Referrals from './pages/Referrals';
 import SiteAudits from './pages/SiteAudits';
 import Forms from './pages/Forms';
+import Automations from './pages/Automations';
 
 export interface RouteConfig {
   path: string;
@@ -155,6 +157,10 @@ export const routes: RouteConfig[] = [
   {
     path: '/database',
     element: <Database />
+  },
+  {
+    path: '/automations',
+    element: <Automations />
   },
   {
     path: '/settings',

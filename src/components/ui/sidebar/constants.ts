@@ -20,6 +20,7 @@ import {
   Calculator,
   FileSearch,
   ClipboardList,
+  Workflow,
 } from 'lucide-react';
 
 import { NavLink } from './SidebarNavLinks';
@@ -212,6 +213,12 @@ export const navigationGroups = [
         icon: Link,
         label: 'Property Boundaries',
         path: '/property-boundaries',
+      },
+      {
+        type: 'link',
+        icon: Workflow,
+        label: 'Automations',
+        path: '/automations',
       },
       {
         type: 'link',
