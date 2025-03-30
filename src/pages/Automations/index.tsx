@@ -17,11 +17,31 @@ import {
   Truck, 
   Star, 
   Flame,
-  MessageSquare
+  MessageSquare,
+  Tool,
+  Package,
+  Gauge,
+  Receipt,
+  ClipboardCheck,
+  CalendarRange,
+  Hammer,
+  Landmark,
+  AlertTriangle,
+  CloudRain,
+  Wrench,
+  PaintBucket,
+  Thermometer,
+  Tags,
+  Map,
+  BarChart2,
+  FileText,
+  Briefcase,
+  Award
 } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { toast } from "sonner";
 
 const Automations = () => {
   const isMobile = useIsMobile();
@@ -138,6 +158,155 @@ const Automations = () => {
       category: 'sales',
       premium: true
     },
+    {
+      id: 13,
+      title: 'Smart Tool Tracking',
+      description: 'Track tools between job sites and automatically assign responsibility',
+      isActive: true,
+      triggers: ['Tool scanned at job site', 'Tool assigned to team member'],
+      actions: ['Update tool location', 'Notify team member of responsibility'],
+      category: 'equipment'
+    },
+    {
+      id: 14,
+      title: 'Safety Certification Monitor',
+      description: 'Track team certification expirations and schedule necessary training',
+      isActive: true,
+      triggers: ['Certification < 60 days to expiry', 'Required certification missing'],
+      actions: ['Schedule training courses', 'Send renewal notifications'],
+      category: 'compliance',
+      premium: true
+    },
+    {
+      id: 15,
+      title: 'Weather Risk Assessment',
+      description: 'Automatically evaluate weather forecasts to assess job site risks',
+      isActive: true,
+      triggers: ['Severe weather alert issued', 'High heat days forecasted'],
+      actions: ['Send safety protocol reminders', 'Adjust work schedule if needed'],
+      category: 'team'
+    },
+    {
+      id: 16,
+      title: 'Trade Waste Management',
+      description: 'Schedule waste collection and recycling for different material types',
+      isActive: false,
+      triggers: ['Job completion form submitted', 'Waste bins nearing capacity'],
+      actions: ['Schedule pickup service', 'Document disposal compliance'],
+      category: 'compliance'
+    },
+    {
+      id: 17,
+      title: 'Material Cost Fluctuation',
+      description: 'Monitor supplier pricing and alert when material costs change significantly',
+      isActive: true,
+      triggers: ['Price increase > 5%', 'Material shortage reported'],
+      actions: ['Alert procurement team', 'Suggest alternative suppliers'],
+      category: 'inventory',
+      premium: true
+    },
+    {
+      id: 18,
+      title: 'Permit & License Tracker',
+      description: 'Monitor all required permits and licenses for active jobs',
+      isActive: true,
+      triggers: ['Permit expiring < 30 days', 'New job requires specific permits'],
+      actions: ['Create renewal tasks', 'Escalate to compliance manager'],
+      category: 'compliance'
+    },
+    {
+      id: 19,
+      title: 'Seasonal Maintenance Reminder',
+      description: 'Schedule recurring seasonal maintenance for customer retention',
+      isActive: true,
+      triggers: ['Season change detected', 'Customer due for maintenance'],
+      actions: ['Generate outreach campaign', 'Create follow-up tasks'],
+      category: 'customer'
+    },
+    {
+      id: 20,
+      title: 'Vehicle Fleet Maintenance',
+      description: 'Schedule preventative maintenance based on mileage and usage',
+      isActive: true,
+      triggers: ['Vehicle mileage threshold', 'Service due based on calendar'],
+      actions: ['Create service appointment', 'Assign temporary vehicle if needed'],
+      category: 'equipment'
+    },
+    {
+      id: 21,
+      title: 'Project Timeline Monitoring',
+      description: 'Detect potential schedule slippage and alert project managers',
+      isActive: true,
+      triggers: ['Task completion delay > 2 days', 'Critical path affected'],
+      actions: ['Notify project manager', 'Suggest resource reallocation'],
+      category: 'team',
+      premium: true
+    },
+    {
+      id: 22,
+      title: 'Supplier Performance Tracking',
+      description: 'Evaluate supplier reliability and product quality over time',
+      isActive: false,
+      triggers: ['Late delivery detected', 'Quality issue reported'],
+      actions: ['Update supplier rating', 'Suggest alternative vendors'],
+      category: 'inventory'
+    },
+    {
+      id: 23,
+      title: 'Cross-Selling Opportunties',
+      description: 'Identify additional service opportunities based on job type',
+      isActive: true,
+      triggers: ['Job completed successfully', 'Customer satisfaction high'],
+      actions: ['Generate related service suggestions', 'Schedule follow-up call'],
+      category: 'sales'
+    },
+    {
+      id: 24,
+      title: 'Warranty Period Monitor',
+      description: 'Track warranty periods for completed jobs and schedule check-ins',
+      isActive: true,
+      triggers: ['Warranty nearing expiration', 'Seasonal check-in due'],
+      actions: ['Schedule maintenance reminder', 'Generate customer communication'],
+      category: 'customer'
+    },
+    {
+      id: 25,
+      title: 'Trade Efficiency Analysis',
+      description: 'Compare planned vs. actual time spent on jobs to improve estimates',
+      isActive: true,
+      triggers: ['Job completed', 'Actual hours > estimated hours by 20%'],
+      actions: ['Generate efficiency report', 'Update estimation templates'],
+      category: 'finance',
+      premium: true
+    },
+    {
+      id: 26,
+      title: 'Site Safety Checklist',
+      description: 'Automatically generate site-specific safety checklists based on job type',
+      isActive: true,
+      triggers: ['New job created', 'High-risk task scheduled'],
+      actions: ['Generate safety checklist', 'Assign team review tasks'],
+      category: 'compliance'
+    },
+    {
+      id: 27,
+      title: 'Client Property Protection',
+      description: 'Generate protection requirements for client property before work begins',
+      isActive: true,
+      triggers: ['Indoor job scheduled', 'High-value property noted'],
+      actions: ['Create property protection list', 'Add to job preparation tasks'],
+      category: 'customer'
+    },
+    {
+      id: 28,
+      title: 'Smart Parts Ordering',
+      description: 'Automatically order common parts when inventory falls below threshold',
+      isActive: false,
+      triggers: ['Inventory level < minimum threshold', 'Part used frequently'],
+      actions: ['Generate purchase order', 'Track shipment status'],
+      category: 'inventory',
+      premium: true
+    }
   ]);
 
   const [selectedCategory, setSelectedCategory] = useState('all');
@@ -148,6 +317,15 @@ const Automations = () => {
         automation.id === id ? {...automation, isActive: !automation.isActive} : automation
       )
     );
+    
+    const automation = automations.find(a => a.id === id);
+    if (automation) {
+      toast.success(
+        automation.isActive 
+          ? `${automation.title} disabled` 
+          : `${automation.title} enabled`
+      );
+    }
   };
 
   const categoryOptions = [
@@ -156,9 +334,9 @@ const Automations = () => {
     { value: 'customer', label: 'Customer', icon: <MessageSquare className="h-4 w-4" /> },
     { value: 'sales', label: 'Sales', icon: <Banknote className="h-4 w-4" /> },
     { value: 'finance', label: 'Finance', icon: <Banknote className="h-4 w-4" /> },
-    { value: 'inventory', label: 'Inventory', icon: <Truck className="h-4 w-4" /> },
+    { value: 'inventory', label: 'Inventory', icon: <Package className="h-4 w-4" /> },
     { value: 'compliance', label: 'Compliance', icon: <ShieldAlert className="h-4 w-4" /> },
-    { value: 'equipment', label: 'Equipment', icon: <Truck className="h-4 w-4" /> },
+    { value: 'equipment', label: 'Equipment', icon: <Tool className="h-4 w-4" /> },
     { value: 'marketing', label: 'Marketing', icon: <Star className="h-4 w-4" /> },
   ];
 
