@@ -35,7 +35,8 @@ import {
   BarChart2,
   FileText,
   Briefcase,
-  Award
+  Award,
+  ClipboardList
 } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
@@ -305,6 +306,42 @@ const Automations = () => {
       actions: ['Generate purchase order', 'Track shipment status'],
       category: 'inventory',
       premium: true
+    },
+    {
+      id: 29,
+      title: 'Job Completion Form',
+      description: 'Automatically send job completion forms when a job is marked as finished',
+      isActive: true,
+      triggers: ['Job status changed to completed', 'Customer email available'],
+      actions: ['Generate job completion form', 'Send form to customer'],
+      category: 'forms'
+    },
+    {
+      id: 30,
+      title: 'Site Inspection Form',
+      description: 'Schedule and send site inspection forms to team members before job starts',
+      isActive: true,
+      triggers: ['Job scheduled', '48 hours before job start'],
+      actions: ['Generate site inspection form', 'Assign to responsible team member'],
+      category: 'forms'
+    },
+    {
+      id: 31,
+      title: 'Customer Feedback Form',
+      description: 'Send customer feedback forms after job completion to gather insights',
+      isActive: true,
+      triggers: ['Job marked as complete', '24 hours after completion'],
+      actions: ['Send feedback form to customer', 'Create follow-up task if no response'],
+      category: 'forms'
+    },
+    {
+      id: 32,
+      title: 'Material Request Form',
+      description: 'Enable team members to submit material requests that require approval',
+      isActive: false,
+      triggers: ['Material request submitted', 'Inventory level below threshold'],
+      actions: ['Send approval request to manager', 'Create purchase order when approved'],
+      category: 'forms'
     }
   ]);
 
@@ -337,6 +374,7 @@ const Automations = () => {
     { value: 'compliance', label: 'Compliance', icon: <ShieldAlert className="h-4 w-4" /> },
     { value: 'equipment', label: 'Equipment', icon: <Wrench className="h-4 w-4" /> },
     { value: 'marketing', label: 'Marketing', icon: <Star className="h-4 w-4" /> },
+    { value: 'forms', label: 'Forms', icon: <ClipboardList className="h-4 w-4" /> },
   ];
 
   const filteredAutomations = selectedCategory === 'all' 
