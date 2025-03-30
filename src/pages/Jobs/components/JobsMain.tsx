@@ -9,50 +9,17 @@ import { JobTable } from "./job-list/JobTable";
 import { Filter, Plus, MapPin, List, Map } from "lucide-react";
 import JobSiteMapView from "./job-list/JobSiteMapView";
 import { toast } from "sonner";
+import { mockJobs } from "../data/mockJobs";
 import type { Job } from "@/types/job";
+import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 
 export function JobsMain() {
   const navigate = useNavigate();
-  const [showMap, setShowMap] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   
-  // Sample job data
-  const sampleJobs: Job[] = [
-    {
-      id: "1",
-      title: "Plumbing Repair",
-      customer: "John Smith",
-      jobNumber: "PLM-001",
-      type: "Plumbing",
-      status: "in-progress",
-      date: "2023-05-15",
-      location: [151.2093, -33.8688],
-      assignedTeam: "Team Blue"
-    },
-    {
-      id: "2",
-      title: "Electrical Installation",
-      customer: "Sarah Johnson",
-      jobNumber: "ELE-001",
-      type: "Electrical",
-      status: "ready",
-      date: "2023-05-16",
-      location: [151.2093, -33.8688],
-      assignedTeam: "Team Red"
-    },
-    {
-      id: "3",
-      title: "HVAC Maintenance",
-      customer: "Michael Brown",
-      jobNumber: "HVAC-001",
-      type: "HVAC",
-      status: "to-invoice",
-      date: "2023-05-17",
-      location: [151.2093, -33.8688],
-      assignedTeam: "Team Green"
-    }
-  ];
+  // Sample job data from mockJobs
+  const jobs = mockJobs;
   
   const handleStatusChange = async (jobId: string, newStatus: Job['status']) => {
     setActionLoading(jobId);
@@ -95,41 +62,28 @@ export function JobsMain() {
             </div>
           </div>
           
-          <div className="flex space-x-2 mb-4">
-            <Button 
-              variant={showMap ? "outline" : "default"}
-              size="sm"
-              onClick={() => setShowMap(false)}
-              className="flex items-center"
-            >
-              <List className="mr-1 h-4 w-4" />
-              List View
-            </Button>
-            <Button
-              variant={showMap ? "default" : "outline"}
-              size="sm"
-              onClick={() => setShowMap(true)}
-              className="flex items-center"
-            >
-              <Map className="mr-1 h-4 w-4" />
-              Map View
-            </Button>
+          <div className="h-[calc(100vh-220px)]">
+            <ResizablePanelGroup direction="horizontal" className="border rounded-lg">
+              <ResizablePanel defaultSize={40} minSize={30}>
+                <div className="h-full overflow-y-auto">
+                  <JobTable 
+                    searchQuery={searchQuery} 
+                    jobs={jobs}
+                    actionLoading={actionLoading}
+                    onStatusChange={handleStatusChange}
+                  />
+                </div>
+              </ResizablePanel>
+              
+              <ResizableHandle withHandle />
+              
+              <ResizablePanel defaultSize={60} minSize={30}>
+                <div className="h-full p-1">
+                  <JobSiteMapView jobs={jobs} />
+                </div>
+              </ResizablePanel>
+            </ResizablePanelGroup>
           </div>
-
-          {showMap ? (
-            <Card>
-              <CardContent className="p-0 relative">
-                <JobSiteMapView jobs={sampleJobs} />
-              </CardContent>
-            </Card>
-          ) : (
-            <JobTable 
-              searchQuery={searchQuery} 
-              jobs={sampleJobs}
-              actionLoading={actionLoading}
-              onStatusChange={handleStatusChange}
-            />
-          )}
         </div>
       </div>
     </AppLayout>
