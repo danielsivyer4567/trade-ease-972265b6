@@ -3,7 +3,7 @@ import React from 'react';
 import { AuditsByDay } from '../types/auditTypes';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Calendar, CheckSquare, User, Camera, Upload } from 'lucide-react';
+import { Calendar, CheckSquare, User, Camera, Upload, MapPin, Phone } from 'lucide-react';
 import { format } from 'date-fns';
 
 interface DailyAuditListProps {
@@ -22,7 +22,7 @@ export const DailyAuditList: React.FC<DailyAuditListProps> = ({ dayData, onAddPh
         <p className="text-xs text-muted-foreground">{dayData.formattedDate}</p>
       </div>
       
-      <div className="flex-1 flex flex-col gap-3 p-2 bg-slate-50 min-h-[300px] overflow-y-auto max-h-[600px]">
+      <div className="flex-1 flex flex-col gap-4 p-3 bg-slate-50 min-h-[300px] overflow-y-auto max-h-[600px]">
         {dayData.audits.length > 0 ? (
           dayData.audits.map((audit) => (
             <Card key={audit.id} className="border border-border shadow-sm hover:shadow-md transition-shadow">
@@ -63,29 +63,37 @@ export const DailyAuditList: React.FC<DailyAuditListProps> = ({ dayData, onAddPh
         ) : (
           // Display 12 empty slots when there are no scheduled audits
           emptySlots.map((index) => (
-            <div key={index} className="border border-dashed border-gray-200 rounded-lg p-3 bg-white">
-              <div className="flex flex-col items-center justify-center text-muted-foreground text-sm gap-2">
-                <span className="text-xs">Audit Slot {index + 1}</span>
+            <div key={index} className="border border-dashed border-gray-200 rounded-lg p-5 bg-white mb-3 min-h-[140px]">
+              <div className="flex flex-col items-start justify-between h-full">
+                <div className="w-full">
+                  <h3 className="font-medium text-base mb-1">Customer {index + 1}</h3>
+                  <div className="flex items-center gap-1 text-sm mb-2">
+                    <MapPin className="h-4 w-4 text-gray-500" />
+                    <p className="text-muted-foreground">123 Main Street, Springfield</p>
+                  </div>
+                  <div className="flex items-center gap-1 text-sm">
+                    <Phone className="h-4 w-4 text-gray-500" />
+                    <p className="text-muted-foreground">555-123-4567</p>
+                  </div>
+                </div>
                 
-                <div className="flex gap-2">
+                <div className="flex gap-2 mt-3 w-full">
                   <Button 
                     variant="outline" 
-                    size="sm" 
-                    className="flex items-center gap-1 h-7"
+                    className="flex items-center gap-2 h-9 flex-1"
                     onClick={onAddPhoto}
                   >
-                    <Camera className="h-3 w-3" />
-                    <span className="text-xs">Photo</span>
+                    <Camera className="h-4 w-4" />
+                    <span>Photo</span>
                   </Button>
                   
                   <Button 
                     variant="outline" 
-                    size="sm" 
-                    className="flex items-center gap-1 h-7"
+                    className="flex items-center gap-2 h-9 flex-1"
                     onClick={onAddPhoto}
                   >
-                    <Upload className="h-3 w-3" />
-                    <span className="text-xs">Upload</span>
+                    <Upload className="h-4 w-4" />
+                    <span>Upload</span>
                   </Button>
                 </div>
               </div>
