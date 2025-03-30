@@ -23,6 +23,12 @@ import { MessagingNode } from './nodes/MessagingNode';
 import { toast } from 'sonner';
 import { AutomationIntegrationService } from '@/services/AutomationIntegrationService';
 
+// Define node data types for better type safety
+interface BaseNodeData {
+  label: string;
+  [key: string]: any; // Allow additional properties
+}
+
 // Define node types
 const nodeTypes = {
   customerNode: CustomerNode,
@@ -118,29 +124,36 @@ export function Flow({ onInit }) {
       id: nodeId,
       type,
       position,
-      data: { label: `New ${type.replace('Node', '')}` },
+      data: { label: `New ${type.replace('Node', '')}` } as BaseNodeData,
     };
     
     // Add special handling for specific node types
     if (type === 'visionNode') {
-      newNode.data.label = 'Extract Financial Data';
+      newNode.data = {
+        ...newNode.data,
+        label: 'Extract Financial Data'
+      };
     } else if (type === 'messagingNode') {
       newNode.data = {
+        ...newNode.data,
         label: 'SMS Message',
         messageType: 'sms'
       };
     } else if (type === 'emailNode') {
       newNode.data = {
+        ...newNode.data,
         label: 'Email Notification',
         messageType: 'email'
       };
     } else if (type === 'whatsappNode') {
       newNode.data = {
+        ...newNode.data,
         label: 'WhatsApp Message',
         messageType: 'whatsapp'
       };
     } else if (type === 'socialNode') {
       newNode.data = {
+        ...newNode.data,
         label: 'Social Media Post',
         icon: '📱',
         color: '#4267B2'  // Facebook blue

@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { Workflow } from 'lucide-react';
 
 interface AutomationWorkflowButtonProps {
-  automationId: number;
+  automationId?: number; // Made optional
   variant?: 'default' | 'outline' | 'secondary' | 'destructive' | 'ghost' | 'link';
   size?: 'default' | 'sm' | 'lg' | 'icon';
   children?: React.ReactNode;
@@ -20,7 +20,11 @@ export function AutomationWorkflowButton({
   const navigate = useNavigate();
   
   const handleClick = () => {
-    navigate(`/workflow?automationId=${automationId}`);
+    if (automationId) {
+      navigate(`/workflow?automationId=${automationId}`);
+    } else {
+      navigate('/workflow');
+    }
   };
 
   return (
