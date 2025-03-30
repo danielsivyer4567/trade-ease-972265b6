@@ -12,13 +12,26 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Workflow, Search, Plus } from 'lucide-react';
+import { Workflow, Search, Plus, Tag } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { AutomationIntegrationService } from '@/services/AutomationIntegrationService';
 
-export function AutomationSelector({ onSelectAutomation }) {
+interface AutomationSelectorProps {
+  onSelectAutomation: (automationNode: any) => void;
+  targetType?: 'job' | 'quote' | 'customer' | 'message' | 'social' | 'calendar';
+  targetId?: string;
+}
+
+export function AutomationSelector({ 
+  onSelectAutomation,
+  targetType,
+  targetId
+}: AutomationSelectorProps) {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [automations, setAutomations] = useState([]);
+  const [associatedAutomations, setAssociatedAutomations] = useState<number[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   
   // Fetch automations (this is mock data, but would come from your actual automations storage)
@@ -53,10 +66,55 @@ export function AutomationSelector({ onSelectAutomation }) {
         actions: ['Send form to customer'],
         category: 'forms'
       },
+      {
+        id: 4,
+        title: 'Social Media Post',
+        description: 'Post job completion to social media',
+        isActive: true,
+        triggers: ['Job marked complete'],
+        actions: ['Post to social media'],
+        category: 'social',
+        premium: true
+      },
+      {
+        id: 5,
+        title: 'SMS Appointment Reminder',
+        description: 'Send SMS reminder 24 hours before appointment',
+        isActive: true,
+        triggers: ['24h before appointment'],
+        actions: ['Send SMS'],
+        category: 'messaging',
+        premium: true
+      }
     ];
     
     setAutomations(mockAutomations);
-  }, []);
+    
+    // If we have a target, load any associated automations
+    if (targetType && targetId) {
+      loadAssociatedAutomations();
+    }
+  }, [targetType, targetId]);
+  
+  const loadAssociatedAutomations = async () => {
+    if (!targetType || !targetId) return;
+    
+    setIsLoading(true);
+    try {
+      const { success, automations } = await AutomationIntegrationService.getAssociatedAutomations(
+        targetType,
+        targetId
+      );
+      
+      if (success && automations) {
+        setAssociatedAutomations(automations.map(a => a.id));
+      }
+    } catch (error) {
+      console.error('Failed to load associated automations:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
   
   // Filter automations based on search query
   const filteredAutomations = searchQuery 
@@ -76,8 +134,15 @@ export function AutomationSelector({ onSelectAutomation }) {
         triggers: automation.triggers,
         actions: automation.actions,
         automationId: automation.id,
+        premium: automation.premium,
       }
     });
+    
+    // If we have target data, associate this automation with the target
+    if (targetType && targetId) {
+      AutomationIntegrationService.associateAutomation(automation.id, targetType, targetId);
+    }
+    
     setDialogOpen(false);
   };
   
@@ -98,6 +163,12 @@ export function AutomationSelector({ onSelectAutomation }) {
           <DialogTitle>Select Automation</DialogTitle>
           <DialogDescription>
             Choose an existing automation to add to your workflow.
+            {targetType && targetId && (
+              <Badge variant="outline" className="ml-2 bg-blue-50">
+                <Tag className="h-3 w-3 mr-1" />
+                {targetType}: {targetId.substring(0, 8)}
+              </Badge>
+            )}
           </DialogDescription>
         </DialogHeader>
         
@@ -117,7 +188,9 @@ export function AutomationSelector({ onSelectAutomation }) {
         </div>
         
         <div className="max-h-72 overflow-y-auto space-y-2 pr-1">
-          {filteredAutomations.length === 0 ? (
+          {isLoading ? (
+            <div className="text-center py-4">Loading...</div>
+          ) : filteredAutomations.length === 0 ? (
             <div className="text-center py-4 text-sm text-gray-500">
               No automations found
             </div>
@@ -132,10 +205,22 @@ export function AutomationSelector({ onSelectAutomation }) {
                   <div className="font-medium flex items-center">
                     <Workflow className="h-4 w-4 text-blue-500 mr-1.5" />
                     {automation.title}
+                    {associatedAutomations.includes(automation.id) && (
+                      <Badge variant="outline" className="ml-2 bg-green-50 text-green-600 border-green-200">
+                        Associated
+                      </Badge>
+                    )}
                   </div>
-                  <Badge variant="outline" className="text-xs">
-                    {automation.category}
-                  </Badge>
+                  <div className="flex gap-1">
+                    {automation.premium && (
+                      <Badge variant="outline" className="text-xs bg-amber-50 text-amber-700 border-amber-200">
+                        <span className="mr-1">✨</span> Pro
+                      </Badge>
+                    )}
+                    <Badge variant="outline" className="text-xs">
+                      {automation.category}
+                    </Badge>
+                  </div>
                 </div>
                 <div className="text-sm text-gray-500">{automation.description}</div>
               </div>
