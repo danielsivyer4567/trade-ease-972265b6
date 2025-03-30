@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Route, Routes as RouterRoutes, Navigate } from 'react-router-dom';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
@@ -36,6 +35,9 @@ const TeamGreenPage = React.lazy(() => import('@/pages/TeamGreen'));
 const TeamNewPage = React.lazy(() => import('@/pages/TeamNew'));
 const SocialPage = React.lazy(() => import('@/pages/Social'));
 const AIFeaturesPage = React.lazy(() => import('@/pages/AIFeatures'));
+
+// New import for combined Quotes and Invoicing
+const QuotesInvoicesPage = React.lazy(() => import('@/pages/QuotesInvoices'));
 
 // Settings Pages
 const SettingsPage = React.lazy(() => import('@/pages/Settings'));
@@ -84,16 +86,10 @@ export function Routes() {
         <Route path="/referrals" element={<ReferralsPage />} />
         <Route path="/database" element={<DatabasePage />} />
         <Route path="/quotes" element={<QuotesPage />} />
+        <Route path="/quotes-invoices" element={<QuotesInvoicesPage />} />
+        <Route path="/invoices/new" element={<NewInvoicePage />} />
         <Route path="/jobs/templates/new" element={<NewTemplatePage />} />
         <Route path="/messaging" element={<MessagingPage />} />
-        <Route path="/workflow" element={<WorkflowPage />} />
-        <Route path="/teams" element={<TeamsPage />} />
-        <Route path="/team-red" element={<TeamRedPage />} />
-        <Route path="/team-blue" element={<TeamBluePage />} />
-        <Route path="/team-green" element={<TeamGreenPage />} />
-        <Route path="/team-new" element={<TeamNewPage />} />
-        <Route path="/social" element={<SocialPage />} />
-        <Route path="/ai-features" element={<AIFeaturesPage />} />
         
         {/* Settings Routes */}
         <Route path="/settings" element={<SettingsPage />} />
