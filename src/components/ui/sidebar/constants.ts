@@ -1,3 +1,4 @@
+
 import { 
   LayoutDashboard, 
   Users, 
@@ -105,26 +106,10 @@ export const navigationGroups = [
     label: "Communication",
     items: [
       {
-        type: 'dropdown',
+        type: 'link',
         icon: MessageSquare,
         label: "Messaging",
-        items: [
-          {
-            icon: MessageSquare,
-            label: "Chat",
-            path: "/messaging"
-          },
-          {
-            icon: Mail,
-            label: "Email",
-            path: "/email"
-          },
-          {
-            icon: Share2,
-            label: "Social",
-            path: "/social"
-          }
-        ]
+        path: "/messaging"
       }
     ]
   },
