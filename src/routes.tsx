@@ -1,4 +1,3 @@
-
 import { ReactNode } from 'react';
 import Customers from './pages/Customers';
 import NewCustomer from './pages/Customers/NewCustomer';
@@ -9,7 +8,7 @@ import Notifications from './pages/Notifications';
 import NotFound from './pages/NotFound';
 import Calendar from './pages/Calendar';
 import CalendarSync from './pages/Calendar/CalendarSync';
-import TasksPage from './pages/Tasks'; // Changed import to use TasksPage from './pages/Tasks'
+import TasksPage from './pages/Tasks';
 import Jobs from './pages/Jobs';
 import TeamRed from './pages/TeamRed';
 import TeamBlue from './pages/TeamBlue';
@@ -40,16 +39,14 @@ import Auth from './pages/Auth';
 import PropertyBoundaries from './pages/PropertyBoundaries';
 import Referrals from './pages/Referrals';
 import SiteAudits from './pages/SiteAudits';
+import Forms from './pages/Forms';
 
-// Define the route type
 export interface RouteConfig {
   path: string;
   element: ReactNode;
 }
 
-// Define the application routes
 export const routes: RouteConfig[] = [
-  // Public routes
   {
     path: '/auth',
     element: <Auth />
@@ -59,7 +56,6 @@ export const routes: RouteConfig[] = [
     element: <Auth />
   },
   
-  // Protected routes
   {
     path: '/',
     element: <Index />
@@ -78,7 +74,11 @@ export const routes: RouteConfig[] = [
   },
   {
     path: '/tasks',
-    element: <TasksPage /> // Using TasksPage from './pages/Tasks'
+    element: <TasksPage />
+  },
+  {
+    path: '/forms',
+    element: <Forms />
   },
   {
     path: '/jobs/*',
@@ -168,7 +168,6 @@ export const routes: RouteConfig[] = [
     path: '/referrals',
     element: <Referrals />
   },
-  // Settings subpages
   {
     path: '/settings/notifications',
     element: <NotificationsSettings />

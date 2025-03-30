@@ -19,6 +19,7 @@ import {
   LogOut,
   Calculator,
   FileSearch,
+  ClipboardList,
 } from 'lucide-react';
 
 import { NavLink } from './SidebarNavLinks';
@@ -107,6 +108,12 @@ export const navigationGroups = [
         icon: ListTodo,
         label: 'Tasks',
         path: '/tasks',
+      },
+      {
+        type: 'link',
+        icon: ClipboardList,
+        label: 'Forms',
+        path: '/forms',
       },
     ],
   },
