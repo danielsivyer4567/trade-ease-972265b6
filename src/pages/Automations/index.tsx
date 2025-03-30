@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { BaseLayout } from '@/components/ui/BaseLayout';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -29,7 +28,6 @@ import {
   Landmark,
   AlertTriangle,
   CloudRain,
-  Wrench as WrenchFix,
   PaintBucket,
   Thermometer,
   Tags,
