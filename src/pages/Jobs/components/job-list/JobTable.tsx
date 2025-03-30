@@ -73,64 +73,60 @@ export function JobTable({
     : jobs;
   
   return (
-    <div className="border rounded-lg overflow-hidden">
-      <div className="overflow-x-auto">
-        <Table>
-          <TableHeader>
-            <TableRow className="bg-slate-100">
-              <TableHead className="font-medium">Job Number</TableHead>
-              <TableHead className="font-medium">Customer</TableHead>
-              <TableHead className="font-medium">Type</TableHead>
-              <TableHead className="font-medium">Status</TableHead>
-              <TableHead className="font-medium">Date</TableHead>
-              <TableHead className="font-medium">Team</TableHead>
-              <TableHead className="font-medium">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {filteredJobs.length > 0 ? (
-              filteredJobs.map((job) => (
-                <TableRow 
-                  key={job.id}
-                  className="hover:bg-slate-50 cursor-pointer"
-                  onClick={() => navigate(`/jobs/${job.id}`)}
-                >
-                  <TableCell className="font-medium">{job.jobNumber}</TableCell>
-                  <TableCell>{job.customer}</TableCell>
-                  <TableCell>{job.type}</TableCell>
-                  <TableCell>
-                    <JobStatusBadge status={job.status} />
-                  </TableCell>
-                  <TableCell className="whitespace-nowrap">
-                    <div className="flex items-center space-x-1">
-                      <Calendar className="h-3 w-3 text-gray-500" />
+    <div className="h-full">
+      <Table>
+        <TableHeader>
+          <TableRow className="bg-slate-100">
+            <TableHead className="font-medium">Job Number</TableHead>
+            <TableHead className="font-medium">Customer</TableHead>
+            <TableHead className="font-medium">Status</TableHead>
+            <TableHead className="font-medium">Actions</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {filteredJobs.length > 0 ? (
+            filteredJobs.map((job) => (
+              <TableRow 
+                key={job.id}
+                className="hover:bg-slate-50 cursor-pointer"
+                onClick={() => navigate(`/jobs/${job.id}`)}
+              >
+                <TableCell className="font-medium whitespace-nowrap">
+                  <div>
+                    <div>{job.jobNumber}</div>
+                    <div className="text-xs text-gray-500">{job.type}</div>
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <div>
+                    <div>{job.customer}</div>
+                    <div className="flex items-center space-x-1 text-xs text-gray-500">
+                      <Calendar className="h-3 w-3" />
                       <span>{job.date || 'Not scheduled'}</span>
                     </div>
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant="outline" className="bg-gray-100">
-                      {job.assignedTeam || 'Unassigned'}
-                    </Badge>
-                  </TableCell>
-                  <TableCell onClick={(e) => e.stopPropagation()}>
-                    <JobActions 
-                      job={job}
-                      actionLoading={actionLoading}
-                      onStatusChange={onStatusChange}
-                    />
-                  </TableCell>
-                </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell colSpan={7} className="text-center py-8 text-gray-500">
-                  No jobs match your search criteria
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <JobStatusBadge status={job.status} />
+                </TableCell>
+                <TableCell onClick={(e) => e.stopPropagation()} className="whitespace-nowrap">
+                  <JobActions 
+                    job={job}
+                    actionLoading={actionLoading}
+                    onStatusChange={onStatusChange}
+                  />
                 </TableCell>
               </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </div>
+            ))
+          ) : (
+            <TableRow>
+              <TableCell colSpan={4} className="text-center py-8 text-gray-500">
+                No jobs match your search criteria
+              </TableCell>
+            </TableRow>
+          )}
+        </TableBody>
+      </Table>
     </div>
   );
 }
