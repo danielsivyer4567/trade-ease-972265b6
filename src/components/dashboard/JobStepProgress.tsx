@@ -288,9 +288,7 @@ export const JobStepProgress = () => {
                           <div className="flex-shrink-0 mt-0.5">
                             {savingTaskId === task.id ? <Loader className="h-4 w-4 animate-spin text-blue-500" /> : <Checkbox id={task.id} checked={task.isCompleted} className={`h-4 w-4 ${task.isCompleted ? "bg-green-500 text-white border-green-500" : ""}`} onCheckedChange={() => handleTaskCompletion(step.id, task.id)} />}
                           </div>
-                          <label htmlFor={task.id} className="">
-                            {task.text}
-                          </label>
+                          
                         </li>)}
                     </ul>
                   </div>
