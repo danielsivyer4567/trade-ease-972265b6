@@ -183,10 +183,8 @@ export const JobFinancialsTab = ({
     <TabsContent value="financials" className="space-y-4">
       <div className="border rounded-lg p-4">
         <div className={`space-y-8 ${isMobile ? 'w-full' : 'max-w-full'}`}>
-          <FinancialCategoriesOverview financialTotals={financialTotals} />
-
-          {/* Document Management Section */}
-          <div className="space-y-4 border-t pt-6">
+          {/* Document Management Section - Moved to the top */}
+          <div className="space-y-4">
             <h2 className="text-lg font-medium mb-4">Quotes & Invoices</h2>
             
             {/* Document Type Filter */}
@@ -298,6 +296,8 @@ export const JobFinancialsTab = ({
 
             <ImagesGrid images={uploadedFiles} title="Uploaded Documents" />
           </div>
+          
+          <FinancialCategoriesOverview financialTotals={financialTotals} />
 
           <ExtractedDataDisplay 
             extractedFinancialData={extractedFinancialData}
