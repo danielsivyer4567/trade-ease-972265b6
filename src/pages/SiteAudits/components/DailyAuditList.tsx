@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { AuditsByDay } from '../types/auditTypes';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -62,38 +63,38 @@ export const DailyAuditList: React.FC<DailyAuditListProps> = ({ dayData, onAddPh
             </Card>
           ))
         ) : (
-          // Display 12 empty slots with larger customer details
+          // Display 12 empty slots with moderately sized customer details
           emptySlots.map((index) => (
-            <div key={index} className="border border-dashed border-gray-200 rounded-lg p-6 bg-white mb-3 min-h-[160px]">
+            <div key={index} className="border border-dashed border-gray-200 rounded-lg p-4 bg-white mb-3 min-h-[150px]">
               <div className="flex flex-col items-start justify-between h-full">
                 <div className="w-full">
-                  <h3 className="font-semibold text-lg md:text-xl mb-2">Customer {index + 1}</h3>
-                  <div className="flex items-center gap-2 text-md mb-3">
-                    <MapPin className="h-5 w-5 text-gray-500" />
-                    <p className="text-gray-700 text-base md:text-lg font-medium">123 Main Street, Springfield</p>
+                  <h3 className="font-semibold text-base mb-2">Customer {index + 1}</h3>
+                  <div className="flex items-center gap-2 mb-2">
+                    <MapPin className="h-4 w-4 text-gray-500" />
+                    <p className="text-gray-700 text-sm font-medium">123 Main Street, Springfield</p>
                   </div>
-                  <div className="flex items-center gap-2 text-md">
-                    <Phone className="h-5 w-5 text-gray-500" />
-                    <p className="text-gray-700 text-base">555-123-4567</p>
+                  <div className="flex items-center gap-2">
+                    <Phone className="h-4 w-4 text-gray-500" />
+                    <p className="text-gray-700 text-sm">555-123-4567</p>
                   </div>
                 </div>
                 
-                <div className="flex gap-3 mt-4 w-full">
+                <div className="flex gap-3 mt-3 w-full">
                   <Button 
                     variant="outline" 
-                    className="flex items-center gap-2 h-10 flex-1 text-sm"
+                    className="flex items-center gap-2 h-9 flex-1 text-xs"
                     onClick={onAddPhoto}
                   >
-                    <Camera className="h-5 w-5" />
+                    <Camera className="h-4 w-4" />
                     <span>Photo</span>
                   </Button>
                   
                   <Button 
                     variant="outline" 
-                    className="flex items-center gap-2 h-10 flex-1 text-sm"
+                    className="flex items-center gap-2 h-9 flex-1 text-xs"
                     onClick={onAddPhoto}
                   >
-                    <Upload className="h-5 w-5" />
+                    <Upload className="h-4 w-4" />
                     <span>Upload</span>
                   </Button>
                 </div>
