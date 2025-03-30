@@ -30,6 +30,7 @@ import AIAssistantSettings from './pages/Settings/AIAssistantSettings';
 import ContractorsPage from './pages/Settings/Contractors';
 import OfficeStaff from './pages/Settings/OfficeStaff';
 import IntegrationsPage from './pages/Settings/Integrations';
+import JobSettings from './pages/Settings/JobSettings';
 import LoadsSpansCalculator from './pages/Calculators/LoadsSpansCalculator';
 import MarkupCalculator from './pages/Calculators/MarkupCalculator';
 import JobCostCalculator from './pages/Calculators/JobCostCalculator';
@@ -190,6 +191,10 @@ export const routes: RouteConfig[] = [
   {
     path: '/settings/integrations',
     element: <IntegrationsPage />
+  },
+  {
+    path: '/settings/jobs',
+    element: <JobSettings />
   },
   {
     path: '/notifications',

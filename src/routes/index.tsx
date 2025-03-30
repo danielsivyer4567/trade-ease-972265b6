@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Route, Routes as RouterRoutes, Navigate } from 'react-router-dom';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
@@ -44,6 +45,7 @@ const TradeRatesPage = React.lazy(() => import('@/pages/Settings/TradeRates'));
 const BillsPurchaseOrdersPage = React.lazy(() => import('@/pages/Settings/BillsPurchaseOrders'));
 const OfficeStaffPage = React.lazy(() => import('@/pages/Settings/OfficeStaff'));
 const ContractorsPage = React.lazy(() => import('@/pages/Settings/Contractors'));
+const JobSettingsPage = React.lazy(() => import('@/pages/Settings/JobSettings'));
 const TermsOfServicePage = React.lazy(() => import('@/pages/Settings/TermsOfService'));
 const GenericSettingsPage = React.lazy(() => import('@/pages/Settings/GenericSettingsPage'));
 
@@ -101,6 +103,7 @@ export function Routes() {
         <Route path="/settings/bills-purchase-orders" element={<BillsPurchaseOrdersPage />} />
         <Route path="/settings/office-staff" element={<OfficeStaffPage />} />
         <Route path="/settings/contractors" element={<ContractorsPage />} />
+        <Route path="/settings/jobs" element={<JobSettingsPage />} />
         <Route path="/settings/terms-of-service" element={<TermsOfServicePage />} />
         
         {/* Generic settings page for routes that don't have specific components */}
