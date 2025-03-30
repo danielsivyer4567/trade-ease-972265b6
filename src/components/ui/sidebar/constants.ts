@@ -20,7 +20,8 @@ import {
   Youtube,
   Store,
   Share2,
-  Receipt
+  Receipt,
+  FileSearch
 } from 'lucide-react';
 
 // Define sidebar constants
@@ -88,6 +89,12 @@ export const navigationGroups = [
         icon: Receipt,
         label: "Quotes & Invoicing",
         path: "/quotes-invoices"
+      },
+      {
+        type: 'link',
+        icon: FileSearch,
+        label: "Site Audits",
+        path: "/site-audits"
       }
     ]
   },

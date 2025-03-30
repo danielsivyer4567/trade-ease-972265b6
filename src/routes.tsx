@@ -39,6 +39,7 @@ import NCCCodesCalculator from './pages/Calculators/NCCCodesCalculator';
 import Auth from './pages/Auth';
 import PropertyBoundaries from './pages/PropertyBoundaries';
 import Referrals from './pages/Referrals';
+import SiteAudits from './pages/SiteAudits';
 
 // Define the route type
 export interface RouteConfig {
@@ -118,6 +119,10 @@ export const routes: RouteConfig[] = [
   {
     path: '/ai-features',
     element: <AIFeatures />
+  },
+  {
+    path: '/site-audits',
+    element: <SiteAudits />
   },
   {
     path: '/calculators',
