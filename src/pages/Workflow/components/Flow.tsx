@@ -43,6 +43,7 @@ export function Flow({ onInit }) {
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const reactFlowInstance = useRef(null);
+  const [existingAutomationIds, setExistingAutomationIds] = useState(new Set());
 
   // Handle connections between nodes
   const onConnect = useCallback((params) => {
@@ -124,18 +125,26 @@ export function Flow({ onInit }) {
     if (type === 'visionNode') {
       newNode.data.label = 'Extract Financial Data';
     } else if (type === 'messagingNode') {
-      newNode.data.label = 'SMS Message';
-      newNode.data.messageType = 'sms';
+      newNode.data = {
+        label: 'SMS Message',
+        messageType: 'sms'
+      };
     } else if (type === 'emailNode') {
-      newNode.data.label = 'Email Notification';
-      newNode.data.messageType = 'email';
+      newNode.data = {
+        label: 'Email Notification',
+        messageType: 'email'
+      };
     } else if (type === 'whatsappNode') {
-      newNode.data.label = 'WhatsApp Message';
-      newNode.data.messageType = 'whatsapp';
+      newNode.data = {
+        label: 'WhatsApp Message',
+        messageType: 'whatsapp'
+      };
     } else if (type === 'socialNode') {
-      newNode.data.label = 'Social Media Post';
-      newNode.data.icon = '📱';
-      newNode.data.color = '#4267B2';  // Facebook blue
+      newNode.data = {
+        label: 'Social Media Post',
+        icon: '📱',
+        color: '#4267B2'  // Facebook blue
+      };
     }
 
     setNodes((nds) => nds.concat(newNode));
@@ -146,6 +155,17 @@ export function Flow({ onInit }) {
     event.preventDefault();
     event.dataTransfer.dropEffect = 'move';
   }, []);
+
+  // Track existing automation IDs to prevent duplicates
+  useEffect(() => {
+    const automationIds = new Set();
+    nodes.forEach(node => {
+      if (node.type === 'automationNode' && node.data?.automationId) {
+        automationIds.add(node.data.automationId);
+      }
+    });
+    setExistingAutomationIds(automationIds);
+  }, [nodes]);
 
   // Set up flow on init
   const onInitFlow = useCallback((instance) => {
@@ -185,14 +205,37 @@ export function Flow({ onInit }) {
       ));
     };
 
+    const handleAddAutomation = (event) => {
+      const { automationData } = event.detail;
+      
+      // Check if this automation already exists in the flow
+      if (existingAutomationIds.has(automationData.automationId)) {
+        toast.info(`Automation "${automationData.label}" already exists in this workflow`);
+        return;
+      }
+      
+      // Create a new automation node
+      const newNode = {
+        id: `automation-${Date.now()}`,
+        type: 'automationNode',
+        position: { x: 100, y: 100 },
+        data: automationData
+      };
+      
+      setNodes((nds) => nds.concat(newNode));
+      toast.success(`Added "${automationData.label}" automation to workflow`);
+    };
+
     document.addEventListener('delete-node', handleDeleteNode);
     document.addEventListener('update-node', handleUpdateNode);
+    document.addEventListener('add-automation', handleAddAutomation);
     
     return () => {
       document.removeEventListener('delete-node', handleDeleteNode);
       document.removeEventListener('update-node', handleUpdateNode);
+      document.removeEventListener('add-automation', handleAddAutomation);
     };
-  }, [setNodes, setEdges]);
+  }, [setNodes, setEdges, existingAutomationIds]);
 
   return (
     <ReactFlowProvider>

@@ -1,34 +1,36 @@
 
 import React from 'react';
-import { Button, ButtonProps } from '@/components/ui/button';
-import { Workflow } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
+import { Workflow } from 'lucide-react';
 
-interface AutomationWorkflowButtonProps extends ButtonProps {
-  automationId?: number;
+interface AutomationWorkflowButtonProps {
+  automationId: number;
+  variant?: 'default' | 'outline' | 'secondary' | 'destructive' | 'ghost' | 'link';
+  size?: 'default' | 'sm' | 'lg' | 'icon';
+  children?: React.ReactNode;
 }
 
-export function AutomationWorkflowButton({ automationId, children, ...props }: AutomationWorkflowButtonProps) {
+export function AutomationWorkflowButton({ 
+  automationId, 
+  variant = 'default', 
+  size = 'default',
+  children = 'Add to Workflow'
+}: AutomationWorkflowButtonProps) {
   const navigate = useNavigate();
   
   const handleClick = () => {
-    if (automationId) {
-      navigate(`/workflow?automationId=${automationId}`);
-    } else {
-      navigate('/workflow');
-    }
+    navigate(`/workflow?automationId=${automationId}`);
   };
-  
+
   return (
     <Button
-      variant="outline"
-      size="sm"
-      className="flex items-center gap-2"
+      variant={variant}
+      size={size}
       onClick={handleClick}
-      {...props}
     >
-      <Workflow className="h-4 w-4" />
-      {children || <span>Open in Workflow Builder</span>}
+      <Workflow className="h-4 w-4 mr-2" />
+      {children}
     </Button>
   );
 }

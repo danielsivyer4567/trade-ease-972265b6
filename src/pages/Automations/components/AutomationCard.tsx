@@ -8,6 +8,7 @@ import { ArrowRight, Clock, Zap, RefreshCcw, Flame } from 'lucide-react';
 import { AutomationWorkflowButton } from '@/components/automation/AutomationWorkflowButton';
 import { toast } from "sonner";
 import { Automation } from '../types';
+import { AutomationIntegrationService } from '@/services/AutomationIntegrationService';
 
 interface AutomationCardProps {
   automation: Automation;
@@ -15,6 +16,23 @@ interface AutomationCardProps {
 }
 
 const AutomationCard = ({ automation, toggleAutomation }: AutomationCardProps) => {
+  const handleRunNow = async () => {
+    try {
+      await AutomationIntegrationService.triggerAutomation(automation.id, {
+        targetType: 'job',
+        targetId: 'manual-run',
+        additionalData: {
+          source: 'manual',
+          timestamp: new Date().toISOString()
+        }
+      });
+      toast.success(`Running automation: ${automation.title}`);
+    } catch (error) {
+      console.error('Failed to run automation:', error);
+      toast.error('Failed to run automation');
+    }
+  };
+
   return (
     <Card key={automation.id} className={`hover:shadow-md transition-shadow duration-200 ${!automation.isActive ? 'opacity-70' : ''}`}>
       <CardHeader className="pb-2">
@@ -72,7 +90,12 @@ const AutomationCard = ({ automation, toggleAutomation }: AutomationCardProps) =
         </div>
       </CardContent>
       <CardFooter className="flex justify-between pt-4 border-t">
-        <Button variant="outline" size="sm" className="flex items-center gap-1">
+        <Button 
+          variant="outline" 
+          size="sm" 
+          className="flex items-center gap-1"
+          onClick={handleRunNow}
+        >
           <RefreshCcw className="h-3 w-3" />
           <span>Run Now</span>
         </Button>

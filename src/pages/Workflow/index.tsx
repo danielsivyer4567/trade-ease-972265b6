@@ -1,11 +1,10 @@
-
 import React, { useState, useCallback, useEffect } from 'react';
 import { AppLayout } from "@/components/ui/AppLayout";
 import { Flow } from './components/Flow';
 import { NodeSidebar } from './components/NodeSidebar';
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Save, Key, Check, FileText, ArrowRightLeft, Workflow } from "lucide-react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -17,12 +16,16 @@ import { AutomationIntegrationService } from '@/services/AutomationIntegrationSe
 export default function WorkflowPage() {
   const navigate = useNavigate();
   const location = useLocation();
+  const [searchParams] = useSearchParams();
+  const automationId = searchParams.get('automationId');
+  
   const [flowInstance, setFlowInstance] = useState(null);
   const [gcpVisionKeyDialogOpen, setGcpVisionKeyDialogOpen] = useState(false);
   const [gcpVisionKey, setGcpVisionKey] = useState('');
   const [hasGcpVisionKey, setHasGcpVisionKey] = useState(false);
   const [isLoadingKey, setIsLoadingKey] = useState(true);
   const [integrationStatus, setIntegrationStatus] = useState('inactive');
+  const [addedAutomationFromURL, setAddedAutomationFromURL] = useState(false);
   
   // Handle target data passed from other parts of the app
   const [targetData, setTargetData] = useState<{
@@ -47,6 +50,98 @@ export default function WorkflowPage() {
       }
     }
   }, [location.state]);
+
+  // Handle automation ID from URL parameter
+  useEffect(() => {
+    if (automationId && flowInstance && !addedAutomationFromURL) {
+      // Fetch automation details and add to workflow
+      const addAutomationFromURL = async () => {
+        try {
+          const automationDetail = await getMockAutomation(parseInt(automationId, 10));
+          
+          if (automationDetail) {
+            // Create custom event to add the automation node
+            const event = new CustomEvent('add-automation', {
+              detail: {
+                automationData: {
+                  label: automationDetail.title,
+                  description: automationDetail.description,
+                  triggers: automationDetail.triggers,
+                  actions: automationDetail.actions,
+                  automationId: automationDetail.id,
+                  premium: automationDetail.premium
+                }
+              }
+            });
+            
+            // Dispatch the event
+            document.dispatchEvent(event);
+            setAddedAutomationFromURL(true);
+          }
+        } catch (error) {
+          console.error('Failed to add automation from URL:', error);
+          toast.error('Failed to add automation from URL');
+        }
+      };
+      
+      addAutomationFromURL();
+    }
+  }, [automationId, flowInstance, addedAutomationFromURL]);
+
+  // Mock function to get automation details - in a real app this would come from API/database
+  async function getMockAutomation(id) {
+    const mockAutomations = [
+      {
+        id: 1,
+        title: 'New Job Alert',
+        description: 'Send notifications when jobs are created',
+        isActive: true,
+        triggers: ['New job created'],
+        actions: ['Send notification'],
+        category: 'team'
+      },
+      {
+        id: 2,
+        title: 'Quote Follow-up',
+        description: 'Follow up on quotes after 3 days',
+        isActive: true,
+        triggers: ['Quote age > 3 days'],
+        actions: ['Send email'],
+        category: 'sales'
+      },
+      {
+        id: 3,
+        title: 'Customer Feedback Form',
+        description: 'Send feedback forms after job completion',
+        isActive: true,
+        triggers: ['Job marked complete'],
+        actions: ['Send form to customer'],
+        category: 'forms'
+      },
+      {
+        id: 4,
+        title: 'Social Media Post',
+        description: 'Post job completion to social media',
+        isActive: true,
+        triggers: ['Job marked complete'],
+        actions: ['Post to social media'],
+        category: 'social',
+        premium: true
+      },
+      {
+        id: 5,
+        title: 'SMS Appointment Reminder',
+        description: 'Send SMS reminder 24 hours before appointment',
+        isActive: true,
+        triggers: ['24h before appointment'],
+        actions: ['Send SMS'],
+        category: 'messaging',
+        premium: true
+      }
+    ];
+    
+    return mockAutomations.find(a => a.id === id) || null;
+  }
 
   // Handle adding an automation node when requested via navigation
   useEffect(() => {
