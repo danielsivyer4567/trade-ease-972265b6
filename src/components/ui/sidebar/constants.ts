@@ -24,6 +24,16 @@ import {
 
 import { NavLink } from './SidebarNavLinks';
 
+// Add the SIDEBAR_CONSTANTS export
+export const SIDEBAR_CONSTANTS = {
+  SIDEBAR_WIDTH: "240px",
+  SIDEBAR_WIDTH_ICON: "64px",
+  SIDEBAR_WIDTH_MOBILE: "100%",
+  SIDEBAR_COOKIE_NAME: "sidebar-expanded",
+  SIDEBAR_COOKIE_MAX_AGE: 60 * 60 * 24 * 365, // 1 year
+  SIDEBAR_KEYBOARD_SHORTCUT: "b",
+};
+
 export const teamLinks = [
   {
     label: 'Team Red',
@@ -42,6 +52,28 @@ export const teamLinks = [
     color: 'green',
     icon: Users,
     path: '/team-green',
+  },
+];
+
+// Add the calendarTeamLinks export
+export const calendarTeamLinks = [
+  {
+    label: 'Team Red Calendar',
+    color: 'red',
+    icon: Calendar,
+    path: '/calendar/team/red',
+  },
+  {
+    label: 'Team Blue Calendar',
+    color: 'blue',
+    icon: Calendar,
+    path: '/calendar/team/blue',
+  },
+  {
+    label: 'Team Green Calendar',
+    color: 'green',
+    icon: Calendar,
+    path: '/calendar/team/green',
   },
 ];
 
