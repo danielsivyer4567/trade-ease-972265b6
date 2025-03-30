@@ -16,6 +16,12 @@ export const FinancialSummary = ({
   laborCost,
   totalCosts
 }: FinancialSummaryProps) => {
+  // Calculate GST (10% in Australia)
+  const gstAmount = quoteAmount * 0.1;
+  
+  // Calculate estimated tax (assuming 30% on net profit)
+  const taxAmount = netProfitWithLabor > 0 ? netProfitWithLabor * 0.3 : 0;
+  
   return (
     <>
       <h3 className="font-medium mb-4">Financial Overview</h3>
@@ -34,6 +40,14 @@ export const FinancialSummary = ({
             <span className={`font-medium ${netProfitWithLabor >= 0 ? 'text-green-600' : 'text-red-600'}`}>
               ${netProfitWithLabor.toFixed(2)}
             </span>
+          </div>
+          <div className="flex justify-between items-center">
+            <span>GST to keep aside:</span>
+            <span className="font-medium text-orange-600">${gstAmount.toFixed(2)}</span>
+          </div>
+          <div className="flex justify-between items-center">
+            <span>Tax to put aside:</span>
+            <span className="font-medium text-purple-600">${taxAmount.toFixed(2)}</span>
           </div>
         </div>
         <div className="space-y-2">
