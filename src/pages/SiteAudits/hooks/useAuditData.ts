@@ -1,132 +1,143 @@
 
 import { useState, useEffect } from 'react';
+import { Customer, Audit } from '../types/auditTypes';
 import { useToast } from '@/hooks/use-toast';
-import { Audit, Customer } from '../types/auditTypes';
 
-// Sample data for demonstration - would be replaced with actual API calls
-const MOCK_CUSTOMERS: Customer[] = [
-  { id: '1', name: 'John Smith', email: 'john@example.com' },
-  { id: '2', name: 'Sarah Johnson', email: 'sarah@example.com' },
-  { id: '3', name: 'Michael Brown', email: 'michael@example.com' },
-  { id: '4', name: 'Emma Davis', email: 'emma@example.com' },
-];
+export const useAuditData = () => {
+  const [audits, setAudits] = useState<Audit[]>([
+    {
+      id: '1',
+      title: 'Kitchen Renovation Initial Assessment',
+      customerId: '1',
+      location: '123 Main St, Springfield',
+      startDate: '2023-11-15',
+      status: 'in_progress',
+      assignedTo: 'John Carpenter',
+      completedItems: 8,
+      totalItems: 12,
+      photos: []
+    },
+    {
+      id: '2',
+      title: 'Bathroom Remodel Site Check',
+      customerId: '2',
+      location: '456 Oak Ave, Springfield',
+      startDate: '2023-11-10',
+      status: 'in_progress',
+      assignedTo: 'Sarah Plumber',
+      completedItems: 3,
+      totalItems: 10,
+      photos: []
+    }
+  ]);
 
-const MOCK_AUDITS: Audit[] = [
-  {
-    id: '1',
-    customerId: '1',
-    title: 'Remodeling Site Audit #1',
-    location: '123 Main St, Anytown, CA',
-    startDate: '2023-10-10',
-    endDate: null,
-    status: 'in_progress',
-    completedItems: 15,
-    totalItems: 24,
-    assignedTo: 'John Smith',
-    photos: []
-  },
-  {
-    id: '2',
-    customerId: '2',
-    title: 'Plumbing Inspection #2',
-    location: '456 Oak St, Somewhere, CA',
-    startDate: '2023-11-05',
-    endDate: null,
-    status: 'in_progress',
-    completedItems: 8,
-    totalItems: 12,
-    assignedTo: 'Mike Johnson',
-    photos: []
-  }
-];
+  const [customers, setCustomers] = useState<Customer[]>([
+    {
+      id: '1',
+      name: 'Jane Smith',
+      email: 'jane.smith@example.com',
+      phone: '555-123-4567',
+      address: '123 Main St, Springfield'
+    },
+    {
+      id: '2',
+      name: 'Robert Johnson',
+      email: 'robert.johnson@example.com',
+      phone: '555-987-6543',
+      address: '456 Oak Ave, Springfield'
+    },
+    {
+      id: '3',
+      name: 'Emily Williams',
+      email: 'emily.williams@example.com',
+      phone: '555-321-7654',
+      address: '789 Pine St, Springfield'
+    }
+  ]);
 
-// This hook would eventually connect to your database
-export function useAuditData() {
-  const [audits, setAudits] = useState<Audit[]>(MOCK_AUDITS);
-  const [customers, setCustomers] = useState<Customer[]>(MOCK_CUSTOMERS);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
-  
-  // Mock customer data fetch - would be replaced with actual API call
+
+  // Simulate loading data
   useEffect(() => {
-    // Simulate API fetch
     setIsLoading(true);
-    
-    // Simulate API delay
     const timer = setTimeout(() => {
-      setCustomers(MOCK_CUSTOMERS);
-      setAudits(MOCK_AUDITS);
       setIsLoading(false);
     }, 800);
     
     return () => clearTimeout(timer);
   }, []);
-  
-  // Function to upload photo to an audit
-  const uploadAuditPhoto = async (customerId: string, file: File): Promise<void> => {
-    try {
-      setIsLoading(true);
-      
-      // In a real implementation, this would upload to storage and update database
-      console.log(`Uploading photo for customer ${customerId}`, file);
-      
-      // Simulate successful upload
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Update the local state with the new photo (mock implementation)
-      setAudits(prevAudits => {
-        return prevAudits.map(audit => {
-          if (audit.customerId === customerId) {
-            return {
-              ...audit,
-              photos: [...(audit.photos || []), {
-                id: `photo_${Date.now()}`,
-                url: URL.createObjectURL(file),
-                uploadedAt: new Date().toISOString(),
-                caption: ''
-              }]
-            };
+
+  const uploadAuditPhoto = async (customerId: string, file: File) => {
+    // Simulate API call
+    setIsLoading(true);
+    
+    return new Promise<void>((resolve, reject) => {
+      setTimeout(() => {
+        // Simulate successful upload
+        setAudits(prevAudits => {
+          const existingAudit = prevAudits.find(a => a.customerId === customerId);
+          
+          if (existingAudit) {
+            // Add photo to existing audit
+            return prevAudits.map(audit => {
+              if (audit.customerId === customerId) {
+                return {
+                  ...audit,
+                  photos: [...audit.photos, {
+                    id: `photo-${Date.now()}`,
+                    url: URL.createObjectURL(file),
+                    name: file.name,
+                    uploadedAt: new Date().toISOString()
+                  }]
+                };
+              }
+              return audit;
+            });
+          } else {
+            // No matching audit found
+            reject(new Error("No audit found for this customer"));
           }
-          return audit;
+          
+          return prevAudits;
         });
-      });
-      
-      setIsLoading(false);
-      return Promise.resolve();
-    } catch (error) {
-      setIsLoading(false);
-      console.error('Error uploading photo:', error);
-      return Promise.reject(new Error('Failed to upload photo'));
-    }
+        
+        setIsLoading(false);
+        resolve();
+      }, 1500);
+    });
   };
-  
-  // Function to create a new audit
+
   const createNewAudit = (customerId: string) => {
     const customer = customers.find(c => c.id === customerId);
     if (!customer) return;
     
-    const newAudit: Audit = {
-      id: `audit_${Date.now()}`,
-      customerId,
-      title: `New Site Audit - ${customer.name}`,
-      location: 'Address pending...',
-      startDate: new Date().toISOString(),
-      endDate: null,
-      status: 'in_progress',
-      completedItems: 0,
-      totalItems: 10,
-      assignedTo: 'Current User', // Would use actual logged-in user
-      photos: []
-    };
+    setIsLoading(true);
     
-    setAudits(prev => [...prev, newAudit]);
-    
-    toast({
-      title: "Audit Created",
-      description: `New audit for ${customer.name} has been created`
-    });
+    setTimeout(() => {
+      const newAudit: Audit = {
+        id: `audit-${Date.now()}`,
+        title: `${customer.name} Property Assessment`,
+        customerId: customer.id,
+        location: customer.address,
+        startDate: new Date().toISOString(),
+        status: 'in_progress',
+        assignedTo: 'Current User', // In a real app, use logged-in user
+        completedItems: 0,
+        totalItems: 10,
+        photos: []
+      };
+      
+      setAudits(prevAudits => [...prevAudits, newAudit]);
+      setIsLoading(false);
+      
+      toast({
+        title: "Audit Created",
+        description: `New site audit created for ${customer.name}`
+      });
+    }, 1000);
   };
-  
+
   return {
     audits,
     customers,
@@ -134,4 +145,4 @@ export function useAuditData() {
     uploadAuditPhoto,
     createNewAudit
   };
-}
+};

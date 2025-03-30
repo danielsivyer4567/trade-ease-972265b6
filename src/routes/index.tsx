@@ -36,6 +36,9 @@ const TeamGreenPage = React.lazy(() => import('@/pages/TeamGreen'));
 const TeamNewPage = React.lazy(() => import('@/pages/TeamNew'));
 const SocialPage = React.lazy(() => import('@/pages/Social'));
 const AIFeaturesPage = React.lazy(() => import('@/pages/AIFeatures'));
+const SiteAuditsPage = React.lazy(() => import('@/pages/SiteAudits'));
+const FormsPage = React.lazy(() => import('@/pages/Forms'));
+const AutomationsPage = React.lazy(() => import('@/pages/Automations'));
 
 // New import for combined Quotes and Invoicing
 const QuotesInvoicesPage = React.lazy(() => import('@/pages/QuotesInvoices'));
@@ -93,6 +96,9 @@ export function Routes() {
         <Route path="/invoices/new" element={<NewInvoice />} />
         <Route path="/jobs/templates/new" element={<NewTemplatePage />} />
         <Route path="/messaging" element={<MessagingPage />} />
+        <Route path="/site-audits" element={<SiteAuditsPage />} />
+        <Route path="/forms" element={<FormsPage />} />
+        <Route path="/automations" element={<AutomationsPage />} />
         
         {/* Settings Routes */}
         <Route path="/settings" element={<SettingsPage />} />
