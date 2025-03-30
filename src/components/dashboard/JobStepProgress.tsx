@@ -275,29 +275,7 @@ export const JobStepProgress = () => {
         <div className="md:w-1/3 border rounded-lg overflow-hidden shadow-sm">
           <div className="space-y-1 max-h-[600px] overflow-y-auto">
             {jobSteps.map(step => <div key={step.id} className={`border-b last:border-b-0 transition-colors ${step.isCompleted ? 'bg-green-50' : 'bg-white'}`}>
-                <div className="px-4 py-3 cursor-pointer hover:bg-gray-50 flex items-start" onClick={() => handleStepCompletion(step.id)}>
-                  <div className="flex-shrink-0 mt-0.5">
-                    {savingStepId === step.id ? <Loader className="h-5 w-5 animate-spin text-blue-500" /> : <Checkbox id={`step-${step.id}`} checked={step.isCompleted} className={step.isCompleted ? "bg-green-500 text-white border-green-500" : ""} onCheckedChange={() => handleStepCompletion(step.id)} />}
-                  </div>
-                  <div className="ml-3 flex-1">
-                    <h4 className={`font-bold ${step.isCompleted ? 'text-green-700' : 'text-gray-900'}`}>
-                      {step.title}
-                    </h4>
-                    <ul className="mt-2 space-y-2">
-                      {step.tasks.map(task => <li key={task.id} className="flex items-start">
-                          <div className="flex-shrink-0 mt-0.5">
-                            {savingTaskId === task.id ? <Loader className="h-4 w-4 animate-spin text-blue-500" /> : <Checkbox id={task.id} checked={task.isCompleted} className={`h-4 w-4 ${task.isCompleted ? "bg-green-500 text-white border-green-500" : ""}`} onCheckedChange={() => handleTaskCompletion(step.id, task.id)} />}
-                          </div>
-                          <label htmlFor={task.id} className={`ml-2 text-sm cursor-pointer ${task.isCompleted ? 'text-green-600 line-through' : 'text-gray-600'}`}>
-                            {task.text}
-                          </label>
-                        </li>)}
-                    </ul>
-                  </div>
-                  <div className="flex-shrink-0">
-                    {step.isCompleted && <Check className="h-5 w-5 text-green-500" />}
-                  </div>
-                </div>
+                
               </div>)}
           </div>
         </div>
