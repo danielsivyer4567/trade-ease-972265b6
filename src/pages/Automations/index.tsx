@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { BaseLayout } from '@/components/ui/BaseLayout';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -18,7 +19,7 @@ import {
   Star, 
   Flame,
   MessageSquare,
-  Tool,
+  Wrench,
   Package,
   Gauge,
   Receipt,
@@ -28,7 +29,7 @@ import {
   Landmark,
   AlertTriangle,
   CloudRain,
-  Wrench,
+  Wrench as WrenchFix,
   PaintBucket,
   Thermometer,
   Tags,
@@ -336,7 +337,7 @@ const Automations = () => {
     { value: 'finance', label: 'Finance', icon: <Banknote className="h-4 w-4" /> },
     { value: 'inventory', label: 'Inventory', icon: <Package className="h-4 w-4" /> },
     { value: 'compliance', label: 'Compliance', icon: <ShieldAlert className="h-4 w-4" /> },
-    { value: 'equipment', label: 'Equipment', icon: <Tool className="h-4 w-4" /> },
+    { value: 'equipment', label: 'Equipment', icon: <Wrench className="h-4 w-4" /> },
     { value: 'marketing', label: 'Marketing', icon: <Star className="h-4 w-4" /> },
   ];
 
