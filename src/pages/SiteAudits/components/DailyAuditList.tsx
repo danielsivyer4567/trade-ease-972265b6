@@ -12,6 +12,9 @@ interface DailyAuditListProps {
 }
 
 export const DailyAuditList: React.FC<DailyAuditListProps> = ({ dayData, onAddPhoto }) => {
+  // Generate array of 12 empty slots
+  const emptySlots = Array.from({ length: 12 }, (_, index) => index);
+  
   return (
     <div className="flex flex-col h-full">
       <div className="text-center p-2 bg-slate-100 rounded-t-lg">
@@ -19,7 +22,7 @@ export const DailyAuditList: React.FC<DailyAuditListProps> = ({ dayData, onAddPh
         <p className="text-xs text-muted-foreground">{dayData.formattedDate}</p>
       </div>
       
-      <div className="flex-1 flex flex-col gap-3 p-2 bg-slate-50 min-h-[300px]">
+      <div className="flex-1 flex flex-col gap-3 p-2 bg-slate-50 min-h-[300px] overflow-y-auto max-h-[600px]">
         {dayData.audits.length > 0 ? (
           dayData.audits.map((audit) => (
             <Card key={audit.id} className="border border-border shadow-sm hover:shadow-md transition-shadow">
@@ -58,33 +61,36 @@ export const DailyAuditList: React.FC<DailyAuditListProps> = ({ dayData, onAddPh
             </Card>
           ))
         ) : (
-          <div className="flex flex-col items-center justify-center h-full text-muted-foreground text-sm gap-3">
-            <div className="flex flex-col items-center">
-              <span>No audits scheduled</span>
+          // Display 12 empty slots when there are no scheduled audits
+          emptySlots.map((index) => (
+            <div key={index} className="border border-dashed border-gray-200 rounded-lg p-3 bg-white">
+              <div className="flex flex-col items-center justify-center text-muted-foreground text-sm gap-2">
+                <span className="text-xs">Audit Slot {index + 1}</span>
+                
+                <div className="flex gap-2">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="flex items-center gap-1 h-7"
+                    onClick={onAddPhoto}
+                  >
+                    <Camera className="h-3 w-3" />
+                    <span className="text-xs">Photo</span>
+                  </Button>
+                  
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="flex items-center gap-1 h-7"
+                    onClick={onAddPhoto}
+                  >
+                    <Upload className="h-3 w-3" />
+                    <span className="text-xs">Upload</span>
+                  </Button>
+                </div>
+              </div>
             </div>
-            
-            <div className="flex gap-2">
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="flex items-center gap-1"
-                onClick={onAddPhoto}
-              >
-                <Camera className="h-4 w-4" />
-                <span className="hidden sm:inline">Take Photo</span>
-              </Button>
-              
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="flex items-center gap-1"
-                onClick={onAddPhoto}
-              >
-                <Upload className="h-4 w-4" />
-                <span className="hidden sm:inline">Upload</span>
-              </Button>
-            </div>
-          </div>
+          ))
         )}
       </div>
     </div>
