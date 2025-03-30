@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { BaseLayout } from '@/components/ui/BaseLayout';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { 
   Workflow, 
   Plus, 
@@ -45,6 +46,22 @@ import { toast } from "sonner";
 
 const Automations = () => {
   const isMobile = useIsMobile();
+  const location = useLocation();
+  const navigate = useNavigate();
+  
+  const urlParams = new URLSearchParams(location.search);
+  const urlCategory = urlParams.get('category');
+  
+  const [selectedCategory, setSelectedCategory] = useState(urlCategory || 'all');
+  
+  useEffect(() => {
+    if (selectedCategory === 'all') {
+      navigate('/automations', { replace: true });
+    } else {
+      navigate(`/automations?category=${selectedCategory}`, { replace: true });
+    }
+  }, [selectedCategory, navigate]);
+  
   const [automations, setAutomations] = useState([
     {
       id: 1,
@@ -345,8 +362,6 @@ const Automations = () => {
     }
   ]);
 
-  const [selectedCategory, setSelectedCategory] = useState('all');
-
   const toggleAutomation = (id: number) => {
     setAutomations(prevAutomations => 
       prevAutomations.map(automation => 
@@ -381,6 +396,10 @@ const Automations = () => {
     ? automations 
     : automations.filter(automation => automation.category === selectedCategory);
 
+  const navigateToForms = () => {
+    navigate('/forms');
+  };
+
   return (
     <BaseLayout>
       <div className="p-4 md:p-6 space-y-4 md:space-y-6">
@@ -394,10 +413,18 @@ const Automations = () => {
               Powerful automation workflows designed specifically for trade businesses
             </p>
           </div>
-          <Button className="flex items-center gap-2">
-            <Plus className="h-4 w-4" />
-            <span>Create Automation</span>
-          </Button>
+          <div className="flex gap-2">
+            {selectedCategory === 'forms' && (
+              <Button variant="outline" className="flex items-center gap-2" onClick={navigateToForms}>
+                <ClipboardList className="h-4 w-4" />
+                <span>Manage Forms</span>
+              </Button>
+            )}
+            <Button className="flex items-center gap-2">
+              <Plus className="h-4 w-4" />
+              <span>Create Automation</span>
+            </Button>
+          </div>
         </div>
         
         <div className="overflow-x-auto pb-2">
@@ -416,6 +443,21 @@ const Automations = () => {
             ))}
           </div>
         </div>
+        
+        {selectedCategory === 'forms' && (
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+            <div className="flex items-start gap-3">
+              <ClipboardList className="h-8 w-8 text-blue-600 mt-1" />
+              <div>
+                <h3 className="text-lg font-medium text-blue-800">Form Automations</h3>
+                <p className="text-sm text-blue-700 mt-1">
+                  These automations are triggered by form submissions and scheduled events. They help automate your form distribution, 
+                  follow-ups, and data collection processes.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
         
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6">
           {filteredAutomations.map((automation) => (
