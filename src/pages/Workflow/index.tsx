@@ -1,16 +1,16 @@
-
 import React, { useState, useCallback, useEffect } from 'react';
 import { AppLayout } from "@/components/ui/AppLayout";
 import { Flow } from './components/Flow';
 import { NodeSidebar } from './components/NodeSidebar';
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Save, Key, Check, FileText, ArrowRightLeft } from "lucide-react";
+import { ArrowLeft, Save, Key, Check, FileText, ArrowRightLeft, Workflow } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { GCPVisionForm } from "@/components/messaging/dialog-sections/GCPVisionForm";
+import { AutomationSelector } from './components/AutomationSelector';
 
 export default function WorkflowPage() {
   const navigate = useNavigate();
@@ -85,6 +85,22 @@ export default function WorkflowPage() {
     }, 1000);
   }, [integrationStatus]);
 
+  const handleAddAutomation = useCallback((automationNode) => {
+    if (!flowInstance) return;
+    
+    // Generate a unique ID for the node
+    automationNode.id = `automation-${Date.now()}`;
+    
+    // Add the node to the flow
+    flowInstance.addNodes(automationNode);
+    
+    toast.success(`Added "${automationNode.data.label}" automation to workflow`);
+  }, [flowInstance]);
+
+  const handleNavigateToAutomations = () => {
+    navigate('/automations');
+  };
+
   return (
     <AppLayout>
       <div className="p-4 h-full">
@@ -96,6 +112,17 @@ export default function WorkflowPage() {
             <h1 className="text-2xl font-bold">Workflow Builder</h1>
           </div>
           <div className="flex items-center gap-2">
+            <Button 
+              variant="outline" 
+              className="flex items-center gap-2"
+              onClick={handleNavigateToAutomations}
+            >
+              <Workflow className="h-4 w-4" />
+              Manage Automations
+            </Button>
+            
+            <AutomationSelector onSelectAutomation={handleAddAutomation} />
+            
             <Dialog open={gcpVisionKeyDialogOpen} onOpenChange={setGcpVisionKeyDialogOpen}>
               <DialogTrigger asChild>
                 <Button variant="outline" className="flex items-center gap-2">
@@ -145,7 +172,7 @@ export default function WorkflowPage() {
         </div>
 
         {!isLoadingKey && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
             {hasGcpVisionKey && (
               <Card>
                 <CardHeader className="py-2">
@@ -176,6 +203,23 @@ export default function WorkflowPage() {
                   <li>Connect it to a Quote or Custom node</li>
                   <li>Save your workflow to enable automated data extraction</li>
                   <li>Extracted data will appear in financial sections</li>
+                </ol>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader className="py-2">
+                <CardTitle className="text-sm flex items-center gap-2">
+                  <Workflow className="h-4 w-4 text-blue-500" />
+                  Automation Integration Guide
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="py-2">
+                <ol className="text-sm space-y-1 list-decimal pl-4">
+                  <li>Click "Add Automation" to include existing automations</li>
+                  <li>Connect automation nodes to jobs, quotes, or customers</li>
+                  <li>Save your workflow to enable the connected automations</li>
+                  <li>Manage automations from the Automations page</li>
                 </ol>
               </CardContent>
             </Card>

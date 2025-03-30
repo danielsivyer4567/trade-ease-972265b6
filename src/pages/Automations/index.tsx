@@ -43,6 +43,7 @@ import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { toast } from "sonner";
+import { AutomationWorkflowButton } from '@/components/automation/AutomationWorkflowButton';
 
 const Automations = () => {
   const isMobile = useIsMobile();
@@ -420,6 +421,9 @@ const Automations = () => {
                 <span>Manage Forms</span>
               </Button>
             )}
+            <AutomationWorkflowButton>
+              <span>Open in Workflow Builder</span>
+            </AutomationWorkflowButton>
             <Button className="flex items-center gap-2">
               <Plus className="h-4 w-4" />
               <span>Create Automation</span>
@@ -521,7 +525,12 @@ const Automations = () => {
                   <RefreshCcw className="h-3 w-3" />
                   <span>Run Now</span>
                 </Button>
-                <Button variant="ghost" size="sm" className="text-blue-600">Edit</Button>
+                <div className="flex gap-2">
+                  <AutomationWorkflowButton automationId={automation.id} variant="ghost" size="sm">
+                    Add to Workflow
+                  </AutomationWorkflowButton>
+                  <Button variant="ghost" size="sm" className="text-blue-600">Edit</Button>
+                </div>
               </CardFooter>
             </Card>
           ))}
