@@ -1,4 +1,3 @@
-
 import { Tabs, TabsList, TabsContent } from "@/components/ui/tabs";
 import type { Job } from "@/types/job";
 import { StandardTabs } from "./tabs/StandardTabs";
@@ -11,7 +10,6 @@ import { JobCalendarTab } from "./tabs/JobCalendarTab";
 import { JobTimerTab } from "./tabs/JobTimerTab";
 import { JobBillsTab } from "./tabs/JobBillsTab";
 import { JobCostsTab } from "./tabs/JobCostsTab";
-import { JobInvoicesTab } from "./tabs/JobInvoicesTab";
 import { JobFinancialsTab } from "./tabs/JobFinancialsTab";
 import { JobProgressTab } from "./tabs/JobProgressTab";
 import { JobCustomerConversationsTab } from "./tabs/JobCustomerConversationsTab";
@@ -145,14 +143,6 @@ export const JobTabs = ({
               />
             </TabsContent>
             
-            <TabsContent value="invoices" className="mt-0 px-1 relative">
-              <JobInvoicesTab
-                tabNotes={tabNotes}
-                setTabNotes={setTabNotes}
-                onUpdateTotals={handleUpdateInvoiceTotals}
-              />
-            </TabsContent>
-            
             <TabsContent value="financials" className="mt-0 px-1 relative">
               <JobFinancialsTab
                 jobTimer={jobTimer}
@@ -161,6 +151,7 @@ export const JobTabs = ({
                 totalRevenue={totalRevenue}
                 totalCosts={totalCosts + totalBills}
                 extractedFinancialData={extractedFinancialData}
+                onUpdateInvoiceTotals={handleUpdateInvoiceTotals}
               />
             </TabsContent>
 

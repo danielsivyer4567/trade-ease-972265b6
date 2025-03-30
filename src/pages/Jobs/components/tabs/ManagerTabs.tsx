@@ -33,10 +33,6 @@ export const ManagerTabs = ({
         Bills
       </TabsTrigger>
       
-      <TabsTrigger value="invoices" className="min-w-[80px] sm:min-w-[100px] whitespace-nowrap flex-shrink-0 bg-slate-400 hover:bg-slate-300 mx-0 px-[28px]">
-        {!isMobile && <FileText className="w-4 h-4 mr-2" />}
-        Qts&Inv
-      </TabsTrigger>
       <TabsTrigger value="financials" className="min-w-[80px] sm:min-w-[100px] whitespace-nowrap flex-shrink-0 bg-slate-400 hover:bg-slate-300 px-[27px] mx-[17px]">
         {!isMobile && <Wallet className="w-4 h-4 mr-2" />}
         Financials
