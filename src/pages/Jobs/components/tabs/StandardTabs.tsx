@@ -1,3 +1,4 @@
+
 import { TabsContent, TabsTrigger } from "@/components/ui/tabs";
 import { FileText, Calendar, Clock, CheckSquare } from "lucide-react";
 import { JobDetailsTab } from "./JobDetailsTab";
