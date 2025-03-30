@@ -7,6 +7,7 @@ import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from 'react-router-dom';
 import { JobNotifications } from '@/components/team/JobNotifications';
+import { SubcontractorView } from '@/components/team/SubcontractorView';
 import { format } from 'date-fns';
 
 export function TeamCalendarPage() {
@@ -77,6 +78,9 @@ export function TeamCalendarPage() {
             assignedJobs={[]}
           />
         </div>
+        
+        {/* Subcontractor View - Added below the calendar */}
+        <SubcontractorView />
       </div>
     </BaseLayout>
   );
