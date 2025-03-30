@@ -86,7 +86,7 @@ export function MainContent({
 
       {/* Main Content Area */}
       <ScrollArea className="flex-1 w-full">
-        <div className="relative w-full">
+        <div className="relative w-full flex justify-center">
           {children}
         </div>
       </ScrollArea>
