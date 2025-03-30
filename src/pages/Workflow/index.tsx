@@ -5,27 +5,99 @@ import { Flow } from './components/Flow';
 import { NodeSidebar } from './components/NodeSidebar';
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Save, Key, Check, FileText, ArrowRightLeft, Workflow } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { GCPVisionForm } from "@/components/messaging/dialog-sections/GCPVisionForm";
 import { AutomationSelector } from './components/AutomationSelector';
+import { AutomationIntegrationService } from '@/services/AutomationIntegrationService';
 
 export default function WorkflowPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [flowInstance, setFlowInstance] = useState(null);
   const [gcpVisionKeyDialogOpen, setGcpVisionKeyDialogOpen] = useState(false);
   const [gcpVisionKey, setGcpVisionKey] = useState('');
   const [hasGcpVisionKey, setHasGcpVisionKey] = useState(false);
   const [isLoadingKey, setIsLoadingKey] = useState(true);
   const [integrationStatus, setIntegrationStatus] = useState('inactive');
+  
+  // Handle target data passed from other parts of the app
+  const [targetData, setTargetData] = useState<{
+    targetType?: 'job' | 'quote' | 'customer' | 'message' | 'social' | 'calendar';
+    targetId?: string;
+    createAutomationNode?: boolean;
+  } | null>(null);
 
   useEffect(() => {
     // Check if GCP Vision API key is configured in Supabase
     checkGcpVisionApiKey();
-  }, []);
+    
+    // Handle any incoming state from navigation
+    if (location.state) {
+      const { targetType, targetId, createAutomationNode } = location.state as any;
+      if (targetType && targetId) {
+        setTargetData({
+          targetType,
+          targetId,
+          createAutomationNode: !!createAutomationNode
+        });
+      }
+    }
+  }, [location.state]);
+
+  // Handle adding an automation node when requested via navigation
+  useEffect(() => {
+    if (flowInstance && targetData?.createAutomationNode) {
+      // Load associated automations
+      const loadAutomations = async () => {
+        try {
+          const { success, automations } = await AutomationIntegrationService.getAssociatedAutomations(
+            targetData.targetType!, 
+            targetData.targetId!
+          );
+          
+          if (success && automations && automations.length > 0) {
+            // Add the first automation as a node
+            const automation = automations[0];
+            
+            const newNode = {
+              id: `automation-${Date.now()}`,
+              type: 'automationNode',
+              position: { x: 100, y: 100 },
+              data: {
+                label: automation.title,
+                description: automation.description,
+                triggers: automation.triggers,
+                actions: automation.actions,
+                automationId: automation.id,
+                targetType: targetData.targetType,
+                targetId: targetData.targetId
+              }
+            };
+            
+            flowInstance.addNodes(newNode);
+            toast.success(`Added "${automation.title}" automation to workflow`);
+          } else {
+            // No automations found, open selector instead
+            toast.info('No automations associated with this item. Please select one to add.');
+          }
+        } catch (error) {
+          console.error('Error loading automations:', error);
+        }
+        
+        // Clear the target data to prevent re-adding
+        setTargetData(prevData => ({
+          ...prevData!,
+          createAutomationNode: false
+        }));
+      };
+      
+      loadAutomations();
+    }
+  }, [flowInstance, targetData]);
 
   const checkGcpVisionApiKey = async () => {
     setIsLoadingKey(true);
@@ -92,11 +164,24 @@ export default function WorkflowPage() {
     // Generate a unique ID for the node
     automationNode.id = `automation-${Date.now()}`;
     
+    // If we have a target entity, associate this automation with it
+    if (targetData?.targetType && targetData?.targetId) {
+      AutomationIntegrationService.associateAutomation(
+        automationNode.data.automationId,
+        targetData.targetType,
+        targetData.targetId
+      );
+      
+      // Add target data to the node
+      automationNode.data.targetType = targetData.targetType;
+      automationNode.data.targetId = targetData.targetId;
+    }
+    
     // Add the node to the flow
     flowInstance.addNodes(automationNode);
     
     toast.success(`Added "${automationNode.data.label}" automation to workflow`);
-  }, [flowInstance]);
+  }, [flowInstance, targetData]);
 
   const handleNavigateToAutomations = () => {
     navigate('/automations');
@@ -122,7 +207,11 @@ export default function WorkflowPage() {
               Manage Automations
             </Button>
             
-            <AutomationSelector onSelectAutomation={handleAddAutomation} />
+            <AutomationSelector 
+              onSelectAutomation={handleAddAutomation} 
+              targetType={targetData?.targetType}
+              targetId={targetData?.targetId}
+            />
             
             <Dialog open={gcpVisionKeyDialogOpen} onOpenChange={setGcpVisionKeyDialogOpen}>
               <DialogTrigger asChild>
@@ -166,7 +255,7 @@ export default function WorkflowPage() {
         </div>
 
         <div className="flex h-[calc(100vh-200px)] border border-gray-200 rounded-lg overflow-hidden">
-          <NodeSidebar />
+          <NodeSidebar targetData={targetData} />
           <div className="flex-1 relative">
             <Flow onInit={setFlowInstance} />
           </div>

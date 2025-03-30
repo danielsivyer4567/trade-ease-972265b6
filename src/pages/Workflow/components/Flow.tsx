@@ -19,7 +19,9 @@ import { QuoteNode } from './nodes/QuoteNode';
 import { CustomNode } from './nodes/CustomNode';
 import { VisionNode } from './nodes/VisionNode';
 import { AutomationNode } from './nodes/AutomationNode';
+import { MessagingNode } from './nodes/MessagingNode';
 import { toast } from 'sonner';
+import { AutomationIntegrationService } from '@/services/AutomationIntegrationService';
 
 // Define node types
 const nodeTypes = {
@@ -29,7 +31,11 @@ const nodeTypes = {
   quoteNode: QuoteNode,
   customNode: CustomNode,
   visionNode: VisionNode,
-  automationNode: AutomationNode
+  automationNode: AutomationNode,
+  messagingNode: MessagingNode,
+  emailNode: MessagingNode,
+  whatsappNode: MessagingNode,
+  socialNode: CustomNode,
 };
 
 export function Flow({ onInit }) {
@@ -66,6 +72,23 @@ export function Flow({ onInit }) {
       }, 1500);
     }
     
+    // Trigger automations when they are connected to other nodes
+    if (sourceNode?.type === 'automationNode' || targetNode?.type === 'automationNode') {
+      const automationNode = sourceNode?.type === 'automationNode' ? sourceNode : targetNode;
+      const otherNode = sourceNode?.type === 'automationNode' ? targetNode : sourceNode;
+      
+      // Record the connection for the automation
+      if (automationNode.data.automationId && otherNode?.data?.targetType) {
+        AutomationIntegrationService.associateAutomation(
+          automationNode.data.automationId,
+          otherNode.data.targetType,
+          otherNode.data.targetId || 'unknown'
+        );
+        
+        toast.success(`Linked automation to ${otherNode.data.targetType}`);
+      }
+    }
+    
     setEdges((eds) => addEdge({
       ...params,
       markerEnd: { type: MarkerType.ArrowClosed },
@@ -97,9 +120,22 @@ export function Flow({ onInit }) {
       data: { label: `New ${type.replace('Node', '')}` },
     };
     
-    // Add special handling for vision nodes
+    // Add special handling for specific node types
     if (type === 'visionNode') {
       newNode.data.label = 'Extract Financial Data';
+    } else if (type === 'messagingNode') {
+      newNode.data.label = 'SMS Message';
+      newNode.data.messageType = 'sms';
+    } else if (type === 'emailNode') {
+      newNode.data.label = 'Email Notification';
+      newNode.data.messageType = 'email';
+    } else if (type === 'whatsappNode') {
+      newNode.data.label = 'WhatsApp Message';
+      newNode.data.messageType = 'whatsapp';
+    } else if (type === 'socialNode') {
+      newNode.data.label = 'Social Media Post';
+      newNode.data.icon = '📱';
+      newNode.data.color = '#4267B2';  // Facebook blue
     }
 
     setNodes((nds) => nds.concat(newNode));
