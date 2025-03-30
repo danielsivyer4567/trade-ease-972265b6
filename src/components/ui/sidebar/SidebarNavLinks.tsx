@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { LayoutDashboard, Briefcase, Users, FileText, Settings, Calendar, Network, Share, Bot, Mail, MessageSquare, Link as LinkIcon, Database, Plus, BarChart, ListTodo, Bell, GitBranch, Gauge, Calculator, LucideIcon, ChevronDown } from 'lucide-react';
@@ -50,8 +51,6 @@ export function SidebarNavLinks({
           const isActive = location.pathname === item.path;
           const LinkIcon = item.icon;
 
-          // Special styling for team links
-          const isTeamLink = item.isTeamLink;
           const linkButton = <Button key={item.path} asChild variant={isActive ? "secondary" : "ghost"} size="sm" className={cn("w-full justify-start h-9", isExpanded ? "px-2" : "px-2 justify-center", isActive && "bg-white border border-foreground/10")}>
                   <Link to={item.path}>
                     <LinkIcon className={cn("h-4 w-4", isActive ? "text-primary" : "text-muted-foreground")} />
@@ -87,7 +86,7 @@ export function SidebarNavLinks({
         }
 
         // Dropdown Menu (for Jobs and other dropdowns)
-        if (item.type === 'dropdown') {
+        if (item.type === 'dropdown' && item.items) {
           const DropdownIcon = item.icon;
           return <Collapsible key={item.label}>
                   <CollapsibleTrigger asChild>
