@@ -1,22 +1,149 @@
 
-import React from 'react';
+import React, { useState, useRef } from 'react';
 import { BaseLayout } from '@/components/ui/BaseLayout';
 import { SectionHeader } from '@/components/ui/SectionHeader';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { FileSearch, Clipboard, Calendar, CheckSquare } from 'lucide-react';
+import { FileSearch, Clipboard, Calendar, CheckSquare, Camera, Upload, User } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { AuditPhotoCapture } from './components/AuditPhotoCapture';
+import { CustomerSelector } from './components/CustomerSelector';
+import { useAuditData } from './hooks/useAuditData';
+import { useToast } from '@/hooks/use-toast';
 
 export default function SiteAudits() {
+  const [activeTab, setActiveTab] = useState('active');
+  const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(null);
+  const [showPhotoCapture, setShowPhotoCapture] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const { toast } = useToast();
+  
+  const { 
+    audits, 
+    customers, 
+    isLoading, 
+    uploadAuditPhoto, 
+    createNewAudit 
+  } = useAuditData();
+
+  const handleCustomerSelect = (customerId: string) => {
+    setSelectedCustomerId(customerId);
+    toast({
+      title: "Customer Selected",
+      description: `Ready to capture photos for this customer's audit`,
+    });
+  };
+
+  const handleFileUpload = (files: FileList | null) => {
+    if (!selectedCustomerId || !files || files.length === 0) {
+      toast({
+        title: "Error",
+        description: "Please select a customer before uploading photos",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Process each file
+    Array.from(files).forEach(file => {
+      uploadAuditPhoto(selectedCustomerId, file)
+        .then(() => {
+          toast({
+            title: "Upload Successful",
+            description: "Photo has been added to the customer's audit",
+          });
+        })
+        .catch((error) => {
+          toast({
+            title: "Upload Failed",
+            description: error.message || "Failed to upload photo",
+            variant: "destructive"
+          });
+        });
+    });
+  };
+
+  const triggerFileUpload = () => {
+    if (!selectedCustomerId) {
+      toast({
+        title: "Select Customer",
+        description: "Please select a customer first before uploading photos",
+        variant: "destructive"
+      });
+      return;
+    }
+    fileInputRef.current?.click();
+  };
+
   return (
     <BaseLayout>
       <div className="container mx-auto py-6 space-y-6 max-w-7xl">
         <SectionHeader
           title="Site Audits"
-          description="Manage and review all site inspections and audits"
+          description="Manage site inspections and upload photos directly to customer profiles"
           icon={<FileSearch className="h-6 w-6" />}
         />
         
-        <Tabs defaultValue="active" className="w-full">
+        <div className="bg-white p-4 rounded-lg shadow-sm mb-6">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div>
+              <h3 className="text-lg font-medium">Quick Photo Upload</h3>
+              <p className="text-sm text-muted-foreground">Select a customer and upload inspection photos on the go</p>
+            </div>
+            
+            <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+              <CustomerSelector 
+                customers={customers} 
+                selectedCustomerId={selectedCustomerId} 
+                onSelectCustomer={handleCustomerSelect} 
+              />
+              <div className="flex gap-2">
+                <Button 
+                  onClick={() => setShowPhotoCapture(true)} 
+                  variant="outline"
+                  className="flex items-center gap-2"
+                  disabled={!selectedCustomerId}
+                >
+                  <Camera className="h-4 w-4" />
+                  <span>Take Photo</span>
+                </Button>
+                <Button 
+                  onClick={triggerFileUpload}
+                  variant="outline"
+                  className="flex items-center gap-2"
+                  disabled={!selectedCustomerId}
+                >
+                  <Upload className="h-4 w-4" />
+                  <span>Upload</span>
+                </Button>
+                <input 
+                  type="file" 
+                  ref={fileInputRef} 
+                  multiple 
+                  accept="image/*"
+                  style={{ display: 'none' }}
+                  onChange={(e) => handleFileUpload(e.target.files)} 
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        {showPhotoCapture && selectedCustomerId && (
+          <AuditPhotoCapture 
+            customerId={selectedCustomerId}
+            onClose={() => setShowPhotoCapture(false)}
+            onPhotoCapture={(blob) => {
+              const file = new File([blob], `audit_photo_${Date.now()}.jpg`, {
+                type: 'image/jpeg'
+              });
+              handleFileUpload(new DataTransfer().files);
+              setShowPhotoCapture(false);
+            }}
+          />
+        )}
+        
+        <Tabs defaultValue="active" value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid grid-cols-4 max-w-lg">
             <TabsTrigger value="active">Active Audits</TabsTrigger>
             <TabsTrigger value="scheduled">Scheduled</TabsTrigger>
@@ -25,37 +152,67 @@ export default function SiteAudits() {
           </TabsList>
           
           <TabsContent value="active" className="pt-4">
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {[1, 2, 3].map((i) => (
-                <Card key={i} className="border border-border hover:shadow-md transition-shadow">
-                  <CardHeader className="pb-2">
-                    <div className="flex justify-between">
-                      <CardTitle className="text-lg">Remodeling Site Audit #{i}</CardTitle>
-                      <span className="text-xs px-2 py-1 rounded-full bg-blue-100 text-blue-700">In Progress</span>
-                    </div>
-                    <CardDescription>123 Main St, Anytown, CA</CardDescription>
-                  </CardHeader>
-                  <CardContent className="text-sm pb-2">
-                    <div className="flex justify-between items-center text-sm text-muted-foreground">
-                      <div className="flex items-center gap-1">
-                        <Calendar className="h-3 w-3" />
-                        <span>Started: Oct 10, 2023</span>
+            {isLoading ? (
+              <div className="flex justify-center p-8">
+                <p>Loading audits...</p>
+              </div>
+            ) : audits.filter(a => a.status === 'in_progress').length > 0 ? (
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {audits.filter(a => a.status === 'in_progress').map((audit) => (
+                  <Card key={audit.id} className="border border-border hover:shadow-md transition-shadow">
+                    <CardHeader className="pb-2">
+                      <div className="flex justify-between">
+                        <CardTitle className="text-lg">{audit.title}</CardTitle>
+                        <span className="text-xs px-2 py-1 rounded-full bg-blue-100 text-blue-700">In Progress</span>
                       </div>
-                      <div className="flex items-center gap-1">
-                        <CheckSquare className="h-3 w-3" />
-                        <span>15/24 completed</span>
+                      <CardDescription>{audit.location}</CardDescription>
+                    </CardHeader>
+                    <CardContent className="text-sm pb-2">
+                      <div className="flex justify-between items-center text-sm text-muted-foreground">
+                        <div className="flex items-center gap-1">
+                          <Calendar className="h-3 w-3" />
+                          <span>Started: {new Date(audit.startDate).toLocaleDateString()}</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <CheckSquare className="h-3 w-3" />
+                          <span>{audit.completedItems}/{audit.totalItems} completed</span>
+                        </div>
                       </div>
-                    </div>
-                  </CardContent>
-                  <CardFooter className="pt-2 border-t text-sm">
-                    <div className="flex justify-between w-full">
-                      <span>Assigned to: John Smith</span>
-                      <button className="text-primary hover:underline">View details</button>
-                    </div>
-                  </CardFooter>
-                </Card>
-              ))}
-            </div>
+                    </CardContent>
+                    <CardFooter className="pt-2 border-t text-sm">
+                      <div className="flex justify-between w-full">
+                        <div className="flex items-center gap-1">
+                          <User className="h-3 w-3" />
+                          <span>{audit.assignedTo}</span>
+                        </div>
+                        <Button size="sm" variant="link" className="text-primary hover:underline">
+                          View details
+                        </Button>
+                      </div>
+                    </CardFooter>
+                  </Card>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-10 text-muted-foreground">
+                <FileSearch className="w-12 h-12 mx-auto mb-4 opacity-30" />
+                <h3 className="text-lg font-medium mb-2">No active audits</h3>
+                <p className="mb-4">Start a new site audit to begin capturing data</p>
+                <Button onClick={() => {
+                  if (!selectedCustomerId) {
+                    toast({
+                      title: "Select Customer",
+                      description: "Please select a customer first",
+                      variant: "destructive"
+                    });
+                    return;
+                  }
+                  createNewAudit(selectedCustomerId);
+                }}>
+                  Create New Audit
+                </Button>
+              </div>
+            )}
           </TabsContent>
           
           <TabsContent value="scheduled" className="pt-4">
