@@ -1,31 +1,40 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { JobStatusBadge } from "./JobStatusBadge";
 import { JobActions } from "./JobActions";
 import { useNavigate } from "react-router-dom";
 import { Calendar, MapPin } from "lucide-react";
+import type { Job } from "@/types/job";
 
 interface JobTableProps {
-  searchQuery: string;
+  searchQuery?: string;
+  jobs?: Job[];
+  actionLoading?: string | null;
+  onStatusChange?: (jobId: string, newStatus: Job['status']) => Promise<void>;
 }
 
-export function JobTable({ searchQuery }: JobTableProps) {
+export function JobTable({ 
+  searchQuery = "", 
+  jobs: propJobs, 
+  actionLoading = null,
+  onStatusChange = async () => {} 
+}: JobTableProps) {
   const navigate = useNavigate();
   
-  // Sample jobs data
-  const jobs = [
+  // Sample jobs data - use prop jobs if provided, otherwise use sample data
+  const defaultJobs = [
     {
       id: "1",
       title: "Plumbing Repair",
       customer: "John Smith",
       jobNumber: "PLM-001",
       type: "Plumbing",
-      status: "in-progress",
+      status: "in-progress" as "in-progress",
       date: "2023-05-15",
-      location: "Gold Coast, QLD",
-      team: "Team Blue"
+      location: [151.2093, -33.8688] as [number, number],
+      assignedTeam: "Team Blue"
     },
     {
       id: "2",
@@ -33,10 +42,10 @@ export function JobTable({ searchQuery }: JobTableProps) {
       customer: "Sarah Johnson",
       jobNumber: "ELE-001",
       type: "Electrical",
-      status: "ready",
+      status: "ready" as "ready",
       date: "2023-05-16",
-      location: "Southport, QLD",
-      team: "Team Red"
+      location: [151.2093, -33.8688] as [number, number],
+      assignedTeam: "Team Red"
     },
     {
       id: "3",
@@ -44,20 +53,22 @@ export function JobTable({ searchQuery }: JobTableProps) {
       customer: "Michael Brown",
       jobNumber: "HVAC-001",
       type: "HVAC",
-      status: "to-invoice",
+      status: "to-invoice" as "to-invoice",
       date: "2023-05-17",
-      location: "Broadbeach, QLD",
-      team: "Team Green"
+      location: [151.2093, -33.8688] as [number, number],
+      assignedTeam: "Team Green"
     }
   ];
+  
+  const jobs = propJobs || defaultJobs;
   
   // Filter jobs based on search query
   const filteredJobs = searchQuery
     ? jobs.filter(job => 
-        job.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        job.customer.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        job.jobNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        job.type.toLowerCase().includes(searchQuery.toLowerCase())
+        job.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        job.customer?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        job.jobNumber?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        job.type?.toLowerCase().includes(searchQuery.toLowerCase())
       )
     : jobs;
   
@@ -72,7 +83,6 @@ export function JobTable({ searchQuery }: JobTableProps) {
               <TableHead className="font-medium">Type</TableHead>
               <TableHead className="font-medium">Status</TableHead>
               <TableHead className="font-medium">Date</TableHead>
-              <TableHead className="font-medium">Location</TableHead>
               <TableHead className="font-medium">Team</TableHead>
               <TableHead className="font-medium">Actions</TableHead>
             </TableRow>
@@ -89,38 +99,31 @@ export function JobTable({ searchQuery }: JobTableProps) {
                   <TableCell>{job.customer}</TableCell>
                   <TableCell>{job.type}</TableCell>
                   <TableCell>
-                    <JobStatusBadge status={job.status as any} />
+                    <JobStatusBadge status={job.status} />
                   </TableCell>
                   <TableCell className="whitespace-nowrap">
                     <div className="flex items-center space-x-1">
                       <Calendar className="h-3 w-3 text-gray-500" />
-                      <span>{job.date}</span>
-                    </div>
-                  </TableCell>
-                  <TableCell className="whitespace-nowrap">
-                    <div className="flex items-center space-x-1">
-                      <MapPin className="h-3 w-3 text-gray-500" />
-                      <span>{job.location}</span>
+                      <span>{job.date || 'Not scheduled'}</span>
                     </div>
                   </TableCell>
                   <TableCell>
                     <Badge variant="outline" className="bg-gray-100">
-                      {job.team}
+                      {job.assignedTeam || 'Unassigned'}
                     </Badge>
                   </TableCell>
-                  <TableCell>
+                  <TableCell onClick={(e) => e.stopPropagation()}>
                     <JobActions 
-                      jobId={job.id} 
-                      onClick={(e) => {
-                        e.stopPropagation();
-                      }}
+                      job={job}
+                      actionLoading={actionLoading}
+                      onStatusChange={onStatusChange}
                     />
                   </TableCell>
                 </TableRow>
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={8} className="text-center py-8 text-gray-500">
+                <TableCell colSpan={7} className="text-center py-8 text-gray-500">
                   No jobs match your search criteria
                 </TableCell>
               </TableRow>
