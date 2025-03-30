@@ -84,12 +84,10 @@ export function MainContent({
         </div>
       </div>
 
-      {/* Main Content Area */}
+      {/* Main Content Area - removed max-width and padding */}
       <ScrollArea className="flex-1 w-full">
-        <div className="relative w-full flex justify-center">
-          <div className="w-full max-w-7xl px-4 md:px-6 py-6">
-            {children}
-          </div>
+        <div className="relative w-full">
+          {children}
         </div>
       </ScrollArea>
     </div>
