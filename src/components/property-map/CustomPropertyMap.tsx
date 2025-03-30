@@ -56,22 +56,24 @@ const CustomPropertyMap = ({
       <CardContent>
         <div ref={containerRef} className="relative w-full h-[300px] md:h-[400px]">
           <MapCanvas
+            containerRef={containerRef}
             canvasRef={canvasRef}
-            {...mapEventHandlers}
-            className="absolute top-0 left-0 w-full h-full"
+            mapEventHandlers={mapEventHandlers}
+            zoomControls={zoomControls}
+            measureMode={measureMode}
           />
           
           {showEdgeMeasurements && (
             <BoundaryMeasurements
+              edges={measurements.edges}
               showMeasurements={showEdgeMeasurements}
-              containerRef={containerRef}
             />
           )}
           
           <MeasurementsDisplay
-            totalArea={measurements.totalArea}
-            totalPerimeter={measurements.totalPerimeter}
-            className="absolute bottom-2 right-2 bg-white/80 p-2 rounded shadow text-sm"
+            boundaryLength={measurements.boundaryLength}
+            boundaryArea={measurements.boundaryArea}
+            individualBoundaries={measurements.individualBoundaries}
           />
         </div>
       </CardContent>
