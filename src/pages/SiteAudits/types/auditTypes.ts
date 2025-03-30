@@ -1,27 +1,28 @@
 
+export interface Photo {
+  id: string;
+  url: string;
+  name: string;
+  uploadedAt: string;
+}
+
 export interface Customer {
   id: string;
   name: string;
   email: string;
-}
-
-export interface AuditPhoto {
-  id: string;
-  url: string;
-  uploadedAt: string;
-  caption: string;
+  phone: string;
+  address: string;
 }
 
 export interface Audit {
   id: string;
-  customerId: string;
   title: string;
+  customerId: string;
   location: string;
   startDate: string;
-  endDate: string | null;
   status: 'scheduled' | 'in_progress' | 'completed';
+  assignedTo: string;
   completedItems: number;
   totalItems: number;
-  assignedTo: string;
-  photos: AuditPhoto[];
+  photos: Photo[];
 }
