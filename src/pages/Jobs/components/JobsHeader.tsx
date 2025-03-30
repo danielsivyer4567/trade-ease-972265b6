@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button";
 import { useNavigate, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { JobStepIndicators } from "./job-header/JobStepIndicators";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface JobsHeaderProps {
   navigateTo?: string;
@@ -13,6 +15,7 @@ export const JobsHeader = ({ navigateTo = "/jobs" }: JobsHeaderProps) => {
   const navigate = useNavigate();
   const { id } = useParams();
   const [jobNumber, setJobNumber] = useState<string>("");
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     const fetchJobNumber = async () => {
@@ -42,22 +45,27 @@ export const JobsHeader = ({ navigateTo = "/jobs" }: JobsHeaderProps) => {
   };
 
   return (
-    <div className="flex items-center gap-4 p-4 sticky top-0 z-50 bg-white border-b">
-      <Button 
-        variant="outline" 
-        size="sm" 
-        onClick={() => navigate(navigateTo)}
-        className="flex items-center gap-2"
-      >
-        <ArrowLeft className="h-4 w-4" />
-        Back to Jobs
-      </Button>
+    <div className="flex items-center justify-between gap-4 p-4 sticky top-0 z-50 bg-white border-b">
+      <div className="flex items-center gap-4">
+        <Button 
+          variant="outline" 
+          size="sm" 
+          onClick={() => navigate(navigateTo)}
+          className="flex items-center gap-2"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Back to Jobs
+        </Button>
+        
+        {jobNumber && (
+          <span className="text-sm font-medium text-gray-500">
+            {formatJobNumber(jobNumber)}
+          </span>
+        )}
+      </div>
       
-      {jobNumber && (
-        <span className="text-sm font-medium text-gray-500">
-          {formatJobNumber(jobNumber)}
-        </span>
-      )}
+      {/* Step indicators to the right of job number */}
+      {id && <JobStepIndicators jobId={id} />}
     </div>
   );
 };
