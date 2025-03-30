@@ -9,7 +9,7 @@ import Notifications from './pages/Notifications';
 import NotFound from './pages/NotFound';
 import Calendar from './pages/Calendar';
 import CalendarSync from './pages/Calendar/CalendarSync';
-import Tasks from './pages/Tasks'; // Updated import to point to the correct Tasks component
+import TasksPage from './pages/Tasks'; // Changed import to use TasksPage from './pages/Tasks'
 import Jobs from './pages/Jobs';
 import TeamRed from './pages/TeamRed';
 import TeamBlue from './pages/TeamBlue';
@@ -78,7 +78,7 @@ export const routes: RouteConfig[] = [
   },
   {
     path: '/tasks',
-    element: <Tasks />
+    element: <TasksPage /> // Using TasksPage from './pages/Tasks'
   },
   {
     path: '/jobs/*',

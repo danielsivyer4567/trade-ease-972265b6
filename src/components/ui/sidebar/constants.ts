@@ -1,4 +1,3 @@
-
 import {
   LayoutDashboard,
   Briefcase,
@@ -24,7 +23,6 @@ import {
 
 import { NavLink } from './SidebarNavLinks';
 
-// Add the SIDEBAR_CONSTANTS export
 export const SIDEBAR_CONSTANTS = {
   SIDEBAR_WIDTH: "240px",
   SIDEBAR_WIDTH_ICON: "64px",
@@ -55,7 +53,6 @@ export const teamLinks = [
   },
 ];
 
-// Add the calendarTeamLinks export
 export const calendarTeamLinks = [
   {
     label: 'Team Red Calendar',
@@ -140,7 +137,6 @@ export const navigationGroups = [
         label: 'Statistics',
         path: '/statistics',
       },
-      // Dropdown menu example
       {
         type: 'dropdown',
         icon: Calculator,
