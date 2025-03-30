@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Route, Routes as RouterRoutes, Navigate } from 'react-router-dom';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
@@ -38,6 +39,8 @@ const AIFeaturesPage = React.lazy(() => import('@/pages/AIFeatures'));
 
 // New import for combined Quotes and Invoicing
 const QuotesInvoicesPage = React.lazy(() => import('@/pages/QuotesInvoices'));
+// Fix the import for NewInvoice page
+const NewInvoice = React.lazy(() => import('@/pages/Invoices/NewInvoice'));
 
 // Settings Pages
 const SettingsPage = React.lazy(() => import('@/pages/Settings'));
@@ -87,7 +90,7 @@ export function Routes() {
         <Route path="/database" element={<DatabasePage />} />
         <Route path="/quotes" element={<QuotesPage />} />
         <Route path="/quotes-invoices" element={<QuotesInvoicesPage />} />
-        <Route path="/invoices/new" element={<NewInvoicePage />} />
+        <Route path="/invoices/new" element={<NewInvoice />} />
         <Route path="/jobs/templates/new" element={<NewTemplatePage />} />
         <Route path="/messaging" element={<MessagingPage />} />
         
