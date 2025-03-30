@@ -1,4 +1,3 @@
-
 import { 
   LayoutDashboard, 
   Users, 
@@ -19,7 +18,8 @@ import {
   Instagram,
   Youtube,
   Store,
-  Share2
+  Share2,
+  Receipt
 } from 'lucide-react';
 
 // Define sidebar constants
@@ -75,6 +75,12 @@ export const navigationGroups = [
         icon: Calendar,
         label: "Calendar",
         path: "/calendar"
+      },
+      {
+        type: 'link',
+        icon: Receipt,
+        label: "Quotes & Invoicing",
+        path: "/quotes-invoices"
       },
       {
         type: 'dropdown',
