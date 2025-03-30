@@ -8,11 +8,66 @@ import { useNavigate } from "react-router-dom";
 import { JobTable } from "./job-list/JobTable";
 import { Filter, Plus, MapPin, List, Map } from "lucide-react";
 import JobSiteMapView from "./job-list/JobSiteMapView";
+import { toast } from "sonner";
+import type { Job } from "@/types/job";
 
 export function JobsMain() {
   const navigate = useNavigate();
   const [showMap, setShowMap] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
+  const [actionLoading, setActionLoading] = useState<string | null>(null);
+  
+  // Sample job data
+  const sampleJobs: Job[] = [
+    {
+      id: "1",
+      title: "Plumbing Repair",
+      customer: "John Smith",
+      jobNumber: "PLM-001",
+      type: "Plumbing",
+      status: "in-progress",
+      date: "2023-05-15",
+      location: [151.2093, -33.8688],
+      assignedTeam: "Team Blue"
+    },
+    {
+      id: "2",
+      title: "Electrical Installation",
+      customer: "Sarah Johnson",
+      jobNumber: "ELE-001",
+      type: "Electrical",
+      status: "ready",
+      date: "2023-05-16",
+      location: [151.2093, -33.8688],
+      assignedTeam: "Team Red"
+    },
+    {
+      id: "3",
+      title: "HVAC Maintenance",
+      customer: "Michael Brown",
+      jobNumber: "HVAC-001",
+      type: "HVAC",
+      status: "to-invoice",
+      date: "2023-05-17",
+      location: [151.2093, -33.8688],
+      assignedTeam: "Team Green"
+    }
+  ];
+  
+  const handleStatusChange = async (jobId: string, newStatus: Job['status']) => {
+    setActionLoading(jobId);
+    try {
+      // This would be an API call in a real application
+      console.log(`Changing job ${jobId} status to ${newStatus}`);
+      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API delay
+      toast.success(`Job ${jobId} status updated to ${newStatus}`);
+    } catch (error) {
+      console.error("Error updating job status:", error);
+      toast.error("Failed to update job status");
+    } finally {
+      setActionLoading(null);
+    }
+  };
 
   return (
     <AppLayout>
@@ -64,11 +119,16 @@ export function JobsMain() {
           {showMap ? (
             <Card>
               <CardContent className="p-0 relative">
-                <JobSiteMapView />
+                <JobSiteMapView jobs={sampleJobs} />
               </CardContent>
             </Card>
           ) : (
-            <JobTable searchQuery={searchQuery} />
+            <JobTable 
+              searchQuery={searchQuery} 
+              jobs={sampleJobs}
+              actionLoading={actionLoading}
+              onStatusChange={handleStatusChange}
+            />
           )}
         </div>
       </div>

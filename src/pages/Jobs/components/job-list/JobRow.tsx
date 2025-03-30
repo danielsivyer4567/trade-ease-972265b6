@@ -13,6 +13,11 @@ interface JobRowProps {
 export const JobRow = ({ job, actionLoading, onStatusChange }: JobRowProps) => {
   const navigate = useNavigate();
 
+  // Add safety check
+  if (!job) {
+    return null;
+  }
+
   const handleJobClick = (jobId: string) => {
     console.log("Navigating to job details:", jobId);
     navigate(`/jobs/${jobId}`);

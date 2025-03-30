@@ -15,6 +15,15 @@ interface JobActionsProps {
 export const JobActions = ({ job, actionLoading, onStatusChange }: JobActionsProps) => {
   const navigate = useNavigate();
 
+  // Add a safety check to prevent accessing properties of undefined
+  if (!job) {
+    return (
+      <Button variant="outline" size="sm" disabled>
+        Loading...
+      </Button>
+    );
+  }
+
   const viewInCalendar = (job: Job) => {
     navigate(`/calendar?job=${job.id}&date=${job.date}`);
     toast.success(`Navigating to ${job.title || `Job #${job.jobNumber}`} in calendar`);
