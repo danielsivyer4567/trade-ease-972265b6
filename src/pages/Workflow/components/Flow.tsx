@@ -18,6 +18,7 @@ import { TaskNode } from './nodes/TaskNode';
 import { QuoteNode } from './nodes/QuoteNode';
 import { CustomNode } from './nodes/CustomNode';
 import { VisionNode } from './nodes/VisionNode';
+import { AutomationNode } from './nodes/AutomationNode';
 import { toast } from 'sonner';
 
 // Define node types
@@ -27,7 +28,8 @@ const nodeTypes = {
   taskNode: TaskNode,
   quoteNode: QuoteNode,
   customNode: CustomNode,
-  visionNode: VisionNode
+  visionNode: VisionNode,
+  automationNode: AutomationNode
 };
 
 export function Flow({ onInit }) {
