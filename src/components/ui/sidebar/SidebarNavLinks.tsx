@@ -70,7 +70,7 @@ export function SidebarNavLinks({
                 </TooltipProvider>;
         } else if (item.type === 'button' && item.action === 'logout') {
           const LogoutIcon = item.icon;
-          const logoutButton = <Button key="logout" variant="ghost" size="sm" onClick={handleLogout} className="">
+          const logoutButton = <Button key="logout" variant="ghost" size="sm" onClick={handleLogout} className="py-[23px] my-0 mx-[75px] px-0 text-left">
                   <LogoutIcon className="h-4 w-4 text-muted-foreground" />
                   {isExpanded && <span className="ml-2 text-sm">{item.label}</span>}
                 </Button>;
