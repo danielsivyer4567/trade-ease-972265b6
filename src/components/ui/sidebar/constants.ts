@@ -78,26 +78,15 @@ export const navigationGroups = [
       },
       {
         type: 'link',
+        icon: Briefcase,
+        label: "Jobs",
+        path: "/jobs"
+      },
+      {
+        type: 'link',
         icon: Receipt,
         label: "Quotes & Invoicing",
         path: "/quotes-invoices"
-      },
-      {
-        type: 'dropdown',
-        icon: Briefcase,
-        label: "Jobs",
-        items: [
-          {
-            icon: Briefcase,
-            label: "All Jobs",
-            path: "/jobs"
-          },
-          {
-            icon: CheckSquare,
-            label: "Tasks",
-            path: "/tasks"
-          }
-        ]
       }
     ]
   },

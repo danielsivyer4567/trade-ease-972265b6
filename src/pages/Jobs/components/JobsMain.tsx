@@ -12,11 +12,13 @@ import { toast } from "sonner";
 import { mockJobs } from "../data/mockJobs";
 import type { Job } from "@/types/job";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
 export function JobsMain() {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<string>("jobs");
   
   // Sample job data from mockJobs
   const jobs = mockJobs;
@@ -62,28 +64,63 @@ export function JobsMain() {
             </div>
           </div>
           
-          <div className="h-[calc(100vh-220px)]">
-            <ResizablePanelGroup direction="horizontal" className="border rounded-lg">
-              <ResizablePanel defaultSize={40} minSize={30}>
-                <div className="h-full overflow-y-auto">
-                  <JobTable 
-                    searchQuery={searchQuery} 
-                    jobs={jobs}
-                    actionLoading={actionLoading}
-                    onStatusChange={handleStatusChange}
-                  />
-                </div>
-              </ResizablePanel>
-              
-              <ResizableHandle withHandle />
-              
-              <ResizablePanel defaultSize={60} minSize={30}>
-                <div className="h-full p-1">
-                  <JobSiteMapView jobs={jobs} />
-                </div>
-              </ResizablePanel>
-            </ResizablePanelGroup>
-          </div>
+          <Tabs defaultValue="jobs" value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <TabsList className="grid grid-cols-4 mb-6 w-full sm:w-[600px]">
+              <TabsTrigger value="jobs">Jobs</TabsTrigger>
+              <TabsTrigger value="tasks">Tasks</TabsTrigger>
+              <TabsTrigger value="templates">Templates</TabsTrigger>
+              <TabsTrigger value="scheduling">Scheduling</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="jobs" className="mt-0">
+              <div className="h-[calc(100vh-220px)]">
+                <ResizablePanelGroup direction="horizontal" className="border rounded-lg">
+                  <ResizablePanel defaultSize={40} minSize={30}>
+                    <div className="h-full overflow-y-auto">
+                      <JobTable 
+                        searchQuery={searchQuery} 
+                        jobs={jobs}
+                        actionLoading={actionLoading}
+                        onStatusChange={handleStatusChange}
+                      />
+                    </div>
+                  </ResizablePanel>
+                  
+                  <ResizableHandle withHandle />
+                  
+                  <ResizablePanel defaultSize={60} minSize={30}>
+                    <div className="h-full p-1">
+                      <JobSiteMapView jobs={jobs} />
+                    </div>
+                  </ResizablePanel>
+                </ResizablePanelGroup>
+              </div>
+            </TabsContent>
+            
+            <TabsContent value="tasks" className="mt-0">
+              <div className="p-4 border rounded-lg min-h-[300px]">
+                <p className="text-center text-gray-500 py-20">
+                  Task management will be displayed here.
+                </p>
+              </div>
+            </TabsContent>
+            
+            <TabsContent value="templates" className="mt-0">
+              <div className="p-4 border rounded-lg min-h-[300px]">
+                <p className="text-center text-gray-500 py-20">
+                  Job templates will be displayed here.
+                </p>
+              </div>
+            </TabsContent>
+            
+            <TabsContent value="scheduling" className="mt-0">
+              <div className="p-4 border rounded-lg min-h-[300px]">
+                <p className="text-center text-gray-500 py-20">
+                  Job scheduling interface will be displayed here.
+                </p>
+              </div>
+            </TabsContent>
+          </Tabs>
         </div>
       </div>
     </AppLayout>
