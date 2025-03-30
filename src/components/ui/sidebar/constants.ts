@@ -1,3 +1,4 @@
+
 import {
   LayoutDashboard,
   Briefcase,
@@ -222,6 +223,12 @@ export const navigationGroups = [
       },
       {
         type: 'link',
+        icon: Workflow,
+        label: 'Workflow',
+        path: '/workflow',
+      },
+      {
+        type: 'link',
         icon: Settings,
         label: 'Settings',
         path: '/settings',
@@ -239,3 +246,4 @@ export const navigationGroups = [
     ],
   },
 ];
+
