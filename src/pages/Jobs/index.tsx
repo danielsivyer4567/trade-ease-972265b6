@@ -6,11 +6,9 @@ import { JobDetails } from "./JobDetails";
 
 export default function Jobs() {
   return (
-    <AppLayout>
-      <Routes>
-        <Route index element={<JobsMain />} />
-        <Route path=":id" element={<JobDetails />} />
-      </Routes>
-    </AppLayout>
+    <Routes>
+      <Route index element={<JobsMain />} />
+      <Route path=":id" element={<JobDetails />} />
+    </Routes>
   );
 }
