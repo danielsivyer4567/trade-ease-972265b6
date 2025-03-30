@@ -1,3 +1,4 @@
+
 import { BaseLayout } from "@/components/ui/BaseLayout";
 import JobSiteMap from "@/components/dashboard/JobSiteMap";
 import RecentActivity from "@/components/dashboard/RecentActivity";
@@ -13,6 +14,8 @@ import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { TradeDashboardContent } from "@/components/trade-dashboard/TradeDashboardContent";
+
 export default function Index() {
   const navigate = useNavigate();
   const [selectedTeam, setSelectedTeam] = useState<string>("red");
@@ -60,7 +63,12 @@ export default function Index() {
       [teamName]: !prev[teamName]
     }));
   };
-  return <BaseLayout showQuickTabs={true}>
+  
+  return (
+    <BaseLayout showQuickTabs={true}>
+      {/* Add the trade dashboard content at the top */}
+      <TradeDashboardContent />
+      
       <div className="px-8 space-y-8 animate-fadeIn py-10">
         <div className="grid grid-cols-1 gap-8">
           <div className="rounded-xl animate-slideUp">
@@ -182,5 +190,6 @@ export default function Index() {
           </div>
         </div>
       </div>
-    </BaseLayout>;
+    </BaseLayout>
+  );
 }
