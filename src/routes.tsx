@@ -42,6 +42,7 @@ import Referrals from './pages/Referrals';
 import SiteAudits from './pages/SiteAudits';
 import Forms from './pages/Forms';
 import Automations from './pages/Automations';
+import WorkflowPage from './pages/Workflow';
 
 export interface RouteConfig {
   path: string;
@@ -68,7 +69,7 @@ export const routes: RouteConfig[] = [
   },
   {
     path: '/workflow',
-    element: <div className="p-6"><h1 className="text-2xl font-bold">Workflow Builder</h1></div>
+    element: <WorkflowPage />
   },
   {
     path: '/statistics',

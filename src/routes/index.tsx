@@ -99,6 +99,7 @@ export function Routes() {
         <Route path="/site-audits" element={<SiteAuditsPage />} />
         <Route path="/forms" element={<FormsPage />} />
         <Route path="/automations" element={<AutomationsPage />} />
+        <Route path="/workflow" element={<WorkflowPage />} />
         
         {/* Settings Routes */}
         <Route path="/settings" element={<SettingsPage />} />
