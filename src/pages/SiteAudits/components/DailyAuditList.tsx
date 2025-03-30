@@ -3,14 +3,15 @@ import React from 'react';
 import { AuditsByDay } from '../types/auditTypes';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Calendar, CheckSquare, User } from 'lucide-react';
+import { Calendar, CheckSquare, User, Camera, Upload } from 'lucide-react';
 import { format } from 'date-fns';
 
 interface DailyAuditListProps {
   dayData: AuditsByDay;
+  onAddPhoto?: () => void;
 }
 
-export const DailyAuditList: React.FC<DailyAuditListProps> = ({ dayData }) => {
+export const DailyAuditList: React.FC<DailyAuditListProps> = ({ dayData, onAddPhoto }) => {
   return (
     <div className="flex flex-col h-full">
       <div className="text-center p-2 bg-slate-100 rounded-t-lg">
@@ -57,8 +58,32 @@ export const DailyAuditList: React.FC<DailyAuditListProps> = ({ dayData }) => {
             </Card>
           ))
         ) : (
-          <div className="flex items-center justify-center h-full text-muted-foreground text-sm">
-            No audits scheduled
+          <div className="flex flex-col items-center justify-center h-full text-muted-foreground text-sm gap-3">
+            <div className="flex flex-col items-center">
+              <span>No audits scheduled</span>
+            </div>
+            
+            <div className="flex gap-2">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="flex items-center gap-1"
+                onClick={onAddPhoto}
+              >
+                <Camera className="h-4 w-4" />
+                <span className="hidden sm:inline">Take Photo</span>
+              </Button>
+              
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="flex items-center gap-1"
+                onClick={onAddPhoto}
+              >
+                <Upload className="h-4 w-4" />
+                <span className="hidden sm:inline">Upload</span>
+              </Button>
+            </div>
           </div>
         )}
       </div>

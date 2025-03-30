@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from 'react';
 import { BaseLayout } from '@/components/ui/BaseLayout';
 import { SectionHeader } from '@/components/ui/SectionHeader';
@@ -50,7 +49,6 @@ export default function SiteAudits() {
       return;
     }
 
-    // Process each file
     Array.from(files).forEach(file => {
       uploadAuditPhoto(selectedCustomerId, file)
         .then(() => {
@@ -79,6 +77,18 @@ export default function SiteAudits() {
       return;
     }
     fileInputRef.current?.click();
+  };
+
+  const handleTakePhoto = () => {
+    if (!selectedCustomerId) {
+      toast({
+        title: "Select Customer",
+        description: "Please select a customer first before taking photos",
+        variant: "destructive"
+      });
+      return;
+    }
+    setShowPhotoCapture(true);
   };
 
   return (
@@ -185,7 +195,10 @@ export default function SiteAudits() {
             <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
               {auditsByDay.map((dayData, index) => (
                 <div key={index} className="border rounded-lg overflow-hidden">
-                  <DailyAuditList dayData={dayData} />
+                  <DailyAuditList 
+                    dayData={dayData} 
+                    onAddPhoto={handleTakePhoto}
+                  />
                 </div>
               ))}
             </div>
