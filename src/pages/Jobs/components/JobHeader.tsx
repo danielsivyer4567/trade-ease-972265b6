@@ -5,7 +5,6 @@ import type { Job } from "@/types/job";
 import { ActionButtons } from "./job-header/ActionButtons";
 import { WalkieTalkie } from "./job-header/WalkieTalkie";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { JobStepProgress } from "@/components/dashboard/JobStepProgress";
 
 interface JobHeaderProps {
   job: Job;
@@ -34,11 +33,6 @@ export const JobHeader = ({
             {job.status}
           </Badge>
           <span className="text-gray-500 text-xs sm:text-sm">{job.date}</span>
-        </div>
-        
-        {/* Progress steps shown below customer info */}
-        <div className="mt-4 sm:mt-6">
-          <JobStepProgress />
         </div>
       </div>
     </Card>

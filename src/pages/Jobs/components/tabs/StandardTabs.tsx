@@ -7,6 +7,7 @@ import { JobCalendarTab } from "./JobCalendarTab";
 import { JobTimerTab } from "./JobTimerTab";
 import type { Job } from "@/types/job";
 import { useIsMobile } from "@/hooks/use-mobile";
+
 interface StandardTabsProps {
   job: Job;
   jobTimer: number;
@@ -23,6 +24,7 @@ interface StandardTabsProps {
   isOnBreak: boolean;
   includeProgressTab?: boolean;
 }
+
 export const StandardTabs = ({
   job,
   jobTimer,
@@ -34,10 +36,12 @@ export const StandardTabs = ({
   handleBreakToggle,
   isTimerRunning,
   isOnBreak,
-  includeProgressTab = false
+  includeProgressTab = true // Changed to default to true
 }: StandardTabsProps) => {
   const isMobile = useIsMobile();
-  return <>
+  
+  return (
+    <>
       <TabsTrigger value="details" className="min-w-[80px] sm:min-w-[100px] whitespace-nowrap flex-shrink-0 bg-slate-400 hover:bg-slate-300 px-[26px] mx-0">
         Details
       </TabsTrigger>
@@ -57,9 +61,12 @@ export const StandardTabs = ({
         Timer
       </TabsTrigger>
 
-      {includeProgressTab && <TabsTrigger value="progress" className="min-w-[80px] sm:min-w-[100px] whitespace-nowrap flex-shrink-0 bg-slate-400 hover:bg-slate-300 mx-[23px] px-0">
+      {includeProgressTab && (
+        <TabsTrigger value="progress" className="min-w-[80px] sm:min-w-[100px] whitespace-nowrap flex-shrink-0 bg-slate-400 hover:bg-slate-300 mx-[23px] px-0">
           {!isMobile && <CheckSquare className="w-4 h-4 mr-2 px-0" />}
           Progress
-        </TabsTrigger>}
-    </>;
+        </TabsTrigger>
+      )}
+    </>
+  );
 };

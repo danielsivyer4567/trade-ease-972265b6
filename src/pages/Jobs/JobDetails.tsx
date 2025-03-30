@@ -12,6 +12,8 @@ import { JobsHeader } from './components/JobsHeader';
 import { JobLoadingState } from './components/JobLoadingState';
 import { JobMapView } from './components/JobMapView';
 import { useJobData } from './hooks/useJobData';
+import { JobStepProgress } from '@/components/dashboard/JobStepProgress';
+import { Card } from '@/components/ui/card';
 
 export function JobDetails() {
   const { id } = useParams<{ id: string }>();
@@ -58,6 +60,11 @@ export function JobDetails() {
       <div className="container-responsive mx-auto">
         <JobsHeader navigateTo="/jobs" />
         <div className="space-y-4 sm:space-y-6 p-2 sm:p-4 max-w-7xl mx-auto pb-24 bg-slate-200">
+          {/* Job Progress Steps above map */}
+          <Card className="bg-white shadow-sm py-3 px-3 sm:px-6">
+            <JobStepProgress />
+          </Card>
+          
           <JobMapView job={job} />
 
           <JobHeader job={job} />
