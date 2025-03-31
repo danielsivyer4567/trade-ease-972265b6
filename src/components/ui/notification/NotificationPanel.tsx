@@ -1,24 +1,11 @@
-
 import React from 'react';
 import { Pin, PinOff, X } from 'lucide-react';
-import { 
-  Sheet, 
-  SheetContent, 
-  SheetHeader, 
-  SheetTitle, 
-  SheetClose 
-} from '@/components/ui/sheet';
-import { 
-  Tabs, 
-  TabsList, 
-  TabsTrigger, 
-  TabsContent 
-} from '@/components/ui/tabs';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetClose } from '@/components/ui/sheet';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Notification } from '@/pages/Notifications/types';
 import { NotificationItem } from './NotificationItem';
 import { cn } from '@/lib/utils';
-
 interface NotificationPanelProps {
   open: boolean;
   isPinned: boolean;
@@ -27,7 +14,6 @@ interface NotificationPanelProps {
   onTogglePin: () => void;
   onNotificationClick: (id: number) => void;
 }
-
 export function NotificationPanel({
   open,
   isPinned,
@@ -36,34 +22,19 @@ export function NotificationPanel({
   onTogglePin,
   onNotificationClick
 }: NotificationPanelProps) {
-  return (
-    <Sheet open={open || isPinned} onOpenChange={onOpenChange}>
-      <SheetContent 
-        side="right" 
-        className={cn(
-          "sm:max-w-md w-[92vw] sm:w-[400px] p-0 transition-all duration-300", 
-          isPinned && "border-l-2 border-blue-500"
-        )}
-      >
+  return <Sheet open={open || isPinned} onOpenChange={onOpenChange}>
+      <SheetContent side="right" className={cn("sm:max-w-md w-[92vw] sm:w-[400px] p-0 transition-all duration-300", isPinned && "border-l-2 border-blue-500")}>
         <div className="h-full flex flex-col">
           <SheetHeader className="px-6 pt-6 pb-2 border-b">
             <div className="flex items-center justify-between">
               <SheetTitle className="text-xl">Notifications</SheetTitle>
               <div className="flex items-center gap-2">
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  onClick={onTogglePin} 
-                  className="rounded-full h-8 w-8 flex items-center justify-center" 
-                  title={isPinned ? "Unpin notifications" : "Pin notifications"}
-                >
-                  {isPinned ? <PinOff className="h-4 w-4" /> : <Pin className="h-4 w-4" />}
+                <Button variant="ghost" size="icon" onClick={onTogglePin} title={isPinned ? "Unpin notifications" : "Pin notifications"} className="rounded-full h-8 w-8 flex items-center justify-center px-0 mx-[66px]">
+                  {isPinned ? <PinOff className="h-4 w-4 px-0" /> : <Pin className="h-4 w-4" />}
                 </Button>
-                {!isPinned && (
-                  <SheetClose className="rounded-full h-8 w-8 flex items-center justify-center">
+                {!isPinned && <SheetClose className="rounded-full h-8 w-8 flex items-center justify-center">
                     <X className="h-4 w-4" />
-                  </SheetClose>
-                )}
+                  </SheetClose>}
               </div>
             </div>
             <p className="text-sm text-muted-foreground">Recent updates and messages</p>
@@ -79,13 +50,7 @@ export function NotificationPanel({
 
             <div className="flex-1 overflow-y-auto px-4">
               <TabsContent value="all" className="mt-0 space-y-4">
-                {notifications.map(notification => (
-                  <NotificationItem 
-                    key={notification.id} 
-                    notification={notification} 
-                    onClick={onNotificationClick} 
-                  />
-                ))}
+                {notifications.map(notification => <NotificationItem key={notification.id} notification={notification} onClick={onNotificationClick} />)}
                 
                 <div className="flex justify-center pt-2 pb-6">
                   <Button variant="ghost" className="text-blue-500 hover:text-blue-700 hover:bg-blue-50">
@@ -103,6 +68,5 @@ export function NotificationPanel({
           </Tabs>
         </div>
       </SheetContent>
-    </Sheet>
-  );
+    </Sheet>;
 }
