@@ -6,6 +6,7 @@ import { useAuth } from '@/contexts/AuthContext';
 
 // Import pages
 const AuthPage = React.lazy(() => import('@/pages/Auth'));
+// Fix the import path to match the correct case
 const DashboardPage = React.lazy(() => import('@/pages/Index'));
 const TradeDashPage = React.lazy(() => import('@/pages/TradeDash'));
 const CalculatorsPage = React.lazy(() => import('@/pages/Calculators'));
