@@ -3,7 +3,7 @@ import { AppLayout } from "@/components/ui/AppLayout";
 import { Flow } from './components/Flow';
 import { NodeSidebar } from './components/NodeSidebar';
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Save, Key, Check, FileText, ArrowRightLeft, Workflow } from "lucide-react";
+import { ArrowLeft, Save, Key, Check, FileText, ArrowRightLeft, Workflow, FolderOpen, Plus } from "lucide-react";
 import { useNavigate, useLocation, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -12,12 +12,17 @@ import { supabase } from "@/integrations/supabase/client";
 import { GCPVisionForm } from "@/components/messaging/dialog-sections/GCPVisionForm";
 import { AutomationSelector } from './components/AutomationSelector';
 import { AutomationIntegrationService } from '@/services/AutomationIntegrationService';
+import { WorkflowSaveDialog } from './components/WorkflowSaveDialog';
+import { WorkflowLoadDialog } from './components/WorkflowLoadDialog';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function WorkflowPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams] = useSearchParams();
   const automationId = searchParams.get('automationId');
+  const workflowId = searchParams.get('id');
+  const { user, session } = useAuth();
   
   const [flowInstance, setFlowInstance] = useState(null);
   const [gcpVisionKeyDialogOpen, setGcpVisionKeyDialogOpen] = useState(false);
@@ -26,6 +31,12 @@ export default function WorkflowPage() {
   const [isLoadingKey, setIsLoadingKey] = useState(true);
   const [integrationStatus, setIntegrationStatus] = useState('inactive');
   const [addedAutomationFromURL, setAddedAutomationFromURL] = useState(false);
+  const [saveDialogOpen, setSaveDialogOpen] = useState(false);
+  const [loadDialogOpen, setLoadDialogOpen] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [currentWorkflowId, setCurrentWorkflowId] = useState<string | undefined>(workflowId || undefined);
+  const [workflowName, setWorkflowName] = useState("New Workflow");
+  const [workflowDescription, setWorkflowDescription] = useState("");
   
   // Handle target data passed from other parts of the app
   const [targetData, setTargetData] = useState<{
@@ -231,12 +242,44 @@ export default function WorkflowPage() {
     }
   };
 
-  const handleSaveFlow = useCallback(() => {
+  const handleSaveWorkflow = useCallback(() => {
     if (!flowInstance) return;
-    const flow = flowInstance.toObject();
-    localStorage.setItem('workflow-data', JSON.stringify(flow));
-    toast.success('Workflow saved successfully!');
+    
+    if (!user) {
+      toast.error("You need to be logged in to save workflows");
+      return;
+    }
+    
+    setSaveDialogOpen(true);
+  }, [flowInstance, user]);
+
+  const handleSaveConfirm = useCallback(async (name: string, description: string) => {
+    if (!flowInstance) return;
+    
+    setIsSaving(true);
+    setWorkflowName(name);
+    setWorkflowDescription(description);
+    
+    try {
+      const flowData = flowInstance.toObject();
+      
+      // Call the flow's save method
+      flowInstance.saveWorkflow && await flowInstance.saveWorkflow(name);
+      
+      setSaveDialogOpen(false);
+    } catch (error) {
+      console.error("Error saving workflow:", error);
+      toast.error("Failed to save workflow");
+    } finally {
+      setIsSaving(false);
+    }
   }, [flowInstance]);
+
+  const handleLoadWorkflow = useCallback((id: string) => {
+    setCurrentWorkflowId(id);
+    // Navigate to the same page with the workflow ID
+    navigate(`/workflow?id=${id}`, { replace: true });
+  }, [navigate]);
 
   const handleSendToFinancials = useCallback(() => {
     if (integrationStatus !== 'ready') {
@@ -290,7 +333,9 @@ export default function WorkflowPage() {
             <Button variant="outline" size="sm" onClick={() => navigate(-1)}>
               <ArrowLeft className="h-4 w-4" />
             </Button>
-            <h1 className="text-2xl font-bold">Workflow Builder</h1>
+            <h1 className="text-2xl font-bold">
+              {currentWorkflowId ? workflowName : "New Workflow"}
+            </h1>
           </div>
           <div className="flex items-center gap-2">
             <Button 
@@ -300,6 +345,15 @@ export default function WorkflowPage() {
             >
               <Workflow className="h-4 w-4" />
               Manage Automations
+            </Button>
+            
+            <Button 
+              variant="outline" 
+              className="flex items-center gap-2"
+              onClick={() => setLoadDialogOpen(true)}
+            >
+              <FolderOpen className="h-4 w-4" />
+              Load Workflow
             </Button>
             
             <AutomationSelector 
@@ -343,7 +397,11 @@ export default function WorkflowPage() {
               Link Vision to Financials
             </Button>
             
-            <Button onClick={handleSaveFlow} className="flex items-center gap-2">
+            <Button 
+              onClick={handleSaveWorkflow} 
+              className="flex items-center gap-2"
+              disabled={!user}
+            >
               <Save className="h-4 w-4" /> Save Workflow
             </Button>
           </div>
@@ -352,7 +410,7 @@ export default function WorkflowPage() {
         <div className="flex h-[calc(100vh-200px)] border border-gray-200 rounded-lg overflow-hidden">
           <NodeSidebar targetData={targetData} />
           <div className="flex-1 relative">
-            <Flow onInit={setFlowInstance} />
+            <Flow onInit={setFlowInstance} workflowId={currentWorkflowId} />
           </div>
         </div>
 
@@ -410,6 +468,21 @@ export default function WorkflowPage() {
             </Card>
           </div>
         )}
+        
+        <WorkflowSaveDialog 
+          open={saveDialogOpen}
+          onOpenChange={setSaveDialogOpen}
+          onSave={handleSaveConfirm}
+          isLoading={isSaving}
+          initialName={workflowName}
+          initialDescription={workflowDescription}
+        />
+        
+        <WorkflowLoadDialog 
+          open={loadDialogOpen}
+          onOpenChange={setLoadDialogOpen}
+          onLoad={handleLoadWorkflow}
+        />
       </div>
     </AppLayout>
   );
