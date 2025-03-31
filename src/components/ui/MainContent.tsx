@@ -89,7 +89,10 @@ export function MainContent({
       </div>
 
       {/* Main Content Area */}
-      <ScrollArea className="flex overflow-hidden h-full flex-col pl-none pt-none justify-center items-center">
+      <ScrollArea className={cn(
+        "flex overflow-hidden h-full flex-col pl-none pt-none justify-center items-center",
+        notificationPanelState.isPinned ? "bg-[#EFF2F5]" : ""
+      )}>
         <div className="relative h-full w-full flex justify-center items-center pl-[60px] pt-[40px]">
           <div className="w-full h-full flex flex-col gap-4">
             <div className="flex flex-col gap-4 bg-white border border-[#B8C5D5]/50 rounded-tl-2xl">
