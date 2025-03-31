@@ -1,3 +1,4 @@
+
 import React from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "./button";
@@ -9,6 +10,7 @@ import { QuickTabs } from "./QuickTabs";
 import { SIDEBAR_CONSTANTS } from "./sidebar/constants";
 import { ScrollArea } from "./scroll-area";
 import { Separator } from "./separator";
+import { NotificationButton } from "./NotificationButton";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -95,6 +97,9 @@ export function MainContent({
           </div>
         </div>
       </ScrollArea>
+
+      {/* Notification Button */}
+      <NotificationButton />
     </main>
   );
 }

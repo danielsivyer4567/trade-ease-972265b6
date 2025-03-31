@@ -36,6 +36,44 @@ export type Database = {
         }
         Relationships: []
       }
+      automation_workflow_connections: {
+        Row: {
+          automation_id: number
+          created_at: string
+          id: string
+          target_id: string | null
+          target_type: string | null
+          user_id: string
+          workflow_id: string
+        }
+        Insert: {
+          automation_id: number
+          created_at?: string
+          id?: string
+          target_id?: string | null
+          target_type?: string | null
+          user_id: string
+          workflow_id: string
+        }
+        Update: {
+          automation_id?: number
+          created_at?: string
+          id?: string
+          target_id?: string | null
+          target_type?: string | null
+          user_id?: string
+          workflow_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "automation_workflow_connections_workflow_id_fkey"
+            columns: ["workflow_id"]
+            isOneToOne: false
+            referencedRelation: "workflows"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       calendar_sync_events: {
         Row: {
           connection_id: string
@@ -497,6 +535,42 @@ export type Database = {
         }
         Relationships: []
       }
+      property_boundaries: {
+        Row: {
+          address: string | null
+          boundaries: Json
+          created_at: string
+          description: string | null
+          id: string
+          location: number[]
+          name: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          address?: string | null
+          boundaries: Json
+          created_at?: string
+          description?: string | null
+          id?: string
+          location: number[]
+          name: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          address?: string | null
+          boundaries?: Json
+          created_at?: string
+          description?: string | null
+          id?: string
+          location?: number[]
+          name?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       statistics_history: {
         Row: {
           count: number
@@ -782,6 +856,36 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      workflows: {
+        Row: {
+          created_at: string
+          data: Json
+          description: string | null
+          id: string
+          name: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          data: Json
+          description?: string | null
+          id?: string
+          name: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          data?: Json
+          description?: string | null
+          id?: string
+          name?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
     }
     Views: {
