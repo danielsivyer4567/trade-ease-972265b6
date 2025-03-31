@@ -246,4 +246,3 @@ export const navigationGroups = [
     ],
   },
 ];
-
