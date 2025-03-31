@@ -1,14 +1,15 @@
 
 import React, { useState } from "react";
-import { Bell } from "lucide-react";
+import { Bell, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "./button";
 import { 
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "./dialog";
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetClose
+} from "./sheet";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "./tabs";
 import { NotificationCard } from "@/pages/Notifications/components/NotificationCard";
 import { Notification } from "@/pages/Notifications/types";
@@ -18,27 +19,27 @@ export function NotificationButton() {
   const [notifications, setNotifications] = useState<Notification[]>([
     {
       id: 1,
-      title: "New job request",
-      description: "You have a new job request from client #1242",
-      date: new Date().toISOString(),
+      title: "New job assigned",
+      description: "You have been assigned to job #1234",
+      date: new Date(Date.now() - 10 * 60000).toISOString(), // 10 minutes ago
       isCompleted: false,
       isSortedLater: false,
       isIncomplete: true
     },
     {
       id: 2,
-      title: "Document approval",
-      description: "Invoice #INV-2022-001 requires your approval",
-      date: new Date(Date.now() - 86400000).toISOString(), // 1 day ago
+      title: "Quote approved",
+      description: "Customer approved quote for job #5678",
+      date: new Date(Date.now() - 3600000).toISOString(), // 1 hour ago
       isCompleted: false,
       isSortedLater: false,
       isIncomplete: true
     },
     {
       id: 3,
-      title: "Quote accepted",
-      description: "Client has accepted quote #QT-2022-035",
-      date: new Date(Date.now() - 172800000).toISOString(), // 2 days ago
+      title: "Payment received",
+      description: "Payment received for invoice #9012",
+      date: new Date(Date.now() - 3 * 3600000).toISOString(), // 3 hours ago
       isCompleted: true,
       isSortedLater: false,
       isIncomplete: false
@@ -77,6 +78,30 @@ export function NotificationButton() {
   // Count unread notifications
   const unreadCount = notifications.filter(n => !n.isCompleted && !n.isSortedLater).length;
 
+  const getInitials = (title: string) => {
+    const words = title.split(' ');
+    if (words.length >= 2) {
+      return (words[0][0] + words[1][0]).toUpperCase();
+    }
+    return title.substring(0, 2).toUpperCase();
+  };
+
+  const formatTimeAgo = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffInMinutes = Math.floor((now.getTime() - date.getTime()) / (1000 * 60));
+    
+    if (diffInMinutes < 60) {
+      return `${diffInMinutes} minutes ago`;
+    } else if (diffInMinutes < 24 * 60) {
+      const hours = Math.floor(diffInMinutes / 60);
+      return `${hours} hour${hours > 1 ? 's' : ''} ago`;
+    } else {
+      const days = Math.floor(diffInMinutes / (24 * 60));
+      return `${days} day${days > 1 ? 's' : ''} ago`;
+    }
+  };
+
   return (
     <>
       <Button 
@@ -92,76 +117,71 @@ export function NotificationButton() {
         )}
       </Button>
 
-      <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="sm:max-w-[500px]">
-          <DialogHeader>
-            <DialogTitle>Notifications</DialogTitle>
-          </DialogHeader>
-          <Tabs defaultValue="all" className="w-full">
-            <TabsList className="w-full">
-              <TabsTrigger value="all" className="flex-1">All</TabsTrigger>
-              <TabsTrigger value="unread" className="flex-1">
-                Unread
-                {unreadCount > 0 && (
-                  <span className="ml-2 h-5 w-5 bg-red-500 rounded-full text-xs text-white flex items-center justify-center">
-                    {unreadCount}
-                  </span>
-                )}
-              </TabsTrigger>
-              <TabsTrigger value="later" className="flex-1">Later</TabsTrigger>
-            </TabsList>
-            <TabsContent value="all" className="max-h-[60vh] overflow-y-auto">
-              {notifications.length === 0 ? (
-                <p className="text-center py-6 text-muted-foreground">No notifications</p>
-              ) : (
-                notifications.map(notification => (
-                  <NotificationCard
-                    key={notification.id}
-                    notification={notification}
-                    onComplete={handleComplete}
-                    onSortLater={handleSortLater}
-                    onNotificationClick={handleNotificationClick}
-                  />
-                ))
-              )}
-            </TabsContent>
-            <TabsContent value="unread" className="max-h-[60vh] overflow-y-auto">
-              {notifications.filter(n => !n.isCompleted && !n.isSortedLater).length === 0 ? (
-                <p className="text-center py-6 text-muted-foreground">No unread notifications</p>
-              ) : (
-                notifications
-                  .filter(n => !n.isCompleted && !n.isSortedLater)
-                  .map(notification => (
-                    <NotificationCard
+      <Sheet open={open} onOpenChange={setOpen}>
+        <SheetContent side="right" className="sm:max-w-md w-[400px] p-0">
+          <div className="h-full flex flex-col">
+            <SheetHeader className="px-6 pt-6 pb-2 border-b">
+              <div className="flex items-center justify-between">
+                <SheetTitle className="text-xl">Notifications</SheetTitle>
+                <SheetClose className="rounded-full h-8 w-8 flex items-center justify-center">
+                  <X className="h-4 w-4" />
+                </SheetClose>
+              </div>
+              <p className="text-sm text-muted-foreground">Recent updates and messages</p>
+            </SheetHeader>
+
+            <Tabs defaultValue="all" className="flex-1 flex flex-col">
+              <div className="px-4 pt-2">
+                <TabsList className="grid w-full grid-cols-2 mb-4">
+                  <TabsTrigger value="all" className="rounded-md">All Notifications</TabsTrigger>
+                  <TabsTrigger value="team" className="rounded-md">Team Notifications</TabsTrigger>
+                </TabsList>
+              </div>
+
+              <div className="flex-1 overflow-y-auto px-4">
+                <TabsContent value="all" className="mt-0 space-y-4">
+                  {notifications.map(notification => (
+                    <div 
                       key={notification.id}
-                      notification={notification}
-                      onComplete={handleComplete}
-                      onSortLater={handleSortLater}
-                      onNotificationClick={handleNotificationClick}
-                    />
-                  ))
-              )}
-            </TabsContent>
-            <TabsContent value="later" className="max-h-[60vh] overflow-y-auto">
-              {notifications.filter(n => n.isSortedLater).length === 0 ? (
-                <p className="text-center py-6 text-muted-foreground">No notifications marked for later</p>
-              ) : (
-                notifications
-                  .filter(n => n.isSortedLater)
-                  .map(notification => (
-                    <NotificationCard
-                      key={notification.id}
-                      notification={notification}
-                      onComplete={handleComplete}
-                      onSortLater={handleSortLater}
-                      onNotificationClick={handleNotificationClick}
-                    />
-                  ))
-              )}
-            </TabsContent>
-          </Tabs>
-        </DialogContent>
-      </Dialog>
+                      className="flex items-start gap-3 py-3 border-b border-gray-100 cursor-pointer hover:bg-gray-50 px-2"
+                      onClick={() => handleNotificationClick(notification.id)}
+                    >
+                      <div className="flex-shrink-0">
+                        <div className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center text-white font-medium">
+                          {getInitials(notification.title)}
+                        </div>
+                      </div>
+                      <div className="flex-1">
+                        <div className="font-medium">{notification.title}</div>
+                        <p className="text-sm text-gray-600">{notification.description}</p>
+                        <div className="text-xs text-gray-500 mt-1">{formatTimeAgo(notification.date)}</div>
+                      </div>
+                      {!notification.isCompleted && (
+                        <div className="w-2 h-2 rounded-full bg-blue-600 flex-shrink-0 mt-2"></div>
+                      )}
+                    </div>
+                  ))}
+                  
+                  <div className="flex justify-center pt-2 pb-6">
+                    <Button 
+                      variant="ghost" 
+                      className="text-blue-500 hover:text-blue-700 hover:bg-blue-50"
+                    >
+                      View all notifications
+                    </Button>
+                  </div>
+                </TabsContent>
+                
+                <TabsContent value="team" className="mt-0">
+                  <div className="py-8 text-center">
+                    <p className="text-muted-foreground">No team notifications yet</p>
+                  </div>
+                </TabsContent>
+              </div>
+            </Tabs>
+          </div>
+        </SheetContent>
+      </Sheet>
     </>
   );
 }
