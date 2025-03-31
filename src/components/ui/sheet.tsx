@@ -1,4 +1,3 @@
-
 import * as React from "react";
 import * as SheetPrimitive from "@radix-ui/react-dialog";
 import { cva, type VariantProps } from "class-variance-authority";
@@ -16,7 +15,8 @@ const SheetOverlay = React.forwardRef<React.ElementRef<typeof SheetPrimitive.Ove
 }, ref) => (
   <SheetPrimitive.Overlay 
     className={cn(
-      "fixed inset-0 z-50 bg-black/20 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0", 
+      "fixed inset-0 z-50 bg-black/20 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
+      props['data-pinned'] === 'true' ? 'bg-transparent pointer-events-none' : '',
       className
     )} 
     {...props} 
@@ -43,25 +43,34 @@ const sheetVariants = cva(
   }
 );
 
-interface SheetContentProps extends React.ComponentPropsWithoutRef<typeof SheetPrimitive.Content>, VariantProps<typeof sheetVariants> {}
+interface SheetContentProps extends React.ComponentPropsWithoutRef<typeof SheetPrimitive.Content>, VariantProps<typeof sheetVariants> {
+  isPinned?: boolean;
+}
 
 const SheetContent = React.forwardRef<React.ElementRef<typeof SheetPrimitive.Content>, SheetContentProps>(({
   side = "right",
   className,
   children,
+  isPinned,
   ...props
-}, ref) => (
-  <SheetPortal>
-    <SheetOverlay />
-    <SheetPrimitive.Content 
-      ref={ref} 
-      className={cn(sheetVariants({ side }), className)} 
-      {...props}
-    >
-      {children}
-    </SheetPrimitive.Content>
-  </SheetPortal>
-));
+}, ref) => {
+  const isPinnedNotification = className?.includes('border-blue-500');
+  
+  return (
+    <SheetPortal>
+      <SheetOverlay data-pinned={isPinnedNotification ? 'true' : 'false'} />
+      <SheetPrimitive.Content 
+        ref={ref} 
+        className={cn(sheetVariants({ side }), className)} 
+        {...props}
+      >
+        {children}
+      </SheetPrimitive.Content>
+    </SheetPortal>
+  );
+});
+
+SheetContent.displayName = SheetPrimitive.Content.displayName;
 
 const SheetHeader = ({
   className,

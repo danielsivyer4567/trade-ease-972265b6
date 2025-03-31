@@ -43,7 +43,7 @@ export function BaseLayout({
         <AppSidebar 
           isExpanded={sidebarOpen}
           onToggle={toggleSidebar}
-          className="fixed top-0 left-0 h-full "
+          className="fixed top-0 left-0 h-full"
         />
 
         {/* Main Content */}

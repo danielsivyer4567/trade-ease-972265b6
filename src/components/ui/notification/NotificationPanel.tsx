@@ -29,7 +29,7 @@ export function NotificationPanel({
   return <Sheet open={open || isPinned} onOpenChange={onOpenChange}>
       <SheetContent side="right" className={cn(
         "sm:max-w-md w-[92vw] sm:w-[400px] p-0 transition-all duration-300",
-        isPinned && "border-l-2 border-blue-500 shadow-lg"
+        isPinned && "border-l-2 border-blue-500 shadow-lg pointer-events-auto"
       )}>
         <div className="h-full flex flex-col">
           <SheetHeader className="px-6 pt-6 pb-2 border-b">
