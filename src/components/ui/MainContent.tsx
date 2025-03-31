@@ -91,7 +91,7 @@ export function MainContent({
       {/* Main Content Area */}
       <ScrollArea className={cn(
         "flex overflow-hidden h-full flex-col pl-none pt-none justify-center items-center",
-        notificationPanelState.isPinned ? "bg-[#EFF2F5]" : ""
+        "bg-[#EFF2F5]" // Always maintain background color
       )}>
         <div className="relative h-full w-full flex justify-center items-center pl-[60px] pt-[40px]">
           <div className="w-full h-full flex flex-col gap-4">
