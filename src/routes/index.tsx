@@ -7,7 +7,7 @@ import { useAuth } from '@/contexts/AuthContext';
 // Import pages
 const AuthPage = React.lazy(() => import('@/pages/Auth'));
 // Fix the import path to match the correct case
-const DashboardPage = React.lazy(() => import('@/pages/Index'));
+const DashboardPage = React.lazy(() => import('@/pages/index'));
 const TradeDashPage = React.lazy(() => import('@/pages/TradeDash'));
 const CalculatorsPage = React.lazy(() => import('@/pages/Calculators'));
 const StatisticsPage = React.lazy(() => import('@/pages/Statistics'));
@@ -40,12 +40,10 @@ const AIFeaturesPage = React.lazy(() => import('@/pages/AIFeatures'));
 const SiteAuditsPage = React.lazy(() => import('@/pages/SiteAudits'));
 const FormsPage = React.lazy(() => import('@/pages/Forms'));
 const AutomationsPage = React.lazy(() => import('@/pages/Automations'));
-
 // New import for combined Quotes and Invoicing
 const QuotesInvoicesPage = React.lazy(() => import('@/pages/QuotesInvoices'));
 // Fix the import for NewInvoice page
 const NewInvoice = React.lazy(() => import('@/pages/Invoices/NewInvoice'));
-
 // Settings Pages
 const SettingsPage = React.lazy(() => import('@/pages/Settings'));
 const NotificationsSettings = React.lazy(() => import('@/pages/Settings/Notifications'));
