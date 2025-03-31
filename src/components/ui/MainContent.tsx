@@ -1,4 +1,3 @@
-
 import React from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "./button";
@@ -88,11 +87,8 @@ export function MainContent({
         </div>
       </div>
 
-      {/* Main Content Area */}
-      <ScrollArea className={cn(
-        "flex overflow-hidden h-full flex-col pl-none pt-none justify-center items-center",
-        "bg-[#EFF2F5]" // Always maintain background color
-      )}>
+      {/* Main Content Area - Keep background color regardless of notification panel state */}
+      <ScrollArea className="flex overflow-hidden h-full flex-col pl-none pt-none justify-center items-center bg-[#EFF2F5]">
         <div className="relative h-full w-full flex justify-center items-center pl-[60px] pt-[40px]">
           <div className="w-full h-full flex flex-col gap-4">
             <div className="flex flex-col gap-4 bg-white border border-[#B8C5D5]/50 rounded-tl-2xl">

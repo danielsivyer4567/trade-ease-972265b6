@@ -1,9 +1,11 @@
+
 import React from 'react';
 import { cn } from '@/lib/utils';
 import { AppSidebar } from './AppSidebar';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { MainContent } from './MainContent';
 import { SidebarProvider } from './sidebar/SidebarProvider';
+import { useNotificationPanelState } from '@/hooks/useNotificationPanelState';
 
 interface BaseLayoutProps {
   children: React.ReactNode;
@@ -18,6 +20,7 @@ export function BaseLayout({
 }: BaseLayoutProps) {
   const isMobile = useIsMobile();
   const [sidebarOpen, setSidebarOpen] = React.useState(!isMobile);
+  const notificationState = useNotificationPanelState();
   
   // Handle sidebar state changes
   React.useEffect(() => {
@@ -46,7 +49,8 @@ export function BaseLayout({
         <main className={cn(
           "min-h-screen w-full bg-[#EFF2F5]",
           "transition-all duration-300 ease-in-out",
-          sidebarOpen ? "pl-[240px]" : "pl-[64px]"
+          sidebarOpen ? "pl-[240px]" : "pl-[64px]",
+          notificationState.isPinned && "pr-[400px]" // Add padding when notification panel is pinned
         )}>
           <MainContent 
             sidebarOpen={sidebarOpen}
