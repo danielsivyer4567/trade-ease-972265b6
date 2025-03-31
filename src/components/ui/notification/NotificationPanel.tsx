@@ -28,7 +28,7 @@ export function NotificationPanel({
           <SheetHeader className="px-6 pt-6 pb-2 border-b">
             <div className="flex items-center justify-between">
               <SheetTitle className="text-xl">Notifications</SheetTitle>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 px-0 py-0">
                 <Button variant="ghost" size="icon" onClick={onTogglePin} title={isPinned ? "Unpin notifications" : "Pin notifications"} className="rounded-full h-8 w-8 flex items-center justify-center px-0 mx-[66px]">
                   {isPinned ? <PinOff className="h-4 w-4 px-0" /> : <Pin className="h-4 w-4" />}
                 </Button>
