@@ -9,22 +9,36 @@ interface AutomationWorkflowButtonProps {
   variant?: 'default' | 'outline' | 'secondary' | 'destructive' | 'ghost' | 'link';
   size?: 'default' | 'sm' | 'lg' | 'icon';
   children?: React.ReactNode;
+  workflowId?: string; // Added workflowId prop
 }
 
 export function AutomationWorkflowButton({ 
   automationId, 
   variant = 'default', 
   size = 'default',
-  children = 'Add to Workflow'
+  children = 'Add to Workflow',
+  workflowId
 }: AutomationWorkflowButtonProps) {
   const navigate = useNavigate();
   
   const handleClick = () => {
+    let path = '/workflow';
+    const params = new URLSearchParams();
+    
     if (automationId) {
-      navigate(`/workflow?automationId=${automationId}`);
-    } else {
-      navigate('/workflow');
+      params.append('automationId', automationId.toString());
     }
+    
+    if (workflowId) {
+      params.append('id', workflowId);
+    }
+    
+    const queryString = params.toString();
+    if (queryString) {
+      path += `?${queryString}`;
+    }
+    
+    navigate(path);
   };
 
   return (

@@ -22,6 +22,8 @@ import { AutomationNode } from './nodes/AutomationNode';
 import { MessagingNode } from './nodes/MessagingNode';
 import { toast } from 'sonner';
 import { AutomationIntegrationService } from '@/services/AutomationIntegrationService';
+import { WorkflowService } from '@/services/WorkflowService';
+import { supabase } from '@/integrations/supabase/client';
 
 // Define node data types for better type safety
 interface BaseNodeData {
@@ -44,12 +46,46 @@ const nodeTypes = {
   socialNode: CustomNode,
 };
 
-export function Flow({ onInit }) {
+interface FlowProps {
+  onInit: (instance: any) => void;
+  workflowId?: string;
+}
+
+export function Flow({ onInit, workflowId }: FlowProps) {
   // Initial nodes and edges
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
+  const [currentWorkflowId, setCurrentWorkflowId] = useState<string | undefined>(workflowId);
+  const [workflowName, setWorkflowName] = useState<string>("New Workflow");
+  const [workflowDescription, setWorkflowDescription] = useState<string>("");
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const reactFlowInstance = useRef(null);
   const [existingAutomationIds, setExistingAutomationIds] = useState(new Set());
+
+  // Check authentication status
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      setIsAuthenticated(!!session);
+    };
+    checkAuth();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      setIsAuthenticated(!!session);
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
+
+  // Load workflow if ID is provided
+  useEffect(() => {
+    if (workflowId && isAuthenticated) {
+      loadWorkflow(workflowId);
+    }
+  }, [workflowId, isAuthenticated]);
 
   // Handle connections between nodes
   const onConnect = useCallback((params) => {
@@ -180,26 +216,112 @@ export function Flow({ onInit }) {
     setExistingAutomationIds(automationIds);
   }, [nodes]);
 
+  // Save workflow to Supabase
+  const saveWorkflow = async (name?: string) => {
+    if (!isAuthenticated) {
+      toast.error("You must be signed in to save workflows");
+      return;
+    }
+
+    if (!reactFlowInstance.current) {
+      toast.error("Flow instance not initialized");
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const flowData = reactFlowInstance.current.toObject();
+      
+      const workflowToSave = {
+        id: currentWorkflowId,
+        name: name || workflowName || "Unnamed Workflow",
+        description: workflowDescription,
+        data: flowData
+      };
+
+      const { success, id, error } = await WorkflowService.saveWorkflow(workflowToSave);
+      
+      if (success && id) {
+        setCurrentWorkflowId(id);
+        toast.success("Workflow saved successfully!");
+        
+        // As a fallback, also save to localStorage
+        localStorage.setItem('workflow-data', JSON.stringify(flowData));
+      } else {
+        throw new Error(error?.message || "Failed to save workflow");
+      }
+    } catch (error) {
+      console.error("Error saving workflow:", error);
+      toast.error("Failed to save workflow. Saving to localStorage as fallback.");
+      
+      // Fallback to localStorage
+      const flowData = reactFlowInstance.current.toObject();
+      localStorage.setItem('workflow-data', JSON.stringify(flowData));
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Load workflow from Supabase
+  const loadWorkflow = async (id: string) => {
+    setIsLoading(true);
+    try {
+      const { success, workflow, error } = await WorkflowService.loadWorkflow(id);
+      
+      if (success && workflow) {
+        setCurrentWorkflowId(workflow.id);
+        setWorkflowName(workflow.name);
+        setWorkflowDescription(workflow.description || "");
+        
+        if (reactFlowInstance.current && workflow.data) {
+          // Load nodes and edges from the saved data
+          const { nodes: flowNodes, edges: flowEdges } = workflow.data;
+          setNodes(flowNodes || []);
+          setEdges(flowEdges || []);
+          reactFlowInstance.current.fitView();
+          toast.success("Workflow loaded successfully!");
+        }
+      } else {
+        throw new Error(error?.message || "Failed to load workflow");
+      }
+    } catch (error) {
+      console.error("Error loading workflow:", error);
+      toast.error("Failed to load workflow. Trying localStorage as fallback.");
+      
+      // Try to load from localStorage as fallback
+      tryLoadFromLocalStorage();
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Fallback to localStorage
+  const tryLoadFromLocalStorage = () => {
+    try {
+      const savedFlow = localStorage.getItem('workflow-data');
+      if (savedFlow) {
+        const flow = JSON.parse(savedFlow);
+        if (flow.nodes && flow.edges) {
+          setNodes(flow.nodes);
+          setEdges(flow.edges);
+          toast.info('Loaded saved workflow from localStorage');
+        }
+      }
+    } catch (error) {
+      console.error('Error loading saved workflow from localStorage:', error);
+    }
+  };
+
   // Set up flow on init
   const onInitFlow = useCallback((instance) => {
     reactFlowInstance.current = instance;
     onInit && onInit(instance);
     
     // Try to load saved workflow if any
-    const savedFlow = localStorage.getItem('workflow-data');
-    if (savedFlow) {
-      try {
-        const flow = JSON.parse(savedFlow);
-        if (flow.nodes && flow.edges) {
-          setNodes(flow.nodes);
-          setEdges(flow.edges);
-          toast.info('Loaded saved workflow');
-        }
-      } catch (error) {
-        console.error('Error loading saved workflow:', error);
-      }
+    if (!workflowId) {
+      tryLoadFromLocalStorage();
     }
-  }, [onInit, setNodes, setEdges]);
+  }, [onInit, setNodes, setEdges, workflowId]);
 
   // Handle custom node deletion
   useEffect(() => {
@@ -237,6 +359,18 @@ export function Flow({ onInit }) {
       
       setNodes((nds) => nds.concat(newNode));
       toast.success(`Added "${automationData.label}" automation to workflow`);
+
+      // If we have a workflow ID, save the automation connection
+      if (currentWorkflowId && automationData.automationId) {
+        WorkflowService.saveAutomationConnection(
+          automationData.automationId,
+          currentWorkflowId,
+          automationData.targetType,
+          automationData.targetId
+        ).catch(error => {
+          console.error("Failed to save automation connection:", error);
+        });
+      }
     };
 
     document.addEventListener('delete-node', handleDeleteNode);
@@ -248,7 +382,7 @@ export function Flow({ onInit }) {
       document.removeEventListener('update-node', handleUpdateNode);
       document.removeEventListener('add-automation', handleAddAutomation);
     };
-  }, [setNodes, setEdges, existingAutomationIds]);
+  }, [setNodes, setEdges, existingAutomationIds, currentWorkflowId]);
 
   return (
     <ReactFlowProvider>
@@ -270,6 +404,11 @@ export function Flow({ onInit }) {
           <Panel position="bottom-right">
             <div className="bg-white p-2 rounded shadow text-xs">
               Drag nodes from left sidebar • Connect nodes by dragging handles
+              {!isAuthenticated && (
+                <div className="mt-1 text-amber-600">
+                  Sign in to save workflows to cloud
+                </div>
+              )}
             </div>
           </Panel>
         </ReactFlow>
