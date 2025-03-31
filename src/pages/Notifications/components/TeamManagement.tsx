@@ -1,11 +1,10 @@
-
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Plus, Trash2, Users, Bell } from 'lucide-react';
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import { cn } from '@/lib/utils';
-import { setNotificationPanelState } from '@/components/ui/NotificationButton';
+import { setNotificationPanelState } from '@/hooks/useNotificationPanelState';
 
 interface Team {
   id: string;
@@ -159,4 +158,4 @@ export function TeamManagement({ selectedTeam, onTeamSelect }: TeamManagementPro
       </Button>
     </div>
   );
-} 
+}
