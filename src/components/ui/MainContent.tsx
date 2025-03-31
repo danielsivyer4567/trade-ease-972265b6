@@ -10,7 +10,7 @@ import { QuickTabs } from "./QuickTabs";
 import { SIDEBAR_CONSTANTS } from "./sidebar/constants";
 import { ScrollArea } from "./scroll-area";
 import { Separator } from "./separator";
-import { NotificationButton } from "./NotificationButton";
+import { NotificationButton, useNotificationPanelState } from "./NotificationButton";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -34,6 +34,7 @@ export function MainContent({
   showQuickTabs = false,
 }: MainContentProps) {
   const navigate = useNavigate();
+  const notificationPanelState = useNotificationPanelState();
 
   const handleLogout = async () => {
     try {
@@ -52,6 +53,7 @@ export function MainContent({
       className={cn(
         "relative flex flex-col flex-1 overflow-hidden",
         sidebarOpen && "transition-all duration-300 ease-in-out",
+        notificationPanelState.isPinned && "pr-[400px] transition-all duration-300",
         className
       )}
       style={
@@ -97,7 +99,7 @@ export function MainContent({
         </div>
       </ScrollArea>
 
-      {/* Notification Button */}
+      {/* Notification Button - will be conditionally hidden when pinned via the component's internal logic */}
       <NotificationButton />
     </main>
   );

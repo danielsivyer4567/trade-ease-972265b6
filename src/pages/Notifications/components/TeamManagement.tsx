@@ -1,9 +1,11 @@
+
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Plus, Trash2, Users } from 'lucide-react';
+import { Plus, Trash2, Users, Bell } from 'lucide-react';
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import { cn } from '@/lib/utils';
+import { setNotificationPanelState } from '@/components/ui/NotificationButton';
 
 interface Team {
   id: string;
@@ -36,6 +38,9 @@ export function TeamManagement({ selectedTeam, onTeamSelect }: TeamManagementPro
       setTeams([...teams, newTeam]);
       setNewTeamName('');
       setIsCreatingTeam(false);
+      
+      // Show the team notification panel when creating a new team
+      setNotificationPanelState({ isOpen: true, isPinned: true });
     }
   };
 
@@ -44,6 +49,10 @@ export function TeamManagement({ selectedTeam, onTeamSelect }: TeamManagementPro
     if (selectedTeam === teamId) {
       onTeamSelect('');
     }
+  };
+
+  const showTeamNotifications = () => {
+    setNotificationPanelState({ isOpen: true, isPinned: true });
   };
 
   const selectedTeamName = teams.find(t => t.id === selectedTeam)?.name || 'Select Team';
@@ -80,17 +89,30 @@ export function TeamManagement({ selectedTeam, onTeamSelect }: TeamManagementPro
                   <span>{team.name}</span>
                   <span className="text-xs text-gray-500">({team.members})</span>
                 </div>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-6 w-6 opacity-0 group-hover:opacity-100 hover:bg-red-100 hover:text-red-600"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleDeleteTeam(team.id);
-                  }}
-                >
-                  <Trash2 className="h-3 w-3" />
-                </Button>
+                <div className="flex items-center">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-6 w-6 mr-1 hover:bg-blue-100 hover:text-blue-600"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      showTeamNotifications();
+                    }}
+                  >
+                    <Bell className="h-3 w-3" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-6 w-6 hover:bg-red-100 hover:text-red-600"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDeleteTeam(team.id);
+                    }}
+                  >
+                    <Trash2 className="h-3 w-3" />
+                  </Button>
+                </div>
               </DropdownMenu.Item>
             ))}
             <DropdownMenu.Separator className="my-1 h-px bg-gray-200" />
@@ -126,6 +148,15 @@ export function TeamManagement({ selectedTeam, onTeamSelect }: TeamManagementPro
           </DropdownMenu.Content>
         </DropdownMenu.Portal>
       </DropdownMenu.Root>
+      
+      <Button
+        variant="outline"
+        size="icon"
+        onClick={showTeamNotifications}
+        className="h-9 w-9"
+      >
+        <Bell className="h-4 w-4" />
+      </Button>
     </div>
   );
 } 

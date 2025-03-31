@@ -1,6 +1,6 @@
 
-import React, { useState } from "react";
-import { Bell, X, Check, Clock } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { Bell, X, Check, Clock, Pin, PinOff } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "./button";
 import { 
@@ -14,8 +14,47 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "./tabs";
 import { Notification } from "@/pages/Notifications/types";
 import { format } from "date-fns";
 
+// Create a global state system for the notification panel state
+type NotificationPanelState = {
+  isOpen: boolean;
+  isPinned: boolean;
+};
+
+let listeners: ((state: NotificationPanelState) => void)[] = [];
+let currentState: NotificationPanelState = {
+  isOpen: false,
+  isPinned: false
+};
+
+const notifyListeners = () => {
+  listeners.forEach(listener => listener({...currentState}));
+};
+
+export const useNotificationPanelState = () => {
+  const [state, setState] = useState(currentState);
+  
+  useEffect(() => {
+    const listener = (newState: NotificationPanelState) => {
+      setState({...newState});
+    };
+    
+    listeners.push(listener);
+    return () => {
+      listeners = listeners.filter(l => l !== listener);
+    };
+  }, []);
+  
+  return state;
+};
+
+export const setNotificationPanelState = (newState: Partial<NotificationPanelState>) => {
+  currentState = {...currentState, ...newState};
+  notifyListeners();
+};
+
 export function NotificationButton() {
   const [open, setOpen] = useState(false);
+  const [isPinned, setIsPinned] = useState(false);
   const [notifications, setNotifications] = useState<Notification[]>([
     {
       id: 1,
@@ -46,6 +85,11 @@ export function NotificationButton() {
     }
   ]);
 
+  // Update global state when local state changes
+  useEffect(() => {
+    setNotificationPanelState({ isOpen: open, isPinned });
+  }, [open, isPinned]);
+
   const handleComplete = (id: number) => {
     setNotifications(prev => 
       prev.map(notification => 
@@ -73,6 +117,16 @@ export function NotificationButton() {
   const handleNotificationClick = (id: number) => {
     console.log("Notification clicked:", id);
     // Here you would navigate to the relevant section of the app
+  };
+
+  const handleTogglePin = () => {
+    setIsPinned(!isPinned);
+  };
+
+  const handleOpenChange = (newOpen: boolean) => {
+    if (!isPinned) {
+      setOpen(newOpen);
+    }
   };
 
   // Count unread notifications
@@ -106,7 +160,10 @@ export function NotificationButton() {
     <>
       <Button 
         onClick={() => setOpen(true)}
-        className="rounded-full w-14 h-14 bg-blue-500 hover:bg-blue-600 fixed bottom-6 right-6 flex items-center justify-center shadow-lg z-50"
+        className={cn(
+          "rounded-full w-14 h-14 bg-blue-500 hover:bg-blue-600 fixed bottom-6 right-6 flex items-center justify-center shadow-lg z-50",
+          isPinned && "opacity-0 pointer-events-none"
+        )}
         aria-label="Notifications"
       >
         <Bell className="h-6 w-6 text-white" />
@@ -117,15 +174,34 @@ export function NotificationButton() {
         )}
       </Button>
 
-      <Sheet open={open} onOpenChange={setOpen}>
-        <SheetContent side="right" className="sm:max-w-md w-[92vw] sm:w-[400px] p-0">
+      <Sheet open={open || isPinned} onOpenChange={handleOpenChange}>
+        <SheetContent 
+          side="right" 
+          className={cn(
+            "sm:max-w-md w-[92vw] sm:w-[400px] p-0 transition-all duration-300",
+            isPinned && "border-l-2 border-blue-500"
+          )}
+        >
           <div className="h-full flex flex-col">
             <SheetHeader className="px-6 pt-6 pb-2 border-b">
               <div className="flex items-center justify-between">
                 <SheetTitle className="text-xl">Notifications</SheetTitle>
-                <SheetClose className="rounded-full h-8 w-8 flex items-center justify-center">
-                  <X className="h-4 w-4" />
-                </SheetClose>
+                <div className="flex items-center gap-2">
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    onClick={handleTogglePin} 
+                    className="rounded-full h-8 w-8 flex items-center justify-center"
+                    title={isPinned ? "Unpin notifications" : "Pin notifications"}
+                  >
+                    {isPinned ? <PinOff className="h-4 w-4" /> : <Pin className="h-4 w-4" />}
+                  </Button>
+                  {!isPinned && (
+                    <SheetClose className="rounded-full h-8 w-8 flex items-center justify-center">
+                      <X className="h-4 w-4" />
+                    </SheetClose>
+                  )}
+                </div>
               </div>
               <p className="text-sm text-muted-foreground">Recent updates and messages</p>
             </SheetHeader>
