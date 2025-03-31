@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Pin, PinOff, X } from 'lucide-react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetClose } from '@/components/ui/sheet';
@@ -7,7 +6,6 @@ import { Button } from '@/components/ui/button';
 import { Notification } from '@/pages/Notifications/types';
 import { NotificationItem } from './NotificationItem';
 import { cn } from '@/lib/utils';
-
 interface NotificationPanelProps {
   open: boolean;
   isPinned: boolean;
@@ -16,7 +14,6 @@ interface NotificationPanelProps {
   onTogglePin: () => void;
   onNotificationClick: (id: number) => void;
 }
-
 export function NotificationPanel({
   open,
   isPinned,
@@ -26,32 +23,18 @@ export function NotificationPanel({
   onNotificationClick
 }: NotificationPanelProps) {
   return <Sheet open={open || isPinned} onOpenChange={onOpenChange}>
-      <SheetContent 
-        side="right" 
-        className={cn(
-          "sm:max-w-md w-[92vw] sm:w-[400px] p-0 transition-all duration-300", 
-          isPinned && "border-l-2 border-blue-500"
-        )}
-      >
+      <SheetContent side="right" className={cn("sm:max-w-md w-[92vw] sm:w-[400px] p-0 transition-all duration-300", isPinned && "border-l-2 border-blue-500")}>
         <div className="h-full flex flex-col">
           <SheetHeader className="px-6 pt-6 pb-2 border-b">
             <div className="flex items-center justify-between">
               <SheetTitle className="text-xl">Notifications</SheetTitle>
               <div className="flex items-center gap-2 px-0 py-0">
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  onClick={onTogglePin} 
-                  title={isPinned ? "Unpin notifications" : "Pin notifications"}
-                  className="rounded-full h-8 w-8 flex items-center justify-center"
-                >
+                <Button variant="ghost" size="icon" onClick={onTogglePin} title={isPinned ? "Unpin notifications" : "Pin notifications"} className="rounded-full h-8 w-8 flex items-center justify-center px-0 mx-[94px]">
                   {isPinned ? <PinOff className="h-4 w-4" /> : <Pin className="h-4 w-4" />}
                 </Button>
-                {!isPinned && (
-                  <SheetClose className="rounded-full h-8 w-8 flex items-center justify-center absolute right-4 top-4">
+                {!isPinned && <SheetClose className="rounded-full h-8 w-8 flex items-center justify-center absolute right-4 top-4">
                     <X className="h-4 w-4" />
-                  </SheetClose>
-                )}
+                  </SheetClose>}
               </div>
             </div>
             <p className="text-sm text-muted-foreground">Recent updates and messages</p>
