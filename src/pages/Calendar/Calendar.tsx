@@ -1,202 +1,98 @@
 
 import React, { useState } from 'react';
-import { BaseLayout } from "@/components/ui/BaseLayout";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { TeamCalendar } from "@/components/team/TeamCalendar";
-import { Button } from "@/components/ui/button";
-import { 
-  CalendarIcon, ChevronLeft, ChevronRight, Filter, 
-  Plus, RefreshCw, Users2, ChevronDown 
-} from "lucide-react";
-import { TeamCalendarGrid } from "./components/TeamCalendarGrid";
-import { useNavigate } from 'react-router-dom';
-import { 
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuTrigger
-} from "@/components/ui/dropdown-menu";
-import { calendarTeamLinks } from "@/components/ui/sidebar/constants";
+import { BaseLayout } from '@/components/ui/BaseLayout';
+import { useCalendarState } from './hooks/useCalendarState';
+import { CalendarHeader } from './components/CalendarHeader';
+import { Card } from '@/components/ui/card';
+import { useParams } from 'react-router-dom';
+import { TeamCalendar } from '@/components/team/TeamCalendar';
+import { Button } from '@/components/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { TeamCalendarGrid } from './components/TeamCalendarGrid';
+import { PlusCircle, Settings } from 'lucide-react';
+import { toast } from '@/hooks/use-toast';
+import { CalendarIntegrationDialog } from './components/CalendarIntegrationDialog';
+import { teamLinks } from '@/components/ui/sidebar/constants';
 
-const Calendar = () => {
-  const [date, setDate] = useState<Date | undefined>(new Date());
-  const [activeTeam, setActiveTeam] = useState<string>("red");
-  const navigate = useNavigate();
-
-  const teams = [
-    { name: "Team Red", color: "red" },
-    { name: "Team Blue", color: "blue" },
-    { name: "Team Green", color: "green" },
-  ];
+export default function Calendar() {
+  const { date, setDate } = useCalendarState();
+  const [isIntegrationDialogOpen, setIsIntegrationDialogOpen] = useState(false);
+  const params = useParams();
+  const teamColor = params.teamColor || 'red';
   
-  const handlePrevMonth = () => {
-    if (date) {
-      const prevMonth = new Date(date);
-      prevMonth.setMonth(prevMonth.getMonth() - 1);
-      setDate(prevMonth);
-    }
-  };
-
-  const handleNextMonth = () => {
-    if (date) {
-      const nextMonth = new Date(date);
-      nextMonth.setMonth(nextMonth.getMonth() + 1);
-      setDate(nextMonth);
-    }
-  };
-
-  const handleToday = () => {
-    setDate(new Date());
-  };
-  
-  const handleTeamSelect = (teamColor: string) => {
-    setActiveTeam(teamColor);
-  };
-  
-  const navigateToTeam = (path: string) => {
-    navigate(path);
-  };
-  
-  const handleTeamCalendarOpen = (teamColor: string) => {
-    navigate(`/calendar/team/${teamColor}`);
+  const handleIntegrate = (provider: string) => {
+    toast({
+      title: "Calendar Integration",
+      description: `Connected to ${provider} successfully`,
+    });
+    setIsIntegrationDialogOpen(false);
   };
 
   return (
     <BaseLayout>
-      <div className="p-6 space-y-6 animate-fadeIn">
-        <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-6">
-          <div className="flex items-center gap-2">
-            <CalendarIcon className="h-6 w-6 text-primary" />
-            <h1 className="text-2xl font-bold">Team Calendar</h1>
-          </div>
-          
-          <div className="flex flex-wrap items-center gap-2">
-            {/* Team Selection Dropdown */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="flex items-center gap-2">
-                  <Users2 className="h-4 w-4" />
-                  Teams
-                  <ChevronDown className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48 bg-white">
-                <DropdownMenuGroup>
-                  {calendarTeamLinks.map((team) => (
-                    <DropdownMenuItem 
-                      key={team.path}
-                      className="cursor-pointer"
-                      onClick={() => navigateToTeam(team.path)}
-                    >
-                      <team.icon className={`h-4 w-4 mr-2 ${
-                        team.color === "red" ? "text-red-500" :
-                        team.color === "blue" ? "text-blue-500" :
-                        team.color === "green" ? "text-green-500" : ""
-                      }`} />
-                      <span>{team.label}</span>
-                    </DropdownMenuItem>
-                  ))}
-                </DropdownMenuGroup>
-              </DropdownMenuContent>
-            </DropdownMenu>
-
-            <Button variant="outline" size="sm" onClick={handlePrevMonth}>
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
-            <Button variant="outline" size="sm" onClick={handleToday}>
-              Today
-            </Button>
-            <Button variant="outline" size="sm" onClick={handleNextMonth}>
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-            <Button variant="outline" size="sm">
-              <Filter className="h-4 w-4 mr-2" />
-              Filter
-            </Button>
-            <Button variant="default" size="sm">
-              <Plus className="h-4 w-4 mr-2" />
-              New Event
-            </Button>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-          {teams.map((team) => (
-            <Card 
-              key={team.color}
-              className={`cursor-pointer hover:shadow-md transition-shadow ${
-                activeTeam === team.color ? 'border-2 border-primary' : ''
-              }`}
-              onClick={() => handleTeamSelect(team.color)}
-            >
-              <CardHeader className="p-4">
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <div className={`w-3 h-3 rounded-full bg-${team.color}-500`}></div>
-                  <span>{team.name}</span>
-                  <div className="ml-auto flex gap-2">
-                    <Button 
-                      variant="ghost" 
-                      size="sm"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        navigateToTeam(`/team-${team.color}`);
-                      }}
-                    >
-                      Details
-                    </Button>
-                    <Button 
-                      variant="outline"
-                      size="sm"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleTeamCalendarOpen(team.color);
-                      }}
-                    >
-                      Calendar
-                    </Button>
-                  </div>
-                </CardTitle>
-              </CardHeader>
-            </Card>
-          ))}
-          
-          <Card 
-            className="cursor-pointer hover:shadow-md transition-shadow"
-            onClick={() => navigate('/calendar/sync')}
-          >
-            <CardHeader className="p-4">
-              <CardTitle className="text-lg flex items-center gap-2">
-                <RefreshCw className="h-4 w-4" />
-                Sync Calendars
-              </CardTitle>
-            </CardHeader>
-          </Card>
-        </div>
-
-        <Card className="bg-white shadow-sm">
-          <CardContent className="p-4">
-            {/* Show selected team calendar */}
-            <TeamCalendar 
-              date={date} 
-              setDate={setDate} 
-              teamColor={activeTeam}
-              assignedJobs={[]}
-            />
-          </CardContent>
-        </Card>
+      <div className="container py-6 space-y-6">
+        <CalendarHeader 
+          date={date} 
+          setDate={setDate}
+          onIntegrateClick={() => setIsIntegrationDialogOpen(true)}
+        />
         
-        {/* Show all team calendars in grid view */}
-        <div className="mt-8">
-          <h2 className="text-xl font-semibold mb-4">All Teams Calendars</h2>
-          <TeamCalendarGrid 
-            teams={teams} 
-            onJobAssign={(jobId, date) => console.log('Job assigned:', jobId, date)} 
-          />
-        </div>
+        <Tabs defaultValue="team-view" className="w-full">
+          <div className="flex justify-between items-center mb-4">
+            <TabsList>
+              <TabsTrigger value="team-view">Team View</TabsTrigger>
+              <TabsTrigger value="month-view">Month View</TabsTrigger>
+              <TabsTrigger value="week-view">Week View</TabsTrigger>
+              <TabsTrigger value="day-view">Day View</TabsTrigger>
+            </TabsList>
+            
+            <div className="flex gap-2">
+              <Button variant="outline" size="sm" onClick={() => setIsIntegrationDialogOpen(true)}>
+                <Settings className="h-4 w-4 mr-2" />
+                Integrations
+              </Button>
+              <Button size="sm">
+                <PlusCircle className="h-4 w-4 mr-2" />
+                New Event
+              </Button>
+            </div>
+          </div>
+
+          <TabsContent value="team-view" className="mt-4">
+            <TeamCalendarGrid />
+          </TabsContent>
+          
+          <TabsContent value="month-view" className="mt-4">
+            <Card className="p-0 overflow-hidden">
+              <TeamCalendar 
+                date={date} 
+                setDate={setDate} 
+                teamColor={teamColor} 
+              />
+            </Card>
+          </TabsContent>
+          
+          <TabsContent value="week-view">
+            <Card className="p-6">
+              <h3 className="text-lg font-medium mb-4">Week View Coming Soon</h3>
+              <p>This feature is currently under development.</p>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="day-view">
+            <Card className="p-6">
+              <h3 className="text-lg font-medium mb-4">Day View Coming Soon</h3>
+              <p>This feature is currently under development.</p>
+            </Card>
+          </TabsContent>
+        </Tabs>
+        
+        <CalendarIntegrationDialog
+          open={isIntegrationDialogOpen}
+          onOpenChange={setIsIntegrationDialogOpen}
+          onIntegrate={handleIntegrate}
+        />
       </div>
     </BaseLayout>
   );
-};
-
-export default Calendar;
+}

@@ -41,7 +41,7 @@ export function SidebarNavLinks({
   return <nav className="grid gap-1 px-2 py-2">
       {navigationGroups.map((group, index) => <div key={index} className="grid gap-0.5 my-[25px] rounded-full">
           {/* Group Label - Only show if it exists and sidebar is expanded */}
-          {isExpanded && group.label && <h4 className="text-gray-950 font-extrabold text-base">
+          {isExpanded && 'label' in group && group.label && <h4 className="text-gray-950 font-extrabold text-base">
               {group.label}
             </h4>}
 
