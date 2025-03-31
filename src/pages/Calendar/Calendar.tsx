@@ -10,21 +10,18 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { TeamCalendarGrid } from './components/TeamCalendarGrid';
 import { PlusCircle, Settings } from 'lucide-react';
-import { toast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 import { CalendarIntegrationDialog } from './components/CalendarIntegrationDialog';
 import { teamLinks } from '@/components/ui/sidebar/constants';
 
 export default function Calendar() {
-  const { date, setDate } = useCalendarState();
+  const { date, setDate, handleCalendarIntegration, redirectToCalendarProvider } = useCalendarState();
   const [isIntegrationDialogOpen, setIsIntegrationDialogOpen] = useState(false);
   const params = useParams();
   const teamColor = params.teamColor || 'red';
   
   const handleIntegrate = (provider: string) => {
-    toast({
-      title: "Calendar Integration",
-      description: `Connected to ${provider} successfully`,
-    });
+    toast.success(`Calendar Integration: Connected to ${provider} successfully`);
     setIsIntegrationDialogOpen(false);
   };
 
@@ -89,7 +86,8 @@ export default function Calendar() {
         <CalendarIntegrationDialog
           open={isIntegrationDialogOpen}
           onOpenChange={setIsIntegrationDialogOpen}
-          onProviderSelect={handleIntegrate}
+          onIntegrate={handleIntegrate}
+          onProviderSelect={redirectToCalendarProvider}
         />
       </div>
     </BaseLayout>
