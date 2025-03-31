@@ -6,6 +6,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { MainContent } from './MainContent';
 import { SidebarProvider } from './sidebar/SidebarProvider';
 import { useNotificationPanelState } from '@/hooks/useNotificationPanelState';
+import { TagSystem } from '@/hooks/useDraggableTag';
 
 interface BaseLayoutProps {
   children: React.ReactNode;
@@ -60,6 +61,9 @@ export function BaseLayout({
             {children}
           </MainContent>
         </main>
+
+        {/* Tag System */}
+        <TagSystem />
       </div>
     </SidebarProvider>
   );

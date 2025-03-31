@@ -1,3 +1,4 @@
+
 export interface Notification {
   id: number;
   title: string;
@@ -6,4 +7,9 @@ export interface Notification {
   isCompleted: boolean;
   isSortedLater: boolean;
   isIncomplete: boolean;
+  isUserTag?: boolean;
+  taggedUserId?: number;
+  tagPosition?: { x: number, y: number };
+  tagPageUrl?: string;
+  tagImage?: string;
 }

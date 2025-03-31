@@ -1,12 +1,13 @@
 
 import React from 'react';
-import { Pin, PinOff, X } from 'lucide-react';
+import { Pin, PinOff, X, User } from 'lucide-react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetClose } from '@/components/ui/sheet';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Notification } from '@/pages/Notifications/types';
 import { NotificationItem } from './NotificationItem';
 import { cn } from '@/lib/utils';
+import { TagUserButton } from '../tag/TagUserButton';
 
 interface NotificationPanelProps {
   open: boolean;
@@ -35,6 +36,7 @@ export function NotificationPanel({
             <div className="flex items-center justify-between">
               <SheetTitle className="text-xl">Notifications</SheetTitle>
               <div className="flex items-center gap-2">
+                <TagUserButton />
                 <Button 
                   variant="ghost" 
                   size="icon" 
