@@ -32,9 +32,8 @@ export default function Calendar() {
     <BaseLayout>
       <div className="container py-6 space-y-6">
         <CalendarHeader 
-          date={date} 
-          setDate={setDate}
-          onIntegrateClick={() => setIsIntegrationDialogOpen(true)}
+          onCalendarIntegration={() => setIsIntegrationDialogOpen(true)}
+          onAddTeam={() => {}}
         />
         
         <Tabs defaultValue="team-view" className="w-full">
@@ -90,7 +89,7 @@ export default function Calendar() {
         <CalendarIntegrationDialog
           open={isIntegrationDialogOpen}
           onOpenChange={setIsIntegrationDialogOpen}
-          onIntegrate={handleIntegrate}
+          onProviderSelect={handleIntegrate}
         />
       </div>
     </BaseLayout>
