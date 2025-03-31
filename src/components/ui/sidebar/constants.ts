@@ -22,6 +22,16 @@ import {
   FileSearch,
   ClipboardList,
   Workflow,
+  TrendingUp,
+  CircleDollarSign,
+  Landmark,
+  Truck,
+  Store,
+  ShoppingCart,
+  LineChart,
+  Receipt,
+  ChevronRightSquare,
+  CheckCircle,
 } from 'lucide-react';
 
 import { NavLink } from './SidebarNavLinks';
@@ -89,6 +99,12 @@ export const navigationGroups = [
       },
       {
         type: 'link',
+        icon: TrendingUp,
+        label: 'Trade Dashboard',
+        path: '/tradedash',
+      },
+      {
+        type: 'link',
         icon: Briefcase,
         label: 'Jobs',
         path: '/jobs',
@@ -130,9 +146,21 @@ export const navigationGroups = [
       },
       {
         type: 'link',
-        icon: FileText,
-        label: 'Quotes',
-        path: '/quotes',
+        icon: CircleDollarSign,
+        label: 'Quotes & Invoices',
+        path: '/quotes-invoices',
+      },
+      {
+        type: 'link',
+        icon: Receipt,
+        label: 'Expenses',
+        path: '/expenses',
+      },
+      {
+        type: 'link',
+        icon: Landmark,
+        label: 'Banking',
+        path: '/banking',
       },
       {
         type: 'link',
@@ -162,6 +190,29 @@ export const navigationGroups = [
             path: '/calculators/job-cost',
           },
         ],
+      },
+    ],
+  },
+  {
+    label: 'Supply Chain',
+    items: [
+      {
+        type: 'link',
+        icon: Truck,
+        label: 'Suppliers',
+        path: '/suppliers',
+      },
+      {
+        type: 'link',
+        icon: Store,
+        label: 'Inventory',
+        path: '/inventory',
+      },
+      {
+        type: 'link',
+        icon: ShoppingCart,
+        label: 'Purchase Orders',
+        path: '/purchase-orders',
       },
     ],
   },
@@ -223,7 +274,7 @@ export const navigationGroups = [
       },
       {
         type: 'link',
-        icon: Workflow,
+        icon: ChevronRightSquare,
         label: 'Workflow',
         path: '/workflow',
       },
