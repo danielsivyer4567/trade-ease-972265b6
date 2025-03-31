@@ -12,7 +12,7 @@ import { TeamCalendarGrid } from './components/TeamCalendarGrid';
 import { PlusCircle, Settings } from 'lucide-react';
 import { toast } from 'sonner';
 import { CalendarIntegrationDialog } from './components/CalendarIntegrationDialog';
-import { teamLinks } from '@/components/ui/sidebar/constants';
+import { teamLinks, calendarTeamLinks } from '@/components/ui/sidebar/constants';
 
 export default function Calendar() {
   const { date, setDate, handleCalendarIntegration, redirectToCalendarProvider } = useCalendarState();
