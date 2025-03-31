@@ -8,12 +8,20 @@ import { useNavigate } from 'react-router-dom';
 import { Job } from '@/types/job';
 
 interface TeamCalendarGridProps {
-  teams: { name: string; color: string }[];
+  teams?: { name: string; color: string }[];
   onJobAssign?: (jobId: string, date: Date) => void;
   assignedJobs?: Record<string, Job[]>;
 }
 
-export function TeamCalendarGrid({ teams, onJobAssign, assignedJobs = {} }: TeamCalendarGridProps) {
+export function TeamCalendarGrid({ 
+  teams = [
+    { name: "Team Red", color: "red" },
+    { name: "Team Blue", color: "blue" },
+    { name: "Team Green", color: "green" }
+  ], 
+  onJobAssign, 
+  assignedJobs = {} 
+}: TeamCalendarGridProps) {
   const navigate = useNavigate();
   const [date] = useState<Date>(new Date());
 
