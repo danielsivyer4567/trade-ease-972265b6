@@ -1,6 +1,6 @@
 
 import React, { useState } from "react";
-import { Bell, X } from "lucide-react";
+import { Bell, X, Check, Clock } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "./button";
 import { 
@@ -11,8 +11,8 @@ import {
   SheetClose
 } from "./sheet";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "./tabs";
-import { NotificationCard } from "@/pages/Notifications/components/NotificationCard";
 import { Notification } from "@/pages/Notifications/types";
+import { format } from "date-fns";
 
 export function NotificationButton() {
   const [open, setOpen] = useState(false);
@@ -118,7 +118,7 @@ export function NotificationButton() {
       </Button>
 
       <Sheet open={open} onOpenChange={setOpen}>
-        <SheetContent side="right" className="sm:max-w-md w-[400px] p-0">
+        <SheetContent side="right" className="sm:max-w-md w-[92vw] sm:w-[400px] p-0">
           <div className="h-full flex flex-col">
             <SheetHeader className="px-6 pt-6 pb-2 border-b">
               <div className="flex items-center justify-between">
