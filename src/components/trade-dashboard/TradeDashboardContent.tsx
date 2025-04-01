@@ -1,9 +1,9 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { CalendarDays, BarChart2, TrendingUp, DollarSign, Users, Clock, ArrowUpRight, PercentCircle, Wallet } from "lucide-react";
 import { Link } from 'react-router-dom';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 export const TradeDashboardContent = () => {
   // State for switch between daily/weekly/monthly view
@@ -40,6 +40,17 @@ export const TradeDashboardContent = () => {
     { id: 3, customer: "Michael Brown", service: "Carpentry", amount: "$2,300", status: "Scheduled", date: "Jan 15" },
     { id: 4, customer: "Emma Davis", service: "Roofing", amount: "$3,600", status: "Quote Sent", date: "Jan 14" },
     { id: 5, customer: "Robert Wilson", service: "Painting", amount: "$1,500", status: "Pending", date: "Jan 10" }
+  ];
+
+  // Financial chart data
+  const data = [
+    { name: 'Jan', earnings: 4000, expenses: 2400, profit: 1600 },
+    { name: 'Feb', earnings: 3000, expenses: 1398, profit: 1602 },
+    { name: 'Mar', earnings: 2000, expenses: 1800, profit: 200 },
+    { name: 'Apr', earnings: 2780, expenses: 1908, profit: 872 },
+    { name: 'May', earnings: 1890, expenses: 1800, profit: 90 },
+    { name: 'Jun', earnings: 2390, expenses: 1800, profit: 590 },
+    { name: 'Jul', earnings: 3490, expenses: 2300, profit: 1190 },
   ];
 
   return (
@@ -134,9 +145,32 @@ export const TradeDashboardContent = () => {
         </Card>
       </div>
 
+      {/* Financial Overview Chart */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Financial Overview</CardTitle>
+          <CardDescription>Compare earnings, expenses, and profit over time</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="h-[300px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={data}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="name" />
+                <YAxis />
+                <Tooltip />
+                <Legend />
+                <Line type="monotone" dataKey="earnings" stroke="#4f46e5" activeDot={{ r: 8 }} />
+                <Line type="monotone" dataKey="expenses" stroke="#ef4444" />
+                <Line type="monotone" dataKey="profit" stroke="#10b981" />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Main Content */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Revenue Chart */}
         <Card className="lg:col-span-2">
           <CardHeader>
             <CardTitle>Revenue Overview</CardTitle>
@@ -153,7 +187,6 @@ export const TradeDashboardContent = () => {
           </CardContent>
         </Card>
 
-        {/* Recent Trades */}
         <Card className="lg:col-span-1">
           <CardHeader>
             <div className="flex justify-between items-center">
