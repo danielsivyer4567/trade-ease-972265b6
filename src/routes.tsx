@@ -4,6 +4,7 @@ import Customers from './pages/Customers';
 import NewCustomer from './pages/Customers/NewCustomer';
 import CustomerDetail from './pages/Customers/CustomerDetail';
 import Index from './pages/index'; // Updated to lowercase index
+import TradeDash from './pages/TradeDash';
 import Notifications from './pages/Notifications';
 import NotFound from './pages/NotFound';
 import Calendar from './pages/Calendar';
@@ -61,6 +62,10 @@ export const routes: RouteConfig[] = [
   {
     path: '/',
     element: <Index />
+  },
+  {
+    path: '/tradedash',
+    element: <TradeDash />
   },
   {
     path: '/workflow',

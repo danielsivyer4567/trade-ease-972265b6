@@ -8,6 +8,7 @@ import { useAuth } from '@/contexts/AuthContext';
 const AuthPage = React.lazy(() => import('@/pages/Auth'));
 // Fix the import path to match the correct case
 const DashboardPage = React.lazy(() => import('@/pages/index'));
+const TradeDashPage = React.lazy(() => import('@/pages/TradeDash'));
 const CalculatorsPage = React.lazy(() => import('@/pages/Calculators'));
 const StatisticsPage = React.lazy(() => import('@/pages/Statistics'));
 const CustomersPage = React.lazy(() => import('@/pages/Customers'));
@@ -74,6 +75,7 @@ export function Routes() {
       {/* Protected Routes */}
       <Route element={<ProtectedRoute />}>
         <Route path="/" element={<DashboardPage />} />
+        <Route path="/tradedash" element={<TradeDashPage />} />
         <Route path="/calculators/*" element={<CalculatorsPage />} />
         <Route path="/statistics" element={<StatisticsPage />} />
         <Route path="/customers" element={<CustomersPage />} />
