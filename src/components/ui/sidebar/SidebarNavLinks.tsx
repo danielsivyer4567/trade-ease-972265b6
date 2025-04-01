@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { LayoutDashboard, Briefcase, Users, FileText, Settings, Calendar, Network, Share, Bot, Mail, MessageSquare, Link as LinkIcon, Database, Plus, BarChart, ListTodo, Bell, GitBranch, Gauge, Calculator, LucideIcon, ChevronDown, Workflow } from 'lucide-react';
@@ -52,7 +53,7 @@ export function SidebarNavLinks({
           const linkButton = <Button key={item.path} asChild variant={isActive ? "secondary" : "ghost"} size="sm" className={cn("w-full justify-start h-9", isExpanded ? "px-2" : "px-2 justify-center", isActive && "bg-white border border-foreground/10")}>
                   <Link to={item.path}>
                     <LinkIcon className={cn("h-4 w-4", isActive ? "text-primary" : "text-muted-foreground")} />
-                    {isExpanded && <span className="ml-2 text-sm">{item.label}</span>}
+                    {isExpanded && <span className="ml-2 text-sm font-medium">{item.label}</span>}
                   </Link>
                 </Button>;
           return isExpanded ? linkButton : <TooltipProvider key={item.path}>
@@ -104,7 +105,7 @@ export function SidebarNavLinks({
                 return <Button key={subItem.path} asChild variant={isSubActive ? "secondary" : "ghost"} size="sm" className={cn("w-full justify-start h-9 pl-8", isSubActive && "bg-white border border-foreground/10")}>
                           <Link to={subItem.path}>
                             <SubIcon className={cn("h-4 w-4", isSubActive ? "text-primary" : "text-muted-foreground")} />
-                            <span className="ml-2 text-sm">{subItem.label}</span>
+                            <span className="ml-2 text-sm font-medium">{subItem.label}</span>
                           </Link>
                         </Button>;
               })}
@@ -121,7 +122,7 @@ export function SidebarNavLinks({
         return <Button key={team.path} asChild variant={isActive ? "secondary" : "ghost"} size="sm" className={cn("w-full justify-start h-9 pl-4", isExpanded ? "px-2" : "px-2 justify-center", isActive && "bg-white border border-foreground/10")}>
               <Link to={team.path}>
                 <TeamIcon className={cn("h-4 w-4", isActive ? "text-primary" : "text-muted-foreground", team.color === "red" && "text-red-500", team.color === "blue" && "text-blue-500", team.color === "green" && "text-green-500")} />
-                <span className={cn("ml-2 text-sm", team.color === "red" && "text-red-500", team.color === "blue" && "text-blue-500", team.color === "green" && "text-green-500")}>
+                <span className={cn("ml-2 text-sm font-medium", team.color === "red" && "text-red-500", team.color === "blue" && "text-blue-500", team.color === "green" && "text-green-500")}>
                   {team.label}
                 </span>
               </Link>

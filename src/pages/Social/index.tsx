@@ -5,6 +5,10 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { SocialAccountCard } from "@/components/tasks/SocialAccountCard";
 import { CreatePostCard } from "@/components/tasks/CreatePostCard";
+import { Button } from "@/components/ui/button";
+import { Share2 } from "lucide-react";
+import { usePhotoSharing } from "@/hooks/usePhotoSharing";
+import { PhotoSharingModal } from "@/components/sharing/PhotoSharingModal";
 
 interface SocialAccount {
   id: string;
@@ -43,6 +47,7 @@ export default function Social() {
     length: 'medium'
   });
   const { toast } = useToast();
+  const { isPhotoSharingOpen, openPhotoSharing, closePhotoSharing } = usePhotoSharing();
 
   const handleConnect = (accountId: string) => {
     setAccounts(accounts.map(account => {
@@ -97,6 +102,10 @@ export default function Social() {
     setSelectedPlatforms([]);
   };
 
+  const handleSharePhotos = () => {
+    openPhotoSharing('social');
+  };
+
   const handleAIEdit = async () => {
     if (!postContent.text) {
       toast({
@@ -143,6 +152,18 @@ export default function Social() {
       <div className="p-6 space-y-6">
         <h1 className="text-2xl font-bold">Social Media Management</h1>
         
+        <div className="flex justify-between items-center">
+          <div></div> {/* Empty div for spacing */}
+          <Button 
+            variant="outline" 
+            className="flex items-center gap-2"
+            onClick={handleSharePhotos}
+          >
+            <Share2 className="h-4 w-4" />
+            Share Photos
+          </Button>
+        </div>
+        
         <div className="grid md:grid-cols-2 gap-6">
           <SocialAccountCard
             accounts={accounts}
@@ -164,6 +185,12 @@ export default function Social() {
           />
         </div>
       </div>
+      
+      <PhotoSharingModal 
+        isOpen={isPhotoSharingOpen} 
+        onClose={closePhotoSharing} 
+        initialSource="social"
+      />
     </AppLayout>
   );
 }
