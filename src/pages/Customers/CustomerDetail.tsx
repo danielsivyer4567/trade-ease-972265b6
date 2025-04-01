@@ -2,7 +2,7 @@ import { AppLayout } from "@/components/ui/AppLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { ArrowLeft, Phone, Mail, MapPin, FileText, Briefcase, Receipt, ListCheck, Plus, ExternalLink, Repeat, Bell, Clipboard } from "lucide-react";
+import { ArrowLeft, Phone, Mail, MapPin, FileText, Briefcase, Receipt, ListCheck, Plus, ExternalLink, Repeat, Bell, Clipboard, Share2 } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { useState, useEffect } from "react";
@@ -10,6 +10,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { Customer } from "../Customers/hooks/useCustomers";
 import { RecurringJobsTab } from "../Jobs/components/tabs/RecurringJobsTab";
 import { ServiceRemindersTab } from "../Jobs/components/tabs/ServiceRemindersTab";
+import { usePhotoSharing } from "@/hooks/usePhotoSharing";
+import { PhotoSharingModal } from "@/components/sharing/PhotoSharingModal";
+
 export default function CustomerDetail() {
   const navigate = useNavigate();
   const {
@@ -22,6 +25,12 @@ export default function CustomerDetail() {
   const [customer, setCustomer] = useState<Customer | null>(null);
   const [loading, setLoading] = useState(true);
   const [jobData, setJobData] = useState<any[]>([]);
+  const {
+    isPhotoSharingOpen,
+    openPhotoSharing,
+    closePhotoSharing
+  } = usePhotoSharing();
+
   useEffect(() => {
     const fetchCustomer = async () => {
       setLoading(true);
@@ -33,14 +42,12 @@ export default function CustomerDetail() {
         } = await supabase.from('customers').select('*').eq('id', id).single();
         if (error) throw error;
         if (data) {
-          // Fix case of zipcode -> zipCode for frontend consistency
           const customerData = {
             ...data,
-            zipCode: data.zipcode // Map zipcode to zipCode for frontend
+            zipCode: data.zipcode
           };
           setCustomer(customerData as Customer);
 
-          // Fetch related jobs for this customer
           const {
             data: jobsData,
             error: jobsError
@@ -61,9 +68,17 @@ export default function CustomerDetail() {
     };
     fetchCustomer();
   }, [id, toast]);
+
   const handleJobClick = (jobId: string) => {
     navigate(`/jobs/${jobId}`);
   };
+
+  const handleSharePhotos = () => {
+    if (customer?.id) {
+      openPhotoSharing('customer', customer.id);
+    }
+  };
+
   if (loading) {
     return <AppLayout>
         <div className="p-6">
@@ -77,6 +92,7 @@ export default function CustomerDetail() {
         </div>
       </AppLayout>;
   }
+
   if (!customer) {
     return <AppLayout>
         <div className="p-6">
@@ -90,14 +106,26 @@ export default function CustomerDetail() {
         </div>
       </AppLayout>;
   }
+
   return <AppLayout>
       <div className="p-6 space-y-6">
-        <div className="flex items-center gap-4">
-          <Button variant="outline" onClick={() => navigate('/customers')} className="bg-slate-400 hover:bg-slate-300">
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Customers
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <Button variant="outline" onClick={() => navigate('/customers')} className="bg-slate-400 hover:bg-slate-300">
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back to Customers
+            </Button>
+            <h1 className="text-2xl font-semibold">{customer.name}</h1>
+          </div>
+          
+          <Button 
+            variant="outline" 
+            onClick={handleSharePhotos}
+            className="flex items-center gap-2"
+          >
+            <Share2 className="h-4 w-4" />
+            Share Photos
           </Button>
-          <h1 className="text-2xl font-semibold">{customer.name}</h1>
         </div>
 
         <Card>
@@ -302,5 +330,12 @@ export default function CustomerDetail() {
           </TabsContent>
         </Tabs>
       </div>
+      
+      <PhotoSharingModal 
+        isOpen={isPhotoSharingOpen} 
+        onClose={closePhotoSharing} 
+        initialSource="customer"
+        customerId={customer?.id}
+      />
     </AppLayout>;
 }
