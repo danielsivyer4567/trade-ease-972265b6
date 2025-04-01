@@ -9,6 +9,7 @@ import { QuickTabs } from "./QuickTabs";
 import { SIDEBAR_CONSTANTS } from "./sidebar/constants";
 import { ScrollArea } from "./scroll-area";
 import { useAuth } from "@/contexts/AuthContext";
+import { NotificationButton } from "@/components/notifications/NotificationButton";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -68,19 +69,22 @@ export function MainContent({
           <div className="flex items-center gap-2 w-full">
             <QuickTabs />
           </div>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="sm" className="h-8 w-8 px-0">
-                <LogOut className="h-4 w-4" />
-                <span className="sr-only">User menu</span>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={handleLogout}>
-                Log out
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <div className="flex items-center space-x-2">
+            <NotificationButton />
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm" className="h-8 w-8 px-0">
+                  <LogOut className="h-4 w-4" />
+                  <span className="sr-only">User menu</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={handleLogout}>
+                  Log out
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </div>
       </div>
 
