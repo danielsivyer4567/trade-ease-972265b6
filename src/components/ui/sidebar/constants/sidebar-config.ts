@@ -7,4 +7,5 @@ export const SIDEBAR_CONSTANTS = {
   SIDEBAR_COOKIE_NAME: "sidebar-expanded",
   SIDEBAR_COOKIE_MAX_AGE: 60 * 60 * 24 * 365, // 1 year
   SIDEBAR_KEYBOARD_SHORTCUT: "b",
+  NOTIFICATIONS_Z_INDEX: 100,
 };
