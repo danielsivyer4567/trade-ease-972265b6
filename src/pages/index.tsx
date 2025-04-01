@@ -14,7 +14,6 @@ import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { TradeDashboardContent } from "@/components/trade-dashboard/TradeDashboardContent";
 
 export default function Index() {
   const navigate = useNavigate();
@@ -187,9 +186,6 @@ export default function Index() {
           </div>
         </div>
       </div>
-      
-      {/* Trade Dashboard Content moved below the bottom div */}
-      <TradeDashboardContent />
     </BaseLayout>
   );
 }
