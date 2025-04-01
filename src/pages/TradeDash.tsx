@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { BaseLayout } from "@/components/ui/BaseLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -30,6 +29,30 @@ const TradeDash = () => {
             </select>
           </div>
         </div>
+
+        {/* Financial Overview Chart */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Financial Overview</CardTitle>
+            <CardDescription>Compare earnings, expenses, and profit over time</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="h-[300px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={data}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="name" />
+                  <YAxis />
+                  <Tooltip />
+                  <Legend />
+                  <Line type="monotone" dataKey="earnings" stroke="#4f46e5" activeDot={{ r: 8 }} />
+                  <Line type="monotone" dataKey="expenses" stroke="#ef4444" />
+                  <Line type="monotone" dataKey="profit" stroke="#10b981" />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
