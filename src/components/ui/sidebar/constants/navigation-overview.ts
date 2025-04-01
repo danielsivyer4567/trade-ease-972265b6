@@ -1,59 +1,45 @@
 
-import {
-  LayoutDashboard,
-  Briefcase,
-  Calendar,
-  FileSearch,
-  ListTodo,
-  ClipboardList,
-  TrendingUp,
-} from 'lucide-react';
+import { LayoutDashboard, BarChart3, Gauge, Network, UserSquare2, Activity } from 'lucide-react';
 
-// Overview navigation group
 export const overviewNavigation = {
   label: 'Overview',
   items: [
     {
       type: 'link',
-      icon: LayoutDashboard,
       label: 'Dashboard',
       path: '/',
+      icon: LayoutDashboard,
+    },
+    // Removing the second dashboard button that was here
+    {
+      type: 'link',
+      label: 'Statistics',
+      path: '/statistics',
+      icon: BarChart3,
     },
     {
       type: 'link',
-      icon: TrendingUp,
-      label: 'Trade Dashboard',
-      path: '/tradedash',
+      label: 'Performance',
+      path: '/performance',
+      icon: Gauge,
     },
     {
       type: 'link',
-      icon: Briefcase,
-      label: 'Jobs',
-      path: '/jobs',
+      label: 'Networks',
+      path: '/networks',
+      icon: Network,
     },
     {
       type: 'link',
-      icon: Calendar,
-      label: 'Calendar',
-      path: '/calendar',
+      label: 'Customers',
+      path: '/customers',
+      icon: UserSquare2,
     },
     {
       type: 'link',
-      icon: FileSearch,
-      label: 'Site Audits',
-      path: '/site-audits',
-    },
-    {
-      type: 'link',
-      icon: ListTodo,
-      label: 'Tasks',
-      path: '/tasks',
-    },
-    {
-      type: 'link',
-      icon: ClipboardList,
-      label: 'Forms',
-      path: '/forms',
+      label: 'Activity',
+      path: '/activity',
+      icon: Activity,
     },
   ],
 };
