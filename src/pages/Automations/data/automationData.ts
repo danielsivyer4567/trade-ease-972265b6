@@ -1,4 +1,3 @@
-
 import { Automation } from '../types';
 
 export const automationData: Automation[] = [
@@ -298,5 +297,14 @@ export const automationData: Automation[] = [
     triggers: ['Material request submitted', 'Inventory level below threshold'],
     actions: ['Send approval request to manager', 'Create purchase order when approved'],
     category: 'forms'
+  },
+  {
+    id: 33,
+    title: 'Job Completion Photo Share',
+    description: 'Automatically send job completion photos to customers via email when job is marked complete',
+    isActive: true,
+    triggers: ['Job status changed to completed', 'Photos uploaded'],
+    actions: ['Send email with photos', 'Update customer notification status'],
+    category: 'customer'
   }
 ];

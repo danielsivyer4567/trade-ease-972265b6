@@ -1,4 +1,3 @@
-
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Automation } from "@/pages/Automations/types";
@@ -106,6 +105,28 @@ export const AutomationIntegrationService = {
     } catch (error) {
       console.error("Failed to get associated automations:", error);
       return { success: false, error: error.message, automations: [] };
+    }
+  },
+  
+  /**
+   * Send job photos to customer
+   */
+  sendJobPhotosToCustomer: async (jobId: string, customerEmail?: string) => {
+    try {
+      // In a real implementation, this would:
+      // 1. Fetch the job photos from storage
+      // 2. Get the customer email from the job record
+      // 3. Send an email with the photos attached
+      
+      console.log(`Sending job photos for job ${jobId} to customer${customerEmail ? ` (${customerEmail})` : ''}`);
+      
+      // Mock the email sending process
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      
+      return { success: true, message: 'Photos sent successfully' };
+    } catch (error) {
+      console.error('Failed to send job photos:', error);
+      return { success: false, error: error.message };
     }
   }
 };
@@ -217,6 +238,12 @@ async function processTeamAutomation(automation: Automation, params: AutomationT
 async function processCustomerAutomation(automation: Automation, params: AutomationTriggerParams) {
   // Handle customer-related automations
   console.log(`Processing customer automation: ${automation.title}`);
+  
+  // Check if this is a photo sharing automation
+  if (automation.id === 33 || automation.title.includes('Photo')) {
+    return await processPhotoSharingAutomation(automation, params);
+  }
+  
   return { success: true, message: `Processed customer automation: ${automation.title}` };
 }
 
@@ -257,4 +284,16 @@ async function simulateSocialMediaIntegration(params: AutomationTriggerParams) {
   console.log('Simulating social media integration', params);
   // In a real implementation, this would call your social media APIs
   return { success: true, message: 'Social media post queued' };
+}
+
+// Add a new processor specifically for handling photo sharing
+async function processPhotoSharingAutomation(automation: Automation, params: AutomationTriggerParams) {
+  console.log(`Processing photo sharing automation: ${automation.title}`);
+  
+  if (params.additionalData?.action === 'share_photos') {
+    // This would integrate with your email service in a real implementation
+    return await AutomationIntegrationService.sendJobPhotosToCustomer(params.targetId);
+  }
+  
+  return { success: true, message: `Processed photo sharing: ${automation.title}` };
 }

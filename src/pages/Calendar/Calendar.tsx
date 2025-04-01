@@ -9,10 +9,11 @@ import { TeamCalendar } from '@/components/team/TeamCalendar';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { TeamCalendarGrid } from './components/TeamCalendarGrid';
-import { PlusCircle, Settings } from 'lucide-react';
+import { PlusCircle, Settings, Camera } from 'lucide-react';
 import { toast } from 'sonner';
 import { CalendarIntegrationDialog } from './components/CalendarIntegrationDialog';
-import { teamLinks, calendarTeamLinks } from '@/components/ui/sidebar/constants';
+import { teamLinks } from '@/components/ui/sidebar/constants';
+import { AutomationIntegrationService } from '@/services/AutomationIntegrationService';
 
 export default function Calendar() {
   const { date, setDate, handleCalendarIntegration, redirectToCalendarProvider } = useCalendarState();
@@ -23,6 +24,23 @@ export default function Calendar() {
   const handleIntegrate = (provider: string) => {
     toast.success(`Calendar Integration: Connected to ${provider} successfully`);
     setIsIntegrationDialogOpen(false);
+  };
+  
+  const handleSendJobPhotos = (jobId: string = 'current-job') => {
+    // Trigger the photo sharing automation (ID 33)
+    AutomationIntegrationService.triggerAutomation(33, {
+      targetType: 'job',
+      targetId: jobId,
+      additionalData: {
+        action: 'share_photos',
+        timestamp: new Date().toISOString()
+      }
+    }).then(() => {
+      toast.success('Job photos sent to customer successfully');
+    }).catch((error) => {
+      console.error('Failed to send job photos:', error);
+      toast.error('Failed to send job photos to customer');
+    });
   };
 
   return (
@@ -46,6 +64,10 @@ export default function Calendar() {
               <Button variant="outline" size="sm" onClick={() => setIsIntegrationDialogOpen(true)}>
                 <Settings className="h-4 w-4 mr-2" />
                 Integrations
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => handleSendJobPhotos()}>
+                <Camera className="h-4 w-4 mr-2" />
+                Send Job Photos
               </Button>
               <Button size="sm">
                 <PlusCircle className="h-4 w-4 mr-2" />
