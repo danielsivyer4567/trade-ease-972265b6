@@ -7,6 +7,18 @@ import { mockLeads, userStats } from "./constants";
 import { DashboardStats } from "./components/DashboardStats";
 import { RatingStats } from "./components/RatingStats";
 import { TopPerformerCard } from "./components/TopPerformerCard";
+import { Card, CardHeader, CardContent, CardTitle, CardDescription } from "@/components/ui/card";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+
+const data = [
+  { name: 'Jan', earnings: 4000, expenses: 2400, profit: 1600 },
+  { name: 'Feb', earnings: 3000, expenses: 1398, profit: 1602 },
+  { name: 'Mar', earnings: 2000, expenses: 1800, profit: 200 },
+  { name: 'Apr', earnings: 2780, expenses: 1908, profit: 872 },
+  { name: 'May', earnings: 1890, expenses: 1800, profit: 90 },
+  { name: 'Jun', earnings: 2390, expenses: 1800, profit: 590 },
+  { name: 'Jul', earnings: 3490, expenses: 2300, profit: 1190 },
+];
 
 export default function TradeDash() {
   const [filters, setFilters] = useState({
@@ -94,6 +106,30 @@ export default function TradeDash() {
     <AppLayout>
       <div className="space-y-6 p-6">
         <h1 className="text-4xl font-bold text-gray-900">Easy Lead Dashboard</h1>
+        
+        {/* Financial Overview Chart */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Financial Overview</CardTitle>
+            <CardDescription>Compare earnings, expenses, and profit over time</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="h-[300px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={data}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="name" />
+                  <YAxis />
+                  <Tooltip />
+                  <Legend />
+                  <Line type="monotone" dataKey="earnings" stroke="#4f46e5" activeDot={{ r: 8 }} />
+                  <Line type="monotone" dataKey="expenses" stroke="#ef4444" />
+                  <Line type="monotone" dataKey="profit" stroke="#10b981" />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
         
         <DashboardStats 
           availableLeads={availableLeads}
