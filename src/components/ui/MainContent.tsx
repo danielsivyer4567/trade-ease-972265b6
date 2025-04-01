@@ -2,7 +2,6 @@
 import React from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "./button";
-import { LogOut } from "lucide-react";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { QuickTabs } from "./QuickTabs";
@@ -10,12 +9,6 @@ import { SIDEBAR_CONSTANTS } from "./sidebar/constants";
 import { ScrollArea } from "./scroll-area";
 import { useAuth } from "@/contexts/AuthContext";
 import { NotificationButton } from "@/components/notifications/NotificationButton";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "./dropdown-menu";
 
 interface MainContentProps {
   children: React.ReactNode;
@@ -34,17 +27,6 @@ export function MainContent({
 }: MainContentProps) {
   const navigate = useNavigate();
   const { signOut } = useAuth();
-
-  const handleLogout = async () => {
-    try {
-      await signOut();
-      toast.success("Logged out successfully");
-      navigate("/auth");
-    } catch (error) {
-      console.error("Error logging out:", error);
-      toast.error("Failed to log out");
-    }
-  };
 
   return (
     <div
@@ -71,19 +53,6 @@ export function MainContent({
           </div>
           <div className="flex items-center space-x-2">
             <NotificationButton />
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm" className="h-8 w-8 px-0">
-                  <LogOut className="h-4 w-4" />
-                  <span className="sr-only">User menu</span>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={handleLogout}>
-                  Log out
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
           </div>
         </div>
       </div>
