@@ -5,7 +5,7 @@ import { communicationNavigation } from './navigation-communication';
 import { overviewNavigation } from './navigation-overview';
 import { supplyChainNavigation } from './navigation-supply-chain';
 import { technicalNavigation } from './navigation-technical';
-import { teamLinks } from './team-links';
+import { teamLinks, calendarTeamLinks } from './team-links';
 import { SIDEBAR_CONSTANTS } from './sidebar-config';
 
 // Export all navigation groups
@@ -21,6 +21,7 @@ export const navigationGroups = [
 // Export all constants
 export {
   teamLinks,
+  calendarTeamLinks,
   SIDEBAR_CONSTANTS,
   overviewNavigation,
   businessNavigation,
