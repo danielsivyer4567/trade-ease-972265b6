@@ -9,49 +9,50 @@ import {
   Calculator,
   Plus,
 } from 'lucide-react';
+import { NavigationGroup, NavigationDropdown, NavigationLink } from './navigation-types';
 
 // Business navigation group
-export const businessNavigation = {
+export const businessNavigation: NavigationGroup = {
   label: 'Business',
   items: [
     {
-      type: 'link',
+      type: 'link' as const,
       icon: Users,
       label: 'Customers',
       path: '/customers',
     },
     {
-      type: 'link',
+      type: 'link' as const,
       icon: CircleDollarSign,
       label: 'Quotes & Invoices',
       path: '/quotes-invoices',
     },
     {
-      type: 'link',
+      type: 'link' as const,
       icon: Receipt,
       label: 'Expenses',
       path: '/expenses',
     },
     {
-      type: 'link',
+      type: 'link' as const,
       icon: Landmark,
       label: 'Banking',
       path: '/banking',
     },
     {
-      type: 'link',
+      type: 'link' as const,
       icon: Share,
       label: 'Referrals',
       path: '/referrals',
     },
     {
-      type: 'link',
+      type: 'link' as const,
       icon: BarChart,
       label: 'Statistics',
       path: '/statistics',
     },
     {
-      type: 'dropdown',
+      type: 'dropdown' as const,
       icon: Calculator,
       label: 'Calculators',
       items: [

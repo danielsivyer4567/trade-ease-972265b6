@@ -8,49 +8,50 @@ import {
   ChevronRightSquare,
   Settings,
 } from 'lucide-react';
+import { NavigationGroup, NavigationLink } from './navigation-types';
 
 // Technical navigation group
-export const technicalNavigation = {
+export const technicalNavigation: NavigationGroup = {
   label: 'Technical',
   items: [
     {
-      type: 'link',
+      type: 'link' as const,
       icon: Bot,
       label: 'AI Features',
       path: '/ai-features',
     },
     {
-      type: 'link',
+      type: 'link' as const,
       icon: Network,
       label: 'Integrations',
       path: '/integrations',
     },
     {
-      type: 'link',
+      type: 'link' as const,
       icon: Database,
       label: 'Database',
       path: '/database',
     },
     {
-      type: 'link',
+      type: 'link' as const,
       icon: Link,
       label: 'Property Boundaries',
       path: '/property-boundaries',
     },
     {
-      type: 'link',
+      type: 'link' as const,
       icon: Workflow,
       label: 'Automations',
       path: '/automations',
     },
     {
-      type: 'link',
+      type: 'link' as const,
       icon: ChevronRightSquare,
       label: 'Workflow',
       path: '/workflow',
     },
     {
-      type: 'link',
+      type: 'link' as const,
       icon: Settings,
       label: 'Settings',
       path: '/settings',
