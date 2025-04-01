@@ -14,6 +14,10 @@ import { JobMapView } from './components/JobMapView';
 import { useJobData } from './hooks/useJobData';
 import { JobStepProgress } from '@/components/dashboard/JobStepProgress';
 import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Camera } from 'lucide-react';
+import { toast } from 'sonner';
+import { AutomationIntegrationService } from '@/services/AutomationIntegrationService';
 
 export function JobDetails() {
   const { id } = useParams<{ id: string }>();
@@ -47,6 +51,25 @@ export function JobDetails() {
     locationHandleTimerToggle(isTimerRunning, setIsTimerRunning);
   };
   
+  const handleSendPhotosToCustomer = () => {
+    if (!id) return;
+    
+    // Trigger the photo sharing automation (ID 33)
+    AutomationIntegrationService.triggerAutomation(33, {
+      targetType: 'job',
+      targetId: id,
+      additionalData: {
+        action: 'share_photos',
+        timestamp: new Date().toISOString()
+      }
+    }).then(() => {
+      toast.success('Job photos sent to customer successfully');
+    }).catch((error) => {
+      console.error('Failed to send job photos:', error);
+      toast.error('Failed to send job photos to customer');
+    });
+  };
+  
   if (loading) {
     return <JobLoadingState />;
   }
@@ -68,6 +91,18 @@ export function JobDetails() {
           <JobMapView job={job} />
 
           <JobHeader job={job} />
+          
+          <div className="flex justify-end">
+            <Button 
+              size="sm"
+              variant="outline"
+              onClick={handleSendPhotosToCustomer}
+              className="mb-2"
+            >
+              <Camera className="h-4 w-4 mr-2" />
+              Share Photos with Customer
+            </Button>
+          </div>
 
           <JobTabs 
             job={job} 

@@ -7,6 +7,7 @@ import {
   Workflow,
   ChevronRightSquare,
   Settings,
+  Camera,
 } from 'lucide-react';
 
 // Technical navigation group
@@ -14,43 +15,49 @@ export const technicalNavigation = {
   label: 'Technical',
   items: [
     {
-      type: 'link',
+      type: 'link' as const,
       icon: Bot,
       label: 'AI Features',
       path: '/ai-features',
     },
     {
-      type: 'link',
+      type: 'link' as const,
       icon: Network,
       label: 'Integrations',
       path: '/integrations',
     },
     {
-      type: 'link',
+      type: 'link' as const,
       icon: Database,
       label: 'Database',
       path: '/database',
     },
     {
-      type: 'link',
+      type: 'link' as const,
       icon: Link,
       label: 'Property Boundaries',
       path: '/property-boundaries',
     },
     {
-      type: 'link',
+      type: 'link' as const,
       icon: Workflow,
       label: 'Automations',
       path: '/automations',
     },
     {
-      type: 'link',
+      type: 'link' as const,
       icon: ChevronRightSquare,
       label: 'Workflow',
       path: '/workflow',
     },
     {
-      type: 'link',
+      type: 'link' as const,
+      icon: Camera,
+      label: 'Job Photos',
+      path: '/automations?category=customer',
+    },
+    {
+      type: 'link' as const,
       icon: Settings,
       label: 'Settings',
       path: '/settings',
