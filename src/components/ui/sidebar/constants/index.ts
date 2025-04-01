@@ -7,9 +7,10 @@ import { supplyChainNavigation } from './navigation-supply-chain';
 import { technicalNavigation } from './navigation-technical';
 import { teamLinks, calendarTeamLinks } from './team-links';
 import { SIDEBAR_CONSTANTS } from './sidebar-config';
+import { NavigationGroup } from './navigation-types';
 
 // Export all navigation groups
-export const navigationGroups = [
+export const navigationGroups: NavigationGroup[] = [
   overviewNavigation,
   businessNavigation,
   technicalNavigation,
@@ -30,3 +31,6 @@ export {
   supplyChainNavigation,
   actionsNavigation
 };
+
+// Export types
+export * from './navigation-types';
