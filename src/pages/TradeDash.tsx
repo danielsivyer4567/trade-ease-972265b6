@@ -1,8 +1,10 @@
+
 import React from 'react';
 import { BaseLayout } from "@/components/ui/BaseLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { TrendingUp, Users, CircleDollarSign, CheckCircle } from 'lucide-react';
+
 const data = [{
   name: 'Jan',
   earnings: 4000,
@@ -39,9 +41,13 @@ const data = [{
   expenses: 2300,
   profit: 1190
 }];
+
 const TradeDash = () => {
-  return <BaseLayout>
-      
-    </BaseLayout>;
+  return (
+    <BaseLayout>
+      {/* Content goes here */}
+    </BaseLayout>
+  );
 };
+
 export default TradeDash;
