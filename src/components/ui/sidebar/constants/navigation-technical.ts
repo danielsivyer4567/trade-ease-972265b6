@@ -8,6 +8,8 @@ import {
   ChevronRightSquare,
   Settings,
   Camera,
+  Bell,
+  Share2,
 } from 'lucide-react';
 
 // Technical navigation group
@@ -55,6 +57,18 @@ export const technicalNavigation = {
       icon: Camera,
       label: 'Job Photos',
       path: '/automations?category=customer',
+    },
+    {
+      type: 'link' as const,
+      icon: Share2,
+      label: 'Photo Sharing',
+      path: '/automations?category=sharing',
+    },
+    {
+      type: 'link' as const,
+      icon: Bell,
+      label: 'Notifications',
+      path: '/notifications',
     },
     {
       type: 'link' as const,
