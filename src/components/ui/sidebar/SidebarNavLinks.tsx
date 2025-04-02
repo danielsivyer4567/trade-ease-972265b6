@@ -26,10 +26,22 @@ export function SidebarNavLinks({
 }: SidebarNavLinksProps) {
   const location = useLocation();
   const navigate = useNavigate();
-  const {
-    signOut
-  } = useAuth();
+  
+  // Safely use Auth context with a fallback
+  let signOut = () => {
+    console.log('Auth context not available');
+    navigate('/auth');
+  };
+  
+  try {
+    const auth = useAuth();
+    signOut = auth.signOut;
+  } catch (error) {
+    console.error('Auth context not available:', error);
+  }
+  
   const isTeamsPage = location.pathname === "/teams";
+  
   const handleLogout = async () => {
     try {
       await signOut();
@@ -38,6 +50,7 @@ export function SidebarNavLinks({
       console.error('Error signing out:', error);
     }
   };
+  
   return <nav className="grid gap-1 px-2 py-2">
       {navigationGroups.map((group, index) => <div key={index} className="grid gap-0.5 my-[25px] rounded-full">
           {/* Group Label - Only show if it exists and sidebar is expanded */}

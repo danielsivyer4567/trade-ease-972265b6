@@ -17,15 +17,16 @@ import { QuotesInvoicesPage } from "./pages/QuotesInvoices";
 import NewInvoice from "./pages/Invoices/NewInvoice";
 // Import the useAuthentication hook properly
 import { useAuthentication } from "./pages/Jobs/hooks/useAuthentication";
+import { AuthProvider } from "./contexts/AuthContext";
 
 function App() {
   return (
-    <>
+    <AuthProvider>
       <Toaster />
       <BrowserRouter>
         <AppRoutes />
       </BrowserRouter>
-    </>
+    </AuthProvider>
   );
 }
 
