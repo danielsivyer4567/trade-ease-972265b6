@@ -53,7 +53,7 @@ function App() {
       <Toaster />
       <BrowserRouter>
         <Routes>
-          {/* Using the Dashboard page as home since Home is missing */}
+          {/* Using a simple welcome page as home since Home component is missing */}
           <Route path="/" element={<div className="p-6">Welcome to Trade App</div>} />
           <Route path="/jobs" element={<ProtectedRoute><Jobs /></ProtectedRoute>} />
           <Route path="/jobs/new" element={<ProtectedRoute><NewJob /></ProtectedRoute>} />
