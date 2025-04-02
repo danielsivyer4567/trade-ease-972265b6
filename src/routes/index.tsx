@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Route, Routes as RouterRoutes, Navigate } from 'react-router-dom';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
@@ -6,7 +5,6 @@ import { useAuth } from '@/contexts/AuthContext';
 
 // Import pages
 const AuthPage = React.lazy(() => import('@/pages/Auth'));
-// Fix the import path to match the correct case
 const DashboardPage = React.lazy(() => import('@/pages/index'));
 const TradeDashPage = React.lazy(() => import('@/pages/TradeDash'));
 const CalculatorsPage = React.lazy(() => import('@/pages/Calculators'));
@@ -42,10 +40,10 @@ const FormsPage = React.lazy(() => import('@/pages/Forms'));
 const AutomationsPage = React.lazy(() => import('@/pages/Automations'));
 const ActivityPage = React.lazy(() => import('@/pages/Activity'));
 const PropertyBoundariesPage = React.lazy(() => import('@/pages/PropertyBoundaries'));
+const BankingPage = React.lazy(() => import('@/pages/Banking'));
 
 // New import for combined Quotes and Invoicing
 const QuotesInvoicesPage = React.lazy(() => import('@/pages/QuotesInvoices'));
-// Fix the import for NewInvoice page
 const NewInvoice = React.lazy(() => import('@/pages/Invoices/NewInvoice'));
 
 // Settings Pages
@@ -105,6 +103,7 @@ export function Routes() {
         <Route path="/workflow" element={<WorkflowPage />} />
         <Route path="/activity" element={<ActivityPage />} />
         <Route path="/property-boundaries" element={<PropertyBoundariesPage />} />
+        <Route path="/banking" element={<BankingPage />} />
         
         {/* Settings Routes */}
         <Route path="/settings" element={<SettingsPage />} />
