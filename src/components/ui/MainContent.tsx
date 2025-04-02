@@ -26,7 +26,19 @@ export function MainContent({
   showQuickTabs = false,
 }: MainContentProps) {
   const navigate = useNavigate();
-  const { signOut } = useAuth();
+  
+  // Safely get signOut from auth context with fallback
+  let signOut = () => {
+    console.log('Auth context not available');
+    navigate('/auth');
+  };
+  
+  try {
+    const auth = useAuth();
+    signOut = auth.signOut;
+  } catch (error) {
+    console.error('Auth context not available:', error);
+  }
 
   return (
     <div

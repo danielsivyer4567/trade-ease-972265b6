@@ -15,17 +15,19 @@ import { Toaster } from "@/components/ui/toaster";
 import CustomerDetail from "./pages/Customers/CustomerDetail";
 import { QuotesInvoicesPage } from "./pages/QuotesInvoices";
 import NewInvoice from "./pages/Invoices/NewInvoice";
-// Import the useAuthentication hook properly
 import { useAuthentication } from "./pages/Jobs/hooks/useAuthentication";
 import { AuthProvider } from "./contexts/AuthContext";
+import { NotificationProvider } from "./components/notifications/NotificationContextProvider";
 
 function App() {
   return (
     <AuthProvider>
-      <Toaster />
-      <BrowserRouter>
-        <AppRoutes />
-      </BrowserRouter>
+      <NotificationProvider>
+        <Toaster />
+        <BrowserRouter>
+          <AppRoutes />
+        </BrowserRouter>
+      </NotificationProvider>
     </AuthProvider>
   );
 }
