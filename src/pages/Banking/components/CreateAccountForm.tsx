@@ -59,7 +59,8 @@ const CreateAccountForm: React.FC<CreateAccountFormProps> = ({
   });
 
   const handleSubmit = async (values: FormSchemaType) => {
-    await onCreateAccount(values);
+    // Using type assertion to ensure TypeScript knows all required fields are present
+    await onCreateAccount(values as BankAccountFormData);
     form.reset();
   };
 
