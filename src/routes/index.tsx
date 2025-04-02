@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Route, Routes as RouterRoutes, Navigate } from 'react-router-dom';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
@@ -121,7 +122,7 @@ export function Routes() {
       </Route>
       
       {/* 404 Route */}
-      <Route path="*" element={<React.lazy(() => import('@/pages/NotFound'))/>} />
+      <Route path="*" element={<NotFoundPage />} />
     </RouterRoutes>
   );
 }
