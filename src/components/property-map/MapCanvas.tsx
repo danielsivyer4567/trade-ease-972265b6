@@ -1,11 +1,11 @@
 
-import React, { useEffect } from 'react';
-import { MapControls } from './MapControls';
-import { useCanvasResize } from './hooks';
+import React, { RefObject } from 'react';
+import { Plus, Minus, RotateCcw } from 'lucide-react';
+import { Button } from "@/components/ui/button";
 
 interface MapCanvasProps {
-  containerRef: React.RefObject<HTMLDivElement>;
-  canvasRef: React.RefObject<HTMLCanvasElement>;
+  canvasRef: RefObject<HTMLCanvasElement>;
+  containerRef: RefObject<HTMLDivElement>;
   mapEventHandlers: {
     handleMouseDown: (e: React.MouseEvent<HTMLCanvasElement>) => void;
     handleMouseMove: (e: React.MouseEvent<HTMLCanvasElement>) => void;
@@ -19,15 +19,15 @@ interface MapCanvasProps {
     handleZoomOut: () => void;
     handleReset: () => void;
   };
-  measureMode?: boolean;
+  measureMode: boolean;
 }
 
 export const MapCanvas: React.FC<MapCanvasProps> = ({
-  containerRef,
   canvasRef,
+  containerRef,
   mapEventHandlers,
   zoomControls,
-  measureMode = false
+  measureMode
 }) => {
   const {
     handleMouseDown,
@@ -38,75 +38,58 @@ export const MapCanvas: React.FC<MapCanvasProps> = ({
     handleTouchEnd
   } = mapEventHandlers;
   
-  const {
-    handleZoomIn,
-    handleZoomOut,
-    handleReset
-  } = zoomControls;
-  
-  // Use the canvas resize hook
-  useCanvasResize(canvasRef, containerRef);
-  
-  // Prevent default touch behavior to avoid browser gestures interfering
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    
-    const preventDefaultTouchAction = (e: TouchEvent) => {
-      // Always prevent default for pinch zoom
-      if (e.touches.length > 1) {
-        e.preventDefault();
-      }
-    };
-    
-    // Add event listener with passive: false to allow preventDefault
-    canvas.addEventListener('touchstart', preventDefaultTouchAction, { passive: false });
-    
-    return () => {
-      canvas.removeEventListener('touchstart', preventDefaultTouchAction);
-    };
-  }, [canvasRef]);
+  const { handleZoomIn, handleZoomOut, handleReset } = zoomControls;
   
   return (
-    <div className="relative w-full bg-gray-50 rounded-lg" style={{ height: '500px' }}>
-      <div ref={containerRef} className="w-full h-full relative overflow-hidden rounded-lg border border-gray-200">
-        <canvas 
-          ref={canvasRef} 
-          className={`w-full h-full touch-none ${measureMode ? 'cursor-crosshair' : ''}`}
-          onMouseDown={handleMouseDown}
-          onMouseMove={handleMouseMove}
-          onMouseUp={handleMouseUp}
-          onMouseLeave={handleMouseUp}
-          onTouchStart={handleTouchStart}
-          onTouchMove={handleTouchMove}
-          onTouchEnd={handleTouchEnd}
-        />
-        
-        <MapControls 
-          onZoomIn={handleZoomIn}
-          onZoomOut={handleZoomOut}
-          onReset={handleReset}
-          measureMode={measureMode}
-        />
-        
-        <div className="absolute top-4 left-4 p-2 bg-white/80 backdrop-blur-sm rounded-md shadow-md">
-          <div className="flex items-center gap-2 text-sm">
-            {measureMode ? (
-              <span className="flex items-center gap-1 text-primary font-medium">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M2 12h20M12 2v20" />
-                </svg>
-                Measurement Mode Active
-              </span>
-            ) : (
-              <>
-                <span className="hidden sm:inline">Drag to pan, pinch to zoom</span>
-                <span className="sm:hidden">Pan & pinch to zoom</span>
-              </>
-            )}
-          </div>
-        </div>
+    <>
+      <canvas
+        ref={canvasRef}
+        className="absolute inset-0 touch-none w-full h-full rounded-md border border-gray-200 bg-gray-50"
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+        onMouseLeave={handleMouseUp}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+      />
+      
+      {/* Zoom controls */}
+      <div className="absolute top-4 right-4 flex flex-col gap-2">
+        <Button
+          variant="secondary"
+          size="icon"
+          className="h-8 w-8 bg-white shadow-md border"
+          onClick={handleZoomIn}
+          aria-label="Zoom in"
+        >
+          <Plus className="h-4 w-4" />
+        </Button>
+        <Button
+          variant="secondary"
+          size="icon" 
+          className="h-8 w-8 bg-white shadow-md border"
+          onClick={handleZoomOut}
+          aria-label="Zoom out"
+        >
+          <Minus className="h-4 w-4" />
+        </Button>
+        <Button
+          variant="secondary"
+          size="icon"
+          className="h-8 w-8 bg-white shadow-md border"
+          onClick={handleReset}
+          aria-label="Reset view"
+        >
+          <RotateCcw className="h-4 w-4" />
+        </Button>
       </div>
-    </div>
+      
+      {measureMode && (
+        <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm text-xs font-medium text-primary rounded-full px-2 py-1 shadow-md border border-primary/20">
+          Measurement Mode Active
+        </div>
+      )}
+    </>
   );
 };

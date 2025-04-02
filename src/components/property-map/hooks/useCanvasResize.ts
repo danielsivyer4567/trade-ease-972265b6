@@ -2,7 +2,7 @@
 import { useEffect, RefObject } from 'react';
 
 /**
- * Hook for handling canvas resize operations
+ * Hook to handle canvas resizing based on container size
  */
 export function useCanvasResize(
   canvasRef: RefObject<HTMLCanvasElement>,
@@ -10,23 +10,26 @@ export function useCanvasResize(
 ) {
   useEffect(() => {
     const handleResize = () => {
-      if (!canvasRef.current || !containerRef.current) return;
+      if (!containerRef.current || !canvasRef.current) return;
       
+      // Set canvas dimensions to match container
       canvasRef.current.width = containerRef.current.clientWidth;
       canvasRef.current.height = containerRef.current.clientHeight;
-      
-      // Trigger a redraw
-      const event = new Event('resize');
-      window.dispatchEvent(event);
     };
     
-    // Initial resize
+    // Call once to initialize
     handleResize();
     
-    // Add resize listener
+    // Add resize event listener
     window.addEventListener('resize', handleResize);
     
-    // Cleanup
-    return () => window.removeEventListener('resize', handleResize);
+    // Handle orientation changes on mobile
+    window.addEventListener('orientationchange', handleResize);
+    
+    // Clean up
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      window.removeEventListener('orientationchange', handleResize);
+    };
   }, [canvasRef, containerRef]);
 }

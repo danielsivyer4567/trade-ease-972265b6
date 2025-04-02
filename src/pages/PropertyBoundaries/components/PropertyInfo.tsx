@@ -1,8 +1,9 @@
 
 import React from 'react';
-import { Card } from '@/components/ui/card';
 import { Property } from '../types';
-import { MapPin, Calendar, User } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { MapPin, Ruler, Landmark } from 'lucide-react';
+import { formatCoordinates } from '../utils/formatters';
 
 interface PropertyInfoProps {
   property: Property | null;
@@ -10,42 +11,63 @@ interface PropertyInfoProps {
 
 export const PropertyInfo: React.FC<PropertyInfoProps> = ({ property }) => {
   if (!property) {
-    return (
-      <Card className="p-4 bg-secondary/10">
-        <div className="text-center text-muted-foreground py-6">
-          Select a property to view details
-        </div>
-      </Card>
-    );
+    return null;
   }
 
+  // Calculate total boundaries
+  const totalBoundaries = property.boundaries.length;
+  
+  // Calculate total points across all boundaries
+  const totalPoints = property.boundaries.reduce(
+    (sum, boundary) => sum + boundary.length,
+    0
+  );
+
   return (
-    <Card className="p-4">
-      <h3 className="text-lg font-semibold mb-2">{property.name}</h3>
-      
-      {property.description && (
-        <p className="text-sm text-muted-foreground mb-4">{property.description}</p>
-      )}
-      
-      {property.address && (
-        <div className="flex items-start gap-2 mb-2">
-          <MapPin className="h-4 w-4 text-primary mt-0.5" />
-          <span className="text-sm">{property.address}</span>
+    <Card>
+      <CardHeader className="pb-2">
+        <CardTitle className="text-base flex items-center gap-2">
+          <Landmark className="h-4 w-4 text-primary" />
+          Property Details
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="pb-3">
+        <div className="space-y-2 text-sm">
+          {property.address && (
+            <div className="flex items-start gap-2">
+              <MapPin className="h-4 w-4 text-gray-500 mt-0.5 flex-shrink-0" />
+              <div>{property.address}</div>
+            </div>
+          )}
+          
+          <div className="flex items-start gap-2">
+            <Ruler className="h-4 w-4 text-gray-500 mt-0.5 flex-shrink-0" />
+            <div>
+              <div className="font-medium">Boundaries</div>
+              <div className="text-xs text-gray-600 mt-1">
+                {totalBoundaries} {totalBoundaries === 1 ? 'boundary' : 'boundaries'} with {totalPoints} total points
+              </div>
+            </div>
+          </div>
+          
+          <div className="flex items-start gap-2">
+            <MapPin className="h-4 w-4 text-gray-500 mt-0.5 flex-shrink-0" />
+            <div>
+              <div className="font-medium">Coordinates</div>
+              <div className="text-xs text-gray-600 mt-1">
+                {formatCoordinates(property.location)}
+              </div>
+            </div>
+          </div>
+          
+          {property.description && (
+            <div className="pt-2 border-t border-gray-100 mt-3">
+              <div className="font-medium mb-1">Description</div>
+              <p className="text-xs text-gray-600">{property.description}</p>
+            </div>
+          )}
         </div>
-      )}
-      
-      <div className="flex items-start gap-2">
-        <Calendar className="h-4 w-4 text-primary mt-0.5" />
-        <span className="text-sm">Coordinates: {property.location[0].toFixed(4)}, {property.location[1].toFixed(4)}</span>
-      </div>
-      
-      <div className="mt-4 pt-2 border-t border-gray-100">
-        <div className="flex items-center justify-between">
-          <span className="text-xs text-muted-foreground">Boundary points: {
-            property.boundaries?.[0]?.length || 0
-          }</span>
-        </div>
-      </div>
+      </CardContent>
     </Card>
   );
 };
