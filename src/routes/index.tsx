@@ -121,7 +121,7 @@ export function Routes() {
       </Route>
       
       {/* 404 Route */}
-      <Route path="*" element={<NotFoundPage />} />
+      <Route path="*" element={<React.lazy(() => import('@/pages/NotFound'))/>} />
     </RouterRoutes>
   );
 }
