@@ -5,8 +5,18 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
 export function useAuthentication() {
-  const navigate = useNavigate();
-  const { toast } = useToast();
+  // Use try-catch to handle the case when used outside Router context
+  let navigate;
+  let toast;
+  
+  try {
+    navigate = useNavigate();
+    toast = useToast();
+  } catch (error) {
+    // Silently handle error when used outside Router context
+    // This prevents the error when the hook is imported at the top level
+  }
+  
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   
@@ -37,7 +47,7 @@ export function useAuthentication() {
   
   // Redirect to login if not authenticated
   useEffect(() => {
-    if (!isCheckingAuth && !isAuthenticated) {
+    if (!isCheckingAuth && !isAuthenticated && navigate && toast) {
       toast({
         title: "Authentication Required",
         description: "You need to be logged in to create jobs",
