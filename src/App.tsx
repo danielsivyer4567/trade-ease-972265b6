@@ -15,6 +15,8 @@ import { Toaster } from "@/components/ui/toaster";
 import CustomerDetail from "./pages/Customers/CustomerDetail";
 import { QuotesInvoicesPage } from "./pages/QuotesInvoices";
 import NewInvoice from "./pages/Invoices/NewInvoice";
+// Import the useAuthentication hook properly
+import { useAuthentication } from "./pages/Jobs/hooks/useAuthentication";
 
 function App() {
   return (
@@ -33,8 +35,7 @@ function AppRoutes() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   
-  // Import useAuthentication here to ensure it's used within Router context
-  const { useAuthentication } = require("./pages/Jobs/hooks/useAuthentication");
+  // Use the properly imported useAuthentication hook
   const { isAuthenticated, isCheckingAuth } = useAuthentication();
 
   const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
