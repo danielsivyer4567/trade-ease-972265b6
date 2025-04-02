@@ -145,6 +145,21 @@ export type Database = {
           },
         ]
       }
+      "banking related": {
+        Row: {
+          created_at: string
+          id: number
+        }
+        Insert: {
+          created_at?: string
+          id?: number
+        }
+        Update: {
+          created_at?: string
+          id?: number
+        }
+        Relationships: []
+      }
       calendar_sync_events: {
         Row: {
           connection_id: string
