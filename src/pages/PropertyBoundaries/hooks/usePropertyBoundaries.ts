@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useTransition } from 'react';
 import { Property } from '../types';
 import { toast } from 'sonner';
 import { supabase } from '@/lib/supabase';
@@ -46,6 +46,7 @@ export const usePropertyBoundaries = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [isMeasuring, setIsMeasuring] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [isPending, startTransition] = useTransition();
   
   // Fetch properties from Supabase on component mount
   useEffect(() => {
@@ -65,8 +66,10 @@ export const usePropertyBoundaries = () => {
             console.error('Error fetching properties:', error);
             toast.error('Failed to load properties');
             // Fall back to mock data if there's an error
-            setProperties(mockProperties);
-            setSelectedProperty(mockProperties[0] || null);
+            startTransition(() => {
+              setProperties(mockProperties);
+              setSelectedProperty(mockProperties[0] || null);
+            });
           } else if (data && data.length > 0) {
             // Transform Supabase data to match Property type
             const transformedData = data
@@ -81,25 +84,33 @@ export const usePropertyBoundaries = () => {
               // Filter out any property with the name "Main Office"
               .filter(property => property.name !== 'Main Office');
             
-            setProperties(transformedData);
-            setSelectedProperty(transformedData[0] || null);
+            startTransition(() => {
+              setProperties(transformedData);
+              setSelectedProperty(transformedData[0] || null);
+            });
             toast.success('Properties loaded successfully');
           } else {
             // If no properties found, use mock data
-            setProperties(mockProperties);
-            setSelectedProperty(mockProperties[0] || null);
+            startTransition(() => {
+              setProperties(mockProperties);
+              setSelectedProperty(mockProperties[0] || null);
+            });
           }
         } else {
           // If user is not logged in, use mock data
-          setProperties(mockProperties);
-          setSelectedProperty(mockProperties[0] || null);
+          startTransition(() => {
+            setProperties(mockProperties);
+            setSelectedProperty(mockProperties[0] || null);
+          });
           toast.warning('Using demo data - log in to save your properties');
         }
       } catch (error) {
         console.error('Error loading properties:', error);
         // Fall back to mock data
-        setProperties(mockProperties);
-        setSelectedProperty(mockProperties[0] || null);
+        startTransition(() => {
+          setProperties(mockProperties);
+          setSelectedProperty(mockProperties[0] || null);
+        });
       } finally {
         setIsLoading(false);
       }
@@ -114,63 +125,12 @@ export const usePropertyBoundaries = () => {
       toast.error('This property cannot be selected');
       return;
     }
-    setSelectedProperty(property);
+    
+    startTransition(() => {
+      setSelectedProperty(property);
+    });
     console.log('Selected property:', property);
   }, []);
-  
-  const handleDeleteProperty = useCallback(async (propertyToDelete: Property) => {
-    try {
-      // Check if user is deleting a property that's currently selected
-      const isSelectedProperty = selectedProperty?.id === propertyToDelete.id;
-      
-      // First check if this is a mock property (has temp- prefix in ID)
-      if (propertyToDelete.id.startsWith('temp-')) {
-        // Just remove from local state
-        setProperties(prev => prev.filter(p => p.id !== propertyToDelete.id));
-        
-        if (isSelectedProperty) {
-          // If deleting the selected property, select another one or null
-          const remainingProperties = properties.filter(p => p.id !== propertyToDelete.id);
-          setSelectedProperty(remainingProperties.length > 0 ? remainingProperties[0] : null);
-        }
-        
-        toast.success(`Deleted property: ${propertyToDelete.name || propertyToDelete.address}`);
-        return;
-      }
-      
-      // Check if user is logged in before trying to delete from Supabase
-      const { data: { user } } = await supabase.auth.getUser();
-      
-      if (user) {
-        // Delete from Supabase
-        const { error } = await supabase
-          .from('property_boundaries')
-          .delete()
-          .eq('id', propertyToDelete.id)
-          .eq('user_id', user.id); // Ensure user only deletes their own properties
-          
-        if (error) {
-          console.error('Error deleting property:', error);
-          toast.error('Failed to delete property');
-          return;
-        }
-      }
-      
-      // Remove from local state
-      setProperties(prev => prev.filter(p => p.id !== propertyToDelete.id));
-      
-      if (isSelectedProperty) {
-        // If deleting the selected property, select another one or null
-        const remainingProperties = properties.filter(p => p.id !== propertyToDelete.id);
-        setSelectedProperty(remainingProperties.length > 0 ? remainingProperties[0] : null);
-      }
-      
-      toast.success(`Deleted property: ${propertyToDelete.name || propertyToDelete.address}`);
-    } catch (error) {
-      console.error('Error in handleDeleteProperty:', error);
-      toast.error('An error occurred while deleting the property');
-    }
-  }, [selectedProperty, properties]);
   
   const extractAddress = (properties: any): string => {
     if (!properties) return '';
@@ -316,8 +276,10 @@ export const usePropertyBoundaries = () => {
           }
           
           if (newProperties.length > 0) {
-            setProperties(prev => [...prev, ...newProperties]);
-            setSelectedProperty(newProperties[0]);
+            startTransition(() => {
+              setProperties(prev => [...prev, ...newProperties]);
+              setSelectedProperty(newProperties[0]);
+            });
             
             if (savedPropertiesCount > 0) {
               toast.success(`Saved ${savedPropertiesCount} properties to your account`);
@@ -350,8 +312,10 @@ export const usePropertyBoundaries = () => {
             
           if (error) {
             console.error('Error fetching properties:', error);
-            setProperties(mockProperties);
-            setSelectedProperty(mockProperties[0] || null);
+            startTransition(() => {
+              setProperties(mockProperties);
+              setSelectedProperty(mockProperties[0] || null);
+            });
           } else if (data && data.length > 0) {
             // Transform Supabase data to match Property type
             const transformedData = data.map((item): Property => ({
@@ -363,20 +327,28 @@ export const usePropertyBoundaries = () => {
               boundaries: item.boundaries
             }));
             
-            setProperties(transformedData);
-            setSelectedProperty(transformedData[0] || null);
+            startTransition(() => {
+              setProperties(transformedData);
+              setSelectedProperty(transformedData[0] || null);
+            });
           } else {
-            setProperties(mockProperties);
-            setSelectedProperty(mockProperties[0] || null);
+            startTransition(() => {
+              setProperties(mockProperties);
+              setSelectedProperty(mockProperties[0] || null);
+            });
           }
         } else {
-          setProperties(mockProperties);
-          setSelectedProperty(mockProperties[0] || null);
+          startTransition(() => {
+            setProperties(mockProperties);
+            setSelectedProperty(mockProperties[0] || null);
+          });
         }
       } catch (error) {
         console.error('Error loading properties:', error);
-        setProperties(mockProperties);
-        setSelectedProperty(mockProperties[0] || null);
+        startTransition(() => {
+          setProperties(mockProperties);
+          setSelectedProperty(mockProperties[0] || null);
+        });
       }
     };
     
@@ -397,6 +369,64 @@ export const usePropertyBoundaries = () => {
   const handleToggleMeasurement = useCallback(() => {
     setIsMeasuring(prev => !prev);
   }, []);
+
+  const handleDeleteProperty = useCallback(async (propertyToDelete: Property) => {
+    try {
+      // Check if user is deleting a property that's currently selected
+      const isSelectedProperty = selectedProperty?.id === propertyToDelete.id;
+      
+      // First check if this is a mock property (has temp- prefix in ID)
+      if (propertyToDelete.id.startsWith('temp-')) {
+        // Just remove from local state
+        startTransition(() => {
+          setProperties(prev => prev.filter(p => p.id !== propertyToDelete.id));
+          
+          if (isSelectedProperty) {
+            // If deleting the selected property, select another one or null
+            const remainingProperties = properties.filter(p => p.id !== propertyToDelete.id);
+            setSelectedProperty(remainingProperties.length > 0 ? remainingProperties[0] : null);
+          }
+        });
+        
+        toast.success(`Deleted property: ${propertyToDelete.name || propertyToDelete.address}`);
+        return;
+      }
+      
+      // Check if user is logged in before trying to delete from Supabase
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (user) {
+        // Delete from Supabase
+        const { error } = await supabase
+          .from('property_boundaries')
+          .delete()
+          .eq('id', propertyToDelete.id)
+          .eq('user_id', user.id); // Ensure user only deletes their own properties
+          
+        if (error) {
+          console.error('Error deleting property:', error);
+          toast.error('Failed to delete property');
+          return;
+        }
+      }
+      
+      // Remove from local state
+      startTransition(() => {
+        setProperties(prev => prev.filter(p => p.id !== propertyToDelete.id));
+        
+        if (isSelectedProperty) {
+          // If deleting the selected property, select another one or null
+          const remainingProperties = properties.filter(p => p.id !== propertyToDelete.id);
+          setSelectedProperty(remainingProperties.length > 0 ? remainingProperties[0] : null);
+        }
+      });
+      
+      toast.success(`Deleted property: ${propertyToDelete.name || propertyToDelete.address}`);
+    } catch (error) {
+      console.error('Error in handleDeleteProperty:', error);
+      toast.error('An error occurred while deleting the property');
+    }
+  }, [selectedProperty, properties]);
   
   return {
     properties,
@@ -405,6 +435,7 @@ export const usePropertyBoundaries = () => {
     searchQuery,
     isMeasuring,
     isLoading,
+    isPending,
     handlePropertySelect,
     handleFileUpload,
     handleFileRemove,
