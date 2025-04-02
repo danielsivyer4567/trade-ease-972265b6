@@ -7,6 +7,8 @@ import { PropertyItem } from './PropertyItem';
 import { PropertyFileInfo } from './PropertyFileInfo';
 import { PropertyActions } from './PropertyActions';
 import { usePropertyListState } from '../hooks/usePropertyListState';
+import { Badge } from '@/components/ui/badge';
+import { Map } from 'lucide-react';
 
 interface PropertyListProps {
   properties: Property[];
@@ -45,7 +47,15 @@ export const PropertyList: React.FC<PropertyListProps> = ({
 
   return (
     <div className="bg-white rounded-lg shadow-md p-4">
-      <h2 className="text-xl font-bold mb-4">Properties</h2>
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-xl font-bold flex items-center gap-2">
+          <Map className="h-4 w-4 text-primary" />
+          Properties
+          <Badge variant="outline" className="ml-2">
+            {properties.length}
+          </Badge>
+        </h2>
+      </div>
       
       {/* Search Box */}
       <PropertySearch 
@@ -60,7 +70,7 @@ export const PropertyList: React.FC<PropertyListProps> = ({
       />
       
       {/* Properties List */}
-      <div className="space-y-2 mb-4 max-h-[300px] overflow-y-auto">
+      <div className="space-y-2 mb-4 max-h-[300px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-200 scrollbar-track-gray-50 pr-1">
         {filteredProperties.length > 0 ? (
           filteredProperties.map(property => (
             <PropertyItem 
