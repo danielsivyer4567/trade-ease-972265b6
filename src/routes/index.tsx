@@ -1,7 +1,15 @@
-import React from 'react';
+
+import React, { Suspense } from 'react';
 import { Route, Routes as RouterRoutes, Navigate } from 'react-router-dom';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { useAuth } from '@/contexts/AuthContext';
+
+// Loading fallback component
+const LoadingFallback = () => (
+  <div className="flex h-screen w-screen items-center justify-center">
+    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+  </div>
+);
 
 // Import pages
 const AuthPage = React.lazy(() => import('@/pages/Auth'));
@@ -66,60 +74,226 @@ export function Routes() {
   }
 
   return (
-    <RouterRoutes>
-      {/* Auth Routes */}
-      <Route path="/auth/*" element={user ? <Navigate to="/" /> : <AuthPage />} />
-      
-      {/* Protected Routes */}
-      <Route element={<ProtectedRoute />}>
-        <Route path="/" element={<DashboardPage />} />
-        <Route path="/tradedash" element={<TradeDashPage />} />
-        <Route path="/calculators/*" element={<CalculatorsPage />} />
-        <Route path="/statistics" element={<StatisticsPage />} />
-        <Route path="/customers" element={<CustomersPage />} />
-        <Route path="/customers/new" element={<NewCustomerPage />} />
-        <Route path="/customers/:id" element={<CustomerDetailPage />} />
-        <Route path="/calendar" element={<CalendarPage />} />
-        <Route path="/calendar/team/:teamColor" element={<TeamCalendarPage />} />
-        <Route path="/calendar/sync" element={<CalendarSyncPage />} />
-        <Route path="/jobs" element={<JobsPage />} />
-        <Route path="/jobs/new" element={<NewJobPage />} />
-        <Route path="/jobs/:id" element={<JobDetailsPage />} />
-        <Route path="/integrations" element={<IntegrationsPage />} />
-        <Route path="/email" element={<EmailPage />} />
-        <Route path="/notifications" element={<NotificationsPage />} />
-        <Route path="/referrals" element={<ReferralsPage />} />
-        <Route path="/database" element={<DatabasePage />} />
-        <Route path="/quotes" element={<QuotesPage />} />
-        <Route path="/quotes-invoices" element={<QuotesInvoicesPage />} />
-        <Route path="/invoices/new" element={<NewInvoice />} />
-        <Route path="/jobs/templates/new" element={<NewTemplatePage />} />
-        <Route path="/messaging" element={<MessagingPage />} />
-        <Route path="/site-audits" element={<SiteAuditsPage />} />
-        <Route path="/forms" element={<FormsPage />} />
-        <Route path="/automations" element={<AutomationsPage />} />
-        <Route path="/workflow" element={<WorkflowPage />} />
-        <Route path="/activity" element={<ActivityPage />} />
-        <Route path="/property-boundaries" element={<PropertyBoundariesPage />} />
-        <Route path="/banking" element={<BankingPage />} />
+    <Suspense fallback={<LoadingFallback />}>
+      <RouterRoutes>
+        {/* Auth Routes */}
+        <Route path="/auth/*" element={user ? <Navigate to="/" /> : <AuthPage />} />
         
-        {/* Settings Routes */}
-        <Route path="/settings" element={<SettingsPage />} />
-        <Route path="/settings/notifications" element={<NotificationsSettings />} />
-        <Route path="/settings/ai-assistant-settings" element={<AIAssistantSettings />} />
-        <Route path="/settings/trade-rates" element={<TradeRatesPage />} />
-        <Route path="/settings/bills-purchase-orders" element={<BillsPurchaseOrdersPage />} />
-        <Route path="/settings/office-staff" element={<OfficeStaffPage />} />
-        <Route path="/settings/contractors" element={<ContractorsPage />} />
-        <Route path="/settings/jobs" element={<JobSettingsPage />} />
-        <Route path="/settings/terms-of-service" element={<TermsOfServicePage />} />
+        {/* Protected Routes */}
+        <Route element={<ProtectedRoute />}>
+          <Route path="/" element={
+            <Suspense fallback={<LoadingFallback />}>
+              <DashboardPage />
+            </Suspense>
+          } />
+          <Route path="/tradedash" element={
+            <Suspense fallback={<LoadingFallback />}>
+              <TradeDashPage />
+            </Suspense>
+          } />
+          <Route path="/calculators/*" element={
+            <Suspense fallback={<LoadingFallback />}>
+              <CalculatorsPage />
+            </Suspense>
+          } />
+          <Route path="/statistics" element={
+            <Suspense fallback={<LoadingFallback />}>
+              <StatisticsPage />
+            </Suspense>
+          } />
+          <Route path="/customers" element={
+            <Suspense fallback={<LoadingFallback />}>
+              <CustomersPage />
+            </Suspense>
+          } />
+          <Route path="/customers/new" element={
+            <Suspense fallback={<LoadingFallback />}>
+              <NewCustomerPage />
+            </Suspense>
+          } />
+          <Route path="/customers/:id" element={
+            <Suspense fallback={<LoadingFallback />}>
+              <CustomerDetailPage />
+            </Suspense>
+          } />
+          <Route path="/calendar" element={
+            <Suspense fallback={<LoadingFallback />}>
+              <CalendarPage />
+            </Suspense>
+          } />
+          <Route path="/calendar/team/:teamColor" element={
+            <Suspense fallback={<LoadingFallback />}>
+              <TeamCalendarPage />
+            </Suspense>
+          } />
+          <Route path="/calendar/sync" element={
+            <Suspense fallback={<LoadingFallback />}>
+              <CalendarSyncPage />
+            </Suspense>
+          } />
+          <Route path="/jobs" element={
+            <Suspense fallback={<LoadingFallback />}>
+              <JobsPage />
+            </Suspense>
+          } />
+          <Route path="/jobs/new" element={
+            <Suspense fallback={<LoadingFallback />}>
+              <NewJobPage />
+            </Suspense>
+          } />
+          <Route path="/jobs/:id" element={
+            <Suspense fallback={<LoadingFallback />}>
+              <JobDetailsPage />
+            </Suspense>
+          } />
+          <Route path="/integrations" element={
+            <Suspense fallback={<LoadingFallback />}>
+              <IntegrationsPage />
+            </Suspense>
+          } />
+          <Route path="/email" element={
+            <Suspense fallback={<LoadingFallback />}>
+              <EmailPage />
+            </Suspense>
+          } />
+          <Route path="/notifications" element={
+            <Suspense fallback={<LoadingFallback />}>
+              <NotificationsPage />
+            </Suspense>
+          } />
+          <Route path="/referrals" element={
+            <Suspense fallback={<LoadingFallback />}>
+              <ReferralsPage />
+            </Suspense>
+          } />
+          <Route path="/database" element={
+            <Suspense fallback={<LoadingFallback />}>
+              <DatabasePage />
+            </Suspense>
+          } />
+          <Route path="/quotes" element={
+            <Suspense fallback={<LoadingFallback />}>
+              <QuotesPage />
+            </Suspense>
+          } />
+          <Route path="/quotes-invoices" element={
+            <Suspense fallback={<LoadingFallback />}>
+              <QuotesInvoicesPage />
+            </Suspense>
+          } />
+          <Route path="/invoices/new" element={
+            <Suspense fallback={<LoadingFallback />}>
+              <NewInvoice />
+            </Suspense>
+          } />
+          <Route path="/jobs/templates/new" element={
+            <Suspense fallback={<LoadingFallback />}>
+              <NewTemplatePage />
+            </Suspense>
+          } />
+          <Route path="/messaging" element={
+            <Suspense fallback={<LoadingFallback />}>
+              <MessagingPage />
+            </Suspense>
+          } />
+          <Route path="/site-audits" element={
+            <Suspense fallback={<LoadingFallback />}>
+              <SiteAuditsPage />
+            </Suspense>
+          } />
+          <Route path="/forms" element={
+            <Suspense fallback={<LoadingFallback />}>
+              <FormsPage />
+            </Suspense>
+          } />
+          <Route path="/automations" element={
+            <Suspense fallback={<LoadingFallback />}>
+              <AutomationsPage />
+            </Suspense>
+          } />
+          <Route path="/workflow" element={
+            <Suspense fallback={<LoadingFallback />}>
+              <WorkflowPage />
+            </Suspense>
+          } />
+          <Route path="/activity" element={
+            <Suspense fallback={<LoadingFallback />}>
+              <ActivityPage />
+            </Suspense>
+          } />
+          <Route path="/property-boundaries" element={
+            <Suspense fallback={<LoadingFallback />}>
+              <PropertyBoundariesPage />
+            </Suspense>
+          } />
+          <Route path="/banking" element={
+            <Suspense fallback={<LoadingFallback />}>
+              <BankingPage />
+            </Suspense>
+          } />
+          
+          {/* Settings Routes */}
+          <Route path="/settings" element={
+            <Suspense fallback={<LoadingFallback />}>
+              <SettingsPage />
+            </Suspense>
+          } />
+          <Route path="/settings/notifications" element={
+            <Suspense fallback={<LoadingFallback />}>
+              <NotificationsSettings />
+            </Suspense>
+          } />
+          <Route path="/settings/ai-assistant-settings" element={
+            <Suspense fallback={<LoadingFallback />}>
+              <AIAssistantSettings />
+            </Suspense>
+          } />
+          <Route path="/settings/trade-rates" element={
+            <Suspense fallback={<LoadingFallback />}>
+              <TradeRatesPage />
+            </Suspense>
+          } />
+          <Route path="/settings/bills-purchase-orders" element={
+            <Suspense fallback={<LoadingFallback />}>
+              <BillsPurchaseOrdersPage />
+            </Suspense>
+          } />
+          <Route path="/settings/office-staff" element={
+            <Suspense fallback={<LoadingFallback />}>
+              <OfficeStaffPage />
+            </Suspense>
+          } />
+          <Route path="/settings/contractors" element={
+            <Suspense fallback={<LoadingFallback />}>
+              <ContractorsPage />
+            </Suspense>
+          } />
+          <Route path="/settings/jobs" element={
+            <Suspense fallback={<LoadingFallback />}>
+              <JobSettingsPage />
+            </Suspense>
+          } />
+          <Route path="/settings/terms-of-service" element={
+            <Suspense fallback={<LoadingFallback />}>
+              <TermsOfServicePage />
+            </Suspense>
+          } />
+          
+          {/* Generic settings page for routes that don't have specific components */}
+          <Route path="/settings/:settingType" element={
+            <Suspense fallback={<LoadingFallback />}>
+              <GenericSettingsPage />
+            </Suspense>
+          } />
+        </Route>
         
-        {/* Generic settings page for routes that don't have specific components */}
-        <Route path="/settings/:settingType" element={<GenericSettingsPage />} />
-      </Route>
-      
-      {/* 404 Route */}
-      <Route path="*" element={<NotFoundPage />} />
-    </RouterRoutes>
+        {/* 404 Route */}
+        <Route path="*" element={
+          <Suspense fallback={<LoadingFallback />}>
+            <NotFoundPage />
+          </Suspense>
+        } />
+      </RouterRoutes>
+    </Suspense>
   );
 }
