@@ -189,13 +189,15 @@ const ActivityPage = () => {
           </h1>
           
           <div className="w-full md:w-auto flex flex-col md:flex-row gap-2">
-            <Input
-              placeholder="Search activities..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full md:w-64"
-              icon={<Search className="h-4 w-4" />}
-            />
+            <div className="relative w-full md:w-64">
+              <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search activities..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-8"
+              />
+            </div>
             <div className="flex gap-2">
               <Select value={filterType} onValueChange={setFilterType}>
                 <SelectTrigger className="w-full md:w-[150px]">
@@ -250,7 +252,7 @@ const ActivityPage = () => {
                           <h3 className="font-medium text-gray-700">{date}</h3>
                         </div>
                         <div className="ml-5 border-l-2 border-gray-200 pl-5 space-y-6">
-                          {activities.map(activity => (
+                          {(activities as typeof mockActivities).map(activity => (
                             <div 
                               key={activity.id} 
                               className="relative flex flex-col md:flex-row md:items-center justify-between p-4 rounded-lg border bg-white shadow-sm hover:bg-gray-50 transition-colors"
