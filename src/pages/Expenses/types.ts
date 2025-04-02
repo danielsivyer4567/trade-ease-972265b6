@@ -1,17 +1,17 @@
 
 export interface Expense {
   id: string;
-  amount: number;
-  category: string;
-  description: string;
-  date: string; // ISO date string
+  date: string;
   vendor: string;
-  receipt?: string; // URL to receipt image
+  category: string;
+  amount: number;
   status: 'pending' | 'approved' | 'rejected';
+  description?: string;
+  receipt?: string;
   submittedBy?: string;
   approvedBy?: string;
+  rejectedBy?: string;
   notes?: string;
-  paymentMethod?: string;
   tags?: string[];
 }
 
@@ -19,18 +19,9 @@ export interface ExpenseCategory {
   id: string;
   name: string;
   description?: string;
-  budget?: number;
   color?: string;
-  icon?: string;
-}
-
-export interface ExpenseSummary {
-  totalExpenses: number;
-  pendingCount: number;
-  approvedCount: number;
-  rejectedCount: number;
-  byCategory: Record<string, number>;
-  recentExpenses: Expense[];
+  budgetLimit?: number;
+  isActive: boolean;
 }
 
 export interface ExpenseReport {
@@ -43,17 +34,25 @@ export interface ExpenseReport {
   totalAmount: number;
   expenseCount: number;
   createdAt: string;
-  status: 'draft' | 'submitted' | 'approved';
-  expenses: string[]; // Array of expense IDs
+  status: 'draft' | 'pending' | 'approved';
+  expenses: string[];
 }
 
-export interface ExpenseFilters {
-  startDate?: Date;
-  endDate?: Date;
-  category?: string;
-  minAmount?: number;
-  maxAmount?: number;
-  status?: string;
-  vendor?: string;
-  searchTerm?: string;
+export interface ExpenseSummary {
+  totalExpenses: number;
+  pendingCount: number;
+  approvedCount: number;
+  rejectedCount: number;
+  recentExpenses: Expense[];
+}
+
+export interface CategoryData {
+  name: string;
+  value: number;
+  color?: string;
+}
+
+export interface MonthlyData {
+  name: string;
+  value: number;
 }

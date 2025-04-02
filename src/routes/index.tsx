@@ -4,10 +4,7 @@ import { Routes as RouterRoutes, Route } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { LoadingFallback } from './loading-fallback';
 
-// Direct import for NotFound page
-const NotFoundPage = React.lazy(() => import('@/pages/NotFound'));
-
-// Import route components directly instead of functions that return JSX
+// Import routes directly
 import { authRoutes } from './auth-routes';
 import { dashboardRoutes } from './dashboard-routes';
 import { customerRoutes } from './customer-routes';
@@ -19,6 +16,7 @@ import { activityRoutes } from './activity-routes';
 import { teamRoutes } from './team-routes';
 import { settingsRoutes } from './settings-routes';
 import { expensesRoutes } from './expenses-route';
+import { notFoundRoute } from './not-found-route';
 
 export function Routes() {
   const { user, loading } = useAuth();
@@ -30,7 +28,7 @@ export function Routes() {
   return (
     <Suspense fallback={<LoadingFallback />}>
       <RouterRoutes>
-        {/* Render all route configurations directly */}
+        {/* Each of these should already be returning Route elements */}
         {authRoutes}
         {dashboardRoutes}
         {customerRoutes}
@@ -42,13 +40,7 @@ export function Routes() {
         {teamRoutes}
         {settingsRoutes}
         {expensesRoutes}
-        
-        {/* 404 Route */}
-        <Route path="*" element={
-          <Suspense fallback={<LoadingFallback />}>
-            <NotFoundPage />
-          </Suspense>
-        } />
+        {notFoundRoute}
       </RouterRoutes>
     </Suspense>
   );
