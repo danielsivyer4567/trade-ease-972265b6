@@ -6,12 +6,11 @@ import { LoadingFallback } from './loading-fallback';
 // Import pages
 const NotFoundPage = React.lazy(() => import('@/pages/NotFound'));
 
-export const NotFoundRoute = () => {
-  return (
-    <Route path="*" element={
-      <Suspense fallback={<LoadingFallback />}>
-        <NotFoundPage />
-      </Suspense>
-    } />
-  );
-};
+// Export routes as JSX elements
+export const notFoundRoute = (
+  <Route path="*" element={
+    <Suspense fallback={<LoadingFallback />}>
+      <NotFoundPage />
+    </Suspense>
+  } />
+);

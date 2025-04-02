@@ -2,13 +2,7 @@
 import React, { Suspense } from 'react';
 import { Route } from 'react-router-dom';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
-
-// Loading fallback component
-const LoadingFallback = () => (
-  <div className="flex h-screen w-screen items-center justify-center">
-    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
-  </div>
-);
+import { LoadingFallback } from './loading-fallback';
 
 // Import pages
 const CustomersPage = React.lazy(() => import('@/pages/Customers'));
@@ -16,8 +10,9 @@ const CustomerDetailPage = React.lazy(() => import('@/pages/Customers/CustomerDe
 const NewCustomerPage = React.lazy(() => import('@/pages/Customers/NewCustomer'));
 const NetworksPage = React.lazy(() => import('@/pages/Networks'));
 
-export const CustomerRoutes = () => {
-  return (
+// Export routes as JSX elements
+export const customerRoutes = (
+  <>
     <Route element={<ProtectedRoute />}>
       <Route path="/customers" element={
         <Suspense fallback={<LoadingFallback />}>
@@ -40,5 +35,5 @@ export const CustomerRoutes = () => {
         </Suspense>
       } />
     </Route>
-  );
-};
+  </>
+);

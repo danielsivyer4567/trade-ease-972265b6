@@ -1,6 +1,6 @@
 
 import React, { Suspense } from 'react';
-import { Route, Navigate } from 'react-router-dom';
+import { Route } from 'react-router-dom';
 
 // Loading fallback component
 const LoadingFallback = () => (
@@ -12,14 +12,13 @@ const LoadingFallback = () => (
 // Import pages
 const AuthPage = React.lazy(() => import('@/pages/Auth'));
 
-export const AuthRoutes = () => {
-  return (
-    <>
-      <Route path="/auth/*" element={
-        <Suspense fallback={<LoadingFallback />}>
-          <AuthPage />
-        </Suspense>
-      } />
-    </>
-  );
-};
+// Export an array of route elements
+export const authRoutes = (
+  <>
+    <Route path="/auth/*" element={
+      <Suspense fallback={<LoadingFallback />}>
+        <AuthPage />
+      </Suspense>
+    } />
+  </>
+);
