@@ -16,6 +16,7 @@ import { activityRoutes } from './activity-routes';
 import { teamRoutes } from './team-routes';
 import { settingsRoutes } from './settings-routes';
 import { expensesRoutes } from './expenses-route';
+import { supplyChainRoutes } from './supply-chain-routes';
 import { notFoundRoute } from './not-found-route';
 
 export function Routes() {
@@ -40,6 +41,7 @@ export function Routes() {
         {teamRoutes}
         {settingsRoutes}
         {expensesRoutes}
+        {supplyChainRoutes}
         {notFoundRoute}
       </RouterRoutes>
     </Suspense>

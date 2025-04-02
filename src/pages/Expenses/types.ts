@@ -22,6 +22,8 @@ export interface ExpenseCategory {
   color?: string;
   budgetLimit?: number;
   isActive: boolean;
+  icon?: string;
+  budget?: number;
 }
 
 export interface ExpenseReport {
@@ -34,7 +36,7 @@ export interface ExpenseReport {
   totalAmount: number;
   expenseCount: number;
   createdAt: string;
-  status: 'draft' | 'pending' | 'approved';
+  status: 'draft' | 'pending' | 'approved' | 'submitted';
   expenses: string[];
 }
 
@@ -44,6 +46,7 @@ export interface ExpenseSummary {
   approvedCount: number;
   rejectedCount: number;
   recentExpenses: Expense[];
+  byCategory?: CategoryData[];
 }
 
 export interface CategoryData {
