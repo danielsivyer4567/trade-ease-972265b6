@@ -45,7 +45,9 @@ const data = [{
 const TradeDash = () => {
   return (
     <BaseLayout>
-      {/* Content goes here */}
+      <div className="p-6">
+        {/* Content goes here */}
+      </div>
     </BaseLayout>
   );
 };

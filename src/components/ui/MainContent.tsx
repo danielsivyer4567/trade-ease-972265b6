@@ -52,7 +52,9 @@ export function MainContent({
             <QuickTabs />
           </div>
           <div className="flex items-center space-x-2">
-            <NotificationButton />
+            <div className="border-2 border-black p-1">
+              <NotificationButton />
+            </div>
           </div>
         </div>
       </div>
