@@ -22,8 +22,9 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { BankAccountFormData } from '../types';
-import { Bank, PlusCircle } from 'lucide-react';
+import { Landmark, PlusCircle } from 'lucide-react';
 
+// Define the form schema that matches the BankAccountFormData type
 const formSchema = z.object({
   name: z.string().min(2, { message: "Account name is required" }),
   bank: z.string().min(2, { message: "Bank name is required" }),
@@ -64,7 +65,7 @@ const CreateAccountForm: React.FC<CreateAccountFormProps> = ({
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <Bank className="h-5 w-5" /> Add New Bank Account
+            <Landmark className="h-5 w-5" /> Add New Bank Account
           </DialogTitle>
           <DialogDescription>
             Enter your bank account details below.
