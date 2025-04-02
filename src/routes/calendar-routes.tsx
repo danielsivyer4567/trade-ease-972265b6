@@ -2,21 +2,16 @@
 import React, { Suspense } from 'react';
 import { Route } from 'react-router-dom';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
-
-// Loading fallback component
-const LoadingFallback = () => (
-  <div className="flex h-screen w-screen items-center justify-center">
-    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
-  </div>
-);
+import { LoadingFallback } from './loading-fallback';
 
 // Import pages
 const CalendarPage = React.lazy(() => import('@/pages/Calendar'));
 const TeamCalendarPage = React.lazy(() => import('@/pages/Calendar/TeamCalendarPage'));
 const CalendarSyncPage = React.lazy(() => import('@/pages/Calendar/CalendarSync'));
 
-export const CalendarRoutes = () => {
-  return (
+// Export routes as JSX elements
+export const calendarRoutes = (
+  <>
     <Route element={<ProtectedRoute />}>
       <Route path="/calendar" element={
         <Suspense fallback={<LoadingFallback />}>
@@ -34,5 +29,5 @@ export const CalendarRoutes = () => {
         </Suspense>
       } />
     </Route>
-  );
-};
+  </>
+);

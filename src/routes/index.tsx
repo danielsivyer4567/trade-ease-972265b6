@@ -1,22 +1,24 @@
 
 import React, { Suspense } from 'react';
-import { Routes as RouterRoutes } from 'react-router-dom';
+import { Routes as RouterRoutes, Route } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { LoadingFallback } from './loading-fallback';
 
-// Import route groups
-import { AuthRoutes } from './auth-routes';
-import { DashboardRoutes } from './dashboard-routes';
-import { CustomerRoutes } from './customer-routes';
-import { JobRoutes } from './job-routes';
-import { CalendarRoutes } from './calendar-routes';
-import { CommunicationRoutes } from './communication-routes';
-import { FinancialRoutes } from './financial-routes';
-import { ActivityRoutes } from './activity-routes';
-import { TeamRoutes } from './team-routes';
-import { SettingsRoutes } from './settings-routes';
-import { NotFoundRoute } from './not-found-route';
-import { ExpensesRoute } from './expenses-route';
+// Direct import for NotFound page
+const NotFoundPage = React.lazy(() => import('@/pages/NotFound'));
+
+// Import route components directly instead of functions that return JSX
+import { authRoutes } from './auth-routes';
+import { dashboardRoutes } from './dashboard-routes';
+import { customerRoutes } from './customer-routes';
+import { jobRoutes } from './job-routes';
+import { calendarRoutes } from './calendar-routes';
+import { communicationRoutes } from './communication-routes';
+import { financialRoutes } from './financial-routes';
+import { activityRoutes } from './activity-routes';
+import { teamRoutes } from './team-routes';
+import { settingsRoutes } from './settings-routes';
+import { expensesRoutes } from './expenses-route';
 
 export function Routes() {
   const { user, loading } = useAuth();
@@ -28,23 +30,25 @@ export function Routes() {
   return (
     <Suspense fallback={<LoadingFallback />}>
       <RouterRoutes>
-        {/* Auth Routes */}
-        <AuthRoutes />
-        
-        {/* Main Application Routes */}
-        <DashboardRoutes />
-        <CustomerRoutes />
-        <JobRoutes />
-        <CalendarRoutes />
-        <CommunicationRoutes />
-        <FinancialRoutes />
-        <ActivityRoutes />
-        <TeamRoutes />
-        <SettingsRoutes />
-        <ExpensesRoute />
+        {/* Render all route configurations directly */}
+        {authRoutes}
+        {dashboardRoutes}
+        {customerRoutes}
+        {jobRoutes}
+        {calendarRoutes}
+        {communicationRoutes}
+        {financialRoutes}
+        {activityRoutes}
+        {teamRoutes}
+        {settingsRoutes}
+        {expensesRoutes}
         
         {/* 404 Route */}
-        <NotFoundRoute />
+        <Route path="*" element={
+          <Suspense fallback={<LoadingFallback />}>
+            <NotFoundPage />
+          </Suspense>
+        } />
       </RouterRoutes>
     </Suspense>
   );

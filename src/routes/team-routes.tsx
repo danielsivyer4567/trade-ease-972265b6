@@ -2,13 +2,7 @@
 import React, { Suspense } from 'react';
 import { Route } from 'react-router-dom';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
-
-// Loading fallback component
-const LoadingFallback = () => (
-  <div className="flex h-screen w-screen items-center justify-center">
-    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
-  </div>
-);
+import { LoadingFallback } from './loading-fallback';
 
 // Import pages
 const TeamsPage = React.lazy(() => import('@/pages/Teams'));
@@ -18,8 +12,9 @@ const TeamGreenPage = React.lazy(() => import('@/pages/TeamGreen'));
 const TeamNewPage = React.lazy(() => import('@/pages/TeamNew'));
 const SocialPage = React.lazy(() => import('@/pages/Social'));
 
-export const TeamRoutes = () => {
-  return (
+// Export routes as JSX elements
+export const teamRoutes = (
+  <>
     <Route element={<ProtectedRoute />}>
       <Route path="/teams" element={
         <Suspense fallback={<LoadingFallback />}>
@@ -52,5 +47,5 @@ export const TeamRoutes = () => {
         </Suspense>
       } />
     </Route>
-  );
-};
+  </>
+);

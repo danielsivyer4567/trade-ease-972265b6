@@ -2,13 +2,7 @@
 import React, { Suspense } from 'react';
 import { Route } from 'react-router-dom';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
-
-// Loading fallback component
-const LoadingFallback = () => (
-  <div className="flex h-screen w-screen items-center justify-center">
-    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
-  </div>
-);
+import { LoadingFallback } from './loading-fallback';
 
 // Import pages
 const ActivityPage = React.lazy(() => import('@/pages/Activity'));
@@ -19,8 +13,9 @@ const SiteAuditsPage = React.lazy(() => import('@/pages/SiteAudits'));
 const FormsPage = React.lazy(() => import('@/pages/Forms'));
 const DatabasePage = React.lazy(() => import('@/pages/Database'));
 
-export const ActivityRoutes = () => {
-  return (
+// Export routes as JSX elements
+export const activityRoutes = (
+  <>
     <Route element={<ProtectedRoute />}>
       <Route path="/activity" element={
         <Suspense fallback={<LoadingFallback />}>
@@ -58,5 +53,5 @@ export const ActivityRoutes = () => {
         </Suspense>
       } />
     </Route>
-  );
-};
+  </>
+);

@@ -2,13 +2,7 @@
 import React, { Suspense } from 'react';
 import { Route } from 'react-router-dom';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
-
-// Loading fallback component
-const LoadingFallback = () => (
-  <div className="flex h-screen w-screen items-center justify-center">
-    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
-  </div>
-);
+import { LoadingFallback } from './loading-fallback';
 
 // Import pages
 const JobsPage = React.lazy(() => import('@/pages/Jobs'));
@@ -17,8 +11,9 @@ const JobDetailsPage = React.lazy(() => import('@/pages/Jobs/JobDetails').then(m
 const NewTemplatePage = React.lazy(() => import('@/pages/Jobs/NewTemplate'));
 const PropertyBoundariesPage = React.lazy(() => import('@/pages/PropertyBoundaries'));
 
-export const JobRoutes = () => {
-  return (
+// Export routes as JSX elements
+export const jobRoutes = (
+  <>
     <Route element={<ProtectedRoute />}>
       <Route path="/jobs" element={
         <Suspense fallback={<LoadingFallback />}>
@@ -46,5 +41,5 @@ export const JobRoutes = () => {
         </Suspense>
       } />
     </Route>
-  );
-};
+  </>
+);

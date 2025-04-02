@@ -2,13 +2,7 @@
 import React, { Suspense } from 'react';
 import { Route } from 'react-router-dom';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
-
-// Loading fallback component
-const LoadingFallback = () => (
-  <div className="flex h-screen w-screen items-center justify-center">
-    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
-  </div>
-);
+import { LoadingFallback } from './loading-fallback';
 
 // Import pages
 const SettingsPage = React.lazy(() => import('@/pages/Settings'));
@@ -22,8 +16,9 @@ const JobSettingsPage = React.lazy(() => import('@/pages/Settings/JobSettings'))
 const TermsOfServicePage = React.lazy(() => import('@/pages/Settings/TermsOfService'));
 const GenericSettingsPage = React.lazy(() => import('@/pages/Settings/GenericSettingsPage'));
 
-export const SettingsRoutes = () => {
-  return (
+// Export routes as JSX elements
+export const settingsRoutes = (
+  <>
     <Route element={<ProtectedRoute />}>
       <Route path="/settings" element={
         <Suspense fallback={<LoadingFallback />}>
@@ -70,11 +65,11 @@ export const SettingsRoutes = () => {
           <TermsOfServicePage />
         </Suspense>
       } />
-      <Route path="/settings/:settingType" element={
+      <Route path="/settings/(:settingType)" element={
         <Suspense fallback={<LoadingFallback />}>
           <GenericSettingsPage />
         </Suspense>
       } />
     </Route>
-  );
-};
+  </>
+);

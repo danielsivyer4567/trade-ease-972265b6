@@ -1,79 +1,67 @@
 
 import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { DateRangePicker } from "@/components/ui/date-range-picker";
 import { Label } from "@/components/ui/label";
-import { 
-  FileText, Download, Filter, Calendar, Search as SearchIcon, Plus, Printer, 
-  FileCog, Check, Loader2
-} from "lucide-react";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { Calendar as CalendarComponent } from "@/components/ui/calendar";
+import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
-import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from "@/components/ui/table";
-import { formatDate } from '../utils/dateUtils';
-import { Badge } from '@/components/ui/badge';
-import { useExpenseReports } from '../hooks/useExpenseReports';
+import { formatDate } from "../utils/dateUtils";
+import { ExpenseReport } from "../types";
+import { Loader2, Download, FileText, Search, Calendar } from 'lucide-react';
+
+// Sample data for demonstration
+const sampleReports: ExpenseReport[] = [
+  {
+    id: '1',
+    name: 'Q1 Expense Report',
+    dateRange: {
+      start: '2023-01-01',
+      end: '2023-03-31',
+    },
+    totalAmount: 4250.75,
+    expenseCount: 28,
+    createdAt: '2023-04-02',
+    status: 'approved',
+    expenses: ['1', '2', '3'],
+  },
+  // ... more sample reports
+];
 
 const ExpenseReports = () => {
-  const [date, setDate] = useState<Date | undefined>(new Date());
-  const [selectedPeriod, setSelectedPeriod] = useState("month");
-  const [search, setSearch] = useState("");
-  const { reports, isLoading, generateReport } = useExpenseReports();
-  const [generatingReport, setGeneratingReport] = useState(false);
-  
-  const handleGenerateReport = async () => {
-    setGeneratingReport(true);
-    try {
-      await generateReport({
-        name: `${selectedPeriod.charAt(0).toUpperCase() + selectedPeriod.slice(1)}ly Report - ${formatDate(new Date().toISOString())}`,
-        period: selectedPeriod,
-        date: date || new Date(),
-      });
-    } finally {
-      setGeneratingReport(false);
-    }
-  };
-  
-  const filteredReports = reports.filter(report => 
-    report.name.toLowerCase().includes(search.toLowerCase())
-  );
-  
-  const getStatusBadge = (status: string) => {
-    switch(status) {
-      case 'approved':
-        return <Badge className="bg-green-500"><Check className="w-3 h-3 mr-1" /> Approved</Badge>;
-      case 'submitted':
-        return <Badge variant="secondary"><FileCog className="w-3 h-3 mr-1" /> Submitted</Badge>;
-      default:
-        return <Badge variant="outline"><Loader2 className="w-3 h-3 mr-1 animate-spin" /> Draft</Badge>;
-    }
-  };
-  
+  const [reports] = useState<ExpenseReport[]>(sampleReports);
+  // Changed from string to a valid type
+  const [period, setPeriod] = useState<"month" | "week" | "quarter" | "year">("quarter");
+  const [loading] = useState(false);
+
   return (
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>Generate Expense Report</CardTitle>
-          <CardDescription>Create a new report based on date range and filters</CardDescription>
+          <CardTitle className="flex justify-between items-center">
+            <span>Expense Reports</span>
+            <Button className="flex items-center gap-2">
+              <FileText className="h-4 w-4" />
+              <span>Create Report</span>
+            </Button>
+          </CardTitle>
+          <CardDescription>Generate and download expense reports</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="flex flex-col md:flex-row gap-4">
-            <div className="flex flex-col gap-2 flex-1">
-              <Label>Report Period</Label>
-              <Select value={selectedPeriod} onValueChange={setSelectedPeriod}>
-                <SelectTrigger>
+          <div className="flex flex-wrap gap-4 mb-6">
+            <div className="flex-1 min-w-[200px]">
+              <Label htmlFor="search">Search Reports</Label>
+              <div className="relative">
+                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Input id="search" placeholder="Search by name or ID..." className="pl-8" />
+              </div>
+            </div>
+            
+            <div>
+              <Label htmlFor="period">Time Period</Label>
+              <Select value={period} onValueChange={(value: "month" | "week" | "quarter" | "year") => setPeriod(value)}>
+                <SelectTrigger id="period" className="w-[180px]">
                   <SelectValue placeholder="Select period" />
                 </SelectTrigger>
                 <SelectContent>
@@ -85,121 +73,63 @@ const ExpenseReports = () => {
               </Select>
             </div>
             
-            <div className="flex flex-col gap-2">
-              <Label>Date</Label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button variant="outline" className="w-full md:w-[240px] justify-start text-left font-normal">
-                    <Calendar className="mr-2 h-4 w-4" />
-                    {date ? formatDate(date.toISOString()) : "Pick a date"}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <CalendarComponent
-                    mode="single"
-                    selected={date}
-                    onSelect={setDate}
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
+            <div>
+              <Label htmlFor="date-range">Date Range</Label>
+              <DateRangePicker align="start" className="w-[280px]" />
             </div>
-            
-            <Button 
-              onClick={handleGenerateReport} 
-              disabled={generatingReport} 
-              className="mt-auto"
-            >
-              {generatingReport ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Generating...
-                </>
-              ) : (
-                <>
-                  <Plus className="mr-2 h-4 w-4" />
-                  Generate Report
-                </>
-              )}
-            </Button>
           </div>
-        </CardContent>
-      </Card>
-      
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle>Saved Reports</CardTitle>
-          <div className="flex items-center gap-2">
-            <div className="relative">
-              <SearchIcon className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input 
-                type="search" 
-                placeholder="Search reports..." 
-                className="pl-8 w-[200px] md:w-[300px]" 
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-              />
-            </div>
-            <Button variant="outline">
-              <Filter className="mr-2 h-4 w-4" />
-              Filter
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent>
-          {isLoading ? (
-            <div className="flex justify-center py-8">
-              <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+          
+          {loading ? (
+            <div className="flex justify-center items-center h-48">
+              <Loader2 className="h-6 w-6 animate-spin text-primary" />
             </div>
           ) : (
-            <div className="overflow-x-auto">
+            <div className="rounded-md border">
               <Table>
                 <TableHeader>
                   <TableRow>
                     <TableHead>Report Name</TableHead>
                     <TableHead>Date Range</TableHead>
-                    <TableHead>Items</TableHead>
-                    <TableHead className="text-right">Total Amount</TableHead>
+                    <TableHead>Amount</TableHead>
+                    <TableHead>Expenses</TableHead>
+                    <TableHead>Created</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredReports.length > 0 ? (
-                    filteredReports.map((report) => (
-                      <TableRow key={report.id}>
-                        <TableCell className="font-medium">{report.name}</TableCell>
-                        <TableCell>
-                          {formatDate(report.dateRange.start)} - {formatDate(report.dateRange.end)}
-                        </TableCell>
-                        <TableCell>{report.expenseCount}</TableCell>
-                        <TableCell className="text-right">${report.totalAmount.toFixed(2)}</TableCell>
-                        <TableCell>{getStatusBadge(report.status)}</TableCell>
-                        <TableCell className="text-right">
-                          <div className="flex justify-end gap-2">
-                            <Button variant="ghost" size="icon">
-                              <FileText className="h-4 w-4" />
-                              <span className="sr-only">View</span>
-                            </Button>
-                            <Button variant="ghost" size="icon">
-                              <Download className="h-4 w-4" />
-                              <span className="sr-only">Download</span>
-                            </Button>
-                            <Button variant="ghost" size="icon">
-                              <Printer className="h-4 w-4" />
-                              <span className="sr-only">Print</span>
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))
-                  ) : (
-                    <TableRow>
-                      <TableCell colSpan={6} className="text-center py-4 text-muted-foreground">
-                        No reports found
+                  {reports.map((report) => (
+                    <TableRow key={report.id}>
+                      <TableCell className="font-medium">{report.name}</TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-1">
+                          <Calendar className="h-3 w-3 text-muted-foreground" />
+                          <span>
+                            {formatDate(report.dateRange.start)} - {formatDate(report.dateRange.end)}
+                          </span>
+                        </div>
+                      </TableCell>
+                      <TableCell>${report.totalAmount.toFixed(2)}</TableCell>
+                      <TableCell>{report.expenseCount}</TableCell>
+                      <TableCell>{formatDate(report.createdAt)}</TableCell>
+                      <TableCell>
+                        <div className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${
+                          report.status === 'approved' 
+                            ? 'bg-green-100 text-green-800' 
+                            : report.status === 'draft' 
+                            ? 'bg-amber-100 text-amber-800'
+                            : 'bg-blue-100 text-blue-800'
+                        }`}>
+                          {report.status.charAt(0).toUpperCase() + report.status.slice(1)}
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Button size="sm" variant="ghost">
+                          <Download className="h-4 w-4" />
+                        </Button>
                       </TableCell>
                     </TableRow>
-                  )}
+                  ))}
                 </TableBody>
               </Table>
             </div>
