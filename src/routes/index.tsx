@@ -40,7 +40,8 @@ const AIFeaturesPage = React.lazy(() => import('@/pages/AIFeatures'));
 const SiteAuditsPage = React.lazy(() => import('@/pages/SiteAudits'));
 const FormsPage = React.lazy(() => import('@/pages/Forms'));
 const AutomationsPage = React.lazy(() => import('@/pages/Automations'));
-const ActivityPage = React.lazy(() => import('@/pages/Activity')); // Add Activity page import
+const ActivityPage = React.lazy(() => import('@/pages/Activity'));
+const PropertyBoundariesPage = React.lazy(() => import('@/pages/PropertyBoundaries')); // Add import for PropertyBoundaries
 
 // New import for combined Quotes and Invoicing
 const QuotesInvoicesPage = React.lazy(() => import('@/pages/QuotesInvoices'));
@@ -102,7 +103,8 @@ export function Routes() {
         <Route path="/forms" element={<FormsPage />} />
         <Route path="/automations" element={<AutomationsPage />} />
         <Route path="/workflow" element={<WorkflowPage />} />
-        <Route path="/activity" element={<ActivityPage />} /> {/* Add Activity route */}
+        <Route path="/activity" element={<ActivityPage />} />
+        <Route path="/property-boundaries" element={<PropertyBoundariesPage />} /> {/* Add Property Boundaries route */}
         
         {/* Settings Routes */}
         <Route path="/settings" element={<SettingsPage />} />
