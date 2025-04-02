@@ -74,6 +74,77 @@ export type Database = {
           },
         ]
       }
+      bank_accounts: {
+        Row: {
+          account_number: string
+          balance: number
+          bank: string
+          created_at: string
+          id: string
+          name: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          account_number: string
+          balance?: number
+          bank: string
+          created_at?: string
+          id?: string
+          name: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          account_number?: string
+          balance?: number
+          bank?: string
+          created_at?: string
+          id?: string
+          name?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      bank_transactions: {
+        Row: {
+          account_id: string
+          amount: number
+          created_at: string
+          date: string
+          description: string
+          id: string
+          type: string
+        }
+        Insert: {
+          account_id: string
+          amount: number
+          created_at?: string
+          date?: string
+          description: string
+          id?: string
+          type: string
+        }
+        Update: {
+          account_id?: string
+          amount?: number
+          created_at?: string
+          date?: string
+          description?: string
+          id?: string
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bank_transactions_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "bank_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       calendar_sync_events: {
         Row: {
           connection_id: string
@@ -354,6 +425,36 @@ export type Database = {
         }
         Relationships: []
       }
+      payment_methods: {
+        Row: {
+          card_type: string
+          created_at: string
+          expiry_date: string
+          id: string
+          last_four: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          card_type: string
+          created_at?: string
+          expiry_date: string
+          id?: string
+          last_four: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          card_type?: string
+          created_at?: string
+          expiry_date?: string
+          id?: string
+          last_four?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       payments: {
         Row: {
           amount: number
@@ -570,6 +671,59 @@ export type Database = {
           user_id?: string | null
         }
         Relationships: []
+      }
+      scheduled_payments: {
+        Row: {
+          amount: number
+          created_at: string
+          description: string | null
+          frequency: string | null
+          from_account_id: string
+          id: string
+          payment_date: string
+          recipient: string
+          recurring: boolean | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          description?: string | null
+          frequency?: string | null
+          from_account_id: string
+          id?: string
+          payment_date: string
+          recipient: string
+          recurring?: boolean | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          description?: string | null
+          frequency?: string | null
+          from_account_id?: string
+          id?: string
+          payment_date?: string
+          recipient?: string
+          recurring?: boolean | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "scheduled_payments_from_account_id_fkey"
+            columns: ["from_account_id"]
+            isOneToOne: false
+            referencedRelation: "bank_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       statistics_history: {
         Row: {
