@@ -1,4 +1,3 @@
-
 import React, { Suspense } from 'react';
 import { Route, Routes as RouterRoutes, Navigate } from 'react-router-dom';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
@@ -17,6 +16,7 @@ const DashboardPage = React.lazy(() => import('@/pages/index'));
 const TradeDashPage = React.lazy(() => import('@/pages/TradeDash'));
 const CalculatorsPage = React.lazy(() => import('@/pages/Calculators'));
 const StatisticsPage = React.lazy(() => import('@/pages/Statistics'));
+const NetworksPage = React.lazy(() => import('@/pages/Networks'));
 const CustomersPage = React.lazy(() => import('@/pages/Customers'));
 const CustomerDetailPage = React.lazy(() => import('@/pages/Customers/CustomerDetail'));
 const NewCustomerPage = React.lazy(() => import('@/pages/Customers/NewCustomer'));
@@ -99,6 +99,11 @@ export function Routes() {
           <Route path="/statistics" element={
             <Suspense fallback={<LoadingFallback />}>
               <StatisticsPage />
+            </Suspense>
+          } />
+          <Route path="/networks" element={
+            <Suspense fallback={<LoadingFallback />}>
+              <NetworksPage />
             </Suspense>
           } />
           <Route path="/customers" element={
