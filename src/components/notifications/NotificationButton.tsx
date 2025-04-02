@@ -21,7 +21,7 @@ export const NotificationButton = () => {
         onClick={toggleNotifications} 
         aria-label="Notifications"
       >
-        <Bell className="h-15 w-15 px-0 my-0 mx-0 py-0" />
+        <Bell className="h-6 w-6" />
         
         {unreadCount > 0 && (
           <span className={cn(
@@ -45,7 +45,7 @@ export const NotificationButton = () => {
         aria-label="Notifications"
         disabled
       >
-        <Bell className="h-15 w-15 px-0 my-0 mx-0 py-0" />
+        <Bell className="h-6 w-6" />
       </Button>
     );
   }
