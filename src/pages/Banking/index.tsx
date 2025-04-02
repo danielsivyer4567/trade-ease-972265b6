@@ -49,7 +49,10 @@ const BankingPage: React.FC = () => {
           <TabsContent value="accounts" className="space-y-4">
             <AccountsList 
               accounts={accounts}
-              loading={loading.accounts}
+              loading={{
+                accounts: loading.accounts,
+                creatingAccount: loading.creatingAccount
+              }}
               formatCurrency={formatCurrency}
               onRefresh={handleRefreshAccount}
               onAddAccount={handleAddAccount}

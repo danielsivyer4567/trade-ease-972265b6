@@ -21,3 +21,10 @@ export interface PaymentMethod {
   last_four: string;
   expiry_date: string;
 }
+
+export interface BankAccountFormData {
+  name: string;
+  bank: string;
+  account_number: string;
+  initial_balance: number;
+}

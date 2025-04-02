@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { BankAccount, Transaction, PaymentMethod } from '../types';
+import { BankAccount, Transaction, PaymentMethod, BankAccountFormData } from '../types';
 import { useToast } from '@/components/ui/use-toast';
 
 export const useBankingData = () => {
@@ -11,7 +11,8 @@ export const useBankingData = () => {
   const [loading, setLoading] = useState({
     accounts: true,
     transactions: true,
-    paymentMethods: true
+    paymentMethods: true,
+    creatingAccount: false
   });
   const { toast } = useToast();
 
@@ -58,7 +59,8 @@ export const useBankingData = () => {
         setLoading({
           accounts: false,
           transactions: false,
-          paymentMethods: false
+          paymentMethods: false,
+          creatingAccount: false
         });
       }
     };
@@ -66,12 +68,45 @@ export const useBankingData = () => {
     fetchBankingData();
   }, [toast]);
 
-  const handleAddAccount = () => {
-    // This would open a modal/form to add a new bank account
-    toast({
-      title: "Coming Soon",
-      description: "The ability to add new accounts will be available soon."
-    });
+  const handleAddAccount = async (formData: BankAccountFormData) => {
+    try {
+      setLoading(prev => ({ ...prev, creatingAccount: true }));
+      
+      const { data, error } = await supabase
+        .from('bank_accounts')
+        .insert([
+          { 
+            name: formData.name,
+            bank: formData.bank,
+            account_number: formData.account_number,
+            balance: formData.initial_balance
+          }
+        ])
+        .select()
+        .single();
+      
+      if (error) throw error;
+      
+      // Add the new account to state
+      setAccounts(prev => [...prev, data]);
+      
+      toast({
+        title: "Account created",
+        description: "Your new bank account has been added successfully."
+      });
+      
+      return data;
+    } catch (error) {
+      console.error('Error adding account:', error);
+      toast({
+        title: "Error creating account",
+        description: "There was a problem adding your bank account.",
+        variant: "destructive"
+      });
+      throw error;
+    } finally {
+      setLoading(prev => ({ ...prev, creatingAccount: false }));
+    }
   };
 
   const handleRefreshAccount = async (accountId: string) => {
