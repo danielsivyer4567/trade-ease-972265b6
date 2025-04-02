@@ -1,341 +1,237 @@
+
+import React, { useState, useEffect } from 'react';
 import { AppLayout } from "@/components/ui/AppLayout";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { ArrowLeft, Phone, Mail, MapPin, FileText, Briefcase, Receipt, ListCheck, Plus, ExternalLink, Repeat, Bell, Clipboard, Share2 } from "lucide-react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams, useNavigate } from 'react-router-dom';
+import { ArrowLeft, Edit, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { useState, useEffect } from "react";
+import { CustomerDetails } from './components/CustomerDetails';
+import { useCustomers } from './hooks/useCustomers';
+import { CustomerNote, CustomerJobHistory } from '@/pages/Banking/types';
 import { supabase } from "@/integrations/supabase/client";
-import { Customer } from "../Customers/hooks/useCustomers";
-import { RecurringJobsTab } from "../Jobs/components/tabs/RecurringJobsTab";
-import { ServiceRemindersTab } from "../Jobs/components/tabs/ServiceRemindersTab";
-import { usePhotoSharing } from "@/hooks/usePhotoSharing";
-import { PhotoSharingModal } from "@/components/sharing/PhotoSharingModal";
 
 export default function CustomerDetail() {
+  const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const {
-    id
-  } = useParams();
-  const {
-    toast
-  } = useToast();
-  const [activeTab, setActiveTab] = useState("jobs");
-  const [customer, setCustomer] = useState<Customer | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [jobData, setJobData] = useState<any[]>([]);
-  const {
-    isPhotoSharingOpen,
-    openPhotoSharing,
-    closePhotoSharing
-  } = usePhotoSharing();
+  const { toast } = useToast();
+  const { isLoading } = useCustomers();
+  const [customer, setCustomer] = useState<any>(null);
+  const [notes, setNotes] = useState<CustomerNote[]>([]);
+  const [jobHistory, setJobHistory] = useState<CustomerJobHistory[]>([]);
+  const [isLoadingData, setIsLoadingData] = useState(true);
 
   useEffect(() => {
-    const fetchCustomer = async () => {
-      setLoading(true);
-      if (!id) return;
+    if (!id) return;
+    
+    const fetchCustomerDetails = async () => {
+      setIsLoadingData(true);
       try {
-        const {
-          data,
-          error
-        } = await supabase.from('customers').select('*').eq('id', id).single();
-        if (error) throw error;
-        if (data) {
-          const customerData = {
-            ...data,
-            zipCode: data.zipcode
-          };
-          setCustomer(customerData as Customer);
-
-          const {
-            data: jobsData,
-            error: jobsError
-          } = await supabase.from('jobs').select('*').eq('customer', customerData.name);
-          if (jobsError) throw jobsError;
-          setJobData(jobsData || []);
+        const { data: session } = await supabase.auth.getSession();
+        if (!session?.session?.user) {
+          toast({
+            title: "Authentication Error",
+            description: "You must be logged in to view customer details",
+            variant: "destructive"
+          });
+          navigate('/auth');
+          return;
         }
+
+        // Fetch customer data
+        const { data: customerData, error: customerError } = await supabase
+          .from('customers')
+          .select('*')
+          .eq('id', id)
+          .single();
+
+        if (customerError || !customerData) {
+          console.error("Error fetching customer:", customerError);
+          toast({
+            title: "Error",
+            description: "Failed to load customer details",
+            variant: "destructive"
+          });
+          navigate('/customers');
+          return;
+        }
+
+        // Format customer data with correct property names
+        const formattedCustomer = {
+          ...customerData,
+          zipCode: customerData.zipcode // Map zipcode from DB to zipCode for UI consistency
+        };
+        
+        setCustomer(formattedCustomer);
+
+        // Fetch customer jobs (in a real implementation)
+        // For now we'll just mock this data
+        const mockJobHistory: CustomerJobHistory[] = [
+          {
+            job_id: '1',
+            job_number: 'J-2024-001',
+            title: 'Bathroom Renovation',
+            date: '2024-05-10',
+            status: 'completed',
+            amount: 4580
+          },
+          {
+            job_id: '2',
+            job_number: 'J-2024-008',
+            title: 'Kitchen Remodel',
+            date: '2024-06-15',
+            status: 'in-progress'
+          }
+        ];
+        
+        setJobHistory(mockJobHistory);
+        
+        // Mock customer notes
+        const mockNotes: CustomerNote[] = [
+          {
+            id: '1',
+            content: 'Customer prefers communication via email rather than calls.',
+            created_at: '2024-04-05T10:30:00Z',
+            created_by: 'John Smith',
+            important: true
+          },
+          {
+            id: '2',
+            content: 'Discussed potential kitchen renovation project for Q3.',
+            created_at: '2024-05-20T14:15:00Z',
+            created_by: 'John Smith',
+            important: false
+          }
+        ];
+        
+        setNotes(mockNotes);
       } catch (error) {
-        console.error('Error fetching customer:', error);
+        console.error("Error fetching customer details:", error);
         toast({
-          variant: "destructive",
           title: "Error",
-          description: "Failed to load customer details."
+          description: "An unexpected error occurred while loading customer details",
+          variant: "destructive"
         });
       } finally {
-        setLoading(false);
+        setIsLoadingData(false);
       }
     };
-    fetchCustomer();
-  }, [id, toast]);
 
-  const handleJobClick = (jobId: string) => {
-    navigate(`/jobs/${jobId}`);
-  };
+    fetchCustomerDetails();
+  }, [id, navigate, toast]);
 
-  const handleSharePhotos = () => {
-    if (customer?.id) {
-      openPhotoSharing('customer', customer.id);
+  const handleAddNote = async (content: string, important: boolean) => {
+    try {
+      // In real implementation, save note to database
+      // For now, just add to local state
+      const newNote: CustomerNote = {
+        id: `temp-${Date.now()}`,
+        content,
+        created_at: new Date().toISOString(),
+        created_by: 'Current User',
+        important
+      };
+      
+      setNotes(prev => [newNote, ...prev]);
+      
+      toast({
+        title: "Success",
+        description: "Note added successfully"
+      });
+      
+      return Promise.resolve();
+    } catch (error) {
+      console.error("Error adding note:", error);
+      toast({
+        title: "Error",
+        description: "Failed to add note",
+        variant: "destructive"
+      });
+      return Promise.reject(error);
     }
   };
 
-  if (loading) {
-    return <AppLayout>
-        <div className="p-6">
-          <Button variant="outline" onClick={() => navigate('/customers')}>
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Customers
-          </Button>
-          <div className="mt-8 text-center">
-            <p className="text-gray-500">Loading customer details...</p>
+  const handleCreateJob = (customerId: string) => {
+    navigate(`/jobs/new?customer=${customerId}`);
+  };
+
+  const handleCreateQuote = (customerId: string) => {
+    navigate(`/quotes/new?customer=${customerId}`);
+  };
+
+  if (isLoadingData || isLoading) {
+    return (
+      <AppLayout>
+        <div className="p-6 flex justify-center items-center h-full">
+          <div className="animate-pulse text-center">
+            <div className="h-8 bg-slate-200 rounded w-48 mx-auto mb-4"></div>
+            <div className="h-4 bg-slate-200 rounded w-64 mx-auto"></div>
           </div>
         </div>
-      </AppLayout>;
+      </AppLayout>
+    );
   }
 
   if (!customer) {
-    return <AppLayout>
+    return (
+      <AppLayout>
         <div className="p-6">
-          <Button variant="outline" onClick={() => navigate('/customers')}>
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Customers
-          </Button>
-          <div className="mt-8 text-center">
-            <h2 className="text-2xl font-semibold">Customer not found</h2>
-          </div>
-        </div>
-      </AppLayout>;
-  }
-
-  return <AppLayout>
-      <div className="p-6 space-y-6">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Button variant="outline" onClick={() => navigate('/customers')} className="bg-slate-400 hover:bg-slate-300">
-              <ArrowLeft className="h-4 w-4 mr-2" />
+          <div className="text-center">
+            <h1 className="text-xl font-bold mb-4">Customer not found</h1>
+            <Button onClick={() => navigate('/customers')}>
               Back to Customers
             </Button>
-            <h1 className="text-2xl font-semibold">{customer.name}</h1>
+          </div>
+        </div>
+      </AppLayout>
+    );
+  }
+
+  return (
+    <AppLayout>
+      <div className="p-6 max-w-5xl mx-auto space-y-6">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" onClick={() => navigate('/customers')} className="rounded-md border border-gray-300">
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
+            <h1 className="text-2xl font-bold">{customer.name}</h1>
           </div>
           
-          <Button 
-            variant="outline" 
-            onClick={handleSharePhotos}
-            className="flex items-center gap-2"
-          >
-            <Share2 className="h-4 w-4" />
-            Share Photos
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              onClick={() => navigate(`/customers/edit/${customer.id}`)}
+              className="flex items-center gap-1"
+            >
+              <Edit className="h-4 w-4" />
+              Edit
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() => {
+                // Implement delete functionality
+                toast({
+                  title: "Not implemented",
+                  description: "Delete functionality will be implemented in future versions",
+                });
+              }}
+              className="flex items-center gap-1"
+            >
+              <Trash2 className="h-4 w-4" />
+              Delete
+            </Button>
+          </div>
         </div>
-
-        <Card>
-          <CardHeader className="bg-slate-400">
-            <CardTitle>Contact Information</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-2 bg-slate-300">
-            <div className="flex items-center gap-2">
-              <Mail className="h-4 w-4 text-gray-500" />
-              <span>{customer.email}</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Phone className="h-4 w-4 text-gray-500" />
-              <span>{customer.phone}</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <MapPin className="h-4 w-4 text-gray-500" />
-              <span>{customer.address}, {customer.city}, {customer.state} {customer.zipCode}</span>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-4 md:grid-cols-8 overflow-x-auto">
-            <TabsTrigger value="notes" className="flex items-center gap-2 bg-slate-400 hover:bg-slate-300 text-slate-950">
-              <Clipboard className="h-4 w-4" />
-              <span className="hidden md:inline">Notes</span>
-            </TabsTrigger>
-            <TabsTrigger value="sites" className="flex items-center gap-2 bg-slate-400 hover:bg-slate-300">
-              <MapPin className="h-4 w-4" />
-              <span className="hidden md:inline">Sites</span>
-            </TabsTrigger>
-            <TabsTrigger value="jobs" className="flex items-center gap-2 bg-slate-400 hover:bg-slate-300">
-              <Briefcase className="h-4 w-4" />
-              <span className="hidden md:inline">Jobs</span>
-            </TabsTrigger>
-            <TabsTrigger value="recurring-jobs" className="flex items-center gap-2 text-slate-950 bg-slate-400 hover:bg-slate-300">
-              <Repeat className="h-4 w-4" />
-              <span className="hidden md:inline">Recurring Jobs</span>
-            </TabsTrigger>
-            <TabsTrigger value="service-reminders" className="flex items-center gap-2 bg-slate-400 hover:bg-slate-300">
-              <Bell className="h-4 w-4" />
-              <span className="hidden md:inline">Service Reminders</span>
-            </TabsTrigger>
-            <TabsTrigger value="invoices" className="flex items-center gap-2 text-slate-950 bg-slate-400 hover:bg-slate-300">
-              <Receipt className="h-4 w-4" />
-              <span className="hidden md:inline">Invoices</span>
-            </TabsTrigger>
-            <TabsTrigger value="quotes" className="flex items-center gap-2 bg-slate-400 hover:bg-slate-300">
-              <FileText className="h-4 w-4" />
-              <span className="hidden md:inline">Quotes</span>
-            </TabsTrigger>
-            <TabsTrigger value="recurring-invoices" className="flex items-center gap-2 bg-slate-400 hover:bg-slate-300">
-              <Repeat className="h-4 w-4" />
-              <span className="hidden md:inline">Recurring Invoices</span>
-            </TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="notes">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle>Notes</CardTitle>
-                <Button size="sm" onClick={() => toast({
-                title: "Adding note",
-                description: "This feature is coming soon!"
-              })}>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add Note
-                </Button>
-              </CardHeader>
-              <CardContent>
-                <p className="text-gray-500">No notes available</p>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="sites">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle>Sites</CardTitle>
-                <Button size="sm" onClick={() => toast({
-                title: "Adding site",
-                description: "This feature is coming soon!"
-              })}>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add Site
-                </Button>
-              </CardHeader>
-              <CardContent>
-                <p className="text-gray-500">No sites available</p>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="jobs">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between bg-slate-300">
-                <CardTitle>Jobs</CardTitle>
-                <div className="flex gap-2">
-                  <Button size="sm" variant="outline" onClick={() => toast({
-                  title: "Creating from template",
-                  description: "This feature is coming soon!"
-                })} className="bg-slate-500 hover:bg-slate-400">
-                    <Plus className="h-4 w-4 mr-2" />
-                    From Template
-                  </Button>
-                  <Button size="sm" onClick={() => navigate("/jobs/new")} className="bg-slate-500 hover:bg-slate-400">
-                    <Plus className="h-4 w-4 mr-2" />
-                    New Job
-                  </Button>
-                </div>
-              </CardHeader>
-              <CardContent className="bg-slate-300">
-                {jobData.length > 0 ? <div className="space-y-4">
-                    {jobData.map(job => <div key={job.id} className="flex justify-between items-center p-2 rounded-md hover:bg-gray-100 cursor-pointer" onClick={() => handleJobClick(job.id)}>
-                        <div className="flex items-center gap-2">
-                          <span>{job.title || job.job_number}</span>
-                          <span className="text-sm text-gray-500">({job.status})</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <span className="text-gray-950 text-xl">{job.date}</span>
-                          <ExternalLink className="h-4 w-4 text-gray-400" />
-                        </div>
-                      </div>)}
-                  </div> : <p className="text-gray-500">No jobs available</p>}
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="recurring-jobs">
-            <RecurringJobsTab />
-          </TabsContent>
-
-          <TabsContent value="service-reminders">
-            <ServiceRemindersTab />
-          </TabsContent>
-
-          <TabsContent value="invoices">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle>Invoices</CardTitle>
-                <div className="flex gap-2">
-                  <Button size="sm" variant="outline" onClick={() => toast({
-                  title: "Creating from template",
-                  description: "This feature is coming soon!"
-                })}>
-                    <Plus className="h-4 w-4 mr-2" />
-                    From Template
-                  </Button>
-                  <Button size="sm" onClick={() => navigate("/invoices/new")}>
-                    <Plus className="h-4 w-4 mr-2" />
-                    New Invoice
-                  </Button>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <p className="text-gray-500">No invoices available</p>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="quotes">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle>Quotes</CardTitle>
-                <div className="flex gap-2">
-                  <Button size="sm" variant="outline" onClick={() => toast({
-                  title: "Creating from template",
-                  description: "This feature is coming soon!"
-                })}>
-                    <Plus className="h-4 w-4 mr-2" />
-                    From Template
-                  </Button>
-                  <Button size="sm" onClick={() => navigate("/quotes/new")}>
-                    <Plus className="h-4 w-4 mr-2" />
-                    New Quote
-                  </Button>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <p className="text-gray-500">No quotes available</p>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="recurring-invoices">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle>Recurring Invoices</CardTitle>
-                <Button size="sm" onClick={() => toast({
-                title: "Add recurring invoice",
-                description: "This feature is coming soon!"
-              })}>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add Recurring Invoice
-                </Button>
-              </CardHeader>
-              <CardContent>
-                <p className="text-gray-500">No recurring invoices available</p>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
+        
+        <CustomerDetails 
+          customer={customer}
+          notes={notes}
+          jobHistory={jobHistory}
+          onAddNote={handleAddNote}
+          onCreateJob={handleCreateJob}
+          onCreateQuote={handleCreateQuote}
+        />
       </div>
-      
-      <PhotoSharingModal 
-        isOpen={isPhotoSharingOpen} 
-        onClose={closePhotoSharing} 
-        initialSource="customer"
-        customerId={customer?.id}
-      />
-    </AppLayout>;
+    </AppLayout>
+  );
 }

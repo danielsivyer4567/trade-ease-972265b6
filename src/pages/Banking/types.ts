@@ -28,3 +28,29 @@ export interface BankAccountFormData {
   account_number: string;
   initial_balance: number;
 }
+
+export interface CustomerContact {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  role?: string;
+  is_primary: boolean;
+}
+
+export interface CustomerNote {
+  id: string;
+  content: string;
+  created_at: string;
+  created_by: string;
+  important: boolean;
+}
+
+export interface CustomerJobHistory {
+  job_id: string;
+  job_number: string;
+  title: string;
+  date: string;
+  status: string;
+  amount?: number;
+}
