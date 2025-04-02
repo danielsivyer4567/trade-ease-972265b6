@@ -1,5 +1,5 @@
 
-import { Routes } from "./routes/index";
+import { Routes } from "./routes/index.tsx";
 import { Toaster } from "@/components/ui/toaster";
 import { AuthProvider } from "./contexts/AuthContext";
 import { NotificationProvider } from "./components/notifications/NotificationContextProvider";
