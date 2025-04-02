@@ -24,13 +24,16 @@ import { Input } from "@/components/ui/input";
 import { BankAccountFormData } from '../types';
 import { Landmark, PlusCircle } from 'lucide-react';
 
-// Define the form schema that matches the BankAccountFormData type
+// Define the form schema with required fields to match BankAccountFormData type
 const formSchema = z.object({
   name: z.string().min(2, { message: "Account name is required" }),
   bank: z.string().min(2, { message: "Bank name is required" }),
   account_number: z.string().min(5, { message: "Account number is required" }),
   initial_balance: z.coerce.number().min(0, { message: "Balance must be a positive number" }),
 });
+
+// Ensure the schema matches the BankAccountFormData type
+type FormSchemaType = z.infer<typeof formSchema>;
 
 interface CreateAccountFormProps {
   open: boolean;
@@ -45,7 +48,7 @@ const CreateAccountForm: React.FC<CreateAccountFormProps> = ({
   onCreateAccount,
   isSubmitting
 }) => {
-  const form = useForm<BankAccountFormData>({
+  const form = useForm<FormSchemaType>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
@@ -55,7 +58,7 @@ const CreateAccountForm: React.FC<CreateAccountFormProps> = ({
     },
   });
 
-  const handleSubmit = async (values: BankAccountFormData) => {
+  const handleSubmit = async (values: FormSchemaType) => {
     await onCreateAccount(values);
     form.reset();
   };
