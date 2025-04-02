@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Route, Routes as RouterRoutes, Navigate } from 'react-router-dom';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
@@ -60,10 +59,8 @@ const TermsOfServicePage = React.lazy(() => import('@/pages/Settings/TermsOfServ
 const GenericSettingsPage = React.lazy(() => import('@/pages/Settings/GenericSettingsPage'));
 
 export function Routes() {
-  // Fix property name from isLoading to loading to match AuthContext
   const { user, loading } = useAuth();
 
-  // Simplified routing logic for demo
   if (loading) {
     return <div className="h-screen w-screen flex items-center justify-center">Loading...</div>;
   }
