@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { formatDate } from "../utils/dateUtils";
 import { ExpenseReport } from "../types";
 import { Loader2, Download, FileText, Search, Calendar } from 'lucide-react';
+import { DateRange } from "react-day-picker";
 
 // Sample data for demonstration
 const sampleReports: ExpenseReport[] = [
@@ -31,8 +32,8 @@ const sampleReports: ExpenseReport[] = [
 
 const ExpenseReports = () => {
   const [reports] = useState<ExpenseReport[]>(sampleReports);
-  // Changed from string to a valid type
-  const [period, setPeriod] = useState<"month" | "week" | "quarter" | "year">("quarter");
+  const [period, setPeriod] = useState<string>("quarter");
+  const [dateRange, setDateRange] = useState<DateRange | undefined>();
   const [loading] = useState(false);
 
   return (
@@ -60,7 +61,7 @@ const ExpenseReports = () => {
             
             <div>
               <Label htmlFor="period">Time Period</Label>
-              <Select value={period} onValueChange={(value: "month" | "week" | "quarter" | "year") => setPeriod(value)}>
+              <Select value={period} onValueChange={(value: string) => setPeriod(value)}>
                 <SelectTrigger id="period" className="w-[180px]">
                   <SelectValue placeholder="Select period" />
                 </SelectTrigger>
@@ -75,7 +76,12 @@ const ExpenseReports = () => {
             
             <div>
               <Label htmlFor="date-range">Date Range</Label>
-              <DateRangePicker align="start" className="w-[280px]" />
+              <DateRangePicker 
+                value={dateRange} 
+                onChange={setDateRange} 
+                align="start" 
+                className="w-[280px]" 
+              />
             </div>
           </div>
           
