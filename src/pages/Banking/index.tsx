@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { BaseLayout } from "@/components/ui/BaseLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { BanknotesIcon, ArrowPathIcon, WalletIcon, CreditCardIcon } from 'lucide-react';
+import { BanknoteIcon, ArrowUpDown, Wallet, CreditCard } from 'lucide-react';
 
 const BankingPage = () => {
   const [activeTab, setActiveTab] = useState<string>("accounts");
@@ -26,7 +26,7 @@ const BankingPage = () => {
     <BaseLayout>
       <div className="p-4 md:p-6">
         <div className="flex items-center gap-2 mb-6">
-          <BanknotesIcon className="h-6 w-6 text-primary" />
+          <BanknoteIcon className="h-6 w-6 text-primary" />
           <h1 className="text-2xl font-bold">Banking</h1>
         </div>
         
@@ -57,7 +57,7 @@ const BankingPage = () => {
                     <div className="text-sm text-muted-foreground">Account: {account.accountNumber}</div>
                     <div className="flex justify-between items-center mt-4">
                       <button className="text-sm text-primary flex items-center gap-1">
-                        <ArrowPathIcon className="h-4 w-4" />
+                        <ArrowUpDown className="h-4 w-4" />
                         Refresh
                       </button>
                       <button className="text-sm text-primary">View Details</button>
@@ -69,7 +69,7 @@ const BankingPage = () => {
               {/* Add New Account Card */}
               <Card className="border-dashed hover:shadow-md transition-shadow bg-muted/50">
                 <CardContent className="flex flex-col items-center justify-center h-full p-6">
-                  <WalletIcon className="h-12 w-12 text-muted-foreground mb-2" />
+                  <Wallet className="h-12 w-12 text-muted-foreground mb-2" />
                   <CardTitle className="text-muted-foreground text-lg mb-2">Add Account</CardTitle>
                   <p className="text-sm text-muted-foreground text-center">
                     Connect a new bank account or card
@@ -161,7 +161,7 @@ const BankingPage = () => {
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <BanknotesIcon className="h-5 w-5" /> 
+                    <BanknoteIcon className="h-5 w-5" /> 
                     Make a Payment
                   </CardTitle>
                 </CardHeader>
@@ -211,7 +211,7 @@ const BankingPage = () => {
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <CreditCardIcon className="h-5 w-5" />
+                    <CreditCard className="h-5 w-5" />
                     Saved Payment Methods
                   </CardTitle>
                 </CardHeader>
@@ -219,7 +219,7 @@ const BankingPage = () => {
                   <div className="space-y-4">
                     <div className="flex items-center justify-between border rounded p-3">
                       <div className="flex items-center gap-3">
-                        <CreditCardIcon className="h-5 w-5" />
+                        <CreditCard className="h-5 w-5" />
                         <div>
                           <div className="font-medium">Visa ending in 4242</div>
                           <div className="text-sm text-muted-foreground">Expires 12/25</div>
@@ -230,7 +230,7 @@ const BankingPage = () => {
                     
                     <div className="flex items-center justify-between border rounded p-3">
                       <div className="flex items-center gap-3">
-                        <CreditCardIcon className="h-5 w-5" />
+                        <CreditCard className="h-5 w-5" />
                         <div>
                           <div className="font-medium">Mastercard ending in 5678</div>
                           <div className="text-sm text-muted-foreground">Expires 03/26</div>
