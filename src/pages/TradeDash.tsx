@@ -104,6 +104,7 @@ const TradeDash = () => {
             icon={CircleDollarSign} 
             trend="up" 
             percentage="12% from yesterday"
+            className=""
           />
           <StatCard 
             title="Active Traders" 
@@ -111,6 +112,7 @@ const TradeDash = () => {
             icon={Users} 
             trend="up" 
             percentage="8% from last week"
+            className=""
           />
           <StatCard 
             title="Successful Trades" 
@@ -118,6 +120,7 @@ const TradeDash = () => {
             icon={CheckCircle} 
             trend="up" 
             percentage="3% from last month"
+            className=""
           />
           <StatCard 
             title="Market Volatility" 
@@ -125,6 +128,7 @@ const TradeDash = () => {
             icon={Activity} 
             trend="down" 
             percentage="5% decrease"
+            className=""
           />
         </div>
 
