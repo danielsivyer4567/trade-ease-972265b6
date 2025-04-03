@@ -1,7 +1,8 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { User, Mail, Phone, MapPin, FileText, Clipboard, Calendar, AlertCircle, Image, DollarSign, FileCheck, Star } from "lucide-react";
+import { User, Mail, Phone, MapPin, FileText, Clipboard, Calendar, AlertCircle, Image, DollarSign, FileCheck, Star, Link as LinkIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { CustomerNote, CustomerJobHistory } from "@/pages/Banking/types";
@@ -9,6 +10,7 @@ import { CustomerPhotos } from './CustomerPhotos';
 import { CustomerFinancials } from './CustomerFinancials';
 import { CustomerForms } from './CustomerForms';
 import { CustomerReviews } from './CustomerReviews';
+import { CustomerProgressLink } from './CustomerProgressLink';
 
 interface CustomerDetailsProps {
   customer: {
@@ -119,6 +121,9 @@ export function CustomerDetails({
               </TabsTrigger>
               <TabsTrigger value="reviews">
                 <Star className="h-4 w-4 mr-1 inline" /> Reviews
+              </TabsTrigger>
+              <TabsTrigger value="progress-link">
+                <LinkIcon className="h-4 w-4 mr-1 inline" /> Progress Link
               </TabsTrigger>
             </TabsList>
             
@@ -314,6 +319,11 @@ export function CustomerDetails({
             {/* Reviews Tab */}
             <TabsContent value="reviews" className="p-4">
               <CustomerReviews customerId={customer.id} />
+            </TabsContent>
+
+            {/* Progress Link Tab */}
+            <TabsContent value="progress-link" className="p-4">
+              <CustomerProgressLink customerId={customer.id} />
             </TabsContent>
           </Tabs>
         </CardContent>

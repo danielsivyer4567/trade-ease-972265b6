@@ -1,10 +1,16 @@
+
 import React, { useState, useEffect } from 'react';
-import { Check, Loader, Maximize2 } from 'lucide-react';
+import { Check, Loader, Maximize2, MessageSquare, Share2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useParams } from 'react-router-dom';
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { toast } from "sonner";
+
 interface JobStep {
   id: number;
   title: string;
@@ -15,6 +21,16 @@ interface JobStep {
   }[];
   isCompleted: boolean;
 }
+
+interface Comment {
+  id: string;
+  text: string;
+  author: string;
+  createdAt: string;
+  taskId: string;
+  tags: string[];
+}
+
 export const JobStepProgress = () => {
   const {
     id
@@ -22,13 +38,21 @@ export const JobStepProgress = () => {
     id: string;
   }>();
   const {
-    toast
+    toast: uiToast
   } = useToast();
   const [jobSteps, setJobSteps] = useState<JobStep[]>([]);
   const [loading, setLoading] = useState(false);
   const [savingTaskId, setSavingTaskId] = useState<string | null>(null);
   const [savingStepId, setSavingStepId] = useState<number | null>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [commentDialogOpen, setCommentDialogOpen] = useState(false);
+  const [currentTaskId, setCurrentTaskId] = useState<string | null>(null);
+  const [comment, setComment] = useState("");
+  const [tag, setTag] = useState("");
+  const [comments, setComments] = useState<Record<string, Comment[]>>({});
+  const [shareLinkDialogOpen, setShareLinkDialogOpen] = useState(false);
+  const [customerNotificationsEnabled, setCustomerNotificationsEnabled] = useState(false);
+
   useEffect(() => {
     // Get existing job steps from database if available
     const fetchJobSteps = async () => {
@@ -161,6 +185,7 @@ export const JobStepProgress = () => {
     };
     fetchJobSteps();
   }, [id]);
+  
   const saveJobSteps = async (updatedSteps: JobStep[]) => {
     if (id) {
       const {
@@ -169,17 +194,26 @@ export const JobStepProgress = () => {
         job_steps: updatedSteps
       }).eq('id', id);
       if (error) {
-        toast({
+        uiToast({
           title: "Error saving progress",
           description: error.message,
           variant: "destructive"
         });
         return false;
       }
+      
+      // If customer notifications are enabled, send a notification
+      if (customerNotificationsEnabled) {
+        // This would normally connect to a notification service
+        console.log("Sending customer notification about step update");
+        // In a real implementation, you would call an API to send the notification
+      }
+      
       return true;
     }
     return false;
   };
+  
   const handleTaskCompletion = async (stepId: number, taskId: string) => {
     setSavingTaskId(taskId);
     const updatedSteps = jobSteps.map(step => {
@@ -203,13 +237,14 @@ export const JobStepProgress = () => {
     const saved = await saveJobSteps(updatedSteps);
     if (saved) {
       const task = updatedSteps.find(s => s.id === stepId)?.tasks.find(t => t.id === taskId);
-      toast({
+      uiToast({
         title: task?.isCompleted ? "Task completed" : "Task reopened",
         description: `Task has been ${task?.isCompleted ? 'marked as complete' : 'reopened'}.`
       });
     }
     setSavingTaskId(null);
   };
+  
   const handleStepCompletion = async (stepId: number) => {
     setSavingStepId(stepId);
     const stepToUpdate = jobSteps.find(step => step.id === stepId);
@@ -226,25 +261,227 @@ export const JobStepProgress = () => {
     const saved = await saveJobSteps(updatedSteps);
     if (saved) {
       const completedStep = updatedSteps.find(s => s.id === stepId);
-      toast({
+      uiToast({
         title: completedStep?.isCompleted ? "Step completed" : "Step reopened",
         description: `${completedStep?.title} has been ${completedStep?.isCompleted ? 'marked as complete' : 'reopened'}.`
       });
     }
     setSavingStepId(null);
   };
+  
   const toggleFullscreen = () => {
     setIsFullscreen(!isFullscreen);
   };
 
+  // Open comment dialog for a specific task
+  const openCommentDialog = (taskId: string) => {
+    setCurrentTaskId(taskId);
+    setCommentDialogOpen(true);
+    setComment("");
+    setTag("");
+  };
+  
+  // Add a comment with optional tag
+  const addComment = () => {
+    if (!currentTaskId || !comment.trim()) return;
+    
+    const newComment: Comment = {
+      id: Date.now().toString(),
+      text: comment,
+      author: "Current User", // In a real app, this would be the logged-in user
+      createdAt: new Date().toISOString(),
+      taskId: currentTaskId,
+      tags: tag ? [tag] : []
+    };
+    
+    setComments(prev => ({
+      ...prev,
+      [currentTaskId]: [...(prev[currentTaskId] || []), newComment]
+    }));
+    
+    toast.success("Comment added successfully");
+    setCommentDialogOpen(false);
+    setComment("");
+    setTag("");
+  };
+  
+  // Generate and share a progress link
+  const shareProgressLink = () => {
+    const progressLink = `${window.location.origin}/progress/${id}`;
+    navigator.clipboard.writeText(progressLink);
+    toast.success("Progress link copied to clipboard");
+    setShareLinkDialogOpen(false);
+    
+    // In a real app, you might want to save this link or send it directly to the customer
+  };
+  
+  // Toggle customer notifications
+  const toggleCustomerNotifications = () => {
+    setCustomerNotificationsEnabled(!customerNotificationsEnabled);
+    toast.success(`Customer notifications ${!customerNotificationsEnabled ? 'enabled' : 'disabled'}`);
+  };
+
   // Visual progress indicator showing how many steps are complete
   const completedSteps = jobSteps.filter(step => step.isCompleted).length;
-  const progressPercentage = jobSteps.length > 0 ? completedSteps / jobSteps.length * 100 : 0;
+  const progressPercentage = jobSteps.length > 0 ? (completedSteps / jobSteps.length) * 100 : 0;
+  
   if (loading) {
     return <div className="flex justify-center items-center h-40">
         <Loader className="animate-spin h-8 w-8 text-gray-500" />
         <span className="ml-2 text-gray-500">Loading job progress...</span>
       </div>;
   }
-  return;
+  
+  return (
+    <div className={`relative ${isFullscreen ? 'fixed inset-0 z-50 bg-white p-6 overflow-auto' : ''}`}>
+      <div className="flex justify-between items-center mb-4">
+        <div className="flex items-center gap-3">
+          <h2 className="text-xl font-bold">Job Progress</h2>
+          <div className="bg-slate-100 rounded-full h-8 px-3 flex items-center">
+            <span className="text-sm font-medium">{progressPercentage.toFixed(0)}% Complete</span>
+          </div>
+        </div>
+        
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" onClick={() => setShareLinkDialogOpen(true)}>
+            <Share2 className="h-4 w-4 mr-2" />
+            Share Progress
+          </Button>
+          <Button variant="ghost" size="icon" onClick={toggleFullscreen}>
+            <Maximize2 className="h-4 w-4" />
+          </Button>
+        </div>
+      </div>
+      
+      <div className="space-y-6 mb-6">
+        {jobSteps.map((step) => (
+          <div key={step.id} className="border rounded-lg overflow-hidden">
+            <div 
+              className={`p-3 flex justify-between items-center cursor-pointer ${
+                step.isCompleted ? 'bg-green-50 border-green-200' : 'bg-slate-50'
+              }`}
+            >
+              <div className="flex items-center gap-3">
+                <Checkbox 
+                  checked={step.isCompleted} 
+                  onCheckedChange={() => handleStepCompletion(step.id)}
+                  disabled={savingStepId === step.id}
+                  className={step.isCompleted ? 'bg-green-500 text-white border-green-500' : ''}
+                />
+                <h3 className="font-medium">{step.title}</h3>
+              </div>
+              
+              <div className="text-sm text-gray-500">
+                {step.tasks.filter(t => t.isCompleted).length}/{step.tasks.length} tasks
+              </div>
+            </div>
+            
+            <div className="p-3 space-y-2 bg-white">
+              {step.tasks.map((task) => (
+                <div key={task.id} className="flex items-center justify-between border-b pb-2 last:border-b-0 last:pb-0">
+                  <div className="flex items-center gap-2">
+                    <Checkbox 
+                      checked={task.isCompleted} 
+                      onCheckedChange={() => handleTaskCompletion(step.id, task.id)}
+                      disabled={savingTaskId === task.id}
+                      className={task.isCompleted ? 'bg-green-500 text-white border-green-500' : ''}
+                    />
+                    <span className={task.isCompleted ? 'line-through text-gray-500' : ''}>{task.text}</span>
+                  </div>
+                  
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    onClick={() => openCommentDialog(task.id)}
+                    className="flex items-center text-gray-500 hover:text-gray-700"
+                  >
+                    <MessageSquare className="h-4 w-4 mr-1" />
+                    {comments[task.id]?.length ? comments[task.id].length : 0}
+                  </Button>
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+      
+      {/* Comment Dialog */}
+      <Dialog open={commentDialogOpen} onOpenChange={setCommentDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add Comment or Tag</DialogTitle>
+            <DialogDescription>
+              Add a comment to this task. You can also tag team members or the customer.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4 py-2">
+            <Textarea 
+              placeholder="Enter your comment here..." 
+              value={comment} 
+              onChange={(e) => setComment(e.target.value)} 
+              className="min-h-[100px]"
+            />
+            
+            <div className="space-y-2">
+              <p className="text-sm font-medium">Tag someone (optional)</p>
+              <Input 
+                placeholder="@manager, @worker, @customer" 
+                value={tag} 
+                onChange={(e) => setTag(e.target.value)}
+              />
+            </div>
+          </div>
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setCommentDialogOpen(false)}>Cancel</Button>
+            <Button onClick={addComment} disabled={!comment.trim()}>Add Comment</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      
+      {/* Share Progress Link Dialog */}
+      <Dialog open={shareLinkDialogOpen} onOpenChange={setShareLinkDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Share Progress Link</DialogTitle>
+            <DialogDescription>
+              Generate a link that the customer can use to track job progress in real-time.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4 py-2">
+            <div className="flex items-center space-x-2">
+              <Checkbox 
+                id="notifications" 
+                checked={customerNotificationsEnabled}
+                onCheckedChange={toggleCustomerNotifications}
+              />
+              <label htmlFor="notifications" className="text-sm">
+                Enable customer notifications for updates
+              </label>
+            </div>
+            
+            <div className="pt-2">
+              <p className="text-sm font-medium mb-2">Progress Link</p>
+              <div className="flex space-x-2">
+                <Input value={`${window.location.origin}/progress/${id}`} readOnly />
+                <Button variant="outline" onClick={shareProgressLink}>
+                  Copy
+                </Button>
+              </div>
+              <p className="text-sm text-gray-500 mt-1">
+                Share this link with your customer to let them track progress in real-time.
+              </p>
+            </div>
+          </div>
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShareLinkDialogOpen(false)}>Cancel</Button>
+            <Button onClick={shareProgressLink}>Copy & Share Link</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
 };
