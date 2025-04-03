@@ -109,6 +109,15 @@ export function CustomerPhotos({ customerId }: CustomerPhotosProps) {
       minute: 'numeric'
     }).format(date);
   };
+
+  // New function to navigate between photos
+  const handlePhotoNavigation = (index: number, direction: 'prev' | 'next') => {
+    if (direction === 'prev' && index > 0) {
+      // Do nothing here, just pass the information to indicate navigation is possible
+    } else if (direction === 'next' && index < filteredPhotos.length - 1) {
+      // Do nothing here, just pass the information to indicate navigation is possible
+    }
+  };
   
   return (
     <div className="space-y-4">
@@ -155,10 +164,16 @@ export function CustomerPhotos({ customerId }: CustomerPhotosProps) {
           <TabsContent key={phase} value={phase} className="space-y-4">
             {filteredPhotos.length > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                {filteredPhotos.map((photo) => (
+                {filteredPhotos.map((photo, index) => (
                   <Card key={photo.id} className="overflow-hidden">
                     <div className="aspect-video relative">
-                      <ImagePreview src={photo.url} alt={photo.caption || 'Customer photo'} />
+                      <ImagePreview 
+                        src={photo.url} 
+                        alt={photo.caption || 'Customer photo'} 
+                        onNavigate={(direction) => handlePhotoNavigation(index, direction)}
+                        hasPrevious={index > 0}
+                        hasNext={index < filteredPhotos.length - 1}
+                      />
                       <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white text-xs p-2">
                         <p className="font-medium">{photo.caption}</p>
                         <p>{formatTimestamp(photo.timestamp)}</p>
