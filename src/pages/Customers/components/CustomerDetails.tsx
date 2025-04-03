@@ -1,11 +1,14 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { User, Mail, Phone, MapPin, FileText, Clipboard, Calendar, AlertCircle } from "lucide-react";
+import { User, Mail, Phone, MapPin, FileText, Clipboard, Calendar, AlertCircle, Image, DollarSign, FileCheck, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { CustomerNote, CustomerJobHistory } from "@/pages/Banking/types";
+import { CustomerPhotos } from './CustomerPhotos';
+import { CustomerFinancials } from './CustomerFinancials';
+import { CustomerForms } from './CustomerForms';
+import { CustomerReviews } from './CustomerReviews';
 
 interface CustomerDetailsProps {
   customer: {
@@ -101,10 +104,22 @@ export function CustomerDetails({
         </CardHeader>
         <CardContent className="p-0">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="w-full border-b rounded-none bg-white">
+            <TabsList className="w-full border-b rounded-none bg-white overflow-x-auto">
               <TabsTrigger value="overview">Overview</TabsTrigger>
               <TabsTrigger value="jobs">Jobs & Quotes</TabsTrigger>
+              <TabsTrigger value="photos">
+                <Image className="h-4 w-4 mr-1 inline" /> Photos
+              </TabsTrigger>
               <TabsTrigger value="notes">Notes</TabsTrigger>
+              <TabsTrigger value="financials">
+                <DollarSign className="h-4 w-4 mr-1 inline" /> Financials
+              </TabsTrigger>
+              <TabsTrigger value="forms">
+                <FileCheck className="h-4 w-4 mr-1 inline" /> Forms
+              </TabsTrigger>
+              <TabsTrigger value="reviews">
+                <Star className="h-4 w-4 mr-1 inline" /> Reviews
+              </TabsTrigger>
             </TabsList>
             
             {/* Overview Tab */}
@@ -222,6 +237,11 @@ export function CustomerDetails({
               )}
             </TabsContent>
             
+            {/* Photos Tab */}
+            <TabsContent value="photos" className="p-4">
+              <CustomerPhotos customerId={customer.id} />
+            </TabsContent>
+            
             {/* Notes Tab */}
             <TabsContent value="notes" className="p-4">
               <div className="space-y-4">
@@ -279,6 +299,21 @@ export function CustomerDetails({
                   <p className="text-sm text-gray-500">No notes for this customer</p>
                 )}
               </div>
+            </TabsContent>
+
+            {/* Financials Tab */}
+            <TabsContent value="financials" className="p-4">
+              <CustomerFinancials customerId={customer.id} />
+            </TabsContent>
+
+            {/* Forms Tab */}
+            <TabsContent value="forms" className="p-4">
+              <CustomerForms customerId={customer.id} />
+            </TabsContent>
+
+            {/* Reviews Tab */}
+            <TabsContent value="reviews" className="p-4">
+              <CustomerReviews customerId={customer.id} />
             </TabsContent>
           </Tabs>
         </CardContent>
