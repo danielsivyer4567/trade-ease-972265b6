@@ -7,7 +7,11 @@ import {
   Share,
   BarChart,
   Calculator,
-  Plus,
+  Percent,
+  Gauge,
+  Ruler,
+  Square,
+  FileCode,
 } from 'lucide-react';
 
 // Business navigation group
@@ -56,14 +60,29 @@ export const businessNavigation = {
       label: 'Calculators',
       items: [
         {
-          icon: Plus,
+          icon: Percent,
           label: 'Markup Calculator',
           path: '/calculators/markup',
         },
         {
-          icon: Plus,
+          icon: Gauge,
           label: 'Job Cost Calculator',
           path: '/calculators/job-cost',
+        },
+        {
+          icon: Ruler,
+          label: 'Loads & Spans Calculator',
+          path: '/calculators/loads-spans',
+        },
+        {
+          icon: Square,
+          label: 'Fencing Calculator',
+          path: '/calculators/fencing',
+        },
+        {
+          icon: FileCode,
+          label: 'NCC Codes Reference',
+          path: '/calculators/ncc-codes',
         },
       ],
     },
