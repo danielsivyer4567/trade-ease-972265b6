@@ -12,6 +12,7 @@ const MarkupCalculator = React.lazy(() => import('@/pages/Calculators/MarkupCalc
 const JobCostCalculator = React.lazy(() => import('@/pages/Calculators/JobCostCalculator'));
 const LoadsSpansCalculator = React.lazy(() => import('@/pages/Calculators/LoadsSpansCalculator'));
 const FencingCalculator = React.lazy(() => import('@/pages/Calculators/FencingCalculator'));
+const NCCCodesCalculator = React.lazy(() => import('@/pages/Calculators/NCCCodesCalculator'));
 const StatisticsPage = React.lazy(() => import('@/pages/Statistics'));
 const AIFeaturesPage = React.lazy(() => import('@/pages/AIFeatures'));
 
@@ -52,6 +53,11 @@ export const dashboardRoutes = (
       <Route path="/calculators/fencing" element={
         <Suspense fallback={<LoadingFallback />}>
           <FencingCalculator />
+        </Suspense>
+      } />
+      <Route path="/calculators/ncc-codes" element={
+        <Suspense fallback={<LoadingFallback />}>
+          <NCCCodesCalculator />
         </Suspense>
       } />
       <Route path="/statistics" element={
