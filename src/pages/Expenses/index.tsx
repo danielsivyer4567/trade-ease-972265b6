@@ -5,13 +5,17 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ExpenseDashboard from './components/ExpenseDashboard';
 import ExpenseSubmission from './components/ExpenseSubmission';
 import ExpenseReports from './components/ExpenseReports';
-import ExpenseCategories from './components/ExpenseCategories';
+import { ExpenseCategories } from './components/ExpenseCategories';
 import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useExpenseData } from './hooks/useExpenseData';
+import { useExpenseCategories } from './hooks/useExpenseCategories';
 
 const ExpensesPage = () => {
   const { toast } = useToast();
   const isMobile = useIsMobile();
+  const expenseData = useExpenseData();
+  const { categories, addCategory, updateCategory, deleteCategory } = useExpenseCategories();
   
   return (
     <BaseLayout>
@@ -39,7 +43,12 @@ const ExpensesPage = () => {
               <ExpenseReports />
             </TabsContent>
             <TabsContent value="categories">
-              <ExpenseCategories />
+              <ExpenseCategories 
+                categories={categories}
+                onAddCategory={addCategory}
+                onUpdateCategory={updateCategory}
+                onDeleteCategory={deleteCategory}
+              />
             </TabsContent>
           </Tabs>
         </div>

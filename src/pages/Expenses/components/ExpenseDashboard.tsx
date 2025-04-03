@@ -10,7 +10,9 @@ import { Button } from '@/components/ui/button';
 import ExpenseCharts from './ExpenseCharts';
 
 const ExpenseDashboard = () => {
-  const { expenseSummary, isLoading, expensesByCategory, expensesByMonth } = useExpenseData();
+  const { summary, monthlyData, expenses } = useExpenseData();
+  
+  const isLoading = false; // Since we're using static data for now
   
   if (isLoading) {
     return (
@@ -30,7 +32,7 @@ const ExpenseDashboard = () => {
           </CardHeader>
           <CardContent>
             <div className="flex items-center justify-between">
-              <div className="text-2xl font-bold">${expenseSummary.totalExpenses.toLocaleString()}</div>
+              <div className="text-2xl font-bold">${summary.totalExpenses.toLocaleString()}</div>
               <DollarSign className="h-5 w-5 text-muted-foreground" />
             </div>
           </CardContent>
@@ -42,7 +44,7 @@ const ExpenseDashboard = () => {
           </CardHeader>
           <CardContent>
             <div className="flex items-center justify-between">
-              <div className="text-2xl font-bold">{expenseSummary.pendingCount}</div>
+              <div className="text-2xl font-bold">{summary.pendingCount}</div>
               <Clock className="h-5 w-5 text-muted-foreground" />
             </div>
           </CardContent>
@@ -54,7 +56,7 @@ const ExpenseDashboard = () => {
           </CardHeader>
           <CardContent>
             <div className="flex items-center justify-between">
-              <div className="text-2xl font-bold">{expenseSummary.approvedCount}</div>
+              <div className="text-2xl font-bold">{summary.approvedCount}</div>
               <Check className="h-5 w-5 text-green-500" />
             </div>
           </CardContent>
@@ -66,7 +68,7 @@ const ExpenseDashboard = () => {
           </CardHeader>
           <CardContent>
             <div className="flex items-center justify-between">
-              <div className="text-2xl font-bold">{expenseSummary.rejectedCount}</div>
+              <div className="text-2xl font-bold">{summary.rejectedCount}</div>
               <AlertCircle className="h-5 w-5 text-red-500" />
             </div>
           </CardContent>
@@ -83,7 +85,7 @@ const ExpenseDashboard = () => {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <ExpenseCharts data={expensesByCategory} chartType="pie" />
+            <ExpenseCharts data={summary.byCategory || []} chartType="pie" />
           </CardContent>
         </Card>
         
@@ -95,7 +97,7 @@ const ExpenseDashboard = () => {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <ExpenseCharts data={expensesByMonth} chartType="bar" />
+            <ExpenseCharts data={monthlyData} chartType="bar" />
           </CardContent>
         </Card>
       </div>
@@ -113,7 +115,7 @@ const ExpenseDashboard = () => {
           </Button>
         </CardHeader>
         <CardContent>
-          <ExpenseList expenses={expenseSummary.recentExpenses} limit={5} />
+          <ExpenseList expenses={summary.recentExpenses} limit={5} />
         </CardContent>
       </Card>
     </div>
