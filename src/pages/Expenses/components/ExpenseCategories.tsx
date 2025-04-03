@@ -1,309 +1,315 @@
 
 import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { 
-  Plus, Pencil, Trash2, Clock, Tag, Wallet, Home, Car, 
-  ShoppingCart, Coffee, Briefcase, Users, Plane, MoreHorizontal, Loader2
-} from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Pencil, Trash2, Plus, AlertCircle } from "lucide-react";
+import { ExpenseCategory } from "../types";
 import { useToast } from "@/hooks/use-toast";
-import { useExpenseCategories } from '../hooks/useExpenseCategories';
-import { ExpenseCategory } from '../types';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 
-const CATEGORY_ICONS = [
-  { name: 'Tag', icon: Tag },
-  { name: 'Wallet', icon: Wallet },
-  { name: 'Home', icon: Home },
-  { name: 'Car', icon: Car },
-  { name: 'Shopping', icon: ShoppingCart },
-  { name: 'Food', icon: Coffee },
-  { name: 'Work', icon: Briefcase },
-  { name: 'Team', icon: Users },
-  { name: 'Travel', icon: Plane },
-  { name: 'Clock', icon: Clock },
-];
+interface ExpenseCategoriesProps {
+  categories: ExpenseCategory[];
+  onAddCategory: (category: Omit<ExpenseCategory, "id">) => void;
+  onUpdateCategory: (id: string, category: Partial<ExpenseCategory>) => void;
+  onDeleteCategory: (id: string) => void;
+}
 
-const ExpenseCategories = () => {
-  const { toast } = useToast();
-  const { categories, isLoading, addCategory, updateCategory, deleteCategory } = useExpenseCategories();
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [isEditing, setIsEditing] = useState(false);
-  const [currentCategory, setCurrentCategory] = useState<ExpenseCategory | null>(null);
-  const [formData, setFormData] = useState({
-    name: '',
-    description: '',
-    budget: '',
-    icon: 'Tag',
+export function ExpenseCategories({
+  categories,
+  onAddCategory,
+  onUpdateCategory,
+  onDeleteCategory
+}: ExpenseCategoriesProps) {
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [newCategory, setNewCategory] = useState<Omit<ExpenseCategory, "id">>({
+    name: "",
+    description: "",
+    icon: "folder",
+    budget: 0,
+    isActive: true
   });
-  const [searchTerm, setSearchTerm] = useState('');
-  
-  const handleOpenDialog = (category?: ExpenseCategory) => {
-    if (category) {
-      setCurrentCategory(category);
-      setFormData({
-        name: category.name,
-        description: category.description || '',
-        budget: category.budget ? category.budget.toString() : '',
-        icon: category.icon || 'Tag',
-      });
-      setIsEditing(true);
-    } else {
-      setCurrentCategory(null);
-      setFormData({
-        name: '',
-        description: '',
-        budget: '',
-        icon: 'Tag',
-      });
-      setIsEditing(false);
-    }
-    setIsDialogOpen(true);
-  };
-  
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-  };
-  
-  const handleSubmit = async () => {
-    try {
-      const categoryData = {
-        name: formData.name,
-        description: formData.description,
-        icon: formData.icon,
-        budget: formData.budget ? parseFloat(formData.budget) : undefined,
-      };
-      
-      if (isEditing && currentCategory) {
-        await updateCategory({ id: currentCategory.id, ...categoryData });
-        toast({
-          title: "Category updated",
-          description: `"${formData.name}" category has been updated.`,
-        });
-      } else {
-        await addCategory(categoryData);
-        toast({
-          title: "Category created",
-          description: `"${formData.name}" category has been created.`,
-        });
-      }
-      
-      setIsDialogOpen(false);
-    } catch (error) {
-      console.error('Error saving category:', error);
+  const [currentCategory, setCurrentCategory] = useState<ExpenseCategory | null>(null);
+  const { toast } = useToast();
+
+  const handleAddCategory = () => {
+    if (!newCategory.name) {
       toast({
         title: "Error",
-        description: "There was an error saving the category.",
-        variant: "destructive",
+        description: "Category name is required",
+        variant: "destructive"
       });
+      return;
     }
+
+    onAddCategory(newCategory);
+    setNewCategory({
+      name: "",
+      description: "",
+      icon: "folder",
+      budget: 0,
+      isActive: true
+    });
+    setIsAddDialogOpen(false);
+    
+    toast({
+      title: "Success",
+      description: "Category has been added"
+    });
   };
-  
-  const handleDelete = async (categoryId: string) => {
-    try {
-      await deleteCategory(categoryId);
-      toast({
-        title: "Category deleted",
-        description: "The category has been deleted.",
-      });
-    } catch (error) {
-      console.error('Error deleting category:', error);
+
+  const handleUpdateCategory = () => {
+    if (!currentCategory || !currentCategory.name) {
       toast({
         title: "Error",
-        description: "There was an error deleting the category.",
-        variant: "destructive",
+        description: "Category name is required",
+        variant: "destructive"
       });
+      return;
     }
+
+    onUpdateCategory(currentCategory.id, currentCategory);
+    setIsEditDialogOpen(false);
+    
+    toast({
+      title: "Success",
+      description: "Category has been updated"
+    });
   };
-  
-  const filteredCategories = categories.filter(category => 
-    category.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-  
-  const getCategoryIcon = (iconName: string) => {
-    const found = CATEGORY_ICONS.find(item => item.name === iconName);
-    const IconComponent = found ? found.icon : Tag;
-    return <IconComponent className="h-4 w-4" />;
+
+  const handleDeleteCategory = () => {
+    if (!currentCategory) return;
+    
+    onDeleteCategory(currentCategory.id);
+    setIsDeleteDialogOpen(false);
+    
+    toast({
+      title: "Success",
+      description: "Category has been deleted"
+    });
   };
-  
+
+  const openEditDialog = (category: ExpenseCategory) => {
+    setCurrentCategory({...category});
+    setIsEditDialogOpen(true);
+  };
+
+  const openDeleteDialog = (category: ExpenseCategory) => {
+    setCurrentCategory({...category});
+    setIsDeleteDialogOpen(true);
+  };
+
   return (
-    <>
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle>Expense Categories</CardTitle>
-          <div className="flex items-center gap-2">
-            <Input
-              type="search"
-              placeholder="Search categories..."
-              className="w-[200px]"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-              <DialogTrigger asChild>
-                <Button onClick={() => handleOpenDialog()}>
-                  <Plus className="mr-2 h-4 w-4" />
-                  Add Category
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>{isEditing ? 'Edit Category' : 'New Category'}</DialogTitle>
-                  <DialogDescription>
-                    {isEditing 
-                      ? 'Edit the expense category and click save when you\'re done.' 
-                      : 'Add a new expense category to organize your transactions.'}
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="grid gap-4 py-4">
-                  <div className="grid gap-2">
-                    <Label htmlFor="name">Category Name</Label>
-                    <Input 
-                      id="name"
-                      name="name"
-                      value={formData.name}
-                      onChange={handleChange}
-                      placeholder="e.g., Office Supplies"
-                    />
-                  </div>
-                  <div className="grid gap-2">
-                    <Label htmlFor="description">Description (Optional)</Label>
-                    <Textarea 
-                      id="description"
-                      name="description"
-                      value={formData.description}
-                      onChange={handleChange}
-                      placeholder="Brief description of this category"
-                    />
-                  </div>
-                  <div className="grid gap-2">
-                    <Label htmlFor="budget">Monthly Budget (Optional)</Label>
-                    <Input 
-                      id="budget"
-                      name="budget"
-                      type="number"
-                      min="0"
-                      step="0.01"
-                      value={formData.budget}
-                      onChange={handleChange}
-                      placeholder="0.00"
-                    />
-                  </div>
-                  <div className="grid gap-2">
-                    <Label>Icon</Label>
-                    <div className="grid grid-cols-5 gap-2">
-                      {CATEGORY_ICONS.map((iconItem) => (
-                        <Button
-                          key={iconItem.name}
-                          type="button"
-                          variant={formData.icon === iconItem.name ? "default" : "outline"}
-                          className="h-10 w-10 p-0"
-                          onClick={() => setFormData(prev => ({ ...prev, icon: iconItem.name }))}
-                        >
-                          <iconItem.icon className="h-4 w-4" />
-                          <span className="sr-only">{iconItem.name}</span>
-                        </Button>
-                      ))}
-                    </div>
-                  </div>
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <h2 className="text-xl font-bold">Expense Categories</h2>
+        <Button 
+          onClick={() => setIsAddDialogOpen(true)}
+          className="flex items-center gap-1"
+        >
+          <Plus className="h-4 w-4" />
+          <span>Add Category</span>
+        </Button>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {categories.map((category) => (
+          <Card key={category.id} className="overflow-hidden">
+            <CardHeader className="bg-slate-50 pb-2">
+              <div className="flex justify-between items-start">
+                <CardTitle className="text-md font-medium">{category.name}</CardTitle>
+                <div className="flex gap-1">
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="h-8 w-8"
+                    onClick={() => openEditDialog(category)}
+                  >
+                    <Pencil className="h-4 w-4" />
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="h-8 w-8 text-red-500 hover:text-red-600"
+                    onClick={() => openDeleteDialog(category)}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
                 </div>
-                <DialogFooter>
-                  <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
-                    Cancel
-                  </Button>
-                  <Button onClick={handleSubmit} disabled={!formData.name}>
-                    {isEditing ? 'Save Changes' : 'Create Category'}
-                  </Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
-          </div>
-        </CardHeader>
-        <CardContent>
-          {isLoading ? (
-            <div className="flex justify-center py-8">
-              <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+              </div>
+            </CardHeader>
+            <CardContent className="pt-4">
+              <p className="text-sm text-gray-500 mb-3">{category.description}</p>
+              <div className="flex justify-between items-center text-sm">
+                <span className="font-medium">Budget:</span>
+                <span>
+                  {new Intl.NumberFormat('en-US', {
+                    style: 'currency',
+                    currency: 'USD'
+                  }).format(category.budget)}
+                </span>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      {/* Add Category Dialog */}
+      <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add New Category</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="name" className="text-right">
+                Name
+              </Label>
+              <Input
+                id="name"
+                value={newCategory.name}
+                onChange={(e) => setNewCategory({ ...newCategory, name: e.target.value })}
+                className="col-span-3"
+              />
             </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {filteredCategories.length > 0 ? (
-                filteredCategories.map((category) => (
-                  <Card key={category.id}>
-                    <CardContent className="p-4">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <div className="flex items-center justify-center h-8 w-8 rounded-full bg-primary/10 text-primary">
-                            {category.icon ? getCategoryIcon(category.icon) : <Tag className="h-4 w-4" />}
-                          </div>
-                          <div>
-                            <h3 className="font-medium">{category.name}</h3>
-                            {category.budget && (
-                              <p className="text-sm text-muted-foreground">
-                                Budget: ${category.budget.toFixed(2)}
-                              </p>
-                            )}
-                          </div>
-                        </div>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon">
-                              <MoreHorizontal className="h-4 w-4" />
-                              <span className="sr-only">Actions</span>
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => handleOpenDialog(category)}>
-                              <Pencil className="mr-2 h-4 w-4" />
-                              Edit
-                            </DropdownMenuItem>
-                            <DropdownMenuItem 
-                              onClick={() => handleDelete(category.id)}
-                              className="text-red-600"
-                            >
-                              <Trash2 className="mr-2 h-4 w-4" />
-                              Delete
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))
-              ) : (
-                <div className="col-span-full flex flex-col items-center justify-center py-8 text-center text-muted-foreground">
-                  <Tag className="h-12 w-12 mb-2 opacity-20" />
-                  <h3 className="text-lg font-medium">No categories found</h3>
-                  <p className="max-w-sm">
-                    {searchTerm 
-                      ? "No categories match your search. Try a different term or clear the search."
-                      : "Create your first category by clicking the Add Category button."}
-                  </p>
-                </div>
-              )}
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="description" className="text-right">
+                Description
+              </Label>
+              <Input
+                id="description"
+                value={newCategory.description}
+                onChange={(e) => setNewCategory({ ...newCategory, description: e.target.value })}
+                className="col-span-3"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="icon" className="text-right">
+                Icon
+              </Label>
+              <Input
+                id="icon"
+                value={newCategory.icon}
+                onChange={(e) => setNewCategory({ ...newCategory, icon: e.target.value })}
+                className="col-span-3"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="budget" className="text-right">
+                Budget
+              </Label>
+              <Input
+                id="budget"
+                type="number"
+                value={newCategory.budget}
+                onChange={(e) => setNewCategory({ ...newCategory, budget: Number(e.target.value) })}
+                className="col-span-3"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleAddCategory}>
+              Add Category
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Category Dialog */}
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Category</DialogTitle>
+          </DialogHeader>
+          {currentCategory && (
+            <div className="space-y-4 py-4">
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="edit-name" className="text-right">
+                  Name
+                </Label>
+                <Input
+                  id="edit-name"
+                  value={currentCategory.name}
+                  onChange={(e) => setCurrentCategory({ ...currentCategory, name: e.target.value })}
+                  className="col-span-3"
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="edit-description" className="text-right">
+                  Description
+                </Label>
+                <Input
+                  id="edit-description"
+                  value={currentCategory.description}
+                  onChange={(e) => setCurrentCategory({ ...currentCategory, description: e.target.value })}
+                  className="col-span-3"
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="edit-icon" className="text-right">
+                  Icon
+                </Label>
+                <Input
+                  id="edit-icon"
+                  value={currentCategory.icon}
+                  onChange={(e) => setCurrentCategory({ ...currentCategory, icon: e.target.value })}
+                  className="col-span-3"
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="edit-budget" className="text-right">
+                  Budget
+                </Label>
+                <Input
+                  id="edit-budget"
+                  type="number"
+                  value={currentCategory.budget}
+                  onChange={(e) => setCurrentCategory({ ...currentCategory, budget: Number(e.target.value) })}
+                  className="col-span-3"
+                />
+              </div>
             </div>
           )}
-        </CardContent>
-      </Card>
-    </>
-  );
-};
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleUpdateCategory}>
+              Update Category
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
-export default ExpenseCategories;
+      {/* Delete Category Dialog */}
+      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <AlertCircle className="h-5 w-5 text-red-500" />
+              <span>Delete Category</span>
+            </DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <p>Are you sure you want to delete the category "<strong>{currentCategory?.name}</strong>"?</p>
+            <p className="text-sm text-gray-500 mt-2">This action cannot be undone.</p>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsDeleteDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={handleDeleteCategory}>
+              Delete
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}

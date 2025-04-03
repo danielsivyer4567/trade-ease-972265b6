@@ -1,126 +1,86 @@
 
-import { useState, useEffect } from 'react';
-import { ExpenseCategory } from '../types';
+import { useState } from "react";
+import { ExpenseCategory } from "../types";
 
-// Mock data for demonstration
-const INITIAL_CATEGORIES: ExpenseCategory[] = [
-  {
-    id: '1',
-    name: 'Office Supplies',
-    description: 'Paper, ink, pens, and other office materials',
-    budget: 500,
-    icon: 'Briefcase',
-  },
-  {
-    id: '2',
-    name: 'Travel',
-    description: 'Business trips, airfare, hotels, and transportation',
-    budget: 2000,
-    icon: 'Plane',
-  },
-  {
-    id: '3',
-    name: 'Meals',
-    description: 'Business lunches, dinners, and team events',
-    budget: 800,
-    icon: 'Coffee',
-  },
-  {
-    id: '4',
-    name: 'Equipment',
-    description: 'Electronics, hardware, and machinery',
-    budget: 5000,
-    icon: 'Home',
-  },
-  {
-    id: '5',
-    name: 'Software',
-    description: 'Software licenses and subscriptions',
-    budget: 1200,
-    icon: 'Tag',
-  },
-  {
-    id: '6',
-    name: 'Training',
-    description: 'Courses, workshops, and educational materials',
-    budget: 1500,
-    icon: 'Users',
-  },
-];
+export function useExpenseCategories() {
+  const [categories, setCategories] = useState<ExpenseCategory[]>([
+    {
+      id: "1",
+      name: "Materials",
+      description: "Construction materials and supplies",
+      budget: 5000,
+      icon: "package", 
+      isActive: true
+    },
+    {
+      id: "2",
+      name: "Labor",
+      description: "Staff and contractor wages",
+      budget: 10000,
+      icon: "users",
+      isActive: true
+    },
+    {
+      id: "3",
+      name: "Equipment",
+      description: "Tools and machinery",
+      budget: 3000,
+      icon: "tool",
+      isActive: true
+    },
+    {
+      id: "4",
+      name: "Office",
+      description: "Office supplies and expenses",
+      budget: 1500,
+      icon: "home",
+      isActive: true
+    },
+    {
+      id: "5",
+      name: "Travel",
+      description: "Transportation and mileage",
+      budget: 2000,
+      icon: "truck",
+      isActive: true
+    },
+    {
+      id: "6",
+      name: "Other",
+      description: "Miscellaneous expenses",
+      budget: 1000,
+      icon: "more-horizontal",
+      isActive: true
+    }
+  ]);
 
-export const useExpenseCategories = () => {
-  const [categories, setCategories] = useState<ExpenseCategory[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  
-  useEffect(() => {
-    // Simulate API call
-    const fetchCategories = async () => {
-      try {
-        // In a real app, we would fetch data from an API
-        await new Promise(resolve => setTimeout(resolve, 800));
-        setCategories(INITIAL_CATEGORIES);
-      } catch (error) {
-        console.error('Error fetching categories:', error);
-      } finally {
-        setIsLoading(false);
-      }
+  // Function to add a new category
+  const addCategory = (category: Omit<ExpenseCategory, "id">) => {
+    const newCategory = {
+      ...category,
+      id: Date.now().toString()
     };
-    
-    fetchCategories();
-  }, []);
-  
-  const addCategory = async (categoryData: Omit<ExpenseCategory, 'id'>) => {
-    try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      const newCategory: ExpenseCategory = {
-        id: Date.now().toString(),
-        ...categoryData,
-      };
-      
-      setCategories(prev => [...prev, newCategory]);
-      return newCategory;
-    } catch (error) {
-      console.error('Error adding category:', error);
-      throw error;
-    }
+    setCategories([...categories, newCategory]);
   };
-  
-  const updateCategory = async (categoryData: ExpenseCategory) => {
-    try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      setCategories(prev =>
-        prev.map(cat => (cat.id === categoryData.id ? categoryData : cat))
-      );
-      
-      return categoryData;
-    } catch (error) {
-      console.error('Error updating category:', error);
-      throw error;
-    }
+
+  // Function to update a category
+  const updateCategory = (id: string, updatedCategory: Partial<ExpenseCategory>) => {
+    setCategories(
+      categories.map(category => 
+        category.id === id ? { ...category, ...updatedCategory } : category
+      )
+    );
   };
-  
-  const deleteCategory = async (categoryId: string) => {
-    try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      setCategories(prev => prev.filter(cat => cat.id !== categoryId));
-      return true;
-    } catch (error) {
-      console.error('Error deleting category:', error);
-      throw error;
-    }
+
+  // Function to delete a category
+  const deleteCategory = (id: string) => {
+    setCategories(categories.filter(category => category.id !== id));
   };
-  
+
   return {
     categories,
-    isLoading,
     addCategory,
     updateCategory,
-    deleteCategory,
+    deleteCategory
   };
-};
+}
