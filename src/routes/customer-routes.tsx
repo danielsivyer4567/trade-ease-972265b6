@@ -7,6 +7,7 @@ import { LoadingFallback } from './loading-fallback';
 // Import pages
 const CustomersPage = React.lazy(() => import('@/pages/Customers'));
 const CustomerDetailPage = React.lazy(() => import('@/pages/Customers/CustomerDetail'));
+const CustomerStatementPage = React.lazy(() => import('@/pages/Customers/CustomerStatement'));
 const NewCustomerPage = React.lazy(() => import('@/pages/Customers/NewCustomer'));
 const NetworksPage = React.lazy(() => import('@/pages/Networks'));
 
@@ -27,6 +28,11 @@ export const customerRoutes = (
       <Route path="/customers/:id" element={
         <Suspense fallback={<LoadingFallback />}>
           <CustomerDetailPage />
+        </Suspense>
+      } />
+      <Route path="/customers/:id/statement" element={
+        <Suspense fallback={<LoadingFallback />}>
+          <CustomerStatementPage />
         </Suspense>
       } />
       <Route path="/networks" element={
