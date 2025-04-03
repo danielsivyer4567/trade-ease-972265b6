@@ -77,10 +77,14 @@ export function useExpenseCategories() {
     setCategories(categories.filter(category => category.id !== id));
   };
 
+  // Since we're using static data, we're not actually loading from an API
+  const isLoading = false;
+
   return {
     categories,
     addCategory,
     updateCategory,
-    deleteCategory
+    deleteCategory,
+    isLoading
   };
 }
