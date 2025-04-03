@@ -5,6 +5,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { DollarSign, FileText, AlertCircle, TrendingUp } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 interface CustomerFinancialsProps {
   customerId: string;
@@ -20,6 +21,8 @@ interface Transaction {
 }
 
 export function CustomerFinancials({ customerId }: CustomerFinancialsProps) {
+  const navigate = useNavigate();
+  
   // Sample data - in a real app, fetch this from your database
   const transactions: Transaction[] = [
     {
@@ -102,6 +105,10 @@ export function CustomerFinancials({ customerId }: CustomerFinancialsProps) {
     }
   };
 
+  const handleViewStatement = () => {
+    navigate(`/customers/${customerId}/statement`);
+  };
+
   return (
     <div className="space-y-6">
       {/* Summary Cards */}
@@ -151,7 +158,7 @@ export function CustomerFinancials({ customerId }: CustomerFinancialsProps) {
             <Button variant="outline" size="sm">
               <FileText className="h-4 w-4 mr-1" /> New Invoice
             </Button>
-            <Button size="sm">
+            <Button size="sm" onClick={handleViewStatement}>
               <TrendingUp className="h-4 w-4 mr-1" /> View Statement
             </Button>
           </div>
