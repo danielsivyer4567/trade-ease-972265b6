@@ -10,6 +10,7 @@ const NewJobPage = React.lazy(() => import('@/pages/Jobs/NewJob'));
 const JobDetailsPage = React.lazy(() => import('@/pages/Jobs/JobDetails').then(module => ({ default: module.JobDetails })));
 const NewTemplatePage = React.lazy(() => import('@/pages/Jobs/NewTemplate'));
 const PropertyBoundariesPage = React.lazy(() => import('@/pages/PropertyBoundaries'));
+const CustomerProgressPage = React.lazy(() => import('@/pages/Jobs/CustomerProgress'));
 
 // Export routes as JSX elements
 export const jobRoutes = (
@@ -41,5 +42,12 @@ export const jobRoutes = (
         </Suspense>
       } />
     </Route>
+    
+    {/* Public route for customer progress tracking - no authentication required */}
+    <Route path="/progress/:id" element={
+      <Suspense fallback={<LoadingFallback />}>
+        <CustomerProgressPage />
+      </Suspense>
+    } />
   </>
 );

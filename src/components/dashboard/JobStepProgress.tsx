@@ -41,6 +41,7 @@ export const JobStepProgress = () => {
     toast: uiToast
   } = useToast();
   const [jobSteps, setJobSteps] = useState<JobStep[]>([]);
+  const [jobDetails, setJobDetails] = useState<{assignedTeam?: string, teamColor?: string}>({});
   const [loading, setLoading] = useState(false);
   const [savingTaskId, setSavingTaskId] = useState<string | null>(null);
   const [savingStepId, setSavingStepId] = useState<number | null>(null);
@@ -52,6 +53,7 @@ export const JobStepProgress = () => {
   const [comments, setComments] = useState<Record<string, Comment[]>>({});
   const [shareLinkDialogOpen, setShareLinkDialogOpen] = useState(false);
   const [customerNotificationsEnabled, setCustomerNotificationsEnabled] = useState(false);
+  const [currentStep, setCurrentStep] = useState<number | null>(null);
 
   useEffect(() => {
     // Get existing job steps from database if available
@@ -61,130 +63,175 @@ export const JobStepProgress = () => {
         const {
           data,
           error
-        } = await supabase.from('jobs').select('job_steps').eq('id', id).single();
-        if (data && data.job_steps && !error) {
-          // Ensure each task has an id and isCompleted property
-          const formattedSteps = data.job_steps.map((step: any) => ({
-            ...step,
-            tasks: step.tasks.map((task: string, index: number) => ({
-              id: `${step.id}-${index}`,
-              text: task,
-              isCompleted: false
-            }))
-          }));
-          setJobSteps(formattedSteps);
+        } = await supabase
+          .from('jobs')
+          .select('job_steps, assigned_team')
+          .eq('id', id)
+          .single();
+
+        if (data) {
+          // Get assigned team info
+          setJobDetails({
+            assignedTeam: data.assigned_team,
+            teamColor: getTeamColor(data.assigned_team)
+          });
+          
+          if (data.job_steps && !error) {
+            // Ensure each task has an id and isCompleted property
+            const formattedSteps = data.job_steps.map((step: any) => ({
+              ...step,
+              tasks: step.tasks.map((task: string, index: number) => ({
+                id: `${step.id}-${index}`,
+                text: task,
+                isCompleted: false
+              }))
+            }));
+            setJobSteps(formattedSteps);
+            
+            // Find current step (first incomplete)
+            const currentStepIndex = formattedSteps.findIndex((s: JobStep) => !s.isCompleted);
+            if (currentStepIndex >= 0) {
+              setCurrentStep(formattedSteps[currentStepIndex].id);
+            } else {
+              setCurrentStep(formattedSteps[0]?.id || null);
+            }
+          } else {
+            createDefaultSteps();
+          }
         } else {
-          // Create default job steps
-          const defaultSteps = [{
-            id: 1,
-            title: 'step 1-',
-            tasks: [{
-              id: '1-0',
-              text: '-schedule job date',
-              isCompleted: false
-            }, {
-              id: '1-1',
-              text: '-allocate staff',
-              isCompleted: false
-            }],
-            isCompleted: false
-          }, {
-            id: 2,
-            title: 'step 2-',
-            tasks: [{
-              id: '2-0',
-              text: '-order materials',
-              isCompleted: false
-            }, {
-              id: '2-1',
-              text: '-fill out job details',
-              isCompleted: false
-            }, {
-              id: '2-2',
-              text: '- management sign off',
-              isCompleted: false
-            }],
-            isCompleted: false
-          }, {
-            id: 3,
-            title: 'step 3-',
-            tasks: [{
-              id: '3-0',
-              text: '-start job',
-              isCompleted: false
-            }, {
-              id: '3-1',
-              text: '-inductions',
-              isCompleted: false
-            }, {
-              id: '3-2',
-              text: '-material count check',
-              isCompleted: false
-            }],
-            isCompleted: false
-          }, {
-            id: 4,
-            title: 'step 4-',
-            tasks: [{
-              id: '4-0',
-              text: '- complete job',
-              isCompleted: false
-            }, {
-              id: '4-1',
-              text: '- do quality check',
-              isCompleted: false
-            }, {
-              id: '4-2',
-              text: '- site clean up',
-              isCompleted: false
-            }, {
-              id: '4-3',
-              text: '- add any variations',
-              isCompleted: false
-            }],
-            isCompleted: false
-          }, {
-            id: 5,
-            title: 'step5-',
-            tasks: [{
-              id: '5-0',
-              text: '- verify customer is happy',
-              isCompleted: false
-            }, {
-              id: '5-1',
-              text: '- customer to sign job is complete as per contract',
-              isCompleted: false
-            }, {
-              id: '5-2',
-              text: '-take pics and double check all documents.',
-              isCompleted: false
-            }, {
-              id: '5-3',
-              text: '-send invoices with variations',
-              isCompleted: false
-            }],
-            isCompleted: false
-          }, {
-            id: 6,
-            title: 'step 6',
-            tasks: [{
-              id: '6-0',
-              text: '- mark invoices paid to finalise job',
-              isCompleted: false
-            }, {
-              id: '6-1',
-              text: '-automaticly sync to xero',
-              isCompleted: false
-            }],
-            isCompleted: false
-          }];
-          setJobSteps(defaultSteps);
+          createDefaultSteps();
         }
         setLoading(false);
       }
     };
+    
     fetchJobSteps();
   }, [id]);
+  
+  const getTeamColor = (teamName?: string) => {
+    if (!teamName) return "bg-gray-400"; // Default color
+    
+    // Map team names to colors
+    const teamColors: Record<string, string> = {
+      "Team A": "bg-blue-500",
+      "Team B": "bg-green-500",
+      "Team C": "bg-purple-500",
+      "Team D": "bg-orange-500",
+      "Team E": "bg-pink-500"
+    };
+    
+    return teamColors[teamName] || "bg-gray-400";
+  };
+
+  const createDefaultSteps = () => {
+    // Create default job steps
+    const defaultSteps = [{
+      id: 1,
+      title: 'step 1-',
+      tasks: [{
+        id: '1-0',
+        text: '-schedule job date',
+        isCompleted: false
+      }, {
+        id: '1-1',
+        text: '-allocate staff',
+        isCompleted: false
+      }],
+      isCompleted: false
+    }, {
+      id: 2,
+      title: 'step 2-',
+      tasks: [{
+        id: '2-0',
+        text: '-order materials',
+        isCompleted: false
+      }, {
+        id: '2-1',
+        text: '-fill out job details',
+        isCompleted: false
+      }, {
+        id: '2-2',
+        text: '- management sign off',
+        isCompleted: false
+      }],
+      isCompleted: false
+    }, {
+      id: 3,
+      title: 'step 3-',
+      tasks: [{
+        id: '3-0',
+        text: '-start job',
+        isCompleted: false
+      }, {
+        id: '3-1',
+        text: '-inductions',
+        isCompleted: false
+      }, {
+        id: '3-2',
+        text: '-material count check',
+        isCompleted: false
+      }],
+      isCompleted: false
+    }, {
+      id: 4,
+      title: 'step 4-',
+      tasks: [{
+        id: '4-0',
+        text: '- complete job',
+        isCompleted: false
+      }, {
+        id: '4-1',
+        text: '- do quality check',
+        isCompleted: false
+      }, {
+        id: '4-2',
+        text: '- site clean up',
+        isCompleted: false
+      }, {
+        id: '4-3',
+        text: '- add any variations',
+        isCompleted: false
+      }],
+      isCompleted: false
+    }, {
+      id: 5,
+      title: 'step5-',
+      tasks: [{
+        id: '5-0',
+        text: '- verify customer is happy',
+        isCompleted: false
+      }, {
+        id: '5-1',
+        text: '- customer to sign job is complete as per contract',
+        isCompleted: false
+      }, {
+        id: '5-2',
+        text: '-take pics and double check all documents.',
+        isCompleted: false
+      }, {
+        id: '5-3',
+        text: '-send invoices with variations',
+        isCompleted: false
+      }],
+      isCompleted: false
+    }, {
+      id: 6,
+      title: 'step 6',
+      tasks: [{
+        id: '6-0',
+        text: '- mark invoices paid to finalise job',
+        isCompleted: false
+      }, {
+        id: '6-1',
+        text: '-automaticly sync to xero',
+        isCompleted: false
+      }],
+      isCompleted: false
+    }];
+    
+    setJobSteps(defaultSteps);
+    setCurrentStep(1);
+  };
   
   const saveJobSteps = async (updatedSteps: JobStep[]) => {
     if (id) {
@@ -234,6 +281,10 @@ export const JobStepProgress = () => {
       return step;
     });
     setJobSteps(updatedSteps);
+    
+    // Update current step if needed
+    updateCurrentStep(updatedSteps);
+    
     const saved = await saveJobSteps(updatedSteps);
     if (saved) {
       const task = updatedSteps.find(s => s.id === stepId)?.tasks.find(t => t.id === taskId);
@@ -257,7 +308,12 @@ export const JobStepProgress = () => {
         isCompleted: newCompletionState
       }))
     } : step);
+    
     setJobSteps(updatedSteps);
+    
+    // Update current step
+    updateCurrentStep(updatedSteps);
+    
     const saved = await saveJobSteps(updatedSteps);
     if (saved) {
       const completedStep = updatedSteps.find(s => s.id === stepId);
@@ -267,6 +323,17 @@ export const JobStepProgress = () => {
       });
     }
     setSavingStepId(null);
+  };
+  
+  const updateCurrentStep = (steps: JobStep[]) => {
+    // Find the first incomplete step
+    const firstIncompleteIndex = steps.findIndex(step => !step.isCompleted);
+    if (firstIncompleteIndex >= 0) {
+      setCurrentStep(steps[firstIncompleteIndex].id);
+    } else if (steps.length > 0) {
+      // If all steps complete, stay on the last one
+      setCurrentStep(steps[steps.length - 1].id);
+    }
   };
   
   const toggleFullscreen = () => {
@@ -353,9 +420,40 @@ export const JobStepProgress = () => {
         </div>
       </div>
       
+      {/* Step indicators showing current progress with team color */}
+      <div className="flex items-center space-x-3 mb-6 overflow-x-auto py-2">
+        {jobSteps.map((step) => (
+          <div
+            key={step.id}
+            onClick={() => handleStepCompletion(step.id)}
+            className={`flex-shrink-0 cursor-pointer w-10 h-10 rounded-full flex items-center justify-center
+              ${step.isCompleted ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-700'} 
+              ${currentStep === step.id ? `border-2 border-${jobDetails.teamColor?.replace('bg-', '')} shadow-md` : 'border-2 border-white'}
+            `}
+            title={step.title}
+          >
+            {step.isCompleted ? (
+              <Check className="h-5 w-5" />
+            ) : (
+              <span className="text-sm font-medium">{step.id}</span>
+            )}
+          </div>
+        ))}
+      </div>
+      
+      {/* Display team indicator if a team is assigned */}
+      {jobDetails.assignedTeam && (
+        <div className="flex items-center mb-4 bg-white p-2 rounded-lg shadow-sm">
+          <div className={`w-4 h-4 rounded-full ${jobDetails.teamColor} mr-2`}></div>
+          <span className="text-sm">This job is assigned to: <span className="font-medium">{jobDetails.assignedTeam}</span></span>
+        </div>
+      )}
+      
       <div className="space-y-6 mb-6">
         {jobSteps.map((step) => (
-          <div key={step.id} className="border rounded-lg overflow-hidden">
+          <div key={step.id} className={`border rounded-lg overflow-hidden
+            ${currentStep === step.id ? `ring-2 ring-${jobDetails.teamColor?.replace('bg-', '')}` : ''}
+          `}>
             <div 
               className={`p-3 flex justify-between items-center cursor-pointer ${
                 step.isCompleted ? 'bg-green-50 border-green-200' : 'bg-slate-50'
@@ -444,41 +542,34 @@ export const JobStepProgress = () => {
       <Dialog open={shareLinkDialogOpen} onOpenChange={setShareLinkDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Share Progress Link</DialogTitle>
+            <DialogTitle>Share Progress with Customer</DialogTitle>
             <DialogDescription>
-              Generate a link that the customer can use to track job progress in real-time.
+              Generate a link that lets your customer view the current job progress.
             </DialogDescription>
           </DialogHeader>
           
           <div className="space-y-4 py-2">
             <div className="flex items-center space-x-2">
               <Checkbox 
-                id="notifications" 
+                id="enable-notifications" 
                 checked={customerNotificationsEnabled}
-                onCheckedChange={toggleCustomerNotifications}
+                onCheckedChange={() => toggleCustomerNotifications()}
               />
-              <label htmlFor="notifications" className="text-sm">
-                Enable customer notifications for updates
+              <label htmlFor="enable-notifications" className="text-sm">
+                Send notifications when progress updates
               </label>
             </div>
             
-            <div className="pt-2">
-              <p className="text-sm font-medium mb-2">Progress Link</p>
-              <div className="flex space-x-2">
-                <Input value={`${window.location.origin}/progress/${id}`} readOnly />
-                <Button variant="outline" onClick={shareProgressLink}>
-                  Copy
-                </Button>
-              </div>
-              <p className="text-sm text-gray-500 mt-1">
-                Share this link with your customer to let them track progress in real-time.
-              </p>
-            </div>
+            <Input 
+              value={`${window.location.origin}/progress/${id}`}
+              readOnly
+              className="font-mono text-sm"
+            />
           </div>
           
           <DialogFooter>
             <Button variant="outline" onClick={() => setShareLinkDialogOpen(false)}>Cancel</Button>
-            <Button onClick={shareProgressLink}>Copy & Share Link</Button>
+            <Button onClick={shareProgressLink}>Copy Link</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
