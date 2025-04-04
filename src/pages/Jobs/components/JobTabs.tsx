@@ -1,3 +1,4 @@
+
 import { Tabs, TabsList, TabsContent } from "@/components/ui/tabs";
 import type { Job } from "@/types/job";
 import { StandardTabs } from "./tabs/StandardTabs";
