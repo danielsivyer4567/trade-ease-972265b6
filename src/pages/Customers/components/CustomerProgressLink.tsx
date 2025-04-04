@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -12,7 +12,8 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ImagesGrid } from "@/components/tasks/ImagesGrid";
 import { Toggle } from "@/components/ui/toggle";
 import { useToast } from "@/hooks/use-toast";
-import { Check, Copy, FileText, Image, MessageSquare, Settings, Users } from "lucide-react";
+import { Check, Copy, FileText, Image, MessageSquare, Settings, Users, Link } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 interface CustomerProgressLinkProps {
   customerId: string;
@@ -20,10 +21,52 @@ interface CustomerProgressLinkProps {
 
 export function CustomerProgressLink({ customerId }: CustomerProgressLinkProps) {
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
-  const [progressLink, setProgressLink] = useState(`https://progress.tradeease.app/customer/${customerId}`);
+  const [progressLink, setProgressLink] = useState('');
   const [linkCopied, setLinkCopied] = useState(false);
   const [activeTab, setActiveTab] = useState("progress");
+  const [customerJobs, setCustomerJobs] = useState<any[]>([]);
+  const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
   const { toast } = useToast();
+
+  useEffect(() => {
+    // Fetch jobs associated with this customer
+    const fetchCustomerJobs = async () => {
+      if (!customerId) return;
+      
+      try {
+        setLoading(true);
+        const { data: customer } = await supabase
+          .from('customers')
+          .select('name')
+          .eq('id', customerId)
+          .single();
+        
+        if (customer && customer.name) {
+          const { data: jobs, error } = await supabase
+            .from('jobs')
+            .select('id, title, job_number, status, date')
+            .eq('customer', customer.name)
+            .order('created_at', { ascending: false });
+            
+          if (error) throw error;
+          
+          setCustomerJobs(jobs || []);
+          if (jobs && jobs.length > 0) {
+            setSelectedJobId(jobs[0].id);
+            // Set the progress link for the first job
+            setProgressLink(`${window.location.origin}/progress/${jobs[0].id}`);
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching customer jobs:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchCustomerJobs();
+  }, [customerId]);
 
   const handleCopyLink = () => {
     navigator.clipboard.writeText(progressLink);
@@ -36,6 +79,11 @@ export function CustomerProgressLink({ customerId }: CustomerProgressLinkProps) 
     setTimeout(() => {
       setLinkCopied(false);
     }, 2000);
+  };
+  
+  const handleJobSelect = (jobId: string) => {
+    setSelectedJobId(jobId);
+    setProgressLink(`${window.location.origin}/progress/${jobId}`);
   };
   
   // Mock data for job steps
@@ -105,6 +153,20 @@ export function CustomerProgressLink({ customerId }: CustomerProgressLinkProps) 
     );
   };
   
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <div className="animate-pulse">
+          <div className="h-8 bg-slate-200 rounded w-56 mb-2"></div>
+          <div className="h-4 bg-slate-200 rounded w-full mb-4"></div>
+          <div className="h-10 bg-slate-200 rounded w-full mb-6"></div>
+          
+          <div className="h-60 bg-slate-200 rounded mb-4"></div>
+        </div>
+      </div>
+    );
+  }
+  
   return (
     <div className="space-y-6">
       <div className="bg-slate-50 rounded-md p-4 border space-y-4">
@@ -123,26 +185,61 @@ export function CustomerProgressLink({ customerId }: CustomerProgressLinkProps) 
           </div>
         </div>
         
-        <div className="flex gap-2">
-          <Input 
-            value={progressLink} 
-            readOnly 
-            className="font-mono text-sm"
-          />
-          <Button
-            variant={linkCopied ? "default" : "outline"}
-            className="shrink-0 gap-2"
-            onClick={handleCopyLink}
-          >
-            {linkCopied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-            <span className="hidden sm:inline">{linkCopied ? "Copied" : "Copy"}</span>
-          </Button>
-        </div>
-        
-        {notificationsEnabled && (
+        {customerJobs.length > 0 ? (
+          <>
+            <div className="space-y-2">
+              <label htmlFor="job-select" className="block text-sm font-medium text-gray-700">
+                Select Job for Progress Link
+              </label>
+              <select 
+                id="job-select"
+                value={selectedJobId || ''}
+                onChange={(e) => handleJobSelect(e.target.value)}
+                className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+              >
+                {customerJobs.map(job => (
+                  <option key={job.id} value={job.id}>
+                    {job.title} ({job.job_number})
+                  </option>
+                ))}
+              </select>
+            </div>
+            
+            <div className="flex gap-2">
+              <Input 
+                value={progressLink} 
+                readOnly 
+                className="font-mono text-sm"
+              />
+              <Button
+                variant={linkCopied ? "default" : "outline"}
+                className="shrink-0 gap-2"
+                onClick={handleCopyLink}
+              >
+                {linkCopied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                <span className="hidden sm:inline">{linkCopied ? "Copied" : "Copy"}</span>
+              </Button>
+            </div>
+            
+            <div className="flex justify-between items-center">
+              <Button variant="outline" size="sm" className="flex items-center gap-1">
+                <Link className="h-4 w-4 mr-1" />
+                <a href={progressLink} target="_blank" rel="noopener noreferrer">
+                  Preview Link
+                </a>
+              </Button>
+              
+              {notificationsEnabled && (
+                <Badge variant="outline" className="bg-blue-50 text-blue-700">
+                  Notifications Enabled
+                </Badge>
+              )}
+            </div>
+          </>
+        ) : (
           <Alert>
             <AlertDescription className="text-sm">
-              The customer will receive email notifications when job progress is updated.
+              No jobs found for this customer. Create a job first to generate a progress link.
             </AlertDescription>
           </Alert>
         )}
