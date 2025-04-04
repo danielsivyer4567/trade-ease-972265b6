@@ -1,7 +1,8 @@
 
+import React from 'react';
 import { TabsTrigger } from "@/components/ui/tabs";
-import { Receipt, Calculator, ScrollText, Wallet, MessageSquare, FileText } from "lucide-react";
-import { useIsMobile } from "@/hooks/use-mobile";
+import { FinancialData } from "../../hooks/financial-data/types";
+
 interface ManagerTabsProps {
   jobTimer: number;
   tabNotes: Record<string, string>;
@@ -9,37 +10,38 @@ interface ManagerTabsProps {
   totalRevenue: number;
   totalCosts: number;
   totalBills: number;
-  extractedFinancialData?: any[];
-  onUpdateBillsTotals: (amount: number) => void;
-  onUpdateCostsTotals: (amount: number) => void;
-  onUpdateInvoiceTotals: (amount: number) => void;
+  extractedFinancialData: FinancialData[];
+  onUpdateInvoiceTotals: (total: number) => void;
+  onUpdateCostsTotals: (total: number) => void;
+  onUpdateBillsTotals: (total: number) => void;
 }
-export const ManagerTabs = ({
+
+export const ManagerTabs: React.FC<ManagerTabsProps> = ({
   jobTimer,
   tabNotes,
   setTabNotes,
   totalRevenue,
   totalCosts,
   totalBills,
-  extractedFinancialData = [],
+  extractedFinancialData,
   onUpdateBillsTotals,
   onUpdateCostsTotals,
   onUpdateInvoiceTotals
-}: ManagerTabsProps) => {
-  const isMobile = useIsMobile();
-  return <>
-      <TabsTrigger value="bills" className="min-w-[80px] sm:min-w-[100px] whitespace-nowrap flex-shrink-0 bg-slate-400 hover:bg-slate-300 mx-0 px-0">
-        {!isMobile && <Receipt className="w-4 h-4 mr-2 mx-[11px]" />}
-        Bills
+}) => {
+  return (
+    <>
+      <TabsTrigger value="bills">Bills</TabsTrigger>
+      <TabsTrigger value="costs">Costs</TabsTrigger>
+      <TabsTrigger value="financials">Financials</TabsTrigger>
+      <TabsTrigger value="conversations">
+        <span className="relative">
+          Customer Conversations
+          <span className="absolute top-0 right-0 -mt-1 -mr-1 flex h-3 w-3">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-3 w-3 bg-blue-500"></span>
+          </span>
+        </span>
       </TabsTrigger>
-      
-      <TabsTrigger value="financials" className="min-w-[80px] sm:min-w-[100px] whitespace-nowrap flex-shrink-0 bg-slate-400 hover:bg-slate-300 px-[27px] mx-[17px]">
-        {!isMobile && <Wallet className="w-4 h-4 mr-2" />}
-        Financials
-      </TabsTrigger>
-      <TabsTrigger value="conversations" className="min-w-[80px] sm:min-w-[120px] whitespace-nowrap flex-shrink-0 bg-slate-400 hover:bg-slate-300 px-[20px] mx-[17px]">
-        {!isMobile && <MessageSquare className="w-4 h-4 mr-2" />}
-        Conversations
-      </TabsTrigger>
-    </>;
+    </>
+  );
 };
