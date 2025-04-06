@@ -1,6 +1,6 @@
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Mic, MicOff } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -14,11 +14,20 @@ const GeminiListen: React.FC<GeminiListenProps> = ({ className }) => {
   const [isProcessing, setIsProcessing] = useState(false);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
+  const silenceTimeoutRef = useRef<number | null>(null);
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const analyserRef = useRef<AnalyserNode | null>(null);
+  const dataArrayRef = useRef<Uint8Array | null>(null);
+  const silenceDetectionThreshold = 15; // Threshold for silence detection
+  const silenceDetectionDuration = 1500; // Duration of silence before stopping in ms
 
   const startListening = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       audioChunksRef.current = [];
+      
+      // Set up audio analysis for silence detection
+      setupAudioAnalysis(stream);
       
       const mediaRecorder = new MediaRecorder(stream);
       mediaRecorderRef.current = mediaRecorder;
@@ -29,7 +38,7 @@ const GeminiListen: React.FC<GeminiListenProps> = ({ className }) => {
       
       mediaRecorder.onstop = handleAudioStop;
       
-      mediaRecorder.start();
+      mediaRecorder.start(100); // Collect data in 100ms chunks
       setIsListening(true);
       toast.info("Listening for instructions...");
     } catch (error) {
@@ -38,11 +47,74 @@ const GeminiListen: React.FC<GeminiListenProps> = ({ className }) => {
     }
   };
 
+  const setupAudioAnalysis = (stream: MediaStream) => {
+    // Initialize AudioContext and analyzer
+    const audioContext = new AudioContext();
+    audioContextRef.current = audioContext;
+    
+    const analyser = audioContext.createAnalyser();
+    analyserRef.current = analyser;
+    analyser.fftSize = 256;
+    
+    const source = audioContext.createMediaStreamSource(stream);
+    source.connect(analyser);
+    
+    const bufferLength = analyser.frequencyBinCount;
+    const dataArray = new Uint8Array(bufferLength);
+    dataArrayRef.current = dataArray;
+    
+    // Start monitoring audio levels
+    checkAudioLevel();
+  };
+
+  const checkAudioLevel = () => {
+    if (!isListening || !analyserRef.current || !dataArrayRef.current) return;
+
+    // Get current audio data
+    analyserRef.current.getByteFrequencyData(dataArrayRef.current);
+    
+    // Calculate average volume level
+    const average = dataArrayRef.current.reduce((a, b) => a + b, 0) / dataArrayRef.current.length;
+    
+    // If sound level is below threshold, start silence timeout
+    if (average < silenceDetectionThreshold) {
+      if (silenceTimeoutRef.current === null) {
+        silenceTimeoutRef.current = window.setTimeout(() => {
+          if (isListening) {
+            stopListening();
+          }
+        }, silenceDetectionDuration);
+      }
+    } else {
+      // If sound is detected, clear the silence timeout
+      if (silenceTimeoutRef.current !== null) {
+        clearTimeout(silenceTimeoutRef.current);
+        silenceTimeoutRef.current = null;
+      }
+    }
+    
+    // Continue checking audio level
+    requestAnimationFrame(checkAudioLevel);
+  };
+
   const stopListening = () => {
     if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
       mediaRecorderRef.current.stop();
       mediaRecorderRef.current.stream.getTracks().forEach(track => track.stop());
     }
+    
+    // Clean up audio analysis
+    if (audioContextRef.current) {
+      audioContextRef.current.close().catch(console.error);
+      audioContextRef.current = null;
+    }
+    
+    // Clear any remaining silence timeout
+    if (silenceTimeoutRef.current !== null) {
+      clearTimeout(silenceTimeoutRef.current);
+      silenceTimeoutRef.current = null;
+    }
+    
     setIsListening(false);
   };
 
@@ -155,6 +227,14 @@ const GeminiListen: React.FC<GeminiListenProps> = ({ className }) => {
       if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
         mediaRecorderRef.current.stop();
         mediaRecorderRef.current.stream.getTracks().forEach(track => track.stop());
+      }
+      
+      if (audioContextRef.current) {
+        audioContextRef.current.close().catch(console.error);
+      }
+      
+      if (silenceTimeoutRef.current !== null) {
+        clearTimeout(silenceTimeoutRef.current);
       }
     };
   }, []);
