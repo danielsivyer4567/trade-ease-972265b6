@@ -1,4 +1,3 @@
-
 import React, { Suspense } from 'react';
 import { Route } from 'react-router-dom';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
@@ -7,6 +6,7 @@ import { LoadingFallback } from './loading-fallback';
 // Import pages
 const DashboardPage = React.lazy(() => import('@/pages/index'));
 const TradeDashPage = React.lazy(() => import('@/pages/TradeDash'));
+const PerformancePage = React.lazy(() => import('@/pages/Performance'));
 const CalculatorsPage = React.lazy(() => import('@/pages/Calculators'));
 const MarkupCalculator = React.lazy(() => import('@/pages/Calculators/MarkupCalculator'));
 const JobCostCalculator = React.lazy(() => import('@/pages/Calculators/JobCostCalculator'));
@@ -28,6 +28,11 @@ export const dashboardRoutes = (
       <Route path="/tradedash" element={
         <Suspense fallback={<LoadingFallback />}>
           <TradeDashPage />
+        </Suspense>
+      } />
+      <Route path="/performance" element={
+        <Suspense fallback={<LoadingFallback />}>
+          <PerformancePage />
         </Suspense>
       } />
       <Route path="/calculators" element={
