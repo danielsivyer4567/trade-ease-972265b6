@@ -12,6 +12,8 @@ const AutomationsPage = React.lazy(() => import('@/pages/Automations'));
 const SiteAuditsPage = React.lazy(() => import('@/pages/SiteAudits'));
 const FormsPage = React.lazy(() => import('@/pages/Forms'));
 const DatabasePage = React.lazy(() => import('@/pages/Database'));
+const WorkflowListPage = React.lazy(() => import('@/pages/Workflow/WorkflowList'));
+const WorkflowTemplatesPage = React.lazy(() => import('@/pages/Workflow/WorkflowTemplates'));
 
 // Export routes as JSX elements
 export const activityRoutes = (
@@ -25,6 +27,16 @@ export const activityRoutes = (
       <Route path="/workflow" element={
         <Suspense fallback={<LoadingFallback />}>
           <WorkflowPage />
+        </Suspense>
+      } />
+      <Route path="/workflow/list" element={
+        <Suspense fallback={<LoadingFallback />}>
+          <WorkflowListPage />
+        </Suspense>
+      } />
+      <Route path="/workflow/templates" element={
+        <Suspense fallback={<LoadingFallback />}>
+          <WorkflowTemplatesPage />
         </Suspense>
       } />
       <Route path="/integrations" element={
