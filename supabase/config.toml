@@ -45,3 +45,6 @@ verify_jwt = false
 
 [functions.admin-manage-numbers]
 verify_jwt = false
+
+[functions.voice-to-text]
+verify_jwt = false
