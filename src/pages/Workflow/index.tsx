@@ -15,6 +15,7 @@ import { AutomationIntegrationService } from '@/services/AutomationIntegrationSe
 import { WorkflowSaveDialog } from './components/WorkflowSaveDialog';
 import { WorkflowLoadDialog } from './components/WorkflowLoadDialog';
 import { useAuth } from '@/contexts/AuthContext';
+import { WorkflowNavigation } from './components/WorkflowNavigation';
 
 export default function WorkflowPage() {
   const navigate = useNavigate();
@@ -38,7 +39,6 @@ export default function WorkflowPage() {
   const [workflowName, setWorkflowName] = useState("New Workflow");
   const [workflowDescription, setWorkflowDescription] = useState("");
   
-  // Handle target data passed from other parts of the app
   const [targetData, setTargetData] = useState<{
     targetType?: 'job' | 'quote' | 'customer' | 'message' | 'social' | 'calendar';
     targetId?: string;
@@ -46,10 +46,8 @@ export default function WorkflowPage() {
   } | null>(null);
 
   useEffect(() => {
-    // Check if GCP Vision API key is configured in Supabase
     checkGcpVisionApiKey();
     
-    // Handle any incoming state from navigation
     if (location.state) {
       const { targetType, targetId, createAutomationNode } = location.state as any;
       if (targetType && targetId) {
@@ -62,16 +60,13 @@ export default function WorkflowPage() {
     }
   }, [location.state]);
 
-  // Handle automation ID from URL parameter
   useEffect(() => {
     if (automationId && flowInstance && !addedAutomationFromURL) {
-      // Fetch automation details and add to workflow
       const addAutomationFromURL = async () => {
         try {
           const automationDetail = await getMockAutomation(parseInt(automationId, 10));
           
           if (automationDetail) {
-            // Create custom event to add the automation node
             const event = new CustomEvent('add-automation', {
               detail: {
                 automationData: {
@@ -85,7 +80,6 @@ export default function WorkflowPage() {
               }
             });
             
-            // Dispatch the event
             document.dispatchEvent(event);
             setAddedAutomationFromURL(true);
           }
@@ -99,7 +93,6 @@ export default function WorkflowPage() {
     }
   }, [automationId, flowInstance, addedAutomationFromURL]);
 
-  // Mock function to get automation details - in a real app this would come from API/database
   async function getMockAutomation(id) {
     const mockAutomations = [
       {
@@ -154,10 +147,8 @@ export default function WorkflowPage() {
     return mockAutomations.find(a => a.id === id) || null;
   }
 
-  // Handle adding an automation node when requested via navigation
   useEffect(() => {
     if (flowInstance && targetData?.createAutomationNode) {
-      // Load associated automations
       const loadAutomations = async () => {
         try {
           const { success, automations } = await AutomationIntegrationService.getAssociatedAutomations(
@@ -166,7 +157,6 @@ export default function WorkflowPage() {
           );
           
           if (success && automations && automations.length > 0) {
-            // Add the first automation as a node
             const automation = automations[0];
             
             const newNode = {
@@ -187,14 +177,12 @@ export default function WorkflowPage() {
             flowInstance.addNodes(newNode);
             toast.success(`Added "${automation.title}" automation to workflow`);
           } else {
-            // No automations found, open selector instead
             toast.info('No automations associated with this item. Please select one to add.');
           }
         } catch (error) {
           console.error('Error loading automations:', error);
         }
         
-        // Clear the target data to prevent re-adding
         setTargetData(prevData => ({
           ...prevData!,
           createAutomationNode: false
@@ -263,7 +251,6 @@ export default function WorkflowPage() {
     try {
       const flowData = flowInstance.toObject();
       
-      // Call the flow's save method
       flowInstance.saveWorkflow && await flowInstance.saveWorkflow(name);
       
       setSaveDialogOpen(false);
@@ -277,7 +264,6 @@ export default function WorkflowPage() {
 
   const handleLoadWorkflow = useCallback((id: string) => {
     setCurrentWorkflowId(id);
-    // Navigate to the same page with the workflow ID
     navigate(`/workflow?id=${id}`, { replace: true });
   }, [navigate]);
 
@@ -289,8 +275,6 @@ export default function WorkflowPage() {
     
     toast.info('Vision analysis will feed data to financial sections');
     
-    // In a real application, this would send the workflow configuration
-    // to a backend service that would execute the workflow
     setTimeout(() => {
       toast.success('Workflow configured to send vision data to financials');
     }, 1000);
@@ -299,10 +283,8 @@ export default function WorkflowPage() {
   const handleAddAutomation = useCallback((automationNode) => {
     if (!flowInstance) return;
     
-    // Generate a unique ID for the node
     automationNode.id = `automation-${Date.now()}`;
     
-    // If we have a target entity, associate this automation with it
     if (targetData?.targetType && targetData?.targetId) {
       AutomationIntegrationService.associateAutomation(
         automationNode.data.automationId,
@@ -310,12 +292,10 @@ export default function WorkflowPage() {
         targetData.targetId
       );
       
-      // Add target data to the node
       automationNode.data.targetType = targetData.targetType;
       automationNode.data.targetId = targetData.targetId;
     }
     
-    // Add the node to the flow
     flowInstance.addNodes(automationNode);
     
     toast.success(`Added "${automationNode.data.label}" automation to workflow`);
@@ -328,11 +308,10 @@ export default function WorkflowPage() {
   return (
     <AppLayout>
       <div className="p-4 h-full">
+        <WorkflowNavigation />
+        
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" onClick={() => navigate(-1)}>
-              <ArrowLeft className="h-4 w-4" />
-            </Button>
             <h1 className="text-2xl font-bold">
               {currentWorkflowId ? workflowName : "New Workflow"}
             </h1>
