@@ -1,10 +1,12 @@
+
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { Brush } from "lucide-react";
+import { GlassCard } from "@/components/ui/GlassCard";
+
 const CleaningRequiredJobs = () => {
   const navigate = useNavigate();
-  return <Card className="p-6 bg-slate-50">
+  return <GlassCard className="p-6">
     <div className="flex justify-between"><h2 className="text-xl font-semibold mb-4 flex items-center">
       <Brush className="mr-2 h-5 w-5 text-orange-500" />
       Cleaning Required Jobs
@@ -33,6 +35,6 @@ const CleaningRequiredJobs = () => {
       </div>
 
     </div>
-  </Card>;
+  </GlassCard>;
 };
 export default CleaningRequiredJobs;
