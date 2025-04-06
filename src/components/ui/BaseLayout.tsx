@@ -5,6 +5,7 @@ import { AppSidebar } from './AppSidebar';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { MainContent } from './MainContent';
 import { SidebarProvider } from './sidebar/SidebarProvider';
+import GeminiListen from "@/components/gemini/GeminiListen";
 
 interface BaseLayoutProps {
   children: React.ReactNode;
@@ -58,6 +59,9 @@ export function BaseLayout({
             {children}
           </MainContent>
         </main>
+        
+        {/* Gemini Listen Feature */}
+        <GeminiListen />
       </div>
     </SidebarProvider>
   );
