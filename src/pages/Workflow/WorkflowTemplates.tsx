@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { AppLayout } from "@/components/ui/AppLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -7,9 +7,10 @@ import { Input } from "@/components/ui/input";
 import { useNavigate } from "react-router-dom";
 import { toast } from 'sonner';
 import { Badge } from "@/components/ui/badge";
-import { Search, ArrowLeft, Workflow as WorkflowIcon, Building, Construction, CreditCard, HardHat, Truck, UserPlus, ClipboardList, Calendar, Zap, WrenchIcon, HomeIcon, ShieldCheck, Receipt, BarChart, Ruler } from "lucide-react";
+import { Search, ArrowLeft, Workflow as WorkflowIcon, Building, Construction, CreditCard, HardHat, Truck, UserPlus, ClipboardList, Calendar, Zap, WrenchIcon, HomeIcon, ShieldCheck, Receipt, BarChart, Ruler, Clock } from "lucide-react";
 import { GlassCard } from '@/components/ui/GlassCard';
 import { WorkflowService, Workflow } from '@/services/WorkflowService';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const TEMPLATE_CATEGORIES = [
   { id: 'construction', name: 'Construction', icon: <Construction className="h-5 w-5" /> },
@@ -584,11 +585,41 @@ export default function WorkflowTemplates() {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredCategory, setFilteredCategory] = useState("");
+  const [userWorkflows, setUserWorkflows] = useState<Workflow[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState("templates");
   
+  // Load user workflows when component mounts
+  useEffect(() => {
+    loadUserWorkflows();
+  }, []);
+
+  const loadUserWorkflows = async () => {
+    setIsLoading(true);
+    try {
+      const { success, workflows } = await WorkflowService.getUserWorkflows();
+      if (success && workflows) {
+        setUserWorkflows(workflows);
+      }
+    } catch (error) {
+      console.error("Error loading user workflows:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const filteredTemplates = WORKFLOW_TEMPLATES.filter(template => {
     const matchesSearch = template.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
                          template.description.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = !filteredCategory || template.category.toLowerCase() === filteredCategory.toLowerCase();
+    return matchesSearch && matchesCategory;
+  });
+
+  const filteredUserWorkflows = userWorkflows.filter(workflow => {
+    const matchesSearch = workflow.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                         (workflow.description && workflow.description.toLowerCase().includes(searchTerm.toLowerCase()));
+    const matchesCategory = !filteredCategory || 
+                           (workflow.category && workflow.category.toLowerCase() === filteredCategory.toLowerCase());
     return matchesSearch && matchesCategory;
   });
   
@@ -610,6 +641,12 @@ export default function WorkflowTemplates() {
     }
   };
 
+  const formatDate = (dateString: string) => {
+    if (!dateString) return 'No date';
+    const date = new Date(dateString);
+    return date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
+  };
+
   return (
     <AppLayout>
       <div className="p-4 md:p-6 space-y-6">
@@ -617,10 +654,10 @@ export default function WorkflowTemplates() {
           <div>
             <h1 className="text-2xl font-bold flex items-center">
               <WorkflowIcon className="mr-2 h-6 w-6" />
-              Workflow Templates
+              Workflow Library
             </h1>
             <p className="text-gray-500 mt-1">
-              Choose a template to use as a starting point for your workflow
+              Choose a template or recent workflow to use as a starting point
             </p>
           </div>
           <Button
@@ -633,88 +670,167 @@ export default function WorkflowTemplates() {
           </Button>
         </div>
         
-        {/* Search and Filters */}
-        <div className="flex flex-col md:flex-row gap-4">
-          <div className="relative flex-grow">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 h-4 w-4" />
-            <Input
-              type="text"
-              placeholder="Search templates..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
-            />
-          </div>
-          <div className="flex flex-wrap gap-2">
-            <Badge
-              variant={filteredCategory === "" ? "default" : "outline"}
-              className="cursor-pointer"
-              onClick={() => setFilteredCategory("")}
-            >
-              All Categories
-            </Badge>
-            {TEMPLATE_CATEGORIES.map((category) => (
-              <Badge
-                key={category.id}
-                variant={filteredCategory === category.name ? "default" : "outline"}
-                className="cursor-pointer flex items-center gap-1"
-                onClick={() => setFilteredCategory(category.name)}
-              >
-                {React.cloneElement(category.icon, { className: "h-3 w-3" })}
-                {category.name}
-              </Badge>
-            ))}
-          </div>
-        </div>
-        
-        {/* Templates Grid */}
-        {filteredTemplates.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filteredTemplates.map((template) => (
-              <Card key={template.id} className="overflow-hidden hover:shadow-md transition-shadow">
-                <CardHeader className="pb-2">
-                  <div className="flex justify-between items-start">
-                    <CardTitle className="text-lg">{template.name}</CardTitle>
-                    <Badge>{template.category}</Badge>
-                  </div>
-                  <CardDescription>{template.description}</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-sm text-gray-500">
-                    <div>Nodes: {template.data.nodes.length}</div>
-                    <div>Connections: {template.data.edges.length}</div>
-                  </div>
-                  <Button 
-                    onClick={() => handleTemplateSelect(template)} 
-                    className="w-full mt-4"
-                  >
-                    Use This Template
-                  </Button>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        ) : (
-          <GlassCard className="p-8 text-center">
-            <div className="flex flex-col items-center gap-4">
-              <WorkflowIcon className="h-16 w-16 text-gray-400" />
-              <h2 className="text-xl font-semibold">No templates found</h2>
-              <p className="text-gray-500 max-w-md">
-                No templates match your current search criteria. Try adjusting your search or clear the filters.
-              </p>
-              <Button 
-                onClick={() => {
-                  setSearchTerm("");
-                  setFilteredCategory("");
-                }}
-                variant="outline"
-                className="mt-2"
-              >
-                Clear Filters
-              </Button>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="mb-4">
+            <TabsTrigger value="templates">Predefined Templates</TabsTrigger>
+            <TabsTrigger value="recent">Recent Workflows</TabsTrigger>
+          </TabsList>
+          
+          {/* Search and Filters - Common to both tabs */}
+          <div className="flex flex-col md:flex-row gap-4 mb-4">
+            <div className="relative flex-grow">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 h-4 w-4" />
+              <Input
+                type="text"
+                placeholder="Search workflows..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10"
+              />
             </div>
-          </GlassCard>
-        )}
+            <div className="flex flex-wrap gap-2">
+              <Badge
+                variant={filteredCategory === "" ? "default" : "outline"}
+                className="cursor-pointer"
+                onClick={() => setFilteredCategory("")}
+              >
+                All Categories
+              </Badge>
+              {TEMPLATE_CATEGORIES.map((category) => (
+                <Badge
+                  key={category.id}
+                  variant={filteredCategory === category.name ? "default" : "outline"}
+                  className="cursor-pointer flex items-center gap-1"
+                  onClick={() => setFilteredCategory(category.name)}
+                >
+                  {React.cloneElement(category.icon, { className: "h-3 w-3" })}
+                  {category.name}
+                </Badge>
+              ))}
+            </div>
+          </div>
+          
+          <TabsContent value="templates">
+            {/* Templates Content */}
+            {filteredTemplates.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {filteredTemplates.map((template) => (
+                  <Card key={template.id} className="overflow-hidden hover:shadow-md transition-shadow">
+                    <CardHeader className="pb-2">
+                      <div className="flex justify-between items-start">
+                        <CardTitle className="text-lg">{template.name}</CardTitle>
+                        <Badge>{template.category}</Badge>
+                      </div>
+                      <CardDescription>{template.description}</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-sm text-gray-500">
+                        <div>Nodes: {template.data.nodes.length}</div>
+                        <div>Connections: {template.data.edges.length}</div>
+                      </div>
+                      <Button 
+                        onClick={() => handleTemplateSelect(template)} 
+                        className="w-full mt-4"
+                      >
+                        Use This Template
+                      </Button>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            ) : (
+              <GlassCard className="p-8 text-center">
+                <div className="flex flex-col items-center gap-4">
+                  <WorkflowIcon className="h-16 w-16 text-gray-400" />
+                  <h2 className="text-xl font-semibold">No templates found</h2>
+                  <p className="text-gray-500 max-w-md">
+                    No templates match your current search criteria. Try adjusting your search or clear the filters.
+                  </p>
+                  <Button 
+                    onClick={() => {
+                      setSearchTerm("");
+                      setFilteredCategory("");
+                    }}
+                    variant="outline"
+                    className="mt-2"
+                  >
+                    Clear Filters
+                  </Button>
+                </div>
+              </GlassCard>
+            )}
+          </TabsContent>
+          
+          <TabsContent value="recent">
+            {/* Recent User Workflows Content */}
+            {isLoading ? (
+              <div className="flex justify-center py-12">
+                <p>Loading recent workflows...</p>
+              </div>
+            ) : filteredUserWorkflows.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {filteredUserWorkflows.map((workflow) => (
+                  <Card key={workflow.id} className="overflow-hidden hover:shadow-md transition-shadow">
+                    <CardHeader className="pb-2">
+                      <div className="flex justify-between items-start">
+                        <CardTitle className="text-lg">{workflow.name}</CardTitle>
+                        {workflow.category && <Badge>{workflow.category}</Badge>}
+                      </div>
+                      <CardDescription>{workflow.description || "No description"}</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-sm text-gray-500 flex items-center mt-1">
+                        <Clock className="h-3 w-3 mr-1" />
+                        {formatDate(workflow.data?.created_at)}
+                      </div>
+                      <div className="text-sm text-gray-500 mt-1">
+                        <div>Nodes: {workflow.data?.nodes?.length || 0}</div>
+                        <div>Connections: {workflow.data?.edges?.length || 0}</div>
+                      </div>
+                      <Button 
+                        onClick={() => navigate(`/workflow?id=${workflow.id}`)} 
+                        className="w-full mt-4"
+                      >
+                        Use This Workflow
+                      </Button>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            ) : (
+              <GlassCard className="p-8 text-center">
+                <div className="flex flex-col items-center gap-4">
+                  <WorkflowIcon className="h-16 w-16 text-gray-400" />
+                  <h2 className="text-xl font-semibold">No recent workflows found</h2>
+                  <p className="text-gray-500 max-w-md">
+                    {searchTerm || filteredCategory ? 
+                      "No workflows match your current search criteria. Try adjusting your search or clear the filters." :
+                      "You haven't created any workflows yet. Create your first workflow to get started."}
+                  </p>
+                  <div className="flex flex-wrap gap-2 justify-center mt-2">
+                    {(searchTerm || filteredCategory) && (
+                      <Button 
+                        onClick={() => {
+                          setSearchTerm("");
+                          setFilteredCategory("");
+                        }}
+                        variant="outline"
+                      >
+                        Clear Filters
+                      </Button>
+                    )}
+                    <Button 
+                      onClick={() => navigate("/workflow")}
+                      className="mt-2"
+                    >
+                      Create New Workflow
+                    </Button>
+                  </div>
+                </div>
+              </GlassCard>
+            )}
+          </TabsContent>
+        </Tabs>
       </div>
     </AppLayout>
   );
