@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback, useEffect } from 'react';
 import { AppLayout } from "@/components/ui/AppLayout";
 import { Flow } from './components/Flow';
@@ -242,7 +241,7 @@ export default function WorkflowPage() {
     setSaveDialogOpen(true);
   }, [flowInstance, user]);
 
-  const handleSaveConfirm = useCallback(async (name: string, description: string) => {
+  const handleSaveConfirm = useCallback(async (name: string, description: string, category: string) => {
     if (!flowInstance) return;
     
     setIsSaving(true);
