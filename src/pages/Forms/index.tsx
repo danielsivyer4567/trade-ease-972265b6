@@ -1,20 +1,33 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { BaseLayout } from '@/components/ui/BaseLayout';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { FileText, FilePlus, ClipboardList, Workflow, ArrowRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
+import { FormPreviewModal } from '@/components/forms/FormPreviewModal';
+
+interface FormTemplate {
+  id: number;
+  title: string;
+  description: string;
+  type: 'job' | 'feedback' | 'onboarding' | 'project';
+  icon: any;
+  hasAutomation: boolean;
+}
 
 const Forms = () => {
   const navigate = useNavigate();
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [selectedForm, setSelectedForm] = useState<FormTemplate | null>(null);
   
-  const formTemplates = [
+  const formTemplates: FormTemplate[] = [
     {
       id: 1,
       title: 'Job Completion Form',
       description: 'Use this form for sign-offs when a job is completed.',
+      type: 'job',
       icon: FileText,
       hasAutomation: true,
     },
@@ -22,6 +35,7 @@ const Forms = () => {
       id: 2,
       title: 'Site Inspection Form',
       description: 'Document on-site inspections and compliance checks.',
+      type: 'project',
       icon: ClipboardList,
       hasAutomation: true,
     },
@@ -29,6 +43,7 @@ const Forms = () => {
       id: 3,
       title: 'Customer Feedback Form',
       description: 'Collect feedback from customers after service completion.',
+      type: 'feedback',
       icon: FileText,
       hasAutomation: true,
     },
@@ -36,6 +51,7 @@ const Forms = () => {
       id: 4, 
       title: 'Material Request Form',
       description: 'Request materials and supplies for upcoming jobs.',
+      type: 'onboarding',
       icon: ClipboardList,
       hasAutomation: true,
     },
@@ -44,6 +60,11 @@ const Forms = () => {
   // Navigate to automations page with forms filter active
   const navigateToAutomations = () => {
     navigate('/automations?category=forms');
+  };
+
+  const handlePreviewForm = (form: FormTemplate) => {
+    setSelectedForm(form);
+    setPreviewOpen(true);
   };
 
   return (
@@ -97,7 +118,13 @@ const Forms = () => {
                 )}
               </CardContent>
               <CardFooter className="flex justify-between pt-4 border-t">
-                <Button variant="outline" size="sm">Preview</Button>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => handlePreviewForm(template)}
+                >
+                  Preview
+                </Button>
                 <Button size="sm">Use Template</Button>
               </CardFooter>
             </Card>
@@ -120,6 +147,14 @@ const Forms = () => {
           </div>
         </div>
       </div>
+
+      {selectedForm && (
+        <FormPreviewModal 
+          open={previewOpen}
+          onOpenChange={setPreviewOpen}
+          formData={selectedForm}
+        />
+      )}
     </BaseLayout>
   );
 };
