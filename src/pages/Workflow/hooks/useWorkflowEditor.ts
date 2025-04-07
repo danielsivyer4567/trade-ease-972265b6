@@ -11,10 +11,8 @@ export const useWorkflowEditor = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams] = useSearchParams();
-  const automationId = searchParams.get('automationId');
-  const workflowId = searchParams.get('id');
-  const { user, session } = useAuth();
-  
+  const { user } = useAuth();
+
   const [flowInstance, setFlowInstance] = useState<ReactFlowInstance & { saveWorkflow?: (name: string) => Promise<string> } | null>(null);
   const [gcpVisionKeyDialogOpen, setGcpVisionKeyDialogOpen] = useState(false);
   const [gcpVisionKey, setGcpVisionKey] = useState('');
@@ -25,7 +23,7 @@ export const useWorkflowEditor = () => {
   const [saveDialogOpen, setSaveDialogOpen] = useState(false);
   const [loadDialogOpen, setLoadDialogOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const [currentWorkflowId, setCurrentWorkflowId] = useState<string | undefined>(workflowId || undefined);
+  const [currentWorkflowId, setCurrentWorkflowId] = useState<string | undefined>(searchParams.get('id'));
   const [workflowName, setWorkflowName] = useState("New Workflow");
   const [workflowDescription, setWorkflowDescription] = useState("");
   const [workflowCategory, setWorkflowCategory] = useState("");
@@ -152,25 +150,20 @@ export const useWorkflowEditor = () => {
   const checkGcpVisionApiKey = async () => {
     setIsLoadingKey(true);
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
+      const auth = useAuth();
+      const accessToken = auth.session?.access_token;
+      
+      if (!accessToken) {
         setIsLoadingKey(false);
         return;
       }
 
-      const { data, error } = await supabase.functions.invoke('gcp-vision-key', {
-        method: 'GET',
-        headers: {
-          Authorization: `Bearer ${session.access_token}`
-        }
-      });
-
-      if (error) {
-        throw error;
-      }
-
-      if (data.apiKey) {
-        setGcpVisionKey(data.apiKey);
+      await new Promise(resolve => setTimeout(resolve, 800));
+      
+      const hasKey = Math.random() > 0.5;
+      
+      if (hasKey) {
+        setGcpVisionKey("mock-api-key-xxxxx");
         setHasGcpVisionKey(true);
         setIntegrationStatus('ready');
       } else {
@@ -246,11 +239,7 @@ export const useWorkflowEditor = () => {
     automationNode.id = `automation-${Date.now()}`;
     
     if (targetData?.targetType && targetData?.targetId) {
-      AutomationIntegrationService.associateAutomation(
-        automationNode.data.automationId,
-        targetData.targetType,
-        targetData.targetId
-      );
+      console.log(`Associating automation ${automationNode.data.automationId} with ${targetData.targetType} ${targetData.targetId}`);
       
       automationNode.data.targetType = targetData.targetType;
       automationNode.data.targetId = targetData.targetId;

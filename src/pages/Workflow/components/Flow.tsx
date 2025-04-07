@@ -6,13 +6,15 @@ import { useFlow } from '../hooks/useFlow';
 import { FlowLoading } from './flow/FlowLoading';
 import { nodeTypes } from './flow/NodeTypes';
 
-interface FlowProps {
+export interface FlowProps {
   onInit?: (instance: ReactFlowInstance) => void;
   workflowId?: string;
+  initialWorkflowId?: string; // Added initialWorkflowId prop
   initialData?: {
     nodes: Node[];
     edges: Edge[];
   };
+  readOnly?: boolean; // Added readOnly prop
 }
 
 export interface FlowHandle {
@@ -23,7 +25,7 @@ export interface FlowHandle {
 }
 
 // Internal component that uses the hook
-const FlowComponent = forwardRef<FlowHandle, FlowProps>(({ onInit, workflowId, initialData }, ref) => {
+const FlowComponent = forwardRef<FlowHandle, FlowProps>(({ onInit, workflowId, initialWorkflowId, initialData, readOnly }, ref) => {
   const {
     nodes,
     edges,
@@ -35,7 +37,12 @@ const FlowComponent = forwardRef<FlowHandle, FlowProps>(({ onInit, workflowId, i
     onDrop,
     handleInit,
     reactFlowInstance
-  } = useFlow({ workflowId, initialData, onInit });
+  } = useFlow({ 
+    workflowId: workflowId || initialWorkflowId, // Support initialWorkflowId
+    initialData, 
+    onInit,
+    readOnly
+  });
 
   // Expose methods to parent via ref
   useImperativeHandle(ref, () => ({
@@ -65,6 +72,12 @@ const FlowComponent = forwardRef<FlowHandle, FlowProps>(({ onInit, workflowId, i
       maxZoom={1.5}
       deleteKeyCode={['Backspace', 'Delete']}
       className="bg-white"
+      // Apply readonly mode if specified
+      nodesDraggable={!readOnly}
+      nodesConnectable={!readOnly}
+      elementsSelectable={!readOnly}
+      zoomOnScroll={!readOnly}
+      panOnScroll={!readOnly}
     >
       <Background />
       <Controls />
