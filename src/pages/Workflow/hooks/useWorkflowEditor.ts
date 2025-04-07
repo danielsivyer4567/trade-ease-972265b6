@@ -1,4 +1,3 @@
-
 import { useState, useCallback, useEffect } from 'react';
 import { useNavigate, useLocation, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
@@ -15,7 +14,7 @@ export const useWorkflowEditor = () => {
   const workflowId = searchParams.get('id');
   const { user, session } = useAuth();
   
-  const [flowInstance, setFlowInstance] = useState<ReactFlowInstance | null>(null);
+  const [flowInstance, setFlowInstance] = useState<ReactFlowInstance & { saveWorkflow?: (name: string) => Promise<string> } | null>(null);
   const [gcpVisionKeyDialogOpen, setGcpVisionKeyDialogOpen] = useState(false);
   const [gcpVisionKey, setGcpVisionKey] = useState('');
   const [hasGcpVisionKey, setHasGcpVisionKey] = useState(false);
@@ -193,8 +192,6 @@ export const useWorkflowEditor = () => {
     setWorkflowCategory(category);
     
     try {
-      const flowData = flowInstance.toObject();
-      
       flowInstance.saveWorkflow && await flowInstance.saveWorkflow(name);
       
       setSaveDialogOpen(false);

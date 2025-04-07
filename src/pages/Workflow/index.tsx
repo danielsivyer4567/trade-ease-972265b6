@@ -31,6 +31,7 @@ export default function WorkflowPage() {
     workflowDescription,
     workflowCategory,
     targetData,
+    initialFlowData,
     handleSaveWorkflow,
     handleSaveConfirm,
     handleLoadWorkflow,
