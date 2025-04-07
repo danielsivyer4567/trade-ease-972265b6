@@ -1,122 +1,127 @@
 
 /**
- * Service for managing workflows
+ * Service for handling workflow operations
  */
+
+export interface Workflow {
+  id: string;
+  name: string;
+  description?: string;
+  category?: string;
+  is_template: boolean;
+  data: any;
+  created_at: string;
+  updated_at: string;
+  user_id: string;
+}
+
 export class WorkflowService {
+  /**
+   * Get workflows for the current user
+   */
+  static async getUserWorkflows(): Promise<Workflow[]> {
+    // In a real app, this would fetch from the backend
+    console.log('Getting user workflows');
+    
+    // Return mock data
+    return [
+      {
+        id: '1',
+        name: 'Customer Onboarding',
+        description: 'Workflow for new customers',
+        category: 'customers',
+        is_template: false,
+        data: {},
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        user_id: 'current-user',
+      },
+      {
+        id: '2',
+        name: 'Job Completion',
+        description: 'Workflow for job completion',
+        category: 'jobs',
+        is_template: false,
+        data: {},
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        user_id: 'current-user',
+      }
+    ];
+  }
+  
+  /**
+   * Get workflow templates
+   */
+  static async getUserTemplates(): Promise<Workflow[]> {
+    // In a real app, this would fetch from the backend
+    console.log('Getting user templates');
+    
+    // Return mock data
+    return [
+      {
+        id: 't1',
+        name: 'Quote Approval Template',
+        description: 'Standard template for quote approvals',
+        category: 'quotes',
+        is_template: true,
+        data: {},
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        user_id: 'current-user',
+      },
+      {
+        id: 't2',
+        name: 'Customer Follow-up Template',
+        description: 'Standard template for customer follow-ups',
+        category: 'customers',
+        is_template: true,
+        data: {},
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        user_id: 'current-user',
+      }
+    ];
+  }
+
   /**
    * Save a workflow
    */
-  static async saveWorkflow(workflowData: {
-    id: string;
-    name: string;
-    description: string;
-    category: string;
-    data: any;
-  }): Promise<{ success: boolean; id?: string; error?: string }> {
-    // In a real app, this would make an API call
-    console.log('Saving workflow:', workflowData);
+  static async saveWorkflow(workflow: Partial<Workflow>): Promise<Workflow> {
+    console.log('Saving workflow:', workflow);
     
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    return { success: true, id: workflowData.id };
+    // Mock a response
+    return {
+      ...workflow,
+      id: workflow.id || Math.random().toString(36).substring(2, 9),
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      user_id: 'current-user',
+      is_template: workflow.is_template || false,
+    } as Workflow;
   }
   
   /**
-   * Load a workflow by ID
+   * Get a workflow by ID
    */
-  static async loadWorkflow(id: string): Promise<{ 
-    success: boolean; 
-    workflow?: {
-      id: string;
-      name: string;
-      description: string;
-      category: string;
-      data: any;
-      createdAt: string;
-      updatedAt: string;
-    }; 
-    error?: string 
-  }> {
-    // In a real app, this would make an API call
-    console.log(`Loading workflow ${id}`);
-    
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 800));
+  static async getWorkflow(id: string): Promise<Workflow | null> {
+    console.log('Getting workflow:', id);
     
     // Mock response
-    return { 
-      success: true,
-      workflow: {
+    if (id) {
+      return {
         id,
         name: 'Sample Workflow',
-        description: 'A sample workflow for testing',
-        category: 'test',
-        data: {
-          nodes: [],
-          edges: [],
-        },
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      }
-    };
-  }
-  
-  /**
-   * List all workflows
-   */
-  static async listWorkflows(): Promise<{ 
-    success: boolean; 
-    workflows?: Array<{
-      id: string;
-      name: string;
-      description: string;
-      category: string;
-      createdAt: string;
-      updatedAt: string;
-    }>; 
-    error?: string 
-  }> {
-    // In a real app, this would make an API call
-    console.log('Listing workflows');
+        description: 'This is a sample workflow',
+        category: 'general',
+        is_template: false,
+        data: {},
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        user_id: 'current-user',
+      };
+    }
     
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 600));
-    
-    // Mock response
-    return { 
-      success: true,
-      workflows: [
-        {
-          id: 'wf-123',
-          name: 'Customer Onboarding',
-          description: 'Workflow for new customers',
-          category: 'customer',
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString()
-        },
-        {
-          id: 'wf-456',
-          name: 'Job Completion',
-          description: 'Workflow for completed jobs',
-          category: 'job',
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString()
-        }
-      ]
-    };
-  }
-  
-  /**
-   * Delete a workflow
-   */
-  static async deleteWorkflow(id: string): Promise<{ success: boolean; error?: string }> {
-    // In a real app, this would make an API call
-    console.log(`Deleting workflow ${id}`);
-    
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 500));
-    
-    return { success: true };
+    return null;
   }
 }

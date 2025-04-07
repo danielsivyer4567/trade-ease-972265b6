@@ -6,13 +6,15 @@ import { Workflow } from 'lucide-react';
 
 export interface AutomationWorkflowButtonProps {
   automationId?: number;
-  variant?: 'default' | 'outline' | 'secondary' | 'destructive' | 'ghost' | 'link';
+  variant?: 'default' | 'outline' | 'secondary' | 'destructive' | 'ghost' | 'link' | 'success';
   size?: 'default' | 'sm' | 'lg' | 'xl' | 'icon';
   children?: React.ReactNode;
   workflowId?: string;
   category?: string;
   targetType?: string; // Added for WorkflowTest compatibility
   targetId?: string;   // Added for WorkflowTest compatibility
+  entityType?: string; // Alternative naming
+  entityId?: string;   // Alternative naming
   label?: string;      // Added for WorkflowTest compatibility
 }
 
@@ -23,7 +25,11 @@ export function AutomationWorkflowButton({
   children,
   workflowId,
   category,
-  label
+  label,
+  targetType,
+  targetId,
+  entityType,
+  entityId
 }: AutomationWorkflowButtonProps) {
   const navigate = useNavigate();
   
@@ -41,6 +47,18 @@ export function AutomationWorkflowButton({
     
     if (category) {
       params.append('category', category);
+    }
+    
+    // Support for both naming conventions
+    const type = targetType || entityType;
+    const id = targetId || entityId;
+    
+    if (type) {
+      params.append('targetType', type);
+    }
+    
+    if (id) {
+      params.append('targetId', id);
     }
     
     const queryString = params.toString();
