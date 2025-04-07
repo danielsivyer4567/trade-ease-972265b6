@@ -3,7 +3,6 @@ import { Routes } from "./routes/index.tsx";
 import { Toaster } from "@/components/ui/toaster";
 import { AuthProvider } from "./contexts/AuthContext";
 import { NotificationProvider } from "./components/notifications/NotificationContextProvider";
-import { BrowserRouter } from "react-router-dom";
 import { Suspense } from "react";
 
 const LoadingFallback = () => (
@@ -18,9 +17,7 @@ function App() {
       <AuthProvider>
         <NotificationProvider>
           <Toaster />
-          <BrowserRouter>
-            <Routes />
-          </BrowserRouter>
+          <Routes />
         </NotificationProvider>
       </AuthProvider>
     </Suspense>
