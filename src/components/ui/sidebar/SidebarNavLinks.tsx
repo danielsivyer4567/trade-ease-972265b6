@@ -18,9 +18,11 @@ export type NavLink = {
   path: string;
   openInNewTab?: boolean;
 };
+
 interface SidebarNavLinksProps {
   isExpanded?: boolean;
 }
+
 export function SidebarNavLinks({
   isExpanded = true
 }: SidebarNavLinksProps) {
@@ -51,25 +53,46 @@ export function SidebarNavLinks({
     }
   };
   
-  return <nav className="grid gap-1 px-2 py-2">
-      {navigationGroups.map((group, index) => <div key={index} className="grid gap-0.5 my-[25px] rounded-full">
+  return (
+    <nav className="grid gap-1 px-2 py-2 w-full">
+      {navigationGroups.map((group, index) => (
+        <div key={index} className="grid gap-0.5 my-[15px] w-full">
           {/* Group Label - Only show if it exists and sidebar is expanded */}
-          {isExpanded && 'label' in group && group.label && <h4 className="text-gray-950 font-extrabold text-base">
+          {isExpanded && 'label' in group && group.label && (
+            <h4 className="text-gray-950 font-extrabold text-base px-2 mb-2">
               {group.label}
-            </h4>}
+            </h4>
+          )}
 
           {/* Regular Links */}
           {group.items.map((item, itemIndex) => {
-        if (item.type === 'link') {
-          const isActive = location.pathname === item.path;
-          const LinkIcon = item.icon;
-          const linkButton = <Button key={item.path} asChild variant={isActive ? "secondary" : "ghost"} size="sm" className={cn("w-full justify-start h-9", isExpanded ? "px-2" : "px-2 justify-center", isActive && "bg-white border border-foreground/10")}>
+            if (item.type === 'link') {
+              const isActive = location.pathname === item.path;
+              const LinkIcon = item.icon;
+              
+              const linkButton = (
+                <Button 
+                  key={item.path} 
+                  asChild 
+                  variant={isActive ? "secondary" : "ghost"} 
+                  size="sm" 
+                  className={cn(
+                    "w-full justify-start h-9", 
+                    isExpanded ? "px-2" : "px-2 justify-center", 
+                    isActive && "bg-white border border-foreground/10"
+                  )}
+                >
                   <Link to={item.path}>
                     <LinkIcon className={cn("h-4 w-4", isActive ? "text-primary" : "text-muted-foreground")} />
-                    {isExpanded && <span className="ml-2 text-sm font-medium">{item.label}</span>}
+                    {isExpanded && <span className="ml-2 text-sm font-medium overflow-hidden text-ellipsis">{item.label}</span>}
                   </Link>
-                </Button>;
-          return isExpanded ? linkButton : <TooltipProvider key={item.path}>
+                </Button>
+              );
+              
+              return isExpanded ? (
+                linkButton
+              ) : (
+                <TooltipProvider key={item.path}>
                   <Tooltip>
                     <TooltipTrigger asChild>
                       {linkButton}
@@ -78,14 +101,29 @@ export function SidebarNavLinks({
                       {item.label}
                     </TooltipContent>
                   </Tooltip>
-                </TooltipProvider>;
-        } else if (item.type === 'button' && item.action === 'logout') {
-          const LogoutIcon = item.icon;
-          const logoutButton = <Button key="logout" variant="ghost" size="sm" onClick={handleLogout} className="py-[23px] my-0 px-0 text-left mx-[9px] text-2xl text-gray-950 rounded-lg bg-slate-50">
+                </TooltipProvider>
+              );
+            } 
+            else if (item.type === 'button' && item.action === 'logout') {
+              const LogoutIcon = item.icon;
+              
+              const logoutButton = (
+                <Button 
+                  key="logout" 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={handleLogout} 
+                  className="py-[15px] px-2 text-left text-gray-950 rounded-lg w-full"
+                >
                   <LogoutIcon className="h-4 w-4 text-muted-foreground" />
-                  {isExpanded && <span className="ml-2 text-sm">{item.label}</span>}
-                </Button>;
-          return isExpanded ? logoutButton : <TooltipProvider key="logout">
+                  {isExpanded && <span className="ml-2 text-sm overflow-hidden text-ellipsis">{item.label}</span>}
+                </Button>
+              );
+              
+              return isExpanded ? (
+                logoutButton
+              ) : (
+                <TooltipProvider key="logout">
                   <Tooltip>
                     <TooltipTrigger asChild>
                       {logoutButton}
@@ -94,18 +132,28 @@ export function SidebarNavLinks({
                       {item.label}
                     </TooltipContent>
                   </Tooltip>
-                </TooltipProvider>;
-        }
+                </TooltipProvider>
+              );
+            }
 
-        // Dropdown Menu (for Jobs and other dropdowns)
-        if (item.type === 'dropdown' && item.items) {
-          const DropdownIcon = item.icon;
-          return <Collapsible key={item.label}>
+            // Dropdown Menu (for Jobs and other dropdowns)
+            if (item.type === 'dropdown' && item.items) {
+              const DropdownIcon = item.icon;
+              
+              return (
+                <Collapsible key={item.label}>
                   <CollapsibleTrigger asChild>
-                    <Button variant="ghost" size="sm" className={cn("w-full justify-between h-10", isExpanded ? "px-2" : "px-2 justify-center")}>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className={cn(
+                        "w-full justify-between h-10", 
+                        isExpanded ? "px-2" : "px-2 justify-center"
+                      )}
+                    >
                       <div className="flex items-center">
                         <DropdownIcon className="h-4 w-4 text-muted-foreground" />
-                        {isExpanded && <span className="ml-2 text-sm">{item.label}</span>}
+                        {isExpanded && <span className="ml-2 text-sm overflow-hidden text-ellipsis">{item.label}</span>}
                       </div>
                       {isExpanded && <ChevronDown className="h-3 w-3" />}
                     </Button>
@@ -113,34 +161,74 @@ export function SidebarNavLinks({
                   
                   <CollapsibleContent>
                     {isExpanded && item.items && item.items.map(subItem => {
-                const isSubActive = location.pathname === subItem.path;
-                const SubIcon = subItem.icon;
-                return <Button key={subItem.path} asChild variant={isSubActive ? "secondary" : "ghost"} size="sm" className={cn("w-full justify-start h-9 pl-8", isSubActive && "bg-white border border-foreground/10")}>
+                      const isSubActive = location.pathname === subItem.path;
+                      const SubIcon = subItem.icon;
+                      
+                      return (
+                        <Button 
+                          key={subItem.path} 
+                          asChild 
+                          variant={isSubActive ? "secondary" : "ghost"} 
+                          size="sm" 
+                          className={cn(
+                            "w-full justify-start h-9 pl-8", 
+                            isSubActive && "bg-white border border-foreground/10"
+                          )}
+                        >
                           <Link to={subItem.path}>
                             <SubIcon className={cn("h-4 w-4", isSubActive ? "text-primary" : "text-muted-foreground")} />
-                            <span className="ml-2 text-sm font-medium">{subItem.label}</span>
+                            <span className="ml-2 text-sm font-medium overflow-hidden text-ellipsis">{subItem.label}</span>
                           </Link>
-                        </Button>;
-              })}
+                        </Button>
+                      );
+                    })}
                   </CollapsibleContent>
-                </Collapsible>;
-        }
-        return null;
-      })}
+                </Collapsible>
+              );
+            }
+            
+            return null;
+          })}
 
-        {/* Show team links only when on the Teams page */}
-        {isTeamsPage && isExpanded && teamLinks.map(team => {
-        const isActive = location.pathname === team.path;
-        const TeamIcon = team.icon;
-        return <Button key={team.path} asChild variant={isActive ? "secondary" : "ghost"} size="sm" className={cn("w-full justify-start h-9 pl-4", isExpanded ? "px-2" : "px-2 justify-center", isActive && "bg-white border border-foreground/10")}>
-              <Link to={team.path}>
-                <TeamIcon className={cn("h-4 w-4", isActive ? "text-primary" : "text-muted-foreground", team.color === "red" && "text-red-500", team.color === "blue" && "text-blue-500", team.color === "green" && "text-green-500")} />
-                <span className={cn("ml-2 text-sm font-medium", team.color === "red" && "text-red-500", team.color === "blue" && "text-blue-500", team.color === "green" && "text-green-500")}>
-                  {team.label}
-                </span>
-              </Link>
-            </Button>;
-      })}
-        </div>)}
-    </nav>;
+          {/* Show team links only when on the Teams page */}
+          {isTeamsPage && isExpanded && teamLinks.map(team => {
+            const isActive = location.pathname === team.path;
+            const TeamIcon = team.icon;
+            
+            return (
+              <Button 
+                key={team.path} 
+                asChild 
+                variant={isActive ? "secondary" : "ghost"} 
+                size="sm" 
+                className={cn(
+                  "w-full justify-start h-9 pl-4", 
+                  isExpanded ? "px-2" : "px-2 justify-center", 
+                  isActive && "bg-white border border-foreground/10"
+                )}
+              >
+                <Link to={team.path}>
+                  <TeamIcon className={cn(
+                    "h-4 w-4", 
+                    isActive ? "text-primary" : "text-muted-foreground",
+                    team.color === "red" && "text-red-500",
+                    team.color === "blue" && "text-blue-500",
+                    team.color === "green" && "text-green-500"
+                  )} />
+                  <span className={cn(
+                    "ml-2 text-sm font-medium overflow-hidden text-ellipsis",
+                    team.color === "red" && "text-red-500",
+                    team.color === "blue" && "text-blue-500",
+                    team.color === "green" && "text-green-500"
+                  )}>
+                    {team.label}
+                  </span>
+                </Link>
+              </Button>
+            );
+          })}
+        </div>
+      ))}
+    </nav>
+  );
 }

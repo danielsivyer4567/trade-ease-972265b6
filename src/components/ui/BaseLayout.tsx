@@ -26,6 +26,9 @@ export function BaseLayout({
     // Automatically collapse sidebar on mobile
     if (isMobile) {
       setSidebarOpen(false);
+    } else {
+      // Ensure sidebar is open on desktop
+      setSidebarOpen(true);
     }
   }, [isMobile]);
 
@@ -34,7 +37,7 @@ export function BaseLayout({
   return (
     <SidebarProvider>
       <div className={cn(
-        "relative min-h-screen w-full",
+        "relative flex min-h-screen w-full",
         className
       )}>
         {/* Sidebar */}
@@ -48,7 +51,7 @@ export function BaseLayout({
         <main className={cn(
           "min-h-screen w-full bg-[#EFF2F5]",
           "transition-all duration-300 ease-in-out",
-          sidebarOpen ? "pl-[240px]" : "pl-[64px]",
+          sidebarOpen ? "md:pl-[240px]" : "md:pl-[64px]",
           isMobile ? "pl-0" : ""
         )}>
           <MainContent 
