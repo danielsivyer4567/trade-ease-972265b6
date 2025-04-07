@@ -8,6 +8,7 @@ export interface Workflow {
   description?: string;
   category?: string;
   data: any;
+  is_template?: boolean;
 }
 
 export const WorkflowService = {
@@ -31,7 +32,8 @@ export const WorkflowService = {
           description: workflow.description || '',
           category: workflow.category || '',
           data: workflow.data,
-          user_id: session.user.id
+          user_id: session.user.id,
+          is_template: workflow.is_template || false
         })
         .select('id')
         .single();
@@ -43,6 +45,20 @@ export const WorkflowService = {
       console.error('Failed to save workflow:', error);
       return { success: false, error };
     }
+  },
+
+  /**
+   * Save workflow as template
+   */
+  saveAsTemplate: async (workflow: Workflow): Promise<{ success: boolean; id?: string; error?: any }> => {
+    // Create a new copy of the workflow with is_template set to true
+    const templateWorkflow = {
+      ...workflow,
+      id: crypto.randomUUID(), // Generate new ID for the template
+      is_template: true
+    };
+    
+    return WorkflowService.saveWorkflow(templateWorkflow);
   },
 
   /**
@@ -65,7 +81,8 @@ export const WorkflowService = {
           name: data.name,
           description: data.description,
           category: data.category,
-          data: data.data
+          data: data.data,
+          is_template: data.is_template
         }
       };
     } catch (error) {
@@ -82,6 +99,7 @@ export const WorkflowService = {
       const { data, error } = await supabase
         .from('workflows')
         .select('*')
+        .eq('is_template', false)
         .order('updated_at', { ascending: false });
 
       if (error) throw error;
@@ -93,11 +111,42 @@ export const WorkflowService = {
           name: item.name,
           description: item.description,
           category: item.category,
-          data: item.data
+          data: item.data,
+          is_template: item.is_template
         }))
       };
     } catch (error) {
       console.error('Failed to get user workflows:', error);
+      return { success: false, error };
+    }
+  },
+
+  /**
+   * Get user templates
+   */
+  getUserTemplates: async (): Promise<{ success: boolean; templates?: Workflow[]; error?: any }> => {
+    try {
+      const { data, error } = await supabase
+        .from('workflows')
+        .select('*')
+        .eq('is_template', true)
+        .order('updated_at', { ascending: false });
+
+      if (error) throw error;
+
+      return { 
+        success: true, 
+        templates: data.map(item => ({
+          id: item.id,
+          name: item.name,
+          description: item.description,
+          category: item.category,
+          data: item.data,
+          is_template: item.is_template
+        }))
+      };
+    } catch (error) {
+      console.error('Failed to get user templates:', error);
       return { success: false, error };
     }
   },
