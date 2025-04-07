@@ -97,13 +97,23 @@ export default function WorkflowListPage() {
       <div className="p-4 md:p-6 space-y-4 md:space-y-6">
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
           <h1 className="text-xl md:text-2xl font-bold">My Workflows</h1>
-          <Button 
-            onClick={() => navigate("/workflow")}
-            size="sm"
-            className="flex items-center gap-2 whitespace-nowrap"
-          >
-            <Plus className="h-4 w-4" /> Create New Workflow
-          </Button>
+          <div className="flex flex-wrap gap-2">
+            <Button 
+              onClick={() => navigate("/workflow/templates")}
+              size="sm"
+              variant="outline"
+              className="flex items-center gap-2 whitespace-nowrap"
+            >
+              <Folder className="h-4 w-4" /> Templates
+            </Button>
+            <Button 
+              onClick={() => navigate("/workflow")}
+              size="sm"
+              className="flex items-center gap-2 whitespace-nowrap"
+            >
+              <Plus className="h-4 w-4" /> Create New Workflow
+            </Button>
+          </div>
         </div>
 
         {isLoading ? (
@@ -118,12 +128,23 @@ export default function WorkflowListPage() {
               <p className="text-gray-500 max-w-md">
                 You haven't created any workflows yet. Create your first workflow to automate tasks and processes.
               </p>
-              <Button 
-                onClick={() => navigate("/workflow")}
-                className="mt-2"
-              >
-                Create Your First Workflow
-              </Button>
+              <div className="flex flex-wrap gap-2 justify-center mt-2">
+                <Button 
+                  onClick={() => navigate("/workflow/templates")}
+                  className="mt-2"
+                  variant="outline"
+                >
+                  <Folder className="h-4 w-4 mr-2" />
+                  Browse Templates
+                </Button>
+                <Button 
+                  onClick={() => navigate("/workflow")}
+                  className="mt-2"
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Create Workflow
+                </Button>
+              </div>
             </div>
           </GlassCard>
         ) : (
