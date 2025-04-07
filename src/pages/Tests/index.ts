@@ -1,4 +1,4 @@
 
-import { WorkflowTest } from './WorkflowTest';
+import WorkflowTest from './WorkflowTest';
 
 export { WorkflowTest };
