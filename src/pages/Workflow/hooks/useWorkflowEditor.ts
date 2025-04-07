@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from '@/contexts/AuthContext';
 import { AutomationIntegrationService } from '@/services/AutomationIntegrationService';
 import { ReactFlowInstance } from '@xyflow/react';
+import { useWorkflowSync } from './useWorkflowSync';
 
 export const useWorkflowEditor = () => {
   const navigate = useNavigate();
@@ -35,6 +36,19 @@ export const useWorkflowEditor = () => {
     targetId?: string;
     createAutomationNode?: boolean;
   } | null>(null);
+
+  const { 
+    lastSavedAt, 
+    isSyncing, 
+    hasUnsavedChanges,
+    saveWorkflow: syncSaveWorkflow 
+  } = useWorkflowSync(
+    flowInstance, 
+    currentWorkflowId, 
+    workflowName, 
+    workflowDescription, 
+    workflowCategory
+  );
 
   useEffect(() => {
     checkGcpVisionApiKey();
@@ -172,7 +186,7 @@ export const useWorkflowEditor = () => {
     }
   };
 
-  const handleSaveWorkflow = useCallback(() => {
+  const handleSaveWorkflow = useCallback(async () => {
     if (!flowInstance) return;
     
     if (!user) {
@@ -192,17 +206,21 @@ export const useWorkflowEditor = () => {
     setWorkflowCategory(category);
     
     try {
-      flowInstance.saveWorkflow && await flowInstance.saveWorkflow(name);
+      const success = await syncSaveWorkflow(true);
       
-      setSaveDialogOpen(false);
-      toast.success("Workflow saved successfully");
+      if (success) {
+        setSaveDialogOpen(false);
+        toast.success("Workflow saved successfully");
+      } else {
+        throw new Error("Failed to save workflow");
+      }
     } catch (error) {
       console.error("Error saving workflow:", error);
       toast.error("Failed to save workflow");
     } finally {
       setIsSaving(false);
     }
-  }, [flowInstance]);
+  }, [flowInstance, syncSaveWorkflow]);
 
   const handleLoadWorkflow = useCallback((id: string) => {
     setCurrentWorkflowId(id);
@@ -274,6 +292,9 @@ export const useWorkflowEditor = () => {
     handleSendToFinancials,
     handleAddAutomation,
     handleNavigateToAutomations,
-    isUserLoggedIn: !!user
+    isUserLoggedIn: !!user,
+    lastSavedAt,
+    isSyncing,
+    hasUnsavedChanges
   };
 };
