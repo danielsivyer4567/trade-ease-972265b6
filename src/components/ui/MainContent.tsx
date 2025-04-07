@@ -9,6 +9,7 @@ import { SIDEBAR_CONSTANTS } from "./sidebar/constants";
 import { ScrollArea } from "./scroll-area";
 import { useAuth } from "@/contexts/AuthContext";
 import { NotificationButton } from "@/components/notifications/NotificationButton";
+import { TabBar } from "./TabBar";
 
 interface MainContentProps {
   children: React.ReactNode;
@@ -70,6 +71,9 @@ export function MainContent({
           </div>
         </div>
       </div>
+
+      {/* Tab Bar */}
+      <TabBar />
 
       {/* Main Content Area - removed max-width and padding */}
       <ScrollArea className="flex-1 w-full">

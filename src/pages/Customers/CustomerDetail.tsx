@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { AppLayout } from "@/components/ui/AppLayout";
 import { Button } from "@/components/ui/button";
@@ -11,6 +10,7 @@ import { CustomerNote, CustomerJobHistory } from '@/pages/Banking/types';
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useTabs } from '@/contexts/TabsContext';
 
 export default function CustomerDetail() {
   const {
@@ -19,14 +19,8 @@ export default function CustomerDetail() {
     id: string;
   }>();
   const navigate = useNavigate();
-  const {
-    toast
-  } = useToast();
-  const {
-    customers,
-    isLoading,
-    fetchCustomers
-  } = useCustomers();
+  const { toast } = useToast();
+  const { customers, isLoading, fetchCustomers } = useCustomers();
   const [customer, setCustomer] = useState<any>(null);
   const [notes, setNotes] = useState<CustomerNote[]>([]);
   const [jobHistory, setJobHistory] = useState<CustomerJobHistory[]>([]);
@@ -34,9 +28,9 @@ export default function CustomerDetail() {
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredCustomers, setFilteredCustomers] = useState<any[]>([]);
   const [showSearchResults, setShowSearchResults] = useState(false);
-  const [customerTabs, setCustomerTabs] = useState<any[]>([]);
-  const [activeTab, setActiveTab] = useState<string | null>(null);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  
+  const { addTab } = useTabs();
 
   useEffect(() => {
     fetchCustomers();
@@ -45,15 +39,10 @@ export default function CustomerDetail() {
   useEffect(() => {
     if (!id) return;
     
-    // Set the active tab to the current customer id
-    setActiveTab(id);
-    
     const fetchCustomerDetails = async () => {
       setIsLoadingData(true);
       try {
-        const {
-          data: session
-        } = await supabase.auth.getSession();
+        const { data: session } = await supabase.auth.getSession();
         if (!session?.session?.user) {
           toast({
             title: "Authentication Error",
@@ -64,11 +53,12 @@ export default function CustomerDetail() {
           return;
         }
 
-        // Fetch customer data
-        const {
-          data: customerData,
-          error: customerError
-        } = await supabase.from('customers').select('*').eq('id', id).single();
+        const { data: customerData, error: customerError } = await supabase
+          .from('customers')
+          .select('*')
+          .eq('id', id)
+          .single();
+          
         if (customerError || !customerData) {
           console.error("Error fetching customer:", customerError);
           toast({
@@ -80,26 +70,20 @@ export default function CustomerDetail() {
           return;
         }
 
-        // Format customer data with correct property names
         const formattedCustomer = {
           ...customerData,
-          zipCode: customerData.zipcode // Map zipcode from DB to zipCode for UI consistency
+          zipCode: customerData.zipcode
         };
         setCustomer(formattedCustomer);
+        
+        if (formattedCustomer) {
+          addTab({
+            id: formattedCustomer.id,
+            title: formattedCustomer.name,
+            path: `/customers/${formattedCustomer.id}`
+          });
+        }
 
-        // Add customer to tabs if not already there
-        setCustomerTabs(prev => {
-          if (!prev.some(tab => tab.id === formattedCustomer.id)) {
-            return [...prev, { 
-              id: formattedCustomer.id, 
-              name: formattedCustomer.name 
-            }];
-          }
-          return prev;
-        });
-
-        // Fetch customer jobs (in a real implementation)
-        // For now we'll just mock this data
         const mockJobHistory: CustomerJobHistory[] = [{
           job_id: '1',
           job_number: 'J-2024-001',
@@ -116,7 +100,6 @@ export default function CustomerDetail() {
         }];
         setJobHistory(mockJobHistory);
 
-        // Mock customer notes
         const mockNotes: CustomerNote[] = [{
           id: '1',
           content: 'Customer prefers communication via email rather than calls.',
@@ -143,7 +126,7 @@ export default function CustomerDetail() {
       }
     };
     fetchCustomerDetails();
-  }, [id, navigate, toast]);
+  }, [id, navigate, toast, addTab]);
 
   useEffect(() => {
     if (searchQuery) {
@@ -161,8 +144,6 @@ export default function CustomerDetail() {
 
   const handleAddNote = async (content: string, important: boolean) => {
     try {
-      // In real implementation, save note to database
-      // For now, just add to local state
       const newNote: CustomerNote = {
         id: `temp-${Date.now()}`,
         content,
@@ -196,17 +177,13 @@ export default function CustomerDetail() {
   };
 
   const handleCustomerChange = (customerId: string) => {
-    // Mark as having unsaved changes
     setHasUnsavedChanges(true);
-    // Navigate to the new customer
     navigate(`/customers/${customerId}`);
-    // Clear the search
     setSearchQuery('');
     setShowSearchResults(false);
   };
 
   const handleSaveAndContinue = () => {
-    // In a real implementation, save any changes to the database
     setHasUnsavedChanges(false);
     toast({
       title: "Success",
@@ -215,7 +192,6 @@ export default function CustomerDetail() {
   };
 
   const handleSaveAndExit = () => {
-    // In a real implementation, save any changes to the database
     setHasUnsavedChanges(false);
     toast({
       title: "Success",
@@ -226,7 +202,6 @@ export default function CustomerDetail() {
 
   const handleTabChange = (tabId: string) => {
     if (hasUnsavedChanges) {
-      // In a real app, you might show a confirmation dialog here
       if (confirm("You have unsaved changes. Are you sure you want to leave?")) {
         setHasUnsavedChanges(false);
         navigate(`/customers/${tabId}`);
@@ -240,7 +215,6 @@ export default function CustomerDetail() {
     event.stopPropagation();
     setCustomerTabs(prev => prev.filter(tab => tab.id !== tabId));
     
-    // If closing the active tab, navigate to the first remaining tab or back to customers
     if (tabId === activeTab) {
       const remainingTabs = customerTabs.filter(tab => tab.id !== tabId);
       if (remainingTabs.length > 0) {
@@ -278,7 +252,6 @@ export default function CustomerDetail() {
   return (
     <AppLayout>
       <div className="flex flex-col h-full">
-        {/* Search bar at the very top */}
         <div className="bg-white border-b p-4 shadow-sm">
           <div className="flex flex-col sm:flex-row gap-4">
             <div className="flex-1 relative">
@@ -325,7 +298,6 @@ export default function CustomerDetail() {
           </div>
         </div>
         
-        {/* Customer tabs */}
         {customerTabs.length > 0 && (
           <div className="bg-white border-b overflow-x-auto">
             <div className="flex">
@@ -350,7 +322,6 @@ export default function CustomerDetail() {
           </div>
         )}
 
-        {/* Main content - takes full remaining height */}
         <div className="flex-1 overflow-auto p-6">
           <div className="max-w-5xl mx-auto">
             <div className="flex items-center justify-between mb-6">
@@ -367,7 +338,6 @@ export default function CustomerDetail() {
                   Edit
                 </Button>
                 <Button variant="destructive" onClick={() => {
-                  // Implement delete functionality
                   toast({
                     title: "Not implemented",
                     description: "Delete functionality will be implemented in future versions"
