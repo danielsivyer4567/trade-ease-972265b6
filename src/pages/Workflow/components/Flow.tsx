@@ -1,7 +1,18 @@
 
 import React, { useCallback } from 'react';
-import ReactFlow, { Background, Controls, Connection, Edge, Node } from '@xyflow/react';
+import {
+  ReactFlow,
+  Background,
+  Controls,
+  Connection,
+  Edge,
+  Node
+} from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
+
+export interface FlowHandle {
+  saveWorkflow: (name: string) => Promise<string>;
+}
 
 interface FlowProps {
   nodes: Node[];

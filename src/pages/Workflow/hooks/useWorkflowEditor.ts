@@ -1,9 +1,8 @@
+
 import { useState, useCallback, useEffect } from 'react';
 import { useNavigate, useLocation, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from '@/contexts/AuthContext';
-import { AutomationIntegrationService } from '@/services/AutomationIntegrationService';
 import { ReactFlowInstance } from '@xyflow/react';
 import { useWorkflowSync } from './useWorkflowSync';
 
@@ -23,7 +22,7 @@ export const useWorkflowEditor = () => {
   const [saveDialogOpen, setSaveDialogOpen] = useState(false);
   const [loadDialogOpen, setLoadDialogOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const [currentWorkflowId, setCurrentWorkflowId] = useState<string | undefined>(searchParams.get('id'));
+  const [currentWorkflowId, setCurrentWorkflowId] = useState<string | undefined>(searchParams.get('id') || undefined);
   const [workflowName, setWorkflowName] = useState("New Workflow");
   const [workflowDescription, setWorkflowDescription] = useState("");
   const [workflowCategory, setWorkflowCategory] = useState("");
@@ -35,18 +34,15 @@ export const useWorkflowEditor = () => {
     createAutomationNode?: boolean;
   } | null>(null);
 
+  const workflowSync = useWorkflowSync(currentWorkflowId);
+  
+  // Extract the properties from workflowSync
   const { 
     lastSavedAt, 
     isSyncing, 
     hasUnsavedChanges,
     saveWorkflow: syncSaveWorkflow 
-  } = useWorkflowSync(
-    flowInstance, 
-    currentWorkflowId, 
-    workflowName, 
-    workflowDescription, 
-    workflowCategory
-  );
+  } = workflowSync;
 
   useEffect(() => {
     checkGcpVisionApiKey();
@@ -93,71 +89,10 @@ export const useWorkflowEditor = () => {
     }
   }, [flowInstance, initialFlowData, currentWorkflowId]);
 
-  async function getMockAutomation(id: number) {
-    const mockAutomations = [
-      {
-        id: 1,
-        title: 'New Job Alert',
-        description: 'Send notifications when jobs are created',
-        isActive: true,
-        triggers: ['New job created'],
-        actions: ['Send notification'],
-        category: 'team'
-      },
-      {
-        id: 2,
-        title: 'Quote Follow-up',
-        description: 'Follow up on quotes after 3 days',
-        isActive: true,
-        triggers: ['Quote age > 3 days'],
-        actions: ['Send email'],
-        category: 'sales'
-      },
-      {
-        id: 3,
-        title: 'Customer Feedback Form',
-        description: 'Send feedback forms after job completion',
-        isActive: true,
-        triggers: ['Job marked complete'],
-        actions: ['Send form to customer'],
-        category: 'forms'
-      },
-      {
-        id: 4,
-        title: 'Social Media Post',
-        description: 'Post job completion to social media',
-        isActive: true,
-        triggers: ['Job marked complete'],
-        actions: ['Post to social media'],
-        category: 'social',
-        premium: true
-      },
-      {
-        id: 5,
-        title: 'SMS Appointment Reminder',
-        description: 'Send SMS reminder 24 hours before appointment',
-        isActive: true,
-        triggers: ['24h before appointment'],
-        actions: ['Send SMS'],
-        category: 'messaging',
-        premium: true
-      }
-    ];
-    
-    return mockAutomations.find(a => a.id === id) || null;
-  }
-
   const checkGcpVisionApiKey = async () => {
     setIsLoadingKey(true);
     try {
-      const auth = useAuth();
-      const accessToken = auth.session?.access_token;
-      
-      if (!accessToken) {
-        setIsLoadingKey(false);
-        return;
-      }
-
+      // Mock API key check
       await new Promise(resolve => setTimeout(resolve, 800));
       
       const hasKey = Math.random() > 0.5;
@@ -199,9 +134,22 @@ export const useWorkflowEditor = () => {
     setWorkflowCategory(category);
     
     try {
-      const success = await syncSaveWorkflow(true);
+      const workflowData = {
+        id: currentWorkflowId,
+        name,
+        description,
+        category,
+        data: {
+          nodes: flowInstance.getNodes(),
+          edges: flowInstance.getEdges()
+        },
+        is_template: false
+      };
       
-      if (success) {
+      const id = await syncSaveWorkflow(workflowData);
+      
+      if (id) {
+        setCurrentWorkflowId(id);
         setSaveDialogOpen(false);
         toast.success("Workflow saved successfully");
       } else {
@@ -213,7 +161,7 @@ export const useWorkflowEditor = () => {
     } finally {
       setIsSaving(false);
     }
-  }, [flowInstance, syncSaveWorkflow]);
+  }, [flowInstance, currentWorkflowId, syncSaveWorkflow]);
 
   const handleLoadWorkflow = useCallback((id: string) => {
     setCurrentWorkflowId(id);
