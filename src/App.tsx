@@ -4,6 +4,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { AuthProvider } from "./contexts/AuthContext";
 import { NotificationProvider } from "./components/notifications/NotificationContextProvider";
 import { Suspense } from "react";
+import { TabsProvider } from "./contexts/TabsContext";
 
 const LoadingFallback = () => (
   <div className="flex h-screen w-screen items-center justify-center">
@@ -16,8 +17,10 @@ function App() {
     <Suspense fallback={<LoadingFallback />}>
       <AuthProvider>
         <NotificationProvider>
-          <Toaster />
-          <Routes />
+          <TabsProvider>
+            <Toaster />
+            <Routes />
+          </TabsProvider>
         </NotificationProvider>
       </AuthProvider>
     </Suspense>
