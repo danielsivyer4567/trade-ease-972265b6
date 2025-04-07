@@ -20,6 +20,7 @@ import { toast } from 'sonner';
 import { AutomationIntegrationService } from '@/services/AutomationIntegrationService';
 import { usePhotoSharing } from '@/hooks/usePhotoSharing';
 import { PhotoSharingModal } from '@/components/sharing/PhotoSharingModal';
+import { useOpenInTab } from './hooks/useOpenInTab';
 
 export function JobDetails() {
   const { id } = useParams<{ id: string }>();
@@ -27,6 +28,9 @@ export function JobDetails() {
   const isManager = true;
   
   const { job, loading } = useJobData(id);
+  
+  // Use the openInTab hook to automatically handle tab management
+  useOpenInTab(job, '/jobs', loading);
   
   const {
     jobTimer,

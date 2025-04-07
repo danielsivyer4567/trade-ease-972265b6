@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { AppLayout } from "@/components/ui/AppLayout";
 import { Button } from "@/components/ui/button";
@@ -9,15 +10,11 @@ import { useCustomers } from './hooks/useCustomers';
 import { CustomerNote, CustomerJobHistory } from '@/pages/Banking/types';
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useTabs } from '@/contexts/TabsContext';
+import { useOpenInTab } from '@/pages/Jobs/hooks/useOpenInTab';
 
 export default function CustomerDetail() {
-  const {
-    id
-  } = useParams<{
-    id: string;
-  }>();
+  const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
   const { customers, isLoading, fetchCustomers } = useCustomers();
@@ -30,7 +27,11 @@ export default function CustomerDetail() {
   const [showSearchResults, setShowSearchResults] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   
-  const { addTab } = useTabs();
+  // Add useTabs hook
+  const { addTab, activateTab, activeTabId } = useTabs();
+  
+  // Use the openInTab hook for automatic tab handling
+  useOpenInTab(customer, '/customers', isLoadingData);
 
   useEffect(() => {
     fetchCustomers();
@@ -76,6 +77,7 @@ export default function CustomerDetail() {
         };
         setCustomer(formattedCustomer);
         
+        // Add the current customer as a tab (this is now handled by useOpenInTab)
         if (formattedCustomer) {
           addTab({
             id: formattedCustomer.id,
@@ -211,20 +213,6 @@ export default function CustomerDetail() {
     }
   };
 
-  const handleCloseTab = (tabId: string, event: React.MouseEvent) => {
-    event.stopPropagation();
-    setCustomerTabs(prev => prev.filter(tab => tab.id !== tabId));
-    
-    if (tabId === activeTab) {
-      const remainingTabs = customerTabs.filter(tab => tab.id !== tabId);
-      if (remainingTabs.length > 0) {
-        navigate(`/customers/${remainingTabs[0].id}`);
-      } else {
-        navigate('/customers');
-      }
-    }
-  };
-
   if (isLoadingData || isLoading) {
     return <AppLayout>
         <div className="p-6 flex justify-center items-center h-full">
@@ -298,30 +286,6 @@ export default function CustomerDetail() {
           </div>
         </div>
         
-        {customerTabs.length > 0 && (
-          <div className="bg-white border-b overflow-x-auto">
-            <div className="flex">
-              {customerTabs.map((tab) => (
-                <div
-                  key={tab.id}
-                  onClick={() => handleTabChange(tab.id)}
-                  className={`flex items-center px-4 py-2 border-r cursor-pointer ${
-                    activeTab === tab.id ? 'bg-blue-50 border-b-2 border-b-blue-500' : 'hover:bg-gray-50'
-                  }`}
-                >
-                  <span className="truncate max-w-[150px]">{tab.name}</span>
-                  <button
-                    onClick={(e) => handleCloseTab(tab.id, e)}
-                    className="ml-2 text-gray-400 hover:text-gray-600"
-                  >
-                    ×
-                  </button>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
         <div className="flex-1 overflow-auto p-6">
           <div className="max-w-5xl mx-auto">
             <div className="flex items-center justify-between mb-6">

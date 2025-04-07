@@ -3,7 +3,7 @@ import { useEffect } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
 import { useTabs } from '@/contexts/TabsContext';
 
-export function useOpenInTab<T extends { id: string; name?: string; title?: string }>(
+export function useOpenInTab<T extends { id: string; name?: string; title?: string; jobNumber?: string }>(
   entity: T | null,
   path: string,
   loading: boolean
@@ -15,8 +15,8 @@ export function useOpenInTab<T extends { id: string; name?: string; title?: stri
   useEffect(() => {
     if (loading || !entity || !id) return;
 
-    // Get the display name (either name or title property)
-    const displayName = entity.name || entity.title || `Item ${entity.id}`;
+    // Get the display name (either name, title, or jobNumber property)
+    const displayName = entity.name || entity.title || entity.jobNumber || `Item ${entity.id}`;
 
     // Add this entity as a tab
     addTab({

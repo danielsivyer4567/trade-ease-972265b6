@@ -16,12 +16,12 @@ function App() {
   return (
     <Suspense fallback={<LoadingFallback />}>
       <AuthProvider>
-        <NotificationProvider>
-          <TabsProvider>
+        <TabsProvider>
+          <NotificationProvider>
             <Toaster />
             <Routes />
-          </TabsProvider>
-        </NotificationProvider>
+          </NotificationProvider>
+        </TabsProvider>
       </AuthProvider>
     </Suspense>
   );
