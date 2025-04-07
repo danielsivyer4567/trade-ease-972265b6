@@ -3,9 +3,10 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
 export interface Workflow {
-  id?: string;
+  id: string;
   name: string;
   description?: string;
+  category?: string;
   data: any;
 }
 
@@ -28,6 +29,7 @@ export const WorkflowService = {
           id: workflow.id,
           name: workflow.name,
           description: workflow.description || '',
+          category: workflow.category || '',
           data: workflow.data,
           user_id: session.user.id
         })
@@ -62,6 +64,7 @@ export const WorkflowService = {
           id: data.id,
           name: data.name,
           description: data.description,
+          category: data.category,
           data: data.data
         }
       };
@@ -89,6 +92,7 @@ export const WorkflowService = {
           id: item.id,
           name: item.name,
           description: item.description,
+          category: item.category,
           data: item.data
         }))
       };
