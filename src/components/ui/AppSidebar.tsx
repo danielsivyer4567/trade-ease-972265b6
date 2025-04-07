@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { cn } from '@/lib/utils';
 import { Button } from './button';
@@ -35,12 +36,14 @@ export function AppSidebar({ className, isExpanded, onToggle }: AppSidebarProps)
           isExpanded={isExpanded}
           onToggle={onToggle}
         />
-        <SidebarNavLinks isExpanded={isExpanded} />
+        <ScrollArea className="flex-1 overflow-y-auto">
+          <SidebarNavLinks isExpanded={isExpanded} />
+        </ScrollArea>
       </aside>
 
       {/* Mobile Sidebar */}
       <Sheet open={isMobileOpen} onOpenChange={setIsMobileOpen}>
-        <SheetContent side="left" className="w-[240px] p-0">
+        <SheetContent side="left" className="w-[280px] p-0">
           <SheetHeader className="h-16 bg-black border-b px-4 flex items-center">
             <SheetTitle className="flex items-center gap-2">
               <svg width="146" height="39" viewBox="0 0 146 39" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -60,8 +63,6 @@ export function AppSidebar({ className, isExpanded, onToggle }: AppSidebarProps)
                 <path fill-rule="evenodd" clip-rule="evenodd" d="M18.9978 20.5594C18.3542 21.2029 17.309 21.197 16.6728 20.5461L10.6078 14.3415C9.98177 13.7011 9.9876 12.6761 10.6209 12.0428V12.0428C11.2644 11.3993 12.3097 11.4052 12.9459 12.0561L19.0108 18.2607C19.6368 18.9012 19.631 19.9261 18.9978 20.5594V20.5594Z" fill="#5EA4D5" />
                 <path d="M21.8242 11.6492C21.9185 12.1834 21.8824 12.7324 21.719 13.2496C21.5557 13.7668 21.2699 14.237 20.8859 14.6201C20.5019 15.0032 20.0311 15.2879 19.5134 15.45C18.9958 15.6121 18.4467 15.6469 17.9128 15.5513C17.5554 15.4874 17.2425 15.5584 17.06 15.743L11.9655 20.7636C11.6933 21.0246 11.33 21.169 10.9529 21.1658C10.5758 21.1627 10.2149 21.0123 9.94714 20.7468C9.67938 20.4813 9.52596 20.1217 9.51963 19.7447C9.5133 19.3677 9.65455 19.0031 9.91325 18.7288L15.0072 13.7081C15.1897 13.524 15.2586 13.21 15.1921 12.8537C15.0922 12.3206 15.1224 11.7714 15.2801 11.2525C15.4379 10.7336 15.7185 10.2605 16.0983 9.87332C16.478 9.48613 16.9455 9.19631 17.4612 9.02848C17.9769 8.86065 18.5255 8.81977 19.0604 8.90931C19.2158 8.93325 19.3605 9.00344 19.4754 9.11076C19.5904 9.21807 19.6704 9.35752 19.705 9.51095C19.7706 9.79348 19.6866 10.1044 19.4639 10.329L18.1372 11.6675C18.119 11.6868 18.1089 11.7123 18.109 11.7388C18.1091 11.7654 18.1194 11.7908 18.1378 11.8099L18.931 12.5963C18.9502 12.6146 18.9758 12.6247 19.0023 12.6246C19.0288 12.6245 19.0543 12.6141 19.0734 12.5957L20.4006 11.2583C20.5047 11.1516 20.6341 11.0729 20.7767 11.0295C20.9194 10.9861 21.0707 10.9795 21.2166 11.0102C21.5101 11.0755 21.7625 11.3017 21.8242 11.6492Z" fill="#5EA4D5" />
               </svg>
-
-
             </SheetTitle>
           </SheetHeader>
           <ScrollArea className="flex-1 py-2 h-[calc(100vh-4rem)]">

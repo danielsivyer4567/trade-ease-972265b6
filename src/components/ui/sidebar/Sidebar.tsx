@@ -1,3 +1,4 @@
+
 import * as React from "react";
 import { cn } from "@/lib/utils";
 import { useSidebar } from "./SidebarProvider";
@@ -16,9 +17,9 @@ export function Sidebar({ className, children }: SidebarProps) {
   if (isMobile) {
     return (
       <Sheet open={openMobile} onOpenChange={setOpenMobile}>
-        <SheetContent side="left" className="w-[300px] p-0 ">
-          <ScrollArea className="h-full">
-            <div className="space-y-4 py-4">
+        <SheetContent side="left" className="w-[300px] p-0">
+          <ScrollArea className="h-full w-full">
+            <div className="space-y-4 py-4 w-full">
               {children}
             </div>
           </ScrollArea>
@@ -32,7 +33,7 @@ export function Sidebar({ className, children }: SidebarProps) {
     <div
       data-state={state}
       className={cn(
-        "relative hidden h-screen border-r  md:flex md:flex-col ",
+        "relative hidden h-screen border-r md:flex md:flex-col",
         state === "expanded" ? "w-[240px]" : "w-[60px]",
         "transition-all duration-300 ease-in-out",
         className
@@ -42,8 +43,8 @@ export function Sidebar({ className, children }: SidebarProps) {
         "--sidebar-width-icon": SIDEBAR_CONSTANTS.SIDEBAR_WIDTH_ICON,
       } as React.CSSProperties}
     >
-      <ScrollArea className="flex-1">
-        <div className="">
+      <ScrollArea className="flex-1 w-full">
+        <div className="w-full">
           {children}
         </div>
       </ScrollArea>
