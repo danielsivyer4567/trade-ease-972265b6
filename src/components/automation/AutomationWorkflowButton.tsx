@@ -10,6 +10,7 @@ interface AutomationWorkflowButtonProps {
   size?: 'default' | 'sm' | 'lg' | 'xl' | 'icon';
   children?: React.ReactNode;
   workflowId?: string; // Added workflowId prop
+  category?: string; // Added category prop
 }
 
 export function AutomationWorkflowButton({ 
@@ -17,7 +18,8 @@ export function AutomationWorkflowButton({
   variant = 'default', 
   size = 'default',
   children = 'Add to Workflow',
-  workflowId
+  workflowId,
+  category
 }: AutomationWorkflowButtonProps) {
   const navigate = useNavigate();
   
@@ -31,6 +33,10 @@ export function AutomationWorkflowButton({
     
     if (workflowId) {
       params.append('id', workflowId);
+    }
+    
+    if (category) {
+      params.append('category', category);
     }
     
     const queryString = params.toString();
