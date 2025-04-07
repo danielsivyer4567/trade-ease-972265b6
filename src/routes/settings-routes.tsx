@@ -65,7 +65,7 @@ export const settingsRoutes = (
           <TermsOfServicePage />
         </Suspense>
       } />
-      <Route path="/settings/(:settingType)" element={
+      <Route path="/settings/:settingType" element={
         <Suspense fallback={<LoadingFallback />}>
           <GenericSettingsPage />
         </Suspense>

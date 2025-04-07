@@ -1,39 +1,26 @@
 
-import React, { createContext, useContext } from 'react';
+import React from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+
+interface QueryProviderProps {
+  children: React.ReactNode;
+}
 
 // Create a client
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 5 * 60 * 1000, // 5 minutes
-      retry: 1,
       refetchOnWindowFocus: false,
+      retry: 1,
+      staleTime: 5 * 60 * 1000, // 5 minutes
     },
   },
 });
 
-// Create a context for the query client
-interface QueryContextType {
-  client: QueryClient;
-}
-
-const QueryContext = createContext<QueryContextType | undefined>(undefined);
-
-// Provider component
-export const QueryProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const QueryProvider = ({ children }: QueryProviderProps) => {
   return (
     <QueryClientProvider client={queryClient}>
       {children}
     </QueryClientProvider>
   );
-};
-
-// Hook to use the query context
-export const useQueryContext = () => {
-  const context = useContext(QueryContext);
-  if (context === undefined) {
-    throw new Error('useQueryContext must be used within a QueryProvider');
-  }
-  return context;
 };
