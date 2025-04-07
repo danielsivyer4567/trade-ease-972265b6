@@ -3,7 +3,7 @@ import React, { useRef } from 'react';
 import { BaseLayout } from '@/components/ui/BaseLayout';
 import { useWorkflowEditor } from './hooks/useWorkflowEditor';
 import { WorkflowHeader } from './components/WorkflowHeader';
-import { Flow, FlowHandle } from './components/Flow';
+import Flow, { FlowHandle } from './components/Flow';
 import { NodeSidebar } from './components/NodeSidebar';
 import { WorkflowSaveDialog } from './components/WorkflowSaveDialog';
 import { WorkflowLoadDialog } from './components/WorkflowLoadDialog';
@@ -100,10 +100,14 @@ const Workflow = () => {
           
           <div className="flex-1 overflow-hidden relative">
             <Flow
-              ref={flowRef}
-              onInit={handleInit}
+              nodes={[]}
+              edges={[]}
+              onNodesChange={() => {}}
+              onEdgesChange={() => {}}
+              onConnect={() => {}}
+              setReactFlowInstance={setFlowInstance}
               workflowId={currentWorkflowId}
-              initialData={initialFlowData}
+              readOnly={false}
             />
             
             <div className="absolute bottom-4 right-4 z-10 bg-white/80 backdrop-blur-sm rounded-md px-3 py-1 shadow-sm border">

@@ -8,13 +8,14 @@ import { WorkflowService } from '@/services/WorkflowService';
 import { toast } from 'sonner';
 import { Search } from 'lucide-react';
 
-interface WorkflowLoadDialogProps {
+export interface WorkflowLoadDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
   onLoadWorkflow: (workflowId: string) => void;
   trigger?: React.ReactNode;
 }
 
-export const WorkflowLoadDialog = ({ onLoadWorkflow, trigger }: WorkflowLoadDialogProps) => {
-  const [open, setOpen] = useState(false);
+export const WorkflowLoadDialog = ({ open, onOpenChange, onLoadWorkflow, trigger }: WorkflowLoadDialogProps) => {
   const [search, setSearch] = useState('');
   const [workflows, setWorkflows] = useState<any[]>([]);
   const [templates, setTemplates] = useState<any[]>([]);
@@ -57,7 +58,7 @@ export const WorkflowLoadDialog = ({ onLoadWorkflow, trigger }: WorkflowLoadDial
 
   const handleSelectWorkflow = (id: string) => {
     onLoadWorkflow(id);
-    setOpen(false);
+    onOpenChange(false);
   };
 
   // Filter workflows and templates based on search
@@ -72,7 +73,7 @@ export const WorkflowLoadDialog = ({ onLoadWorkflow, trigger }: WorkflowLoadDial
   );
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogTrigger asChild>
         {trigger || <Button variant="outline">Load Workflow</Button>}
       </DialogTrigger>

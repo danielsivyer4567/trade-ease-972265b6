@@ -7,6 +7,8 @@ export const useWorkflowSync = (workflowId?: string) => {
   const [isSyncing, setIsSyncing] = useState(false);
   const [lastSynced, setLastSynced] = useState<Date | null>(null);
   const [needsSaving, setNeedsSaving] = useState(false);
+  const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
   // Load workflow data when ID changes
   useEffect(() => {
@@ -22,6 +24,8 @@ export const useWorkflowSync = (workflowId?: string) => {
       if (response.success && response.workflows && response.workflows.length > 0) {
         const workflow = response.workflows[0];
         setLastSynced(new Date());
+        setLastSavedAt(new Date());
+        setHasUnsavedChanges(false);
         return workflow;
       } else {
         toast.error('Failed to load workflow');
@@ -41,8 +45,11 @@ export const useWorkflowSync = (workflowId?: string) => {
     try {
       const result = await WorkflowService.saveWorkflow(workflow);
       if (result.success) {
-        setLastSynced(new Date());
+        const now = new Date();
+        setLastSynced(now);
+        setLastSavedAt(now);
         setNeedsSaving(false);
+        setHasUnsavedChanges(false);
         toast.success('Workflow saved');
         return result.id;
       } else {
@@ -60,6 +67,7 @@ export const useWorkflowSync = (workflowId?: string) => {
 
   const markAsChanged = useCallback(() => {
     setNeedsSaving(true);
+    setHasUnsavedChanges(true);
   }, []);
 
   return {
@@ -69,5 +77,7 @@ export const useWorkflowSync = (workflowId?: string) => {
     lastSynced,
     needsSaving,
     markAsChanged,
+    lastSavedAt,
+    hasUnsavedChanges
   };
 };
