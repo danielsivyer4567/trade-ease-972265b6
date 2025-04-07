@@ -1,170 +1,127 @@
 
-import { useState, useCallback, useEffect } from 'react';
-import { useNodesState, useEdgesState, useReactFlow, Node, Edge, Connection } from '@xyflow/react';
-import { toast } from 'sonner';
+import { useState, useCallback, useRef } from 'react';
+import { 
+  useNodesState, 
+  useEdgesState, 
+  addEdge, 
+  Node, 
+  Edge, 
+  OnNodesChange, 
+  OnEdgesChange, 
+  OnConnect, 
+  ReactFlowInstance, 
+  Connection 
+} from '@xyflow/react';
 import { WorkflowService } from '@/services/WorkflowService';
-import { useAuth } from '@/contexts/AuthContext';
 
-export interface UseFlowProps {
+interface UseFlowProps {
   workflowId?: string;
   initialData?: {
     nodes: Node[];
     edges: Edge[];
   };
-  onInit?: (instance: any) => void;
+  onInit?: (instance: ReactFlowInstance) => void;
 }
 
 export const useFlow = ({ workflowId, initialData, onInit }: UseFlowProps) => {
-  const [nodes, setNodes, onNodesChange] = useNodesState([]);
-  const [edges, setEdges, onEdgesChange] = useEdgesState([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const { user } = useAuth();
-  
-  // This hook will only work inside a ReactFlowProvider
-  const reactFlowInstance = useReactFlow();
+  const [nodes, setNodes, onNodesChange] = useNodesState<Node[]>(initialData?.nodes || []);
+  const [edges, setEdges, onEdgesChange] = useEdgesState<Edge[]>(initialData?.edges || []);
+  const [isLoading, setIsLoading] = useState(workflowId ? true : false);
+  const [reactFlowInstance, setReactFlowInstance] = useState<ReactFlowInstance | null>(null);
+  const nodeIdCounter = useRef(1);
 
-  const handleInit = useCallback((instance: any) => {
+  const handleInit = useCallback((instance: ReactFlowInstance) => {
+    setReactFlowInstance(instance);
+    
     if (onInit) {
-      // Add saveWorkflow method to the instance
-      const enhancedInstance = {
-        ...instance,
-        saveWorkflow: async (name: string) => {
-          if (!user) {
-            toast.error("You need to be logged in to save workflows");
-            return;
-          }
-          
-          try {
-            const flowObj = instance.toObject();
-            
-            const workflowData = {
-              id: workflowId || crypto.randomUUID(),
-              name,
-              data: flowObj,
-            };
-            
-            const result = await WorkflowService.saveWorkflow(workflowData);
-            
-            if (result.success) {
-              return result.id;
-            } else {
-              throw new Error("Failed to save workflow");
-            }
-          } catch (error) {
-            console.error("Error saving workflow:", error);
-            throw error;
-          }
-        }
-      };
-      
-      onInit(enhancedInstance);
+      onInit(instance);
     }
-  }, [onInit, workflowId, user]);
 
-  // Load workflow by ID
-  useEffect(() => {
+    // If a workflowId is provided, load that workflow
     if (workflowId) {
-      const loadWorkflow = async () => {
-        setIsLoading(true);
-        try {
-          const { success, workflow, error } = await WorkflowService.loadWorkflow(workflowId);
-          
-          if (success && workflow) {
-            if (workflow.data?.nodes) {
-              setNodes(workflow.data.nodes);
-            }
-            
-            if (workflow.data?.edges) {
-              setEdges(workflow.data.edges);
-            }
-          } else {
-            console.error("Error loading workflow:", error);
-            toast.error("Failed to load workflow");
-          }
-        } catch (error) {
-          console.error("Error loading workflow:", error);
-          toast.error("Failed to load workflow");
-        } finally {
-          setIsLoading(false);
-        }
-      };
-      
-      loadWorkflow();
-    } else if (initialData && !isLoading) {
-      // Apply initial data from template if provided and not loading a workflow
-      if (initialData.nodes) {
-        setNodes(initialData.nodes);
-      }
-      
-      if (initialData.edges) {
-        setEdges(initialData.edges);
-      }
+      loadWorkflow(workflowId, instance);
+    } else {
+      setIsLoading(false);
     }
-  }, [workflowId, setNodes, setEdges, initialData, isLoading]);
+  }, [workflowId, onInit]);
 
-  // Event handlers
-  const onConnect = useCallback((params: Connection) => {
-    setEdges((eds) => [...eds, { ...params, id: `e-${params.source}-${params.target}` }]);
+  // Connect nodes
+  const onConnect = useCallback((connection: Connection) => {
+    setEdges(eds => addEdge(connection, eds));
   }, [setEdges]);
 
-  const onDragOver = useCallback((event: React.DragEvent<HTMLDivElement>) => {
+  // Load workflow
+  const loadWorkflow = async (id: string, instance: ReactFlowInstance) => {
+    try {
+      setIsLoading(true);
+      const { success, workflow, error } = await WorkflowService.loadWorkflow(id);
+      
+      if (!success || !workflow) {
+        throw new Error(error || 'Failed to load workflow');
+      }
+      
+      // Update nodes and edges from the loaded workflow
+      if (workflow.data && instance) {
+        if (workflow.data.nodes) {
+          instance.setNodes(workflow.data.nodes);
+        }
+        
+        if (workflow.data.edges) {
+          instance.setEdges(workflow.data.edges);
+        }
+      }
+      
+      // Find the highest node ID to continue from
+      if (workflow.data?.nodes?.length) {
+        const highestId = workflow.data.nodes.reduce((max, node) => {
+          const idNum = parseInt(node.id.toString().split('-').pop() || '0', 10);
+          return idNum > max ? idNum : max;
+        }, 0);
+        nodeIdCounter.current = highestId + 1;
+      }
+      
+      setTimeout(() => {
+        instance.fitView({ padding: 0.2 });
+      }, 100);
+    } catch (error) {
+      console.error('Error loading workflow:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Handle dropping nodes onto the canvas
+  const onDragOver = useCallback((event: React.DragEvent) => {
     event.preventDefault();
     event.dataTransfer.dropEffect = 'move';
   }, []);
 
-  const onDrop = useCallback(
-    (event: React.DragEvent<HTMLDivElement>) => {
-      event.preventDefault();
+  const onDrop = useCallback((event: React.DragEvent) => {
+    event.preventDefault();
 
-      const reactFlowBounds = event.currentTarget.getBoundingClientRect();
-      const nodeData = JSON.parse(event.dataTransfer.getData('application/reactflow'));
+    if (!reactFlowInstance) return;
 
-      // Check if the dropped element is valid
-      if (!nodeData) return;
-
-      const position = reactFlowInstance.screenToFlowPosition({
-        x: event.clientX - reactFlowBounds.left,
-        y: event.clientY - reactFlowBounds.top,
-      });
-
-      const newNode = {
-        id: `${nodeData.type}-${crypto.randomUUID().substring(0, 8)}`,
-        type: nodeData.type,
-        position,
-        data: { ...nodeData.data },
-      };
-
-      setNodes((nds) => [...nds, newNode]);
-    },
-    [reactFlowInstance, setNodes]
-  );
-
-  // Add event listeners for custom events
-  useEffect(() => {
-    const handleAddAutomation = (event: CustomEvent) => {
-      if (!event.detail?.automationData) return;
-      
-      const { automationData } = event.detail;
-      
-      // Create an automation node at a fixed position (or calculate a position)
-      const newNode = {
-        id: `automation-${Date.now()}`,
-        type: 'automationNode',
-        position: { x: 100, y: 100 },
-        data: automationData,
-      };
-      
-      setNodes((nds) => [...nds, newNode]);
-    };
+    const reactFlowBounds = event.currentTarget.getBoundingClientRect();
+    const type = event.dataTransfer.getData('application/reactflow/type');
+    const data = JSON.parse(event.dataTransfer.getData('application/reactflow/data') || '{}');
     
-    // Register event listener
-    document.addEventListener('add-automation', handleAddAutomation as EventListener);
-    
-    // Clean up
-    return () => {
-      document.removeEventListener('add-automation', handleAddAutomation as EventListener);
+    // Check if the dropped element is valid
+    if (!type) return;
+
+    const position = reactFlowInstance.screenToFlowPosition({
+      x: event.clientX - reactFlowBounds.left,
+      y: event.clientY - reactFlowBounds.top,
+    });
+
+    const newNode = {
+      id: `${type}-${nodeIdCounter.current++}`,
+      type,
+      position,
+      data: { ...data },
     };
-  }, [setNodes]);
+
+    setNodes(nds => nds.concat(newNode));
+  }, [reactFlowInstance, setNodes]);
 
   return {
     nodes,
@@ -175,6 +132,7 @@ export const useFlow = ({ workflowId, initialData, onInit }: UseFlowProps) => {
     onConnect,
     onDragOver,
     onDrop,
-    handleInit
+    handleInit,
+    reactFlowInstance
   };
 };
