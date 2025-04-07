@@ -1,64 +1,150 @@
 
 import React from 'react';
-import { 
-  Workflow, 
-  User, 
-  Clock, 
-  MessageSquare, 
-  Eye
-} from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { useMediaQuery } from '@/hooks/use-mobile';
+import { Paperclip } from 'lucide-react';
 
-export interface NodeSidebarProps {
-  handleAddAutomation: (automationNode: any) => void;
+interface NodeSidebarProps {
+  targetData?: {
+    targetType?: 'job' | 'quote' | 'customer' | 'message' | 'social' | 'calendar';
+    targetId?: string;
+    createAutomationNode?: boolean;
+  } | null;
 }
 
-export const NodeSidebar: React.FC<NodeSidebarProps> = ({ handleAddAutomation }) => {
-  const isMobile = useMediaQuery("(max-width: 640px)");
-
-  const handleDragStart = (event: React.DragEvent, nodeType: string, data: any = {}) => {
-    event.dataTransfer.setData('application/reactflow/type', nodeType);
-    event.dataTransfer.setData('application/reactflow/data', JSON.stringify(data));
+export function NodeSidebar({ targetData }: NodeSidebarProps) {
+  const handleDragStart = (event, nodeType) => {
+    event.dataTransfer.setData('application/reactflow', nodeType);
     event.dataTransfer.effectAllowed = 'move';
   };
 
-  const nodes = [
-    { type: 'customer', label: 'Customer', icon: <User className="h-4 w-4 mr-2" /> },
-    { type: 'job', label: 'Job', icon: <Workflow className="h-4 w-4 mr-2" /> },
-    { type: 'task', label: 'Task', icon: <Clock className="h-4 w-4 mr-2" /> },
-    { type: 'quote', label: 'Quote', icon: <MessageSquare className="h-4 w-4 mr-2" /> },
-    { type: 'visionNode', label: 'Vision Analysis', icon: <Eye className="h-4 w-4 mr-2" /> },
-  ];
-
-  const addNode = (type: string, label: string) => {
-    handleAddAutomation({
-      type,
-      position: { x: 100, y: 100 },
-      data: { label }
-    });
-  };
-
   return (
-    <div className={`p-2 border-r flex flex-col ${isMobile ? 'w-12' : 'w-48'}`}>
-      <div className="text-sm font-medium mb-2 px-1">
-        {!isMobile && 'Drag Nodes'}
+    <aside className="w-64 bg-slate-50 border-r border-gray-200 p-4 overflow-y-auto">
+      <h3 className="font-medium text-sm mb-2">Workflow Nodes</h3>
+      
+      {targetData?.targetType && targetData?.targetId && (
+        <div className="mb-4">
+          <div className="text-xs text-gray-500 mb-1">Working with:</div>
+          <div className="bg-blue-50 border border-blue-200 rounded p-2 flex items-center">
+            <Paperclip className="h-3 w-3 text-blue-500 mr-2" />
+            <div className="text-xs">
+              <span className="font-medium">{targetData.targetType}</span>
+              <span className="text-gray-500 mx-1">•</span>
+              <span>{targetData.targetId.substring(0, 8)}</span>
+            </div>
+          </div>
+        </div>
+      )}
+      
+      <div className="space-y-1 mb-4">
+        <div
+          className="bg-white p-3 border border-gray-200 rounded-md shadow-sm cursor-move"
+          onDragStart={(event) => handleDragStart(event, 'customerNode')}
+          draggable
+        >
+          <div className="text-sm font-medium">Customer</div>
+          <div className="text-xs text-gray-500">Contact info & history</div>
+        </div>
       </div>
+
+      <div className="space-y-1 mb-4">
+        <div
+          className="bg-white p-3 border border-gray-200 rounded-md shadow-sm cursor-move"
+          onDragStart={(event) => handleDragStart(event, 'jobNode')}
+          draggable
+        >
+          <div className="text-sm font-medium">Job</div>
+          <div className="text-xs text-gray-500">Schedule & assignments</div>
+        </div>
+      </div>
+
+      <div className="space-y-1 mb-4">
+        <div
+          className="bg-white p-3 border border-gray-200 rounded-md shadow-sm cursor-move"
+          onDragStart={(event) => handleDragStart(event, 'quoteNode')}
+          draggable
+        >
+          <div className="text-sm font-medium">Quote</div>
+          <div className="text-xs text-gray-500">Pricing & approvals</div>
+        </div>
+      </div>
+
+      <div className="space-y-1 mb-4">
+        <div
+          className="bg-white p-3 border border-gray-200 rounded-md shadow-sm cursor-move"
+          onDragStart={(event) => handleDragStart(event, 'taskNode')}
+          draggable
+        >
+          <div className="text-sm font-medium">Task</div>
+          <div className="text-xs text-gray-500">To-dos & assignments</div>
+        </div>
+      </div>
+
+      <div className="space-y-1 mb-4">
+        <div
+          className="bg-white p-3 border border-gray-200 rounded-md shadow-sm cursor-move"
+          onDragStart={(event) => handleDragStart(event, 'visionNode')}
+          draggable
+        >
+          <div className="text-sm font-medium">Vision Analysis</div>
+          <div className="text-xs text-gray-500">Extract financial data</div>
+        </div>
+      </div>
+
       <div className="space-y-1">
-        {nodes.map((node) => (
-          <Button
-            key={node.type}
-            variant="ghost"
-            className={`w-full justify-start text-xs ${isMobile ? 'px-1' : ''}`}
-            draggable
-            onDragStart={(e) => handleDragStart(e, node.type, { label: node.label })}
-            onClick={() => addNode(node.type, node.label)}
-          >
-            {node.icon}
-            {!isMobile && node.label}
-          </Button>
-        ))}
+        <div
+          className="bg-white p-3 border border-gray-200 rounded-md shadow-sm cursor-move"
+          onDragStart={(event) => handleDragStart(event, 'customNode')}
+          draggable
+        >
+          <div className="text-sm font-medium">Custom</div>
+          <div className="text-xs text-gray-500">Blank node</div>
+        </div>
       </div>
-    </div>
+
+      <h3 className="font-medium text-sm mt-6 mb-2">Messaging Nodes</h3>
+      <div className="space-y-1 mb-4">
+        <div
+          className="bg-white p-3 border border-gray-200 rounded-md shadow-sm cursor-move"
+          onDragStart={(event) => handleDragStart(event, 'messagingNode')}
+          draggable
+        >
+          <div className="text-sm font-medium">SMS</div>
+          <div className="text-xs text-gray-500">Text notifications</div>
+        </div>
+      </div>
+
+      <div className="space-y-1 mb-4">
+        <div
+          className="bg-white p-3 border border-gray-200 rounded-md shadow-sm cursor-move"
+          onDragStart={(event) => handleDragStart(event, 'emailNode')}
+          draggable
+        >
+          <div className="text-sm font-medium">Email</div>
+          <div className="text-xs text-gray-500">Email notifications</div>
+        </div>
+      </div>
+
+      <div className="space-y-1">
+        <div
+          className="bg-white p-3 border border-gray-200 rounded-md shadow-sm cursor-move"
+          onDragStart={(event) => handleDragStart(event, 'whatsappNode')}
+          draggable
+        >
+          <div className="text-sm font-medium">WhatsApp</div>
+          <div className="text-xs text-gray-500">WhatsApp messages</div>
+        </div>
+      </div>
+
+      <h3 className="font-medium text-sm mt-6 mb-2">Social Media</h3>
+      <div className="space-y-1">
+        <div
+          className="bg-white p-3 border border-gray-200 rounded-md shadow-sm cursor-move"
+          onDragStart={(event) => handleDragStart(event, 'socialNode')}
+          draggable
+        >
+          <div className="text-sm font-medium">Social Post</div>
+          <div className="text-xs text-gray-500">Facebook & Instagram</div>
+        </div>
+      </div>
+    </aside>
   );
-};
+}

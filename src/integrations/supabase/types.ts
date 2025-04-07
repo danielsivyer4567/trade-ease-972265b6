@@ -1028,34 +1028,28 @@ export type Database = {
       }
       workflows: {
         Row: {
-          category: string | null
           created_at: string
           data: Json
           description: string | null
           id: string
-          is_template: boolean | null
           name: string
           updated_at: string
           user_id: string
         }
         Insert: {
-          category?: string | null
           created_at?: string
           data: Json
           description?: string | null
           id?: string
-          is_template?: boolean | null
           name: string
           updated_at?: string
           user_id: string
         }
         Update: {
-          category?: string | null
           created_at?: string
           data?: Json
           description?: string | null
           id?: string
-          is_template?: boolean | null
           name?: string
           updated_at?: string
           user_id?: string

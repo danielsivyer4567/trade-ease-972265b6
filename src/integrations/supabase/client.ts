@@ -7,13 +7,7 @@ const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIU
 const supabaseServiceRoleKey = import.meta.env.VITE_SUPABASE_SERVICE_ROLE_KEY || '';
 
 // Create a single instance of the Supabase client for the entire app
-export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-  realtime: {
-    params: {
-      eventsPerSecond: 10
-    }
-  }
-});
+export const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
 // Create an admin client with the service role key for privileged operations
 export const supabaseAdmin = supabaseServiceRoleKey 

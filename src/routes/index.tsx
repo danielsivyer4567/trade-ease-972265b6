@@ -29,7 +29,7 @@ export function Routes() {
   return (
     <Suspense fallback={<LoadingFallback />}>
       <RouterRoutes>
-        {/* Include all route elements */}
+        {/* Each of these should already be returning Route elements */}
         {authRoutes}
         {dashboardRoutes}
         {customerRoutes}
