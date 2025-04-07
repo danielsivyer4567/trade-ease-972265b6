@@ -10,7 +10,8 @@ import {
   OnEdgesChange, 
   OnConnect, 
   ReactFlowInstance, 
-  Connection 
+  Connection,
+  XYPosition
 } from '@xyflow/react';
 import { WorkflowService } from '@/services/WorkflowService';
 
@@ -120,7 +121,7 @@ export const useFlow = ({ workflowId, initialData, onInit }: UseFlowProps) => {
       data: { ...data },
     };
 
-    setNodes(nds => nds.concat(newNode));
+    setNodes(nds => [...nds, newNode]);
   }, [reactFlowInstance, setNodes]);
 
   return {

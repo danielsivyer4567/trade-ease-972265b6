@@ -67,18 +67,24 @@ export const useWorkflowSync = (
       setHasUnsavedChanges(true);
     };
 
-    flowInstance.on('nodeChange', handleChange);
-    flowInstance.on('edgeChange', handleChange);
-    flowInstance.on('nodesChange', handleChange);
-    flowInstance.on('edgesChange', handleChange);
-    flowInstance.on('connect', handleChange);
+    // Use Event Listeners via DOM events instead of ReactFlow instance methods
+    const container = document.querySelector('.react-flow');
+    if (container) {
+      container.addEventListener('nodechange', handleChange);
+      container.addEventListener('edgechange', handleChange);
+      container.addEventListener('nodeschange', handleChange);
+      container.addEventListener('edgeschange', handleChange);
+      container.addEventListener('connect', handleChange);
+    }
 
     return () => {
-      flowInstance.off('nodeChange', handleChange);
-      flowInstance.off('edgeChange', handleChange);
-      flowInstance.off('nodesChange', handleChange);
-      flowInstance.off('edgesChange', handleChange);
-      flowInstance.off('connect', handleChange);
+      if (container) {
+        container.removeEventListener('nodechange', handleChange);
+        container.removeEventListener('edgechange', handleChange);
+        container.removeEventListener('nodeschange', handleChange);
+        container.removeEventListener('edgeschange', handleChange);
+        container.removeEventListener('connect', handleChange);
+      }
     };
   }, [flowInstance]);
 
