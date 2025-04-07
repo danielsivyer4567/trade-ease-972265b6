@@ -21,16 +21,20 @@ const WorkflowTest = () => {
   const navigate = useNavigate();
 
   // Function to run a single test and store its result
-  const runTest = useCallback(async (testId: string, testFn: () => Promise<{ success: boolean; message: string }>) => {
+  const runTest = useCallback(async (testId: string, testFn: () => Promise<{ success: boolean; message: string } | { success: boolean; error: any }>) => {
     setIsLoading(prev => ({ ...prev, [testId]: true }));
     try {
       const result = await testFn();
-      setTestResults(prev => ({ ...prev, [testId]: result }));
+      setTestResults(prev => ({ ...prev, [testId]: 
+        result.success 
+          ? { success: true, message: 'message' in result ? result.message : 'Success' } 
+          : { success: false, message: 'error' in result ? result.error : 'Unknown error' }
+      }));
       
       if (result.success) {
-        toast.success(`Test "${testId}" passed: ${result.message}`);
+        toast.success(`Test "${testId}" passed: ${'message' in result ? result.message : 'Success'}`);
       } else {
-        toast.error(`Test "${testId}" failed: ${result.message}`);
+        toast.error(`Test "${testId}" failed: ${'error' in result ? result.error : 'Unknown error'}`);
       }
     } catch (error) {
       console.error(`Error in test "${testId}":`, error);
