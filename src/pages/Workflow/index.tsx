@@ -1,3 +1,4 @@
+
 import React, { useState, useCallback, useEffect } from 'react';
 import { AppLayout } from "@/components/ui/AppLayout";
 import { Flow } from './components/Flow';
@@ -310,29 +311,31 @@ export default function WorkflowPage() {
       <div className="p-4 h-full">
         <WorkflowNavigation />
         
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4 gap-2">
           <div className="flex items-center gap-2">
             <h1 className="text-2xl font-bold">
               {currentWorkflowId ? workflowName : "New Workflow"}
             </h1>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <Button 
               variant="outline" 
+              size="sm"
               className="flex items-center gap-2"
               onClick={handleNavigateToAutomations}
             >
               <Workflow className="h-4 w-4" />
-              Manage Automations
+              <span className="hidden sm:inline">Manage Automations</span>
             </Button>
             
             <Button 
               variant="outline" 
+              size="sm"
               className="flex items-center gap-2"
               onClick={() => setLoadDialogOpen(true)}
             >
               <FolderOpen className="h-4 w-4" />
-              Load Workflow
+              <span className="hidden sm:inline">Load</span>
             </Button>
             
             <AutomationSelector 
@@ -343,8 +346,9 @@ export default function WorkflowPage() {
             
             <Dialog open={gcpVisionKeyDialogOpen} onOpenChange={setGcpVisionKeyDialogOpen}>
               <DialogTrigger asChild>
-                <Button variant="outline" className="flex items-center gap-2">
-                  <Key className="h-4 w-4" /> Configure GCP Vision API Key
+                <Button variant="outline" size="sm" className="flex items-center gap-2">
+                  <Key className="h-4 w-4" /> 
+                  <span className="hidden sm:inline">GCP Key</span>
                 </Button>
               </DialogTrigger>
               <DialogContent className="sm:max-w-[425px] bg-slate-200">
@@ -368,20 +372,22 @@ export default function WorkflowPage() {
             
             <Button 
               variant="outline" 
+              size="sm"
               className="flex items-center gap-2"
               disabled={integrationStatus !== 'ready'}
               onClick={handleSendToFinancials}
             >
               <ArrowRightLeft className="h-4 w-4" /> 
-              Link Vision to Financials
+              <span className="hidden sm:inline">Vision to Financials</span>
             </Button>
             
             <Button 
-              onClick={handleSaveWorkflow} 
+              onClick={handleSaveWorkflow}
+              size="sm" 
               className="flex items-center gap-2"
               disabled={!user}
             >
-              <Save className="h-4 w-4" /> Save Workflow
+              <Save className="h-4 w-4" /> Save
             </Button>
           </div>
         </div>

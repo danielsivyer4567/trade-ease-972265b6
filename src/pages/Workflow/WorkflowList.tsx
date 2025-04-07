@@ -94,12 +94,13 @@ export default function WorkflowListPage() {
 
   return (
     <AppLayout>
-      <div className="p-6 space-y-6">
-        <div className="flex justify-between items-center">
-          <h1 className="text-2xl font-bold">My Workflows</h1>
+      <div className="p-4 md:p-6 space-y-4 md:space-y-6">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
+          <h1 className="text-xl md:text-2xl font-bold">My Workflows</h1>
           <Button 
             onClick={() => navigate("/workflow")}
-            className="flex items-center gap-2"
+            size="sm"
+            className="flex items-center gap-2 whitespace-nowrap"
           >
             <Plus className="h-4 w-4" /> Create New Workflow
           </Button>
@@ -126,7 +127,7 @@ export default function WorkflowListPage() {
             </div>
           </GlassCard>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {workflows.map((workflow) => (
               <Card 
                 key={workflow.id} 
@@ -135,7 +136,7 @@ export default function WorkflowListPage() {
               >
                 <CardHeader className="pb-2">
                   <div className="flex justify-between items-start">
-                    <CardTitle>{workflow.name}</CardTitle>
+                    <CardTitle className="text-lg">{workflow.name}</CardTitle>
                     <div className="flex gap-1">
                       <Button variant="ghost" size="sm" onClick={(e) => handleDuplicate(workflow, e)}>
                         <Copy className="h-4 w-4" />

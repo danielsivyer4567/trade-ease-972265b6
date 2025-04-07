@@ -314,26 +314,28 @@ export default function WorkflowTemplatesPage() {
 
   return (
     <AppLayout>
-      <div className="p-6 space-y-6">
-        <div className="flex justify-between items-center">
-          <h1 className="text-2xl font-bold">Workflow Templates</h1>
+      <div className="p-4 md:p-6 space-y-4 md:space-y-6">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
+          <h1 className="text-xl md:text-2xl font-bold">Workflow Templates</h1>
           <Button 
             onClick={() => navigate("/workflow")}
             variant="outline"
-            className="flex items-center gap-2"
+            size="sm"
+            className="flex items-center gap-2 whitespace-nowrap"
           >
-            <WorkflowIcon className="h-4 w-4" /> Create Custom Workflow
+            <WorkflowIcon className="h-4 w-4" /> 
+            Create Custom Workflow
           </Button>
         </div>
 
-        <GlassCard className="p-6">
+        <GlassCard className="p-4 md:p-6">
           <h2 className="text-lg font-semibold mb-4">Choose a template to get started quickly</h2>
           <p className="text-gray-500 mb-6">
             These templates provide pre-configured workflows for common business processes. 
             Select a template to customize it for your specific needs.
           </p>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {workflowTemplates.map((template) => (
               <Card key={template.id} className="border overflow-hidden">
                 <CardHeader className={`${template.color} pb-2`}>
