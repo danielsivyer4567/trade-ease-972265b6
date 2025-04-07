@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, Dispatch, SetStateAction } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,22 +9,26 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 
 interface WorkflowSaveDialogProps {
   open: boolean;
-  onClose: () => void;
+  onClose?: () => void;
+  onOpenChange?: (open: boolean) => void;
   onSave: (name: string, description: string, category: string) => void;
   initialName?: string;
   initialDescription?: string;
   initialCategory?: string;
   title?: string;
+  isLoading?: boolean;
 }
 
 export const WorkflowSaveDialog: React.FC<WorkflowSaveDialogProps> = ({
   open,
   onClose,
+  onOpenChange,
   onSave,
   initialName = '',
   initialDescription = '',
   initialCategory = '',
-  title = 'Save Workflow'
+  title = 'Save Workflow',
+  isLoading = false
 }) => {
   const [name, setName] = useState(initialName);
   const [description, setDescription] = useState(initialDescription);
@@ -35,8 +39,14 @@ export const WorkflowSaveDialog: React.FC<WorkflowSaveDialogProps> = ({
     onSave(name, description, category);
   };
 
+  const handleClose = () => {
+    if (onClose) {
+      onClose();
+    }
+  };
+
   return (
-    <Dialog open={open} onOpenChange={onClose}>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
@@ -91,11 +101,11 @@ export const WorkflowSaveDialog: React.FC<WorkflowSaveDialogProps> = ({
           </div>
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={onClose}>
+          <Button variant="outline" onClick={handleClose} disabled={isLoading}>
             Cancel
           </Button>
-          <Button type="submit" onClick={handleSave} disabled={!name.trim()}>
-            Save
+          <Button type="submit" onClick={handleSave} disabled={!name.trim() || isLoading}>
+            {isLoading ? 'Saving...' : 'Save'}
           </Button>
         </DialogFooter>
       </DialogContent>
