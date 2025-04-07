@@ -1,94 +1,104 @@
 
 import React, { useState } from 'react';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Save } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface WorkflowSaveDialogProps {
   open: boolean;
-  onOpenChange: (open: boolean) => void;
-  onSave: (name: string, description: string) => void;
-  isLoading: boolean;
+  onClose: () => void;
+  onSave: (name: string, description: string, category: string) => void;
   initialName?: string;
   initialDescription?: string;
+  initialCategory?: string;
+  title?: string;
 }
 
-export function WorkflowSaveDialog({
+export const WorkflowSaveDialog: React.FC<WorkflowSaveDialogProps> = ({
   open,
-  onOpenChange,
+  onClose,
   onSave,
-  isLoading,
-  initialName = "",
-  initialDescription = ""
-}: WorkflowSaveDialogProps) {
+  initialName = '',
+  initialDescription = '',
+  initialCategory = '',
+  title = 'Save Workflow'
+}) => {
   const [name, setName] = useState(initialName);
   const [description, setDescription] = useState(initialDescription);
+  const [category, setCategory] = useState(initialCategory);
 
   const handleSave = () => {
-    if (!name.trim()) {
-      return;
-    }
-    onSave(name, description);
+    if (!name.trim()) return;
+    onSave(name, description, category);
   };
-  
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
+    <Dialog open={open} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Save Workflow</DialogTitle>
-          <DialogDescription>
-            Give your workflow a name and optional description
-          </DialogDescription>
+          <DialogTitle>{title}</DialogTitle>
         </DialogHeader>
-        
         <div className="grid gap-4 py-4">
-          <div className="grid gap-2">
-            <Label htmlFor="name">Workflow Name</Label>
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="name" className="text-right">
+              Name
+            </Label>
             <Input
               id="name"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="My Workflow"
               className="col-span-3"
+              placeholder="Workflow name"
             />
           </div>
-          
-          <div className="grid gap-2">
-            <Label htmlFor="description">Description (optional)</Label>
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="category" className="text-right">
+              Category
+            </Label>
+            <Select 
+              value={category} 
+              onValueChange={setCategory}
+            >
+              <SelectTrigger className="col-span-3">
+                <SelectValue placeholder="Select a category" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="Residential">Residential</SelectItem>
+                <SelectItem value="Commercial">Commercial</SelectItem>
+                <SelectItem value="Safety">Safety</SelectItem>
+                <SelectItem value="Financial">Financial</SelectItem>
+                <SelectItem value="Quality">Quality</SelectItem>
+                <SelectItem value="Efficiency">Efficiency</SelectItem>
+                <SelectItem value="Custom">Custom</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="description" className="text-right">
+              Description
+            </Label>
             <Textarea
               id="description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Enter a description for this workflow"
               className="col-span-3"
+              placeholder="Workflow description"
+              rows={3}
             />
           </div>
         </div>
-        
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
+          <Button variant="outline" onClick={onClose}>
             Cancel
           </Button>
-          <Button onClick={handleSave} disabled={isLoading || !name.trim()}>
-            {isLoading ? "Saving..." : (
-              <>
-                <Save className="h-4 w-4 mr-2" />
-                Save Workflow
-              </>
-            )}
+          <Button type="submit" onClick={handleSave} disabled={!name.trim()}>
+            Save
           </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
   );
-}
+};
