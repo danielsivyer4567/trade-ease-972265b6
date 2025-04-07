@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { AppLayout } from "@/components/ui/AppLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -419,7 +420,7 @@ export default function WorkflowTemplates() {
           open={saveDialogOpen}
           onOpenChange={setSaveDialogOpen}
           onSave={handleSaveTemplate}
-          isLoading={isSaving}
+          isSaving={isSaving}
           initialName={selectedTemplate?.name ? `Copy of ${selectedTemplate.name}` : ''}
           initialDescription={selectedTemplate?.description || ''}
           initialCategory={selectedTemplate?.category || ''}

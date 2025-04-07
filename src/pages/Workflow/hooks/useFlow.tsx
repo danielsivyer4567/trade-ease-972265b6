@@ -25,8 +25,8 @@ interface UseFlowProps {
 }
 
 export const useFlow = ({ workflowId, initialData, onInit }: UseFlowProps) => {
-  const [nodes, setNodes, onNodesChange] = useNodesState<Node[]>(initialData?.nodes || []);
-  const [edges, setEdges, onEdgesChange] = useEdgesState<Edge[]>(initialData?.edges || []);
+  const [nodes, setNodes, onNodesChange] = useNodesState(initialData?.nodes || []);
+  const [edges, setEdges, onEdgesChange] = useEdgesState(initialData?.edges || []);
   const [isLoading, setIsLoading] = useState(workflowId ? true : false);
   const [reactFlowInstance, setReactFlowInstance] = useState<ReactFlowInstance | null>(null);
   const nodeIdCounter = useRef(1);
@@ -121,7 +121,7 @@ export const useFlow = ({ workflowId, initialData, onInit }: UseFlowProps) => {
       data: { ...data },
     };
 
-    setNodes(nds => [...nds, newNode]);
+    setNodes((nds) => [...nds, newNode]);
   }, [reactFlowInstance, setNodes]);
 
   return {

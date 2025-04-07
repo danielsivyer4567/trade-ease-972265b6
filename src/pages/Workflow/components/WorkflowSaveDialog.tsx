@@ -22,6 +22,7 @@ export interface WorkflowSaveDialogProps {
   initialName: string;
   initialDescription: string;
   initialCategory: string;
+  title?: string;
 }
 
 export const WorkflowSaveDialog: React.FC<WorkflowSaveDialogProps> = ({
@@ -31,7 +32,8 @@ export const WorkflowSaveDialog: React.FC<WorkflowSaveDialogProps> = ({
   isSaving,
   initialName,
   initialDescription,
-  initialCategory
+  initialCategory,
+  title = "Save Workflow"
 }) => {
   const [name, setName] = useState(initialName);
   const [description, setDescription] = useState(initialDescription);
@@ -72,7 +74,7 @@ export const WorkflowSaveDialog: React.FC<WorkflowSaveDialogProps> = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Save Workflow</DialogTitle>
+          <DialogTitle>{title}</DialogTitle>
           <DialogDescription>
             Provide details for your workflow for easy reference later.
           </DialogDescription>

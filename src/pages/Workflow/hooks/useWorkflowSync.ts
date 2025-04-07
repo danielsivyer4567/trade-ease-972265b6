@@ -67,7 +67,7 @@ export const useWorkflowSync = (
       setHasUnsavedChanges(true);
     };
 
-    // Use Event Listeners via DOM events instead of ReactFlow instance methods
+    // Use DOM Event-based approach instead of ReactFlow instance methods
     const container = document.querySelector('.react-flow');
     if (container) {
       container.addEventListener('nodechange', handleChange);
