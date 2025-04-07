@@ -4,22 +4,26 @@ import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import { Workflow } from 'lucide-react';
 
-interface AutomationWorkflowButtonProps {
-  automationId?: number; // Made optional
+export interface AutomationWorkflowButtonProps {
+  automationId?: number;
   variant?: 'default' | 'outline' | 'secondary' | 'destructive' | 'ghost' | 'link';
   size?: 'default' | 'sm' | 'lg' | 'xl' | 'icon';
   children?: React.ReactNode;
-  workflowId?: string; // Added workflowId prop
-  category?: string; // Added category prop
+  workflowId?: string;
+  category?: string;
+  targetType?: string; // Added for WorkflowTest compatibility
+  targetId?: string;   // Added for WorkflowTest compatibility
+  label?: string;      // Added for WorkflowTest compatibility
 }
 
 export function AutomationWorkflowButton({ 
   automationId, 
   variant = 'default', 
   size = 'default',
-  children = 'Add to Workflow',
+  children,
   workflowId,
-  category
+  category,
+  label
 }: AutomationWorkflowButtonProps) {
   const navigate = useNavigate();
   
@@ -55,7 +59,7 @@ export function AutomationWorkflowButton({
       className="whitespace-nowrap"
     >
       <Workflow className="h-4 w-4 mr-2" />
-      {children}
+      {label || children || 'Add to Workflow'}
     </Button>
   );
 }

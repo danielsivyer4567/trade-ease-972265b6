@@ -4,11 +4,19 @@ import { Button, ButtonProps } from '@/components/ui/button';
 import { Workflow } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
-interface FormWorkflowButtonProps extends ButtonProps {
+export interface FormWorkflowButtonProps extends ButtonProps {
   formId?: number;
+  targetType?: string; // Added for WorkflowTest compatibility
+  targetId?: string;   // Added for WorkflowTest compatibility
+  label?: string;      // Added for WorkflowTest compatibility
 }
 
-export function FormWorkflowButton({ formId, children, ...props }: FormWorkflowButtonProps) {
+export function FormWorkflowButton({ 
+  formId, 
+  children, 
+  label,
+  ...props 
+}: FormWorkflowButtonProps) {
   const navigate = useNavigate();
   
   const handleClick = () => {
@@ -28,7 +36,7 @@ export function FormWorkflowButton({ formId, children, ...props }: FormWorkflowB
       {...props}
     >
       <Workflow className="h-4 w-4" />
-      {children || <span>Manage Automations</span>}
+      {label || children || <span>Manage Automations</span>}
     </Button>
   );
 }
