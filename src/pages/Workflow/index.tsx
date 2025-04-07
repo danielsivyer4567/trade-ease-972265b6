@@ -38,6 +38,8 @@ export default function WorkflowPage() {
   const [currentWorkflowId, setCurrentWorkflowId] = useState<string | undefined>(workflowId || undefined);
   const [workflowName, setWorkflowName] = useState("New Workflow");
   const [workflowDescription, setWorkflowDescription] = useState("");
+  const [workflowCategory, setWorkflowCategory] = useState("");
+  const [initialFlowData, setInitialFlowData] = useState<any>(null);
   
   const [targetData, setTargetData] = useState<{
     targetType?: 'job' | 'quote' | 'customer' | 'message' | 'social' | 'calendar';
@@ -49,6 +51,13 @@ export default function WorkflowPage() {
     checkGcpVisionApiKey();
     
     if (location.state) {
+      if (location.state.templateData) {
+        setInitialFlowData(location.state.templateData);
+        setWorkflowName(location.state.templateName || "New Workflow from Template");
+        setWorkflowDescription(location.state.templateDescription || "");
+        setWorkflowCategory(location.state.templateCategory || "");
+      }
+      
       const { targetType, targetId, createAutomationNode } = location.state as any;
       if (targetType && targetId) {
         setTargetData({
@@ -61,37 +70,27 @@ export default function WorkflowPage() {
   }, [location.state]);
 
   useEffect(() => {
-    if (automationId && flowInstance && !addedAutomationFromURL) {
-      const addAutomationFromURL = async () => {
-        try {
-          const automationDetail = await getMockAutomation(parseInt(automationId, 10));
-          
-          if (automationDetail) {
-            const event = new CustomEvent('add-automation', {
-              detail: {
-                automationData: {
-                  label: automationDetail.title,
-                  description: automationDetail.description,
-                  triggers: automationDetail.triggers,
-                  actions: automationDetail.actions,
-                  automationId: automationDetail.id,
-                  premium: automationDetail.premium
-                }
-              }
-            });
-            
-            document.dispatchEvent(event);
-            setAddedAutomationFromURL(true);
-          }
-        } catch (error) {
-          console.error('Failed to add automation from URL:', error);
-          toast.error('Failed to add automation from URL');
-        }
-      };
+    if (flowInstance && initialFlowData && !currentWorkflowId) {
+      flowInstance.setNodes([]);
+      flowInstance.setEdges([]);
       
-      addAutomationFromURL();
+      if (initialFlowData.nodes) {
+        flowInstance.addNodes(initialFlowData.nodes);
+      }
+      
+      if (initialFlowData.edges) {
+        flowInstance.addEdges(initialFlowData.edges);
+      }
+      
+      setInitialFlowData(null);
+      
+      toast.success("Template applied successfully");
+      
+      setTimeout(() => {
+        flowInstance.fitView({ padding: 0.2 });
+      }, 100);
     }
-  }, [automationId, flowInstance, addedAutomationFromURL]);
+  }, [flowInstance, initialFlowData, currentWorkflowId]);
 
   async function getMockAutomation(id) {
     const mockAutomations = [
@@ -147,52 +146,6 @@ export default function WorkflowPage() {
     return mockAutomations.find(a => a.id === id) || null;
   }
 
-  useEffect(() => {
-    if (flowInstance && targetData?.createAutomationNode) {
-      const loadAutomations = async () => {
-        try {
-          const { success, automations } = await AutomationIntegrationService.getAssociatedAutomations(
-            targetData.targetType!, 
-            targetData.targetId!
-          );
-          
-          if (success && automations && automations.length > 0) {
-            const automation = automations[0];
-            
-            const newNode = {
-              id: `automation-${Date.now()}`,
-              type: 'automationNode',
-              position: { x: 100, y: 100 },
-              data: {
-                label: automation.title,
-                description: automation.description,
-                triggers: automation.triggers,
-                actions: automation.actions,
-                automationId: automation.id,
-                targetType: targetData.targetType,
-                targetId: targetData.targetId
-              }
-            };
-            
-            flowInstance.addNodes(newNode);
-            toast.success(`Added "${automation.title}" automation to workflow`);
-          } else {
-            toast.info('No automations associated with this item. Please select one to add.');
-          }
-        } catch (error) {
-          console.error('Error loading automations:', error);
-        }
-        
-        setTargetData(prevData => ({
-          ...prevData!,
-          createAutomationNode: false
-        }));
-      };
-      
-      loadAutomations();
-    }
-  }, [flowInstance, targetData]);
-
   const checkGcpVisionApiKey = async () => {
     setIsLoadingKey(true);
     try {
@@ -247,6 +200,7 @@ export default function WorkflowPage() {
     setIsSaving(true);
     setWorkflowName(name);
     setWorkflowDescription(description);
+    setWorkflowCategory(category);
     
     try {
       const flowData = flowInstance.toObject();
@@ -254,6 +208,7 @@ export default function WorkflowPage() {
       flowInstance.saveWorkflow && await flowInstance.saveWorkflow(name);
       
       setSaveDialogOpen(false);
+      toast.success("Workflow saved successfully");
     } catch (error) {
       console.error("Error saving workflow:", error);
       toast.error("Failed to save workflow");
@@ -313,7 +268,7 @@ export default function WorkflowPage() {
         <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4 gap-2">
           <div className="flex items-center gap-2">
             <h1 className="text-2xl font-bold">
-              {currentWorkflowId ? workflowName : "New Workflow"}
+              {currentWorkflowId ? workflowName : workflowName}
             </h1>
           </div>
           <div className="flex flex-wrap items-center gap-2">
@@ -394,7 +349,7 @@ export default function WorkflowPage() {
         <div className="flex h-[calc(100vh-200px)] border border-gray-200 rounded-lg overflow-hidden">
           <NodeSidebar targetData={targetData} />
           <div className="flex-1 relative">
-            <Flow onInit={setFlowInstance} workflowId={currentWorkflowId} />
+            <Flow onInit={setFlowInstance} workflowId={currentWorkflowId} initialData={initialFlowData} />
           </div>
         </div>
 
@@ -460,6 +415,7 @@ export default function WorkflowPage() {
           isLoading={isSaving}
           initialName={workflowName}
           initialDescription={workflowDescription}
+          initialCategory={workflowCategory}
         />
         
         <WorkflowLoadDialog 

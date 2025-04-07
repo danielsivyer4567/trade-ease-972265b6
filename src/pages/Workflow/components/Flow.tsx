@@ -1,418 +1,219 @@
 
-import React, { useCallback, useState, useEffect, useRef } from 'react';
-import {
-  ReactFlow,
-  ReactFlowProvider,
-  Background,
-  Controls,
-  useNodesState,
-  useEdgesState,
-  addEdge,
-  Panel,
-  MarkerType,
-} from '@xyflow/react';
+import React, { useCallback, useEffect, useState } from 'react';
+import { ReactFlow, Background, Controls, useNodesState, useEdgesState, useReactFlow, NodeTypes, EdgeTypes, Node, Edge, ReactFlowInstance } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
+import { toast } from 'sonner';
+import { WorkflowService } from '@/services/WorkflowService';
+import { useAuth } from '@/contexts/AuthContext';
+
+// Import node types
+import { AutomationNode } from './nodes/AutomationNode';
+import { CustomNode } from './nodes/CustomNode';
 import { CustomerNode } from './nodes/CustomerNode';
 import { JobNode } from './nodes/JobNode';
-import { TaskNode } from './nodes/TaskNode';
 import { QuoteNode } from './nodes/QuoteNode';
-import { CustomNode } from './nodes/CustomNode';
-import { VisionNode } from './nodes/VisionNode';
-import { AutomationNode } from './nodes/AutomationNode';
+import { TaskNode } from './nodes/TaskNode';
 import { MessagingNode } from './nodes/MessagingNode';
-import { toast } from 'sonner';
-import { AutomationIntegrationService } from '@/services/AutomationIntegrationService';
-import { WorkflowService } from '@/services/WorkflowService';
-import { supabase } from '@/integrations/supabase/client';
+import { VisionNode } from './nodes/VisionNode';
 
-// Define node data types for better type safety
-interface BaseNodeData {
-  label: string;
-  [key: string]: any; // Allow additional properties
-}
-
-// Define node types
-const nodeTypes = {
-  customerNode: CustomerNode,
-  jobNode: JobNode,
-  taskNode: TaskNode,
-  quoteNode: QuoteNode,
-  customNode: CustomNode,
-  visionNode: VisionNode,
+// Define node types for registration
+const nodeTypes: NodeTypes = {
   automationNode: AutomationNode,
+  customNode: CustomNode,
+  customer: CustomerNode,
+  job: JobNode,
+  quote: QuoteNode,
+  task: TaskNode,
   messagingNode: MessagingNode,
-  emailNode: MessagingNode,
-  whatsappNode: MessagingNode,
-  socialNode: CustomNode,
+  visionNode: VisionNode,
 };
 
 interface FlowProps {
-  onInit: (instance: any) => void;
+  onInit?: (instance: ReactFlowInstance) => void;
   workflowId?: string;
+  initialData?: {
+    nodes: Node[];
+    edges: Edge[];
+  };
 }
 
-export function Flow({ onInit, workflowId }: FlowProps) {
-  // Initial nodes and edges
+export const Flow: React.FC<FlowProps> = ({ onInit, workflowId, initialData }) => {
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
-  const [currentWorkflowId, setCurrentWorkflowId] = useState<string | undefined>(workflowId);
-  const [workflowName, setWorkflowName] = useState<string>("New Workflow");
-  const [workflowDescription, setWorkflowDescription] = useState<string>("");
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const reactFlowInstance = useRef(null);
-  const [existingAutomationIds, setExistingAutomationIds] = useState(new Set());
+  const [isLoading, setIsLoading] = useState(false);
+  const reactFlowInstance = useReactFlow();
+  const { user } = useAuth();
 
-  // Check authentication status
-  useEffect(() => {
-    const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      setIsAuthenticated(!!session);
-    };
-    checkAuth();
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      setIsAuthenticated(!!session);
-    });
-
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, []);
-
-  // Load workflow if ID is provided
-  useEffect(() => {
-    if (workflowId && isAuthenticated) {
-      loadWorkflow(workflowId);
-    }
-  }, [workflowId, isAuthenticated]);
-
-  // Handle connections between nodes
-  const onConnect = useCallback((params) => {
-    // Special handling for vision nodes connecting to financial nodes
-    const sourceNode = nodes.find(node => node.id === params.source);
-    const targetNode = nodes.find(node => node.id === params.target);
-    
-    if (sourceNode?.type === 'visionNode' && targetNode?.type === 'quoteNode') {
-      toast.info('Vision analysis will feed data to financial node');
+  const handleInit = useCallback((instance: ReactFlowInstance) => {
+    if (onInit) {
+      // Add saveWorkflow method to the instance
+      const enhancedInstance = {
+        ...instance,
+        saveWorkflow: async (name: string) => {
+          if (!user) {
+            toast.error("You need to be logged in to save workflows");
+            return;
+          }
+          
+          try {
+            const flowObj = instance.toObject();
+            
+            const workflowData = {
+              id: workflowId || crypto.randomUUID(),
+              name,
+              data: flowObj,
+            };
+            
+            const result = await WorkflowService.saveWorkflow(workflowData);
+            
+            if (result.success) {
+              return result.id;
+            } else {
+              throw new Error("Failed to save workflow");
+            }
+          } catch (error) {
+            console.error("Error saving workflow:", error);
+            throw error;
+          }
+        }
+      };
       
-      // Simulate processing - in a real app, this would trigger actual data processing
-      setTimeout(() => {
-        // Extract the financial data from the vision node
-        const extractedData = {
-          timestamp: new Date().toISOString(),
-          amount: Math.floor(Math.random() * 5000) + 1000, // Simulated amount between $1000-$6000
-          jobId: targetNode?.data?.jobId || null,
-          sourceNodeId: sourceNode.id,
-          targetNodeId: targetNode.id
-        };
-        
-        // Store the extracted data in localStorage for use in the financials section
-        const existingData = JSON.parse(localStorage.getItem('vision-financial-data') || '[]');
-        localStorage.setItem('vision-financial-data', JSON.stringify([...existingData, extractedData]));
-        
-        toast.success('Financial data extracted and applied');
-      }, 1500);
+      onInit(enhancedInstance);
     }
-    
-    // Trigger automations when they are connected to other nodes
-    if (sourceNode?.type === 'automationNode' || targetNode?.type === 'automationNode') {
-      const automationNode = sourceNode?.type === 'automationNode' ? sourceNode : targetNode;
-      const otherNode = sourceNode?.type === 'automationNode' ? targetNode : sourceNode;
+  }, [onInit, workflowId, user]);
+
+  // Load workflow by ID
+  useEffect(() => {
+    if (workflowId) {
+      const loadWorkflow = async () => {
+        setIsLoading(true);
+        try {
+          const { success, workflow, error } = await WorkflowService.loadWorkflow(workflowId);
+          
+          if (success && workflow) {
+            if (workflow.data?.nodes) {
+              setNodes(workflow.data.nodes);
+            }
+            
+            if (workflow.data?.edges) {
+              setEdges(workflow.data.edges);
+            }
+          } else {
+            console.error("Error loading workflow:", error);
+            toast.error("Failed to load workflow");
+          }
+        } catch (error) {
+          console.error("Error loading workflow:", error);
+          toast.error("Failed to load workflow");
+        } finally {
+          setIsLoading(false);
+        }
+      };
       
-      // Record the connection for the automation
-      if (automationNode.data.automationId && otherNode?.data?.targetType) {
-        AutomationIntegrationService.associateAutomation(
-          automationNode.data.automationId,
-          otherNode.data.targetType,
-          otherNode.data.targetId || 'unknown'
-        );
-        
-        toast.success(`Linked automation to ${otherNode.data.targetType}`);
+      loadWorkflow();
+    } else if (initialData && !isLoading) {
+      // Apply initial data from template if provided and not loading a workflow
+      if (initialData.nodes) {
+        setNodes(initialData.nodes);
+      }
+      
+      if (initialData.edges) {
+        setEdges(initialData.edges);
       }
     }
-    
-    setEdges((eds) => addEdge({
-      ...params,
-      markerEnd: { type: MarkerType.ArrowClosed },
-      animated: true
-    }, eds));
-  }, [nodes, setEdges]);
+  }, [workflowId, setNodes, setEdges, initialData, isLoading]);
 
-  // Handle node dropping from sidebar
-  const onDrop = useCallback((event) => {
-    event.preventDefault();
-    const type = event.dataTransfer.getData('application/reactflow');
-    
-    if (!type || !reactFlowInstance.current) {
-      return;
-    }
+  // Event handlers
+  const onConnect = useCallback((params) => {
+    setEdges((eds) => [...eds, { ...params, id: `e-${params.source}-${params.target}` }]);
+  }, [setEdges]);
 
-    // Get drop position
-    const position = reactFlowInstance.current.screenToFlowPosition({
-      x: event.clientX,
-      y: event.clientY,
-    });
-
-    // Create a new node
-    const nodeId = `${type}-${Date.now()}`;
-    let newNode = {
-      id: nodeId,
-      type,
-      position,
-      data: { label: `New ${type.replace('Node', '')}` } as BaseNodeData,
-    };
-    
-    // Add special handling for specific node types
-    if (type === 'visionNode') {
-      newNode.data = {
-        ...newNode.data,
-        label: 'Extract Financial Data'
-      };
-    } else if (type === 'messagingNode') {
-      newNode.data = {
-        ...newNode.data,
-        label: 'SMS Message',
-        messageType: 'sms'
-      };
-    } else if (type === 'emailNode') {
-      newNode.data = {
-        ...newNode.data,
-        label: 'Email Notification',
-        messageType: 'email'
-      };
-    } else if (type === 'whatsappNode') {
-      newNode.data = {
-        ...newNode.data,
-        label: 'WhatsApp Message',
-        messageType: 'whatsapp'
-      };
-    } else if (type === 'socialNode') {
-      newNode.data = {
-        ...newNode.data,
-        label: 'Social Media Post',
-        icon: '📱',
-        color: '#4267B2'  // Facebook blue
-      };
-    }
-
-    setNodes((nds) => nds.concat(newNode));
-  }, [setNodes]);
-
-  // Handle drag over
   const onDragOver = useCallback((event) => {
     event.preventDefault();
     event.dataTransfer.dropEffect = 'move';
   }, []);
 
-  // Track existing automation IDs to prevent duplicates
-  useEffect(() => {
-    const automationIds = new Set();
-    nodes.forEach(node => {
-      if (node.type === 'automationNode' && node.data?.automationId) {
-        automationIds.add(node.data.automationId);
-      }
-    });
-    setExistingAutomationIds(automationIds);
-  }, [nodes]);
+  const onDrop = useCallback(
+    (event) => {
+      event.preventDefault();
 
-  // Save workflow to Supabase
-  const saveWorkflow = async (name?: string) => {
-    if (!isAuthenticated) {
-      toast.error("You must be signed in to save workflows");
-      return;
-    }
+      const reactFlowBounds = event.currentTarget.getBoundingClientRect();
+      const nodeData = JSON.parse(event.dataTransfer.getData('application/reactflow'));
 
-    if (!reactFlowInstance.current) {
-      toast.error("Flow instance not initialized");
-      return;
-    }
+      // Check if the dropped element is valid
+      if (!nodeData) return;
 
-    setIsLoading(true);
-    try {
-      const flowData = reactFlowInstance.current.toObject();
-      
-      const workflowToSave = {
-        id: currentWorkflowId,
-        name: name || workflowName || "Unnamed Workflow",
-        description: workflowDescription,
-        data: flowData
+      const position = reactFlowInstance.screenToFlowPosition({
+        x: event.clientX - reactFlowBounds.left,
+        y: event.clientY - reactFlowBounds.top,
+      });
+
+      const newNode = {
+        id: `${nodeData.type}-${crypto.randomUUID().substring(0, 8)}`,
+        type: nodeData.type,
+        position,
+        data: { ...nodeData.data },
       };
 
-      const { success, id, error } = await WorkflowService.saveWorkflow(workflowToSave);
-      
-      if (success && id) {
-        setCurrentWorkflowId(id);
-        toast.success("Workflow saved successfully!");
-        
-        // As a fallback, also save to localStorage
-        localStorage.setItem('workflow-data', JSON.stringify(flowData));
-      } else {
-        throw new Error(error?.message || "Failed to save workflow");
-      }
-    } catch (error) {
-      console.error("Error saving workflow:", error);
-      toast.error("Failed to save workflow. Saving to localStorage as fallback.");
-      
-      // Fallback to localStorage
-      const flowData = reactFlowInstance.current.toObject();
-      localStorage.setItem('workflow-data', JSON.stringify(flowData));
-    } finally {
-      setIsLoading(false);
-    }
-  };
+      setNodes((nds) => [...nds, newNode]);
+    },
+    [reactFlowInstance, setNodes]
+  );
 
-  // Load workflow from Supabase
-  const loadWorkflow = async (id: string) => {
-    setIsLoading(true);
-    try {
-      const { success, workflow, error } = await WorkflowService.loadWorkflow(id);
-      
-      if (success && workflow) {
-        setCurrentWorkflowId(workflow.id);
-        setWorkflowName(workflow.name);
-        setWorkflowDescription(workflow.description || "");
-        
-        if (reactFlowInstance.current && workflow.data) {
-          // Load nodes and edges from the saved data
-          const { nodes: flowNodes, edges: flowEdges } = workflow.data;
-          setNodes(flowNodes || []);
-          setEdges(flowEdges || []);
-          reactFlowInstance.current.fitView();
-          toast.success("Workflow loaded successfully!");
-        }
-      } else {
-        throw new Error(error?.message || "Failed to load workflow");
-      }
-    } catch (error) {
-      console.error("Error loading workflow:", error);
-      toast.error("Failed to load workflow. Trying localStorage as fallback.");
-      
-      // Try to load from localStorage as fallback
-      tryLoadFromLocalStorage();
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Fallback to localStorage
-  const tryLoadFromLocalStorage = () => {
-    try {
-      const savedFlow = localStorage.getItem('workflow-data');
-      if (savedFlow) {
-        const flow = JSON.parse(savedFlow);
-        if (flow.nodes && flow.edges) {
-          setNodes(flow.nodes);
-          setEdges(flow.edges);
-          toast.info('Loaded saved workflow from localStorage');
-        }
-      }
-    } catch (error) {
-      console.error('Error loading saved workflow from localStorage:', error);
-    }
-  };
-
-  // Set up flow on init
-  const onInitFlow = useCallback((instance) => {
-    reactFlowInstance.current = instance;
-    onInit && onInit(instance);
-    
-    // Try to load saved workflow if any
-    if (!workflowId) {
-      tryLoadFromLocalStorage();
-    }
-  }, [onInit, setNodes, setEdges, workflowId]);
-
-  // Handle custom node deletion
+  // Add event listeners for custom events
   useEffect(() => {
-    const handleDeleteNode = (event) => {
-      const { id } = event.detail;
-      setNodes((nodes) => nodes.filter((node) => node.id !== id));
-      setEdges((edges) => edges.filter((edge) => 
-        edge.source !== id && edge.target !== id
-      ));
-    };
-
-    const handleUpdateNode = (event) => {
-      const { id, data } = event.detail;
-      setNodes((nodes) => nodes.map((node) => 
-        node.id === id ? { ...node, data: { ...node.data, ...data } } : node
-      ));
-    };
-
-    const handleAddAutomation = (event) => {
+    const handleAddAutomation = (event: CustomEvent) => {
+      if (!event.detail?.automationData) return;
+      
       const { automationData } = event.detail;
       
-      // Check if this automation already exists in the flow
-      if (existingAutomationIds.has(automationData.automationId)) {
-        toast.info(`Automation "${automationData.label}" already exists in this workflow`);
-        return;
-      }
-      
-      // Create a new automation node
+      // Create an automation node at a fixed position (or calculate a position)
       const newNode = {
         id: `automation-${Date.now()}`,
         type: 'automationNode',
         position: { x: 100, y: 100 },
-        data: automationData
+        data: automationData,
       };
       
-      setNodes((nds) => nds.concat(newNode));
-      toast.success(`Added "${automationData.label}" automation to workflow`);
-
-      // If we have a workflow ID, save the automation connection
-      if (currentWorkflowId && automationData.automationId) {
-        WorkflowService.saveAutomationConnection(
-          automationData.automationId,
-          currentWorkflowId,
-          automationData.targetType,
-          automationData.targetId
-        ).catch(error => {
-          console.error("Failed to save automation connection:", error);
-        });
-      }
+      setNodes((nds) => [...nds, newNode]);
     };
-
-    document.addEventListener('delete-node', handleDeleteNode);
-    document.addEventListener('update-node', handleUpdateNode);
-    document.addEventListener('add-automation', handleAddAutomation);
     
+    // Register event listener
+    document.addEventListener('add-automation', handleAddAutomation as EventListener);
+    
+    // Clean up
     return () => {
-      document.removeEventListener('delete-node', handleDeleteNode);
-      document.removeEventListener('update-node', handleUpdateNode);
-      document.removeEventListener('add-automation', handleAddAutomation);
+      document.removeEventListener('add-automation', handleAddAutomation as EventListener);
     };
-  }, [setNodes, setEdges, existingAutomationIds, currentWorkflowId]);
+  }, [setNodes]);
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-full w-full">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
 
   return (
-    <ReactFlowProvider>
-      <div style={{ width: '100%', height: '100%' }}>
-        <ReactFlow
-          nodes={nodes}
-          edges={edges}
-          onNodesChange={onNodesChange}
-          onEdgesChange={onEdgesChange}
-          onConnect={onConnect}
-          onInit={onInitFlow}
-          onDrop={onDrop}
-          onDragOver={onDragOver}
-          nodeTypes={nodeTypes}
-          fitView
-        >
-          <Background />
-          <Controls />
-          <Panel position="bottom-right">
-            <div className="bg-white p-2 rounded shadow text-xs">
-              Drag nodes from left sidebar • Connect nodes by dragging handles
-              {!isAuthenticated && (
-                <div className="mt-1 text-amber-600">
-                  Sign in to save workflows to cloud
-                </div>
-              )}
-            </div>
-          </Panel>
-        </ReactFlow>
-      </div>
-    </ReactFlowProvider>
+    <ReactFlow
+      nodes={nodes}
+      edges={edges}
+      onNodesChange={onNodesChange}
+      onEdgesChange={onEdgesChange}
+      onConnect={onConnect}
+      onInit={handleInit}
+      onDrop={onDrop}
+      onDragOver={onDragOver}
+      nodeTypes={nodeTypes}
+      fitView
+      minZoom={0.5}
+      maxZoom={1.5}
+      deleteKeyCode={['Backspace', 'Delete']}
+      className="bg-white"
+    >
+      <Background />
+      <Controls />
+    </ReactFlow>
   );
-}
+};
