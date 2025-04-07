@@ -1,6 +1,6 @@
 
 import { useState, useCallback, useEffect } from 'react';
-import { useNodesState, useEdgesState, useReactFlow, Node, Edge } from '@xyflow/react';
+import { useNodesState, useEdgesState, useReactFlow, Node, Edge, Connection } from '@xyflow/react';
 import { toast } from 'sonner';
 import { WorkflowService } from '@/services/WorkflowService';
 import { useAuth } from '@/contexts/AuthContext';
@@ -18,8 +18,10 @@ export const useFlow = ({ workflowId, initialData, onInit }: UseFlowProps) => {
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const [isLoading, setIsLoading] = useState(false);
-  const reactFlowInstance = useReactFlow();
   const { user } = useAuth();
+  
+  // This hook will only work inside a ReactFlowProvider
+  const reactFlowInstance = useReactFlow();
 
   const handleInit = useCallback((instance: any) => {
     if (onInit) {
@@ -101,17 +103,17 @@ export const useFlow = ({ workflowId, initialData, onInit }: UseFlowProps) => {
   }, [workflowId, setNodes, setEdges, initialData, isLoading]);
 
   // Event handlers
-  const onConnect = useCallback((params) => {
+  const onConnect = useCallback((params: Connection) => {
     setEdges((eds) => [...eds, { ...params, id: `e-${params.source}-${params.target}` }]);
   }, [setEdges]);
 
-  const onDragOver = useCallback((event) => {
+  const onDragOver = useCallback((event: React.DragEvent<HTMLDivElement>) => {
     event.preventDefault();
     event.dataTransfer.dropEffect = 'move';
   }, []);
 
   const onDrop = useCallback(
-    (event) => {
+    (event: React.DragEvent<HTMLDivElement>) => {
       event.preventDefault();
 
       const reactFlowBounds = event.currentTarget.getBoundingClientRect();
