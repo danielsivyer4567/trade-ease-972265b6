@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { AppLayout } from "@/components/ui/AppLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -6,10 +7,11 @@ import { Input } from "@/components/ui/input";
 import { useNavigate } from "react-router-dom";
 import { toast } from 'sonner';
 import { Badge } from "@/components/ui/badge";
-import { Search, ArrowLeft, Workflow as WorkflowIcon, Building, Construction, CreditCard, HardHat, Truck, UserPlus, ClipboardList, Calendar, Zap, WrenchIcon, HomeIcon, ShieldCheck, Receipt, BarChart, Ruler, Clock } from "lucide-react";
+import { Search, ArrowLeft, Workflow as WorkflowIcon, Building, Construction, CreditCard, HardHat, Truck, UserPlus, ClipboardList, Calendar, Zap, WrenchIcon, HomeIcon, ShieldCheck, Receipt, BarChart, Ruler, Clock, PlusCircle, Bookmark, Star } from "lucide-react";
 import { GlassCard } from '@/components/ui/GlassCard';
 import { WorkflowService, Workflow } from '@/services/WorkflowService';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { WorkflowSaveDialog } from './components/WorkflowSaveDialog';
 
 const TEMPLATE_CATEGORIES = [
   { id: 'construction', name: 'Construction', icon: <Construction className="h-5 w-5" /> },
@@ -585,12 +587,16 @@ export default function WorkflowTemplates() {
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredCategory, setFilteredCategory] = useState("");
   const [userWorkflows, setUserWorkflows] = useState<Workflow[]>([]);
+  const [userTemplates, setUserTemplates] = useState<Workflow[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("templates");
+  const [saveDialogOpen, setSaveDialogOpen] = useState(false);
+  const [selectedWorkflow, setSelectedWorkflow] = useState<Workflow | null>(null);
   
-  // Load user workflows when component mounts
+  // Load user workflows and templates when component mounts
   useEffect(() => {
     loadUserWorkflows();
+    loadUserTemplates();
   }, []);
 
   const loadUserWorkflows = async () => {
@@ -607,10 +613,53 @@ export default function WorkflowTemplates() {
     }
   };
 
-  const filteredTemplates = WORKFLOW_TEMPLATES.filter(template => {
+  const loadUserTemplates = async () => {
+    try {
+      const { success, templates } = await WorkflowService.getUserTemplates();
+      if (success && templates) {
+        setUserTemplates(templates);
+      }
+    } catch (error) {
+      console.error("Error loading user templates:", error);
+    }
+  };
+
+  const handleSaveAsTemplate = async (name: string, description: string) => {
+    if (!selectedWorkflow) return;
+    
+    const templateToSave = {
+      ...selectedWorkflow,
+      name,
+      description,
+    };
+    
+    try {
+      const { success } = await WorkflowService.saveAsTemplate(templateToSave);
+      if (success) {
+        toast.success("Workflow saved as template");
+        setSaveDialogOpen(false);
+        loadUserTemplates();
+      } else {
+        toast.error("Failed to save template");
+      }
+    } catch (error) {
+      console.error("Error saving template:", error);
+      toast.error("An error occurred");
+    }
+  };
+
+  const filteredPredefinedTemplates = WORKFLOW_TEMPLATES.filter(template => {
     const matchesSearch = template.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
                          template.description.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = !filteredCategory || template.category.toLowerCase() === filteredCategory.toLowerCase();
+    return matchesSearch && matchesCategory;
+  });
+
+  const filteredUserTemplates = userTemplates.filter(template => {
+    const matchesSearch = template.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                         (template.description && template.description.toLowerCase().includes(searchTerm.toLowerCase()));
+    const matchesCategory = !filteredCategory || 
+                           (template.category && template.category.toLowerCase() === filteredCategory.toLowerCase());
     return matchesSearch && matchesCategory;
   });
 
@@ -646,6 +695,19 @@ export default function WorkflowTemplates() {
     return date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
   };
 
+  // Function to determine card border color based on node types
+  const getCardBorderColor = (workflow: Workflow) => {
+    const nodeTypes = workflow.data?.nodes?.map((node: any) => node.type) || [];
+    
+    if (nodeTypes.includes('customer')) return "border-l-blue-500";
+    if (nodeTypes.includes('job')) return "border-l-green-500";
+    if (nodeTypes.includes('quote')) return "border-l-yellow-500";
+    if (nodeTypes.includes('task')) return "border-l-purple-500";
+    if (nodeTypes.includes('vision')) return "border-l-red-500";
+    
+    return "border-l-gray-300";
+  };
+
   return (
     <AppLayout>
       <div className="p-4 md:p-6 space-y-6">
@@ -672,10 +734,11 @@ export default function WorkflowTemplates() {
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="mb-4">
             <TabsTrigger value="templates">Predefined Templates</TabsTrigger>
+            <TabsTrigger value="user-templates">My Templates</TabsTrigger>
             <TabsTrigger value="recent">Recent Workflows</TabsTrigger>
           </TabsList>
           
-          {/* Search and Filters - Common to both tabs */}
+          {/* Search and Filters - Common to all tabs */}
           <div className="flex flex-col md:flex-row gap-4 mb-4">
             <div className="relative flex-grow">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 h-4 w-4" />
@@ -709,12 +772,12 @@ export default function WorkflowTemplates() {
             </div>
           </div>
           
+          {/* Predefined Templates Tab */}
           <TabsContent value="templates">
-            {/* Templates Content */}
-            {filteredTemplates.length > 0 ? (
+            {filteredPredefinedTemplates.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {filteredTemplates.map((template) => (
-                  <Card key={template.id} className="overflow-hidden hover:shadow-md transition-shadow">
+                {filteredPredefinedTemplates.map((template) => (
+                  <Card key={template.id} className={`overflow-hidden hover:shadow-md transition-shadow border-l-4 ${getCardBorderColor(template)}`}>
                     <CardHeader className="pb-2">
                       <div className="flex justify-between items-start">
                         <CardTitle className="text-lg">{template.name}</CardTitle>
@@ -760,8 +823,53 @@ export default function WorkflowTemplates() {
             )}
           </TabsContent>
           
+          {/* User Templates Tab */}
+          <TabsContent value="user-templates">
+            {userTemplates.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {filteredUserTemplates.map((template) => (
+                  <Card key={template.id} className={`overflow-hidden hover:shadow-md transition-shadow border-l-4 ${getCardBorderColor(template)}`}>
+                    <CardHeader className="pb-2">
+                      <div className="flex justify-between items-start">
+                        <CardTitle className="text-lg">{template.name}</CardTitle>
+                        {template.category && <Badge>{template.category}</Badge>}
+                      </div>
+                      <CardDescription>{template.description || "No description"}</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-sm text-gray-500 flex items-center mt-1">
+                        <Clock className="h-3 w-3 mr-1" />
+                        {formatDate(template.data?.created_at)}
+                      </div>
+                      <div className="text-sm text-gray-500 mt-1">
+                        <div>Nodes: {template.data?.nodes?.length || 0}</div>
+                        <div>Connections: {template.data?.edges?.length || 0}</div>
+                      </div>
+                      <Button 
+                        onClick={() => handleTemplateSelect(template)} 
+                        className="w-full mt-4"
+                      >
+                        Use This Template
+                      </Button>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            ) : (
+              <GlassCard className="p-8 text-center">
+                <div className="flex flex-col items-center gap-4">
+                  <Star className="h-16 w-16 text-gray-400" />
+                  <h2 className="text-xl font-semibold">No custom templates found</h2>
+                  <p className="text-gray-500 max-w-md">
+                    You haven't saved any workflows as templates yet. You can convert your workflows to templates from the "Recent Workflows" tab.
+                  </p>
+                </div>
+              </GlassCard>
+            )}
+          </TabsContent>
+          
+          {/* Recent User Workflows Content */}
           <TabsContent value="recent">
-            {/* Recent User Workflows Content */}
             {isLoading ? (
               <div className="flex justify-center py-12">
                 <p>Loading recent workflows...</p>
@@ -769,7 +877,7 @@ export default function WorkflowTemplates() {
             ) : filteredUserWorkflows.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {filteredUserWorkflows.map((workflow) => (
-                  <Card key={workflow.id} className="overflow-hidden hover:shadow-md transition-shadow">
+                  <Card key={workflow.id} className={`overflow-hidden hover:shadow-md transition-shadow border-l-4 ${getCardBorderColor(workflow)}`}>
                     <CardHeader className="pb-2">
                       <div className="flex justify-between items-start">
                         <CardTitle className="text-lg">{workflow.name}</CardTitle>
@@ -786,12 +894,25 @@ export default function WorkflowTemplates() {
                         <div>Nodes: {workflow.data?.nodes?.length || 0}</div>
                         <div>Connections: {workflow.data?.edges?.length || 0}</div>
                       </div>
-                      <Button 
-                        onClick={() => navigate(`/workflow?id=${workflow.id}`)} 
-                        className="w-full mt-4"
-                      >
-                        Use This Workflow
-                      </Button>
+                      <div className="flex gap-2 mt-4">
+                        <Button 
+                          onClick={() => navigate(`/workflow?id=${workflow.id}`)} 
+                          className="flex-1"
+                        >
+                          Use Workflow
+                        </Button>
+                        <Button 
+                          variant="outline"
+                          onClick={() => {
+                            setSelectedWorkflow(workflow);
+                            setSaveDialogOpen(true);
+                          }}
+                          className="flex items-center"
+                        >
+                          <Bookmark className="h-4 w-4 mr-1" />
+                          Save as Template
+                        </Button>
+                      </div>
                     </CardContent>
                   </Card>
                 ))}
@@ -822,6 +943,7 @@ export default function WorkflowTemplates() {
                       onClick={() => navigate("/workflow")}
                       className="mt-2"
                     >
+                      <PlusCircle className="h-4 w-4 mr-2" />
                       Create New Workflow
                     </Button>
                   </div>
@@ -831,6 +953,15 @@ export default function WorkflowTemplates() {
           </TabsContent>
         </Tabs>
       </div>
+
+      <WorkflowSaveDialog
+        open={saveDialogOpen}
+        onOpenChange={setSaveDialogOpen}
+        onSave={handleSaveAsTemplate}
+        isLoading={false}
+        initialName={selectedWorkflow?.name ? `${selectedWorkflow.name} Template` : ''}
+        initialDescription={selectedWorkflow?.description || ''}
+      />
     </AppLayout>
   );
 }
