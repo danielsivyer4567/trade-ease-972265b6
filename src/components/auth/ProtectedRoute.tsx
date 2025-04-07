@@ -1,19 +1,22 @@
 
-import React from 'react';
-import { Navigate, Outlet } from 'react-router-dom';
+import { Navigate, useLocation, Outlet } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
 
-export interface ProtectedRouteProps {
-  children?: React.ReactNode;
-}
+export function ProtectedRoute() {
+  const { user, loading } = useAuth();
+  const location = useLocation();
 
-export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
-  // In a real application, you would check if the user is authenticated here
-  // For example: if (!isAuthenticated) return <Navigate to="/login" />;
-  const isAuthenticated = true; // Mock authentication state
-  
-  if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
+  if (loading) {
+    // You can replace this with a loading spinner component
+    return <div className="flex h-screen w-screen items-center justify-center">
+      <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+    </div>;
   }
-  
-  return children ? <>{children}</> : <Outlet />;
-};
+
+  if (!user) {
+    // Save the attempted URL for redirecting after login
+    return <Navigate to="/auth" state={{ from: location }} replace />;
+  }
+
+  return <Outlet />;
+}

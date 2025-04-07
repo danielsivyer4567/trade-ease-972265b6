@@ -1,165 +1,202 @@
 
-/**
- * Service for handling workflow operations
- */
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 export interface Workflow {
   id: string;
   name: string;
   description?: string;
   category?: string;
-  is_template: boolean;
   data: any;
-  created_at: string;
-  updated_at: string;
-  user_id: string;
+  is_template?: boolean;
 }
 
-export interface WorkflowResponse {
-  success: boolean;
-  workflows?: Workflow[];
-  templates?: Workflow[];
-  id?: string;
-  error?: string;
-}
+export const WorkflowService = {
+  /**
+   * Save workflow to Supabase
+   */
+  saveWorkflow: async (workflow: Workflow): Promise<{ success: boolean; id?: string; error?: any }> => {
+    try {
+      // Check if user is authenticated
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        toast.error('You must be signed in to save workflows');
+        return { success: false, error: 'Authentication required' };
+      }
 
-export class WorkflowService {
-  /**
-   * Get workflows for the current user
-   */
-  static async getUserWorkflows(): Promise<WorkflowResponse> {
-    // In a real app, this would fetch from the backend
-    console.log('Getting user workflows');
-    
-    // Return mock data with success property
-    return {
-      success: true,
-      workflows: [
-        {
-          id: '1',
-          name: 'Customer Onboarding',
-          description: 'Workflow for new customers',
-          category: 'customers',
-          is_template: false,
-          data: {},
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-          user_id: 'current-user',
-        },
-        {
-          id: '2',
-          name: 'Job Completion',
-          description: 'Workflow for job completion',
-          category: 'jobs',
-          is_template: false,
-          data: {},
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-          user_id: 'current-user',
-        }
-      ]
-    };
-  }
-  
-  /**
-   * Get workflow templates
-   */
-  static async getUserTemplates(): Promise<WorkflowResponse> {
-    // In a real app, this would fetch from the backend
-    console.log('Getting user templates');
-    
-    // Return mock data with success property
-    return {
-      success: true,
-      templates: [
-        {
-          id: 't1',
-          name: 'Quote Approval Template',
-          description: 'Standard template for quote approvals',
-          category: 'quotes',
-          is_template: true,
-          data: {},
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-          user_id: 'current-user',
-        },
-        {
-          id: 't2',
-          name: 'Customer Follow-up Template',
-          description: 'Standard template for customer follow-ups',
-          category: 'customers',
-          is_template: true,
-          data: {},
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-          user_id: 'current-user',
-        }
-      ]
-    };
-  }
+      const { data, error } = await supabase
+        .from('workflows')
+        .upsert({
+          id: workflow.id,
+          name: workflow.name,
+          description: workflow.description || '',
+          category: workflow.category || '',
+          data: workflow.data,
+          user_id: session.user.id,
+          is_template: workflow.is_template || false
+        })
+        .select('id')
+        .single();
 
-  /**
-   * Save a workflow
-   */
-  static async saveWorkflow(workflow: Partial<Workflow>): Promise<WorkflowResponse> {
-    console.log('Saving workflow:', workflow);
-    
-    // Mock a response
-    const newId = workflow.id || Math.random().toString(36).substring(2, 9);
-    
-    return {
-      success: true,
-      id: newId,
-      workflows: [{
-        ...workflow,
-        id: newId,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        user_id: 'current-user',
-        is_template: workflow.is_template || false,
-      } as Workflow]
-    };
-  }
-  
-  /**
-   * Get a workflow by ID
-   */
-  static async getWorkflow(id: string): Promise<WorkflowResponse> {
-    console.log('Getting workflow:', id);
-    
-    // Mock response
-    if (id) {
-      return {
-        success: true,
-        workflows: [{
-          id,
-          name: 'Sample Workflow',
-          description: 'This is a sample workflow',
-          category: 'general',
-          is_template: false,
-          data: {},
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-          user_id: 'current-user',
-        }]
-      };
+      if (error) throw error;
+
+      return { success: true, id: data.id };
+    } catch (error) {
+      console.error('Failed to save workflow:', error);
+      return { success: false, error };
     }
-    
-    return {
-      success: false,
-      error: 'Workflow not found'
-    };
-  }
-  
+  },
+
   /**
-   * Delete a workflow by ID
+   * Save workflow as template
    */
-  static async deleteWorkflow(id: string): Promise<WorkflowResponse> {
-    console.log('Deleting workflow:', id);
-    
-    // Mock successful deletion
-    return {
-      success: true
+  saveAsTemplate: async (workflow: Workflow): Promise<{ success: boolean; id?: string; error?: any }> => {
+    // Create a new copy of the workflow with is_template set to true
+    const templateWorkflow = {
+      ...workflow,
+      id: crypto.randomUUID(), // Generate new ID for the template
+      is_template: true
     };
+    
+    return WorkflowService.saveWorkflow(templateWorkflow);
+  },
+
+  /**
+   * Load workflow from Supabase
+   */
+  loadWorkflow: async (id: string): Promise<{ success: boolean; workflow?: Workflow; error?: any }> => {
+    try {
+      const { data, error } = await supabase
+        .from('workflows')
+        .select('*')
+        .eq('id', id)
+        .single();
+
+      if (error) throw error;
+
+      return { 
+        success: true, 
+        workflow: {
+          id: data.id,
+          name: data.name,
+          description: data.description,
+          category: data.category,
+          data: data.data,
+          is_template: data.is_template
+        }
+      };
+    } catch (error) {
+      console.error('Failed to load workflow:', error);
+      return { success: false, error };
+    }
+  },
+
+  /**
+   * Get all user workflows
+   */
+  getUserWorkflows: async (): Promise<{ success: boolean; workflows?: Workflow[]; error?: any }> => {
+    try {
+      const { data, error } = await supabase
+        .from('workflows')
+        .select('*')
+        .eq('is_template', false)
+        .order('updated_at', { ascending: false });
+
+      if (error) throw error;
+
+      return { 
+        success: true, 
+        workflows: data.map(item => ({
+          id: item.id,
+          name: item.name,
+          description: item.description,
+          category: item.category,
+          data: item.data,
+          is_template: item.is_template
+        }))
+      };
+    } catch (error) {
+      console.error('Failed to get user workflows:', error);
+      return { success: false, error };
+    }
+  },
+
+  /**
+   * Get user templates
+   */
+  getUserTemplates: async (): Promise<{ success: boolean; templates?: Workflow[]; error?: any }> => {
+    try {
+      const { data, error } = await supabase
+        .from('workflows')
+        .select('*')
+        .eq('is_template', true)
+        .order('updated_at', { ascending: false });
+
+      if (error) throw error;
+
+      return { 
+        success: true, 
+        templates: data.map(item => ({
+          id: item.id,
+          name: item.name,
+          description: item.description,
+          category: item.category,
+          data: item.data,
+          is_template: item.is_template
+        }))
+      };
+    } catch (error) {
+      console.error('Failed to get user templates:', error);
+      return { success: false, error };
+    }
+  },
+
+  /**
+   * Delete workflow from Supabase
+   */
+  deleteWorkflow: async (id: string): Promise<{ success: boolean; error?: any }> => {
+    try {
+      const { error } = await supabase
+        .from('workflows')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+
+      return { success: true };
+    } catch (error) {
+      console.error('Failed to delete workflow:', error);
+      return { success: false, error };
+    }
+  },
+
+  /**
+   * Save automation connection
+   */
+  saveAutomationConnection: async (automationId: number, workflowId: string, targetType?: string, targetId?: string): Promise<{ success: boolean; error?: any }> => {
+    try {
+      // Check if user is authenticated
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        return { success: false, error: 'Authentication required' };
+      }
+
+      const { error } = await supabase
+        .from('automation_workflow_connections')
+        .insert({
+          automation_id: automationId,
+          workflow_id: workflowId,
+          target_type: targetType,
+          target_id: targetId,
+          user_id: session.user.id
+        });
+
+      if (error) throw error;
+
+      return { success: true };
+    } catch (error) {
+      console.error('Failed to save automation connection:', error);
+      return { success: false, error };
+    }
   }
-}
+};

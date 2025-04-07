@@ -1,25 +1,32 @@
 
-import React, { useState, useEffect } from 'react';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { WorkflowService } from '@/services/WorkflowService';
+import React, { useEffect, useState } from 'react';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { WorkflowService, Workflow } from '@/services/WorkflowService';
+import { Folder, Trash2, Clock } from "lucide-react";
 import { toast } from 'sonner';
-import { Search } from 'lucide-react';
 
-export interface WorkflowLoadDialogProps {
+interface WorkflowLoadDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onLoadWorkflow: (workflowId: string) => void;
-  trigger?: React.ReactNode;
+  onLoad: (workflowId: string) => void;
 }
 
-export const WorkflowLoadDialog = ({ open, onOpenChange, onLoadWorkflow, trigger }: WorkflowLoadDialogProps) => {
-  const [search, setSearch] = useState('');
-  const [workflows, setWorkflows] = useState<any[]>([]);
-  const [templates, setTemplates] = useState<any[]>([]);
+export function WorkflowLoadDialog({
+  open,
+  onOpenChange,
+  onLoad
+}: WorkflowLoadDialogProps) {
+  const [workflows, setWorkflows] = useState<Workflow[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     if (open) {
@@ -29,127 +36,111 @@ export const WorkflowLoadDialog = ({ open, onOpenChange, onLoadWorkflow, trigger
 
   const loadWorkflows = async () => {
     setIsLoading(true);
-    
     try {
-      // Load user workflows
-      const workflowsResponse = await WorkflowService.getUserWorkflows();
-      if (workflowsResponse.success && workflowsResponse.workflows) {
-        setWorkflows(workflowsResponse.workflows);
+      const { success, workflows } = await WorkflowService.getUserWorkflows();
+      if (success && workflows) {
+        setWorkflows(workflows);
       } else {
-        setWorkflows([]);
-      }
-      
-      // Load templates
-      const templatesResponse = await WorkflowService.getUserTemplates();
-      if (templatesResponse.success && templatesResponse.templates) {
-        setTemplates(templatesResponse.templates);
-      } else {
-        setTemplates([]);
+        toast.error("Failed to load workflows");
       }
     } catch (error) {
-      console.error('Error loading workflows:', error);
-      toast.error('Failed to load workflows');
-      setWorkflows([]);
-      setTemplates([]);
+      console.error("Error loading workflows:", error);
+      toast.error("Failed to load workflows");
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleSelectWorkflow = (id: string) => {
-    onLoadWorkflow(id);
+  const handleDelete = async (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setIsDeleting(true);
+    
+    try {
+      const { success } = await WorkflowService.deleteWorkflow(id);
+      if (success) {
+        toast.success("Workflow deleted");
+        loadWorkflows();
+      } else {
+        toast.error("Failed to delete workflow");
+      }
+    } catch (error) {
+      console.error("Error deleting workflow:", error);
+      toast.error("Failed to delete workflow");
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const handleSelect = (workflowId: string) => {
+    onLoad(workflowId);
     onOpenChange(false);
   };
 
-  // Filter workflows and templates based on search
-  const filteredWorkflows = workflows.filter(wf => 
-    wf.name.toLowerCase().includes(search.toLowerCase()) ||
-    (wf.description && wf.description.toLowerCase().includes(search.toLowerCase()))
-  );
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
+  };
   
-  const filteredTemplates = templates.filter(t => 
-    t.name.toLowerCase().includes(search.toLowerCase()) ||
-    (t.description && t.description.toLowerCase().includes(search.toLowerCase()))
-  );
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogTrigger asChild>
-        {trigger || <Button variant="outline">Load Workflow</Button>}
-      </DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Load Workflow</DialogTitle>
           <DialogDescription>
-            Select an existing workflow or template to load
+            Select a workflow to load
           </DialogDescription>
         </DialogHeader>
         
-        <div className="relative my-4">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
-          <Input
-            type="search"
-            placeholder="Search workflows..."
-            className="pl-8"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-        </div>
-        
-        <ScrollArea className="max-h-[50vh]">
+        <div className="h-64 overflow-auto">
           {isLoading ? (
-            <div className="text-center py-4">Loading workflows...</div>
+            <div className="flex items-center justify-center h-32">
+              <p>Loading workflows...</p>
+            </div>
+          ) : workflows.length === 0 ? (
+            <div className="flex flex-col items-center justify-center h-32 text-gray-500">
+              <Folder className="h-12 w-12 mb-2" />
+              <p>No saved workflows</p>
+            </div>
           ) : (
-            <div className="space-y-4">
-              {filteredWorkflows.length > 0 && (
-                <div>
-                  <h3 className="font-medium mb-2">Your Workflows</h3>
-                  <div className="space-y-2">
-                    {filteredWorkflows.map(workflow => (
-                      <div
-                        key={workflow.id}
-                        className="p-3 border rounded-md hover:bg-gray-50 cursor-pointer"
-                        onClick={() => handleSelectWorkflow(workflow.id)}
-                      >
-                        <div className="font-medium">{workflow.name}</div>
-                        {workflow.description && (
-                          <div className="text-sm text-gray-500">{workflow.description}</div>
-                        )}
+            <div className="space-y-2">
+              {workflows.map((workflow) => (
+                <div 
+                  key={workflow.id} 
+                  className="border rounded-md p-3 cursor-pointer hover:bg-gray-50"
+                  onClick={() => handleSelect(workflow.id)}
+                >
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <h4 className="font-medium">{workflow.name}</h4>
+                      {workflow.description && (
+                        <p className="text-sm text-gray-500">{workflow.description}</p>
+                      )}
+                      <div className="text-xs text-gray-400 flex items-center mt-1">
+                        <Clock className="h-3 w-3 mr-1" />
+                        {formatDate(workflow.data?.created_at)}
                       </div>
-                    ))}
+                    </div>
+                    <Button 
+                      variant="ghost" 
+                      size="sm"
+                      onClick={(e) => handleDelete(workflow.id, e)}
+                      disabled={isDeleting}
+                    >
+                      <Trash2 className="h-4 w-4 text-gray-400 hover:text-red-500" />
+                    </Button>
                   </div>
                 </div>
-              )}
-              
-              {filteredTemplates.length > 0 && (
-                <div>
-                  <h3 className="font-medium mb-2">Templates</h3>
-                  <div className="space-y-2">
-                    {filteredTemplates.map(template => (
-                      <div
-                        key={template.id}
-                        className="p-3 border rounded-md hover:bg-gray-50 cursor-pointer"
-                        onClick={() => handleSelectWorkflow(template.id)}
-                      >
-                        <div className="font-medium">{template.name}</div>
-                        {template.description && (
-                          <div className="text-sm text-gray-500">{template.description}</div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-              
-              {filteredWorkflows.length === 0 && filteredTemplates.length === 0 && (
-                <div className="text-center py-4">
-                  {search ? `No workflows matching "${search}"` : 'No workflows available'}
-                </div>
-              )}
+              ))}
             </div>
           )}
-        </ScrollArea>
+        </div>
+        
+        <DialogFooter>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
+            Cancel
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );
-};
+}

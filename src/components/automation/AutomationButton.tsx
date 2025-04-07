@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Workflow, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { AutomationIntegrationService } from '@/services/AutomationIntegrationService';
 import { useNavigate } from 'react-router-dom';
 import {
   Popover,
@@ -10,14 +11,13 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 
-export interface AutomationButtonProps {
-  targetType: 'job' | 'quote' | 'customer' | 'message' | 'social' | 'calendar' | string;
+interface AutomationButtonProps {
+  targetType: 'job' | 'quote' | 'customer' | 'message' | 'social' | 'calendar';
   targetId: string;
   variant?: 'default' | 'outline' | 'secondary';
   size?: 'sm' | 'default' | 'lg';
   fullWidth?: boolean;
   buttonText?: string;
-  label?: string; // Added for WorkflowTest compatibility
 }
 
 export function AutomationButton({
@@ -26,8 +26,7 @@ export function AutomationButton({
   variant = 'outline',
   size = 'sm',
   fullWidth = false,
-  buttonText = 'Automations',
-  label
+  buttonText = 'Automations'
 }: AutomationButtonProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [automations, setAutomations] = useState<any[]>([]);
@@ -37,12 +36,13 @@ export function AutomationButton({
   const loadAutomations = async () => {
     setIsLoading(true);
     try {
-      // Mock API call to get associated automations
-      await new Promise(resolve => setTimeout(resolve, 500));
-      setAutomations([
-        { id: 1, title: 'Send Notification', category: 'notification' },
-        { id: 2, title: 'Update Status', category: 'status' }
-      ]);
+      const { success, automations, error } = await AutomationIntegrationService.getAssociatedAutomations(targetType, targetId);
+      
+      if (!success) {
+        throw new Error(error);
+      }
+      
+      setAutomations(automations || []);
     } catch (error) {
       console.error('Failed to load automations:', error);
       toast.error('Failed to load automations');
@@ -61,8 +61,10 @@ export function AutomationButton({
   const handleTriggerAutomation = async (automationId: number) => {
     setIsLoading(true);
     try {
-      // Mock API call to trigger automation
-      await new Promise(resolve => setTimeout(resolve, 800));
+      await AutomationIntegrationService.triggerAutomation(automationId, {
+        targetType,
+        targetId
+      });
       toast.success('Automation triggered successfully');
       setIsOpen(false);
     } catch (error) {
@@ -92,7 +94,7 @@ export function AutomationButton({
           className={fullWidth ? "w-full" : ""}
         >
           <Workflow className="h-4 w-4 mr-2" />
-          {label || buttonText}
+          {buttonText}
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-64 p-2">

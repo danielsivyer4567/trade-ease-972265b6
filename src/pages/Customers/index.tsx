@@ -1,7 +1,6 @@
-
 import { AppLayout } from "@/components/ui/AppLayout";
 import { Input } from "@/components/ui/input";
-import { Search, Mail, Phone, Edit, PlusCircle } from "lucide-react";
+import { Search, Mail, Phone, Edit } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
@@ -74,10 +73,6 @@ export default function Customers() {
   const handleViewDetails = (customerId) => {
     navigate(`/customers/${customerId}`);
   };
-  
-  const handleAddCustomer = () => {
-    navigate('/customers/new');
-  };
 
   const onSubmit = async (data) => {
     try {
@@ -138,10 +133,6 @@ export default function Customers() {
       <div className="p-6 space-y-6">
         <div className="flex justify-between items-center">
           <h1 className="text-2xl font-semibold">Customers</h1>
-          <Button onClick={handleAddCustomer} className="flex items-center gap-2">
-            <PlusCircle className="h-4 w-4" />
-            Add Customer
-          </Button>
         </div>
 
         <div className="relative max-w-md">
