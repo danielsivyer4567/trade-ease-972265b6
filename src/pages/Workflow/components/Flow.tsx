@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { ReactFlow, Background, Controls, ReactFlowInstance, Node, Edge } from '@xyflow/react';
+import { ReactFlow, ReactFlowProvider, Background, Controls, ReactFlowInstance, Node, Edge } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { useFlow } from '../hooks/useFlow';
 import { FlowLoading } from './flow/FlowLoading';
@@ -15,7 +15,8 @@ interface FlowProps {
   };
 }
 
-export const Flow: React.FC<FlowProps> = ({ onInit, workflowId, initialData }) => {
+// Internal component that uses the hook
+const FlowComponent: React.FC<FlowProps> = ({ onInit, workflowId, initialData }) => {
   const {
     nodes,
     edges,
@@ -52,5 +53,14 @@ export const Flow: React.FC<FlowProps> = ({ onInit, workflowId, initialData }) =
       <Background />
       <Controls />
     </ReactFlow>
+  );
+};
+
+// Wrapper component that provides the ReactFlowProvider
+export const Flow: React.FC<FlowProps> = (props) => {
+  return (
+    <ReactFlowProvider>
+      <FlowComponent {...props} />
+    </ReactFlowProvider>
   );
 };
