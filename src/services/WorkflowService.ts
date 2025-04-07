@@ -9,6 +9,7 @@ export interface Workflow {
   category?: string;
   data: any;
   is_template?: boolean;
+  updated_at?: string;
 }
 
 export const WorkflowService = {
@@ -24,6 +25,15 @@ export const WorkflowService = {
         return { success: false, error: 'Authentication required' };
       }
 
+      // Make sure workflow has updated_at for proper sorting
+      const currentTime = new Date().toISOString();
+      
+      // Add created_at to data if it doesn't exist (for new workflows)
+      const workflowData = { 
+        ...workflow.data,
+        created_at: workflow.data?.created_at || currentTime
+      };
+
       const { data, error } = await supabase
         .from('workflows')
         .upsert({
@@ -31,9 +41,9 @@ export const WorkflowService = {
           name: workflow.name,
           description: workflow.description || '',
           category: workflow.category || '',
-          data: workflow.data,
+          data: workflowData,
           user_id: session.user.id,
-          is_template: workflow.is_template || false
+          is_template: workflow.is_template || false,
         })
         .select('id')
         .single();
@@ -82,7 +92,8 @@ export const WorkflowService = {
           description: data.description,
           category: data.category,
           data: data.data,
-          is_template: data.is_template
+          is_template: data.is_template,
+          updated_at: data.updated_at
         }
       };
     } catch (error) {
@@ -112,7 +123,8 @@ export const WorkflowService = {
           description: item.description,
           category: item.category,
           data: item.data,
-          is_template: item.is_template
+          is_template: item.is_template,
+          updated_at: item.updated_at
         }))
       };
     } catch (error) {
@@ -142,7 +154,8 @@ export const WorkflowService = {
           description: item.description,
           category: item.category,
           data: item.data,
-          is_template: item.is_template
+          is_template: item.is_template,
+          updated_at: item.updated_at
         }))
       };
     } catch (error) {
