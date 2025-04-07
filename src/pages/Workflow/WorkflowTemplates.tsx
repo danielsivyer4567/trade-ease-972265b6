@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { AppLayout } from "@/components/ui/AppLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -319,3 +320,257 @@ const WORKFLOW_TEMPLATES = [
         { id: 'e5-6', source: 'contract-negotiation', target: 'purchase-orders' },
         { id: 'e6-7', source: 'purchase-orders', target: 'progress-payment' },
         { id: 'e7-8', source: 'progress-payment', target: 'change-order-management' },
+        { id: 'e8-9', source: 'change-order-management', target: 'invoice-verification' },
+        { id: 'e9-10', source: 'invoice-verification', target: 'payment-processing' },
+        { id: 'e10-11', source: 'payment-processing', target: 'cost-tracking' },
+        { id: 'e11-12', source: 'cost-tracking', target: 'variance-analysis' },
+        { id: 'e12-13', source: 'variance-analysis', target: 'forecast-updates' },
+        { id: 'e13-14', source: 'forecast-updates', target: 'final-reconciliation' },
+        { id: 'e14-15', source: 'final-reconciliation', target: 'financial-closeout' },
+      ],
+      created_at: new Date().toISOString()
+    }
+  }
+];
+
+const WorkflowTemplates: React.FC = () => {
+  const navigate = useNavigate();
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [showSaveDialog, setShowSaveDialog] = useState(false);
+  const [currentTemplate, setCurrentTemplate] = useState<Workflow | null>(null);
+  const [userTemplates, setUserTemplates] = useState<Workflow[]>([]);
+
+  useEffect(() => {
+    // Load user templates when the component mounts
+    const loadUserTemplates = async () => {
+      const result = await WorkflowService.getUserTemplates();
+      if (result.success && result.templates) {
+        setUserTemplates(result.templates);
+      }
+    };
+    
+    loadUserTemplates();
+  }, []);
+
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+  };
+
+  const handleCategorySelect = (category: string) => {
+    setSelectedCategory(category);
+  };
+
+  const handleGoBack = () => {
+    navigate('/workflow');
+  };
+
+  const filterTemplates = () => {
+    // Combine built-in templates with user templates
+    const allTemplates = [...WORKFLOW_TEMPLATES, ...userTemplates];
+    
+    return allTemplates.filter(template => {
+      const matchesCategory = selectedCategory === 'all' || 
+        template.category?.toLowerCase() === selectedCategory.toLowerCase();
+      
+      const matchesSearch = template.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (template.description && template.description.toLowerCase().includes(searchQuery.toLowerCase()));
+      
+      return matchesCategory && matchesSearch;
+    });
+  };
+
+  const handleUseTemplate = (template: Workflow) => {
+    setCurrentTemplate(template);
+    setShowSaveDialog(true);
+  };
+
+  const handleSaveDialogClose = () => {
+    setShowSaveDialog(false);
+    setCurrentTemplate(null);
+  };
+
+  const handleCreateWorkflow = async (name: string, description: string, category: string) => {
+    if (!currentTemplate) return;
+    
+    try {
+      // Create a new workflow from the template
+      const newWorkflow: Workflow = {
+        id: crypto.randomUUID(), // Generate a new ID for the workflow
+        name,
+        description,
+        category,
+        data: currentTemplate.data,
+        is_template: false // This is a workflow, not a template
+      };
+      
+      const result = await WorkflowService.saveWorkflow(newWorkflow);
+      
+      if (result.success) {
+        toast.success("Workflow created successfully!");
+        navigate(`/workflow/edit/${result.id}`);
+      } else {
+        toast.error("Failed to create workflow");
+      }
+    } catch (error) {
+      console.error("Error creating workflow:", error);
+      toast.error("An error occurred while creating the workflow");
+    } finally {
+      setShowSaveDialog(false);
+      setCurrentTemplate(null);
+    }
+  };
+
+  const filteredTemplates = filterTemplates();
+
+  return (
+    <AppLayout>
+      <div className="container mx-auto px-4 py-6">
+        <div className="flex flex-col md:flex-row md:items-center mb-6 gap-4">
+          <Button
+            variant="outline"
+            onClick={handleGoBack}
+            className="flex items-center gap-2 mb-4 md:mb-0"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back to Workflows
+          </Button>
+          
+          <div className="flex-1">
+            <h1 className="text-2xl md:text-3xl font-bold">Workflow Templates</h1>
+            <p className="text-gray-500 mt-1">Use templates to quickly create workflows for your projects</p>
+          </div>
+          
+          <div className="relative w-full md:w-64">
+            <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+            <Input
+              placeholder="Search templates..."
+              className="pl-10"
+              value={searchQuery}
+              onChange={handleSearch}
+            />
+          </div>
+        </div>
+
+        <Tabs defaultValue="library">
+          <TabsList className="mb-4">
+            <TabsTrigger value="library">Template Library</TabsTrigger>
+            <TabsTrigger value="my-templates">My Templates</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="library" className="space-y-6">
+            <div className="flex flex-wrap gap-2">
+              <Badge
+                onClick={() => handleCategorySelect('all')}
+                className={`cursor-pointer px-3 py-1 ${
+                  selectedCategory === 'all'
+                    ? 'bg-blue-500 hover:bg-blue-600'
+                    : 'bg-gray-200 hover:bg-gray-300 text-gray-700'
+                }`}
+              >
+                All
+              </Badge>
+              
+              {TEMPLATE_CATEGORIES.map((category) => (
+                <Badge
+                  key={category.id}
+                  onClick={() => handleCategorySelect(category.id)}
+                  className={`cursor-pointer px-3 py-1 flex items-center gap-1 ${
+                    selectedCategory === category.id
+                      ? 'bg-blue-500 hover:bg-blue-600'
+                      : 'bg-gray-200 hover:bg-gray-300 text-gray-700'
+                  }`}
+                >
+                  {category.icon}
+                  {category.name}
+                </Badge>
+              ))}
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredTemplates.map((template) => (
+                <GlassCard key={template.id} className="relative">
+                  <div className="absolute top-4 right-4">
+                    <Badge className="bg-blue-100 text-blue-700 border border-blue-300">
+                      {template.category || 'General'}
+                    </Badge>
+                  </div>
+                  
+                  <h3 className="text-xl font-semibold mt-2 mb-2">{template.name}</h3>
+                  <p className="text-gray-600 text-sm mb-4 line-clamp-2">{template.description}</p>
+                  
+                  <div className="flex justify-between items-center mt-auto">
+                    <Button
+                      variant="default"
+                      onClick={() => handleUseTemplate(template)}
+                      className="w-full"
+                    >
+                      Use This Template
+                    </Button>
+                  </div>
+                </GlassCard>
+              ))}
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="my-templates" className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {userTemplates.length > 0 ? (
+                userTemplates.map((template) => (
+                  <GlassCard key={template.id} className="relative">
+                    <div className="absolute top-4 right-4">
+                      <Badge className="bg-green-100 text-green-700 border border-green-300">
+                        {template.category || 'Custom'}
+                      </Badge>
+                    </div>
+                    
+                    <h3 className="text-xl font-semibold mt-2 mb-2">{template.name}</h3>
+                    <p className="text-gray-600 text-sm mb-4 line-clamp-2">{template.description}</p>
+                    
+                    <div className="flex justify-between items-center mt-auto">
+                      <Button
+                        variant="default"
+                        onClick={() => handleUseTemplate(template)}
+                        className="w-full"
+                      >
+                        Use This Template
+                      </Button>
+                    </div>
+                  </GlassCard>
+                ))
+              ) : (
+                <div className="col-span-full text-center py-8">
+                  <div className="text-gray-400 mb-4">
+                    <Bookmark className="h-12 w-12 mx-auto mb-2" />
+                    <h3 className="text-xl font-medium">No Custom Templates Yet</h3>
+                  </div>
+                  <p className="text-gray-500 mb-4">
+                    You haven't saved any custom workflow templates yet. Create a workflow and save it as a template.
+                  </p>
+                  <Button onClick={() => navigate('/workflow/new')}>
+                    Create New Workflow
+                  </Button>
+                </div>
+              )}
+            </div>
+          </TabsContent>
+        </Tabs>
+      </div>
+      
+      {/* Save Dialog for creating a workflow from a template */}
+      {showSaveDialog && currentTemplate && (
+        <WorkflowSaveDialog
+          open={showSaveDialog}
+          onClose={handleSaveDialogClose}
+          onSave={handleCreateWorkflow}
+          initialName={currentTemplate.name}
+          initialDescription={currentTemplate.description || ''}
+          initialCategory={currentTemplate.category || ''}
+          title="Create Workflow from Template"
+        />
+      )}
+    </AppLayout>
+  );
+};
+
+export default WorkflowTemplates;
