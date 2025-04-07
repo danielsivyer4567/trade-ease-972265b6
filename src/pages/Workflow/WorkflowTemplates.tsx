@@ -318,4 +318,4 @@ const WORKFLOW_TEMPLATES = [
         { id: 'e4-5', source: 'vendor-bidding', target: 'contract-negotiation' },
         { id: 'e5-6', source: 'contract-negotiation', target: 'purchase-orders' },
         { id: 'e6-7', source: 'purchase-orders', target: 'progress-payment' },
-        { id: 'e7-8', source: 'progress-payment', target: 'change-order-management'
+        { id: 'e7-8', source: 'progress-payment', target: 'change-order-management' },
