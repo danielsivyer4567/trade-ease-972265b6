@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { AppLayout } from "@/components/ui/AppLayout";
 import { Button } from "@/components/ui/button";
@@ -27,10 +26,8 @@ export default function CustomerDetail() {
   const [showSearchResults, setShowSearchResults] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   
-  // Add useTabs hook
   const { addTab, activateTab } = useTabs();
   
-  // Use the openInTab hook for automatic tab handling
   useOpenInTab(customer, '/customers', isLoadingData);
 
   useEffect(() => {
@@ -266,7 +263,7 @@ export default function CustomerDetail() {
           </div>
         </div>
         
-        <div className="flex-1 overflow-auto p-6">
+        <div className="flex-1 overflow-y-auto p-6 bg-slate-50">
           <div className="max-w-5xl mx-auto">
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-2">
