@@ -10,6 +10,7 @@ const CustomerDetailPage = React.lazy(() => import('@/pages/Customers/CustomerDe
 const CustomerStatementPage = React.lazy(() => import('@/pages/Customers/CustomerStatement'));
 const NewCustomerPage = React.lazy(() => import('@/pages/Customers/NewCustomer'));
 const NetworksPage = React.lazy(() => import('@/pages/Networks'));
+const CustomerProgressPage = React.lazy(() => import('@/pages/Jobs/CustomerProgress'));
 
 // Export routes as JSX elements
 export const customerRoutes = (
@@ -38,6 +39,11 @@ export const customerRoutes = (
       <Route path="/networks" element={
         <Suspense fallback={<LoadingFallback />}>
           <NetworksPage />
+        </Suspense>
+      } />
+      <Route path="/progress/:jobId" element={
+        <Suspense fallback={<LoadingFallback />}>
+          <CustomerProgressPage />
         </Suspense>
       } />
     </Route>
