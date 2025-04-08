@@ -6,6 +6,7 @@ import { LoadingFallback } from './loading-fallback';
 
 // Import the actual Expenses page component
 const ExpensesPage = React.lazy(() => import('@/pages/Expenses'));
+const InvoiceProcessingPage = React.lazy(() => import('@/pages/Expenses/InvoiceProcessing'));
 
 // Export the routes as JSX elements
 export const expensesRoutes = (
@@ -14,6 +15,11 @@ export const expensesRoutes = (
       <Route path="/expenses" element={
         <Suspense fallback={<LoadingFallback />}>
           <ExpensesPage />
+        </Suspense>
+      } />
+      <Route path="/expenses/invoices" element={
+        <Suspense fallback={<LoadingFallback />}>
+          <InvoiceProcessingPage />
         </Suspense>
       } />
     </Route>
