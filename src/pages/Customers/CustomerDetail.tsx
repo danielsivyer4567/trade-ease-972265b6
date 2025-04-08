@@ -28,7 +28,7 @@ export default function CustomerDetail() {
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   
   // Add useTabs hook
-  const { addTab, activateTab, activeTabId } = useTabs();
+  const { addTab, activateTab } = useTabs();
   
   // Use the openInTab hook for automatic tab handling
   useOpenInTab(customer, '/customers', isLoadingData);
@@ -76,15 +76,6 @@ export default function CustomerDetail() {
           zipCode: customerData.zipcode
         };
         setCustomer(formattedCustomer);
-        
-        // Add the current customer as a tab (this is now handled by useOpenInTab)
-        if (formattedCustomer) {
-          addTab({
-            id: formattedCustomer.id,
-            title: formattedCustomer.name,
-            path: `/customers/${formattedCustomer.id}`
-          });
-        }
 
         const mockJobHistory: CustomerJobHistory[] = [{
           job_id: '1',
@@ -200,17 +191,6 @@ export default function CustomerDetail() {
       description: "Changes saved successfully"
     });
     navigate('/customers');
-  };
-
-  const handleTabChange = (tabId: string) => {
-    if (hasUnsavedChanges) {
-      if (confirm("You have unsaved changes. Are you sure you want to leave?")) {
-        setHasUnsavedChanges(false);
-        navigate(`/customers/${tabId}`);
-      }
-    } else {
-      navigate(`/customers/${tabId}`);
-    }
   };
 
   if (isLoadingData || isLoading) {

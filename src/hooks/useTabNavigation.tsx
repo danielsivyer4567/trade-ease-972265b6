@@ -8,7 +8,9 @@ export function useTabNavigation() {
 
   const openInTab = (path: string, title: string, id?: string) => {
     // If tab is already open, just activate it
+    const tabId = id || path;
     const existingTab = tabs.find(tab => tab.path === path);
+    
     if (existingTab) {
       activateTab(existingTab.id);
       return;
@@ -16,7 +18,7 @@ export function useTabNavigation() {
 
     // Add new tab
     addTab({
-      id,
+      id: tabId,
       title,
       path
     });
