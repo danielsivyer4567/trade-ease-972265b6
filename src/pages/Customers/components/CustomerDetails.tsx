@@ -1,16 +1,28 @@
+
 import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { User, Mail, Phone, MapPin, FileText, Clipboard, Calendar, AlertCircle, Image, DollarSign, FileCheck, Star, Link as LinkIcon, MessageCircle } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { 
+  MessageCircle, 
+  Image, 
+  DollarSign, 
+  FileCheck, 
+  Star, 
+  Link as LinkIcon 
+} from "lucide-react";
 import { CustomerNote, CustomerJobHistory } from "@/pages/Banking/types";
+
+// Import the tab components
+import { CustomerOverview } from './tabs/CustomerOverview';
+import { CustomerJobsQuotes } from './tabs/CustomerJobsQuotes';
+import { CustomerNotes } from './tabs/CustomerNotes';
+import { CustomerConversations } from './CustomerConversations';
 import { CustomerPhotos } from './CustomerPhotos';
 import { CustomerFinancials } from './CustomerFinancials';
 import { CustomerForms } from './CustomerForms';
 import { CustomerReviews } from './CustomerReviews';
-import { CustomerProgressLink } from './CustomerProgressLink';
-import { CustomerConversations } from './CustomerConversations';
+import { CustomerProgressLink } from './tabs/CustomerProgressLink';
+import { CustomerDetailsHeader } from './CustomerDetailsHeader';
 
 interface CustomerDetailsProps {
   customer: {
@@ -41,24 +53,6 @@ export function CustomerDetails({
   onCreateQuote 
 }: CustomerDetailsProps) {
   const [activeTab, setActiveTab] = useState("overview");
-  const [newNote, setNewNote] = useState("");
-  const [isImportant, setIsImportant] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
-
-  const handleAddNote = async () => {
-    if (!newNote.trim() || !onAddNote) return;
-    
-    setIsSaving(true);
-    try {
-      await onAddNote(newNote, isImportant);
-      setNewNote("");
-      setIsImportant(false);
-    } catch (error) {
-      console.error("Failed to add note:", error);
-    } finally {
-      setIsSaving(false);
-    }
-  };
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -73,36 +67,11 @@ export function CustomerDetails({
     <div className="space-y-6">
       <Card>
         <CardHeader className="bg-slate-50 border-b">
-          <div className="flex justify-between items-start">
-            <CardTitle className="text-xl font-bold flex items-center gap-2">
-              <User className="h-5 w-5 text-primary" />
-              {customer.name}
-              <Badge variant={customer.status === 'active' ? "default" : "secondary"}>
-                {customer.status}
-              </Badge>
-            </CardTitle>
-            <div className="flex gap-2">
-              {onCreateQuote && (
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={() => onCreateQuote(customer.id)}
-                  className="text-sm"
-                >
-                  <FileText className="h-4 w-4 mr-1" /> New Quote
-                </Button>
-              )}
-              {onCreateJob && (
-                <Button 
-                  size="sm" 
-                  onClick={() => onCreateJob(customer.id)}
-                  className="text-sm"
-                >
-                  <Clipboard className="h-4 w-4 mr-1" /> New Job
-                </Button>
-              )}
-            </div>
-          </div>
+          <CustomerDetailsHeader 
+            customer={customer} 
+            onCreateJob={onCreateJob} 
+            onCreateQuote={onCreateQuote} 
+          />
         </CardHeader>
         <CardContent className="p-0">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
@@ -131,206 +100,61 @@ export function CustomerDetails({
             </TabsList>
             
             {/* Overview Tab */}
-            <TabsContent value="overview" className="p-4 space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-3">
-                  <div className="flex items-start gap-2">
-                    <Mail className="h-4 w-4 text-gray-500 mt-1" />
-                    <div>
-                      <p className="font-medium">Email</p>
-                      <p className="text-sm text-gray-600">{customer.email || "No email provided"}</p>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-2">
-                    <Phone className="h-4 w-4 text-gray-500 mt-1" />
-                    <div>
-                      <p className="font-medium">Phone</p>
-                      <p className="text-sm text-gray-600">{customer.phone || "No phone provided"}</p>
-                    </div>
-                  </div>
-                </div>
-                <div className="space-y-3">
-                  <div className="flex items-start gap-2">
-                    <MapPin className="h-4 w-4 text-gray-500 mt-1" />
-                    <div>
-                      <p className="font-medium">Address</p>
-                      <p className="text-sm text-gray-600">
-                        {customer.address}, {customer.city}, {customer.state} {customer.zipCode}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-2">
-                    <Calendar className="h-4 w-4 text-gray-500 mt-1" />
-                    <div>
-                      <p className="font-medium">Customer since</p>
-                      <p className="text-sm text-gray-600">
-                        {formatDate(customer.created_at)}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="mt-6 border-t pt-4">
-                <h3 className="font-medium mb-2">Recent Activity</h3>
-                {jobHistory.length > 0 ? (
-                  <div className="space-y-2">
-                    {jobHistory.slice(0, 3).map(job => (
-                      <div key={job.job_id} className="flex items-center justify-between bg-slate-50 p-2 rounded">
-                        <div>
-                          <p className="font-medium">{job.title}</p>
-                          <p className="text-xs text-gray-500">{job.job_number} • {formatDate(job.date)}</p>
-                        </div>
-                        <Badge variant="outline">{job.status}</Badge>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-sm text-gray-500">No recent activity</p>
-                )}
-              </div>
+            <TabsContent value="overview">
+              <CustomerOverview 
+                customer={customer} 
+                jobHistory={jobHistory} 
+                formatDate={formatDate} 
+              />
             </TabsContent>
             
             {/* Jobs Tab */}
-            <TabsContent value="jobs" className="p-4">
-              <h3 className="font-medium mb-3">Jobs & Quotes History</h3>
-              {jobHistory.length > 0 ? (
-                <div className="space-y-3">
-                  {jobHistory.map(job => (
-                    <Card key={job.job_id} className="bg-slate-50">
-                      <CardContent className="p-3">
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <p className="font-medium">{job.title}</p>
-                            <p className="text-xs text-gray-500">
-                              {job.job_number} • {formatDate(job.date)}
-                            </p>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            {job.amount && (
-                              <span className="text-sm font-medium">
-                                ${job.amount.toFixed(2)}
-                              </span>
-                            )}
-                            <Badge variant="outline">{job.status}</Badge>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-6">
-                  <p className="text-gray-500">No jobs or quotes yet</p>
-                  <div className="flex justify-center gap-2 mt-4">
-                    {onCreateQuote && (
-                      <Button 
-                        variant="outline" 
-                        size="sm"
-                        onClick={() => onCreateQuote(customer.id)}
-                      >
-                        <FileText className="h-4 w-4 mr-1" /> Create Quote
-                      </Button>
-                    )}
-                    {onCreateJob && (
-                      <Button 
-                        size="sm" 
-                        onClick={() => onCreateJob(customer.id)}
-                      >
-                        <Clipboard className="h-4 w-4 mr-1" /> Create Job
-                      </Button>
-                    )}
-                  </div>
-                </div>
-              )}
+            <TabsContent value="jobs">
+              <CustomerJobsQuotes 
+                jobHistory={jobHistory} 
+                formatDate={formatDate} 
+                onCreateJob={onCreateJob}
+                onCreateQuote={onCreateQuote}
+                customerId={customer.id}
+              />
             </TabsContent>
             
             {/* Conversations Tab */}
-            <TabsContent value="conversations" className="p-4">
+            <TabsContent value="conversations">
               <CustomerConversations customerId={customer.id} />
             </TabsContent>
             
             {/* Photos Tab */}
-            <TabsContent value="photos" className="p-4">
+            <TabsContent value="photos">
               <CustomerPhotos customerId={customer.id} />
             </TabsContent>
             
             {/* Notes Tab */}
-            <TabsContent value="notes" className="p-4">
-              <div className="space-y-4">
-                <div className="border rounded p-3">
-                  <h3 className="font-medium mb-2">Add a Note</h3>
-                  <textarea
-                    value={newNote}
-                    onChange={(e) => setNewNote(e.target.value)}
-                    className="w-full border rounded p-2 text-sm mb-2"
-                    rows={3}
-                    placeholder="Enter a note about this customer..."
-                  />
-                  <div className="flex items-center justify-between">
-                    <label className="flex items-center gap-1 text-sm cursor-pointer">
-                      <input 
-                        type="checkbox" 
-                        checked={isImportant} 
-                        onChange={() => setIsImportant(!isImportant)} 
-                      />
-                      Mark as important
-                    </label>
-                    <Button 
-                      size="sm"
-                      onClick={handleAddNote}
-                      disabled={!newNote.trim() || isSaving}
-                    >
-                      {isSaving ? "Saving..." : "Save Note"}
-                    </Button>
-                  </div>
-                </div>
-                
-                <h3 className="font-medium">Customer Notes</h3>
-                {notes.length > 0 ? (
-                  <div className="space-y-3">
-                    {notes.map(note => (
-                      <div 
-                        key={note.id} 
-                        className={`border rounded p-3 ${note.important ? 'border-amber-200 bg-amber-50' : ''}`}
-                      >
-                        {note.important && (
-                          <div className="flex items-center gap-1 text-amber-600 mb-1">
-                            <AlertCircle className="h-4 w-4" />
-                            <span className="text-xs font-medium">Important</span>
-                          </div>
-                        )}
-                        <p className="text-sm">{note.content}</p>
-                        <div className="mt-2 flex justify-between items-center text-xs text-gray-500">
-                          <span>By: {note.created_by}</span>
-                          <span>{formatDate(note.created_at)}</span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-sm text-gray-500">No notes for this customer</p>
-                )}
-              </div>
+            <TabsContent value="notes">
+              <CustomerNotes 
+                notes={notes} 
+                onAddNote={onAddNote} 
+                formatDate={formatDate} 
+              />
             </TabsContent>
 
             {/* Financials Tab */}
-            <TabsContent value="financials" className="p-4">
+            <TabsContent value="financials">
               <CustomerFinancials customerId={customer.id} />
             </TabsContent>
 
             {/* Forms Tab */}
-            <TabsContent value="forms" className="p-4">
+            <TabsContent value="forms">
               <CustomerForms customerId={customer.id} />
             </TabsContent>
 
             {/* Reviews Tab */}
-            <TabsContent value="reviews" className="p-4">
+            <TabsContent value="reviews">
               <CustomerReviews customerId={customer.id} />
             </TabsContent>
 
             {/* Progress Link Tab */}
-            <TabsContent value="progress-link" className="p-4">
+            <TabsContent value="progress-link">
               <CustomerProgressLink customerId={customer.id} />
             </TabsContent>
           </Tabs>
