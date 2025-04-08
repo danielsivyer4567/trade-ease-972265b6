@@ -58,6 +58,7 @@ function TabItem({ tab, isActive, onClick, onClose }: TabItemProps) {
       <button
         className="p-1 rounded-full text-gray-400 hover:text-gray-600 hover:bg-gray-100"
         onClick={onClose}
+        aria-label={`Close ${tab.title} tab`}
       >
         <X size={14} />
       </button>
