@@ -1,8 +1,7 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { User, Mail, Phone, MapPin, FileText, Clipboard, Calendar, AlertCircle, Image, DollarSign, FileCheck, Star, Link as LinkIcon } from "lucide-react";
+import { User, Mail, Phone, MapPin, FileText, Clipboard, Calendar, AlertCircle, Image, DollarSign, FileCheck, Star, Link as LinkIcon, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { CustomerNote, CustomerJobHistory } from "@/pages/Banking/types";
@@ -11,6 +10,7 @@ import { CustomerFinancials } from './CustomerFinancials';
 import { CustomerForms } from './CustomerForms';
 import { CustomerReviews } from './CustomerReviews';
 import { CustomerProgressLink } from './CustomerProgressLink';
+import { CustomerConversations } from './CustomerConversations';
 
 interface CustomerDetailsProps {
   customer: {
@@ -109,6 +109,9 @@ export function CustomerDetails({
             <TabsList className="w-full border-b rounded-none bg-white overflow-x-auto">
               <TabsTrigger value="overview">Overview</TabsTrigger>
               <TabsTrigger value="jobs">Jobs & Quotes</TabsTrigger>
+              <TabsTrigger value="conversations">
+                <MessageCircle className="h-4 w-4 mr-1 inline" /> Conversations
+              </TabsTrigger>
               <TabsTrigger value="photos">
                 <Image className="h-4 w-4 mr-1 inline" /> Photos
               </TabsTrigger>
@@ -240,6 +243,11 @@ export function CustomerDetails({
                   </div>
                 </div>
               )}
+            </TabsContent>
+            
+            {/* Conversations Tab */}
+            <TabsContent value="conversations" className="p-4">
+              <CustomerConversations customerId={customer.id} />
             </TabsContent>
             
             {/* Photos Tab */}
