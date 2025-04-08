@@ -8,6 +8,7 @@ import { LoadingFallback } from './loading-fallback';
 const SuppliersPage = React.lazy(() => import('@/pages/Suppliers'));
 const InventoryPage = React.lazy(() => import('@/pages/Inventory'));
 const PurchaseOrdersPage = React.lazy(() => import('@/pages/PurchaseOrders'));
+const MaterialOrderingPage = React.lazy(() => import('@/pages/MaterialOrdering'));
 
 // Export routes as JSX elements
 export const supplyChainRoutes = (
@@ -28,6 +29,12 @@ export const supplyChainRoutes = (
       <Route path="/purchase-orders" element={
         <Suspense fallback={<LoadingFallback />}>
           <PurchaseOrdersPage />
+        </Suspense>
+      } />
+      
+      <Route path="/material-ordering" element={
+        <Suspense fallback={<LoadingFallback />}>
+          <MaterialOrderingPage />
         </Suspense>
       } />
     </Route>
