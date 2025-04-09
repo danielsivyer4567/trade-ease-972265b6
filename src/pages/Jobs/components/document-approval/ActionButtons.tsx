@@ -1,50 +1,74 @@
 
-import { Check, FileCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Check, Save, Send } from "lucide-react";
 
 interface ActionButtonsProps {
   currentFile: File | null;
   isProcessing: boolean;
   onApprove: () => void;
   onSaveDraft: () => void;
+  supplierEmail?: string;
 }
 
-export function ActionButtons({ 
-  currentFile, 
-  isProcessing, 
-  onApprove, 
-  onSaveDraft 
+export function ActionButtons({
+  currentFile,
+  isProcessing,
+  onApprove,
+  onSaveDraft,
+  supplierEmail
 }: ActionButtonsProps) {
+  const hasFile = !!currentFile;
+  const isEmailReady = !!supplierEmail;
+  
   return (
-    <div className="space-y-3 bg-gray-50 p-4 rounded-lg border">
-      <h4 className="font-medium text-sm">Document Actions</h4>
-      
-      <div className="space-y-2">
-        <Button
-          variant="default"
-          className="w-full justify-start bg-blue-600 hover:bg-blue-700"
-          disabled={!currentFile || isProcessing}
-          onClick={onApprove}
-        >
-          <Check className="mr-2 h-4 w-4" />
-          Approve Document
-        </Button>
-        
-        <Button
-          variant="outline"
-          className="w-full justify-start"
-          disabled={!currentFile || isProcessing}
-          onClick={onSaveDraft}
-        >
-          <FileCheck className="mr-2 h-4 w-4" />
-          Save as Draft
-        </Button>
-      </div>
-      
-      <p className="text-xs text-gray-500 mt-2">
-        Approving a document will extract financial data and add it to the job record.
-        Draft documents are saved but not marked as approved.
-      </p>
-    </div>
+    <Card className="col-span-1 md:col-span-2">
+      <CardContent className="p-4 md:p-6">
+        <div className="flex flex-col space-y-4">
+          <div className="flex flex-col gap-2">
+            <h4 className="font-medium text-sm">Document Actions</h4>
+            <p className="text-muted-foreground text-sm">
+              Approve documents or save as draft for later review.
+            </p>
+          </div>
+          
+          <div className="flex gap-2 flex-wrap">
+            <Button
+              onClick={onApprove}
+              disabled={!hasFile || isProcessing}
+              className="flex items-center gap-2"
+            >
+              <Check className="h-4 w-4" />
+              Approve Document
+            </Button>
+            
+            <Button
+              variant="outline"
+              onClick={onSaveDraft}
+              disabled={!hasFile || isProcessing}
+              className="flex items-center gap-2"
+            >
+              <Save className="h-4 w-4" />
+              Save as Draft
+            </Button>
+            
+            <Button
+              variant="secondary"
+              disabled={!hasFile || !isEmailReady || isProcessing}
+              className="flex items-center gap-2 ml-auto"
+            >
+              <Send className="h-4 w-4" />
+              Send to Supplier
+            </Button>
+          </div>
+          
+          {hasFile && !isEmailReady && (
+            <p className="text-amber-600 text-xs">
+              Select a supplier email to enable sending
+            </p>
+          )}
+        </div>
+      </CardContent>
+    </Card>
   );
 }
