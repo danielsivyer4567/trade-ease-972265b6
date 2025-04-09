@@ -15,9 +15,11 @@ import { useNavigate } from "react-router-dom";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { TradeDashboardContent } from "@/components/trade-dashboard/TradeDashboardContent";
+import { useTabNavigation } from "@/hooks/useTabNavigation";
 
 export default function Index() {
   const navigate = useNavigate();
+  const { openInTab } = useTabNavigation();
   const [selectedTeam, setSelectedTeam] = useState<string>("red");
   const [calendarExpanded, setCalendarExpanded] = useState<boolean>(false);
   const [expandedTeams, setExpandedTeams] = useState<Record<string, boolean>>({});
@@ -51,17 +53,23 @@ export default function Index() {
     description: "Changed job site map style",
     timestamp: "Yesterday, 4:45 PM"
   }];
+  
   const handleUndoChange = (changeId: number) => {
     // Here you would implement the actual logic to undo specific changes
     console.log(`Undoing change with ID: ${changeId}`);
     // For demonstration purposes, show a toast message
     alert(`Change #${changeId} has been reverted`);
   };
+  
   const toggleTeamCalendar = (teamName: string) => {
     setExpandedTeams(prev => ({
       ...prev,
       [teamName]: !prev[teamName]
     }));
+  };
+  
+  const handleTeamClick = (path: string, teamName: string) => {
+    openInTab(path, teamName);
   };
   
   return (
@@ -116,7 +124,11 @@ export default function Index() {
             
             {/* Full Calendar button centered */}
             <div className="flex justify-center mb-4">
-              <Button variant="outline" onClick={() => navigate("/calendar")} className="flex items-center gap-2 text-center bg-slate-400 hover:bg-slate-300">
+              <Button 
+                variant="outline" 
+                onClick={() => openInTab("/calendar", "Calendar")} 
+                className="flex items-center gap-2 text-center bg-slate-400 hover:bg-slate-300"
+              >
                 <CalendarDays className="h-4 w-4" />
                 <span>Full Calendar</span>
               </Button>
@@ -133,9 +145,13 @@ export default function Index() {
                         <h3 className={`text-lg font-medium text-${team.color}-700`}>{team.name}</h3>
                       </div>
                       <div className="flex items-center gap-2">
-                        <Link to={team.path} className="text-sm text-blue-600 hover:underline">
+                        <Button 
+                          variant="link" 
+                          className="text-sm text-blue-600 hover:underline p-0"
+                          onClick={() => handleTeamClick(team.path, team.name)}
+                        >
                           View details
-                        </Link>
+                        </Button>
                         <Button variant="ghost" size="icon" className="h-6 w-6" onClick={e => {
                       e.preventDefault();
                       toggleTeamCalendar(team.name);
@@ -159,11 +175,17 @@ export default function Index() {
         }}>
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {teams.map(team => <Link key={`dashboard-${team.name}`} to={team.path} className="block hover:scale-105 transition-transform duration-200">
+              {teams.map(team => 
+                <div 
+                  key={`dashboard-${team.name}`} 
+                  className="block hover:scale-105 transition-transform duration-200 cursor-pointer"
+                  onClick={() => handleTeamClick(team.path, team.name)}
+                >
                   <Card className="">
                     
                   </Card>
-                </Link>)}
+                </div>
+              )}
             </div>
           </div>
 

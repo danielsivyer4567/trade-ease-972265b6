@@ -2,7 +2,6 @@
 import React from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "./button";
-import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { QuickTabs } from "./QuickTabs";
 import { SIDEBAR_CONSTANTS } from "./sidebar/constants";
@@ -72,10 +71,10 @@ export function MainContent({
         </div>
       </div>
 
-      {/* Tab Bar */}
+      {/* Tab Bar - Browser-like tabs */}
       <TabBar />
 
-      {/* Main Content Area - removed max-width and padding */}
+      {/* Main Content Area - Tab content */}
       <ScrollArea className="flex-1 w-full">
         <div className="relative w-full">
           {children}
