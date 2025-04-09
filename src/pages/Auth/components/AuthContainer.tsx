@@ -1,0 +1,24 @@
+
+import React from 'react';
+import { Card } from "@/components/ui/card";
+
+interface AuthContainerProps {
+  children: React.ReactNode;
+}
+
+export const AuthContainer: React.FC<AuthContainerProps> = ({ children }) => {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-slate-100 p-4">
+      <div className="w-full max-w-md">
+        <div className="mb-8 text-center">
+          <div className="flex justify-center mb-4">
+            <img src="/lovable-uploads/6a07dd00-f2c7-49da-8b00-48d960c13610.png" alt="Trade Ease Logo" className="w-16 h-16" />
+          </div>
+          <h1 className="text-4xl font-bold text-gray-900 mb-2">Trade Ease</h1>
+          <p className="text-gray-600">Simplifying your business operations</p>
+        </div>
+        {children}
+      </div>
+    </div>
+  );
+};
