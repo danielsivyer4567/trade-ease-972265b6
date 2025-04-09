@@ -11,11 +11,20 @@ interface CustomerSaveActionsProps {
 export const CustomerSaveActions = ({ onSaveAndContinue, onSaveAndExit }: CustomerSaveActionsProps) => {
   return (
     <div className="flex gap-2 shrink-0">
-      <Button variant="outline" onClick={onSaveAndContinue} className="flex items-center gap-1 whitespace-nowrap">
+      <Button 
+        variant="outline" 
+        onClick={onSaveAndContinue} 
+        className="flex items-center gap-1 whitespace-nowrap"
+        size="sm"
+      >
         <Save className="h-4 w-4" />
         <span className="hidden sm:inline">Save</span>
       </Button>
-      <Button onClick={onSaveAndExit} className="flex items-center gap-1 whitespace-nowrap">
+      <Button 
+        onClick={onSaveAndExit} 
+        className="flex items-center gap-1 whitespace-nowrap"
+        size="sm"
+      >
         <Save className="h-4 w-4" />
         <span className="hidden sm:inline">Save & Exit</span>
       </Button>

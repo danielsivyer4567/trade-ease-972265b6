@@ -1,7 +1,8 @@
 
-import React from 'react';
-import { Search } from "lucide-react";
+import React, { useRef, useEffect } from 'react';
 import { Input } from "@/components/ui/input";
+import { Search, User } from "lucide-react";
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface CustomerSearchProps {
   searchQuery: string;
@@ -20,34 +21,63 @@ export const CustomerSearch = ({
   showSearchResults,
   setShowSearchResults
 }: CustomerSearchProps) => {
+  const resultsRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const isMobile = useIsMobile();
+  
+  // Close search results when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        resultsRef.current && 
+        !resultsRef.current.contains(event.target as Node) &&
+        inputRef.current && 
+        !inputRef.current.contains(event.target as Node)
+      ) {
+        setShowSearchResults(false);
+      }
+    };
+    
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [setShowSearchResults]);
+  
   return (
-    <div className="flex-1 relative min-w-0">
+    <div className="relative flex-1 min-w-0">
       <div className="relative">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+        <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
         <Input
-          placeholder="Search customers..."
+          ref={inputRef}
+          placeholder={isMobile ? "Search..." : "Search customers by name or email..."}
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="pl-10 pr-4 py-2 w-full text-sm"
+          onFocus={() => searchQuery && setShowSearchResults(true)}
+          className="pl-8 pr-2 h-9 w-full"
         />
       </div>
       
-      {showSearchResults && (
-        <div className="absolute z-50 mt-1 w-full bg-white border rounded-md shadow-lg max-h-60 overflow-auto">
-          {filteredCustomers.length > 0 ? (
-            filteredCustomers.map((c) => (
-              <div
-                key={c.id}
-                className="p-2 hover:bg-gray-100 cursor-pointer border-b last:border-b-0"
-                onClick={() => onCustomerChange(c.id)}
-              >
-                <div className="font-medium truncate">{c.name}</div>
-                <div className="text-sm text-gray-500 truncate">{c.email}</div>
+      {showSearchResults && filteredCustomers.length > 0 && (
+        <div 
+          ref={resultsRef}
+          className="absolute z-20 top-full left-0 right-0 mt-1 bg-white border rounded-md shadow-lg max-h-60 overflow-y-auto"
+        >
+          {filteredCustomers.map(customer => (
+            <div
+              key={customer.id}
+              className="p-2 hover:bg-gray-100 cursor-pointer flex items-center"
+              onClick={() => onCustomerChange(customer.id)}
+            >
+              <User className="h-4 w-4 mr-2 text-gray-500" />
+              <div className="truncate">
+                <span className="font-medium">{customer.name}</span>
+                {customer.email && (
+                  <span className="text-xs text-gray-500 ml-2">{customer.email}</span>
+                )}
               </div>
-            ))
-          ) : (
-            <div className="p-2 text-center text-gray-500">No customers found</div>
-          )}
+            </div>
+          ))}
         </div>
       )}
     </div>
