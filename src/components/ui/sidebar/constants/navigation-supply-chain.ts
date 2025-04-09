@@ -3,6 +3,7 @@ import {
   Truck,
   Store,
   ShoppingCart,
+  Package2,
 } from 'lucide-react';
 
 // Supply Chain navigation group
@@ -26,6 +27,12 @@ export const supplyChainNavigation = {
       icon: ShoppingCart,
       label: 'Purchase Orders',
       path: '/purchase-orders',
+    },
+    {
+      type: 'link',
+      icon: Package2,
+      label: 'Material Ordering',
+      path: '/material-ordering',
     },
   ],
 };
