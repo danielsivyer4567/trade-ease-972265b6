@@ -13,6 +13,11 @@ export default function MaterialOrdering() {
     navigate("/suppliers");
   };
 
+  // Use a safer navigation approach that won't cause loops
+  const handleOrderMaterials = () => {
+    navigate("/jobs/new/materials");
+  };
+
   return (
     <AppLayout>
       <div className="container p-6 max-w-5xl mx-auto">
@@ -35,8 +40,12 @@ export default function MaterialOrdering() {
               <p className="text-sm text-muted-foreground mb-4">
                 Search and order materials from approved suppliers.
               </p>
-              <Button variant="outline" className="w-full text-sm" size="sm" 
-                onClick={() => navigate("/jobs/:jobId/materials")}>
+              <Button 
+                variant="outline" 
+                className="w-full text-sm" 
+                size="sm" 
+                onClick={handleOrderMaterials}
+              >
                 Order Materials
               </Button>
             </CardContent>
