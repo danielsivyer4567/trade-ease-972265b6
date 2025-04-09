@@ -3,9 +3,9 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from '@/hooks/use-toast';
-import MarketOverview from './MarketOverview';
-import RecentTrades from './RecentTrades';
-import WatchList from './WatchList';
+import { MarketOverview } from './MarketOverview';
+import { RecentTrades } from './RecentTrades';
+import { WatchList } from './WatchList';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { DashboardStats } from '@/pages/TradeDash/components/DashboardStats';
 
