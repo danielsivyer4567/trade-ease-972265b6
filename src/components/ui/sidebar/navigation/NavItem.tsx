@@ -10,10 +10,11 @@ import { useLocation } from "react-router-dom";
 interface NavItemProps {
   path: string;
   className?: string;
-  title: string;
+  title?: string;
+  label?: string;  // Added label prop
   icon?: React.ComponentType<{ className?: string }>;
   count?: number;
-  countVariant?: "default" | "destructive" | "success" | null | undefined;
+  countVariant?: "default" | "destructive" | "secondary" | "outline";
   active?: boolean;
   variant?: "default" | "destructive";
   disabled?: boolean;
@@ -24,6 +25,7 @@ interface NavItemProps {
 export function NavItem({
   path,
   title,
+  label,  // Added label prop
   icon: Icon,
   count,
   countVariant = "default",
@@ -39,6 +41,9 @@ export function NavItem({
   const { openInTab } = useTabNavigation();
   const location = useLocation();
   
+  // Use label if provided, otherwise fall back to title
+  const displayText = label || title;
+  
   const isActive = active || path === location.pathname;
   const expanded = sidebarExpanded !== undefined ? sidebarExpanded : state === "expanded";
 
@@ -47,7 +52,7 @@ export function NavItem({
     
     if (!disabled) {
       // Open the link in a new tab
-      openInTab(path, title);
+      openInTab(path, displayText || "");
     }
   };
 
@@ -73,7 +78,7 @@ export function NavItem({
             {Icon && (
               <Icon className={cn("h-5 w-5 flex-shrink-0", expanded && "mr-1")} />
             )}
-            {expanded && <span className="truncate">{title}</span>}
+            {expanded && <span className="truncate">{displayText}</span>}
             {count !== undefined && (
               <Badge variant={countVariant} className={cn("ml-auto", !expanded && "hidden")}>
                 {count}
@@ -83,7 +88,7 @@ export function NavItem({
         </TooltipTrigger>
         {!expanded && (
           <TooltipContent side="right" className="flex items-center gap-4">
-            {title}
+            {displayText}
             {count !== undefined && <Badge variant={countVariant}>{count}</Badge>}
           </TooltipContent>
         )}

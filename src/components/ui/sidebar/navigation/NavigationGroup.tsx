@@ -62,7 +62,7 @@ export const NavigationGroup: React.FC<NavigationGroupProps> = ({
             <NavItem
               key={`${item.path}-${index}`}
               path={item.path}
-              label={item.label}
+              title={item.label}  // Pass label as title
               icon={item.icon}
               isExpanded={isExpanded}
             />
@@ -95,4 +95,4 @@ export const NavigationGroup: React.FC<NavigationGroupProps> = ({
       })}
     </div>
   );
-};
+}
