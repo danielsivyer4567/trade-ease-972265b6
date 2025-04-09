@@ -1,27 +1,22 @@
 
-import React from 'react';
-import { createRoot } from 'react-dom/client';
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import App from './App.tsx';
-import './index.css';
-import ErrorBoundary from './components/error/ErrorBoundary';
+import React from 'react'
+import ReactDOM from 'react-dom/client'
+import App from './App.tsx'
+import './index.css'
+import { initializeTables } from './integrations/supabase/dbInit.ts'
 
-const rootElement = document.getElementById("root");
-if (!rootElement) {
-  throw new Error("Root element not found");
-}
+// Initialize database tables on app start
+initializeTables().then(result => {
+  if (result.success) {
+    console.log('Database tables initialized successfully');
+  } else {
+    console.warn('Table initialization issues:', result.error);
+    // Continue loading the app anyway, since some tables might exist
+  }
+});
 
-// Add React.StrictMode only in development to prevent double renders in production
-const StrictModeWrapper = process.env.NODE_ENV === 'development' 
-  ? React.StrictMode 
-  : React.Fragment;
-
-createRoot(rootElement).render(
-  <StrictModeWrapper>
-    <ErrorBoundary>
-      <BrowserRouter>
-        <App />
-      </BrowserRouter>
-    </ErrorBoundary>
-  </StrictModeWrapper>
-);
+ReactDOM.createRoot(document.getElementById('root')!).render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>,
+)
