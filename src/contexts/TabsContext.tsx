@@ -30,6 +30,29 @@ export function TabsProvider({ children }: { children: React.ReactNode }) {
   const navigate = useNavigate();
   const location = useLocation();
 
+  // Initialize with current path on first mount
+  useEffect(() => {
+    if (isInitialMount && location.pathname) {
+      // Create a default tab for the current location
+      const defaultTabId = `tab-${Date.now()}`;
+      const pathSegments = location.pathname.split('/');
+      const lastSegment = pathSegments[pathSegments.length - 1];
+      
+      // Generate a title from the path
+      let title = lastSegment || 'Home';
+      title = title.charAt(0).toUpperCase() + title.slice(1);
+      
+      setTabs([{ 
+        id: defaultTabId, 
+        title, 
+        path: location.pathname 
+      }]);
+      
+      setActiveTabId(defaultTabId);
+      setIsInitialMount(false);
+    }
+  }, [isInitialMount, location.pathname]);
+
   // Throttle function to prevent excessive calls
   const throttle = useCallback((callback: Function, delay: number = 300) => {
     let timeoutId: NodeJS.Timeout | null = null;
@@ -125,6 +148,34 @@ export function TabsProvider({ children }: { children: React.ReactNode }) {
       return () => clearTimeout(timer);
     }
   }, [navigationInProgress, location.pathname]);
+
+  // Update tabs when location changes (external navigation)
+  useEffect(() => {
+    if (!navigationInProgress && !isInitialMount) {
+      // Check if this path is already open in a tab
+      const existingTabIndex = tabs.findIndex(tab => tab.path === location.pathname);
+      
+      if (existingTabIndex >= 0) {
+        // Path exists in a tab, just activate it
+        setActiveTabId(tabs[existingTabIndex].id);
+      } else if (location.pathname !== '/') {
+        // New path, create a new tab
+        const pathSegments = location.pathname.split('/');
+        const lastSegment = pathSegments[pathSegments.length - 1];
+        let title = lastSegment || 'Home';
+        title = title.charAt(0).toUpperCase() + title.slice(1);
+        
+        const newTab = {
+          id: `tab-${Date.now()}`,
+          title,
+          path: location.pathname
+        };
+        
+        setTabs(prev => [...prev, newTab]);
+        setActiveTabId(newTab.id);
+      }
+    }
+  }, [location.pathname, navigationInProgress, isInitialMount, tabs]);
 
   // Check if a tab with a specific path is already open
   const isTabOpen = useCallback((path: string) => {
