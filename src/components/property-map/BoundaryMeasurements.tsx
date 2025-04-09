@@ -4,7 +4,7 @@ import { Card } from "@/components/ui/card";
 import { BoundaryEdge } from './types';
 import { Ruler } from 'lucide-react';
 
-interface BoundaryMeasurementsProps {
+export interface BoundaryMeasurementsProps {
   edges: BoundaryEdge[];
   showMeasurements: boolean;
 }
