@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Package2, Search, Plus, ArrowDown, FileSpreadsheet, FileCsv, Import } from "lucide-react";
+import { Package2, Search, Plus, ArrowDown, FileSpreadsheet, Files, Import } from "lucide-react";
 import { toast } from "sonner";
 import { PriceListItem } from '@/pages/Quotes/components/PriceList/types';
 import { supabase } from '@/integrations/supabase/client';
@@ -218,7 +218,7 @@ export function ImportPriceListItems({ onImportItems }: ImportPriceListItemsProp
               onClick={toggleUploadMode}
               className="flex items-center gap-1"
             >
-              <FileCsv className="h-4 w-4" />
+              <Files className="h-4 w-4" />
               Import from CSV
             </Button>
           </div>
@@ -226,7 +226,7 @@ export function ImportPriceListItems({ onImportItems }: ImportPriceListItemsProp
           {uploadMode ? (
             <div className="border rounded-lg p-6 bg-slate-50 space-y-4">
               <div className="text-center">
-                <FileCsv className="h-12 w-12 mx-auto text-blue-500 mb-2" />
+                <Files className="h-12 w-12 mx-auto text-blue-500 mb-2" />
                 <h3 className="text-lg font-medium mb-1">Import from CSV</h3>
                 <p className="text-sm text-muted-foreground mb-4">
                   Upload a CSV file with columns for name, quantity, and unit
