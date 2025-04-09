@@ -7,11 +7,12 @@ import { supplyChainNavigation } from './navigation-supply-chain';
 import { technicalNavigation } from './navigation-technical';
 import { teamLinks, calendarTeamLinks } from './team-links';
 import { SIDEBAR_CONSTANTS } from './sidebar-config';
+import { NavigationItem } from '../navigation/NavigationGroup';
 
 // Define the structure for navigation groups
 export type NavigationGroup = {
   label?: string;
-  items: Array<any>;
+  items: NavigationItem[];
 };
 
 // Export all navigation groups
