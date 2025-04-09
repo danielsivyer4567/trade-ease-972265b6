@@ -16,15 +16,15 @@ const TradeDashboard = () => {
   return (
     <div className="space-y-4">
       <header className="mb-6">
-        <h1 className="text-3xl font-bold tracking-tight">Trading Dashboard</h1>
-        <p className="text-muted-foreground">Monitor markets and execute trades</p>
+        <h1 className="text-3xl font-bold tracking-tight">Trades Dashboard</h1>
+        <p className="text-muted-foreground">Monitor construction jobs and manage activities</p>
       </header>
       
       <Tabs defaultValue="overview" className="w-full" onValueChange={setActiveTab}>
         <TabsList className={`grid ${isMobile ? 'grid-cols-3' : 'w-[400px] grid-cols-3'}`}>
           <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="watchlist">Watchlist</TabsTrigger>
-          <TabsTrigger value="trades">Trades</TabsTrigger>
+          <TabsTrigger value="watchlist">Job Monitor</TabsTrigger>
+          <TabsTrigger value="trades">Recent Jobs</TabsTrigger>
         </TabsList>
         
         <TabsContent value="overview" className="space-y-4 pt-4">
