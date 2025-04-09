@@ -1,5 +1,5 @@
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 export interface Tab {
@@ -24,11 +24,12 @@ const TabsContext = createContext<TabsContextType | undefined>(undefined);
 export function TabsProvider({ children }: { children: React.ReactNode }) {
   const [tabs, setTabs] = useState<Tab[]>([]);
   const [activeTabId, setActiveTabId] = useState<string | null>(null);
+  const [isInitialMount, setIsInitialMount] = useState(true);
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Add a new tab
-  const addTab = (tab: Omit<Tab, 'id'> & { id?: string }) => {
+  // Add a new tab - memoized to prevent rerenders
+  const addTab = useCallback((tab: Omit<Tab, 'id'> & { id?: string }) => {
     const id = tab.id || `tab-${Date.now()}`;
     const newTab = { ...tab, id };
     
@@ -37,16 +38,16 @@ export function TabsProvider({ children }: { children: React.ReactNode }) {
     
     if (existingTabIndex >= 0) {
       // Tab exists, activate it
-      activateTab(tabs[existingTabIndex].id);
+      setActiveTabId(tabs[existingTabIndex].id);
     } else {
       // Create new tab
       setTabs(prev => [...prev, newTab]);
       setActiveTabId(newTab.id);
     }
-  };
+  }, [tabs]);
 
-  // Remove a tab
-  const removeTab = (tabId: string) => {
+  // Remove a tab - memoized to prevent rerenders
+  const removeTab = useCallback((tabId: string) => {
     const tabIndex = tabs.findIndex(tab => tab.id === tabId);
     if (tabIndex === -1) return;
     
@@ -57,34 +58,35 @@ export function TabsProvider({ children }: { children: React.ReactNode }) {
       if (tabs.length > 1) {
         const newActiveTab = tabs[newActiveIndex] || tabs[tabIndex + 1];
         setActiveTabId(newActiveTab.id);
-        navigate(newActiveTab.path);
+        navigate(newActiveTab.path, { replace: true });
       } else {
         setActiveTabId(null);
-        navigate('/'); // Default location if no tabs left
+        navigate('/', { replace: true }); // Default location if no tabs left
       }
     }
     
     setTabs(prev => prev.filter(tab => tab.id !== tabId));
-  };
+  }, [tabs, activeTabId, navigate]);
 
-  // Activate a tab
-  const activateTab = (tabId: string) => {
+  // Activate a tab - memoized to prevent rerenders
+  const activateTab = useCallback((tabId: string) => {
     const tab = tabs.find(tab => tab.id === tabId);
     if (tab) {
       setActiveTabId(tabId);
-      navigate(tab.path);
+      // Use replace instead of push to avoid filling history
+      navigate(tab.path, { replace: true });
     }
-  };
+  }, [tabs, navigate]);
 
   // Check if a tab with a specific path is already open
-  const isTabOpen = (path: string) => {
+  const isTabOpen = useCallback((path: string) => {
     return tabs.some(tab => tab.path === path);
-  };
+  }, [tabs]);
 
   // Get a tab by its ID
-  const getTabById = (id: string) => {
+  const getTabById = useCallback((id: string) => {
     return tabs.find(tab => tab.id === id);
-  };
+  }, [tabs]);
 
   // Value object for provider
   const value = {

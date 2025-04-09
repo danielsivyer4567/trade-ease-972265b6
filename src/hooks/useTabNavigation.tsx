@@ -8,6 +8,9 @@ export const useTabNavigation = () => {
   const navigate = useNavigate();
 
   const openInTab = useCallback((path: string, title: string, id: string) => {
+    // Prevent continuous reopening of the same tab
+    const tabId = id || `tab-${Date.now()}`;
+    
     // First check if we already have this tab open to prevent duplicate navigation
     if (isTabOpen && isTabOpen(path)) {
       // If the tab is already open, just activate it
@@ -21,13 +24,13 @@ export const useTabNavigation = () => {
     // Only add a new tab if it doesn't exist
     if (addTab) {
       addTab({
-        id,
+        id: tabId,
         title,
         path,
       });
     } else {
       // Fallback to regular navigation if tab context is not available
-      navigate(path);
+      navigate(path, { replace: true });
     }
   }, [addTab, activateTab, navigate, isTabOpen, tabs]);
 

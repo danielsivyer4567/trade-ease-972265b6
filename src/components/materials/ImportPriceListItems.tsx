@@ -1,8 +1,8 @@
 
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowDown, Package2, Files, Search } from "lucide-react";
+import { ArrowDown, Package2, Files, Search, X } from "lucide-react";
 import { CSVUploadForm } from './import/CSVUploadForm';
 import { PriceListSearch } from './import/PriceListSearch';
 
@@ -14,10 +14,14 @@ export function ImportPriceListItems({ onImportItems }: ImportPriceListItemsProp
   const [isOpen, setIsOpen] = useState(false);
   const [uploadMode, setUploadMode] = useState(false);
 
-  const handleImport = (items: Array<{name: string, quantity: string, unit: string}>) => {
+  const handleImport = useCallback((items: Array<{name: string, quantity: string, unit: string}>) => {
     onImportItems(items);
     setIsOpen(false);
-  };
+  }, [onImportItems]);
+
+  const handleCloseModal = useCallback(() => {
+    setIsOpen(false);
+  }, []);
 
   if (!isOpen) {
     return (
@@ -43,23 +47,9 @@ export function ImportPriceListItems({ onImportItems }: ImportPriceListItemsProp
           variant="ghost" 
           size="icon"
           className="absolute top-2 right-2 rounded-full h-8 w-8" 
-          onClick={() => setIsOpen(false)}
+          onClick={handleCloseModal}
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="18"
-            height="18"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor" 
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="lucide lucide-x"
-          >
-            <path d="M18 6 6 18" />
-            <path d="m6 6 12 12" />
-          </svg>
+          <X className="h-4 w-4" />
           <span className="sr-only">Close</span>
         </Button>
       </CardHeader>
@@ -95,7 +85,7 @@ export function ImportPriceListItems({ onImportItems }: ImportPriceListItemsProp
           ) : (
             <PriceListSearch 
               onImport={handleImport} 
-              onCancel={() => setIsOpen(false)} 
+              onCancel={handleCloseModal} 
             />
           )}
         </div>
