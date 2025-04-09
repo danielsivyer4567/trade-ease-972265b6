@@ -36,7 +36,11 @@ export function PurchasedLeadsTab() {
   };
 
   const formatDate = (dateString) => {
-    const options: Intl.DateTimeFormatOptions = { month: "short", day: "numeric", year: "numeric" };
+    const options: Intl.DateTimeFormatOptions = { 
+      month: "short", 
+      day: "numeric", 
+      year: "numeric" 
+    };
     return new Date(dateString).toLocaleDateString('en-US', options);
   };
 
