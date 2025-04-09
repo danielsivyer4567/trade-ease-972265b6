@@ -3,7 +3,7 @@ import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useSidebar } from './SidebarProvider';
 import { ScrollArea } from '../scroll-area';
-import { navigationGroups, teamLinks, NavigationGroup } from './constants';
+import { navigationGroups, teamLinks, SidebarNavigationGroup } from './constants';
 import { useAuth } from '@/contexts/AuthContext';
 import { NavigationGroup as NavGroup } from './navigation/NavigationGroup';
 import { TeamLinks } from './navigation/TeamLinks';
@@ -44,7 +44,7 @@ export function SidebarNavLinks({
   
   return (
     <nav className="grid gap-1 px-2 py-2 w-full">
-      {navigationGroups.map((group: NavigationGroup, index) => (
+      {navigationGroups.map((group: SidebarNavigationGroup, index) => (
         <NavGroup
           key={`nav-group-${index}`}
           label={group.label || undefined}
