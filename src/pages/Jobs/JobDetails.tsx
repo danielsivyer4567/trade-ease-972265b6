@@ -21,6 +21,7 @@ import { AutomationIntegrationService } from '@/services/AutomationIntegrationSe
 import { usePhotoSharing } from '@/hooks/usePhotoSharing';
 import { PhotoSharingModal } from '@/components/sharing/PhotoSharingModal';
 import { useOpenInTab } from './hooks/useOpenInTab';
+import { useEffect } from 'react';
 
 export function JobDetails() {
   const { id } = useParams<{ id: string }>();
@@ -30,7 +31,15 @@ export function JobDetails() {
   const { job, loading } = useJobData(id);
   
   // Use the openInTab hook to automatically handle tab management
-  useOpenInTab(job, '/jobs', loading);
+  const { openInTab } = useOpenInTab();
+  
+  // Add an effect to handle tab creation when job data is loaded
+  useEffect(() => {
+    if (job && !loading && id) {
+      // Create a tab with the job information
+      openInTab(`/jobs/${id}`, job.title || job.jobNumber, `job-${id}`);
+    }
+  }, [job, loading, id, openInTab]);
   
   const {
     jobTimer,
