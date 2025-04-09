@@ -57,7 +57,6 @@ export const JobStepProgress = () => {
   const [isExpanded, setIsExpanded] = useState(false);
 
   useEffect(() => {
-    // Get existing job steps from database if available
     const fetchJobSteps = async () => {
       if (id) {
         setLoading(true);
@@ -71,14 +70,12 @@ export const JobStepProgress = () => {
           .single();
 
         if (data) {
-          // Get assigned team info
           setJobDetails({
             assignedTeam: data.assigned_team,
             teamColor: getTeamColor(data.assigned_team)
           });
           
           if (data.job_steps && !error) {
-            // Ensure each task has an id and isCompleted property
             const formattedSteps = data.job_steps.map((step: any) => ({
               ...step,
               tasks: step.tasks.map((task: string, index: number) => ({
@@ -89,7 +86,6 @@ export const JobStepProgress = () => {
             }));
             setJobSteps(formattedSteps);
             
-            // Find current step (first incomplete)
             const currentStepIndex = formattedSteps.findIndex((s: JobStep) => !s.isCompleted);
             if (currentStepIndex >= 0) {
               setCurrentStep(formattedSteps[currentStepIndex].id);
@@ -110,9 +106,8 @@ export const JobStepProgress = () => {
   }, [id]);
   
   const getTeamColor = (teamName?: string) => {
-    if (!teamName) return "bg-gray-400"; // Default color
+    if (!teamName) return "bg-gray-400";
     
-    // Map team names to colors
     const teamColors: Record<string, string> = {
       "Team A": "bg-blue-500",
       "Team B": "bg-green-500",
@@ -125,7 +120,6 @@ export const JobStepProgress = () => {
   };
 
   const createDefaultSteps = () => {
-    // Create default job steps
     const defaultSteps = [{
       id: 1,
       title: 'step 1-',
@@ -250,11 +244,8 @@ export const JobStepProgress = () => {
         return false;
       }
       
-      // If customer notifications are enabled, send a notification
       if (customerNotificationsEnabled) {
-        // This would normally connect to a notification service
         console.log("Sending customer notification about step update");
-        // In a real implementation, you would call an API to send the notification
       }
       
       return true;
@@ -271,7 +262,6 @@ export const JobStepProgress = () => {
           isCompleted: !task.isCompleted
         } : task);
 
-        // Check if all tasks are completed
         const allTasksCompleted = updatedTasks.every(task => task.isCompleted);
         return {
           ...step,
@@ -283,7 +273,6 @@ export const JobStepProgress = () => {
     });
     setJobSteps(updatedSteps);
     
-    // Update current step if needed
     updateCurrentStep(updatedSteps);
     
     const saved = await saveJobSteps(updatedSteps);
@@ -312,7 +301,6 @@ export const JobStepProgress = () => {
     
     setJobSteps(updatedSteps);
     
-    // Update current step
     updateCurrentStep(updatedSteps);
     
     const saved = await saveJobSteps(updatedSteps);
@@ -327,12 +315,10 @@ export const JobStepProgress = () => {
   };
   
   const updateCurrentStep = (steps: JobStep[]) => {
-    // Find the first incomplete step
     const firstIncompleteIndex = steps.findIndex(step => !step.isCompleted);
     if (firstIncompleteIndex >= 0) {
       setCurrentStep(steps[firstIncompleteIndex].id);
     } else if (steps.length > 0) {
-      // If all steps complete, stay on the last one
       setCurrentStep(steps[steps.length - 1].id);
     }
   };
@@ -358,7 +344,7 @@ export const JobStepProgress = () => {
     const newComment: Comment = {
       id: Date.now().toString(),
       text: comment,
-      author: "Current User", // In a real app, this would be the logged-in user
+      author: "Current User",
       createdAt: new Date().toISOString(),
       taskId: currentTaskId,
       tags: tag ? [tag] : []
@@ -380,8 +366,6 @@ export const JobStepProgress = () => {
     navigator.clipboard.writeText(progressLink);
     toast.success("Progress link copied to clipboard");
     setShareLinkDialogOpen(false);
-    
-    // In a real app, you might want to save this link or send it directly to the customer
   };
   
   const toggleCustomerNotifications = () => {
@@ -411,11 +395,14 @@ export const JobStepProgress = () => {
           </div>
           
           <div className="flex items-center gap-2">
-            <CollapsibleTrigger asChild>
-              <Button variant="ghost" size="icon" title={isExpanded ? "Minimize" : "Maximize"}>
-                {isExpanded ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
-              </Button>
-            </CollapsibleTrigger>
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={toggleExpanded} 
+              title={isExpanded ? "Minimize" : "Maximize"}
+            >
+              {isExpanded ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
+            </Button>
             {isExpanded && (
               <>
                 <Button variant="outline" size="sm" onClick={() => setShareLinkDialogOpen(true)}>
