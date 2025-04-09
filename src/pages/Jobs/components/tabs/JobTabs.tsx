@@ -2,19 +2,19 @@
 import { Tabs, TabsList, TabsContent } from "@/components/ui/tabs";
 import type { Job } from "@/types/job";
 import { StandardTabs } from "./StandardTabs";
-import { ManagerTabs } from "./tabs/ManagerTabs";
+import { ManagerTabs } from "../ManagerTabs";
 import { useJobFinancials } from "../../hooks/useJobFinancials";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { JobDetailsTab } from "./tabs/JobDetailsTab";
-import { JobNotesTab } from "./tabs/JobNotesTab";
-import { JobCalendarTab } from "./tabs/JobCalendarTab";
-import { JobTimerTab } from "./tabs/JobTimerTab";
-import { JobBillsTab } from "./tabs/JobBillsTab";
-import { JobCostsTab } from "./tabs/JobCostsTab";
-import { JobFinancialsTab } from "./tabs/JobFinancialsTab";
-import { JobProgressTab } from "./tabs/JobProgressTab";
-import { JobCustomerConversationsTab } from "./tabs/JobCustomerConversationsTab";
-import { JobMaterialsTab } from "./tabs/JobMaterialsTab";
+import { JobDetailsTab } from "./JobDetailsTab";
+import { JobNotesTab } from "./JobNotesTab";
+import { JobCalendarTab } from "./JobCalendarTab";
+import { JobTimerTab } from "./JobTimerTab";
+import { JobBillsTab } from "./JobBillsTab";
+import { JobCostsTab } from "./JobCostsTab";
+import { JobFinancialsTab } from "./JobFinancialsTab";
+import { JobProgressTab } from "./JobProgressTab";
+import { JobCustomerConversationsTab } from "./JobCustomerConversationsTab";
+import { JobMaterialsTab } from "./JobMaterialsTab";
 import { FinancialData } from "../../hooks/financial-data/types";
 
 interface JobTabsProps {
