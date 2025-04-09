@@ -6,9 +6,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Package2, Plus, Search, Truck } from "lucide-react";
+import { Package2, Plus, Search, Truck, ArrowDown } from "lucide-react";
 import { toast } from "sonner";
 import type { Job } from '@/types/job';
+import { ImportPriceListItems } from '@/components/materials/ImportPriceListItems';
 
 interface JobMaterialsTabProps {
   job: Job;
@@ -81,6 +82,28 @@ export function JobMaterialsTab({ job }: JobMaterialsTabProps) {
   const handleRemoveItem = (id: string) => {
     setOrderItems(orderItems.filter(item => item.id !== id));
     toast.success("Item removed from order");
+  };
+  
+  const handleImportItems = (items: Array<{name: string, quantity: string, unit: string}>) => {
+    const newItems = items.map((item, index) => {
+      // Find if there's a similar item in the materials array to get a price
+      const similarItem = materials.find(m => 
+        m.name.toLowerCase().includes(item.name.toLowerCase()) || 
+        item.name.toLowerCase().includes(m.name.toLowerCase())
+      );
+      
+      const price = similarItem ? similarItem.price : 0;
+      
+      return {
+        id: `imported-${Date.now()}-${index}`,
+        name: item.name,
+        quantity: parseInt(item.quantity) || 1,
+        price
+      };
+    });
+    
+    setOrderItems([...orderItems, ...newItems]);
+    toast.success(`Imported ${newItems.length} items from price list`);
   };
   
   const handlePlaceOrder = () => {
@@ -165,7 +188,10 @@ export function JobMaterialsTab({ job }: JobMaterialsTabProps) {
           </div>
           
           <div className="border rounded-md p-4 space-y-4">
-            <h3 className="font-medium">Current Order</h3>
+            <div className="flex justify-between items-center">
+              <h3 className="font-medium">Current Order</h3>
+              <ImportPriceListItems onImportItems={handleImportItems} />
+            </div>
             
             {orderItems.length > 0 ? (
               <div className="space-y-4">
