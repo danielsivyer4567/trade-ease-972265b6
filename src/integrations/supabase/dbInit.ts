@@ -33,3 +33,11 @@ export async function initializeTables() {
     return { success: false, error };
   }
 }
+
+/**
+ * Initialize backend components needed for the application
+ * Currently just a wrapper for initializeTables, but can be extended
+ */
+export async function initializeBackend() {
+  return await initializeTables();
+}
