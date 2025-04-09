@@ -12,14 +12,14 @@ interface BillingFormProps {
 
 export function BillingForm({ formData, handleInputChange }: BillingFormProps) {
   return (
-    <Card>
+    <Card className="h-full">
       <CardHeader>
         <CardTitle>Billing Information</CardTitle>
         <CardDescription>Enter customer billing information</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="firstName">First Name</Label>
               <Input
@@ -27,6 +27,7 @@ export function BillingForm({ formData, handleInputChange }: BillingFormProps) {
                 name="firstName"
                 value={formData.firstName}
                 onChange={handleInputChange}
+                className="w-full"
               />
             </div>
             <div className="space-y-2">
@@ -36,6 +37,7 @@ export function BillingForm({ formData, handleInputChange }: BillingFormProps) {
                 name="lastName"
                 value={formData.lastName}
                 onChange={handleInputChange}
+                className="w-full"
               />
             </div>
           </div>
@@ -48,6 +50,7 @@ export function BillingForm({ formData, handleInputChange }: BillingFormProps) {
               type="email"
               value={formData.email}
               onChange={handleInputChange}
+              className="w-full"
             />
           </div>
           
@@ -58,6 +61,7 @@ export function BillingForm({ formData, handleInputChange }: BillingFormProps) {
               name="address1"
               value={formData.address1}
               onChange={handleInputChange}
+              className="w-full"
             />
           </div>
           
@@ -68,10 +72,11 @@ export function BillingForm({ formData, handleInputChange }: BillingFormProps) {
               name="locality"
               value={formData.locality}
               onChange={handleInputChange}
+              className="w-full"
             />
           </div>
           
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="administrativeArea">State</Label>
               <Input
@@ -79,6 +84,7 @@ export function BillingForm({ formData, handleInputChange }: BillingFormProps) {
                 name="administrativeArea"
                 value={formData.administrativeArea}
                 onChange={handleInputChange}
+                className="w-full"
               />
             </div>
             <div className="space-y-2">
@@ -88,6 +94,7 @@ export function BillingForm({ formData, handleInputChange }: BillingFormProps) {
                 name="postalCode"
                 value={formData.postalCode}
                 onChange={handleInputChange}
+                className="w-full"
               />
             </div>
           </div>
@@ -99,6 +106,7 @@ export function BillingForm({ formData, handleInputChange }: BillingFormProps) {
               name="country"
               value={formData.country}
               onChange={handleInputChange}
+              className="w-full"
             />
           </div>
           
@@ -109,6 +117,7 @@ export function BillingForm({ formData, handleInputChange }: BillingFormProps) {
               name="phoneNumber"
               value={formData.phoneNumber}
               onChange={handleInputChange}
+              className="w-full"
             />
           </div>
         </div>

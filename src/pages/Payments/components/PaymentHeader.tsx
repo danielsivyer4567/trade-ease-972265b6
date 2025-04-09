@@ -14,9 +14,9 @@ export function PaymentHeader() {
         onClick={() => navigate(-1)} 
         className="rounded-md border border-gray-300 px-3 py-1 bg-[#D3E4FD] hover:bg-[#B5D1F8] text-[#1E40AF] hover:text-[#1E3A8A]"
       >
-        <ArrowLeft className="h-5 w-5" />
+        <ArrowLeft className="h-4 w-4 sm:h-5 sm:w-5" />
       </Button>
-      <h1 className="text-2xl font-bold">New Payment</h1>
+      <h1 className="text-xl sm:text-2xl font-bold">New Payment</h1>
     </div>
   );
 }

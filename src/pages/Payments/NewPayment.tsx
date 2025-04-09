@@ -1,14 +1,15 @@
 
 import { useState } from "react";
-import { AppLayout } from "@/components/ui/AppLayout";
 import { z } from "zod";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { useNavigate } from "react-router-dom";
 import { PaymentHeader } from "./components/PaymentHeader";
 import { PaymentInfoCard } from "./components/PaymentInfoCard";
 import { PaymentForm } from "./components/PaymentForm";
 import { BillingForm } from "./components/BillingForm";
 import { PaymentFormData, ValidatedPaymentData } from "./types";
+import { AppLayout } from "@/components/ui/AppLayout";
 
 // Define a schema for payment data validation
 const paymentSchema = z.object({
@@ -30,6 +31,7 @@ const paymentSchema = z.object({
 });
 
 export default function NewPayment() {
+  const navigate = useNavigate();
   const [isProcessing, setIsProcessing] = useState(false);
   const [formData, setFormData] = useState<PaymentFormData>({
     cardNumber: "4111111111111111",
@@ -113,6 +115,9 @@ export default function NewPayment() {
             cardInfo: data.data.cardInfo,
           }
         ]));
+        
+        // Navigate back to payments list
+        navigate('/payments');
       } else {
         throw new Error("Payment processing failed");
       }
@@ -126,11 +131,11 @@ export default function NewPayment() {
 
   return (
     <AppLayout>
-      <div className="p-6 max-w-4xl mx-auto">
+      <div className="p-4 md:p-6 max-w-4xl mx-auto">
         <PaymentHeader />
         <PaymentInfoCard />
 
-        <div className="grid md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
           <div>
             <PaymentForm 
               formData={formData} 
