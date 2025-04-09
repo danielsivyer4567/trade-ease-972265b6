@@ -8,6 +8,7 @@ import { LoadingFallback } from './loading-fallback';
 const SuppliersPage = React.lazy(() => import('@/pages/Suppliers'));
 const InventoryPage = React.lazy(() => import('@/pages/Inventory'));
 const PurchaseOrdersPage = React.lazy(() => import('@/pages/PurchaseOrders'));
+// Fixed import path for MaterialOrdering
 const MaterialOrderingPage = React.lazy(() => import('@/pages/MaterialOrdering'));
 
 // Export routes as JSX elements
