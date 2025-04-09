@@ -3,7 +3,6 @@ import React from 'react';
 import { cn } from '@/lib/utils';
 import { Button } from './button';
 import { ScrollArea } from './scroll-area';
-import { ChevronLeft } from 'lucide-react';
 import { SidebarNavLinks } from './sidebar/SidebarNavLinks';
 import {
   Sheet,
@@ -12,6 +11,8 @@ import {
   SheetTitle,
 } from './sheet';
 import { SidebarHeader } from './sidebar/SidebarHeader';
+import { sidebarVariants } from './sidebar/theme/sidebarTheme';
+import { useSidebarTheme } from './sidebar/theme/SidebarThemeContext';
 
 interface AppSidebarProps {
   className?: string;
@@ -21,15 +22,16 @@ interface AppSidebarProps {
 
 export function AppSidebar({ className, isExpanded, onToggle }: AppSidebarProps) {
   const [isMobileOpen, setIsMobileOpen] = React.useState(false);
+  const { theme } = useSidebarTheme();
 
   return (
     <>
       {/* Desktop Sidebar */}
       <aside className={cn(
-        "relative z-30 flex flex-col",
-        "border-r border-[#B8C5D5] bg-[#E2E8F0]",
-        "transition-all duration-300 ease-in-out",
-        isExpanded ? "w-[240px]" : "w-[64px]",
+        sidebarVariants({ 
+          theme: theme, 
+          size: isExpanded ? "expanded" : "collapsed" 
+        }),
         className
       )}>
         <SidebarHeader
