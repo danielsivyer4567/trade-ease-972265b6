@@ -56,6 +56,7 @@ export const NavigationGroup: React.FC<NavigationGroupProps> = ({
       )}
 
       {items.map((item, index) => {
+        // Use type guards to ensure type safety
         if (item.type === 'link') {
           return (
             <NavItem
