@@ -10,7 +10,7 @@ interface JobMapViewProps {
 export const JobMapView = ({ job }: JobMapViewProps) => {
   // Create a marker from the job data
   const jobMarker = {
-    position: [job.location[1], job.location[0]],
+    position: [job.location[1], job.location[0]] as [number, number],
     title: job.title || job.jobNumber || 'Job Location'
   };
   
