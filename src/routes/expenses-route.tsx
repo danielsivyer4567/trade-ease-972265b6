@@ -6,6 +6,7 @@ import { LoadingFallback } from './loading-fallback';
 
 // Import the actual Expenses page component
 const ExpensesPage = React.lazy(() => import('@/pages/Expenses'));
+// Fixed import path for InvoiceProcessing
 const InvoiceProcessingPage = React.lazy(() => import('@/pages/Expenses/InvoiceProcessing'));
 
 // Export the routes as JSX elements
