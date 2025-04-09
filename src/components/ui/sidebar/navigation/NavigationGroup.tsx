@@ -5,21 +5,22 @@ import { DropdownMenu } from './DropdownMenu';
 import { LogoutButton } from './LogoutButton';
 import { LucideIcon } from 'lucide-react';
 
-interface NavItemType {
+// Define strict literal types for navigation items
+export interface NavItemType {
   type: 'link';
   icon: LucideIcon;
   label: string;
   path: string;
 }
 
-interface ButtonItemType {
+export interface ButtonItemType {
   type: 'button';
   icon: LucideIcon;
   label: string;
   action: string;
 }
 
-interface DropdownItemType {
+export interface DropdownItemType {
   type: 'dropdown';
   icon: LucideIcon;
   label: string;
@@ -30,7 +31,7 @@ interface DropdownItemType {
   }[];
 }
 
-type NavigationItem = NavItemType | ButtonItemType | DropdownItemType;
+export type NavigationItem = NavItemType | ButtonItemType | DropdownItemType;
 
 interface NavigationGroupProps {
   label?: string;
