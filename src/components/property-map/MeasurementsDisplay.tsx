@@ -3,7 +3,7 @@ import React from 'react';
 import { IndividualBoundaryMeasurement } from './types';
 import { MapPin, Ruler } from 'lucide-react';
 
-interface MeasurementsDisplayProps {
+export interface MeasurementsDisplayProps {
   boundaryLength: number;
   boundaryArea: number;
   individualBoundaries: IndividualBoundaryMeasurement[];

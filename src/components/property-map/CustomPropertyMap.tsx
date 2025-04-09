@@ -59,20 +59,23 @@ const CustomPropertyMap = ({
             onMouseDown={mapEventHandlers.handleMouseDown}
             onMouseMove={mapEventHandlers.handleMouseMove}
             onMouseUp={mapEventHandlers.handleMouseUp}
-            onWheel={mapEventHandlers.handleWheel}
+            onTouchStart={mapEventHandlers.handleTouchStart}
+            onTouchMove={mapEventHandlers.handleTouchMove}
+            onTouchEnd={mapEventHandlers.handleTouchEnd}
           />
-          {measurements.area > 0 && (
+          {measurements.boundaryArea > 0 && (
             <MeasurementsDisplay
-              area={measurements.area}
-              perimeter={measurements.perimeter}
+              boundaryArea={measurements.boundaryArea}
+              boundaryLength={measurements.boundaryLength}
+              individualBoundaries={measurements.individualBoundaries}
             />
           )}
         </div>
         
         {showEdgeMeasurements && boundaries.length > 0 && (
           <BoundaryMeasurements 
-            boundaries={boundaries} 
-            measurements={measurements.edgeMeasurements} 
+            edges={measurements.edges} 
+            showMeasurements={true} 
           />
         )}
       </CardContent>
