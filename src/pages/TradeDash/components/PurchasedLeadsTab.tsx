@@ -1,54 +1,104 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Check, Info, X } from "lucide-react";
+
+const mockLeads = [
+  { id: 1, name: "Sarah Johnson", location: "New York, NY", service: "Kitchen Remodel", status: "active", date: "2023-08-15" },
+  { id: 2, name: "Mike Anderson", location: "San Francisco, CA", service: "Bathroom Remodel", status: "active", date: "2023-08-14" },
+  { id: 3, name: "Lisa Nguyen", location: "Austin, TX", service: "Home Addition", status: "contacted", date: "2023-08-13" },
+  { id: 4, name: "David Wilson", location: "Seattle, WA", service: "Deck Construction", status: "pending", date: "2023-08-12" },
+  { id: 5, name: "Emily Brown", location: "Chicago, IL", service: "Flooring Installation", status: "expired", date: "2023-07-28" },
+  { id: 6, name: "Robert Chen", location: "Boston, MA", service: "Roof Repair", status: "contacted", date: "2023-08-10" },
+  { id: 7, name: "Karen Williams", location: "Denver, CO", service: "Window Replacement", status: "pending", date: "2023-08-09" },
+  { id: 8, name: "James Martinez", location: "Phoenix, AZ", service: "Painting", status: "expired", date: "2023-07-25" },
+];
 
 export function PurchasedLeadsTab() {
-  const positions = [
-    { id: 1, symbol: 'AAPL', shares: 10, avgPrice: 182.63, currentPrice: 187.10, profit: 44.70, profitPercent: 2.45 },
-    { id: 2, symbol: 'MSFT', shares: 5, avgPrice: 340.50, currentPrice: 337.22, profit: -16.40, profitPercent: -0.96 },
-    { id: 3, symbol: 'GOOGL', shares: 8, avgPrice: 131.20, currentPrice: 134.17, profit: 23.76, profitPercent: 2.26 },
-    { id: 4, symbol: 'TSLA', shares: 3, avgPrice: 250.10, currentPrice: 247.50, profit: -7.80, profitPercent: -1.04 },
-    { id: 5, symbol: 'AMZN', shares: 6, avgPrice: 128.75, currentPrice: 130.37, profit: 9.72, profitPercent: 1.26 },
-  ];
+  const [leads, setLeads] = useState(mockLeads);
+
+  const getStatusBadge = (status) => {
+    switch (status) {
+      case 'active':
+        return <Badge variant="outline" className="bg-green-50 text-green-600 border-green-200">Active</Badge>;
+      case 'contacted':
+        return <Badge variant="outline" className="bg-blue-50 text-blue-600 border-blue-200">Contacted</Badge>;
+      case 'pending':
+        return <Badge variant="outline" className="bg-yellow-50 text-yellow-600 border-yellow-200">Pending</Badge>;
+      case 'expired':
+        return <Badge variant="outline" className="bg-gray-50 text-gray-600 border-gray-200">Expired</Badge>;
+      default:
+        return null;
+    }
+  };
+
+  const formatDate = (dateString) => {
+    const options = { month: 'short', day: 'numeric', year: 'numeric' };
+    return new Date(dateString).toLocaleDateString('en-US', options);
+  };
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Your Portfolio</CardTitle>
+        <CardTitle>Your Purchased Leads</CardTitle>
       </CardHeader>
       <CardContent>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Symbol</TableHead>
-              <TableHead className="text-right">Shares</TableHead>
-              <TableHead className="text-right">Avg Price</TableHead>
-              <TableHead className="text-right">Current Price</TableHead>
-              <TableHead className="text-right">Profit/Loss</TableHead>
-              <TableHead className="text-right">Status</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {positions.map(position => (
-              <TableRow key={position.id}>
-                <TableCell className="font-medium">{position.symbol}</TableCell>
-                <TableCell className="text-right">{position.shares}</TableCell>
-                <TableCell className="text-right">${position.avgPrice.toFixed(2)}</TableCell>
-                <TableCell className="text-right">${position.currentPrice.toFixed(2)}</TableCell>
-                <TableCell className={`text-right ${position.profit >= 0 ? 'text-green-500' : 'text-red-500'}`}>
-                  ${position.profit.toFixed(2)} ({position.profitPercent >= 0 ? '+' : ''}{position.profitPercent.toFixed(2)}%)
-                </TableCell>
-                <TableCell className="text-right">
-                  <Badge variant={position.profit >= 0 ? "success" : "destructive"} className="bg-opacity-10">
-                    {position.profit >= 0 ? 'Profitable' : 'Loss'}
-                  </Badge>
-                </TableCell>
+        {leads.length > 0 ? (
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Lead</TableHead>
+                <TableHead>Service</TableHead>
+                <TableHead>Date</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+            </TableHeader>
+            <TableBody>
+              {leads.map((lead) => (
+                <TableRow key={lead.id}>
+                  <TableCell>
+                    <div>
+                      <div className="font-medium">{lead.name}</div>
+                      <div className="text-sm text-muted-foreground">{lead.location}</div>
+                    </div>
+                  </TableCell>
+                  <TableCell>{lead.service}</TableCell>
+                  <TableCell>{formatDate(lead.date)}</TableCell>
+                  <TableCell>{getStatusBadge(lead.status)}</TableCell>
+                  <TableCell className="text-right">
+                    <div className="flex justify-end gap-2">
+                      <Button variant="outline" size="sm">
+                        <Info className="h-4 w-4 mr-1" />
+                        Details
+                      </Button>
+                      {lead.status === 'pending' && (
+                        <Button variant="outline" size="sm">
+                          <Check className="h-4 w-4 mr-1" />
+                          Contact
+                        </Button>
+                      )}
+                      {lead.status === 'expired' && (
+                        <Button variant="destructive" size="sm">
+                          <X className="h-4 w-4 mr-1" />
+                          Remove
+                        </Button>
+                      )}
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        ) : (
+          <div className="text-center py-8">
+            <p className="text-gray-500">No purchased leads found</p>
+            <Button className="mt-4">Browse Available Leads</Button>
+          </div>
+        )}
       </CardContent>
     </Card>
   );

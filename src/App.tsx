@@ -7,6 +7,7 @@ import { Suspense, useEffect } from "react";
 import { TabsProvider } from "./contexts/TabsContext";
 import { initializeTables } from "./integrations/supabase/dbInit";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { BrowserRouter } from "react-router-dom";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -39,15 +40,17 @@ const AppContent = () => {
 
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <TabsProvider>
-          <NotificationProvider>
-            <AppContent />
-          </NotificationProvider>
-        </TabsProvider>
-      </AuthProvider>
-    </QueryClientProvider>
+    <BrowserRouter>
+      <QueryClientProvider client={queryClient}>
+        <AuthProvider>
+          <TabsProvider>
+            <NotificationProvider>
+              <AppContent />
+            </NotificationProvider>
+          </TabsProvider>
+        </AuthProvider>
+      </QueryClientProvider>
+    </BrowserRouter>
   );
 }
 
