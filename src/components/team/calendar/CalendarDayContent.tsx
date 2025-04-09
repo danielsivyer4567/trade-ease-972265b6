@@ -47,6 +47,19 @@ export const CalendarDayContent: React.FC<CalendarDayContentProps> = ({
 
   // In mini view, show job count with a dot indicator instead of full job information
   const showJobDot = miniView && jobsForDate && jobsForDate.length > 0;
+  
+  const getTeamColorDot = () => {
+    switch(teamColor) {
+      case 'red':
+        return 'bg-red-500';
+      case 'blue':
+        return 'bg-blue-500';
+      case 'green':
+        return 'bg-green-500';
+      default:
+        return 'bg-gray-500';
+    }
+  };
 
   return (
     <div 
@@ -61,7 +74,7 @@ export const CalendarDayContent: React.FC<CalendarDayContentProps> = ({
       
       {miniView ? (
         showJobDot && (
-          <div className={`absolute bottom-1 right-1 w-2 h-2 rounded-full bg-${teamColor}-500`} 
+          <div className={`absolute bottom-1 right-1 w-2 h-2 rounded-full ${getTeamColorDot()}`} 
                title={`${jobsForDate.length} jobs scheduled`} />
         )
       ) : (

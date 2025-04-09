@@ -7,6 +7,7 @@ import MarketOverview from './MarketOverview';
 import RecentTrades from './RecentTrades';
 import WatchList from './WatchList';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { DashboardStats } from '@/pages/TradeDash/components/DashboardStats';
 
 const TradeDashboard = () => {
   const [activeTab, setActiveTab] = useState("overview");
@@ -16,9 +17,11 @@ const TradeDashboard = () => {
   return (
     <div className="space-y-4">
       <header className="mb-6">
-        <h1 className="text-3xl font-bold tracking-tight">Trades Dashboard</h1>
+        <h1 className="text-3xl font-bold tracking-tight">Trade Dashboard</h1>
         <p className="text-muted-foreground">Monitor construction jobs and manage activities</p>
       </header>
+      
+      <DashboardStats />
       
       <Tabs defaultValue="overview" className="w-full" onValueChange={setActiveTab}>
         <TabsList className={`grid ${isMobile ? 'grid-cols-3' : 'w-[400px] grid-cols-3'}`}>
