@@ -10,6 +10,10 @@ export const processCSVContent = (content: string): Array<{name: string, quantit
   try {
     // Basic CSV parsing - handles simple CSV format
     const lines = content.split('\n').filter(line => line.trim() !== '');
+    if (lines.length === 0) {
+      throw new Error("CSV file is empty");
+    }
+    
     const headers = lines[0].split(',').map(header => header.trim().toLowerCase());
     
     // Check for required columns
@@ -23,11 +27,36 @@ export const processCSVContent = (content: string): Array<{name: string, quantit
     
     // Process rows
     const items = lines.slice(1).map(line => {
-      const columns = line.split(',').map(col => col.trim());
+      // Handle special cases where commas might be inside quotes
+      let columns: string[] = [];
+      let inQuotes = false;
+      let currentField = '';
+      
+      for (let i = 0; i < line.length; i++) {
+        const char = line[i];
+        
+        if (char === '"' && (i === 0 || line[i-1] !== '\\')) {
+          inQuotes = !inQuotes;
+          continue;
+        }
+        
+        if (char === ',' && !inQuotes) {
+          columns.push(currentField.trim());
+          currentField = '';
+          continue;
+        }
+        
+        currentField += char;
+      }
+      
+      // Add the last field
+      columns.push(currentField.trim());
+      
+      // Ensure we don't accidentally use undefined for missing columns
       return {
         name: columns[nameIndex] || '',
-        quantity: quantityIndex >= 0 ? columns[quantityIndex] || '1' : '1',
-        unit: unitIndex >= 0 ? columns[unitIndex] || 'pieces' : 'pieces'
+        quantity: quantityIndex >= 0 && columns[quantityIndex] ? columns[quantityIndex] : '1',
+        unit: unitIndex >= 0 && columns[unitIndex] ? columns[unitIndex] : 'pieces'
       };
     }).filter(item => item.name);
     
