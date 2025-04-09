@@ -1,6 +1,5 @@
-
 import React, { useState, useEffect } from 'react';
-import { Check, Loader, Maximize2, MessageSquare, Share2 } from 'lucide-react';
+import { Check, Loader, Maximize2, Minimize2, MessageSquare, Share2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useParams } from 'react-router-dom';
@@ -10,6 +9,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 interface JobStep {
   id: number;
@@ -54,6 +54,7 @@ export const JobStepProgress = () => {
   const [shareLinkDialogOpen, setShareLinkDialogOpen] = useState(false);
   const [customerNotificationsEnabled, setCustomerNotificationsEnabled] = useState(false);
   const [currentStep, setCurrentStep] = useState<number | null>(null);
+  const [isExpanded, setIsExpanded] = useState(false);
 
   useEffect(() => {
     // Get existing job steps from database if available
@@ -340,7 +341,10 @@ export const JobStepProgress = () => {
     setIsFullscreen(!isFullscreen);
   };
 
-  // Open comment dialog for a specific task
+  const toggleExpanded = () => {
+    setIsExpanded(!isExpanded);
+  };
+
   const openCommentDialog = (taskId: string) => {
     setCurrentTaskId(taskId);
     setCommentDialogOpen(true);
@@ -348,7 +352,6 @@ export const JobStepProgress = () => {
     setTag("");
   };
   
-  // Add a comment with optional tag
   const addComment = () => {
     if (!currentTaskId || !comment.trim()) return;
     
@@ -372,7 +375,6 @@ export const JobStepProgress = () => {
     setTag("");
   };
   
-  // Generate and share a progress link
   const shareProgressLink = () => {
     const progressLink = `${window.location.origin}/progress/${id}`;
     navigator.clipboard.writeText(progressLink);
@@ -382,13 +384,11 @@ export const JobStepProgress = () => {
     // In a real app, you might want to save this link or send it directly to the customer
   };
   
-  // Toggle customer notifications
   const toggleCustomerNotifications = () => {
     setCustomerNotificationsEnabled(!customerNotificationsEnabled);
     toast.success(`Customer notifications ${!customerNotificationsEnabled ? 'enabled' : 'disabled'}`);
   };
 
-  // Visual progress indicator showing how many steps are complete
   const completedSteps = jobSteps.filter(step => step.isCompleted).length;
   const progressPercentage = jobSteps.length > 0 ? (completedSteps / jobSteps.length) * 100 : 0;
   
@@ -401,109 +401,119 @@ export const JobStepProgress = () => {
   
   return (
     <div className={`relative ${isFullscreen ? 'fixed inset-0 z-50 bg-white p-6 overflow-auto' : ''}`}>
-      <div className="flex justify-between items-center mb-4">
-        <div className="flex items-center gap-3">
-          <h2 className="text-xl font-bold">Job Progress</h2>
-          <div className="bg-slate-100 rounded-full h-8 px-3 flex items-center">
-            <span className="text-sm font-medium">{progressPercentage.toFixed(0)}% Complete</span>
+      <Collapsible open={isExpanded} onOpenChange={setIsExpanded}>
+        <div className="flex justify-between items-center mb-4">
+          <div className="flex items-center gap-3">
+            <h2 className="text-xl font-bold">Job Progress</h2>
+            <div className="bg-slate-100 rounded-full h-8 px-3 flex items-center">
+              <span className="text-sm font-medium">{progressPercentage.toFixed(0)}% Complete</span>
+            </div>
+          </div>
+          
+          <div className="flex items-center gap-2">
+            <CollapsibleTrigger asChild>
+              <Button variant="ghost" size="icon" title={isExpanded ? "Minimize" : "Maximize"}>
+                {isExpanded ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
+              </Button>
+            </CollapsibleTrigger>
+            {isExpanded && (
+              <>
+                <Button variant="outline" size="sm" onClick={() => setShareLinkDialogOpen(true)}>
+                  <Share2 className="h-4 w-4 mr-2" />
+                  Share Progress
+                </Button>
+                <Button variant="ghost" size="icon" onClick={toggleFullscreen}>
+                  <Maximize2 className="h-4 w-4" />
+                </Button>
+              </>
+            )}
           </div>
         </div>
         
-        <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" onClick={() => setShareLinkDialogOpen(true)}>
-            <Share2 className="h-4 w-4 mr-2" />
-            Share Progress
-          </Button>
-          <Button variant="ghost" size="icon" onClick={toggleFullscreen}>
-            <Maximize2 className="h-4 w-4" />
-          </Button>
-        </div>
-      </div>
-      
-      {/* Step indicators showing current progress with team color */}
-      <div className="flex items-center space-x-3 mb-6 overflow-x-auto py-2">
-        {jobSteps.map((step) => (
-          <div
-            key={step.id}
-            onClick={() => handleStepCompletion(step.id)}
-            className={`flex-shrink-0 cursor-pointer w-10 h-10 rounded-full flex items-center justify-center
-              ${step.isCompleted ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-700'} 
-              ${currentStep === step.id ? `border-2 border-${jobDetails.teamColor?.replace('bg-', '')} shadow-md` : 'border-2 border-white'}
-            `}
-            title={step.title}
-          >
-            {step.isCompleted ? (
-              <Check className="h-5 w-5" />
-            ) : (
-              <span className="text-sm font-medium">{step.id}</span>
-            )}
-          </div>
-        ))}
-      </div>
-      
-      {/* Display team indicator if a team is assigned */}
-      {jobDetails.assignedTeam && (
-        <div className="flex items-center mb-4 bg-white p-2 rounded-lg shadow-sm">
-          <div className={`w-4 h-4 rounded-full ${jobDetails.teamColor} mr-2`}></div>
-          <span className="text-sm">This job is assigned to: <span className="font-medium">{jobDetails.assignedTeam}</span></span>
-        </div>
-      )}
-      
-      <div className="space-y-6 mb-6">
-        {jobSteps.map((step) => (
-          <div key={step.id} className={`border rounded-lg overflow-hidden
-            ${currentStep === step.id ? `ring-2 ring-${jobDetails.teamColor?.replace('bg-', '')}` : ''}
-          `}>
-            <div 
-              className={`p-3 flex justify-between items-center cursor-pointer ${
-                step.isCompleted ? 'bg-green-50 border-green-200' : 'bg-slate-50'
-              }`}
+        <div className="flex items-center space-x-3 mb-6 overflow-x-auto py-2">
+          {jobSteps.map((step) => (
+            <div
+              key={step.id}
+              onClick={() => handleStepCompletion(step.id)}
+              className={`flex-shrink-0 cursor-pointer w-10 h-10 rounded-full flex items-center justify-center
+                ${step.isCompleted ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-700'} 
+                ${currentStep === step.id ? `border-2 border-${jobDetails.teamColor?.replace('bg-', '')} shadow-md` : 'border-2 border-white'}
+              `}
+              title={step.title}
             >
-              <div className="flex items-center gap-3">
-                <Checkbox 
-                  checked={step.isCompleted} 
-                  onCheckedChange={() => handleStepCompletion(step.id)}
-                  disabled={savingStepId === step.id}
-                  className={step.isCompleted ? 'bg-green-500 text-white border-green-500' : ''}
-                />
-                <h3 className="font-medium">{step.title}</h3>
-              </div>
-              
-              <div className="text-sm text-gray-500">
-                {step.tasks.filter(t => t.isCompleted).length}/{step.tasks.length} tasks
-              </div>
+              {step.isCompleted ? (
+                <Check className="h-5 w-5" />
+              ) : (
+                <span className="text-sm font-medium">{step.id}</span>
+              )}
             </div>
-            
-            <div className="p-3 space-y-2 bg-white">
-              {step.tasks.map((task) => (
-                <div key={task.id} className="flex items-center justify-between border-b pb-2 last:border-b-0 last:pb-0">
-                  <div className="flex items-center gap-2">
+          ))}
+        </div>
+        
+        <CollapsibleContent className="space-y-4">
+          {jobDetails.assignedTeam && (
+            <div className="flex items-center mb-4 bg-white p-2 rounded-lg shadow-sm">
+              <div className={`w-4 h-4 rounded-full ${jobDetails.teamColor} mr-2`}></div>
+              <span className="text-sm">This job is assigned to: <span className="font-medium">{jobDetails.assignedTeam}</span></span>
+            </div>
+          )}
+          
+          <div className="space-y-6 mb-6">
+            {jobSteps.map((step) => (
+              <div key={step.id} className={`border rounded-lg overflow-hidden
+                ${currentStep === step.id ? `ring-2 ring-${jobDetails.teamColor?.replace('bg-', '')}` : ''}
+              `}>
+                <div 
+                  className={`p-3 flex justify-between items-center cursor-pointer ${
+                    step.isCompleted ? 'bg-green-50 border-green-200' : 'bg-slate-50'
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
                     <Checkbox 
-                      checked={task.isCompleted} 
-                      onCheckedChange={() => handleTaskCompletion(step.id, task.id)}
-                      disabled={savingTaskId === task.id}
-                      className={task.isCompleted ? 'bg-green-500 text-white border-green-500' : ''}
+                      checked={step.isCompleted} 
+                      onCheckedChange={() => handleStepCompletion(step.id)}
+                      disabled={savingStepId === step.id}
+                      className={step.isCompleted ? 'bg-green-500 text-white border-green-500' : ''}
                     />
-                    <span className={task.isCompleted ? 'line-through text-gray-500' : ''}>{task.text}</span>
+                    <h3 className="font-medium">{step.title}</h3>
                   </div>
                   
-                  <Button 
-                    variant="ghost" 
-                    size="sm"
-                    onClick={() => openCommentDialog(task.id)}
-                    className="flex items-center text-gray-500 hover:text-gray-700"
-                  >
-                    <MessageSquare className="h-4 w-4 mr-1" />
-                    {comments[task.id]?.length ? comments[task.id].length : 0}
-                  </Button>
+                  <div className="text-sm text-gray-500">
+                    {step.tasks.filter(t => t.isCompleted).length}/{step.tasks.length} tasks
+                  </div>
                 </div>
-              ))}
-            </div>
+                
+                <div className="p-3 space-y-2 bg-white">
+                  {step.tasks.map((task) => (
+                    <div key={task.id} className="flex items-center justify-between border-b pb-2 last:border-b-0 last:pb-0">
+                      <div className="flex items-center gap-2">
+                        <Checkbox 
+                          checked={task.isCompleted} 
+                          onCheckedChange={() => handleTaskCompletion(step.id, task.id)}
+                          disabled={savingTaskId === task.id}
+                          className={task.isCompleted ? 'bg-green-500 text-white border-green-500' : ''}
+                        />
+                        <span className={task.isCompleted ? 'line-through text-gray-500' : ''}>{task.text}</span>
+                      </div>
+                      
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        onClick={() => openCommentDialog(task.id)}
+                        className="flex items-center text-gray-500 hover:text-gray-700"
+                      >
+                        <MessageSquare className="h-4 w-4 mr-1" />
+                        {comments[task.id]?.length ? comments[task.id].length : 0}
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
+        </CollapsibleContent>
+      </Collapsible>
       
-      {/* Comment Dialog */}
       <Dialog open={commentDialogOpen} onOpenChange={setCommentDialogOpen}>
         <DialogContent>
           <DialogHeader>
@@ -538,7 +548,6 @@ export const JobStepProgress = () => {
         </DialogContent>
       </Dialog>
       
-      {/* Share Progress Link Dialog */}
       <Dialog open={shareLinkDialogOpen} onOpenChange={setShareLinkDialogOpen}>
         <DialogContent>
           <DialogHeader>
