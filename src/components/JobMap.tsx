@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { GoogleMap, LoadScript, InfoWindow } from '@react-google-maps/api';
+import { GoogleMap, LoadScript, InfoWindow, Polygon } from '@react-google-maps/api';
 import type { Job } from '@/types/job';
 import { Briefcase } from 'lucide-react';
 
@@ -12,9 +12,10 @@ interface JobMapProps {
     position: [number, number];
     title: string;
   }>;
+  boundaries?: Array<Array<[number, number]>>;
 }
 
-const JobMap = ({ jobs = [], center, zoom = 14, markers = [] }: JobMapProps) => {
+const JobMap = ({ jobs = [], center, zoom = 14, markers = [], boundaries = [] }: JobMapProps) => {
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
 
   const mapContainerStyle = {
@@ -105,6 +106,28 @@ const JobMap = ({ jobs = [], center, zoom = 14, markers = [] }: JobMapProps) => 
         map,
         content: centerMarkerElement,
         title: "Location"
+      });
+    }
+    
+    // Draw property boundaries if provided
+    if (boundaries.length > 0) {
+      boundaries.forEach((boundary, index) => {
+        // Convert the boundary points to Google Maps LatLng objects
+        const polygonPath = boundary.map(point => ({
+          lat: point[1],
+          lng: point[0]
+        }));
+        
+        // Create and add the polygon to the map
+        new google.maps.Polygon({
+          paths: polygonPath,
+          strokeColor: '#5D4A9C',
+          strokeOpacity: 0.8,
+          strokeWeight: 3,
+          fillColor: '#9b87f5',
+          fillOpacity: 0.35,
+          map: map
+        });
       });
     }
   };
