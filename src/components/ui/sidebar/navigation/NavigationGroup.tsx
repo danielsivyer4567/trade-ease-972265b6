@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { NavItem } from './NavItem';
 import { DropdownMenu } from './DropdownMenu';
@@ -49,8 +50,11 @@ export const NavigationGroup: React.FC<NavigationGroupProps> = ({
       {items.map((item, index) => {
       // Use type guards to ensure type safety
       if (item.type === 'link') {
-        return <NavItem key={`${item.path}-${index}`} path={item.path} title={item.label} // Pass label as title
-        icon={item.icon} isExpanded={isExpanded} />;
+        return <NavItem key={`${item.path}-${index}`} 
+          path={item.path} 
+          title={item.label} // Pass label as title
+          icon={item.icon} 
+          sidebarExpanded={isExpanded} />; // Use sidebarExpanded instead of isExpanded
       }
       if (item.type === 'button' && item.action === 'logout') {
         return <LogoutButton key={`logout-${index}`} isExpanded={isExpanded} onLogout={onLogout} />;
