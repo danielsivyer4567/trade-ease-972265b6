@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 
 export interface EmailOptions {
@@ -15,8 +14,14 @@ export interface EmailOptions {
  */
 export const sendEmail = async (options: EmailOptions): Promise<{ success: boolean; error?: string }> => {
   try {
-    const { data, error } = await supabase.functions.invoke('mailgun-email-sender', {
-      body: options
+    const { data, error } = await supabase.functions.invoke('brevo-email-sender', {
+      body: {
+        to: options.to,
+        subject: options.subject,
+        htmlContent: options.html,
+        textContent: options.text,
+        sender: options.from ? { email: options.from } : undefined
+      }
     });
 
     if (error) {
@@ -25,7 +30,7 @@ export const sendEmail = async (options: EmailOptions): Promise<{ success: boole
     }
 
     return { success: true };
-  } catch (error) {
+  } catch (error: any) {
     console.error('Exception sending email:', error);
     return { success: false, error: error.message };
   }
@@ -109,6 +114,59 @@ export const sendPasswordResetEmail = async (email: string, resetLink: string): 
         <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #eee; text-align: center; color: #666; font-size: 12px;">
           <p>&copy; ${new Date().getFullYear()} Trade Ease. All rights reserved.</p>
         </div>
+      </div>
+    `
+  });
+};
+
+/**
+ * Sends a material order email to a supplier
+ */
+export const sendMaterialOrderEmail = async (
+  supplierEmail: string, 
+  userEmail: string,
+  jobNumber: string,
+  jobTitle: string,
+  customerName: string,
+  orderDetails: string
+): Promise<{ success: boolean; error?: string }> => {
+  // Send to supplier
+  const supplierResult = await sendEmail({
+    to: supplierEmail,
+    subject: `Material Order - Job #${jobNumber} - ${jobTitle}`,
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <h2 style="color: #333;">Material Order Request</h2>
+        <div style="background-color: #f5f5f5; padding: 15px; border-radius: 5px; margin: 15px 0;">
+          <p><strong>Job #:</strong> ${jobNumber}</p>
+          <p><strong>Title:</strong> ${jobTitle}</p>
+          <p><strong>Customer:</strong> ${customerName}</p>
+        </div>
+        <div style="white-space: pre-wrap;">${orderDetails}</div>
+      </div>
+    `
+  });
+  
+  if (!supplierResult.success) {
+    return supplierResult;
+  }
+  
+  // Send confirmation to user
+  return sendEmail({
+    to: userEmail,
+    subject: `Material Order Confirmation - Job #${jobNumber}`,
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <h2 style="color: #333;">Material Order Sent</h2>
+        <p>Your material order has been sent to the supplier.</p>
+        <div style="background-color: #f5f5f5; padding: 15px; border-radius: 5px; margin: 15px 0;">
+          <p><strong>Job #:</strong> ${jobNumber}</p>
+          <p><strong>Title:</strong> ${jobTitle}</p>
+          <p><strong>Customer:</strong> ${customerName}</p>
+          <p><strong>Supplier:</strong> ${supplierEmail}</p>
+        </div>
+        <p>Order details:</p>
+        <div style="white-space: pre-wrap; background-color: #f9f9f9; padding: 15px; border-radius: 5px;">${orderDetails}</div>
       </div>
     `
   });

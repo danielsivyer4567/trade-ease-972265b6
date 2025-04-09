@@ -1,10 +1,11 @@
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
-import { Package2, Truck, Search, ClipboardList, Mail } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import { Package2, Truck, Search, ClipboardList, Mail, Paperclip, Send, X, Minimize, Maximize } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useTabNavigation } from '@/hooks/useTabNavigation';
 import { toast } from "sonner";
@@ -34,6 +35,11 @@ export function CustomerMaterials({
   const [selectedJob, setSelectedJob] = useState<string>("");
   const [recentOrders, setRecentOrders] = useState<any[]>([]);
   const [userEmail, setUserEmail] = useState<string>("");
+  const [messageBody, setMessageBody] = useState<string>("");
+  const [supplierEmail, setSupplierEmail] = useState<string>("supplier@example.com");
+  const [ccEmail, setCcEmail] = useState<string>("");
+  const [bccEmail, setBccEmail] = useState<string>("");
+  const [isMinimized, setIsMinimized] = useState<boolean>(false);
   
   // Fetch current user's email on component mount
   React.useEffect(() => {
@@ -46,62 +52,88 @@ export function CustomerMaterials({
     getUserEmail();
   }, []);
   
-  // Handler to navigate to the material ordering page for a job
-  const handleOrderMaterials = () => {
+  // Function to generate default message body when job is selected
+  React.useEffect(() => {
     if (selectedJob) {
-      // Find the selected job details to use later
       const jobDetails = jobHistory.find(job => job.job_id === selectedJob);
-      
-      if (!jobDetails) {
-        toast.error("Job details not found");
-        return;
+      if (jobDetails) {
+        setMessageBody(`Please supply the following materials for job #${jobDetails.job_number} - ${jobDetails.title}:
+
+1. 
+2. 
+3. 
+
+Delivery address: ${customerName}
+
+Requested delivery date: 
+
+Thank you,
+`);
       }
-      
-      // Use a safer approach to prevent infinite navigation loops
-      const tabId = `job-${selectedJob}-materials`;
-      const path = `/jobs/${selectedJob}/materials`;
-      const title = `Materials for Job ${jobDetails.job_number}`;
-      
-      // Only open a tab if there's actually a selected job
-      openInTab(path, title, tabId);
-      
-      // Send a notification email about material ordering
-      if (userEmail) {
-        sendEmail({
-          to: userEmail,
-          subject: `Material Order Initiated - Job #${jobDetails.job_number}`,
-          html: `
-            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-              <h2 style="color: #333;">Material Order Started</h2>
-              <p>You have initiated a material order for:</p>
-              <div style="background-color: #f5f5f5; padding: 15px; border-radius: 5px; margin: 15px 0;">
-                <p><strong>Job #:</strong> ${jobDetails.job_number}</p>
-                <p><strong>Title:</strong> ${jobDetails.title}</p>
-                <p><strong>Customer:</strong> ${customerName}</p>
-              </div>
-              <p>You can continue and complete your order by clicking the link below:</p>
-              <p style="text-align: center;">
-                <a href="${window.location.origin}/jobs/${selectedJob}/materials" 
-                   style="display: inline-block; background-color: #4F46E5; color: white; padding: 10px 20px; 
-                          text-decoration: none; border-radius: 4px; font-weight: bold;">
-                  Complete Order
-                </a>
-              </p>
-              <p>This email serves as a record of your material ordering activity.</p>
-            </div>
-          `
-        }).then(({ success }) => {
-          if (success) {
-            toast.success("Order notification sent to your email");
-          }
-        }).catch(() => {
-          // Handle silently if email fails
-          console.log("Failed to send email notification");
-        });
-      }
-    } else {
-      toast.error("Please select a job first");
     }
+  }, [selectedJob, jobHistory, customerName]);
+  
+  // Handler to send materials email
+  const handleSendOrder = () => {
+    if (!selectedJob) {
+      toast.error("Please select a job first");
+      return;
+    }
+    
+    const jobDetails = jobHistory.find(job => job.job_id === selectedJob);
+    
+    if (!jobDetails) {
+      toast.error("Job details not found");
+      return;
+    }
+    
+    // Send the actual email
+    sendEmail({
+      to: supplierEmail,
+      subject: `Material Order - Job #${jobDetails.job_number} - ${jobDetails.title}`,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <h2 style="color: #333;">Material Order Request</h2>
+          <div style="background-color: #f5f5f5; padding: 15px; border-radius: 5px; margin: 15px 0;">
+            <p><strong>Job #:</strong> ${jobDetails.job_number}</p>
+            <p><strong>Title:</strong> ${jobDetails.title}</p>
+            <p><strong>Customer:</strong> ${customerName}</p>
+          </div>
+          <div style="white-space: pre-wrap;">${messageBody}</div>
+        </div>
+      `
+    }).then(({ success }) => {
+      if (success) {
+        toast.success("Material order sent successfully");
+        
+        // Send a confirmation to the user as well
+        if (userEmail) {
+          sendEmail({
+            to: userEmail,
+            subject: `Material Order Sent - Job #${jobDetails.job_number}`,
+            html: `
+              <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                <h2 style="color: #333;">Material Order Sent</h2>
+                <p>You have successfully sent a material order for:</p>
+                <div style="background-color: #f5f5f5; padding: 15px; border-radius: 5px; margin: 15px 0;">
+                  <p><strong>Job #:</strong> ${jobDetails.job_number}</p>
+                  <p><strong>Title:</strong> ${jobDetails.title}</p>
+                  <p><strong>Customer:</strong> ${customerName}</p>
+                  <p><strong>Supplier:</strong> ${supplierEmail}</p>
+                </div>
+                <p>Order details:</p>
+                <div style="white-space: pre-wrap; background-color: #f9f9f9; padding: 15px; border-radius: 5px;">${messageBody}</div>
+              </div>
+            `
+          });
+        }
+      } else {
+        toast.error("Failed to send material order");
+      }
+    }).catch((error) => {
+      console.error("Error sending email:", error);
+      toast.error("Failed to send material order");
+    });
   };
   
   // Handler to view all orders
@@ -113,53 +145,103 @@ export function CustomerMaterials({
     <div className="p-4">
       <div className="mb-6">
         <h3 className="text-lg font-medium mb-4">Order Materials for {customerName}</h3>
-        <Card className="bg-slate-50">
-          <CardContent className="p-4">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
-              <div className="col-span-1 md:col-span-2 space-y-2">
-                <label className="text-sm font-medium">Select Job</label>
-                <Select value={selectedJob} onValueChange={setSelectedJob}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select a job" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {jobHistory.map(job => (
-                      <SelectItem key={job.job_id} value={job.job_id}>
-                        {job.job_number} - {job.title}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              <div className="col-span-1 md:col-span-2 flex space-x-2">
-                <Button 
-                  className="flex items-center gap-2 flex-1"
-                  onClick={handleOrderMaterials}
-                  disabled={!selectedJob}
-                >
-                  <Package2 className="h-4 w-4" />
-                  Order Materials
-                </Button>
-                
-                <Button 
-                  variant="outline" 
-                  className="flex items-center gap-2"
-                  onClick={handleViewAllOrders}
-                >
-                  <ClipboardList className="h-4 w-4" />
-                  All Orders
-                </Button>
-              </div>
+        <Card className={`bg-slate-50 ${isMinimized ? 'h-16 overflow-hidden' : ''}`}>
+          <CardHeader className="p-4 pb-0 flex flex-row justify-between items-center">
+            <CardTitle className="text-lg">New Message</CardTitle>
+            <div className="flex items-center gap-2">
+              <Button variant="ghost" size="icon" onClick={() => setIsMinimized(!isMinimized)}>
+                {isMinimized ? <Maximize className="h-4 w-4" /> : <Minimize className="h-4 w-4" />}
+              </Button>
+              <Button variant="ghost" size="icon">
+                <X className="h-4 w-4" />
+              </Button>
             </div>
-            
-            {userEmail && (
-              <div className="mt-4 text-xs text-gray-500 flex items-center">
-                <Mail className="h-3 w-3 mr-1" />
-                <span>Order details will be sent to: {userEmail}</span>
+          </CardHeader>
+          
+          {!isMinimized && (
+            <CardContent className="p-4">
+              <div className="space-y-4">
+                <div className="flex items-center border-b py-2">
+                  <span className="w-16 text-sm text-gray-500">To</span>
+                  <Input 
+                    value={supplierEmail} 
+                    onChange={e => setSupplierEmail(e.target.value)} 
+                    className="border-none shadow-none focus-visible:ring-0" 
+                    placeholder="Supplier email"
+                  />
+                </div>
+                
+                <div className="flex items-center border-b py-2">
+                  <span className="w-16 text-sm text-gray-500">Cc</span>
+                  <Input 
+                    value={ccEmail} 
+                    onChange={e => setCcEmail(e.target.value)} 
+                    className="border-none shadow-none focus-visible:ring-0" 
+                    placeholder="Cc email addresses"
+                  />
+                </div>
+                
+                <div className="flex items-center border-b py-2">
+                  <span className="w-16 text-sm text-gray-500">Subject</span>
+                  <div className="flex-1">
+                    <Select value={selectedJob} onValueChange={setSelectedJob}>
+                      <SelectTrigger className="border-none shadow-none focus:ring-0">
+                        <SelectValue placeholder="Select a job for material order" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {jobHistory.map(job => (
+                          <SelectItem key={job.job_id} value={job.job_id}>
+                            Job #{job.job_number} - {job.title}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                
+                <Textarea 
+                  value={messageBody} 
+                  onChange={e => setMessageBody(e.target.value)} 
+                  placeholder="Type your material order details here..."
+                  className="min-h-[200px] border-none shadow-none focus-visible:ring-0"
+                />
+                
+                <div className="flex justify-between items-center">
+                  <div className="flex gap-2">
+                    <Button variant="ghost" size="sm" className="text-gray-500">
+                      <Paperclip className="h-4 w-4 mr-1" />
+                      Attach
+                    </Button>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={handleViewAllOrders}
+                    >
+                      <ClipboardList className="h-4 w-4 mr-1" />
+                      All Orders
+                    </Button>
+                    <Button 
+                      size="sm"
+                      onClick={handleSendOrder}
+                      disabled={!selectedJob || !messageBody.trim()}
+                    >
+                      <Send className="h-4 w-4 mr-1" />
+                      Send Order
+                    </Button>
+                  </div>
+                </div>
+                
+                {userEmail && (
+                  <div className="mt-4 text-xs text-gray-500 flex items-center">
+                    <Mail className="h-3 w-3 mr-1" />
+                    <span>Order confirmation will be sent to: {userEmail}</span>
+                  </div>
+                )}
               </div>
-            )}
-          </CardContent>
+            </CardContent>
+          )}
         </Card>
       </div>
       
@@ -179,10 +261,10 @@ export function CustomerMaterials({
                 <Button 
                   variant="outline" 
                   className="mt-4"
-                  onClick={handleOrderMaterials}
-                  disabled={!selectedJob}
+                  onClick={() => setIsMinimized(false)}
                 >
-                  Order Materials
+                  <Mail className="h-4 w-4 mr-2" />
+                  Create Material Order
                 </Button>
               </div>
             </CardContent>
