@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 
@@ -21,14 +21,14 @@ export const CustomerSearch = ({
   setShowSearchResults
 }: CustomerSearchProps) => {
   return (
-    <div className="flex-1 relative">
+    <div className="flex-1 relative min-w-0">
       <div className="relative">
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
         <Input
           placeholder="Search customers..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="pl-10 pr-4 py-2 w-full"
+          className="pl-10 pr-4 py-2 w-full text-sm"
         />
       </div>
       

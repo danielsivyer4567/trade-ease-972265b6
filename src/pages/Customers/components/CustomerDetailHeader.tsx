@@ -16,8 +16,8 @@ export const CustomerDetailHeader = ({ customerId, customerName }: CustomerDetai
   
   return (
     <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-0 mb-6">
-      <div className="flex items-center gap-2">
-        <Button variant="outline" size="sm" onClick={() => navigate('/customers')} className="rounded-md border border-gray-300">
+      <div className="flex items-center gap-2 max-w-[70%]">
+        <Button variant="outline" size="sm" onClick={() => navigate('/customers')} className="rounded-md border border-gray-300 shrink-0">
           <ArrowLeft className="h-5 w-5" />
         </Button>
         <h1 className="text-xl sm:text-2xl font-bold truncate">{customerName}</h1>
