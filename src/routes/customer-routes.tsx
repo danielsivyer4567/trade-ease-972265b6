@@ -5,7 +5,7 @@ import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { LoadingFallback } from './loading-fallback';
 
 // Import pages
-const CustomersPage = React.lazy(() => import('@/pages/Customers'));
+const CustomersPage = React.lazy(() => import('@/pages/Customers/index'));
 const CustomerDetailPage = React.lazy(() => import('@/pages/Customers/CustomerDetail'));
 const CustomerStatementPage = React.lazy(() => import('@/pages/Customers/CustomerStatement'));
 const NewCustomerPage = React.lazy(() => import('@/pages/Customers/NewCustomer'));
