@@ -21,7 +21,20 @@ const TradeDashboard = () => {
         <p className="text-muted-foreground">Monitor construction jobs and manage activities</p>
       </header>
       
-      <DashboardStats />
+      <DashboardStats 
+        creditsBalance={25}
+        availableLeads={12}
+        purchasedLeads={8}
+        userStats={{
+          totalJobs: 45,
+          fiveStarReviews: 32,
+          overallRating: 4.8,
+          ranking: 5,
+          responseRate: 92,
+          isTopTen: true,
+          freeLeadsAvailable: 3
+        }}
+      />
       
       <Tabs defaultValue="overview" className="w-full" onValueChange={setActiveTab}>
         <TabsList className={`grid ${isMobile ? 'grid-cols-3' : 'w-[400px] grid-cols-3'}`}>

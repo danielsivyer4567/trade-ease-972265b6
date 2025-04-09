@@ -11,6 +11,7 @@ const LoadingFallback = () => (
 
 // Import pages
 const TradingPage = React.lazy(() => import('@/pages/Trading'));
+const TradeDashboardPage = React.lazy(() => import('@/pages/TradeDash'));
 
 // Export an array of route elements
 export const tradingRoutes = (
@@ -18,6 +19,11 @@ export const tradingRoutes = (
     <Route path="/trading" element={
       <Suspense fallback={<LoadingFallback />}>
         <TradingPage />
+      </Suspense>
+    } />
+    <Route path="/trade-dashboard" element={
+      <Suspense fallback={<LoadingFallback />}>
+        <TradeDashboardPage />
       </Suspense>
     } />
   </>
