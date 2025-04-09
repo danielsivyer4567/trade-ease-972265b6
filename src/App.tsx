@@ -3,8 +3,19 @@ import { Routes } from "./routes/index.tsx";
 import { Toaster } from "@/components/ui/toaster";
 import { AuthProvider } from "./contexts/AuthContext";
 import { NotificationProvider } from "./components/notifications/NotificationContextProvider";
-import { Suspense } from "react";
+import { Suspense, useEffect } from "react";
 import { TabsProvider } from "./contexts/TabsContext";
+import { initializeBackend } from "./integrations/supabase/dbInit";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+      retry: 1,
+    },
+  },
+});
 
 const LoadingFallback = () => (
   <div className="flex h-screen w-screen items-center justify-center">
@@ -12,18 +23,31 @@ const LoadingFallback = () => (
   </div>
 );
 
-function App() {
+const AppContent = () => {
+  useEffect(() => {
+    // Initialize backend connectivity
+    initializeBackend().catch(console.error);
+  }, []);
+
   return (
     <Suspense fallback={<LoadingFallback />}>
+      <Toaster />
+      <Routes />
+    </Suspense>
+  );
+};
+
+function App() {
+  return (
+    <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <TabsProvider>
           <NotificationProvider>
-            <Toaster />
-            <Routes />
+            <AppContent />
           </NotificationProvider>
         </TabsProvider>
       </AuthProvider>
-    </Suspense>
+    </QueryClientProvider>
   );
 }
 
