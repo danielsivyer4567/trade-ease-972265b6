@@ -1,7 +1,8 @@
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 
 export interface Customer {
   id: string;
@@ -22,14 +23,19 @@ export type CustomerFormValues = Omit<Customer, 'id' | 'status' | 'created_at' |
 export function useCustomers() {
   const [isLoading, setIsLoading] = useState(false);
   const [customers, setCustomers] = useState<Customer[]>([]);
-  const { toast } = useToast();
+  const [error, setError] = useState<string | null>(null);
+  const { toast: uiToast } = useToast();
 
-  const fetchCustomers = async () => {
+  const fetchCustomers = useCallback(async () => {
     setIsLoading(true);
+    setError(null);
+    
     try {
       const { data: session } = await supabase.auth.getSession();
       if (!session?.session?.user) {
-        toast({
+        const errMsg = "Authentication Error: You must be logged in to view customers";
+        setError(errMsg);
+        uiToast({
           title: "Authentication Error",
           description: "You must be logged in to view customers",
           variant: "destructive"
@@ -44,13 +50,7 @@ export function useCustomers() {
         .order('name');
 
       if (error) {
-        console.error("Error fetching customers:", error);
-        toast({
-          title: "Error",
-          description: "Failed to load customers",
-          variant: "destructive"
-        });
-        return [];
+        throw error;
       }
 
       // Map database fields to our interface format
@@ -62,26 +62,37 @@ export function useCustomers() {
       setCustomers(formattedData);
       return formattedData;
     } catch (error: any) {
+      const errMsg = error.message || "An unexpected error occurred";
+      setError(errMsg);
       console.error("Exception fetching customers:", error);
-      toast({
+      uiToast({
         title: "Error",
-        description: error.message || "An unexpected error occurred",
+        description: errMsg,
         variant: "destructive"
       });
       return [];
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [uiToast]);
+
+  // Load customers on mount
+  useEffect(() => {
+    fetchCustomers();
+  }, [fetchCustomers]);
 
   const createCustomer = async (customerData: CustomerFormValues) => {
     setIsLoading(true);
+    setError(null);
+    
     try {
       const { data: session } = await supabase.auth.getSession();
       if (!session?.session?.user) {
-        toast({
+        const errMsg = "Authentication Error: You must be logged in to create a customer";
+        setError(errMsg);
+        uiToast({
           title: "Authentication Error",
-          description: "You must be logged in to create a customer",
+          description: errMsg,
           variant: "destructive"
         });
         return { success: false, data: null };
@@ -112,19 +123,10 @@ export function useCustomers() {
         .single();
       
       if (error) {
-        console.error("Error creating customer:", error);
-        toast({
-          title: "Error",
-          description: error.message || "Failed to create customer",
-          variant: "destructive"
-        });
-        return { success: false, data: null };
+        throw error;
       }
       
-      toast({
-        title: "Success",
-        description: "Customer created successfully"
-      });
+      toast.success("Customer created successfully");
       
       // Map the returned data to match our interface, ensuring zipCode is properly set
       const formattedData = {
@@ -132,14 +134,17 @@ export function useCustomers() {
         zipCode: data.zipcode
       };
       
-      console.log("Formatted data after creation:", formattedData);
+      // Update the local customer list with the new customer
+      setCustomers(prev => [...prev, formattedData]);
       
       return { success: true, data: formattedData };
     } catch (error: any) {
+      const errMsg = error.message || "An unexpected error occurred";
+      setError(errMsg);
       console.error("Exception creating customer:", error);
-      toast({
+      uiToast({
         title: "Error",
-        description: error.message || "An unexpected error occurred",
+        description: errMsg,
         variant: "destructive"
       });
       return { success: false, data: null };
@@ -148,10 +153,130 @@ export function useCustomers() {
     }
   };
 
+  const updateCustomer = async (id: string, customerData: CustomerFormValues) => {
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      const { data: session } = await supabase.auth.getSession();
+      if (!session?.session?.user) {
+        const errMsg = "Authentication Error: You must be logged in to update a customer";
+        setError(errMsg);
+        uiToast({
+          title: "Authentication Error",
+          description: errMsg,
+          variant: "destructive"
+        });
+        return { success: false, data: null };
+      }
+      
+      // Map zipCode to zipcode for the database
+      const customerUpdate = {
+        name: customerData.name,
+        email: customerData.email,
+        phone: customerData.phone,
+        address: customerData.address,
+        city: customerData.city,
+        state: customerData.state,
+        zipcode: customerData.zipCode
+      };
+      
+      const { data, error } = await supabase
+        .from('customers')
+        .update(customerUpdate)
+        .eq('id', id)
+        .eq('user_id', session.session.user.id)
+        .select()
+        .single();
+      
+      if (error) {
+        throw error;
+      }
+      
+      toast.success("Customer updated successfully");
+      
+      // Map the returned data to match our interface
+      const formattedData = {
+        ...data,
+        zipCode: data.zipcode
+      };
+      
+      // Update the local customer list
+      setCustomers(prev => prev.map(customer => 
+        customer.id === id ? formattedData : customer
+      ));
+      
+      return { success: true, data: formattedData };
+    } catch (error: any) {
+      const errMsg = error.message || "An unexpected error occurred";
+      setError(errMsg);
+      console.error("Exception updating customer:", error);
+      uiToast({
+        title: "Error",
+        description: errMsg,
+        variant: "destructive"
+      });
+      return { success: false, data: null };
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const deleteCustomer = async (id: string) => {
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      const { data: session } = await supabase.auth.getSession();
+      if (!session?.session?.user) {
+        const errMsg = "Authentication Error: You must be logged in to delete a customer";
+        setError(errMsg);
+        uiToast({
+          title: "Authentication Error",
+          description: errMsg,
+          variant: "destructive"
+        });
+        return { success: false };
+      }
+      
+      const { error } = await supabase
+        .from('customers')
+        .delete()
+        .eq('id', id)
+        .eq('user_id', session.session.user.id);
+      
+      if (error) {
+        throw error;
+      }
+      
+      toast.success("Customer deleted successfully");
+      
+      // Update the local customer list
+      setCustomers(prev => prev.filter(customer => customer.id !== id));
+      
+      return { success: true };
+    } catch (error: any) {
+      const errMsg = error.message || "An unexpected error occurred";
+      setError(errMsg);
+      console.error("Exception deleting customer:", error);
+      uiToast({
+        title: "Error",
+        description: errMsg,
+        variant: "destructive"
+      });
+      return { success: false };
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return {
     customers,
     isLoading,
+    error,
     fetchCustomers,
-    createCustomer
+    createCustomer,
+    updateCustomer,
+    deleteCustomer
   };
 }

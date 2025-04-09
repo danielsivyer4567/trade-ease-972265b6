@@ -1,50 +1,32 @@
 
 project_id = "wxwbxupdisbofesaygqj"
 
-[functions.validate-ghl-number]
-verify_jwt = false
+[api]
+enabled = true
+port = 54321
+schemas = ["public", "storage", "graphql_public"]
 
-[functions.validate-integration]
-verify_jwt = false
+[db]
+port = 54322
 
-[functions.generate-with-openai]
-verify_jwt = false
+[studio]
+enabled = true
+port = 54323
 
-[functions.notify-team-leader]
-verify_jwt = false
+[inbucket]
+enabled = true
+port = 54324
 
-[functions.cybersource-payment]
-verify_jwt = false
+[auth]
+enabled = true
+port = 54325
 
-[functions.gcp-vision-analyze]
-verify_jwt = false
+[storage]
+enabled = true
+port = 54326
 
-[functions.web-enquiry-submit]
-verify_jwt = false
+[functions]
+enabled = true
 
-[functions.organization-invite]
+[functions.create-tables]
 verify_jwt = true
-
-[functions.hello-world]
-verify_jwt = false
-
-[functions.generate-demo-data]
-verify_jwt = false
-
-[functions.brevo-email-sender]
-verify_jwt = false
-
-[functions.mailgun-email-sender]
-verify_jwt = false
-
-[functions.twilio-order-number]
-verify_jwt = false
-
-[functions.twilio-available-numbers]
-verify_jwt = false
-
-[functions.admin-manage-numbers]
-verify_jwt = false
-
-[functions.voice-to-text]
-verify_jwt = false
