@@ -31,16 +31,17 @@ export function CustomerMaterials({
   const { openInTab } = useTabNavigation();
   const [selectedJob, setSelectedJob] = useState<string>("");
   const [recentOrders, setRecentOrders] = useState<any[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
   
   // Handler to navigate to the material ordering page for a job
   const handleOrderMaterials = () => {
     if (selectedJob) {
-      openInTab(
-        `/jobs/${selectedJob}/materials`, 
-        `Materials for Job ${selectedJob.substring(0, 4)}`,
-        `job-${selectedJob}-materials`
-      );
+      // Use a safer approach to prevent infinite navigation loops
+      const tabId = `job-${selectedJob}-materials`;
+      const path = `/jobs/${selectedJob}/materials`;
+      const title = `Materials for Job ${selectedJob.substring(0, 4)}`;
+      
+      // Only open a tab if there's actually a selected job
+      openInTab(path, title, tabId);
     } else {
       toast.error("Please select a job first");
     }

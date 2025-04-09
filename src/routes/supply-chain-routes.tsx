@@ -8,8 +8,9 @@ import { LoadingFallback } from './loading-fallback';
 const SuppliersPage = React.lazy(() => import('@/pages/Suppliers'));
 const InventoryPage = React.lazy(() => import('@/pages/Inventory'));
 const PurchaseOrdersPage = React.lazy(() => import('@/pages/PurchaseOrders'));
-// Fixed import path for MaterialOrdering
 const MaterialOrderingPage = React.lazy(() => import('@/pages/MaterialOrdering'));
+// Import job material ordering
+const JobMaterialOrderingPage = React.lazy(() => import('@/pages/Jobs/JobMaterialOrdering'));
 
 // Export routes as JSX elements
 export const supplyChainRoutes = (
@@ -36,6 +37,12 @@ export const supplyChainRoutes = (
       <Route path="/material-ordering" element={
         <Suspense fallback={<LoadingFallback />}>
           <MaterialOrderingPage />
+        </Suspense>
+      } />
+      
+      <Route path="/jobs/:jobId/materials" element={
+        <Suspense fallback={<LoadingFallback />}>
+          <JobMaterialOrderingPage />
         </Suspense>
       } />
     </Route>
