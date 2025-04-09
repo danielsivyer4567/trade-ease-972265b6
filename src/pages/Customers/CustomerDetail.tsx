@@ -116,8 +116,8 @@ export default function CustomerDetail() {
   return (
     <AppLayout>
       <div className="flex flex-col h-full w-full">
-        <div className="bg-white border-b p-4 shadow-sm fixed top-16 left-0 right-0 z-10">
-          <div className="flex flex-col sm:flex-row gap-4 max-w-5xl mx-auto">
+        <div className="bg-white border-b p-3 sm:p-4 shadow-sm fixed top-16 left-0 right-0 z-10">
+          <div className="flex flex-col sm:flex-row gap-3 max-w-5xl mx-auto">
             <CustomerSearch 
               searchQuery={searchQuery}
               setSearchQuery={setSearchQuery}
@@ -134,7 +134,7 @@ export default function CustomerDetail() {
           </div>
         </div>
         
-        <div className="flex-1 overflow-y-auto pt-24 p-6 bg-slate-50">
+        <div className="flex-1 overflow-y-auto pt-24 sm:pt-28 p-3 sm:p-6 bg-slate-50">
           <div className="max-w-5xl mx-auto">
             <CustomerDetailHeader 
               customerId={customer.id} 
