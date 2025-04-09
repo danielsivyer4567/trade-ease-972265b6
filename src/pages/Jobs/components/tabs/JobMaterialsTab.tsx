@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -6,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Package2, Plus, Search, Truck, ArrowDown } from "lucide-react";
+import { Package2, Plus, Search, Truck } from "lucide-react";
 import { toast } from "sonner";
 import type { Job } from '@/types/job';
 import { ImportPriceListItems } from '@/components/materials/ImportPriceListItems';
@@ -21,7 +20,6 @@ export function JobMaterialsTab({ job }: JobMaterialsTabProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [orderItems, setOrderItems] = useState<Array<{id: string, name: string, quantity: number, price: number}>>([]);
   
-  // Dummy materials data - in a real app this would come from your API
   const materials = [
     { id: "m1", name: "Copper Pipe (1m)", category: "Plumbing", price: 8.50 },
     { id: "m2", name: "PVC Pipe (1m)", category: "Plumbing", price: 3.25 },
@@ -51,16 +49,13 @@ export function JobMaterialsTab({ job }: JobMaterialsTabProps) {
       return;
     }
     
-    // Check if the item is already in the order
     const existingItemIndex = orderItems.findIndex(item => item.id === selectedMaterial);
     
     if (existingItemIndex >= 0) {
-      // Update the existing item quantity
       const updatedItems = [...orderItems];
       updatedItems[existingItemIndex].quantity += quantityNum;
       setOrderItems(updatedItems);
     } else {
-      // Add a new item to the order
       setOrderItems([
         ...orderItems,
         {
@@ -74,7 +69,6 @@ export function JobMaterialsTab({ job }: JobMaterialsTabProps) {
     
     toast.success(`Added ${quantity} x ${selectedMaterialItem.name} to order`);
     
-    // Reset selection
     setSelectedMaterial("");
     setQuantity("1");
   };
@@ -86,7 +80,6 @@ export function JobMaterialsTab({ job }: JobMaterialsTabProps) {
   
   const handleImportItems = (items: Array<{name: string, quantity: string, unit: string}>) => {
     const newItems = items.map((item, index) => {
-      // Find if there's a similar item in the materials array to get a price
       const similarItem = materials.find(m => 
         m.name.toLowerCase().includes(item.name.toLowerCase()) || 
         item.name.toLowerCase().includes(m.name.toLowerCase())
@@ -103,7 +96,7 @@ export function JobMaterialsTab({ job }: JobMaterialsTabProps) {
     });
     
     setOrderItems([...orderItems, ...newItems]);
-    toast.success(`Imported ${newItems.length} items from price list`);
+    toast.success(`Imported ${newItems.length} items from file`);
   };
   
   const handlePlaceOrder = () => {
@@ -112,12 +105,10 @@ export function JobMaterialsTab({ job }: JobMaterialsTabProps) {
       return;
     }
     
-    // In a real app, you would send this order to your backend
     console.log("Placing order for job", job.id, orderItems);
     
     toast.success("Order placed successfully!");
     
-    // Clear the order after submission
     setOrderItems([]);
   };
   
