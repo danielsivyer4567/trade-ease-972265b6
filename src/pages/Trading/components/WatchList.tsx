@@ -1,118 +1,59 @@
 
-import React, { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import React from 'react';
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Plus } from "lucide-react";
-import { toast } from "sonner";
+import { Star, Plus, ArrowUp, ArrowDown } from "lucide-react";
 
-// Sample job monitoring data - will be replaced with real database data later
-const initialJobs = [
-  { jobId: 'JOB-2023-001', description: 'Kitchen Renovation', status: 'In Progress', nextAction: 'Material Delivery', dueDate: '2024-04-15', priority: 'High' },
-  { jobId: 'JOB-2023-002', description: 'Bathroom Remodel', status: 'Scheduled', nextAction: 'Initial Consultation', dueDate: '2024-04-18', priority: 'Medium' },
-  { jobId: 'JOB-2023-003', description: 'Deck Construction', status: 'Quote Sent', nextAction: 'Follow-up Call', dueDate: '2024-04-12', priority: 'Low' },
-  { jobId: 'JOB-2023-004', description: 'Basement Finishing', status: 'In Progress', nextAction: 'Drywall Installation', dueDate: '2024-04-20', priority: 'High' },
-  { jobId: 'JOB-2023-005', description: 'Fence Installation', status: 'Scheduled', nextAction: 'Material Order', dueDate: '2024-04-25', priority: 'Medium' },
-];
+export function WatchList() {
+  const [watchlist, setWatchlist] = React.useState([
+    { symbol: 'AAPL', name: 'Apple Inc.', price: 182.63, change: 2.45, changePercent: 1.35 },
+    { symbol: 'MSFT', name: 'Microsoft', price: 337.22, change: -4.18, changePercent: -1.22 },
+    { symbol: 'GOOGL', name: 'Alphabet Inc.', price: 134.17, change: 1.25, changePercent: 0.94 },
+    { symbol: 'AMZN', name: 'Amazon.com', price: 130.37, change: -2.12, changePercent: -1.62 }
+  ]);
 
-const WatchList = () => {
-  const [monitoredJobs, setMonitoredJobs] = useState(initialJobs);
-  const [newJobId, setNewJobId] = useState('');
-  
-  const handleAddJob = () => {
-    if (!newJobId) return;
-    
-    // In a real app, we would validate the job ID and fetch its data
-    // For now, let's just add a dummy entry
-    const mockNewJob = {
-      jobId: newJobId,
-      description: `New Job ${newJobId}`,
-      status: 'Pending',
-      nextAction: 'Initial Assessment',
-      dueDate: '2024-04-30',
-      priority: 'Medium'
-    };
-    
-    setMonitoredJobs([...monitoredJobs, mockNewJob]);
-    setNewJobId('');
-    toast.success(`Added job ${newJobId} to monitoring list`);
-  };
-  
-  const handleRemoveJob = (jobId) => {
-    setMonitoredJobs(monitoredJobs.filter(item => item.jobId !== jobId));
-    toast.success(`Removed job ${jobId} from monitoring list`);
-  };
-  
   return (
-    <Card className="border shadow-sm">
-      <CardHeader className="pb-2">
-        <div className="flex justify-between items-center">
-          <div>
-            <CardTitle>Job Monitoring</CardTitle>
-            <CardDescription>Track important jobs and their status</CardDescription>
-          </div>
-          <div className="flex space-x-2">
-            <Input 
-              value={newJobId} 
-              onChange={(e) => setNewJobId(e.target.value)} 
-              placeholder="Add job ID..." 
-              className="w-24 md:w-32"
-            />
-            <Button size="sm" onClick={handleAddJob}>
-              <Plus className="h-4 w-4 mr-1" />
-              <span>Add</span>
-            </Button>
-          </div>
-        </div>
+    <Card className="h-full">
+      <CardHeader className="pb-3 flex flex-row items-center justify-between">
+        <CardTitle className="text-xl flex items-center gap-2">
+          <Star className="h-5 w-5 text-yellow-400" />
+          Watchlist
+        </CardTitle>
+        <Button variant="ghost" size="icon" className="h-8 w-8">
+          <Plus className="h-4 w-4" />
+        </Button>
       </CardHeader>
-      <CardContent>
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b">
-                <th className="text-left py-2 font-medium">Job ID</th>
-                <th className="text-left py-2 font-medium">Description</th>
-                <th className="text-left py-2 font-medium">Status</th>
-                <th className="text-left py-2 font-medium">Next Action</th>
-                <th className="text-left py-2 font-medium">Due Date</th>
-                <th className="text-right py-2 font-medium"></th>
-              </tr>
-            </thead>
-            <tbody>
-              {monitoredJobs.map((job) => (
-                <tr key={job.jobId} className="border-b">
-                  <td className="py-3 font-medium">{job.jobId}</td>
-                  <td className="py-3">{job.description}</td>
-                  <td className="py-3">
-                    <span className={`px-2 py-1 rounded-full text-xs ${
-                      job.status === 'In Progress' ? 'bg-blue-100 text-blue-800' : 
-                      job.status === 'Scheduled' ? 'bg-yellow-100 text-yellow-800' :
-                      job.status === 'Quote Sent' ? 'bg-purple-100 text-purple-800' :
-                      'bg-gray-100 text-gray-800'
-                    }`}>
-                      {job.status}
-                    </span>
-                  </td>
-                  <td className="py-3">{job.nextAction}</td>
-                  <td className="py-3">{job.dueDate}</td>
-                  <td className="py-3 text-right">
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      className="h-7 px-2"
-                      onClick={() => handleRemoveJob(job.jobId)}
-                    >
-                      Remove
-                    </Button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+      <CardContent className="px-0">
+        <div className="px-4 pb-2 text-sm text-muted-foreground flex justify-between border-b">
+          <span>Symbol</span>
+          <span>Price</span>
+        </div>
+        <div className="divide-y">
+          {watchlist.map((stock) => (
+            <div key={stock.symbol} className="px-4 py-3 flex justify-between items-center">
+              <div>
+                <div className="font-medium">{stock.symbol}</div>
+                <div className="text-xs text-muted-foreground">{stock.name}</div>
+              </div>
+              <div className="text-right">
+                <div className="font-medium">${stock.price.toFixed(2)}</div>
+                <div className={`text-xs flex items-center gap-1 ${
+                  stock.change > 0 ? 'text-green-500' : 'text-red-500'
+                }`}>
+                  {stock.change > 0 ? 
+                    <ArrowUp className="h-3 w-3" /> : 
+                    <ArrowDown className="h-3 w-3" />
+                  }
+                  {stock.change > 0 ? '+' : ''}{stock.change.toFixed(2)} ({stock.changePercent > 0 ? '+' : ''}{stock.changePercent.toFixed(2)}%)
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+        <div className="px-4 pt-4">
+          <Button className="w-full text-sm" size="sm">View All</Button>
         </div>
       </CardContent>
     </Card>
   );
-};
-
-export default WatchList;
+}

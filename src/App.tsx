@@ -5,7 +5,7 @@ import { AuthProvider } from "./contexts/AuthContext";
 import { NotificationProvider } from "./components/notifications/NotificationContextProvider";
 import { Suspense, useEffect } from "react";
 import { TabsProvider } from "./contexts/TabsContext";
-import { initializeBackend } from "./integrations/supabase/dbInit";
+import { initializeTables } from "./integrations/supabase/dbInit";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 const queryClient = new QueryClient({
@@ -25,8 +25,8 @@ const LoadingFallback = () => (
 
 const AppContent = () => {
   useEffect(() => {
-    // Initialize backend connectivity
-    initializeBackend().catch(console.error);
+    // Initialize database tables
+    initializeTables().catch(console.error);
   }, []);
 
   return (

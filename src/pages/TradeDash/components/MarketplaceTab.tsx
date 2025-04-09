@@ -1,135 +1,56 @@
-import React, { useState } from "react";
-import { LeadCard } from "./LeadCard";
-import { LeadFilters } from "./LeadFilters";
-import { GlassCard } from "@/components/ui/GlassCard";
-import { SectionHeader } from "@/components/ui/SectionHeader";
-import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Search } from "lucide-react";
 
-interface Lead {
-  id: number;
-  title: string;
-  description: string;
-  postcode: string;
-  suburb: string;
-  size: number;
-  budget: string;
-  date: string;
-  status: string;
-  customerName: string;
-  contactTime: string;
-  isResold?: boolean;
-  isFromContractor?: boolean;
-}
+import React from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
-interface MarketplaceTabProps {
-  leads: Lead[];
-  freeLeads: number;
-  filters: {
-    postcode: string;
-    minSize: string;
-    maxBudget: string;
-    leadType: string;
-    tradeType: string;
-  };
-  savedFilters: Array<{
-    name: string;
-    active: boolean;
-  }>;
-  onFilterChange: (field: string, value: string) => void;
-  onSavedFilterToggle: (index: number) => void;
-  onClaimFreeLead: (leadId: number) => void;
-  onBuyLead: (leadId: number) => void;
-}
-
-export const MarketplaceTab: React.FC<MarketplaceTabProps> = ({
-  leads,
-  freeLeads,
-  filters,
-  savedFilters,
-  onFilterChange,
-  onSavedFilterToggle,
-  onClaimFreeLead,
-  onBuyLead
-}) => {
-  const [searchTerm, setSearchTerm] = useState("");
-  const availableLeads = leads.filter(lead => lead.status === "available");
-  
-  const filteredLeads = availableLeads.filter(lead => {
-    if (searchTerm && 
-        !lead.title.toLowerCase().includes(searchTerm.toLowerCase()) && 
-        !lead.description.toLowerCase().includes(searchTerm.toLowerCase()) &&
-        !lead.suburb.toLowerCase().includes(searchTerm.toLowerCase()) &&
-        !lead.postcode.includes(searchTerm)) {
-      return false;
-    }
-    
-    if (filters.postcode && lead.postcode !== filters.postcode) {
-      return false;
-    }
-    
-    if (filters.minSize && lead.size < parseInt(filters.minSize)) {
-      return false;
-    }
-    
-    return true;
-  });
+export function MarketplaceTab() {
+  const opportunities = [
+    { id: 1, symbol: 'AMD', price: 115.70, change: 2.35, volume: '12.5M', recommendation: 'Buy' },
+    { id: 2, symbol: 'NVDA', price: 625.30, change: 4.75, volume: '25.8M', recommendation: 'Strong Buy' },
+    { id: 3, symbol: 'INTC', price: 31.25, change: -0.85, volume: '8.1M', recommendation: 'Hold' },
+    { id: 4, symbol: 'META', price: 326.80, change: 1.25, volume: '15.2M', recommendation: 'Buy' },
+    { id: 5, symbol: 'UBER', price: 67.40, change: -1.50, volume: '9.8M', recommendation: 'Hold' },
+  ];
 
   return (
-    <div className="space-y-6">
-      <Card className="border-none shadow-none bg-transparent">
-        <CardContent className="p-0">
-          <div className="flex flex-col gap-6">
-            <div className="relative">
-              <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-500" />
-              <Input
-                placeholder="Search leads by title, description, suburb or postcode..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-9"
-              />
-            </div>
-            
-            <LeadFilters 
-              filters={filters} 
-              savedFilters={savedFilters} 
-              onFilterChange={onFilterChange} 
-              onSavedFilterToggle={onSavedFilterToggle} 
-            />
-          </div>
-        </CardContent>
-      </Card>
-      
-      <div className="flex items-center justify-between">
-        <SectionHeader title="Available Leads" />
-        <span className="text-sm text-gray-500">
-          {filteredLeads.length} leads found
-        </span>
-      </div>
-      
-      {filteredLeads.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredLeads.map(lead => (
-            <LeadCard 
-              key={lead.id} 
-              lead={lead} 
-              freeLeads={freeLeads} 
-              onClaimFreeLead={onClaimFreeLead} 
-              onBuyLead={onBuyLead} 
-            />
-          ))}
-        </div>
-      ) : (
-        <Card className="bg-gray-50">
-          <CardContent className="flex flex-col items-center justify-center py-12">
-            <p className="text-gray-600 font-medium">No leads match your current filters</p>
-            <p className="text-sm text-gray-500 mt-1">
-              Try adjusting your filters or check back later for new leads
-            </p>
-          </CardContent>
-        </Card>
-      )}
-    </div>
+    <Card>
+      <CardHeader>
+        <CardTitle>Market Opportunities</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Symbol</TableHead>
+              <TableHead className="text-right">Price</TableHead>
+              <TableHead className="text-right">24h Change</TableHead>
+              <TableHead className="text-right">Volume</TableHead>
+              <TableHead>Recommendation</TableHead>
+              <TableHead></TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {opportunities.map(opportunity => (
+              <TableRow key={opportunity.id}>
+                <TableCell className="font-medium">{opportunity.symbol}</TableCell>
+                <TableCell className="text-right">${opportunity.price.toFixed(2)}</TableCell>
+                <TableCell className={`text-right ${opportunity.change >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                  {opportunity.change >= 0 ? '+' : ''}{opportunity.change.toFixed(2)}%
+                </TableCell>
+                <TableCell className="text-right">{opportunity.volume}</TableCell>
+                <TableCell>{opportunity.recommendation}</TableCell>
+                <TableCell>
+                  <div className="flex gap-2">
+                    <Button size="sm">Buy</Button>
+                    <Button size="sm" variant="outline">Details</Button>
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </CardContent>
+    </Card>
   );
-};
+}

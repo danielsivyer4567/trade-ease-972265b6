@@ -1,83 +1,94 @@
 
 import React from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { useIsMobile } from '@/hooks/use-mobile';
 
-// Sample data - will be replaced with real API data later
-const tradeActivityData = [
-  { name: 'Jan', completed: 12, scheduled: 15, pending: 5 },
-  { name: 'Feb', completed: 15, scheduled: 18, pending: 6 },
-  { name: 'Mar', completed: 18, scheduled: 20, pending: 4 },
-  { name: 'Apr', completed: 14, scheduled: 16, pending: 8 },
-  { name: 'May', completed: 21, scheduled: 24, pending: 3 },
-  { name: 'Jun', completed: 25, scheduled: 27, pending: 2 },
-  { name: 'Jul', completed: 20, scheduled: 22, pending: 5 },
-  { name: 'Aug', completed: 23, scheduled: 25, pending: 4 },
-];
-
-const tradeSummary = [
-  { name: 'Completed Jobs', value: '125', change: '+8.6%', color: 'text-green-500' },
-  { name: 'Active Jobs', value: '48', change: '+9.5%', color: 'text-green-500' },
-  { name: 'Quotes Sent', value: '68', change: '+6.3%', color: 'text-green-500' },
-  { name: 'Pending Reviews', value: '12', change: '-2.3%', color: 'text-red-500' },
-  { name: 'Client Inquiries', value: '37', change: '+8.2%', color: 'text-green-500' },
-  { name: 'Revenue', value: '$48,250', change: '+2.1%', color: 'text-green-500' },
-];
-
-const MarketOverview = () => {
-  const isMobile = useIsMobile();
+export function MarketOverview() {
+  // Mock data for the chart
+  const dailyData = [
+    { time: '9:30', value: 14000 },
+    { time: '10:30', value: 14120 },
+    { time: '11:30', value: 14350 },
+    { time: '12:30', value: 14280 },
+    { time: '13:30', value: 14400 },
+    { time: '14:30', value: 14380 },
+    { time: '15:30', value: 14500 },
+    { time: '16:00', value: 14620 },
+  ];
   
+  const weeklyData = [
+    { time: 'Mon', value: 14000 },
+    { time: 'Tue', value: 14200 },
+    { time: 'Wed', value: 14150 },
+    { time: 'Thu', value: 14380 },
+    { time: 'Fri', value: 14620 },
+  ];
+  
+  const monthlyData = [
+    { time: 'Jan', value: 13200 },
+    { time: 'Feb', value: 13800 },
+    { time: 'Mar', value: 14100 },
+    { time: 'Apr', value: 14000 },
+    { time: 'May', value: 14300 },
+    { time: 'Jun', value: 14620 },
+  ];
+
   return (
-    <div className="space-y-4">
-      <Card className="border shadow-sm">
-        <CardHeader className="pb-2">
-          <CardTitle>Trade Performance Summary</CardTitle>
-          <CardDescription>Overview of job metrics for this quarter</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-            {tradeSummary.map((item) => (
-              <div key={item.name} className="flex flex-col">
-                <span className="text-sm font-medium text-muted-foreground">{item.name}</span>
-                <span className="text-xl font-bold">{item.value}</span>
-                <span className={`text-sm font-medium ${item.color}`}>{item.change}</span>
-              </div>
-            ))}
+    <Card>
+      <CardHeader className="pb-2">
+        <CardTitle className="text-xl">Market Overview</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <Tabs defaultValue="daily">
+          <div className="flex items-center justify-between mb-4">
+            <TabsList>
+              <TabsTrigger value="daily">Daily</TabsTrigger>
+              <TabsTrigger value="weekly">Weekly</TabsTrigger>
+              <TabsTrigger value="monthly">Monthly</TabsTrigger>
+            </TabsList>
+            <div className="text-xl font-bold text-green-500">
+              S&P 500: 4,623.22 (+0.83%)
+            </div>
           </div>
-        </CardContent>
-      </Card>
-      
-      <Card className="border shadow-sm">
-        <CardHeader className="pb-2">
-          <CardTitle>Trade Activity Trends</CardTitle>
-          <CardDescription>Monthly job completion performance</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="h-[300px] w-full">
+          
+          <TabsContent value="daily" className="h-[300px]">
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart
-                data={tradeActivityData}
-                margin={{ top: 5, right: 20, left: 20, bottom: 5 }}
-              >
-                <CartesianGrid strokeDasharray="3 3" stroke="#444" opacity={0.1} />
-                <XAxis dataKey="name" tick={{ fontSize: 12 }} />
-                <YAxis tick={{ fontSize: 12 }} width={isMobile ? 30 : 40} />
-                <Tooltip 
-                  contentStyle={{ backgroundColor: "rgba(0, 0, 0, 0.8)", border: "none" }} 
-                  itemStyle={{ color: "#fff" }}
-                  labelStyle={{ color: "#fff" }}
-                />
-                <Line type="monotone" dataKey="completed" stroke="#4ade80" strokeWidth={2} dot={false} />
-                <Line type="monotone" dataKey="scheduled" stroke="#3b82f6" strokeWidth={2} dot={false} />
-                <Line type="monotone" dataKey="pending" stroke="#f97316" strokeWidth={2} dot={false} />
+              <LineChart data={dailyData}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                <XAxis dataKey="time" />
+                <YAxis domain={['dataMin - 200', 'dataMax + 200']} />
+                <Tooltip formatter={(value) => [`$${value}`, 'Index Value']} />
+                <Line type="monotone" dataKey="value" stroke="#3b82f6" strokeWidth={2} dot={false} />
               </LineChart>
             </ResponsiveContainer>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
+          </TabsContent>
+          
+          <TabsContent value="weekly" className="h-[300px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={weeklyData}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                <XAxis dataKey="time" />
+                <YAxis domain={['dataMin - 200', 'dataMax + 200']} />
+                <Tooltip formatter={(value) => [`$${value}`, 'Index Value']} />
+                <Line type="monotone" dataKey="value" stroke="#3b82f6" strokeWidth={2} dot={false} />
+              </LineChart>
+            </ResponsiveContainer>
+          </TabsContent>
+          
+          <TabsContent value="monthly" className="h-[300px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={monthlyData}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                <XAxis dataKey="time" />
+                <YAxis domain={['dataMin - 200', 'dataMax + 200']} />
+                <Tooltip formatter={(value) => [`$${value}`, 'Index Value']} />
+                <Line type="monotone" dataKey="value" stroke="#3b82f6" strokeWidth={2} dot={false} />
+              </LineChart>
+            </ResponsiveContainer>
+          </TabsContent>
+        </Tabs>
+      </CardContent>
+    </Card>
   );
-};
-
-export default MarketOverview;
+}
