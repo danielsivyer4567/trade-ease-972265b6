@@ -4,6 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { FileText, Clipboard } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 interface CustomerJobsQuotesProps {
   jobHistory: Array<{
@@ -27,13 +28,23 @@ export function CustomerJobsQuotes({
   onCreateQuote,
   customerId 
 }: CustomerJobsQuotesProps) {
+  const navigate = useNavigate();
+
+  const handleJobClick = (jobId: string) => {
+    navigate(`/jobs/${jobId}`);
+  };
+
   return (
     <div className="p-4">
       <h3 className="font-medium mb-3">Jobs & Quotes History</h3>
       {jobHistory.length > 0 ? (
         <div className="space-y-3">
           {jobHistory.map(job => (
-            <Card key={job.job_id} className="bg-slate-50">
+            <Card 
+              key={job.job_id} 
+              className="bg-slate-50 hover:bg-slate-100 transition-colors cursor-pointer"
+              onClick={() => handleJobClick(job.job_id)}
+            >
               <CardContent className="p-3">
                 <div className="flex items-center justify-between">
                   <div>
