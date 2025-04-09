@@ -4,7 +4,27 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { LeadCreditsCard } from "@/pages/TradeDash/components/LeadCreditsCard";
 import { ArrowDown, ArrowUp, Percent, DollarSign } from 'lucide-react';
 
-export const DashboardStats = () => {
+interface DashboardStatsProps {
+  creditsBalance: number;
+  userStats?: {
+    totalJobs: number;
+    fiveStarReviews: number;
+    overallRating: number;
+    ranking: number;
+    responseRate: number;
+    isTopTen: boolean;
+    freeLeadsAvailable: number;
+  };
+  availableLeads?: number;
+  purchasedLeads?: number;
+}
+
+export const DashboardStats: React.FC<DashboardStatsProps> = ({ 
+  creditsBalance, 
+  userStats,
+  availableLeads,
+  purchasedLeads
+}) => {
   // Mock data - in a real app this would come from an API
   const stats = [
     { 
@@ -47,7 +67,7 @@ export const DashboardStats = () => {
           </CardContent>
         </Card>
       ))}
-      <LeadCreditsCard creditsBalance={250} usedLeadsThisWeek={3} />
+      <LeadCreditsCard creditsBalance={creditsBalance} usedLeadsThisWeek={3} />
     </div>
   );
 };
