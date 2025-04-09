@@ -45,6 +45,12 @@ export const supplyChainRoutes = (
           <JobMaterialOrderingPage />
         </Suspense>
       } />
+      
+      <Route path="/jobs/new/materials" element={
+        <Suspense fallback={<LoadingFallback />}>
+          <JobMaterialOrderingPage />
+        </Suspense>
+      } />
     </Route>
   </>
 );
