@@ -11,6 +11,7 @@ import { useCustomerDetail } from './hooks/useCustomerDetail';
 import { CustomerDetailHeader } from './components/CustomerDetailHeader';
 import { CustomerSearch } from './components/CustomerSearch';
 import { CustomerSaveActions } from './components/CustomerSaveActions';
+import { AlertTriangle } from "lucide-react";
 
 export default function CustomerDetail() {
   const { id } = useParams<{ id: string }>();
@@ -28,6 +29,7 @@ export default function CustomerDetail() {
     notes, 
     jobHistory, 
     isLoadingData, 
+    error,
     handleAddNote 
   } = useCustomerDetail(id);
 
@@ -81,6 +83,14 @@ export default function CustomerDetail() {
     navigate('/customers');
   };
 
+  const handleRetry = () => {
+    if (id) {
+      window.location.reload();
+    } else {
+      navigate('/customers');
+    }
+  };
+
   // Handle opening customer in new tab
   useEffect(() => {
     if (customer && !isLoadingData && id) {
@@ -100,11 +110,33 @@ export default function CustomerDetail() {
       </AppLayout>;
   }
 
+  if (error) {
+    return <AppLayout>
+        <div className="p-6">
+          <div className="max-w-md mx-auto text-center bg-white rounded-lg shadow-md p-6 mt-10">
+            <AlertTriangle className="h-12 w-12 text-amber-500 mx-auto mb-4" />
+            <h1 className="text-xl font-bold mb-4">Customer Load Error</h1>
+            <p className="text-gray-600 mb-6">{error}</p>
+            <div className="flex gap-4 justify-center">
+              <Button onClick={handleRetry} variant="default">
+                Retry
+              </Button>
+              <Button onClick={() => navigate('/customers')} variant="outline">
+                Back to Customers
+              </Button>
+            </div>
+          </div>
+        </div>
+      </AppLayout>;
+  }
+
   if (!customer) {
     return <AppLayout>
         <div className="p-6">
-          <div className="text-center">
+          <div className="max-w-md mx-auto text-center bg-white rounded-lg shadow-md p-6 mt-10">
+            <AlertTriangle className="h-12 w-12 text-amber-500 mx-auto mb-4" />
             <h1 className="text-xl font-bold mb-4">Customer not found</h1>
+            <p className="text-gray-600 mb-6">The customer you're looking for couldn't be found or may have been deleted.</p>
             <Button onClick={() => navigate('/customers')}>
               Back to Customers
             </Button>
