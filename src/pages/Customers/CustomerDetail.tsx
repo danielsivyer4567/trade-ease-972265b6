@@ -11,7 +11,7 @@ import { CustomerNote, CustomerJobHistory } from '@/pages/Banking/types';
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { useTabs } from '@/contexts/TabsContext';
-import { useOpenInTab } from '@/pages/Jobs/hooks/useOpenInTab';
+import { useTabNavigation } from '@/hooks/useTabNavigation';
 
 export default function CustomerDetail() {
   const { id } = useParams<{ id: string }>();
@@ -28,7 +28,7 @@ export default function CustomerDetail() {
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   
   const { addTab } = useTabs();
-  const { openInTab } = useOpenInTab();
+  const { openInTab } = useTabNavigation();
 
   useEffect(() => {
     fetchCustomers();
@@ -190,9 +190,9 @@ export default function CustomerDetail() {
     navigate('/customers');
   };
 
-  // Handle opening customer in new tab if needed
+  // Handle opening customer in new tab
   useEffect(() => {
-    if (customer && !isLoadingData) {
+    if (customer && !isLoadingData && id) {
       // Only set tab information if we have a customer loaded
       openInTab(`/customers/${id}`, customer?.name || 'Customer Details', `customer-${id}`);
     }

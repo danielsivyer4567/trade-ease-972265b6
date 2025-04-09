@@ -7,10 +7,10 @@ export const useTabNavigation = () => {
   const { addTab, activateTab } = useTabs();
   const navigate = useNavigate();
 
-  const openInTab = useCallback((path: string, title: string, key: string) => {
+  const openInTab = useCallback((path: string, title: string, id: string) => {
     if (addTab) {
       addTab({
-        key,
+        id,
         title,
         path,
       });
