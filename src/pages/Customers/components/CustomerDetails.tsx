@@ -8,7 +8,8 @@ import {
   DollarSign, 
   FileCheck, 
   Star, 
-  Link as LinkIcon 
+  Link as LinkIcon,
+  Package2
 } from "lucide-react";
 import { CustomerNote, CustomerJobHistory } from "@/pages/Banking/types";
 
@@ -23,6 +24,7 @@ import { CustomerForms } from './CustomerForms';
 import { CustomerReviews } from './CustomerReviews';
 import { CustomerProgressLink } from './tabs/CustomerProgressLink';
 import { CustomerDetailsHeader } from './CustomerDetailsHeader';
+import { CustomerMaterials } from './tabs/CustomerMaterials';
 
 interface CustomerDetailsProps {
   customer: {
@@ -78,6 +80,9 @@ export function CustomerDetails({
             <TabsList className="w-full border-b rounded-none bg-white overflow-x-auto">
               <TabsTrigger value="overview">Overview</TabsTrigger>
               <TabsTrigger value="jobs">Jobs & Quotes</TabsTrigger>
+              <TabsTrigger value="materials">
+                <Package2 className="h-4 w-4 mr-1 inline" /> Materials
+              </TabsTrigger>
               <TabsTrigger value="conversations">
                 <MessageCircle className="h-4 w-4 mr-1 inline" /> Conversations
               </TabsTrigger>
@@ -116,6 +121,15 @@ export function CustomerDetails({
                 onCreateJob={onCreateJob}
                 onCreateQuote={onCreateQuote}
                 customerId={customer.id}
+              />
+            </TabsContent>
+            
+            {/* Materials Tab */}
+            <TabsContent value="materials">
+              <CustomerMaterials 
+                customerId={customer.id}
+                customerName={customer.name}
+                jobHistory={jobHistory}
               />
             </TabsContent>
             
