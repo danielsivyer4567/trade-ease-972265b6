@@ -18,6 +18,7 @@ import { settingsRoutes } from './settings-routes';
 import { expensesRoutes } from './expenses-route';
 import { supplyChainRoutes } from './supply-chain-routes';
 import { tradingRoutes } from './trading-routes';
+import { paymentRoutes } from './payment-routes';
 import { notFoundRoute } from './not-found-route';
 
 export function Routes() {
@@ -44,6 +45,7 @@ export function Routes() {
         {expensesRoutes}
         {supplyChainRoutes}
         {tradingRoutes}
+        {paymentRoutes}
         {notFoundRoute}
       </RouterRoutes>
     </Suspense>

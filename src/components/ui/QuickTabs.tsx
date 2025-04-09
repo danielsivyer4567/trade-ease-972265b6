@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -131,4 +130,4 @@ export const QuickTabs = () => {
       </div>
     </TooltipProvider>
   );
-}
+};
