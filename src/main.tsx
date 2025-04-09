@@ -4,6 +4,7 @@ import { createRoot } from 'react-dom/client';
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import App from './App.tsx';
 import './index.css';
+import ErrorBoundary from './components/error/ErrorBoundary';
 
 const rootElement = document.getElementById("root");
 if (!rootElement) {
@@ -17,8 +18,10 @@ const StrictModeWrapper = process.env.NODE_ENV === 'development'
 
 createRoot(rootElement).render(
   <StrictModeWrapper>
-    <BrowserRouter>
-      <App />
-    </BrowserRouter>
+    <ErrorBoundary>
+      <BrowserRouter>
+        <App />
+      </BrowserRouter>
+    </ErrorBoundary>
   </StrictModeWrapper>
 );

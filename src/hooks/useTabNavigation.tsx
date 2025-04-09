@@ -1,13 +1,27 @@
 
-import { useCallback } from 'react';
+import { useCallback, useRef } from 'react';
 import { useTabs } from '@/contexts/TabsContext';
 import { useNavigate } from 'react-router-dom';
+import { trackHistoryCall } from '@/utils/performanceMonitor';
 
 export const useTabNavigation = () => {
   const { addTab, activateTab, isTabOpen, tabs } = useTabs();
   const navigate = useNavigate();
+  const lastNavigationRef = useRef({ path: '', time: 0 });
 
   const openInTab = useCallback((path: string, title: string, id: string) => {
+    // Prevent duplicate navigations within a short timeframe
+    const now = Date.now();
+    if (
+      path === lastNavigationRef.current.path && 
+      now - lastNavigationRef.current.time < 500
+    ) {
+      return;
+    }
+    
+    // Update last navigation record
+    lastNavigationRef.current = { path, time: now };
+    
     // Prevent continuous reopening of the same tab
     const tabId = id || `tab-${Date.now()}`;
     
@@ -21,8 +35,8 @@ export const useTabNavigation = () => {
       }
     }
     
-    // Only add a new tab if it doesn't exist
-    if (addTab) {
+    // Only add a new tab if it doesn't exist and history API is not overloaded
+    if (addTab && trackHistoryCall()) {
       addTab({
         id: tabId,
         title,
@@ -30,7 +44,8 @@ export const useTabNavigation = () => {
       });
     } else {
       // Fallback to regular navigation if tab context is not available
-      navigate(path, { replace: true });
+      // or if we're hitting history API limits
+      navigate(path);
     }
   }, [addTab, activateTab, navigate, isTabOpen, tabs]);
 

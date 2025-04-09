@@ -1,6 +1,7 @@
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { trackHistoryCall } from '@/utils/performanceMonitor';
 
 export interface Tab {
   id: string;
@@ -25,11 +26,29 @@ export function TabsProvider({ children }: { children: React.ReactNode }) {
   const [tabs, setTabs] = useState<Tab[]>([]);
   const [activeTabId, setActiveTabId] = useState<string | null>(null);
   const [isInitialMount, setIsInitialMount] = useState(true);
+  const [navigationInProgress, setNavigationInProgress] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
 
+  // Throttle function to prevent excessive calls
+  const throttle = useCallback((callback: Function, delay: number = 300) => {
+    let timeoutId: NodeJS.Timeout | null = null;
+    return (...args: any[]) => {
+      if (timeoutId) {
+        return;
+      }
+      
+      timeoutId = setTimeout(() => {
+        callback(...args);
+        timeoutId = null;
+      }, delay);
+    };
+  }, []);
+
   // Add a new tab - memoized to prevent rerenders
   const addTab = useCallback((tab: Omit<Tab, 'id'> & { id?: string }) => {
+    if (navigationInProgress) return;
+    
     const id = tab.id || `tab-${Date.now()}`;
     const newTab = { ...tab, id };
     
@@ -44,10 +63,12 @@ export function TabsProvider({ children }: { children: React.ReactNode }) {
       setTabs(prev => [...prev, newTab]);
       setActiveTabId(newTab.id);
     }
-  }, [tabs]);
+  }, [tabs, navigationInProgress]);
 
   // Remove a tab - memoized to prevent rerenders
   const removeTab = useCallback((tabId: string) => {
+    if (navigationInProgress) return;
+    
     const tabIndex = tabs.findIndex(tab => tab.id === tabId);
     if (tabIndex === -1) return;
     
@@ -58,25 +79,52 @@ export function TabsProvider({ children }: { children: React.ReactNode }) {
       if (tabs.length > 1) {
         const newActiveTab = tabs[newActiveIndex] || tabs[tabIndex + 1];
         setActiveTabId(newActiveTab.id);
-        navigate(newActiveTab.path, { replace: true });
+        
+        if (trackHistoryCall()) {
+          setNavigationInProgress(true);
+          navigate(newActiveTab.path, { replace: true });
+        }
       } else {
         setActiveTabId(null);
-        navigate('/', { replace: true }); // Default location if no tabs left
+        
+        if (trackHistoryCall()) {
+          setNavigationInProgress(true);
+          navigate('/', { replace: true }); // Default location if no tabs left
+        }
       }
     }
     
     setTabs(prev => prev.filter(tab => tab.id !== tabId));
-  }, [tabs, activeTabId, navigate]);
+  }, [tabs, activeTabId, navigate, navigationInProgress]);
 
   // Activate a tab - memoized to prevent rerenders
   const activateTab = useCallback((tabId: string) => {
+    if (navigationInProgress) return;
+    
     const tab = tabs.find(tab => tab.id === tabId);
-    if (tab) {
+    if (tab && activeTabId !== tabId) {
       setActiveTabId(tabId);
-      // Use replace instead of push to avoid filling history
-      navigate(tab.path, { replace: true });
+      
+      // Only update history if it's safe to do so
+      if (trackHistoryCall()) {
+        setNavigationInProgress(true);
+        // Use replace instead of push to avoid filling history
+        navigate(tab.path, { replace: true });
+      }
     }
-  }, [tabs, navigate]);
+  }, [tabs, navigate, activeTabId, navigationInProgress]);
+
+  // Navigation completion handler
+  useEffect(() => {
+    if (navigationInProgress) {
+      // Reset navigation flag after a short delay
+      const timer = setTimeout(() => {
+        setNavigationInProgress(false);
+      }, 100);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [navigationInProgress, location.pathname]);
 
   // Check if a tab with a specific path is already open
   const isTabOpen = useCallback((path: string) => {
