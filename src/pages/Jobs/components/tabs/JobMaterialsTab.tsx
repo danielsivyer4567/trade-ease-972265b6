@@ -3,227 +3,222 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Package2, Search, ShoppingCart, Truck, List } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Package2, Plus, Search, Truck } from "lucide-react";
 import { toast } from "sonner";
-import type { Job } from "@/types/job";
+import type { Job } from '@/types/job';
 
 interface JobMaterialsTabProps {
   job: Job;
 }
 
 export function JobMaterialsTab({ job }: JobMaterialsTabProps) {
-  const navigate = useNavigate();
-  const [supplier, setSupplier] = useState('');
-  const [searchTerm, setSearchTerm] = useState('');
-  const [materials, setMaterials] = useState([
-    { id: 1, name: '', quantity: '', unit: 'pieces' }
-  ]);
-  const [recentOrders, setRecentOrders] = useState<any[]>([]);
+  const [selectedMaterial, setSelectedMaterial] = useState("");
+  const [quantity, setQuantity] = useState("1");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [orderItems, setOrderItems] = useState<Array<{id: string, name: string, quantity: number, price: number}>>([]);
   
-  // Add more material rows
-  const handleAddMaterial = () => {
-    setMaterials([...materials, { 
-      id: materials.length + 1, 
-      name: '', 
-      quantity: '', 
-      unit: 'pieces' 
-    }]);
-  };
+  // Dummy materials data - in a real app this would come from your API
+  const materials = [
+    { id: "m1", name: "Copper Pipe (1m)", category: "Plumbing", price: 8.50 },
+    { id: "m2", name: "PVC Pipe (1m)", category: "Plumbing", price: 3.25 },
+    { id: "m3", name: "Circuit Breaker", category: "Electrical", price: 12.99 },
+    { id: "m4", name: "Electrical Wire (5m)", category: "Electrical", price: 7.49 },
+    { id: "m5", name: "Wall Outlet", category: "Electrical", price: 4.99 },
+    { id: "m6", name: "Paint - White (1L)", category: "Painting", price: 15.99 },
+    { id: "m7", name: "Paint - Off-White (1L)", category: "Painting", price: 15.99 }
+  ];
+  
+  const filteredMaterials = materials.filter(material => 
+    material.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    material.category.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
-  // Remove a material row
-  const handleRemoveMaterial = (id: number) => {
-    if (materials.length > 1) {
-      setMaterials(materials.filter(material => material.id !== id));
-    }
-  };
-
-  // Update material values
-  const handleMaterialChange = (id: number, field: string, value: string) => {
-    setMaterials(materials.map(material => 
-      material.id === id ? { ...material, [field]: value } : material
-    ));
-  };
-
-  // Send order
-  const handleSendOrder = () => {
-    // Validation
-    if (!supplier) {
-      toast.error("Please select a supplier");
+  const selectedMaterialItem = materials.find(m => m.id === selectedMaterial);
+  
+  const handleAddToOrder = () => {
+    if (!selectedMaterial || !selectedMaterialItem) {
+      toast.error("Please select a material");
       return;
     }
     
-    if (materials.some(m => !m.name || !m.quantity)) {
-      toast.error("Please complete all material fields");
+    const quantityNum = parseInt(quantity);
+    if (isNaN(quantityNum) || quantityNum <= 0) {
+      toast.error("Please enter a valid quantity");
       return;
     }
     
-    // Simulate sending order
-    toast.success("Material order has been sent to the supplier");
+    // Check if the item is already in the order
+    const existingItemIndex = orderItems.findIndex(item => item.id === selectedMaterial);
     
-    // Reset form
-    setMaterials([{ id: 1, name: '', quantity: '', unit: 'pieces' }]);
-    setSupplier('');
+    if (existingItemIndex >= 0) {
+      // Update the existing item quantity
+      const updatedItems = [...orderItems];
+      updatedItems[existingItemIndex].quantity += quantityNum;
+      setOrderItems(updatedItems);
+    } else {
+      // Add a new item to the order
+      setOrderItems([
+        ...orderItems,
+        {
+          id: selectedMaterialItem.id,
+          name: selectedMaterialItem.name,
+          quantity: quantityNum,
+          price: selectedMaterialItem.price
+        }
+      ]);
+    }
+    
+    toast.success(`Added ${quantity} x ${selectedMaterialItem.name} to order`);
+    
+    // Reset selection
+    setSelectedMaterial("");
+    setQuantity("1");
   };
   
-  // View all orders
-  const handleViewAllOrders = () => {
-    navigate("/material-ordering");
+  const handleRemoveItem = (id: string) => {
+    setOrderItems(orderItems.filter(item => item.id !== id));
+    toast.success("Item removed from order");
   };
   
+  const handlePlaceOrder = () => {
+    if (orderItems.length === 0) {
+      toast.error("Your order is empty");
+      return;
+    }
+    
+    // In a real app, you would send this order to your backend
+    console.log("Placing order for job", job.id, orderItems);
+    
+    toast.success("Order placed successfully!");
+    
+    // Clear the order after submission
+    setOrderItems([]);
+  };
+  
+  const calculateTotal = () => {
+    return orderItems.reduce((total, item) => total + (item.price * item.quantity), 0);
+  };
+
   return (
-    <div className="p-3 sm:p-6 space-y-6">
-      <div className="flex justify-between items-center">
-        <h2 className="text-xl font-semibold">Job Materials</h2>
-        <div className="flex gap-2">
-          <Button 
-            variant="outline" 
-            size="sm"
-            onClick={handleViewAllOrders}
-            className="flex items-center gap-2"
-          >
-            <List className="h-4 w-4" />
-            All Orders
-          </Button>
-        </div>
-      </div>
-      
-      {/* Quick Order Form */}
+    <div className="p-4 space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-lg">
-            <ShoppingCart className="h-5 w-5 text-blue-500" />
-            Order Materials
+          <CardTitle className="flex items-center">
+            <Package2 className="w-5 h-5 mr-2" />
+            Order Materials for Job: {job.title}
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Supplier</label>
-                <Select value={supplier} onValueChange={setSupplier}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select supplier" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="abc_building">ABC Building Supplies</SelectItem>
-                    <SelectItem value="smiths_timber">Smith's Timber & Hardware</SelectItem>
-                    <SelectItem value="metro_electrical">Metro Electrical Wholesale</SelectItem>
-                    <SelectItem value="coastal_plumbing">Coastal Plumbing Supplies</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Search Materials</label>
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-                  <Input
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    placeholder="Search materials catalog..."
-                    className="pl-9"
-                  />
-                </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <div className="space-y-2">
+              <Label htmlFor="material-search">Search Materials</Label>
+              <div className="relative">
+                <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                <Input
+                  id="material-search"
+                  placeholder="Search by name or category"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10"
+                />
               </div>
             </div>
             
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <h3 className="text-md font-medium">Materials</h3>
+            <div className="space-y-2">
+              <Label htmlFor="material-select">Select Material</Label>
+              <Select value={selectedMaterial} onValueChange={setSelectedMaterial}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Choose a material" />
+                </SelectTrigger>
+                <SelectContent>
+                  {filteredMaterials.map(material => (
+                    <SelectItem key={material.id} value={material.id}>
+                      {material.name} - ${material.price.toFixed(2)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="quantity">Quantity</Label>
+              <div className="flex space-x-2">
+                <Input
+                  id="quantity"
+                  type="number"
+                  min="1"
+                  value={quantity}
+                  onChange={(e) => setQuantity(e.target.value)}
+                />
                 <Button 
-                  type="button" 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={handleAddMaterial}
-                  className="text-xs h-8"
+                  onClick={handleAddToOrder} 
+                  disabled={!selectedMaterial}
                 >
-                  Add Material
+                  <Plus className="w-4 h-4 mr-1" />
+                  Add
                 </Button>
               </div>
-
-              {materials.map((material, index) => (
-                <div key={material.id} className="grid grid-cols-12 gap-3 items-start">
-                  <div className="col-span-5">
-                    <Input 
-                      value={material.name} 
-                      onChange={(e) => handleMaterialChange(material.id, 'name', e.target.value)}
-                      placeholder="Material name" 
-                    />
-                  </div>
-                  <div className="col-span-2">
-                    <Input 
-                      value={material.quantity} 
-                      onChange={(e) => handleMaterialChange(material.id, 'quantity', e.target.value)}
-                      placeholder="Qty" 
-                      type="number"
-                      min="1"
-                    />
-                  </div>
-                  <div className="col-span-3">
-                    <Select 
-                      value={material.unit} 
-                      onValueChange={(value) => handleMaterialChange(material.id, 'unit', value)}
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="pieces">Pieces</SelectItem>
-                        <SelectItem value="meters">Meters</SelectItem>
-                        <SelectItem value="kg">Kilograms</SelectItem>
-                        <SelectItem value="liters">Liters</SelectItem>
-                        <SelectItem value="packs">Packs</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="col-span-2 flex justify-end">
-                    {materials.length > 1 && (
-                      <Button 
-                        type="button" 
-                        variant="outline" 
-                        size="sm" 
-                        onClick={() => handleRemoveMaterial(material.id)}
-                        className="text-xs h-8"
-                      >
-                        Remove
-                      </Button>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <div className="pt-4 flex justify-end">
-              <Button 
-                onClick={handleSendOrder} 
-                disabled={!supplier || materials.some(m => !m.name || !m.quantity)}
-                className="min-w-[150px]"
-              >
-                Send Order
-              </Button>
             </div>
           </div>
-        </CardContent>
-      </Card>
-      
-      {/* Recent Orders */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Recent Material Orders</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {recentOrders.length > 0 ? (
-            <div className="space-y-4">
-              {/* Orders would be mapped here */}
-              <p>Orders list...</p>
-            </div>
-          ) : (
-            <div className="p-12 border-2 border-dashed rounded-lg flex justify-center">
-              <p className="text-muted-foreground">No recent orders found for this job.</p>
-            </div>
-          )}
+          
+          <div className="border rounded-md p-4 space-y-4">
+            <h3 className="font-medium">Current Order</h3>
+            
+            {orderItems.length > 0 ? (
+              <div className="space-y-4">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Material</TableHead>
+                      <TableHead className="text-right">Quantity</TableHead>
+                      <TableHead className="text-right">Price</TableHead>
+                      <TableHead className="text-right">Total</TableHead>
+                      <TableHead></TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {orderItems.map(item => (
+                      <TableRow key={item.id}>
+                        <TableCell>{item.name}</TableCell>
+                        <TableCell className="text-right">{item.quantity}</TableCell>
+                        <TableCell className="text-right">${item.price.toFixed(2)}</TableCell>
+                        <TableCell className="text-right">${(item.price * item.quantity).toFixed(2)}</TableCell>
+                        <TableCell>
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            onClick={() => handleRemoveItem(item.id)}
+                            className="h-7 px-2 text-red-500 hover:text-red-700"
+                          >
+                            Remove
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+                
+                <div className="flex justify-between items-center pt-4 border-t">
+                  <div className="font-medium text-lg">
+                    Total: ${calculateTotal().toFixed(2)}
+                  </div>
+                  <Button onClick={handlePlaceOrder}>
+                    <Truck className="w-4 h-4 mr-2" />
+                    Place Order
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <div className="text-center py-6 text-gray-500">
+                <Package2 className="mx-auto h-8 w-8 text-gray-400 mb-2" />
+                <p>Your order is empty</p>
+                <p className="text-sm mt-1">Select materials and click 'Add' to build your order</p>
+              </div>
+            )}
+          </div>
         </CardContent>
       </Card>
     </div>
