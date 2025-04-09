@@ -8,6 +8,7 @@ import { useNavigate } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
+import { ImportPriceListItems } from '@/components/materials/ImportPriceListItems';
 
 export default function JobMaterialOrdering() {
   const navigate = useNavigate();
@@ -19,7 +20,7 @@ export default function JobMaterialOrdering() {
   const [isLoading, setIsLoading] = useState(false);
 
   const handleBack = () => {
-    navigate("/suppliers");
+    navigate("/material-ordering");
   };
 
   const handleAddMaterial = () => {
@@ -41,6 +42,22 @@ export default function JobMaterialOrdering() {
     setMaterials(materials.map(material => 
       material.id === id ? { ...material, [field]: value } : material
     ));
+  };
+
+  const handleImportItems = (items: Array<{name: string, quantity: string, unit: string}>) => {
+    const lastId = materials.reduce((max, item) => Math.max(max, item.id), 0);
+    
+    const newItems = items.map((item, index) => ({
+      id: lastId + index + 1,
+      name: item.name,
+      quantity: item.quantity,
+      unit: item.unit
+    }));
+    
+    // Filter out empty rows except for the first one
+    const nonEmptyMaterials = materials.filter(m => m.name || m.id === 1);
+    
+    setMaterials([...nonEmptyMaterials, ...newItems]);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -166,15 +183,18 @@ export default function JobMaterialOrdering() {
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <h3 className="text-md font-medium">Materials</h3>
-                  <Button 
-                    type="button" 
-                    variant="outline" 
-                    size="sm" 
-                    onClick={handleAddMaterial}
-                    className="text-xs h-8"
-                  >
-                    Add Material
-                  </Button>
+                  <div className="flex gap-2">
+                    <ImportPriceListItems onImportItems={handleImportItems} />
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={handleAddMaterial}
+                      className="text-xs h-8"
+                    >
+                      Add Material
+                    </Button>
+                  </div>
                 </div>
 
                 {materials.map((material, index) => (
