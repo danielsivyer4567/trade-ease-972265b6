@@ -36,7 +36,7 @@ export function PurchasedLeadsTab() {
   };
 
   const formatDate = (dateString) => {
-    const options = { month: 'short', day: 'numeric', year: 'numeric' };
+    const options = { month: "short", day: "numeric", year: "numeric" };
     return new Date(dateString).toLocaleDateString('en-US', options);
   };
 
@@ -47,52 +47,54 @@ export function PurchasedLeadsTab() {
       </CardHeader>
       <CardContent>
         {leads.length > 0 ? (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Lead</TableHead>
-                <TableHead>Service</TableHead>
-                <TableHead>Date</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {leads.map((lead) => (
-                <TableRow key={lead.id}>
-                  <TableCell>
-                    <div>
-                      <div className="font-medium">{lead.name}</div>
-                      <div className="text-sm text-muted-foreground">{lead.location}</div>
-                    </div>
-                  </TableCell>
-                  <TableCell>{lead.service}</TableCell>
-                  <TableCell>{formatDate(lead.date)}</TableCell>
-                  <TableCell>{getStatusBadge(lead.status)}</TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex justify-end gap-2">
-                      <Button variant="outline" size="sm">
-                        <Info className="h-4 w-4 mr-1" />
-                        Details
-                      </Button>
-                      {lead.status === 'pending' && (
-                        <Button variant="outline" size="sm">
-                          <Check className="h-4 w-4 mr-1" />
-                          Contact
-                        </Button>
-                      )}
-                      {lead.status === 'expired' && (
-                        <Button variant="destructive" size="sm">
-                          <X className="h-4 w-4 mr-1" />
-                          Remove
-                        </Button>
-                      )}
-                    </div>
-                  </TableCell>
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Lead</TableHead>
+                  <TableHead>Service</TableHead>
+                  <TableHead>Date</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {leads.map((lead) => (
+                  <TableRow key={lead.id}>
+                    <TableCell>
+                      <div>
+                        <div className="font-medium">{lead.name}</div>
+                        <div className="text-sm text-muted-foreground">{lead.location}</div>
+                      </div>
+                    </TableCell>
+                    <TableCell>{lead.service}</TableCell>
+                    <TableCell>{formatDate(lead.date)}</TableCell>
+                    <TableCell>{getStatusBadge(lead.status)}</TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex justify-end gap-2">
+                        <Button variant="outline" size="sm">
+                          <Info className="h-4 w-4 mr-1" />
+                          Details
+                        </Button>
+                        {lead.status === 'pending' && (
+                          <Button variant="outline" size="sm">
+                            <Check className="h-4 w-4 mr-1" />
+                            Contact
+                          </Button>
+                        )}
+                        {lead.status === 'expired' && (
+                          <Button variant="destructive" size="sm">
+                            <X className="h-4 w-4 mr-1" />
+                            Remove
+                          </Button>
+                        )}
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
         ) : (
           <div className="text-center py-8">
             <p className="text-gray-500">No purchased leads found</p>
