@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Package2, Truck, Search, ClipboardList, Mail, Paperclip, Send, X, Minimize, Maximize } from "lucide-react";
+import { Package2, Truck, Search, ClipboardList, Mail, Paperclip, Send, X, Minimize, Maximize, Users } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useTabNavigation } from '@/hooks/useTabNavigation';
 import { toast } from "sonner";
@@ -25,6 +25,16 @@ interface CustomerMaterialsProps {
   }>;
 }
 
+// Define common suppliers
+const commonSuppliers = [
+  { name: "ABC Building Supplies", email: "orders@abcbuilding.com" },
+  { name: "Smith's Timber & Hardware", email: "orders@smithstimber.com" },
+  { name: "Metro Electrical Wholesale", email: "orders@metroelectrical.com" },
+  { name: "Coastal Plumbing Supplies", email: "orders@coastalplumbing.com" },
+  { name: "BuildWell Construction Materials", email: "sales@buildwell.com" },
+  { name: "Premier Roofing Supplies", email: "orders@premierroofing.com" },
+];
+
 export function CustomerMaterials({ 
   customerId, 
   customerName,
@@ -36,7 +46,7 @@ export function CustomerMaterials({
   const [recentOrders, setRecentOrders] = useState<any[]>([]);
   const [userEmail, setUserEmail] = useState<string>("");
   const [messageBody, setMessageBody] = useState<string>("");
-  const [supplierEmail, setSupplierEmail] = useState<string>("supplier@example.com");
+  const [supplierEmail, setSupplierEmail] = useState<string>("");
   const [ccEmail, setCcEmail] = useState<string>("");
   const [bccEmail, setBccEmail] = useState<string>("");
   const [isMinimized, setIsMinimized] = useState<boolean>(false);
@@ -72,6 +82,14 @@ Thank you,
       }
     }
   }, [selectedJob, jobHistory, customerName]);
+  
+  // Handler for selecting a supplier from the dropdown
+  const handleSupplierSelect = (supplierEmail: string) => {
+    const supplier = commonSuppliers.find(s => s.email === supplierEmail);
+    if (supplier) {
+      setSupplierEmail(supplier.email);
+    }
+  };
   
   // Handler to send materials email
   const handleSendOrder = () => {
@@ -163,12 +181,29 @@ Thank you,
               <div className="space-y-4">
                 <div className="flex items-center border-b py-2">
                   <span className="w-16 text-sm text-gray-500">To</span>
-                  <Input 
-                    value={supplierEmail} 
-                    onChange={e => setSupplierEmail(e.target.value)} 
-                    className="border-none shadow-none focus-visible:ring-0" 
-                    placeholder="Supplier email"
-                  />
+                  <div className="flex-1 flex items-center gap-2">
+                    <Input 
+                      value={supplierEmail} 
+                      onChange={e => setSupplierEmail(e.target.value)} 
+                      className="border-none shadow-none focus-visible:ring-0" 
+                      placeholder="Supplier email"
+                    />
+                    <div className="min-w-[180px]">
+                      <Select onValueChange={handleSupplierSelect}>
+                        <SelectTrigger className="h-8 border-dashed border-slate-300">
+                          <Users className="h-3.5 w-3.5 mr-1.5 text-muted-foreground" />
+                          <span className="text-xs">Select supplier</span>
+                        </SelectTrigger>
+                        <SelectContent>
+                          {commonSuppliers.map((supplier) => (
+                            <SelectItem key={supplier.email} value={supplier.email}>
+                              {supplier.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
                 </div>
                 
                 <div className="flex items-center border-b py-2">
@@ -225,7 +260,7 @@ Thank you,
                     <Button 
                       size="sm"
                       onClick={handleSendOrder}
-                      disabled={!selectedJob || !messageBody.trim()}
+                      disabled={!selectedJob || !messageBody.trim() || !supplierEmail.trim()}
                     >
                       <Send className="h-4 w-4 mr-1" />
                       Send Order
