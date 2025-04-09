@@ -3,7 +3,7 @@ import { Routes } from "./routes/index.tsx";
 import { Toaster } from "@/components/ui/toaster";
 import { AuthProvider } from "./contexts/AuthContext";
 import { NotificationProvider } from "./components/notifications/NotificationContextProvider";
-import { Suspense, useEffect } from "react";
+import { Suspense } from "react";
 import { TabsProvider } from "./contexts/TabsContext";
 import { initializeTables } from "./integrations/supabase/dbInit";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -25,8 +25,8 @@ const LoadingFallback = () => (
 );
 
 const AppContent = () => {
-  useEffect(() => {
-    // Initialize database tables
+  // Initialize database tables on mount
+  React.useEffect(() => {
     initializeTables().catch(console.error);
   }, []);
 
