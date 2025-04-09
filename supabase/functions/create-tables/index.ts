@@ -30,7 +30,18 @@ serve(async (req) => {
         const { error } = await supabaseAdmin.rpc("create_demo_requests_table_if_not_exists");
         results["demo_requests"] = error ? { success: false, error: error.message } : { success: true };
       }
-      // Add more table creation cases as needed
+      else if (table === "trade_accounts") {
+        const { error } = await supabaseAdmin.rpc("create_trade_accounts_table_if_not_exists");
+        results["trade_accounts"] = error ? { success: false, error: error.message } : { success: true };
+      }
+      else if (table === "trade_watchlists") {
+        const { error } = await supabaseAdmin.rpc("create_trade_watchlists_table_if_not_exists");
+        results["trade_watchlists"] = error ? { success: false, error: error.message } : { success: true };
+      }
+      else if (table === "trade_transactions") {
+        const { error } = await supabaseAdmin.rpc("create_trade_transactions_table_if_not_exists");
+        results["trade_transactions"] = error ? { success: false, error: error.message } : { success: true };
+      }
     }
 
     return new Response(JSON.stringify({ success: true, results }), {
