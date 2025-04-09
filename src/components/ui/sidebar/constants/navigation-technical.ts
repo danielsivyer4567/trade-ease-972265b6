@@ -11,6 +11,7 @@ import {
   Bell,
   Share2,
 } from 'lucide-react';
+import type { NavigationItem } from '../navigation/NavigationGroup';
 
 // Technical navigation group
 export const technicalNavigation = {
@@ -76,5 +77,5 @@ export const technicalNavigation = {
       label: 'Settings',
       path: '/settings',
     },
-  ],
+  ] as NavigationItem[],
 };
