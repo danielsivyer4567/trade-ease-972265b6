@@ -15,6 +15,15 @@ export const JobsDisplay: React.FC<JobsDisplayProps> = ({
 }) => {
   if (!jobsForDate || jobsForDate.length === 0) return null;
   
+  const getColorClass = (color: string) => {
+    switch (color) {
+      case 'red': return 'bg-red-500';
+      case 'blue': return 'bg-blue-500';
+      case 'green': return 'bg-green-500';
+      default: return 'bg-gray-500';
+    }
+  };
+  
   return (
     <>
       <div className="absolute bottom-5 left-0 right-0 px-1">
@@ -22,7 +31,7 @@ export const JobsDisplay: React.FC<JobsDisplayProps> = ({
           <div 
             key={`${job.id}-${idx}`}
             onClick={(e) => onJobClick(job.id, e)}
-            className={`text-[9px] truncate rounded mb-[2px] px-1 cursor-pointer hover:opacity-80 bg-${teamColor}-500 text-white`}
+            className={`text-[9px] truncate rounded mb-[2px] px-1 cursor-pointer hover:opacity-80 ${getColorClass(teamColor)} text-white`}
             title={job.title || job.jobNumber}
           >
             {job.title || `Job #${job.jobNumber}`}

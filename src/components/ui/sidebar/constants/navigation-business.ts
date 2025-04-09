@@ -1,5 +1,5 @@
 
-import { CreditCard, DollarSign, FileText, Receipt, ShoppingCart, Store } from 'lucide-react';
+import { CreditCard, DollarSign, FileText, Receipt, ShoppingCart, Store, TrendingUp } from 'lucide-react';
 
 export const businessNavigation = {
   label: "Business",
@@ -39,6 +39,12 @@ export const businessNavigation = {
       icon: ShoppingCart,
       label: 'Trading',
       path: '/trading',
+    },
+    {
+      type: 'link',
+      icon: TrendingUp,
+      label: 'Trade Dashboard',
+      path: '/trade-dashboard',
     },
   ],
 };
