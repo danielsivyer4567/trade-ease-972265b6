@@ -12,15 +12,24 @@ export const useCustomerDetail = (id: string | undefined) => {
   const [notes, setNotes] = useState<CustomerNote[]>([]);
   const [jobHistory, setJobHistory] = useState<CustomerJobHistory[]>([]);
   const [isLoadingData, setIsLoadingData] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!id) return;
+    if (!id) {
+      setIsLoadingData(false);
+      setError("No customer ID provided");
+      return;
+    }
     
     const fetchCustomerDetails = async () => {
       setIsLoadingData(true);
+      setError(null);
+      
       try {
+        console.log("Fetching customer with ID:", id);
         const { data: session } = await supabase.auth.getSession();
         if (!session?.session?.user) {
+          console.error("No authenticated user found");
           toast({
             title: "Authentication Error",
             description: "You must be logged in to view customer details",
@@ -36,23 +45,25 @@ export const useCustomerDetail = (id: string | undefined) => {
           .eq('id', id)
           .maybeSingle();
           
-        if (customerError || !customerData) {
-          console.error("Error fetching customer:", customerError);
-          toast({
-            title: "Error",
-            description: "Failed to load customer details",
-            variant: "destructive"
-          });
-          navigate('/customers');
-          return;
+        if (customerError) {
+          console.error("Supabase error fetching customer:", customerError);
+          throw new Error(`Failed to load customer: ${customerError.message}`);
+        }
+        
+        if (!customerData) {
+          console.error("No customer found with ID:", id);
+          throw new Error("Customer not found");
         }
 
+        console.log("Customer data retrieved:", customerData);
         const formattedCustomer = {
           ...customerData,
           zipCode: customerData.zipcode
         };
         setCustomer(formattedCustomer);
 
+        // Load mock data for job history and notes
+        // In a real application, these would be fetched from the database
         const mockJobHistory: CustomerJobHistory[] = [{
           job_id: '1',
           job_number: 'J-2024-001',
@@ -84,16 +95,20 @@ export const useCustomerDetail = (id: string | undefined) => {
         }];
         setNotes(mockNotes);
       } catch (error) {
-        console.error("Error fetching customer details:", error);
+        console.error("Error in useCustomerDetail:", error);
+        const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred";
+        setError(errorMessage);
+        
         toast({
           title: "Error",
-          description: "An unexpected error occurred while loading customer details",
+          description: errorMessage,
           variant: "destructive"
         });
       } finally {
         setIsLoadingData(false);
       }
     };
+    
     fetchCustomerDetails();
   }, [id, navigate, toast]);
 
@@ -128,6 +143,7 @@ export const useCustomerDetail = (id: string | undefined) => {
     notes,
     jobHistory,
     isLoadingData,
+    error,
     handleAddNote
   };
 };
