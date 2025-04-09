@@ -16,7 +16,7 @@ interface PaymentFormProps {
 
 export function PaymentForm({ formData, isProcessing, handleInputChange, handleSubmit }: PaymentFormProps) {
   return (
-    <Card>
+    <Card className="h-full">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <CreditCard className="h-5 w-5" />
@@ -38,6 +38,7 @@ export function PaymentForm({ formData, isProcessing, handleInputChange, handleS
               onChange={handleInputChange}
               placeholder="Card Number"
               maxLength={19}
+              className="w-full"
             />
           </div>
           
@@ -50,10 +51,11 @@ export function PaymentForm({ formData, isProcessing, handleInputChange, handleS
               value={formData.cardHolderName}
               onChange={handleInputChange}
               placeholder="Cardholder Name"
+              className="w-full"
             />
           </div>
           
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-3 gap-2 sm:gap-4">
             <div className="space-y-2">
               <Label htmlFor="expirationMonth">Month</Label>
               <Input
@@ -64,6 +66,7 @@ export function PaymentForm({ formData, isProcessing, handleInputChange, handleS
                 onChange={handleInputChange}
                 placeholder="MM"
                 maxLength={2}
+                className="w-full"
               />
             </div>
             <div className="space-y-2">
@@ -76,6 +79,7 @@ export function PaymentForm({ formData, isProcessing, handleInputChange, handleS
                 onChange={handleInputChange}
                 placeholder="YYYY"
                 maxLength={4}
+                className="w-full"
               />
             </div>
             <div className="space-y-2">
@@ -88,6 +92,7 @@ export function PaymentForm({ formData, isProcessing, handleInputChange, handleS
                 onChange={handleInputChange}
                 placeholder="CVV"
                 maxLength={4}
+                className="w-full"
               />
             </div>
           </div>
@@ -102,7 +107,7 @@ export function PaymentForm({ formData, isProcessing, handleInputChange, handleS
                 type="text"
                 value={formData.totalAmount}
                 onChange={handleInputChange}
-                className="pl-10"
+                className="pl-10 w-full"
                 placeholder="0.00"
               />
             </div>
