@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { AppLayout } from "@/components/ui/AppLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -58,6 +57,7 @@ export default function JobMaterialOrdering() {
     const nonEmptyMaterials = materials.filter(m => m.name || m.id === 1);
     
     setMaterials([...nonEmptyMaterials, ...newItems]);
+    toast.success(`Added ${newItems.length} items to your order`);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
