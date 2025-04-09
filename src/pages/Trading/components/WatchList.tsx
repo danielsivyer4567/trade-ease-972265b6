@@ -6,40 +6,41 @@ import { Input } from "@/components/ui/input";
 import { Plus } from "lucide-react";
 import { toast } from "sonner";
 
-// Sample watchlist data - will be replaced with real database data later
-const initialWatchlist = [
-  { symbol: 'AAPL', name: 'Apple Inc.', price: '188.12', change: '+1.45%', color: 'text-green-500' },
-  { symbol: 'MSFT', name: 'Microsoft Corp.', price: '416.38', change: '+0.78%', color: 'text-green-500' },
-  { symbol: 'GOOGL', name: 'Alphabet Inc.', price: '176.52', change: '-0.32%', color: 'text-red-500' },
-  { symbol: 'AMZN', name: 'Amazon.com Inc.', price: '185.80', change: '+1.12%', color: 'text-green-500' },
-  { symbol: 'TSLA', name: 'Tesla Inc.', price: '175.34', change: '-2.15%', color: 'text-red-500' },
+// Sample job monitoring data - will be replaced with real database data later
+const initialJobs = [
+  { jobId: 'JOB-2023-001', description: 'Kitchen Renovation', status: 'In Progress', nextAction: 'Material Delivery', dueDate: '2024-04-15', priority: 'High' },
+  { jobId: 'JOB-2023-002', description: 'Bathroom Remodel', status: 'Scheduled', nextAction: 'Initial Consultation', dueDate: '2024-04-18', priority: 'Medium' },
+  { jobId: 'JOB-2023-003', description: 'Deck Construction', status: 'Quote Sent', nextAction: 'Follow-up Call', dueDate: '2024-04-12', priority: 'Low' },
+  { jobId: 'JOB-2023-004', description: 'Basement Finishing', status: 'In Progress', nextAction: 'Drywall Installation', dueDate: '2024-04-20', priority: 'High' },
+  { jobId: 'JOB-2023-005', description: 'Fence Installation', status: 'Scheduled', nextAction: 'Material Order', dueDate: '2024-04-25', priority: 'Medium' },
 ];
 
 const WatchList = () => {
-  const [watchlist, setWatchlist] = useState(initialWatchlist);
-  const [newSymbol, setNewSymbol] = useState('');
+  const [monitoredJobs, setMonitoredJobs] = useState(initialJobs);
+  const [newJobId, setNewJobId] = useState('');
   
-  const handleAddSymbol = () => {
-    if (!newSymbol) return;
+  const handleAddJob = () => {
+    if (!newJobId) return;
     
-    // In a real app, we would validate the symbol and fetch its data
+    // In a real app, we would validate the job ID and fetch its data
     // For now, let's just add a dummy entry
-    const mockNewEntry = {
-      symbol: newSymbol.toUpperCase(),
-      name: `${newSymbol.toUpperCase()} Corp.`,
-      price: (Math.random() * 1000).toFixed(2),
-      change: `${Math.random() > 0.5 ? '+' : '-'}${(Math.random() * 3).toFixed(2)}%`,
-      color: Math.random() > 0.5 ? 'text-green-500' : 'text-red-500'
+    const mockNewJob = {
+      jobId: newJobId,
+      description: `New Job ${newJobId}`,
+      status: 'Pending',
+      nextAction: 'Initial Assessment',
+      dueDate: '2024-04-30',
+      priority: 'Medium'
     };
     
-    setWatchlist([...watchlist, mockNewEntry]);
-    setNewSymbol('');
-    toast.success(`Added ${newSymbol.toUpperCase()} to watchlist`);
+    setMonitoredJobs([...monitoredJobs, mockNewJob]);
+    setNewJobId('');
+    toast.success(`Added job ${newJobId} to monitoring list`);
   };
   
-  const handleRemoveSymbol = (symbol) => {
-    setWatchlist(watchlist.filter(item => item.symbol !== symbol));
-    toast.success(`Removed ${symbol} from watchlist`);
+  const handleRemoveJob = (jobId) => {
+    setMonitoredJobs(monitoredJobs.filter(item => item.jobId !== jobId));
+    toast.success(`Removed job ${jobId} from monitoring list`);
   };
   
   return (
@@ -47,17 +48,17 @@ const WatchList = () => {
       <CardHeader className="pb-2">
         <div className="flex justify-between items-center">
           <div>
-            <CardTitle>My Watchlist</CardTitle>
-            <CardDescription>Symbols you're tracking</CardDescription>
+            <CardTitle>Job Monitoring</CardTitle>
+            <CardDescription>Track important jobs and their status</CardDescription>
           </div>
           <div className="flex space-x-2">
             <Input 
-              value={newSymbol} 
-              onChange={(e) => setNewSymbol(e.target.value)} 
-              placeholder="Add symbol..." 
+              value={newJobId} 
+              onChange={(e) => setNewJobId(e.target.value)} 
+              placeholder="Add job ID..." 
               className="w-24 md:w-32"
             />
-            <Button size="sm" onClick={handleAddSymbol}>
+            <Button size="sm" onClick={handleAddJob}>
               <Plus className="h-4 w-4 mr-1" />
               <span>Add</span>
             </Button>
@@ -69,26 +70,37 @@ const WatchList = () => {
           <table className="w-full">
             <thead>
               <tr className="border-b">
-                <th className="text-left py-2 font-medium">Symbol</th>
-                <th className="text-left py-2 font-medium">Name</th>
-                <th className="text-right py-2 font-medium">Price</th>
-                <th className="text-right py-2 font-medium">Change</th>
+                <th className="text-left py-2 font-medium">Job ID</th>
+                <th className="text-left py-2 font-medium">Description</th>
+                <th className="text-left py-2 font-medium">Status</th>
+                <th className="text-left py-2 font-medium">Next Action</th>
+                <th className="text-left py-2 font-medium">Due Date</th>
                 <th className="text-right py-2 font-medium"></th>
               </tr>
             </thead>
             <tbody>
-              {watchlist.map((item) => (
-                <tr key={item.symbol} className="border-b">
-                  <td className="py-3 font-medium">{item.symbol}</td>
-                  <td className="py-3">{item.name}</td>
-                  <td className="py-3 text-right">${item.price}</td>
-                  <td className={`py-3 text-right ${item.color}`}>{item.change}</td>
+              {monitoredJobs.map((job) => (
+                <tr key={job.jobId} className="border-b">
+                  <td className="py-3 font-medium">{job.jobId}</td>
+                  <td className="py-3">{job.description}</td>
+                  <td className="py-3">
+                    <span className={`px-2 py-1 rounded-full text-xs ${
+                      job.status === 'In Progress' ? 'bg-blue-100 text-blue-800' : 
+                      job.status === 'Scheduled' ? 'bg-yellow-100 text-yellow-800' :
+                      job.status === 'Quote Sent' ? 'bg-purple-100 text-purple-800' :
+                      'bg-gray-100 text-gray-800'
+                    }`}>
+                      {job.status}
+                    </span>
+                  </td>
+                  <td className="py-3">{job.nextAction}</td>
+                  <td className="py-3">{job.dueDate}</td>
                   <td className="py-3 text-right">
                     <Button 
                       variant="ghost" 
                       size="sm" 
                       className="h-7 px-2"
-                      onClick={() => handleRemoveSymbol(item.symbol)}
+                      onClick={() => handleRemoveJob(job.jobId)}
                     >
                       Remove
                     </Button>
