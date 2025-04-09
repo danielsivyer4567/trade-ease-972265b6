@@ -16,7 +16,7 @@ export function DashboardContent() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Portfolio Value</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">Total Revenue</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex items-center justify-between">
@@ -31,7 +31,7 @@ export function DashboardContent() {
         
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Active Positions</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">Active Jobs</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex items-center justify-between">
@@ -40,7 +40,7 @@ export function DashboardContent() {
                 <Users className="h-4 w-4 text-blue-500" />
               </div>
             </div>
-            <div className="text-xs text-muted-foreground mt-1">8 profitable, 4 losing</div>
+            <div className="text-xs text-muted-foreground mt-1">8 on schedule, 4 delayed</div>
           </CardContent>
         </Card>
         
@@ -56,7 +56,7 @@ export function DashboardContent() {
               </div>
             </div>
             <div className="text-xs text-blue-500 mt-1 cursor-pointer group flex items-center gap-1">
-              Deposit more <ArrowRight className="h-3 w-3 group-hover:translate-x-1 transition-transform" />
+              Manage budget <ArrowRight className="h-3 w-3 group-hover:translate-x-1 transition-transform" />
             </div>
           </CardContent>
         </Card>
@@ -64,9 +64,9 @@ export function DashboardContent() {
       
       <Tabs defaultValue="portfolio" className="space-y-4">
         <TabsList className="grid w-full md:w-auto grid-cols-3 h-auto p-1 gap-1">
-          <TabsTrigger value="portfolio">Portfolio</TabsTrigger>
-          <TabsTrigger value="marketplace">Marketplace</TabsTrigger>
-          <TabsTrigger value="rankings">Rankings</TabsTrigger>
+          <TabsTrigger value="portfolio">Current Jobs</TabsTrigger>
+          <TabsTrigger value="marketplace">Job Marketplace</TabsTrigger>
+          <TabsTrigger value="rankings">Trade Rankings</TabsTrigger>
         </TabsList>
         
         <TabsContent value="portfolio" className="space-y-4">

@@ -7,37 +7,37 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 export function MarketOverview() {
   // Mock data for the chart
   const dailyData = [
-    { time: '9:30', value: 14000 },
-    { time: '10:30', value: 14120 },
-    { time: '11:30', value: 14350 },
-    { time: '12:30', value: 14280 },
-    { time: '13:30', value: 14400 },
-    { time: '14:30', value: 14380 },
-    { time: '15:30', value: 14500 },
-    { time: '16:00', value: 14620 },
+    { time: '9:30', value: 14 },
+    { time: '10:30', value: 18 },
+    { time: '11:30', value: 16 },
+    { time: '12:30', value: 19 },
+    { time: '13:30', value: 22 },
+    { time: '14:30', value: 25 },
+    { time: '15:30', value: 28 },
+    { time: '16:00', value: 30 },
   ];
   
   const weeklyData = [
-    { time: 'Mon', value: 14000 },
-    { time: 'Tue', value: 14200 },
-    { time: 'Wed', value: 14150 },
-    { time: 'Thu', value: 14380 },
-    { time: 'Fri', value: 14620 },
+    { time: 'Mon', value: 15 },
+    { time: 'Tue', value: 18 },
+    { time: 'Wed', value: 22 },
+    { time: 'Thu', value: 26 },
+    { time: 'Fri', value: 30 },
   ];
   
   const monthlyData = [
-    { time: 'Jan', value: 13200 },
-    { time: 'Feb', value: 13800 },
-    { time: 'Mar', value: 14100 },
-    { time: 'Apr', value: 14000 },
-    { time: 'May', value: 14300 },
-    { time: 'Jun', value: 14620 },
+    { time: 'Jan', value: 150 },
+    { time: 'Feb', value: 165 },
+    { time: 'Mar', value: 180 },
+    { time: 'Apr', value: 195 },
+    { time: 'May', value: 210 },
+    { time: 'Jun', value: 230 },
   ];
 
   return (
     <Card>
       <CardHeader className="pb-2">
-        <CardTitle className="text-xl">Market Overview</CardTitle>
+        <CardTitle className="text-xl">Job Performance Overview</CardTitle>
       </CardHeader>
       <CardContent>
         <Tabs defaultValue="daily">
@@ -48,7 +48,7 @@ export function MarketOverview() {
               <TabsTrigger value="monthly">Monthly</TabsTrigger>
             </TabsList>
             <div className="text-xl font-bold text-green-500">
-              S&P 500: 4,623.22 (+0.83%)
+              Jobs Completed: 125 (+8%)
             </div>
           </div>
           
@@ -57,8 +57,8 @@ export function MarketOverview() {
               <LineChart data={dailyData}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} />
                 <XAxis dataKey="time" />
-                <YAxis domain={['dataMin - 200', 'dataMax + 200']} />
-                <Tooltip formatter={(value) => [`$${value}`, 'Index Value']} />
+                <YAxis domain={['dataMin - 2', 'dataMax + 2']} />
+                <Tooltip formatter={(value) => [`${value} jobs`, 'Completed']} />
                 <Line type="monotone" dataKey="value" stroke="#3b82f6" strokeWidth={2} dot={false} />
               </LineChart>
             </ResponsiveContainer>
@@ -69,8 +69,8 @@ export function MarketOverview() {
               <LineChart data={weeklyData}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} />
                 <XAxis dataKey="time" />
-                <YAxis domain={['dataMin - 200', 'dataMax + 200']} />
-                <Tooltip formatter={(value) => [`$${value}`, 'Index Value']} />
+                <YAxis domain={['dataMin - 2', 'dataMax + 2']} />
+                <Tooltip formatter={(value) => [`${value} jobs`, 'Completed']} />
                 <Line type="monotone" dataKey="value" stroke="#3b82f6" strokeWidth={2} dot={false} />
               </LineChart>
             </ResponsiveContainer>
@@ -81,8 +81,8 @@ export function MarketOverview() {
               <LineChart data={monthlyData}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} />
                 <XAxis dataKey="time" />
-                <YAxis domain={['dataMin - 200', 'dataMax + 200']} />
-                <Tooltip formatter={(value) => [`$${value}`, 'Index Value']} />
+                <YAxis domain={['dataMin - 10', 'dataMax + 10']} />
+                <Tooltip formatter={(value) => [`${value} jobs`, 'Completed']} />
                 <Line type="monotone" dataKey="value" stroke="#3b82f6" strokeWidth={2} dot={false} />
               </LineChart>
             </ResponsiveContainer>
