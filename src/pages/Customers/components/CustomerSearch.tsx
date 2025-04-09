@@ -41,8 +41,8 @@ export const CustomerSearch = ({
                 className="p-2 hover:bg-gray-100 cursor-pointer border-b last:border-b-0"
                 onClick={() => onCustomerChange(c.id)}
               >
-                <div className="font-medium">{c.name}</div>
-                <div className="text-sm text-gray-500">{c.email}</div>
+                <div className="font-medium truncate">{c.name}</div>
+                <div className="text-sm text-gray-500 truncate">{c.email}</div>
               </div>
             ))
           ) : (

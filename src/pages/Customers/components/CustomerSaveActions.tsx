@@ -13,11 +13,11 @@ export const CustomerSaveActions = ({ onSaveAndContinue, onSaveAndExit }: Custom
     <div className="flex gap-2">
       <Button variant="outline" onClick={onSaveAndContinue} className="flex items-center gap-1">
         <Save className="h-4 w-4" />
-        Save
+        <span className="hidden sm:inline">Save</span>
       </Button>
       <Button onClick={onSaveAndExit} className="flex items-center gap-1">
         <Save className="h-4 w-4" />
-        Save & Exit
+        <span className="hidden sm:inline">Save & Exit</span>
       </Button>
     </div>
   );
