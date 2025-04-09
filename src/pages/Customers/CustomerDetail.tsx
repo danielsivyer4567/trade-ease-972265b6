@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { AppLayout } from "@/components/ui/AppLayout";
 import { Button } from "@/components/ui/button";
@@ -26,13 +27,12 @@ export default function CustomerDetail() {
   const [showSearchResults, setShowSearchResults] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   
-  const { addTab, activateTab } = useTabs();
-  
-  useOpenInTab(customer, '/customers', isLoadingData);
+  const { addTab } = useTabs();
+  const { openInTab } = useOpenInTab();
 
   useEffect(() => {
     fetchCustomers();
-  }, []);
+  }, [fetchCustomers]);
 
   useEffect(() => {
     if (!id) return;
@@ -55,7 +55,7 @@ export default function CustomerDetail() {
           .from('customers')
           .select('*')
           .eq('id', id)
-          .single();
+          .maybeSingle();
           
         if (customerError || !customerData) {
           console.error("Error fetching customer:", customerError);
@@ -189,6 +189,14 @@ export default function CustomerDetail() {
     });
     navigate('/customers');
   };
+
+  // Handle opening customer in new tab if needed
+  useEffect(() => {
+    if (customer && !isLoadingData) {
+      // Only set tab information if we have a customer loaded
+      openInTab(`/customers/${id}`, customer?.name || 'Customer Details', `customer-${id}`);
+    }
+  }, [customer, id, isLoadingData, openInTab]);
 
   if (isLoadingData || isLoading) {
     return <AppLayout>

@@ -1,31 +1,24 @@
 
-import { useNavigate } from 'react-router-dom';
+import { useCallback } from 'react';
 import { useTabs } from '@/contexts/TabsContext';
+import { useNavigate } from 'react-router-dom';
 
-export function useTabNavigation() {
+export const useTabNavigation = () => {
+  const { addTab, activateTab } = useTabs();
   const navigate = useNavigate();
-  const { addTab, activateTab, isTabOpen, tabs } = useTabs();
 
-  const openInTab = (path: string, title: string, id?: string) => {
-    // If tab is already open, just activate it
-    const tabId = id || path;
-    const existingTab = tabs.find(tab => tab.path === path);
-    
-    if (existingTab) {
-      activateTab(existingTab.id);
-      return;
+  const openInTab = useCallback((path: string, title: string, key: string) => {
+    if (addTab) {
+      addTab({
+        key,
+        title,
+        path,
+      });
+    } else {
+      // Fallback to regular navigation if tab context is not available
+      navigate(path);
     }
-
-    // Add new tab
-    addTab({
-      id: tabId,
-      title,
-      path
-    });
-    
-    // Navigate to the path
-    navigate(path);
-  };
+  }, [addTab, navigate]);
 
   return { openInTab };
-}
+};
