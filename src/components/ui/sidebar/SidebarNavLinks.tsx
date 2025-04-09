@@ -47,7 +47,7 @@ export function SidebarNavLinks({
       {navigationGroups.map((group, index) => (
         <NavigationGroup
           key={`nav-group-${index}`}
-          label={'label' in group ? group.label : undefined}
+          label={group.label || undefined}
           items={group.items}
           isExpanded={isExpanded}
           onLogout={handleLogout}

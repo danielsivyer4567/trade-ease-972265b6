@@ -8,8 +8,14 @@ import { technicalNavigation } from './navigation-technical';
 import { teamLinks, calendarTeamLinks } from './team-links';
 import { SIDEBAR_CONSTANTS } from './sidebar-config';
 
+// Define the structure for navigation groups
+export type NavigationGroup = {
+  label?: string;
+  items: Array<any>;
+};
+
 // Export all navigation groups
-export const navigationGroups = [
+export const navigationGroups: NavigationGroup[] = [
   overviewNavigation,
   businessNavigation,
   technicalNavigation,
