@@ -27,7 +27,6 @@ export default function CustomerDetail() {
   const [showSearchResults, setShowSearchResults] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   
-  const { addTab } = useTabs();
   const { openInTab } = useTabNavigation();
 
   useEffect(() => {
@@ -116,7 +115,7 @@ export default function CustomerDetail() {
       }
     };
     fetchCustomerDetails();
-  }, [id, navigate, toast, addTab]);
+  }, [id, navigate, toast]);
 
   useEffect(() => {
     if (searchQuery) {
@@ -224,9 +223,9 @@ export default function CustomerDetail() {
 
   return (
     <AppLayout>
-      <div className="flex flex-col h-full">
-        <div className="bg-white border-b p-4 shadow-sm">
-          <div className="flex flex-col sm:flex-row gap-4">
+      <div className="flex flex-col h-full w-full">
+        <div className="bg-white border-b p-4 shadow-sm fixed top-16 left-0 right-0 z-10">
+          <div className="flex flex-col sm:flex-row gap-4 max-w-5xl mx-auto">
             <div className="flex-1 relative">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
@@ -271,7 +270,7 @@ export default function CustomerDetail() {
           </div>
         </div>
         
-        <div className="flex-1 overflow-y-auto p-6 bg-slate-50">
+        <div className="flex-1 overflow-y-auto pt-24 p-6 bg-slate-50">
           <div className="max-w-5xl mx-auto">
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-2">

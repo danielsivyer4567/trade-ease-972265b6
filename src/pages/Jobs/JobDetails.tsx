@@ -2,7 +2,7 @@
 import { useParams } from 'react-router-dom';
 import { JobHeader } from './components/JobHeader';
 import { JobTabs } from './components/JobTabs';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { DocumentApproval } from './components/document-approval/DocumentApproval';
 import { useJobTimer } from './hooks/useJobTimer';
 import { useJobLocation } from './hooks/useJobLocation';
@@ -21,7 +21,6 @@ import { AutomationIntegrationService } from '@/services/AutomationIntegrationSe
 import { usePhotoSharing } from '@/hooks/usePhotoSharing';
 import { PhotoSharingModal } from '@/components/sharing/PhotoSharingModal';
 import { useOpenInTab } from './hooks/useOpenInTab';
-import { useEffect } from 'react';
 
 export function JobDetails() {
   const { id } = useParams<{ id: string }>();
