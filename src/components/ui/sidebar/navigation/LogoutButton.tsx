@@ -3,6 +3,9 @@ import React from 'react';
 import { LogOut } from 'lucide-react';
 import { Button } from '../../button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../../tooltip";
+import { cn } from '@/lib/utils';
+import { iconVariants, navItemVariants } from '../theme/sidebarTheme';
+import { useSidebarTheme } from '../theme/SidebarThemeContext';
 
 interface LogoutButtonProps {
   isExpanded: boolean;
@@ -10,14 +13,19 @@ interface LogoutButtonProps {
 }
 
 export const LogoutButton: React.FC<LogoutButtonProps> = ({ isExpanded, onLogout }) => {
+  const { theme } = useSidebarTheme();
+  
   const logoutButton = (
     <Button 
       variant="ghost" 
       size="sm" 
       onClick={onLogout} 
-      className="py-[15px] px-2 text-left text-gray-950 rounded-lg w-full"
+      className={cn(
+        "py-[15px] px-2 text-left rounded-lg w-full",
+        navItemVariants({ theme })
+      )}
     >
-      <LogOut className="h-4 w-4 text-muted-foreground" />
+      <LogOut className={iconVariants({ theme })} />
       {isExpanded && <span className="ml-2 text-sm overflow-hidden text-ellipsis">Logout</span>}
     </Button>
   );

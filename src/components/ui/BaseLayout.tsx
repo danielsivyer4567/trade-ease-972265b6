@@ -6,6 +6,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { MainContent } from './MainContent';
 import { SidebarProvider } from './sidebar/SidebarProvider';
 import GeminiListen from "@/components/gemini/GeminiListen";
+import { SidebarThemeProvider } from './sidebar/theme/SidebarThemeContext';
 
 interface BaseLayoutProps {
   children: React.ReactNode;
@@ -36,36 +37,38 @@ export function BaseLayout({
 
   return (
     <SidebarProvider>
-      <div className={cn(
-        "relative flex min-h-screen w-full",
-        className
-      )}>
-        {/* Sidebar */}
-        <AppSidebar 
-          isExpanded={sidebarOpen}
-          onToggle={toggleSidebar}
-          className="fixed top-0 left-0 h-full z-40"
-        />
-
-        {/* Main Content */}
-        <main className={cn(
-          "min-h-screen w-full bg-[#EFF2F5]",
-          "transition-all duration-300 ease-in-out",
-          sidebarOpen ? "md:pl-[240px]" : "md:pl-[64px]",
-          isMobile ? "pl-0" : ""
+      <SidebarThemeProvider defaultTheme="default">
+        <div className={cn(
+          "relative flex min-h-screen w-full",
+          className
         )}>
-          <MainContent 
-            sidebarOpen={sidebarOpen}
-            isMobile={isMobile}
-            showQuickTabs={showQuickTabs}
-          >
-            {children}
-          </MainContent>
-        </main>
-        
-        {/* Gemini Listen Feature */}
-        <GeminiListen />
-      </div>
+          {/* Sidebar */}
+          <AppSidebar 
+            isExpanded={sidebarOpen}
+            onToggle={toggleSidebar}
+            className="fixed top-0 left-0 h-full z-40"
+          />
+
+          {/* Main Content */}
+          <main className={cn(
+            "min-h-screen w-full bg-[#EFF2F5]",
+            "transition-all duration-300 ease-in-out",
+            sidebarOpen ? "md:pl-[240px]" : "md:pl-[64px]",
+            isMobile ? "pl-0" : ""
+          )}>
+            <MainContent 
+              sidebarOpen={sidebarOpen}
+              isMobile={isMobile}
+              showQuickTabs={showQuickTabs}
+            >
+              {children}
+            </MainContent>
+          </main>
+          
+          {/* Gemini Listen Feature */}
+          <GeminiListen />
+        </div>
+      </SidebarThemeProvider>
     </SidebarProvider>
   );
 }
