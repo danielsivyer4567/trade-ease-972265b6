@@ -15,6 +15,7 @@ const ContractorsPage = React.lazy(() => import('@/pages/Settings/Contractors'))
 const JobSettingsPage = React.lazy(() => import('@/pages/Settings/JobSettings'));
 const TermsOfServicePage = React.lazy(() => import('@/pages/Settings/TermsOfService'));
 const GenericSettingsPage = React.lazy(() => import('@/pages/Settings/GenericSettingsPage'));
+const IntegrationsPage = React.lazy(() => import('@/pages/Settings/Integrations'));
 
 // Export routes as JSX elements
 export const settingsRoutes = (
@@ -63,6 +64,11 @@ export const settingsRoutes = (
       <Route path="/settings/terms-of-service" element={
         <Suspense fallback={<LoadingFallback />}>
           <TermsOfServicePage />
+        </Suspense>
+      } />
+      <Route path="/settings/integrations" element={
+        <Suspense fallback={<LoadingFallback />}>
+          <IntegrationsPage />
         </Suspense>
       } />
       <Route path="/settings/(:settingType)" element={
