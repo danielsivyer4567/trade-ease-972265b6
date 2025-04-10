@@ -102,7 +102,7 @@ export const availableIntegrations: Integration[] = [
   // Accounting Integrations
   {
     title: "Xero",
-    icon: FileText,
+    icon: Calculator,
     description: "Sync invoices, payments and accounting data with Xero",
     path: "/settings/integrations/xero",
     apiKeyRequired: true,
