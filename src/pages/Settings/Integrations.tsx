@@ -1,7 +1,7 @@
 
 import { AppLayout } from "@/components/ui/AppLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Link2, MessageSquare, CreditCard, Mail, Calendar, Key, FileText, Phone, Facebook, Building, Calculator, PenTool, Users, Database, Briefcase, HardHat, Construction, Hammer, Tool, BookOpen, Server, Search } from "lucide-react";
+import { Link2, MessageSquare, CreditCard, Mail, Calendar, Key, FileText, Phone, Facebook, Building, Calculator, PenTool, Users, Database, Briefcase, HardHat, Construction, Hammer, Wrench, BookOpen, Server, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { Input } from "@/components/ui/input";
@@ -17,8 +17,17 @@ interface IntegrationConfig {
   status: string;
 }
 
+interface Integration {
+  title: string;
+  icon: React.ElementType;
+  description: string;
+  path: string;
+  category: string;
+  apiKeyRequired?: boolean;
+}
+
 // Extended list of integrations including accounting, CRM and construction apps
-const availableIntegrations = [
+const availableIntegrations: Integration[] = [
   // CRM Integrations
   {
     title: "Go High Level",
@@ -171,7 +180,7 @@ const availableIntegrations = [
   },
   {
     title: "CoConstruct",
-    icon: Tool,
+    icon: Wrench,
     description: "Custom home builder and remodeler software",
     path: "/settings/integrations/coconstruct",
     apiKeyRequired: true,
@@ -270,7 +279,7 @@ export default function IntegrationsPage() {
     }
   };
 
-  const handleIntegrationAction = (event: React.MouseEvent, integration: any) => {
+  const handleIntegrationAction = (event: React.MouseEvent, integration: Integration) => {
     if (integrationStatuses[integration.title] !== "connected" && 
         integration.apiKeyRequired && 
         !apiKeys[integration.title]) {
@@ -347,9 +356,6 @@ export default function IntegrationsPage() {
                           <integration.icon className="h-5 w-5 text-gray-600" />
                           <CardTitle className="text-lg md:text-xl">{integration.title}</CardTitle>
                         </div>
-                        {integration.devMode && (
-                          <span className="bg-violet-100 text-violet-800 text-xs px-2 py-1 rounded-full">Dev</span>
-                        )}
                         <span className={`text-xs md:text-sm px-2 py-1 rounded-full ${
                           integrationStatuses[integration.title] === "connected"
                             ? "bg-green-100 text-green-800"
@@ -380,7 +386,7 @@ export default function IntegrationsPage() {
                             <Button 
                               onClick={() => handleApiKeySubmit(integration.title)}
                               disabled={loading[integration.title] || !apiKeys[integration.title]}
-                              className={`h-9 text-xs whitespace-nowrap ${integration.devMode ? 'bg-violet-500 hover:bg-violet-600' : ''}`}
+                              className="h-9 text-xs whitespace-nowrap"
                               size="sm"
                             >
                               <Key className="h-3 w-3 mr-1" />
@@ -391,7 +397,7 @@ export default function IntegrationsPage() {
                       )}
                       {integrationStatuses[integration.title] !== "connected" && integration.apiKeyRequired ? (
                         <Button 
-                          className={`w-full h-9 text-sm ${integration.devMode ? 'bg-violet-500 hover:bg-violet-600' : ''}`}
+                          className="w-full h-9 text-sm"
                           variant="outline"
                           size="sm"
                           onClick={() => {
@@ -407,7 +413,7 @@ export default function IntegrationsPage() {
                       ) : (
                         <Link to={integration.path} className="w-full mt-auto" onClick={(e) => handleIntegrationAction(e, integration)}>
                           <Button 
-                            className={`w-full h-9 text-sm ${integration.devMode ? 'bg-violet-500 hover:bg-violet-600' : ''}`}
+                            className="w-full h-9 text-sm"
                             variant={integrationStatuses[integration.title] === "connected" ? "default" : "outline"}
                             size="sm"
                           >
