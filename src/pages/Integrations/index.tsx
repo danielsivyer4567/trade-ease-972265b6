@@ -9,6 +9,7 @@ import { MobileAppSyncCard } from "@/components/integrations/MobileAppSyncCard";
 import { ApiAccessCard } from "@/components/integrations/ApiAccessCard";
 import { ServiceSyncCard } from "@/components/messaging/ServiceSyncCard";
 import { GoogleCalendarCard } from "@/components/integrations/GoogleCalendarCard";
+import { XeroIntegrationCard } from "@/components/integrations/XeroIntegrationCard";
 
 export default function Integrations() {
   const navigate = useNavigate();
@@ -27,6 +28,7 @@ export default function Integrations() {
         <ServiceSyncCard />
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <XeroIntegrationCard />
           <GoogleCalendarCard />
           <AutoLeadPurchaseCard />
           <PaymentGatewaysCard />

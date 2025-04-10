@@ -11,4 +11,5 @@ export interface Integration {
   path: string;
   category: string;
   apiKeyRequired?: boolean;
+  devMode?: boolean;
 }

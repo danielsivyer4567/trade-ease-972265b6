@@ -20,7 +20,7 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
-    const { integration, apiKey } = await req.json();
+    const { integration, apiKey, clientId } = await req.json();
     console.log(`Processing integration request for: ${integration}`);
 
     // Validate the API key based on the integration
@@ -40,6 +40,7 @@ serve(async (req) => {
       "Xero": {
         integration_name: 'Xero',
         api_key: apiKey,
+        client_id: clientId,
         status: 'connected'
       },
       "Go High Level": {
