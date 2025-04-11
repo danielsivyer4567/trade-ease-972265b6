@@ -10,6 +10,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Briefcase, Plus, Save, Truck, Trash2 } from 'lucide-react';
 import SettingsPageTemplate from './SettingsPageTemplate';
 import { AddSupplierCard } from "@/components/integrations/AddSupplierCard";
+import { JobStep } from "@/types/job"; // Import from existing type file
 
 export default function JobSettings() {
   const [jobStepTemplates, setJobStepTemplates] = useState<JobStep[]>([]);
