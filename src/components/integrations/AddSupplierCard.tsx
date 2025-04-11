@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, UserPlus } from "lucide-react";
+import { Plus, Truck } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 export const AddSupplierCard = () => {
@@ -68,10 +68,10 @@ export const AddSupplierCard = () => {
       <Card className="bg-white border-dashed border-2 border-blue-200 hover:border-blue-400 transition-colors cursor-pointer h-full">
         <CardContent className="p-6 flex flex-col items-center justify-center h-full text-center" onClick={() => setIsOpen(true)}>
           <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center mb-4">
-            <UserPlus className="h-6 w-6 text-blue-600" />
+            <Truck className="h-6 w-6 text-blue-600" />
           </div>
           <h3 className="font-medium text-lg mb-1">Add New Supplier</h3>
-          <p className="text-gray-500 text-sm">Create a new supplier connection</p>
+          <p className="text-gray-500 text-sm">Create a new supplier for job materials</p>
           <Button variant="outline" className="mt-4 border-blue-200 text-blue-600 hover:bg-blue-50">
             <Plus className="h-4 w-4 mr-2" />
             Add Supplier
