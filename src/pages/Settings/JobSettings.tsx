@@ -51,109 +51,61 @@ export default function JobSettings() {
           {
             id: 1,
             title: 'step 1-',
-            tasks: [{
-              id: '1-0',
-              text: '-schedule job date',
-              isCompleted: false
-            }, {
-              id: '1-1',
-              text: '-allocate staff',
-              isCompleted: false
-            }],
+            tasks: [
+              '-schedule job date',
+              '-allocate staff'
+            ],
             isCompleted: false
           },
           {
             id: 2,
             title: 'step 2-',
-            tasks: [{
-              id: '2-0',
-              text: '-order materials',
-              isCompleted: false
-            }, {
-              id: '2-1',
-              text: '-fill out job details',
-              isCompleted: false
-            }, {
-              id: '2-2',
-              text: '- management sign off',
-              isCompleted: false
-            }],
+            tasks: [
+              '-order materials',
+              '-fill out job details',
+              '- management sign off'
+            ],
             isCompleted: false
           },
           {
             id: 3,
             title: 'step 3-',
-            tasks: [{
-              id: '3-0',
-              text: '-start job',
-              isCompleted: false
-            }, {
-              id: '3-1',
-              text: '-inductions',
-              isCompleted: false
-            }, {
-              id: '3-2',
-              text: '-material count check',
-              isCompleted: false
-            }],
+            tasks: [
+              '-start job',
+              '-inductions',
+              '-material count check'
+            ],
             isCompleted: false
           },
           {
             id: 4,
             title: 'step 4-',
-            tasks: [{
-              id: '4-0',
-              text: '- complete job',
-              isCompleted: false
-            }, {
-              id: '4-1',
-              text: '- do quality check',
-              isCompleted: false
-            }, {
-              id: '4-2',
-              text: '- site clean up',
-              isCompleted: false
-            }, {
-              id: '4-3',
-              text: '- add any variations',
-              isCompleted: false
-            }],
+            tasks: [
+              '- complete job',
+              '- do quality check',
+              '- site clean up',
+              '- add any variations'
+            ],
             isCompleted: false
           },
           {
             id: 5,
             title: 'step5-',
-            tasks: [{
-              id: '5-0',
-              text: '- verify customer is happy',
-              isCompleted: false
-            }, {
-              id: '5-1',
-              text: '- customer to sign job is complete as per contract',
-              isCompleted: false
-            }, {
-              id: '5-2',
-              text: '-take pics and double check all documents.',
-              isCompleted: false
-            }, {
-              id: '5-3',
-              text: '-send invoices with variations',
-              isCompleted: false
-            }],
+            tasks: [
+              '- verify customer is happy',
+              '- customer to sign job is complete as per contract',
+              '-take pics and double check all documents.',
+              '-send invoices with variations'
+            ],
             isCompleted: false
           },
           {
             id: 6,
             title: 'step 6',
-            tasks: [{
-              id: '6-0',
-              text: '- mark invoices paid to finalise job',
-              isCompleted: false
-            }, {
-              id: '6-1',
-              text: '-automaticly sync to xero',
-              isCompleted: false
-            }],
+            tasks: [
+              '- mark invoices paid to finalise job',
+              '-automaticly sync to xero'
+            ],
             isCompleted: false
           }
         ];
@@ -175,14 +127,14 @@ export default function JobSettings() {
     );
   };
 
-  const updateTaskText = (stepId: number, taskId: string, newText: string) => {
+  const updateTaskText = (stepId: number, taskIndex: number, newText: string) => {
     setJobStepTemplates(prevSteps =>
       prevSteps.map(step => 
         step.id === stepId 
           ? { 
               ...step, 
-              tasks: step.tasks.map(task => 
-                task.id === taskId ? { ...task, text: newText } : task
+              tasks: step.tasks.map((task, idx) => 
+                idx === taskIndex ? newText : task
               )
             } 
           : step
@@ -194,13 +146,9 @@ export default function JobSettings() {
     setJobStepTemplates(prevSteps =>
       prevSteps.map(step => {
         if (step.id === stepId) {
-          const newTaskId = `${stepId}-${step.tasks.length}`;
           return {
             ...step,
-            tasks: [
-              ...step.tasks, 
-              { id: newTaskId, text: 'New task', isCompleted: false }
-            ]
+            tasks: [...step.tasks, 'New task']
           };
         }
         return step;
@@ -208,13 +156,13 @@ export default function JobSettings() {
     );
   };
 
-  const removeTask = (stepId: number, taskId: string) => {
+  const removeTask = (stepId: number, taskIndex: number) => {
     setJobStepTemplates(prevSteps =>
       prevSteps.map(step => 
         step.id === stepId 
           ? { 
               ...step, 
-              tasks: step.tasks.filter(task => task.id !== taskId)
+              tasks: step.tasks.filter((_, idx) => idx !== taskIndex)
             } 
           : step
       )
@@ -231,7 +179,7 @@ export default function JobSettings() {
       {
         id: newId,
         title: `Step ${newId}`,
-        tasks: [{ id: `${newId}-0`, text: 'New task', isCompleted: false }],
+        tasks: ['New task'],
         isCompleted: false
       }
     ]);
@@ -458,19 +406,19 @@ export default function JobSettings() {
                         <CardContent className="pt-4">
                           <div className="space-y-3">
                             {step.tasks.map((task, idx) => (
-                              <div key={task.id} className="flex items-start gap-2">
+                              <div key={idx} className="flex items-start gap-2">
                                 <span className="text-xs bg-gray-100 px-1.5 py-1 rounded mt-2">
                                   {idx + 1}
                                 </span>
                                 <Textarea 
-                                  value={task.text}
-                                  onChange={(e) => updateTaskText(step.id, task.id, e.target.value)}
+                                  value={task}
+                                  onChange={(e) => updateTaskText(step.id, idx, e.target.value)}
                                   className="flex-1 min-h-[60px]"
                                 />
                                 <Button
                                   variant="ghost"
                                   size="sm"
-                                  onClick={() => removeTask(step.id, task.id)}
+                                  onClick={() => removeTask(step.id, idx)}
                                   className="mt-1"
                                 >
                                   <Trash2 className="h-4 w-4 text-red-500" />
