@@ -6,9 +6,9 @@ import { LoadingFallback } from './loading-fallback';
 
 // Import pages
 const QuotesPage = React.lazy(() => import('@/pages/Quotes'));
+const NewQuotePage = React.lazy(() => import('@/pages/Quotes/NewQuote'));
 const QuotesInvoicesPage = React.lazy(() => import('@/pages/QuotesInvoices'));
 const NewInvoice = React.lazy(() => import('@/pages/Invoices/NewInvoice'));
-const BankingPage = React.lazy(() => import('@/pages/Banking'));
 // Fixed import paths for JobInvoices and InvoiceDetail
 const JobInvoicesPage = React.lazy(() => import('@/pages/Invoices/JobInvoices'));
 const InvoiceDetailPage = React.lazy(() => import('@/pages/Invoices/InvoiceDetail'));
@@ -20,6 +20,11 @@ export const financialRoutes = (
       <Route path="/quotes" element={
         <Suspense fallback={<LoadingFallback />}>
           <QuotesPage />
+        </Suspense>
+      } />
+      <Route path="/quotes/new" element={
+        <Suspense fallback={<LoadingFallback />}>
+          <NewQuotePage />
         </Suspense>
       } />
       <Route path="/quotes-invoices" element={
