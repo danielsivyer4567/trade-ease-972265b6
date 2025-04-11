@@ -7,19 +7,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from '@/integrations/supabase/client';
-import { Briefcase, Plus, Save, Trash2 } from 'lucide-react';
+import { Briefcase, Plus, Save, Truck, Trash2 } from 'lucide-react';
 import SettingsPageTemplate from './SettingsPageTemplate';
-
-interface JobStep {
-  id: number;
-  title: string;
-  tasks: {
-    id: string;
-    text: string;
-    isCompleted: boolean;
-  }[];
-  isCompleted: boolean;
-}
+import { AddSupplierCard } from "@/components/integrations/AddSupplierCard";
 
 export default function JobSettings() {
   const [jobStepTemplates, setJobStepTemplates] = useState<JobStep[]>([]);
@@ -506,6 +496,21 @@ export default function JobSettings() {
                 </TabsContent>
               ))}
             </Tabs>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader>
+            <CardTitle>Suppliers Management</CardTitle>
+            <CardDescription>
+              Add and manage suppliers for your jobs to streamline material ordering and vendor relationships.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <AddSupplierCard />
+              {/* Future spot for supplier list */}
+            </div>
           </CardContent>
         </Card>
       </div>
