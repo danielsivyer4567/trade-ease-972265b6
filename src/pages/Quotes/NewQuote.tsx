@@ -36,6 +36,8 @@ export default function NewQuote() {
     total: 0
   }]);
   const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
+  const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
+  const [previewImages, setPreviewImages] = useState<string[]>([]);
 
   const handleBack = () => {
     navigate("/quotes");
@@ -109,7 +111,12 @@ export default function NewQuote() {
                     </TabsContent>
                     
                     <TabsContent value="items" className="mt-0">
-                      <QuoteItemsForm quoteItems={quoteItems} setQuoteItems={setQuoteItems} onPrevTab={() => setActiveTab("details")} onNextTab={() => setActiveTab("terms")} />
+                      <QuoteItemsForm 
+                        quoteItems={quoteItems} 
+                        setQuoteItems={setQuoteItems} 
+                        onPrevTab={() => setActiveTab("details")} 
+                        onNextTab={() => setActiveTab("terms")} 
+                      />
                     </TabsContent>
                     
                     <TabsContent value="price-list" className="mt-0">
@@ -121,7 +128,10 @@ export default function NewQuote() {
                     </TabsContent>
                     
                     <TabsContent value="preview" className="mt-0">
-                      <QuotePreview quoteItems={quoteItems} onPrevTab={() => setActiveTab("terms")} />
+                      <QuotePreview 
+                        quoteItems={quoteItems} 
+                        onPrevTab={() => setActiveTab("terms")} 
+                      />
                     </TabsContent>
                   </CardContent>
                 </Card>

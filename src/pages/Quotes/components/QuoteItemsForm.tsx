@@ -1,9 +1,11 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Plus, Trash2, ChevronLeft, ChevronRight } from "lucide-react";
+import { Plus, Trash2, ChevronLeft, ChevronRight, FileImage } from "lucide-react";
+import { FileUpload } from "@/components/tasks/FileUpload";
+import { ImagesGrid } from "@/components/tasks/ImagesGrid";
 
 export interface QuoteItem {
   description: string;
@@ -25,6 +27,8 @@ export const QuoteItemsForm = ({
   onPrevTab,
   onNextTab 
 }: QuoteItemsFormProps) => {
+  const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
+  const [previewImages, setPreviewImages] = useState<string[]>([]);
   
   const handleAddItem = () => {
     setQuoteItems([...quoteItems, { description: "", quantity: 1, rate: 0, total: 0 }]);
@@ -49,6 +53,23 @@ export const QuoteItemsForm = ({
   };
   
   const totalAmount = quoteItems.reduce((sum, item) => sum + item.total, 0);
+  
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      const newFiles = Array.from(e.target.files);
+      setUploadedFiles(prev => [...prev, ...newFiles]);
+
+      // Create preview URLs for images
+      const newPreviewUrls = newFiles.map(file => {
+        if (file.type.startsWith('image/')) {
+          return URL.createObjectURL(file);
+        }
+        return '';
+      }).filter(url => url !== '');
+      
+      setPreviewImages(prev => [...prev, ...newPreviewUrls]);
+    }
+  };
   
   return (
     <div className="space-y-6">
@@ -141,6 +162,29 @@ export const QuoteItemsForm = ({
           </table>
         </div>
       </div>
+      
+      {/* Photo upload section */}
+      <div className="mt-6 border-t pt-4">
+        <h3 className="font-medium mb-2 flex items-center">
+          <FileImage className="mr-2 h-4 w-4" />
+          Attach Photos to Quote
+        </h3>
+        <FileUpload onFileUpload={handleFileUpload} label="Drag and drop images or click to browse" />
+        {uploadedFiles.length > 0 && (
+          <div className="mt-2">
+            <p className="text-sm text-gray-600">
+              {uploadedFiles.length} file(s) attached to quote
+            </p>
+          </div>
+        )}
+      </div>
+      
+      {previewImages.length > 0 && (
+        <div className="mt-4">
+          <h3 className="font-medium mb-2">Attached Photos</h3>
+          <ImagesGrid images={previewImages} />
+        </div>
+      )}
       
       <div className="flex justify-between mt-6">
         <Button variant="outline" onClick={onPrevTab}>
