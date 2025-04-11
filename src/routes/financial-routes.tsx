@@ -12,6 +12,8 @@ const NewInvoice = React.lazy(() => import('@/pages/Invoices/NewInvoice'));
 // Fixed import paths for JobInvoices and InvoiceDetail
 const JobInvoicesPage = React.lazy(() => import('@/pages/Invoices/JobInvoices'));
 const InvoiceDetailPage = React.lazy(() => import('@/pages/Invoices/InvoiceDetail'));
+// Add the missing import for BankingPage
+const BankingPage = React.lazy(() => import('@/pages/Banking'));
 
 // Export routes as JSX elements
 export const financialRoutes = (
