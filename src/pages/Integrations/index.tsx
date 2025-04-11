@@ -10,6 +10,7 @@ import { ApiAccessCard } from "@/components/integrations/ApiAccessCard";
 import { ServiceSyncCard } from "@/components/messaging/ServiceSyncCard";
 import { GoogleCalendarCard } from "@/components/integrations/GoogleCalendarCard";
 import { XeroIntegrationCard } from "@/components/integrations/XeroIntegrationCard";
+import { AddSupplierCard } from "@/components/integrations/AddSupplierCard";
 
 export default function Integrations() {
   const navigate = useNavigate();
@@ -34,6 +35,7 @@ export default function Integrations() {
           <PaymentGatewaysCard />
           <MobileAppSyncCard />
           <ApiAccessCard />
+          <AddSupplierCard />
         </div>
       </div>
     </AppLayout>
