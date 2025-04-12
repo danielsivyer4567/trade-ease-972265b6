@@ -1,4 +1,17 @@
-import { Calculator } from 'lucide-react';
+
+import { 
+  Bot,
+  Network,
+  Database,
+  Link,
+  Workflow,
+  ChevronRightSquare,
+  Camera,
+  Share2,
+  Bell,
+  Settings,
+  Calculator
+} from 'lucide-react';
 import { NavigationItem } from '../navigation/NavigationGroup';
 
 export const technicalNavigation = {
