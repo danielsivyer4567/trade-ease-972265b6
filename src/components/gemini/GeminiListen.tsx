@@ -1,5 +1,6 @@
+
 import React, { useState, useRef, useEffect } from 'react';
-import { Loader2, Mic, MicOff, HelpCircle } from 'lucide-react';
+import { Loader2, Mic, MicOff, HelpCircle, CheckCircle2 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -15,6 +16,7 @@ const GeminiListen: React.FC<GeminiListenProps> = ({
   const [isListening, setIsListening] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [showTooltip, setShowTooltip] = useState(false);
+  const [recognizedText, setRecognizedText] = useState<string | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
   const silenceTimeoutRef = useRef<number | null>(null);
@@ -41,6 +43,7 @@ const GeminiListen: React.FC<GeminiListenProps> = ({
         audio: true
       });
       audioChunksRef.current = [];
+      setRecognizedText(null);
 
       setupAudioAnalysis(stream);
       const mediaRecorder = new MediaRecorder(stream);
@@ -139,6 +142,7 @@ const GeminiListen: React.FC<GeminiListenProps> = ({
           throw new Error(error.message);
         }
         if (data?.text) {
+          setRecognizedText(data.text);
           toast.success(`Recognized: "${data.text}"`);
           processCommand(data.text);
         } else {
@@ -304,6 +308,19 @@ const GeminiListen: React.FC<GeminiListenProps> = ({
             ))}
           </div>
           <p className="text-xs mt-2 text-gray-500">Speak now or click to cancel</p>
+        </div>
+      )}
+
+      {/* Display recognized text */}
+      {recognizedText && !isListening && !isProcessing && (
+        <div className="absolute bottom-16 right-0 bg-white dark:bg-gray-800 p-4 rounded-lg shadow-lg min-w-[250px] max-w-[300px] animate-fade-in">
+          <div className="flex items-start gap-2">
+            <CheckCircle2 className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
+            <div>
+              <p className="text-sm font-medium mb-1">I heard:</p>
+              <p className="text-sm text-gray-600 dark:text-gray-300 break-words">{recognizedText}</p>
+            </div>
+          </div>
         </div>
       )}
 
