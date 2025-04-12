@@ -21,6 +21,9 @@ export const processCommand = (text: string) => {
     }
   } else if (lowerText.includes("search")) {
     toast.info("Search functionality coming soon!");
+  } else if (lowerText.includes("calculator") || lowerText.includes("calculators")) {
+    window.location.href = "/calculators";
+    toast.success("Navigating to Calculators");
   } else {
     toast.info("Command not recognized. Try saying 'Go to Jobs' or 'Create new customer'");
   }
@@ -50,7 +53,9 @@ export const navigateTo = (destination: string) => {
     team: "/teams",
     expenses: "/expenses",
     banking: "/banking",
-    inventory: "/inventory"
+    inventory: "/inventory",
+    calculators: "/calculators",
+    calculator: "/calculators"
   };
   const url = destinations[destination.toLowerCase()];
   if (url) {
