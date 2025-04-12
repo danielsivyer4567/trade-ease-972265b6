@@ -1,19 +1,6 @@
+import { Calculator } from 'lucide-react';
+import { NavigationItem } from '../navigation/NavigationGroup';
 
-import {
-  Bot,
-  Network,
-  Database,
-  Link,
-  Workflow,
-  ChevronRightSquare,
-  Settings,
-  Camera,
-  Bell,
-  Share2,
-} from 'lucide-react';
-import type { NavigationItem } from '../navigation/NavigationGroup';
-
-// Technical navigation group
 export const technicalNavigation = {
   label: 'Technical',
   items: [
@@ -77,5 +64,11 @@ export const technicalNavigation = {
       label: 'Settings',
       path: '/settings',
     },
+    {
+      type: 'link',
+      icon: Calculator,
+      label: 'Calculators',
+      path: '/calculators'
+    }
   ] as NavigationItem[],
 };
