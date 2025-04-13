@@ -24,13 +24,13 @@ interface CustomerSelectorProps {
 }
 
 export function CustomerSelector({
-  customers,
+  customers = [],
   selectedCustomerId,
   onSelectCustomer
 }: CustomerSelectorProps) {
   const [open, setOpen] = React.useState(false);
   const selectedCustomer = React.useMemo(() => 
-    customers.find(c => c.id === selectedCustomerId),
+    customers?.find(c => c.id === selectedCustomerId),
   [customers, selectedCustomerId]);
 
   return (
@@ -56,7 +56,7 @@ export function CustomerSelector({
           <CommandInput placeholder="Search customers..." />
           <CommandEmpty>No customers found.</CommandEmpty>
           <CommandGroup className="max-h-[300px] overflow-auto">
-            {customers.map((customer) => (
+            {(customers || []).map((customer) => (
               <CommandItem
                 key={customer.id}
                 value={customer.name}
