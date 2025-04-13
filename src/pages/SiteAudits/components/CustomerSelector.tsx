@@ -30,7 +30,7 @@ export function CustomerSelector({
 }: CustomerSelectorProps) {
   const [open, setOpen] = React.useState(false);
   const selectedCustomer = React.useMemo(() => 
-    customers?.find(c => c.id === selectedCustomerId),
+    (customers || []).find(c => c.id === selectedCustomerId),
   [customers, selectedCustomerId]);
 
   return (

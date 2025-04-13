@@ -44,6 +44,9 @@ export function ComboboxDemo() {
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState("");
 
+  // Ensure suppliers is not undefined
+  const safeSuppliers = suppliers || [];
+
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
@@ -54,7 +57,7 @@ export function ComboboxDemo() {
           className="w-full justify-between"
         >
           {value
-            ? suppliers.find((supplier) => supplier.value === value)?.label
+            ? safeSuppliers.find((supplier) => supplier.value === value)?.label
             : "Select supplier..."}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
@@ -64,7 +67,7 @@ export function ComboboxDemo() {
           <CommandInput placeholder="Search supplier..." />
           <CommandEmpty>No supplier found.</CommandEmpty>
           <CommandGroup>
-            {(suppliers || []).map((supplier) => (
+            {safeSuppliers.map((supplier) => (
               <CommandItem
                 key={supplier.value}
                 value={supplier.value}

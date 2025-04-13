@@ -24,12 +24,15 @@ export function TemplateSelector({ onShowTemplateSearch, applyTemplate }: Templa
         setUserTemplates(JSON.parse(savedTemplates));
       } catch (err) {
         console.error("Error loading user templates:", err);
+        setUserTemplates([]);
       }
     }
   }, []);
 
   // Ensure QUICK_TEMPLATES is not undefined
   const quickTemplates = QUICK_TEMPLATES || [];
+  // Ensure userTemplates is not undefined
+  const safeUserTemplates = userTemplates || [];
   
   return (
     <div className="space-y-2 flex flex-col justify-end">
@@ -50,13 +53,13 @@ export function TemplateSelector({ onShowTemplateSearch, applyTemplate }: Templa
               </DropdownMenuItem>
             ))}
             
-            {(userTemplates || []).length > 0 && (
+            {safeUserTemplates.length > 0 && (
               <>
                 <DropdownMenuSeparator />
                 <div className="px-2 py-1 text-sm font-medium text-gray-500">
                   My Templates
                 </div>
-                {userTemplates.map(template => (
+                {safeUserTemplates.map(template => (
                   <DropdownMenuItem 
                     key={template.id} 
                     onClick={() => applyTemplate(template)}

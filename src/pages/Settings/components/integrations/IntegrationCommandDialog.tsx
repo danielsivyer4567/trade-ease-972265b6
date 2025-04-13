@@ -17,15 +17,19 @@ export const IntegrationCommandDialog: React.FC<IntegrationCommandDialogProps> =
   integrations = [],
   onSelectIntegration
 }) => {
+  // Ensure categoryOptions and integrations are not undefined
+  const safeCategories = categoryOptions || [];
+  const safeIntegrations = integrations || [];
+
   return (
     <CommandDialog open={open} onOpenChange={onOpenChange}>
       <Command className="rounded-lg border shadow-md">
         <CommandInput placeholder="Search for integrations..." />
         <CommandList>
           <CommandEmpty>No integrations found.</CommandEmpty>
-          {(categoryOptions || []).filter(c => c.value !== "all").map((category) => (
+          {safeCategories.filter(c => c.value !== "all").map((category) => (
             <CommandGroup key={category.value} heading={category.label}>
-              {(integrations || [])
+              {safeIntegrations
                 .filter(integration => integration.category === category.value)
                 .map(integration => {
                   const IntegrationIcon = integration.icon;
