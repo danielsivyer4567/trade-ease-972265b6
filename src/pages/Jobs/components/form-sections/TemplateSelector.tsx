@@ -28,6 +28,9 @@ export function TemplateSelector({ onShowTemplateSearch, applyTemplate }: Templa
     }
   }, []);
 
+  // Ensure QUICK_TEMPLATES is not undefined
+  const quickTemplates = QUICK_TEMPLATES || [];
+  
   return (
     <div className="space-y-2 flex flex-col justify-end">
       <Label>Templates</Label>
@@ -41,13 +44,13 @@ export function TemplateSelector({ onShowTemplateSearch, applyTemplate }: Templa
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="bg-white w-56">
-            {QUICK_TEMPLATES.map(template => (
+            {quickTemplates.map(template => (
               <DropdownMenuItem key={template.id} onClick={() => applyTemplate(template)}>
                 {template.title}
               </DropdownMenuItem>
             ))}
             
-            {userTemplates.length > 0 && (
+            {(userTemplates || []).length > 0 && (
               <>
                 <DropdownMenuSeparator />
                 <div className="px-2 py-1 text-sm font-medium text-gray-500">

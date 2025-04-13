@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -97,30 +98,54 @@ const QUOTE_TEMPLATES = [{
     rate: 120
   }]
 }];
+
 interface QuoteTemplateSelectorProps {
   onSelectTemplate: (templateId: string) => void;
   selectedTemplate: string | null;
 }
+
 export function QuoteTemplateSelector({
   onSelectTemplate,
   selectedTemplate
 }: QuoteTemplateSelectorProps) {
   const [searchQuery, setSearchQuery] = useState("");
-  const filteredTemplates = QUOTE_TEMPLATES.filter(template => template.name.toLowerCase().includes(searchQuery.toLowerCase()) || template.category.toLowerCase().includes(searchQuery.toLowerCase()));
-  return <Card>
+  
+  // Add null check and default to empty array
+  const templates = QUOTE_TEMPLATES || [];
+  
+  const filteredTemplates = templates.filter(template => 
+    template.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+    template.category.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+  
+  return (
+    <Card>
       <CardHeader className="pb-3">
         <CardTitle className="text-lg font-medium">Quote Templates</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-          <Input placeholder="Search templates..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="pl-9" />
+          <Input 
+            placeholder="Search templates..." 
+            value={searchQuery} 
+            onChange={e => setSearchQuery(e.target.value)} 
+            className="pl-9" 
+          />
         </div>
         
         <div className="space-y-3 max-h-[600px] overflow-y-auto pr-1">
-          {filteredTemplates.length === 0 ? <div className="text-center py-8 text-gray-500">
+          {filteredTemplates.length === 0 ? (
+            <div className="text-center py-8 text-gray-500">
               <p>No templates found</p>
-            </div> : filteredTemplates.map(template => <div key={template.id} onClick={() => onSelectTemplate(template.id)} className="bg-slate-100">
+            </div>
+          ) : (
+            filteredTemplates.map(template => (
+              <div 
+                key={template.id} 
+                onClick={() => onSelectTemplate(template.id)} 
+                className="bg-slate-100"
+              >
                 <div className="flex justify-between items-start">
                   <div>
                     <h3 className="font-medium text-sm line-clamp-1">{template.name}</h3>
@@ -133,21 +158,30 @@ export function QuoteTemplateSelector({
                       </span>
                     </div>
                   </div>
-                  {selectedTemplate === template.id && <Badge className="bg-blue-500">
+                  {selectedTemplate === template.id && (
+                    <Badge className="bg-blue-500">
                       <Check className="h-3 w-3 mr-1" />
                       Selected
-                    </Badge>}
+                    </Badge>
+                  )}
                 </div>
                 <div className="mt-2 text-xs text-gray-500">
-                  {template.items.length} items · Total: $
-                  {template.items.reduce((sum, item) => sum + item.quantity * item.rate, 0).toLocaleString()}
+                  {(template.items || []).length} items · Total: $
+                  {(template.items || []).reduce((sum, item) => sum + item.quantity * item.rate, 0).toLocaleString()}
                 </div>
-              </div>)}
+              </div>
+            ))
+          )}
         </div>
         
-        <Button variant="outline" onClick={() => setSearchQuery("")} className="w-full bg-slate-500 hover:bg-slate-400">
+        <Button 
+          variant="outline" 
+          onClick={() => setSearchQuery("")} 
+          className="w-full bg-slate-500 hover:bg-slate-400"
+        >
           Show All Templates
         </Button>
       </CardContent>
-    </Card>;
+    </Card>
+  );
 }
