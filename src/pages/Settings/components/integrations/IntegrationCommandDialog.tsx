@@ -14,7 +14,7 @@ interface IntegrationCommandDialogProps {
 export const IntegrationCommandDialog: React.FC<IntegrationCommandDialogProps> = ({
   open,
   onOpenChange,
-  integrations,
+  integrations = [],
   onSelectIntegration
 }) => {
   return (
@@ -23,9 +23,9 @@ export const IntegrationCommandDialog: React.FC<IntegrationCommandDialogProps> =
         <CommandInput placeholder="Search for integrations..." />
         <CommandList>
           <CommandEmpty>No integrations found.</CommandEmpty>
-          {categoryOptions.filter(c => c.value !== "all").map((category) => (
+          {(categoryOptions || []).filter(c => c.value !== "all").map((category) => (
             <CommandGroup key={category.value} heading={category.label}>
-              {integrations
+              {(integrations || [])
                 .filter(integration => integration.category === category.value)
                 .map(integration => {
                   const IntegrationIcon = integration.icon;

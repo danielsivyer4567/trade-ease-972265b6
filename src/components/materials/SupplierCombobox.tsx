@@ -64,7 +64,7 @@ export function ComboboxDemo() {
           <CommandInput placeholder="Search supplier..." />
           <CommandEmpty>No supplier found.</CommandEmpty>
           <CommandGroup>
-            {suppliers.map((supplier) => (
+            {(suppliers || []).map((supplier) => (
               <CommandItem
                 key={supplier.value}
                 value={supplier.value}
