@@ -17,16 +17,19 @@ export const DailyAuditList: React.FC<DailyAuditListProps> = ({ dayData, onAddPh
   const emptySlots = Array.from({ length: 12 }, (_, index) => index);
   const isMobile = useIsMobile();
   
+  // Ensure audits is an array even if it's undefined
+  const audits = dayData?.audits || [];
+  
   return (
     <div className="flex flex-col h-full">
       <div className="text-center p-2 bg-slate-100 rounded-t-lg">
-        <h3 className="font-medium">{dayData.dayName}</h3>
-        <p className="text-xs text-muted-foreground">{dayData.formattedDate}</p>
+        <h3 className="font-medium">{dayData?.dayName || 'Day'}</h3>
+        <p className="text-xs text-muted-foreground">{dayData?.formattedDate || ''}</p>
       </div>
       
       <div className="flex-1 flex flex-col gap-4 p-3 bg-slate-50 min-h-[300px] overflow-y-auto max-h-[600px]">
-        {dayData.audits.length > 0 ? (
-          dayData.audits.map((audit) => (
+        {audits.length > 0 ? (
+          audits.map((audit) => (
             <Card key={audit.id} className="border border-border shadow-sm hover:shadow-md transition-shadow">
               <CardHeader className="pb-2">
                 <div className="flex justify-between items-start">

@@ -1,3 +1,4 @@
+
 import React, { useState, useRef } from 'react';
 import { BaseLayout } from '@/components/ui/BaseLayout';
 import { SectionHeader } from '@/components/ui/SectionHeader';
@@ -91,6 +92,11 @@ export default function SiteAudits() {
     setShowPhotoCapture(true);
   };
 
+  // Ensure audits array is defined
+  const auditsList = audits || [];
+  // Ensure auditsByDay array is defined
+  const auditsByDayList = auditsByDay || [];
+
   return (
     <BaseLayout>
       <div className="container mx-auto py-6 space-y-6 max-w-7xl">
@@ -115,7 +121,7 @@ export default function SiteAudits() {
               />
               <div className="flex gap-2">
                 <Button 
-                  onClick={() => setShowPhotoCapture(true)} 
+                  onClick={handleTakePhoto} 
                   variant="outline"
                   className="flex items-center gap-2"
                   disabled={!selectedCustomerId}
@@ -173,7 +179,7 @@ export default function SiteAudits() {
                 <span>Previous Week</span>
               </Button>
               <span className="text-sm font-medium">
-                Week of {format(currentWeekStart, 'MMM d, yyyy')}
+                Week of {format(currentWeekStart || new Date(), 'MMM d, yyyy')}
               </span>
               <Button 
                 variant="outline" 
@@ -193,7 +199,7 @@ export default function SiteAudits() {
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-              {auditsByDay.map((dayData, index) => (
+              {auditsByDayList.map((dayData, index) => (
                 <div key={index} className="border rounded-lg overflow-hidden">
                   <DailyAuditList 
                     dayData={dayData} 
@@ -218,9 +224,9 @@ export default function SiteAudits() {
               <div className="flex justify-center p-8">
                 <p>Loading audits...</p>
               </div>
-            ) : audits.filter(a => a.status === 'in_progress').length > 0 ? (
+            ) : auditsList.filter(a => a.status === 'in_progress').length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {audits.filter(a => a.status === 'in_progress').map((audit) => (
+                {auditsList.filter(a => a.status === 'in_progress').map((audit) => (
                   <Card key={audit.id} className="border border-border hover:shadow-md transition-shadow">
                     <CardContent className="p-4">
                       <div className="flex justify-between items-start">

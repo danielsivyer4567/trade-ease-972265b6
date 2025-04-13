@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { format } from 'date-fns';
 import { Job } from '@/types/job';
@@ -50,14 +51,18 @@ export const DayDetailDrawer: React.FC<DayDetailDrawerProps> = ({
   ]);
 
   if (!selectedDay) return null;
-  const {
-    date,
-    jobs
-  } = selectedDay;
+  
+  const date = selectedDay.date || new Date();
+  const jobs = selectedDay.jobs || [];
 
-  const filteredJobs = jobs.filter(job => {
-    const searchLower = jobSearchQuery.toLowerCase();
-    return job.title?.toLowerCase().includes(searchLower) || job.customer?.toLowerCase().includes(searchLower) || job.jobNumber?.toLowerCase().includes(searchLower) || job.type?.toLowerCase().includes(searchLower);
+  const filteredJobs = (jobs || []).filter(job => {
+    const searchLower = (jobSearchQuery || '').toLowerCase();
+    return (
+      (job.title?.toLowerCase() || '').includes(searchLower) || 
+      (job.customer?.toLowerCase() || '').includes(searchLower) || 
+      (job.jobNumber?.toLowerCase() || '').includes(searchLower) || 
+      (job.type?.toLowerCase() || '').includes(searchLower)
+    );
   });
 
   const mockCustomerQuotes = [{
@@ -155,7 +160,8 @@ export const DayDetailDrawer: React.FC<DayDetailDrawerProps> = ({
     }
   };
 
-  return <Drawer open={Boolean(selectedDay)} onOpenChange={onClose}>
+  return (
+    <Drawer open={Boolean(selectedDay)} onOpenChange={onClose}>
       <DrawerContent className="fixed inset-x-0 top-20 transform max-w-2xl h-auto border shadow-lg rounded-xl bg-slate-50 px-[10px] py-0 mx-auto my-0 max-h-[80vh] overflow-auto">
         <DrawerHeader className="border-b py-1">
           <DrawerTitle className="text-center flex items-center justify-center gap-2">
@@ -287,7 +293,7 @@ export const DayDetailDrawer: React.FC<DayDetailDrawerProps> = ({
             <TabsContent value="notes">
               <div className="mb-4">
                 <h3 className="font-medium mb-2">Client Notes</h3>
-                {clientNotes.map(note => (
+                {(clientNotes || []).map(note => (
                   <ClientContactNote
                     key={note.id}
                     id={note.id}
@@ -315,5 +321,6 @@ export const DayDetailDrawer: React.FC<DayDetailDrawerProps> = ({
           </Button>
         </DrawerFooter>
       </DrawerContent>
-    </Drawer>;
+    </Drawer>
+  );
 };
