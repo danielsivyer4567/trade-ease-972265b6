@@ -20,7 +20,7 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
-    const { prompt } = await req.json();
+    const { prompt, model = 'gpt-4o-mini' } = await req.json();
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -29,7 +29,7 @@ serve(async (req) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4o-mini',
+        model: model,
         messages: [
           { role: 'system', content: 'You are a helpful assistant that generates content based on user prompts.' },
           { role: 'user', content: prompt }
@@ -47,7 +47,7 @@ serve(async (req) => {
         {
           prompt,
           response: generatedText,
-          model: 'gpt-4o-mini',
+          model: model,
           provider: 'openai'
         }
       ]);

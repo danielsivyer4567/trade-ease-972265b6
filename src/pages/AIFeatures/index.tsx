@@ -1,11 +1,11 @@
 
+import React, { useState } from 'react';
 import { AppLayout } from "@/components/ui/AppLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { Brain, Sparkles, Zap, Network } from "lucide-react";
-import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -19,7 +19,10 @@ export default function AIFeatures() {
     setIsGenerating(true);
     try {
       const { data, error } = await supabase.functions.invoke('generate-with-openai', {
-        body: { prompt }
+        body: { 
+          prompt,
+          model: 'gpt-4o-mini'  // Explicitly specify the model
+        }
       });
 
       if (error) throw error;
