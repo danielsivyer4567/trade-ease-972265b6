@@ -10,7 +10,7 @@ import { useTabNavigation } from "@/hooks/useTabNavigation";
 const getPurchaseOrderById = (id: string): Promise<PurchaseOrder | undefined> => {
   return new Promise((resolve) => {
     setTimeout(() => {
-      const mockOrders = [
+      const mockOrders: PurchaseOrder[] = [
         {
           id: '1',
           orderNo: 'PO00005',
