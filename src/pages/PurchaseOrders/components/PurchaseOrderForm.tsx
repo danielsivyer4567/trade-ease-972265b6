@@ -99,7 +99,7 @@ export function PurchaseOrderForm({
 
   const removeItem = (index: number) => {
     if (items.length === 1) {
-      toast("At least one item is required");
+      toast.warning("At least one item is required");
       return;
     }
     
