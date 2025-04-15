@@ -87,7 +87,6 @@ export function PurchaseOrderForm({
   const removeItem = (index: number) => {
     if (items.length === 1) {
       toast({
-        title: "Cannot remove",
         description: "At least one item is required",
         variant: "destructive",
       });
