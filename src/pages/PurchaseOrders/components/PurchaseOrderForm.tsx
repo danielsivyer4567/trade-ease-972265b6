@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,8 +14,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { toast } from "sonner";
 import { PurchaseOrder } from "../types";
+import { AttachmentUpload } from "./AttachmentUpload";
+import { v4 as uuidv4 } from "uuid";
 
-// Form schema for validation
 const formSchema = z.object({
   orderNo: z.string().min(1, "Order number is required"),
   supplier: z.string().min(1, "Supplier is required"),
@@ -33,6 +33,15 @@ const formSchema = z.object({
       total: z.number().min(0, "Total must be at least 0"),
     })
   ).min(1, "At least one item is required"),
+  attachments: z.array(
+    z.object({
+      id: z.string(),
+      fileName: z.string(),
+      fileUrl: z.string(),
+      fileType: z.string(),
+      uploadedAt: z.string()
+    })
+  ).optional()
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -52,6 +61,10 @@ export function PurchaseOrderForm({
     { description: string; quantity: number; unitPrice: number; total: number }[]
   >(initialData?.items || [{ description: "", quantity: 1, unitPrice: 0, total: 0 }]);
 
+  const [attachments, setAttachments] = useState<PurchaseOrderAttachment[]>(
+    initialData?.attachments || []
+  );
+
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -63,6 +76,7 @@ export function PurchaseOrderForm({
       deliveryDate: initialData?.deliveryDate ? new Date(initialData.deliveryDate) : new Date(),
       status: initialData?.status || "draft",
       items: items,
+      attachments: initialData?.attachments || []
     },
   });
 
@@ -70,7 +84,6 @@ export function PurchaseOrderForm({
     const newItems = [...items];
     newItems[index] = { ...newItems[index], [field]: value };
     
-    // Recalculate total if quantity or unitPrice changes
     if (field === "quantity" || field === "unitPrice") {
       newItems[index].total = 
         Number(newItems[index].quantity) * Number(newItems[index].unitPrice);
@@ -98,10 +111,26 @@ export function PurchaseOrderForm({
     form.setValue("items", newItems);
   };
 
+  const handleAttach = (files: FileList) => {
+    const newAttachments = Array.from(files).map((file) => ({
+      id: uuidv4(),
+      fileName: file.name,
+      fileUrl: URL.createObjectURL(file),
+      fileType: file.type,
+      uploadedAt: new Date().toISOString()
+    }));
+    setAttachments([...attachments, ...newAttachments]);
+  };
+
+  const handleRemoveAttachment = (attachmentId: string) => {
+    setAttachments(attachments.filter((a) => a.id !== attachmentId));
+  };
+
   const handleFormSubmit = (data: FormValues) => {
     onSubmit({
       ...data,
       items: items,
+      attachments: attachments
     });
   };
 
@@ -335,6 +364,15 @@ export function PurchaseOrderForm({
               <div className="flex justify-end items-center space-x-2 border-t pt-4">
                 <div className="font-semibold">Total: ${totalAmount.toFixed(2)}</div>
               </div>
+            </div>
+            
+            <div className="space-y-4 my-6">
+              <h3 className="text-lg font-medium">Attachments</h3>
+              <AttachmentUpload
+                attachments={attachments}
+                onAttach={handleAttach}
+                onRemove={handleRemoveAttachment}
+              />
             </div>
             
             <div className="flex justify-end space-x-2">

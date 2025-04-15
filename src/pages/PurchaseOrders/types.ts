@@ -7,6 +7,14 @@ export interface PurchaseOrderItem {
   total: number;
 }
 
+export interface PurchaseOrderAttachment {
+  id: string;
+  fileName: string;
+  fileUrl: string;
+  fileType: string;
+  uploadedAt: string;
+}
+
 export interface PurchaseOrder {
   id: string;
   orderNo: string;
@@ -20,4 +28,5 @@ export interface PurchaseOrder {
   total: number;
   sent: boolean;
   items?: PurchaseOrderItem[];
+  attachments?: PurchaseOrderAttachment[];
 }
