@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -100,10 +99,7 @@ export function PurchaseOrderForm({
 
   const removeItem = (index: number) => {
     if (items.length === 1) {
-      toast({
-        description: "At least one item is required",
-        variant: "destructive",
-      });
+      toast("At least one item is required");
       return;
     }
     
