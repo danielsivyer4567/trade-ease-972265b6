@@ -1,4 +1,3 @@
-
 import { 
   Bot,
   Network,
@@ -10,7 +9,8 @@ import {
   Share2,
   Bell,
   Settings,
-  Calculator
+  Calculator,
+  Map  // Add this import for the property boundaries icon
 } from 'lucide-react';
 import { NavigationItem } from '../navigation/NavigationGroup';
 
@@ -82,6 +82,12 @@ export const technicalNavigation = {
       icon: Calculator,
       label: 'Calculators',
       path: '/calculators'
-    }
+    },
+    {
+      type: 'link' as const,
+      icon: Map,  // Use the Map icon for property boundaries
+      label: 'Property Boundaries',
+      path: '/property-boundaries',
+    },
   ] as NavigationItem[],
 };
