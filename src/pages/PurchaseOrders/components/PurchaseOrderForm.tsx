@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,7 +14,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { toast } from "sonner";
-import { PurchaseOrder } from "../types";
+import { PurchaseOrder, PurchaseOrderAttachment } from "../types";
 import { AttachmentUpload } from "./AttachmentUpload";
 import { v4 as uuidv4 } from "uuid";
 
