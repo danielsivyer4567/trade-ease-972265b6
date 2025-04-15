@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { AppLayout } from "@/components/ui/AppLayout";
 import { Card, CardContent } from "@/components/ui/card";
@@ -5,6 +6,7 @@ import { PurchaseOrderHeader } from './components/PurchaseOrderHeader';
 import { PurchaseOrderActions } from './components/PurchaseOrderActions';
 import { PurchaseOrderTable } from './components/PurchaseOrderTable';
 import { PurchaseOrder } from './types';
+import { useTabNavigation } from '@/hooks/useTabNavigation';
 
 const purchaseOrders: PurchaseOrder[] = [
   {
@@ -50,6 +52,22 @@ const purchaseOrders: PurchaseOrder[] = [
 
 export default function PurchaseOrders() {
   const [selectedTab, setSelectedTab] = useState('all');
+  const [searchQuery, setSearchQuery] = useState("");
+  const { openInTab } = useTabNavigation();
+
+  // Filter purchase orders based on search query
+  const filteredOrders = searchQuery
+    ? purchaseOrders.filter(order => 
+        order.orderNo.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        order.supplier.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        order.job.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    : purchaseOrders;
+
+  // Handle row click to open the purchase order in a new tab
+  const handleRowClick = (order: PurchaseOrder) => {
+    openInTab(`/purchase-orders/${order.id}`, `PO: ${order.orderNo}`, `po-${order.id}`);
+  };
 
   return (
     <AppLayout>
@@ -61,12 +79,15 @@ export default function PurchaseOrders() {
           />
 
           <PurchaseOrderActions 
-            onSearch={(value) => console.log('Search:', value)}
+            onSearch={setSearchQuery}
           />
 
           <Card>
             <CardContent className="p-0">
-              <PurchaseOrderTable purchaseOrders={purchaseOrders} />
+              <PurchaseOrderTable 
+                purchaseOrders={filteredOrders} 
+                onRowClick={handleRowClick}
+              />
             </CardContent>
           </Card>
         </div>

@@ -1,56 +1,16 @@
 
-import React, { Suspense } from 'react';
+import React from 'react';
 import { Route } from 'react-router-dom';
-import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
-import { LoadingFallback } from './loading-fallback';
 
-// Import pages
-const SuppliersPage = React.lazy(() => import('@/pages/Suppliers'));
-const InventoryPage = React.lazy(() => import('@/pages/Inventory'));
-const PurchaseOrdersPage = React.lazy(() => import('@/pages/PurchaseOrders'));
-const MaterialOrderingPage = React.lazy(() => import('@/pages/MaterialOrdering'));
-// Import job material ordering
-const JobMaterialOrderingPage = React.lazy(() => import('@/pages/Jobs/JobMaterialOrdering'));
+// Purchase Orders
+const PurchaseOrders = React.lazy(() => import('@/pages/PurchaseOrders/index'));
+const CreatePurchaseOrder = React.lazy(() => import('@/pages/PurchaseOrders/CreatePurchaseOrder'));
+const PurchaseOrderView = React.lazy(() => import('@/pages/PurchaseOrders/PurchaseOrderView'));
 
-// Export routes as JSX elements
 export const supplyChainRoutes = (
   <>
-    <Route element={<ProtectedRoute />}>
-      <Route path="/suppliers" element={
-        <Suspense fallback={<LoadingFallback />}>
-          <SuppliersPage />
-        </Suspense>
-      } />
-      
-      <Route path="/inventory" element={
-        <Suspense fallback={<LoadingFallback />}>
-          <InventoryPage />
-        </Suspense>
-      } />
-      
-      <Route path="/purchase-orders" element={
-        <Suspense fallback={<LoadingFallback />}>
-          <PurchaseOrdersPage />
-        </Suspense>
-      } />
-      
-      <Route path="/material-ordering" element={
-        <Suspense fallback={<LoadingFallback />}>
-          <MaterialOrderingPage />
-        </Suspense>
-      } />
-      
-      <Route path="/jobs/:jobId/materials" element={
-        <Suspense fallback={<LoadingFallback />}>
-          <JobMaterialOrderingPage />
-        </Suspense>
-      } />
-      
-      <Route path="/jobs/new/materials" element={
-        <Suspense fallback={<LoadingFallback />}>
-          <JobMaterialOrderingPage />
-        </Suspense>
-      } />
-    </Route>
+    <Route path="/purchase-orders" element={<PurchaseOrders />} />
+    <Route path="/purchase-orders/create" element={<CreatePurchaseOrder />} />
+    <Route path="/purchase-orders/:id" element={<PurchaseOrderView />} />
   </>
 );
