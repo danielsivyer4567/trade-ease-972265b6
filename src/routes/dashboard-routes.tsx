@@ -15,6 +15,7 @@ const FencingCalculator = React.lazy(() => import('@/pages/Calculators/FencingCa
 const NCCCodesCalculator = React.lazy(() => import('@/pages/Calculators/NCCCodesCalculator'));
 const StatisticsPage = React.lazy(() => import('@/pages/Statistics'));
 const AIFeaturesPage = React.lazy(() => import('@/pages/AIFeatures'));
+const PropertyBoundariesPage = React.lazy(() => import('@/pages/PropertyBoundaries'));
 
 // Export routes as JSX elements
 export const dashboardRoutes = (
@@ -73,6 +74,11 @@ export const dashboardRoutes = (
       <Route path="/ai-features" element={
         <Suspense fallback={<LoadingFallback />}>
           <AIFeaturesPage />
+        </Suspense>
+      } />
+      <Route path="/property-boundaries" element={
+        <Suspense fallback={<LoadingFallback />}>
+          <PropertyBoundariesPage />
         </Suspense>
       } />
     </Route>
