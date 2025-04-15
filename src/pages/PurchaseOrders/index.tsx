@@ -1,242 +1,164 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { AppLayout } from "@/components/ui/AppLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, Plus, Filter, FileDown, Clock } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Search, Printer, Mail, Download, MoreHorizontal } from "lucide-react";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 
 interface PurchaseOrder {
   id: string;
-  poNumber: string;
+  orderNo: string;
   supplier: string;
+  reference: string;
+  linkedBill: string;
+  status: 'billed' | 'pending' | 'draft';
+  job: string;
   orderDate: string;
   deliveryDate: string;
-  totalAmount: number;
-  status: 'draft' | 'sent' | 'partially-received' | 'received' | 'cancelled';
+  total: number;
+  sent: boolean;
 }
 
-const PurchaseOrdersPage = () => {
-  // Sample purchase orders data - in a real app, this would be fetched from your database
-  const purchaseOrders: PurchaseOrder[] = [
-    {
-      id: '1',
-      poNumber: 'PO-2024-001',
-      supplier: 'Lumber Supplies Inc.',
-      orderDate: '2024-04-01',
-      deliveryDate: '2024-04-10',
-      totalAmount: 2750.00,
-      status: 'received'
-    },
-    {
-      id: '2',
-      poNumber: 'PO-2024-002',
-      supplier: 'Hardware Depot',
-      orderDate: '2024-04-15',
-      deliveryDate: '2024-04-25',
-      totalAmount: 1250.75,
-      status: 'sent'
-    },
-    {
-      id: '3',
-      poNumber: 'PO-2024-003',
-      supplier: 'Electrical Components Ltd.',
-      orderDate: '2024-05-01',
-      deliveryDate: '2024-05-15',
-      totalAmount: 3000.00,
-      status: 'partially-received'
-    },
-    {
-      id: '4',
-      poNumber: 'PO-2024-004',
-      supplier: 'Paint Supplies Co.',
-      orderDate: '2024-05-10',
-      deliveryDate: '2024-05-20',
-      totalAmount: 875.50,
-      status: 'draft'
-    },
-    {
-      id: '5',
-      poNumber: 'PO-2024-005',
-      supplier: 'Tools & Equipment Inc.',
-      orderDate: '2024-05-15',
-      deliveryDate: '2024-05-25',
-      totalAmount: 4250.00,
-      status: 'sent'
-    },
-  ];
+const purchaseOrders: PurchaseOrder[] = [
+  {
+    id: '1',
+    orderNo: 'PO00005',
+    supplier: 'Aaa Timber And Hardware',
+    reference: '',
+    linkedBill: 'Aaa Timber And Hardware',
+    status: 'billed',
+    job: 'JB00763',
+    orderDate: '21 Jan 2025',
+    deliveryDate: '21 Jan 2025',
+    total: 500.00,
+    sent: true
+  },
+  {
+    id: '2',
+    orderNo: 'PO00004',
+    supplier: 'Jackson Ryan',
+    reference: '',
+    linkedBill: 'Jackson Ryan - 18 Jan 2025',
+    status: 'billed',
+    job: 'JB00764',
+    orderDate: '18 Jan 2025',
+    deliveryDate: '18 Jan 2025',
+    total: 0.00,
+    sent: true
+  },
+  {
+    id: '3',
+    orderNo: 'PO00003',
+    supplier: 'China',
+    reference: '',
+    linkedBill: 'China - 18 Jan 2025',
+    status: 'billed',
+    job: 'JB00764',
+    orderDate: '18 Jan 2025',
+    deliveryDate: '18 Jan 2025',
+    total: 1100.00,
+    sent: true
+  }
+];
 
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD'
-    }).format(amount);
-  };
-
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return new Intl.DateTimeFormat('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    }).format(date);
-  };
-
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'draft':
-        return <Badge variant="outline" className="bg-gray-50 text-gray-700 border-gray-200">Draft</Badge>;
-      case 'sent':
-        return <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">Sent</Badge>;
-      case 'partially-received':
-        return <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200">Partially Received</Badge>;
-      case 'received':
-        return <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">Received</Badge>;
-      case 'cancelled':
-        return <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">Cancelled</Badge>;
-      default:
-        return <Badge variant="outline">{status}</Badge>;
-    }
-  };
-
-  const getDeliveryStatus = (deliveryDate: string) => {
-    const today = new Date();
-    const delivery = new Date(deliveryDate);
-    
-    if (delivery < today) {
-      return <span className="flex items-center text-red-600 text-xs font-medium">
-        <Clock className="h-3 w-3 mr-1" />
-        Overdue
-      </span>;
-    }
-    
-    const diffTime = Math.abs(delivery.getTime() - today.getTime());
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    
-    if (diffDays <= 7) {
-      return <span className="text-amber-600 text-xs font-medium">Due in {diffDays} days</span>;
-    }
-    
-    return <span className="text-gray-500 text-xs">On schedule</span>;
-  };
+export default function PurchaseOrders() {
+  const [selectedTab, setSelectedTab] = useState('all');
 
   return (
     <AppLayout>
       <div className="p-6">
-        <div className="max-w-6xl mx-auto space-y-6">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <div>
-              <h1 className="text-2xl font-bold">Purchase Orders</h1>
-              <p className="text-gray-500">Create and manage purchase orders to suppliers</p>
+        <div className="max-w-[1600px] mx-auto">
+          <div className="flex justify-between items-center mb-6">
+            <div className="flex items-center gap-4">
+              <Tabs defaultValue="all" className="w-full">
+                <TabsList>
+                  <TabsTrigger value="draft">Draft P/O (2)</TabsTrigger>
+                  <TabsTrigger value="unbilled">Unbilled P/O</TabsTrigger>
+                  <TabsTrigger value="billed">Billed P/O (3)</TabsTrigger>
+                  <TabsTrigger value="all">All P/O (5)</TabsTrigger>
+                  <TabsTrigger value="draft-bills">Draft Bills (2)</TabsTrigger>
+                  <TabsTrigger value="approved">Approved Bills (234)</TabsTrigger>
+                  <TabsTrigger value="all-bills">All Bills (252)</TabsTrigger>
+                </TabsList>
+              </Tabs>
             </div>
-            <div className="flex gap-2 w-full sm:w-auto">
-              <Button
-                className="flex items-center gap-1"
-              >
-                <Plus className="h-4 w-4" />
-                <span>New Purchase Order</span>
+            <div className="flex items-center gap-2">
+              <Button variant="outline" size="icon">
+                <MoreHorizontal className="h-4 w-4" />
+              </Button>
+              <Button variant="outline" size="icon">
+                <Printer className="h-4 w-4" />
+              </Button>
+              <Button variant="outline" size="icon">
+                <Mail className="h-4 w-4" />
+              </Button>
+              <Button variant="outline" size="icon">
+                <Download className="h-4 w-4" />
               </Button>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium text-gray-500">Total Orders</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{purchaseOrders.length}</div>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium text-gray-500">Open Orders</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-blue-600">
-                  {purchaseOrders.filter(po => ['sent', 'partially-received'].includes(po.status)).length}
-                </div>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium text-gray-500">Total Value</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">
-                  {formatCurrency(purchaseOrders.reduce((total, po) => total + po.totalAmount, 0))}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          <Card>
-            <CardHeader className="pb-4">
-              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                <CardTitle>Purchase Orders</CardTitle>
-                <div className="flex flex-wrap gap-2 w-full sm:w-auto">
-                  <div className="relative w-full sm:w-auto">
-                    <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-400" />
-                    <Input
-                      placeholder="Search orders..."
-                      className="pl-8 w-full sm:w-[250px]"
-                    />
-                  </div>
-                  
-                  <Button variant="outline" size="icon">
-                    <Filter className="h-4 w-4" />
-                  </Button>
-                  
-                  <Button variant="outline" size="icon">
-                    <FileDown className="h-4 w-4" />
-                  </Button>
-                </div>
+          <div className="space-y-4">
+            <div className="flex justify-between">
+              <Button className="bg-[#00A3BE] hover:bg-[#008CA3]">
+                New Purchase Order
+              </Button>
+              <div className="relative w-[300px]">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Input
+                  placeholder="Search..."
+                  className="pl-9"
+                />
               </div>
-            </CardHeader>
-            <CardContent>
-              <div className="overflow-x-auto">
+            </div>
+
+            <Card>
+              <CardContent className="p-0">
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>PO Number</TableHead>
+                      <TableHead>Order No</TableHead>
                       <TableHead>Supplier</TableHead>
+                      <TableHead>Reference</TableHead>
+                      <TableHead>Linked Bill</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Job</TableHead>
                       <TableHead>Order Date</TableHead>
                       <TableHead>Delivery Date</TableHead>
-                      <TableHead className="text-right">Amount</TableHead>
-                      <TableHead>Status</TableHead>
+                      <TableHead className="text-right">Total</TableHead>
+                      <TableHead>Sent</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {purchaseOrders.map((po) => (
-                      <TableRow key={po.id} className="cursor-pointer hover:bg-gray-50">
-                        <TableCell className="font-medium">{po.poNumber}</TableCell>
-                        <TableCell>{po.supplier}</TableCell>
-                        <TableCell>{formatDate(po.orderDate)}</TableCell>
+                    {purchaseOrders.map((order) => (
+                      <TableRow key={order.id} className="hover:bg-muted/50 cursor-pointer">
+                        <TableCell>{order.orderNo}</TableCell>
+                        <TableCell>{order.supplier}</TableCell>
+                        <TableCell>{order.reference}</TableCell>
+                        <TableCell>{order.linkedBill}</TableCell>
                         <TableCell>
-                          <div>
-                            {formatDate(po.deliveryDate)}
-                            <div>
-                              {getDeliveryStatus(po.deliveryDate)}
-                            </div>
-                          </div>
+                          <Badge variant="outline" className="bg-[#61BD4F] text-white">
+                            {order.status}
+                          </Badge>
                         </TableCell>
-                        <TableCell className="text-right">{formatCurrency(po.totalAmount)}</TableCell>
-                        <TableCell>{getStatusBadge(po.status)}</TableCell>
+                        <TableCell>{order.job}</TableCell>
+                        <TableCell>{order.orderDate}</TableCell>
+                        <TableCell>{order.deliveryDate}</TableCell>
+                        <TableCell className="text-right">{order.total.toFixed(2)}</TableCell>
+                        <TableCell>{order.sent ? "Yes" : "No"}</TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
                 </Table>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </div>
     </AppLayout>
   );
-};
-
-export default PurchaseOrdersPage;
+}
