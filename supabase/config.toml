@@ -4,3 +4,5 @@
 verify_jwt = true
 [functions.arcgis-boundaries]
 verify_jwt = true
+[functions.search-property-boundaries]
+verify_jwt = true
