@@ -54,7 +54,12 @@ export const searchProperties = async (
 
     return { 
       data: properties, 
-      pagination: data?.pagination || { total: 0, limit, offset, hasMore: false },
+      pagination: {
+        total: data?.pagination?.total || 0,
+        limit: data?.pagination?.limit || limit,
+        offset: data?.pagination?.offset || offset,
+        hasMore: data?.pagination?.hasMore || false
+      },
       error: null 
     };
   } catch (error) {
