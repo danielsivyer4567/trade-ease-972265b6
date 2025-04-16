@@ -2,3 +2,4 @@
 [functions]
 [functions.search-property-boundaries]
 verify_jwt = true
+

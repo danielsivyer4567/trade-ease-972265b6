@@ -26,9 +26,14 @@ serve(async (req) => {
     const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
     // Parse request body
-    const { searchQuery, userId, limit = 20, offset = 0 } = await req.json()
+    const requestData = await req.json().catch(error => {
+      console.error('Error parsing request body:', error);
+      throw new Error('Invalid request body format');
+    });
     
-    console.log(`Search request received: query="${searchQuery}", userId=${userId}`)
+    const { searchQuery, userId, limit = 20, offset = 0 } = requestData;
+    
+    console.log(`Search request received: query="${searchQuery}", userId=${userId}, limit=${limit}, offset=${offset}`);
 
     // Build base query
     let query = supabase
@@ -56,16 +61,21 @@ serve(async (req) => {
       throw error
     }
     
+    // Construct the response with pagination data
+    const responseBody = {
+      data,
+      pagination: {
+        total: count || 0,
+        limit,
+        offset,
+        hasMore: (offset + limit) < (count || 0)
+      }
+    };
+    
+    console.log(`Search completed: Found ${data?.length || 0} results out of ${count || 0} total`);
+    
     return new Response(
-      JSON.stringify({
-        data,
-        pagination: {
-          total: count || 0,
-          limit,
-          offset,
-          hasMore: (offset + limit) < (count || 0)
-        }
-      }),
+      JSON.stringify(responseBody),
       { 
         headers: { 
           ...corsHeaders, 
@@ -77,7 +87,10 @@ serve(async (req) => {
     console.error('Error in search-property-boundaries function:', error)
     
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ 
+        error: error instanceof Error ? error.message : 'Unknown error occurred',
+        details: error instanceof Error ? error.stack : undefined 
+      }),
       { 
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -85,4 +98,3 @@ serve(async (req) => {
     )
   }
 })
-

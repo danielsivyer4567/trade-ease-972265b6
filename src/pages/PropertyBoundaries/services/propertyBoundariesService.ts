@@ -24,6 +24,8 @@ export const searchProperties = async (
   error: string | null 
 }> => {
   try {
+    console.log(`Calling search-property-boundaries with query: "${searchQuery}", limit: ${limit}, offset: ${offset}`);
+    
     // Get the current user for authenticated requests
     const { data: { user } } = await supabase.auth.getUser();
     const userId = user?.id;
@@ -41,6 +43,8 @@ export const searchProperties = async (
         error: error.message 
       };
     }
+
+    console.log('Search response:', data);
 
     // Transform the data to match the Property type if needed
     const properties = data?.data?.map((item: any): Property => ({
