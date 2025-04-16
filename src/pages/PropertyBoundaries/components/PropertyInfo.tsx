@@ -1,72 +1,75 @@
 
 import React from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import CustomPropertyMap from '@/components/property-map/CustomPropertyMap';
 import { Property } from '../types';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { MapPin, Ruler, Landmark } from 'lucide-react';
-import { formatCoordinates } from '../utils/formatters';
+import { formatCoordinate } from '../utils/formatters';
 
 interface PropertyInfoProps {
   property: Property | null;
+  isLoading: boolean;
+  isMeasuring: boolean;
 }
 
-export const PropertyInfo: React.FC<PropertyInfoProps> = ({ property }) => {
-  if (!property) {
-    return null;
+export const PropertyInfo: React.FC<PropertyInfoProps> = ({ 
+  property, 
+  isLoading, 
+  isMeasuring 
+}) => {
+  if (isLoading) {
+    return (
+      <Card className="w-full">
+        <CardHeader>
+          <Skeleton className="h-8 w-3/4" />
+          <Skeleton className="h-4 w-1/2 mt-2" />
+        </CardHeader>
+        <CardContent>
+          <Skeleton className="h-[400px] w-full" />
+        </CardContent>
+      </Card>
+    );
   }
 
-  // Calculate total boundaries
-  const totalBoundaries = property.boundaries.length;
-  
-  // Calculate total points across all boundaries
-  const totalPoints = property.boundaries.reduce(
-    (sum, boundary) => sum + boundary.length,
-    0
-  );
+  if (!property) {
+    return (
+      <Card className="w-full h-full flex items-center justify-center">
+        <CardContent className="p-6 text-center">
+          <p className="text-muted-foreground">
+            Select a property to view its boundaries
+          </p>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // Convert boundaries from GeoJSON format to the format expected by CustomPropertyMap
+  const processedBoundaries = property.boundaries.map(boundary => {
+    return boundary.map(point => [point[1], point[0]]);
+  });
 
   return (
-    <Card>
-      <CardHeader className="pb-2">
-        <CardTitle className="text-base flex items-center gap-2">
-          <Landmark className="h-4 w-4 text-primary" />
-          Property Details
-        </CardTitle>
+    <Card className="w-full">
+      <CardHeader>
+        <CardTitle>{property.name}</CardTitle>
+        <p className="text-sm text-muted-foreground">{property.address}</p>
       </CardHeader>
-      <CardContent className="pb-3">
-        <div className="space-y-2 text-sm">
-          {property.address && (
-            <div className="flex items-start gap-2">
-              <MapPin className="h-4 w-4 text-gray-500 mt-0.5 flex-shrink-0" />
-              <div>{property.address}</div>
-            </div>
-          )}
-          
-          <div className="flex items-start gap-2">
-            <Ruler className="h-4 w-4 text-gray-500 mt-0.5 flex-shrink-0" />
-            <div>
-              <div className="font-medium">Boundaries</div>
-              <div className="text-xs text-gray-600 mt-1">
-                {totalBoundaries} {totalBoundaries === 1 ? 'boundary' : 'boundaries'} with {totalPoints} total points
-              </div>
-            </div>
+      <CardContent className="p-0">
+        {property.location && (
+          <div className="mb-4 px-6">
+            <p className="text-sm text-muted-foreground">
+              <span className="font-medium">Location:</span> {formatCoordinate(property.location[0])}, {formatCoordinate(property.location[1])}
+            </p>
           </div>
-          
-          <div className="flex items-start gap-2">
-            <MapPin className="h-4 w-4 text-gray-500 mt-0.5 flex-shrink-0" />
-            <div>
-              <div className="font-medium">Coordinates</div>
-              <div className="text-xs text-gray-600 mt-1">
-                {formatCoordinates(property.location)}
-              </div>
-            </div>
-          </div>
-          
-          {property.description && (
-            <div className="pt-2 border-t border-gray-100 mt-3">
-              <div className="font-medium mb-1">Description</div>
-              <p className="text-xs text-gray-600">{property.description}</p>
-            </div>
-          )}
-        </div>
+        )}
+        
+        <CustomPropertyMap 
+          boundaries={processedBoundaries}
+          title={property.name}
+          description={property.description || property.address || "Property boundary view"}
+          centerPoint={property.location || [0, 0]}
+          measureMode={isMeasuring}
+        />
       </CardContent>
     </Card>
   );
