@@ -44,8 +44,12 @@ export const PropertyInfo: React.FC<PropertyInfoProps> = ({
   }
 
   // Convert boundaries from GeoJSON format to the format expected by CustomPropertyMap
+  // Make sure each boundary point is explicitly cast as [number, number]
   const processedBoundaries = property.boundaries.map(boundary => {
-    return boundary.map(point => [point[1], point[0]]);
+    return boundary.map(point => {
+      // Ensure each point is a tuple of exactly two numbers [lng, lat]
+      return [point[1], point[0]] as [number, number];
+    });
   });
 
   return (

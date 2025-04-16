@@ -49,6 +49,7 @@ const PropertyBoundaries: React.FC = () => {
         <PageHeader 
           title="Property Boundaries"
           description="View, search and manage property boundaries"
+          onFileUploadClick={handleUploadClick}
         />
         
         {!isAuthenticated && (
