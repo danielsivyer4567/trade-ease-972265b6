@@ -8,10 +8,16 @@ import { AuthNotice } from './AuthNotice';
 import { useState, useEffect } from 'react';
 
 interface PageHeaderProps {
-  onFileUploadClick: () => void;
+  title: string;
+  description?: string;
+  onFileUploadClick?: () => void;
 }
 
-export const PageHeader: React.FC<PageHeaderProps> = ({ onFileUploadClick }) => {
+export const PageHeader: React.FC<PageHeaderProps> = ({ 
+  title, 
+  description,
+  onFileUploadClick 
+}) => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   
   useEffect(() => {
@@ -38,13 +44,15 @@ export const PageHeader: React.FC<PageHeaderProps> = ({ onFileUploadClick }) => 
   return (
     <div className="space-y-4">
       <SectionHeader
-        title="Property Boundaries"
-        description="View and manage property boundaries for your sites."
+        title={title}
+        description={description}
         rightElement={
-          <Button onClick={onFileUploadClick} className="gap-2">
-            <Upload className="h-4 w-4" />
-            <span>Upload Boundaries</span>
-          </Button>
+          onFileUploadClick && (
+            <Button onClick={onFileUploadClick} className="gap-2">
+              <Upload className="h-4 w-4" />
+              <span>Upload Boundaries</span>
+            </Button>
+          )
         }
       />
       
