@@ -33,7 +33,7 @@ serve(async (req) => {
     // Build base query
     let query = supabase
       .from('property_boundaries')
-      .select('*')
+      .select('*', { count: 'exact' })
       
     // Apply search filters if provided
     if (searchQuery) {
@@ -56,25 +56,14 @@ serve(async (req) => {
       throw error
     }
     
-    // Get the total count for pagination
-    const { count: totalCount, error: countError } = await supabase
-      .from('property_boundaries')
-      .select('*', { count: 'exact', head: true })
-      .or(`name.ilike.%${searchQuery || ''}%,address.ilike.%${searchQuery || ''}%,description.ilike.%${searchQuery || ''}%`)
-      .eq(userId ? 'user_id' : 'id', userId || '')
-    
-    if (countError) {
-      console.error('Error counting property boundaries:', countError)
-    }
-
     return new Response(
       JSON.stringify({
         data,
         pagination: {
-          total: totalCount || 0,
+          total: count || 0,
           limit,
           offset,
-          hasMore: (offset + limit) < (totalCount || 0)
+          hasMore: (offset + limit) < (count || 0)
         }
       }),
       { 
@@ -96,3 +85,4 @@ serve(async (req) => {
     )
   }
 })
+
