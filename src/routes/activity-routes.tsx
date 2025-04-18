@@ -1,4 +1,3 @@
-
 import React, { Suspense } from 'react';
 import { Route } from 'react-router-dom';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
@@ -7,7 +6,6 @@ import { LoadingFallback } from './loading-fallback';
 // Import pages
 const ActivityPage = React.lazy(() => import('@/pages/Activity'));
 const WorkflowPage = React.lazy(() => import('@/pages/Workflow'));
-const IntegrationsPage = React.lazy(() => import('@/pages/Integrations'));
 const AutomationsPage = React.lazy(() => import('@/pages/Automations'));
 const SiteAuditsPage = React.lazy(() => import('@/pages/SiteAudits'));
 const FormsPage = React.lazy(() => import('@/pages/Forms'));
@@ -37,11 +35,6 @@ export const activityRoutes = (
       <Route path="/workflow/templates" element={
         <Suspense fallback={<LoadingFallback />}>
           <WorkflowTemplatesPage />
-        </Suspense>
-      } />
-      <Route path="/integrations" element={
-        <Suspense fallback={<LoadingFallback />}>
-          <IntegrationsPage />
         </Suspense>
       } />
       <Route path="/automations" element={
