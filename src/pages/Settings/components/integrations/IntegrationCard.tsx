@@ -65,8 +65,7 @@ export const IntegrationCard: React.FC<IntegrationCardProps> = ({
             {loading ? (
               <Loader2 className="h-3 w-3 animate-spin" />
             ) : (
-              status?.charAt(0).toUpperCase() + 
-              status?.slice(1) || 'Not Connected'
+              status?.charAt(0).toUpperCase() + status?.slice(1) || 'Not Connected'
             )}
           </span>
         </div>
@@ -118,6 +117,15 @@ export const IntegrationCard: React.FC<IntegrationCardProps> = ({
           >
             <Loader2 className="h-4 w-4 animate-spin mr-2" />
             Connecting...
+          </Button>
+        ) : !isConnected && integration.apiKeyRequired ? (
+          <Button 
+            className="w-full h-9 text-sm"
+            variant="outline"
+            size="sm"
+            onClick={isXero ? handleXeroConnect : () => onConnect(integration)}
+          >
+            Connect
           </Button>
         ) : (
           <Link to={integration.path} className="w-full mt-auto" onClick={(e) => onIntegrationAction(e, integration)}>
