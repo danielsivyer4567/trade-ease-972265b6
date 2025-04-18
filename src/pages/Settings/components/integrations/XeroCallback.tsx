@@ -28,9 +28,21 @@ export default function XeroCallback() {
           throw new Error("No authorization code received");
         }
 
+        // Get the redirect URI that was used for the initial request
+        const redirect_uri = localStorage.getItem("xeroRedirectUri");
+        if (!redirect_uri) {
+          throw new Error("No redirect URI found");
+        }
+
+        // Clear the stored redirect URI
+        localStorage.removeItem("xeroRedirectUri");
+
         // Exchange the code for tokens
         const response = await supabase.functions.invoke('xero-token-exchange', {
-          body: { code }
+          body: { 
+            code,
+            redirect_uri
+          }
         });
 
         if (response.error) {

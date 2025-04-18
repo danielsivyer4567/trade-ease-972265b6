@@ -11,16 +11,25 @@ export const useIntegrations = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [commandOpen, setCommandOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [xeroClientId, setXeroClientId] = useState("");
+  const [xeroClientSecret, setXeroClientSecret] = useState("");
 
   const fetchConfigs = async (): Promise<IntegrationConfig[]> => {
     try {
       console.log('Fetching integration configs...');
       const { data, error } = await supabase
         .from('integration_configs')
-        .select('integration_name, status');
+        .select('integration_name, status, client_id, client_secret');
 
       if (error) {
         throw error;
+      }
+
+      // Set Xero credentials if they exist
+      const xeroConfig = data.find(config => config.integration_name === 'Xero');
+      if (xeroConfig) {
+        setXeroClientId(xeroConfig.client_id || '');
+        setXeroClientSecret(xeroConfig.client_secret || '');
       }
 
       return data || [];
@@ -59,16 +68,44 @@ export const useIntegrations = () => {
     }));
   };
 
+  const handleXeroClientIdChange = (value: string) => {
+    setXeroClientId(value);
+  };
+
+  const handleXeroClientSecretChange = (value: string) => {
+    setXeroClientSecret(value);
+  };
+
   const handleApiKeySubmit = async (integration: string) => {
     setLoading(prev => ({ ...prev, [integration]: true }));
     try {
       console.log(`Submitting API key for ${integration}...`);
-      const apiKey = apiKeys[integration];
       
-      // For now, just simulate a successful validation
-      // In production, you would call the Supabase function
-      console.log('Simulating API key validation...');
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      if (integration === 'Xero') {
+        // For Xero, we store both client ID and secret
+        const { error } = await supabase
+          .from('integration_configs')
+          .upsert({
+            integration_name: 'Xero',
+            client_id: xeroClientId,
+            client_secret: xeroClientSecret,
+            status: 'pending'
+          });
+
+        if (error) throw error;
+      } else {
+        // For other integrations, store the API key
+        const apiKey = apiKeys[integration];
+        const { error } = await supabase
+          .from('integration_configs')
+          .upsert({
+            integration_name: integration,
+            api_key: apiKey,
+            status: 'connected'
+          });
+
+        if (error) throw error;
+      }
       
       toast.success(`${integration} configured successfully`);
       await loadIntegrationStatuses();
@@ -92,7 +129,13 @@ export const useIntegrations = () => {
   };
 
   const handleConnect = (integration: Integration) => {
-    if (apiKeys[integration.title]) {
+    if (integration.title === 'Xero') {
+      if (!xeroClientId || !xeroClientSecret) {
+        toast.error('Please enter both Client ID and Client Secret for Xero');
+        return;
+      }
+      handleApiKeySubmit('Xero');
+    } else if (apiKeys[integration.title]) {
       handleApiKeySubmit(integration.title);
     } else {
       toast.error(`Please enter an API key for ${integration.title} first`);
@@ -123,6 +166,10 @@ export const useIntegrations = () => {
     handleIntegrationAction,
     handleConnect,
     filterIntegrations,
-    error
+    error,
+    xeroClientId,
+    xeroClientSecret,
+    handleXeroClientIdChange,
+    handleXeroClientSecretChange
   };
 };
