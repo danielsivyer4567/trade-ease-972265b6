@@ -25,10 +25,14 @@ serve(async (req: Request) => {
   }
 
   try {
-    const { code } = await req.json()
+    const { code, redirect_uri } = await req.json()
 
     if (!code) {
       throw new Error('No authorization code provided')
+    }
+
+    if (!redirect_uri) {
+      throw new Error('No redirect URI provided')
     }
 
     const supabaseUrl = Deno.env.get('SUPABASE_URL')
@@ -62,7 +66,7 @@ serve(async (req: Request) => {
       body: new URLSearchParams({
         'grant_type': 'authorization_code',
         'code': code,
-        'redirect_uri': `${req.headers.get('origin')}/settings/integrations/xero/callback`
+        'redirect_uri': redirect_uri
       })
     })
 

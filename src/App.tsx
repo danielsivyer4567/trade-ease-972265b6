@@ -1,14 +1,15 @@
-
-import React from "react";
-import { Routes } from "./routes/index.tsx";
-import { Toaster } from "@/components/ui/toaster";
-import { AuthProvider } from "./contexts/AuthContext";
-import { NotificationProvider } from "./components/notifications/NotificationContextProvider";
-import { Suspense } from "react";
-import { TabsProvider } from "./contexts/TabsContext";
-import { initializeTables } from "./integrations/supabase/dbInit";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter } from "react-router-dom";
+import React, { Suspense } from 'react';
+import { BrowserRouter } from 'react-router-dom';
+import { AuthProvider } from '@/contexts/AuthContext';
+import { Toaster } from '@/components/ui/toaster';
+import { Routes } from './routes/index';
+import { Analytics } from '@vercel/analytics/react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { Toaster as SonnerToaster } from 'sonner';
+import { NotificationProvider } from './components/notifications/NotificationContextProvider';
+import { TabsProvider } from './contexts/TabsContext';
+import { initializeTables } from './integrations/supabase/dbInit';
+import './App.css';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -33,7 +34,6 @@ const AppContent = () => {
 
   return (
     <Suspense fallback={<LoadingFallback />}>
-      <Toaster />
       <Routes />
     </Suspense>
   );
@@ -47,6 +47,9 @@ function App() {
           <TabsProvider>
             <NotificationProvider>
               <AppContent />
+              <Toaster />
+              <SonnerToaster position="bottom-right" closeButton richColors />
+              <Analytics />
             </NotificationProvider>
           </TabsProvider>
         </AuthProvider>
