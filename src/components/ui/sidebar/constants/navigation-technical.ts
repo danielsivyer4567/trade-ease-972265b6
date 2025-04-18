@@ -25,12 +25,6 @@ export const technicalNavigation = {
     },
     {
       type: 'link' as const,
-      icon: Network,
-      label: 'Integrations',
-      path: '/integrations',
-    },
-    {
-      type: 'link' as const,
       icon: Database,
       label: 'Database',
       path: '/database',
