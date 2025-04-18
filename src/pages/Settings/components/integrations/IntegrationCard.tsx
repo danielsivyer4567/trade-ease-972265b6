@@ -1,10 +1,12 @@
-
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardHeader, CardContent, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { ApiKeyInput } from './ApiKeyInput';
 import { Integration } from './types';
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { toast } from "sonner";
 
 interface IntegrationCardProps {
   integration: Integration;
@@ -29,6 +31,22 @@ export const IntegrationCard: React.FC<IntegrationCardProps> = ({
 }) => {
   const IntegrationIcon = integration.icon;
   const isConnected = status === "connected";
+  const [clientId, setClientId] = useState("");
+  
+  // Special handling for Xero integration
+  const isXero = integration.title === "Xero";
+  
+  const handleXeroConnect = () => {
+    if (!clientId || !apiKey) {
+      toast.error("Please enter both Client ID and Client Secret");
+      return;
+    }
+    
+    // Store both values in the apiKey field for simplicity
+    // In a real implementation, you'd want to handle these separately
+    onApiKeyChange(integration.title, `${clientId}:${apiKey}`);
+    onApiKeySubmit(integration.title);
+  };
   
   return (
     <Card key={integration.title} className="flex flex-col h-full">
@@ -51,20 +69,44 @@ export const IntegrationCard: React.FC<IntegrationCardProps> = ({
       </CardHeader>
       <CardContent className="space-y-3 pt-0 flex-grow flex flex-col justify-end">
         {integration.apiKeyRequired && (
-          <ApiKeyInput
-            integration={integration.title}
-            value={apiKey}
-            onChange={(value) => onApiKeyChange(integration.title, value)}
-            onSubmit={() => onApiKeySubmit(integration.title)}
-            isLoading={loading}
-          />
+          <>
+            {isXero ? (
+              <div className="space-y-3">
+                <div className="space-y-2">
+                  <Label htmlFor="xero-client-id" className="text-sm">Client ID</Label>
+                  <Input
+                    id="xero-client-id"
+                    placeholder="Enter your Xero Client ID"
+                    value={clientId}
+                    onChange={(e) => setClientId(e.target.value)}
+                    className="text-sm h-9"
+                  />
+                </div>
+                <ApiKeyInput
+                  integration={integration.title}
+                  value={apiKey}
+                  onChange={(value) => onApiKeyChange(integration.title, value)}
+                  onSubmit={() => {}} // We'll handle this in the button click
+                  isLoading={loading}
+                />
+              </div>
+            ) : (
+              <ApiKeyInput
+                integration={integration.title}
+                value={apiKey}
+                onChange={(value) => onApiKeyChange(integration.title, value)}
+                onSubmit={() => onApiKeySubmit(integration.title)}
+                isLoading={loading}
+              />
+            )}
+          </>
         )}
         {!isConnected && integration.apiKeyRequired ? (
           <Button 
             className="w-full h-9 text-sm"
             variant="outline"
             size="sm"
-            onClick={() => onConnect(integration)}
+            onClick={isXero ? handleXeroConnect : () => onConnect(integration)}
           >
             Connect
           </Button>
