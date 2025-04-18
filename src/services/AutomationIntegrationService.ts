@@ -4,10 +4,15 @@ import { Automation } from "@/pages/Automations/types";
 
 type AutomationTarget = 'job' | 'quote' | 'customer' | 'message' | 'social' | 'calendar';
 
+interface AutomationData {
+  action?: string;
+  [key: string]: string | undefined;
+}
+
 interface AutomationTriggerParams {
   targetType: AutomationTarget;
   targetId: string;
-  additionalData?: Record<string, any>;
+  additionalData?: AutomationData;
   userId?: string;
 }
 

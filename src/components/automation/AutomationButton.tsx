@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Workflow, Loader2 } from 'lucide-react';
@@ -10,6 +9,12 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+
+interface Automation {
+  id: number;
+  title: string;
+  category: string;
+}
 
 interface AutomationButtonProps {
   targetType: 'job' | 'quote' | 'customer' | 'message' | 'social' | 'calendar';
@@ -29,7 +34,7 @@ export function AutomationButton({
   buttonText = 'Automations'
 }: AutomationButtonProps) {
   const [isLoading, setIsLoading] = useState(false);
-  const [automations, setAutomations] = useState<any[]>([]);
+  const [automations, setAutomations] = useState<Automation[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const navigate = useNavigate();
   
@@ -43,8 +48,9 @@ export function AutomationButton({
       }
       
       setAutomations(automations || []);
-    } catch (error) {
-      console.error('Failed to load automations:', error);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to load automations';
+      console.error('Failed to load automations:', errorMessage);
       toast.error('Failed to load automations');
     } finally {
       setIsLoading(false);
@@ -67,8 +73,9 @@ export function AutomationButton({
       });
       toast.success('Automation triggered successfully');
       setIsOpen(false);
-    } catch (error) {
-      console.error('Failed to trigger automation:', error);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to trigger automation';
+      console.error('Failed to trigger automation:', errorMessage);
       toast.error('Failed to trigger automation');
     } finally {
       setIsLoading(false);
