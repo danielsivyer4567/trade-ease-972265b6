@@ -7,6 +7,7 @@ import { Integration } from './types';
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
+import { Loader2 } from "lucide-react";
 
 interface IntegrationCardProps {
   integration: Integration;
@@ -61,12 +62,17 @@ export const IntegrationCard: React.FC<IntegrationCardProps> = ({
               ? "bg-green-100 text-green-800"
               : "bg-gray-100 text-gray-800"
           }`}>
-            {status?.charAt(0).toUpperCase() + 
-            status?.slice(1) || 'Not Connected'}
+            {loading ? (
+              <Loader2 className="h-3 w-3 animate-spin" />
+            ) : (
+              status?.charAt(0).toUpperCase() + 
+              status?.slice(1) || 'Not Connected'
+            )}
           </span>
         </div>
         <CardDescription className="text-xs md:text-sm mt-1">{integration.description}</CardDescription>
       </CardHeader>
+      
       <CardContent className="space-y-3 pt-0 flex-grow flex flex-col justify-end">
         {integration.apiKeyRequired && (
           <>
@@ -80,13 +86,14 @@ export const IntegrationCard: React.FC<IntegrationCardProps> = ({
                     value={clientId}
                     onChange={(e) => setClientId(e.target.value)}
                     className="text-sm h-9"
+                    disabled={loading}
                   />
                 </div>
                 <ApiKeyInput
                   integration={integration.title}
                   value={apiKey}
                   onChange={(value) => onApiKeyChange(integration.title, value)}
-                  onSubmit={() => {}} // We'll handle this in the button click
+                  onSubmit={() => {}}
                   isLoading={loading}
                 />
               </div>
@@ -101,14 +108,16 @@ export const IntegrationCard: React.FC<IntegrationCardProps> = ({
             )}
           </>
         )}
-        {!isConnected && integration.apiKeyRequired ? (
+        
+        {loading ? (
           <Button 
             className="w-full h-9 text-sm"
             variant="outline"
             size="sm"
-            onClick={isXero ? handleXeroConnect : () => onConnect(integration)}
+            disabled
           >
-            Connect
+            <Loader2 className="h-4 w-4 animate-spin mr-2" />
+            Connecting...
           </Button>
         ) : (
           <Link to={integration.path} className="w-full mt-auto" onClick={(e) => onIntegrationAction(e, integration)}>

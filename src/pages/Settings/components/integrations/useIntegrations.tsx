@@ -15,29 +15,15 @@ export const useIntegrations = () => {
   const fetchConfigs = async (): Promise<IntegrationConfig[]> => {
     try {
       console.log('Fetching integration configs...');
-      // This is a mock implementation - in a real app, this would fetch from an API
-      return [
-        {
-          integration_name: "Go High Level",
-          status: "connected"
-        }, 
-        {
-          integration_name: "Stripe",
-          status: "not_connected"
-        },
-        {
-          integration_name: "Xero",
-          status: "not_connected"
-        },
-        {
-          integration_name: "WhatsApp Business",
-          status: "not_connected"
-        },
-        {
-          integration_name: "Facebook",
-          status: "not_connected"
-        }
-      ];
+      const { data, error } = await supabase
+        .from('integration_configs')
+        .select('integration_name, status');
+
+      if (error) {
+        throw error;
+      }
+
+      return data || [];
     } catch (error) {
       console.error('Error fetching integration configs:', error);
       setError('Failed to fetch integration configurations');
