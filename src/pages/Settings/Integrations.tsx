@@ -1,4 +1,4 @@
-import { AppLayout } from "@/components/ui/AppLayout";
+import { BaseLayout } from "@/components/ui/BaseLayout";
 import { Link2, Search } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -26,11 +26,7 @@ export default function IntegrationsPage() {
     handleIntegrationAction,
     handleConnect,
     filterIntegrations,
-    error,
-    xeroClientId,
-    xeroClientSecret,
-    handleXeroClientIdChange,
-    handleXeroClientSecretChange
+    error
   } = useIntegrations();
 
   const filteredIntegrations = filterIntegrations(
@@ -45,7 +41,7 @@ export default function IntegrationsPage() {
   };
 
   return (
-    <AppLayout>
+    <BaseLayout>
       <div className="p-4 md:p-6 max-w-7xl mx-auto space-y-4 md:space-y-6">
         <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4 justify-between">
           <div className="flex items-center gap-2">
@@ -86,10 +82,6 @@ export default function IntegrationsPage() {
               loading={loading}
               onConnect={handleConnect}
               onIntegrationAction={handleIntegrationAction}
-              xeroClientId={xeroClientId}
-              xeroClientSecret={xeroClientSecret}
-              onXeroClientIdChange={handleXeroClientIdChange}
-              onXeroClientSecretChange={handleXeroClientSecretChange}
             />
           </TabsContent>
         </Tabs>
@@ -101,6 +93,6 @@ export default function IntegrationsPage() {
         integrations={availableIntegrations}
         onSelectIntegration={handleSelectIntegration}
       />
-    </AppLayout>
+    </BaseLayout>
   );
 }
