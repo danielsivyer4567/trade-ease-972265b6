@@ -59,3 +59,20 @@ function App() {
 }
 
 export default App;
+
+// Add type declaration for electron
+declare global {
+  interface Window {
+    electron?: {
+      ipcRenderer: {
+        send(channel: string): void;
+      };
+    };
+  }
+}
+
+// Send to main process
+if (window.electron) {
+  window.electron.ipcRenderer.send('to-main');
+}
+
