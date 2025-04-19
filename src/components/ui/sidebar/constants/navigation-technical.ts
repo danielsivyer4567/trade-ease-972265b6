@@ -1,14 +1,10 @@
 import { 
   Bot,
   Database,
+  Map,
   Workflow,
   ChevronRightSquare,
-  Camera,
-  Share2,
-  Bell,
-  Settings,
-  Calculator,
-  Map
+  Calculator
 } from 'lucide-react';
 import { NavigationItem } from '../navigation/NavigationGroup';
 
@@ -47,30 +43,6 @@ export const technicalNavigation = {
     },
     {
       type: 'link' as const,
-      icon: Camera,
-      label: 'Job Photos',
-      path: '/automations?category=customer',
-    },
-    {
-      type: 'link' as const,
-      icon: Share2,
-      label: 'Photo Sharing',
-      path: '/automations?category=sharing',
-    },
-    {
-      type: 'link' as const,
-      icon: Bell,
-      label: 'Notifications',
-      path: '/notifications',
-    },
-    {
-      type: 'link' as const,
-      icon: Settings,
-      label: 'Settings',
-      path: '/settings',
-    },
-    {
-      type: 'link',
       icon: Calculator,
       label: 'Calculators',
       path: '/calculators'
