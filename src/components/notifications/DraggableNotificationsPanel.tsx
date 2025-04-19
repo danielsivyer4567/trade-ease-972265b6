@@ -23,7 +23,7 @@ export const DraggableNotificationsPanel = ({
   const [isPinned, setIsPinned] = useState(false);
   const [customWidth, setCustomWidth] = useState(350); // Default width in pixels
   const panelRef = useRef<HTMLDivElement>(null);
-  const resizeHandleRef = useRef<HTMLDivElement>(null);
+  const leftResizeHandleRef = useRef<HTMLDivElement>(null);
   const { notifications, markAllAsRead } = useNotifications();
 
   // Dynamic size based on panel size state
@@ -35,9 +35,9 @@ export const DraggableNotificationsPanel = ({
 
   // Resize functionality
   useEffect(() => {
-    const resizeHandle = resizeHandleRef.current;
+    const leftResizeHandle = leftResizeHandleRef.current;
     const panel = panelRef.current;
-    if (!resizeHandle || !panel) return;
+    if (!leftResizeHandle || !panel) return;
 
     let isResizing = false;
     let startX = 0;
@@ -53,8 +53,8 @@ export const DraggableNotificationsPanel = ({
 
     const onMouseMove = (e: MouseEvent) => {
       if (!isResizing) return;
-      const deltaX = e.clientX - startX;
-      const newWidth = Math.max(300, startWidth - deltaX); // Ensure minimum width of 300px
+      const deltaX = startX - e.clientX;
+      const newWidth = Math.max(300, startWidth + deltaX); // Ensure minimum width of 300px
       setCustomWidth(newWidth);
       setPanelSize('custom');
     };
@@ -65,12 +65,12 @@ export const DraggableNotificationsPanel = ({
       document.body.style.userSelect = '';
     };
 
-    resizeHandle.addEventListener('mousedown', onMouseDown);
+    leftResizeHandle.addEventListener('mousedown', onMouseDown);
     document.addEventListener('mousemove', onMouseMove);
     document.addEventListener('mouseup', onMouseUp);
 
     return () => {
-      resizeHandle.removeEventListener('mousedown', onMouseDown);
+      leftResizeHandle.removeEventListener('mousedown', onMouseDown);
       document.removeEventListener('mousemove', onMouseMove);
       document.removeEventListener('mouseup', onMouseUp);
     };
@@ -112,13 +112,6 @@ export const DraggableNotificationsPanel = ({
         />
       )}
 
-      {/* Resize Handle */}
-      <div 
-        ref={resizeHandleRef}
-        className="absolute left-0 top-0 bottom-0 w-4 cursor-ew-resize z-50"
-        style={{ transform: 'translateX(-50%)' }}
-      />
-
       {/* Notifications Panel */}
       <div 
         ref={panelRef}
@@ -129,6 +122,13 @@ export const DraggableNotificationsPanel = ({
         )}
         style={{ width: getPanelWidth() }}
       >
+        {/* Left Resize Handle */}
+        <div 
+          ref={leftResizeHandleRef}
+          className="absolute left-0 top-0 bottom-0 w-1 cursor-ew-resize z-50 hover:bg-blue-400 hover:w-1.5 transition-all"
+          aria-label="Drag to resize"
+        />
+
         <div className="flex flex-col h-full">
           {/* Header */}
           <div className="flex justify-between items-center p-4 border-b">
@@ -137,7 +137,13 @@ export const DraggableNotificationsPanel = ({
               Notifications
             </h2>
             <div className="flex space-x-2">
-              <Button variant="outline" size="icon" onClick={togglePin} aria-label={isPinned ? "Unpin panel" : "Pin panel"}>
+              <Button 
+                variant="outline" 
+                size="icon" 
+                onClick={togglePin} 
+                aria-label={isPinned ? "Unpin panel" : "Pin panel"}
+                title={isPinned ? "Unpin panel (allows closing)" : "Pin panel (stay open while working)"}
+              >
                 <PinIcon className={cn("h-4 w-4", isPinned && "text-blue-500 fill-blue-500")} />
               </Button>
               <Button variant="outline" size="icon" onClick={togglePanelSize} aria-label="Resize panel">
