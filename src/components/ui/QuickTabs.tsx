@@ -93,44 +93,7 @@ export const QuickTabs = () => {
   return (
     <TooltipProvider>
       <div className="w-full overflow-x-auto">
-        <div className="flex flex-nowrap gap-2">
-          {quickActions.map((action) => (
-            <Tooltip key={action.to}>
-              <TooltipTrigger asChild>
-                <TabLink 
-                  to={action.to}
-                  title={action.label}
-                  className="shrink-0"
-                >
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className={cn(
-                      "border transition-all duration-200",
-                      "flex items-center justify-center gap-1.5",
-                      "shadow-sm hover:shadow-md px-3 py-1 h-8",
-                      action.bgColor,
-                      action.hoverBgColor,
-                      action.borderColor,
-                      action.textColor,
-                      action.hoverTextColor
-                    )}
-                  >
-                    <div className="flex items-center gap-1">
-                      {action.icon}
-                      <span className={isMobile ? "hidden" : "inline"}>
-                        {isMobile ? action.mobileLabel : action.label}
-                      </span>
-                    </div>
-                  </Button>
-                </TabLink>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>{action.label}</p>
-              </TooltipContent>
-            </Tooltip>
-          ))}
-        </div>
+        {/* Quick action buttons removed */}
       </div>
     </TooltipProvider>
   );
