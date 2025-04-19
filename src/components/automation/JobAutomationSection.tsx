@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -6,13 +5,14 @@ import { Loader2, Plus, Workflow, ArrowRight } from 'lucide-react';
 import { toast } from 'sonner';
 import { AutomationIntegrationService } from '@/services/AutomationIntegrationService';
 import { useNavigate } from 'react-router-dom';
+import { Automation } from '@/pages/Automations/types';
 
 interface JobAutomationSectionProps {
   jobId: string;
 }
 
 export function JobAutomationSection({ jobId }: JobAutomationSectionProps) {
-  const [automations, setAutomations] = useState<any[]>([]);
+  const [automations, setAutomations] = useState<Automation[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
   
@@ -30,8 +30,9 @@ export function JobAutomationSection({ jobId }: JobAutomationSectionProps) {
       }
       
       setAutomations(automations || []);
-    } catch (error) {
-      console.error('Failed to load automations:', error);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to load automations';
+      console.error('Failed to load automations:', errorMessage);
       toast.error('Failed to load automations');
     } finally {
       setIsLoading(false);
@@ -46,8 +47,9 @@ export function JobAutomationSection({ jobId }: JobAutomationSectionProps) {
         targetId: jobId
       });
       toast.success('Automation triggered successfully');
-    } catch (error) {
-      console.error('Failed to trigger automation:', error);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to trigger automation';
+      console.error('Failed to trigger automation:', errorMessage);
       toast.error('Failed to trigger automation');
     } finally {
       setIsLoading(false);

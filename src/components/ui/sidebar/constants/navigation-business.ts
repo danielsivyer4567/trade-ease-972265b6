@@ -1,19 +1,15 @@
-
-import { CreditCard, DollarSign, FileText, Receipt, ShoppingCart, Store, TrendingUp } from 'lucide-react';
+import { Scroll, DollarSign, Receipt, CreditCard } from 'lucide-react';
 import type { NavigationItem } from '../navigation/NavigationGroup';
+import { lazy } from 'react';
+
+const NotificationsPage = lazy(() => import('@/pages/Notifications'));
 
 export const businessNavigation = {
   label: "Business",
   items: [
     {
       type: 'link' as const,
-      icon: Store,
-      label: 'Customers',
-      path: '/customers',
-    },
-    {
-      type: 'link' as const,
-      icon: FileText,
+      icon: Scroll,
       label: 'Quotes',
       path: '/quotes',
     },
@@ -34,18 +30,6 @@ export const businessNavigation = {
       icon: CreditCard,
       label: 'Banking',
       path: '/banking',
-    },
-    {
-      type: 'link' as const,
-      icon: ShoppingCart,
-      label: 'Trading',
-      path: '/trading',
-    },
-    {
-      type: 'link' as const,
-      icon: TrendingUp,
-      label: 'Trade Dashboard',
-      path: '/trade-dashboard',
     },
   ] as NavigationItem[],
 };

@@ -1,8 +1,7 @@
-
 import { BaseLayout } from "@/components/ui/BaseLayout";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Settings, DollarSign, Receipt, Clock, Users, Shield, FileText, Calendar, List, CreditCard, User, Bot, Briefcase, Network, Mail, FileJson, Building, Share, Zap, Search, Link2, Bell, Globe, FileLock, Brain } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Settings, DollarSign, Receipt, Clock, Users, Shield, FileText, Calendar, List, CreditCard, User, Bot, Briefcase, Network, Mail, FileJson, Building, Share, Zap, Search, Link2, Bell, Globe, FileLock, Brain, Database } from "lucide-react";
+import { Link, Outlet, useLocation } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 
 const settingsSections = [
@@ -16,7 +15,13 @@ const settingsSections = [
     title: "AI Features",
     icon: Brain,
     description: "Configure and use AI capabilities",
-    path: "/ai-features"
+    path: "/settings/ai-features"
+  },
+  {
+    title: "Database",
+    icon: Database,
+    description: "Manage system database",
+    path: "/settings/database"
   },
   {
     title: "AI Assistant Settings",
@@ -47,6 +52,12 @@ const settingsSections = [
     icon: Users,
     description: "Manage office personnel",
     path: "/settings/office-staff"
+  },
+  {
+    title: "Staff",
+    icon: Users,
+    description: "Manage staff members",
+    path: "/settings/staff"
   },
   {
     title: "On-site Staff",
@@ -106,7 +117,7 @@ const settingsSections = [
     title: "Integrations",
     icon: Network,
     description: "Manage third-party integrations",
-    path: "/integrations"
+    path: "/settings/integrations"
   },
   {
     title: "Jobs",
@@ -160,7 +171,13 @@ const settingsSections = [
 
 export default function SettingsPage() {
   const navigate = useNavigate();
-  console.log("Rendering Settings Page");
+  const location = useLocation();
+  console.log("Rendering Settings Page, path:", location.pathname);
+
+  // If we're on a nested route, render the child route
+  if (location.pathname !== '/settings') {
+    return <Outlet />;
+  }
 
   const handleCardClick = (path: string) => {
     navigate(path);
