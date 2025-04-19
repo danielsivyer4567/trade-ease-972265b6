@@ -70,6 +70,7 @@ const TasksPage = lazy(() => import('@/pages/Tasks'));
 const AIFeaturesPage = lazy(() => import('@/pages/AIFeatures'));
 const PropertyBoundariesPage = lazy(() => import('@/pages/PropertyBoundaries'));
 const NetworksPage = lazy(() => import('@/pages/Networks'));
+const CredentialsPage = lazy(() => import('@/pages/Credentials'));
 
 // Settings
 const SettingsPage = lazy(() => import('@/pages/Settings'));
@@ -372,6 +373,13 @@ export function Routes() {
           <Route path="/networks" element={
             <Suspense fallback={<LoadingFallback />}>
               <NetworksPage />
+            </Suspense>
+          } />
+          
+          {/* Credentials route */}
+          <Route path="/credentials" element={
+            <Suspense fallback={<LoadingFallback />}>
+              <CredentialsPage />
             </Suspense>
           } />
           

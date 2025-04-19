@@ -4,6 +4,7 @@ import { networksNavigation } from './navigation-networks';
 import { overviewNavigation } from './navigation-overview';
 import { supplyChainNavigation } from './navigation-supply-chain';
 import { technicalNavigation } from './navigation-technical';
+import { complianceNavigation } from './navigation-compliance';
 import { teamLinks, calendarTeamLinks } from './team-links';
 import { SIDEBAR_CONSTANTS } from './sidebar-config';
 import { NavigationItem } from '../navigation/NavigationGroup';
@@ -19,6 +20,7 @@ export const navigationGroups: NavigationGroup[] = [
   overviewNavigation,
   businessNavigation,
   technicalNavigation,
+  complianceNavigation,
   networksNavigation,
   supplyChainNavigation,
   actionsNavigation
@@ -32,6 +34,7 @@ export {
   overviewNavigation,
   businessNavigation,
   technicalNavigation,
+  complianceNavigation,
   networksNavigation,
   supplyChainNavigation,
   actionsNavigation
