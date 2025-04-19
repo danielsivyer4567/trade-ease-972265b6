@@ -1,10 +1,9 @@
-
 import React, { useState, useRef } from 'react';
 import { BaseLayout } from '@/components/ui/BaseLayout';
 import { SectionHeader } from '@/components/ui/SectionHeader';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { FileSearch, Clipboard, Calendar, CheckSquare, Camera, Upload, User, ChevronLeft, ChevronRight } from 'lucide-react';
-import { Card, CardContent } from '@/components/ui/card';
+import { FileSearch, Clipboard, Calendar, CheckSquare, Camera, Upload, User, ChevronLeft, ChevronRight, Users, ArrowRight } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { AuditPhotoCapture } from './components/AuditPhotoCapture';
 import { CustomerSelector } from './components/CustomerSelector';
@@ -12,6 +11,31 @@ import { DailyAuditList } from './components/DailyAuditList';
 import { useAuditData } from './hooks/useAuditData';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
+import { useNavigate } from 'react-router-dom';
+
+// Interface for SiteAudit
+interface SiteAudit {
+  id: string;
+  name: string;
+  date?: string;
+  status?: 'completed' | 'pending' | 'in-progress';
+}
+
+// Mock data - replace with actual data fetching
+const siteAudits: SiteAudit[] = [
+  { 
+    id: 'audit-1', 
+    name: 'Audit for Property A',
+    date: '2024-04-17',
+    status: 'completed'
+  },
+  { 
+    id: 'audit-2', 
+    name: 'Inspection at Site B',
+    date: '2024-04-18',
+    status: 'in-progress'
+  },
+];
 
 export default function SiteAudits() {
   const [activeTab, setActiveTab] = useState('active');
@@ -19,6 +43,7 @@ export default function SiteAudits() {
   const [showPhotoCapture, setShowPhotoCapture] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
+  const navigate = useNavigate();
   
   const { 
     audits, 
@@ -96,6 +121,10 @@ export default function SiteAudits() {
   const auditsList = audits || [];
   // Ensure auditsByDay array is defined
   const auditsByDayList = auditsByDay || [];
+
+  const handleViewCustomers = (auditId: string) => {
+    navigate(`/customers/${auditId}`);
+  };
 
   return (
     <BaseLayout>
@@ -309,6 +338,45 @@ export default function SiteAudits() {
             </div>
           </TabsContent>
         </Tabs>
+
+        <div className="mt-6">
+          <h2 className="text-2xl font-bold mb-4">Site Audits</h2>
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {siteAudits.map((audit) => (
+              <Card key={audit.id} className="hover:shadow-lg transition-shadow">
+                <CardHeader>
+                  <CardTitle className="text-lg">{audit.name}</CardTitle>
+                  <div className="text-sm text-gray-500">
+                    {audit.date && <p>Date: {new Date(audit.date).toLocaleDateString()}</p>}
+                    {audit.status && (
+                      <span className={`inline-block px-2 py-1 rounded-full text-xs ${
+                        audit.status === 'completed' ? 'bg-green-100 text-green-800' :
+                        audit.status === 'in-progress' ? 'bg-blue-100 text-blue-800' :
+                        'bg-yellow-100 text-yellow-800'
+                      }`}>
+                        {audit.status.charAt(0).toUpperCase() + audit.status.slice(1)}
+                      </span>
+                    )}
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex justify-between items-center">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleViewCustomers(audit.id)}
+                      className="flex items-center gap-2"
+                    >
+                      <Users className="h-4 w-4" />
+                      View Customers
+                      <ArrowRight className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
       </div>
     </BaseLayout>
   );

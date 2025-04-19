@@ -1,7 +1,8 @@
-
-import { AppLayout } from "@/components/ui/AppLayout";
+import { BaseLayout } from "@/components/ui/BaseLayout";
 import { Link2, Search } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { AlertCircle } from "lucide-react";
 
 import { IntegrationsList } from "./components/integrations/IntegrationsList";
 import { IntegrationSearch } from "./components/integrations/IntegrationSearch";
@@ -24,7 +25,8 @@ export default function IntegrationsPage() {
     handleApiKeySubmit,
     handleIntegrationAction,
     handleConnect,
-    filterIntegrations
+    filterIntegrations,
+    error
   } = useIntegrations();
 
   const filteredIntegrations = filterIntegrations(
@@ -39,7 +41,7 @@ export default function IntegrationsPage() {
   };
 
   return (
-    <AppLayout>
+    <BaseLayout>
       <div className="p-4 md:p-6 max-w-7xl mx-auto space-y-4 md:space-y-6">
         <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4 justify-between">
           <div className="flex items-center gap-2">
@@ -53,6 +55,13 @@ export default function IntegrationsPage() {
             onOpenCommandDialog={() => setCommandOpen(true)}
           />
         </div>
+
+        {error && (
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
 
         <Tabs defaultValue="all" value={selectedCategory} onValueChange={setSelectedCategory}>
           <TabsList className="mb-4 flex flex-wrap">
@@ -84,6 +93,6 @@ export default function IntegrationsPage() {
         integrations={availableIntegrations}
         onSelectIntegration={handleSelectIntegration}
       />
-    </AppLayout>
+    </BaseLayout>
   );
 }

@@ -1,4 +1,3 @@
-
 import * as React from "react";
 import { TooltipProvider } from "../tooltip";
 import { SIDEBAR_CONSTANTS } from "./constants";
@@ -7,13 +6,13 @@ import { useIsMobile } from "@/hooks/use-mobile";
 
 const SidebarContext = React.createContext<SidebarContextType | null>(null);
 
-export function useSidebar() {
+const useSidebarHook = () => {
   const context = React.useContext(SidebarContext);
   if (!context) {
     throw new Error("useSidebar must be used within a SidebarProvider.");
   }
   return context;
-}
+};
 
 export const SidebarProvider = React.forwardRef<HTMLDivElement, SidebarProviderProps>(
   ({ defaultOpen = true, open: openProp, onOpenChange: setOpenProp, className, style, children, ...props }, ref) => {
@@ -92,3 +91,6 @@ export const SidebarProvider = React.forwardRef<HTMLDivElement, SidebarProviderP
 );
 
 SidebarProvider.displayName = "SidebarProvider";
+
+// Export the hook after the component
+export const useSidebar = useSidebarHook;

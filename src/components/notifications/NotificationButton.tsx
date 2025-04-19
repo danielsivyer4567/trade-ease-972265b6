@@ -1,61 +1,35 @@
-
 import React from 'react';
 import { Bell } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useNotifications } from './NotificationContextProvider';
 import { cn } from '@/lib/utils';
-import { NotificationSidebar } from './NotificationSidebar';
 
-export const NotificationButton = () => {
-  // Add error handling for when the NotificationProvider is not available
-  try {
-    const {
-      unreadCount,
-      isNotificationOpen,
-      toggleNotifications
-    } = useNotifications();
-    
-    return (
-      <>
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          className="relative h-12 w-12 md:h-15 md:w-15" 
-          onClick={toggleNotifications} 
-          aria-label="Notifications"
-        >
-          <Bell className="h-6 w-6" />
-          
-          {unreadCount > 0 && (
-            <span className={cn(
-              "absolute top-1 right-1 h-6 w-6 text-xs flex items-center justify-center",
-              "rounded-full bg-red-600 text-white font-bold",
-              "transform translate-x-1 -translate-y-1"
-            )}>
-              {unreadCount > 9 ? '9+' : unreadCount}
-            </span>
-          )}
-        </Button>
-        
-        <NotificationSidebar 
-          isOpen={isNotificationOpen} 
-          onClose={toggleNotifications} 
-        />
-      </>
-    );
-  } catch (error) {
-    // Provide a fallback when NotificationProvider is not available
-    console.error('NotificationProvider not available:', error);
-    return (
-      <Button 
-        variant="ghost" 
-        size="icon" 
-        className="relative h-12 w-12 md:h-15 md:w-15" 
-        aria-label="Notifications"
-        disabled
-      >
-        <Bell className="h-6 w-6" />
-      </Button>
-    );
-  }
+interface NotificationButtonProps {
+  className?: string;
+}
+
+export const NotificationButton = ({ className }: NotificationButtonProps) => {
+  const { 
+    unreadCount, 
+    toggleDraggableNotifications, 
+    isDraggableNotificationOpen 
+  } = useNotifications();
+  
+  return (
+    <Button 
+      variant="ghost" 
+      size="icon" 
+      className={cn("relative", className, isDraggableNotificationOpen && "text-primary bg-primary/10")} 
+      onClick={toggleDraggableNotifications}
+      aria-label={`${unreadCount} unread notifications`}
+    >
+      <Bell className="h-5 w-5" />
+      
+      {unreadCount > 0 && (
+        <span className="absolute top-0 right-0 -mt-1 -mr-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] font-medium text-white">
+          {unreadCount > 99 ? '99+' : unreadCount}
+        </span>
+      )}
+    </Button>
+  );
 };
