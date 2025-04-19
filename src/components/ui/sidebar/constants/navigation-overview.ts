@@ -1,5 +1,4 @@
-
-import { LayoutDashboard, BarChart3, Gauge, Network, UserSquare2, Activity } from 'lucide-react';
+import { LayoutDashboard, Network, UserSquare2, Activity } from 'lucide-react';
 import type { NavigationItem } from '../navigation/NavigationGroup';
 
 export const overviewNavigation = {
@@ -10,18 +9,6 @@ export const overviewNavigation = {
       label: 'Dashboard',
       path: '/',
       icon: LayoutDashboard,
-    },
-    {
-      type: 'link' as const,
-      label: 'Statistics',
-      path: '/statistics',
-      icon: BarChart3,
-    },
-    {
-      type: 'link' as const,
-      label: 'Performance',
-      path: '/performance',
-      icon: Gauge,
     },
     {
       type: 'link' as const,
