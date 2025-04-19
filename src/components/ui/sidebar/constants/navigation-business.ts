@@ -1,5 +1,8 @@
 import { CreditCard, DollarSign, FileText, Receipt, ShoppingCart, Store, TrendingUp } from 'lucide-react';
 import type { NavigationItem } from '../navigation/NavigationGroup';
+import { lazy } from 'react';
+
+const NotificationsPage = lazy(() => import('@/pages/Notifications'));
 
 export const businessNavigation = {
   label: "Business",
