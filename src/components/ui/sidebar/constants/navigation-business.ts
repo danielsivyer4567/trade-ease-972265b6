@@ -1,16 +1,9 @@
-
 import { CreditCard, DollarSign, FileText, Receipt, ShoppingCart, Store, TrendingUp } from 'lucide-react';
 import type { NavigationItem } from '../navigation/NavigationGroup';
 
 export const businessNavigation = {
   label: "Business",
   items: [
-    {
-      type: 'link' as const,
-      icon: Store,
-      label: 'Customers',
-      path: '/customers',
-    },
     {
       type: 'link' as const,
       icon: FileText,
