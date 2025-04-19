@@ -1,4 +1,4 @@
-import { LayoutDashboard, Network, UserSquare2, Activity } from 'lucide-react';
+import { LayoutDashboard, Briefcase, MessageSquare, UserSquare2 } from 'lucide-react';
 import type { NavigationItem } from '../navigation/NavigationGroup';
 
 export const overviewNavigation = {
@@ -12,21 +12,21 @@ export const overviewNavigation = {
     },
     {
       type: 'link' as const,
-      label: 'Networks',
-      path: '/networks',
-      icon: Network,
+      label: 'Jobs',
+      path: '/jobs',
+      icon: Briefcase,
+    },
+    {
+      type: 'link' as const,
+      label: 'Messaging',
+      path: '/messaging',
+      icon: MessageSquare,
     },
     {
       type: 'link' as const,
       label: 'Customers',
       path: '/customers',
       icon: UserSquare2,
-    },
-    {
-      type: 'link' as const,
-      label: 'Activity',
-      path: '/activity',
-      icon: Activity,
     },
   ] as NavigationItem[],
 };
