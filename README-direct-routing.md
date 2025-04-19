@@ -84,6 +84,66 @@ function MyComponent() {
 }
 ```
 
+## Configurable Direct Navigation
+
+The application now includes a configurable direct navigation system that allows users to choose between:
+
+1. **Direct Navigation Mode (ON)**: Clicking on a tab/link immediately navigates to the target page
+2. **Confirmation Mode (OFF)**: Clicking on a tab/link sets the target but requires confirmation before navigation
+
+### How to Use
+
+A toggle button is displayed in the top-right corner of the application allowing users to switch between modes:
+
+- When direct navigation is ON (green button), tabs behave as before with immediate navigation
+- When direct navigation is OFF (amber button), clicking a tab shows a confirmation panel
+
+### Components
+
+#### 1. `useDirectTabNavigation` Hook
+
+This hook extends the original `useTabbedLink` with toggle functionality:
+
+```tsx
+import { useDirectTabNavigation } from '@/hooks/useDirectTabNavigation';
+
+function MyComponent() {
+  const { 
+    navigateWithTab, 
+    createClickHandler,
+    directNavigationEnabled,
+    toggleDirectNavigation,
+    targetPath,
+    executeNavigation,
+    clearTabTarget
+  } = useDirectTabNavigation();
+  
+  // The hook handles navigation based on current mode
+  return (
+    <a href="/path" onClick={createClickHandler('/path', 'Tab Title')}>
+      Link Text
+    </a>
+  );
+}
+```
+
+#### 2. `TabNavigator` Component
+
+A floating UI component that shows the navigation toggle and confirmation panel:
+
+```tsx
+import { TabNavigator } from '@/components/ui/TabNavigator';
+
+function AppLayout() {
+  return (
+    <div>
+      {/* Your app content */}
+      <TabNavigator />
+    </div>
+  );
+}
+```
+
 ## Usage in Common Components
 
 ### 1. In QuickTabs:
@@ -104,6 +164,7 @@ BaseLayout has been updated with a `useNewSidebar` prop that allows switching be
 2. **Tab Breadcrumbs**: Navigation history is still maintained in tabs
 3. **SEO Friendly**: Regular links are preserved for better SEO
 4. **Accessibility**: Standard navigation patterns are maintained
+5. **User Preference**: Users can now choose their navigation style
 
 ## Implementing in Existing Components
 
@@ -111,7 +172,7 @@ To update existing components to use this feature:
 
 1. Replace `Link` components with `TabLink`
 2. Replace navigation links with `NavLink`
-3. For custom buttons triggering navigation, use the `useTabbedLink` hook
+3. For custom buttons triggering navigation, use the `useDirectTabNavigation` hook
 
 Example conversion:
 

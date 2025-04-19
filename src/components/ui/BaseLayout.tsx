@@ -6,6 +6,7 @@ import { MainContent } from './MainContent';
 import { SidebarProvider } from './sidebar/SidebarProvider';
 import GeminiListen from "@/components/gemini/GeminiListen";
 import { SidebarThemeProvider } from './sidebar/theme/SidebarThemeContext';
+import { TabNavigator } from './TabNavigator';
 // Optionally import the new sidebar
 // import { Sidebar } from '@/components/navigation/Sidebar';
 
@@ -81,6 +82,9 @@ export function BaseLayout({
           
           {/* Gemini Listen Feature */}
           <GeminiListen />
+          
+          {/* Tab Navigator for direct/indirect tab navigation */}
+          <TabNavigator />
         </div>
       </SidebarThemeProvider>
     </SidebarProvider>
