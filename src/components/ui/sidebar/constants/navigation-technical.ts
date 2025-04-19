@@ -1,5 +1,4 @@
 import { 
-  Database,
   Map,
   ChevronRightSquare,
   Calculator
@@ -9,12 +8,6 @@ import { NavigationItem } from '../navigation/NavigationGroup';
 export const technicalNavigation = {
   label: 'Technical',
   items: [
-    {
-      type: 'link' as const,
-      icon: Database,
-      label: 'Database',
-      path: '/database',
-    },
     {
       type: 'link' as const,
       icon: Map,
