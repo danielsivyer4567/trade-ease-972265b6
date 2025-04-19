@@ -1,6 +1,7 @@
-# <type>: <subject>
+# <type>(<scope>): <subject>
 # |<---- Using a maximum of 50 characters ---->|
-# Example: feat: add new feature
+# Example: feat(auth): add OAuth2 login
+# Example: fix(ui): correct button alignment
 
 # <body>
 # |<---- Try to limit each line to 72 characters ---->|
@@ -28,6 +29,14 @@
 #   ci       (continuous integration related)
 #   build    (build system changes)
 #   revert   (reverting a previous commit)
+
+# Scope should be a noun describing a section of the codebase:
+#   auth     (authentication related)
+#   ui       (user interface components)
+#   api      (API related changes)
+#   db       (database related)
+#   deps     (dependency updates)
+#   etc.
 
 # Remember:
 # - Capitalize the subject line
