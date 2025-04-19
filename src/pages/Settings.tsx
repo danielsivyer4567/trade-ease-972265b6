@@ -54,6 +54,12 @@ const settingsSections = [
     path: "/settings/office-staff"
   },
   {
+    title: "Staff",
+    icon: Users,
+    description: "Manage staff members",
+    path: "/settings/staff"
+  },
+  {
     title: "On-site Staff",
     icon: Users,
     description: "Manage field workers",
