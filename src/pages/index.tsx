@@ -3,7 +3,6 @@ import JobSiteMap from "@/components/dashboard/JobSiteMap";
 import RecentActivity from "@/components/dashboard/RecentActivity";
 import UpcomingJobs from "@/components/dashboard/UpcomingJobs";
 import CleaningRequiredJobs from "@/components/dashboard/CleaningRequiredJobs";
-import { QuickTabs } from "@/components/ui/QuickTabs";
 import { Card } from "@/components/ui/card";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { TeamCalendar } from "@/components/team/TeamCalendar";
@@ -29,7 +28,6 @@ export default function DashboardPage() {
               <h1 className="text-3xl font-bold">Dashboard</h1>
               <p className="text-sm text-gray-500 mt-1">Welcome back to your dashboard.</p>
             </div>
-            <QuickTabs />
           </div>
 
           <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
