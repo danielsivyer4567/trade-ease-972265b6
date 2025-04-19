@@ -1,8 +1,6 @@
 import { 
-  Bot,
   Database,
   Map,
-  Workflow,
   ChevronRightSquare,
   Calculator
 } from 'lucide-react';
@@ -11,12 +9,6 @@ import { NavigationItem } from '../navigation/NavigationGroup';
 export const technicalNavigation = {
   label: 'Technical',
   items: [
-    {
-      type: 'link' as const,
-      icon: Bot,
-      label: 'AI Features',
-      path: '/ai-features',
-    },
     {
       type: 'link' as const,
       icon: Database,
@@ -28,12 +20,6 @@ export const technicalNavigation = {
       icon: Map,
       label: 'Property Boundaries',
       path: '/property-boundaries',
-    },
-    {
-      type: 'link' as const,
-      icon: Workflow,
-      label: 'Automations',
-      path: '/automations',
     },
     {
       type: 'link' as const,
