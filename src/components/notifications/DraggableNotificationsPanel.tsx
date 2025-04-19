@@ -28,13 +28,125 @@ export const DraggableNotificationsPanel = ({
   const leftResizeHandleRef = useRef<HTMLDivElement>(null);
   const { notifications, markAllAsRead } = useNotifications();
 
+  // Calculate right sidebar width (assuming it's 50px)
+  const SIDEBAR_WIDTH = 50;
+
   // Dynamic size based on panel size state
   const getPanelWidth = () => {
     if (panelSize === 'minimized') return '60px';
-    if (panelSize === 'quarter') return '25vw';
-    if (panelSize === 'half') return '50vw';
+    if (panelSize === 'quarter') return `calc(25vw - ${SIDEBAR_WIDTH}px)`;
+    if (panelSize === 'half') return `calc(50vw - ${SIDEBAR_WIDTH}px)`;
     return `${customWidth}px`;
   };
+
+  // Adjust main content layout when the panel is open/pinned
+  useEffect(() => {
+    const adjustLayoutWithPanel = () => {
+      // Get all elements with main content, maps, buttons, etc.
+      const mainElements = document.querySelectorAll('.main-content, .map-container, .button-container');
+      const rightSidebar = document.querySelector('.right-sidebar');
+      
+      if (!rightSidebar) {
+        console.warn('Right sidebar not found');
+      }
+      
+      // Right sidebar width plus some padding
+      const sidebarWidth = rightSidebar ? rightSidebar.getBoundingClientRect().width : SIDEBAR_WIDTH;
+      
+      // Calculate panel width
+      const panelWidth = isPinned && isOpen ? 
+        (panelSize === 'minimized' ? 60 : 
+         panelSize === 'quarter' ? Math.min(window.innerWidth * 0.25, window.innerWidth - sidebarWidth) : 
+         panelSize === 'half' ? Math.min(window.innerWidth * 0.5, window.innerWidth - sidebarWidth) : 
+         Math.min(customWidth, window.innerWidth - sidebarWidth)) : 0;
+      
+      // Add right margin to main content to make room for the panel plus sidebar
+      const totalRightMargin = panelWidth + sidebarWidth;
+      
+      mainElements.forEach(element => {
+        if (element instanceof HTMLElement) {
+          if (isPinned && isOpen) {
+            element.style.width = `calc(100% - ${totalRightMargin}px)`;
+            element.style.marginRight = `${totalRightMargin}px`;
+            element.style.transition = 'width 0.3s ease, margin-right 0.3s ease';
+          } else {
+            element.style.width = `calc(100% - ${sidebarWidth}px)`;
+            element.style.marginRight = `${sidebarWidth}px`;
+          }
+        }
+      });
+    };
+
+    // Call the adjustment function
+    adjustLayoutWithPanel();
+    
+    // Listen for window resize to readjust
+    window.addEventListener('resize', adjustLayoutWithPanel);
+    
+    return () => {
+      window.removeEventListener('resize', adjustLayoutWithPanel);
+      
+      // Reset styles when component unmounts
+      const mainElements = document.querySelectorAll('.main-content, .map-container, .button-container');
+      const rightSidebar = document.querySelector('.right-sidebar');
+      const sidebarWidth = rightSidebar ? rightSidebar.getBoundingClientRect().width : SIDEBAR_WIDTH;
+      
+      mainElements.forEach(element => {
+        if (element instanceof HTMLElement) {
+          element.style.width = `calc(100% - ${sidebarWidth}px)`;
+          element.style.marginRight = `${sidebarWidth}px`;
+        }
+      });
+    };
+  }, [isPinned, isOpen, panelSize, customWidth]);
+
+  // Initialize layout on component mount
+  useEffect(() => {
+    // Add classes to main elements for easier selection
+    const addClasses = () => {
+      // Add to map container
+      const mapContainer = document.querySelector('#map-container') || 
+                           document.querySelector('.map-view') ||
+                           document.querySelector('.leaflet-container');
+      if (mapContainer) {
+        mapContainer.classList.add('map-container');
+      }
+      
+      // Add to main content
+      const mainContent = document.querySelector('#main-content') || 
+                         document.querySelector('main') ||
+                         document.querySelector('.main-app-content');
+      if (mainContent) {
+        mainContent.classList.add('main-content');
+      }
+      
+      // Add to button containers
+      const buttonContainers = document.querySelectorAll('.button-row, .controls, .map-controls');
+      buttonContainers.forEach(container => {
+        container.classList.add('button-container');
+      });
+      
+      // Identify right sidebar
+      const rightSidebar = document.querySelector('.sidebar-right') || 
+                          document.querySelector('.controls-right') ||
+                          document.querySelector('.right-controls');
+      if (rightSidebar) {
+        rightSidebar.classList.add('right-sidebar');
+      }
+    };
+    
+    // Run initialization
+    addClasses();
+    
+    // Set initial right margin for all content
+    const mainElements = document.querySelectorAll('.main-content, .map-container, .button-container');
+    mainElements.forEach(element => {
+      if (element instanceof HTMLElement) {
+        element.style.width = `calc(100% - ${SIDEBAR_WIDTH}px)`;
+        element.style.marginRight = `${SIDEBAR_WIDTH}px`;
+      }
+    });
+  }, []);
 
   // Resize functionality
   useEffect(() => {
@@ -57,7 +169,13 @@ export const DraggableNotificationsPanel = ({
     const onMouseMove = (e: MouseEvent) => {
       if (!isResizing) return;
       const deltaX = startX - e.clientX;
-      const newWidth = Math.max(300, startWidth + deltaX); // Ensure minimum width of 300px
+      
+      // Calculate max width considering the sidebar
+      const maxWidth = window.innerWidth - SIDEBAR_WIDTH;
+      
+      // Ensure minimum width of 300px and maximum that doesn't overlap sidebar
+      const newWidth = Math.min(Math.max(300, startWidth + deltaX), maxWidth - 20);
+      
       setCustomWidth(newWidth);
       setPanelSize('custom');
     };
