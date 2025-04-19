@@ -4,17 +4,13 @@ import RecentActivity from "@/components/dashboard/RecentActivity";
 import UpcomingJobs from "@/components/dashboard/UpcomingJobs";
 import CleaningRequiredJobs from "@/components/dashboard/CleaningRequiredJobs";
 import { QuickTabs } from "@/components/ui/QuickTabs";
-import { Link } from "react-router-dom";
 import { Card } from "@/components/ui/card";
-import { Hammer, CalendarDays, ArrowLeft, RotateCcw, ChevronDown, ChevronUp } from "lucide-react";
+import { ChevronDown, ChevronUp } from "lucide-react";
 import { TeamCalendar } from "@/components/team/TeamCalendar";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { useNavigate } from "react-router-dom";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { TradeDashboardContent } from "@/components/trade-dashboard/TradeDashboardContent";
-import { useTabNavigation } from "@/hooks/useTabNavigation";
 import { PerformanceSection } from "@/components/dashboard/PerformanceSection";
 import { StatisticsSection } from "@/components/dashboard/StatisticsSection";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -22,7 +18,7 @@ import { Separator } from "@/components/ui/separator";
 
 export default function DashboardPage() {
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const [showMore, setShowMore] = useState(false);
+  const [calendarDate, setCalendarDate] = useState<Date | undefined>(new Date());
   
   return (
     <BaseLayout showQuickTabs>
@@ -39,7 +35,7 @@ export default function DashboardPage() {
           <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
             <div className="xl:col-span-2">
               <Card className="shadow-md">
-                <JobSiteMap height={300} />
+                <JobSiteMap />
               </Card>
             </div>
             <div>
@@ -78,7 +74,11 @@ export default function DashboardPage() {
             </CollapsibleTrigger>
             <CollapsibleContent>
               <Card className="shadow-md mb-4">
-                <TeamCalendar />
+                <TeamCalendar 
+                  date={calendarDate}
+                  setDate={setCalendarDate}
+                  teamColor="blue"
+                />
               </Card>
             </CollapsibleContent>
           </Collapsible>
