@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { X, Bell, PinIcon, Maximize2, Minimize2, ArrowLeftRight, Pin, Calendar, MessageSquare, Tag, Edit3, Image, UploadCloud, MessageCircle, Save, Mic, Trash2, Brush, Paperclip, UserPlus, AlertCircle } from 'lucide-react';
+import { X, Bell, PinIcon, Maximize2, Minimize2, ArrowLeftRight, Pin, Calendar, MessageSquare, Tag, Edit3, Image, UploadCloud, MessageCircle, Save, Mic, Trash2, Brush, Paperclip, UserPlus, AlertCircle, Minus, MoveUpRight, Square, Circle, Star } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { NotificationItem } from './NotificationItem';
@@ -435,7 +435,10 @@ export const DraggableNotificationsPanel = ({
                                          <img src={uploadedFile.previewUrl} alt="Preview" className="w-full h-full object-cover rounded border" />
                                       )}
                                       {uploadedFile.type === 'drawing' && (
-                                         <img src={uploadedFile.previewUrl} alt="Drawing Preview" className="w-full h-full object-contain rounded border p-1" />
+                                         // Use a specific icon for the drawing preview placeholder
+                                         <div className="w-full h-full flex items-center justify-center bg-gray-200 rounded border">
+                                              <Brush className="h-6 w-6 text-gray-600"/>
+                                         </div>
                                       )}
                                        {uploadedFile.type === 'audio' && (
                                          <div className="w-full h-full flex items-center justify-center bg-gray-200 rounded border">
@@ -453,19 +456,87 @@ export const DraggableNotificationsPanel = ({
                               ))}
                           </div>
                       )}
-                      {/* Action Buttons */}
+                      {/* Attachment Action Buttons */}
                       <div className="flex items-center gap-2">
                            <Button variant="outline" size="sm" className="flex-1 text-xs gap-1" onClick={() => document.getElementById('tag-image-upload')?.click()}>
                                <Image className="h-3.5 w-3.5"/> Image
                                <input type="file" id="tag-image-upload" accept="image/*" className="hidden" onChange={handleImageUpload}/>
                            </Button>
-                           <Button variant="outline" size="sm" className={`flex-1 text-xs gap-1 ${isDrawingActive ? 'bg-blue-100 text-blue-700' : ''}`} onClick={handleToggleDrawing}>
+                           <Button 
+                               variant="outline" 
+                               size="sm" 
+                               className={cn(
+                                   "flex-1 text-xs gap-1", 
+                                   isDrawingActive ? 'bg-blue-100 text-blue-700 border-blue-300' : '' // Active state style
+                               )} 
+                               onClick={handleToggleDrawing}
+                            >
                                <Brush className="h-3.5 w-3.5"/> Draw
                            </Button>
-                           <Button variant="outline" size="sm" className={`flex-1 text-xs gap-1 ${isRecordingAudio ? 'bg-red-100 text-red-700' : ''}`} onClick={handleToggleAudioRecord}>
+                           <Button 
+                               variant="outline" 
+                               size="sm" 
+                               className={cn(
+                                   "flex-1 text-xs gap-1", 
+                                   isRecordingAudio ? 'bg-red-100 text-red-700 border-red-300' : '' // Active state style
+                               )} 
+                               onClick={handleToggleAudioRecord}
+                            >
                                <Mic className="h-3.5 w-3.5"/> Voice
                            </Button>
                       </div>
+                      
+                      {/* --- Conditionally Rendered Drawing Toolbar --- */}
+                      {isDrawingActive && (
+                          <div className="mt-3 pt-3 border-t border-gray-200 flex flex-col gap-3">
+                              {/* Row 1: Tools & Brush Options */}
+                              <div className="flex items-center gap-4">
+                                  {/* Tools Section */}
+                                  <div className="flex items-center gap-1 border-r pr-3">
+                                      <span className="text-xs font-medium mr-1">Tools:</span>
+                                      {/* Placeholder Icons for Tools */}
+                                      <Button variant="ghost" size="icon" className="h-7 w-7" title="Pencil"><Edit3 className="h-4 w-4" /></Button>
+                                      <Button variant="ghost" size="icon" className="h-7 w-7" title="Text">A</Button> {/* Simple Text Icon */}
+                                      <Button variant="ghost" size="icon" className="h-7 w-7" title="Eraser"><Trash2 className="h-4 w-4" /></Button> 
+                                      {/* Add more tool icons as needed */}
+                                  </div>
+                                  {/* Brush Section */}
+                                  <div className="flex items-center gap-1">
+                                       <span className="text-xs font-medium mr-1">Brush:</span>
+                                       {/* Placeholder for brush dropdown */}
+                                       <select className="text-xs border rounded px-1 py-0.5">
+                                          <option>Normal</option>
+                                          <option>Thick</option>
+                                          <option>Spray</option>
+                                       </select>
+                                  </div>
+                              </div>
+                              
+                              {/* Row 2: Shapes & Colors */}
+                              <div className="flex items-center gap-4">
+                                  {/* Shapes Section */}
+                                  <div className="flex items-center gap-1 border-r pr-3 flex-wrap">
+                                      <span className="text-xs font-medium mr-1 w-full mb-1">Shapes:</span>
+                                      {/* Placeholder Icons for Shapes */}
+                                      <Button variant="ghost" size="icon" className="h-6 w-6"><Minus className="h-4 w-4"/></Button> {/* Line */}
+                                      <Button variant="ghost" size="icon" className="h-6 w-6"><MoveUpRight className="h-4 w-4"/></Button> {/* Arrow */}
+                                      <Button variant="ghost" size="icon" className="h-6 w-6"><Square className="h-4 w-4"/></Button>
+                                      <Button variant="ghost" size="icon" className="h-6 w-6"><Circle className="h-4 w-4"/></Button>
+                                      <Button variant="ghost" size="icon" className="h-6 w-6"><Star className="h-4 w-4"/></Button>
+                                       {/* Add more shape icons... */}
+                                  </div>
+                                  {/* Colours Section */}
+                                  <div className="flex items-center gap-1 flex-wrap">
+                                      <span className="text-xs font-medium mr-1 w-full mb-1">Colours:</span>
+                                      {/* Placeholder Color Swatches */}
+                                      {['#FF0000', '#000000', '#FFFFFF', '#CCCCCC', '#888888', '#FFFF00', '#00FF00', '#0000FF', '#FF00FF', '#00FFFF'].map(color => (
+                                          <Button key={color} variant="outline" size="icon" className="h-5 w-5 p-0 border rounded-full" style={{ backgroundColor: color }} title={color}></Button>
+                                      ))}
+                                       {/* Add more colors... */}
+                                  </div>
+                              </div>
+                          </div>
+                      )}
                   </div>
               </div>
 
