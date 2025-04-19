@@ -7,7 +7,7 @@ import {
   FileText,
   CreditCard,
 } from "lucide-react";
-import { Link } from "react-router-dom";
+import { TabLink } from "@/components/ui/TabLink";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
 import {
@@ -97,7 +97,11 @@ export const QuickTabs = () => {
           {quickActions.map((action) => (
             <Tooltip key={action.to}>
               <TooltipTrigger asChild>
-                <Link to={action.to} className="shrink-0">
+                <TabLink 
+                  to={action.to}
+                  title={action.label}
+                  className="shrink-0"
+                >
                   <Button
                     size="sm"
                     variant="outline"
@@ -119,7 +123,7 @@ export const QuickTabs = () => {
                       </span>
                     </div>
                   </Button>
-                </Link>
+                </TabLink>
               </TooltipTrigger>
               <TooltipContent>
                 <p>{action.label}</p>

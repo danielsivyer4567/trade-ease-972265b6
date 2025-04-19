@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { cn } from '@/lib/utils';
 import { AppSidebar } from './AppSidebar';
@@ -7,17 +6,22 @@ import { MainContent } from './MainContent';
 import { SidebarProvider } from './sidebar/SidebarProvider';
 import GeminiListen from "@/components/gemini/GeminiListen";
 import { SidebarThemeProvider } from './sidebar/theme/SidebarThemeContext';
+// Optionally import the new sidebar
+// import { Sidebar } from '@/components/navigation/Sidebar';
 
 interface BaseLayoutProps {
   children: React.ReactNode;
   className?: string;
   showQuickTabs?: boolean;
+  // Add prop to control which sidebar to use
+  useNewSidebar?: boolean;
 }
 
 export function BaseLayout({
   children,
   className,
-  showQuickTabs = false
+  showQuickTabs = false,
+  useNewSidebar = false // Default to using the original sidebar
 }: BaseLayoutProps) {
   const isMobile = useIsMobile();
   const [sidebarOpen, setSidebarOpen] = React.useState(!isMobile);
@@ -42,12 +46,22 @@ export function BaseLayout({
           "relative flex min-h-screen w-full",
           className
         )}>
-          {/* Sidebar */}
-          <AppSidebar 
-            isExpanded={sidebarOpen}
-            onToggle={toggleSidebar}
-            className="fixed top-0 left-0 h-full z-40"
-          />
+          {/* Sidebar - conditionally render based on the prop */}
+          {!useNewSidebar ? (
+            <AppSidebar 
+              isExpanded={sidebarOpen}
+              onToggle={toggleSidebar}
+              className="fixed top-0 left-0 h-full z-40"
+            />
+          ) : (
+            /* You can uncomment this when ready to use the new sidebar */
+            /* <Sidebar /> */
+            <AppSidebar 
+              isExpanded={sidebarOpen}
+              onToggle={toggleSidebar}
+              className="fixed top-0 left-0 h-full z-40"
+            />
+          )}
 
           {/* Main Content */}
           <main className={cn(
