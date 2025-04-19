@@ -6,6 +6,7 @@ import { LoadingFallback } from './loading-fallback';
 // Import pages
 const SettingsPage = React.lazy(() => import('@/pages/Settings'));
 const NotificationsSettings = React.lazy(() => import('@/pages/Settings/Notifications'));
+const AIFeaturesSettings = React.lazy(() => import('@/pages/Settings/AIFeatures'));
 const AIAssistantSettings = React.lazy(() => import('@/pages/Settings/AIAssistantSettings'));
 const TradeRatesPage = React.lazy(() => import('@/pages/Settings/TradeRates'));
 const BillsPurchaseOrdersPage = React.lazy(() => import('@/pages/Settings/BillsPurchaseOrders'));
@@ -50,6 +51,14 @@ export const SettingsRoutes = (): RouteObject[] => [
     element: (
       <Suspense fallback={<LoadingFallback />}>
         <NotificationsSettings />
+      </Suspense>
+    ),
+  },
+  {
+    path: "ai-features",
+    element: (
+      <Suspense fallback={<LoadingFallback />}>
+        <AIFeaturesSettings />
       </Suspense>
     ),
   },
