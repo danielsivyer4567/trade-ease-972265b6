@@ -16,6 +16,7 @@ interface NavLinkProps extends Omit<LinkProps, 'to'> {
 /**
  * NavLink component - A specialized TabLink for navigation components
  * that adds active styling and default behavior for sidebar navigation
+ * Now uses the configurable direct navigation system via TabLink
  */
 export const NavLink: React.FC<NavLinkProps> = ({
   to,
