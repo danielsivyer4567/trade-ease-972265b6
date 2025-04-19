@@ -2,7 +2,6 @@ import { BaseLayout } from "@/components/ui/BaseLayout";
 import JobSiteMap from "@/components/dashboard/JobSiteMap";
 import RecentActivity from "@/components/dashboard/RecentActivity";
 import UpcomingJobs from "@/components/dashboard/UpcomingJobs";
-import CleaningRequiredJobs from "@/components/dashboard/CleaningRequiredJobs";
 import { Card } from "@/components/ui/card";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { TeamCalendar } from "@/components/team/TeamCalendar";
@@ -43,12 +42,9 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4">
             <Card className="shadow-md">
               <UpcomingJobs />
-            </Card>
-            <Card className="shadow-md">
-              <CleaningRequiredJobs />
             </Card>
           </div>
 
