@@ -15,7 +15,7 @@ const settingsSections = [
     title: "AI Features",
     icon: Brain,
     description: "Configure and use AI capabilities",
-    path: "/ai-features"
+    path: "/settings/ai-features"
   },
   {
     title: "AI Assistant Settings",
