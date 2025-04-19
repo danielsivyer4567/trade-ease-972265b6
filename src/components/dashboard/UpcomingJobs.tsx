@@ -19,7 +19,7 @@ const UpcomingJobs = () => {
           onClick={() => navigate("/calendar")} 
           className="bg-primary hover:bg-primary/90"
         >
-          View Calendar
+          Team Calendars View
         </Button>
       </div>
       <div className="space-y-4">
