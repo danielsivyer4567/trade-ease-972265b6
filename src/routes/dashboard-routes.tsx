@@ -17,18 +17,23 @@ const StatisticsPage = React.lazy(() => import('@/pages/Statistics'));
 const AIFeaturesPage = React.lazy(() => import('@/pages/AIFeatures'));
 const PropertyBoundariesPage = React.lazy(() => import('@/pages/PropertyBoundaries'));
 
-// Export routes as JSX elements
+// Dashboard routes
 export const dashboardRoutes = (
   <>
+    {/* 
+      Main Dashboard Routes
+      - These routes are now integrated into a single unified dashboard
+      - But we keep them separate for direct URL access and deep linking
+    */}
     <Route element={<ProtectedRoute />}>
       <Route path="/" element={
         <Suspense fallback={<LoadingFallback />}>
           <DashboardPage />
         </Suspense>
       } />
-      <Route path="/tradedash" element={
+      <Route path="/statistics" element={
         <Suspense fallback={<LoadingFallback />}>
-          <TradeDashPage />
+          <StatisticsPage />
         </Suspense>
       } />
       <Route path="/performance" element={
@@ -36,6 +41,13 @@ export const dashboardRoutes = (
           <PerformancePage />
         </Suspense>
       } />
+      <Route path="/trade-dashboard" element={
+        <Suspense fallback={<LoadingFallback />}>
+          <TradeDashPage />
+        </Suspense>
+      } />
+      
+      {/* Other Routes */}
       <Route path="/calculators" element={
         <Suspense fallback={<LoadingFallback />}>
           <CalculatorsPage />
@@ -64,11 +76,6 @@ export const dashboardRoutes = (
       <Route path="/calculators/ncc-codes" element={
         <Suspense fallback={<LoadingFallback />}>
           <NCCCodesCalculator />
-        </Suspense>
-      } />
-      <Route path="/statistics" element={
-        <Suspense fallback={<LoadingFallback />}>
-          <StatisticsPage />
         </Suspense>
       } />
       <Route path="/ai-features" element={
