@@ -29,22 +29,18 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
-            <div className="xl:col-span-2">
-              <Card className="shadow-md">
-                <JobSiteMap />
-              </Card>
-            </div>
-            <div>
-              <Card className="shadow-md h-full">
-                <RecentActivity />
-              </Card>
-            </div>
-          </div>
-
           <div className="grid grid-cols-1 gap-4">
             <Card className="shadow-md">
+              <JobSiteMap />
+            </Card>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <Card className="shadow-md">
               <UpcomingJobs />
+            </Card>
+            <Card className="shadow-md">
+              <RecentActivity />
             </Card>
           </div>
 
@@ -58,7 +54,7 @@ export default function DashboardPage() {
                 variant="ghost"
                 className="w-full p-2 flex justify-between items-center border rounded-md mb-4"
               >
-                <span className="text-lg font-semibold">Team Calendar</span>
+                <span className="text-lg font-semibold">Managers Calendar</span>
                 {isCollapsed ? (
                   <ChevronDown className="h-5 w-5" />
                 ) : (
