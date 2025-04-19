@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -11,45 +10,54 @@ export const useIntegrations = () => {
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [commandOpen, setCommandOpen] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [xeroClientId, setXeroClientId] = useState("");
+  const [xeroClientSecret, setXeroClientSecret] = useState("");
 
   const fetchConfigs = async (): Promise<IntegrationConfig[]> => {
     try {
-      return [{
-        integration_name: "Go High Level",
-        status: "connected"
-      }, {
-        integration_name: "Stripe",
-        status: "not_connected"
-      }, {
-        integration_name: "Xero",
-        status: "not_connected"
-      }, {
-        integration_name: "WhatsApp Business",
-        status: "not_connected"
-      }, {
-        integration_name: "Facebook",
-        status: "not_connected"
-      }];
+      console.log('Fetching integration configs...');
+      const { data, error } = await supabase
+        .from('integration_configs')
+        .select('integration_name, status, client_id, client_secret');
+
+      if (error) {
+        throw error;
+      }
+
+      // Set Xero credentials if they exist
+      const xeroConfig = data.find(config => config.integration_name === 'Xero');
+      if (xeroConfig) {
+        setXeroClientId(xeroConfig.client_id || '');
+        setXeroClientSecret(xeroConfig.client_secret || '');
+      }
+
+      return data || [];
     } catch (error) {
       console.error('Error fetching integration configs:', error);
+      setError('Failed to fetch integration configurations');
       return [];
     }
   };
 
   const loadIntegrationStatuses = async () => {
     try {
+      console.log('Loading integration statuses...');
       const integrationData = await fetchConfigs();
       const statuses = Object.fromEntries(
         integrationData.map(item => [item.integration_name, item.status])
       );
       setIntegrationStatuses(statuses);
+      console.log('Integration statuses loaded:', statuses);
     } catch (error) {
       console.error('Error loading integration statuses:', error);
+      setError('Failed to load integration statuses');
       toast.error('Failed to load integration statuses');
     }
   };
 
   useEffect(() => {
+    console.log('useIntegrations hook mounted');
     loadIntegrationStatuses();
   }, []);
 
@@ -60,25 +68,51 @@ export const useIntegrations = () => {
     }));
   };
 
+  const handleXeroClientIdChange = (value: string) => {
+    setXeroClientId(value);
+  };
+
+  const handleXeroClientSecretChange = (value: string) => {
+    setXeroClientSecret(value);
+  };
+
   const handleApiKeySubmit = async (integration: string) => {
     setLoading(prev => ({ ...prev, [integration]: true }));
     try {
-      const response = await supabase.functions.invoke('validate-integration', {
-        body: {
-          integration,
-          apiKey: apiKeys[integration]
-        }
-      });
+      console.log(`Submitting API key for ${integration}...`);
       
-      if (response.error) {
-        throw new Error(response.error.message || 'Failed to configure integration');
-      }
+      if (integration === 'Xero') {
+        // For Xero, we store both client ID and secret
+        const { error } = await supabase
+          .from('integration_configs')
+          .upsert({
+            integration_name: 'Xero',
+            client_id: xeroClientId,
+            client_secret: xeroClientSecret,
+            status: 'pending'
+          });
 
+        if (error) throw error;
+      } else {
+        // For other integrations, store the API key
+        const apiKey = apiKeys[integration];
+        const { error } = await supabase
+          .from('integration_configs')
+          .upsert({
+            integration_name: integration,
+            api_key: apiKey,
+            status: 'connected'
+          });
+
+        if (error) throw error;
+      }
+      
       toast.success(`${integration} configured successfully`);
       await loadIntegrationStatuses();
       setApiKeys(prev => ({ ...prev, [integration]: '' }));
     } catch (error) {
       console.error('Error submitting API key:', error);
+      setError(`Failed to configure ${integration}`);
       toast.error(error.message || 'Failed to configure integration');
     } finally {
       setLoading(prev => ({ ...prev, [integration]: false }));
@@ -95,7 +129,13 @@ export const useIntegrations = () => {
   };
 
   const handleConnect = (integration: Integration) => {
-    if (apiKeys[integration.title]) {
+    if (integration.title === 'Xero') {
+      if (!xeroClientId || !xeroClientSecret) {
+        toast.error('Please enter both Client ID and Client Secret for Xero');
+        return;
+      }
+      handleApiKeySubmit('Xero');
+    } else if (apiKeys[integration.title]) {
       handleApiKeySubmit(integration.title);
     } else {
       toast.error(`Please enter an API key for ${integration.title} first`);
@@ -125,6 +165,11 @@ export const useIntegrations = () => {
     handleApiKeySubmit,
     handleIntegrationAction,
     handleConnect,
-    filterIntegrations
+    filterIntegrations,
+    error,
+    xeroClientId,
+    xeroClientSecret,
+    handleXeroClientIdChange,
+    handleXeroClientSecretChange
   };
 };

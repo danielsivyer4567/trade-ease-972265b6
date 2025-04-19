@@ -1,4 +1,3 @@
-
 import React from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "./button";
@@ -7,7 +6,7 @@ import { QuickTabs } from "./QuickTabs";
 import { SIDEBAR_CONSTANTS } from "./sidebar/constants";
 import { ScrollArea } from "./scroll-area";
 import { useAuth } from "@/contexts/AuthContext";
-import { NotificationButton } from "@/components/notifications/NotificationButton";
+import { NotificationsContainer } from "@/components/notifications/NotificationsContainer";
 import { TabBar } from "./TabBar";
 
 interface MainContentProps {
@@ -65,7 +64,7 @@ export function MainContent({
           </div>
           <div className="flex items-center space-x-2">
             <div className="border-2 border-black p-1">
-              <NotificationButton />
+              <NotificationsContainer />
             </div>
           </div>
         </div>

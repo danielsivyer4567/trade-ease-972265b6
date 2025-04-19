@@ -1,7 +1,6 @@
-
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
-interface Notification {
+export interface Notification {
   id: string | number;
   type: 'job' | 'quote' | 'payment' | 'message' | 'other';
   title: string;
@@ -16,9 +15,13 @@ interface NotificationContextType {
   notifications: Notification[];
   unreadCount: number;
   isNotificationOpen: boolean;
+  isDraggableNotificationOpen: boolean;
   openNotifications: () => void;
   closeNotifications: () => void;
   toggleNotifications: () => void;
+  openDraggableNotifications: () => void;
+  closeDraggableNotifications: () => void;
+  toggleDraggableNotifications: () => void;
   markAsRead: (id: string | number) => void;
   markAllAsRead: () => void;
 }
@@ -72,12 +75,35 @@ const initialNotifications: Notification[] = [
 export const NotificationProvider = ({ children }: { children: ReactNode }) => {
   const [notifications, setNotifications] = useState<Notification[]>(initialNotifications);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
+  const [isDraggableNotificationOpen, setIsDraggableNotificationOpen] = useState(false);
   
   const unreadCount = notifications.filter(notification => !notification.read).length;
   
-  const openNotifications = () => setIsNotificationOpen(true);
+  const openNotifications = () => {
+    setIsNotificationOpen(true);
+    setIsDraggableNotificationOpen(false);
+  };
+  
   const closeNotifications = () => setIsNotificationOpen(false);
-  const toggleNotifications = () => setIsNotificationOpen(!isNotificationOpen);
+  const toggleNotifications = () => {
+    setIsNotificationOpen(!isNotificationOpen);
+    if (!isNotificationOpen) {
+      setIsDraggableNotificationOpen(false);
+    }
+  };
+  
+  const openDraggableNotifications = () => {
+    setIsDraggableNotificationOpen(true);
+    setIsNotificationOpen(false);
+  };
+  
+  const closeDraggableNotifications = () => setIsDraggableNotificationOpen(false);
+  const toggleDraggableNotifications = () => {
+    setIsDraggableNotificationOpen(!isDraggableNotificationOpen);
+    if (!isDraggableNotificationOpen) {
+      setIsNotificationOpen(false);
+    }
+  };
   
   const markAsRead = (id: string | number) => {
     setNotifications(notifications.map(notification => 
@@ -94,6 +120,7 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
     const handleEscape = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
         closeNotifications();
+        closeDraggableNotifications();
       }
     };
 
@@ -108,9 +135,13 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
       notifications,
       unreadCount,
       isNotificationOpen,
+      isDraggableNotificationOpen,
       openNotifications,
       closeNotifications,
       toggleNotifications,
+      openDraggableNotifications,
+      closeDraggableNotifications,
+      toggleDraggableNotifications,
       markAsRead,
       markAllAsRead,
     }}>

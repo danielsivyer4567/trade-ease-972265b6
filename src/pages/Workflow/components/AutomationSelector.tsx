@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -15,9 +14,23 @@ import { Input } from "@/components/ui/input";
 import { Workflow, Search, Plus, Tag } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { AutomationIntegrationService } from '@/services/AutomationIntegrationService';
+import { Automation } from '@/pages/Automations/types';
+
+interface AutomationNode {
+  type: 'automationNode';
+  position: { x: number; y: number };
+  data: {
+    label: string;
+    description: string;
+    triggers: string[];
+    actions: string[];
+    automationId: number;
+    premium?: boolean;
+  };
+}
 
 interface AutomationSelectorProps {
-  onSelectAutomation: (automationNode: any) => void;
+  onSelectAutomation: (automationNode: AutomationNode) => void;
   targetType?: 'job' | 'quote' | 'customer' | 'message' | 'social' | 'calendar';
   targetId?: string;
 }
@@ -29,7 +42,7 @@ export function AutomationSelector({
 }: AutomationSelectorProps) {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [automations, setAutomations] = useState([]);
+  const [automations, setAutomations] = useState<Automation[]>([]);
   const [associatedAutomations, setAssociatedAutomations] = useState<number[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
