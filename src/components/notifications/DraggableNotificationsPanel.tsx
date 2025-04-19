@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { X, Bell, PinIcon, Maximize2, Minimize2, ArrowLeftRight, Pin, Calendar, MessageSquare, Tag, Edit3, Image } from 'lucide-react';
+import { X, Bell, PinIcon, Maximize2, Minimize2, ArrowLeftRight, Pin, Calendar, MessageSquare, Tag, Edit3, Image, UploadCloud, MessageCircle, Save } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { NotificationItem } from './NotificationItem';
@@ -24,8 +24,12 @@ export const DraggableNotificationsPanel = ({
   const [customWidth, setCustomWidth] = useState(350); // Default width in pixels
   const [isDrawingMode, setIsDrawingMode] = useState(false);
   const [sortLater, setSortLater] = useState<string[]>([]);
+  const [tagDragEnabled, setTagDragEnabled] = useState(false);
+  const [showTagDragInstructions, setShowTagDragInstructions] = useState(false);
+  const [selectedTag, setSelectedTag] = useState<string | null>(null);
   const panelRef = useRef<HTMLDivElement>(null);
   const leftResizeHandleRef = useRef<HTMLDivElement>(null);
+  const tagDragRef = useRef<HTMLDivElement>(null);
   const { notifications, markAllAsRead } = useNotifications();
 
   // Calculate right sidebar width (assuming it's 50px)
@@ -247,6 +251,120 @@ export const DraggableNotificationsPanel = ({
     security: 0
   };
 
+  // Enable drag feature for tag drops
+  const enableTagDrag = () => {
+    setTagDragEnabled(true);
+    setShowTagDragInstructions(true);
+    document.body.style.cursor = 'grab';
+  };
+
+  // Disable drag feature and reset
+  const disableTagDrag = () => {
+    setTagDragEnabled(false);
+    setShowTagDragInstructions(false);
+    document.body.style.cursor = '';
+    setSelectedTag(null);
+  };
+
+  // Handle the placement of a tag
+  const handleTagPlacement = (event: React.MouseEvent) => {
+    if (!tagDragEnabled) return;
+    
+    // Create tag element at the clicked position
+    const tagElement = document.createElement('div');
+    tagElement.className = 'fixed bg-blue-100 border border-blue-400 rounded p-2 shadow-lg z-50';
+    tagElement.style.left = `${event.clientX}px`;
+    tagElement.style.top = `${event.clientY}px`;
+    
+    // Create tag content
+    const tagContent = document.createElement('div');
+    tagContent.className = 'flex flex-col gap-2';
+    
+    // Tag header
+    const tagHeader = document.createElement('div');
+    tagHeader.className = 'flex justify-between items-center';
+    tagHeader.innerHTML = `
+      <span class="font-medium text-sm">TD = tag</span>
+      <span class="bg-blue-500 text-white rounded-full h-5 w-5 flex items-center justify-center text-xs font-bold">?</span>
+    `;
+    
+    // Comment input
+    const commentInput = document.createElement('textarea');
+    commentInput.className = 'border rounded p-1 text-sm w-full';
+    commentInput.placeholder = 'Add a comment...';
+    
+    // Action buttons
+    const actionButtons = document.createElement('div');
+    actionButtons.className = 'flex justify-between';
+    actionButtons.innerHTML = `
+      <button class="text-xs px-2 py-1 bg-green-100 text-green-700 rounded hover:bg-green-200">Save</button>
+      <button class="text-xs px-2 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200">Cancel</button>
+    `;
+    
+    // Assemble the tag
+    tagContent.appendChild(tagHeader);
+    tagContent.appendChild(commentInput);
+    tagContent.appendChild(actionButtons);
+    tagElement.appendChild(tagContent);
+    
+    // Add to document
+    document.body.appendChild(tagElement);
+    
+    // Set up event listeners for the buttons
+    const buttons = tagElement.querySelectorAll('button');
+    buttons[0].addEventListener('click', () => {
+      // Save logic - replace textarea with the comment text
+      const comment = commentInput.value;
+      const commentElement = document.createElement('p');
+      commentElement.className = 'text-sm text-gray-600 mt-1';
+      commentElement.textContent = comment || 'No comment provided';
+      
+      // Replace input with the saved comment
+      tagContent.replaceChild(commentElement, commentInput);
+      tagContent.removeChild(actionButtons);
+      
+      // Add a dashed border to highlight the area
+      const targetElement = document.elementFromPoint(event.clientX, event.clientY);
+      if (targetElement && targetElement !== tagElement) {
+        const rect = targetElement.getBoundingClientRect();
+        const highlightElement = document.createElement('div');
+        highlightElement.className = 'absolute border-2 border-red-500 border-dashed pointer-events-none';
+        highlightElement.style.left = `${rect.left}px`;
+        highlightElement.style.top = `${rect.top}px`;
+        highlightElement.style.width = `${rect.width}px`;
+        highlightElement.style.height = `${rect.height}px`;
+        document.body.appendChild(highlightElement);
+      }
+      
+      // Disable tag drag mode
+      disableTagDrag();
+    });
+    
+    buttons[1].addEventListener('click', () => {
+      // Cancel - remove the tag element
+      document.body.removeChild(tagElement);
+      disableTagDrag();
+    });
+    
+    // Focus the textarea
+    commentInput.focus();
+  };
+
+  // Set up event listener for tag placement
+  useEffect(() => {
+    const handleClickForTagPlacement = (e: MouseEvent) => {
+      if (tagDragEnabled && e.target instanceof HTMLElement) {
+        handleTagPlacement(e as unknown as React.MouseEvent);
+      }
+    };
+    
+    document.addEventListener('click', handleClickForTagPlacement);
+    
+    return () => {
+      document.removeEventListener('click', handleClickForTagPlacement);
+    };
+  }, [tagDragEnabled]);
+
   return (
     <>
       {/* Overlay - only shown when not pinned */}
@@ -419,11 +537,49 @@ export const DraggableNotificationsPanel = ({
 
             {/* Activity Dashboard Section */}
             <div className="bg-gray-50 p-4 border-b">
-              <h3 className="text-sm font-medium text-gray-700 mb-2">Activity Dashboard</h3>
-              <p className="text-xs text-gray-500">
-                View and manage actions from all users. Click on any activity to dismiss or pin important notifications.
-              </p>
+              <div className="flex justify-between items-center">
+                <div>
+                  <h3 className="text-sm font-medium text-gray-700 mb-2">Activity Dashboard</h3>
+                  <p className="text-xs text-gray-500">
+                    View and manage actions from all users. Click on any activity to dismiss or pin important notifications.
+                  </p>
+                </div>
+                <button 
+                  className={cn(
+                    "text-xs px-3 py-1.5 rounded flex items-center gap-1 transition-colors",
+                    tagDragEnabled 
+                      ? "bg-blue-500 text-white hover:bg-blue-600" 
+                      : "bg-blue-100 text-blue-700 hover:bg-blue-200"
+                  )}
+                  onClick={tagDragEnabled ? disableTagDrag : enableTagDrag}
+                >
+                  <Tag className="h-3.5 w-3.5" />
+                  {tagDragEnabled ? "Cancel Tag Drop" : "Start Tag Drop"}
+                </button>
+              </div>
             </div>
+
+            {/* Tag Drop Instructions - only shows when feature is enabled */}
+            {showTagDragInstructions && (
+              <div className="bg-blue-50 p-3 border-b border-blue-200">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Tag className="h-4 w-4 text-blue-600" />
+                    <span className="text-sm font-medium text-blue-700">Tag Drop Mode Active</span>
+                  </div>
+                  <button 
+                    className="text-xs bg-blue-100 hover:bg-blue-200 text-blue-700 px-2 py-1 rounded"
+                    onClick={disableTagDrag}
+                  >
+                    Cancel
+                  </button>
+                </div>
+                <p className="text-xs text-blue-600 mt-1">
+                  Drag this onto any part of the site, then allow a comment feature to other staff.
+                  Allow for both users to reply back and forwards. Allow for picture uploads.
+                </p>
+              </div>
+            )}
 
             {/* Drawing Mode Banner - only shows when drawing mode is enabled */}
             {isDrawingMode && (
@@ -446,6 +602,54 @@ export const DraggableNotificationsPanel = ({
 
             {/* Notification List */}
             <div className="flex-1 overflow-y-auto divide-y">
+              {activeTab === 'all' && (
+                <>
+                  <div className="p-4 hover:bg-gray-50 flex items-start gap-3">
+                    <div className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center text-white font-semibold flex-shrink-0">
+                      NJ
+                    </div>
+                    <div className="flex-1">
+                      <h4 className="font-medium text-gray-900">New job assigned</h4>
+                      <p className="text-gray-700">You have been assigned to job #1234</p>
+                      <span className="text-xs text-gray-500">6 hours ago</span>
+                    </div>
+                  </div>
+
+                  <div className="p-4 hover:bg-gray-50 flex items-start gap-3">
+                    <div className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center text-white font-semibold flex-shrink-0">
+                      QA
+                    </div>
+                    <div className="flex-1">
+                      <h4 className="font-medium text-gray-900">Quote approved</h4>
+                      <p className="text-gray-700">Customer approved quote for job #5678</p>
+                      <span className="text-xs text-gray-500">7 hours ago</span>
+                    </div>
+                  </div>
+
+                  <div className="p-4 hover:bg-gray-50 flex items-start gap-3">
+                    <div className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center text-white font-semibold flex-shrink-0">
+                      PR
+                    </div>
+                    <div className="flex-1">
+                      <h4 className="font-medium text-gray-900">Payment received</h4>
+                      <p className="text-gray-700">Payment received for invoice #9012</p>
+                      <span className="text-xs text-gray-500">9 hours ago</span>
+                    </div>
+                  </div>
+
+                  <div className="p-4 hover:bg-gray-50 flex items-start gap-3">
+                    <div className="w-10 h-10 rounded-full bg-green-500 flex items-center justify-center text-white font-semibold flex-shrink-0">
+                      TL
+                    </div>
+                    <div className="flex-1">
+                      <h4 className="font-medium text-gray-900">New message</h4>
+                      <p className="text-gray-700">Team leader sent you a message</p>
+                      <span className="text-xs text-gray-500">1 day ago</span>
+                    </div>
+                  </div>
+                </>
+              )}
+
               {activeTab === 'all' && notifications.length > 0 && 
                 notifications.map(notification => 
                   <NotificationItem 
@@ -459,13 +663,13 @@ export const DraggableNotificationsPanel = ({
               {/* Calendar Booking Requests */}
               {activeTab === 'calendar' && (
                 <>
-                  <div className="p-4 hover:bg-gray-50 flex items-start">
+                  <div className="p-4 hover:bg-gray-50 flex items-start gap-3">
+                    <div className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center text-white font-semibold flex-shrink-0">
+                      CB
+                    </div>
                     <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        <Calendar className="h-4 w-4 text-blue-500" />
-                        <h4 className="font-medium">New booking request</h4>
-                      </div>
-                      <p className="font-medium">Job #701 - Fence Installation</p>
+                      <h4 className="font-medium text-gray-900">New booking request</h4>
+                      <p className="text-gray-700">Job #701 - Fence Installation</p>
                       <p className="text-sm text-gray-600">Requested for Jul 20, 10:00 AM - 2:00 PM</p>
                       <span className="text-xs text-gray-500">Jul 15, 09:45 AM</span>
                     </div>
@@ -481,13 +685,13 @@ export const DraggableNotificationsPanel = ({
               {/* Comments & Tags */}
               {activeTab === 'comments' && (
                 <>
-                  <div className="p-4 hover:bg-gray-50 flex items-start">
+                  <div className="p-4 hover:bg-gray-50 flex items-start gap-3">
+                    <div className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center text-white font-semibold flex-shrink-0">
+                      TD
+                    </div>
                     <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        <Tag className="h-4 w-4 text-blue-500" />
-                        <h4 className="font-medium">You were tagged</h4>
-                      </div>
-                      <p className="font-medium">@admin please review quote #998</p>
+                      <h4 className="font-medium text-gray-900">You were tagged</h4>
+                      <p className="text-gray-700">@admin please review quote #998</p>
                       <div className="mt-2 bg-gray-50 p-2 rounded-md border relative">
                         <p className="text-sm text-gray-600">Customer requested rush delivery</p>
                         <div className="absolute top-0 left-0 right-0 bottom-0 border-2 border-red-500 border-dashed pointer-events-none"></div>
@@ -500,13 +704,13 @@ export const DraggableNotificationsPanel = ({
                     </div>
                   </div>
                   
-                  <div className="p-4 hover:bg-gray-50 flex items-start">
+                  <div className="p-4 hover:bg-gray-50 flex items-start gap-3">
+                    <div className="w-10 h-10 rounded-full bg-green-500 flex items-center justify-center text-white font-semibold flex-shrink-0">
+                      CM
+                    </div>
                     <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        <MessageSquare className="h-4 w-4 text-green-500" />
-                        <h4 className="font-medium">New comment on Job #556</h4>
-                      </div>
-                      <p className="text-sm text-gray-600">Greg added: "Customer is very satisfied with the work"</p>
+                      <h4 className="font-medium text-gray-900">New comment on Job #556</h4>
+                      <p className="text-gray-700">Greg added: "Customer is very satisfied with the work"</p>
                       <div className="mt-2 flex gap-2">
                         <img src="https://via.placeholder.com/40" alt="Comment attachment" className="h-16 w-16 rounded object-cover" />
                         <img src="https://via.placeholder.com/40" alt="Comment attachment" className="h-16 w-16 rounded object-cover" />
@@ -519,13 +723,13 @@ export const DraggableNotificationsPanel = ({
                     </div>
                   </div>
                   
-                  <div className="p-4 hover:bg-gray-50 flex items-start">
+                  <div className="p-4 hover:bg-gray-50 flex items-start gap-3">
+                    <div className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center text-white font-semibold flex-shrink-0">
+                      TD
+                    </div>
                     <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        <Tag className="h-4 w-4 text-blue-500" />
-                        <h4 className="font-medium">New tag drop added</h4>
-                      </div>
-                      <p className="text-sm text-gray-600">Jane tagged a spot on Invoice #1092</p>
+                      <h4 className="font-medium text-gray-900">New tag drop added</h4>
+                      <p className="text-gray-700">Jane tagged a spot on Invoice #1092</p>
                       <div className="mt-2 bg-gray-50 p-2 rounded-md border">
                         <div className="flex justify-between">
                           <p className="text-sm font-medium">TD = tag</p>
@@ -546,11 +750,12 @@ export const DraggableNotificationsPanel = ({
               {/* Sample notification items based on the image with dismiss/pin options */}
               {activeTab === 'trades' && (
                 <>
-                  <div className="p-4 hover:bg-gray-50 flex items-start">
+                  <div className="p-4 hover:bg-gray-50 flex items-start gap-3">
+                    <div className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center text-white font-semibold flex-shrink-0">
+                      JB
+                    </div>
                     <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        <h4 className="font-medium">job 550 - sally healer</h4>
-                      </div>
+                      <h4 className="font-medium text-gray-900">job 550 - sally healer</h4>
                       <p className="text-green-500 font-medium">invoice paid</p>
                       <span className="text-xs text-gray-500">Jul 12, 10:15 AM</span>
                     </div>
@@ -563,11 +768,12 @@ export const DraggableNotificationsPanel = ({
                     </div>
                   </div>
                   
-                  <div className="p-4 hover:bg-gray-50 flex items-start">
+                  <div className="p-4 hover:bg-gray-50 flex items-start gap-3">
+                    <div className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center text-white font-semibold flex-shrink-0">
+                      GH
+                    </div>
                     <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        <h4 className="font-medium">job556 - greg hearn</h4>
-                      </div>
+                      <h4 className="font-medium text-gray-900">job556 - greg hearn</h4>
                       <p className="text-green-500 font-medium">job completed by Jackson ryan</p>
                       <span className="text-xs text-gray-500">Jul 11, 04:45 PM</span>
                     </div>
@@ -584,11 +790,12 @@ export const DraggableNotificationsPanel = ({
                     </div>
                   </div>
                   
-                  <div className="p-4 hover:bg-gray-50 flex items-start">
+                  <div className="p-4 hover:bg-gray-50 flex items-start gap-3">
+                    <div className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center text-white font-semibold flex-shrink-0">
+                      JG
+                    </div>
                     <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        <h4 className="font-medium">qt 998 - jess grean</h4>
-                      </div>
+                      <h4 className="font-medium text-gray-900">qt 998 - jess grean</h4>
                       <p className="text-green-500 font-medium">quote accepted</p>
                       <span className="text-xs text-gray-500">Jul 8, 03:30 PM</span>
                     </div>
@@ -600,12 +807,13 @@ export const DraggableNotificationsPanel = ({
                       </button>
                     </div>
                   </div>
-                  
-                  <div className="p-4 hover:bg-gray-50 flex items-start">
+                   
+                  <div className="p-4 hover:bg-gray-50 flex items-start gap-3">
+                    <div className="w-10 h-10 rounded-full bg-red-500 flex items-center justify-center text-white font-semibold flex-shrink-0">
+                      MF
+                    </div>
                     <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        <h4 className="font-medium">Qt 999 - mike fills</h4>
-                      </div>
+                      <h4 className="font-medium text-gray-900">Qt 999 - mike fills</h4>
                       <p className="text-red-500 font-medium">quote denied</p>
                       <span className="text-xs text-gray-500">Jul 7, 10:20 AM</span>
                     </div>
@@ -617,8 +825,11 @@ export const DraggableNotificationsPanel = ({
                       </button>
                     </div>
                   </div>
-                  
-                  <div className="p-4 hover:bg-gray-50 flex items-start border-t">
+                   
+                  <div className="p-4 hover:bg-gray-50 flex items-start border-t gap-3">
+                    <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 font-semibold flex-shrink-0">
+                      $
+                    </div>
                     <div className="flex-1">
                       <span className="text-xs text-gray-500">Jul 5, 09:30 AM</span>
                     </div>
