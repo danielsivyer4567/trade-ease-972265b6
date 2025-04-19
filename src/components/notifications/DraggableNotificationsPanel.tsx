@@ -163,48 +163,41 @@ export const DraggableNotificationsPanel = ({
 
   // Handle click on page to place a new tag (for CREATION)
   const handlePlaceNewTag = useCallback((event: MouseEvent) => {
-    console.log('[TagDrop] handlePlaceNewTag triggered.'); // Log entry
-
     // 1. Check basic conditions: Mode must be active, no creation/viewing popup open
-    if (!tagDropModeActive || isTagPopupOpen) {
-      console.log('[TagDrop] Exiting: Mode not active or popup already open.', { tagDropModeActive, isTagPopupOpen });
-      return;
-    }
+    if (!tagDropModeActive || isTagPopupOpen) return; 
 
     const target = event.target as HTMLElement;
-    console.log('[TagDrop] Click target:', target); // Log the target element
 
     // 2. Ignore clicks on the notification panel itself or its buttons/interactive elements
     if (panelRef.current?.contains(target)) {
-        console.log("[TagDrop] Exiting: Click inside panel.");
-        return;
+        // console.log("Click inside panel, ignoring for tag placement.");
+        return; 
     }
-
+    
     // 3. Ignore clicks on existing markers or popups
     if (target.closest('.tag-marker, .tag-popup-content, .tag-view-popup-content')) {
-       console.log("[TagDrop] Exiting: Click on marker or popup.");
+       // console.log("Click on marker/popup, ignoring for tag placement.");
         return;
     }
-
+    
     // 4. Ignore clicks on common interactive elements that shouldn't trigger a tag
-    const closestInteractive = target.closest('button, a, input, textarea, select');
-    if (closestInteractive) {
-        console.log("[TagDrop] Exiting: Click on interactive element:", closestInteractive);
+    if (target.closest('button, a, input, textarea, select')) {
+        // console.log("Click on interactive element, ignoring for tag placement.");
         return;
     }
 
     // 5. If none of the above, proceed to place the tag
-    console.log("[TagDrop] Conditions passed. Placing new tag creation popup at", event.clientX, event.clientY);
-
-    // --- Stop propagation *only* if we are actually placing a tag ---
-    event.stopPropagation();
-    event.preventDefault();
+    console.log("Placing new tag creation popup at", event.clientX, event.clientY);
+    
+    // --- Stop propagation *only* if we are actually placing a tag --- 
+    event.stopPropagation(); 
+    event.preventDefault(); 
 
     setTagPopupCoords({ x: event.clientX, y: event.clientY });
-    setIsTagPopupOpen(true);
+    setIsTagPopupOpen(true); // This check happens *inside* the function, no need for it in deps
     document.body.style.cursor = 'default';
 
-  }, [tagDropModeActive, isTagPopupOpen, panelRef]); // Added panelRef dependency
+  }, [tagDropModeActive]); // REMOVED isTagPopupOpen from dependency array
 
 
   // --- Handlers for actions WITHIN the tag pop-up ---
