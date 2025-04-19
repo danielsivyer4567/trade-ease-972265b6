@@ -272,75 +272,205 @@ export const DraggableNotificationsPanel = ({
     
     // Create tag element at the clicked position
     const tagElement = document.createElement('div');
-    tagElement.className = 'fixed bg-blue-100 border border-blue-400 rounded p-2 shadow-lg z-50';
+    tagElement.className = 'fixed bg-blue-50 border border-blue-300 rounded-lg p-3 shadow-lg z-50 w-[350px]';
     tagElement.style.left = `${event.clientX}px`;
     tagElement.style.top = `${event.clientY}px`;
     
     // Create tag content
     const tagContent = document.createElement('div');
-    tagContent.className = 'flex flex-col gap-2';
+    tagContent.className = 'flex flex-col gap-3';
     
     // Tag header
     const tagHeader = document.createElement('div');
     tagHeader.className = 'flex justify-between items-center';
     tagHeader.innerHTML = `
-      <span class="font-medium text-sm">TD = tag</span>
-      <span class="bg-blue-500 text-white rounded-full h-5 w-5 flex items-center justify-center text-xs font-bold">?</span>
+      <span class="font-medium text-base">Tag drop</span>
+      <span class="bg-blue-500 text-white rounded-full h-6 w-6 flex items-center justify-center text-sm font-bold">?</span>
     `;
     
     // Comment input
-    const commentInput = document.createElement('textarea');
-    commentInput.className = 'border rounded p-1 text-sm w-full';
-    commentInput.placeholder = 'Add a comment...';
+    const commentContainer = document.createElement('div');
+    commentContainer.className = 'border border-gray-300 rounded-lg overflow-hidden';
     
+    const commentInput = document.createElement('textarea');
+    commentInput.className = 'w-full p-3 text-gray-700 resize-none focus:outline-none';
+    commentInput.placeholder = 'Add a comment...';
+    commentInput.rows = 2;
+    
+    // Staff selection area
+    const staffSelectionArea = document.createElement('div');
+    staffSelectionArea.className = 'px-3 py-2 border-t border-gray-300 bg-gray-50 flex justify-between items-center';
+    staffSelectionArea.innerHTML = `
+      <div class="text-sm text-gray-500">Choose staff to notify</div>
+      <div class="flex items-center gap-2">
+        <button class="w-6 h-6 rounded-full bg-blue-500 text-white flex items-center justify-center text-xs font-medium">+</button>
+        <button class="w-6 h-6 rounded-full bg-gray-700 text-white flex items-center justify-center">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M18 10c0 4.418-3.582 8-8 8s-8-3.582-8-8 3.582-8 8-8 8 3.582 8 8zm-8-5a1 1 0 0 0-1 1v3H6a1 1 0 1 0 0 2h3v3a1 1 0 1 0 2 0v-3h3a1 1 0 1 0 0-2h-3V6a1 1 0 0 0-1-1z" clip-rule="evenodd" />
+          </svg>
+        </button>
+      </div>
+    `;
+
     // Action buttons
     const actionButtons = document.createElement('div');
-    actionButtons.className = 'flex justify-between';
-    actionButtons.innerHTML = `
-      <button class="text-xs px-2 py-1 bg-green-100 text-green-700 rounded hover:bg-green-200">Save</button>
-      <button class="text-xs px-2 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200">Cancel</button>
-    `;
+    actionButtons.className = 'flex justify-between gap-2 mt-2';
+    
+    // Save button
+    const saveButton = document.createElement('button');
+    saveButton.className = 'flex-1 py-2 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 font-medium';
+    saveButton.textContent = 'Save';
+    
+    // Reply button
+    const replyButton = document.createElement('button');
+    replyButton.className = 'flex-1 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 font-medium';
+    replyButton.textContent = 'reply';
+    
+    // Cancel button
+    const cancelButton = document.createElement('button');
+    cancelButton.className = 'flex-1 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 font-medium';
+    cancelButton.textContent = 'Cancel';
+    
+    // Add all buttons to the action buttons container
+    actionButtons.appendChild(saveButton);
+    actionButtons.appendChild(replyButton);
+    actionButtons.appendChild(cancelButton);
+    
+    // Assemble the comment container
+    commentContainer.appendChild(commentInput);
+    commentContainer.appendChild(staffSelectionArea);
     
     // Assemble the tag
     tagContent.appendChild(tagHeader);
-    tagContent.appendChild(commentInput);
+    tagContent.appendChild(commentContainer);
     tagContent.appendChild(actionButtons);
     tagElement.appendChild(tagContent);
     
     // Add to document
     document.body.appendChild(tagElement);
     
-    // Set up event listeners for the buttons
-    const buttons = tagElement.querySelectorAll('button');
-    buttons[0].addEventListener('click', () => {
-      // Save logic - replace textarea with the comment text
-      const comment = commentInput.value;
-      const commentElement = document.createElement('p');
-      commentElement.className = 'text-sm text-gray-600 mt-1';
-      commentElement.textContent = comment || 'No comment provided';
+    // Make the tag draggable
+    makeDraggable(tagElement, tagHeader);
+    
+    // Enable file upload via drag and drop
+    enableImageUpload(commentContainer);
+    
+    // Setup reply functionality
+    replyButton.addEventListener('click', () => {
+      const replyContainer = document.createElement('div');
+      replyContainer.className = 'border border-gray-300 rounded-lg overflow-hidden mt-3';
       
-      // Replace input with the saved comment
-      tagContent.replaceChild(commentElement, commentInput);
-      tagContent.removeChild(actionButtons);
+      const replyInput = document.createElement('textarea');
+      replyInput.className = 'w-full p-3 text-gray-700 resize-none focus:outline-none';
+      replyInput.placeholder = 'Type your reply...';
+      replyInput.rows = 2;
       
-      // Add a dashed border to highlight the area
-      const targetElement = document.elementFromPoint(event.clientX, event.clientY);
-      if (targetElement && targetElement !== tagElement) {
-        const rect = targetElement.getBoundingClientRect();
-        const highlightElement = document.createElement('div');
-        highlightElement.className = 'absolute border-2 border-red-500 border-dashed pointer-events-none';
-        highlightElement.style.left = `${rect.left}px`;
-        highlightElement.style.top = `${rect.top}px`;
-        highlightElement.style.width = `${rect.width}px`;
-        highlightElement.style.height = `${rect.height}px`;
-        document.body.appendChild(highlightElement);
-      }
+      replyContainer.appendChild(replyInput);
+      tagContent.appendChild(replyContainer);
       
-      // Disable tag drag mode
-      disableTagDrag();
+      // Add reply actions
+      const replyActions = document.createElement('div');
+      replyActions.className = 'flex justify-end gap-2 mt-2';
+      
+      const sendReplyButton = document.createElement('button');
+      sendReplyButton.className = 'px-3 py-1 bg-blue-500 text-white rounded-lg hover:bg-blue-600 font-medium';
+      sendReplyButton.textContent = 'Send';
+      
+      const cancelReplyButton = document.createElement('button');
+      cancelReplyButton.className = 'px-3 py-1 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 font-medium';
+      cancelReplyButton.textContent = 'Cancel';
+      
+      replyActions.appendChild(cancelReplyButton);
+      replyActions.appendChild(sendReplyButton);
+      
+      tagContent.appendChild(replyActions);
+      
+      // Focus the reply input
+      replyInput.focus();
+      
+      // Handle reply cancel
+      cancelReplyButton.addEventListener('click', () => {
+        tagContent.removeChild(replyContainer);
+        tagContent.removeChild(replyActions);
+      });
+      
+      // Handle reply send
+      sendReplyButton.addEventListener('click', () => {
+        const replyText = replyInput.value.trim();
+        if (replyText) {
+          const replyDisplay = document.createElement('div');
+          replyDisplay.className = 'mt-3 bg-gray-50 p-3 rounded-lg border border-gray-200';
+          
+          const replyHeader = document.createElement('div');
+          replyHeader.className = 'flex items-center gap-2 mb-1';
+          replyHeader.innerHTML = `
+            <div class="w-6 h-6 rounded-full bg-blue-500 text-white flex items-center justify-center text-xs font-medium">U</div>
+            <div class="text-sm font-medium">You</div>
+            <div class="text-xs text-gray-500">just now</div>
+          `;
+          
+          const replyContent = document.createElement('p');
+          replyContent.className = 'text-sm text-gray-700';
+          replyContent.textContent = replyText;
+          
+          replyDisplay.appendChild(replyHeader);
+          replyDisplay.appendChild(replyContent);
+          
+          // Replace the reply input with the reply display
+          tagContent.removeChild(replyContainer);
+          tagContent.removeChild(replyActions);
+          tagContent.appendChild(replyDisplay);
+        }
+      });
     });
     
-    buttons[1].addEventListener('click', () => {
+    // Save button functionality
+    saveButton.addEventListener('click', () => {
+      // Save logic - replace textarea with the comment text
+      const comment = commentInput.value.trim();
+      if (comment) {
+        const commentElement = document.createElement('p');
+        commentElement.className = 'text-sm text-gray-700 mt-1 p-2 bg-gray-50 rounded border border-gray-200';
+        commentElement.textContent = comment;
+        
+        // Add the dashed highlight to the target
+        const targetElement = document.elementFromPoint(event.clientX, event.clientY);
+        if (targetElement && targetElement !== tagElement) {
+          const rect = targetElement.getBoundingClientRect();
+          const highlightElement = document.createElement('div');
+          highlightElement.className = 'absolute border-2 border-red-500 border-dashed pointer-events-none';
+          highlightElement.style.left = `${rect.left}px`;
+          highlightElement.style.top = `${rect.top}px`;
+          highlightElement.style.width = `${rect.width}px`;
+          highlightElement.style.height = `${rect.height}px`;
+          document.body.appendChild(highlightElement);
+        }
+        
+        // Persist the tag element but update its appearance
+        commentContainer.remove();
+        tagContent.insertBefore(commentElement, actionButtons);
+        
+        // Update action buttons
+        actionButtons.innerHTML = '';
+        const viewButton = document.createElement('button');
+        viewButton.className = 'flex-1 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 font-medium';
+        viewButton.textContent = 'View';
+        
+        const closeButton = document.createElement('button');
+        closeButton.className = 'flex-1 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 font-medium';
+        closeButton.textContent = 'Close';
+        
+        actionButtons.appendChild(viewButton);
+        actionButtons.appendChild(closeButton);
+        
+        closeButton.addEventListener('click', () => {
+          tagElement.remove();
+        });
+      }
+    });
+    
+    // Cancel button functionality
+    cancelButton.addEventListener('click', () => {
       // Cancel - remove the tag element
       document.body.removeChild(tagElement);
       disableTagDrag();
@@ -348,6 +478,151 @@ export const DraggableNotificationsPanel = ({
     
     // Focus the textarea
     commentInput.focus();
+  };
+
+  // Function to make an element draggable
+  const makeDraggable = (element: HTMLElement, handle: HTMLElement) => {
+    let offsetX = 0;
+    let offsetY = 0;
+    let isDragging = false;
+    
+    handle.style.cursor = 'move';
+    
+    handle.addEventListener('mousedown', (e) => {
+      isDragging = true;
+      const rect = element.getBoundingClientRect();
+      offsetX = e.clientX - rect.left;
+      offsetY = e.clientY - rect.top;
+      element.style.opacity = '0.8';
+    });
+    
+    document.addEventListener('mousemove', (e) => {
+      if (!isDragging) return;
+      element.style.left = `${e.clientX - offsetX}px`;
+      element.style.top = `${e.clientY - offsetY}px`;
+    });
+    
+    document.addEventListener('mouseup', () => {
+      if (isDragging) {
+        isDragging = false;
+        element.style.opacity = '1';
+      }
+    });
+  };
+
+  // Function to enable image upload via drag and drop
+  const enableImageUpload = (container: HTMLElement) => {
+    container.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      container.classList.add('bg-blue-50');
+    });
+    
+    container.addEventListener('dragleave', () => {
+      container.classList.remove('bg-blue-50');
+    });
+    
+    container.addEventListener('drop', (e) => {
+      e.preventDefault();
+      container.classList.remove('bg-blue-50');
+      
+      // Check if files were dropped
+      if (e.dataTransfer?.files.length) {
+        const files = e.dataTransfer.files;
+        for (let i = 0; i < files.length; i++) {
+          const file = files[i];
+          
+          // Only allow images
+          if (file.type.startsWith('image/')) {
+            const reader = new FileReader();
+            reader.onload = (event) => {
+              // Create image preview
+              const imgPreview = document.createElement('div');
+              imgPreview.className = 'flex items-center gap-2 p-2 bg-gray-50 border-t border-gray-200';
+              imgPreview.innerHTML = `
+                <img src="${event.target?.result}" class="h-10 w-10 object-cover rounded" />
+                <div class="text-sm text-gray-700 flex-1">${file.name}</div>
+                <button class="text-gray-500 hover:text-red-500">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+                  </svg>
+                </button>
+              `;
+              
+              container.appendChild(imgPreview);
+              
+              // Add click event for remove button
+              const removeButton = imgPreview.querySelector('button');
+              removeButton?.addEventListener('click', () => {
+                container.removeChild(imgPreview);
+              });
+            };
+            reader.readAsDataURL(file);
+          }
+        }
+      }
+    });
+    
+    // Add an upload button
+    const uploadButtonContainer = document.createElement('div');
+    uploadButtonContainer.className = 'p-2 border-t border-gray-200';
+    
+    const uploadButton = document.createElement('button');
+    uploadButton.className = 'text-sm text-blue-600 flex items-center gap-1 hover:text-blue-800';
+    uploadButton.innerHTML = `
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clip-rule="evenodd" />
+      </svg>
+      Upload image
+    `;
+    
+    uploadButtonContainer.appendChild(uploadButton);
+    container.appendChild(uploadButtonContainer);
+    
+    // Create hidden file input
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.accept = 'image/*';
+    fileInput.style.display = 'none';
+    container.appendChild(fileInput);
+    
+    // Attach click handler to upload button
+    uploadButton.addEventListener('click', () => {
+      fileInput.click();
+    });
+    
+    // Handle file selection
+    fileInput.addEventListener('change', () => {
+      if (fileInput.files?.length) {
+        const file = fileInput.files[0];
+        
+        // Read and display the file
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          // Create image preview
+          const imgPreview = document.createElement('div');
+          imgPreview.className = 'flex items-center gap-2 p-2 bg-gray-50 border-t border-gray-200';
+          imgPreview.innerHTML = `
+            <img src="${event.target?.result}" class="h-10 w-10 object-cover rounded" />
+            <div class="text-sm text-gray-700 flex-1">${file.name}</div>
+            <button class="text-gray-500 hover:text-red-500">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+              </svg>
+            </button>
+          `;
+          
+          // Insert before the upload button
+          container.insertBefore(imgPreview, uploadButtonContainer);
+          
+          // Add click event for remove button
+          const removeButton = imgPreview.querySelector('button');
+          removeButton?.addEventListener('click', () => {
+            container.removeChild(imgPreview);
+          });
+        };
+        reader.readAsDataURL(file);
+      }
+    });
   };
 
   // Set up event listener for tag placement
