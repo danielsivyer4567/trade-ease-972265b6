@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
-interface Notification {
+export interface Notification {
   id: string | number;
   type: 'job' | 'quote' | 'payment' | 'message' | 'other';
   title: string;
