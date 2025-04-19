@@ -343,25 +343,28 @@ export const DraggableNotificationsPanel = ({
 
   // --- Event Listener for Placing Tag (useEffect) ---
   useEffect(() => {
-    // Define the handler within the effect or ensure it's stable (useCallback used above)
+    console.log('[TagDropEffect] Running effect. Mode active:', tagDropModeActive); // Log effect run
+
     const listener = (event: MouseEvent) => handlePlaceNewTag(event);
 
     if (tagDropModeActive) {
-        // Use capturing phase to catch clicks early, but handlePlaceNewTag decides whether to stop propagation
+        console.log('[TagDropEffect] Adding click listener.'); // Log listener add
         document.addEventListener('click', listener, true); 
     } else {
+        console.log('[TagDropEffect] Removing click listener.'); // Log listener remove
         document.removeEventListener('click', listener, true);
     }
     
     // Cleanup function
     return () => {
+      console.log('[TagDropEffect] Cleanup: Removing click listener.'); // Log cleanup
       document.removeEventListener('click', listener, true);
       // Ensure cursor is reset if component unmounts while mode is active
       if (tagDropModeActive) {
+          console.log('[TagDropEffect] Cleanup: Resetting cursor.'); // Log cursor reset
           document.body.style.cursor = '';
       }
     };
-    // Re-add handlePlaceNewTag to dependencies now that it's stable via useCallback
   }, [tagDropModeActive, handlePlaceNewTag]); 
 
 
