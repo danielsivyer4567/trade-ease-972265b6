@@ -24,6 +24,24 @@ export default function CredentialsPage() {
         <p className="text-gray-600 mb-4">
           Manage site-specific documents like SWMS and JSAs. Drag documents onto Jobs or Staff to assign them.
         </p>
+        
+        {/* Status Legend */}
+        <div className="flex items-center space-x-4 mb-4 p-2 bg-slate-100 rounded border border-slate-200 text-sm text-slate-600">
+          <span className="font-medium">Status Legend:</span>
+          <div className="flex items-center space-x-1">
+            <span className="w-3 h-3 rounded-full bg-green-500"></span>
+            <span>Compliant</span>
+          </div>
+          <div className="flex items-center space-x-1">
+            <span className="w-3 h-3 rounded-full bg-red-500"></span>
+            <span>Incomplete</span>
+          </div>
+           <div className="flex items-center space-x-1">
+            <span className="w-3 h-3 rounded-full bg-yellow-400"></span>
+            <span>Pending</span>
+          </div>
+        </div>
+
         {/* Grid layout for Jobs, Staff, and Documents */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="md:col-span-1">
