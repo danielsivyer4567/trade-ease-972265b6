@@ -39,6 +39,7 @@ const CalendarPage = lazy(() => import('@/pages/Calendar'));
 // Communication
 const EmailPage = lazy(() => import('@/pages/Email'));
 const MessagingPage = lazy(() => import('@/pages/Messaging'));
+const NotificationsPage = lazy(() => import('@/pages/Notifications'));
 
 // Finance
 const BankingPage = lazy(() => import('@/pages/Banking'));
@@ -238,6 +239,12 @@ export function Routes() {
           <Route path="/messaging" element={
             <Suspense fallback={<LoadingFallback />}>
               <MessagingPage />
+            </Suspense>
+          } />
+          
+          <Route path="/notifications" element={
+            <Suspense fallback={<LoadingFallback />}>
+              <NotificationsPage />
             </Suspense>
           } />
           
