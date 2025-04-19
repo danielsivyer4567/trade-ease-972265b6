@@ -1,4 +1,4 @@
-import { Network, Users } from 'lucide-react';
+import { Network } from 'lucide-react';
 import { NavigationItem } from '../navigation/NavigationGroup';
 
 export const networksNavigation = {
@@ -9,12 +9,6 @@ export const networksNavigation = {
       icon: Network,
       label: 'Networks',
       path: '/networks',
-    },
-    {
-      type: 'link' as const,
-      icon: Users,
-      label: 'Staff',
-      path: '/staff',
     },
   ] as NavigationItem[],
 }; 
