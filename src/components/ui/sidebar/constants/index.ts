@@ -1,7 +1,6 @@
-
 import { actionsNavigation } from './navigation-actions';
 import { businessNavigation } from './navigation-business';
-import { communicationNavigation } from './navigation-communication';
+import { networksNavigation } from './navigation-networks';
 import { overviewNavigation } from './navigation-overview';
 import { supplyChainNavigation } from './navigation-supply-chain';
 import { technicalNavigation } from './navigation-technical';
@@ -20,7 +19,7 @@ export const navigationGroups: NavigationGroup[] = [
   overviewNavigation,
   businessNavigation,
   technicalNavigation,
-  communicationNavigation,
+  networksNavigation,
   supplyChainNavigation,
   actionsNavigation
 ];
@@ -33,7 +32,7 @@ export {
   overviewNavigation,
   businessNavigation,
   technicalNavigation,
-  communicationNavigation,
+  networksNavigation,
   supplyChainNavigation,
   actionsNavigation
 };

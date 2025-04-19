@@ -1,6 +1,6 @@
-
 import React from 'react';
 import { IntegrationCard } from './IntegrationCard';
+import { XeroIntegrationCard } from './XeroIntegrationCard';
 import { Integration } from './types';
 
 interface IntegrationsListProps {
@@ -12,6 +12,10 @@ interface IntegrationsListProps {
   loading: Record<string, boolean>;
   onConnect: (integration: Integration) => void;
   onIntegrationAction: (event: React.MouseEvent, integration: Integration) => void;
+  xeroClientId?: string;
+  xeroClientSecret?: string;
+  onXeroClientIdChange?: (value: string) => void;
+  onXeroClientSecretChange?: (value: string) => void;
 }
 
 export const IntegrationsList: React.FC<IntegrationsListProps> = ({
@@ -22,7 +26,11 @@ export const IntegrationsList: React.FC<IntegrationsListProps> = ({
   onApiKeySubmit,
   loading,
   onConnect,
-  onIntegrationAction
+  onIntegrationAction,
+  xeroClientId = "",
+  xeroClientSecret = "",
+  onXeroClientIdChange = () => {},
+  onXeroClientSecretChange = () => {}
 }) => {
   if (filteredIntegrations.length === 0) {
     return (
@@ -34,19 +42,36 @@ export const IntegrationsList: React.FC<IntegrationsListProps> = ({
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-      {filteredIntegrations.map((integration) => (
-        <IntegrationCard
-          key={integration.title}
-          integration={integration}
-          status={integrationStatuses[integration.title] || 'not_connected'}
-          apiKey={apiKeys[integration.title] || ''}
-          onApiKeyChange={onApiKeyChange}
-          onApiKeySubmit={onApiKeySubmit}
-          loading={!!loading[integration.title]}
-          onConnect={onConnect}
-          onIntegrationAction={onIntegrationAction}
-        />
-      ))}
+      {filteredIntegrations.map((integration) => {
+        if (integration.title === "Xero") {
+          return (
+            <XeroIntegrationCard
+              key={integration.title}
+              status={integrationStatuses[integration.title] || 'not_connected'}
+              loading={!!loading[integration.title]}
+              clientId={xeroClientId}
+              clientSecret={xeroClientSecret}
+              onClientIdChange={onXeroClientIdChange}
+              onClientSecretChange={onXeroClientSecretChange}
+              onConnect={() => onConnect(integration)}
+            />
+          );
+        }
+        
+        return (
+          <IntegrationCard
+            key={integration.title}
+            integration={integration}
+            status={integrationStatuses[integration.title] || 'not_connected'}
+            apiKey={apiKeys[integration.title] || ''}
+            onApiKeyChange={onApiKeyChange}
+            onApiKeySubmit={onApiKeySubmit}
+            loading={!!loading[integration.title]}
+            onConnect={onConnect}
+            onIntegrationAction={onIntegrationAction}
+          />
+        );
+      })}
     </div>
   );
 };
