@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200">
+  <!-- Main blue circle -->
+  <circle cx="600" cy="500" r="400" fill="#3498db"/>
+  <!-- Dark outer border -->
+  <circle cx="600" cy="500" r="400" fill="none" stroke="#1a2b3c" stroke-width="40"/>
+  
+  <!-- Cross lines in the background -->
+  <line x1="400" y1="500" x2="800" y2="500" stroke="white" stroke-width="25"/>
+  <line x1="600" y1="300" x2="600" y2="700" stroke="white" stroke-width="25"/>
+  <line x1="450" y1="350" x2="750" y2="650" stroke="white" stroke-width="25"/>
+  <line x1="450" y1="650" x2="750" y2="350" stroke="white" stroke-width="25"/>
+  
+  <!-- Wrench -->
+  <path d="M425 425 C400 350 450 325 500 375 L600 475 C625 500 600 525 575 500 L475 400 C450 375 425 425 425 425Z" fill="#eeeeee" stroke="#1a2b3c" stroke-width="10"/>
+  
+  <!-- Hammer -->
+  <path d="M775 425 C800 350 750 325 700 375 L600 475 C575 500 600 525 625 500 L725 400 C750 375 775 425 775 425Z" fill="#eeeeee" stroke="#1a2b3c" stroke-width="10"/>
+  
+  <!-- Location pin -->
+  <path d="M600 950 L825 600 H375 Z" fill="#1a2b3c"/>
+  <path d="M380 600 C380 600 600 700 600 600 C600 700 820 600 820 600" stroke="#1a2b3c" stroke-width="10" fill="none"/>
+  
+  <!-- Extra shadow details -->
+  <path d="M600 500 L650 450 L700 500" fill="none" stroke="white" stroke-width="10" opacity="0.7"/>
+  <path d="M600 500 L550 450 L500 500" fill="none" stroke="white" stroke-width="10" opacity="0.7"/>
+</svg> 

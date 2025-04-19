@@ -34,8 +34,9 @@ export const Sidebar = () => {
 
   return (
     <aside className="min-w-60 w-60 h-screen bg-white border-r border-gray-200 py-6 flex flex-col overflow-y-auto">
-      <div className="px-4 mb-6">
-        <h2 className="text-xl font-bold">Trade Ease</h2>
+      <div className="px-4 mb-6 flex items-center">
+        <img src="/images/logooooo.png" alt="Trade Ease Logo" className="h-8 w-auto" />
+        <span className="ml-2 text-xl font-bold">TradeEase</span>
       </div>
       
       <nav className="flex-1">
