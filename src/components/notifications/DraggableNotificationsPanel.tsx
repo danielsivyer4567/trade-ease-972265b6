@@ -125,8 +125,10 @@ export const DraggableNotificationsPanel = ({
 
   // Toggles the overall Tag Drop mode on/off
   const toggleTagDropMode = () => {
+    console.log('[TagDrop] toggleTagDropMode called.'); // Add log here
     setTagDropModeActive(prev => {
       const nextState = !prev;
+      console.log('[TagDrop] Setting tagDropModeActive to:', nextState); // Add log here
       if (!nextState) { // Turning OFF
         closeTagPopup(); // Close any open popup
         document.body.style.cursor = '';
