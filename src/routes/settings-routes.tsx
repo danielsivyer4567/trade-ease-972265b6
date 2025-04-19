@@ -18,6 +18,7 @@ const TermsOfServicePage = React.lazy(() => import('@/pages/Settings/TermsOfServ
 const IntegrationsPage = React.lazy(() => import('@/pages/Settings/Integrations'));
 const XeroCallback = React.lazy(() => import('@/pages/Settings/components/integrations/XeroCallback'));
 const GenericSettingsPage = React.lazy(() => import('@/pages/Settings/GenericSettingsPage'));
+const StaffPage = React.lazy(() => import('@/pages/Settings/Staff'));
 
 // Export routes configuration
 export const SettingsRoutes = (): RouteObject[] => [
@@ -100,6 +101,14 @@ export const SettingsRoutes = (): RouteObject[] => [
     element: (
       <Suspense fallback={<LoadingFallback />}>
         <OfficeStaffPage />
+      </Suspense>
+    ),
+  },
+  {
+    path: "staff",
+    element: (
+      <Suspense fallback={<LoadingFallback />}>
+        <StaffPage />
       </Suspense>
     ),
   },
