@@ -11,17 +11,20 @@ const mockDocuments = [
 
 export const SafetyDocumentsManager = () => {
   return (
-    <Card>
+    <Card className="bg-slate-50 border border-slate-200 shadow-sm">
       <CardHeader>
-        <CardTitle>Safety Documents Library</CardTitle>
+        <CardTitle className="text-slate-700">Safety Documents Library</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="space-y-2 mb-4">
-            <h3 className="text-lg font-semibold mb-2">Available Documents</h3>
+            <h3 className="text-lg font-semibold mb-2 text-slate-600">Available Documents</h3>
             {mockDocuments.map((doc) => (
-            <div key={doc.id} className="p-2 border rounded bg-white shadow-sm cursor-grab"> {/* Added cursor-grab */}
-                <p className="font-medium">{doc.name}</p>
-                <div className="flex justify-between text-sm text-gray-600 mt-1">
+            <div 
+              key={doc.id} 
+              className="p-3 border border-slate-300 rounded bg-white shadow-xs cursor-grab active:cursor-grabbing hover:shadow-md hover:bg-blue-50 transition-all"
+            >
+                <p className="font-medium text-slate-800">{doc.name}</p>
+                <div className="flex justify-between text-sm text-slate-500 mt-1">
                 <span>Type: {doc.type} | Ver: {doc.version}</span>
                 <span>Date: {doc.date}</span>
                 </div>
@@ -29,10 +32,10 @@ export const SafetyDocumentsManager = () => {
             ))}
         </div>
 
-        {/* Placeholder for document upload section */}
-        <div className="p-6 border rounded-lg bg-gray-50 mt-4">
-          <p className="text-gray-500 text-center">
-            Upload new documents (SWMS, JSA, Licenses, Insurance, etc.) here.
+        {/* Placeholder for document upload section - styled */}
+        <div className="p-6 border-2 border-dashed border-slate-300 rounded-lg bg-slate-100 mt-6 hover:border-slate-400 hover:bg-slate-200 transition-colors cursor-pointer">
+          <p className="text-slate-500 text-center">
+            + Upload New Document (SWMS, JSA, etc.)
           </p>
           {/* Potential future location for <DocumentUploader /> */}
         </div>
