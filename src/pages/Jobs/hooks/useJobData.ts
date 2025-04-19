@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -105,7 +104,7 @@ export const useJobData = (id: string | undefined) => {
         });
       } else {
         toast.error("Job not found");
-        navigate('/jobs');
+        // navigate('/jobs'); // <-- Temporarily comment this out
       }
       setLoading(false);
     };
