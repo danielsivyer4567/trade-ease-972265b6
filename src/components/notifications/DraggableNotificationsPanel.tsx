@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { X, Bell, PinIcon, Maximize2, Minimize2, ArrowLeftRight, Pin, Calendar, MessageSquare, Tag, Edit3, Image, UploadCloud, MessageCircle, Save, Mic, Trash2, Brush, Paperclip, UserPlus, AlertCircle, Minus, MoveUpRight, Square, Circle, Star } from 'lucide-react';
+import { X, Bell, PinIcon, Maximize2, Minimize2, ArrowLeftRight, Pin, Calendar, MessageSquare, Tag, Edit3, Image, UploadCloud, MessageCircle, Save, Mic, Trash2, Brush, Paperclip, UserPlus, AlertCircle, Minus, MoveUpRight, Square, Circle, Star, Reply } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { NotificationItem } from './NotificationItem';
@@ -161,27 +161,43 @@ export const DraggableNotificationsPanel = ({
     }
   }, [isTagPopupOpen, tagDropModeActive]); // Include tagDropModeActive
 
-  // Handles the click on the page to place a new tag popup
+  // Handle click on page to place a new tag (for CREATION)
   const handlePlaceNewTag = useCallback((event: MouseEvent) => {
-    if (!tagDropModeActive || isTagPopupOpen) return; // Only place if mode active and no popup open
+    // 1. Check basic conditions: Mode must be active, no creation/viewing popup open
+    if (!tagDropModeActive || isTagPopupOpen) return; 
 
     const target = event.target as HTMLElement;
 
-    // Prevent placing tag on the panel, existing markers, or the popup itself
-    if (panelRef.current?.contains(target) || target.closest('.tag-marker, .tag-popup-content')) {
-      return;
+    // 2. Ignore clicks on the notification panel itself or its buttons/interactive elements
+    if (panelRef.current?.contains(target)) {
+        // console.log("Click inside panel, ignoring for tag placement.");
+        return; 
     }
     
-    // Prevent propagation to avoid interfering with other click listeners on the page
+    // 3. Ignore clicks on existing markers or popups
+    if (target.closest('.tag-marker, .tag-popup-content, .tag-view-popup-content')) {
+       // console.log("Click on marker/popup, ignoring for tag placement.");
+        return;
+    }
+    
+    // 4. Ignore clicks on common interactive elements that shouldn't trigger a tag
+    if (target.closest('button, a, input, textarea, select')) {
+        // console.log("Click on interactive element, ignoring for tag placement.");
+        return;
+    }
+
+    // 5. If none of the above, proceed to place the tag
+    console.log("Placing new tag creation popup at", event.clientX, event.clientY);
+    
+    // --- Stop propagation *only* if we are actually placing a tag --- 
     event.stopPropagation(); 
     event.preventDefault(); 
 
-    console.log("Placing new tag popup");
     setTagPopupCoords({ x: event.clientX, y: event.clientY });
-    setIsTagPopupOpen(true); // Open the single popup instance via conditional rendering
-    document.body.style.cursor = 'default'; // Change cursor while popup is open
+    setIsTagPopupOpen(true); 
+    document.body.style.cursor = 'default';
 
-  }, [tagDropModeActive, isTagPopupOpen]);
+  }, [tagDropModeActive, isTagPopupOpen]); // Removed handlePlaceNewTag from deps as it's the function itself
 
 
   // --- Handlers for actions WITHIN the tag pop-up ---
@@ -327,23 +343,26 @@ export const DraggableNotificationsPanel = ({
 
   // --- Event Listener for Placing Tag (useEffect) ---
   useEffect(() => {
+    // Define the handler within the effect or ensure it's stable (useCallback used above)
+    const listener = (event: MouseEvent) => handlePlaceNewTag(event);
+
     if (tagDropModeActive) {
-        // Add listener when mode is active
-        document.addEventListener('click', handlePlaceNewTag, true); // Use capturing phase
+        // Use capturing phase to catch clicks early, but handlePlaceNewTag decides whether to stop propagation
+        document.addEventListener('click', listener, true); 
     } else {
-        // Remove listener when mode is inactive
-        document.removeEventListener('click', handlePlaceNewTag, true);
+        document.removeEventListener('click', listener, true);
     }
     
     // Cleanup function
     return () => {
-      document.removeEventListener('click', handlePlaceNewTag, true);
+      document.removeEventListener('click', listener, true);
       // Ensure cursor is reset if component unmounts while mode is active
       if (tagDropModeActive) {
           document.body.style.cursor = '';
       }
     };
-  }, [tagDropModeActive, isTagPopupOpen, handlePlaceNewTag]); // Depend on mode and popup state
+    // Re-add handlePlaceNewTag to dependencies now that it's stable via useCallback
+  }, [tagDropModeActive, handlePlaceNewTag]); 
 
 
   return (
