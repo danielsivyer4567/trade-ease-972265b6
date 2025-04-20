@@ -1,9 +1,8 @@
-
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { User, Upload, UserPlus, ArrowLeft } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { User, Upload, UserPlus, ArrowLeft, ExternalLink, LayoutDashboard } from "lucide-react";
+import { useNavigate, Link } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 
 interface CustomerHeaderProps {
@@ -31,6 +30,22 @@ export const CustomerHeader = ({ handleFileUpload }: CustomerHeaderProps) => {
         </h1>
       </div>
       <div className="flex gap-2 bg-slate-200">
+        <Button
+          variant="outline"
+          onClick={() => navigate('/customers/console')}
+          className="flex items-center gap-1"
+        >
+          <LayoutDashboard className="h-4 w-4 mr-1" />
+          Customer Console
+        </Button>
+        <Button
+          variant="outline"
+          onClick={() => navigate('/customers/external')}
+          className="flex items-center gap-1"
+        >
+          <ExternalLink className="h-4 w-4 mr-1" />
+          External View
+        </Button>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline">
@@ -67,10 +82,12 @@ export const CustomerHeader = ({ handleFileUpload }: CustomerHeaderProps) => {
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
-        <Button onClick={() => navigate('/customers/new')} className="text-zinc-950 bg-slate-400 hover:bg-slate-300">
-          <UserPlus className="h-4 w-4 mr-2" />
-          Add Customer
-        </Button>
+        <Link to="/customers/new">
+          <Button>
+            <UserPlus className="h-4 w-4 mr-2" />
+            Add Customer
+          </Button>
+        </Link>
       </div>
     </div>
   );

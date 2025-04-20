@@ -24,7 +24,11 @@ export const fetchCustomersFromAPI = async (): Promise<CustomerData[]> => {
 
 export const openCustomer = async (customerId: string): Promise<void> => {
   try {
+    // First call the API endpoint
     await apiClient.get(`/customers/${customerId}/open`);
+    
+    // Then open the customer in a new tab
+    window.open(`${API_URL}/customers/${customerId}`, '_blank');
   } catch (error) {
     console.error('Error opening customer:', error);
     throw error;
