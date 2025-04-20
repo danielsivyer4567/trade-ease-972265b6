@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -14,10 +13,15 @@ import { useAuthRedirect } from './hooks/useAuthRedirect';
 import { useInviteCode } from './hooks/useInviteCode';
 import { useAuthForm } from './hooks/useAuthForm';
 
+// Add a simple loading component or spinner if you have one
+// For now, just using text
+const LoadingIndicator = () => <div>Loading authentication state...</div>;
+
 export default function Auth() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user } = useAuth();
+  // Destructure loading state along with user
+  const { user, loading: authLoading } = useAuth();
   const { inviteCode } = useInviteCode();
   const {
     email,
@@ -40,7 +44,12 @@ export default function Auth() {
     handleSignUp,
   } = useAuthForm();
 
-  // Redirect if user is already authenticated
+  // Handle initial loading state from AuthProvider
+  if (authLoading) {
+    return <LoadingIndicator />;
+  }
+
+  // Redirect if user is already authenticated (runs AFTER loading is false)
   useEffect(() => {
     if (user) {
       const from = location.state?.from?.pathname || '/';
