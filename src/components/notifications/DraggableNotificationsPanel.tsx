@@ -64,6 +64,200 @@ const uploadFileToSupabase = async (file: File, folder: string, fileName: string
   return mockUrl;
 };
 
+// DrawingCanvas component for simpler, direct drawing
+const DrawingCanvas = ({ 
+  width, 
+  height, 
+  drawingState, 
+  canvasRef,
+  drawArrow,
+  drawStar
+}: { 
+  width: number, 
+  height: number, 
+  drawingState: DrawingState, 
+  canvasRef: React.RefObject<HTMLCanvasElement>,
+  drawArrow: (ctx: CanvasRenderingContext2D, from: Point, to: Point, color: string, lineWidth: number) => void,
+  drawStar: (ctx: CanvasRenderingContext2D, centerX: number, centerY: number, points: number, radius: number, color: string, lineWidth: number) => void
+}) => {
+  const [isDrawing, setIsDrawing] = useState(false);
+  const [lastPoint, setLastPoint] = useState<Point | null>(null);
+
+  const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    console.log('[DrawingCanvas] Mouse Down Event:', e.nativeEvent.offsetX, e.nativeEvent.offsetY);
+    e.stopPropagation();
+    e.preventDefault();
+    
+    const rect = canvasRef.current?.getBoundingClientRect();
+    if (!rect || !canvasRef.current) return;
+    
+    const point = {
+      x: e.nativeEvent.offsetX,
+      y: e.nativeEvent.offsetY
+    };
+    
+    setIsDrawing(true);
+    setLastPoint(point);
+    console.log('[DrawingCanvas] State after Mouse Down:', { isDrawing: true, lastPoint: point });
+    
+    const ctx = canvasRef.current.getContext('2d');
+    if (!ctx) {
+      console.error('[DrawingCanvas] Failed to get 2D context');
+      return;
+    }
+    
+    console.log('[DrawingCanvas] Setting up context style:', { color: drawingState.color, lineWidth: drawingState.lineWidth });
+    ctx.beginPath();
+    ctx.moveTo(point.x, point.y);
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.strokeStyle = drawingState.color;
+    ctx.lineWidth = drawingState.lineWidth;
+  };
+  
+  const handleMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    if (!isDrawing || !lastPoint || !canvasRef.current) return;
+    console.log('[DrawingCanvas] Mouse Move Event:', e.nativeEvent.offsetX, e.nativeEvent.offsetY, 'isDrawing:', isDrawing);
+    
+    e.stopPropagation();
+    e.preventDefault();
+    
+    const point = {
+      x: e.nativeEvent.offsetX,
+      y: e.nativeEvent.offsetY
+    };
+    
+    const ctx = canvasRef.current.getContext('2d');
+    if (!ctx) return;
+    
+    console.log('[DrawingCanvas] Drawing with tool:', drawingState.tool);
+    switch (drawingState.tool) {
+      case 'pencil':
+        ctx.beginPath();
+        ctx.moveTo(lastPoint.x, lastPoint.y);
+        ctx.lineTo(point.x, point.y);
+        ctx.strokeStyle = drawingState.color;
+        ctx.lineWidth = drawingState.lineWidth;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        ctx.stroke();
+        console.log('[DrawingCanvas] Pencil stroke drawn');
+        break;
+      case 'eraser':
+        ctx.clearRect(
+          point.x - drawingState.lineWidth * 5,
+          point.y - drawingState.lineWidth * 5,
+          drawingState.lineWidth * 10,
+          drawingState.lineWidth * 10
+        );
+        console.log('[DrawingCanvas] Eraser area cleared');
+        break;
+    }
+    
+    setLastPoint(point);
+  };
+  
+  const handleMouseUp = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    console.log('[DrawingCanvas] Mouse Up Event:', e.nativeEvent.offsetX, e.nativeEvent.offsetY);
+    if (!isDrawing || !lastPoint || !canvasRef.current) {
+      setIsDrawing(false);
+      setLastPoint(null);
+      return;
+    }
+    
+    e.stopPropagation();
+    e.preventDefault();
+    
+    const point = {
+      x: e.nativeEvent.offsetX,
+      y: e.nativeEvent.offsetY
+    };
+    
+    const ctx = canvasRef.current.getContext('2d');
+    if (!ctx) return;
+    
+    console.log('[DrawingCanvas] Finalizing shape with tool:', drawingState.tool);
+    // Handle shape tools
+    switch (drawingState.tool) {
+      case 'line':
+        ctx.beginPath();
+        ctx.moveTo(lastPoint.x, lastPoint.y);
+        ctx.lineTo(point.x, point.y);
+        ctx.strokeStyle = drawingState.color;
+        ctx.lineWidth = drawingState.lineWidth;
+        ctx.stroke();
+        break;
+      case 'arrow':
+        drawArrow(ctx, lastPoint, point, drawingState.color, drawingState.lineWidth);
+        break;
+      case 'rectangle':
+        ctx.beginPath();
+        ctx.rect(
+          lastPoint.x,
+          lastPoint.y,
+          point.x - lastPoint.x,
+          point.y - lastPoint.y
+        );
+        ctx.strokeStyle = drawingState.color;
+        ctx.lineWidth = drawingState.lineWidth;
+        ctx.stroke();
+        break;
+      case 'circle':
+        const radius = Math.sqrt(
+          Math.pow(point.x - lastPoint.x, 2) + Math.pow(point.y - lastPoint.y, 2)
+        );
+        ctx.beginPath();
+        ctx.arc(lastPoint.x, lastPoint.y, radius, 0, 2 * Math.PI);
+        ctx.strokeStyle = drawingState.color;
+        ctx.lineWidth = drawingState.lineWidth;
+        ctx.stroke();
+        break;
+      case 'star':
+        drawStar(ctx, lastPoint.x, lastPoint.y, 5, 
+          Math.sqrt(Math.pow(point.x - lastPoint.x, 2) + Math.pow(point.y - lastPoint.y, 2)), 
+          drawingState.color, drawingState.lineWidth);
+        break;
+    }
+    
+    setIsDrawing(false);
+    setLastPoint(null);
+    console.log('[DrawingCanvas] State after Mouse Up:', { isDrawing: false, lastPoint: null });
+  };
+  
+  const handleMouseLeave = () => {
+    setIsDrawing(false);
+    setLastPoint(null);
+  };
+  
+  return (
+    <canvas
+      ref={canvasRef}
+      width={width}
+      height={height}
+      className="border rounded w-full cursor-crosshair bg-white"
+      onMouseDown={handleMouseDown}
+      onMouseMove={handleMouseMove}
+      onMouseUp={handleMouseUp}
+      onMouseLeave={handleMouseLeave}
+      style={{ 
+        touchAction: 'none',
+        display: 'block',
+        pointerEvents: 'all' // Set pointer events correctly
+      }}
+    />
+  );
+};
+
+// Helper component to log when the drawing area becomes active
+const EffectLogger = ({ active }: { active: boolean }) => {
+  useEffect(() => {
+    if (active) {
+      console.log('[Popup] Drawing Toolbar and Canvas rendered.');
+    }
+  }, [active]);
+  return null; // This component doesn't render anything visible
+};
+
 export const DraggableNotificationsPanel = ({
   isOpen,
   onClose,
@@ -253,17 +447,19 @@ export const DraggableNotificationsPanel = ({
   
   // Placeholder for drawing
   const handleToggleDrawing = () => {
-    console.log("[Placeholder] Toggle drawing canvas");
-    setIsDrawingActive(!isDrawingActive);
+    console.log('[handleToggleDrawing] Called. Current isDrawingActive:', isDrawingActive);
+    const nextIsDrawingActive = !isDrawingActive;
+    setIsDrawingActive(nextIsDrawingActive);
+    console.log('[handleToggleDrawing] Set isDrawingActive to:', nextIsDrawingActive);
     
     // Update drawing state
     setDrawingState(prev => ({
       ...prev,
-      isActive: !isDrawingActive
+      isActive: nextIsDrawingActive // Use the calculated next state
     }));
     
     // If not already added and turning on drawing
-    if (!isDrawingActive && !uploadedFiles.some(f => f.type === 'drawing')) {
+    if (nextIsDrawingActive && !uploadedFiles.some(f => f.type === 'drawing')) {
       // Placeholder for real drawing component
       const drawingPlaceholder: UploadedFile = {
         file: new File([], "drawing.png"), // Dummy file
@@ -271,9 +467,11 @@ export const DraggableNotificationsPanel = ({
         type: 'drawing'
       };
       setUploadedFiles(prev => [...prev, drawingPlaceholder]);
-    } else if (isDrawingActive) {
+      console.log('[handleToggleDrawing] Added drawing placeholder.');
+    } else if (!nextIsDrawingActive) {
       // Turning off - in real app we would save the drawing data
       setUploadedFiles(prev => prev.filter(f => f.type !== 'drawing'));
+      console.log('[handleToggleDrawing] Removed drawing placeholder/data.');
     }
   };
 
@@ -414,6 +612,24 @@ export const DraggableNotificationsPanel = ({
   const tagCanvasRef = useRef<HTMLCanvasElement>(null);
   const pageCanvasRef = useRef<HTMLCanvasElement>(null);
   const canvasContainerRef = useRef<HTMLDivElement>(null);
+  
+  // Add Refs for listener state
+  const isDrawingRef = useRef(isDrawing);
+  const lastPointRef = useRef(lastPoint);
+  const drawingStateRef = useRef(drawingState);
+  
+  // Keep Refs synchronized with State
+  useEffect(() => {
+    isDrawingRef.current = isDrawing;
+  }, [isDrawing]);
+  
+  useEffect(() => {
+    lastPointRef.current = lastPoint;
+  }, [lastPoint]);
+  
+  useEffect(() => {
+    drawingStateRef.current = drawingState;
+  }, [drawingState]);
   
   // Drawing functions
   const startDrawing = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
@@ -634,7 +850,11 @@ export const DraggableNotificationsPanel = ({
   
   // Set up page-wide canvas when drawing on page
   useEffect(() => {
+    // Log when the effect is triggered based on isDrawingOnPage
+    console.log(`[FullPage Draw Effect] Running. isDrawingOnPage: ${drawingState.isDrawingOnPage}`);
+
     if (drawingState.isDrawingOnPage) {
+      console.log('[FullPage Draw Effect] Creating overlay canvas and controls...');
       // Create a full-page canvas overlay for drawing
       const container = document.createElement('div');
       container.style.position = 'fixed';
@@ -642,7 +862,7 @@ export const DraggableNotificationsPanel = ({
       container.style.left = '0';
       container.style.width = '100vw';
       container.style.height = '100vh';
-      container.style.zIndex = '9999'; // Ultra high z-index to be above everything
+      container.style.zIndex = '9999'; 
       container.style.pointerEvents = 'all';
       container.classList.add('drawing-overlay');
       
@@ -655,9 +875,8 @@ export const DraggableNotificationsPanel = ({
       canvas.style.width = '100%';
       canvas.style.height = '100%';
       canvas.style.cursor = 'crosshair';
-      canvas.style.pointerEvents = 'all'; // Ensure it captures all pointer events
+      canvas.style.pointerEvents = 'all'; 
       
-      // Add controls div
       const controls = document.createElement('div');
       controls.style.position = 'fixed';
       controls.style.bottom = '20px';
@@ -669,13 +888,13 @@ export const DraggableNotificationsPanel = ({
       controls.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
       controls.style.display = 'flex';
       controls.style.gap = '10px';
-      controls.style.zIndex = '10000'; // Higher z-index than the canvas
+      controls.style.zIndex = '10000'; 
       controls.innerHTML = `
         <button class="drawing-done-btn px-4 py-2 bg-blue-600 text-white rounded">Done</button>
         <button class="drawing-cancel-btn px-4 py-2 bg-gray-300 text-gray-700 rounded">Cancel</button>
       `;
       
-      // Add tools toolbar
+      // CORRECTED toolsbar.innerHTML
       const toolsbar = document.createElement('div');
       toolsbar.style.position = 'fixed';
       toolsbar.style.top = '20px';
@@ -688,41 +907,41 @@ export const DraggableNotificationsPanel = ({
       toolsbar.style.display = 'flex';
       toolsbar.style.alignItems = 'center';
       toolsbar.style.gap = '8px';
-      toolsbar.style.zIndex = '10000'; // Higher z-index than the canvas
+      toolsbar.style.zIndex = '10000';
       toolsbar.innerHTML = `
         <div class="tool-group" style="display: flex; gap: 4px; border-right: 1px solid #ddd; padding-right: 8px;">
-          <button class="tool-btn pencil ${drawingState.tool === 'pencil' ? 'active' : ''}" title="Pencil" style="width: 32px; height: 32px; border-radius: 4px; display: flex; align-items: center; justify-content: center; ${drawingState.tool === 'pencil' ? 'background-color: #e6f0ff; border: 1px solid #3b82f6;' : 'background-color: #f1f5f9; border: 1px solid #ddd;'}">
+          <button class="tool-btn pencil ${drawingStateRef.current.tool === 'pencil' ? 'active' : ''}" title="Pencil" style="width: 32px; height: 32px; border-radius: 4px; display: flex; align-items: center; justify-content: center; ${drawingStateRef.current.tool === 'pencil' ? 'background-color: #e6f0ff; border: 1px solid #3b82f6;' : 'background-color: #f1f5f9; border: 1px solid #ddd;'}">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"></path></svg>
           </button>
-          <button class="tool-btn eraser ${drawingState.tool === 'eraser' ? 'active' : ''}" title="Eraser" style="width: 32px; height: 32px; border-radius: 4px; display: flex; align-items: center; justify-content: center; ${drawingState.tool === 'eraser' ? 'background-color: #e6f0ff; border: 1px solid #3b82f6;' : 'background-color: #f1f5f9; border: 1px solid #ddd;'}">
+          <button class="tool-btn eraser ${drawingStateRef.current.tool === 'eraser' ? 'active' : ''}" title="Eraser" style="width: 32px; height: 32px; border-radius: 4px; display: flex; align-items: center; justify-content: center; ${drawingStateRef.current.tool === 'eraser' ? 'background-color: #e6f0ff; border: 1px solid #3b82f6;' : 'background-color: #f1f5f9; border: 1px solid #ddd;'}">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 20H7L3 16c-1.5-1.45-1.5-3.55 0-5l6.5-6.5c1.45-1.5 3.55-1.5 5 0l7 7c1.5 1.45 1.5 3.55 0 5L20 18"></path></svg>
           </button>
         </div>
         <div class="tool-group" style="display: flex; gap: 4px; border-right: 1px solid #ddd; padding-right: 8px;">
-          <button class="tool-btn line ${drawingState.tool === 'line' ? 'active' : ''}" title="Line" style="width: 32px; height: 32px; border-radius: 4px; display: flex; align-items: center; justify-content: center; ${drawingState.tool === 'line' ? 'background-color: #e6f0ff; border: 1px solid #3b82f6;' : 'background-color: #f1f5f9; border: 1px solid #ddd;'}">
+          <button class="tool-btn line ${drawingStateRef.current.tool === 'line' ? 'active' : ''}" title="Line" style="width: 32px; height: 32px; border-radius: 4px; display: flex; align-items: center; justify-content: center; ${drawingStateRef.current.tool === 'line' ? 'background-color: #e6f0ff; border: 1px solid #3b82f6;' : 'background-color: #f1f5f9; border: 1px solid #ddd;'}">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path></svg>
           </button>
-          <button class="tool-btn arrow ${drawingState.tool === 'arrow' ? 'active' : ''}" title="Arrow" style="width: 32px; height: 32px; border-radius: 4px; display: flex; align-items: center; justify-content: center; ${drawingState.tool === 'arrow' ? 'background-color: #e6f0ff; border: 1px solid #3b82f6;' : 'background-color: #f1f5f9; border: 1px solid #ddd;'}">
+          <button class="tool-btn arrow ${drawingStateRef.current.tool === 'arrow' ? 'active' : ''}" title="Arrow" style="width: 32px; height: 32px; border-radius: 4px; display: flex; align-items: center; justify-content: center; ${drawingStateRef.current.tool === 'arrow' ? 'background-color: #e6f0ff; border: 1px solid #3b82f6;' : 'background-color: #f1f5f9; border: 1px solid #ddd;'}">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
           </button>
-          <button class="tool-btn rectangle ${drawingState.tool === 'rectangle' ? 'active' : ''}" title="Rectangle" style="width: 32px; height: 32px; border-radius: 4px; display: flex; align-items: center; justify-content: center; ${drawingState.tool === 'rectangle' ? 'background-color: #e6f0ff; border: 1px solid #3b82f6;' : 'background-color: #f1f5f9; border: 1px solid #ddd;'}">
+          <button class="tool-btn rectangle ${drawingStateRef.current.tool === 'rectangle' ? 'active' : ''}" title="Rectangle" style="width: 32px; height: 32px; border-radius: 4px; display: flex; align-items: center; justify-content: center; ${drawingStateRef.current.tool === 'rectangle' ? 'background-color: #e6f0ff; border: 1px solid #3b82f6;' : 'background-color: #f1f5f9; border: 1px solid #ddd;'}">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"></rect></svg>
           </button>
-          <button class="tool-btn circle ${drawingState.tool === 'circle' ? 'active' : ''}" title="Circle" style="width: 32px; height: 32px; border-radius: 4px; display: flex; align-items: center; justify-content: center; ${drawingState.tool === 'circle' ? 'background-color: #e6f0ff; border: 1px solid #3b82f6;' : 'background-color: #f1f5f9; border: 1px solid #ddd;'}">
+          <button class="tool-btn circle ${drawingStateRef.current.tool === 'circle' ? 'active' : ''}" title="Circle" style="width: 32px; height: 32px; border-radius: 4px; display: flex; align-items: center; justify-content: center; ${drawingStateRef.current.tool === 'circle' ? 'background-color: #e6f0ff; border: 1px solid #3b82f6;' : 'background-color: #f1f5f9; border: 1px solid #ddd;'}">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle></svg>
           </button>
         </div>
         <div class="tool-group" style="display: flex; gap: 4px; border-right: 1px solid #ddd; padding-right: 8px;">
           <select class="brush-width" style="padding: 4px; border-radius: 4px; border: 1px solid #ddd;">
-            <option value="1" ${drawingState.lineWidth === 1 ? 'selected' : ''}>Thin</option>
-            <option value="3" ${drawingState.lineWidth === 3 ? 'selected' : ''}>Normal</option>
-            <option value="5" ${drawingState.lineWidth === 5 ? 'selected' : ''}>Thick</option>
-            <option value="10" ${drawingState.lineWidth === 10 ? 'selected' : ''}>Extra Thick</option>
+            <option value="1" ${drawingStateRef.current.lineWidth === 1 ? 'selected' : ''}>Thin</option>
+            <option value="3" ${drawingStateRef.current.lineWidth === 3 ? 'selected' : ''}>Normal</option>
+            <option value="5" ${drawingStateRef.current.lineWidth === 5 ? 'selected' : ''}>Thick</option>
+            <option value="10" ${drawingStateRef.current.lineWidth === 10 ? 'selected' : ''}>Extra Thick</option>
           </select>
         </div>
         <div class="color-pickers" style="display: flex; gap: 4px;">
           ${['#FF0000', '#000000', '#FFFFFF', '#CCCCCC', '#888888', '#FFFF00', '#00FF00', '#0000FF'].map(color => 
-            `<button class="color-btn" data-color="${color}" style="width: 24px; height: 24px; border-radius: 50%; background-color: ${color}; border: ${drawingState.color === color ? '2px solid #3b82f6' : '1px solid #ddd'}; ${color === '#FFFFFF' ? 'border: 1px solid #ddd;' : ''}"></button>`
+            `<button class="color-btn" data-color="${color}" style="width: 24px; height: 24px; border-radius: 50%; background-color: ${color}; border: ${drawingStateRef.current.color === color ? '2px solid #3b82f6' : '1px solid #ddd'}; ${color === '#FFFFFF' ? 'border: 1px solid #ddd;' : ''}"></button>`
           ).join('')}
         </div>
       `;
@@ -732,12 +951,13 @@ export const DraggableNotificationsPanel = ({
       container.appendChild(toolsbar);
       document.body.appendChild(container);
       
-      // Set refs
       canvasContainerRef.current = container;
       pageCanvasRef.current = canvas;
-      
-      // Add event listeners for drawing
+      console.log('[FullPage Draw Effect] Overlay appended to body.');
+
+      // Add event listeners for drawing - USE REFS HERE
       const mouseDownListener = (e: MouseEvent) => {
+        console.log('[FullPage Canvas] Mouse Down Event', e.clientX, e.clientY);
         e.preventDefault();
         e.stopPropagation();
         
@@ -745,24 +965,24 @@ export const DraggableNotificationsPanel = ({
           x: e.clientX,
           y: e.clientY
         };
-        setIsDrawing(true);
-        setLastPoint(point);
+        setIsDrawing(true); 
+        setLastPoint(point); 
         
-        if (drawingState.tool === 'pencil') {
+        if (drawingStateRef.current.tool === 'pencil') {
           const ctx = canvas.getContext('2d');
           if (!ctx) return;
-          
           ctx.beginPath();
           ctx.moveTo(point.x, point.y);
           ctx.lineCap = 'round';
           ctx.lineJoin = 'round';
-          ctx.strokeStyle = drawingState.color;
-          ctx.lineWidth = drawingState.lineWidth;
+          ctx.strokeStyle = drawingStateRef.current.color;
+          ctx.lineWidth = drawingStateRef.current.lineWidth;
         }
       };
       
       const mouseMoveListener = (e: MouseEvent) => {
-        if (!isDrawing || !lastPoint) return;
+        if (!isDrawingRef.current || !lastPointRef.current) return;
+        console.log('[FullPage Canvas] Mouse Move Event', e.clientX, e.clientY);
         
         e.preventDefault();
         e.stopPropagation();
@@ -775,34 +995,35 @@ export const DraggableNotificationsPanel = ({
         const ctx = canvas.getContext('2d');
         if (!ctx) return;
         
-        switch (drawingState.tool) {
+        switch (drawingStateRef.current.tool) {
           case 'pencil':
             ctx.beginPath();
-            ctx.moveTo(lastPoint.x, lastPoint.y);
+            ctx.moveTo(lastPointRef.current.x, lastPointRef.current.y);
             ctx.lineTo(point.x, point.y);
-            ctx.strokeStyle = drawingState.color;
-            ctx.lineWidth = drawingState.lineWidth;
+            ctx.strokeStyle = drawingStateRef.current.color;
+            ctx.lineWidth = drawingStateRef.current.lineWidth;
             ctx.lineCap = 'round';
             ctx.lineJoin = 'round';
             ctx.stroke();
             break;
           case 'eraser':
-            ctx.clearRect(
-              point.x - drawingState.lineWidth * 5,
-              point.y - drawingState.lineWidth * 5,
-              drawingState.lineWidth * 10,
-              drawingState.lineWidth * 10
+             ctx.clearRect(
+              point.x - drawingStateRef.current.lineWidth * 5,
+              point.y - drawingStateRef.current.lineWidth * 5,
+              drawingStateRef.current.lineWidth * 10,
+              drawingStateRef.current.lineWidth * 10
             );
             break;
         }
         
-        setLastPoint(point);
+        setLastPoint(point); 
       };
       
       const mouseUpListener = (e: MouseEvent) => {
-        if (!isDrawing || !lastPoint) {
-          setIsDrawing(false);
-          setLastPoint(null);
+         console.log('[FullPage Canvas] Mouse Up/Leave Event', e.clientX, e.clientY);
+         if (!isDrawingRef.current || !lastPointRef.current) {
+          setIsDrawing(false); 
+          setLastPoint(null); 
           return;
         }
         
@@ -817,163 +1038,141 @@ export const DraggableNotificationsPanel = ({
         const ctx = canvas.getContext('2d');
         if (!ctx) return;
         
-        // Handle shape tools that draw on mouse up
-        switch (drawingState.tool) {
+        const currentTool = drawingStateRef.current.tool;
+        const currentLastPoint = lastPointRef.current;
+        const currentColor = drawingStateRef.current.color;
+        const currentLineWidth = drawingStateRef.current.lineWidth;
+        
+        // Redraw the switch statement for drawing shapes using refs
+        switch (currentTool) {
           case 'line':
             ctx.beginPath();
-            ctx.moveTo(lastPoint.x, lastPoint.y);
+            ctx.moveTo(currentLastPoint.x, currentLastPoint.y);
             ctx.lineTo(endPoint.x, endPoint.y);
-            ctx.strokeStyle = drawingState.color;
-            ctx.lineWidth = drawingState.lineWidth;
+            ctx.strokeStyle = currentColor;
+            ctx.lineWidth = currentLineWidth;
             ctx.stroke();
             break;
           case 'arrow':
-            drawArrow(ctx, lastPoint, endPoint, drawingState.color, drawingState.lineWidth);
+            drawArrow(ctx, currentLastPoint, endPoint, currentColor, currentLineWidth);
             break;
           case 'rectangle':
             ctx.beginPath();
             ctx.rect(
-              lastPoint.x,
-              lastPoint.y,
-              endPoint.x - lastPoint.x,
-              endPoint.y - lastPoint.y
+              currentLastPoint.x,
+              currentLastPoint.y,
+              endPoint.x - currentLastPoint.x,
+              endPoint.y - currentLastPoint.y
             );
-            ctx.strokeStyle = drawingState.color;
-            ctx.lineWidth = drawingState.lineWidth;
+            ctx.strokeStyle = currentColor;
+            ctx.lineWidth = currentLineWidth;
             ctx.stroke();
             break;
           case 'circle':
             const radius = Math.sqrt(
-              Math.pow(endPoint.x - lastPoint.x, 2) + Math.pow(endPoint.y - lastPoint.y, 2)
+              Math.pow(endPoint.x - currentLastPoint.x, 2) + Math.pow(endPoint.y - currentLastPoint.y, 2)
             );
             ctx.beginPath();
-            ctx.arc(lastPoint.x, lastPoint.y, radius, 0, 2 * Math.PI);
-            ctx.strokeStyle = drawingState.color;
-            ctx.lineWidth = drawingState.lineWidth;
+            ctx.arc(currentLastPoint.x, currentLastPoint.y, radius, 0, 2 * Math.PI);
+            ctx.strokeStyle = currentColor;
+            ctx.lineWidth = currentLineWidth;
             ctx.stroke();
             break;
           case 'star':
-            drawStar(ctx, lastPoint.x, lastPoint.y, 5, 
-                Math.sqrt(Math.pow(endPoint.x - lastPoint.x, 2) + Math.pow(endPoint.y - lastPoint.y, 2)), 
-                drawingState.color, drawingState.lineWidth);
+            drawStar(ctx, currentLastPoint.x, currentLastPoint.y, 5, 
+                Math.sqrt(Math.pow(endPoint.x - currentLastPoint.x, 2) + Math.pow(endPoint.y - currentLastPoint.y, 2)), 
+                currentColor, currentLineWidth);
             break;
         }
         
-        setIsDrawing(false);
-        setLastPoint(null);
+        setIsDrawing(false); 
+        setLastPoint(null); 
       };
       
-      // Add event listeners
+      console.log('[FullPage Draw Effect] Adding event listeners to full page canvas...');
       canvas.addEventListener('mousedown', mouseDownListener);
       canvas.addEventListener('mousemove', mouseMoveListener);
       canvas.addEventListener('mouseup', mouseUpListener);
-      
-      // Add button event listeners
-      const doneButton = container.querySelector('.drawing-done-btn');
-      const cancelButton = container.querySelector('.drawing-cancel-btn');
-      
-      if (doneButton) {
-        doneButton.addEventListener('click', () => {
-          // Capture the drawing as a blob/data URL
-          const dataUrl = canvas.toDataURL('image/png');
-          // Create a file object from the data URL
-          const file = dataURLtoFile(dataUrl, `drawing_${Date.now()}.png`);
-          
-          // Add to uploaded files
-          if (file) {
-            const drawingFile: UploadedFile = {
-              file,
-              previewUrl: dataUrl,
-              type: 'drawing'
-            };
-            setUploadedFiles(prev => [...prev, drawingFile]);
-          }
-          
-          // Turn off drawing mode
-          setDrawingState(prev => ({...prev, isDrawingOnPage: false}));
-        });
-      }
-      
-      if (cancelButton) {
-        cancelButton.addEventListener('click', () => {
-          setDrawingState(prev => ({...prev, isDrawingOnPage: false}));
-        });
-      }
-      
-      // Add toolbar event listeners
+      canvas.addEventListener('mouseleave', mouseUpListener);
+
+      // Button and Toolbar listeners (ensure they use setDrawingState)
       const toolButtons = container.querySelectorAll('.tool-btn');
       toolButtons.forEach(btn => {
         btn.addEventListener('click', (e) => {
           const btn = e.currentTarget as HTMLElement;
-          // Get the tool type from the class name
           const toolType = Array.from(btn.classList)
             .find(cls => ['pencil', 'eraser', 'line', 'arrow', 'rectangle', 'circle', 'star'].includes(cls));
-          
           if (toolType) {
-            setDrawingState(prev => ({
-              ...prev, 
-              tool: toolType as DrawingState['tool']
-            }));
-            
-            // Update the UI
-            toolButtons.forEach(b => {
-              (b as HTMLElement).style.backgroundColor = '#f1f5f9';
-              (b as HTMLElement).style.border = '1px solid #ddd';
-            });
-            btn.style.backgroundColor = '#e6f0ff';
-            btn.style.border = '1px solid #3b82f6';
+            setDrawingState(prev => ({ ...prev, tool: toolType as DrawingState['tool'] }));
+            toolButtons.forEach(b => { (b as HTMLElement).style.backgroundColor = '#f1f5f9'; (b as HTMLElement).style.border = '1px solid #ddd'; });
+            btn.style.backgroundColor = '#e6f0ff'; btn.style.border = '1px solid #3b82f6';
           }
         });
       });
-      
-      // Add brush size listener
       const brushSizeSelect = container.querySelector('.brush-width') as HTMLSelectElement;
       if (brushSizeSelect) {
         brushSizeSelect.addEventListener('change', () => {
-          const size = parseInt(brushSizeSelect.value);
-          setDrawingState(prev => ({
-            ...prev,
-            lineWidth: size
-          }));
+          setDrawingState(prev => ({ ...prev, lineWidth: parseInt(brushSizeSelect.value) }));
         });
       }
-      
-      // Add color buttons listeners
       const colorButtons = container.querySelectorAll('.color-btn');
       colorButtons.forEach(btn => {
         btn.addEventListener('click', () => {
           const colorBtn = btn as HTMLElement;
           const color = colorBtn.dataset.color;
           if (color) {
-            setDrawingState(prev => ({
-              ...prev,
-              color
-            }));
-            
-            // Update the UI
-            colorButtons.forEach(b => {
-              const htmlElement = b as HTMLElement;
-              htmlElement.style.border = htmlElement.getAttribute('data-color') === '#FFFFFF' 
-                ? '1px solid #ddd' 
-                : '1px solid #ddd';
-            });
+            setDrawingState(prev => ({ ...prev, color }));
+            colorButtons.forEach(b => { (b as HTMLElement).style.border = (b as HTMLElement).getAttribute('data-color') === '#FFFFFF' ? '1px solid #ddd' : '1px solid #ddd'; });
             colorBtn.style.border = '2px solid #3b82f6';
           }
         });
       });
-      
+      const doneButton = container.querySelector('.drawing-done-btn');
+      const cancelButton = container.querySelector('.drawing-cancel-btn');
+      if (doneButton) {
+        doneButton.addEventListener('click', () => {
+          const dataUrl = canvas.toDataURL('image/png');
+          const file = dataURLtoFile(dataUrl, `drawing_${Date.now()}.png`);
+          if (file) {
+            setUploadedFiles(prev => [...prev, { file, previewUrl: dataUrl, type: 'drawing' }]);
+          }
+          setDrawingState(prev => ({ ...prev, isDrawingOnPage: false }));
+        });
+      }
+      if (cancelButton) {
+        cancelButton.addEventListener('click', () => {
+          setDrawingState(prev => ({ ...prev, isDrawingOnPage: false }));
+        });
+      }
+        
       // Cleanup function
       return () => {
+        console.log('[FullPage Draw Effect] Cleanup: Removing listeners and overlay...');
         canvas.removeEventListener('mousedown', mouseDownListener);
         canvas.removeEventListener('mousemove', mouseMoveListener);
         canvas.removeEventListener('mouseup', mouseUpListener);
+        canvas.removeEventListener('mouseleave', mouseUpListener);
         
         if (container && container.parentNode) {
+          console.log('[FullPage Draw Effect] Removing container from parentNode.');
           container.parentNode.removeChild(container);
+        } else {
+          console.warn('[FullPage Draw Effect] Cleanup: Container or parentNode not found.');
         }
+        pageCanvasRef.current = null;
+        canvasContainerRef.current = null;
       };
+    } else {
+        // Ensure cleanup if effect runs when isDrawingOnPage is false
+        if (canvasContainerRef.current && canvasContainerRef.current.parentNode) {
+            console.log('[FullPage Draw Effect] isDrawingOnPage is false, ensuring cleanup.');
+            canvasContainerRef.current.parentNode.removeChild(canvasContainerRef.current);
+            pageCanvasRef.current = null;
+            canvasContainerRef.current = null;
+        }
     }
-  }, [drawingState.isDrawingOnPage, drawingState.color, drawingState.lineWidth, drawingState.tool, isDrawing, lastPoint, drawArrow, drawStar]);
+  // Keep dependencies minimal: only need isDrawingOnPage and stable functions
+  }, [drawingState.isDrawingOnPage, drawArrow, drawStar]);
   
   // Helper to convert data URL to File
   const dataURLtoFile = (dataurl: string, filename: string): File | null => {
@@ -1074,6 +1273,28 @@ export const DraggableNotificationsPanel = ({
     }
   }, [isDraggingPopup, handlePopupDrag, handlePopupDragEnd]);
 
+  useEffect(() => {
+    if (isDrawing && tagCanvasRef.current) {
+      const ctx = tagCanvasRef.current.getContext('2d');
+      ctx.lineWidth = drawingState.lineWidth;
+      ctx.strokeStyle = drawingState.color;
+      ctx.lineCap = 'round';
+    }
+  }, [isDrawing, drawingState.lineWidth, drawingState.color]);
+
+  const drawPencil = (ctx, startPoint, endPoint) => {
+    ctx.beginPath();
+    ctx.moveTo(startPoint.x, startPoint.y);
+    ctx.lineTo(endPoint.x, endPoint.y);
+    ctx.stroke();
+  };
+
+  const eraseArea = (ctx, point, size) => {
+    ctx.clearRect(point.x - size, point.y - size, size * 2, size * 2);
+  };
+
+  // Similar functions for other tools
+
   return (
     <>
       {/* Overlay */}
@@ -1101,29 +1322,24 @@ export const DraggableNotificationsPanel = ({
                 top: `${tagPopupCoords.y}px`,
                 cursor: isDraggingPopup ? 'move' : 'default'
               }}
-              onClick={(e) => e.stopPropagation()}
           >
-              {/* Header - Now with drag handle functionality */}
+              {/* Header - Drag handle */}
               <div 
-                className="popup-drag-handle flex justify-between items-center p-3 border-b bg-gray-50 rounded-t-lg cursor-move"
-                onMouseDown={handlePopupDragStart}
+                className="popup-drag-handle flex justify-between items-center p-3 border-b bg-slate-400 rounded-t-lg cursor-move"
+                onMouseDown={handlePopupDragStart} 
               >
-                  <div className="flex items-center gap-2">
-                      <img src={businessLogoUrl} alt="Logo" className="h-5 w-5 rounded-full" />
-                      <span className="font-semibold text-gray-700">Create Tag</span>
+                  <div className="flex items-center gap-2 text-white"> {/* Added text-white for better contrast */}
+                      <Tag className="h-5 w-5" /> {/* Added Tag icon */}
+                      <span className="font-semibold">Create Tag</span> {/* Removed business logo img */}
                   </div>
-                  <Button variant="ghost" size="icon" className="h-7 w-7" onClick={closeTagPopup}>
+                  <Button variant="ghost" size="icon" className="h-7 w-7 text-white hover:bg-slate-500" onClick={closeTagPopup}> {/* Added text-white */}
                       <X className="h-4 w-4" />
                   </Button>
               </div>
 
-              {/* Content Area - Add event handler to stop propagation */}
+              {/* Content Area */}
               <div 
-                  className="p-4 flex flex-col gap-4"
-                  onMouseDown={(e) => {
-                      // Prevent the popup from being dragged when interacting with content
-                      e.stopPropagation();
-                  }}
+                  className="p-4 flex flex-col gap-4 overflow-y-auto max-h-[70vh]"
               >
                   {/* Comment */}
                   <textarea
@@ -1132,13 +1348,11 @@ export const DraggableNotificationsPanel = ({
                       rows={3}
                       value={tagComment}
                       onChange={handleCommentChange}
-                      onMouseDown={(e) => e.stopPropagation()} // Prevent drag on text input
                   />
 
                   {/* Staff Selection */}
                   <div 
                       className="border rounded-md p-3"
-                      onMouseDown={(e) => e.stopPropagation()} // Prevent drag on staff selection
                   >
                       <label className="text-sm font-medium text-gray-700 block mb-2">Notify Staff <span className="text-red-500">*</span></label>
                       <div className="max-h-24 overflow-y-auto mb-2 border-t border-b py-1">
@@ -1150,7 +1364,6 @@ export const DraggableNotificationsPanel = ({
                                       className="form-checkbox h-4 w-4 text-blue-600 rounded"
                                       checked={selectedStaff.some(s => s.id === staff.id)}
                                       onChange={() => handleStaffSelect(staff)}
-                                      onMouseDown={(e) => e.stopPropagation()} // Prevent drag on checkbox
                                   />
                               </div>
                           ))}
@@ -1170,7 +1383,7 @@ export const DraggableNotificationsPanel = ({
                   </div>
 
                   {/* Attachments */}
-                  <div onMouseDown={(e) => e.stopPropagation()}>
+                  <div>
                       <label className="text-sm font-medium text-gray-700 block mb-1">Attachments</label>
                       {/* Previews */}
                       {uploadedFiles.length > 0 && (
@@ -1194,7 +1407,6 @@ export const DraggableNotificationsPanel = ({
                                           variant="destructive" size="icon"
                                           className="absolute -top-1 -right-1 h-4 w-4 rounded-full p-0"
                                           onClick={() => removeUploadedFile(index)}
-                                          onMouseDown={(e) => e.stopPropagation()} // Prevent drag on button
                                       >
                                           <X className="h-2.5 w-2.5" />
                                       </Button>
@@ -1209,7 +1421,6 @@ export const DraggableNotificationsPanel = ({
                                size="sm" 
                                className="flex-1 text-xs gap-1" 
                                onClick={() => document.getElementById('tag-image-upload')?.click()}
-                               onMouseDown={(e) => e.stopPropagation()} // Prevent drag on button
                            >
                                <Image className="h-3.5 w-3.5"/> Image
                                <input type="file" id="tag-image-upload" accept="image/*" className="hidden" onChange={handleImageUpload}/>
@@ -1219,11 +1430,10 @@ export const DraggableNotificationsPanel = ({
                                size="sm" 
                                className={cn(
                                    "flex-1 text-xs gap-1", 
-                                   isDrawingActive ? 'bg-blue-100 text-blue-700 border-blue-300' : '' // Active state style
+                                   isDrawingActive ? 'bg-blue-100 text-blue-700 border-blue-300' : '' 
                                )} 
                                onClick={handleToggleDrawing}
-                               onMouseDown={(e) => e.stopPropagation()} // Prevent drag on button
-                            >
+                           >
                                <Brush className="h-3.5 w-3.5"/> Draw
                            </Button>
                            <Button 
@@ -1231,303 +1441,156 @@ export const DraggableNotificationsPanel = ({
                                size="sm" 
                                className={cn(
                                    "flex-1 text-xs gap-1", 
-                                   isRecordingAudio ? 'bg-red-100 text-red-700 border-red-300' : '' // Active state style
+                                   isRecordingAudio ? 'bg-red-100 text-red-700 border-red-300' : '' 
                                )} 
                                onClick={handleToggleAudioRecord}
-                               onMouseDown={(e) => e.stopPropagation()} // Prevent drag on button
-                            >
+                           >
                                <Mic className="h-3.5 w-3.5"/> Voice
                            </Button>
                       </div>
                       
                       {/* --- Drawing Toolbar (Updated) --- */}
                       {isDrawingActive && (
-                          <div 
-                              className="mt-3 pt-3 border-t border-gray-200 flex flex-col gap-3"
-                              onMouseDown={(e) => e.stopPropagation()} // Prevent drag on drawing toolbar
-                          >
-                              {/* Row 1: Tools & Brush Options */}
-                              <div className="flex items-center gap-4">
-                                  {/* Tools Section */}
-                                  <div className="flex items-center gap-1 border-r pr-3">
-                                      <span className="text-xs font-medium mr-1">Tools:</span>
-                                      {/* Interactive Tool Buttons */}
-                                      <Button 
-                                          variant={drawingState.tool === 'pencil' ? 'default' : 'ghost'} 
-                                          size="icon" 
-                                          className="h-7 w-7" 
-                                          title="Pencil"
-                                          onClick={() => handleToolChange('pencil')}
-                                          onMouseDown={(e) => e.stopPropagation()} // Prevent drag on button
-                                      >
-                                          <Edit3 className="h-4 w-4" />
-                                      </Button>
-                                      <Button 
-                                          variant={drawingState.tool === 'eraser' ? 'default' : 'ghost'} 
-                                          size="icon" 
-                                          className="h-7 w-7" 
-                                          title="Eraser"
-                                          onClick={() => handleToolChange('eraser')}
-                                          onMouseDown={(e) => e.stopPropagation()} // Prevent drag on button
-                                      >
-                                          <Trash2 className="h-4 w-4" />
-                                      </Button>
-                                  </div>
-                                  {/* Brush Section */}
-                                  <div className="flex items-center gap-1">
-                                       <span className="text-xs font-medium mr-1">Brush:</span>
-                                       {/* Functional brush size selector */}
-                                       <select 
-                                           className="text-xs border rounded px-1 py-0.5"
-                                           value={drawingState.lineWidth}
-                                           onChange={(e) => handleBrushSizeChange(Number(e.target.value))}
-                                           onMouseDown={(e) => e.stopPropagation()} // Prevent drag on select
-                                       >
-                                          <option value="1">Thin</option>
-                                          <option value="3">Normal</option>
-                                          <option value="5">Thick</option>
-                                          <option value="10">Extra Thick</option>
-                                       </select>
-                                  </div>
-                              </div>
-                              
-                              {/* Row 2: Shapes & Colors */}
-                              <div className="flex items-center gap-4">
-                                  {/* Shapes Section */}
-                                  <div className="flex items-center gap-1 border-r pr-3 flex-wrap">
-                                      <span className="text-xs font-medium mr-1 w-full mb-1">Shapes:</span>
-                                      {/* Interactive Shape Buttons */}
-                                      <Button 
-                                          variant={drawingState.tool === 'line' ? 'default' : 'ghost'} 
-                                          size="icon" 
-                                          className="h-6 w-6"
-                                          onClick={() => handleToolChange('line')}
-                                          onMouseDown={(e) => e.stopPropagation()} // Prevent drag on button
-                                      >
-                                          <Minus className="h-4 w-4"/>
-                                      </Button>
-                                      <Button 
-                                          variant={drawingState.tool === 'arrow' ? 'default' : 'ghost'} 
-                                          size="icon" 
-                                          className="h-6 w-6"
-                                          onClick={() => handleToolChange('arrow')}
-                                          onMouseDown={(e) => e.stopPropagation()} // Prevent drag on button
-                                      >
-                                          <MoveUpRight className="h-4 w-4"/>
-                                      </Button>
-                                      <Button 
-                                          variant={drawingState.tool === 'rectangle' ? 'default' : 'ghost'} 
-                                          size="icon" 
-                                          className="h-6 w-6"
-                                          onClick={() => handleToolChange('rectangle')}
-                                          onMouseDown={(e) => e.stopPropagation()} // Prevent drag on button
-                                      >
-                                          <Square className="h-4 w-4"/>
-                                      </Button>
-                                      <Button 
-                                          variant={drawingState.tool === 'circle' ? 'default' : 'ghost'} 
-                                          size="icon" 
-                                          className="h-6 w-6"
-                                          onClick={() => handleToolChange('circle')}
-                                          onMouseDown={(e) => e.stopPropagation()} // Prevent drag on button
-                                      >
-                                          <Circle className="h-4 w-4"/>
-                                      </Button>
-                                      <Button 
-                                          variant={drawingState.tool === 'star' ? 'default' : 'ghost'} 
-                                          size="icon" 
-                                          className="h-6 w-6"
-                                          onClick={() => handleToolChange('star')}
-                                          onMouseDown={(e) => e.stopPropagation()} // Prevent drag on button
-                                      >
-                                          <Star className="h-4 w-4"/>
-                                      </Button>
-                                  </div>
-                                  {/* Colors Section */}
-                                  <div className="flex items-center gap-1 flex-wrap">
-                                      <span className="text-xs font-medium mr-1 w-full mb-1">Colors:</span>
-                                      {/* Interactive Color Swatches */}
-                                      {['#FF0000', '#000000', '#FFFFFF', '#CCCCCC', '#888888', '#FFFF00', '#00FF00', '#0000FF', '#FF00FF', '#00FFFF'].map(color => (
-                                          <Button 
-                                              key={color} 
-                                              variant="outline" 
-                                              size="icon" 
-                                              className={cn(
-                                                "h-5 w-5 p-0 border rounded-full", 
-                                                drawingState.color === color ? "ring-2 ring-offset-1 ring-blue-500" : ""
-                                              )} 
-                                              style={{ backgroundColor: color }} 
-                                              title={color}
-                                              onClick={() => handleColorChange(color)}
-                                              onMouseDown={(e) => e.stopPropagation()} // Prevent drag on button
-                                          />
-                                      ))}
-                                  </div>
-                              </div>
-                              
-                              {/* Row 3: Canvas and Drawing Outside the Tag */}
-                              <div className="mt-2">
-                                  {/* Drawing Canvas with improved event isolation */}
-                                  <div 
-                                      className="relative border rounded w-full bg-white"
-                                      style={{ 
-                                          height: "200px",
-                                          pointerEvents: "all",
-                                          overflow: "hidden"
-                                      }}
-                                      onMouseDown={(e) => {
-                                          // Completely isolate canvas container from drag
-                                          e.stopPropagation();
-                                          e.preventDefault();
-                                      }}
-                                  >
-                                      <canvas 
-                                          ref={tagCanvasRef}
-                                          width={340} 
-                                          height={200} 
-                                          className="absolute top-0 left-0 w-full h-full cursor-crosshair z-10"
-                                          style={{ 
-                                              touchAction: 'none',
-                                              pointerEvents: 'all' 
-                                          }}
-                                      />
-                                      {/* Invisible overlay to capture events */}
-                                      <div
-                                          className="absolute top-0 left-0 w-full h-full z-20"
-                                          onMouseDown={(e) => {
-                                              e.stopPropagation();
-                                              e.preventDefault();
-                                              if (tagCanvasRef.current) {
-                                                  const rect = tagCanvasRef.current.getBoundingClientRect();
-                                                  const point = {
-                                                      x: e.clientX - rect.left,
-                                                      y: e.clientY - rect.top
-                                                  };
-                                                  
-                                                  setIsDrawing(true);
-                                                  setLastPoint(point);
-                                                  
-                                                  const ctx = tagCanvasRef.current.getContext('2d');
-                                                  if (!ctx) return;
-                                                  
-                                                  ctx.beginPath();
-                                                  ctx.moveTo(point.x, point.y);
-                                                  ctx.lineCap = 'round';
-                                                  ctx.lineJoin = 'round';
-                                                  ctx.strokeStyle = drawingState.color;
-                                                  ctx.lineWidth = drawingState.lineWidth;
-                                              }
-                                          }}
-                                          onMouseMove={(e) => {
-                                              if (!isDrawing || !lastPoint || !tagCanvasRef.current) return;
-                                              
-                                              e.stopPropagation();
-                                              e.preventDefault();
-                                              
-                                              const rect = tagCanvasRef.current.getBoundingClientRect();
-                                              const point = {
-                                                  x: e.clientX - rect.left,
-                                                  y: e.clientY - rect.top
-                                              };
-                                              
-                                              const ctx = tagCanvasRef.current.getContext('2d');
-                                              if (!ctx) return;
-                                              
-                                              switch (drawingState.tool) {
-                                                  case 'pencil':
-                                                      ctx.beginPath();
-                                                      ctx.moveTo(lastPoint.x, lastPoint.y);
-                                                      ctx.lineTo(point.x, point.y);
-                                                      ctx.strokeStyle = drawingState.color;
-                                                      ctx.lineWidth = drawingState.lineWidth;
-                                                      ctx.lineCap = 'round';
-                                                      ctx.lineJoin = 'round';
-                                                      ctx.stroke();
-                                                      break;
-                                                  case 'eraser':
-                                                      ctx.clearRect(
-                                                          point.x - drawingState.lineWidth * 5,
-                                                          point.y - drawingState.lineWidth * 5,
-                                                          drawingState.lineWidth * 10,
-                                                          drawingState.lineWidth * 10
-                                                      );
-                                                      break;
-                                              }
-                                              
-                                              setLastPoint(point);
-                                          }}
-                                          onMouseUp={(e) => {
-                                              e.stopPropagation();
-                                              e.preventDefault();
-                                              
-                                              if (!isDrawing || !lastPoint || !tagCanvasRef.current) {
-                                                  setIsDrawing(false);
-                                                  setLastPoint(null);
-                                                  return;
-                                              }
-                                              
-                                              const rect = tagCanvasRef.current.getBoundingClientRect();
-                                              const endPoint = {
-                                                  x: e.clientX - rect.left,
-                                                  y: e.clientY - rect.top
-                                              };
-                                              
-                                              const ctx = tagCanvasRef.current.getContext('2d');
-                                              if (!ctx) return;
-                                              
-                                              // Handle shape tools that draw on mouse up
-                                              switch (drawingState.tool) {
-                                                  case 'line':
-                                                      ctx.beginPath();
-                                                      ctx.moveTo(lastPoint.x, lastPoint.y);
-                                                      ctx.lineTo(endPoint.x, endPoint.y);
-                                                      ctx.strokeStyle = drawingState.color;
-                                                      ctx.lineWidth = drawingState.lineWidth;
-                                                      ctx.stroke();
-                                                      break;
-                                                  case 'arrow':
-                                                      drawArrow(ctx, lastPoint, endPoint, drawingState.color, drawingState.lineWidth);
-                                                      break;
-                                                  case 'rectangle':
-                                                      ctx.beginPath();
-                                                      ctx.rect(
-                                                          lastPoint.x,
-                                                          lastPoint.y,
-                                                          endPoint.x - lastPoint.x,
-                                                          endPoint.y - lastPoint.y
-                                                      );
-                                                      ctx.strokeStyle = drawingState.color;
-                                                      ctx.lineWidth = drawingState.lineWidth;
-                                                      ctx.stroke();
-                                                      break;
-                                                  case 'circle':
-                                                      const radius = Math.sqrt(
-                                                          Math.pow(endPoint.x - lastPoint.x, 2) + Math.pow(endPoint.y - lastPoint.y, 2)
-                                                      );
-                                                      ctx.beginPath();
-                                                      ctx.arc(lastPoint.x, lastPoint.y, radius, 0, 2 * Math.PI);
-                                                      ctx.strokeStyle = drawingState.color;
-                                                      ctx.lineWidth = drawingState.lineWidth;
-                                                      ctx.stroke();
-                                                      break;
-                                                  case 'star':
-                                                      drawStar(ctx, lastPoint.x, lastPoint.y, 5, 
-                                                          Math.sqrt(Math.pow(endPoint.x - lastPoint.x, 2) + Math.pow(endPoint.y - lastPoint.y, 2)), 
-                                                          drawingState.color, drawingState.lineWidth);
-                                                      break;
-                                              }
-                                              
-                                              setIsDrawing(false);
-                                              setLastPoint(null);
-                                          }}
-                                          onMouseLeave={() => {
-                                              setIsDrawing(false);
-                                              setLastPoint(null);
-                                          }}
-                                      ></div>
-                                  </div>
-                              </div>
-                          </div>
+                          <>
+                            {/* Use useEffect for logging when isDrawingActive changes */}
+                            <EffectLogger active={isDrawingActive} />
+                             <div 
+                                 className="mt-3 pt-3 border-t border-gray-200 flex flex-col gap-3"
+                             >
+                                 {/* Row 1: Tools & Brush Options */}
+                                 <div className="flex items-center gap-4">
+                                     {/* Tools Section */}
+                                     <div className="flex items-center gap-1 border-r pr-3">
+                                         <span className="text-xs font-medium mr-1">Tools:</span>
+                                         {/* Interactive Tool Buttons */}
+                                         <Button 
+                                             variant={drawingState.tool === 'pencil' ? 'default' : 'ghost'} 
+                                             size="icon" 
+                                             className="h-7 w-7" 
+                                             title="Pencil"
+                                             onClick={() => handleToolChange('pencil')}
+                                         >
+                                             <Edit3 className="h-4 w-4" />
+                                         </Button>
+                                         <Button 
+                                             variant={drawingState.tool === 'eraser' ? 'default' : 'ghost'} 
+                                             size="icon" 
+                                             className="h-7 w-7" 
+                                             title="Eraser"
+                                             onClick={() => handleToolChange('eraser')}
+                                         >
+                                             <Trash2 className="h-4 w-4" />
+                                         </Button>
+                                     </div>
+                                     {/* Brush Section */}
+                                     <div className="flex items-center gap-1">
+                                          <span className="text-xs font-medium mr-1">Brush:</span>
+                                          {/* Functional brush size selector */}
+                                          <select 
+                                              className="text-xs border rounded px-1 py-0.5"
+                                              value={drawingState.lineWidth}
+                                              onChange={(e) => handleBrushSizeChange(Number(e.target.value))}
+                                          >
+                                             <option value="1">Thin</option>
+                                             <option value="3">Normal</option>
+                                             <option value="5">Thick</option>
+                                             <option value="10">Extra Thick</option>
+                                          </select>
+                                     </div>
+                                 </div>
+                                 
+                                 {/* Row 2: Shapes & Colors */}
+                                 <div className="flex items-center gap-4">
+                                     {/* Shapes Section */}
+                                     <div className="flex items-center gap-1 border-r pr-3 flex-wrap">
+                                         <span className="text-xs font-medium mr-1 w-full mb-1">Shapes:</span>
+                                         {/* Re-add shape buttons */}
+                                        <Button 
+                                            variant={drawingState.tool === 'line' ? 'default' : 'ghost'} 
+                                            size="icon" 
+                                            className="h-6 w-6"
+                                            onClick={() => handleToolChange('line')}
+                                        >
+                                            <Minus className="h-4 w-4"/>
+                                        </Button>
+                                        <Button 
+                                            variant={drawingState.tool === 'arrow' ? 'default' : 'ghost'} 
+                                            size="icon" 
+                                            className="h-6 w-6"
+                                            onClick={() => handleToolChange('arrow')}
+                                        >
+                                            <MoveUpRight className="h-4 w-4"/>
+                                        </Button>
+                                        <Button 
+                                            variant={drawingState.tool === 'rectangle' ? 'default' : 'ghost'} 
+                                            size="icon" 
+                                            className="h-6 w-6"
+                                            onClick={() => handleToolChange('rectangle')}
+                                        >
+                                            <Square className="h-4 w-4"/>
+                                        </Button>
+                                        <Button 
+                                            variant={drawingState.tool === 'circle' ? 'default' : 'ghost'} 
+                                            size="icon" 
+                                            className="h-6 w-6"
+                                            onClick={() => handleToolChange('circle')}
+                                        >
+                                            <Circle className="h-4 w-4"/>
+                                        </Button>
+                                        <Button 
+                                            variant={drawingState.tool === 'star' ? 'default' : 'ghost'} 
+                                            size="icon" 
+                                            className="h-6 w-6"
+                                            onClick={() => handleToolChange('star')}
+                                        >
+                                            <Star className="h-4 w-4"/>
+                                        </Button>
+                                     </div>
+                                     {/* Colors Section */}
+                                     <div className="flex items-center gap-1 flex-wrap">
+                                         <span className="text-xs font-medium mr-1 w-full mb-1">Colors:</span>
+                                         {/* Re-add color swatches */}
+                                         {['#FF0000', '#000000', '#FFFFFF', '#CCCCCC', '#888888', '#FFFF00', '#00FF00', '#0000FF', '#FF00FF', '#00FFFF'].map(color => (
+                                             <Button 
+                                                 key={color} 
+                                                 variant="outline" 
+                                                 size="icon" 
+                                                 className={cn(
+                                                   "h-5 w-5 p-0 border rounded-full", 
+                                                   drawingState.color === color ? "ring-2 ring-offset-1 ring-blue-500" : ""
+                                                 )} 
+                                                 style={{ backgroundColor: color }} 
+                                                 title={color}
+                                                 onClick={() => handleColorChange(color)}
+                                             />
+                                         ))}
+                                     </div>
+                                 </div>
+                                 
+                                 {/* Row 3: Canvas and Drawing Outside the Tag */}
+                                 <div className="mt-2">
+                                     <DrawingCanvas 
+                                       width={340} 
+                                       height={200} 
+                                       drawingState={drawingState} 
+                                       canvasRef={tagCanvasRef}
+                                       drawArrow={drawArrow}
+                                       drawStar={drawStar}
+                                     />
+                                     
+                                     {/* Draw Outside Tag Button */}
+                                     <Button
+                                         variant="outline"
+                                         size="sm"
+                                         className="mt-2 w-full text-xs"
+                                         onClick={handleTogglePageDrawing}
+                                     >
+                                         <Brush className="h-3.5 w-3.5 mr-1" />
+                                         Draw Outside Tag (Full Page)
+                                     </Button>
+                                 </div>
+                             </div>
+                          </>
                       )}
                   </div>
               </div>
@@ -1535,18 +1598,15 @@ export const DraggableNotificationsPanel = ({
               {/* Footer Actions */}
               <div 
                   className="flex justify-end gap-3 p-3 border-t bg-gray-50 rounded-b-lg"
-                  onMouseDown={(e) => e.stopPropagation()} // Prevent drag on footer
               >
                   <Button 
                       variant="ghost" 
                       onClick={closeTagPopup}
-                      onMouseDown={(e) => e.stopPropagation()} // Prevent drag on button
                   >
                       Cancel
                   </Button>
                   <Button 
                       onClick={handleSaveTag}
-                      onMouseDown={(e) => e.stopPropagation()} // Prevent drag on button
                   >
                       <Save className="h-4 w-4 mr-1"/> Save Tag
                   </Button>
@@ -1560,7 +1620,6 @@ export const DraggableNotificationsPanel = ({
         ref={panelRef}
         className={cn(
           "fixed right-0 top-0 h-screen bg-white z-50 shadow-lg transition-all duration-300 ease-in-out", // Keep base styles & transition
-          // Remove transform classes: isOpen ? "translate-x-0" : "translate-x-full",
           isOpen ? "" : "hidden", // Use hidden class when not open
           isPinned ? "border-l border-gray-200" : ""
         )}
@@ -1592,10 +1651,9 @@ export const DraggableNotificationsPanel = ({
                     <Pin className={cn("h-4 w-4", isPinned && "fill-current text-blue-600")} />
                 </Button>
                 <Button variant="outline" size="icon" onClick={togglePanelSize} title="Resize panel">
-                  {panelSize === 'quarter' ? <Maximize2 className="h-4 w-4" /> : <Minimize2 className="h-4 w-4" />}
+                  {panelSize === 'quarter' ? <Maximize2 className="h-4 w-4" /> : <Minimize2 className="h-4 w-4" />} 
                 </Button>
                 <Button variant="outline" size="icon" onClick={minimizePanel} title="Minimize panel"><ArrowLeftRight className="h-4 w-4" /></Button>
-                {/* Removed Edit3 button for general drawing from header, can be added back if needed */}
                 <Button variant="ghost" size="icon" onClick={onClose} title="Close panel"><X className="h-5 w-5" /></Button>
               </div>
             </div>
@@ -1603,13 +1661,12 @@ export const DraggableNotificationsPanel = ({
             {/* Filter Tabs */}
             <div className="border-b">
               <div className="flex overflow-x-auto px-4 py-2 gap-2 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
-                {/* Tab buttons like before */}
                 {(Object.keys(notificationCounts) as ActiveTab[]).map(tab => (
                     <div key={tab} className={cn(
                         "relative flex items-center justify-center px-3 py-1.5 rounded-md cursor-pointer whitespace-nowrap text-sm",
                         activeTab === tab ? "bg-gray-100 font-medium" : "hover:bg-gray-50"
                       )} onClick={() => setActiveTab(tab)}>
-                          {tab.charAt(0).toUpperCase() + tab.slice(1).replace(/([A-Z])/g, ' $1').trim()} {/* Format tab name */}
+                          {tab.charAt(0).toUpperCase() + tab.slice(1).replace(/([A-Z])/g, ' $1').trim()}
                           {notificationCounts[tab] > 0 && (
                             <span className="absolute -top-1 -right-1 flex items-center justify-center bg-red-500 text-white text-xs font-bold rounded-full h-4 w-4 leading-none">
                               {notificationCounts[tab]}
@@ -1634,8 +1691,8 @@ export const DraggableNotificationsPanel = ({
                   className={cn(
                     "text-xs flex items-center gap-1",
                     tagDropModeActive
-                      ? "bg-red-100 text-red-700 hover:bg-red-200" // Style for cancelling
-                      : "bg-blue-100 text-blue-700 hover:bg-blue-200" // Style for starting
+                      ? "bg-red-100 text-red-700 hover:bg-red-200" 
+                      : "bg-blue-100 text-blue-700 hover:bg-blue-200" 
                   )}
                   onClick={toggleTagDropMode}
                 >
@@ -1647,9 +1704,7 @@ export const DraggableNotificationsPanel = ({
 
             {/* Notification List Area */}
             <div className="flex-1 overflow-y-auto divide-y">
-              {/* Render notifications based on activeTab */}
               {(() => {
-                 // Now we can directly use the imported Notification type
                  type NotificationType = Notification['type']; 
 
                 const getVisibleTypesForTab = (tab: ActiveTab): Array<NotificationType> => {
@@ -1657,10 +1712,7 @@ export const DraggableNotificationsPanel = ({
                         case 'trades':
                             return ['job', 'quote', 'payment']; 
                         case 'comments':
-                            return ['message', 'other']; // Assuming 'other' might include tags or specific comment types
-                        // case 'calendar':
-                        //     return ['calendar']; // Removed: 'calendar' is not a valid NotificationType
-                        // Map 'team', 'account', 'security' if they correspond to specific notification types
+                            return ['message', 'other']; 
                         default:
                             return []; 
                     }
@@ -1669,12 +1721,9 @@ export const DraggableNotificationsPanel = ({
                 const filteredNotifications = notifications.filter(n => {
                     if (activeTab === 'all') return true;
                     const visibleTypes = getVisibleTypesForTab(activeTab);
-                    // Now comparing Notification['type'] with an array of Notification['type']
                     return visibleTypes.includes(n.type);
                 });
 
-                // --- Empty State Rendering ---
-                // (Keep the logic for rendering empty states as modified before)
                  if (filteredNotifications.length === 0) {
                      let emptyMessage = `No ${activeTab} notifications`;
                      if (activeTab === 'all') emptyMessage = "No notifications";
@@ -1688,7 +1737,6 @@ export const DraggableNotificationsPanel = ({
                      );
                  }
 
-                // Render the filtered notifications
                 return filteredNotifications.map(notification =>
                     <NotificationItem
                         key={notification.id}
