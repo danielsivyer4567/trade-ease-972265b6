@@ -1,4 +1,3 @@
-
 import React, { Suspense } from 'react';
 import { Route } from 'react-router-dom';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
@@ -20,6 +19,11 @@ export const financialRoutes = (
   <>
     <Route element={<ProtectedRoute />}>
       <Route path="/quotes" element={
+        <Suspense fallback={<LoadingFallback />}>
+          <NewQuotePage />
+        </Suspense>
+      } />
+      <Route path="/quotes/empty" element={
         <Suspense fallback={<LoadingFallback />}>
           <QuotesPage />
         </Suspense>
