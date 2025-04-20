@@ -1,6 +1,6 @@
 import React from 'react';
-import { Link, LinkProps } from 'react-router-dom';
-import { useDirectTabNavigation } from '@/hooks/useDirectTabNavigation';
+import { Link, LinkProps, useNavigate } from 'react-router-dom';
+import { useTabNavigation } from '@/hooks/useTabNavigation';
 
 interface TabLinkProps extends Omit<LinkProps, 'to'> {
   to: string;
@@ -12,7 +12,6 @@ interface TabLinkProps extends Omit<LinkProps, 'to'> {
 /**
  * TabLink component - Drop-in replacement for regular Link component
  * that maintains the tab breadcrumb feature while allowing direct routing
- * Now uses the configurable direct navigation system
  */
 export const TabLink: React.FC<TabLinkProps> = ({
   to,
@@ -22,9 +21,10 @@ export const TabLink: React.FC<TabLinkProps> = ({
   onClick,
   ...rest
 }) => {
-  const { createClickHandler } = useDirectTabNavigation();
+  const navigate = useNavigate();
+  const { openInTab } = useTabNavigation();
   
-  // Create a click handler that both opens the tab and navigates directly (if enabled)
+  // Create a simplified click handler that directly navigates and handles tabs
   const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     // Call the original onClick handler if provided
     if (onClick) {
@@ -36,8 +36,18 @@ export const TabLink: React.FC<TabLinkProps> = ({
       }
     }
     
-    // Handle the navigation and tab creation based on current settings
-    createClickHandler(to, title, tabId)(e);
+    // Prevent default link behavior
+    e.preventDefault();
+    
+    // First navigate to the path
+    navigate(to);
+    
+    // Then handle tab creation (but don't let errors prevent navigation)
+    try {
+      openInTab(to, title, tabId);
+    } catch (error) {
+      console.error('Tab creation failed, but navigation completed:', error);
+    }
   };
 
   return (
@@ -72,7 +82,8 @@ export const TabButton: React.FC<TabButtonProps> = ({
   onClick,
   ...rest
 }) => {
-  const { navigateWithTab } = useDirectTabNavigation();
+  const navigate = useNavigate();
+  const { openInTab } = useTabNavigation();
   
   const handleClick = (e: React.MouseEvent) => {
     // Call the original onClick handler if provided
@@ -80,8 +91,15 @@ export const TabButton: React.FC<TabButtonProps> = ({
       onClick(e);
     }
     
-    // Handle the navigation and tab creation based on current settings
-    navigateWithTab(to, title, tabId);
+    // First navigate to the path
+    navigate(to);
+    
+    // Then handle tab creation (but don't let errors prevent navigation)
+    try {
+      openInTab(to, title, tabId);
+    } catch (error) {
+      console.error('Tab creation failed, but navigation completed:', error);
+    }
   };
 
   return (

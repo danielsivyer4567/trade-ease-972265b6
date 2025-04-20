@@ -37,12 +37,14 @@ export const useDirectTabNavigation = () => {
   
   // Navigate to the target path (when direct navigation is enabled)
   const navigateWithTab = useCallback((path: string, title: string, id?: string) => {
+    // Always navigate to the path
+    navigate(path);
+    
     if (directNavigationEnabled) {
-      // Direct navigation - behave like the original useTabbedLink
-      navigate(path);
+      // Open in tab when direct navigation is enabled
       openInTab(path, title, id);
     } else {
-      // Just set the target without navigating
+      // Just set the target without opening a tab
       setTabTarget(path, title, id);
     }
   }, [directNavigationEnabled, navigate, openInTab, setTabTarget]);
@@ -60,9 +62,18 @@ export const useDirectTabNavigation = () => {
   const createClickHandler = useCallback((path: string, title: string, id?: string) => {
     return (e: React.MouseEvent) => {
       e.preventDefault();
-      navigateWithTab(path, title, id);
+      
+      // Always navigate to the path
+      navigate(path);
+      
+      // Handle tab management based on settings
+      if (directNavigationEnabled) {
+        openInTab(path, title, id);
+      } else {
+        setTabTarget(path, title, id);
+      }
     };
-  }, [navigateWithTab]);
+  }, [navigate, directNavigationEnabled, openInTab, setTabTarget]);
   
   return {
     navigateWithTab,

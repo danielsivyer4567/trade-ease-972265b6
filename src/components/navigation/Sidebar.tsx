@@ -23,7 +23,6 @@ export const Sidebar = () => {
     { path: '/customers', title: 'Customers', icon: <Users className="w-5 h-5" /> },
     { path: '/jobs', title: 'Jobs', icon: <Briefcase className="w-5 h-5" /> },
     { path: '/quotes', title: 'Quotes', icon: <FileText className="w-5 h-5" /> },
-    { path: '/invoices', title: 'Invoices', icon: <FileCheck className="w-5 h-5" /> },
     { path: '/calendar', title: 'Calendar', icon: <Calendar className="w-5 h-5" /> },
     { path: '/inventory', title: 'Inventory', icon: <Boxes className="w-5 h-5" /> },
     { path: '/payments', title: 'Payments', icon: <Wallet className="w-5 h-5" /> },

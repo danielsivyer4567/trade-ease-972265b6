@@ -4,7 +4,8 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "../../tooltip";
 import { Badge } from "../../badge";
 import { useSidebar } from "../SidebarProvider";
 import { useTabNavigation } from "@/hooks/useTabNavigation";
-import { useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+
 interface NavItemProps {
   path: string;
   className?: string;
@@ -21,6 +22,7 @@ interface NavItemProps {
   sidebarExpanded?: boolean;
   children?: React.ReactNode;
 }
+
 export function NavItem({
   path,
   title,
@@ -37,41 +39,69 @@ export function NavItem({
   children,
   ...props
 }: NavItemProps) {
-  const {
-    state
-  } = useSidebar();
-  const {
-    openInTab
-  } = useTabNavigation();
+  const { state } = useSidebar();
+  const { openInTab } = useTabNavigation();
   const location = useLocation();
+  const navigate = useNavigate();
 
   // Use label if provided, otherwise fall back to title
   const displayText = label || title;
   const isActive = active || path === location.pathname;
   const expanded = sidebarExpanded !== undefined ? sidebarExpanded : state === "expanded";
+  
   const handleClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    if (!disabled) {
-      // Open the link in a new tab
+    if (disabled) {
+      e.preventDefault();
+      return;
+    }
+    
+    // Navigate directly and handle tab management separately
+    navigate(path);
+    
+    try {
+      // Try to open in tab, but don't let failure prevent navigation
       openInTab(path, displayText || "");
+    } catch (error) {
+      console.error("Error opening tab:", error);
     }
   };
-  return <li className="relative my-[17px] px-[5px] py-0">
+  
+  return (
+    <li className="relative my-[17px] px-[5px] py-0">
       <Tooltip>
         <TooltipTrigger asChild>
-          <a href={path} onClick={handleClick} className={cn("group flex items-center gap-x-3 relative rounded-md px-3 py-2 text-sm font-medium transition-colors", expanded ? "justify-start" : "justify-center", isActive && variant === "default" && "bg-accent text-accent-foreground", isActive && variant === "destructive" && "bg-destructive text-destructive-foreground", disabled && "pointer-events-none opacity-50", variant === "default" && !isActive && "hover:bg-secondary/50 hover:text-primary", variant === "destructive" && !isActive && "hover:bg-destructive hover:text-destructive-foreground", className)} {...props}>
+          <Link
+            to={path}
+            onClick={handleClick}
+            className={cn(
+              "group flex items-center gap-x-3 relative rounded-md px-3 py-2 text-sm font-medium transition-colors",
+              expanded ? "justify-start" : "justify-center",
+              isActive && variant === "default" && "bg-accent text-accent-foreground",
+              isActive && variant === "destructive" && "bg-destructive text-destructive-foreground",
+              disabled && "pointer-events-none opacity-50",
+              variant === "default" && !isActive && "hover:bg-secondary/50 hover:text-primary",
+              variant === "destructive" && !isActive && "hover:bg-destructive hover:text-destructive-foreground",
+              className
+            )}
+            {...props}
+          >
             {Icon && <Icon className="" />}
             {expanded && <span className="truncate">{displayText}</span>}
-            {count !== undefined && <Badge variant={countVariant} className={cn("ml-auto", !expanded && "hidden")}>
+            {count !== undefined && (
+              <Badge variant={countVariant} className={cn("ml-auto", !expanded && "hidden")}>
                 {count}
-              </Badge>}
-          </a>
+              </Badge>
+            )}
+          </Link>
         </TooltipTrigger>
-        {!expanded && <TooltipContent side="right" className="flex items-center gap-4">
+        {!expanded && (
+          <TooltipContent side="right" className="flex items-center gap-4">
             {displayText}
             {count !== undefined && <Badge variant={countVariant}>{count}</Badge>}
-          </TooltipContent>}
+          </TooltipContent>
+        )}
       </Tooltip>
       {children}
-    </li>;
+    </li>
+  );
 }
