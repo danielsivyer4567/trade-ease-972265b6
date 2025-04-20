@@ -1,8 +1,9 @@
-
 import React from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { User, Phone, Mail, MapPin, Edit } from "lucide-react";
+import { User, Phone, Mail, MapPin, Edit, ExternalLink } from "lucide-react";
+import { openCustomer } from "@/services/api";
+import { useToast } from "@/hooks/use-toast";
 
 export interface CustomerData {
   id: string;
@@ -23,6 +24,26 @@ interface CustomerCardProps {
 }
 
 export const CustomerCard = ({ customer, onCustomerClick, onEditClick }: CustomerCardProps) => {
+  const { toast } = useToast();
+
+  const handleOpenClick = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    try {
+      await openCustomer(customer.id);
+      toast({
+        title: "Success",
+        description: `Opened customer: ${customer.name}`,
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to open customer",
+        variant: "destructive"
+      });
+      console.error("Error opening customer:", error);
+    }
+  };
+
   return (
     <Card 
       key={customer.id} 
@@ -37,6 +58,17 @@ export const CustomerCard = ({ customer, onCustomerClick, onEditClick }: Custome
           </div>
           <div className="flex items-center gap-2">
             <span>{customer.status === 'active' ? 'Active' : 'Inactive'}</span>
+            {customer.status === 'active' && (
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={handleOpenClick}
+                className="px-2 py-1 h-7 text-xs"
+              >
+                <ExternalLink className="h-3 w-3 mr-1" />
+                Open
+              </Button>
+            )}
             <Button 
               variant="ghost" 
               size="sm"
