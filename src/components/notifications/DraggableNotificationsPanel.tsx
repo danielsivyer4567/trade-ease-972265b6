@@ -14,6 +14,7 @@ interface TagMarker {
   x: number;
   y: number;
   timestamp: number; // To manage temporary display
+  drawingData?: string; // Store drawing data URL
 }
 
 interface StaffMember {
@@ -26,6 +27,24 @@ interface UploadedFile {
     previewUrl: string; // For images
     type: 'image' | 'audio' | 'drawing';
     supabaseUrl?: string; // Set after successful upload
+}
+
+interface DrawingState {
+  isActive: boolean;
+  tool: 'pencil' | 'text' | 'eraser' | 'line' | 'arrow' | 'rectangle' | 'circle' | 'star';
+  color: string;
+  lineWidth: number;
+  isDrawingOnPage: boolean; // Whether drawing is happening on the whole page
+}
+
+interface Point {
+  x: number;
+  y: number;
+}
+
+interface TagPopupPosition {
+  x: number;
+  y: number;
 }
 
 interface DraggableNotificationsPanelProps {
@@ -61,11 +80,15 @@ export const DraggableNotificationsPanel = ({
   
   // --- Tag Drop State ---
   const [tagDropModeActive, setTagDropModeActive] = useState(false);
-  const [isTagPopupOpen, setIsTagPopupOpen] = useState(false); // Tracks if the single popup is open
-  const [tagPopupCoords, setTagPopupCoords] = useState<{ x: number; y: number } | null>(null);
-  const [tagMarkers, setTagMarkers] = useState<TagMarker[]>([]); // Stores saved tag markers (temporary logos)
-  const activeTagPopupElement = useRef<HTMLDivElement | null>(null); // Ref to the DOM element of the popup
-
+  const [isTagPopupOpen, setIsTagPopupOpen] = useState(false);
+  const [tagPopupCoords, setTagPopupCoords] = useState<TagPopupPosition | null>(null);
+  const [tagMarkers, setTagMarkers] = useState<TagMarker[]>([]);
+  const activeTagPopupElement = useRef<HTMLDivElement | null>(null);
+  
+  // Add drag state for the tag popup
+  const [isDraggingPopup, setIsDraggingPopup] = useState(false);
+  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+  
   // --- State for within the Tag Popup ---
   const [tagComment, setTagComment] = useState('');
   const [selectedStaff, setSelectedStaff] = useState<StaffMember[]>([]);
@@ -165,41 +188,36 @@ export const DraggableNotificationsPanel = ({
 
   // Handle click on page to place a new tag (for CREATION)
   const handlePlaceNewTag = useCallback((event: MouseEvent) => {
-    // 1. Check basic conditions: Mode must be active, no creation/viewing popup open
+    // Check basic conditions
     if (!tagDropModeActive || isTagPopupOpen) return; 
 
     const target = event.target as HTMLElement;
 
-    // 2. Ignore clicks on the notification panel itself or its buttons/interactive elements
-    if (panelRef.current?.contains(target)) {
-        // console.log("Click inside panel, ignoring for tag placement.");
-        return; 
-    }
-    
-    // 3. Ignore clicks on existing markers or popups
-    if (target.closest('.tag-marker, .tag-popup-content, .tag-view-popup-content')) {
-       // console.log("Click on marker/popup, ignoring for tag placement.");
-        return;
-    }
-    
-    // 4. Ignore clicks on common interactive elements that shouldn't trigger a tag
-    if (target.closest('button, a, input, textarea, select')) {
-        // console.log("Click on interactive element, ignoring for tag placement.");
-        return;
+    // Ignore clicks on the notification panel, existing tags, or interactive elements
+    if (
+      panelRef.current?.contains(target) || 
+      target.closest('.tag-marker, .tag-popup-content, .tag-view-popup-content, .drawing-overlay') ||
+      target.closest('button, a, input, textarea, select')
+    ) {
+      return; 
     }
 
-    // 5. If none of the above, proceed to place the tag
+    // If none of the above, proceed to place the tag
     console.log("Placing new tag creation popup at", event.clientX, event.clientY);
     
-    // --- Stop propagation *only* if we are actually placing a tag --- 
+    // Stop propagation
     event.stopPropagation(); 
     event.preventDefault(); 
 
-    setTagPopupCoords({ x: event.clientX, y: event.clientY });
-    setIsTagPopupOpen(true); // This check happens *inside* the function, no need for it in deps
+    // Position the popup offset from the click point to prevent immediate interference
+    setTagPopupCoords({ 
+      x: event.clientX - 190, // Offset to center the popup horizontally
+      y: event.clientY - 30   // Offset slightly above the click point
+    });
+    setIsTagPopupOpen(true);
     document.body.style.cursor = 'default';
 
-  }, [tagDropModeActive]); // REMOVED isTagPopupOpen from dependency array
+  }, [tagDropModeActive, isTagPopupOpen]);
 
 
   // --- Handlers for actions WITHIN the tag pop-up ---
@@ -235,21 +253,28 @@ export const DraggableNotificationsPanel = ({
   
   // Placeholder for drawing
   const handleToggleDrawing = () => {
-      console.log("[Placeholder] Toggle drawing canvas");
-      setIsDrawingActive(!isDrawingActive);
-      // In reality, this would show/hide or interact with a drawing component
-      if (!isDrawingActive && !uploadedFiles.some(f => f.type === 'drawing')) {
-         // Simulate adding a drawing placeholder if toggled on
-         const drawingPlaceholder: UploadedFile = {
-             file: new File([], "drawing.png"), // Dummy file
-             previewUrl: "https://via.placeholder.com/64/cccccc/888888?text=Drawing",
-             type: 'drawing'
-         };
-         setUploadedFiles(prev => [...prev, drawingPlaceholder]);
-      } else if (isDrawingActive) {
-         // Simulate removing placeholder if toggled off (real version would save data)
-         setUploadedFiles(prev => prev.filter(f => f.type !== 'drawing'));
-      }
+    console.log("[Placeholder] Toggle drawing canvas");
+    setIsDrawingActive(!isDrawingActive);
+    
+    // Update drawing state
+    setDrawingState(prev => ({
+      ...prev,
+      isActive: !isDrawingActive
+    }));
+    
+    // If not already added and turning on drawing
+    if (!isDrawingActive && !uploadedFiles.some(f => f.type === 'drawing')) {
+      // Placeholder for real drawing component
+      const drawingPlaceholder: UploadedFile = {
+        file: new File([], "drawing.png"), // Dummy file
+        previewUrl: "https://via.placeholder.com/64/cccccc/888888?text=Drawing",
+        type: 'drawing'
+      };
+      setUploadedFiles(prev => [...prev, drawingPlaceholder]);
+    } else if (isDrawingActive) {
+      // Turning off - in real app we would save the drawing data
+      setUploadedFiles(prev => prev.filter(f => f.type !== 'drawing'));
+    }
   };
 
   // Placeholder for audio recording
@@ -286,61 +311,65 @@ export const DraggableNotificationsPanel = ({
     setStaffSelectionError(null);
 
     const tagId = `tag_${currentUserId}_${Date.now()}`;
-    const originalCoords = tagPopupCoords; // Capture coords before closing
+    const originalCoords = tagPopupCoords;
+
+    // Capture drawing from canvas if available
+    let canvasDrawingData = null;
+    if (tagCanvasRef.current) {
+      canvasDrawingData = tagCanvasRef.current.toDataURL('image/png');
+    }
 
     // 1. Close the popup first
     closeTagPopup();
 
-    // 2. Upload files (placeholder)
+    // 2. Upload files 
     const uploadPromises = uploadedFiles.map(async (uploadedFile) => {
-        const folderPath = `tag_drops/${tagId}`;
-        let fileName = uploadedFile.file.name;
-        if (uploadedFile.type === 'drawing') fileName = 'drawing.png';
-        if (uploadedFile.type === 'audio') fileName = 'recording.mp3';
-        
-        try {
-             // In a real scenario, pass the actual file/blob or drawing data
-             const url = await uploadFileToSupabase(uploadedFile.file, folderPath, fileName);
-             return { ...uploadedFile, supabaseUrl: url };
-        } catch (error) {
-            console.error("Upload failed:", error);
-            return { ...uploadedFile, supabaseUrl: undefined }; // Mark as failed
-        }
+      const folderPath = `tag_drops/${tagId}`;
+      let fileName = uploadedFile.file.name;
+      if (uploadedFile.type === 'drawing') fileName = 'drawing.png';
+      if (uploadedFile.type === 'audio') fileName = 'recording.mp3';
+      
+      try {
+        const url = await uploadFileToSupabase(uploadedFile.file, folderPath, fileName);
+        return { ...uploadedFile, supabaseUrl: url };
+      } catch (error) {
+        console.error("Upload failed:", error);
+        return { ...uploadedFile, supabaseUrl: undefined };
+      }
     });
     
     const uploadedFilesWithUrls = await Promise.all(uploadPromises);
 
-    // 3. Prepare tag data for backend/notification
+    // 3. Prepare tag data including the drawing
     const tagDataPayload = {
       id: tagId,
       creatorId: currentUserId,
       comment: tagComment,
       taggedStaffIds: selectedStaff.map(s => s.id),
       attachments: uploadedFilesWithUrls
-          .filter(f => f.supabaseUrl) // Only include successfully uploaded files
+          .filter(f => f.supabaseUrl)
           .map(f => ({ type: f.type, url: f.supabaseUrl })),
       coords: originalCoords,
       timestamp: Date.now(),
+      drawingData: canvasDrawingData, // Include the drawing data
     };
 
     console.log("[Save Tag] Data Payload:", tagDataPayload);
     
-    // 4. Simulate sending notification to backend/service
+    // 4. Simulate sending notification
     console.log(`[Simulate] Sending notification for tag ${tagId} to staff: ${selectedStaff.map(s => s.name).join(', ')}`);
-    // --> dispatchNotification(tagDataPayload);
 
-    // 5. Show temporary logo marker at original coordinates
+    // 5. Show temporary marker at original coordinates with drawing data
     if (originalCoords) {
-        const newMarker: TagMarker = {
-            id: tagId,
-            x: originalCoords.x,
-            y: originalCoords.y,
-            timestamp: Date.now()
-        };
-        setTagMarkers(prev => [...prev, newMarker]);
+      const newMarker: TagMarker = {
+        id: tagId,
+        x: originalCoords.x,
+        y: originalCoords.y,
+        timestamp: Date.now(),
+        drawingData: canvasDrawingData // Store drawing data with the marker
+      };
+      setTagMarkers(prev => [...prev, newMarker]);
     }
-    
-    // 6. Reset popup state (already done in closeTagPopup)
   };
 
   // --- Event Listener for Placing Tag (useEffect) ---
@@ -369,6 +398,681 @@ export const DraggableNotificationsPanel = ({
     };
   }, [tagDropModeActive, handlePlaceNewTag]); 
 
+  // Add states for drawing
+  const [drawingState, setDrawingState] = useState<DrawingState>({
+    isActive: false,
+    tool: 'pencil',
+    color: '#000000',
+    lineWidth: 2,
+    isDrawingOnPage: false
+  });
+  
+  const [isDrawing, setIsDrawing] = useState(false);
+  const [lastPoint, setLastPoint] = useState<Point | null>(null);
+  
+  // Refs for canvases
+  const tagCanvasRef = useRef<HTMLCanvasElement>(null);
+  const pageCanvasRef = useRef<HTMLCanvasElement>(null);
+  const canvasContainerRef = useRef<HTMLDivElement>(null);
+  
+  // Drawing functions
+  const startDrawing = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
+    // If we're dragging the popup, don't start drawing
+    if (isDraggingPopup) return;
+    
+    const canvas = drawingState.isDrawingOnPage ? pageCanvasRef.current : tagCanvasRef.current;
+    if (!canvas) return;
+    
+    // These are critical to prevent the popup from being dragged when drawing on the canvas
+    e.stopPropagation();
+    e.nativeEvent.stopImmediatePropagation();
+    
+    const rect = canvas.getBoundingClientRect();
+    const point = {
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top
+    };
+    
+    setIsDrawing(true);
+    setLastPoint(point);
+    
+    // Start path for pencil tool
+    if (drawingState.tool === 'pencil') {
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+      
+      ctx.beginPath();
+      ctx.moveTo(point.x, point.y);
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.strokeStyle = drawingState.color;
+      ctx.lineWidth = drawingState.lineWidth;
+    }
+  }, [drawingState, isDraggingPopup]);
+  
+  const draw = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
+    if (!isDrawing || !lastPoint) return;
+    
+    // These are critical to prevent the popup from being dragged when drawing on the canvas
+    e.stopPropagation();
+    e.nativeEvent.stopImmediatePropagation();
+    e.preventDefault();
+    
+    const canvas = drawingState.isDrawingOnPage ? pageCanvasRef.current : tagCanvasRef.current;
+    if (!canvas) return;
+    
+    const rect = canvas.getBoundingClientRect();
+    const point = {
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top
+    };
+    
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    
+    switch (drawingState.tool) {
+      case 'pencil':
+        ctx.beginPath();
+        ctx.moveTo(lastPoint.x, lastPoint.y);
+        ctx.lineTo(point.x, point.y);
+        ctx.strokeStyle = drawingState.color;
+        ctx.lineWidth = drawingState.lineWidth;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        ctx.stroke();
+        break;
+      case 'eraser':
+        ctx.clearRect(
+          point.x - drawingState.lineWidth * 5,
+          point.y - drawingState.lineWidth * 5,
+          drawingState.lineWidth * 10,
+          drawingState.lineWidth * 10
+        );
+        break;
+    }
+    
+    setLastPoint(point);
+  }, [isDrawing, lastPoint, drawingState]);
+  
+  const endDrawing = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
+    // These are critical to prevent the popup from being dragged when drawing on the canvas
+    e.stopPropagation();
+    e.nativeEvent.stopImmediatePropagation();
+    e.preventDefault();
+    
+    if (!isDrawing || !lastPoint) {
+      setIsDrawing(false);
+      setLastPoint(null);
+      return;
+    }
+    
+    const canvas = drawingState.isDrawingOnPage ? pageCanvasRef.current : tagCanvasRef.current;
+    if (!canvas) return;
+    
+    const rect = canvas.getBoundingClientRect();
+    const endPoint = {
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top
+    };
+    
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    
+    // Handle shape tools that draw on mouse up
+    switch (drawingState.tool) {
+      case 'line':
+        ctx.beginPath();
+        ctx.moveTo(lastPoint.x, lastPoint.y);
+        ctx.lineTo(endPoint.x, endPoint.y);
+        ctx.strokeStyle = drawingState.color;
+        ctx.lineWidth = drawingState.lineWidth;
+        ctx.stroke();
+        break;
+      case 'arrow':
+        drawArrow(ctx, lastPoint, endPoint, drawingState.color, drawingState.lineWidth);
+        break;
+      case 'rectangle':
+        ctx.beginPath();
+        ctx.rect(
+          lastPoint.x,
+          lastPoint.y,
+          endPoint.x - lastPoint.x,
+          endPoint.y - lastPoint.y
+        );
+        ctx.strokeStyle = drawingState.color;
+        ctx.lineWidth = drawingState.lineWidth;
+        ctx.stroke();
+        break;
+      case 'circle':
+        const radius = Math.sqrt(
+          Math.pow(endPoint.x - lastPoint.x, 2) + Math.pow(endPoint.y - lastPoint.y, 2)
+        );
+        ctx.beginPath();
+        ctx.arc(lastPoint.x, lastPoint.y, radius, 0, 2 * Math.PI);
+        ctx.strokeStyle = drawingState.color;
+        ctx.lineWidth = drawingState.lineWidth;
+        ctx.stroke();
+        break;
+      case 'star':
+        drawStar(ctx, lastPoint.x, lastPoint.y, 5, 
+            Math.sqrt(Math.pow(endPoint.x - lastPoint.x, 2) + Math.pow(endPoint.y - lastPoint.y, 2)), 
+            drawingState.color, drawingState.lineWidth);
+        break;
+    }
+    
+    setIsDrawing(false);
+    setLastPoint(null);
+  }, [isDrawing, lastPoint, drawingState]);
+  
+  // Helper function to draw arrow
+  const drawArrow = (
+    ctx: CanvasRenderingContext2D,
+    from: Point,
+    to: Point,
+    color: string,
+    lineWidth: number
+  ) => {
+    const headLength = 10;
+    const angle = Math.atan2(to.y - from.y, to.x - from.x);
+    
+    // Draw main line
+    ctx.beginPath();
+    ctx.moveTo(from.x, from.y);
+    ctx.lineTo(to.x, to.y);
+    ctx.strokeStyle = color;
+    ctx.lineWidth = lineWidth;
+    ctx.stroke();
+    
+    // Draw arrow head
+    ctx.beginPath();
+    ctx.moveTo(to.x, to.y);
+    ctx.lineTo(
+      to.x - headLength * Math.cos(angle - Math.PI / 6),
+      to.y - headLength * Math.sin(angle - Math.PI / 6)
+    );
+    ctx.lineTo(
+      to.x - headLength * Math.cos(angle + Math.PI / 6),
+      to.y - headLength * Math.sin(angle + Math.PI / 6)
+    );
+    ctx.closePath();
+    ctx.fillStyle = color;
+    ctx.fill();
+  };
+  
+  // Helper function to draw star
+  const drawStar = (
+    ctx: CanvasRenderingContext2D,
+    centerX: number,
+    centerY: number,
+    points: number,
+    radius: number,
+    color: string,
+    lineWidth: number
+  ) => {
+    ctx.beginPath();
+    ctx.strokeStyle = color;
+    ctx.fillStyle = color;
+    ctx.lineWidth = lineWidth;
+    
+    let angle = Math.PI / points;
+    
+    for (let i = 0; i < 2 * points; i++) {
+      const r = i % 2 === 0 ? radius : radius / 2;
+      const x = centerX + r * Math.cos(i * angle - Math.PI / 2);
+      const y = centerY + r * Math.sin(i * angle - Math.PI / 2);
+      
+      if (i === 0) {
+        ctx.moveTo(x, y);
+      } else {
+        ctx.lineTo(x, y);
+      }
+    }
+    
+    ctx.closePath();
+    ctx.stroke();
+  };
+  
+  // Set up page-wide canvas when drawing on page
+  useEffect(() => {
+    if (drawingState.isDrawingOnPage) {
+      // Create a full-page canvas overlay for drawing
+      const container = document.createElement('div');
+      container.style.position = 'fixed';
+      container.style.top = '0';
+      container.style.left = '0';
+      container.style.width = '100vw';
+      container.style.height = '100vh';
+      container.style.zIndex = '9999'; // Ultra high z-index to be above everything
+      container.style.pointerEvents = 'all';
+      container.classList.add('drawing-overlay');
+      
+      const canvas = document.createElement('canvas');
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      canvas.style.position = 'absolute';
+      canvas.style.top = '0';
+      canvas.style.left = '0';
+      canvas.style.width = '100%';
+      canvas.style.height = '100%';
+      canvas.style.cursor = 'crosshair';
+      canvas.style.pointerEvents = 'all'; // Ensure it captures all pointer events
+      
+      // Add controls div
+      const controls = document.createElement('div');
+      controls.style.position = 'fixed';
+      controls.style.bottom = '20px';
+      controls.style.left = '50%';
+      controls.style.transform = 'translateX(-50%)';
+      controls.style.backgroundColor = '#fff';
+      controls.style.padding = '10px';
+      controls.style.borderRadius = '8px';
+      controls.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
+      controls.style.display = 'flex';
+      controls.style.gap = '10px';
+      controls.style.zIndex = '10000'; // Higher z-index than the canvas
+      controls.innerHTML = `
+        <button class="drawing-done-btn px-4 py-2 bg-blue-600 text-white rounded">Done</button>
+        <button class="drawing-cancel-btn px-4 py-2 bg-gray-300 text-gray-700 rounded">Cancel</button>
+      `;
+      
+      // Add tools toolbar
+      const toolsbar = document.createElement('div');
+      toolsbar.style.position = 'fixed';
+      toolsbar.style.top = '20px';
+      toolsbar.style.left = '50%';
+      toolsbar.style.transform = 'translateX(-50%)';
+      toolsbar.style.backgroundColor = '#fff';
+      toolsbar.style.padding = '8px';
+      toolsbar.style.borderRadius = '8px';
+      toolsbar.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
+      toolsbar.style.display = 'flex';
+      toolsbar.style.alignItems = 'center';
+      toolsbar.style.gap = '8px';
+      toolsbar.style.zIndex = '10000'; // Higher z-index than the canvas
+      toolsbar.innerHTML = `
+        <div class="tool-group" style="display: flex; gap: 4px; border-right: 1px solid #ddd; padding-right: 8px;">
+          <button class="tool-btn pencil ${drawingState.tool === 'pencil' ? 'active' : ''}" title="Pencil" style="width: 32px; height: 32px; border-radius: 4px; display: flex; align-items: center; justify-content: center; ${drawingState.tool === 'pencil' ? 'background-color: #e6f0ff; border: 1px solid #3b82f6;' : 'background-color: #f1f5f9; border: 1px solid #ddd;'}">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"></path></svg>
+          </button>
+          <button class="tool-btn eraser ${drawingState.tool === 'eraser' ? 'active' : ''}" title="Eraser" style="width: 32px; height: 32px; border-radius: 4px; display: flex; align-items: center; justify-content: center; ${drawingState.tool === 'eraser' ? 'background-color: #e6f0ff; border: 1px solid #3b82f6;' : 'background-color: #f1f5f9; border: 1px solid #ddd;'}">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 20H7L3 16c-1.5-1.45-1.5-3.55 0-5l6.5-6.5c1.45-1.5 3.55-1.5 5 0l7 7c1.5 1.45 1.5 3.55 0 5L20 18"></path></svg>
+          </button>
+        </div>
+        <div class="tool-group" style="display: flex; gap: 4px; border-right: 1px solid #ddd; padding-right: 8px;">
+          <button class="tool-btn line ${drawingState.tool === 'line' ? 'active' : ''}" title="Line" style="width: 32px; height: 32px; border-radius: 4px; display: flex; align-items: center; justify-content: center; ${drawingState.tool === 'line' ? 'background-color: #e6f0ff; border: 1px solid #3b82f6;' : 'background-color: #f1f5f9; border: 1px solid #ddd;'}">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path></svg>
+          </button>
+          <button class="tool-btn arrow ${drawingState.tool === 'arrow' ? 'active' : ''}" title="Arrow" style="width: 32px; height: 32px; border-radius: 4px; display: flex; align-items: center; justify-content: center; ${drawingState.tool === 'arrow' ? 'background-color: #e6f0ff; border: 1px solid #3b82f6;' : 'background-color: #f1f5f9; border: 1px solid #ddd;'}">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+          </button>
+          <button class="tool-btn rectangle ${drawingState.tool === 'rectangle' ? 'active' : ''}" title="Rectangle" style="width: 32px; height: 32px; border-radius: 4px; display: flex; align-items: center; justify-content: center; ${drawingState.tool === 'rectangle' ? 'background-color: #e6f0ff; border: 1px solid #3b82f6;' : 'background-color: #f1f5f9; border: 1px solid #ddd;'}">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"></rect></svg>
+          </button>
+          <button class="tool-btn circle ${drawingState.tool === 'circle' ? 'active' : ''}" title="Circle" style="width: 32px; height: 32px; border-radius: 4px; display: flex; align-items: center; justify-content: center; ${drawingState.tool === 'circle' ? 'background-color: #e6f0ff; border: 1px solid #3b82f6;' : 'background-color: #f1f5f9; border: 1px solid #ddd;'}">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle></svg>
+          </button>
+        </div>
+        <div class="tool-group" style="display: flex; gap: 4px; border-right: 1px solid #ddd; padding-right: 8px;">
+          <select class="brush-width" style="padding: 4px; border-radius: 4px; border: 1px solid #ddd;">
+            <option value="1" ${drawingState.lineWidth === 1 ? 'selected' : ''}>Thin</option>
+            <option value="3" ${drawingState.lineWidth === 3 ? 'selected' : ''}>Normal</option>
+            <option value="5" ${drawingState.lineWidth === 5 ? 'selected' : ''}>Thick</option>
+            <option value="10" ${drawingState.lineWidth === 10 ? 'selected' : ''}>Extra Thick</option>
+          </select>
+        </div>
+        <div class="color-pickers" style="display: flex; gap: 4px;">
+          ${['#FF0000', '#000000', '#FFFFFF', '#CCCCCC', '#888888', '#FFFF00', '#00FF00', '#0000FF'].map(color => 
+            `<button class="color-btn" data-color="${color}" style="width: 24px; height: 24px; border-radius: 50%; background-color: ${color}; border: ${drawingState.color === color ? '2px solid #3b82f6' : '1px solid #ddd'}; ${color === '#FFFFFF' ? 'border: 1px solid #ddd;' : ''}"></button>`
+          ).join('')}
+        </div>
+      `;
+      
+      container.appendChild(canvas);
+      container.appendChild(controls);
+      container.appendChild(toolsbar);
+      document.body.appendChild(container);
+      
+      // Set refs
+      canvasContainerRef.current = container;
+      pageCanvasRef.current = canvas;
+      
+      // Add event listeners for drawing
+      const mouseDownListener = (e: MouseEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        const point = {
+          x: e.clientX,
+          y: e.clientY
+        };
+        setIsDrawing(true);
+        setLastPoint(point);
+        
+        if (drawingState.tool === 'pencil') {
+          const ctx = canvas.getContext('2d');
+          if (!ctx) return;
+          
+          ctx.beginPath();
+          ctx.moveTo(point.x, point.y);
+          ctx.lineCap = 'round';
+          ctx.lineJoin = 'round';
+          ctx.strokeStyle = drawingState.color;
+          ctx.lineWidth = drawingState.lineWidth;
+        }
+      };
+      
+      const mouseMoveListener = (e: MouseEvent) => {
+        if (!isDrawing || !lastPoint) return;
+        
+        e.preventDefault();
+        e.stopPropagation();
+        
+        const point = {
+          x: e.clientX,
+          y: e.clientY
+        };
+        
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return;
+        
+        switch (drawingState.tool) {
+          case 'pencil':
+            ctx.beginPath();
+            ctx.moveTo(lastPoint.x, lastPoint.y);
+            ctx.lineTo(point.x, point.y);
+            ctx.strokeStyle = drawingState.color;
+            ctx.lineWidth = drawingState.lineWidth;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            ctx.stroke();
+            break;
+          case 'eraser':
+            ctx.clearRect(
+              point.x - drawingState.lineWidth * 5,
+              point.y - drawingState.lineWidth * 5,
+              drawingState.lineWidth * 10,
+              drawingState.lineWidth * 10
+            );
+            break;
+        }
+        
+        setLastPoint(point);
+      };
+      
+      const mouseUpListener = (e: MouseEvent) => {
+        if (!isDrawing || !lastPoint) {
+          setIsDrawing(false);
+          setLastPoint(null);
+          return;
+        }
+        
+        e.preventDefault();
+        e.stopPropagation();
+        
+        const endPoint = {
+          x: e.clientX,
+          y: e.clientY
+        };
+        
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return;
+        
+        // Handle shape tools that draw on mouse up
+        switch (drawingState.tool) {
+          case 'line':
+            ctx.beginPath();
+            ctx.moveTo(lastPoint.x, lastPoint.y);
+            ctx.lineTo(endPoint.x, endPoint.y);
+            ctx.strokeStyle = drawingState.color;
+            ctx.lineWidth = drawingState.lineWidth;
+            ctx.stroke();
+            break;
+          case 'arrow':
+            drawArrow(ctx, lastPoint, endPoint, drawingState.color, drawingState.lineWidth);
+            break;
+          case 'rectangle':
+            ctx.beginPath();
+            ctx.rect(
+              lastPoint.x,
+              lastPoint.y,
+              endPoint.x - lastPoint.x,
+              endPoint.y - lastPoint.y
+            );
+            ctx.strokeStyle = drawingState.color;
+            ctx.lineWidth = drawingState.lineWidth;
+            ctx.stroke();
+            break;
+          case 'circle':
+            const radius = Math.sqrt(
+              Math.pow(endPoint.x - lastPoint.x, 2) + Math.pow(endPoint.y - lastPoint.y, 2)
+            );
+            ctx.beginPath();
+            ctx.arc(lastPoint.x, lastPoint.y, radius, 0, 2 * Math.PI);
+            ctx.strokeStyle = drawingState.color;
+            ctx.lineWidth = drawingState.lineWidth;
+            ctx.stroke();
+            break;
+          case 'star':
+            drawStar(ctx, lastPoint.x, lastPoint.y, 5, 
+                Math.sqrt(Math.pow(endPoint.x - lastPoint.x, 2) + Math.pow(endPoint.y - lastPoint.y, 2)), 
+                drawingState.color, drawingState.lineWidth);
+            break;
+        }
+        
+        setIsDrawing(false);
+        setLastPoint(null);
+      };
+      
+      // Add event listeners
+      canvas.addEventListener('mousedown', mouseDownListener);
+      canvas.addEventListener('mousemove', mouseMoveListener);
+      canvas.addEventListener('mouseup', mouseUpListener);
+      
+      // Add button event listeners
+      const doneButton = container.querySelector('.drawing-done-btn');
+      const cancelButton = container.querySelector('.drawing-cancel-btn');
+      
+      if (doneButton) {
+        doneButton.addEventListener('click', () => {
+          // Capture the drawing as a blob/data URL
+          const dataUrl = canvas.toDataURL('image/png');
+          // Create a file object from the data URL
+          const file = dataURLtoFile(dataUrl, `drawing_${Date.now()}.png`);
+          
+          // Add to uploaded files
+          if (file) {
+            const drawingFile: UploadedFile = {
+              file,
+              previewUrl: dataUrl,
+              type: 'drawing'
+            };
+            setUploadedFiles(prev => [...prev, drawingFile]);
+          }
+          
+          // Turn off drawing mode
+          setDrawingState(prev => ({...prev, isDrawingOnPage: false}));
+        });
+      }
+      
+      if (cancelButton) {
+        cancelButton.addEventListener('click', () => {
+          setDrawingState(prev => ({...prev, isDrawingOnPage: false}));
+        });
+      }
+      
+      // Add toolbar event listeners
+      const toolButtons = container.querySelectorAll('.tool-btn');
+      toolButtons.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const btn = e.currentTarget as HTMLElement;
+          // Get the tool type from the class name
+          const toolType = Array.from(btn.classList)
+            .find(cls => ['pencil', 'eraser', 'line', 'arrow', 'rectangle', 'circle', 'star'].includes(cls));
+          
+          if (toolType) {
+            setDrawingState(prev => ({
+              ...prev, 
+              tool: toolType as DrawingState['tool']
+            }));
+            
+            // Update the UI
+            toolButtons.forEach(b => {
+              (b as HTMLElement).style.backgroundColor = '#f1f5f9';
+              (b as HTMLElement).style.border = '1px solid #ddd';
+            });
+            btn.style.backgroundColor = '#e6f0ff';
+            btn.style.border = '1px solid #3b82f6';
+          }
+        });
+      });
+      
+      // Add brush size listener
+      const brushSizeSelect = container.querySelector('.brush-width') as HTMLSelectElement;
+      if (brushSizeSelect) {
+        brushSizeSelect.addEventListener('change', () => {
+          const size = parseInt(brushSizeSelect.value);
+          setDrawingState(prev => ({
+            ...prev,
+            lineWidth: size
+          }));
+        });
+      }
+      
+      // Add color buttons listeners
+      const colorButtons = container.querySelectorAll('.color-btn');
+      colorButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+          const colorBtn = btn as HTMLElement;
+          const color = colorBtn.dataset.color;
+          if (color) {
+            setDrawingState(prev => ({
+              ...prev,
+              color
+            }));
+            
+            // Update the UI
+            colorButtons.forEach(b => {
+              const htmlElement = b as HTMLElement;
+              htmlElement.style.border = htmlElement.getAttribute('data-color') === '#FFFFFF' 
+                ? '1px solid #ddd' 
+                : '1px solid #ddd';
+            });
+            colorBtn.style.border = '2px solid #3b82f6';
+          }
+        });
+      });
+      
+      // Cleanup function
+      return () => {
+        canvas.removeEventListener('mousedown', mouseDownListener);
+        canvas.removeEventListener('mousemove', mouseMoveListener);
+        canvas.removeEventListener('mouseup', mouseUpListener);
+        
+        if (container && container.parentNode) {
+          container.parentNode.removeChild(container);
+        }
+      };
+    }
+  }, [drawingState.isDrawingOnPage, drawingState.color, drawingState.lineWidth, drawingState.tool, isDrawing, lastPoint, drawArrow, drawStar]);
+  
+  // Helper to convert data URL to File
+  const dataURLtoFile = (dataurl: string, filename: string): File | null => {
+    const arr = dataurl.split(',');
+    if (arr.length < 2) return null;
+    
+    const mime = arr[0].match(/:(.*?);/)?.[1];
+    const bstr = atob(arr[1]);
+    let n = bstr.length;
+    const u8arr = new Uint8Array(n);
+    
+    while (n--) {
+      u8arr[n] = bstr.charCodeAt(n);
+    }
+    
+    return new File([u8arr], filename, { type: mime || 'image/png' });
+  };
+  
+  // Handle tool changes
+  const handleToolChange = (tool: DrawingState['tool']) => {
+    setDrawingState(prev => ({...prev, tool}));
+  };
+  
+  const handleBrushSizeChange = (size: number) => {
+    setDrawingState(prev => ({...prev, lineWidth: size}));
+  };
+  
+  const handleColorChange = (color: string) => {
+    setDrawingState(prev => ({...prev, color}));
+  };
+  
+  // Toggle drawing on the entire page
+  const handleTogglePageDrawing = () => {
+    setDrawingState(prev => ({
+      ...prev,
+      isActive: true,
+      isDrawingOnPage: !prev.isDrawingOnPage
+    }));
+  };
+
+  // Handle starting popup drag operation
+  const handlePopupDragStart = (e: React.MouseEvent) => {
+    if (activeTagPopupElement.current && tagPopupCoords) {
+      // Only allow dragging from the header element with the specific popup-drag-handle class
+      const target = e.target as HTMLElement;
+      const isDragHandle = target.closest('.popup-drag-handle');
+      
+      // If not clicking on the drag handle, don't start dragging
+      if (!isDragHandle) return;
+      
+      setIsDraggingPopup(true);
+      
+      // Calculate offset between mouse position and popup top-left corner
+      const rect = activeTagPopupElement.current.getBoundingClientRect();
+      setDragOffset({
+        x: e.clientX - rect.left,
+        y: e.clientY - rect.top
+      });
+      
+      // Prevent other events
+      e.stopPropagation();
+    }
+  };
+  
+  // Handle popup dragging
+  const handlePopupDrag = useCallback((e: MouseEvent) => {
+    if (isDraggingPopup && tagPopupCoords) {
+      setTagPopupCoords({
+        x: e.clientX - dragOffset.x,
+        y: e.clientY - dragOffset.y
+      });
+      
+      // Prevent other events
+      e.preventDefault();
+      e.stopPropagation();
+    }
+  }, [isDraggingPopup, tagPopupCoords, dragOffset]);
+  
+  // Handle ending popup drag
+  const handlePopupDragEnd = useCallback(() => {
+    setIsDraggingPopup(false);
+  }, []);
+  
+  // Set up global mouse event listeners for dragging
+  useEffect(() => {
+    if (isDraggingPopup) {
+      document.addEventListener('mousemove', handlePopupDrag);
+      document.addEventListener('mouseup', handlePopupDragEnd);
+      
+      // Add temporary dragging cursor to the whole document
+      document.body.style.cursor = 'move';
+      
+      return () => {
+        document.removeEventListener('mousemove', handlePopupDrag);
+        document.removeEventListener('mouseup', handlePopupDragEnd);
+        document.body.style.cursor = '';
+      };
+    }
+  }, [isDraggingPopup, handlePopupDrag, handlePopupDragEnd]);
 
   return (
     <>
@@ -387,16 +1091,23 @@ export const DraggableNotificationsPanel = ({
         </div>
       ))}
 
-      {/* --- Tag Drop Popup (Conditionally Rendered) --- */}
+      {/* --- Tag Drop Popup (Updated with draggable header) --- */}
       {isTagPopupOpen && tagPopupCoords && (
           <div
-              ref={activeTagPopupElement} // Assign ref if needed for direct DOM manipulation (like drag)
+              ref={activeTagPopupElement}
               className="tag-popup-content fixed bg-white border border-gray-300 rounded-lg shadow-xl z-[100] w-[380px] flex flex-col"
-              style={{ left: `${tagPopupCoords.x + 5}px`, top: `${tagPopupCoords.y + 5}px` }}
-              onClick={(e) => e.stopPropagation()} // Prevent clicks inside propagating to the placement listener
+              style={{ 
+                left: `${tagPopupCoords.x}px`, 
+                top: `${tagPopupCoords.y}px`,
+                cursor: isDraggingPopup ? 'move' : 'default'
+              }}
+              onClick={(e) => e.stopPropagation()}
           >
-              {/* Header */}
-              <div className="flex justify-between items-center p-3 border-b bg-gray-50 rounded-t-lg">
+              {/* Header - Now with drag handle functionality */}
+              <div 
+                className="popup-drag-handle flex justify-between items-center p-3 border-b bg-gray-50 rounded-t-lg cursor-move"
+                onMouseDown={handlePopupDragStart}
+              >
                   <div className="flex items-center gap-2">
                       <img src={businessLogoUrl} alt="Logo" className="h-5 w-5 rounded-full" />
                       <span className="font-semibold text-gray-700">Create Tag</span>
@@ -406,8 +1117,14 @@ export const DraggableNotificationsPanel = ({
                   </Button>
               </div>
 
-              {/* Content Area */}
-              <div className="p-4 flex flex-col gap-4">
+              {/* Content Area - Add event handler to stop propagation */}
+              <div 
+                  className="p-4 flex flex-col gap-4"
+                  onMouseDown={(e) => {
+                      // Prevent the popup from being dragged when interacting with content
+                      e.stopPropagation();
+                  }}
+              >
                   {/* Comment */}
                   <textarea
                       className="w-full p-2 text-sm border rounded-md resize-none focus:ring-1 focus:ring-blue-500 focus:outline-none"
@@ -415,10 +1132,14 @@ export const DraggableNotificationsPanel = ({
                       rows={3}
                       value={tagComment}
                       onChange={handleCommentChange}
+                      onMouseDown={(e) => e.stopPropagation()} // Prevent drag on text input
                   />
 
                   {/* Staff Selection */}
-                  <div className="border rounded-md p-3">
+                  <div 
+                      className="border rounded-md p-3"
+                      onMouseDown={(e) => e.stopPropagation()} // Prevent drag on staff selection
+                  >
                       <label className="text-sm font-medium text-gray-700 block mb-2">Notify Staff <span className="text-red-500">*</span></label>
                       <div className="max-h-24 overflow-y-auto mb-2 border-t border-b py-1">
                           {availableStaff.map(staff => (
@@ -429,6 +1150,7 @@ export const DraggableNotificationsPanel = ({
                                       className="form-checkbox h-4 w-4 text-blue-600 rounded"
                                       checked={selectedStaff.some(s => s.id === staff.id)}
                                       onChange={() => handleStaffSelect(staff)}
+                                      onMouseDown={(e) => e.stopPropagation()} // Prevent drag on checkbox
                                   />
                               </div>
                           ))}
@@ -448,7 +1170,7 @@ export const DraggableNotificationsPanel = ({
                   </div>
 
                   {/* Attachments */}
-                  <div>
+                  <div onMouseDown={(e) => e.stopPropagation()}>
                       <label className="text-sm font-medium text-gray-700 block mb-1">Attachments</label>
                       {/* Previews */}
                       {uploadedFiles.length > 0 && (
@@ -459,7 +1181,6 @@ export const DraggableNotificationsPanel = ({
                                          <img src={uploadedFile.previewUrl} alt="Preview" className="w-full h-full object-cover rounded border" />
                                       )}
                                       {uploadedFile.type === 'drawing' && (
-                                         // Use a specific icon for the drawing preview placeholder
                                          <div className="w-full h-full flex items-center justify-center bg-gray-200 rounded border">
                                               <Brush className="h-6 w-6 text-gray-600"/>
                                          </div>
@@ -473,6 +1194,7 @@ export const DraggableNotificationsPanel = ({
                                           variant="destructive" size="icon"
                                           className="absolute -top-1 -right-1 h-4 w-4 rounded-full p-0"
                                           onClick={() => removeUploadedFile(index)}
+                                          onMouseDown={(e) => e.stopPropagation()} // Prevent drag on button
                                       >
                                           <X className="h-2.5 w-2.5" />
                                       </Button>
@@ -482,7 +1204,13 @@ export const DraggableNotificationsPanel = ({
                       )}
                       {/* Attachment Action Buttons */}
                       <div className="flex items-center gap-2">
-                           <Button variant="outline" size="sm" className="flex-1 text-xs gap-1" onClick={() => document.getElementById('tag-image-upload')?.click()}>
+                           <Button 
+                               variant="outline" 
+                               size="sm" 
+                               className="flex-1 text-xs gap-1" 
+                               onClick={() => document.getElementById('tag-image-upload')?.click()}
+                               onMouseDown={(e) => e.stopPropagation()} // Prevent drag on button
+                           >
                                <Image className="h-3.5 w-3.5"/> Image
                                <input type="file" id="tag-image-upload" accept="image/*" className="hidden" onChange={handleImageUpload}/>
                            </Button>
@@ -494,6 +1222,7 @@ export const DraggableNotificationsPanel = ({
                                    isDrawingActive ? 'bg-blue-100 text-blue-700 border-blue-300' : '' // Active state style
                                )} 
                                onClick={handleToggleDrawing}
+                               onMouseDown={(e) => e.stopPropagation()} // Prevent drag on button
                             >
                                <Brush className="h-3.5 w-3.5"/> Draw
                            </Button>
@@ -505,33 +1234,59 @@ export const DraggableNotificationsPanel = ({
                                    isRecordingAudio ? 'bg-red-100 text-red-700 border-red-300' : '' // Active state style
                                )} 
                                onClick={handleToggleAudioRecord}
+                               onMouseDown={(e) => e.stopPropagation()} // Prevent drag on button
                             >
                                <Mic className="h-3.5 w-3.5"/> Voice
                            </Button>
                       </div>
                       
-                      {/* --- Conditionally Rendered Drawing Toolbar --- */}
+                      {/* --- Drawing Toolbar (Updated) --- */}
                       {isDrawingActive && (
-                          <div className="mt-3 pt-3 border-t border-gray-200 flex flex-col gap-3">
+                          <div 
+                              className="mt-3 pt-3 border-t border-gray-200 flex flex-col gap-3"
+                              onMouseDown={(e) => e.stopPropagation()} // Prevent drag on drawing toolbar
+                          >
                               {/* Row 1: Tools & Brush Options */}
                               <div className="flex items-center gap-4">
                                   {/* Tools Section */}
                                   <div className="flex items-center gap-1 border-r pr-3">
                                       <span className="text-xs font-medium mr-1">Tools:</span>
-                                      {/* Placeholder Icons for Tools */}
-                                      <Button variant="ghost" size="icon" className="h-7 w-7" title="Pencil"><Edit3 className="h-4 w-4" /></Button>
-                                      <Button variant="ghost" size="icon" className="h-7 w-7" title="Text">A</Button> {/* Simple Text Icon */}
-                                      <Button variant="ghost" size="icon" className="h-7 w-7" title="Eraser"><Trash2 className="h-4 w-4" /></Button> 
-                                      {/* Add more tool icons as needed */}
+                                      {/* Interactive Tool Buttons */}
+                                      <Button 
+                                          variant={drawingState.tool === 'pencil' ? 'default' : 'ghost'} 
+                                          size="icon" 
+                                          className="h-7 w-7" 
+                                          title="Pencil"
+                                          onClick={() => handleToolChange('pencil')}
+                                          onMouseDown={(e) => e.stopPropagation()} // Prevent drag on button
+                                      >
+                                          <Edit3 className="h-4 w-4" />
+                                      </Button>
+                                      <Button 
+                                          variant={drawingState.tool === 'eraser' ? 'default' : 'ghost'} 
+                                          size="icon" 
+                                          className="h-7 w-7" 
+                                          title="Eraser"
+                                          onClick={() => handleToolChange('eraser')}
+                                          onMouseDown={(e) => e.stopPropagation()} // Prevent drag on button
+                                      >
+                                          <Trash2 className="h-4 w-4" />
+                                      </Button>
                                   </div>
                                   {/* Brush Section */}
                                   <div className="flex items-center gap-1">
                                        <span className="text-xs font-medium mr-1">Brush:</span>
-                                       {/* Placeholder for brush dropdown */}
-                                       <select className="text-xs border rounded px-1 py-0.5">
-                                          <option>Normal</option>
-                                          <option>Thick</option>
-                                          <option>Spray</option>
+                                       {/* Functional brush size selector */}
+                                       <select 
+                                           className="text-xs border rounded px-1 py-0.5"
+                                           value={drawingState.lineWidth}
+                                           onChange={(e) => handleBrushSizeChange(Number(e.target.value))}
+                                           onMouseDown={(e) => e.stopPropagation()} // Prevent drag on select
+                                       >
+                                          <option value="1">Thin</option>
+                                          <option value="3">Normal</option>
+                                          <option value="5">Thick</option>
+                                          <option value="10">Extra Thick</option>
                                        </select>
                                   </div>
                               </div>
@@ -541,22 +1296,235 @@ export const DraggableNotificationsPanel = ({
                                   {/* Shapes Section */}
                                   <div className="flex items-center gap-1 border-r pr-3 flex-wrap">
                                       <span className="text-xs font-medium mr-1 w-full mb-1">Shapes:</span>
-                                      {/* Placeholder Icons for Shapes */}
-                                      <Button variant="ghost" size="icon" className="h-6 w-6"><Minus className="h-4 w-4"/></Button> {/* Line */}
-                                      <Button variant="ghost" size="icon" className="h-6 w-6"><MoveUpRight className="h-4 w-4"/></Button> {/* Arrow */}
-                                      <Button variant="ghost" size="icon" className="h-6 w-6"><Square className="h-4 w-4"/></Button>
-                                      <Button variant="ghost" size="icon" className="h-6 w-6"><Circle className="h-4 w-4"/></Button>
-                                      <Button variant="ghost" size="icon" className="h-6 w-6"><Star className="h-4 w-4"/></Button>
-                                       {/* Add more shape icons... */}
+                                      {/* Interactive Shape Buttons */}
+                                      <Button 
+                                          variant={drawingState.tool === 'line' ? 'default' : 'ghost'} 
+                                          size="icon" 
+                                          className="h-6 w-6"
+                                          onClick={() => handleToolChange('line')}
+                                          onMouseDown={(e) => e.stopPropagation()} // Prevent drag on button
+                                      >
+                                          <Minus className="h-4 w-4"/>
+                                      </Button>
+                                      <Button 
+                                          variant={drawingState.tool === 'arrow' ? 'default' : 'ghost'} 
+                                          size="icon" 
+                                          className="h-6 w-6"
+                                          onClick={() => handleToolChange('arrow')}
+                                          onMouseDown={(e) => e.stopPropagation()} // Prevent drag on button
+                                      >
+                                          <MoveUpRight className="h-4 w-4"/>
+                                      </Button>
+                                      <Button 
+                                          variant={drawingState.tool === 'rectangle' ? 'default' : 'ghost'} 
+                                          size="icon" 
+                                          className="h-6 w-6"
+                                          onClick={() => handleToolChange('rectangle')}
+                                          onMouseDown={(e) => e.stopPropagation()} // Prevent drag on button
+                                      >
+                                          <Square className="h-4 w-4"/>
+                                      </Button>
+                                      <Button 
+                                          variant={drawingState.tool === 'circle' ? 'default' : 'ghost'} 
+                                          size="icon" 
+                                          className="h-6 w-6"
+                                          onClick={() => handleToolChange('circle')}
+                                          onMouseDown={(e) => e.stopPropagation()} // Prevent drag on button
+                                      >
+                                          <Circle className="h-4 w-4"/>
+                                      </Button>
+                                      <Button 
+                                          variant={drawingState.tool === 'star' ? 'default' : 'ghost'} 
+                                          size="icon" 
+                                          className="h-6 w-6"
+                                          onClick={() => handleToolChange('star')}
+                                          onMouseDown={(e) => e.stopPropagation()} // Prevent drag on button
+                                      >
+                                          <Star className="h-4 w-4"/>
+                                      </Button>
                                   </div>
-                                  {/* Colours Section */}
+                                  {/* Colors Section */}
                                   <div className="flex items-center gap-1 flex-wrap">
-                                      <span className="text-xs font-medium mr-1 w-full mb-1">Colours:</span>
-                                      {/* Placeholder Color Swatches */}
+                                      <span className="text-xs font-medium mr-1 w-full mb-1">Colors:</span>
+                                      {/* Interactive Color Swatches */}
                                       {['#FF0000', '#000000', '#FFFFFF', '#CCCCCC', '#888888', '#FFFF00', '#00FF00', '#0000FF', '#FF00FF', '#00FFFF'].map(color => (
-                                          <Button key={color} variant="outline" size="icon" className="h-5 w-5 p-0 border rounded-full" style={{ backgroundColor: color }} title={color}></Button>
+                                          <Button 
+                                              key={color} 
+                                              variant="outline" 
+                                              size="icon" 
+                                              className={cn(
+                                                "h-5 w-5 p-0 border rounded-full", 
+                                                drawingState.color === color ? "ring-2 ring-offset-1 ring-blue-500" : ""
+                                              )} 
+                                              style={{ backgroundColor: color }} 
+                                              title={color}
+                                              onClick={() => handleColorChange(color)}
+                                              onMouseDown={(e) => e.stopPropagation()} // Prevent drag on button
+                                          />
                                       ))}
-                                       {/* Add more colors... */}
+                                  </div>
+                              </div>
+                              
+                              {/* Row 3: Canvas and Drawing Outside the Tag */}
+                              <div className="mt-2">
+                                  {/* Drawing Canvas with improved event isolation */}
+                                  <div 
+                                      className="relative border rounded w-full bg-white"
+                                      style={{ 
+                                          height: "200px",
+                                          pointerEvents: "all",
+                                          overflow: "hidden"
+                                      }}
+                                      onMouseDown={(e) => {
+                                          // Completely isolate canvas container from drag
+                                          e.stopPropagation();
+                                          e.preventDefault();
+                                      }}
+                                  >
+                                      <canvas 
+                                          ref={tagCanvasRef}
+                                          width={340} 
+                                          height={200} 
+                                          className="absolute top-0 left-0 w-full h-full cursor-crosshair z-10"
+                                          style={{ 
+                                              touchAction: 'none',
+                                              pointerEvents: 'all' 
+                                          }}
+                                      />
+                                      {/* Invisible overlay to capture events */}
+                                      <div
+                                          className="absolute top-0 left-0 w-full h-full z-20"
+                                          onMouseDown={(e) => {
+                                              e.stopPropagation();
+                                              e.preventDefault();
+                                              if (tagCanvasRef.current) {
+                                                  const rect = tagCanvasRef.current.getBoundingClientRect();
+                                                  const point = {
+                                                      x: e.clientX - rect.left,
+                                                      y: e.clientY - rect.top
+                                                  };
+                                                  
+                                                  setIsDrawing(true);
+                                                  setLastPoint(point);
+                                                  
+                                                  const ctx = tagCanvasRef.current.getContext('2d');
+                                                  if (!ctx) return;
+                                                  
+                                                  ctx.beginPath();
+                                                  ctx.moveTo(point.x, point.y);
+                                                  ctx.lineCap = 'round';
+                                                  ctx.lineJoin = 'round';
+                                                  ctx.strokeStyle = drawingState.color;
+                                                  ctx.lineWidth = drawingState.lineWidth;
+                                              }
+                                          }}
+                                          onMouseMove={(e) => {
+                                              if (!isDrawing || !lastPoint || !tagCanvasRef.current) return;
+                                              
+                                              e.stopPropagation();
+                                              e.preventDefault();
+                                              
+                                              const rect = tagCanvasRef.current.getBoundingClientRect();
+                                              const point = {
+                                                  x: e.clientX - rect.left,
+                                                  y: e.clientY - rect.top
+                                              };
+                                              
+                                              const ctx = tagCanvasRef.current.getContext('2d');
+                                              if (!ctx) return;
+                                              
+                                              switch (drawingState.tool) {
+                                                  case 'pencil':
+                                                      ctx.beginPath();
+                                                      ctx.moveTo(lastPoint.x, lastPoint.y);
+                                                      ctx.lineTo(point.x, point.y);
+                                                      ctx.strokeStyle = drawingState.color;
+                                                      ctx.lineWidth = drawingState.lineWidth;
+                                                      ctx.lineCap = 'round';
+                                                      ctx.lineJoin = 'round';
+                                                      ctx.stroke();
+                                                      break;
+                                                  case 'eraser':
+                                                      ctx.clearRect(
+                                                          point.x - drawingState.lineWidth * 5,
+                                                          point.y - drawingState.lineWidth * 5,
+                                                          drawingState.lineWidth * 10,
+                                                          drawingState.lineWidth * 10
+                                                      );
+                                                      break;
+                                              }
+                                              
+                                              setLastPoint(point);
+                                          }}
+                                          onMouseUp={(e) => {
+                                              e.stopPropagation();
+                                              e.preventDefault();
+                                              
+                                              if (!isDrawing || !lastPoint || !tagCanvasRef.current) {
+                                                  setIsDrawing(false);
+                                                  setLastPoint(null);
+                                                  return;
+                                              }
+                                              
+                                              const rect = tagCanvasRef.current.getBoundingClientRect();
+                                              const endPoint = {
+                                                  x: e.clientX - rect.left,
+                                                  y: e.clientY - rect.top
+                                              };
+                                              
+                                              const ctx = tagCanvasRef.current.getContext('2d');
+                                              if (!ctx) return;
+                                              
+                                              // Handle shape tools that draw on mouse up
+                                              switch (drawingState.tool) {
+                                                  case 'line':
+                                                      ctx.beginPath();
+                                                      ctx.moveTo(lastPoint.x, lastPoint.y);
+                                                      ctx.lineTo(endPoint.x, endPoint.y);
+                                                      ctx.strokeStyle = drawingState.color;
+                                                      ctx.lineWidth = drawingState.lineWidth;
+                                                      ctx.stroke();
+                                                      break;
+                                                  case 'arrow':
+                                                      drawArrow(ctx, lastPoint, endPoint, drawingState.color, drawingState.lineWidth);
+                                                      break;
+                                                  case 'rectangle':
+                                                      ctx.beginPath();
+                                                      ctx.rect(
+                                                          lastPoint.x,
+                                                          lastPoint.y,
+                                                          endPoint.x - lastPoint.x,
+                                                          endPoint.y - lastPoint.y
+                                                      );
+                                                      ctx.strokeStyle = drawingState.color;
+                                                      ctx.lineWidth = drawingState.lineWidth;
+                                                      ctx.stroke();
+                                                      break;
+                                                  case 'circle':
+                                                      const radius = Math.sqrt(
+                                                          Math.pow(endPoint.x - lastPoint.x, 2) + Math.pow(endPoint.y - lastPoint.y, 2)
+                                                      );
+                                                      ctx.beginPath();
+                                                      ctx.arc(lastPoint.x, lastPoint.y, radius, 0, 2 * Math.PI);
+                                                      ctx.strokeStyle = drawingState.color;
+                                                      ctx.lineWidth = drawingState.lineWidth;
+                                                      ctx.stroke();
+                                                      break;
+                                                  case 'star':
+                                                      drawStar(ctx, lastPoint.x, lastPoint.y, 5, 
+                                                          Math.sqrt(Math.pow(endPoint.x - lastPoint.x, 2) + Math.pow(endPoint.y - lastPoint.y, 2)), 
+                                                          drawingState.color, drawingState.lineWidth);
+                                                      break;
+                                              }
+                                              
+                                              setIsDrawing(false);
+                                              setLastPoint(null);
+                                          }}
+                                          onMouseLeave={() => {
+                                              setIsDrawing(false);
+                                              setLastPoint(null);
+                                          }}
+                                      ></div>
                                   </div>
                               </div>
                           </div>
@@ -565,9 +1533,21 @@ export const DraggableNotificationsPanel = ({
               </div>
 
               {/* Footer Actions */}
-              <div className="flex justify-end gap-3 p-3 border-t bg-gray-50 rounded-b-lg">
-                  <Button variant="ghost" onClick={closeTagPopup}>Cancel</Button>
-                  <Button onClick={handleSaveTag}>
+              <div 
+                  className="flex justify-end gap-3 p-3 border-t bg-gray-50 rounded-b-lg"
+                  onMouseDown={(e) => e.stopPropagation()} // Prevent drag on footer
+              >
+                  <Button 
+                      variant="ghost" 
+                      onClick={closeTagPopup}
+                      onMouseDown={(e) => e.stopPropagation()} // Prevent drag on button
+                  >
+                      Cancel
+                  </Button>
+                  <Button 
+                      onClick={handleSaveTag}
+                      onMouseDown={(e) => e.stopPropagation()} // Prevent drag on button
+                  >
                       <Save className="h-4 w-4 mr-1"/> Save Tag
                   </Button>
               </div>
