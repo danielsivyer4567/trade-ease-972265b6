@@ -56,6 +56,7 @@ export default function QuotesMain() {
   const [quoteName, setQuoteName] = useState("New Quote");
   const [showTemplates, setShowTemplates] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [selectedTemplateCategory, setSelectedTemplateCategory] = useState("All Categories");
 
   const handleBack = () => {
     navigate("/quotes");
@@ -206,12 +207,11 @@ export default function QuotesMain() {
 
     // Extract unique categories for the sidebar
     const categories = Array.from(new Set(templates.map(t => t.category)));
-    const [selectedCategory, setSelectedCategory] = useState(categories[0]);
     
     // Filter templates by selected category
-    const filteredTemplates = selectedCategory === "All Categories" 
+    const filteredTemplates = selectedTemplateCategory === "All Categories" 
       ? templates 
-      : templates.filter(t => t.category === selectedCategory);
+      : templates.filter(t => t.category === selectedTemplateCategory);
 
     return (
       <div className="flex h-full">
@@ -232,11 +232,11 @@ export default function QuotesMain() {
             <div className="space-y-1">
               <button 
                 className={`w-full text-left p-2.5 rounded-md text-sm font-medium ${
-                  selectedCategory === "All Categories" 
+                  selectedTemplateCategory === "All Categories" 
                     ? "bg-blue-50 text-blue-700" 
                     : "text-slate-700 hover:bg-slate-100"
                 }`}
-                onClick={() => setSelectedCategory("All Categories")}
+                onClick={() => setSelectedTemplateCategory("All Categories")}
               >
                 All Categories
               </button>
@@ -245,11 +245,11 @@ export default function QuotesMain() {
                 <button 
                   key={category}
                   className={`w-full text-left p-2.5 rounded-md text-sm font-medium ${
-                    selectedCategory === category 
+                    selectedTemplateCategory === category 
                       ? "bg-blue-50 text-blue-700" 
                       : "text-slate-700 hover:bg-slate-100"
                   }`}
-                  onClick={() => setSelectedCategory(category)}
+                  onClick={() => setSelectedTemplateCategory(category)}
                 >
                   {category}
                 </button>
