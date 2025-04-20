@@ -50,25 +50,25 @@ export const CustomerCard = ({ customer, onCustomerClick, onEditClick }: Custome
       className="hover:shadow-md transition-all cursor-pointer"
       onClick={() => onCustomerClick(customer.id)}
     >
-      <CardHeader className="py-3 bg-slate-200">
+      <CardHeader className="py-3 bg-slate-300">
         <CardTitle className="text-lg flex items-center justify-between text-slate-950">
           <div className="flex items-center gap-2">
             <User className="h-5 w-5 text-gray-500" />
             <span className="cursor-pointer hover:text-blue-600 hover:underline">{customer.name}</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <span>{customer.status === 'active' ? 'Active' : 'Inactive'}</span>
             {customer.status === 'active' && (
               <Button 
                 variant="outline" 
                 size="sm"
                 onClick={handleOpenClick}
-                className="px-2 py-1 h-7 text-xs"
+                className="px-2 py-1 h-7 text-xs ml-2"
               >
                 <ExternalLink className="h-3 w-3 mr-1" />
                 Open
               </Button>
             )}
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-sm px-2 py-1 rounded-full bg-blue-100 text-blue-800">{customer.status === 'active' ? 'Active' : 'Inactive'}</span>
             <Button 
               variant="ghost" 
               size="sm"

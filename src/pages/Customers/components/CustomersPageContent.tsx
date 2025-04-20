@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
@@ -12,6 +11,7 @@ import { CustomerSearchBar } from "./CustomerSearchBar";
 import { CustomerList } from "./CustomerList";
 import { CustomerEditModal } from "./CustomerEditModal";
 import { CustomerData } from "./CustomerCard";
+import { fetchCustomersFromAPI } from "@/services/api";
 
 const formSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -28,6 +28,9 @@ export function CustomersPageContent() {
   const [selectedFilter, setSelectedFilter] = useState("all");
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [selectedCustomer, setSelectedCustomer] = useState<CustomerData | null>(null);
+  const [apiCustomers, setApiCustomers] = useState<CustomerData[]>([]);
+  const [isApiLoading, setIsApiLoading] = useState(false);
+  const [apiError, setApiError] = useState<string | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
   const { customers, isLoading, fetchCustomers } = useCustomers();
@@ -45,9 +48,31 @@ export function CustomersPageContent() {
     }
   });
   
+  // Fetch customers from both sources
   useEffect(() => {
     fetchCustomers();
+    fetchApiCustomers();
   }, [fetchCustomers]);
+  
+  // Function to fetch customers from API
+  const fetchApiCustomers = async () => {
+    setIsApiLoading(true);
+    setApiError(null);
+    try {
+      const data = await fetchCustomersFromAPI();
+      setApiCustomers(data);
+    } catch (error) {
+      console.error("Error fetching customers from API:", error);
+      setApiError("Failed to fetch customers from external API");
+      toast({
+        title: "API Error",
+        description: "Failed to fetch customers from external API",
+        variant: "destructive"
+      });
+    } finally {
+      setIsApiLoading(false);
+    }
+  };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -59,7 +84,12 @@ export function CustomersPageContent() {
     }
   };
 
-  const filteredCustomers = customers.filter(customer => {
+  // Combine customers from both sources, prioritizing API customers
+  const allCustomers = [...apiCustomers, ...customers.filter(
+    customer => !apiCustomers.some(apiCustomer => apiCustomer.id === customer.id)
+  )];
+
+  const filteredCustomers = allCustomers.filter(customer => {
     const matchesSearch = customer.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
                          customer.email.toLowerCase().includes(searchQuery.toLowerCase()) || 
                          customer.phone.includes(searchQuery);
@@ -139,6 +169,7 @@ export function CustomersPageContent() {
       
       setEditModalOpen(false);
       fetchCustomers();
+      fetchApiCustomers(); // Refresh API customers as well
     } catch (error) {
       console.error("Exception updating customer:", error);
       toast({
@@ -165,7 +196,7 @@ export function CustomersPageContent() {
       </div>
 
       <CustomerList 
-        isLoading={isLoading}
+        isLoading={isLoading || isApiLoading}
         filteredCustomers={filteredCustomers}
         searchQuery={searchQuery}
         onCustomerClick={handleCustomerClick}
