@@ -29,6 +29,7 @@ const NewJobPage = lazy(() => import('@/pages/Jobs/NewJob'));
 
 // Quotes and Invoices
 const QuotesPage = lazy(() => import('@/pages/Quotes'));
+const NewQuotePage = lazy(() => import('@/pages/Quotes/NewQuote'));
 {/* const QuoteDetailsPage = lazy(() => import('@/pages/Quote/QuoteDetails')); */}
 {/* const InvoicesPage = lazy(() => import('@/pages/Invoices')); */}
 
@@ -152,6 +153,7 @@ const routeObjects: RouteObject[] = [
         path: "/quotes",
         children: [
           { index: true, element: <SuspenseWrapper><QuotesPage /></SuspenseWrapper> },
+          { path: "new", element: <SuspenseWrapper><NewQuotePage /></SuspenseWrapper> },
         ],
       },
       // Team routes
