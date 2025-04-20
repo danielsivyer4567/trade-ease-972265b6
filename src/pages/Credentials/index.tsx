@@ -1,15 +1,12 @@
 import React from 'react';
-// Removed AppLayout import assuming it's handled higher up
 import { TicketWallet } from './components/TicketWallet';
-import { JobList } from './components/JobList';
-import { StaffList } from './components/StaffList';
-import { SafetyDocumentsManager } from './components/SafetyDocumentsManager';
-// Placeholder for upload functionality components
-// import { DocumentUploader } from './components/DocumentUploader';
+import { JobList } from '@/components/JobList';
+import { StaffList } from '@/components/StaffList';
+import { SafetyDocumentsManager } from '@/components/SafetyDocumentsManager';
 
 export default function CredentialsPage() {
   return (
-    <div className="container mx-auto p-4 space-y-8"> {/* Increased spacing */}
+    <div className="container mx-auto p-4 space-y-8">
       <h1 className="text-3xl font-bold mb-6">Credentials & Compliance</h1>
 
       {/* Tickets Section */}

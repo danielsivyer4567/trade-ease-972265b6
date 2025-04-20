@@ -1,5 +1,5 @@
 import React, { Suspense, lazy } from 'react';
-import { Routes as RouterRoutes, Route, Outlet, Navigate } from 'react-router-dom';
+import { createBrowserRouter, createRoutesFromElements, RouteObject, Outlet, Navigate, Route } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { LoadingFallback } from './loading-fallback';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
@@ -76,334 +76,120 @@ const CredentialsPage = lazy(() => import('@/pages/Credentials'));
 const SettingsPage = lazy(() => import('@/pages/Settings'));
 const IntegrationsPage = lazy(() => import('@/pages/Integrations'));
 
-export function Routes() {
-  const { user, loading } = useAuth();
-  const settingsRoutes = SettingsRoutes();
+// Helper component for Suspense boundary
+const SuspenseWrapper = ({ children }) => (
+  <Suspense fallback={<LoadingFallback />}>{children}</Suspense>
+);
 
-  if (loading) {
-    return <div className="h-screen w-screen flex items-center justify-center">Loading...</div>;
+// Convert JSX auth routes to RouteObjects
+const authRouteObjects = createRoutesFromElements(authRoutes);
+
+// Get settings RouteObjects by calling the function
+const settingsRouteObjects = SettingsRoutes();
+
+// Define main application routes using RouteObject configuration
+const routeObjects: RouteObject[] = [
+  // Auth Routes (now converted RouteObjects)
+  ...authRouteObjects,
+  {
+    // Protected Routes Layout
+    element: <ProtectedRoute />,
+    children: [
+      { path: "/", element: <SuspenseWrapper><DashboardPage /></SuspenseWrapper> },
+      // Settings Routes
+      {
+        path: "settings", // Base path for settings
+        // element: <SuspenseWrapper><SettingsPage /></SuspenseWrapper>, // Optional: Render SettingsPage layout here?
+        children: settingsRouteObjects // Nest the objects returned by SettingsRoutes()
+      },
+      // Customer routes
+      {
+        path: "/customers",
+        children: [
+          { index: true, element: <SuspenseWrapper><CustomersPage /></SuspenseWrapper> },
+          { path: ":auditId", element: <SuspenseWrapper><CustomersPage /></SuspenseWrapper> },
+          { path: ":auditId/:customerId", element: <SuspenseWrapper><CustomerDetailsPage /></SuspenseWrapper> },
+        ],
+      },
+      // Site Audits routes
+      {
+        path: "/site-audits",
+        children: [
+          { index: true, element: <SuspenseWrapper><SiteAuditsPage /></SuspenseWrapper> },
+          { path: "new", element: <SuspenseWrapper><SiteAuditsPage /></SuspenseWrapper> },
+        ],
+      },
+      // Job routes
+      { path: "/job", element: <SuspenseWrapper><JobsPage /></SuspenseWrapper> },
+      {
+        path: "/jobs",
+        children: [
+          { index: true, element: <SuspenseWrapper><JobsPage /></SuspenseWrapper> },
+          { path: "new", element: <SuspenseWrapper><NewJobPage /></SuspenseWrapper> },
+        ],
+      },
+      // Quote routes
+      { path: "/quote", element: <SuspenseWrapper><QuotesPage /></SuspenseWrapper> },
+      {
+        path: "/quotes",
+        children: [
+          { index: true, element: <SuspenseWrapper><QuotesPage /></SuspenseWrapper> },
+        ],
+      },
+      // Team routes
+      { path: "/teams", element: <SuspenseWrapper><TeamsPage /></SuspenseWrapper> },
+      { path: "/team-red", element: <SuspenseWrapper><TeamRedPage /></SuspenseWrapper> },
+      { path: "/team-blue", element: <SuspenseWrapper><TeamBluePage /></SuspenseWrapper> },
+      { path: "/team-green", element: <SuspenseWrapper><TeamGreenPage /></SuspenseWrapper> },
+      { path: "/team-new", element: <SuspenseWrapper><TeamNewPage /></SuspenseWrapper> },
+      // Calendar route
+      { path: "/calendar", element: <SuspenseWrapper><CalendarPage /></SuspenseWrapper> },
+      // Communication routes
+      { path: "/email", element: <SuspenseWrapper><EmailPage /></SuspenseWrapper> },
+      { path: "/messaging", element: <SuspenseWrapper><MessagingPage /></SuspenseWrapper> },
+      { path: "/notifications", element: <SuspenseWrapper><NotificationsPage /></SuspenseWrapper> },
+      // Finance routes
+      { path: "/banking", element: <SuspenseWrapper><BankingPage /></SuspenseWrapper> },
+      { path: "/payments", element: <SuspenseWrapper><PaymentsPage /></SuspenseWrapper> },
+      { path: "/expenses", element: <SuspenseWrapper><ExpensesPage /></SuspenseWrapper> },
+      // Trading routes
+      { path: "/trading", element: <SuspenseWrapper><TradingPage /></SuspenseWrapper> },
+      { path: "/tradedash", element: <SuspenseWrapper><TradeDashPage /></SuspenseWrapper> },
+      // Reporting routes
+      { path: "/statistics", element: <SuspenseWrapper><StatisticsPage /></SuspenseWrapper> },
+      { path: "/performance", element: <SuspenseWrapper><PerformancePage /></SuspenseWrapper> },
+      { path: "/activity", element: <SuspenseWrapper><ActivityPage /></SuspenseWrapper> },
+      // Supply Chain routes
+      { path: "/suppliers", element: <SuspenseWrapper><SuppliersPage /></SuspenseWrapper> },
+      { path: "/inventory", element: <SuspenseWrapper><InventoryPage /></SuspenseWrapper> },
+      { path: "/purchase-orders", element: <SuspenseWrapper><PurchaseOrdersPage /></SuspenseWrapper> },
+      { path: "/material-ordering", element: <SuspenseWrapper><MaterialOrderingPage /></SuspenseWrapper> },
+      // Tools and Utilities routes
+      { path: "/calculators", element: <SuspenseWrapper><CalculatorsPage /></SuspenseWrapper> },
+      { path: "/workflow", element: <SuspenseWrapper><WorkflowPage /></SuspenseWrapper> },
+      { path: "/forms", element: <SuspenseWrapper><FormsPage /></SuspenseWrapper> },
+      { path: "/tasks", element: <SuspenseWrapper><TasksPage /></SuspenseWrapper> },
+      { path: "/ai-features", element: <SuspenseWrapper><AIFeaturesPage /></SuspenseWrapper> },
+      { path: "/property-boundaries", element: <SuspenseWrapper><PropertyBoundariesPage /></SuspenseWrapper> },
+      { path: "/networks", element: <SuspenseWrapper><NetworksPage /></SuspenseWrapper> },
+      // Credentials route
+      { path: "/credentials", element: <SuspenseWrapper><CredentialsPage /></SuspenseWrapper> },
+      // Integrations (already handled under settings? Check original structure if needed)
+      // { path: "/integrations", element: <SuspenseWrapper><IntegrationsPage /></SuspenseWrapper> },
+    ]
+  },
+  // 404 Route - must be last
+  {
+    path: "*",
+    element: <SuspenseWrapper><NotFoundPage /></SuspenseWrapper>,
+  },
+];
+
+// Create the browser router instance with the relativeSplatPath future flag
+export const router = createBrowserRouter(routeObjects, {
+  future: {
+    v7_relativeSplatPath: true,
+    // Add other future flags for createBrowserRouter here if needed
+    // e.g., v7_fetcherPersist, v7_normalizeFormMethod, etc.
   }
-
-  return (
-    <Suspense fallback={<LoadingFallback />}>
-      <RouterRoutes>
-        {/* Auth routes */}
-        {authRoutes}
-
-        <Route element={<ProtectedRoute />}>
-          {/* Root route - main dashboard */}
-          <Route path="/" element={
-            <Suspense fallback={<LoadingFallback />}>
-              <DashboardPage />
-            </Suspense>
-          } />
-          
-          {/* Settings routes */}
-          <Route path="settings/*">
-            {settingsRoutes.map((route, index) => (
-              <Route
-                key={index}
-                path={route.path}
-                element={route.element}
-              />
-            ))}
-          </Route>
-          
-          {/* Customer routes */}
-          <Route path="/customers">
-            <Route index element={
-              <Suspense fallback={<LoadingFallback />}>
-                <CustomersPage />
-              </Suspense>
-            } />
-            <Route path=":auditId" element={
-              <Suspense fallback={<LoadingFallback />}>
-                <CustomersPage />
-              </Suspense>
-            } />
-            <Route path=":auditId/:customerId" element={
-              <Suspense fallback={<LoadingFallback />}>
-                <CustomerDetailsPage />
-              </Suspense>
-            } />
-          </Route>
-          
-          {/* Site Audits routes */}
-          <Route path="/site-audits">
-            <Route index element={
-              <Suspense fallback={<LoadingFallback />}>
-                <SiteAuditsPage />
-              </Suspense>
-            } />
-            <Route path="new" element={
-              <Suspense fallback={<LoadingFallback />}>
-                <SiteAuditsPage />
-              </Suspense>
-            } />
-          </Route>
-          
-          {/* Job routes */}
-          <Route path="/job" element={
-            <Suspense fallback={<LoadingFallback />}>
-              <JobsPage />
-            </Suspense>
-          } />
-          
-          <Route path="/jobs">
-            <Route index element={
-              <Suspense fallback={<LoadingFallback />}>
-                <JobsPage />
-              </Suspense>
-            } />
-            <Route path="new" element={
-              <Suspense fallback={<LoadingFallback />}>
-                <NewJobPage />
-              </Suspense>
-            } />
-          </Route>
-          
-          {/* Quote and Invoice routes */}
-          <Route path="/quote" element={
-            <Suspense fallback={<LoadingFallback />}>
-              <QuotesPage />
-            </Suspense>
-          } />
-          
-          <Route path="/quotes">
-            <Route index element={
-              <Suspense fallback={<LoadingFallback />}>
-                <QuotesPage />
-              </Suspense>
-            } />
-            {/* 
-            <Route path=":quoteId" element={
-              <Suspense fallback={<LoadingFallback />}>
-                <QuoteDetailsPage />
-              </Suspense>
-            } />
-            */}
-          </Route>
-          
-          {/* 
-          <Route path="/invoices" element={
-            <Suspense fallback={<LoadingFallback />}>
-              <InvoicesPage />
-            </Suspense>
-          } />
-          */}
-          
-          {/* Team routes */}
-          <Route path="/teams" element={
-            <Suspense fallback={<LoadingFallback />}>
-              <TeamsPage />
-            </Suspense>
-          } />
-          
-          <Route path="/team-red" element={
-            <Suspense fallback={<LoadingFallback />}>
-              <TeamRedPage />
-            </Suspense>
-          } />
-          
-          <Route path="/team-blue" element={
-            <Suspense fallback={<LoadingFallback />}>
-              <TeamBluePage />
-            </Suspense>
-          } />
-          
-          <Route path="/team-green" element={
-            <Suspense fallback={<LoadingFallback />}>
-              <TeamGreenPage />
-            </Suspense>
-          } />
-          
-          <Route path="/team-new" element={
-            <Suspense fallback={<LoadingFallback />}>
-              <TeamNewPage />
-            </Suspense>
-          } />
-          
-          {/* Calendar route */}
-          <Route path="/calendar" element={
-            <Suspense fallback={<LoadingFallback />}>
-              <CalendarPage />
-            </Suspense>
-          } />
-          
-          {/* Communication routes */}
-          <Route path="/email" element={
-            <Suspense fallback={<LoadingFallback />}>
-              <EmailPage />
-            </Suspense>
-          } />
-          
-          <Route path="/messaging" element={
-            <Suspense fallback={<LoadingFallback />}>
-              <MessagingPage />
-            </Suspense>
-          } />
-          
-          <Route path="/notifications" element={
-            <Suspense fallback={<LoadingFallback />}>
-              <NotificationsPage />
-            </Suspense>
-          } />
-          
-          {/* Finance routes */}
-          <Route path="/banking" element={
-            <Suspense fallback={<LoadingFallback />}>
-              <BankingPage />
-            </Suspense>
-          } />
-          
-          <Route path="/payments" element={
-            <Suspense fallback={<LoadingFallback />}>
-              <PaymentsPage />
-            </Suspense>
-          } />
-          
-          <Route path="/expenses" element={
-            <Suspense fallback={<LoadingFallback />}>
-              <ExpensesPage />
-            </Suspense>
-          } />
-          
-          {/* 
-          <Route path="/payroll" element={
-            <Suspense fallback={<LoadingFallback />}>
-              <PayrollPage />
-            </Suspense>
-          } />
-          */}
-          
-          {/* Trading routes */}
-          <Route path="/trading" element={
-            <Suspense fallback={<LoadingFallback />}>
-              <TradingPage />
-            </Suspense>
-          } />
-          
-          <Route path="/tradedash" element={
-            <Suspense fallback={<LoadingFallback />}>
-              <TradeDashPage />
-            </Suspense>
-          } />
-          
-          {/* Reporting routes */}
-          <Route path="/statistics" element={
-            <Suspense fallback={<LoadingFallback />}>
-              <StatisticsPage />
-            </Suspense>
-          } />
-          
-          <Route path="/performance" element={
-            <Suspense fallback={<LoadingFallback />}>
-              <PerformancePage />
-            </Suspense>
-          } />
-          
-          <Route path="/activity" element={
-            <Suspense fallback={<LoadingFallback />}>
-              <ActivityPage />
-            </Suspense>
-          } />
-          
-          {/* Supply Chain routes */}
-          <Route path="/suppliers" element={
-            <Suspense fallback={<LoadingFallback />}>
-              <SuppliersPage />
-            </Suspense>
-          } />
-          
-          <Route path="/inventory" element={
-            <Suspense fallback={<LoadingFallback />}>
-              <InventoryPage />
-            </Suspense>
-          } />
-          
-          <Route path="/purchase-orders" element={
-            <Suspense fallback={<LoadingFallback />}>
-              <PurchaseOrdersPage />
-            </Suspense>
-          } />
-          
-          <Route path="/material-ordering" element={
-            <Suspense fallback={<LoadingFallback />}>
-              <MaterialOrderingPage />
-            </Suspense>
-          } />
-          
-          {/* Tools and Utilities routes */}
-          <Route path="/calculators" element={
-            <Suspense fallback={<LoadingFallback />}>
-              <CalculatorsPage />
-            </Suspense>
-          } />
-          
-          <Route path="/workflow" element={
-            <Suspense fallback={<LoadingFallback />}>
-              <WorkflowPage />
-            </Suspense>
-          } />
-          
-          <Route path="/forms" element={
-            <Suspense fallback={<LoadingFallback />}>
-              <FormsPage />
-            </Suspense>
-          } />
-          
-          <Route path="/tasks" element={
-            <Suspense fallback={<LoadingFallback />}>
-              <TasksPage />
-            </Suspense>
-          } />
-          
-          <Route path="/ai-features" element={
-            <Suspense fallback={<LoadingFallback />}>
-              <AIFeaturesPage />
-            </Suspense>
-          } />
-          
-          <Route path="/property-boundaries" element={
-            <Suspense fallback={<LoadingFallback />}>
-              <PropertyBoundariesPage />
-            </Suspense>
-          } />
-          
-          <Route path="/networks" element={
-            <Suspense fallback={<LoadingFallback />}>
-              <NetworksPage />
-            </Suspense>
-          } />
-          
-          {/* Credentials route */}
-          <Route path="/credentials" element={
-            <Suspense fallback={<LoadingFallback />}>
-              <CredentialsPage />
-            </Suspense>
-          } />
-          
-          {/* Settings and Integrations */}
-          <Route path="/settings" element={
-            <Suspense fallback={<LoadingFallback />}>
-              <SettingsPage />
-            </Suspense>
-          } />
-          
-          <Route path="/integrations" element={
-            <Suspense fallback={<LoadingFallback />}>
-              <IntegrationsPage />
-            </Suspense>
-          } />
-        </Route>
-        
-        {/* 404 route */}
-        <Route path="*" element={
-          <Suspense fallback={<LoadingFallback />}>
-            <NotFoundPage />
-          </Suspense>
-        } />
-      </RouterRoutes>
-    </Suspense>
-  );
-}
+});
