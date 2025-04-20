@@ -67,25 +67,25 @@ export function NavItem({
   };
   
   return (
-    <li className="relative my-[17px] px-[5px] py-0">
+    <div className="relative my-[17px] px-[5px] py-0">
       <Tooltip>
         <TooltipTrigger asChild>
           <Link
             to={path}
             onClick={handleClick}
             className={cn(
-              "group flex items-center gap-x-3 relative rounded-md px-3 py-2 text-sm font-medium transition-colors",
+              "group flex items-center gap-x-3 relative rounded-md px-3 py-2 text-sm font-medium transition-colors text-white",
               expanded ? "justify-start" : "justify-center",
-              isActive && variant === "default" && "bg-accent text-accent-foreground",
+              isActive && variant === "default" && "bg-white/20 text-white",
               isActive && variant === "destructive" && "bg-destructive text-destructive-foreground",
               disabled && "pointer-events-none opacity-50",
-              variant === "default" && !isActive && "hover:bg-secondary/50 hover:text-primary",
+              variant === "default" && !isActive && "hover:bg-white/10 hover:text-white",
               variant === "destructive" && !isActive && "hover:bg-destructive hover:text-destructive-foreground",
               className
             )}
             {...props}
           >
-            {Icon && <Icon className="" />}
+            {Icon && <Icon className="text-white" />}
             {expanded && <span className="truncate">{displayText}</span>}
             {count !== undefined && (
               <Badge variant={countVariant} className={cn("ml-auto", !expanded && "hidden")}>
@@ -102,6 +102,6 @@ export function NavItem({
         )}
       </Tooltip>
       {children}
-    </li>
+    </div>
   );
 }

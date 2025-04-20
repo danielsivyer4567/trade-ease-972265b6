@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { NavItem } from './NavItem';
 import { DropdownMenu } from './DropdownMenu';
@@ -41,9 +40,9 @@ export const NavigationGroup: React.FC<NavigationGroupProps> = ({
   isExpanded,
   onLogout
 }) => {
-  return <div className="grid gap-0.5 w-full my-0">
+  return <div className="grid gap-0.5 w-full my-3 pt-3 border-t border-white/30 first:border-0 first:pt-0 first:mt-0">
       {/* Group Label - Only show if it exists and sidebar is expanded */}
-      {isExpanded && label && <h4 className="text-gray-950 font-extrabold text-base px-2 mb-2">
+      {isExpanded && label && <h4 className="text-white font-extrabold text-lg px-2 mb-2">
           {label}
         </h4>}
 

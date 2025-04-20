@@ -66,7 +66,7 @@ export function BaseLayout({
 
           {/* Main Content */}
           <main className={cn(
-            "min-h-screen w-full bg-[#EFF2F5]",
+            "min-h-screen w-full bg-[#f0f4fa]",
             "transition-all duration-300 ease-in-out",
             sidebarOpen ? "md:pl-[240px]" : "md:pl-[64px]",
             isMobile ? "pl-0" : ""

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useTabs, Tab } from '@/contexts/TabsContext';
 import { X, Plus } from 'lucide-react';
@@ -22,7 +21,7 @@ export function TabBar() {
   };
 
   return (
-    <div className="flex overflow-x-auto bg-white border-b border-gray-200 shadow-sm h-10">
+    <div className="flex overflow-x-auto bg-[#E2E8F0] border-b border-[#B8C5D5] shadow-sm h-10">
       {tabs.map((tab) => (
         <TabItem
           key={tab.id}
@@ -35,7 +34,7 @@ export function TabBar() {
       <Button 
         variant="ghost" 
         size="icon" 
-        className="h-10 w-10 flex-shrink-0 text-gray-500 hover:text-gray-700 hover:bg-gray-100" 
+        className="h-10 w-10 flex-shrink-0 text-gray-600 hover:text-gray-800 hover:bg-gray-100" 
         onClick={() => addTab({ title: "New Tab", path: "/" })}
         aria-label="New tab"
       >
@@ -56,17 +55,17 @@ function TabItem({ tab, isActive, onClick, onClose }: TabItemProps) {
   return (
     <div
       className={cn(
-        "flex items-center h-10 px-4 py-2 border-r border-gray-200 cursor-pointer select-none whitespace-nowrap transition-colors min-w-[120px] max-w-[200px]",
+        "flex items-center h-10 px-4 py-2 border-r border-[#B8C5D5] cursor-pointer select-none whitespace-nowrap transition-colors min-w-[120px] max-w-[200px]",
         isActive 
-          ? "bg-blue-50 border-b-2 border-b-blue-500" 
-          : "hover:bg-gray-50"
+          ? "bg-white border-b-2 border-b-blue-500" 
+          : "hover:bg-gray-200"
       )}
       onClick={onClick}
     >
       {tab.icon && <span className="mr-2">{tab.icon}</span>}
       <span className="mr-2 truncate flex-1">{tab.title}</span>
       <button
-        className="p-1 rounded-full text-gray-400 hover:text-gray-600 hover:bg-gray-100"
+        className="p-1 rounded-full text-gray-500 hover:text-gray-700 hover:bg-gray-300"
         onClick={onClose}
         aria-label={`Close ${tab.title} tab`}
       >
