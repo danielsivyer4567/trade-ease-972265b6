@@ -1,6 +1,5 @@
-
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate as useReactRouterNavigate, useLocation as useReactRouterLocation, NavigateFunction } from 'react-router-dom';
 import { trackHistoryCall } from '@/utils/performanceMonitor';
 
 export interface Tab {
@@ -22,13 +21,33 @@ interface TabsContextType {
 
 const TabsContext = createContext<TabsContextType | undefined>(undefined);
 
+// Safe hook that works outside Router context
+function useSafeNavigate(): NavigateFunction | null {
+  try {
+    return useReactRouterNavigate();
+  } catch (error) {
+    console.warn('useNavigate used outside Router context - navigation disabled');
+    return null;
+  }
+}
+
+// Safe hook for location that works outside Router context
+function useSafeLocation() {
+  try {
+    return useReactRouterLocation();
+  } catch (error) {
+    console.warn('useLocation used outside Router context - using default location');
+    return { pathname: '/' };
+  }
+}
+
 export function TabsProvider({ children }: { children: React.ReactNode }) {
   const [tabs, setTabs] = useState<Tab[]>([]);
   const [activeTabId, setActiveTabId] = useState<string | null>(null);
   const [isInitialMount, setIsInitialMount] = useState(true);
   const [navigationInProgress, setNavigationInProgress] = useState(false);
-  const navigate = useNavigate();
-  const location = useLocation();
+  const navigate = useSafeNavigate();
+  const location = useSafeLocation();
 
   // Initialize with current path on first mount
   useEffect(() => {
@@ -103,14 +122,14 @@ export function TabsProvider({ children }: { children: React.ReactNode }) {
         const newActiveTab = tabs[newActiveIndex] || tabs[tabIndex + 1];
         setActiveTabId(newActiveTab.id);
         
-        if (trackHistoryCall()) {
+        if (trackHistoryCall() && navigate) {
           setNavigationInProgress(true);
           navigate(newActiveTab.path, { replace: true });
         }
       } else {
         setActiveTabId(null);
         
-        if (trackHistoryCall()) {
+        if (trackHistoryCall() && navigate) {
           setNavigationInProgress(true);
           navigate('/', { replace: true }); // Default location if no tabs left
         }
@@ -129,7 +148,7 @@ export function TabsProvider({ children }: { children: React.ReactNode }) {
       setActiveTabId(tabId);
       
       // Only update history if it's safe to do so
-      if (trackHistoryCall()) {
+      if (trackHistoryCall() && navigate) {
         setNavigationInProgress(true);
         // Use replace instead of push to avoid filling history
         navigate(tab.path, { replace: true });
