@@ -2,7 +2,7 @@ import { BaseLayout } from "@/components/ui/BaseLayout";
 import JobSiteMap from "@/components/dashboard/JobSiteMap";
 import UpcomingJobs from "@/components/dashboard/UpcomingJobs";
 import { Card } from "@/components/ui/card";
-import { ChevronDown, ChevronUp, ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Calendar } from "lucide-react";
 import { TeamCalendar } from "@/components/team/TeamCalendar";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -12,7 +12,7 @@ import { PerformanceSection } from "@/components/dashboard/PerformanceSection";
 import { StatisticsSection } from "@/components/dashboard/StatisticsSection";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
-import { Calendar } from "@/components/ui/calendar";
+import { Calendar as ReactCalendar } from "@/components/ui/calendar";
 
 export default function DashboardPage() {
   const [calendarDate, setCalendarDate] = useState<Date | undefined>(new Date());
@@ -110,54 +110,152 @@ export default function DashboardPage() {
             </div>
 
             {/* Staff Calendar */}
-            <div className="relative bg-gray-100 rounded-lg p-6">
-              <div className="text-center mb-6">
-                <h2 className="text-lg font-medium">Staff calendar</h2>
+            <div className="relative bg-white rounded-lg border shadow-sm overflow-hidden mb-6">
+              {/* Calendar Header */}
+              <div className="p-4 border-b flex items-center justify-between bg-white">
+                <div className="flex items-center space-x-2">
+                  <Button variant="default" className="bg-slate-500 hover:bg-slate-600 text-white">
+                    New Appointment
+                  </Button>
+                  <Button variant="outline" size="sm">
+                    Today
+                  </Button>
+                </div>
+                
+                <div className="text-xl font-medium text-center">
+                  February 2025
+                </div>
+                
+                <div className="flex items-center space-x-1.5">
+                  <Button variant="ghost" size="sm" className="rounded-full h-8 w-8 p-0 border border-gray-200 shadow-sm">
+                    <ChevronLeft className="h-4 w-4 font-bold" />
+                  </Button>
+                  <Button variant="ghost" size="sm" className="rounded-full h-8 w-8 p-0 border border-gray-200 shadow-sm">
+                    <Calendar className="h-4 w-4 font-bold" />
+                  </Button>
+                  <Button variant="ghost" size="sm" className="rounded-full h-8 w-8 p-0 border border-gray-200 shadow-sm">
+                    <ChevronRight className="h-4 w-4 font-bold" />
+                  </Button>
+                </div>
               </div>
               
-              <div className="calendar-container relative">
-                <div className="text-center mb-3">
-                  <h3 className="text-md font-medium">April 2025</h3>
+              {/* Calendar Week View */}
+              <div className="grid grid-cols-7 border-b">
+                <div className="border-r p-2 text-center font-medium">Mon</div>
+                <div className="border-r p-2 text-center font-medium">Tue</div>
+                <div className="border-r p-2 text-center font-medium">Wed</div>
+                <div className="border-r p-2 text-center font-medium">Thu</div>
+                <div className="border-r p-2 text-center font-medium">Fri</div>
+                <div className="border-r p-2 text-center font-medium">Sat</div>
+                <div className="p-2 text-center font-medium">Sun</div>
+              </div>
+              
+              {/* Calendar Dates Grid */}
+              <div className="grid grid-cols-7 auto-rows-fr">
+                {/* Week 1 */}
+                <div className="border-r border-b min-h-[120px] p-1 relative">
+                  <div className="text-gray-400 text-sm absolute top-1 right-2">27</div>
+                  <div className="mt-5 space-y-1">
+                    {/* Appointments would go here */}
+                  </div>
+                </div>
+                <div className="border-r border-b min-h-[120px] p-1 relative">
+                  <div className="text-gray-400 text-sm absolute top-1 right-2">28</div>
+                  <div className="mt-5 space-y-1">
+                    <div className="bg-emerald-700 text-white text-xs p-1 rounded truncate">
+                      <span className="font-semibold">JB00766</span> Jeremy Youssef
+                    </div>
+                    <div className="bg-emerald-700 text-white text-xs p-1 rounded truncate">
+                      <span className="font-semibold">JB00766</span> Jeremy Youssef
+                    </div>
+                  </div>
+                </div>
+                <div className="border-r border-b min-h-[120px] p-1 relative">
+                  <div className="text-gray-400 text-sm absolute top-1 right-2">29</div>
+                  <div className="mt-5 space-y-1">
+                    <div className="bg-blue-800 text-white text-xs p-1 rounded truncate">
+                      <span className="font-semibold">JB00771</span> Ethan Paterson
+                    </div>
+                  </div>
+                </div>
+                <div className="border-r border-b min-h-[120px] p-1 relative">
+                  <div className="text-gray-400 text-sm absolute top-1 right-2">30</div>
+                  <div className="mt-5 space-y-1">
+                    <div className="bg-red-700 text-white text-xs p-1 rounded truncate">
+                      <span className="font-semibold">Daniel siyer</span> 776 MATERIALS
+                    </div>
+                  </div>
+                </div>
+                <div className="border-r border-b min-h-[120px] p-1 relative">
+                  <div className="text-gray-400 text-sm absolute top-1 right-2">31</div>
+                  <div className="mt-5 space-y-1">
+                    <div className="bg-red-700 text-white text-xs p-1 rounded truncate">
+                      <span className="font-semibold">Daniel siyer</span> JB00768
+                    </div>
+                    <div className="bg-red-700 text-white text-xs p-1 rounded truncate">
+                      <span className="font-semibold">Daniel siyer</span> 768 MATERIALS
+                    </div>
+                    <div className="text-xs text-blue-800">+1 more</div>
+                  </div>
+                </div>
+                <div className="border-r border-b min-h-[120px] p-1 relative">
+                  <div className="text-sm absolute top-1 right-2">1</div>
+                  <div className="mt-5 space-y-1"></div>
+                </div>
+                <div className="border-b min-h-[120px] p-1 relative">
+                  <div className="text-sm absolute top-1 right-2">2</div>
+                  <div className="mt-5 space-y-1"></div>
                 </div>
                 
-                <div className="absolute left-4 top-1/2 transform -translate-y-1/2 z-10">
-                  <button className="p-2 rounded-full bg-white shadow hover:bg-gray-100">
-                    <ChevronLeft className="h-5 w-5" />
-                  </button>
+                {/* Week 2 */}
+                <div className="border-r border-b min-h-[120px] p-1 relative">
+                  <div className="text-sm absolute top-1 right-2">3</div>
+                  <div className="mt-5 space-y-1">
+                    <div className="bg-emerald-700 text-white text-xs p-1 rounded truncate">
+                      <span className="font-semibold">JB00780</span> Ben Craw
+                    </div>
+                  </div>
                 </div>
-                <div className="absolute right-4 top-1/2 transform -translate-y-1/2 z-10">
-                  <button className="p-2 rounded-full bg-white shadow hover:bg-gray-100">
-                    <ChevronRight className="h-5 w-5" />
-                  </button>
+                <div className="border-r border-b min-h-[120px] p-1 relative">
+                  <div className="text-sm absolute top-1 right-2">4</div>
+                  <div className="mt-5 space-y-1">
+                    <div className="bg-gray-600 text-white text-xs p-1 rounded truncate">
+                      <span className="font-semibold">Daniel siyer</span> 2 quotes
+                    </div>
+                  </div>
                 </div>
-                
-                <Calendar
-                  mode="single"
-                  selected={calendarDate}
-                  onSelect={setCalendarDate}
-                  className="w-full bg-gray-100 rounded-lg"
-                  classNames={{
-                    months: "flex flex-col space-y-4",
-                    month: "space-y-4",
-                    caption: "hidden",
-                    caption_label: "hidden",
-                    nav: "hidden",
-                    nav_button: "hidden",
-                    table: "w-full border-collapse",
-                    head_row: "flex justify-between w-full mb-2",
-                    head_cell: "text-gray-500 font-normal text-sm uppercase text-center flex-1",
-                    row: "flex w-full mb-3 justify-between",
-                    cell: "text-center flex-1",
-                    day: "h-10 w-10 p-0 font-normal hover:bg-gray-200 rounded-full mx-auto flex items-center justify-center",
-                    day_selected: "bg-blue-500 text-white hover:bg-blue-600 hover:text-white focus:bg-blue-600 focus:text-white",
-                    day_today: "bg-gray-200 text-gray-900",
-                    day_outside: "text-gray-400 opacity-50",
-                    day_disabled: "text-gray-400 opacity-50",
-                    day_hidden: "invisible",
-                    day_range_middle: "day-range-middle",
-                    day_range_end: "day-range-end",
-                  }}
-                />
+                <div className="border-r border-b min-h-[120px] p-1 relative">
+                  <div className="text-sm absolute top-1 right-2">5</div>
+                  <div className="mt-5 space-y-1">
+                    <div className="bg-blue-800 text-white text-xs p-1 rounded truncate">
+                      <span className="font-semibold">JB00769</span> J Parker Super
+                    </div>
+                  </div>
+                </div>
+                <div className="border-r border-b min-h-[120px] p-1 relative">
+                  <div className="text-sm absolute top-1 right-2">6</div>
+                  <div className="mt-5 space-y-1">
+                    <div className="bg-red-700 text-white text-xs p-1 rounded truncate">
+                      <span className="font-semibold">jackson ryan</span> JACKSON OFF TILL
+                    </div>
+                  </div>
+                </div>
+                <div className="border-r border-b min-h-[120px] p-1 relative">
+                  <div className="text-sm absolute top-1 right-2">7</div>
+                  <div className="mt-5 space-y-1">
+                    <div className="bg-red-700 text-white text-xs p-1 rounded truncate">
+                      <span className="font-semibold">jackson ryan</span> Jr off
+                    </div>
+                  </div>
+                </div>
+                <div className="border-r border-b min-h-[120px] p-1 relative">
+                  <div className="text-sm absolute top-1 right-2">8</div>
+                  <div className="mt-5 space-y-1"></div>
+                </div>
+                <div className="border-b min-h-[120px] p-1 relative">
+                  <div className="text-sm absolute top-1 right-2">9</div>
+                  <div className="mt-5 space-y-1"></div>
+                </div>
               </div>
             </div>
 

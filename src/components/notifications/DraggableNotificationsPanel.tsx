@@ -86,7 +86,7 @@ export const DraggableNotificationsPanel = ({
     if (panelSize === 'half') return `calc(50vw - ${SIDEBAR_WIDTH}px)`;
     return `${customWidth}px`;
   };
-
+  
   // --- Effects for Layout & Resize (mostly unchanged) ---
   useEffect(() => { /* Layout adjustment effect */ }, [isPinned, isOpen, panelSize, customWidth]);
   useEffect(() => { /* Initial layout setup */ }, []);
