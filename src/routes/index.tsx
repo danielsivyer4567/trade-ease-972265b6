@@ -6,9 +6,15 @@ import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { authRoutes } from './auth-routes';
 import { SettingsRoutes } from './settings-routes';
 
+// Development mode debugging component
+const DevelopmentEntry = lazy(() => import('@/pages/DevelopmentEntry'));
+
 // Lazy load main page components
 const DashboardPage = lazy(() => import('@/pages/index'));
 const NotFoundPage = lazy(() => import('@/pages/NotFound'));
+
+// Auth pages
+const AuthPage = lazy(() => import('@/pages/Auth'));
 
 // Customer related pages
 const CustomersPage = lazy(() => import('@/pages/Customers/CustomersPage'));
@@ -89,6 +95,18 @@ const settingsRouteObjects = SettingsRoutes();
 
 // Define main application routes using RouteObject configuration
 const routeObjects: RouteObject[] = [
+  // Development Entry (only in dev mode)
+  {
+    path: "/dev",
+    element: <Suspense fallback={<LoadingFallback />}><DevelopmentEntry /></Suspense>
+  },
+  
+  // Auth Routes - flattened to avoid nested routing issues
+  {
+    path: "/auth",
+    element: <Suspense fallback={<LoadingFallback />}><AuthPage /></Suspense>
+  },
+  
   // Auth Routes (now converted RouteObjects)
   ...authRouteObjects,
   {

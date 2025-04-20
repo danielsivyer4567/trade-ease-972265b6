@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect, useTransition } from 'react';
 import { Property } from '../types';
 import { toast } from 'sonner';
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/integrations/supabase/client';
 
 // Sample mock properties for initial UI rendering when no data is available
 const mockProperties: Property[] = [

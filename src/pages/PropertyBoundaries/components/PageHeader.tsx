@@ -1,9 +1,8 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { SectionHeader } from '@/components/ui/SectionHeader';
 import { Upload } from 'lucide-react';
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/integrations/supabase/client';
 import { AuthNotice } from './AuthNotice';
 import { useState, useEffect } from 'react';
 
