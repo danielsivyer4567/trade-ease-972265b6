@@ -296,6 +296,16 @@ export default function QuotesMain() {
                 <option>Newest</option>
                 <option>Highest Rated</option>
               </select>
+              <Button variant="outline" className="bg-slate-300 text-slate-700 hover:bg-slate-400 rounded-lg flex items-center justify-center w-full h-12" onClick={() => document.getElementById('template-upload').click()}>
+                <Upload className="h-6 w-6 mr-2" />
+                <span>Upload Template</span>
+              </Button>
+              <input
+                type="file"
+                id="template-upload"
+                style={{ display: 'none' }}
+                onChange={handleFileUpload}
+              />
             </div>
           </div>
 
