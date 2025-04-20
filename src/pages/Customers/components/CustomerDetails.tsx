@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -9,7 +8,8 @@ import {
   FileCheck, 
   Star, 
   Link as LinkIcon,
-  Package2
+  Package2,
+  History
 } from "lucide-react";
 import { CustomerNote, CustomerJobHistory } from "@/pages/Banking/types";
 
@@ -25,6 +25,7 @@ import { CustomerReviews } from './CustomerReviews';
 import { CustomerProgressLink } from './tabs/CustomerProgressLink';
 import { CustomerDetailsHeader } from './CustomerDetailsHeader';
 import { CustomerMaterials } from './tabs/CustomerMaterials';
+import { CustomerJourney } from './tabs/CustomerJourney';
 
 interface CustomerDetailsProps {
   customer: {
@@ -79,6 +80,9 @@ export function CustomerDetails({
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <TabsList className="w-full border-b rounded-none bg-white overflow-x-auto">
               <TabsTrigger value="overview">Overview</TabsTrigger>
+              <TabsTrigger value="journey">
+                <History className="h-4 w-4 mr-1 inline" /> Journey
+              </TabsTrigger>
               <TabsTrigger value="jobs">Jobs & Quotes</TabsTrigger>
               <TabsTrigger value="materials">
                 <Package2 className="h-4 w-4 mr-1 inline" /> Materials
@@ -111,6 +115,11 @@ export function CustomerDetails({
                 jobHistory={jobHistory} 
                 formatDate={formatDate} 
               />
+            </TabsContent>
+
+            {/* Journey Tab */}
+            <TabsContent value="journey">
+              <CustomerJourney customerId={customer.id} />
             </TabsContent>
             
             {/* Jobs Tab */}

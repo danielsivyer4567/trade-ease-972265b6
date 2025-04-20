@@ -111,7 +111,7 @@ export default function Notifications() {
             : "max-w-[1200px] scale-[0.99] hover:scale-100"
         )}
       >
-        <div className="flex-shrink-0 p-6 pb-4">
+        <div className="flex-shrink-0 p-6 pb-4 bg-slate-300">
           <div className="flex items-center justify-between">
             <div className="space-y-1">
               <h1 className="text-3xl font-bold tracking-tight">
