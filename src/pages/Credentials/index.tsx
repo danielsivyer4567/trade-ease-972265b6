@@ -1,8 +1,8 @@
 import React from 'react';
 import { TicketWallet } from './components/TicketWallet';
-import { JobList } from '@/components/JobList';
-import { StaffList } from '@/components/StaffList';
-import { SafetyDocumentsManager } from '@/components/SafetyDocumentsManager';
+import { JobList } from './components/JobList';
+import { StaffList } from './components/StaffList';
+import { SafetyDocumentsManager } from './components/SafetyDocumentsManager';
 
 export default function CredentialsPage() {
   return (
