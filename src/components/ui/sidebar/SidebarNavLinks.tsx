@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useSidebar } from './SidebarProvider';
@@ -44,7 +43,7 @@ export function SidebarNavLinks({
   };
   
   return (
-    <nav className="grid gap-1 px-2 py-2 w-full">
+    <div className="grid gap-1 px-2 py-2 w-full">
       {navigationGroups.map((group: SidebarNavigationGroup, index) => (
         <NavGroup
           key={`nav-group-${index}`}
@@ -62,6 +61,6 @@ export function SidebarNavLinks({
           isExpanded={isExpanded}
         />
       )}
-    </nav>
+    </div>
   );
 }

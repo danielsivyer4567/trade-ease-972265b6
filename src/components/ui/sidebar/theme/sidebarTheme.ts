@@ -1,13 +1,12 @@
-
 import { cva } from "class-variance-authority";
 
 // Main sidebar container
 export const sidebarVariants = cva(
-  "relative flex flex-col border-r transition-all duration-300 ease-in-out",
+  "relative flex flex-col border-r border-r-black border-r-[1px] transition-all duration-300 ease-in-out",
   {
     variants: {
       theme: {
-        default: "bg-[#E2E8F0] border-[#B8C5D5]",
+        default: "bg-gradient-to-b from-[#1e2a3b] via-[#23375d] to-[#2e4d87] border-[#B8C5D5]",
         dark: "bg-gray-900 border-gray-800 text-gray-100",
         light: "bg-white border-gray-200",
         blue: "bg-blue-50 border-blue-200",
@@ -32,7 +31,7 @@ export const sidebarHeaderVariants = cva(
   {
     variants: {
       theme: {
-        default: "bg-[#E2E8F0] border-[#B8C5D5]",
+        default: "bg-gradient-to-r from-[#1e2a3b] to-[#23375d] border-[#B8C5D5]",
         dark: "bg-gray-900 border-gray-800",
         light: "bg-white border-gray-200",
         blue: "bg-blue-100 border-blue-200",
@@ -48,11 +47,11 @@ export const sidebarHeaderVariants = cva(
 
 // Navigation items
 export const navItemVariants = cva(
-  "flex items-center rounded-lg transition-colors",
+  "flex items-center rounded-lg transition-colors text-base font-medium",
   {
     variants: {
       theme: {
-        default: "text-gray-950 hover:bg-white hover:text-primary",
+        default: "text-white hover:bg-white/10 hover:text-white",
         dark: "text-gray-200 hover:bg-gray-800 hover:text-white",
         light: "text-gray-700 hover:bg-gray-100 hover:text-gray-900",
         blue: "text-blue-900 hover:bg-blue-100 hover:text-blue-700",
@@ -68,7 +67,7 @@ export const navItemVariants = cva(
       {
         theme: "default",
         active: true,
-        className: "bg-white text-primary border border-foreground/10",
+        className: "bg-white/20 text-white border border-white/10",
       },
       {
         theme: "dark",
@@ -104,10 +103,10 @@ export const navItemVariants = cva(
 );
 
 // Navigation group labels
-export const groupLabelVariants = cva("font-extrabold text-base px-2 mb-2", {
+export const groupLabelVariants = cva("font-extrabold text-lg px-2 mb-2", {
   variants: {
     theme: {
-      default: "text-gray-950",
+      default: "text-white",
       dark: "text-gray-300",
       light: "text-gray-700",
       blue: "text-blue-800",
@@ -121,10 +120,10 @@ export const groupLabelVariants = cva("font-extrabold text-base px-2 mb-2", {
 });
 
 // Icon colors
-export const iconVariants = cva("h-4 w-4", {
+export const iconVariants = cva("h-5 w-5", {
   variants: {
     theme: {
-      default: "text-muted-foreground",
+      default: "text-white/80",
       dark: "text-gray-400",
       light: "text-gray-500",
       blue: "text-blue-500",
@@ -140,7 +139,7 @@ export const iconVariants = cva("h-4 w-4", {
     {
       theme: "default",
       active: true,
-      className: "text-primary",
+      className: "text-white",
     },
     {
       theme: "dark",

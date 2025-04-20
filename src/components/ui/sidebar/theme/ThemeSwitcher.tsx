@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Check, PaintBucket } from 'lucide-react';
 import { Button } from '../../button';
@@ -37,7 +36,7 @@ export const ThemeSwitcher: React.FC<ThemeSwitcherProps> = ({ className }) => {
           size="icon" 
           className={cn("flex items-center justify-center", className)}
         >
-          <PaintBucket className="h-4 w-4" />
+          <PaintBucket className="h-4 w-4 text-white" />
           <span className="sr-only">Change theme</span>
         </Button>
       </DropdownMenuTrigger>
