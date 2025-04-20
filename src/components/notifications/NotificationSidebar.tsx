@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { X, Bell } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -28,13 +27,13 @@ export const NotificationSidebar = ({
       <div className={cn("fixed right-0 top-0 h-screen bg-white z-50 shadow-lg w-[350px] transform transition-transform duration-300 ease-in-out", isOpen ? "translate-x-0" : "translate-x-full")}>
         <div className="flex flex-col h-full">
           {/* Header */}
-          <div className="flex justify-between items-center p-4 border-b">
+          <div className="flex justify-between items-center p-4 border-b bg-slate-300">
             <h2 className="text-xl font-bold">Notifications</h2>
             <div className="flex space-x-2">
               <Button variant="outline" size="sm" onClick={markAllAsRead}>
                 Mark all read
               </Button>
-              <Button variant="ghost" size="icon" onClick={onClose}>
+              <Button variant="outline" size="icon" onClick={onClose}>
                 <X className="h-5 w-5" />
               </Button>
             </div>

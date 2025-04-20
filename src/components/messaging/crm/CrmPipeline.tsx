@@ -1,10 +1,11 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Inbox, PhoneCall, FileText, Clock, X, CheckCircle, ChevronRight, MessageSquare, User, Calendar, PlusCircle, Bell, AlertTriangle, Plus } from "lucide-react";
+import { Inbox, PhoneCall, FileText, Clock, X, CheckCircle, ChevronRight, MessageSquare, User, Calendar, PlusCircle, Bell, AlertTriangle, Plus, Maximize2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useNavigate } from 'react-router-dom';
+import { CustomerStageIndicator } from '@/components/dashboard/CustomerStageIndicator';
 
 // Mock pipelines
 const PIPELINES = [{
@@ -294,11 +295,19 @@ const CustomerCard: React.FC<CustomerCardProps> = ({
   customer,
   onDragStart
 }) => {
+  const navigate = useNavigate();
+
+  const handleExpandCustomer = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+    navigate(`/customers/${customer.id}`);
+  };
+
   return <div draggable onDragStart={onDragStart} className="px-3 py-2 my-1 bg-white rounded-md shadow-sm hover:shadow-md transition-shadow border border-gray-100">
       <div className="flex items-start justify-between">
         <div className="flex items-center gap-2">
-          <div className="bg-gray-100 rounded-full p-1 cursor-grab">
-            <User className="h-4 w-4 text-gray-600" />
+          <div className="flex-shrink-0">
+            <CustomerStageIndicator customerId={customer.id} size="sm" />
           </div>
           <div>
             <div className="flex items-center gap-1">
@@ -308,7 +317,18 @@ const CustomerCard: React.FC<CustomerCardProps> = ({
             <p className="text-xs text-gray-500">{customer.phone}</p>
           </div>
         </div>
-        <span className="text-xs text-gray-400">{customer.timestamp}</span>
+        <div className="flex items-center gap-1">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-6 w-6"
+            onClick={handleExpandCustomer}
+            title="Expand customer details"
+          >
+            <Maximize2 className="h-3.5 w-3.5 text-gray-500" />
+          </Button>
+          <span className="text-xs text-gray-400">{customer.timestamp}</span>
+        </div>
       </div>
       
       <div className="mt-2 flex items-start gap-1">
