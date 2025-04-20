@@ -1,8 +1,8 @@
 import React, { Suspense, useState, useEffect } from 'react';
-import { BrowserRouter } from 'react-router-dom';
+import { RouterProvider } from 'react-router-dom';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { Toaster } from '@/components/ui/toaster';
-import { Routes } from './routes/index';
+import { router } from './routes/index';
 import { Analytics } from '@vercel/analytics/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster as SonnerToaster } from 'sonner';
@@ -40,10 +40,9 @@ const ErrorFallback = ({ error, resetErrorBoundary }) => (
   </div>
 );
 
-const AppContent = () => {
+function App() {
   const [initError, setInitError] = useState(null);
   
-  // Initialize database tables on mount
   useEffect(() => {
     initializeTables()
       .catch(error => {
@@ -52,42 +51,34 @@ const AppContent = () => {
       });
   }, []);
 
-  // If there was an initialization error, show a message but still continue
   if (initError) {
     console.warn('App continuing despite initialization error:', initError);
   }
 
   return (
-    <Suspense fallback={<LoadingFallback />}>
-      <Routes />
-    </Suspense>
-  );
-};
-
-function App() {
-  return (
-    <BrowserRouter>
-      <QueryClientProvider client={queryClient}>
-        <AuthProvider>
-          <TabsProvider>
-            <NotificationProvider>
-              <ErrorBoundary FallbackComponent={ErrorFallback}>
-                <AppContent />
-              </ErrorBoundary>
-              <Toaster />
-              <SonnerToaster position="bottom-right" closeButton richColors />
-              <Analytics />
-            </NotificationProvider>
-          </TabsProvider>
-        </AuthProvider>
-      </QueryClientProvider>
-    </BrowserRouter>
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <TabsProvider>
+          <NotificationProvider>
+            <ErrorBoundary FallbackComponent={ErrorFallback}>
+              <RouterProvider 
+                router={router} 
+                future={{ v7_startTransition: true }} 
+                fallbackElement={<LoadingFallback />}
+              />
+            </ErrorBoundary>
+            <Toaster />
+            <SonnerToaster position="bottom-right" closeButton richColors />
+            <Analytics />
+          </NotificationProvider>
+        </TabsProvider>
+      </AuthProvider>
+    </QueryClientProvider>
   );
 }
 
 export default App;
 
-// Add type declaration for electron
 declare global {
   interface Window {
     electron?: {
@@ -98,7 +89,6 @@ declare global {
   }
 }
 
-// Send to main process
 if (window.electron) {
   window.electron.ipcRenderer.send('to-main');
 }
