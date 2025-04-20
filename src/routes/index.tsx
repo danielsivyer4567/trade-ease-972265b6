@@ -152,7 +152,8 @@ const routeObjects: RouteObject[] = [
       {
         path: "/quotes",
         children: [
-          { index: true, element: <SuspenseWrapper><QuotesPage /></SuspenseWrapper> },
+          { index: true, element: <SuspenseWrapper><NewQuotePage /></SuspenseWrapper> },
+          { path: "empty", element: <SuspenseWrapper><QuotesPage /></SuspenseWrapper> },
           { path: "new", element: <SuspenseWrapper><NewQuotePage /></SuspenseWrapper> },
         ],
       },

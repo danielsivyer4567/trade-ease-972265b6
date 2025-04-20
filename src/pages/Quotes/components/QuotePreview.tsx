@@ -1,12 +1,7 @@
-
-import React, { useState } from "react";
+import React from "react";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, Save, SendHorizontal, FileImage } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
-import { useNavigate } from "react-router-dom";
+import { Save, SendHorizontal, FileImage, Download, Mail } from "lucide-react";
 import { QuoteItem } from "./QuoteItemsForm";
-import { FileUpload } from "@/components/tasks/FileUpload";
-import { ImagesGrid } from "@/components/tasks/ImagesGrid";
 
 interface QuotePreviewProps {
   quoteItems: QuoteItem[];
@@ -17,163 +12,129 @@ export const QuotePreview = ({
   quoteItems,
   onPrevTab
 }: QuotePreviewProps) => {
-  const { toast } = useToast();
-  const navigate = useNavigate();
-  const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
-  const [previewImages, setPreviewImages] = useState<string[]>([]);
-
   const totalAmount = quoteItems.reduce((sum, item) => sum + item.total, 0);
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files.length > 0) {
-      const newFiles = Array.from(e.target.files);
-      setUploadedFiles(prev => [...prev, ...newFiles]);
-
-      // Create preview URLs for images
-      const newPreviewUrls = newFiles.map(file => {
-        if (file.type.startsWith('image/')) {
-          return URL.createObjectURL(file);
-        }
-        return '';
-      }).filter(url => url !== '');
-      setPreviewImages(prev => [...prev, ...newPreviewUrls]);
-      toast({
-        title: "Files Uploaded",
-        description: `${newFiles.length} file(s) added to quote`
-      });
-    }
-  };
-
-  const handleSaveQuote = async () => {
-    toast({
-      title: "Quote Saved",
-      description: "Quote has been saved successfully"
-    });
-  };
-
-  const handleSendQuote = () => {
-    toast({
-      title: "Quote Sent",
-      description: "Quote has been sent to the customer"
-    });
-    navigate("/quotes");
-  };
-
   return (
-    <div className="space-y-6">
-      <div className="border p-4 rounded-md bg-slate-100">
-        <div className="flex flex-col md:flex-row md:justify-between gap-4">
-          <div>
-            <h2 className="font-bold text-xl">QUOTE</h2>
-            <p className="text-gray-500 text-sm mt-1">Kitchen Renovation</p>
-          </div>
-          <div className="text-left md:text-right">
-            <p className="font-medium">Quote #: Q-2024-009</p>
-            <p className="text-sm text-gray-500 mt-1">Date: {new Date().toLocaleDateString()}</p>
-            <p className="text-sm text-gray-500">Valid until: {new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toLocaleDateString()}</p>
-          </div>
-        </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-          <div>
-            <h3 className="font-medium text-sm text-gray-500 mb-1">FROM</h3>
-            <p className="font-medium">Your Company Name</p>
-            <p className="text-sm">123 Business Street</p>
-            <p className="text-sm">City, State ZIP</p>
-            <p className="text-sm">Phone: (555) 987-6543</p>
-            <p className="text-sm">Email: info@yourcompany.com</p>
-          </div>
-          <div>
-            <h3 className="font-medium text-sm text-gray-500 mb-1">TO</h3>
-            <p className="font-medium">John Smith</p>
-            <p className="text-sm">456 Residential Ave</p>
-            <p className="text-sm">City, State ZIP</p>
-            <p className="text-sm">Phone: (555) 123-4567</p>
-            <p className="text-sm">Email: john@example.com</p>
-          </div>
-        </div>
-
-        {/* File upload section - moved above the pricing table */}
-        <div className="mt-6 border-t pt-4">
-          <h3 className="font-medium mb-2 flex items-center">
-            <FileImage className="mr-2 h-4 w-4" />
-            Attach Images to Quote
-          </h3>
-          <FileUpload onFileUpload={handleFileUpload} label="Drag and drop images or click to browse" />
-          {uploadedFiles.length > 0 && (
-            <div className="mt-2">
-              <p className="text-sm text-gray-600">
-                {uploadedFiles.length} file(s) attached to quote
-              </p>
+    <div className="space-y-4">
+      <div className="border rounded-md overflow-hidden shadow-md bg-white">
+        {/* Quote Header */}
+        <div className="bg-gradient-to-r from-blue-600 to-blue-800 p-4 text-white">
+          <div className="flex flex-col gap-1">
+            <div className="flex justify-between items-start">
+              <div>
+                <h2 className="font-bold text-xl tracking-tight">QUOTE</h2>
+                <p className="text-blue-100 text-xs">Kitchen Renovation</p>
+              </div>
+              <div className="bg-blue-500/30 p-2 rounded-md backdrop-blur-sm">
+                <p className="font-medium text-xs">Quote #: Q-2024-009</p>
+                <p className="text-xs text-blue-100">Date: {new Date().toLocaleDateString()}</p>
+                <p className="text-xs text-blue-100">Valid until: {new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toLocaleDateString()}</p>
+              </div>
             </div>
-          )}
-        </div>
-        
-        {previewImages.length > 0 && (
-          <div className="mt-4">
-            <h3 className="font-medium mb-2">Attached Photos</h3>
-            <ImagesGrid images={previewImages} />
           </div>
-        )}
-        
-        <div className="mt-8 overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-gray-300">
-                <th className="text-left py-2 font-medium">Description</th>
-                <th className="text-center py-2 font-medium">Qty</th>
-                <th className="text-right py-2 font-medium">Rate</th>
-                <th className="text-right py-2 font-medium">Amount</th>
-              </tr>
-            </thead>
-            <tbody>
-              {quoteItems.map((item, index) => (
-                <tr key={index} className="border-b border-gray-200">
-                  <td className="py-3">{item.description || "Item description"}</td>
-                  <td className="py-3 text-center">{item.quantity}</td>
-                  <td className="py-3 text-right">${item.rate.toFixed(2)}</td>
-                  <td className="py-3 text-right">${item.total.toFixed(2)}</td>
-                </tr>
-              ))}
-            </tbody>
-            <tfoot>
-              <tr>
-                <td colSpan={3} className="text-right py-4 font-medium">Subtotal:</td>
-                <td className="text-right py-4 font-medium">${totalAmount.toFixed(2)}</td>
-              </tr>
-              <tr>
-                <td colSpan={3} className="text-right py-2">Tax (10%):</td>
-                <td className="text-right py-2">${(totalAmount * 0.1).toFixed(2)}</td>
-              </tr>
-              <tr className="text-lg">
-                <td colSpan={3} className="text-right py-4 font-bold">Total:</td>
-                <td className="text-right py-4 font-bold">${(totalAmount * 1.1).toFixed(2)}</td>
-              </tr>
-            </tfoot>
-          </table>
         </div>
         
-        <div className="mt-8 border-t pt-4">
-          <h3 className="bg-slate-400 hover:bg-slate-300 text-gray-950 text-lg p-2 rounded">Terms & Conditions</h3>
-          <p className="text-sm mt-2">Payment due within 14 days of quote acceptance. This quote is valid for 30 days from the date of issue.</p>
+        {/* Company and Customer Info */}
+        <div className="p-4 bg-gradient-to-b from-slate-50 to-white">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="bg-blue-50 p-3 rounded-md border border-blue-100">
+              <h3 className="font-medium text-xs text-blue-700 uppercase mb-1 flex items-center">
+                <span className="h-1.5 w-1.5 rounded-full bg-blue-500 mr-1"></span>
+                FROM
+              </h3>
+              <p className="font-medium text-xs text-slate-800">Your Company Name</p>
+              <p className="text-xs text-slate-600">123 Business Street</p>
+              <p className="text-xs text-slate-600">City, State ZIP</p>
+              <p className="text-xs text-slate-600">Phone: (555) 987-6543</p>
+              <p className="text-xs text-slate-600">Email: info@yourcompany.com</p>
+            </div>
+            <div className="bg-amber-50 p-3 rounded-md border border-amber-100">
+              <h3 className="font-medium text-xs text-amber-700 uppercase mb-1 flex items-center">
+                <span className="h-1.5 w-1.5 rounded-full bg-amber-500 mr-1"></span>
+                TO
+              </h3>
+              <p className="font-medium text-xs text-slate-800">John Smith</p>
+              <p className="text-xs text-slate-600">456 Residential Ave</p>
+              <p className="text-xs text-slate-600">City, State ZIP</p>
+              <p className="text-xs text-slate-600">Phone: (555) 123-4567</p>
+              <p className="text-xs text-slate-600">Email: john@example.com</p>
+            </div>
+          </div>
+        </div>
+        
+        {/* Quote Items */}
+        <div className="px-4 py-3">
+          <div className="overflow-x-auto rounded-md border border-slate-200">
+            <table className="w-full text-xs bg-white">
+              <thead>
+                <tr className="bg-gradient-to-r from-slate-100 to-slate-200">
+                  <th className="text-left py-2 px-2 font-medium text-slate-700">Description</th>
+                  <th className="text-center py-2 px-2 font-medium text-slate-700">Qty</th>
+                  <th className="text-right py-2 px-2 font-medium text-slate-700">Rate</th>
+                  <th className="text-right py-2 px-2 font-medium text-slate-700">Amount</th>
+                </tr>
+              </thead>
+              <tbody>
+                {quoteItems.map((item, index) => (
+                  <tr key={index} className={`border-b border-slate-100 ${index % 2 === 0 ? 'bg-white' : 'bg-slate-50'}`}>
+                    <td className="py-2 px-2 text-slate-700">{item.description || "Item description"}</td>
+                    <td className="py-2 px-2 text-center text-slate-700">{item.quantity}</td>
+                    <td className="py-2 px-2 text-right text-slate-700">${item.rate.toFixed(2)}</td>
+                    <td className="py-2 px-2 text-right text-slate-700">${item.total.toFixed(2)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+        
+        {/* Totals */}
+        <div className="p-4 bg-gradient-to-b from-white to-slate-50">
+          <div className="ml-auto w-full md:w-1/2 bg-white rounded-md border border-slate-200 overflow-hidden">
+            <table className="w-full text-xs">
+              <tbody>
+                <tr className="border-b border-slate-100">
+                  <td className="py-2 px-3 text-right font-medium text-slate-600">Subtotal:</td>
+                  <td className="py-2 px-3 text-right font-medium text-slate-800 w-24">${totalAmount.toFixed(2)}</td>
+                </tr>
+                <tr className="border-b border-slate-100">
+                  <td className="py-2 px-3 text-right text-slate-600">Tax (10%):</td>
+                  <td className="py-2 px-3 text-right text-slate-800">${(totalAmount * 0.1).toFixed(2)}</td>
+                </tr>
+                <tr className="bg-gradient-to-r from-slate-50 to-slate-100">
+                  <td className="py-3 px-3 text-right font-bold text-slate-700">Total:</td>
+                  <td className="py-3 px-3 text-right font-bold text-blue-700">${(totalAmount * 1.1).toFixed(2)}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        
+        {/* Terms & Conditions */}
+        <div className="p-4 border-t border-slate-200">
+          <div className="bg-slate-800 text-white text-xs p-2 rounded-md flex items-center">
+            <span className="font-semibold">Terms & Conditions</span>
+          </div>
+          <p className="text-xs mt-2 text-slate-600">Payment due within 14 days of quote acceptance. This quote is valid for 30 days from the date of issue.</p>
         </div>
       </div>
       
-      <div className="flex flex-col sm:flex-row justify-between gap-4 mt-6">
-        <Button variant="outline" onClick={onPrevTab} className="w-full sm:w-auto">
-          <ChevronLeft className="mr-2 h-4 w-4" />
-          Back
-        </Button>
-        <div className="flex flex-col sm:flex-row gap-2">
-          <Button variant="outline" onClick={handleSaveQuote} className="w-full sm:w-auto">
-            <Save className="mr-2 h-4 w-4" />
-            Save Quote
+      {/* Actions */}
+      <div className="flex justify-between items-center bg-gradient-to-r from-slate-50 to-blue-50 p-2 rounded-md border border-slate-200">
+        <div className="flex space-x-1">
+          <Button variant="ghost" size="sm" className="text-slate-600 hover:text-blue-600 hover:bg-blue-50">
+            <Download className="h-3 w-3 mr-1" />
+            PDF
           </Button>
-          <Button onClick={handleSendQuote} className="w-full sm:w-auto">
-            <SendHorizontal className="mr-2 h-4 w-4" />
-            Send to Customer
+          <Button variant="ghost" size="sm" className="text-slate-600 hover:text-blue-600 hover:bg-blue-50">
+            <Mail className="h-3 w-3 mr-1" />
+            Email
           </Button>
         </div>
+        <Button size="sm" className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white">
+          <SendHorizontal className="h-3 w-3 mr-1" />
+          Send Quote
+        </Button>
       </div>
     </div>
   );
