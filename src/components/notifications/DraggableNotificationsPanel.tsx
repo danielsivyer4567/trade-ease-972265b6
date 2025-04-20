@@ -576,11 +576,12 @@ export const DraggableNotificationsPanel = ({
 
 
       {/* Notifications Panel */}
-      <div 
+      <div
         ref={panelRef}
         className={cn(
-          "fixed right-0 top-0 h-screen bg-white z-50 shadow-lg transform transition-all duration-300 ease-in-out",
-          isOpen ? "translate-x-0" : "translate-x-full",
+          "fixed right-0 top-0 h-screen bg-white z-50 shadow-lg transition-all duration-300 ease-in-out", // Keep base styles & transition
+          // Remove transform classes: isOpen ? "translate-x-0" : "translate-x-full",
+          isOpen ? "" : "hidden", // Use hidden class when not open
           isPinned ? "border-l border-gray-200" : ""
         )}
         style={{ width: getPanelWidth() }}
