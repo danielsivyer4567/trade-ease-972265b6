@@ -1,6 +1,14 @@
-
+// @ts-ignore
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+// @ts-ignore
 import { Twilio } from "https://esm.sh/twilio@4.19.3";
+
+// Add Deno namespace declaration
+declare const Deno: {
+  env: {
+    get(key: string): string | undefined;
+  };
+};
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -16,7 +24,7 @@ interface OrderNumberRequest {
   userId: string;
 }
 
-serve(async (req) => {
+serve(async (req: Request) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -65,13 +73,17 @@ serve(async (req) => {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
         }
       );
-    } catch (twilioError) {
+    } catch (twilioError: unknown) {
       console.error("Twilio API error:", twilioError);
+      
+      const errorMessage = twilioError instanceof Error ? 
+        twilioError.message : 
+        "Error ordering phone number through Twilio";
       
       return new Response(
         JSON.stringify({ 
           success: false, 
-          message: twilioError.message || "Error ordering phone number through Twilio" 
+          message: errorMessage
         }),
         { 
           status: 400, 
@@ -79,13 +91,17 @@ serve(async (req) => {
         }
       );
     }
-  } catch (error) {
+  } catch (error: unknown) {
     console.error("Error in twilio-order-number function:", error);
+    
+    const errorMessage = error instanceof Error ?
+      error.message :
+      "An unexpected error occurred";
     
     return new Response(
       JSON.stringify({ 
         success: false, 
-        message: error.message || "An unexpected error occurred" 
+        message: errorMessage
       }),
       { 
         status: 500, 

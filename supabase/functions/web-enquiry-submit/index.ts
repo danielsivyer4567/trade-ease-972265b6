@@ -1,5 +1,12 @@
-
+// @ts-ignore
 import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
+
+// Add Deno namespace declaration
+declare const Deno: {
+  env: {
+    get(key: string): string | undefined;
+  };
+};
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -11,7 +18,7 @@ interface EnquiryData {
   targetEmail: string;
 }
 
-serve(async (req) => {
+serve(async (req: Request) => {
   // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -56,14 +63,16 @@ serve(async (req) => {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       }
     );
-  } catch (error) {
+  } catch (error: unknown) {
     console.error("Error processing web enquiry:", error);
+    
+    const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
     
     return new Response(
       JSON.stringify({ 
         success: false, 
         message: "Failed to process enquiry",
-        error: error.message 
+        error: errorMessage 
       }),
       {
         status: 500,
