@@ -1,5 +1,14 @@
+// @ts-ignore
 import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
+// @ts-ignore
 import { Twilio } from "https://esm.sh/twilio@4.19.0";
+
+// Add Deno namespace declaration
+declare const Deno: {
+  env: {
+    get(key: string): string | undefined;
+  };
+};
 
 interface RequestData {
   phoneNumber: string;
@@ -33,9 +42,9 @@ serve(async (req: Request) => {
       : `+1${phoneNumber}`; // Default to US country code if not provided
     
     // Initialize Twilio client with environment variables
-    const accountSid = process.env.TWILIO_ACCOUNT_SID;
-    const authToken = process.env.TWILIO_AUTH_TOKEN;
-    const twilioNumber = process.env.TWILIO_PHONE_NUMBER;
+    const accountSid = Deno.env.get("TWILIO_ACCOUNT_SID");
+    const authToken = Deno.env.get("TWILIO_AUTH_TOKEN");
+    const twilioNumber = Deno.env.get("TWILIO_PHONE_NUMBER");
     
     if (!accountSid || !authToken || !twilioNumber) {
       return new Response(
@@ -57,11 +66,13 @@ serve(async (req: Request) => {
       JSON.stringify({ success: true, messageId: result.sid }),
       { status: 200, headers: { 'Content-Type': 'application/json' } }
     );
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error sending SMS:', error);
     
+    const errorMessage = error instanceof Error ? error.message : 'Failed to send SMS';
+    
     return new Response(
-      JSON.stringify({ error: error.message || 'Failed to send SMS' }),
+      JSON.stringify({ error: errorMessage }),
       { status: 500, headers: { 'Content-Type': 'application/json' } }
     );
   }
