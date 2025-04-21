@@ -13,6 +13,10 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@esri/arcgis-rest-auth": "^4.0.3",
+    "@esri/arcgis-rest-feature-layer": "^4.0.3",
+    "@esri/arcgis-rest-geocoding": "^4.0.3",
+    "@esri/arcgis-rest-request": "^4.0.3",
     "@hookform/resolvers": "^3.3.4",
     "@lottiefiles/react-lottie-player": "^3.5.3",
     "@radix-ui/react-accordion": "^1.1.2",
