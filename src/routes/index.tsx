@@ -5,6 +5,7 @@ import { LoadingFallback } from './loading-fallback';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { authRoutes } from './auth-routes';
 import { SettingsRoutes } from './settings-routes';
+import { templateRoutes } from './template-routes';
 
 // Development mode debugging component
 const DevelopmentEntry = lazy(() => import('@/pages/DevelopmentEntry'));
@@ -118,9 +119,10 @@ const routeObjects: RouteObject[] = [
       // Settings Routes
       {
         path: "settings", // Base path for settings
-        // element: <SuspenseWrapper><SettingsPage /></SuspenseWrapper>, // Optional: Render SettingsPage layout here?
         children: settingsRouteObjects // Nest the objects returned by SettingsRoutes()
       },
+      // Template Routes
+      templateRoutes,
       // Customer routes
       {
         path: "/customers",
