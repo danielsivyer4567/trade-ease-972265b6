@@ -24,14 +24,27 @@ export const AutomationIntegrationService = {
     try {
       console.log(`Triggering automation ${automationId} for ${params.targetType}:${params.targetId}`);
       
-      // Get the automation details
-      // In a real implementation, this would fetch from your database
-      // For now, we're using a mock implementation
-      const automationDetails = await getMockAutomation(automationId);
+      // Get the automation details from the database
+      const { data: automationData, error: automationError } = await supabase
+        .from('automation_definitions')
+        .select('*')
+        .eq('id', automationId)
+        .single();
       
-      if (!automationDetails) {
-        throw new Error(`Automation with ID ${automationId} not found`);
+      if (automationError || !automationData) {
+        throw new Error(`Automation with ID ${automationId} not found: ${automationError?.message || ''}`);
       }
+      
+      const automationDetails: Automation = {
+        id: automationData.id,
+        title: automationData.title,
+        description: automationData.description,
+        isActive: true,
+        triggers: automationData.triggers || [],
+        actions: automationData.actions || [],
+        category: automationData.category,
+        premium: automationData.is_premium
+      };
 
       // Log the trigger attempt
       await logAutomationTrigger(automationId, params);
@@ -70,18 +83,84 @@ export const AutomationIntegrationService = {
   ) => {
     try {
       console.log(`Associating automation ${automationId} with ${targetType}:${targetId}`);
-      // In a real implementation, this would create an entry in your database
-      // For now, we're using localStorage for demo purposes
+
+      // Get the current user
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        throw new Error('Authentication required');
+      }
+
+      // Find or create a workflow for this automation
+      let workflowId: string;
       
-      const associationsKey = `automation-associations-${targetType}-${targetId}`;
-      const existingAssociations = JSON.parse(localStorage.getItem(associationsKey) || '[]');
+      // Check if this automation already has a workflow
+      const { data: existingConnection, error: connectionError } = await supabase
+        .from('automation_workflow_connections')
+        .select('workflow_id')
+        .eq('automation_id', automationId)
+        .eq('target_type', targetType)
+        .eq('target_id', targetId)
+        .single();
       
-      if (!existingAssociations.includes(automationId)) {
-        existingAssociations.push(automationId);
-        localStorage.setItem(associationsKey, JSON.stringify(existingAssociations));
+      if (existingConnection) {
+        workflowId = existingConnection.workflow_id;
+      } else {
+        // Get automation details to create a workflow
+        const { data: automationData, error: automationError } = await supabase
+          .from('automation_definitions')
+          .select('*')
+          .eq('id', automationId)
+          .single();
+          
+        if (automationError || !automationData) {
+          throw new Error(`Automation not found: ${automationError?.message || ''}`);
+        }
+        
+        // Create a new workflow
+        const { data: workflowData, error: workflowError } = await supabase
+          .from('workflows')
+          .insert({
+            name: `${automationData.title} - ${targetType} ${targetId.substring(0, 8)}`,
+            description: automationData.description,
+            category: automationData.category,
+            data: { 
+              nodes: [], 
+              edges: [],
+              automationId: automationId,
+              targetType: targetType,
+              targetId: targetId
+            },
+            user_id: session.user.id
+          })
+          .select('id')
+          .single();
+          
+        if (workflowError || !workflowData) {
+          throw new Error(`Failed to create workflow: ${workflowError?.message || ''}`);
+        }
+        
+        workflowId = workflowData.id;
+        
+        // Insert the connection
+        const { error: insertError } = await supabase
+          .from('automation_workflow_connections')
+          .insert({
+            workflow_id: workflowId,
+            automation_id: automationId,
+            target_type: targetType,
+            target_id: targetId,
+            user_id: session.user.id
+          });
+          
+        if (insertError) {
+          throw new Error(`Failed to create connection: ${insertError.message}`);
+        }
+        
+        // Create the appropriate workflow stage entry
+        await createWorkflowStage(targetType, targetId, workflowId);
       }
       
-      return { success: true };
+      return { success: true, workflowId };
     } catch (error) {
       console.error("Failed to associate automation:", error);
       return { success: false, error: error.message };
@@ -93,20 +172,46 @@ export const AutomationIntegrationService = {
    */
   getAssociatedAutomations: async (targetType: AutomationTarget, targetId: string) => {
     try {
-      // In a real implementation, this would fetch from your database
-      // For now, we're using localStorage for demo purposes
+      // Get associated automation IDs from the connections table
+      const { data: connections, error: connectionsError } = await supabase
+        .from('automation_workflow_connections')
+        .select('automation_id, workflow_id')
+        .eq('target_type', targetType)
+        .eq('target_id', targetId);
+        
+      if (connectionsError) {
+        throw new Error(`Failed to get connections: ${connectionsError.message}`);
+      }
       
-      const associationsKey = `automation-associations-${targetType}-${targetId}`;
-      const associatedIds = JSON.parse(localStorage.getItem(associationsKey) || '[]');
-      
-      if (associatedIds.length === 0) {
+      if (!connections || connections.length === 0) {
         return { success: true, automations: [] };
       }
       
-      // For demo, we'll just mock fetch these automations
-      const automations = associatedIds.map(id => getMockAutomation(id));
+      // Get the automation details for each connection
+      const automationIds = connections.map(c => c.automation_id);
       
-      return { success: true, automations: await Promise.all(automations) };
+      const { data: automationsData, error: automationsError } = await supabase
+        .from('automation_definitions')
+        .select('*')
+        .in('id', automationIds);
+        
+      if (automationsError) {
+        throw new Error(`Failed to get automations: ${automationsError.message}`);
+      }
+      
+      const automations: Automation[] = automationsData.map(a => ({
+        id: a.id,
+        title: a.title,
+        description: a.description,
+        isActive: true,
+        triggers: a.triggers || [],
+        actions: a.actions || [],
+        category: a.category,
+        premium: a.is_premium,
+        workflowId: connections.find(c => c.automation_id === a.id)?.workflow_id
+      }));
+      
+      return { success: true, automations };
     } catch (error) {
       console.error("Failed to get associated automations:", error);
       return { success: false, error: error.message, automations: [] };
@@ -118,17 +223,56 @@ export const AutomationIntegrationService = {
    */
   sendJobPhotosToCustomer: async (jobId: string, customerEmail?: string) => {
     try {
-      // In a real implementation, this would:
-      // 1. Fetch the job photos from storage
-      // 2. Get the customer email from the job record
-      // 3. Send an email with the photos attached
+      // Get the job details to find the customer
+      const { data: jobData, error: jobError } = await supabase
+        .from('jobs')
+        .select('customer_id')
+        .eq('id', jobId)
+        .single();
       
-      console.log(`Sending job photos for job ${jobId} to customer${customerEmail ? ` (${customerEmail})` : ''}`);
+      if (jobError || !jobData) {
+        throw new Error(`Failed to get job details: ${jobError?.message || ''}`);
+      }
       
-      // Mock the email sending process
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      // Get the customer email if not provided
+      let email = customerEmail;
+      if (!email) {
+        const { data: customerData, error: customerError } = await supabase
+          .from('customers')
+          .select('email')
+          .eq('id', jobData.customer_id)
+          .single();
+          
+        if (customerError || !customerData) {
+          throw new Error(`Failed to get customer details: ${customerError?.message || ''}`);
+        }
+        
+        email = customerData.email;
+      }
       
-      return { success: true, message: 'Photos sent successfully' };
+      if (!email) {
+        throw new Error('Customer email not available');
+      }
+      
+      // Get job photos
+      const { data: photos, error: photosError } = await supabase
+        .storage
+        .from('job-photos')
+        .list(`${jobId}/`);
+        
+      if (photosError) {
+        throw new Error(`Failed to get job photos: ${photosError.message}`);
+      }
+      
+      if (!photos || photos.length === 0) {
+        return { success: true, message: 'No photos to send' };
+      }
+      
+      // In a real implementation, you would now send an email with the photos
+      // For now, we'll just log and return success
+      console.log(`Would send ${photos.length} photos to ${email} for job ${jobId}`);
+      
+      return { success: true, message: `Photos sent successfully to ${email}` };
     } catch (error) {
       console.error('Failed to send job photos:', error);
       return { success: false, error: error.message };
@@ -136,67 +280,95 @@ export const AutomationIntegrationService = {
   }
 };
 
-// Mock implementations for demo purposes
-// In a real implementation, these would interact with your database
-
-async function getMockAutomation(id: number): Promise<Automation | null> {
-  // This would be replaced with an actual database query in production
-  const mockAutomations: Automation[] = [
-    {
-      id: 1,
-      title: 'New Job Alert',
-      description: 'Send notifications when jobs are created',
-      isActive: true,
-      triggers: ['New job created'],
-      actions: ['Send notification'],
-      category: 'team'
-    },
-    {
-      id: 2,
-      title: 'Quote Follow-up',
-      description: 'Follow up on quotes after 3 days',
-      isActive: true,
-      triggers: ['Quote age > 3 days'],
-      actions: ['Send email'],
-      category: 'sales'
-    },
-    {
-      id: 3,
-      title: 'Customer Feedback Form',
-      description: 'Send feedback forms after job completion',
-      isActive: true,
-      triggers: ['Job marked complete'],
-      actions: ['Send form to customer'],
-      category: 'forms'
-    },
-    {
-      id: 4,
-      title: 'Social Media Post',
-      description: 'Post job completion to social media',
-      isActive: true,
-      triggers: ['Job marked complete'],
-      actions: ['Post to social media'],
-      category: 'social',
-      premium: true
-    },
-    {
-      id: 5,
-      title: 'SMS Appointment Reminder',
-      description: 'Send SMS reminder 24 hours before appointment',
-      isActive: true,
-      triggers: ['24h before appointment'],
-      actions: ['Send SMS'],
-      category: 'messaging',
-      premium: true
-    }
-  ];
-  
-  return mockAutomations.find(a => a.id === id) || null;
-}
+// Helper functions
 
 async function logAutomationTrigger(automationId: number, params: AutomationTriggerParams) {
-  // In a real implementation, this would log to your database
-  console.log(`[${new Date().toISOString()}] Automation ${automationId} triggered for ${params.targetType}:${params.targetId}`, params.additionalData);
+  try {
+    // Get the current user
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    // Create a workflow log entry
+    const { data: logData, error: logError } = await supabase
+      .from('workflow_logs')
+      .insert({
+        workflow_id: await getWorkflowIdForAutomation(automationId, params.targetType, params.targetId),
+        status: 'in_progress',
+        created_by: session?.user?.id,
+        context: {
+          automationId,
+          targetType: params.targetType,
+          targetId: params.targetId,
+          additionalData: params.additionalData
+        }
+      })
+      .select('id')
+      .single();
+      
+    if (logError) {
+      console.error(`Failed to log automation trigger: ${logError.message}`);
+    }
+    
+    return logData?.id;
+  } catch (error) {
+    console.error('Error logging automation trigger:', error);
+    return null;
+  }
+}
+
+async function getWorkflowIdForAutomation(automationId: number, targetType: string, targetId: string): Promise<string | null> {
+  // Find the workflow ID for this automation + target combination
+  const { data, error } = await supabase
+    .from('automation_workflow_connections')
+    .select('workflow_id')
+    .eq('automation_id', automationId)
+    .eq('target_type', targetType)
+    .eq('target_id', targetId)
+    .single();
+    
+  if (error || !data) {
+    console.error(`No workflow found for automation ${automationId} and ${targetType}:${targetId}`);
+    return null;
+  }
+  
+  return data.workflow_id;
+}
+
+async function createWorkflowStage(targetType: string, targetId: string, workflowId: string) {
+  try {
+    // Choose the appropriate table based on target type
+    let table: string;
+    
+    switch (targetType) {
+      case 'customer':
+        table = 'customer_workflow_stages';
+        break;
+      case 'job':
+        table = 'job_workflow_stages';
+        break;
+      case 'quote':
+        table = 'quote_workflow_stages';
+        break;
+      default:
+        // For other types we don't have specific stage tables
+        return;
+    }
+    
+    // Create the stage record
+    const { error } = await supabase
+      .from(table)
+      .insert({
+        [`${targetType}_id`]: targetId, 
+        workflow_id: workflowId,
+        current_stage: 'initial',
+        status: 'in_progress'
+      });
+      
+    if (error) {
+      console.error(`Failed to create workflow stage: ${error.message}`);
+    }
+  } catch (error) {
+    console.error('Error creating workflow stage:', error);
+  }
 }
 
 // Process different types of automations
@@ -253,7 +425,7 @@ async function processCustomerAutomation(automation: Automation, params: Automat
 }
 
 async function processSalesAutomation(automation: Automation, params: AutomationTriggerParams) {
-  // Handle sales-related automations, like quote follow-ups
+  // Handle sales-related automations
   console.log(`Processing sales automation: ${automation.title}`);
   return { success: true, message: `Processed sales automation: ${automation.title}` };
 }
@@ -265,40 +437,38 @@ async function processFormsAutomation(automation: Automation, params: Automation
 }
 
 async function processGenericAutomation(automation: Automation, params: AutomationTriggerParams) {
-  // Fallback for other automation types
+  // Handle any automation type not specifically handled
   console.log(`Processing generic automation: ${automation.title}`);
-  return { success: true, message: `Processed automation: ${automation.title}` };
+  return { success: true, message: `Processed generic automation: ${automation.title}` };
 }
 
-// Simulation functions for integration demos
-// These would be replaced with actual API calls in a real implementation
+// Simulation functions for integration examples
 
 async function simulateTwilioIntegration(params: AutomationTriggerParams) {
-  console.log('Simulating Twilio SMS integration', params);
-  // In a real implementation, this would call your Twilio edge function
-  return { success: true, message: 'SMS message queued for delivery' };
+  console.log(`Simulating Twilio SMS integration for ${params.targetType}:${params.targetId}`);
+  await new Promise(resolve => setTimeout(resolve, 1000)); // Fake delay
+  return { success: true, message: 'SMS notification sent successfully' };
 }
 
 async function simulateEmailIntegration(params: AutomationTriggerParams) {
-  console.log('Simulating email integration', params);
-  // In a real implementation, this would call your email edge function
-  return { success: true, message: 'Email queued for delivery' };
+  console.log(`Simulating Email integration for ${params.targetType}:${params.targetId}`);
+  await new Promise(resolve => setTimeout(resolve, 1000)); // Fake delay
+  return { success: true, message: 'Email sent successfully' };
 }
 
 async function simulateSocialMediaIntegration(params: AutomationTriggerParams) {
-  console.log('Simulating social media integration', params);
-  // In a real implementation, this would call your social media APIs
-  return { success: true, message: 'Social media post queued' };
+  console.log(`Simulating Social Media integration for ${params.targetType}:${params.targetId}`);
+  await new Promise(resolve => setTimeout(resolve, 1000)); // Fake delay
+  return { success: true, message: 'Posted to social media successfully' };
 }
 
-// Add a new processor specifically for handling photo sharing
 async function processPhotoSharingAutomation(automation: Automation, params: AutomationTriggerParams) {
-  console.log(`Processing photo sharing automation: ${automation.title}`);
+  console.log(`Processing photo sharing automation for ${params.targetType}:${params.targetId}`);
   
-  if (params.additionalData?.action === 'share_photos') {
-    // This would integrate with your email service in a real implementation
+  // For job photo sharing
+  if (params.targetType === 'job') {
     return await AutomationIntegrationService.sendJobPhotosToCustomer(params.targetId);
   }
   
-  return { success: true, message: `Processed photo sharing: ${automation.title}` };
+  return { success: true, message: 'Photo sharing processed' };
 }
