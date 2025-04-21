@@ -16,6 +16,7 @@ import { ErrorBoundary } from "react-error-boundary";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { supabase } from "@/lib/supabase";
 
 // Quote status options
 const statusFilters = [
@@ -38,7 +39,7 @@ function ErrorFallback({ error, resetErrorBoundary }) {
   );
 }
 
-export default function QuotesMain() {
+const QuotesMain = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [activeSection, setActiveSection] = useState("customer");
@@ -57,6 +58,7 @@ export default function QuotesMain() {
   const [showTemplates, setShowTemplates] = useState(true);
   const [showNotifications, setShowNotifications] = useState(false);
   const [selectedTemplateCategory, setSelectedTemplateCategory] = useState("All Categories");
+  const [userTemplates, setUserTemplates] = useState([]);
 
   const handleBack = () => {
     navigate("/quotes");
@@ -119,6 +121,19 @@ export default function QuotesMain() {
       setShowTemplates(false);
     }
   };
+
+  const fetchUserTemplates = async () => {
+    const { data, error } = await supabase.storage.from('quotetemplates').list('user-templates/');
+    if (error) {
+      console.error('Error fetching templates:', error.message);
+    } else {
+      setUserTemplates(data);
+    }
+  };
+
+  useEffect(() => {
+    fetchUserTemplates();
+  }, []);
 
   // Render the active section component
   const renderActiveSection = () => {
@@ -655,4 +670,6 @@ export default function QuotesMain() {
       </AppLayout>
     </ErrorBoundary>
   );
-}
+};
+
+export default QuotesMain;
