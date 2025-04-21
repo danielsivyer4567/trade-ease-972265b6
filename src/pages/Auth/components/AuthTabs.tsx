@@ -1,13 +1,11 @@
-
 import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import SignInForm from './SignInForm';
 import SignUpForm from './SignUpForm';
-import DemoRequestForm from './DemoRequestForm';
 import VerificationStatus from './VerificationStatus';
 import OrganizationSetup from './OrganizationSetup';
-import DemoDataGenerator from './DemoDataGenerator';
+import VideoDemo from './VideoDemo';
 
 interface AuthTabsProps {
   defaultTab: string;
@@ -19,14 +17,8 @@ interface AuthTabsProps {
   setConfirmPassword: (password: string) => void;
   loading: boolean;
   verificationSent: boolean;
-  demoRequestName: string;
-  setDemoRequestName: (name: string) => void;
-  demoRequestEmail: string;
-  setDemoRequestEmail: (email: string) => void;
-  demoRequestCompany: string;
-  setDemoRequestCompany: (company: string) => void;
   setLoading: (loading: boolean) => void;
-  onSignIn: (e: React.FormEvent) => Promise<void>;
+  onSignIn: (e: React.FormEvent, rememberMe: boolean) => Promise<void>;
   onSignUp: (e: React.FormEvent) => Promise<void>;
   inviteCode: string | null;
 }
@@ -41,12 +33,6 @@ export const AuthTabs: React.FC<AuthTabsProps> = ({
   setConfirmPassword,
   loading,
   verificationSent,
-  demoRequestName,
-  setDemoRequestName,
-  demoRequestEmail,
-  setDemoRequestEmail,
-  demoRequestCompany,
-  setDemoRequestCompany,
   setLoading,
   onSignIn,
   onSignUp,
@@ -59,7 +45,7 @@ export const AuthTabs: React.FC<AuthTabsProps> = ({
           <TabsTrigger value="signin">Sign In</TabsTrigger>
           <TabsTrigger value="signup">Sign Up</TabsTrigger>
           <TabsTrigger value="organization">Organization</TabsTrigger>
-          <TabsTrigger value="demo">Request Demo</TabsTrigger>
+          <TabsTrigger value="demo">Video Demo</TabsTrigger>
         </TabsList>
         
         <TabsContent value="signin">
@@ -123,28 +109,15 @@ export const AuthTabs: React.FC<AuthTabsProps> = ({
         <TabsContent value="demo">
           <Card>
             <CardHeader>
-              <CardTitle>Request a Demo</CardTitle>
-              <CardDescription>Let us show you how Trade Ease can help your business</CardDescription>
+              <CardTitle>Video Demo</CardTitle>
+              <CardDescription>Upload a video demonstration of Trade Ease features</CardDescription>
             </CardHeader>
             <CardContent>
-              <DemoRequestForm 
-                demoRequestName={demoRequestName}
-                setDemoRequestName={setDemoRequestName}
-                demoRequestEmail={demoRequestEmail}
-                setDemoRequestEmail={setDemoRequestEmail}
-                demoRequestCompany={demoRequestCompany}
-                setDemoRequestCompany={setDemoRequestCompany}
-                loading={loading}
-                setLoading={setLoading}
-              />
+              <VideoDemo />
             </CardContent>
           </Card>
         </TabsContent>
       </Tabs>
-      
-      <div className="mt-6">
-        <DemoDataGenerator />
-      </div>
     </>
   );
 };

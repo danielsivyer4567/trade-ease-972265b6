@@ -6,6 +6,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { AuthContainer } from './components/AuthContainer';
 import { AuthTabs } from './components/AuthTabs';
 import VerificationStatus from './components/VerificationStatus';
+import TwoFactorVerification from './components/TwoFactorVerification';
 
 // Hooks
 import { useEmailVerification } from './hooks/useEmailVerification';
@@ -21,7 +22,7 @@ export default function Auth() {
   const navigate = useNavigate();
   const location = useLocation();
   // Destructure loading state along with user
-  const { user, loading: authLoading } = useAuth();
+  const { user, loading: authLoading, awaitingTwoFactor } = useAuth();
   const { inviteCode } = useInviteCode();
   const {
     email,
@@ -34,15 +35,15 @@ export default function Auth() {
     setLoading,
     verificationSent,
     setVerificationSent,
-    demoRequestName,
-    setDemoRequestName,
-    demoRequestEmail,
-    setDemoRequestEmail,
-    demoRequestCompany,
-    setDemoRequestCompany,
+    loadSavedCredentials,
     handleSignIn,
     handleSignUp,
   } = useAuthForm();
+  
+  // Load saved credentials when component mounts
+  useEffect(() => {
+    loadSavedCredentials();
+  }, []);
 
   // Handle initial loading state from AuthProvider
   if (authLoading) {
@@ -75,6 +76,15 @@ export default function Auth() {
       />
     );
   }
+  
+  // If awaiting two-factor auth, show the verification screen
+  if (awaitingTwoFactor) {
+    return (
+      <AuthContainer>
+        <TwoFactorVerification />
+      </AuthContainer>
+    );
+  }
 
   return (
     <AuthContainer>
@@ -88,12 +98,6 @@ export default function Auth() {
         setConfirmPassword={setConfirmPassword}
         loading={loading}
         verificationSent={verificationSent}
-        demoRequestName={demoRequestName}
-        setDemoRequestName={setDemoRequestName}
-        demoRequestEmail={demoRequestEmail}
-        setDemoRequestEmail={setDemoRequestEmail}
-        demoRequestCompany={demoRequestCompany}
-        setDemoRequestCompany={setDemoRequestCompany}
         setLoading={setLoading}
         onSignIn={handleSignIn}
         onSignUp={handleSignUp}
