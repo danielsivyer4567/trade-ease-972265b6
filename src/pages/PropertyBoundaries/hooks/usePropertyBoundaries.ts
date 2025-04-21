@@ -40,6 +40,22 @@ const mockProperties: Property[] = [
   }
 ];
 
+interface PropertyData {
+  id: string;
+  name: string;
+  description?: string;
+  address?: string;
+  location: number[];
+  boundaries: number[][][];
+  user_id?: string;
+  [key: string]: any;
+}
+
+interface BoundaryGeometryData {
+  rings: number[][][];
+  [key: string]: any;
+}
+
 export const usePropertyBoundaries = () => {
   const [properties, setProperties] = useState<Property[]>([]);
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
@@ -75,7 +91,7 @@ export const usePropertyBoundaries = () => {
           } else if (data && data.length > 0) {
             // Transform Supabase data to match Property type
             const transformedData = data
-              .map((item) => ({
+              .map((item: PropertyData) => ({
                 id: item.id,
                 name: item.name,
                 description: item.description || '',
@@ -84,7 +100,7 @@ export const usePropertyBoundaries = () => {
                 boundaries: item.boundaries
               }))
               // Filter out any property with the name "Main Office"
-              .filter((property) => property.name !== 'Main Office');
+              .filter((property: Property) => property.name !== 'Main Office');
             
             startTransition(() => {
               setProperties(transformedData);
@@ -320,7 +336,7 @@ export const usePropertyBoundaries = () => {
             });
           } else if (data && data.length > 0) {
             // Transform Supabase data to match Property type
-            const transformedData = data.map((item) => ({
+            const transformedData = data.map((item: PropertyData) => ({
               id: item.id,
               name: item.name,
               description: item.description || '',
@@ -456,8 +472,8 @@ export const usePropertyBoundaries = () => {
           boundaryData.geometry.rings[0][0][1],
           boundaryData.geometry.rings[0][0][0]
         ],
-        boundaries: boundaryData.geometry.rings.map(ring => 
-          ring.map(coords => [coords[1], coords[0]])
+        boundaries: boundaryData.geometry.rings.map((ring: number[][]) => 
+          ring.map((coords: number[]) => [coords[1], coords[0]])
         )
       };
       
