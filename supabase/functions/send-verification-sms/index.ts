@@ -1,5 +1,5 @@
-import { serve } from 'https://deno.land/std@0.177.0/http/server.ts';
-import { Twilio } from 'https://esm.sh/twilio@4.19.0';
+import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
+import { Twilio } from "https://esm.sh/twilio@4.19.0";
 
 interface RequestData {
   phoneNumber: string;
@@ -33,9 +33,9 @@ serve(async (req: Request) => {
       : `+1${phoneNumber}`; // Default to US country code if not provided
     
     // Initialize Twilio client with environment variables
-    const accountSid = Deno.env.get('TWILIO_ACCOUNT_SID');
-    const authToken = Deno.env.get('TWILIO_AUTH_TOKEN');
-    const twilioNumber = Deno.env.get('TWILIO_PHONE_NUMBER');
+    const accountSid = process.env.TWILIO_ACCOUNT_SID;
+    const authToken = process.env.TWILIO_AUTH_TOKEN;
+    const twilioNumber = process.env.TWILIO_PHONE_NUMBER;
     
     if (!accountSid || !authToken || !twilioNumber) {
       return new Response(
