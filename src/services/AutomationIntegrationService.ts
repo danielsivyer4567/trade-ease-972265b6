@@ -16,11 +16,24 @@ interface AutomationTriggerParams {
   userId?: string;
 }
 
+// Add return type interfaces
+interface AutomationResponse {
+  success: boolean;
+  message?: string;
+  error?: string;
+}
+
+interface AutomationsListResponse {
+  success: boolean;
+  automations: Automation[];
+  error?: string;
+}
+
 export const AutomationIntegrationService = {
   /**
    * Trigger an automation based on specific parameters
    */
-  triggerAutomation: async (automationId: number, params: AutomationTriggerParams) => {
+  triggerAutomation: async (automationId: number, params: AutomationTriggerParams): Promise<AutomationResponse> => {
     try {
       console.log(`Triggering automation ${automationId} for ${params.targetType}:${params.targetId}`);
       
@@ -92,7 +105,7 @@ export const AutomationIntegrationService = {
     automationId: number, 
     targetType: AutomationTarget, 
     targetId: string
-  ) => {
+  ): Promise<{ success: boolean, workflowId?: string, error?: string }> => {
     try {
       console.log(`Associating automation ${automationId} with ${targetType}:${targetId}`);
 
@@ -182,7 +195,7 @@ export const AutomationIntegrationService = {
   /**
    * Get automations associated with a specific entity
    */
-  getAssociatedAutomations: async (targetType: AutomationTarget, targetId: string) => {
+  getAssociatedAutomations: async (targetType: AutomationTarget, targetId: string): Promise<AutomationsListResponse> => {
     try {
       // Get associated automation IDs from the connections table
       const { data: connections, error: connectionsError } = await supabase
@@ -253,7 +266,7 @@ export const AutomationIntegrationService = {
   /**
    * Send job photos to customer
    */
-  sendJobPhotosToCustomer: async (jobId: string, customerEmail?: string) => {
+  sendJobPhotosToCustomer: async (jobId: string, customerEmail?: string): Promise<AutomationResponse> => {
     try {
       // Get the job details to find the customer
       const { data: jobData, error: jobError } = await supabase
@@ -406,7 +419,7 @@ async function createWorkflowStage(targetType: string, targetId: string, workflo
 // Process different types of automations
 // These functions would contain the actual implementation in a real app
 
-async function processMessagingAutomation(automation: Automation, params: AutomationTriggerParams) {
+async function processMessagingAutomation(automation: Automation, params: AutomationTriggerParams): Promise<AutomationResponse> {
   // Handle SMS, email, or other messaging automations
   console.log(`Processing messaging automation: ${automation.title}`);
   
@@ -425,7 +438,7 @@ async function processMessagingAutomation(automation: Automation, params: Automa
   return { success: true, message: `Processed messaging automation: ${automation.title}` };
 }
 
-async function processSocialAutomation(automation: Automation, params: AutomationTriggerParams) {
+async function processSocialAutomation(automation: Automation, params: AutomationTriggerParams): Promise<AutomationResponse> {
   // Handle social media integrations
   console.log(`Processing social automation: ${automation.title}`);
   
@@ -438,13 +451,13 @@ async function processSocialAutomation(automation: Automation, params: Automatio
   return { success: true, message: `Processed social automation: ${automation.title}` };
 }
 
-async function processTeamAutomation(automation: Automation, params: AutomationTriggerParams) {
+async function processTeamAutomation(automation: Automation, params: AutomationTriggerParams): Promise<AutomationResponse> {
   // Handle team notifications and assignments
   console.log(`Processing team automation: ${automation.title}`);
   return { success: true, message: `Processed team automation: ${automation.title}` };
 }
 
-async function processCustomerAutomation(automation: Automation, params: AutomationTriggerParams) {
+async function processCustomerAutomation(automation: Automation, params: AutomationTriggerParams): Promise<AutomationResponse> {
   // Handle customer-related automations
   console.log(`Processing customer automation: ${automation.title}`);
   
@@ -456,19 +469,19 @@ async function processCustomerAutomation(automation: Automation, params: Automat
   return { success: true, message: `Processed customer automation: ${automation.title}` };
 }
 
-async function processSalesAutomation(automation: Automation, params: AutomationTriggerParams) {
+async function processSalesAutomation(automation: Automation, params: AutomationTriggerParams): Promise<AutomationResponse> {
   // Handle sales-related automations
   console.log(`Processing sales automation: ${automation.title}`);
   return { success: true, message: `Processed sales automation: ${automation.title}` };
 }
 
-async function processFormsAutomation(automation: Automation, params: AutomationTriggerParams) {
+async function processFormsAutomation(automation: Automation, params: AutomationTriggerParams): Promise<AutomationResponse> {
   // Handle form-related automations
   console.log(`Processing forms automation: ${automation.title}`);
   return { success: true, message: `Processed forms automation: ${automation.title}` };
 }
 
-async function processGenericAutomation(automation: Automation, params: AutomationTriggerParams) {
+async function processGenericAutomation(automation: Automation, params: AutomationTriggerParams): Promise<AutomationResponse> {
   // Handle any automation type not specifically handled
   console.log(`Processing generic automation: ${automation.title}`);
   return { success: true, message: `Processed generic automation: ${automation.title}` };
@@ -476,25 +489,25 @@ async function processGenericAutomation(automation: Automation, params: Automati
 
 // Simulation functions for integration examples
 
-async function simulateTwilioIntegration(params: AutomationTriggerParams) {
+async function simulateTwilioIntegration(params: AutomationTriggerParams): Promise<AutomationResponse> {
   console.log(`Simulating Twilio SMS integration for ${params.targetType}:${params.targetId}`);
   await new Promise(resolve => setTimeout(resolve, 1000)); // Fake delay
   return { success: true, message: 'SMS notification sent successfully' };
 }
 
-async function simulateEmailIntegration(params: AutomationTriggerParams) {
+async function simulateEmailIntegration(params: AutomationTriggerParams): Promise<AutomationResponse> {
   console.log(`Simulating Email integration for ${params.targetType}:${params.targetId}`);
   await new Promise(resolve => setTimeout(resolve, 1000)); // Fake delay
   return { success: true, message: 'Email sent successfully' };
 }
 
-async function simulateSocialMediaIntegration(params: AutomationTriggerParams) {
+async function simulateSocialMediaIntegration(params: AutomationTriggerParams): Promise<AutomationResponse> {
   console.log(`Simulating Social Media integration for ${params.targetType}:${params.targetId}`);
   await new Promise(resolve => setTimeout(resolve, 1000)); // Fake delay
   return { success: true, message: 'Posted to social media successfully' };
 }
 
-async function processPhotoSharingAutomation(automation: Automation, params: AutomationTriggerParams) {
+async function processPhotoSharingAutomation(automation: Automation, params: AutomationTriggerParams): Promise<AutomationResponse> {
   console.log(`Processing photo sharing automation for ${params.targetType}:${params.targetId}`);
   
   // For job photo sharing
@@ -506,7 +519,7 @@ async function processPhotoSharingAutomation(automation: Automation, params: Aut
 }
 
 // Add mock functions for demo purposes
-function getMockAssociatedAutomations(targetType: AutomationTarget, targetId: string) {
+function getMockAssociatedAutomations(targetType: AutomationTarget, targetId: string): AutomationsListResponse {
   console.log(`Providing mock automations for ${targetType}:${targetId}`);
   
   // Return a few relevant automations based on the target type
@@ -550,7 +563,7 @@ function getMockAssociatedAutomations(targetType: AutomationTarget, targetId: st
   return { success: true, automations: mockAutomations };
 }
 
-function mockTriggerAutomation(automationId: number, params: AutomationTriggerParams) {
+function mockTriggerAutomation(automationId: number, params: AutomationTriggerParams): Promise<AutomationResponse> {
   console.log(`Mock triggering automation ${automationId} for ${params.targetType}:${params.targetId}`);
   
   // Simulate a delay for realistic behavior
