@@ -1,4 +1,4 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
 import { Twilio } from "https://esm.sh/twilio@4.19.0";
 
 interface RequestData {
