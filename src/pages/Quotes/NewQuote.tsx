@@ -54,7 +54,7 @@ export default function QuotesMain() {
   const [quoteLetterSpecs, setQuoteLetterSpecs] = useState("");
   const [requestForQuote, setRequestForQuote] = useState("");
   const [quoteName, setQuoteName] = useState("New Quote");
-  const [showTemplates, setShowTemplates] = useState(false);
+  const [showTemplates, setShowTemplates] = useState(true);
   const [showNotifications, setShowNotifications] = useState(false);
   const [selectedTemplateCategory, setSelectedTemplateCategory] = useState("All Categories");
 
