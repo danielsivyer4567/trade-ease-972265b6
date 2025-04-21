@@ -1,57 +1,42 @@
-
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Workflow, ListChecks, FileText, ArrowLeft } from "lucide-react";
+import { ButtonGroup, ButtonGroupItem } from "@/components/ui/button-group";
+import { LayoutTemplate, ListTodo, BarChart3 } from "lucide-react";
 
 export function WorkflowNavigation() {
   const navigate = useNavigate();
   const location = useLocation();
+  const path = location.pathname;
   
   const isActive = (path: string) => {
     return location.pathname === path;
   };
   
   return (
-    <div className="flex flex-wrap items-center gap-2 mb-4">
-      <Button 
-        variant="outline" 
-        size="sm" 
-        onClick={() => navigate(-1)}
-        className="mr-2"
+    <ButtonGroup>
+      <ButtonGroupItem 
+        to="/workflow/templates" 
+        active={path === '/workflow/templates'}
+        icon={<LayoutTemplate className="w-4 h-4" />}
       >
-        <ArrowLeft className="h-4 w-4" />
-      </Button>
-      
-      <Button
-        variant={isActive('/workflow') ? "default" : "outline"}
-        size="sm"
-        onClick={() => navigate('/workflow')}
-        className="flex items-center gap-2"
-      >
-        <Workflow className="h-4 w-4" />
-        Editor
-      </Button>
-      
-      <Button
-        variant={isActive('/workflow/list') ? "default" : "outline"}
-        size="sm"
-        onClick={() => navigate('/workflow/list')}
-        className="flex items-center gap-2"
-      >
-        <ListChecks className="h-4 w-4" />
-        My Workflows
-      </Button>
-      
-      <Button
-        variant={isActive('/workflow/templates') ? "default" : "outline"}
-        size="sm"
-        onClick={() => navigate('/workflow/templates')}
-        className="flex items-center gap-2"
-      >
-        <FileText className="h-4 w-4" />
         Templates
-      </Button>
-    </div>
+      </ButtonGroupItem>
+      <ButtonGroupItem 
+        to="/workflow/list" 
+        active={path === '/workflow/list'}
+        icon={<ListTodo className="w-4 h-4" />}
+      >
+        My Workflows
+      </ButtonGroupItem>
+      <ButtonGroupItem 
+        to="/workflow/metrics" 
+        active={path === '/workflow/metrics'}
+        icon={<BarChart3 className="w-4 h-4" />}
+      >
+        Metrics
+      </ButtonGroupItem>
+    </ButtonGroup>
   );
 }
