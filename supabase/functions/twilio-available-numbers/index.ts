@@ -1,6 +1,14 @@
-
+// @ts-ignore
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+// @ts-ignore
 import { Twilio } from "https://esm.sh/twilio@4.19.3";
+
+// Add Deno namespace declaration
+declare const Deno: {
+  env: {
+    get(key: string): string | undefined;
+  };
+};
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -15,7 +23,21 @@ interface AvailableNumbersRequest {
   country?: string;
 }
 
-serve(async (req) => {
+interface TwilioPhoneNumber {
+  phoneNumber: string;
+  friendlyName: string;
+  locality: string;
+  region: string;
+  isoCountry: string;
+  capabilities: {
+    voice: boolean;
+    SMS: boolean;
+    MMS: boolean;
+  };
+  [key: string]: any;
+}
+
+serve(async (req: Request) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -57,7 +79,7 @@ serve(async (req) => {
       console.log(`Successfully fetched ${availableNumbers.length} available phone numbers`);
       
       // Map to simpler format for frontend
-      const formattedNumbers = availableNumbers.map(number => ({
+      const formattedNumbers = availableNumbers.map((number: TwilioPhoneNumber) => ({
         phoneNumber: number.phoneNumber,
         friendlyName: number.friendlyName,
         locality: number.locality,
@@ -76,13 +98,15 @@ serve(async (req) => {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
         }
       );
-    } catch (twilioError) {
+    } catch (twilioError: unknown) {
       console.error("Twilio API error:", twilioError);
+      
+      const errorMessage = twilioError instanceof Error ? twilioError.message : "Error fetching available numbers from Twilio";
       
       return new Response(
         JSON.stringify({ 
           success: false, 
-          message: twilioError.message || "Error fetching available numbers from Twilio" 
+          message: errorMessage 
         }),
         { 
           status: 400, 
@@ -90,13 +114,15 @@ serve(async (req) => {
         }
       );
     }
-  } catch (error) {
+  } catch (error: unknown) {
     console.error("Error in twilio-available-numbers function:", error);
+    
+    const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred";
     
     return new Response(
       JSON.stringify({ 
         success: false, 
-        message: error.message || "An unexpected error occurred" 
+        message: errorMessage 
       }),
       { 
         status: 500, 
