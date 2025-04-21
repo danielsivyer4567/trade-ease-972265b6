@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card } from "@/components/ui/card";
 
@@ -8,8 +7,21 @@ interface AuthContainerProps {
 
 export const AuthContainer: React.FC<AuthContainerProps> = ({ children }) => {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-100 p-4">
-      <div className="w-full max-w-md">
+    <div className="min-h-screen flex items-center justify-center bg-slate-100 p-4 relative">
+      {/* Black and white faded background image */}
+      <div 
+        className="absolute inset-0 z-0 opacity-30 grayscale"
+        style={{
+          backgroundImage: 'url("/images/background-pattern.svg")',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
+          margin: '0',
+          padding: '0'
+        }}
+      />
+      
+      <div className="w-full max-w-md relative z-10">
         <div className="mb-8 text-center">
           <div className="flex justify-center mb-4">
             <img src="/lovable-uploads/6a07dd00-f2c7-49da-8b00-48d960c13610.png" alt="Trade Ease Logo" className="w-16 h-16" />
