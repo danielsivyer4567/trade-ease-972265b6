@@ -1,8 +1,8 @@
 import { useState, useCallback, useEffect, useTransition } from 'react';
 import { Property } from '../types';
 import { toast } from 'sonner';
-import { supabase } from '@/integrations/supabase/client';
-import { searchAddressAndFetchBoundary } from '@/integrations/arcgis/propertyBoundaries';
+import { supabase } from '../../../integrations/supabase/client';
+import { searchAddressAndFetchBoundary } from '../../../integrations/arcgis/propertyBoundaries';
 
 // Sample mock properties for initial UI rendering when no data is available
 const mockProperties: Property[] = [
@@ -96,8 +96,8 @@ export const usePropertyBoundaries = () => {
                 name: item.name,
                 description: item.description || '',
                 address: item.address || '',
-                location: item.location,
-                boundaries: item.boundaries
+                location: item.location as [number, number],
+                boundaries: item.boundaries as Array<Array<[number, number]>>
               }))
               // Filter out any property with the name "Main Office"
               .filter((property: Property) => property.name !== 'Main Office');
@@ -278,8 +278,8 @@ export const usePropertyBoundaries = () => {
               name,
               description: feature.properties?.description || `Uploaded boundary ${index + 1}`,
               address,
-              location: [centerLat, centerLng],
-              boundaries: coords
+              location: [centerLat, centerLng] as [number, number],
+              boundaries: coords as Array<Array<[number, number]>>
             };
             
             newProperties.push(newProperty);
@@ -341,8 +341,8 @@ export const usePropertyBoundaries = () => {
               name: item.name,
               description: item.description || '',
               address: item.address || '',
-              location: item.location,
-              boundaries: item.boundaries
+              location: item.location as [number, number],
+              boundaries: item.boundaries as Array<Array<[number, number]>>
             }));
             
             startTransition(() => {
@@ -471,10 +471,10 @@ export const usePropertyBoundaries = () => {
         location: [
           boundaryData.geometry.rings[0][0][1],
           boundaryData.geometry.rings[0][0][0]
-        ],
+        ] as [number, number],
         boundaries: boundaryData.geometry.rings.map((ring: number[][]) => 
-          ring.map((coords: number[]) => [coords[1], coords[0]])
-        )
+          ring.map((coords: number[]) => [coords[1], coords[0]] as [number, number])
+        ) as Array<Array<[number, number]>>
       };
       
       // Try to save to Supabase if user is authenticated
