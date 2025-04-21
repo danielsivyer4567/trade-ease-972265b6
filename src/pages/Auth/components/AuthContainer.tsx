@@ -20,7 +20,7 @@ export const AuthContainer: React.FC<AuthContainerProps> = ({ children }) => {
       <div 
         className="absolute inset-0 z-0 opacity-50 grayscale"
         style={{
-          backgroundImage: 'url("/images/Screenshot 2025-04-21 125049.png")',
+          backgroundImage: 'url("/Screenshot 2025-04-21 125049.png")',
           backgroundSize: 'contain',
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat',

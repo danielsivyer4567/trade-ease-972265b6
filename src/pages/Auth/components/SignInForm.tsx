@@ -1,8 +1,9 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { Mail } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Checkbox } from "@/components/ui/checkbox"
 
 interface SignInFormProps {
   email: string
@@ -10,7 +11,7 @@ interface SignInFormProps {
   password: string
   setPassword: (password: string) => void
   loading: boolean
-  onSubmit: (e: React.FormEvent) => Promise<void>
+  onSubmit: (e: React.FormEvent, rememberMe: boolean) => Promise<void>
 }
 
 export default function SignInForm({
@@ -21,8 +22,15 @@ export default function SignInForm({
   loading,
   onSubmit
 }: SignInFormProps) {
+  const [rememberMe, setRememberMe] = useState(false);
+  
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onSubmit(e, rememberMe);
+  };
+  
   return (
-    <form onSubmit={onSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-4">
       <div className="space-y-2">
         <Label htmlFor="email">Email</Label>
         <div className="relative">
@@ -48,6 +56,19 @@ export default function SignInForm({
           onChange={(e) => setPassword(e.target.value)}
           required
         />
+      </div>
+      <div className="flex items-center space-x-2">
+        <Checkbox 
+          id="remember" 
+          checked={rememberMe} 
+          onCheckedChange={(checked) => setRememberMe(checked === true)}
+        />
+        <Label 
+          htmlFor="remember" 
+          className="text-sm font-normal cursor-pointer"
+        >
+          Remember me
+        </Label>
       </div>
       <Button type="submit" className="w-full" disabled={loading}>
         {loading ? 'Signing in...' : 'Sign In'}
