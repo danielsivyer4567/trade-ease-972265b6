@@ -17,6 +17,9 @@ const NotFoundPage = lazy(() => import('@/pages/NotFound'));
 // Auth pages
 const AuthPage = lazy(() => import('@/pages/Auth'));
 
+// Automations page
+const AutomationsPage = lazy(() => import('@/pages/Automations'));
+
 // Customer related pages
 const CustomersPage = lazy(() => import('@/pages/Customers/CustomersPage'));
 const CustomerDetailsPage = lazy(() => import('@/pages/Customers/CustomerDetail'));
@@ -119,6 +122,8 @@ const routeObjects: RouteObject[] = [
     element: <ProtectedRoute />,
     children: [
       { path: "/", element: <SuspenseWrapper><DashboardPage /></SuspenseWrapper> },
+      // Automations route
+      { path: "/automations", element: <SuspenseWrapper><AutomationsPage /></SuspenseWrapper> },
       // Settings Routes
       {
         path: "settings", // Base path for settings
