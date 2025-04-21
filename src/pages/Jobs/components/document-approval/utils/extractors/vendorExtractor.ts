@@ -1,4 +1,3 @@
-
 /**
  * Extracts vendor name from text based on keyword indicators
  */
@@ -11,7 +10,7 @@ export const extractVendor = (text: string): string | null => {
     if (keywordIndex !== -1) {
       // Extract the text after the keyword until a newline or period
       const afterKeyword = fullText.substring(keywordIndex + keyword.length).trim();
-      return afterKeyword.split(/[\n\r\.,]/)[0].trim();
+      return afterKeyword.split(/[\n\r,.]/)[0].trim();
     }
   }
   

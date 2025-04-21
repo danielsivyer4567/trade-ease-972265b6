@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.7.1";
 
@@ -117,7 +116,7 @@ serve(async (req) => {
       .eq('email', email)
       .maybeSingle();
     
-    let userId = existingUser?.id;
+    const userId = existingUser?.id;
     
     // Generate an invitation link
     const inviteLink = `${new URL(req.url).origin}/auth?invite=${orgId}`;
