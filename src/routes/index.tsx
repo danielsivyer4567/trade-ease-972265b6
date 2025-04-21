@@ -73,6 +73,8 @@ const MaterialOrderingPage = lazy(() => import('@/pages/MaterialOrdering'));
 // Tools and Utilities
 const CalculatorsPage = lazy(() => import('@/pages/Calculators'));
 const WorkflowPage = lazy(() => import('@/pages/Workflow'));
+const WorkflowListPage = lazy(() => import('@/pages/Workflow/WorkflowList'));
+const WorkflowTemplatesPage = lazy(() => import('@/pages/Workflow/WorkflowTemplates'));
 const FormsPage = lazy(() => import('@/pages/Forms'));
 const TasksPage = lazy(() => import('@/pages/Tasks'));
 const AIFeaturesPage = lazy(() => import('@/pages/AIFeatures'));
@@ -189,7 +191,15 @@ const routeObjects: RouteObject[] = [
       { path: "/material-ordering", element: <SuspenseWrapper><MaterialOrderingPage /></SuspenseWrapper> },
       // Tools and Utilities routes
       { path: "/calculators", element: <SuspenseWrapper><CalculatorsPage /></SuspenseWrapper> },
-      { path: "/workflow", element: <SuspenseWrapper><WorkflowPage /></SuspenseWrapper> },
+      // Workflow routes
+      {
+        path: "/workflow",
+        children: [
+          { index: true, element: <SuspenseWrapper><WorkflowPage /></SuspenseWrapper> },
+          { path: "list", element: <SuspenseWrapper><WorkflowListPage /></SuspenseWrapper> },
+          { path: "templates", element: <SuspenseWrapper><WorkflowTemplatesPage /></SuspenseWrapper> },
+        ],
+      },
       { path: "/forms", element: <SuspenseWrapper><FormsPage /></SuspenseWrapper> },
       { path: "/tasks", element: <SuspenseWrapper><TasksPage /></SuspenseWrapper> },
       { path: "/ai-features", element: <SuspenseWrapper><AIFeaturesPage /></SuspenseWrapper> },
