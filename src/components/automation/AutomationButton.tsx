@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Workflow, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
@@ -34,11 +34,22 @@ export function AutomationButton({
   buttonText = 'Automations'
 }: AutomationButtonProps) {
   const [isLoading, setIsLoading] = useState(false);
+  const [loadingAutomationId, setLoadingAutomationId] = useState<number | null>(null);
   const [automations, setAutomations] = useState<Automation[]>([]);
   const [isOpen, setIsOpen] = useState(false);
+  const [hasInitiallyLoaded, setHasInitiallyLoaded] = useState(false);
   const navigate = useNavigate();
   
+  // Pre-load automations on component mount
+  useEffect(() => {
+    if (targetId && targetType) {
+      loadAutomations();
+    }
+  }, [targetId, targetType]);
+  
   const loadAutomations = async () => {
+    if (isLoading) return;
+    
     setIsLoading(true);
     try {
       const { success, automations, error } = await AutomationIntegrationService.getAssociatedAutomations(targetType, targetId);
@@ -48,10 +59,14 @@ export function AutomationButton({
       }
       
       setAutomations(automations || []);
+      setHasInitiallyLoaded(true);
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to load automations';
       console.error('Failed to load automations:', errorMessage);
-      toast.error('Failed to load automations');
+      // Only show toast for user interaction, not initial load
+      if (hasInitiallyLoaded) {
+        toast.error('Failed to load automations');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -59,13 +74,13 @@ export function AutomationButton({
   
   const handleOpenChange = (open: boolean) => {
     setIsOpen(open);
-    if (open) {
+    if (open && (!hasInitiallyLoaded || automations.length === 0)) {
       loadAutomations();
     }
   };
   
   const handleTriggerAutomation = async (automationId: number) => {
-    setIsLoading(true);
+    setLoadingAutomationId(automationId);
     try {
       await AutomationIntegrationService.triggerAutomation(automationId, {
         targetType,
@@ -78,7 +93,7 @@ export function AutomationButton({
       console.error('Failed to trigger automation:', errorMessage);
       toast.error('Failed to trigger automation');
     } finally {
-      setIsLoading(false);
+      setLoadingAutomationId(null);
     }
   };
   
@@ -90,6 +105,7 @@ export function AutomationButton({
         createAutomationNode: true
       } 
     });
+    setIsOpen(false);
   };
 
   return (
@@ -99,8 +115,13 @@ export function AutomationButton({
           variant={variant} 
           size={size} 
           className={fullWidth ? "w-full" : ""}
+          disabled={isLoading && !hasInitiallyLoaded}
         >
-          <Workflow className="h-4 w-4 mr-2" />
+          {isLoading && !hasInitiallyLoaded ? (
+            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+          ) : (
+            <Workflow className="h-4 w-4 mr-2" />
+          )}
           {buttonText}
         </Button>
       </PopoverTrigger>
@@ -108,7 +129,7 @@ export function AutomationButton({
         <div className="space-y-2">
           <h4 className="text-sm font-medium p-2">Associated Automations</h4>
           
-          {isLoading ? (
+          {isLoading && hasInitiallyLoaded ? (
             <div className="flex items-center justify-center p-4">
               <Loader2 className="h-4 w-4 animate-spin" />
             </div>
@@ -121,9 +142,13 @@ export function AutomationButton({
                   onClick={() => handleTriggerAutomation(automation.id)}
                 >
                   <span className="text-sm">{automation.title}</span>
-                  <span className="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full">
-                    {automation.category}
-                  </span>
+                  {loadingAutomationId === automation.id ? (
+                    <Loader2 className="h-3 w-3 animate-spin" />
+                  ) : (
+                    <span className="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full">
+                      {automation.category}
+                    </span>
+                  )}
                 </div>
               ))}
             </div>
