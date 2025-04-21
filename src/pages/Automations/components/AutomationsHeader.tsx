@@ -1,9 +1,3 @@
-import React from 'react';
-import { Button } from '@/components/ui/button';
-import { Plus, Workflow, ClipboardList } from 'lucide-react';
-import { AutomationWorkflowButton } from '@/components/automation/AutomationWorkflowButton';
-import { useNavigate } from 'react-router-dom';
-
 interface AutomationsHeaderProps {
   selectedCategory: string;
 }
@@ -31,13 +25,7 @@ const AutomationsHeader = ({ selectedCategory }: AutomationsHeaderProps) => {
         </p>
       </div>
       <div className="flex gap-2">
-        {selectedCategory === 'forms' && (
-          <Button variant="outline" className="flex items-center gap-2" onClick={navigateToForms}>
-            <ClipboardList className="h-4 w-4" />
-            <span>Manage Forms</span>
-          </Button>
-        )}
-        <AutomationWorkflowButton>
+        <AutomationWorkflowButton className="flex items-center gap-2" onClick={navigateToForms}>
           <span>Open in Workflow Builder</span>
         </AutomationWorkflowButton>
         <Button className="flex items-center gap-2" onClick={navigateToCreateAutomation}>

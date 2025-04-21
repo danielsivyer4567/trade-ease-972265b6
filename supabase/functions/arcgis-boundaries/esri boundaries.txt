@@ -1,0 +1,1322 @@
+from arcgis.gis import GIS
+from arcgis.geocoding import geocode
+from arcgis.geometry import Geometry
+from arcgis.features import FeatureLayer
+import matplotlib.pyplot as plt
+import numpy as np
+import os
+import requests
+from io import BytesIO
+from PIL import Image
+import matplotlib.patches as patches
+
+# ===== INSERT YOUR API KEY HERE =====
+API_KEY = "WRITE HERE"  # Replace with your ArcGIS API key
+# ====================================
+
+# Brisbane Property Boundaries FeatureServer URL
+BRISBANE_PROPERTY_URL = "https://services2.arcgis.com/dEKgZETqwmDAh1rP/arcgis/rest/services/property_boundaries_holding/FeatureServer/0"
+
+# Brisbane Roads/Streets FeatureServer URL (for identifying front/back of house)
+BRISBANE_ROADS_URL = "https://services2.arcgis.com/dEKgZETqwmDAh1rP/arcgis/rest/services/Road_corridor/FeatureServer/0"
+
+def get_property_boundary(address, house_number=None, street_name=None, suburb=None, postcode=None):
+    """
+    Gets the property boundary based on its address, with preference for Brisbane properties.
+    
+    Args:
+        address (str): The full address of the property.
+        house_number (str, optional): House number for direct query.
+        street_name (str, optional): Street name for direct query.
+        suburb (str, optional): Suburb for direct query.
+        postcode (str, optional): Postcode for direct query.
+        
+    Returns:
+        dict: Dictionary containing boundary information and geometry
+    """
+    try:
+        # Connect to ArcGIS with API key
+        gis = GIS(api_key=API_KEY)
+        print("Connected using API key")
+        
+        # Access the Brisbane Property Boundaries layer
+        property_layer = FeatureLayer(BRISBANE_PROPERTY_URL)
+        print("Connected to Brisbane Property Boundaries service")
+        
+        # Method 1: Try to query directly using address components if provided
+        property_found = False
+        if house_number and street_name:
+            print(f"Searching for property with house number {house_number} on {street_name}")
+            
+            # Build a query to find the property by address components
+            query_string = ""
+            if house_number:
+                query_string += f"HOUSE_NUMBER = {house_number} "
+            
+            if street_name:
+                # Remove suffixes like St, Road etc for better matching
+                street_base = street_name.split(' ')[0] if ' ' in street_name else street_name
+                if query_string:
+                    query_string += "AND "
+                query_string += f"CORRIDOR_NAME LIKE '%{street_base}%' "
+            
+            if suburb:
+                if query_string:
+                    query_string += "AND "
+                query_string += f"SUBURB LIKE '%{suburb}%' "
+                
+            if postcode:
+                if query_string:
+                    query_string += "AND "
+                query_string += f"POSTCODE = {postcode} "
+            
+            # Execute the query
+            if query_string:
+                print(f"Executing query: {query_string}")
+                query_result = property_layer.query(where=query_string, return_geometry=True, out_fields='*')
+                
+                if query_result.features:
+                    print(f"Found {len(query_result.features)} matching properties by direct query")
+                    property_found = True
+                    parcel = query_result.features[0]
+                    parcel_geometry = parcel.geometry
+                    
+                    # Extract the address from the feature attributes
+                    house_num = parcel.attributes.get('HOUSE_NUMBER', '')
+                    house_suffix = parcel.attributes.get('HOUSE_NUMBER_SUFFIX', '')
+                    street = parcel.attributes.get('CORRIDOR_NAME', '')
+                    street_suffix = parcel.attributes.get('CORRIDOR_SUFFIX_CODE', '')
+                    suburb_name = parcel.attributes.get('SUBURB', '')
+                    
+                    formatted_address = f"{house_num}{house_suffix} {street} {street_suffix}, {suburb_name}"
+                    
+                    # Calculate the perimeter (boundary length)
+                    geometry_obj = Geometry(parcel_geometry)
+                    
+                    # Get the total boundary length directly from the attribute if available
+                    total_length = parcel.attributes.get('Shape__Length', geometry_obj.length)
+                    
+                    # Find the street for front/back detection
+                    street_info = None
+                    try:
+                        street_info = get_nearest_street(gis, parcel_geometry, street)
+                    except Exception as e:
+                        print(f"Warning: Could not identify nearest street: {e}")
+                    
+                    # Get neighboring properties to identify shared boundaries
+                    neighboring_properties = find_neighboring_properties(gis, property_layer, parcel_geometry)
+                    
+                    return {
+                        'geometry': parcel_geometry,
+                        'geometry_obj': geometry_obj,
+                        'total_length': total_length,
+                        'address': formatted_address,
+                        'feature': parcel,
+                        'street_info': street_info,
+                        'street_name': street,
+                        'neighboring_properties': neighboring_properties
+                    }
+        
+        # Method 2: If direct query didn't work, try geocoding and spatial query
+        if not property_found:
+            print("Direct query didn't find the property, trying geocoding...")
+            # Append Australia to address if not already present
+            if "australia" not in address.lower():
+                search_address = f"{address}, Australia"
+            else:
+                search_address = address
+                
+            print(f"Geocoding: {search_address}")
+            
+            # Geocode the address to get its location
+            geocode_result = geocode(search_address)[0]
+            location = geocode_result['location']
+            
+            print(f"Address geocoded: {geocode_result['address']}")
+            print(f"Location: {location}")
+            
+            # Create a small buffer around the geocoded point to find the parcel
+            buffer_distance = 50  # meters
+            search_location = {
+                "spatialReference": {"wkid": 4326},
+                "x": location['x'],
+                "y": location['y']
+            }
+            
+            # Create query to find parcels near the point
+            query_result = property_layer.query(
+                geometry=search_location,
+                geometry_type="esriGeometryPoint",
+                spatial_relationship="esriSpatialRelIntersects",
+                distance=buffer_distance,
+                units="esriSRUnit_Meter",
+                return_geometry=True,
+                out_fields='*'
+            )
+            
+            if query_result.features:
+                print(f"Found {len(query_result.features)} matching properties by spatial query")
+                # Get the first matching parcel geometry
+                parcel = query_result.features[0]
+                parcel_geometry = parcel.geometry
+                
+                # Extract the address from the feature attributes
+                house_num = parcel.attributes.get('HOUSE_NUMBER', '')
+                house_suffix = parcel.attributes.get('HOUSE_NUMBER_SUFFIX', '')
+                street = parcel.attributes.get('CORRIDOR_NAME', '')
+                street_suffix = parcel.attributes.get('CORRIDOR_SUFFIX_CODE', '')
+                suburb_name = parcel.attributes.get('SUBURB', '')
+                
+                formatted_address = f"{house_num}{house_suffix} {street} {street_suffix}, {suburb_name}"
+                
+                # Calculate the perimeter (boundary length)
+                geometry_obj = Geometry(parcel_geometry)
+                
+                # Get the total boundary length directly from the attribute if available
+                total_length = parcel.attributes.get('Shape__Length', geometry_obj.length)
+                
+                # Find the street for front/back detection
+                street_info = None
+                try:
+                    street_info = get_nearest_street(gis, parcel_geometry, street)
+                except Exception as e:
+                    print(f"Warning: Could not identify nearest street: {e}")
+                
+                # Get neighboring properties to identify shared boundaries
+                neighboring_properties = find_neighboring_properties(gis, property_layer, parcel_geometry)
+                
+                return {
+                    'geometry': parcel_geometry,
+                    'geometry_obj': geometry_obj,
+                    'total_length': total_length,
+                    'address': formatted_address,
+                    'feature': parcel,
+                    'street_info': street_info,
+                    'street_name': street,
+                    'neighboring_properties': neighboring_properties
+                }
+            else:
+                print("No matching property found at this location.")
+                print("Try providing more specific address details or check if the property is within Brisbane City Council area.")
+                return None
+        
+    except Exception as e:
+        print(f"Error: {str(e)}")
+        return None
+
+def get_nearest_street(gis, parcel_geometry, street_name=None):
+    """
+    Find the nearest street to the property to determine front/back orientation.
+    
+    Args:
+        gis: ArcGIS GIS instance
+        parcel_geometry: Property boundary geometry
+        street_name: Name of the street from address (for verification)
+        
+    Returns:
+        dict: Information about the nearest street
+    """
+    try:
+        # Access the Brisbane Roads layer
+        roads_layer = FeatureLayer(BRISBANE_ROADS_URL)
+        print("Connected to Brisbane Roads service")
+        
+        # Get the property centroid for search
+        centroid = get_centroid(parcel_geometry)
+        if not centroid:
+            print("Could not calculate property centroid")
+            return None
+            
+        print(f"Property centroid: {centroid}")
+        
+        # Create a search point
+        search_point = {
+            "spatialReference": parcel_geometry.get('spatialReference', {"wkid": 28356}),
+            "x": centroid[0],
+            "y": centroid[1]
+        }
+        
+        # First try: Use a direct manual approach based on property address
+        # Sometimes this is more reliable than the API query
+        if street_name:
+            print(f"Using manual approach with street name: {street_name}")
+            
+            # Create a simulated street point (straight line approach)
+            # This approach assumes the street is in the direction of decreasing y-coordinate
+            # from the property centroid (common in many map orientations)
+            manual_street_point = {
+                "x": centroid[0],
+                "y": centroid[1] - 100  # 100 meters south of property
+            }
+            
+            # Manually find the closest side to this assumed street point
+            closest_side = find_closest_side_to_street(parcel_geometry, 
+                                                       {"paths": [[[manual_street_point["x"], manual_street_point["y"]]]]})
+            
+            if closest_side:
+                print("Found closest side using manual approach")
+                return {
+                    'geometry': {"paths": [[[manual_street_point["x"], manual_street_point["y"]]]]},
+                    'name': street_name,
+                    'closest_side': closest_side,
+                    'method': 'manual'
+                }
+        
+        # Second try: Search for nearby roads using the service
+        print("Searching for nearby roads using service...")
+        print(f"Search point: {search_point}")
+        print(f"Using buffer distance: 100 meters")
+        
+        try:
+            # Search for nearby roads
+            query_result = roads_layer.query(
+                geometry=search_point,
+                geometry_type="esriGeometryPoint",
+                spatial_relationship="esriSpatialRelIntersects",
+                distance=100,  # Search within 100 meters
+                units="esriSRUnit_Meter",
+                return_geometry=True,
+                out_fields='*'
+            )
+            
+            if not query_result.features:
+                print("No streets found near the property via service")
+                # Fall back to the manual method if we haven't tried it yet
+                if not street_name:
+                    return None
+                    
+                print("Trying manual approach...")
+                manual_street_point = {
+                    "x": centroid[0],
+                    "y": centroid[1] - 100  # 100 meters south of property
+                }
+                
+                closest_side = find_closest_side_to_street(parcel_geometry, 
+                                                       {"paths": [[[manual_street_point["x"], manual_street_point["y"]]]]})
+                
+                if closest_side:
+                    print("Found closest side using fallback manual approach")
+                    return {
+                        'geometry': {"paths": [[[manual_street_point["x"], manual_street_point["y"]]]]},
+                        'name': "Street (estimated)",
+                        'closest_side': closest_side,
+                        'method': 'manual'
+                    }
+                return None
+                
+            print(f"Found {len(query_result.features)} streets near the property")
+            
+            # If we have the street name, try to find a matching street first
+            matching_street = None
+            if street_name:
+                for road in query_result.features:
+                    road_name = road.attributes.get('ROAD_NAME', '')
+                    print(f"Comparing street name: '{street_name}' with '{road_name}'")
+                    if street_name.lower() in road_name.lower():
+                        matching_street = road
+                        print(f"Found matching street: {road_name}")
+                        break
+            
+            # Use the first street if no match found
+            nearest_street = matching_street if matching_street else query_result.features[0]
+            
+            street_geom = nearest_street.geometry
+            street_name = nearest_street.attributes.get('ROAD_NAME', 'Unknown Street')
+            
+            # Calculate which side of the property is closest to the street
+            closest_side = find_closest_side_to_street(parcel_geometry, street_geom)
+            
+            if closest_side:
+                print(f"Found closest side at index {closest_side['index']} to street {street_name}")
+                return {
+                    'geometry': street_geom,
+                    'name': street_name,
+                    'closest_side': closest_side,
+                    'method': 'service'
+                }
+            else:
+                print("Could not determine closest side to street")
+                return None
+                
+        except Exception as query_error:
+            print(f"Error querying road service: {query_error}")
+            # Fall back to manual method
+            if street_name:
+                print("Falling back to manual method after query error")
+                manual_street_point = {
+                    "x": centroid[0],
+                    "y": centroid[1] - 100  # 100 meters south of property
+                }
+                
+                closest_side = find_closest_side_to_street(parcel_geometry, 
+                                                      {"paths": [[[manual_street_point["x"], manual_street_point["y"]]]]})
+                
+                if closest_side:
+                    return {
+                        'geometry': {"paths": [[[manual_street_point["x"], manual_street_point["y"]]]]},
+                        'name': street_name,
+                        'closest_side': closest_side,
+                        'method': 'manual_fallback'
+                    }
+            return None
+        
+    except Exception as e:
+        print(f"Error finding nearest street: {str(e)}")
+        # As a last resort, try a simple geometric approach
+        print("Trying simplistic geometric approach...")
+        
+        # Assume the street is on the "bottom" side (min y-coordinate)
+        rings = parcel_geometry['rings'][0]
+        
+        # Find the side with the minimum average y-coordinate (typically the "bottom" of the property)
+        min_y_side = None
+        min_y_val = float('inf')
+        
+        for i in range(len(rings)-1):
+            point1 = rings[i]
+            point2 = rings[i+1]
+            avg_y = (point1[1] + point2[1]) / 2
+            
+            if avg_y < min_y_val:
+                min_y_val = avg_y
+                min_y_side = {
+                    'index': i,
+                    'start': point1,
+                    'end': point2,
+                    'midpoint': [(point1[0] + point2[0]) / 2, (point1[1] + point2[1]) / 2]
+                }
+        
+        if min_y_side:
+            # Find opposite side (max y-coordinate side)
+            max_y_side = None
+            max_y_val = float('-inf')
+            
+            for i in range(len(rings)-1):
+                if i == min_y_side['index']:
+                    continue
+                    
+                point1 = rings[i]
+                point2 = rings[i+1]
+                avg_y = (point1[1] + point2[1]) / 2
+                
+                if avg_y > max_y_val:
+                    max_y_val = avg_y
+                    max_y_side = {
+                        'index': i,
+                        'start': point1,
+                        'end': point2,
+                        'midpoint': [(point1[0] + point2[0]) / 2, (point1[1] + point2[1]) / 2]
+                    }
+            
+            if max_y_side:
+                min_y_side['opposite_side'] = max_y_side
+            
+            print("Created front/back detection using geometric approach")
+            return {
+                'name': "Street (estimated)",
+                'closest_side': min_y_side,
+                'method': 'geometric'
+            }
+        
+        return None
+
+def get_centroid(geometry):
+    """Calculate the centroid of a polygon"""
+    if 'rings' not in geometry:
+        return None
+        
+    rings = geometry['rings']
+    if not rings or not rings[0]:
+        return None
+        
+    # Get the first ring (outer boundary)
+    ring = rings[0]
+    
+    # Calculate centroid
+    x_sum = sum(point[0] for point in ring)
+    y_sum = sum(point[1] for point in ring)
+    
+    return [x_sum / len(ring), y_sum / len(ring)]
+
+def find_closest_side_to_street(property_geom, street_geom):
+    """
+    Find which side of the property is closest to the street.
+    
+    Returns:
+        dict: Information about the closest side
+    """
+    sides = []
+    
+    # Extract property boundary
+    rings = property_geom['rings'][0]
+    
+    # Create sides
+    for i in range(len(rings)-1):
+        point1 = rings[i]
+        point2 = rings[i+1]
+        
+        # Calculate midpoint of the side
+        mid_x = (point1[0] + point2[0]) / 2
+        mid_y = (point1[1] + point2[1]) / 2
+        
+        # Create side info
+        sides.append({
+            'index': i,
+            'start': point1,
+            'end': point2,
+            'midpoint': [mid_x, mid_y],
+        })
+    
+    # Extract street points
+    street_points = []
+    
+    if 'paths' in street_geom:
+        # Line geometry
+        for path in street_geom['paths']:
+            street_points.extend(path)
+    elif 'rings' in street_geom:
+        # Polygon geometry
+        for ring in street_geom['rings']:
+            street_points.extend(ring)
+    else:
+        # Just use the first point if it's a point geometry
+        street_points = [[street_geom.get('x', 0), street_geom.get('y', 0)]]
+    
+    # Find the closest side to any street point
+    min_distance = float('inf')
+    closest_side = None
+    
+    for side in sides:
+        for street_point in street_points:
+            # Calculate distance from street point to side midpoint
+            dx = side['midpoint'][0] - street_point[0]
+            dy = side['midpoint'][1] - street_point[1]
+            distance = (dx**2 + dy**2)**0.5
+            
+            if distance < min_distance:
+                min_distance = distance
+                closest_side = side
+                closest_side['distance'] = distance
+    
+    # Also determine the opposite side (back of house)
+    if closest_side and len(sides) >= 3:
+        # Find the side that's most opposite to the front
+        front_mid = closest_side['midpoint']
+        max_distance = 0
+        opposite_side = None
+        
+        for side in sides:
+            if side['index'] == closest_side['index']:
+                continue
+            
+            side_mid = side['midpoint']
+            dx = front_mid[0] - side_mid[0]
+            dy = front_mid[1] - side_mid[1]
+            distance = (dx**2 + dy**2)**0.5
+            
+            if distance > max_distance:
+                max_distance = distance
+                opposite_side = side
+        
+        closest_side['opposite_side'] = opposite_side
+    
+    return closest_side
+
+def find_neighboring_properties(gis, property_layer, parcel_geometry):
+    """
+    Find neighboring properties that share a boundary with the current property.
+    
+    Args:
+        gis: ArcGIS GIS instance
+        property_layer: FeatureLayer for property boundaries
+        parcel_geometry: The geometry of the current property
+        
+    Returns:
+        list: List of dictionaries with neighboring property information
+    """
+    try:
+        print("Searching for neighboring properties...")
+        # Create a small buffer around the property to find neighbors
+        # A negative buffer would be ideal but isn't supported,
+        # so we'll use a very small positive buffer
+        buffer_distance = 1  # 1 meter
+        
+        # Get the spatial reference from the parcel geometry
+        spatial_ref = parcel_geometry.get('spatialReference', {"wkid": 28356})
+        
+        # Create a buffer around the property
+        # First, get the centroid to ensure the query works properly
+        centroid = get_centroid(parcel_geometry)
+        
+        if not centroid:
+            print("Could not calculate property centroid")
+            return []
+            
+        # Create a search area around the property
+        buffer = {
+            "spatialReference": spatial_ref,
+            "x": centroid[0],
+            "y": centroid[1]
+        }
+        
+        # Query for nearby properties
+        query_result = property_layer.query(
+            geometry=buffer,
+            geometry_type="esriGeometryPoint",
+            spatial_relationship="esriSpatialRelIntersects",
+            distance=buffer_distance * 20,  # Use a larger buffer to ensure we get all neighbors
+            units="esriSRUnit_Meter",
+            return_geometry=True,
+            out_fields='*'
+        )
+        
+        if not query_result.features:
+            print("No neighboring properties found")
+            return []
+            
+        # Filter out the original property and get only those that share a boundary
+        # We need to check for actual boundary intersection
+        neighbors = []
+        original_property_id = None
+        
+        # Extract original property ID if available
+        if hasattr(query_result.features[0], 'attributes') and 'OBJECTID' in query_result.features[0].attributes:
+            for feature in query_result.features:
+                if is_same_geometry(feature.geometry, parcel_geometry):
+                    original_property_id = feature.attributes.get('OBJECTID')
+                    break
+        
+        # Process each potential neighbor
+        for feature in query_result.features:
+            feature_id = feature.attributes.get('OBJECTID')
+            
+            # Skip if this is the original property
+            if feature_id == original_property_id or is_same_geometry(feature.geometry, parcel_geometry):
+                continue
+                
+            # Check if this property shares a boundary with our property
+            shared_boundary = find_shared_boundary(parcel_geometry, feature.geometry)
+            
+            if shared_boundary:
+                # Extract useful property information
+                house_num = feature.attributes.get('HOUSE_NUMBER', '')
+                street = feature.attributes.get('CORRIDOR_NAME', '')
+                
+                neighbors.append({
+                    'id': feature_id,
+                    'geometry': feature.geometry,
+                    'shared_boundary': shared_boundary,
+                    'address': f"{house_num} {street}",
+                    'feature': feature
+                })
+        
+        print(f"Found {len(neighbors)} neighboring properties that share boundaries")
+        return neighbors
+        
+    except Exception as e:
+        print(f"Error finding neighboring properties: {str(e)}")
+        return []
+
+def is_same_geometry(geom1, geom2):
+    """Check if two geometries are the same"""
+    try:
+        # A simple check - compare the first ring of both geometries
+        if 'rings' not in geom1 or 'rings' not in geom2:
+            return False
+            
+        if not geom1['rings'] or not geom2['rings']:
+            return False
+            
+        # Compare the number of points
+        ring1 = geom1['rings'][0]
+        ring2 = geom2['rings'][0]
+        
+        if len(ring1) != len(ring2):
+            return False
+            
+        # Compare centroids (faster than comparing all points)
+        centroid1 = get_centroid(geom1)
+        centroid2 = get_centroid(geom2)
+        
+        if not centroid1 or not centroid2:
+            return False
+            
+        # Check if centroids are very close
+        dx = centroid1[0] - centroid2[0]
+        dy = centroid1[1] - centroid2[1]
+        distance = np.sqrt(dx**2 + dy**2)
+        
+        return distance < 1  # Within 1 meter
+    except Exception:
+        return False
+
+def find_shared_boundary(geom1, geom2):
+    """
+    Find shared boundary segment between two geometries.
+    
+    Args:
+        geom1: First geometry
+        geom2: Second geometry
+        
+    Returns:
+        dict or None: Information about shared boundary if found
+    """
+    try:
+        # Extract rings
+        if 'rings' not in geom1 or 'rings' not in geom2:
+            return None
+            
+        if not geom1['rings'] or not geom2['rings']:
+            return None
+            
+        ring1 = geom1['rings'][0]
+        ring2 = geom2['rings'][0]
+        
+        # For each edge in the first geometry, check if it matches any edge in the second
+        # An edge is shared if the endpoints match (in any order)
+        shared_segments = []
+        
+        for i in range(len(ring1) - 1):
+            point1 = ring1[i]
+            point2 = ring1[i+1]
+            
+            for j in range(len(ring2) - 1):
+                neighbor_point1 = ring2[j]
+                neighbor_point2 = ring2[j+1]
+                
+                # Check if this segment matches (in either direction)
+                if (is_point_equal(point1, neighbor_point1) and is_point_equal(point2, neighbor_point2)) or \
+                   (is_point_equal(point1, neighbor_point2) and is_point_equal(point2, neighbor_point1)):
+                    
+                    # Calculate the length of this shared segment
+                    dx = point2[0] - point1[0]
+                    dy = point2[1] - point1[1]
+                    length = np.sqrt(dx**2 + dy**2)
+                    
+                    shared_segments.append({
+                        'index1': i,
+                        'index2': j,
+                        'point1': point1,
+                        'point2': point2,
+                        'length': length,
+                        'midpoint': [(point1[0] + point2[0])/2, (point1[1] + point2[1])/2]
+                    })
+        
+        # If we found shared segments, return information about them
+        if shared_segments:
+            # Sort by length (descending) to find the longest shared boundary
+            shared_segments.sort(key=lambda x: x['length'], reverse=True)
+            return {
+                'segments': shared_segments,
+                'total_length': sum(s['length'] for s in shared_segments)
+            }
+            
+        return None
+    except Exception as e:
+        print(f"Error finding shared boundary: {str(e)}")
+        return None
+
+def is_point_equal(point1, point2, tolerance=0.1):
+    """Check if two points are equal within a tolerance"""
+    if len(point1) < 2 or len(point2) < 2:
+        return False
+        
+    dx = point1[0] - point2[0]
+    dy = point1[1] - point2[1]
+    
+    # Use squared distance for efficiency
+    return (dx*dx + dy*dy) < tolerance*tolerance
+
+def calculate_sides(geometry, neighboring_properties=None, street_info=None, angle_threshold=10):
+    """
+    Calculate individual sides of a property boundary, identifying shared and non-shared boundaries.
+    Merges sides that have minor angle deviations into a single side.
+    
+    Args:
+        geometry: The property boundary geometry
+        neighboring_properties: List of neighboring properties that share boundaries
+        street_info: Information about the nearest street
+        angle_threshold: Maximum angle deviation (in degrees) to consider sides as collinear
+        
+    Returns:
+        list: List of sides with their lengths and boundary information
+    """
+    try:
+        # Extract the rings (polygon boundaries)
+        if 'rings' not in geometry:
+            print("Geometry does not contain rings data")
+            return None
+            
+        rings = geometry['rings']
+        if not rings or not rings[0]:
+            return None
+            
+        # Get the first ring (outer boundary)
+        ring = rings[0]
+        
+        # Calculate basic side information first
+        basic_sides = []
+        for i in range(len(ring)-1):  # -1 because polygons close (last point = first point)
+            point1 = ring[i]
+            point2 = ring[i+1]
+            
+            # Calculate Euclidean distance
+            if len(point1) >= 2 and len(point2) >= 2:
+                # For Brisbane properties (uses specific coordinate system)
+                # The coordinates are likely already in meters
+                dx = point2[0] - point1[0]
+                dy = point2[1] - point1[1]
+                
+                length = np.sqrt(dx**2 + dy**2)
+                
+                # Calculate midpoint
+                mid_x = (point1[0] + point2[0]) / 2
+                mid_y = (point1[1] + point2[1]) / 2
+                
+                # Calculate angle (in radians) for use in merging collinear sides
+                angle = np.arctan2(dy, dx)
+                
+                basic_sides.append({
+                    'start': point1,
+                    'end': point2,
+                    'length': length,
+                    'index': i,
+                    'midpoint': [mid_x, mid_y],
+                    'angle': angle,
+                    'shared_with': None,  # Will be populated if this is a shared boundary
+                    'boundary_type': 'unknown'  # Will be classified as 'shared', 'street', or 'other'
+                })
+        
+        # Merge sides that have minor angle deviations (collinear sides)
+        merged_sides = []
+        current_merged_side = basic_sides[0]
+        
+        for i in range(1, len(basic_sides)):
+            current_side = basic_sides[i]
+            prev_side = basic_sides[i-1] if i > 0 else basic_sides[-1]
+            
+            # Calculate angle difference (convert to degrees for easier threshold comparison)
+            angle_diff = abs(np.degrees(current_side['angle'] - current_merged_side['angle']))
+            # Normalize angle difference to 0-180 range
+            angle_diff = min(angle_diff, 360 - angle_diff)
+            
+            # Check if the current side is collinear with the merged side
+            if angle_diff <= angle_threshold:
+                # Sides are collinear, extend the current merged side
+                current_merged_side['end'] = current_side['end']
+                
+                # Recalculate length (direct distance from start to new end)
+                dx = current_merged_side['end'][0] - current_merged_side['start'][0]
+                dy = current_merged_side['end'][1] - current_merged_side['start'][1]
+                current_merged_side['length'] = np.sqrt(dx**2 + dy**2)
+                
+                # Recalculate midpoint
+                current_merged_side['midpoint'] = [
+                    (current_merged_side['start'][0] + current_merged_side['end'][0]) / 2,
+                    (current_merged_side['start'][1] + current_merged_side['end'][1]) / 2
+                ]
+            else:
+                # Sides have significant angle difference, add completed merged side and start a new one
+                merged_sides.append(current_merged_side)
+                current_merged_side = current_side
+        
+        # Add the last merged side
+        merged_sides.append(current_merged_side)
+        
+        # Update indices for the merged sides
+        for i, side in enumerate(merged_sides):
+            side['index'] = i
+        
+        # Identify the front (street-facing) side if street information is available
+        front_index = -1
+        if street_info and 'closest_side' in street_info:
+            # For merged sides, we need to find which merged side contains the original street-facing side
+            original_front_index = street_info['closest_side']['index']
+            
+            # Find which merged side contains this original index
+            # This is a simplification - a more robust approach would be to calculate the closest merged side to the street
+            min_distance = float('inf')
+            front_index = -1
+            street_point = street_info['closest_side'].get('midpoint', None)
+            
+            if street_point:
+                for i, side in enumerate(merged_sides):
+                    mid_x, mid_y = side['midpoint']
+                    dx = mid_x - street_point[0]
+                    dy = mid_y - street_point[1]
+                    distance = np.sqrt(dx**2 + dy**2)
+                    
+                    if distance < min_distance:
+                        min_distance = distance
+                        front_index = i
+            
+            # Mark the front side as street-facing
+            if 0 <= front_index < len(merged_sides):
+                merged_sides[front_index]['boundary_type'] = 'street'
+        
+        # Now identify shared boundaries if neighboring properties are provided
+        if neighboring_properties:
+            for neighbor in neighboring_properties:
+                shared_boundary = neighbor.get('shared_boundary')
+                if not shared_boundary:
+                    continue
+                    
+                # For each shared segment, find the closest merged side
+                for segment in shared_boundary.get('segments', []):
+                    segment_midpoint = segment.get('midpoint')
+                    if not segment_midpoint:
+                        continue
+                    
+                    # Find closest merged side to this shared segment
+                    min_distance = float('inf')
+                    closest_side_index = -1
+                    
+                    for i, side in enumerate(merged_sides):
+                        mid_x, mid_y = side['midpoint']
+                        dx = mid_x - segment_midpoint[0]
+                        dy = mid_y - segment_midpoint[1]
+                        distance = np.sqrt(dx**2 + dy**2)
+                        
+                        if distance < min_distance:
+                            min_distance = distance
+                            closest_side_index = i
+                    
+                    # Mark this side as shared with a neighbor if found
+                    if 0 <= closest_side_index < len(merged_sides):
+                        merged_sides[closest_side_index]['shared_with'] = neighbor.get('address', 'Neighboring property')
+                        merged_sides[closest_side_index]['boundary_type'] = 'shared'
+        
+        # Classify any remaining sides
+        for side in merged_sides:
+            if side['boundary_type'] == 'unknown':
+                # If not identified as shared or street-facing, mark as 'other'
+                side['boundary_type'] = 'other'
+        
+        return merged_sides
+    except Exception as e:
+        print(f"Error calculating sides: {str(e)}")
+        return None
+
+def create_boundary_image(boundary_data, output_path='property_boundary.png'):
+    """
+    Creates an image of the property boundary with satellite imagery background and numbered sides.
+    
+    Args:
+        boundary_data: The boundary data from get_property_boundary
+        output_path: Path to save the image
+        
+    Returns:
+        str: Path to the saved image file
+    """
+    try:
+        # Ensure matplotlib is imported
+        import matplotlib.pyplot as plt
+        import numpy as np
+        
+        # Extract the boundary rings
+        rings = boundary_data['geometry']['rings']
+        if not rings or not rings[0]:
+            print("No valid boundary to display")
+            return None
+            
+        # Get the first ring (outer boundary)
+        ring = rings[0]
+        
+        # Extract x and y coordinates
+        x_coords = [point[0] for point in ring]
+        y_coords = [point[1] for point in ring]
+        
+        # Calculate exact bounding box of property
+        x_min, x_max = min(x_coords), max(x_coords)
+        y_min, y_max = min(y_coords), max(y_coords)
+        
+        # Calculate buffer distance (to ensure the entire property is visible with minimal padding)
+        width = x_max - x_min
+        height = y_max - y_min
+        buffer_factor = 0.05  # Even smaller buffer for tighter view
+        buffer_x = width * buffer_factor
+        buffer_y = height * buffer_factor
+        
+        # Extended bounding box with minimal buffer
+        ext_x_min = x_min - buffer_x
+        ext_x_max = x_max + buffer_x
+        ext_y_min = y_min - buffer_y
+        ext_y_max = y_max + buffer_y
+        
+        # Calculate centroid 
+        centroid = get_centroid(boundary_data['geometry'])
+        if not centroid:
+            print("Could not calculate property centroid")
+            return None
+        
+        # Create a new figure with appropriate size
+        plt.figure(figsize=(12, 12))
+        ax = plt.gca()
+        
+        # SIMPLIFIED APPROACH: Just draw a plain background and the property boundaries
+        # This works reliably, but without satellite imagery
+        plt.fill([ext_x_min, ext_x_max, ext_x_max, ext_x_min], 
+                [ext_y_min, ext_y_min, ext_y_max, ext_y_max], 
+                color='lightgray', alpha=0.5)
+        
+        # Set the plot limits to match our calculated boundary
+        plt.xlim(ext_x_min, ext_x_max)
+        plt.ylim(ext_y_min, ext_y_max)
+        
+        # Try to add a satellite image using contextily
+        has_ctx = False
+        try:
+            # First, ensure contextily is installed
+            try:
+                import contextily as ctx
+                has_ctx = True
+                print("Contextily is installed, attempting to use satellite imagery")
+            except ImportError:
+                print("Contextily not available, installing...")
+                try:
+                    import subprocess
+                    import sys
+                    subprocess.check_call([sys.executable, "-m", "pip", "install", "contextily"])
+                    import contextily as ctx
+                    has_ctx = True
+                    print("Successfully installed contextily")
+                except Exception as e:
+                    print(f"Could not install contextily: {e}")
+                    has_ctx = False
+            
+            if has_ctx:
+                # Get geocoded location for basemap
+                address = boundary_data.get('address', '')
+                lat = None
+                lon = None
+                
+                if address:
+                    try:
+                        geocode_result = geocode(address)[0]
+                        location = geocode_result['location']
+                        lon = location.get('x')
+                        lat = location.get('y')
+                        print(f"Using geocoded coordinates: {lat}, {lon}")
+                    except Exception as e:
+                        print(f"Geocoding error: {e}")
+                
+                # Try alternative approach: directly using contextily with no coordinate transformation
+                try:
+                    # Create a very basic plot of property boundary first
+                    boundary_plot = plt.plot(x_coords, y_coords, 'r-', linewidth=1, alpha=0.01)
+                    
+                    # Try with a higher zoom level (19 or 20 for very detailed view)
+                    zoom_level = 20  # Maximum zoom possible for most sources
+                    
+                    print(f"Adding satellite basemap with zoom level {zoom_level}...")
+                    
+                    # Try different providers if one fails
+                    providers = [
+                        ctx.providers.Esri.WorldImagery,  # First choice
+                        ctx.providers.OpenStreetMap.Mapnik,  # Fallback
+                        ctx.providers.CartoDB.Positron  # Last resort
+                    ]
+                    
+                    basemap_added = False
+                    for provider in providers:
+                        try:
+                            print(f"Trying provider: {provider}")
+                            # Use crs parameter to match the property coordinates
+                            ctx.add_basemap(ax, source=provider, zoom=zoom_level, crs='epsg:28356')
+                            basemap_added = True
+                            print(f"Successfully added basemap from {provider}")
+                            break
+                        except Exception as provider_err:
+                            print(f"Provider {provider} failed: {provider_err}")
+                    
+                    if not basemap_added:
+                        print("All providers failed, using plain background")
+                except Exception as ctx_err:
+                    print(f"Error with contextily: {ctx_err}")
+            else:
+                print("Contextily not available, using plain background")
+                
+            # Ensure the property is visible by setting limits again
+            plt.xlim(ext_x_min, ext_x_max)
+            plt.ylim(ext_y_min, ext_y_max)
+                
+        except Exception as img_err:
+            print(f"Error with satellite imagery: {img_err}")
+        
+        # Get neighboring properties
+        neighboring_properties = boundary_data.get('neighboring_properties', [])
+        
+        # Calculate sides for labeling, including shared boundary information
+        sides = calculate_sides(
+            boundary_data['geometry'], 
+            neighboring_properties=neighboring_properties,
+            street_info=boundary_data.get('street_info')
+        )
+        
+        # Plot the property boundary with numbered sides
+        if sides:
+            # Define colors for the boundary lines
+            boundary_color = 'blue'  # Use one color for all boundaries
+            vertex_color = 'orange'  # Corners
+            
+            # Text colors - white works well on any background
+            text_color = 'white'
+            
+            # Plot each side with the same color
+            for side in sides:
+                x_side = [side['start'][0], side['end'][0]]
+                y_side = [side['start'][1], side['end'][1]]
+                
+                # Plot this side with thicker line for better visibility
+                plt.plot(x_side, y_side, color=boundary_color, linestyle='-', linewidth=5, alpha=0.9)
+            
+            # Fill the property with semi-transparent color to highlight it
+            plt.fill(x_coords, y_coords, color='yellow', alpha=0.2)
+            
+            # Add markers for each vertex
+            plt.plot(x_coords, y_coords, 'o', color=vertex_color, markersize=8)
+            
+            # Simple legend without boundary type distinctions
+            from matplotlib.lines import Line2D
+            legend_elements = [
+                Line2D([0], [0], color=boundary_color, lw=3, label='Property Boundary'),
+                Line2D([0], [0], marker='o', color=vertex_color, label='Corner', markerfacecolor=vertex_color, markersize=8)
+            ]
+            plt.legend(handles=legend_elements, loc='lower right', fontsize=10)
+            
+            # Determine optimal label placement to avoid overlapping
+            # Calculate the size of the plot
+            plot_width = x_max - x_min
+            plot_height = y_max - y_min
+            
+            # Determine if we should use the leader line method for complex properties
+            use_leader_lines = len(sides) > 5  # Use leader lines only for properties with many sides
+            
+            if use_leader_lines:
+                # Use leader lines to place labels close to the property but avoiding overlap
+                
+                # Place each label based on its side position but closer to the boundary
+                for i, side in enumerate(sides):
+                    # Side number (1-based index)
+                    side_number = i + 1
+                    
+                    # Get side midpoint
+                    side_mid_x = side['midpoint'][0]
+                    side_mid_y = side['midpoint'][1]
+                    
+                    # Calculate perpendicular direction for label placement
+                    if side['length'] > 0:
+                        dx = side['end'][0] - side['start'][0]
+                        dy = side['end'][1] - side['start'][1]
+                        
+                        # Normalize and rotate 90 degrees for perpendicular direction
+                        length = np.sqrt(dx**2 + dy**2)
+                        if length > 0:
+                            perp_dx = -dy / length
+                            perp_dy = dx / length
+                            
+                            # Place label extremely close to the side (minimal offset)
+                            offset = min(side['length'] * 0.1, max(0.5, side['length'] * 0.05))
+                            label_x = side_mid_x + perp_dx * offset
+                            label_y = side_mid_y + perp_dy * offset
+                        else:
+                            # Fallback if length is zero
+                            label_x = side_mid_x + 0.5
+                            label_y = side_mid_y + 0.5
+                    else:
+                        # Fallback if side length calculation failed
+                        label_x = side_mid_x + 0.5
+                        label_y = side_mid_y + 0.5
+                    
+                    # Create an arrow pointing from the label to the side midpoint
+                    plt.annotate('', 
+                                xy=(side_mid_x, side_mid_y),  # Arrow tip at side midpoint
+                                xytext=(label_x, label_y),    # Arrow base at label
+                                arrowprops=dict(facecolor='white', edgecolor='black', 
+                                                shrink=0.02, width=1.5, headwidth=8),
+                                zorder=5)  # Higher zorder to ensure visibility
+                    
+                    # Construct label text - simple Side X: length format
+                    label_text = f"Side {side_number}: {side['length']:.2f}m"
+                    
+                    # Add the label with a white outline for better visibility
+                    plt.text(label_x, label_y, label_text, 
+                             fontsize=9, ha='center', va='center', color=text_color, 
+                             fontweight='bold', 
+                             bbox=dict(facecolor=boundary_color, alpha=0.85, boxstyle='round,pad=0.3', 
+                                      edgecolor='white', linewidth=1.5),
+                             zorder=6)  # Even higher zorder for text
+            else:
+                # For simpler properties, use perpendicular placement very close to sides
+                
+                # Add labels at perpendicular offset from each side
+                for i, side in enumerate(sides):
+                    # Side number (1-based index)
+                    side_number = i + 1
+                    
+                    # Get side midpoint
+                    mid_x = side['midpoint'][0]
+                    mid_y = side['midpoint'][1]
+                    
+                    # Calculate perpendicular direction
+                    if side['length'] > 0:
+                        dx = side['end'][0] - side['start'][0]
+                        dy = side['end'][1] - side['start'][1]
+                        
+                        # Normalize and rotate 90 degrees
+                        length = np.sqrt(dx**2 + dy**2)
+                        if length > 0:
+                            perp_dx = -dy / length
+                            perp_dy = dx / length
+                            
+                            # Place label extremely close to the side (minimal offset)
+                            offset = min(side['length'] * 0.1, max(0.5, side['length'] * 0.05))
+                            label_x = mid_x + perp_dx * offset
+                            label_y = mid_y + perp_dy * offset
+                        else:
+                            label_x, label_y = mid_x + 0.5, mid_y + 0.5
+                    else:
+                        label_x, label_y = mid_x + 0.5, mid_y + 0.5
+                    
+                    # Create an arrow pointing from the label to the side midpoint
+                    plt.annotate('', 
+                                xy=(mid_x, mid_y),  # Arrow tip at side midpoint
+                                xytext=(label_x, label_y),    # Arrow base at label
+                                arrowprops=dict(facecolor='white', edgecolor='black', 
+                                                shrink=0.02, width=1, headwidth=6),
+                                zorder=5)
+                    
+                    # Construct label text - simple Side X: length format
+                    label_text = f"Side {side_number}: {side['length']:.2f}m"
+                    
+                    # Add the label with a white outline for better visibility
+                    plt.text(label_x, label_y, label_text, 
+                             fontsize=9, ha='center', va='center', color=text_color, 
+                             fontweight='bold', 
+                             bbox=dict(facecolor=boundary_color, alpha=0.8, boxstyle='round,pad=0.3', 
+                                      edgecolor='white', linewidth=1),
+                             zorder=6)
+        
+        # Set title with contrasting background for visibility
+        title = f"Property Boundary: {boundary_data['address']}"
+        plt.title(title, fontsize=14, color='black', 
+                 backgroundcolor='white', pad=10)
+        
+        # Add north arrow
+        arrow_x = x_min + (x_max - x_min) * 0.9
+        arrow_y = y_min + (y_max - y_min) * 0.9
+        arrow_length = (y_max - y_min) * 0.1
+        
+        plt.annotate('N', xy=(arrow_x, arrow_y), 
+                    xytext=(arrow_x, arrow_y - arrow_length),
+                    arrowprops=dict(facecolor='white', edgecolor='black', width=2, headwidth=10),
+                    ha='center', va='center', fontsize=14, fontweight='bold', color='black',
+                    bbox=dict(boxstyle="circle", fc="white", ec="black"))
+        
+        # Set equal aspect ratio to avoid distortion
+        plt.axis('equal')
+        
+        # Ensure the plot limits match the calculated extent - reinforced here
+        plt.xlim(ext_x_min, ext_x_max)
+        plt.ylim(ext_y_min, ext_y_max)
+        
+        # Remove axes for cleaner look
+        plt.axis('off')
+        
+        # Save the figure with high resolution
+        plt.savefig(output_path, dpi=300, bbox_inches='tight')
+        print(f"Boundary image saved to: {output_path}")
+        
+        return output_path
+    except Exception as e:
+        print(f"Error creating boundary image: {str(e)}")
+        return None
+
+# Add a function to install required packages if needed
+def ensure_dependencies():
+    """Ensure all required dependencies are installed."""
+    try:
+        import contextily
+        print("Contextily is already installed.")
+    except ImportError:
+        print("Installing contextily package for satellite imagery...")
+        import subprocess
+        import sys
+        
+        try:
+            subprocess.check_call([sys.executable, "-m", "pip", "install", "contextily"])
+            print("Successfully installed contextily package.")
+        except Exception as e:
+            print(f"Warning: Could not install contextily: {e}")
+            print("Satellite imagery may be limited.")
+
+# Update main function to ensure dependencies
+def main():
+    print("Brisbane Property Boundary Calculator")
+    print("------------------------------------")
+    
+    # Ensure dependencies are installed
+    ensure_dependencies()
+    
+    # Get detailed address information
+    house_number = input("Enter house number: ")
+    street_name = input("Enter street name (e.g., Smith St): ")
+    suburb = input("Enter suburb: ")
+    postcode = input("Enter postcode: ")
+    
+    # Construct the complete address
+    address = f"{house_number} {street_name}, {suburb} {postcode}, Queensland, Australia"
+    print(f"Full address: {address}")
+    
+    # Get the property boundary
+    boundary_data = get_property_boundary(
+        address, 
+        house_number=house_number, 
+        street_name=street_name, 
+        suburb=suburb, 
+        postcode=postcode
+    )
+    
+    if boundary_data:
+        total_length = boundary_data['total_length']
+        print(f"Total property boundary length: {total_length:.2f} meters")
+        
+        # Get neighboring properties
+        neighboring_properties = boundary_data.get('neighboring_properties', [])
+        
+        # Calculate and display individual sides with boundary information
+        sides = calculate_sides(
+            boundary_data['geometry'], 
+            neighboring_properties=neighboring_properties,
+            street_info=boundary_data.get('street_info')
+        )
+        
+        if sides:
+            print("\nIndividual boundary sides:")
+            
+            for i, side in enumerate(sides):
+                # Use 1-based numbering for sides
+                side_number = i + 1
+                
+                # Display additional information for each side
+                boundary_type = side['boundary_type']
+                boundary_desc = ""
+                
+                if boundary_type == 'shared':
+                    boundary_desc = f" - Shared boundary with {side['shared_with']}"
+                elif boundary_type == 'street':
+                    boundary_desc = f" - Street-facing boundary"
+                else:
+                    boundary_desc = f" - Other boundary (non-shared)"
+                
+                print(f"Side {side_number}: {side['length']:.2f} meters{boundary_desc}")
+                
+        # Create and save boundary image with satellite view
+        image_path = create_boundary_image(boundary_data)
+        if image_path:
+            print(f"\nA visualization of the boundary with numbered sides has been saved to:\n{os.path.abspath(image_path)}")
+    else:
+        print("Could not calculate property boundary information.")
+
+if __name__ == "__main__":
+    main() 
