@@ -79,6 +79,7 @@ const WorkflowPage = lazy(() => import('@/pages/Workflow'));
 const WorkflowListPage = lazy(() => import('@/pages/Workflow/WorkflowList'));
 const WorkflowTemplatesPage = lazy(() => import('@/pages/Workflow/WorkflowTemplates'));
 const WorkflowMetricsPage = lazy(() => import('@/pages/Workflow/WorkflowMetrics'));
+const MaintenanceWorkflowPage = lazy(() => import('@/pages/Workflow/MaintenanceWorkflow'));
 const FormsPage = lazy(() => import('@/pages/Forms'));
 const TasksPage = lazy(() => import('@/pages/Tasks'));
 const AIFeaturesPage = lazy(() => import('@/pages/AIFeatures'));
@@ -205,6 +206,7 @@ const routeObjects: RouteObject[] = [
           { path: "list", element: <SuspenseWrapper><WorkflowListPage /></SuspenseWrapper> },
           { path: "templates", element: <SuspenseWrapper><WorkflowTemplatesPage /></SuspenseWrapper> },
           { path: "metrics", element: <SuspenseWrapper><WorkflowMetricsPage /></SuspenseWrapper> },
+          { path: "maintenance", element: <SuspenseWrapper><MaintenanceWorkflowPage /></SuspenseWrapper> },
         ],
       },
       { path: "/forms", element: <SuspenseWrapper><FormsPage /></SuspenseWrapper> },
