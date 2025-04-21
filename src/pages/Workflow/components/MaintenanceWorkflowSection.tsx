@@ -1,19 +1,44 @@
 import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../ui/card";
-import { Button } from "../ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
-import { Input } from "../ui/input";
-import { Label } from "../ui/label";
-import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "../ui/select";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../../../components/ui/card";
+import { Button } from "../../../components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../../components/ui/tabs";
+import { Input } from "../../../components/ui/input";
+import { Label } from "../../../components/ui/label";
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "../../../components/ui/select";
 import { toast } from 'sonner';
 import { Wrench, CalendarCheck, Repeat, PlusCircle, ListChecks, Search } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from '../../../integrations/supabase/client';
+
+interface Customer {
+  name: string;
+}
+
+interface MaintenancePlan {
+  id: string;
+  name: string;
+  description?: string;
+  frequency: string;
+  status: string;
+  start_date: string;
+  end_date: string;
+  customers: { name: string } | null;
+}
+
+interface MaintenanceVisit {
+  id: string;
+  title: string;
+  status: string;
+  scheduled_date: string;
+  completed_date?: string;
+  customers: { name: string } | null;
+  maintenance_plans: { name: string } | null;
+}
 
 export const MaintenanceWorkflowSection = () => {
   const [activeTab, setActiveTab] = useState("plans");
   const [searchTerm, setSearchTerm] = useState("");
-  const [plans, setPlans] = useState([]);
-  const [visits, setVisits] = useState([]);
+  const [plans, setPlans] = useState<MaintenancePlan[]>([]);
+  const [visits, setVisits] = useState<MaintenanceVisit[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -39,7 +64,7 @@ export const MaintenanceWorkflowSection = () => {
         .order('created_at', { ascending: false });
 
       if (plansError) throw plansError;
-      setPlans(plansData || []);
+      setPlans(plansData as MaintenancePlan[] || []);
 
       // Fetch maintenance visits
       const { data: visitsData, error: visitsError } = await supabase
@@ -56,7 +81,7 @@ export const MaintenanceWorkflowSection = () => {
         .order('scheduled_date', { ascending: true });
 
       if (visitsError) throw visitsError;
-      setVisits(visitsData || []);
+      setVisits(visitsData as MaintenanceVisit[] || []);
     } catch (error) {
       console.error('Error fetching maintenance data:', error);
       toast.error('Failed to load maintenance data');
@@ -82,12 +107,12 @@ export const MaintenanceWorkflowSection = () => {
   );
 
   const filteredVisits = visits.filter(visit => 
-    visit.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (visit.customers && visit.customers.name && visit.customers.name.toLowerCase().includes(searchTerm.toLowerCase())) ||
-    (visit.maintenance_plans && visit.maintenance_plans.name && visit.maintenance_plans.name.toLowerCase().includes(searchTerm.toLowerCase()))
+    visit.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (visit.customers?.name?.toLowerCase().includes(searchTerm.toLowerCase())) ||
+    (visit.maintenance_plans?.name?.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
-  const getStatusColor = (status) => {
+  const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
       case 'active': return 'bg-green-100 text-green-800';
       case 'scheduled': return 'bg-blue-100 text-blue-800';
@@ -99,7 +124,7 @@ export const MaintenanceWorkflowSection = () => {
     }
   };
 
-  const formatDate = (dateString) => {
+  const formatDate = (dateString: string | undefined) => {
     if (!dateString) return 'N/A';
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', { 
