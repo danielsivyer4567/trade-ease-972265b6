@@ -4,7 +4,7 @@ import {
   MATERIAL_GRADES, 
   MATERIAL_DIMENSIONS,
 } from "../constants";
-import { useToast } from "@/hooks/use-toast";
+import { useToast } from "../../../../hooks/use-toast";
 
 export const useSpanTableCalculator = () => {
   const [material, setMaterial] = useState<string>("Timber");
@@ -47,15 +47,18 @@ export const useSpanTableCalculator = () => {
         lookupDimension = spacing; // For James Hardie, we use spacing directly
       }
       
-      const spanValue = SPAN_TABLE[material as keyof typeof SPAN_TABLE]?.[lookupGrade as keyof (typeof SPAN_TABLE)[keyof typeof SPAN_TABLE]]?.[lookupDimension as keyof (typeof SPAN_TABLE)[keyof typeof SPAN_TABLE][keyof (typeof SPAN_TABLE)[keyof typeof SPAN_TABLE]]]?.[lookupSpacing];
+      const spanValue = SPAN_TABLE[material as keyof typeof SPAN_TABLE]?.[lookupGrade as keyof (typeof SPAN_TABLE)[keyof typeof SPAN_TABLE]]?.[lookupDimension as keyof (typeof SPAN_TABLE)[keyof typeof SPAN_TABLE][keyof (typeof SPAN_TABLE)[keyof typeof SPAN_TABLE]]]?.[lookupSpacing] as number | undefined;
       
       if (spanValue !== undefined) {
         // Apply some basic adjustments based on span type
-        let adjustedSpan = spanValue;
+        let adjustedSpan: number = spanValue;
         if (spanType === "Continuous span") {
-          adjustedSpan = spanValue * 1.25; // 25% increase for continuous spans
-        } else if (spanType === "Cantilever") {
-          adjustedSpan = spanValue * 0.4; // 60% decrease for cantilevers
+          const spanAdjustments = {
+            "Continuous span": 1.25, // 25% increase for continuous spans
+            "Cantilever": 0.4, // 60% decrease for cantilevers
+            "Single span": 1.0 // No adjustment for single spans
+          };
+          adjustedSpan = spanValue * (spanAdjustments[spanType as keyof typeof spanAdjustments] || 1.0);
         }
         
         // Apply load adjustment (simplified)
