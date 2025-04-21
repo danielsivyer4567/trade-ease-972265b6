@@ -12,18 +12,6 @@ export const templatesNavigation = {
     },
     {
       type: 'link' as const,
-      icon: FileText,
-      label: 'Construction Quote',
-      path: '/templates/construction-quote',
-    },
-    {
-      type: 'link' as const,
-      icon: FileEdit,
-      label: 'Minimalist Quote',
-      path: '/templates/minimalist-quote',
-    },
-    {
-      type: 'link' as const,
       icon: Calculator,
       label: 'Construction Estimate',
       path: '/templates/construction-estimate',
