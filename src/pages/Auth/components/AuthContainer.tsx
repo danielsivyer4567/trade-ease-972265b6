@@ -6,17 +6,22 @@ interface AuthContainerProps {
 }
 
 export const AuthContainer: React.FC<AuthContainerProps> = ({ children }) => {
-  // Create an SVG pattern data URL for the background
-  const svgPatternUrl = `data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100%25' height='100%25' viewBox='0 0 1000 1000'%3E%3Cdefs%3E%3Cpattern id='pattern' patternUnits='userSpaceOnUse' width='100' height='100'%3E%3Cpath fill='none' stroke='%23cccccc' stroke-width='1' d='M25,100 L0,25 L50,-25 L75,50 L100,75 L50,125 Z'%3E%3C/path%3E%3Cpath fill='none' stroke='%23dddddd' stroke-width='1' d='M50,75 L125,0 L100,100 L75,150 L0,100 Z'%3E%3C/path%3E%3C/pattern%3E%3C/defs%3E%3Crect fill='%23f0f0f0' width='100%25' height='100%25'%3E%3C/rect%3E%3Crect fill='url(%23pattern)' width='100%25' height='100%25' opacity='0.3'%3E%3C/rect%3E%3C/svg%3E`;
-
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-100 p-4 relative">
-      {/* Black and white faded background image */}
+      {/* Solid background color to match the image */}
+      <div 
+        className="absolute inset-0 z-0"
+        style={{
+          backgroundColor: '#f0f0f0',
+        }}
+      />
+      
+      {/* Non-stretched background image */}
       <div 
         className="absolute inset-0 z-0 opacity-50 grayscale"
         style={{
-          backgroundImage: `url("${svgPatternUrl}")`,
-          backgroundSize: 'cover',
+          backgroundImage: 'url("/images/Screenshot 2025-04-21 125049.png")',
+          backgroundSize: 'contain',
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat',
           margin: '0',
