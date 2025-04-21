@@ -2,6 +2,11 @@ import ConstructionQuote from './ConstructionQuote';
 import MinimalistQuote from './MinimalistQuote';
 import ConstructionEstimate from './ConstructionEstimate';
 
+// Debug imports
+console.log('ConstructionQuote loaded:', !!ConstructionQuote);
+console.log('MinimalistQuote loaded:', !!MinimalistQuote);
+console.log('ConstructionEstimate loaded:', !!ConstructionEstimate);
+
 export interface Template {
   id: string;
   name: string;
@@ -29,5 +34,8 @@ export const templates: Template[] = [
     component: ConstructionEstimate,
   },
 ];
+
+// Debug templates array
+console.log('Templates array created with', templates.length, 'items');
 
 export default templates; 

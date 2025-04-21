@@ -1,4 +1,4 @@
-import { FileText, FileEdit, Calculator, HardHat } from 'lucide-react';
+import { FileText, FileEdit, Calculator, HardHat, Bug, TestTube } from 'lucide-react';
 import type { NavigationItem } from '../navigation/NavigationGroup';
 
 export const templatesNavigation = {
@@ -8,7 +8,7 @@ export const templatesNavigation = {
       type: 'link' as const,
       icon: HardHat,
       label: 'Construction',
-      path: '/templates/construction',
+      path: '/templates',
     },
     {
       type: 'link' as const,
@@ -27,6 +27,18 @@ export const templatesNavigation = {
       icon: Calculator,
       label: 'Construction Estimate',
       path: '/templates/construction-estimate',
+    },
+    {
+      type: 'link' as const,
+      icon: TestTube,
+      label: 'Template Previews',
+      path: '/templates/test',
+    },
+    {
+      type: 'link' as const,
+      icon: Bug,
+      label: 'Debug Templates',
+      path: '/templates/debug',
     },
   ] as NavigationItem[],
 }; 
