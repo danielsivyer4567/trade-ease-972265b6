@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Plus, Workflow, ClipboardList } from 'lucide-react';
@@ -14,6 +13,10 @@ const AutomationsHeader = ({ selectedCategory }: AutomationsHeaderProps) => {
 
   const navigateToForms = () => {
     navigate('/forms');
+  };
+
+  const navigateToCreateAutomation = () => {
+    navigate('/workflow?create=true');
   };
 
   return (
@@ -37,7 +40,7 @@ const AutomationsHeader = ({ selectedCategory }: AutomationsHeaderProps) => {
         <AutomationWorkflowButton>
           <span>Open in Workflow Builder</span>
         </AutomationWorkflowButton>
-        <Button className="flex items-center gap-2">
+        <Button className="flex items-center gap-2" onClick={navigateToCreateAutomation}>
           <Plus className="h-4 w-4" />
           <span>Create Automation</span>
         </Button>
