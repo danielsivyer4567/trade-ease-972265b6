@@ -1,6 +1,6 @@
-// @ts-ignore
+// @ts-expect-error
 import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
-// @ts-ignore
+// @ts-expect-error
 import { Twilio } from "https://esm.sh/twilio@4.19.0";
 
 // Add Deno namespace declaration

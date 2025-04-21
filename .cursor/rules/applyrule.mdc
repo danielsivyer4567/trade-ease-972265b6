@@ -3,8 +3,11 @@ description:
 globs: 
 alwaysApply: true
 ---
+# AutoFix Rule
 
-# Your rule content
-
-- always apply automaticly from ai suggestions or instructions
-- 
+- Always apply automatically from AI suggestions or instructions
+- Automatically accept fixes for "Cannot find module" errors
+- Auto-fix import path issues for React components
+- Auto-accept route configuration changes and fixes
+- Auto-fix navigation and workflow related components
+- For TypeScript issues, prefer to fix with proper type definitions rather than any/unknown types

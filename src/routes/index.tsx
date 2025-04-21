@@ -1,18 +1,17 @@
 import React, { Suspense, lazy } from 'react';
 import { createBrowserRouter, createRoutesFromElements, RouteObject, Outlet, Navigate, Route } from 'react-router-dom';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '../contexts/AuthContext';
 import { LoadingFallback } from './loading-fallback';
-import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
+import { ProtectedRoute } from '../components/auth/ProtectedRoute';
 import { authRoutes } from './auth-routes';
 import { SettingsRoutes } from './settings-routes';
 import { templateRoutes } from './template-routes';
-
 // Development mode debugging component
-const DevelopmentEntry = lazy(() => import('@/pages/DevelopmentEntry'));
+const DevelopmentEntry = lazy(() => import('../pages/DevelopmentEntry'));
 
 // Lazy load main page components
-const DashboardPage = lazy(() => import('@/pages/index'));
-const NotFoundPage = lazy(() => import('@/pages/NotFound'));
+const DashboardPage = lazy(() => import('../pages/Dashboard'));
+const NotFoundPage = lazy(() => import('../pages/NotFound'));
 
 // Auth pages
 const AuthPage = lazy(() => import('@/pages/Auth'));
@@ -45,33 +44,18 @@ const TeamNewPage = lazy(() => import('@/pages/TeamNew'));
 const TeamsPage = lazy(() => import('@/pages/Teams'));
 
 // Calendar and Scheduling
-const CalendarPage = lazy(() => import('@/pages/Calendar'));
-
-// Communication
-const EmailPage = lazy(() => import('@/pages/Email'));
-const MessagingPage = lazy(() => import('@/pages/Messaging'));
-const NotificationsPage = lazy(() => import('@/pages/Notifications'));
-
-// Finance
-const BankingPage = lazy(() => import('@/pages/Banking'));
-const PaymentsPage = lazy(() => import('@/pages/Payments'));
-const ExpensesPage = lazy(() => import('@/pages/Expenses'));
+{/* const CalendarPage = lazy(() => import('@/pages/Calendar')); */}
+{/* const PaymentsPage = lazy(() => import('@/pages/Payments')); */}
+{/* const ExpensesPage = lazy(() => import('@/pages/Expenses')); */}
 {/* const PayrollPage = lazy(() => import('@/pages/Payroll')); */}
 
 // Trading
 const TradingPage = lazy(() => import('@/pages/Trading'));
-const TradeDashPage = lazy(() => import('@/pages/TradeDash'));
+{/* const TradeDashPage = lazy(() => import('@/pages/TradeDash')); */}
 
-// Reporting
-const StatisticsPage = lazy(() => import('@/pages/Statistics'));
-const PerformancePage = lazy(() => import('@/pages/Performance'));
-const ActivityPage = lazy(() => import('@/pages/Activity'));
-
-// Supply Chain
-const SuppliersPage = lazy(() => import('@/pages/Suppliers'));
-const InventoryPage = lazy(() => import('@/pages/Inventory'));
-const PurchaseOrdersPage = lazy(() => import('@/pages/PurchaseOrders'));
-const MaterialOrderingPage = lazy(() => import('@/pages/MaterialOrdering'));
+{/* const InventoryPage = lazy(() => import('@/pages/Inventory')); */}
+{/* const PurchaseOrdersPage = lazy(() => import('@/pages/PurchaseOrders')); */}
+{/* const MaterialOrderingPage = lazy(() => import('@/pages/MaterialOrdering')); */}
 
 // Tools and Utilities
 const CalculatorsPage = lazy(() => import('@/pages/Calculators'));

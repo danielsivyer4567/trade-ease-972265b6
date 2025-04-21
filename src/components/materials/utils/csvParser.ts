@@ -1,4 +1,3 @@
-
 /**
  * CSV parser utilities for material imports
  */
@@ -28,7 +27,7 @@ export const processCSVContent = (content: string): Array<{name: string, quantit
     // Process rows
     const items = lines.slice(1).map(line => {
       // Handle special cases where commas might be inside quotes
-      let columns: string[] = [];
+      const columns: string[] = [];
       let inQuotes = false;
       let currentField = '';
       

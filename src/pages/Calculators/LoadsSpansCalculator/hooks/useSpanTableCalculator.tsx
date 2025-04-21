@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { 
   SPAN_TABLE, 
@@ -8,8 +7,8 @@ import {
 import { useToast } from "@/hooks/use-toast";
 
 export const useSpanTableCalculator = () => {
-  const [material, setMaterial] = useState("Timber");
-  const [grade, setGrade] = useState("MGP10");
+  const [material, setMaterial] = useState<string>("Timber");
+  const [grade, setGrade] = useState<string>("MGP10");
   const [dimension, setDimension] = useState("140x45");
   const [spacing, setSpacing] = useState("450mm");
   const [load, setLoad] = useState("2.0");
@@ -41,14 +40,14 @@ export const useSpanTableCalculator = () => {
       // and the dimension is directly the spacing (since there is no width)
       let lookupGrade = grade;
       let lookupDimension = dimension;
-      let lookupSpacing = spacing;
+      const lookupSpacing = spacing;
       
       if (material === "James Hardie") {
         lookupGrade = grade; // Already in correct format (e.g., "10mm")
         lookupDimension = spacing; // For James Hardie, we use spacing directly
       }
       
-      const spanValue = SPAN_TABLE[material]?.[lookupGrade]?.[lookupDimension]?.[lookupSpacing];
+      const spanValue = SPAN_TABLE[material as keyof typeof SPAN_TABLE]?.[lookupGrade as keyof (typeof SPAN_TABLE)[keyof typeof SPAN_TABLE]]?.[lookupDimension as keyof (typeof SPAN_TABLE)[keyof typeof SPAN_TABLE][keyof (typeof SPAN_TABLE)[keyof typeof SPAN_TABLE]]]?.[lookupSpacing];
       
       if (spanValue !== undefined) {
         // Apply some basic adjustments based on span type

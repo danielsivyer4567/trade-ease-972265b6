@@ -1,4 +1,3 @@
-
 import { serve } from 'https://deno.land/std@0.177.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.7.1'
 
@@ -14,7 +13,8 @@ serve(async (req) => {
   }
   
   try {
-    let { imageBase64, apiKey } = await req.json();
+    const { imageBase64, apiKey: initialApiKey } = await req.json();
+    let apiKey = initialApiKey;
     
     // If no API key provided, try to get it from the database using the authorization header
     if (!apiKey) {
