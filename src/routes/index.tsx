@@ -75,6 +75,7 @@ const CalculatorsPage = lazy(() => import('@/pages/Calculators'));
 const WorkflowPage = lazy(() => import('@/pages/Workflow'));
 const WorkflowListPage = lazy(() => import('@/pages/Workflow/WorkflowList'));
 const WorkflowTemplatesPage = lazy(() => import('@/pages/Workflow/WorkflowTemplates'));
+const WorkflowMetricsPage = lazy(() => import('@/pages/Workflow/WorkflowMetrics'));
 const FormsPage = lazy(() => import('@/pages/Forms'));
 const TasksPage = lazy(() => import('@/pages/Tasks'));
 const AIFeaturesPage = lazy(() => import('@/pages/AIFeatures'));
@@ -198,6 +199,7 @@ const routeObjects: RouteObject[] = [
           { index: true, element: <SuspenseWrapper><WorkflowPage /></SuspenseWrapper> },
           { path: "list", element: <SuspenseWrapper><WorkflowListPage /></SuspenseWrapper> },
           { path: "templates", element: <SuspenseWrapper><WorkflowTemplatesPage /></SuspenseWrapper> },
+          { path: "metrics", element: <SuspenseWrapper><WorkflowMetricsPage /></SuspenseWrapper> },
         ],
       },
       { path: "/forms", element: <SuspenseWrapper><FormsPage /></SuspenseWrapper> },
