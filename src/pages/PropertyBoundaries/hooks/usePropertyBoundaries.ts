@@ -2,6 +2,7 @@ import { useState, useCallback, useEffect, useTransition } from 'react';
 import { Property } from '../types';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
+import { searchAddressAndFetchBoundary } from '@/integrations/arcgis/propertyBoundaries';
 
 // Sample mock properties for initial UI rendering when no data is available
 const mockProperties: Property[] = [
@@ -47,6 +48,7 @@ export const usePropertyBoundaries = () => {
   const [isMeasuring, setIsMeasuring] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isPending, startTransition] = useTransition();
+  const [isSearchingAddress, setIsSearchingAddress] = useState(false);
   
   // Fetch properties from Supabase on component mount
   useEffect(() => {
@@ -73,7 +75,7 @@ export const usePropertyBoundaries = () => {
           } else if (data && data.length > 0) {
             // Transform Supabase data to match Property type
             const transformedData = data
-              .map((item): Property => ({
+              .map((item) => ({
                 id: item.id,
                 name: item.name,
                 description: item.description || '',
@@ -82,7 +84,7 @@ export const usePropertyBoundaries = () => {
                 boundaries: item.boundaries
               }))
               // Filter out any property with the name "Main Office"
-              .filter(property => property.name !== 'Main Office');
+              .filter((property) => property.name !== 'Main Office');
             
             startTransition(() => {
               setProperties(transformedData);
@@ -318,7 +320,7 @@ export const usePropertyBoundaries = () => {
             });
           } else if (data && data.length > 0) {
             // Transform Supabase data to match Property type
-            const transformedData = data.map((item): Property => ({
+            const transformedData = data.map((item) => ({
               id: item.id,
               name: item.name,
               description: item.description || '',
@@ -428,6 +430,60 @@ export const usePropertyBoundaries = () => {
     }
   }, [selectedProperty, properties]);
   
+  const handleAddressBoundarySearch = useCallback(async (address: string) => {
+    if (!address.trim()) {
+      toast.error('Please enter an address to search');
+      return;
+    }
+    
+    setIsSearchingAddress(true);
+    
+    try {
+      const boundaryData = await searchAddressAndFetchBoundary(address);
+      
+      if (!boundaryData) {
+        toast.error('Could not find property boundary for this address');
+        return;
+      }
+      
+      // Create a new property with the data
+      const newProperty: Property = {
+        id: `temp-${Date.now()}`,
+        name: boundaryData.address || 'New Property',
+        description: 'Property found via address search',
+        address: boundaryData.address || address,
+        location: [
+          boundaryData.geometry.rings[0][0][1],
+          boundaryData.geometry.rings[0][0][0]
+        ],
+        boundaries: boundaryData.geometry.rings.map(ring => 
+          ring.map(coords => [coords[1], coords[0]])
+        )
+      };
+      
+      // Try to save to Supabase if user is authenticated
+      const savedProperty = await savePropertyToSupabase(newProperty);
+      if (savedProperty) {
+        // Update the ID with the one from Supabase
+        newProperty.id = savedProperty.id;
+        toast.success('Saved property boundary to your account');
+      }
+      
+      // Add to the list of properties and select it
+      startTransition(() => {
+        setProperties(prev => [...prev, newProperty]);
+        setSelectedProperty(newProperty);
+      });
+      
+      toast.success('Found property boundary');
+    } catch (error) {
+      console.error('Error searching for property boundary:', error);
+      toast.error('An error occurred while searching for the property boundary');
+    } finally {
+      setIsSearchingAddress(false);
+    }
+  }, []);
+  
   return {
     properties,
     selectedProperty,
@@ -436,12 +492,14 @@ export const usePropertyBoundaries = () => {
     isMeasuring,
     isLoading,
     isPending,
+    isSearchingAddress,
     handlePropertySelect,
     handleFileUpload,
     handleFileRemove,
     handleSearchChange,
     handleToggleMeasurement,
     savePropertyToSupabase,
-    handleDeleteProperty
+    handleDeleteProperty,
+    handleAddressBoundarySearch
   };
 };
