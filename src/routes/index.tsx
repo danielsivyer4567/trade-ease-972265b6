@@ -7,11 +7,11 @@ import { authRoutes } from './auth-routes';
 import { SettingsRoutes } from './settings-routes';
 import { templateRoutes } from './template-routes';
 // Development mode debugging component
-const DevelopmentEntry = lazy(() => import('../pages/DevelopmentEntry'));
+const DevelopmentEntry = lazy(() => import('@/pages/DevelopmentEntry'));
 
 // Lazy load main page components
-const DashboardPage = lazy(() => import('../pages/Dashboard'));
-const NotFoundPage = lazy(() => import('../pages/NotFound'));
+const DashboardPage = lazy(() => import('@/pages/Dashboard'));
+const NotFoundPage = lazy(() => import('@/pages/NotFound'));
 
 // Auth pages
 // const AuthPage = lazy(() => import('@/pages/Auth'));
