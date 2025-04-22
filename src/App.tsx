@@ -58,20 +58,18 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <TabsProvider>
-          <NotificationProvider>
-            <ErrorBoundary FallbackComponent={ErrorFallback}>
-              <RouterProvider 
-                router={router} 
-                future={{ v7_startTransition: true }} 
-                fallbackElement={<LoadingFallback />}
-              />
-            </ErrorBoundary>
-            <Toaster />
-            <SonnerToaster position="bottom-right" closeButton richColors />
-            <Analytics />
-          </NotificationProvider>
-        </TabsProvider>
+        <NotificationProvider>
+          <ErrorBoundary FallbackComponent={ErrorFallback}>
+            <RouterProvider 
+              router={router} 
+              future={{ v7_startTransition: true }} 
+              fallbackElement={<LoadingFallback />}
+            />
+          </ErrorBoundary>
+          <Toaster />
+          <SonnerToaster position="bottom-right" closeButton richColors />
+          <Analytics />
+        </NotificationProvider>
       </AuthProvider>
     </QueryClientProvider>
   );
