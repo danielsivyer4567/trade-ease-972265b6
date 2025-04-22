@@ -1,4 +1,8 @@
-# Welcome to your Lovable project
+# Trade Ease
+
+Trade management system.
+
+Updated: April 22, 2025
 
 ## Project infos
 
