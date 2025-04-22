@@ -11,12 +11,13 @@
       "headers": [
         {
           "key": "Cache-Control",
-          "value": "public, max-age=0, must-revalidate"
+          "value": "no-store, no-cache, must-revalidate"
         }
       ]
     }
   ],
-  "buildCommand": "npm cache clean --force && rm -rf node_modules && npm install && npm run build",
+  "buildCommand": "rm -rf node_modules .next .cache dist && npm install && npm run build",
   "cleanUrls": true,
-  "trailingSlash": false
+  "trailingSlash": false,
+  "public": true
 } 
