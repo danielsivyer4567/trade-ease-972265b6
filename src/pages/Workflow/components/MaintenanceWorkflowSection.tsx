@@ -1,9 +1,9 @@
 import React, { useState, useEffect, ChangeEvent } from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../ui/card';
-import { Input } from '../ui/input';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
-import { Badge } from '../ui/badge';
-import { Button } from '../ui/button';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Search, Calendar, Plus } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -31,13 +31,13 @@ const filterVisits = (visits: Visit[], searchTerm: string) => {
 const getStatusColor = (status: string) => {
   switch (status?.toLowerCase()) {
     case 'pending':
-      return 'warning';
+      return 'secondary';
     case 'completed':
-      return 'success';
-    case 'cancelled':
-      return 'error';
-    default:
       return 'default';
+    case 'cancelled':
+      return 'destructive';
+    default:
+      return 'outline';
   }
 };
 
