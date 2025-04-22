@@ -1,4 +1,4 @@
-import React, { Suspense, ReactNode } from 'react';
+import React, { Suspense, ReactNode, lazy } from 'react';
 import { createBrowserRouter, createRoutesFromElements, RouteObject, Navigate } from 'react-router-dom';
 import { LoadingFallback } from './loading-fallback';
 import { ProtectedRoute } from '../components/auth/ProtectedRoute';
@@ -8,7 +8,16 @@ import { templateRoutes } from './template-routes';
 import DevelopmentEntry from '../pages/DevelopmentEntry';
 import DashboardPage from '../pages/Dashboard';
 import NotFoundPage from '../pages/NotFound';
-import { StubPage } from '../components/ui/StubPage';
+
+// Dynamically import page components
+const JobsPage = lazy(() => import('../pages/Jobs'));
+const MessagingPage = lazy(() => import('../pages/Messaging'));
+const CustomersPage = lazy(() => import('../pages/Customers'));
+const CalendarPage = lazy(() => import('../pages/Calendar'));
+const InventoryPage = lazy(() => import('../pages/Inventory'));
+const PaymentsPage = lazy(() => import('../pages/Payments'));
+const NetworksPage = lazy(() => import('../pages/Networks'));
+const EmailPage = lazy(() => import('../pages/Email'));
 
 // Helper component for Suspense boundary
 const SuspenseWrapper = ({ children }: { children: ReactNode }) => (
@@ -43,38 +52,38 @@ const routeObjects: RouteObject[] = [
     children: [
       { path: "/", element: <SuspenseWrapper><DashboardPage /></SuspenseWrapper> },
       
-      // Stub routes for sidebar navigation
+      // Main navigation routes with actual implementations
       { 
-        path: "jobs", 
-        element: <SuspenseWrapper><StubPage title="Jobs Dashboard" description="View and manage all your active and completed jobs." /></SuspenseWrapper> 
+        path: "jobs/*", 
+        element: <SuspenseWrapper><JobsPage /></SuspenseWrapper> 
       },
       { 
-        path: "messaging", 
-        element: <SuspenseWrapper><StubPage title="Messaging" description="Communication center for your team and clients." /></SuspenseWrapper> 
+        path: "messaging/*", 
+        element: <SuspenseWrapper><MessagingPage /></SuspenseWrapper> 
       },
       { 
-        path: "customers", 
-        element: <SuspenseWrapper><StubPage title="Customers" description="Manage your customer database and relationships." /></SuspenseWrapper> 
+        path: "customers/*", 
+        element: <SuspenseWrapper><CustomersPage /></SuspenseWrapper> 
       },
       { 
-        path: "calendar", 
-        element: <SuspenseWrapper><StubPage title="Calendar" description="Schedule and manage appointments and project timelines." /></SuspenseWrapper> 
+        path: "calendar/*", 
+        element: <SuspenseWrapper><CalendarPage /></SuspenseWrapper> 
       },
       { 
-        path: "inventory", 
-        element: <SuspenseWrapper><StubPage title="Inventory" description="Track and manage your inventory and supplies." /></SuspenseWrapper> 
+        path: "inventory/*", 
+        element: <SuspenseWrapper><InventoryPage /></SuspenseWrapper> 
       },
       { 
-        path: "payments", 
-        element: <SuspenseWrapper><StubPage title="Payments" description="Manage invoices, payments, and financial transactions." /></SuspenseWrapper> 
+        path: "payments/*", 
+        element: <SuspenseWrapper><PaymentsPage /></SuspenseWrapper> 
       },
       { 
-        path: "networks", 
-        element: <SuspenseWrapper><StubPage title="Networks" description="Connect with partners, suppliers, and industry networks." /></SuspenseWrapper> 
+        path: "networks/*", 
+        element: <SuspenseWrapper><NetworksPage /></SuspenseWrapper> 
       },
       { 
-        path: "email", 
-        element: <SuspenseWrapper><StubPage title="Email" description="Email communication and campaign management." /></SuspenseWrapper> 
+        path: "email/*", 
+        element: <SuspenseWrapper><EmailPage /></SuspenseWrapper> 
       },
       
       // Settings Routes
