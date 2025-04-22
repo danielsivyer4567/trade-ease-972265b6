@@ -1,4 +1,4 @@
-import React, { Suspense, ReactNode } from 'react';
+import React, { Suspense, ReactNode, lazy } from 'react';
 import { createBrowserRouter, createRoutesFromElements, RouteObject, Navigate } from 'react-router-dom';
 import { LoadingFallback } from './loading-fallback';
 import { ProtectedRoute } from '../components/auth/ProtectedRoute';
@@ -35,6 +35,12 @@ import Teams from '../pages/Teams';
 import Trading from '../pages/Trading';
 import TradeDash from '../pages/TradeDash';
 import TagsPage from '../pages/Tags/TagsPage';
+
+// Lazy load invoice pages
+const InvoicesPage = lazy(() => import('../pages/Invoices'));
+const NewInvoice = lazy(() => import('../pages/Invoices/NewInvoice'));
+const InvoiceDetail = lazy(() => import('../pages/Invoices/InvoiceDetail'));
+const JobInvoices = lazy(() => import('../pages/Invoices/JobInvoices'));
 
 // Helper component for Suspense boundary
 const SuspenseWrapper = ({ children }: { children: ReactNode }) => (
@@ -86,6 +92,12 @@ const routeObjects: RouteObject[] = [
       { path: "trading/*", element: <SuspenseWrapper><Trading /></SuspenseWrapper> },
       { path: "trade-dash/*", element: <SuspenseWrapper><TradeDash /></SuspenseWrapper> },
       { path: "tags", element: <SuspenseWrapper><TagsPage /></SuspenseWrapper> },
+      
+      // Invoice routes - specific routes first, then parameterized routes
+      { path: "invoices", element: <SuspenseWrapper><InvoicesPage /></SuspenseWrapper> },
+      { path: "invoices/new", element: <SuspenseWrapper><NewInvoice /></SuspenseWrapper> },
+      { path: "invoices/job/:jobId", element: <SuspenseWrapper><JobInvoices /></SuspenseWrapper> },
+      { path: "invoices/:id", element: <SuspenseWrapper><InvoiceDetail /></SuspenseWrapper> },
       
       // Team routes
       { path: "teams/*", element: <SuspenseWrapper><Teams /></SuspenseWrapper> },

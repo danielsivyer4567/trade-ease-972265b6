@@ -1,18 +1,18 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { AppLayout } from "@/components/ui/AppLayout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Filter, Plus, Search } from "lucide-react";
-import { useNavigate } from "react-router-dom";
 
 // Mock invoice data for demonstration
 const invoices = [
-  { id: "INV-0001", customer: "John Smith", amount: 2500, date: "2023-05-15", status: "paid" },
-  { id: "INV-0002", customer: "Sarah Johnson", amount: 1800, date: "2023-05-20", status: "pending" },
-  { id: "INV-0003", customer: "Michael Brown", amount: 3200, date: "2023-05-22", status: "overdue" },
-  { id: "INV-0004", customer: "Jessica Williams", amount: 950, date: "2023-05-25", status: "pending" },
-  { id: "INV-0005", customer: "David Miller", amount: 4100, date: "2023-05-27", status: "draft" },
+  { id: "INV-0001", customer: "John Smith", amount: 2500, date: "2024-03-15", status: "paid" },
+  { id: "INV-0002", customer: "Sarah Johnson", amount: 1800, date: "2024-03-20", status: "pending" },
+  { id: "INV-0003", customer: "Michael Brown", amount: 3200, date: "2024-03-22", status: "overdue" },
+  { id: "INV-0004", customer: "Jessica Williams", amount: 950, date: "2024-03-25", status: "pending" },
+  { id: "INV-0005", customer: "David Miller", amount: 4100, date: "2024-03-27", status: "draft" },
 ];
 
 export default function InvoicesPage() {
@@ -74,7 +74,7 @@ export default function InvoicesPage() {
                     <tr key={invoice.id} className="border-b hover:bg-gray-50">
                       <td className="p-3">{invoice.id}</td>
                       <td className="p-3">{invoice.customer}</td>
-                      <td className="p-3">{invoice.date}</td>
+                      <td className="p-3">{new Date(invoice.date).toLocaleDateString()}</td>
                       <td className="p-3">${invoice.amount.toFixed(2)}</td>
                       <td className="p-3">
                         <span className={`px-2 py-1 rounded-full text-xs font-semibold 
