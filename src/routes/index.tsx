@@ -1,10 +1,25 @@
 import React, { Suspense, ReactNode, lazy } from 'react';
-import { createBrowserRouter, createRoutesFromElements, RouteObject, Navigate } from 'react-router-dom';
+import { createBrowserRouter, createRoutesFromElements, RouteObject, Navigate, Route } from 'react-router-dom';
 import { LoadingFallback } from './loading-fallback';
 import { ProtectedRoute } from '../components/auth/ProtectedRoute';
 import { authRoutes } from './auth-routes';
-import { SettingsRoutes } from './settings-routes';
 import { templateRoutes } from './template-routes';
+import { jobRoutes } from './job-routes';
+import { activityRoutes } from './activity-routes';
+import { calendarRoutes } from './calendar-routes';
+import { communicationRoutes } from './communication-routes';
+import { dashboardRoutes } from './dashboard-routes';
+import { expensesRoutes } from './expenses-route';
+import { financialRoutes } from './financial-routes';
+import { paymentRoutes } from './payment-routes';
+import { SettingsRoutes } from './settings-routes';
+import { teamRoutes } from './team-routes';
+import { tradingRoutes } from './trading-routes';
+
+interface AppRoute {
+  path: string;
+  element: ReactNode;
+}
 
 // CRITICAL: This routing configuration ONLY uses actual implemented components 
 // NO stub pages are used, ensuring full functionality of the application
@@ -18,7 +33,7 @@ import Statistics from '../pages/Statistics';
 import Tasks from '../pages/Tasks';
 import Performance from '../pages/Performance';
 import DevelopmentEntry from '../pages/DevelopmentEntry';
-import NotFoundPage from '../pages/NotFound';
+import NotFoundPage from '../pages/NotFound/NotFoundPage';
 import AIFeatures from '../pages/AIFeatures';
 import TeamRed from '../pages/TeamRed';
 import TeamBlue from '../pages/TeamBlue';
@@ -40,93 +55,84 @@ import TagsPage from '../pages/Tags/TagsPage';
 const InvoicesPage = lazy(() => import('../pages/Invoices'));
 const NewInvoice = lazy(() => import('../pages/Invoices/NewInvoice'));
 const InvoiceDetail = lazy(() => import('../pages/Invoices/InvoiceDetail'));
-const JobInvoices = lazy(() => import('../pages/Invoices/JobInvoices'));
 
-// Helper component for Suspense boundary
+// Lazy load settings pages
+const SettingsPage = lazy(() => import('../pages/Settings/SettingsPage'));
+const SettingsPageTemplate = lazy(() => import('../pages/Settings/SettingsPageTemplate'));
+
+// Helper component to wrap routes with Suspense
 const SuspenseWrapper = ({ children }: { children: ReactNode }) => (
-  <Suspense fallback={<LoadingFallback />}>{children}</Suspense>
+  <Suspense fallback={<LoadingFallback />}>
+    {children}
+  </Suspense>
 );
 
-// Convert JSX auth routes to RouteObjects
-const authRouteObjects = createRoutesFromElements(authRoutes);
+// Create the router configuration
+const router = createBrowserRouter(
+  createRoutesFromElements(
+    <Route>
+      {/* Auth routes */}
+      {authRoutes}
 
-// Get settings RouteObjects by calling the function
-const settingsRouteObjects = SettingsRoutes();
+      {/* Protected routes */}
+      <Route element={<ProtectedRoute />}>
+        {/* Template routes */}
+        {templateRoutes}
 
-// Define main application routes using RouteObject configuration
-const routeObjects: RouteObject[] = [
-  // Development Entry (only in dev mode)
-  {
-    path: "/dev",
-    element: <Suspense fallback={<LoadingFallback />}><DevelopmentEntry /></Suspense>
-  },
-  
-  // Auth Routes - flattened to avoid nested routing issues
-  {
-    path: "/auth",
-    element: <Navigate to="/auth/login" replace />
-  },
-  
-  // Auth Routes (now converted RouteObjects)
-  ...authRouteObjects,
-  {
-    // Protected Routes Layout
-    element: <ProtectedRoute />,
-    children: [
-      // Main routes - only including actual existing pages
-      { path: "/", element: <SuspenseWrapper><DashboardPage /></SuspenseWrapper> },
-      { path: "jobs/*", element: <SuspenseWrapper><JobsPage /></SuspenseWrapper> },
-      { path: "job-details/:id", element: <SuspenseWrapper><JobDetails /></SuspenseWrapper> },
-      { path: "messaging/*", element: <SuspenseWrapper><Messaging /></SuspenseWrapper> },
-      { path: "customers/*", element: <SuspenseWrapper><Customers /></SuspenseWrapper> },
-      { path: "material-ordering", element: <SuspenseWrapper><MaterialOrdering /></SuspenseWrapper> },
-      { path: "workflow/*", element: <SuspenseWrapper><Workflow /></SuspenseWrapper> },
-      { path: "property-boundaries/*", element: <SuspenseWrapper><PropertyBoundaries /></SuspenseWrapper> },
-      { path: "site-audits/*", element: <SuspenseWrapper><SiteAudits /></SuspenseWrapper> },
-      { path: "inventory/*", element: <SuspenseWrapper><Inventory /></SuspenseWrapper> },
-      { path: "calendar/*", element: <SuspenseWrapper><Calendar /></SuspenseWrapper> },
-      { path: "statistics", element: <SuspenseWrapper><Statistics /></SuspenseWrapper> },
-      { path: "tasks", element: <SuspenseWrapper><Tasks /></SuspenseWrapper> },
-      { path: "performance", element: <SuspenseWrapper><Performance /></SuspenseWrapper> },
-      { path: "ai-features/*", element: <SuspenseWrapper><AIFeatures /></SuspenseWrapper> },
-      { path: "trading/*", element: <SuspenseWrapper><Trading /></SuspenseWrapper> },
-      { path: "trade-dash/*", element: <SuspenseWrapper><TradeDash /></SuspenseWrapper> },
-      { path: "tags", element: <SuspenseWrapper><TagsPage /></SuspenseWrapper> },
-      
-      // Invoice routes - specific routes first, then parameterized routes
-      { path: "invoices", element: <SuspenseWrapper><InvoicesPage /></SuspenseWrapper> },
-      { path: "invoices/new", element: <SuspenseWrapper><NewInvoice /></SuspenseWrapper> },
-      { path: "invoices/job/:jobId", element: <SuspenseWrapper><JobInvoices /></SuspenseWrapper> },
-      { path: "invoices/:id", element: <SuspenseWrapper><InvoiceDetail /></SuspenseWrapper> },
-      
-      // Team routes
-      { path: "teams/*", element: <SuspenseWrapper><Teams /></SuspenseWrapper> },
-      { path: "team-red", element: <SuspenseWrapper><TeamRed /></SuspenseWrapper> },
-      { path: "team-blue", element: <SuspenseWrapper><TeamBlue /></SuspenseWrapper> },
-      { path: "team-green", element: <SuspenseWrapper><TeamGreen /></SuspenseWrapper> },
-      { path: "team-new", element: <SuspenseWrapper><TeamNew /></SuspenseWrapper> },
-      
-      // Settings Routes
-      {
-        path: "settings", // Base path for settings
-        children: settingsRouteObjects // Nest the objects returned by SettingsRoutes()
-      },
-      
-      // Template Routes
-      templateRoutes
-    ]
-  },
-  // 404 Route - must be last
-  {
-    path: "*",
-    element: <SuspenseWrapper><NotFoundPage /></SuspenseWrapper>,
-  },
-];
+        {/* Feature routes */}
+        {jobRoutes}
+        {activityRoutes}
+        {calendarRoutes}
+        {communicationRoutes}
+        {dashboardRoutes}
+        {expensesRoutes}
+        {financialRoutes}
+        {paymentRoutes}
+        {teamRoutes}
+        {tradingRoutes}
+        {SettingsRoutes}
 
-// Create the browser router instance with the relativeSplatPath future flag
-export const router = createBrowserRouter(routeObjects, {
-  future: {
-    v7_relativeSplatPath: true,
-  }
-});
+        {/* Main routes */}
+        <Route path="/" element={<Navigate to="/dashboard" replace />} />
+        <Route path="/dashboard" element={<DashboardPage />} />
+        <Route path="/jobs" element={<JobsPage />} />
+        <Route path="/jobs/:id" element={<JobDetails />} />
+        <Route path="/material-ordering" element={<MaterialOrdering />} />
+        <Route path="/statistics" element={<Statistics />} />
+        <Route path="/tasks" element={<Tasks />} />
+        <Route path="/performance" element={<Performance />} />
+        <Route path="/development" element={<DevelopmentEntry />} />
+        <Route path="/ai-features" element={<AIFeatures />} />
+        <Route path="/team-red" element={<TeamRed />} />
+        <Route path="/team-blue" element={<TeamBlue />} />
+        <Route path="/team-green" element={<TeamGreen />} />
+        <Route path="/team-new" element={<TeamNew />} />
+        <Route path="/customers" element={<Customers />} />
+        <Route path="/workflow" element={<Workflow />} />
+        <Route path="/property-boundaries" element={<PropertyBoundaries />} />
+        <Route path="/site-audits" element={<SiteAudits />} />
+        <Route path="/inventory" element={<Inventory />} />
+        <Route path="/calendar" element={<Calendar />} />
+        <Route path="/messaging" element={<Messaging />} />
+        <Route path="/teams" element={<Teams />} />
+        <Route path="/trading" element={<Trading />} />
+        <Route path="/trade-dash" element={<TradeDash />} />
+        <Route path="/tags" element={<TagsPage />} />
+
+        {/* Invoice routes */}
+        <Route path="/invoices" element={<SuspenseWrapper><InvoicesPage /></SuspenseWrapper>} />
+        <Route path="/invoices/new" element={<SuspenseWrapper><NewInvoice /></SuspenseWrapper>} />
+        <Route path="/invoices/:id" element={<SuspenseWrapper><InvoiceDetail /></SuspenseWrapper>} />
+
+        {/* Settings routes */}
+        <Route path="/settings/*" element={<SuspenseWrapper><SettingsPage /></SuspenseWrapper>} />
+      </Route>
+
+      {/* 404 route */}
+      <Route path="*" element={<NotFoundPage />} />
+    </Route>
+  )
+);
+
+export default router;
 
