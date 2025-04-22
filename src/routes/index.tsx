@@ -9,6 +9,9 @@ import DevelopmentEntry from '../pages/DevelopmentEntry';
 import DashboardPage from '../pages/Dashboard';
 import NotFoundPage from '../pages/NotFound';
 
+// IMPORTANT: This file has been updated to use the original page implementations
+// instead of stub pages. This restores all functionality that was temporarily replaced.
+
 // Dynamically import page components
 const JobsPage = lazy(() => import('../pages/Jobs'));
 const MessagingPage = lazy(() => import('../pages/Messaging'));
