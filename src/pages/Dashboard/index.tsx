@@ -2,7 +2,8 @@ import React from 'react';
 import { AppLayout } from '@/components/ui/AppLayout';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from '@/components/ui/button';
-import { ChevronLeft, ChevronRight, MapPin } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import JobMap from '@/components/JobMap';
 
 // Mock data for jobs
 const todayJobs = [
@@ -24,6 +25,26 @@ const completedJobs = [
 const daysOfWeek = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
 const currentMonth = Array.from({ length: 31 }, (_, i) => i + 1);
 
+// Mock data for job locations
+const jobLocations = [
+  {
+    id: 1,
+    jobNumber: "HVAC-001",
+    customer: "Gold Coast Residence",
+    type: "HVAC Installation",
+    date: "Today, 9:00 AM",
+    location: [153.4014, -28.0171] // [longitude, latitude]
+  },
+  {
+    id: 2,
+    jobNumber: "ELE-001",
+    customer: "Surfers Paradise Office",
+    type: "Electrical Upgrade",
+    date: "Today, 11:30 AM",
+    location: [153.4261, -27.9994]
+  }
+];
+
 const Dashboard: React.FC = () => {
   // Get today's date to highlight in the calendar
   const today = new Date().getDate();
@@ -33,24 +54,12 @@ const Dashboard: React.FC = () => {
       <div className="flex flex-col gap-4 p-4">
         {/* Google Maps View */}
         <div className="w-full h-[300px] bg-gray-100 rounded-lg overflow-hidden relative">
-          <div className="absolute inset-0 bg-cover bg-center" style={{ 
-            backgroundImage: "url('https://maps.googleapis.com/maps/api/staticmap?center=australia&zoom=5&size=1200x300&key=YOUR_API_KEY')" 
-          }}>
-            {/* Placeholder map - in production you would use a real Google Maps component */}
-          </div>
-          <div className="absolute top-2 left-2 bg-white p-1 rounded-sm">
-            <svg width="50" height="20" xmlns="http://www.w3.org/2000/svg">
-              <text x="5" y="15" fill="#5F6368" fontSize="14">Google</text>
-            </svg>
-          </div>
-          <div className="absolute bottom-1 right-1 text-xs text-white bg-black bg-opacity-50 p-1 rounded">
-            Map data ©2023
-          </div>
-          <div className="absolute top-2 right-2">
-            <Button size="icon" variant="outline" className="bg-white h-8 w-8">
-              <MapPin className="h-4 w-4" />
-            </Button>
-          </div>
+          <JobMap 
+            jobs={jobLocations}
+            center={[153.4014, -28.0171]} // Gold Coast coordinates
+            zoom={12}
+            height={300}
+          />
         </div>
 
         {/* Job Sections */}
