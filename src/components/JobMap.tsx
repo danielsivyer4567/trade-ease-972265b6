@@ -47,12 +47,37 @@ const JobMap = ({
     mapTypeControl: true,
     fullscreenControl: true,
     zoomControl: true,
-    mapId: '8f348c1e276da9d5' // Added Map ID for Advanced Markers
+    mapId: '8f348c1e276da9d5', // Added Map ID for Advanced Markers
+    streetView: {
+      visible: false,
+      enableCloseButton: true,
+      enableCompass: true,
+      motionTracking: false,
+      motionTrackingControl: true,
+      position: undefined, // Will use default position
+      pov: {
+        heading: 0,
+        pitch: 0
+      }
+    }
   };
 
   const onLoad = (map: google.maps.Map) => {
     // Force satellite view
     map.setMapTypeId('satellite');
+    
+    // Configure street view
+    const streetViewService = new google.maps.StreetViewService();
+    const panorama = map.getStreetView();
+
+    // Set panorama options
+    panorama.setOptions({
+      enableCloseButton: true,
+      addressControl: true,
+      fullscreenControl: true,
+      motionTracking: false,
+      motionTrackingControl: true
+    });
     
     // Add markers from jobs if provided
     if (jobs.length > 0) {
@@ -79,6 +104,21 @@ const JobMap = ({
           // Add click listener using the recommended 'gmp-click' event
           marker.addListener('gmp-click', () => {
             setSelectedJob(job);
+            
+            // Check if street view is available at this position
+            streetViewService.getPanorama({
+              location: { lat: job.location[1], lng: job.location[0] },
+              radius: 50 // Search radius in meters
+            }, (data, status) => {
+              if (status === google.maps.StreetViewStatus.OK) {
+                // Street view is available, position the panorama
+                panorama.setPosition(data.location.latLng);
+                panorama.setPov({
+                  heading: 0,
+                  pitch: 0
+                });
+              }
+            });
           });
         } catch (error) {
           console.error("Error creating advanced marker:", error);
