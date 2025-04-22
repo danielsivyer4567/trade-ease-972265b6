@@ -31,45 +31,81 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   useEffect(() => {
     // Set up the auth state listener first
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, currentSession) => {
-        console.log('Auth state changed:', event);
+    let subscription: { unsubscribe: () => void } | null = null;
+    
+    try {
+      const { data: { subscription: authSubscription } } = supabase.auth.onAuthStateChange(
+        (event, currentSession) => {
+          console.log('Auth state changed:', event);
+          setSession(currentSession);
+          setUser(currentSession?.user ?? null);
+          setLoading(false);
+        }
+      );
+      
+      subscription = authSubscription;
+      
+      // Then check for existing session
+      supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
         setSession(currentSession);
         setUser(currentSession?.user ?? null);
         setLoading(false);
-      }
-    );
-
-    // Then check for existing session
-    supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
-      setSession(currentSession);
-      setUser(currentSession?.user ?? null);
+      }).catch(error => {
+        console.warn('Error getting session:', error);
+        setLoading(false);
+      });
+    } catch (error) {
+      console.error('Error setting up auth listener:', error);
       setLoading(false);
-    });
+    }
 
     return () => {
-      subscription.unsubscribe();
+      if (subscription) {
+        try {
+          subscription.unsubscribe();
+        } catch (error) {
+          console.warn('Error unsubscribing from auth changes:', error);
+        }
+      }
     };
   }, []);
 
   const signIn = async (email: string, password: string) => {
     try {
+      // Check connection to Supabase before attempting sign in
+      try {
+        const { error: pingError } = await supabase.from('auth_health_check').select('count').limit(1).single();
+        if (pingError && pingError.code !== 'PGRST116') {
+          // If it's not a "relation does not exist" error (which is expected), it might be a connection issue
+          console.warn('Connection check failed:', pingError);
+          // Continue anyway as the table might not exist
+        }
+      } catch (connectionError) {
+        console.warn('Connection check failed, attempting sign in anyway:', connectionError);
+      }
+      
+      // Proceed with sign in
       const { data, error } = await supabase.auth.signInWithPassword({ email, password });
       
       if (error) throw error;
       
       // Check if 2FA is enabled for this user
-      const isTwoFactorEnabled = await twoFactorAuthService.isEnabled(data.user.id);
-      
-      if (isTwoFactorEnabled) {
-        // Store user ID temporarily and set awaiting 2FA state
-        setTempUserId(data.user.id);
-        setAwaitingTwoFactor(true);
+      try {
+        const isTwoFactorEnabled = await twoFactorAuthService.isEnabled(data.user.id);
         
-        // Sign out immediately - user will complete sign in after 2FA
-        await supabase.auth.signOut();
-        
-        return;
+        if (isTwoFactorEnabled) {
+          // Store user ID temporarily and set awaiting 2FA state
+          setTempUserId(data.user.id);
+          setAwaitingTwoFactor(true);
+          
+          // Sign out immediately - user will complete sign in after 2FA
+          await supabase.auth.signOut();
+          
+          return;
+        }
+      } catch (twoFactorError) {
+        console.warn('Error checking 2FA status, assuming 2FA is not enabled:', twoFactorError);
+        // Continue without 2FA
       }
       
       // No 2FA, user is fully authenticated
@@ -248,7 +284,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       if (!user) return false;
       return await twoFactorAuthService.isEnabled(user.id);
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error checking 2FA status:', error);
       return false;
     }
