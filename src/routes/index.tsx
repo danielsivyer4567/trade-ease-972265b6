@@ -55,10 +55,9 @@ import TagsPage from '../pages/Tags/TagsPage';
 const InvoicesPage = lazy(() => import('../pages/Invoices'));
 const NewInvoice = lazy(() => import('../pages/Invoices/NewInvoice'));
 const InvoiceDetail = lazy(() => import('../pages/Invoices/InvoiceDetail'));
-
 // Lazy load settings pages
-const SettingsPage = lazy(() => import('../pages/Settings/SettingsPage'));
-const SettingsPageTemplate = lazy(() => import('../pages/Settings/SettingsPageTemplate'));
+const SettingsPage = lazy(() => import('../pages/Settings/Settings'));
+const SettingsPageTemplate = lazy(() => import('../pages/Settings/SettingsTemplate'));
 
 // Helper component to wrap routes with Suspense
 const SuspenseWrapper = ({ children }: { children: ReactNode }) => (
@@ -134,6 +133,7 @@ const router = createBrowserRouter(
   )
 );
 
-export { router };
-export default router;
+const exportedRouter = router;
+export { exportedRouter as router };
+export default exportedRouter;
 
