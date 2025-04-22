@@ -8,6 +8,7 @@ import { templateRoutes } from './template-routes';
 import DevelopmentEntry from '../pages/DevelopmentEntry';
 import DashboardPage from '../pages/Dashboard';
 import NotFoundPage from '../pages/NotFound';
+import { StubPage } from '../components/ui/StubPage';
 
 // Helper component for Suspense boundary
 const SuspenseWrapper = ({ children }: { children: ReactNode }) => (
@@ -41,6 +42,41 @@ const routeObjects: RouteObject[] = [
     element: <ProtectedRoute />,
     children: [
       { path: "/", element: <SuspenseWrapper><DashboardPage /></SuspenseWrapper> },
+      
+      // Stub routes for sidebar navigation
+      { 
+        path: "jobs", 
+        element: <SuspenseWrapper><StubPage title="Jobs Dashboard" description="View and manage all your active and completed jobs." /></SuspenseWrapper> 
+      },
+      { 
+        path: "messaging", 
+        element: <SuspenseWrapper><StubPage title="Messaging" description="Communication center for your team and clients." /></SuspenseWrapper> 
+      },
+      { 
+        path: "customers", 
+        element: <SuspenseWrapper><StubPage title="Customers" description="Manage your customer database and relationships." /></SuspenseWrapper> 
+      },
+      { 
+        path: "calendar", 
+        element: <SuspenseWrapper><StubPage title="Calendar" description="Schedule and manage appointments and project timelines." /></SuspenseWrapper> 
+      },
+      { 
+        path: "inventory", 
+        element: <SuspenseWrapper><StubPage title="Inventory" description="Track and manage your inventory and supplies." /></SuspenseWrapper> 
+      },
+      { 
+        path: "payments", 
+        element: <SuspenseWrapper><StubPage title="Payments" description="Manage invoices, payments, and financial transactions." /></SuspenseWrapper> 
+      },
+      { 
+        path: "networks", 
+        element: <SuspenseWrapper><StubPage title="Networks" description="Connect with partners, suppliers, and industry networks." /></SuspenseWrapper> 
+      },
+      { 
+        path: "email", 
+        element: <SuspenseWrapper><StubPage title="Email" description="Email communication and campaign management." /></SuspenseWrapper> 
+      },
+      
       // Settings Routes
       {
         path: "settings", // Base path for settings
