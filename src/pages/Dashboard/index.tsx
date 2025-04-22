@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from '@/components/ui/button';
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import JobMap from '@/components/JobMap';
+import type { Job } from '@/types/job';
 
 // Mock data for jobs
 const todayJobs = [
@@ -26,20 +27,24 @@ const daysOfWeek = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
 const currentMonth = Array.from({ length: 31 }, (_, i) => i + 1);
 
 // Mock data for job locations
-const jobLocations = [
+const jobLocations: Job[] = [
   {
-    id: 1,
+    id: "HVAC-001",
     jobNumber: "HVAC-001",
     customer: "Gold Coast Residence",
     type: "HVAC Installation",
+    title: "HVAC System Installation",
+    status: "in-progress",
     date: "Today, 9:00 AM",
     location: [153.4014, -28.0171] // [longitude, latitude]
   },
   {
-    id: 2,
+    id: "ELE-001",
     jobNumber: "ELE-001",
     customer: "Surfers Paradise Office",
     type: "Electrical Upgrade",
+    title: "Electrical Panel Upgrade",
+    status: "ready",
     date: "Today, 11:30 AM",
     location: [153.4261, -27.9994]
   }
