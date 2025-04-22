@@ -3,33 +3,29 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { AppLayout } from "@/components/ui/AppLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, FileText, Printer, Download, Edit } from "lucide-react";
+import { ArrowLeft, FileText, Printer, Download, Edit, Trash2 } from "lucide-react";
 import { InvoiceForm } from './components/InvoiceForm';
-import { toast } from "sonner";
-
-// Mock data - replace with actual API call
-const mockInvoice = {
-  invoiceNumber: "INV-001",
-  customerId: "customer-1",
-  issueDate: new Date(),
-  dueDate: new Date(),
-  status: "draft" as const,
-  items: [
-    {
-      description: "Sample Item",
-      quantity: 1,
-      unitPrice: 100,
-      total: 100
-    }
-  ],
-  notes: "Sample invoice notes",
-  attachments: []
-};
+import { useInvoices } from "@/hooks/useInvoices";
+import { format } from "date-fns";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 export default function InvoiceDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [isEditing, setIsEditing] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const { invoices, updateInvoice, deleteInvoice } = useInvoices();
+
+  const invoice = invoices?.find(inv => inv.id === id);
 
   const handleBack = () => {
     navigate("/invoices");
@@ -41,19 +37,44 @@ export default function InvoiceDetail() {
 
   const handleSubmit = async (data: any) => {
     try {
-      // TODO: Implement API call to update invoice
-      console.log("Updating invoice:", data);
-      toast.success("Invoice updated successfully");
+      await updateInvoice.mutateAsync({
+        id: id!,
+        ...data,
+      });
       setIsEditing(false);
     } catch (error) {
       console.error("Error updating invoice:", error);
-      toast.error("Failed to update invoice");
+    }
+  };
+
+  const handleDelete = async () => {
+    try {
+      await deleteInvoice.mutateAsync(id!);
+      navigate("/invoices");
+    } catch (error) {
+      console.error("Error deleting invoice:", error);
     }
   };
 
   const handleCancel = () => {
     setIsEditing(false);
   };
+
+  if (!invoice) {
+    return (
+      <AppLayout>
+        <div className="container p-6 max-w-5xl mx-auto">
+          <div className="text-center py-12">
+            <h2 className="text-2xl font-bold mb-2">Invoice Not Found</h2>
+            <p className="text-muted-foreground mb-4">
+              The invoice you're looking for doesn't exist or has been deleted.
+            </p>
+            <Button onClick={handleBack}>Return to Invoices</Button>
+          </div>
+        </div>
+      </AppLayout>
+    );
+  }
 
   if (isEditing) {
     return (
@@ -68,11 +89,11 @@ export default function InvoiceDetail() {
             >
               <ArrowLeft className="h-4 w-4" />
             </Button>
-            <h1 className="text-2xl font-bold">Edit Invoice #{id}</h1>
+            <h1 className="text-2xl font-bold">Edit Invoice #{invoice.invoice_number}</h1>
           </div>
           
           <InvoiceForm
-            initialData={mockInvoice}
+            initialData={invoice}
             onSubmit={handleSubmit}
             onCancel={handleCancel}
           />
@@ -89,7 +110,7 @@ export default function InvoiceDetail() {
             <Button variant="outline" size="icon" className="mr-4" onClick={handleBack}>
               <ArrowLeft className="h-4 w-4" />
             </Button>
-            <h1 className="text-2xl font-bold">Invoice #{id}</h1>
+            <h1 className="text-2xl font-bold">Invoice #{invoice.invoice_number}</h1>
           </div>
           <div className="flex gap-2">
             <Button variant="outline" className="flex items-center gap-1" onClick={handleEdit}>
@@ -103,6 +124,14 @@ export default function InvoiceDetail() {
             <Button variant="outline" className="flex items-center gap-1">
               <Download className="h-4 w-4" />
               Download
+            </Button>
+            <Button 
+              variant="destructive" 
+              className="flex items-center gap-1"
+              onClick={() => setIsDeleteDialogOpen(true)}
+            >
+              <Trash2 className="h-4 w-4" />
+              Delete
             </Button>
           </div>
         </div>
@@ -119,22 +148,22 @@ export default function InvoiceDetail() {
               <div className="grid grid-cols-2 gap-4 p-4 border rounded-md">
                 <div>
                   <p className="text-sm font-medium text-gray-500">Invoice Number</p>
-                  <p>{mockInvoice.invoiceNumber}</p>
+                  <p>{invoice.invoice_number}</p>
                 </div>
                 <div>
                   <p className="text-sm font-medium text-gray-500">Date</p>
-                  <p>{mockInvoice.issueDate.toLocaleDateString()}</p>
+                  <p>{format(new Date(invoice.issue_date), 'MMM d, yyyy')}</p>
                 </div>
                 <div>
                   <p className="text-sm font-medium text-gray-500">Status</p>
                   <p className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                    {mockInvoice.status.charAt(0).toUpperCase() + mockInvoice.status.slice(1)}
+                    {invoice.status.charAt(0).toUpperCase() + invoice.status.slice(1)}
                   </p>
                 </div>
                 <div>
                   <p className="text-sm font-medium text-gray-500">Amount</p>
                   <p className="text-lg font-bold">
-                    ${mockInvoice.items.reduce((sum, item) => sum + item.total, 0).toFixed(2)}
+                    ${invoice.total_amount.toFixed(2)}
                   </p>
                 </div>
               </div>
@@ -152,11 +181,11 @@ export default function InvoiceDetail() {
                       </tr>
                     </thead>
                     <tbody>
-                      {mockInvoice.items.map((item, index) => (
+                      {invoice.items.map((item, index) => (
                         <tr key={index} className="border-t">
                           <td className="px-4 py-2">{item.description}</td>
                           <td className="px-4 py-2 text-right">{item.quantity}</td>
-                          <td className="px-4 py-2 text-right">${item.unitPrice.toFixed(2)}</td>
+                          <td className="px-4 py-2 text-right">${item.unit_price.toFixed(2)}</td>
                           <td className="px-4 py-2 text-right">${item.total.toFixed(2)}</td>
                         </tr>
                       ))}
@@ -165,15 +194,32 @@ export default function InvoiceDetail() {
                 </div>
               </div>
 
-              {mockInvoice.notes && (
+              {invoice.notes && (
                 <div className="space-y-2">
                   <h3 className="text-lg font-medium">Notes</h3>
-                  <p className="text-gray-600">{mockInvoice.notes}</p>
+                  <p className="text-gray-600">{invoice.notes}</p>
                 </div>
               )}
             </div>
           </CardContent>
         </Card>
+
+        <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete Invoice</AlertDialogTitle>
+              <AlertDialogDescription>
+                Are you sure you want to delete this invoice? This action cannot be undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground">
+                Delete
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </AppLayout>
   );
