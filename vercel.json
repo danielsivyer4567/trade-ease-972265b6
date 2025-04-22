@@ -16,7 +16,8 @@
       ]
     }
   ],
-  "buildCommand": "npm cache clean --force && npm install --legacy-peer-deps && npm run build",
+  "buildCommand": "npm cache clean --force && rm -rf node_modules && npm install --legacy-peer-deps && npm run build",
   "cleanUrls": true,
-  "trailingSlash": false
+  "trailingSlash": false,
+  "ignoreCommand": "exit 0"
 } 
