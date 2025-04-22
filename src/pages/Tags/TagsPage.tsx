@@ -181,6 +181,7 @@ const TagsPage: React.FC = () => {
         isOpen={isTagCreatorOpen}
         onClose={() => setIsTagCreatorOpen(false)}
         onCreateTag={handleCreateTag}
+        onRequestExternalDrawing={activateTagDrop}
       />
 
       {/* Outside drawing mode */}

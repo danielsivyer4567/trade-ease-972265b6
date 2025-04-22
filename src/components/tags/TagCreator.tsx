@@ -24,7 +24,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { PlusCircle, Image } from 'lucide-react';
+import { PlusCircle, Image, ExternalLink } from 'lucide-react';
 import DrawingTools from './DrawingTools';
 
 const tagSchema = z.object({
@@ -40,6 +40,7 @@ export interface TagCreatorProps {
   isOpen: boolean;
   onClose: () => void;
   onCreateTag: (tagData: TagFormValues & { drawing?: string }) => void;
+  onRequestExternalDrawing?: () => void;
 }
 
 const predefinedColors = [
@@ -57,6 +58,7 @@ export const TagCreator: React.FC<TagCreatorProps> = ({
   isOpen,
   onClose,
   onCreateTag,
+  onRequestExternalDrawing
 }) => {
   const [activeTab, setActiveTab] = useState('details');
   const [drawing, setDrawing] = useState<string | undefined>(undefined);
@@ -88,6 +90,13 @@ export const TagCreator: React.FC<TagCreatorProps> = ({
     setActiveTab(value);
   };
 
+  const handleExternalDrawingRequest = () => {
+    if (onRequestExternalDrawing) {
+      onClose();
+      onRequestExternalDrawing();
+    }
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[600px]">
@@ -103,6 +112,8 @@ export const TagCreator: React.FC<TagCreatorProps> = ({
             onSaveDrawing={handleSaveDrawing} 
             onCancel={() => setShowDrawingTools(false)}
             initialImage={drawing}
+            enableExternalDrawing={!!onRequestExternalDrawing}
+            onRequestExternalDrawing={handleExternalDrawingRequest}
           />
         ) : (
           <Tabs value={activeTab} onValueChange={handleTabChange}>
@@ -257,18 +268,37 @@ export const TagCreator: React.FC<TagCreatorProps> = ({
                           </Button>
                         </div>
                       ) : (
-                        <Button 
-                          variant="outline" 
-                          className="h-24 w-24 flex flex-col gap-1"
-                          onClick={() => setShowDrawingTools(true)}
-                        >
-                          <Image className="h-6 w-6" />
-                          <span className="text-xs">Add Icon</span>
-                        </Button>
+                        <div className="flex flex-col gap-2">
+                          <Button 
+                            variant="outline" 
+                            className="h-24 w-24 flex flex-col gap-1"
+                            onClick={() => setShowDrawingTools(true)}
+                          >
+                            <Image className="h-6 w-6" />
+                            <span className="text-xs">Add Icon</span>
+                          </Button>
+                          
+                          {onRequestExternalDrawing && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={handleExternalDrawingRequest}
+                              className="flex items-center justify-center mt-1"
+                            >
+                              <ExternalLink className="h-4 w-4 mr-1" />
+                              <span className="text-xs">Draw Outside</span>
+                            </Button>
+                          )}
+                        </div>
                       )}
                       <div className="text-sm text-muted-foreground">
                         <p>Create a custom icon for this tag using our drawing tools.</p>
                         <p>This helps make your tags more distinguishable.</p>
+                        {onRequestExternalDrawing && (
+                          <p className="mt-1 text-xs font-medium text-primary">
+                            You can also draw outside the tag creator for more flexibility.
+                          </p>
+                        )}
                       </div>
                     </div>
                   </div>
