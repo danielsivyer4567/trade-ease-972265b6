@@ -1,8 +1,15 @@
 # Trade Ease
 
-Trade management system.
+A comprehensive trade management system for businesses.
 
-Updated: April 22, 2025 - 15:45
+Updated: April 22, 2025 - 15:48
+
+## Features
+
+- Business management tools
+- Customer tracking
+- Job scheduling
+- Invoicing system
 
 ## Project infos
 
