@@ -447,54 +447,103 @@ export const usePropertyBoundaries = () => {
   }, [selectedProperty, properties]);
   
   const handleAddressBoundarySearch = useCallback(async (address: string) => {
-    if (!address.trim()) {
-      toast.error('Please enter an address to search');
-      return;
-    }
-    
     setIsSearchingAddress(true);
     
     try {
-      const boundaryData = await searchAddressAndFetchBoundary(address);
+      const result = await searchAddressAndFetchBoundary(address);
       
-      if (!boundaryData) {
-        toast.error('Could not find property boundary for this address');
+      if (!result) {
+        toast.error(`No property boundary found for ${address}`);
         return;
       }
+
+      // Extract the boundary ring from the geometry
+      const boundaryRing = result.geometry.rings[0];
       
-      // Create a new property with the data
-      const newProperty: Property = {
-        id: `temp-${Date.now()}`,
-        name: boundaryData.address || 'New Property',
-        description: 'Property found via address search',
-        address: boundaryData.address || address,
-        location: [
-          boundaryData.geometry.rings[0][0][1],
-          boundaryData.geometry.rings[0][0][0]
-        ] as [number, number],
-        boundaries: boundaryData.geometry.rings.map((ring: number[][]) => 
-          ring.map((coords: number[]) => [coords[1], coords[0]] as [number, number])
-        ) as Array<Array<[number, number]>>
-      };
+      // Calculate boundary measurements
+      const segmentLengths: { length: number; coordinates: [number, number][] }[] = [];
+      let totalLength = 0;
       
-      // Try to save to Supabase if user is authenticated
-      const savedProperty = await savePropertyToSupabase(newProperty);
-      if (savedProperty) {
-        // Update the ID with the one from Supabase
-        newProperty.id = savedProperty.id;
-        toast.success('Saved property boundary to your account');
+      // Calculate length of each segment and total perimeter
+      for (let i = 0; i < boundaryRing.length - 1; i++) {
+        const point1 = boundaryRing[i];
+        const point2 = boundaryRing[i + 1];
+        
+        // Calculate Euclidean distance (this is a simplification - for a more accurate
+        // calculation, we would use the Haversine formula for geographic coordinates)
+        const length = Math.sqrt(
+          Math.pow(point2[0] - point1[0], 2) + 
+          Math.pow(point2[1] - point1[1], 2)
+        );
+        
+        // Convert to meters (this is an approximation based on the coordinate system)
+        const lengthInMeters = length * 111319.9; // Approx meters per degree at the equator
+        
+        segmentLengths.push({
+          length: lengthInMeters,
+          coordinates: [point1, point2]
+        });
+        
+        totalLength += lengthInMeters;
       }
       
-      // Add to the list of properties and select it
-      startTransition(() => {
-        setProperties(prev => [...prev, newProperty]);
-        setSelectedProperty(newProperty);
-      });
+      // Create a property object from the result with measurement data
+      const newProperty: Property = {
+        id: `temp-${Date.now()}`,
+        name: result.address || address,
+        description: "Property from address search",
+        address: result.address || address,
+        location: [
+          boundaryRing[0][0],
+          boundaryRing[0][1]
+        ],
+        boundaries: [
+          boundaryRing.map((point: number[]): [number, number] => [point[0], point[1]])
+        ],
+        measurements: {
+          totalLength: totalLength,
+          segments: segmentLengths.map(segment => ({
+            length: segment.length,
+            coordinates: segment.coordinates
+          })),
+          area: calculatePolygonArea(boundaryRing)
+        }
+      };
+
+      // Add to properties list
+      setProperties(prev => [newProperty, ...prev]);
       
-      toast.success('Found property boundary');
+      // Select the new property
+      setSelectedProperty(newProperty);
+      
+      // Automatically toggle measurement mode on
+      setIsMeasuring(true);
+      
+      // Show success message with measurement info
+      toast.success(
+        `Found property boundary for ${result.address || address}\n` +
+        `Total perimeter: ${(totalLength).toFixed(2)}m\n` +
+        `Area: ${(newProperty.measurements?.area || 0).toFixed(2)}m²`,
+        { duration: 5000 }
+      );
+      
+      // Save the property if user is authenticated
+      const savedProperty = await savePropertyToSupabase(newProperty);
+      if (savedProperty) {
+        // Update the property with the saved ID
+        const updatedProperty = {
+          ...newProperty,
+          id: savedProperty.id
+        };
+        
+        setProperties(prev => 
+          prev.map(p => p.id === newProperty.id ? updatedProperty : p)
+        );
+        setSelectedProperty(updatedProperty);
+      }
     } catch (error) {
-      console.error('Error searching for property boundary:', error);
-      toast.error('An error occurred while searching for the property boundary');
+      console.error('Error searching property by address:', error);
+      toast.error(`Failed to find property boundary: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
       setIsSearchingAddress(false);
     }
@@ -519,3 +568,22 @@ export const usePropertyBoundaries = () => {
     handleAddressBoundarySearch
   };
 };
+
+// Add this helper function for calculating polygon area if it doesn't exist already
+function calculatePolygonArea(points: number[][]) {
+  let area = 0;
+  
+  // Apply the Shoelace formula for polygon area calculation
+  for (let i = 0; i < points.length - 1; i++) {
+    area += points[i][0] * points[i + 1][1] - points[i + 1][0] * points[i][1];
+  }
+  
+  // Close the polygon loop
+  area += points[points.length - 1][0] * points[0][1] - points[0][0] * points[points.length - 1][1];
+  
+  // Take the absolute value and scale
+  area = Math.abs(area) / 2;
+  
+  // Convert to square meters (approximate conversion based on coordinate system)
+  return area * 111319.9 * 111319.9; // Square meters per square degree at the equator
+}
