@@ -11,7 +11,8 @@ import {
   Save,
   Eraser,
   Check,
-  X
+  X,
+  ExternalLink
 } from 'lucide-react';
 import { Slider } from '@/components/ui/slider';
 
@@ -19,6 +20,8 @@ export interface DrawingToolsProps {
   onSaveDrawing: (dataUrl: string) => void;
   onCancel: () => void;
   initialImage?: string;
+  enableExternalDrawing?: boolean;
+  onRequestExternalDrawing?: () => void;
 }
 
 type Tool = 'pen' | 'eraser' | 'text' | 'circle' | 'rectangle' | 'arrow';
@@ -26,7 +29,9 @@ type Tool = 'pen' | 'eraser' | 'text' | 'circle' | 'rectangle' | 'arrow';
 export const DrawingTools: React.FC<DrawingToolsProps> = ({
   onSaveDrawing,
   onCancel,
-  initialImage
+  initialImage,
+  enableExternalDrawing = false,
+  onRequestExternalDrawing
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [ctx, setCtx] = useState<CanvasRenderingContext2D | null>(null);
@@ -37,6 +42,7 @@ export const DrawingTools: React.FC<DrawingToolsProps> = ({
   const [textInput, setTextInput] = useState('');
   const [showTextInput, setShowTextInput] = useState(false);
   const [textPosition, setTextPosition] = useState({ x: 0, y: 0 });
+  const [isFullPage, setIsFullPage] = useState(false);
 
   // Setup canvas context
   useEffect(() => {
@@ -54,6 +60,10 @@ export const DrawingTools: React.FC<DrawingToolsProps> = ({
       context.strokeStyle = color;
       context.lineWidth = lineWidth;
       setCtx(context);
+      
+      // Fill with white background
+      context.fillStyle = '#ffffff';
+      context.fillRect(0, 0, canvas.width, canvas.height);
     }
   }, []);
 
@@ -151,7 +161,8 @@ export const DrawingTools: React.FC<DrawingToolsProps> = ({
   // Clear canvas
   const clearCanvas = () => {
     if (!ctx || !canvasRef.current) return;
-    ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, canvasRef.current.width, canvasRef.current.height);
   };
 
   // Save drawing
@@ -159,6 +170,19 @@ export const DrawingTools: React.FC<DrawingToolsProps> = ({
     if (!canvasRef.current) return;
     const dataUrl = canvasRef.current.toDataURL('image/png');
     onSaveDrawing(dataUrl);
+  };
+
+  // Handle drawing outside request
+  const handleDrawOutside = () => {
+    if (onRequestExternalDrawing) {
+      onRequestExternalDrawing();
+    }
+  };
+
+  // Draw outside tag directly on the document
+  const enableFullPageDrawing = () => {
+    setIsFullPage(true);
+    // Additional logic to enable drawing on the full page
   };
 
   // Tool buttons
@@ -264,7 +288,13 @@ export const DrawingTools: React.FC<DrawingToolsProps> = ({
           )}
         </div>
         
-        <div className="mt-3 flex justify-end gap-2">
+        <div className="mt-3 flex justify-between gap-2">
+          {enableExternalDrawing && (
+            <Button variant="outline" size="sm" onClick={handleDrawOutside} className="mr-auto">
+              <ExternalLink className="h-4 w-4 mr-1" />
+              Draw Outside Tag
+            </Button>
+          )}
           <Button variant="outline" size="sm" onClick={onCancel}>
             Cancel
           </Button>
