@@ -34,6 +34,7 @@ import Messaging from '../pages/Messaging';
 import Teams from '../pages/Teams';
 import Trading from '../pages/Trading';
 import TradeDash from '../pages/TradeDash';
+import TagsPage from '../pages/Tags/TagsPage';
 
 // Helper component for Suspense boundary
 const SuspenseWrapper = ({ children }: { children: ReactNode }) => (
@@ -84,6 +85,7 @@ const routeObjects: RouteObject[] = [
       { path: "ai-features/*", element: <SuspenseWrapper><AIFeatures /></SuspenseWrapper> },
       { path: "trading/*", element: <SuspenseWrapper><Trading /></SuspenseWrapper> },
       { path: "trade-dash/*", element: <SuspenseWrapper><TradeDash /></SuspenseWrapper> },
+      { path: "tags", element: <SuspenseWrapper><TagsPage /></SuspenseWrapper> },
       
       // Team routes
       { path: "teams/*", element: <SuspenseWrapper><Teams /></SuspenseWrapper> },
