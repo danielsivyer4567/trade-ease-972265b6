@@ -117,18 +117,24 @@ class TwoFactorAuthService {
   // Check if a user has 2FA enabled
   async isEnabled(userId: string): Promise<boolean> {
     try {
-      const { data, error } = await supabase
-        .from('user_profiles')
-        .select('two_factor_enabled, phone_number')
-        .eq('user_id', userId)
-        .single();
-      
-      if (error || !data) {
-        console.error('Error checking if 2FA is enabled:', error);
+      // First check if the user_profiles table exists by doing a minimal query
+      try {
+        const { data, error } = await supabase
+          .from('user_profiles')
+          .select('two_factor_enabled, phone_number')
+          .eq('user_id', userId)
+          .single();
+        
+        if (error) {
+          console.warn('Error checking if 2FA is enabled (likely table does not exist yet):', error);
+          return false;
+        }
+        
+        return data?.two_factor_enabled && !!data?.phone_number;
+      } catch (innerError) {
+        console.warn('Exception in 2FA check, assuming 2FA is not enabled:', innerError);
         return false;
       }
-      
-      return data.two_factor_enabled && !!data.phone_number;
     } catch (error) {
       console.error('Error in isEnabled:', error);
       return false;

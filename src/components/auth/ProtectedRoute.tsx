@@ -1,5 +1,6 @@
 import { Navigate, useLocation, Outlet } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { TabsProvider } from '@/contexts/TabsContext';
 
 export function ProtectedRoute() {
   const { user, loading } = useAuth();
@@ -17,5 +18,9 @@ export function ProtectedRoute() {
     return <Navigate to="/auth" state={{ from: location }} replace />;
   }
 
-  return <Outlet />;
+  return (
+    <TabsProvider>
+      <Outlet />
+    </TabsProvider>
+  );
 }
