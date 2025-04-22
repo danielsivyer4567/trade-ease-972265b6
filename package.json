@@ -90,7 +90,7 @@
     "@types/react-dom": "^18.2.19",
     "@vitejs/plugin-react-swc": "^3.5.0",
     "autoprefixer": "^10.4.17",
-    "eslint": "^8.56.0",
+    "eslint": "^9.0.0",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.5",
     "globals": "^13.24.0",
@@ -103,6 +103,11 @@
   "overrides": {
     "rollup": {
       "rollup": "npm:@rollup/wasm-node"
-    }
+    },
+    "glob": "^10.3.10",
+    "rimraf": "^5.0.5",
+    "@humanwhocodes/config-array": "@eslint/config-array",
+    "@humanwhocodes/object-schema": "@eslint/object-schema",
+    "inflight": "npm:lru-cache"
   }
 }
