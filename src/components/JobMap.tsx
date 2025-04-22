@@ -47,19 +47,7 @@ const JobMap = ({
     mapTypeControl: true,
     fullscreenControl: true,
     zoomControl: true,
-    mapId: '8f348c1e276da9d5', // Added Map ID for Advanced Markers
-    streetView: {
-      visible: false,
-      enableCloseButton: true,
-      enableCompass: true,
-      motionTracking: false,
-      motionTrackingControl: true,
-      position: undefined, // Will use default position
-      pov: {
-        heading: 0,
-        pitch: 0
-      }
-    }
+    mapId: '8f348c1e276da9d5' // Added Map ID for Advanced Markers
   };
 
   const onLoad = (map: google.maps.Map) => {
@@ -110,7 +98,7 @@ const JobMap = ({
               location: { lat: job.location[1], lng: job.location[0] },
               radius: 50 // Search radius in meters
             }, (data, status) => {
-              if (status === google.maps.StreetViewStatus.OK) {
+              if (status === google.maps.StreetViewStatus.OK && data && data.location && data.location.latLng) {
                 // Street view is available, position the panorama
                 panorama.setPosition(data.location.latLng);
                 panorama.setPov({
