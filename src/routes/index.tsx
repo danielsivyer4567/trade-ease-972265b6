@@ -6,6 +6,9 @@ import { authRoutes } from './auth-routes';
 import { SettingsRoutes } from './settings-routes';
 import { templateRoutes } from './template-routes';
 
+// CRITICAL: This routing configuration ONLY uses actual implemented components 
+// NO stub pages are used, ensuring full functionality of the application
+
 // Direct imports for main page components
 import DashboardPage from '../pages/Dashboard';
 import JobsPage from '../pages/Jobs';
