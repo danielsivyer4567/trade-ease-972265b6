@@ -28,6 +28,10 @@
         {
           "key": "Referrer-Policy",
           "value": "strict-origin-when-cross-origin"
+        },
+        {
+          "key": "Strict-Transport-Security",
+          "value": "max-age=31536000; includeSubDomains"
         }
       ]
     }
@@ -35,9 +39,5 @@
   "buildCommand": "rm -rf node_modules .next .cache dist && npm install && npm run build",
   "cleanUrls": true,
   "trailingSlash": false,
-  "public": true,
-  "security": {
-    "allowedIPs": ["192.168.1.110"],
-    "protectionMode": "development"
-  }
+  "public": true
 } 
