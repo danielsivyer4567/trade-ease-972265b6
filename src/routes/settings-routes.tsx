@@ -5,7 +5,7 @@ import { LoadingFallback } from './loading-fallback';
 import { lazy } from "react";
 
 // Import pages
-const SettingsPage = React.lazy(() => import('@/pages/Settings'));
+const SettingsPage = React.lazy(() => import('@/pages/Settings/Settings'));
 const NotificationsSettings = React.lazy(() => import('@/pages/Settings/Notifications'));
 const AIFeaturesSettings = React.lazy(() => import('@/pages/Settings/AIFeatures'));
 const DatabaseSettings = React.lazy(() => import('@/pages/Settings/Database'));
