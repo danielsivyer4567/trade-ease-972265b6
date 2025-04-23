@@ -1,4 +1,3 @@
-
 import { useParams } from 'react-router-dom';
 import { JobHeader } from './components/JobHeader';
 import { JobTabs } from './components/JobTabs';
@@ -21,13 +20,15 @@ import { AutomationIntegrationService } from '@/services/AutomationIntegrationSe
 import { usePhotoSharing } from '@/hooks/usePhotoSharing';
 import { PhotoSharingModal } from '@/components/sharing/PhotoSharingModal';
 import { useOpenInTab } from './hooks/useOpenInTab';
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { AlertCircle } from "lucide-react";
 
 export function JobDetails() {
   const { id } = useParams<{ id: string }>();
   const [jobNotes, setJobNotes] = useState("");
   const isManager = true;
   
-  const { job, loading } = useJobData(id);
+  const { job, loading, error } = useJobData(id);
   
   // Use the openInTab hook to automatically handle tab management
   const { openInTab } = useOpenInTab();
@@ -80,8 +81,21 @@ export function JobDetails() {
     return <JobLoadingState />;
   }
   
-  if (!job) {
-    return <JobLoadingState isError />;
+  if (error || !job) {
+    return (
+      <AppLayout>
+        <div className="container-responsive mx-auto p-4">
+          <JobsHeader navigateTo="/jobs" />
+          <Alert variant="destructive" className="mt-4">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>Error</AlertTitle>
+            <AlertDescription>
+              {error || 'Job not found. Please try again.'}
+            </AlertDescription>
+          </Alert>
+        </div>
+      </AppLayout>
+    );
   }
   
   return (

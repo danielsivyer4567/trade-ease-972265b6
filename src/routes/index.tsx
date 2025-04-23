@@ -49,7 +49,7 @@ const NewInvoice = lazy(() => import('../pages/Invoices/NewInvoice'));
 const InvoiceDetail = lazy(() => import('../pages/Invoices/InvoiceDetail'));
 const PaymentsPage = lazy(() => import('../pages/Payments'));
 const NewPayment = lazy(() => import('../pages/Payments/NewPayment'));
-const SettingsPage = lazy(() => import('../pages/Settings/SettingsPage'));
+const SettingsPage = lazy(() => import('../pages/Settings/SettingsPage').then(module => ({ default: module.default })));
 const AuthPage = lazy(() => import('../pages/Auth'));
 
 // Helper component to wrap routes with Suspense
