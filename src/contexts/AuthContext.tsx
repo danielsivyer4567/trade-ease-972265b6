@@ -72,45 +72,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const signIn = async (email: string, password: string) => {
     try {
-      // Check connection to Supabase before attempting sign in
-      try {
-        const { error: pingError } = await supabase.from('auth_health_check').select('count').limit(1).single();
-        if (pingError && pingError.code !== 'PGRST116') {
-          // If it's not a "relation does not exist" error (which is expected), it might be a connection issue
-          console.warn('Connection check failed:', pingError);
-          // Continue anyway as the table might not exist
-        }
-      } catch (connectionError) {
-        console.warn('Connection check failed, attempting sign in anyway:', connectionError);
-      }
+      console.log('Starting sign in process...');
+      console.log('Supabase URL:', import.meta.env.VITE_SUPABASE_URL);
       
       // Proceed with sign in
+      console.log('Attempting to sign in with email...');
       const { data, error } = await supabase.auth.signInWithPassword({ email, password });
       
-      if (error) throw error;
-      
-      // Check if 2FA is enabled for this user
-      try {
-        const isTwoFactorEnabled = await twoFactorAuthService.isEnabled(data.user.id);
-        
-        if (isTwoFactorEnabled) {
-          // Store user ID temporarily and set awaiting 2FA state
-          setTempUserId(data.user.id);
-          setAwaitingTwoFactor(true);
-          
-          // Sign out immediately - user will complete sign in after 2FA
-          await supabase.auth.signOut();
-          
-          return;
-        }
-      } catch (twoFactorError) {
-        console.warn('Error checking 2FA status, assuming 2FA is not enabled:', twoFactorError);
-        // Continue without 2FA
+      if (error) {
+        console.error('Sign in error details:', {
+          message: error.message,
+          status: error.status,
+          name: error.name
+        });
+        throw error;
       }
       
-      // No 2FA, user is fully authenticated
+      console.log('Sign in successful');
+      // Skip 2FA checks and proceed with authentication
       setAwaitingTwoFactor(false);
       setTempUserId(null);
+      
     } catch (error: any) {
       console.error('Error signing in:', error.message);
       toast.error(error.message || 'Error signing in');
