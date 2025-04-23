@@ -5,7 +5,7 @@ import { LoadingFallback } from './loading-fallback';
 import { lazy } from "react";
 
 // Import pages
-const SettingsPage = React.lazy(() => import('@/pages/Settings/Settings'));
+const SettingsPage = React.lazy(() => import('@/pages/Settings/Settings').then(module => ({ default: module.default })));
 const NotificationsSettings = React.lazy(() => import('@/pages/Settings/Notifications'));
 const AIFeaturesSettings = React.lazy(() => import('@/pages/Settings/AIFeatures'));
 const DatabaseSettings = React.lazy(() => import('@/pages/Settings/Database'));
@@ -20,7 +20,7 @@ const IntegrationsPage = React.lazy(() => import('@/pages/Settings/Integrations'
 const XeroCallback = React.lazy(() => import('@/pages/Settings/components/integrations/XeroCallback'));
 const GenericSettingsPage = React.lazy(() => import('@/pages/Settings/GenericSettingsPage'));
 const StaffPage = React.lazy(() => import('@/pages/Settings/Staff'));
-const GeneralSettings = lazy(() => import("../pages/Settings/pages/GeneralSettings"));
+const GeneralSettings = lazy(() => import("../pages/Settings/pages/GeneralSettings").then(module => ({ default: module.default })));
 
 // Export routes configuration
 export const SettingsRoutes = (): RouteObject[] => [
