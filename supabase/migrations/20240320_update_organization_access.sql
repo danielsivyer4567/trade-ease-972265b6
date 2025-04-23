@@ -5,8 +5,8 @@ DROP FUNCTION IF EXISTS public.has_organization_access;
 CREATE OR REPLACE FUNCTION public.has_organization_access(org_id uuid)
 RETURNS boolean
 LANGUAGE plpgsql
-SECURITY DEFINER
-SET search_path = public
+SECURITY INVOKER
+SET search_path TO public, auth
 AS $$
 BEGIN
   RETURN EXISTS (
