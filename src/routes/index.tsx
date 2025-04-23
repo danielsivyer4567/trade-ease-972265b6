@@ -43,11 +43,12 @@ import Trading from '../pages/Trading';
 import TradeDash from '../pages/TradeDash';
 import TagsPage from '../pages/Tags/TagsPage';
 
-// Lazy load invoice pages
+// Lazy load pages
 const InvoicesPage = lazy(() => import('../pages/Invoices'));
 const NewInvoice = lazy(() => import('../pages/Invoices/NewInvoice'));
 const InvoiceDetail = lazy(() => import('../pages/Invoices/InvoiceDetail'));
-// Lazy load settings pages
+const PaymentsPage = lazy(() => import('../pages/Payments'));
+const NewPayment = lazy(() => import('../pages/Payments/NewPayment'));
 const SettingsPage = lazy(() => import('../pages/Settings/SettingsPage'));
 const AuthPage = lazy(() => import('../pages/Auth'));
 
@@ -167,6 +168,14 @@ const router = createBrowserRouter([
       {
         path: 'tags',
         element: <TagsPage />
+      },
+      {
+        path: 'payments',
+        element: <SuspenseWrapper><PaymentsPage /></SuspenseWrapper>
+      },
+      {
+        path: 'payments/new',
+        element: <SuspenseWrapper><NewPayment /></SuspenseWrapper>
       },
       {
         path: 'invoices',

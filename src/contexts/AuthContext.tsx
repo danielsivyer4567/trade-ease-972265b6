@@ -22,38 +22,68 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+const MAX_RETRIES = 3;
+const RETRY_DELAY = 1000; // 1 second
+
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const [awaitingTwoFactor, setAwaitingTwoFactor] = useState(false);
   const [tempUserId, setTempUserId] = useState<string | null>(null);
+  const [retryCount, setRetryCount] = useState(0);
+
+  const initializeAuth = async () => {
+    try {
+      const { data: { session: currentSession }, error } = await supabase.auth.getSession();
+      
+      if (error) {
+        throw error;
+      }
+      
+      setSession(currentSession);
+      setUser(currentSession?.user ?? null);
+      setLoading(false);
+      setRetryCount(0); // Reset retry count on successful connection
+    } catch (error: any) {
+      console.error('Error initializing auth:', error.message);
+      
+      if (retryCount < MAX_RETRIES) {
+        console.log(`Retrying auth initialization in ${RETRY_DELAY}ms... (Attempt ${retryCount + 1}/${MAX_RETRIES})`);
+        setTimeout(() => {
+          setRetryCount(prev => prev + 1);
+          initializeAuth();
+        }, RETRY_DELAY);
+      } else {
+        setLoading(false);
+        toast.error('Failed to connect to authentication service. Please check your internet connection and try again.');
+      }
+    }
+  };
 
   useEffect(() => {
-    // Set up the auth state listener first
     let subscription: { unsubscribe: () => void } | null = null;
     
     try {
+      // Set up auth state listener
       const { data: { subscription: authSubscription } } = supabase.auth.onAuthStateChange(
-        (event, currentSession) => {
+        async (event, currentSession) => {
           console.log('Auth state changed:', event);
           setSession(currentSession);
           setUser(currentSession?.user ?? null);
           setLoading(false);
+          
+          // Handle session refresh
+          if (event === 'TOKEN_REFRESHED') {
+            await initializeAuth();
+          }
         }
       );
       
       subscription = authSubscription;
       
-      // Then check for existing session
-      supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
-        setSession(currentSession);
-        setUser(currentSession?.user ?? null);
-        setLoading(false);
-      }).catch(error => {
-        console.warn('Error getting session:', error);
-        setLoading(false);
-      });
+      // Initialize auth
+      initializeAuth();
     } catch (error) {
       console.error('Error setting up auth listener:', error);
       setLoading(false);
@@ -72,12 +102,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const signIn = async (email: string, password: string) => {
     try {
+      setLoading(true);
       console.log('Starting sign in process...');
-      console.log('Supabase URL:', import.meta.env.VITE_SUPABASE_URL);
       
-      // Proceed with sign in
-      console.log('Attempting to sign in with email...');
-      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      // Validate input
+      if (!email || !password) {
+        throw new Error('Email and password are required');
+      }
+      
+      // Attempt sign in
+      const { data, error } = await supabase.auth.signInWithPassword({ 
+        email, 
+        password
+      });
       
       if (error) {
         console.error('Sign in error details:', {
@@ -89,14 +126,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
       
       console.log('Sign in successful');
-      // Skip 2FA checks and proceed with authentication
       setAwaitingTwoFactor(false);
       setTempUserId(null);
+      
+      // Update session and user state
+      if (data.session) {
+        setSession(data.session);
+        setUser(data.session.user);
+      }
       
     } catch (error: any) {
       console.error('Error signing in:', error.message);
       toast.error(error.message || 'Error signing in');
       throw error;
+    } finally {
+      setLoading(false);
     }
   };
 
