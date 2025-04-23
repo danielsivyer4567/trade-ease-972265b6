@@ -56,8 +56,8 @@ const InvoicesPage = lazy(() => import('../pages/Invoices'));
 const NewInvoice = lazy(() => import('../pages/Invoices/NewInvoice'));
 const InvoiceDetail = lazy(() => import('../pages/Invoices/InvoiceDetail'));
 // Lazy load settings pages
-const SettingsPage = lazy(() => import('../pages/Settings/Settings'));
-const SettingsPageTemplate = lazy(() => import('../pages/Settings/SettingsTemplate'));
+const SettingsPage = lazy(() => import('../pages/Settings/SettingsPage'));
+const SettingsPageTemplate = lazy(() => import('../pages/Settings/SettingsPageTemplate'));
 
 // Helper component to wrap routes with Suspense
 const SuspenseWrapper = ({ children }: { children: ReactNode }) => (
@@ -76,20 +76,34 @@ const router = createBrowserRouter(
       {/* Protected routes */}
       <Route element={<ProtectedRoute />}>
         {/* Template routes */}
-        {templateRoutes}
+        <Route>
+          {templateRoutes}
+        </Route>
 
         {/* Feature routes */}
-        {jobRoutes}
+        <Route>
+          {jobRoutes}
+        </Route>
         {activityRoutes}
         {calendarRoutes}
         {communicationRoutes}
         {dashboardRoutes}
         {expensesRoutes}
-        {financialRoutes}
-        {paymentRoutes}
-        {teamRoutes}
-        {tradingRoutes}
-        {SettingsRoutes}
+        <Route>
+          {financialRoutes()}
+        </Route>
+        <Route>
+          {paymentRoutes()}
+        </Route>
+        <Route>
+          {teamRoutes()}
+        </Route>
+        <Route>
+          {tradingRoutes()}
+        </Route>
+        <Route>
+          {SettingsRoutes()}
+        </Route>
 
         {/* Main routes */}
         <Route path="/" element={<Navigate to="/dashboard" replace />} />
