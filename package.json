@@ -110,6 +110,7 @@
     "rimraf": "^5.0.5",
     "@humanwhocodes/config-array": "@eslint/config-array",
     "@humanwhocodes/object-schema": "@eslint/object-schema",
-    "inflight": "npm:lru-cache"
+    "inflight": "npm:lru-cache",
+    "uuid": "^9.0.1"
   }
 }
