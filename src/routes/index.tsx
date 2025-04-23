@@ -1,5 +1,5 @@
 import React, { Suspense, ReactNode, lazy } from 'react';
-import { createBrowserRouter, createRoutesFromElements, RouteObject, Navigate, Route } from 'react-router-dom';
+import { createBrowserRouter, Navigate } from 'react-router-dom';
 import { LoadingFallback } from './loading-fallback';
 import { ProtectedRoute } from '../components/auth/ProtectedRoute';
 import { authRoutes } from './auth-routes';
@@ -15,14 +15,6 @@ import { paymentRoutes } from './payment-routes';
 import { SettingsRoutes } from './settings-routes';
 import { teamRoutes } from './team-routes';
 import { tradingRoutes } from './trading-routes';
-
-interface AppRoute {
-  path: string;
-  element: ReactNode;
-}
-
-// CRITICAL: This routing configuration ONLY uses actual implemented components 
-// NO stub pages are used, ensuring full functionality of the application
 
 // Direct imports for main page components
 import DashboardPage from '../pages/Dashboard';
@@ -57,7 +49,7 @@ const NewInvoice = lazy(() => import('../pages/Invoices/NewInvoice'));
 const InvoiceDetail = lazy(() => import('../pages/Invoices/InvoiceDetail'));
 // Lazy load settings pages
 const SettingsPage = lazy(() => import('../pages/Settings/SettingsPage'));
-const SettingsPageTemplate = lazy(() => import('../pages/Settings/SettingsPageTemplate'));
+const AuthPage = lazy(() => import('../pages/Auth'));
 
 // Helper component to wrap routes with Suspense
 const SuspenseWrapper = ({ children }: { children: ReactNode }) => (
@@ -67,85 +59,138 @@ const SuspenseWrapper = ({ children }: { children: ReactNode }) => (
 );
 
 // Create the router configuration
-const router = createBrowserRouter(
-  createRoutesFromElements(
-    <Route>
-      {/* Auth routes */}
-      {authRoutes}
-
-      {/* Protected routes */}
-      <Route element={<ProtectedRoute />}>
-        {/* Template routes */}
-        <Route>
-          {templateRoutes}
-        </Route>
-
-        {/* Feature routes */}
-        <Route>
-          {jobRoutes}
-        </Route>
-        {activityRoutes}
-        {calendarRoutes}
-        {communicationRoutes}
-        {dashboardRoutes}
-        {expensesRoutes}
-        <Route>
-          {financialRoutes()}
-        </Route>
-        <Route>
-          {paymentRoutes()}
-        </Route>
-        <Route>
-          {teamRoutes()}
-        </Route>
-        <Route>
-          {tradingRoutes()}
-        </Route>
-        <Route>
-          {SettingsRoutes()}
-        </Route>
-
-        {/* Main routes */}
-        <Route path="/" element={<Navigate to="/dashboard" replace />} />
-        <Route path="/dashboard" element={<DashboardPage />} />
-        <Route path="/jobs" element={<JobsPage />} />
-        <Route path="/jobs/:id" element={<JobDetails />} />
-        <Route path="/material-ordering" element={<MaterialOrdering />} />
-        <Route path="/statistics" element={<Statistics />} />
-        <Route path="/tasks" element={<Tasks />} />
-        <Route path="/performance" element={<Performance />} />
-        <Route path="/development" element={<DevelopmentEntry />} />
-        <Route path="/ai-features" element={<AIFeatures />} />
-        <Route path="/team-red" element={<TeamRed />} />
-        <Route path="/team-blue" element={<TeamBlue />} />
-        <Route path="/team-green" element={<TeamGreen />} />
-        <Route path="/team-new" element={<TeamNew />} />
-        <Route path="/customers" element={<Customers />} />
-        <Route path="/workflow" element={<Workflow />} />
-        <Route path="/property-boundaries" element={<PropertyBoundaries />} />
-        <Route path="/site-audits" element={<SiteAudits />} />
-        <Route path="/inventory" element={<Inventory />} />
-        <Route path="/calendar" element={<Calendar />} />
-        <Route path="/messaging" element={<Messaging />} />
-        <Route path="/teams" element={<Teams />} />
-        <Route path="/trading" element={<Trading />} />
-        <Route path="/trade-dash" element={<TradeDash />} />
-        <Route path="/tags" element={<TagsPage />} />
-
-        {/* Invoice routes */}
-        <Route path="/invoices" element={<SuspenseWrapper><InvoicesPage /></SuspenseWrapper>} />
-        <Route path="/invoices/new" element={<SuspenseWrapper><NewInvoice /></SuspenseWrapper>} />
-        <Route path="/invoices/:id" element={<SuspenseWrapper><InvoiceDetail /></SuspenseWrapper>} />
-
-        {/* Settings routes */}
-        <Route path="/settings/*" element={<SuspenseWrapper><SettingsPage /></SuspenseWrapper>} />
-      </Route>
-
-      {/* 404 route */}
-      <Route path="*" element={<NotFoundPage />} />
-    </Route>
-  )
-);
+const router = createBrowserRouter([
+  {
+    path: '/auth/*',
+    element: <SuspenseWrapper><AuthPage /></SuspenseWrapper>
+  },
+  {
+    path: '/',
+    element: <ProtectedRoute />,
+    children: [
+      {
+        path: '',
+        element: <Navigate to="/dashboard" replace />
+      },
+      {
+        path: 'dashboard',
+        element: <DashboardPage />
+      },
+      {
+        path: 'jobs',
+        element: <JobsPage />
+      },
+      {
+        path: 'jobs/:id',
+        element: <JobDetails />
+      },
+      {
+        path: 'material-ordering',
+        element: <MaterialOrdering />
+      },
+      {
+        path: 'statistics',
+        element: <Statistics />
+      },
+      {
+        path: 'tasks',
+        element: <Tasks />
+      },
+      {
+        path: 'performance',
+        element: <Performance />
+      },
+      {
+        path: 'development',
+        element: <DevelopmentEntry />
+      },
+      {
+        path: 'ai-features',
+        element: <AIFeatures />
+      },
+      {
+        path: 'team-red',
+        element: <TeamRed />
+      },
+      {
+        path: 'team-blue',
+        element: <TeamBlue />
+      },
+      {
+        path: 'team-green',
+        element: <TeamGreen />
+      },
+      {
+        path: 'team-new',
+        element: <TeamNew />
+      },
+      {
+        path: 'customers',
+        element: <Customers />
+      },
+      {
+        path: 'workflow',
+        element: <Workflow />
+      },
+      {
+        path: 'property-boundaries',
+        element: <PropertyBoundaries />
+      },
+      {
+        path: 'site-audits',
+        element: <SiteAudits />
+      },
+      {
+        path: 'inventory',
+        element: <Inventory />
+      },
+      {
+        path: 'calendar',
+        element: <Calendar />
+      },
+      {
+        path: 'messaging',
+        element: <Messaging />
+      },
+      {
+        path: 'teams',
+        element: <Teams />
+      },
+      {
+        path: 'trading',
+        element: <Trading />
+      },
+      {
+        path: 'trade-dash',
+        element: <TradeDash />
+      },
+      {
+        path: 'tags',
+        element: <TagsPage />
+      },
+      {
+        path: 'invoices',
+        element: <SuspenseWrapper><InvoicesPage /></SuspenseWrapper>
+      },
+      {
+        path: 'invoices/new',
+        element: <SuspenseWrapper><NewInvoice /></SuspenseWrapper>
+      },
+      {
+        path: 'invoices/:id',
+        element: <SuspenseWrapper><InvoiceDetail /></SuspenseWrapper>
+      },
+      {
+        path: 'settings/*',
+        element: <SuspenseWrapper><SettingsPage /></SuspenseWrapper>
+      }
+    ]
+  },
+  {
+    path: '*',
+    element: <NotFoundPage />
+  }
+]);
 
 const exportedRouter = router;
 export { exportedRouter as router };
