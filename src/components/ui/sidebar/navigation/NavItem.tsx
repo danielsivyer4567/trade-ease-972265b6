@@ -3,14 +3,13 @@ import { cn } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../../tooltip";
 import { Badge } from "../../badge";
 import { useSidebar } from "../SidebarProvider";
-import { useTabNavigation } from "@/hooks/useTabNavigation";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 
 interface NavItemProps {
   path: string;
   className?: string;
   title?: string;
-  label?: string; // Added label prop
+  label?: string;
   icon?: React.ComponentType<{
     className?: string;
   }>;
@@ -27,7 +26,6 @@ export function NavItem({
   path,
   title,
   label,
-  // Added label prop
   icon: Icon,
   count,
   countVariant = "default",
@@ -40,31 +38,11 @@ export function NavItem({
   ...props
 }: NavItemProps) {
   const { state } = useSidebar();
-  const { openInTab } = useTabNavigation();
   const location = useLocation();
-  const navigate = useNavigate();
 
-  // Use label if provided, otherwise fall back to title
   const displayText = label || title;
   const isActive = active || path === location.pathname;
   const expanded = sidebarExpanded !== undefined ? sidebarExpanded : state === "expanded";
-  
-  const handleClick = (e: React.MouseEvent) => {
-    if (disabled) {
-      e.preventDefault();
-      return;
-    }
-    
-    // Navigate directly and handle tab management separately
-    navigate(path);
-    
-    try {
-      // Try to open in tab, but don't let failure prevent navigation
-      openInTab(path, displayText || "");
-    } catch (error) {
-      console.error("Error opening tab:", error);
-    }
-  };
   
   return (
     <div className="relative my-[17px] px-[5px] py-0">
@@ -72,7 +50,6 @@ export function NavItem({
         <TooltipTrigger asChild>
           <Link
             to={path}
-            onClick={handleClick}
             className={cn(
               "group flex items-center gap-x-3 relative rounded-md px-3 py-2 text-sm font-medium transition-colors text-white",
               expanded ? "justify-start" : "justify-center",

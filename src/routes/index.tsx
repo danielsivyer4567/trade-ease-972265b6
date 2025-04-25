@@ -51,6 +51,12 @@ const PaymentsPage = lazy(() => import('../pages/Payments'));
 const NewPayment = lazy(() => import('../pages/Payments/NewPayment'));
 const SettingsPage = lazy(() => import('../pages/Settings/SettingsPage').then(module => ({ default: module.default })));
 const AuthPage = lazy(() => import('../pages/Auth'));
+const QuotesPage = lazy(() => import('../pages/Quotes'));
+const ExpensesPage = lazy(() => import('../pages/Expenses'));
+const BankingPage = lazy(() => import('../pages/Banking'));
+const SuppliersPage = lazy(() => import('../pages/Suppliers'));
+const PurchaseOrdersPage = lazy(() => import('../pages/PurchaseOrders'));
+const CredentialsPage = lazy(() => import('../pages/Credentials'));
 
 // Helper component to wrap routes with Suspense
 const SuspenseWrapper = ({ children }: { children: ReactNode }) => (
@@ -192,6 +198,31 @@ const router = createBrowserRouter([
       {
         path: 'settings/*',
         element: <SuspenseWrapper><SettingsPage /></SuspenseWrapper>
+      },
+      // Add new routes for missing pages
+      {
+        path: 'quotes',
+        element: <SuspenseWrapper><QuotesPage /></SuspenseWrapper>
+      },
+      {
+        path: 'expenses',
+        element: <SuspenseWrapper><ExpensesPage /></SuspenseWrapper>
+      },
+      {
+        path: 'banking',
+        element: <SuspenseWrapper><BankingPage /></SuspenseWrapper>
+      },
+      {
+        path: 'suppliers',
+        element: <SuspenseWrapper><SuppliersPage /></SuspenseWrapper>
+      },
+      {
+        path: 'purchase-orders',
+        element: <SuspenseWrapper><PurchaseOrdersPage /></SuspenseWrapper>
+      },
+      {
+        path: 'credentials',
+        element: <SuspenseWrapper><CredentialsPage /></SuspenseWrapper>
       }
     ]
   },
