@@ -232,6 +232,6 @@ html, body {
     @apply border-[hsl(var(--border))];
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-[hsl(var(--background))] text-foreground;
   }
 }
