@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -7,26 +7,39 @@ import { JobTable } from "./job-list/JobTable";
 import { Filter, Plus, MapPin, List, Map } from "lucide-react";
 import JobSiteMapView from "./job-list/JobSiteMapView";
 import { toast } from "sonner";
-import { mockJobs } from "../data/mockJobs";
 import type { Job } from "@/types/job";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { supabase } from "@/integrations/supabase/client";
 
 export function JobsMain() {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<string>("jobs");
-  
-  // Sample job data from mockJobs
-  const jobs = mockJobs;
-  
+  const [jobs, setJobs] = useState<Job[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchJobs = async () => {
+      setLoading(true);
+      const { data, error } = await supabase.from('jobs').select('*');
+      if (error) {
+        toast.error("Failed to fetch jobs");
+      } else {
+        setJobs(data || []);
+      }
+      setLoading(false);
+    };
+    fetchJobs();
+  }, []);
+
   const handleStatusChange = async (jobId: string, newStatus: Job['status']) => {
     setActionLoading(jobId);
     try {
       // This would be an API call in a real application
-      console.log(`Changing job ${jobId} status to ${newStatus}`);
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API delay
+      await supabase.from('jobs').update({ status: newStatus }).eq('id', jobId);
+      setJobs(jobs => jobs.map(job => job.id === jobId ? { ...job, status: newStatus } : job));
       toast.success(`Job ${jobId} status updated to ${newStatus}`);
     } catch (error) {
       console.error("Error updating job status:", error);

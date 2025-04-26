@@ -1,4 +1,4 @@
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { JobHeader } from './components/JobHeader';
 import { JobTabs } from './components/JobTabs';
 import { useState, useEffect } from 'react';
@@ -12,7 +12,7 @@ import { JobLoadingState } from './components/JobLoadingState';
 import { JobMapView } from './components/JobMapView';
 import { useJobData } from './hooks/useJobData';
 import { JobStepProgress } from '@/components/dashboard/JobStepProgress';
-import { Card } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Camera, Share2 } from 'lucide-react';
 import { toast } from 'sonner';
@@ -20,9 +20,13 @@ import { AutomationIntegrationService } from '@/services/AutomationIntegrationSe
 import { usePhotoSharing } from '@/hooks/usePhotoSharing';
 import { PhotoSharingModal } from '@/components/sharing/PhotoSharingModal';
 import { useOpenInTab } from './hooks/useOpenInTab';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { AlertCircle } from 'lucide-react';
 
 export function JobDetails() {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const [jobNotes, setJobNotes] = useState("");
   const isManager = true;
   
@@ -76,11 +80,60 @@ export function JobDetails() {
   };
   
   if (loading) {
-    return <JobLoadingState />;
+    return (
+      <div className="container mx-auto p-4">
+        <Card>
+          <CardHeader>
+            <Skeleton className="h-8 w-1/3" />
+          </CardHeader>
+          <CardContent>
+            <Skeleton className="h-4 w-full mb-4" />
+            <Skeleton className="h-4 w-3/4 mb-4" />
+            <Skeleton className="h-4 w-1/2" />
+          </CardContent>
+        </Card>
+      </div>
+    );
   }
-  
-  if (error || !job) {
-    return <JobLoadingState isError errorMessage={error || "Job not found"} />;
+
+  if (error) {
+    return (
+      <div className="container mx-auto p-4">
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Error</AlertTitle>
+          <AlertDescription>
+            {error === "Job not found" 
+              ? "The job you're looking for doesn't exist or has been removed."
+              : error}
+          </AlertDescription>
+          <div className="mt-4">
+            <Button onClick={() => navigate('/jobs')}>
+              Back to Jobs
+            </Button>
+          </div>
+        </Alert>
+      </div>
+    );
+  }
+
+  if (!job) {
+    return (
+      <div className="container mx-auto p-4">
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Error</AlertTitle>
+          <AlertDescription>
+            Unable to load job details. Please try again later.
+          </AlertDescription>
+          <div className="mt-4">
+            <Button onClick={() => navigate('/jobs')}>
+              Back to Jobs
+            </Button>
+          </div>
+        </Alert>
+      </div>
+    );
   }
   
   return (

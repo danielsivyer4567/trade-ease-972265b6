@@ -1,47 +1,26 @@
-import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useState } from 'react';
+import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
-const backgroundImages = [
-  '/backgrounds/construction.png', // workers on a beam, city background
-  '/backgrounds/urban.png',        // gothic city street, tram, and car
-  '/backgrounds/acropolis.png',    // workers on a beam, ancient city below
-  '/backgrounds/tesla.png',        // man with electricity, lab scene
-  '/backgrounds/explosion.png',    // building with explosion cloud
-];
-
 export default function LoginPage() {
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentImageIndex((prevIndex) => (prevIndex + 1) % backgroundImages.length);
-    }, 20000);
-
-    return () => clearInterval(interval);
-  }, []);
-
   return (
     <div className="min-h-screen w-full relative overflow-hidden">
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={currentImageIndex}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 1 }}
-          className="absolute inset-0 z-0"
-          style={{
-            backgroundImage: `url(${backgroundImages[currentImageIndex]})`,
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-          }}
-        />
-      </AnimatePresence>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 1 }}
+        className="absolute inset-0 z-0"
+        style={{
+          backgroundImage: 'url("/images/Screenshot 2025-04-21 125049.png")',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+        }}
+      />
       
       <div className="absolute inset-0 bg-black/50 z-10" />
       
