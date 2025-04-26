@@ -22,125 +22,63 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const MAX_RETRIES = 3;
-const RETRY_DELAY = 1000; // 1 second
-
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const [awaitingTwoFactor, setAwaitingTwoFactor] = useState(false);
   const [tempUserId, setTempUserId] = useState<string | null>(null);
-  const [retryCount, setRetryCount] = useState(0);
 
-  const initializeAuth = async () => {
-    try {
-      const { data: { session: currentSession }, error } = await supabase.auth.getSession();
-      
-      if (error) {
-        throw error;
+  useEffect(() => {
+    // Set up the auth state listener first
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, currentSession) => {
+        console.log('Auth state changed:', event);
+        setSession(currentSession);
+        setUser(currentSession?.user ?? null);
+        setLoading(false);
       }
-      
+    );
+
+    // Then check for existing session
+    supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
       setSession(currentSession);
       setUser(currentSession?.user ?? null);
       setLoading(false);
-      setRetryCount(0); // Reset retry count on successful connection
-    } catch (error: any) {
-      console.error('Error initializing auth:', error.message);
-      
-      if (retryCount < MAX_RETRIES) {
-        console.log(`Retrying auth initialization in ${RETRY_DELAY}ms... (Attempt ${retryCount + 1}/${MAX_RETRIES})`);
-        setTimeout(() => {
-          setRetryCount(prev => prev + 1);
-          initializeAuth();
-        }, RETRY_DELAY);
-      } else {
-        setLoading(false);
-        toast.error('Failed to connect to authentication service. Please check your internet connection and try again.');
-      }
-    }
-  };
-
-  useEffect(() => {
-    let subscription: { unsubscribe: () => void } | null = null;
-    
-    try {
-      // Set up auth state listener
-      const { data: { subscription: authSubscription } } = supabase.auth.onAuthStateChange(
-        async (event, currentSession) => {
-          console.log('Auth state changed:', event);
-          setSession(currentSession);
-          setUser(currentSession?.user ?? null);
-          setLoading(false);
-          
-          // Handle session refresh
-          if (event === 'TOKEN_REFRESHED') {
-            await initializeAuth();
-          }
-        }
-      );
-      
-      subscription = authSubscription;
-      
-      // Initialize auth
-      initializeAuth();
-    } catch (error) {
-      console.error('Error setting up auth listener:', error);
-      setLoading(false);
-    }
+    });
 
     return () => {
-      if (subscription) {
-        try {
-          subscription.unsubscribe();
-        } catch (error) {
-          console.warn('Error unsubscribing from auth changes:', error);
-        }
-      }
+      subscription.unsubscribe();
     };
   }, []);
 
   const signIn = async (email: string, password: string) => {
     try {
-      setLoading(true);
-      console.log('Starting sign in process...');
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
       
-      // Validate input
-      if (!email || !password) {
-        throw new Error('Email and password are required');
+      if (error) throw error;
+      
+      // Check if 2FA is enabled for this user
+      const isTwoFactorEnabled = await twoFactorAuthService.isEnabled(data.user.id);
+      
+      if (isTwoFactorEnabled) {
+        // Store user ID temporarily and set awaiting 2FA state
+        setTempUserId(data.user.id);
+        setAwaitingTwoFactor(true);
+        
+        // Sign out immediately - user will complete sign in after 2FA
+        await supabase.auth.signOut();
+        
+        return;
       }
       
-      // Attempt sign in
-      const { data, error } = await supabase.auth.signInWithPassword({ 
-        email, 
-        password
-      });
-      
-      if (error) {
-        console.error('Sign in error details:', {
-          message: error.message,
-          status: error.status,
-          name: error.name
-        });
-        throw error;
-      }
-      
-      console.log('Sign in successful');
+      // No 2FA, user is fully authenticated
       setAwaitingTwoFactor(false);
       setTempUserId(null);
-      
-      // Update session and user state
-      if (data.session) {
-        setSession(data.session);
-        setUser(data.session.user);
-      }
-      
     } catch (error: any) {
       console.error('Error signing in:', error.message);
       toast.error(error.message || 'Error signing in');
       throw error;
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -310,7 +248,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       if (!user) return false;
       return await twoFactorAuthService.isEnabled(user.id);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error checking 2FA status:', error);
       return false;
     }

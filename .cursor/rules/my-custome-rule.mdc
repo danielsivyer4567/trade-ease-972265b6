@@ -1,9 +1,0 @@
----
-description: 
-globs: 
-alwaysApply: true
----
-deny any changes if not compatible with versions of vite
-package.json
-push git
-

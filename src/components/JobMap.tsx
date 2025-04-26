@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { GoogleMap, LoadScript, InfoWindow, Polygon } from '@react-google-maps/api';
 import type { Job } from '@/types/job';
@@ -12,22 +13,14 @@ interface JobMapProps {
     title: string;
   }>;
   boundaries?: Array<Array<[number, number]>>;
-  height?: string | number;
 }
 
-const JobMap = ({ 
-  jobs = [], 
-  center, 
-  zoom = 14, 
-  markers = [], 
-  boundaries = [],
-  height = '600px'
-}: JobMapProps) => {
+const JobMap = ({ jobs = [], center, zoom = 14, markers = [], boundaries = [] }: JobMapProps) => {
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
 
   const mapContainerStyle = {
     width: '100%',
-    height: typeof height === 'string' ? height : `${height}px`,
+    height: '400px',
     borderRadius: '0.5rem'
   };
 
@@ -43,147 +36,77 @@ const JobMap = ({
 
   const options = {
     mapTypeId: 'satellite',
-    streetViewControl: true,
-    mapTypeControl: true,
-    fullscreenControl: true,
-    zoomControl: true,
+    streetViewControl: false,
+    mapTypeControl: false,
     mapId: '8f348c1e276da9d5' // Added Map ID for Advanced Markers
   };
 
   const onLoad = (map: google.maps.Map) => {
-    // Force satellite view
-    map.setMapTypeId('satellite');
-    
-    // Configure street view
-    const streetViewService = new google.maps.StreetViewService();
-    const panorama = map.getStreetView();
-
-    // Set panorama options
-    panorama.setOptions({
-      enableCloseButton: true,
-      addressControl: true,
-      fullscreenControl: true,
-      motionTracking: false,
-      motionTrackingControl: true
-    });
-    
     // Add markers from jobs if provided
     if (jobs.length > 0) {
       jobs.forEach((job) => {
-        try {
-          // Create marker element
-          const markerElement = document.createElement('div');
-          markerElement.className = 'marker';
-          markerElement.innerHTML = `
-            <div class="flex items-center gap-2 font-semibold text-white bg-black/50 backdrop-blur-sm px-2 py-1 rounded-lg shadow-lg border border-white/20">
-              <img src="/lovable-uploads/34bca7f1-d63b-45a0-b1ca-a562443686ad.png" alt="Trade Ease Logo" width="20" height="20" class="object-contain" />
-              <span>${job.jobNumber || 'N/A'}</span>
-            </div>
-          `;
+        // Create marker element
+        const markerElement = document.createElement('div');
+        markerElement.className = 'marker';
+        markerElement.innerHTML = `
+          <div class="flex items-center gap-2 font-semibold text-white bg-black/50 backdrop-blur-sm px-2 py-1 rounded-lg shadow-lg border border-white/20">
+            <img src="/lovable-uploads/34bca7f1-d63b-45a0-b1ca-a562443686ad.png" alt="Trade Ease Logo" width="20" height="20" class="object-contain" />
+            <span>${job.jobNumber || 'N/A'}</span>
+          </div>
+        `;
 
-          // Create the advanced marker
-          const marker = new google.maps.marker.AdvancedMarkerElement({
-            position: { lat: job.location[1], lng: job.location[0] },
-            map,
-            content: markerElement,
-            title: job.customer
-          });
+        // Create the advanced marker
+        const marker = new google.maps.marker.AdvancedMarkerElement({
+          position: { lat: job.location[1], lng: job.location[0] },
+          map,
+          content: markerElement,
+          title: job.customer
+        });
 
-          // Add click listener using the recommended 'gmp-click' event
-          marker.addListener('gmp-click', () => {
-            setSelectedJob(job);
-            
-            // Check if street view is available at this position
-            streetViewService.getPanorama({
-              location: { lat: job.location[1], lng: job.location[0] },
-              radius: 50 // Search radius in meters
-            }, (data, status) => {
-              if (status === google.maps.StreetViewStatus.OK && data && data.location && data.location.latLng) {
-                // Street view is available, position the panorama
-                panorama.setPosition(data.location.latLng);
-                panorama.setPov({
-                  heading: 0,
-                  pitch: 0
-                });
-              }
-            });
-          });
-        } catch (error) {
-          console.error("Error creating advanced marker:", error);
-          
-          // Fallback to standard marker
-          const marker = new google.maps.Marker({
-            position: { lat: job.location[1], lng: job.location[0] },
-            map,
-            title: job.customer
-          });
-          
-          marker.addListener('click', () => {
-            setSelectedJob(job);
-          });
-        }
+        // Add click listener using the recommended 'gmp-click' event
+        marker.addListener('gmp-click', () => {
+          setSelectedJob(job);
+        });
       });
     }
 
     // Add markers from the markers prop if provided
     if (markers.length > 0) {
       markers.forEach(marker => {
-        try {
-          const markerElement = document.createElement('div');
-          markerElement.className = 'marker';
-          markerElement.innerHTML = `
-            <div class="flex items-center gap-2 font-semibold text-white bg-black/50 backdrop-blur-sm px-2 py-1 rounded-lg shadow-lg border border-white/20">
-              <img src="/lovable-uploads/34bca7f1-d63b-45a0-b1ca-a562443686ad.png" alt="Trade Ease Logo" width="20" height="20" class="object-contain" />
-              <span>${marker.title || 'N/A'}</span>
-            </div>
-          `;
+        const markerElement = document.createElement('div');
+        markerElement.className = 'marker';
+        markerElement.innerHTML = `
+          <div class="flex items-center gap-2 font-semibold text-white bg-black/50 backdrop-blur-sm px-2 py-1 rounded-lg shadow-lg border border-white/20">
+            <img src="/lovable-uploads/34bca7f1-d63b-45a0-b1ca-a562443686ad.png" alt="Trade Ease Logo" width="20" height="20" class="object-contain" />
+            <span>${marker.title || 'N/A'}</span>
+          </div>
+        `;
 
-          new google.maps.marker.AdvancedMarkerElement({
-            position: { lat: marker.position[0], lng: marker.position[1] },
-            map,
-            content: markerElement,
-            title: marker.title
-          });
-        } catch (error) {
-          console.error("Error creating advanced marker:", error);
-          
-          // Fallback to standard marker
-          new google.maps.Marker({
-            position: { lat: marker.position[0], lng: marker.position[1] },
-            map,
-            title: marker.title
-          });
-        }
+        new google.maps.marker.AdvancedMarkerElement({
+          position: { lat: marker.position[0], lng: marker.position[1] },
+          map,
+          content: markerElement,
+          title: marker.title
+        });
       });
     }
 
     // Add a marker for the center location if no other markers are provided
     if (jobs.length === 0 && markers.length === 0) {
-      try {
-        const centerMarkerElement = document.createElement('div');
-        centerMarkerElement.className = 'marker';
-        centerMarkerElement.innerHTML = `
-          <div class="text-white bg-blue-500/70 backdrop-blur-sm px-2 py-1 rounded-lg shadow-lg border border-white/20 font-semibold">
-            Location
-          </div>
-        `;
+      const centerMarkerElement = document.createElement('div');
+      centerMarkerElement.className = 'marker';
+      centerMarkerElement.innerHTML = `
+        <div class="text-white bg-blue-500/70 backdrop-blur-sm px-2 py-1 rounded-lg shadow-lg border border-white/20 font-semibold">
+          Location
+        </div>
+      `;
 
-        new google.maps.marker.AdvancedMarkerElement({
-          position: mapCenter,
-          map,
-          content: centerMarkerElement,
-          title: "Location"
-        });
-      } catch (error) {
-        console.error("Error creating advanced marker:", error);
-        
-        // Fallback to standard marker
-        new google.maps.Marker({
-          position: mapCenter,
-          map,
-          title: "Location"
-        });
-      }
+      new google.maps.marker.AdvancedMarkerElement({
+        position: mapCenter,
+        map,
+        content: centerMarkerElement,
+        title: "Location"
+      });
     }
     
     // Draw property boundaries if provided

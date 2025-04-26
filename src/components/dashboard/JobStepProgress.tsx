@@ -31,101 +31,16 @@ interface Comment {
   tags: string[];
 }
 
-const defaultSteps: JobStep[] = [{
-  id: 1,
-  title: 'step 1-',
-  tasks: [{
-    id: '1-0',
-    text: '-schedule job date',
-    isCompleted: false
-  }, {
-    id: '1-1',
-    text: '-allocate staff',
-    isCompleted: false
-  }],
-  isCompleted: false
-}, {
-  id: 2,
-  title: 'step 2-',
-  tasks: [{
-    id: '2-0',
-    text: '-order materials',
-    isCompleted: false
-  }, {
-    id: '2-1',
-    text: '-fill out job details',
-    isCompleted: false
-  }, {
-    id: '2-2',
-    text: '- management sign off',
-    isCompleted: false
-  }],
-  isCompleted: false
-}, {
-  id: 3,
-  title: 'step 3-',
-  tasks: [{
-    id: '3-0',
-    text: '-start job',
-    isCompleted: false
-  }, {
-    id: '3-1',
-    text: '-inductions',
-    isCompleted: false
-  }, {
-    id: '3-2',
-    text: '-material count check',
-    isCompleted: false
-  }],
-  isCompleted: false
-}, {
-  id: 4,
-  title: 'step 4-',
-  tasks: [{
-    id: '4-0',
-    text: '- complete job',
-    isCompleted: false
-  }, {
-    id: '4-1',
-    text: '- do quality check',
-    isCompleted: false
-  }, {
-    id: '4-2',
-    text: '- site clean up',
-    isCompleted: false
-  }, {
-    id: '4-3',
-    text: '- add any variations',
-    isCompleted: false
-  }],
-  isCompleted: false
-}, {
-  id: 5,
-  title: 'step5-',
-  tasks: [{
-    id: '5-0',
-    text: '- verify customer is happy',
-    isCompleted: false
-  }, {
-    id: '5-1',
-    text: '- customer to sign job is complete as per contract',
-    isCompleted: false
-  }, {
-    id: '5-2',
-    text: '-take pics and double check all documents.',
-    isCompleted: false
-  }, {
-    id: '5-3',
-    text: '-send invoices with variations',
-    isCompleted: false
-  }],
-  isCompleted: false
-}];
-
 export const JobStepProgress = () => {
-  const { id } = useParams<{ id: string }>();
-  const { toast: uiToast } = useToast();
-  const [jobSteps, setJobSteps] = useState<JobStep[]>(defaultSteps);
+  const {
+    id
+  } = useParams<{
+    id: string;
+  }>();
+  const {
+    toast: uiToast
+  } = useToast();
+  const [jobSteps, setJobSteps] = useState<JobStep[]>([]);
   const [jobDetails, setJobDetails] = useState<{assignedTeam?: string, teamColor?: string}>({});
   const [loading, setLoading] = useState(false);
   const [savingTaskId, setSavingTaskId] = useState<string | null>(null);
@@ -143,23 +58,24 @@ export const JobStepProgress = () => {
 
   useEffect(() => {
     const fetchJobSteps = async () => {
-      if (!id) return;
-
-      setLoading(true);
-      try {
-        const { data, error } = await supabase
+      if (id) {
+        setLoading(true);
+        const {
+          data,
+          error
+        } = await supabase
           .from('jobs')
           .select('job_steps, assigned_team')
           .eq('id', id)
           .single();
 
-        if (data && !error) {
+        if (data) {
           setJobDetails({
             assignedTeam: data.assigned_team,
             teamColor: getTeamColor(data.assigned_team)
           });
           
-          if (data.job_steps) {
+          if (data.job_steps && !error) {
             const formattedSteps = data.job_steps.map((step: any) => ({
               ...step,
               tasks: step.tasks.map((task: string, index: number) => ({
@@ -171,13 +87,17 @@ export const JobStepProgress = () => {
             setJobSteps(formattedSteps);
             
             const currentStepIndex = formattedSteps.findIndex((s: JobStep) => !s.isCompleted);
-            setCurrentStep(currentStepIndex >= 0 ? formattedSteps[currentStepIndex].id : formattedSteps[0]?.id || null);
+            if (currentStepIndex >= 0) {
+              setCurrentStep(formattedSteps[currentStepIndex].id);
+            } else {
+              setCurrentStep(formattedSteps[0]?.id || null);
+            }
+          } else {
+            createDefaultSteps();
           }
+        } else {
+          createDefaultSteps();
         }
-      } catch (err) {
-        console.error('Error fetching job steps:', err);
-        toast.error('Failed to load job steps');
-      } finally {
         setLoading(false);
       }
     };
@@ -199,227 +119,453 @@ export const JobStepProgress = () => {
     return teamColors[teamName] || "bg-gray-400";
   };
 
-  const saveJobSteps = async () => {
-    if (!id) return;
-
-    try {
-      const { error } = await supabase
-        .from('jobs')
-        .update({ job_steps: jobSteps })
-        .eq('id', id);
-
-      if (error) throw error;
-      toast.success('Progress saved successfully');
-    } catch (err) {
-      console.error('Error saving job steps:', err);
-      toast.error('Failed to save progress');
-    }
+  const createDefaultSteps = () => {
+    const defaultSteps = [{
+      id: 1,
+      title: 'step 1-',
+      tasks: [{
+        id: '1-0',
+        text: '-schedule job date',
+        isCompleted: false
+      }, {
+        id: '1-1',
+        text: '-allocate staff',
+        isCompleted: false
+      }],
+      isCompleted: false
+    }, {
+      id: 2,
+      title: 'step 2-',
+      tasks: [{
+        id: '2-0',
+        text: '-order materials',
+        isCompleted: false
+      }, {
+        id: '2-1',
+        text: '-fill out job details',
+        isCompleted: false
+      }, {
+        id: '2-2',
+        text: '- management sign off',
+        isCompleted: false
+      }],
+      isCompleted: false
+    }, {
+      id: 3,
+      title: 'step 3-',
+      tasks: [{
+        id: '3-0',
+        text: '-start job',
+        isCompleted: false
+      }, {
+        id: '3-1',
+        text: '-inductions',
+        isCompleted: false
+      }, {
+        id: '3-2',
+        text: '-material count check',
+        isCompleted: false
+      }],
+      isCompleted: false
+    }, {
+      id: 4,
+      title: 'step 4-',
+      tasks: [{
+        id: '4-0',
+        text: '- complete job',
+        isCompleted: false
+      }, {
+        id: '4-1',
+        text: '- do quality check',
+        isCompleted: false
+      }, {
+        id: '4-2',
+        text: '- site clean up',
+        isCompleted: false
+      }, {
+        id: '4-3',
+        text: '- add any variations',
+        isCompleted: false
+      }],
+      isCompleted: false
+    }, {
+      id: 5,
+      title: 'step5-',
+      tasks: [{
+        id: '5-0',
+        text: '- verify customer is happy',
+        isCompleted: false
+      }, {
+        id: '5-1',
+        text: '- customer to sign job is complete as per contract',
+        isCompleted: false
+      }, {
+        id: '5-2',
+        text: '-take pics and double check all documents.',
+        isCompleted: false
+      }, {
+        id: '5-3',
+        text: '-send invoices with variations',
+        isCompleted: false
+      }],
+      isCompleted: false
+    }, {
+      id: 6,
+      title: 'step 6',
+      tasks: [{
+        id: '6-0',
+        text: '- mark invoices paid to finalise job',
+        isCompleted: false
+      }, {
+        id: '6-1',
+        text: '-automaticly sync to xero',
+        isCompleted: false
+      }],
+      isCompleted: false
+    }];
+    
+    setJobSteps(defaultSteps);
+    setCurrentStep(1);
   };
-
-  const handleTaskCompletion = async (stepId: number, taskId: string, isCompleted: boolean) => {
-    setSavingTaskId(taskId);
-    try {
-      const updatedSteps = jobSteps.map(step => {
-        if (step.id === stepId) {
-          return {
-            ...step,
-            tasks: step.tasks.map(task => 
-              task.id === taskId ? { ...task, isCompleted } : task
-            )
-          };
-        }
-        return step;
-      });
-      
-      setJobSteps(updatedSteps);
-      await saveJobSteps();
-    } finally {
-      setSavingTaskId(null);
-    }
-  };
-
-  const handleStepCompletion = async (stepId: number, isCompleted: boolean) => {
-    setSavingStepId(stepId);
-    try {
-      const updatedSteps = jobSteps.map(step => 
-        step.id === stepId ? { ...step, isCompleted } : step
-      );
-      
-      setJobSteps(updatedSteps);
-      await saveJobSteps();
-      
-      if (isCompleted) {
-        const nextStep = jobSteps.find(s => s.id > stepId && !s.isCompleted);
-        if (nextStep) setCurrentStep(nextStep.id);
+  
+  const saveJobSteps = async (updatedSteps: JobStep[]) => {
+    if (id) {
+      const {
+        error
+      } = await supabase.from('jobs').update({
+        job_steps: updatedSteps
+      }).eq('id', id);
+      if (error) {
+        uiToast({
+          title: "Error saving progress",
+          description: error.message,
+          variant: "destructive"
+        });
+        return false;
       }
-    } finally {
-      setSavingStepId(null);
+      
+      if (customerNotificationsEnabled) {
+        console.log("Sending customer notification about step update");
+      }
+      
+      return true;
+    }
+    return false;
+  };
+  
+  const handleTaskCompletion = async (stepId: number, taskId: string) => {
+    setSavingTaskId(taskId);
+    const updatedSteps = jobSteps.map(step => {
+      if (step.id === stepId) {
+        const updatedTasks = step.tasks.map(task => task.id === taskId ? {
+          ...task,
+          isCompleted: !task.isCompleted
+        } : task);
+
+        const allTasksCompleted = updatedTasks.every(task => task.isCompleted);
+        return {
+          ...step,
+          tasks: updatedTasks,
+          isCompleted: allTasksCompleted
+        };
+      }
+      return step;
+    });
+    setJobSteps(updatedSteps);
+    
+    updateCurrentStep(updatedSteps);
+    
+    const saved = await saveJobSteps(updatedSteps);
+    if (saved) {
+      const task = updatedSteps.find(s => s.id === stepId)?.tasks.find(t => t.id === taskId);
+      uiToast({
+        title: task?.isCompleted ? "Task completed" : "Task reopened",
+        description: `Task has been ${task?.isCompleted ? 'marked as complete' : 'reopened'}.`
+      });
+    }
+    setSavingTaskId(null);
+  };
+  
+  const handleStepCompletion = async (stepId: number) => {
+    setSavingStepId(stepId);
+    const stepToUpdate = jobSteps.find(step => step.id === stepId);
+    const newCompletionState = !stepToUpdate?.isCompleted;
+    const updatedSteps = jobSteps.map(step => step.id === stepId ? {
+      ...step,
+      isCompleted: newCompletionState,
+      tasks: step.tasks.map(task => ({
+        ...task,
+        isCompleted: newCompletionState
+      }))
+    } : step);
+    
+    setJobSteps(updatedSteps);
+    
+    updateCurrentStep(updatedSteps);
+    
+    const saved = await saveJobSteps(updatedSteps);
+    if (saved) {
+      const completedStep = updatedSteps.find(s => s.id === stepId);
+      uiToast({
+        title: completedStep?.isCompleted ? "Step completed" : "Step reopened",
+        description: `${completedStep?.title} has been ${completedStep?.isCompleted ? 'marked as complete' : 'reopened'}.`
+      });
+    }
+    setSavingStepId(null);
+  };
+  
+  const updateCurrentStep = (steps: JobStep[]) => {
+    const firstIncompleteIndex = steps.findIndex(step => !step.isCompleted);
+    if (firstIncompleteIndex >= 0) {
+      setCurrentStep(steps[firstIncompleteIndex].id);
+    } else if (steps.length > 0) {
+      setCurrentStep(steps[steps.length - 1].id);
     }
   };
+  
+  const toggleFullscreen = () => {
+    setIsFullscreen(!isFullscreen);
+  };
 
-  const handleAddComment = async () => {
+  const toggleExpanded = () => {
+    setIsExpanded(!isExpanded);
+  };
+
+  const openCommentDialog = (taskId: string) => {
+    setCurrentTaskId(taskId);
+    setCommentDialogOpen(true);
+    setComment("");
+    setTag("");
+  };
+  
+  const addComment = () => {
     if (!currentTaskId || !comment.trim()) return;
     
     const newComment: Comment = {
       id: Date.now().toString(),
       text: comment,
-      author: 'Current User', // Replace with actual user
+      author: "Current User",
       createdAt: new Date().toISOString(),
       taskId: currentTaskId,
       tags: tag ? [tag] : []
     };
-
+    
     setComments(prev => ({
       ...prev,
       [currentTaskId]: [...(prev[currentTaskId] || []), newComment]
     }));
-
-    setComment('');
-    setTag('');
+    
+    toast.success("Comment added successfully");
     setCommentDialogOpen(false);
+    setComment("");
+    setTag("");
+  };
+  
+  const shareProgressLink = () => {
+    const progressLink = `${window.location.origin}/progress/${id}`;
+    navigator.clipboard.writeText(progressLink);
+    toast.success("Progress link copied to clipboard");
+    setShareLinkDialogOpen(false);
+  };
+  
+  const toggleCustomerNotifications = () => {
+    setCustomerNotificationsEnabled(!customerNotificationsEnabled);
+    toast.success(`Customer notifications ${!customerNotificationsEnabled ? 'enabled' : 'disabled'}`);
   };
 
-  const toggleFullscreen = () => setIsFullscreen(prev => !prev);
-  const toggleExpanded = () => setIsExpanded(prev => !prev);
+  const completedSteps = jobSteps.filter(step => step.isCompleted).length;
+  const progressPercentage = jobSteps.length > 0 ? (completedSteps / jobSteps.length) * 100 : 0;
   
   if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <Loader className="animate-spin" />
-      </div>
-    );
+    return <div className="flex justify-center items-center h-40">
+        <Loader className="animate-spin h-8 w-8 text-gray-500" />
+        <span className="ml-2 text-gray-500">Loading job progress...</span>
+      </div>;
   }
-
+  
   return (
-    <div className={`bg-white rounded-lg shadow-md p-4 ${isFullscreen ? 'fixed inset-0 z-50' : ''}`}>
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-semibold">Job Progress</h2>
-        <div className="flex gap-2">
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={toggleExpanded}
-          >
-            {isExpanded ? <Minimize2 /> : <Maximize2 />}
-          </Button>
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={() => setShareLinkDialogOpen(true)}
-          >
-            <Share2 />
-          </Button>
+    <div className={`relative ${isFullscreen ? 'fixed inset-0 z-50 bg-white p-6 overflow-auto' : ''}`}>
+      <Collapsible open={isExpanded} onOpenChange={setIsExpanded}>
+        <div className="flex justify-between items-center mb-4">
+          <div className="flex items-center gap-3">
+            <h2 className="text-xl font-bold">Job Progress</h2>
+            <div className="bg-slate-100 rounded-full h-8 px-3 flex items-center">
+              <span className="text-sm font-medium">{progressPercentage.toFixed(0)}% Complete</span>
+            </div>
+          </div>
+          
+          <div className="flex items-center gap-2">
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={toggleExpanded} 
+              title={isExpanded ? "Minimize" : "Maximize"}
+            >
+              {isExpanded ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
+            </Button>
+            {isExpanded && (
+              <>
+                <Button variant="outline" size="sm" onClick={() => setShareLinkDialogOpen(true)}>
+                  <Share2 className="h-4 w-4 mr-2" />
+                  Share Progress
+                </Button>
+                <Button variant="ghost" size="icon" onClick={toggleFullscreen}>
+                  <Maximize2 className="h-4 w-4" />
+                </Button>
+              </>
+            )}
+          </div>
         </div>
-      </div>
-
-      <Collapsible open={isExpanded}>
-        <CollapsibleContent>
+        
+        <div className="flex items-center space-x-3 mb-6 overflow-x-auto py-2">
           {jobSteps.map((step) => (
             <div
               key={step.id}
-              className={`mb-4 p-4 rounded-lg border ${
-                currentStep === step.id ? jobDetails.teamColor || 'bg-gray-100' : 'bg-white'
-              }`}
+              onClick={() => handleStepCompletion(step.id)}
+              className={`flex-shrink-0 cursor-pointer w-10 h-10 rounded-full flex items-center justify-center
+                ${step.isCompleted ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-700'} 
+                ${currentStep === step.id ? `border-2 border-${jobDetails.teamColor?.replace('bg-', '')} shadow-md` : 'border-2 border-white'}
+              `}
+              title={step.title}
             >
-              <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center gap-2">
-                  <Checkbox
-                    checked={step.isCompleted}
-                    onCheckedChange={(checked) => handleStepCompletion(step.id, checked as boolean)}
-                    disabled={!!savingStepId}
-                  />
-                  <h3 className="font-medium">{step.title}</h3>
-                </div>
-                {savingStepId === step.id && <Loader className="animate-spin" />}
-              </div>
-
-              <div className="ml-6">
-                {step.tasks.map((task) => (
-                  <div key={task.id} className="flex items-center justify-between py-1">
-                    <div className="flex items-center gap-2">
-                      <Checkbox
-                        checked={task.isCompleted}
-                        onCheckedChange={(checked) => handleTaskCompletion(step.id, task.id, checked as boolean)}
-                        disabled={!!savingTaskId}
-                      />
-                      <span className={task.isCompleted ? 'line-through text-gray-500' : ''}>
-                        {task.text}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      {savingTaskId === task.id && <Loader className="animate-spin" />}
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => {
-                          setCurrentTaskId(task.id);
-                          setCommentDialogOpen(true);
-                        }}
-                      >
-                        <MessageSquare className="h-4 w-4" />
-                        {comments[task.id]?.length > 0 && (
-                          <span className="ml-1">{comments[task.id].length}</span>
-                        )}
-                      </Button>
-                    </div>
-                  </div>
-                ))}
-              </div>
+              {step.isCompleted ? (
+                <Check className="h-5 w-5" />
+              ) : (
+                <span className="text-sm font-medium">{step.id}</span>
+              )}
             </div>
           ))}
+        </div>
+        
+        <CollapsibleContent className="space-y-4">
+          {jobDetails.assignedTeam && (
+            <div className="flex items-center mb-4 bg-white p-2 rounded-lg shadow-sm">
+              <div className={`w-4 h-4 rounded-full ${jobDetails.teamColor} mr-2`}></div>
+              <span className="text-sm">This job is assigned to: <span className="font-medium">{jobDetails.assignedTeam}</span></span>
+            </div>
+          )}
+          
+          <div className="space-y-6 mb-6">
+            {jobSteps.map((step) => (
+              <div key={step.id} className={`border rounded-lg overflow-hidden
+                ${currentStep === step.id ? `ring-2 ring-${jobDetails.teamColor?.replace('bg-', '')}` : ''}
+              `}>
+                <div 
+                  className={`p-3 flex justify-between items-center cursor-pointer ${
+                    step.isCompleted ? 'bg-green-50 border-green-200' : 'bg-slate-50'
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <Checkbox 
+                      checked={step.isCompleted} 
+                      onCheckedChange={() => handleStepCompletion(step.id)}
+                      disabled={savingStepId === step.id}
+                      className={step.isCompleted ? 'bg-green-500 text-white border-green-500' : ''}
+                    />
+                    <h3 className="font-medium">{step.title}</h3>
+                  </div>
+                  
+                  <div className="text-sm text-gray-500">
+                    {step.tasks.filter(t => t.isCompleted).length}/{step.tasks.length} tasks
+                  </div>
+                </div>
+                
+                <div className="p-3 space-y-2 bg-white">
+                  {step.tasks.map((task) => (
+                    <div key={task.id} className="flex items-center justify-between border-b pb-2 last:border-b-0 last:pb-0">
+                      <div className="flex items-center gap-2">
+                        <Checkbox 
+                          checked={task.isCompleted} 
+                          onCheckedChange={() => handleTaskCompletion(step.id, task.id)}
+                          disabled={savingTaskId === task.id}
+                          className={task.isCompleted ? 'bg-green-500 text-white border-green-500' : ''}
+                        />
+                        <span className={task.isCompleted ? 'line-through text-gray-500' : ''}>{task.text}</span>
+                      </div>
+                      
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        onClick={() => openCommentDialog(task.id)}
+                        className="flex items-center text-gray-500 hover:text-gray-700"
+                      >
+                        <MessageSquare className="h-4 w-4 mr-1" />
+                        {comments[task.id]?.length ? comments[task.id].length : 0}
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
         </CollapsibleContent>
       </Collapsible>
-
+      
       <Dialog open={commentDialogOpen} onOpenChange={setCommentDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Add Comment</DialogTitle>
+            <DialogTitle>Add Comment or Tag</DialogTitle>
             <DialogDescription>
-              Add a comment to track progress or note important information.
+              Add a comment to this task. You can also tag team members or the customer.
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-4">
-            <Textarea
-              value={comment}
-              onChange={(e) => setComment(e.target.value)}
-              placeholder="Enter your comment..."
+          
+          <div className="space-y-4 py-2">
+            <Textarea 
+              placeholder="Enter your comment here..." 
+              value={comment} 
+              onChange={(e) => setComment(e.target.value)} 
+              className="min-h-[100px]"
             />
-            <Input
-              value={tag}
-              onChange={(e) => setTag(e.target.value)}
-              placeholder="Add a tag (optional)"
-            />
+            
+            <div className="space-y-2">
+              <p className="text-sm font-medium">Tag someone (optional)</p>
+              <Input 
+                placeholder="@manager, @worker, @customer" 
+                value={tag} 
+                onChange={(e) => setTag(e.target.value)}
+              />
+            </div>
           </div>
+          
           <DialogFooter>
-            <Button onClick={handleAddComment}>Add Comment</Button>
+            <Button variant="outline" onClick={() => setCommentDialogOpen(false)}>Cancel</Button>
+            <Button onClick={addComment} disabled={!comment.trim()}>Add Comment</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
-
+      
       <Dialog open={shareLinkDialogOpen} onOpenChange={setShareLinkDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Share Progress</DialogTitle>
+            <DialogTitle>Share Progress with Customer</DialogTitle>
             <DialogDescription>
-              Share the job progress with stakeholders.
+              Generate a link that lets your customer view the current job progress.
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-4">
+          
+          <div className="space-y-4 py-2">
             <div className="flex items-center space-x-2">
-              <Checkbox
-                id="notifications"
+              <Checkbox 
+                id="enable-notifications" 
                 checked={customerNotificationsEnabled}
-                onCheckedChange={(checked) => setCustomerNotificationsEnabled(checked as boolean)}
+                onCheckedChange={() => toggleCustomerNotifications()}
               />
-              <label htmlFor="notifications">Enable customer notifications</label>
+              <label htmlFor="enable-notifications" className="text-sm">
+                Send notifications when progress updates
+              </label>
             </div>
-            <Input
+            
+            <Input 
+              value={`${window.location.origin}/progress/${id}`}
               readOnly
-              value={`${window.location.origin}/jobs/${id}/progress`}
+              className="font-mono text-sm"
             />
           </div>
+          
           <DialogFooter>
-            <Button onClick={() => setShareLinkDialogOpen(false)}>Close</Button>
+            <Button variant="outline" onClick={() => setShareLinkDialogOpen(false)}>Cancel</Button>
+            <Button onClick={shareProgressLink}>Copy Link</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

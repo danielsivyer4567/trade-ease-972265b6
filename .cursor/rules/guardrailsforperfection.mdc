@@ -1,9 +1,0 @@
----
-description: 
-globs: 
-alwaysApply: true
----
-[main.tsx](mdc:src/main.tsx)[20231002_customer_journey.sql](mdc:supabase/migrations/20231002_customer_journey.sql)[tsconfig.app.json](mdc:tsconfig.app.json)[WorkflowInstructions.tsx](mdc:src/pages/Workflow/components/sidebar/WorkflowInstructions.tsx)[automationData.ts](mdc:src/pages/Automations/data/automationData.ts)[TradeDashboard.tsx](mdc:src/pages/Trading/components/TradeDashboard.tsx)[TradeDashboardContent.tsx](mdc:src/components/trade-dashboard/TradeDashboardContent.tsx) [applyrule.mdc](mdc:.cursor/rules/applyrule.mdc) 
-
-
-@tradeease 

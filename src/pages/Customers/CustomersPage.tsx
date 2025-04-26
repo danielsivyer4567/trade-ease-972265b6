@@ -28,7 +28,6 @@ import { Progress } from '@/components/ui/progress';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { mockDatabaseService, MockCustomer } from '@/services/MockDatabaseService';
 
 // Define the interface for your Customer object
 interface Customer {
@@ -46,28 +45,85 @@ interface Customer {
   totalSteps?: number;
 }
 
-// Convert MockCustomer to Customer for the UI
-const convertToCustomer = (mockCustomer: MockCustomer): Customer => {
-  return {
-    id: mockCustomer.id,
-    name: mockCustomer.name,
-    email: mockCustomer.email,
-    phone: mockCustomer.phone,
-    address: mockCustomer.address,
-    status: 'active', // Default status
-    progress: 50, // Default progress
-    lastContact: mockCustomer.created_at,
-    jobId: `JOB-${1000 + parseInt(mockCustomer.id)}`,
-    jobTitle: 'Active Project',
-    stepCompleted: 5,
+// Mock data for customers
+const MOCK_CUSTOMERS: Customer[] = [
+  {
+    id: 'CUST-1001',
+    name: 'John Smith',
+    email: 'john.smith@example.com',
+    phone: '(555) 123-4567',
+    address: '123 Main St, Anytown, ST 12345',
+    status: 'active',
+    progress: 43,
+    lastContact: '2023-12-01',
+    jobId: 'JOB-7923',
+    jobTitle: 'Basic Maintenance',
+    stepCompleted: 3,
+    totalSteps: 7
+  },
+  {
+    id: 'CUST-1002',
+    name: 'Sarah Johnson',
+    email: 'sarah.j@example.com',
+    phone: '(555) 987-6543',
+    address: '456 Oak Ave, Somewhere, ST 67890',
+    status: 'active',
+    progress: 75,
+    lastContact: '2023-12-05',
+    jobId: 'JOB-8042',
+    jobTitle: 'Kitchen Renovation',
+    stepCompleted: 6,
+    totalSteps: 8
+  },
+  {
+    id: 'CUST-1003',
+    name: 'Michael Barnes',
+    email: 'mbarnes@example.com',
+    phone: '(555) 234-5678',
+    address: '789 Pine Dr, Elsewhere, ST 54321',
+    status: 'inactive',
+    progress: 20,
+    lastContact: '2023-11-15',
+    jobId: 'JOB-7854',
+    jobTitle: 'Bathroom Remodel',
+    stepCompleted: 2,
     totalSteps: 10
-  };
-};
+  },
+  {
+    id: 'CUST-1004',
+    name: 'Emily Chen',
+    email: 'echen@example.com',
+    phone: '(555) 345-6789',
+    address: '101 Maple Ln, Nowhere, ST 13579',
+    status: 'active',
+    progress: 90,
+    lastContact: '2023-12-10',
+    jobId: 'JOB-8115',
+    jobTitle: 'Roof Repair',
+    stepCompleted: 9,
+    totalSteps: 10
+  },
+  {
+    id: 'CUST-1005',
+    name: 'David Wilson',
+    email: 'dwilson@example.com',
+    phone: '(555) 456-7890',
+    address: '202 Cedar St, Anywhere, ST 24680',
+    status: 'active',
+    progress: 60,
+    lastContact: '2023-12-08',
+    jobId: 'JOB-8076',
+    jobTitle: 'Deck Installation',
+    stepCompleted: 6,
+    totalSteps: 10
+  },
+];
 
-// Simulating API call with mock data service
+// Simulating API call with mock data
 const fetchCustomers = async (): Promise<Customer[]> => {
-  const mockCustomers = await mockDatabaseService.getCustomers();
-  return mockCustomers.map(convertToCustomer);
+  // Simulate API latency
+  await new Promise(resolve => setTimeout(resolve, 500));
+  return MOCK_CUSTOMERS;
 };
 
 type SortField = 'name' | 'status' | 'progress';

@@ -1,30 +1,19 @@
-// @ts-ignore
-import { serve } from 'https://deno.land/std@0.177.0/http/server.ts';
 
-// Add Deno namespace declaration
-declare const Deno: {
-  env: {
-    get(key: string): string | undefined;
-  };
-};
+import { serve } from 'https://deno.land/std@0.177.0/http/server.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-interface GHLNumberRequest {
-  phoneNumber: string;
-}
-
-serve(async (req: Request) => {
+serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const { phoneNumber } = await req.json() as GHLNumberRequest;
+    const { phoneNumber } = await req.json();
     console.log('Received phone number:', phoneNumber);
 
     // Validate phone number format
@@ -53,13 +42,10 @@ serve(async (req: Request) => {
       }
     );
 
-  } catch (error: unknown) {
-    console.error('Error:', error instanceof Error ? error.message : 'Unknown error');
-    
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    
+  } catch (error) {
+    console.error('Error:', error.message);
     return new Response(
-      JSON.stringify({ success: false, error: errorMessage }),
+      JSON.stringify({ success: false, error: error.message }),
       { 
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }

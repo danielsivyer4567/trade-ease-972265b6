@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -7,12 +7,10 @@ import { JobTable } from "./job-list/JobTable";
 import { Filter, Plus, MapPin, List, Map } from "lucide-react";
 import JobSiteMapView from "./job-list/JobSiteMapView";
 import { toast } from "sonner";
-import { mockJobs, convertToJob } from "../data/mockJobs";
-import { mockDatabaseService } from "@/services/MockDatabaseService";
+import { mockJobs } from "../data/mockJobs";
 import type { Job } from "@/types/job";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { useQuery } from "@tanstack/react-query";
 
 export function JobsMain() {
   const navigate = useNavigate();
@@ -20,21 +18,8 @@ export function JobsMain() {
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<string>("jobs");
   
-  // Fetch jobs using React Query
-  const { isLoading, isError, data: jobs = [], error } = useQuery({
-    queryKey: ['jobs'],
-    queryFn: async () => {
-      try {
-        const mockJobs = await mockDatabaseService.getJobs();
-        return mockJobs.map(convertToJob);
-      } catch (error) {
-        console.error("Error fetching jobs:", error);
-        throw error;
-      }
-    },
-    // Fallback to mockJobs if there's an error
-    placeholderData: mockJobs,
-  });
+  // Sample job data from mockJobs
+  const jobs = mockJobs;
   
   const handleStatusChange = async (jobId: string, newStatus: Job['status']) => {
     setActionLoading(jobId);
@@ -50,14 +35,6 @@ export function JobsMain() {
       setActionLoading(null);
     }
   };
-
-  // Filter jobs based on search query
-  const filteredJobs = jobs.filter(job => 
-    job.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    job.customer.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    job.type.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    job.jobNumber.toLowerCase().includes(searchQuery.toLowerCase())
-  );
 
   return (
     <div className="w-full h-full p-0">
@@ -84,43 +61,63 @@ export function JobsMain() {
           </div>
         </div>
         
-        {isLoading ? (
-          <div className="flex justify-center items-center p-8">
-            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-gray-900"></div>
-          </div>
-        ) : isError ? (
-          <div className="p-8 text-center">
-            <p className="text-red-500 mb-2">Error loading jobs</p>
-            <Button 
-              variant="outline" 
-              onClick={() => window.location.reload()}
-            >
-              Try Again
-            </Button>
-          </div>
-        ) : (
-          <Tabs defaultValue="list" className="w-full">
-            <TabsList className="mb-4">
-              <TabsTrigger value="list"><List className="mr-1 h-4 w-4" /> List View</TabsTrigger>
-              <TabsTrigger value="map"><Map className="mr-1 h-4 w-4" /> Map View</TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="list" className="bg-white rounded-md">
-              <JobTable 
-                jobs={filteredJobs}
-                searchQuery={searchQuery}
-                actionLoading={actionLoading}
-                onStatusChange={handleStatusChange}
-              />
-            </TabsContent>
-            
-            <TabsContent value="map">
-              <div className="h-[600px] bg-white rounded-md">
-                <JobSiteMapView jobs={filteredJobs} />
-              </div>
-            </TabsContent>
-          </Tabs>
-        )}
+        <Tabs defaultValue="jobs" value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid grid-cols-4 mb-6 w-full sm:w-[600px]">
+            <TabsTrigger value="jobs">Jobs</TabsTrigger>
+            <TabsTrigger value="tasks">Tasks</TabsTrigger>
+            <TabsTrigger value="templates">Templates</TabsTrigger>
+            <TabsTrigger value="scheduling">Scheduling</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="jobs" className="mt-0">
+            <div className="h-[calc(100vh-220px)]">
+              <ResizablePanelGroup direction="horizontal" className="border rounded-lg">
+                <ResizablePanel defaultSize={40} minSize={30}>
+                  <div className="h-full overflow-y-auto">
+                    <JobTable 
+                      searchQuery={searchQuery} 
+                      jobs={jobs}
+                      actionLoading={actionLoading}
+                      onStatusChange={handleStatusChange}
+                    />
+                  </div>
+                </ResizablePanel>
+                
+                <ResizableHandle withHandle />
+                
+                <ResizablePanel defaultSize={60} minSize={30}>
+                  <div className="h-full p-1">
+                    <JobSiteMapView jobs={jobs} />
+                  </div>
+                </ResizablePanel>
+              </ResizablePanelGroup>
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="tasks" className="mt-0">
+            <div className="p-4 border rounded-lg min-h-[300px]">
+              <p className="text-center text-gray-500 py-20">
+                Task management will be displayed here.
+              </p>
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="templates" className="mt-0">
+            <div className="p-4 border rounded-lg min-h-[300px]">
+              <p className="text-center text-gray-500 py-20">
+                Job templates will be displayed here.
+              </p>
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="scheduling" className="mt-0">
+            <div className="p-4 border rounded-lg min-h-[300px]">
+              <p className="text-center text-gray-500 py-20">
+                Job scheduling interface will be displayed here.
+              </p>
+            </div>
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );

@@ -39,7 +39,7 @@ const JobSiteMap = () => {
     mapTypeId: 'satellite',
     tilt: 45,
     zoom: 13,
-    mapTypeControl: true,
+    mapTypeControl: false,
     streetViewControl: true,
     fullscreenControl: true,
     mapId: '8f348c1e276da9d5'
@@ -128,20 +128,6 @@ const JobSiteMap = () => {
                   // Set initial tilt for Earth-like view
                   map.setTilt(45);
 
-                  // Configure street view
-                  const streetViewService = new google.maps.StreetViewService();
-                  const panorama = map.getStreetView();
-
-                  // Set panorama options
-                  panorama.setOptions({
-                    enableCloseButton: true,
-                    addressControl: true,
-                    fullscreenControl: true,
-                    motionTracking: false,
-                    motionTrackingControl: true,
-                    position: center
-                  });
-
                   // Place markers for each location
                   locations.forEach(location => {
                     const markerElement = document.createElement('div');
@@ -161,30 +147,10 @@ const JobSiteMap = () => {
                       content: markerElement,
                       title: location.name
                     });
-                    
                     marker.addListener('gmp-click', () => {
                       setSelectedLocation({
                         lat: location.lat,
                         lng: location.lng
-                      });
-                      
-                      // Check if street view is available at this position
-                      streetViewService.getPanorama({
-                        location: { lat: location.lat, lng: location.lng },
-                        radius: 50 // Search radius in meters
-                      }, (data, status) => {
-                        if (status === google.maps.StreetViewStatus.OK && data && data.location && data.location.latLng) {
-                          // Street view is available, position the panorama
-                          panorama.setPosition(data.location.latLng);
-                          panorama.setPov({
-                            heading: 0,
-                            pitch: 0
-                          });
-                          // Show street view
-                          panorama.setVisible(true);
-                        } else {
-                          console.info("Street View not available at this location");
-                        }
                       });
                     });
                   });

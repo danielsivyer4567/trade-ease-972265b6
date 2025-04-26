@@ -12,9 +12,7 @@ const FormsPage = React.lazy(() => import('@/pages/Forms'));
 const DatabasePage = React.lazy(() => import('@/pages/Database'));
 const WorkflowListPage = React.lazy(() => import('@/pages/Workflow/WorkflowList'));
 const WorkflowTemplatesPage = React.lazy(() => import('@/pages/Workflow/WorkflowTemplates'));
-const WorkflowMetricsPage = React.lazy(() => import('@/pages/Workflow/WorkflowMetrics'));
 const IntegrationsPage = React.lazy(() => import('@/pages/Integrations'));
-const MaintenanceWorkflow = React.lazy(() => import('@/pages/Workflow/MaintenanceWorkflow'));
 
 // Export routes as JSX elements
 export const activityRoutes = (
@@ -38,16 +36,6 @@ export const activityRoutes = (
       <Route path="/workflow/templates" element={
         <Suspense fallback={<LoadingFallback />}>
           <WorkflowTemplatesPage />
-        </Suspense>
-      } />
-      <Route path="/workflow/metrics" element={
-        <Suspense fallback={<LoadingFallback />}>
-          <WorkflowMetricsPage />
-        </Suspense>
-      } />
-      <Route path="/workflow/maintenance" element={
-        <Suspense fallback={<LoadingFallback />}>
-          <MaintenanceWorkflow />
         </Suspense>
       } />
       <Route path="/automations" element={
