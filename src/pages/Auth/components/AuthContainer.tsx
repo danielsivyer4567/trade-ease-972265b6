@@ -1,11 +1,32 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card } from "@/components/ui/card";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface AuthContainerProps {
   children: React.ReactNode;
 }
 
+// Define the background images
+const backgroundImages = [
+  '/backgrounds/construction.png',
+  '/backgrounds/urban.png.png',
+  '/backgrounds/acropolis.png.png',
+  '/backgrounds/tesla.png.png',
+  '/backgrounds/explosion.png.png',
+];
+
 export const AuthContainer: React.FC<AuthContainerProps> = ({ children }) => {
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+  // Set up the rotation interval
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentImageIndex((prevIndex) => (prevIndex + 1) % backgroundImages.length);
+    }, 10000); // 10 seconds
+
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-100 p-4 relative">
       {/* Solid background color to match the image */}
@@ -16,18 +37,23 @@ export const AuthContainer: React.FC<AuthContainerProps> = ({ children }) => {
         }}
       />
       
-      {/* Non-stretched background image */}
-      <div 
-        className="absolute inset-0 z-0 opacity-50 grayscale"
-        style={{
-          backgroundImage: 'url("/Screenshot 2025-04-21 125049.png")',
-          backgroundSize: 'contain',
-          backgroundPosition: 'center',
-          backgroundRepeat: 'no-repeat',
-          margin: '0',
-          padding: '0'
-        }}
-      />
+      {/* Rotating background images with smooth transitions */}
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={currentImageIndex}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 0.8 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 1.5 }}
+          className="absolute inset-0 z-0 grayscale"
+          style={{
+            backgroundImage: `url(${backgroundImages[currentImageIndex]})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat',
+          }}
+        />
+      </AnimatePresence>
       
       <div className="w-full max-w-md relative z-10">
         <div className="mb-8 text-center">

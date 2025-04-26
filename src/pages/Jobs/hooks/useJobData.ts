@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import type { Job, JobStep } from '@/types/job';
-import { mockJobs } from '../data/mockJobs';
 
 // Default job steps if not present in the database
 const defaultJobSteps: JobStep[] = [
@@ -52,12 +51,10 @@ export const useJobData = (id: string | undefined) => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    console.log("JobDetails mounted with id:", id);
     const fetchJob = async () => {
       if (!id) {
         setError("No job ID provided");
         setLoading(false);
-        navigate('/jobs');
         return;
       }
 
@@ -71,8 +68,6 @@ export const useJobData = (id: string | undefined) => {
             .maybeSingle();
             
           if (data && !error) {
-            console.log("Job fetched from Supabase:", data);
-            
             const transformedJob: Job = {
               id: data.id,
               jobNumber: data.job_number,
@@ -88,42 +83,25 @@ export const useJobData = (id: string | undefined) => {
               job_steps: data.job_steps || defaultJobSteps,
               boundaries: data.boundaries
             };
-            
             setJob(transformedJob);
             setError(null);
             setLoading(false);
             return;
           } else if (error) {
-            console.error("Error fetching job from Supabase:", error);
             setError("Failed to fetch job from database");
           }
         }
       } catch (err) {
-        console.error("Exception fetching job:", err);
         setError("An unexpected error occurred");
       }
       
-      // Fallback to mock data
-      const foundJob = mockJobs.find(j => j.id === id);
-      console.log("Using mock job data:", foundJob);
-      if (foundJob) {
-        // Add job steps to the mock job if it doesn't have them
-        setJob({
-          ...foundJob,
-          job_steps: defaultJobSteps,
-          boundaries: foundJob.boundaries || [] // Ensure boundaries exists even if undefined in mock data
-        });
-        setError(null);
-      } else {
-        setError("Job not found");
-        toast.error("Job not found");
-        navigate('/jobs');
-      }
+      // If we get here, the job wasn't found
+      setError("Job not found");
+      toast.error("Job not found");
       setLoading(false);
     };
-    
     fetchJob();
-  }, [id, navigate]);
+  }, [id]);
 
   return { job, loading, error };
 };
