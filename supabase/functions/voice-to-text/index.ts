@@ -1,14 +1,6 @@
-// @ts-ignore
-import "https://deno.land/x/xhr@0.1.0/mod.ts";
-// @ts-ignore
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
-// Add Deno namespace declaration
-declare const Deno: {
-  env: {
-    get(key: string): string | undefined;
-  };
-};
+import "https://deno.land/x/xhr@0.1.0/mod.ts";
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -45,7 +37,7 @@ function processBase64Chunks(base64String: string, chunkSize = 32768) {
   return result;
 }
 
-serve(async (req: Request) => {
+serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
   }
@@ -97,11 +89,10 @@ serve(async (req: Request) => {
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
 
-  } catch (error: unknown) {
+  } catch (error) {
     console.error('Error in voice-to-text function:', error);
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
     return new Response(
-      JSON.stringify({ error: errorMessage }),
+      JSON.stringify({ error: error.message }),
       {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },

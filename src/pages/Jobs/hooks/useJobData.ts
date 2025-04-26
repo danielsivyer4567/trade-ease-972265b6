@@ -48,82 +48,73 @@ const defaultJobSteps: JobStep[] = [
 export const useJobData = (id: string | undefined) => {
   const [job, setJob] = useState<Job | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!id) {
-      setError('No job ID provided');
-      setLoading(false);
-      navigate('/jobs');
-      return;
-    }
-
+    console.log("JobDetails mounted with id:", id);
     const fetchJob = async () => {
       try {
-        setLoading(true);
-        setError(null);
-        
         const { data: session } = await supabase.auth.getSession();
-        if (!session?.session?.user) {
-          throw new Error('No authenticated user');
+        if (session?.session?.user) {
+          const { data, error } = await supabase
+            .from('jobs')
+            .select('*')
+            .eq('id', id)
+            .maybeSingle();
+            
+          if (data && !error) {
+            console.log("Job fetched from Supabase:", data);
+            
+            const transformedJob: Job = {
+              id: data.id,
+              jobNumber: data.job_number,
+              title: data.title,
+              customer: data.customer,
+              description: data.description || '',
+              type: data.type,
+              date: data.date,
+              status: data.status,
+              location: data.location,
+              assignedTeam: data.assigned_team,
+              date_undecided: data.date_undecided,
+              job_steps: data.job_steps || defaultJobSteps,
+              boundaries: data.boundaries
+            };
+            
+            setJob(transformedJob);
+            setLoading(false);
+            return;
+          } else if (error) {
+            console.error("Error fetching job from Supabase:", error);
+          }
         }
-
-        const { data, error: supabaseError } = await supabase
-          .from('jobs')
-          .select('*')
-          .eq('id', id)
-          .maybeSingle();
-          
-        if (supabaseError) {
-          throw supabaseError;
-        }
-        
-        if (data) {
-          const transformedJob: Job = {
-            id: data.id,
-            jobNumber: data.job_number,
-            title: data.title,
-            customer: data.customer,
-            description: data.description || '',
-            type: data.type,
-            date: data.date,
-            status: data.status || 'ready',
-            location: data.location || [0, 0],
-            assignedTeam: data.assigned_team,
-            date_undecided: data.date_undecided || false,
-            job_steps: data.job_steps || defaultJobSteps,
-            boundaries: data.boundaries || []
-          };
-          
-          setJob(transformedJob);
-          return;
-        }
-
-        // If no data from Supabase, try mock data
-        const foundJob = mockJobs.find(j => j.id === id);
-        if (foundJob) {
-          setJob({
-            ...foundJob,
-            job_steps: defaultJobSteps,
-            boundaries: foundJob.boundaries || []
-          });
-          return;
-        }
-
-        // If no job found in either source
-        throw new Error('Job not found');
       } catch (err) {
-        console.error('Error fetching job:', err);
-        setError(err instanceof Error ? err.message : 'Failed to fetch job');
-        toast.error('Could not load job information');
-      } finally {
-        setLoading(false);
+        console.error("Exception fetching job:", err);
       }
+      
+      // Fallback to mock data
+      const foundJob = mockJobs.find(j => j.id === id);
+      console.log("Using mock job data:", foundJob);
+      if (foundJob) {
+        // Add job steps to the mock job if it doesn't have them
+        setJob({
+          ...foundJob,
+          job_steps: defaultJobSteps,
+          boundaries: foundJob.boundaries || [] // Ensure boundaries exists even if undefined in mock data
+        });
+      } else {
+        toast.error("Job not found");
+        // navigate('/jobs'); // <-- Temporarily comment this out
+      }
+      setLoading(false);
     };
     
-    fetchJob();
+    if (id) {
+      fetchJob();
+    } else {
+      navigate('/jobs');
+    }
   }, [id, navigate]);
 
-  return { job, loading, error };
+  return { job, loading };
 };

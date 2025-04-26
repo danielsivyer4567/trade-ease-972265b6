@@ -1,34 +1,13 @@
-// @ts-ignore
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-// @ts-ignore
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.22.0";
 
-// Add Deno namespace declaration
-declare const Deno: {
-  env: {
-    get(key: string): string | undefined;
-  };
-};
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.22.0";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-interface IntegrationRequest {
-  integration: string;
-  apiKey: string;
-  clientId?: string;
-}
-
-interface IntegrationConfig {
-  integration_name: string;
-  api_key: string;
-  client_id?: string;
-  status: string;
-}
-
-serve(async (req: Request) => {
+serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -41,7 +20,7 @@ serve(async (req: Request) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
-    const { integration, apiKey, clientId }: IntegrationRequest = await req.json();
+    const { integration, apiKey, clientId } = await req.json();
     console.log(`Processing integration request for: ${integration}`);
 
     // Validate the API key based on the integration
@@ -57,7 +36,7 @@ serve(async (req: Request) => {
     }
 
     // Create a map of integration names to their table entries
-    const integrationMap: Record<string, IntegrationConfig> = {
+    const integrationMap: Record<string, any> = {
       "Xero": {
         integration_name: 'Xero',
         api_key: apiKey,
@@ -125,13 +104,10 @@ serve(async (req: Request) => {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       }
     );
-  } catch (error: unknown) {
+  } catch (error) {
     console.error(error);
-    
-    const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
-    
     return new Response(
-      JSON.stringify({ error: errorMessage }),
+      JSON.stringify({ error: error.message }),
       { 
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }

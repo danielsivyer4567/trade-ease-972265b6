@@ -1,39 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Card } from "@/components/ui/card";
 
 interface AuthContainerProps {
   children: React.ReactNode;
 }
 
-// Array of background image filenames - simplified for better performance
-const BACKGROUND_IMAGES = [
-  'bg1.png',
-  'bg2.png',
-  'bg3.png',
-  'bg4.png',
-  'bg5.png'
-];
-
-// Function to get a random image from the array
-const getRandomBackgroundImage = () => {
-  const randomIndex = Math.floor(Math.random() * BACKGROUND_IMAGES.length);
-  return BACKGROUND_IMAGES[randomIndex];
-};
-
 export const AuthContainer: React.FC<AuthContainerProps> = ({ children }) => {
-  // State to hold the current background image
-  const [backgroundImage, setBackgroundImage] = useState<string>(getRandomBackgroundImage());
-
-  // Effect to rotate the background image every 20 seconds
-  useEffect(() => {
-    const intervalId = setInterval(() => {
-      setBackgroundImage(getRandomBackgroundImage());
-    }, 20000); // 20 seconds
-
-    // Clean up interval on unmount
-    return () => clearInterval(intervalId);
-  }, []);
-
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-100 p-4 relative">
       {/* Solid background color to match the image */}
@@ -44,17 +16,16 @@ export const AuthContainer: React.FC<AuthContainerProps> = ({ children }) => {
         }}
       />
       
-      {/* Background image with rotation */}
+      {/* Non-stretched background image */}
       <div 
-        className="absolute inset-0 z-0 opacity-50"
+        className="absolute inset-0 z-0 opacity-50 grayscale"
         style={{
-          backgroundImage: `url("/backround-images/${backgroundImage}")`,
-          backgroundSize: 'cover',
+          backgroundImage: 'url("/Screenshot 2025-04-21 125049.png")',
+          backgroundSize: 'contain',
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat',
           margin: '0',
-          padding: '0',
-          transition: 'background-image 1s ease-in-out'
+          padding: '0'
         }}
       />
       

@@ -2,10 +2,10 @@ import * as React from "react"
 import { Slot } from "@radix-ui/react-slot"
 import { ChevronRight, MoreHorizontal } from "lucide-react"
 
-import { cn } from "../../lib/utils"
+import { cn } from "@/lib/utils"
 
 const Breadcrumb = React.forwardRef<
-  HTMLDivElement,
+  HTMLElement,
   React.ComponentPropsWithoutRef<"nav"> & {
     separator?: React.ReactNode
   }
@@ -102,7 +102,7 @@ const BreadcrumbEllipsis = ({
     <span className="sr-only">More</span>
   </span>
 )
-BreadcrumbEllipsis.displayName = "BreadcrumbEllipsis"
+BreadcrumbEllipsis.displayName = "BreadcrumbElipssis"
 
 export {
   Breadcrumb,

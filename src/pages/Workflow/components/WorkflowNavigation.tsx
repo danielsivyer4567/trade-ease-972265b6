@@ -1,35 +1,57 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { FolderOpen, ListPlus, Gauge, Wrench } from 'lucide-react';
 
-export const WorkflowNavigation = () => {
+import React from 'react';
+import { Button } from "@/components/ui/button";
+import { useNavigate, useLocation } from "react-router-dom";
+import { Workflow, ListChecks, FileText, ArrowLeft } from "lucide-react";
+
+export function WorkflowNavigation() {
+  const navigate = useNavigate();
+  const location = useLocation();
+  
+  const isActive = (path: string) => {
+    return location.pathname === path;
+  };
+  
   return (
-    <div className="flex flex-col sm:flex-row gap-2 mb-4">
-      <Link to="/workflow/list" className="flex-1">
-        <Button variant="outline" className="w-full">
-          <FolderOpen className="mr-2 h-4 w-4" />
-          My Workflows
-        </Button>
-      </Link>
-      <Link to="/workflow/templates" className="flex-1">
-        <Button variant="outline" className="w-full">
-          <ListPlus className="mr-2 h-4 w-4" />
-          Templates
-        </Button>
-      </Link>
-      <Link to="/workflow/metrics" className="flex-1">
-        <Button variant="outline" className="w-full">
-          <Gauge className="mr-2 h-4 w-4" />
-          Metrics
-        </Button>
-      </Link>
-      <Link to="/workflow/maintenance" className="flex-1">
-        <Button variant="outline" className="w-full">
-          <Wrench className="mr-2 h-4 w-4" />
-          Maintenance
-        </Button>
-      </Link>
+    <div className="flex flex-wrap items-center gap-2 mb-4">
+      <Button 
+        variant="outline" 
+        size="sm" 
+        onClick={() => navigate(-1)}
+        className="mr-2"
+      >
+        <ArrowLeft className="h-4 w-4" />
+      </Button>
+      
+      <Button
+        variant={isActive('/workflow') ? "default" : "outline"}
+        size="sm"
+        onClick={() => navigate('/workflow')}
+        className="flex items-center gap-2"
+      >
+        <Workflow className="h-4 w-4" />
+        Editor
+      </Button>
+      
+      <Button
+        variant={isActive('/workflow/list') ? "default" : "outline"}
+        size="sm"
+        onClick={() => navigate('/workflow/list')}
+        className="flex items-center gap-2"
+      >
+        <ListChecks className="h-4 w-4" />
+        My Workflows
+      </Button>
+      
+      <Button
+        variant={isActive('/workflow/templates') ? "default" : "outline"}
+        size="sm"
+        onClick={() => navigate('/workflow/templates')}
+        className="flex items-center gap-2"
+      >
+        <FileText className="h-4 w-4" />
+        Templates
+      </Button>
     </div>
   );
-};
+}

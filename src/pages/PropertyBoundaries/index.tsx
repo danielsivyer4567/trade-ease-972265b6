@@ -1,3 +1,4 @@
+
 import React, { useCallback } from 'react';
 import { BaseLayout } from "@/components/ui/BaseLayout";
 import { Card, CardContent } from "@/components/ui/card";
@@ -6,8 +7,6 @@ import { PropertyList } from './components/PropertyList';
 import { PropertyInfo } from './components/PropertyInfo';
 import { PageHeader } from './components/PageHeader';
 import { AuthNotice } from './components/AuthNotice';
-import { AddressBoundarySearch } from './components/AddressBoundarySearch';
-import { BoundaryCanvas } from './components/BoundaryCanvas';
 import { usePropertyBoundaries } from './hooks/usePropertyBoundaries';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -20,14 +19,12 @@ const PropertyBoundaries: React.FC = () => {
     isMeasuring,
     isLoading,
     isPending,
-    isSearchingAddress,
     handlePropertySelect,
     handleFileUpload,
     handleFileRemove,
     handleSearchChange,
     handleToggleMeasurement,
-    handleDeleteProperty,
-    handleAddressBoundarySearch
+    handleDeleteProperty
   } = usePropertyBoundaries();
 
   const handleUploadClick = useCallback(() => {
@@ -61,11 +58,6 @@ const PropertyBoundaries: React.FC = () => {
         
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-1">
-            <AddressBoundarySearch 
-              onSearch={handleAddressBoundarySearch}
-              isSearching={isSearchingAddress}
-            />
-            
             <PropertyList
               properties={properties}
               selectedProperty={selectedProperty}
@@ -104,20 +96,6 @@ const PropertyBoundaries: React.FC = () => {
               isLoading={isLoading || isPending}
               isMeasuring={isMeasuring} 
             />
-            
-            {/* Add the boundary visualization canvas */}
-            <div className="mt-4">
-              <Card>
-                <CardContent className="p-4">
-                  <h3 className="text-lg font-medium mb-4">Property Boundary Visualization</h3>
-                  <BoundaryCanvas 
-                    property={selectedProperty} 
-                    width={800} 
-                    height={500} 
-                  />
-                </CardContent>
-              </Card>
-            </div>
           </div>
         </div>
       </div>

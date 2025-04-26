@@ -1,74 +1,18 @@
+
 import { createClient } from '@supabase/supabase-js'
 
 // Use fallback values if environment variables are not defined
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-const supabaseServiceRoleKey = import.meta.env.VITE_SUPABASE_SERVICE_ROLE_KEY;
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://wxwbxupdisbofesaygqj.supabase.co';
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind4d2J4dXBkaXNib2Zlc2F5Z3FqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDAwMDI0OTgsImV4cCI6MjA1NTU3ODQ5OH0.xhjkVsi9XZMwobUMsdYE0e1FXQeT_uNLaTHquGvRxjI';
+const supabaseServiceRoleKey = import.meta.env.VITE_SUPABASE_SERVICE_ROLE_KEY || '';
 
-if (!supabaseUrl || !supabaseAnonKey) {
-  console.error('Missing required Supabase environment variables:', {
-    hasUrl: !!supabaseUrl,
-    hasAnonKey: !!supabaseAnonKey
-  });
-}
-
-// Create Supabase client with enhanced configuration
-export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-  auth: {
-    persistSession: true,
-    autoRefreshToken: true,
-    detectSessionInUrl: true,
-    storageKey: 'supabase.auth.token',
-    storage: window.localStorage,
-    flowType: 'pkce',
-    debug: import.meta.env.DEV
-  },
-  global: {
-    headers: {
-      'x-client-info': 'trade-ease'
-    }
-  },
-  db: {
-    schema: 'public'
-  }
-});
-
-// Test the connection and retry if needed
-const MAX_RETRIES = 3;
-const RETRY_DELAY = 1000; // 1 second
-
-const testConnection = async (retryCount = 0): Promise<void> => {
-  try {
-    const { data, error } = await supabase.auth.getSession();
-    if (error) {
-      throw error;
-    }
-    console.log('Supabase connection test successful:', data);
-  } catch (err) {
-    console.error('Error testing Supabase connection:', err);
-    if (retryCount < MAX_RETRIES) {
-      console.log(`Retrying connection in ${RETRY_DELAY}ms... (Attempt ${retryCount + 1}/${MAX_RETRIES})`);
-      setTimeout(() => testConnection(retryCount + 1), RETRY_DELAY);
-    }
-  }
-};
-
-// Initialize connection test
-testConnection();
+// Create a single instance of the Supabase client for the entire app
+export const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
 // Create an admin client with the service role key for privileged operations
 export const supabaseAdmin = supabaseServiceRoleKey 
-  ? createClient(supabaseUrl, supabaseServiceRoleKey, {
-      auth: {
-        persistSession: true,
-        autoRefreshToken: true,
-        storageKey: 'supabase.auth.admin.token',
-        storage: window.localStorage,
-        flowType: 'pkce',
-        debug: import.meta.env.DEV
-      }
-    })
-  : null;
+  ? createClient(supabaseUrl, supabaseServiceRoleKey)
+  : null 
 
 // Add the demo data generation function
 export const generateDemoData = async () => {

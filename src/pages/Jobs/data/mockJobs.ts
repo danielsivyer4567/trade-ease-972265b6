@@ -1,33 +1,6 @@
+
 import type { Job } from '@/types/job';
-import { mockDatabaseService, MockJob } from '@/services/MockDatabaseService';
 
-// Convert MockJob to Job for the UI
-export const convertToJob = (mockJob: MockJob): Job => {
-  return {
-    id: mockJob.id,
-    customer: mockJob.customer_id, // This would need to be resolved to a customer name in a real implementation
-    type: mockJob.title.split(' ')[0], // Simple categorization based on job title
-    status: mockJob.status === 'completed' ? 'to-invoice' : 
-           mockJob.status === 'in_progress' ? 'in-progress' : 'ready',
-    date: mockJob.scheduled_date,
-    location: [151.2093, -33.8688], // Default location
-    jobNumber: mockJob.id,
-    title: mockJob.title,
-    description: mockJob.description,
-    assignedTeam: mockJob.assigned_team,
-    boundaries: [
-      [
-        [151.2073, -33.8668],
-        [151.2113, -33.8668],
-        [151.2113, -33.8708],
-        [151.2073, -33.8708],
-        [151.2073, -33.8668]
-      ]
-    ]
-  };
-};
-
-// This is kept for backward compatibility with existing code
 export const mockJobs: Job[] = [
   {
     id: "1",

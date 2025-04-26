@@ -11,33 +11,10 @@
       "headers": [
         {
           "key": "Cache-Control",
-          "value": "no-store, no-cache, must-revalidate"
-        },
-        {
-          "key": "X-Frame-Options",
-          "value": "DENY"
-        },
-        {
-          "key": "X-Content-Type-Options",
-          "value": "nosniff"
-        },
-        {
-          "key": "X-XSS-Protection",
-          "value": "1; mode=block"
-        },
-        {
-          "key": "Referrer-Policy",
-          "value": "strict-origin-when-cross-origin"
-        },
-        {
-          "key": "Strict-Transport-Security",
-          "value": "max-age=31536000; includeSubDomains"
+          "value": "public, max-age=0, must-revalidate"
         }
       ]
     }
   ],
-  "buildCommand": "rm -rf node_modules .next .cache dist && npm install && npm run build",
-  "cleanUrls": true,
-  "trailingSlash": false,
-  "public": true
+  "buildCommand": "npm install --legacy-peer-deps && npm run build"
 } 

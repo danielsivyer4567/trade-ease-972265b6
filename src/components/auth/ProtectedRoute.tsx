@@ -1,10 +1,12 @@
 import { Navigate, useLocation, Outlet } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import { TabsProvider } from '@/contexts/TabsContext';
 
 export function ProtectedRoute() {
   const { user, loading } = useAuth();
   const location = useLocation();
+  
+  // Development mode check - bypasses authentication in dev mode
+  const isDevelopment = import.meta.env.DEV || window.location.hostname === 'localhost';
   
   if (loading) {
     // You can replace this with a loading spinner component
@@ -13,14 +15,16 @@ export function ProtectedRoute() {
     </div>;
   }
 
-  if (!user) {
+  // Allow access in development mode even without authentication
+  if (!user && !isDevelopment) {
     // Save the attempted URL for redirecting after login
     return <Navigate to="/auth" state={{ from: location }} replace />;
   }
 
-  return (
-    <TabsProvider>
-      <Outlet />
-    </TabsProvider>
-  );
+  // If in development mode and no user, log a message but allow access
+  if (!user && isDevelopment) {
+    console.warn('DEV MODE: Bypassing authentication for development');
+  }
+
+  return <Outlet />;
 }

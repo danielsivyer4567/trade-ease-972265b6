@@ -3,49 +3,8 @@ description:
 globs: 
 alwaysApply: true
 ---
-# AutoFix Rule
 
-- Always apply automatically from AI suggestions or instructions
-- Automatically accept fixes for "Cannot find module" errors
-- Auto-fix import path issues for React components
-- Auto-accept route configuration changes and fixes
-- Auto-fix navigation and workflow related components
-- For TypeScript issues, prefer to fix with proper type definitions rather than any/unknown types
+# Your rule content
 
-
-@main.tsx@20231002_customer_journey.sql@tsconfig.app.json@WorkflowInstructions.tsx@automationData.ts@TradeDashboard.tsx@TradeDashboardContent.tsx
-
-Blueprint for Building the Premier Construction Organizing App with Cursor
-Cursor, our mission is to build the best construction organizing app the industry has ever seen, creating a platform that is miles ahead of competitors like GoHighLevel. To achieve this ambitious goal, please adhere strictly to the following collaboration blueprint:
-
-Precision Tasking for Flawless Features: Each prompt will define one specific, meticulously planned task (e.g., implement a core feature component, resolve a specific bug, refactor for performance, write targeted tests). This focus ensures each piece is built to the highest standard, contributing to our competitive edge.
-
-Comprehensive Context is Mandatory: To ensure seamless integration and architectural integrity, always utilize the full context provided:
-
-Code Location: Pinpoint accuracy regarding file paths (e.g., src/components/core/..., src/pages/workflow/...) and specific functions/components.
-
-Tech Stack: Masterfully apply our chosen stack: React, TypeScript, Tailwind CSS, Shadcn/UI, Supabase (backend/auth), React Query, and React Context API.
-
-Strategic Goal: Understand the precise functional objective and its contribution to the overall user experience, workflow efficiency, and market differentiation.
-
-Architectural Constraints: Strictly follow defined patterns (functional components, hooks), required libraries, robust error handling protocols, state management strategies (React Context/React Query), and our established modular component architecture.
-
-Optimized Output Formatting: Deliver your response in the exact format requested to maximize development velocity (e.g., "complete, production-ready function/component," "precise code changes (diff)," "full file content," "strategic pseudocode outline," "comprehensive unit tests," "clear explanation").
-
-Learn & Adapt for Excellence: When feedback is provided on your output, analyze it carefully. Understand the corrections and examples to continuously refine your contribution towards our goal of building a superior application.
-
-Architect Complex Features: For intricate functionalities, propose a clear implementation plan or generate pseudocode first. This allows us to validate the architecture for robustness, scalability, and innovative potential before full implementation.
-
-Explain for Alignment: Be prepared to clearly explain your code, logic, or architectural choices upon request. Shared understanding is key to building a cohesive, maintainable, and ultimately superior application.
-
-Leverage Project Blueprint: Consistently generate code that aligns perfectly with the 'Trade ease' project structure, established patterns, and features (e.g., modular components, page organization, Supabase table usage like jobs, profiles, site_audits). Internalize the project's knowledge base to ensure consistency and quality.
-
-Implement Examples Precisely: Utilize any provided mini-examples (data structures, outputs, styles) to ensure your implementation meets the exact specifications required for a premium, market-leading user experience.
-
-Maintain Scope Integrity: Execute tasks strictly within the defined scope: modify specific files, create new files at designated paths, or provide targeted snippets for integration. This maintains an organized and predictable workflow necessary for rapid, high-quality development.
-
-Flawless State Management: Implement state management with absolute precision using our established tools (React Context API, React Query) and patterns (hooks, query invalidation). This is critical for a seamless, responsive, and reliable user interface that surpasses expectations.
-
-Adhering to this blueprint is crucial for our collaboration. Let's build something exceptional and redefine the standard for construction organization software.
-
-
+- always apply automaticly from ai suggestions or instructions
+- 

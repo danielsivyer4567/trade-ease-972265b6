@@ -1,3 +1,4 @@
+
 import React, { useState, useCallback, useEffect } from 'react';
 import { AppLayout } from "@/components/ui/AppLayout";
 import { Flow } from './components/Flow';
@@ -308,15 +309,14 @@ export default function WorkflowPage() {
   return (
     <AppLayout>
       <div className="p-4 h-full">
+        <WorkflowNavigation />
+        
         <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4 gap-2">
           <div className="flex items-center gap-2">
             <h1 className="text-2xl font-bold">
               {currentWorkflowId ? workflowName : "New Workflow"}
             </h1>
           </div>
-          
-          <WorkflowNavigation />
-          
           <div className="flex flex-wrap items-center gap-2">
             <Button 
               variant="outline" 

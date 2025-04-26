@@ -1,3 +1,4 @@
+
 import React, { useCallback, useState, useEffect, useRef } from 'react';
 import {
   ReactFlow,
@@ -155,7 +156,7 @@ export function Flow({ onInit, workflowId }: FlowProps) {
 
     // Create a new node
     const nodeId = `${type}-${Date.now()}`;
-    const newNode = {
+    let newNode = {
       id: nodeId,
       type,
       position,
