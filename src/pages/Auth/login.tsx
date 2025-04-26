@@ -5,11 +5,11 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 const backgroundImages = [
-  '/backround images/sqoler_A_candid_paparazzi-style_photo_of_Nikola_Tesla_in_a_diml_0cd8445b-d8db-4f5d-aa5b-31240d95bcb9.png',
-  '/backround images/u2541555194_Daguerrotype_soviet_tower_of_babel_Soviet_ziggurat__99d618f1-910a-4364-86ab-ea67b475998e.png',
-  '/backround images/redblank_An_urban_streetscape_the_year_2125_gothic_ruins_post_t_88524fa6-86e9-46c2-8cc2-1e449e4af813.png',
-  '/backround images/nmicai_construction_workers_sitting_on_an_i-beam_high_above_new_2804aa90-3960-4efd-9b77-3f1c34b63fa8 (1).png',
-  '/backround images/Screenshot 2025-04-21 125049.png',
+  '/backgrounds/tesla.png',
+  '/backgrounds/soviet.png',
+  '/backgrounds/urban.png',
+  '/backgrounds/construction.png',
+  '/backgrounds/screenshot.png',
 ];
 
 export default function LoginPage() {
