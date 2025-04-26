@@ -21,7 +21,6 @@ const LoadingIndicator = () => <div>Loading authentication state...</div>;
 export default function Auth() {
   const navigate = useNavigate();
   const location = useLocation();
-  // Destructure loading state along with user
   const { user, loading: authLoading, awaitingTwoFactor } = useAuth();
   const { inviteCode } = useInviteCode();
   const {
@@ -40,6 +39,14 @@ export default function Auth() {
     handleSignUp,
   } = useAuthForm();
   
+  // Handle email verification process - moved before conditional returns
+  const { 
+    verificationStatus, 
+    verificationMessage, 
+    verificationSent: hookVerificationSent, 
+    handleResendVerification 
+  } = useEmailVerification(navigate);
+  
   // Load saved credentials when component mounts
   useEffect(() => {
     loadSavedCredentials();
@@ -57,14 +64,6 @@ export default function Auth() {
       navigate(from, { replace: true });
     }
   }, [user, navigate, location]);
-
-  // Handle email verification process
-  const { 
-    verificationStatus, 
-    verificationMessage, 
-    verificationSent: hookVerificationSent, 
-    handleResendVerification 
-  } = useEmailVerification(navigate);
 
   // If verification is in progress, show the verification status
   if (verificationStatus !== 'idle') {
