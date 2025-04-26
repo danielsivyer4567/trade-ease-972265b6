@@ -48,11 +48,19 @@ const defaultJobSteps: JobStep[] = [
 export const useJobData = (id: string | undefined) => {
   const [job, setJob] = useState<Job | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
     console.log("JobDetails mounted with id:", id);
     const fetchJob = async () => {
+      if (!id) {
+        setError("No job ID provided");
+        setLoading(false);
+        navigate('/jobs');
+        return;
+      }
+
       try {
         const { data: session } = await supabase.auth.getSession();
         if (session?.session?.user) {
@@ -82,14 +90,17 @@ export const useJobData = (id: string | undefined) => {
             };
             
             setJob(transformedJob);
+            setError(null);
             setLoading(false);
             return;
           } else if (error) {
             console.error("Error fetching job from Supabase:", error);
+            setError("Failed to fetch job from database");
           }
         }
       } catch (err) {
         console.error("Exception fetching job:", err);
+        setError("An unexpected error occurred");
       }
       
       // Fallback to mock data
@@ -102,19 +113,17 @@ export const useJobData = (id: string | undefined) => {
           job_steps: defaultJobSteps,
           boundaries: foundJob.boundaries || [] // Ensure boundaries exists even if undefined in mock data
         });
+        setError(null);
       } else {
+        setError("Job not found");
         toast.error("Job not found");
-        // navigate('/jobs'); // <-- Temporarily comment this out
+        navigate('/jobs');
       }
       setLoading(false);
     };
     
-    if (id) {
-      fetchJob();
-    } else {
-      navigate('/jobs');
-    }
+    fetchJob();
   }, [id, navigate]);
 
-  return { job, loading };
+  return { job, loading, error };
 };

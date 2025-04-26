@@ -1,4 +1,3 @@
-
 import React, { Suspense } from 'react';
 import { Route } from 'react-router-dom';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
@@ -26,14 +25,14 @@ export const jobRoutes = (
           <NewJobPage />
         </Suspense>
       } />
-      <Route path="/jobs/:id" element={
-        <Suspense fallback={<LoadingFallback />}>
-          <JobDetailsPage />
-        </Suspense>
-      } />
       <Route path="/jobs/templates/new" element={
         <Suspense fallback={<LoadingFallback />}>
           <NewTemplatePage />
+        </Suspense>
+      } />
+      <Route path="/jobs/:id" element={
+        <Suspense fallback={<LoadingFallback />}>
+          <JobDetailsPage />
         </Suspense>
       } />
       <Route path="/property-boundaries" element={

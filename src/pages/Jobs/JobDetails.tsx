@@ -1,4 +1,3 @@
-
 import { useParams } from 'react-router-dom';
 import { JobHeader } from './components/JobHeader';
 import { JobTabs } from './components/JobTabs';
@@ -27,7 +26,7 @@ export function JobDetails() {
   const [jobNotes, setJobNotes] = useState("");
   const isManager = true;
   
-  const { job, loading } = useJobData(id);
+  const { job, loading, error } = useJobData(id);
   
   // Use the openInTab hook to automatically handle tab management
   const { openInTab } = useOpenInTab();
@@ -80,8 +79,8 @@ export function JobDetails() {
     return <JobLoadingState />;
   }
   
-  if (!job) {
-    return <JobLoadingState isError />;
+  if (error || !job) {
+    return <JobLoadingState isError errorMessage={error || "Job not found"} />;
   }
   
   return (
