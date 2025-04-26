@@ -5,11 +5,11 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 const backgroundImages = [
-  '/backgrounds/tesla.png',
-  '/backgrounds/soviet.png',
-  '/backgrounds/urban.png',
-  '/backgrounds/construction.png',
-  '/backgrounds/screenshot.png',
+  '/backgrounds/construction.png', // workers on a beam, city background
+  '/backgrounds/urban.png',        // gothic city street, tram, and car
+  '/backgrounds/acropolis.png',    // workers on a beam, ancient city below
+  '/backgrounds/tesla.png',        // man with electricity, lab scene
+  '/backgrounds/explosion.png',    // building with explosion cloud
 ];
 
 export default function LoginPage() {
