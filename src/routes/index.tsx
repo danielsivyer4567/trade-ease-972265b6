@@ -6,6 +6,7 @@ import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { authRoutes } from './auth-routes';
 import { SettingsRoutes } from './settings-routes';
 import { templateRoutes } from './template-routes';
+import { paymentRoutes } from './payment-routes';
 import { AppLayoutWithTabs } from '@/components/AppLayoutWithTabs';
 
 // Development mode debugging component
@@ -33,8 +34,6 @@ const JobDetailsPage = lazy(() => import('@/pages/Jobs/JobDetails').then(module 
 // Quotes and Invoices
 const QuotesPage = lazy(() => import('@/pages/Quotes'));
 const NewQuotePage = lazy(() => import('@/pages/Quotes/NewQuote'));
-{/* const QuoteDetailsPage = lazy(() => import('@/pages/Quote/QuoteDetails')); */}
-{/* const InvoicesPage = lazy(() => import('@/pages/Invoices')); */}
 
 // Teams
 const TeamRedPage = lazy(() => import('@/pages/TeamRed'));
@@ -46,6 +45,11 @@ const TeamsPage = lazy(() => import('@/pages/Teams'));
 // Calendar and Scheduling
 const CalendarPage = lazy(() => import('@/pages/Calendar'));
 
+// Workflow pages
+const WorkflowPage = lazy(() => import('@/pages/Workflow'));
+const WorkflowListPage = lazy(() => import('@/pages/Workflow/WorkflowList'));
+const WorkflowTemplatesPage = lazy(() => import('@/pages/Workflow/WorkflowTemplates'));
+
 // Communication
 const EmailPage = lazy(() => import('@/pages/Email'));
 const MessagingPage = lazy(() => import('@/pages/Messaging'));
@@ -55,7 +59,6 @@ const NotificationsPage = lazy(() => import('@/pages/Notifications'));
 const BankingPage = lazy(() => import('@/pages/Banking'));
 const PaymentsPage = lazy(() => import('@/pages/Payments'));
 const ExpensesPage = lazy(() => import('@/pages/Expenses'));
-{/* const PayrollPage = lazy(() => import('@/pages/Payroll')); */}
 
 // Trading
 const TradingPage = lazy(() => import('@/pages/Trading'));
@@ -74,7 +77,6 @@ const MaterialOrderingPage = lazy(() => import('@/pages/MaterialOrdering'));
 
 // Tools and Utilities
 const CalculatorsPage = lazy(() => import('@/pages/Calculators'));
-const WorkflowPage = lazy(() => import('@/pages/Workflow'));
 const FormsPage = lazy(() => import('@/pages/Forms'));
 const TasksPage = lazy(() => import('@/pages/Tasks'));
 const AIFeaturesPage = lazy(() => import('@/pages/AIFeatures'));
@@ -101,6 +103,9 @@ const authRouteObjects = createRoutesFromElements(authRoutes);
 
 // Get settings RouteObjects by calling the function
 const settingsRouteObjects = SettingsRoutes();
+
+// Convert payment routes to RouteObjects
+const paymentRouteObjects = createRoutesFromElements(paymentRoutes);
 
 // Define main application routes using RouteObject configuration
 const routeObjects: RouteObject[] = [
@@ -134,6 +139,8 @@ const routeObjects: RouteObject[] = [
           },
           // Template Routes
           templateRoutes,
+          // Payment Routes
+          ...paymentRouteObjects,
           // Customer routes
           {
             path: "/customers",
@@ -207,6 +214,8 @@ const routeObjects: RouteObject[] = [
           { path: "/calculators/fencing", element: <SuspenseWrapper><FencingCalculator /></SuspenseWrapper> },
           { path: "/calculators/ncc-codes", element: <SuspenseWrapper><NCCCodesCalculator /></SuspenseWrapper> },
           { path: "/workflow", element: <SuspenseWrapper><WorkflowPage /></SuspenseWrapper> },
+          { path: "/workflow/list", element: <SuspenseWrapper><WorkflowListPage /></SuspenseWrapper> },
+          { path: "/workflow/templates", element: <SuspenseWrapper><WorkflowTemplatesPage /></SuspenseWrapper> },
           { path: "/forms", element: <SuspenseWrapper><FormsPage /></SuspenseWrapper> },
           { path: "/tasks", element: <SuspenseWrapper><TasksPage /></SuspenseWrapper> },
           { path: "/ai-features", element: <SuspenseWrapper><AIFeaturesPage /></SuspenseWrapper> },

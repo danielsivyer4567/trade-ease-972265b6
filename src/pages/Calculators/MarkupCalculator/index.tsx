@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { AppLayout } from "@/components/ui/AppLayout";
 import { Link } from "react-router-dom";
-import { ArrowLeft, Percent } from "lucide-react";
+import { ArrowLeft, Percent, History } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,6 +9,8 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useCalculationHistory } from "@/hooks/use-calculation-history";
+import { CalculationHistory } from "@/components/ui/CalculationHistory";
 
 const MarkupCalculator = () => {
   const [cost, setCost] = useState<number | ''>('');
@@ -17,8 +19,10 @@ const MarkupCalculator = () => {
   const [profit, setProfit] = useState<number | null>(null);
   const [marginPercent, setMarginPercent] = useState<number | null>(null);
   const [activeTab, setActiveTab] = useState("markup");
+  const [activeView, setActiveView] = useState("calculator");
   const { toast } = useToast();
   const isMobile = useIsMobile();
+  const { calculations, addCalculation, deleteCalculation } = useCalculationHistory();
 
   // Calculate selling price when cost and markup change
   useEffect(() => {
@@ -47,6 +51,17 @@ const MarkupCalculator = () => {
       setSellingPrice(calculatedSellingPrice);
       setProfit(calculatedProfit);
       setMarginPercent(calculatedMarginPercent);
+
+      // Save to calculation history
+      addCalculation('Markup Calculator', {
+        cost: numericCost,
+        markup: numericMarkup,
+        type: 'markup'
+      }, {
+        sellingPrice: calculatedSellingPrice,
+        profit: calculatedProfit,
+        marginPercent: calculatedMarginPercent
+      });
     } else {
       // For margin calculation: selling price = cost / (1 - margin/100)
       const calculatedSellingPrice = numericCost / (1 - numericMarkup / 100);
@@ -56,6 +71,17 @@ const MarkupCalculator = () => {
       setSellingPrice(calculatedSellingPrice);
       setProfit(calculatedProfit);
       // We don't update marginPercent here since it's the input value
+
+      // Save to calculation history
+      addCalculation('Markup Calculator', {
+        cost: numericCost,
+        margin: numericMarkup,
+        type: 'margin'
+      }, {
+        sellingPrice: calculatedSellingPrice,
+        profit: calculatedProfit,
+        markup: calculatedMarkup
+      });
     }
   };
 
@@ -89,6 +115,19 @@ const MarkupCalculator = () => {
     return `${value.toFixed(2)}%`;
   };
 
+  const handleRestoreCalculation = (calculation: any) => {
+    if (calculation.inputs.type === 'markup') {
+      setActiveTab('markup');
+      setCost(calculation.inputs.cost);
+      setMarkup(calculation.inputs.markup);
+    } else {
+      setActiveTab('margin');
+      setCost(calculation.inputs.cost);
+      setMarkup(calculation.inputs.margin);
+    }
+    setActiveView('calculator');
+  };
+
   return (
     <AppLayout>
       <div className="container mx-auto p-4 md:p-6">
@@ -100,151 +139,132 @@ const MarkupCalculator = () => {
           <h1 className="text-3xl font-bold">Markup Calculator</h1>
         </div>
         
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Calculator Input Section */}
-          <Card className="lg:col-span-2">
-            <CardHeader>
-              <CardTitle>Calculate Price</CardTitle>
-              <CardDescription>
-                {activeTab === "markup"
-                  ? "Add a markup percentage to your cost price"
-                  : "Set a profit margin percentage for your pricing"}
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Tabs value={activeTab} onValueChange={handleTabChange} className="mb-6">
-                <TabsList className="grid grid-cols-2">
-                  <TabsTrigger value="markup">Markup Calculation</TabsTrigger>
-                  <TabsTrigger value="margin">Margin Calculation</TabsTrigger>
-                </TabsList>
-              </Tabs>
-              
-              <div className="space-y-4">
-                <div>
-                  <Label htmlFor="cost">Cost Price ($)</Label>
-                  <Input
-                    id="cost"
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    placeholder="Enter cost price"
-                    value={cost}
-                    onChange={(e) => setCost(e.target.value === '' ? '' : Number(e.target.value))}
-                  />
-                </div>
-                
-                <div>
-                  <Label htmlFor="markup">
-                    {activeTab === "markup" ? "Markup Percentage (%)" : "Margin Percentage (%)"}
-                  </Label>
-                  <Input
-                    id="markup"
-                    type="number"
-                    min="0"
-                    max={activeTab === "margin" ? "99.99" : undefined}
-                    step="0.1"
-                    placeholder={`Enter ${activeTab === "markup" ? "markup" : "margin"} percentage`}
-                    value={markup}
-                    onChange={(e) => setMarkup(e.target.value === '' ? '' : Number(e.target.value))}
-                  />
-                  {activeTab === "margin" && markup && Number(markup) >= 100 && (
-                    <p className="text-red-500 text-sm mt-1">
-                      Margin percentage must be less than 100%
-                    </p>
-                  )}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Results Section */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Results</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-2">
-                  <div className="font-medium">Cost Price:</div>
-                  <div>{formatCurrency(cost === '' ? null : Number(cost))}</div>
-                </div>
-                
-                <div className="grid grid-cols-2 gap-2">
-                  <div className="font-medium">
-                    {activeTab === "markup" ? "Markup:" : "Margin:"}
-                  </div>
-                  <div>{markup === '' ? '-' : `${markup}%`}</div>
-                </div>
-                
-                <div className="grid grid-cols-2 gap-2">
-                  <div className="font-medium">Selling Price:</div>
-                  <div className="font-bold text-green-600">{formatCurrency(sellingPrice)}</div>
-                </div>
-                
-                <div className="grid grid-cols-2 gap-2">
-                  <div className="font-medium">Profit:</div>
-                  <div>{formatCurrency(profit)}</div>
-                </div>
-                
-                {activeTab === "markup" && (
-                  <div className="grid grid-cols-2 gap-2">
-                    <div className="font-medium">Profit Margin:</div>
-                    <div>{formatPercent(marginPercent)}</div>
-                  </div>
-                )}
-                {activeTab === "margin" && (
-                  <div className="grid grid-cols-2 gap-2">
-                    <div className="font-medium">Markup Rate:</div>
-                    <div>{formatPercent(markup === '' ? null : Number(markup))}</div>
-                  </div>
-                )}
-                
-                <Button 
-                  onClick={handleShareResults} 
-                  disabled={!sellingPrice}
-                  className="w-full mt-4"
-                >
-                  Copy Results
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+        <Tabs value={activeView} onValueChange={setActiveView} className="mb-6">
+          <TabsList className="grid grid-cols-2">
+            <TabsTrigger value="calculator">Calculator</TabsTrigger>
+            <TabsTrigger value="history" className="flex items-center gap-2">
+              <History className="h-4 w-4" />
+              History
+            </TabsTrigger>
+          </TabsList>
           
-          {/* Information Card */}
-          <Card className="lg:col-span-3">
-            <CardHeader>
-              <CardTitle>Understanding Markup vs. Margin</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <h3 className="font-bold text-lg mb-2">Markup</h3>
-                  <p className="text-gray-700 mb-2">
-                    Markup is the percentage added to the cost price to determine the selling price.
-                  </p>
-                  <p className="text-gray-700">
-                    <strong>Formula:</strong> Markup = (Profit / Cost) × 100
-                  </p>
-                  <p className="text-gray-700">
-                    <strong>Example:</strong> If cost is $100 and markup is 25%, the selling price is $125.
-                  </p>
-                </div>
-                <div>
-                  <h3 className="font-bold text-lg mb-2">Margin</h3>
-                  <p className="text-gray-700 mb-2">
-                    Margin is the percentage of the selling price that represents profit.
-                  </p>
-                  <p className="text-gray-700">
-                    <strong>Formula:</strong> Margin = (Profit / Selling Price) × 100
-                  </p>
-                  <p className="text-gray-700">
-                    <strong>Example:</strong> If selling price is $125 and cost is $100, the margin is 20%.
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+          <TabsContent value="calculator">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* Calculator Input Section */}
+              <Card className="lg:col-span-2">
+                <CardHeader>
+                  <CardTitle>Calculate Price</CardTitle>
+                  <CardDescription>
+                    {activeTab === "markup"
+                      ? "Add a markup percentage to your cost price"
+                      : "Set a profit margin percentage for your pricing"}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Tabs value={activeTab} onValueChange={handleTabChange} className="mb-6">
+                    <TabsList className="grid grid-cols-2">
+                      <TabsTrigger value="markup">Markup Calculation</TabsTrigger>
+                      <TabsTrigger value="margin">Margin Calculation</TabsTrigger>
+                    </TabsList>
+                  </Tabs>
+                  
+                  <div className="space-y-4">
+                    <div>
+                      <Label htmlFor="cost">Cost Price ($)</Label>
+                      <Input
+                        id="cost"
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        placeholder="Enter cost price"
+                        value={cost}
+                        onChange={(e) => setCost(e.target.value === '' ? '' : Number(e.target.value))}
+                      />
+                    </div>
+                    
+                    <div>
+                      <Label htmlFor="markup">
+                        {activeTab === "markup" ? "Markup Percentage (%)" : "Margin Percentage (%)"}
+                      </Label>
+                      <Input
+                        id="markup"
+                        type="number"
+                        min="0"
+                        max={activeTab === "margin" ? "99.99" : undefined}
+                        step="0.1"
+                        placeholder={`Enter ${activeTab === "markup" ? "markup" : "margin"} percentage`}
+                        value={markup}
+                        onChange={(e) => setMarkup(e.target.value === '' ? '' : Number(e.target.value))}
+                      />
+                      {activeTab === "margin" && markup && Number(markup) >= 100 && (
+                        <p className="text-red-500 text-sm mt-1">
+                          Margin percentage must be less than 100%
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Results Section */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Results</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-2 gap-2">
+                      <div className="font-medium">Cost Price:</div>
+                      <div>{formatCurrency(cost === '' ? null : Number(cost))}</div>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-2">
+                      <div className="font-medium">
+                        {activeTab === "markup" ? "Markup:" : "Margin:"}
+                      </div>
+                      <div>{markup === '' ? '-' : `${markup}%`}</div>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-2">
+                      <div className="font-medium">Selling Price:</div>
+                      <div className="font-bold text-green-600">{formatCurrency(sellingPrice)}</div>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-2">
+                      <div className="font-medium">Profit:</div>
+                      <div>{formatCurrency(profit)}</div>
+                    </div>
+                    
+                    {activeTab === "markup" && (
+                      <div className="grid grid-cols-2 gap-2">
+                        <div className="font-medium">Profit Margin:</div>
+                        <div>{formatPercent(marginPercent)}</div>
+                      </div>
+                    )}
+                    {activeTab === "margin" && (
+                      <div className="grid grid-cols-2 gap-2">
+                        <div className="font-medium">Markup Rate:</div>
+                        <div>{formatPercent(markup === '' ? null : Number(markup))}</div>
+                      </div>
+                    )}
+                    
+                    <Button onClick={handleShareResults} className="w-full">
+                      Copy Results
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="history">
+            <CalculationHistory
+              calculations={calculations.filter(calc => calc.calculatorType === 'Markup Calculator')}
+              onDelete={deleteCalculation}
+              onRestore={handleRestoreCalculation}
+            />
+          </TabsContent>
+        </Tabs>
       </div>
     </AppLayout>
   );
