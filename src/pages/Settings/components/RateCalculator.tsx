@@ -1,53 +1,118 @@
-
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import React, { useState, useCallback } from "react";
+import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useState } from "react";
-import { Rate, Calculation } from "../types";
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
 
-interface RateCalculatorProps {
-  selectedRate: Rate | null;
-  onCalculate: (calculation: Calculation) => void;
-}
+export const RateCalculator = () => {
+  const [hours, setHours] = useState<number | ''>('');
+  const [rate, setRate] = useState<number | ''>('');
+  const [total, setTotal] = useState<number | null>(null);
+  const { toast } = useToast();
 
-export function RateCalculator({ selectedRate, onCalculate }: RateCalculatorProps) {
-  const [quantity, setQuantity] = useState<string>("");
+  const calculateTotal = useCallback(() => {
+    if (hours === '' || rate === '') {
+      setTotal(null);
+      return;
+    }
 
-  const handleCalculate = () => {
-    if (selectedRate && quantity) {
-      const numQuantity = parseFloat(quantity);
-      const total = numQuantity * selectedRate.rate;
-      onCalculate({
-        quantity: numQuantity,
-        rate: selectedRate.rate,
-        total,
+    const numericHours = Number(hours);
+    const numericRate = Number(rate);
+    
+    if (isNaN(numericHours) || isNaN(numericRate)) return;
+
+    const calculatedTotal = numericHours * numericRate;
+    setTotal(calculatedTotal);
+  }, [hours, rate]);
+
+  const handleShareResults = useCallback(async () => {
+    try {
+      const text = `Hours: ${hours}, Rate: $${rate}/hr, Total: $${total?.toFixed(2)}`;
+      await navigator.clipboard.writeText(text);
+      toast({
+        title: "Results copied to clipboard",
+        description: "You can now paste the calculation results."
+      });
+    } catch (error) {
+      console.error('Failed to copy to clipboard:', error);
+      toast({
+        title: "Failed to copy results",
+        description: "Please try again or copy manually.",
+        variant: "destructive"
       });
     }
-  };
+  }, [hours, rate, total, toast]);
 
-  if (!selectedRate) return null;
+  const formatCurrency = useCallback((value: number | null) => {
+    if (value === null) return "-";
+    return `$${value.toFixed(2)}`;
+  }, []);
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Calculate Rate</CardTitle>
-        <CardDescription>Calculate total for {selectedRate.name}</CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="space-y-2">
-          <Label>Quantity ({selectedRate.unit})</Label>
+    <div className="space-y-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <Label htmlFor="hours">Hours</Label>
           <Input
+            id="hours"
             type="number"
-            value={quantity}
-            onChange={(e) => setQuantity(e.target.value)}
-            placeholder={`Enter quantity in ${selectedRate.unit}`}
+            min="0"
+            step="0.5"
+            placeholder="Enter hours"
+            value={hours}
+            onChange={(e) => {
+              setHours(e.target.value === '' ? '' : Number(e.target.value));
+              calculateTotal();
+            }}
           />
         </div>
-        <Button onClick={handleCalculate} className="w-full">
-          Calculate Total
-        </Button>
-      </CardContent>
-    </Card>
+        
+        <div>
+          <Label htmlFor="rate">Rate per Hour ($)</Label>
+          <Input
+            id="rate"
+            type="number"
+            min="0"
+            step="0.01"
+            placeholder="Enter rate per hour"
+            value={rate}
+            onChange={(e) => {
+              setRate(e.target.value === '' ? '' : Number(e.target.value));
+              calculateTotal();
+            }}
+          />
+        </div>
+      </div>
+
+      <Card>
+        <CardContent className="pt-6">
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-2">
+              <div className="font-medium">Hours:</div>
+              <div>{hours === '' ? '-' : hours}</div>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-2">
+              <div className="font-medium">Rate:</div>
+              <div>{formatCurrency(rate === '' ? null : Number(rate))}/hr</div>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-2">
+              <div className="font-medium">Total:</div>
+              <div className="font-bold text-green-600">{formatCurrency(total)}</div>
+            </div>
+            
+            <Button 
+              onClick={handleShareResults} 
+              disabled={!total}
+              className="w-full mt-4"
+            >
+              Copy Results
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
   );
-}
+};
