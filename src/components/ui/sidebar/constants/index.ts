@@ -24,7 +24,6 @@ export const navigationGroups: NavigationGroup[] = [
   complianceNavigation,
   networksNavigation,
   supplyChainNavigation,
-  templatesNavigation,
   actionsNavigation
 ];
 
