@@ -81,6 +81,11 @@ const AIFeaturesPage = lazy(() => import('@/pages/AIFeatures'));
 const PropertyBoundariesPage = lazy(() => import('@/pages/PropertyBoundaries'));
 const NetworksPage = lazy(() => import('@/pages/Networks'));
 const CredentialsPage = lazy(() => import('@/pages/Credentials'));
+const JobCostCalculator = lazy(() => import('@/pages/Calculators/JobCostCalculator'));
+const LoadsSpansCalculator = lazy(() => import('@/pages/Calculators/LoadsSpansCalculator'));
+const FencingCalculator = lazy(() => import('@/pages/Calculators/FencingCalculator'));
+const MarkupCalculator = lazy(() => import('@/pages/Calculators/MarkupCalculator'));
+const NCCCodesCalculator = lazy(() => import('@/pages/Calculators/NCCCodesCalculator'));
 
 // Settings
 const SettingsPage = lazy(() => import('@/pages/Settings'));
@@ -196,6 +201,11 @@ const routeObjects: RouteObject[] = [
           { path: "/material-ordering", element: <SuspenseWrapper><MaterialOrderingPage /></SuspenseWrapper> },
           // Tools and Utilities routes
           { path: "/calculators", element: <SuspenseWrapper><CalculatorsPage /></SuspenseWrapper> },
+          { path: "/calculators/markup", element: <SuspenseWrapper><MarkupCalculator /></SuspenseWrapper> },
+          { path: "/calculators/job-cost", element: <SuspenseWrapper><JobCostCalculator /></SuspenseWrapper> },
+          { path: "/calculators/loads-spans", element: <SuspenseWrapper><LoadsSpansCalculator /></SuspenseWrapper> },
+          { path: "/calculators/fencing", element: <SuspenseWrapper><FencingCalculator /></SuspenseWrapper> },
+          { path: "/calculators/ncc-codes", element: <SuspenseWrapper><NCCCodesCalculator /></SuspenseWrapper> },
           { path: "/workflow", element: <SuspenseWrapper><WorkflowPage /></SuspenseWrapper> },
           { path: "/forms", element: <SuspenseWrapper><FormsPage /></SuspenseWrapper> },
           { path: "/tasks", element: <SuspenseWrapper><TasksPage /></SuspenseWrapper> },
