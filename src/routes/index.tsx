@@ -98,14 +98,8 @@ const SuspenseWrapper = ({ children }) => (
   <Suspense fallback={<LoadingFallback />}>{children}</Suspense>
 );
 
-// Convert JSX auth routes to RouteObjects
-const authRouteObjects = createRoutesFromElements(authRoutes);
-
 // Get settings RouteObjects by calling the function
 const settingsRouteObjects = SettingsRoutes();
-
-// Convert payment routes to RouteObjects
-const paymentRouteObjects = createRoutesFromElements(paymentRoutes);
 
 // Define main application routes using RouteObject configuration
 const routeObjects: RouteObject[] = [
@@ -114,15 +108,8 @@ const routeObjects: RouteObject[] = [
     path: "/dev",
     element: <Suspense fallback={<LoadingFallback />}><DevelopmentEntry /></Suspense>
   },
-  
-  // Auth Routes - flattened to avoid nested routing issues
-  {
-    path: "/auth",
-    element: <Suspense fallback={<LoadingFallback />}><AuthPage /></Suspense>
-  },
-  
-  // Auth Routes (now converted RouteObjects)
-  ...authRouteObjects,
+  // Auth Route as RouteObject
+  authRoutes,
   {
     // Main App Layout with TabsProvider
     element: <AppLayoutWithTabs />,
@@ -140,7 +127,7 @@ const routeObjects: RouteObject[] = [
           // Template Routes
           templateRoutes,
           // Payment Routes
-          ...paymentRouteObjects,
+          paymentRoutes,
           // Customer routes
           {
             path: "/customers",

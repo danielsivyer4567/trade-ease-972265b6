@@ -1,6 +1,14 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { 
+  Workflow, 
+  WorkflowData, 
+  CreateWorkflowParams, 
+  UpdateWorkflowParams, 
+  ExecuteWorkflowParams,
+  WorkflowExecutionData
+} from '@/types/workflow';
+import { logger } from '@/utils/logger';
 
 export interface Workflow {
   id: string;
@@ -12,6 +20,218 @@ export interface Workflow {
 }
 
 export const WorkflowService = {
+  /**
+   * Create a new workflow
+   */
+  createWorkflow: async (params: CreateWorkflowParams): Promise<{ success: boolean; workflow?: Workflow; error?: any }> => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        return { success: false, error: 'Authentication required' };
+      }
+
+      const { data: workflow, error } = await supabase
+        .from('workflows')
+        .insert({
+          name: params.name,
+          description: params.description,
+          data: params.data,
+          category: params.category,
+          is_template: params.isTemplate || false,
+          user_id: session.user.id
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      return { success: true, workflow };
+    } catch (error) {
+      console.error('Failed to create workflow:', error);
+      return { success: false, error };
+    }
+  },
+
+  /**
+   * Update an existing workflow
+   */
+  updateWorkflow: async (params: UpdateWorkflowParams): Promise<{ success: boolean; workflow?: Workflow; error?: any }> => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        return { success: false, error: 'Authentication required' };
+      }
+
+      const { data: workflow, error } = await supabase
+        .from('workflows')
+        .update({
+          name: params.name,
+          description: params.description,
+          data: params.data,
+          category: params.category,
+          is_template: params.isTemplate,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', params.id)
+        .eq('user_id', session.user.id)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      return { success: true, workflow };
+    } catch (error) {
+      console.error('Failed to update workflow:', error);
+      return { success: false, error };
+    }
+  },
+
+  /**
+   * Get a workflow by ID
+   */
+  getWorkflow: async (id: string): Promise<{ success: boolean; workflow?: Workflow; error?: any }> => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        return { success: false, error: 'Authentication required' };
+      }
+
+      const { data: workflow, error } = await supabase
+        .from('workflows')
+        .select('*')
+        .eq('id', id)
+        .eq('user_id', session.user.id)
+        .single();
+
+      if (error) throw error;
+
+      return { success: true, workflow };
+    } catch (error) {
+      console.error('Failed to get workflow:', error);
+      return { success: false, error };
+    }
+  },
+
+  /**
+   * List all workflows for the current user
+   */
+  listWorkflows: async (): Promise<{ success: boolean; workflows?: Workflow[]; error?: any }> => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        return { success: false, error: 'Authentication required' };
+      }
+
+      const { data: workflows, error } = await supabase
+        .from('workflows')
+        .select('*')
+        .eq('user_id', session.user.id)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      return { success: true, workflows };
+    } catch (error) {
+      console.error('Failed to list workflows:', error);
+      return { success: false, error };
+    }
+  },
+
+  /**
+   * Delete a workflow
+   */
+  deleteWorkflow: async (id: string): Promise<{ success: boolean; error?: any }> => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        return { success: false, error: 'Authentication required' };
+      }
+
+      const { error } = await supabase
+        .from('workflows')
+        .delete()
+        .eq('id', id)
+        .eq('user_id', session.user.id);
+
+      if (error) throw error;
+
+      return { success: true };
+    } catch (error) {
+      console.error('Failed to delete workflow:', error);
+      return { success: false, error };
+    }
+  },
+
+  /**
+   * Execute a workflow
+   */
+  executeWorkflow: async (params: ExecuteWorkflowParams): Promise<{ success: boolean; executionId?: string; error?: any }> => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        return { success: false, error: 'Authentication required' };
+      }
+
+      // Create execution record
+      const { data: execution, error: executionError } = await supabase
+        .from('workflow_executions')
+        .insert({
+          workflow_id: params.workflowId,
+          status: 'pending',
+          execution_data: {
+            input: params.input,
+            steps: []
+          }
+        })
+        .select()
+        .single();
+
+      if (executionError) throw executionError;
+
+      // Start execution process (this would be handled by a background job in production)
+      // For now, we'll just update the status
+      const { error: updateError } = await supabase
+        .from('workflow_executions')
+        .update({
+          status: 'running',
+          started_at: new Date().toISOString()
+        })
+        .eq('id', execution.id);
+
+      if (updateError) throw updateError;
+
+      return { success: true, executionId: execution.id };
+    } catch (error) {
+      console.error('Failed to execute workflow:', error);
+      return { success: false, error };
+    }
+  },
+
+  /**
+   * Get workflow execution status
+   */
+  getExecutionStatus: async (executionId: string): Promise<{ success: boolean; execution?: WorkflowExecution; error?: any }> => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        return { success: false, error: 'Authentication required' };
+      }
+
+      const { data: execution, error } = await supabase
+        .from('workflow_executions')
+        .select('*')
+        .eq('id', executionId)
+        .single();
+
+      if (error) throw error;
+
+      return { success: true, execution };
+    } catch (error) {
+      console.error('Failed to get execution status:', error);
+      return { success: false, error };
+    }
+  },
+
   /**
    * Save workflow to Supabase
    */
@@ -59,36 +279,6 @@ export const WorkflowService = {
     };
     
     return WorkflowService.saveWorkflow(templateWorkflow);
-  },
-
-  /**
-   * Load workflow from Supabase
-   */
-  loadWorkflow: async (id: string): Promise<{ success: boolean; workflow?: Workflow; error?: any }> => {
-    try {
-      const { data, error } = await supabase
-        .from('workflows')
-        .select('*')
-        .eq('id', id)
-        .single();
-
-      if (error) throw error;
-
-      return { 
-        success: true, 
-        workflow: {
-          id: data.id,
-          name: data.name,
-          description: data.description,
-          category: data.category,
-          data: data.data,
-          is_template: data.is_template
-        }
-      };
-    } catch (error) {
-      console.error('Failed to load workflow:', error);
-      return { success: false, error };
-    }
   },
 
   /**
@@ -152,25 +342,6 @@ export const WorkflowService = {
   },
 
   /**
-   * Delete workflow from Supabase
-   */
-  deleteWorkflow: async (id: string): Promise<{ success: boolean; error?: any }> => {
-    try {
-      const { error } = await supabase
-        .from('workflows')
-        .delete()
-        .eq('id', id);
-
-      if (error) throw error;
-
-      return { success: true };
-    } catch (error) {
-      console.error('Failed to delete workflow:', error);
-      return { success: false, error };
-    }
-  },
-
-  /**
    * Save automation connection
    */
   saveAutomationConnection: async (automationId: number, workflowId: string, targetType?: string, targetId?: string): Promise<{ success: boolean; error?: any }> => {
@@ -196,6 +367,39 @@ export const WorkflowService = {
       return { success: true };
     } catch (error) {
       console.error('Failed to save automation connection:', error);
+      return { success: false, error };
+    }
+  },
+
+  async createWorkflowFromTemplate(templateId: string): Promise<{ success: boolean; workflow?: Workflow; error?: any }> {
+    try {
+      // Get template data from the database
+      const { data: template, error: templateError } = await supabase
+        .from('workflow_templates')
+        .select('*')
+        .eq('id', templateId)
+        .single();
+
+      if (templateError) throw templateError;
+
+      // Create new workflow from template
+      const { data: workflow, error: workflowError } = await supabase
+        .from('workflows')
+        .insert({
+          name: template.name,
+          description: template.description,
+          data: template.data,
+          template_id: templateId
+        })
+        .select()
+        .single();
+
+      if (workflowError) throw workflowError;
+
+      logger.info(`Created workflow from template: ${templateId}`);
+      return { success: true, workflow };
+    } catch (error) {
+      logger.error('Failed to create workflow from template:', error);
       return { success: false, error };
     }
   }
