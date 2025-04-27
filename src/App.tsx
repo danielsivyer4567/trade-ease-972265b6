@@ -72,7 +72,6 @@ function App() {
             <RouterProvider 
               router={router} 
               future={{ v7_startTransition: true }} 
-              fallbackElement={<AppWithTabsProvider />}
             />
           </ErrorBoundary>
         </NotificationProvider>

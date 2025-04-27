@@ -1,3 +1,2 @@
-
-import LoadsSpansCalculator from './LoadsSpansCalculator/index';
+import LoadsSpansCalculator from './LoadsSpansCalculator/components/LoadsSpansCalculator';
 export default LoadsSpansCalculator;
