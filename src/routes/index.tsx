@@ -6,6 +6,7 @@ import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { authRoutes } from './auth-routes';
 import { SettingsRoutes } from './settings-routes';
 import { templateRoutes } from './template-routes';
+import { AppLayoutWithTabs } from '@/components/AppLayoutWithTabs';
 
 // Development mode debugging component
 const DevelopmentEntry = lazy(() => import('@/pages/DevelopmentEntry'));
@@ -113,94 +114,98 @@ const routeObjects: RouteObject[] = [
   // Auth Routes (now converted RouteObjects)
   ...authRouteObjects,
   {
-    // Protected Routes Layout
-    element: <ProtectedRoute />,
+    // Main App Layout with TabsProvider
+    element: <AppLayoutWithTabs />,
     children: [
-      { path: "/", element: <SuspenseWrapper><DashboardPage /></SuspenseWrapper> },
-      // Settings Routes
       {
-        path: "settings", // Base path for settings
-        children: settingsRouteObjects // Nest the objects returned by SettingsRoutes()
-      },
-      // Template Routes
-      templateRoutes,
-      // Customer routes
-      {
-        path: "/customers",
+        // Protected Routes Layout
+        element: <ProtectedRoute />,
         children: [
-          { index: true, element: <SuspenseWrapper><CustomersPage /></SuspenseWrapper> },
-          { path: ":auditId", element: <SuspenseWrapper><CustomersPage /></SuspenseWrapper> },
-          { path: ":auditId/:customerId", element: <SuspenseWrapper><CustomerDetailsPage /></SuspenseWrapper> },
-        ],
-      },
-      // Site Audits routes
-      {
-        path: "/site-audits",
-        children: [
-          { index: true, element: <SuspenseWrapper><SiteAuditsPage /></SuspenseWrapper> },
-          { path: "new", element: <SuspenseWrapper><SiteAuditsPage /></SuspenseWrapper> },
-        ],
-      },
-      // Job routes
-      { path: "/job", element: <SuspenseWrapper><JobsPage /></SuspenseWrapper> },
-      {
-        path: "/jobs",
-        children: [
-          { index: true, element: <SuspenseWrapper><JobsPage /></SuspenseWrapper> },
-          { path: "new", element: <SuspenseWrapper><NewJobPage /></SuspenseWrapper> },
-          { path: ":id", element: <SuspenseWrapper><JobDetailsPage /></SuspenseWrapper> },
-        ],
-      },
-      // Quote routes
-      { path: "/quote", element: <SuspenseWrapper><QuotesPage /></SuspenseWrapper> },
-      {
-        path: "/quotes",
-        children: [
-          { index: true, element: <SuspenseWrapper><NewQuotePage /></SuspenseWrapper> },
-          { path: "empty", element: <SuspenseWrapper><QuotesPage /></SuspenseWrapper> },
-          { path: "new", element: <SuspenseWrapper><NewQuotePage /></SuspenseWrapper> },
-        ],
-      },
-      // Team routes
-      { path: "/teams", element: <SuspenseWrapper><TeamsPage /></SuspenseWrapper> },
-      { path: "/team-red", element: <SuspenseWrapper><TeamRedPage /></SuspenseWrapper> },
-      { path: "/team-blue", element: <SuspenseWrapper><TeamBluePage /></SuspenseWrapper> },
-      { path: "/team-green", element: <SuspenseWrapper><TeamGreenPage /></SuspenseWrapper> },
-      { path: "/team-new", element: <SuspenseWrapper><TeamNewPage /></SuspenseWrapper> },
-      // Calendar route
-      { path: "/calendar", element: <SuspenseWrapper><CalendarPage /></SuspenseWrapper> },
-      // Communication routes
-      { path: "/email", element: <SuspenseWrapper><EmailPage /></SuspenseWrapper> },
-      { path: "/messaging", element: <SuspenseWrapper><MessagingPage /></SuspenseWrapper> },
-      { path: "/notifications", element: <SuspenseWrapper><NotificationsPage /></SuspenseWrapper> },
-      // Finance routes
-      { path: "/banking", element: <SuspenseWrapper><BankingPage /></SuspenseWrapper> },
-      { path: "/payments", element: <SuspenseWrapper><PaymentsPage /></SuspenseWrapper> },
-      { path: "/expenses", element: <SuspenseWrapper><ExpensesPage /></SuspenseWrapper> },
-      // Trading routes
-      { path: "/trading", element: <SuspenseWrapper><TradingPage /></SuspenseWrapper> },
-      { path: "/tradedash", element: <SuspenseWrapper><TradeDashPage /></SuspenseWrapper> },
-      // Reporting routes
-      { path: "/statistics", element: <SuspenseWrapper><StatisticsPage /></SuspenseWrapper> },
-      { path: "/performance", element: <SuspenseWrapper><PerformancePage /></SuspenseWrapper> },
-      { path: "/activity", element: <SuspenseWrapper><ActivityPage /></SuspenseWrapper> },
-      // Supply Chain routes
-      { path: "/suppliers", element: <SuspenseWrapper><SuppliersPage /></SuspenseWrapper> },
-      { path: "/inventory", element: <SuspenseWrapper><InventoryPage /></SuspenseWrapper> },
-      { path: "/purchase-orders", element: <SuspenseWrapper><PurchaseOrdersPage /></SuspenseWrapper> },
-      { path: "/material-ordering", element: <SuspenseWrapper><MaterialOrderingPage /></SuspenseWrapper> },
-      // Tools and Utilities routes
-      { path: "/calculators", element: <SuspenseWrapper><CalculatorsPage /></SuspenseWrapper> },
-      { path: "/workflow", element: <SuspenseWrapper><WorkflowPage /></SuspenseWrapper> },
-      { path: "/forms", element: <SuspenseWrapper><FormsPage /></SuspenseWrapper> },
-      { path: "/tasks", element: <SuspenseWrapper><TasksPage /></SuspenseWrapper> },
-      { path: "/ai-features", element: <SuspenseWrapper><AIFeaturesPage /></SuspenseWrapper> },
-      { path: "/property-boundaries", element: <SuspenseWrapper><PropertyBoundariesPage /></SuspenseWrapper> },
-      { path: "/networks", element: <SuspenseWrapper><NetworksPage /></SuspenseWrapper> },
-      // Credentials route
-      { path: "/credentials", element: <SuspenseWrapper><CredentialsPage /></SuspenseWrapper> },
-      // Integrations (already handled under settings? Check original structure if needed)
-      // { path: "/integrations", element: <SuspenseWrapper><IntegrationsPage /></SuspenseWrapper> },
+          { path: "/", element: <SuspenseWrapper><DashboardPage /></SuspenseWrapper> },
+          // Settings Routes
+          {
+            path: "settings", // Base path for settings
+            children: settingsRouteObjects // Nest the objects returned by SettingsRoutes()
+          },
+          // Template Routes
+          templateRoutes,
+          // Customer routes
+          {
+            path: "/customers",
+            children: [
+              { index: true, element: <SuspenseWrapper><CustomersPage /></SuspenseWrapper> },
+              { path: ":auditId", element: <SuspenseWrapper><CustomersPage /></SuspenseWrapper> },
+              { path: ":auditId/:customerId", element: <SuspenseWrapper><CustomerDetailsPage /></SuspenseWrapper> },
+            ],
+          },
+          // Site Audits routes
+          {
+            path: "/site-audits",
+            children: [
+              { index: true, element: <SuspenseWrapper><SiteAuditsPage /></SuspenseWrapper> },
+              { path: "new", element: <SuspenseWrapper><SiteAuditsPage /></SuspenseWrapper> },
+            ],
+          },
+          // Job routes
+          { path: "/job", element: <SuspenseWrapper><JobsPage /></SuspenseWrapper> },
+          {
+            path: "/jobs",
+            children: [
+              { index: true, element: <SuspenseWrapper><JobsPage /></SuspenseWrapper> },
+              { path: "new", element: <SuspenseWrapper><NewJobPage /></SuspenseWrapper> },
+              { path: ":id", element: <SuspenseWrapper><JobDetailsPage /></SuspenseWrapper> },
+            ],
+          },
+          // Quote routes
+          { path: "/quote", element: <SuspenseWrapper><QuotesPage /></SuspenseWrapper> },
+          {
+            path: "/quotes",
+            children: [
+              { index: true, element: <SuspenseWrapper><NewQuotePage /></SuspenseWrapper> },
+              { path: "empty", element: <SuspenseWrapper><QuotesPage /></SuspenseWrapper> },
+              { path: "new", element: <SuspenseWrapper><NewQuotePage /></SuspenseWrapper> },
+            ],
+          },
+          // Team routes
+          { path: "/teams", element: <SuspenseWrapper><TeamsPage /></SuspenseWrapper> },
+          { path: "/team-red", element: <SuspenseWrapper><TeamRedPage /></SuspenseWrapper> },
+          { path: "/team-blue", element: <SuspenseWrapper><TeamBluePage /></SuspenseWrapper> },
+          { path: "/team-green", element: <SuspenseWrapper><TeamGreenPage /></SuspenseWrapper> },
+          { path: "/team-new", element: <SuspenseWrapper><TeamNewPage /></SuspenseWrapper> },
+          // Calendar route
+          { path: "/calendar", element: <SuspenseWrapper><CalendarPage /></SuspenseWrapper> },
+          // Communication routes
+          { path: "/email", element: <SuspenseWrapper><EmailPage /></SuspenseWrapper> },
+          { path: "/messaging", element: <SuspenseWrapper><MessagingPage /></SuspenseWrapper> },
+          { path: "/notifications", element: <SuspenseWrapper><NotificationsPage /></SuspenseWrapper> },
+          // Finance routes
+          { path: "/banking", element: <SuspenseWrapper><BankingPage /></SuspenseWrapper> },
+          { path: "/payments", element: <SuspenseWrapper><PaymentsPage /></SuspenseWrapper> },
+          { path: "/expenses", element: <SuspenseWrapper><ExpensesPage /></SuspenseWrapper> },
+          // Trading routes
+          { path: "/trading", element: <SuspenseWrapper><TradingPage /></SuspenseWrapper> },
+          { path: "/tradedash", element: <SuspenseWrapper><TradeDashPage /></SuspenseWrapper> },
+          // Reporting routes
+          { path: "/statistics", element: <SuspenseWrapper><StatisticsPage /></SuspenseWrapper> },
+          { path: "/performance", element: <SuspenseWrapper><PerformancePage /></SuspenseWrapper> },
+          { path: "/activity", element: <SuspenseWrapper><ActivityPage /></SuspenseWrapper> },
+          // Supply Chain routes
+          { path: "/suppliers", element: <SuspenseWrapper><SuppliersPage /></SuspenseWrapper> },
+          { path: "/inventory", element: <SuspenseWrapper><InventoryPage /></SuspenseWrapper> },
+          { path: "/purchase-orders", element: <SuspenseWrapper><PurchaseOrdersPage /></SuspenseWrapper> },
+          { path: "/material-ordering", element: <SuspenseWrapper><MaterialOrderingPage /></SuspenseWrapper> },
+          // Tools and Utilities routes
+          { path: "/calculators", element: <SuspenseWrapper><CalculatorsPage /></SuspenseWrapper> },
+          { path: "/workflow", element: <SuspenseWrapper><WorkflowPage /></SuspenseWrapper> },
+          { path: "/forms", element: <SuspenseWrapper><FormsPage /></SuspenseWrapper> },
+          { path: "/tasks", element: <SuspenseWrapper><TasksPage /></SuspenseWrapper> },
+          { path: "/ai-features", element: <SuspenseWrapper><AIFeaturesPage /></SuspenseWrapper> },
+          { path: "/property-boundaries", element: <SuspenseWrapper><PropertyBoundariesPage /></SuspenseWrapper> },
+          { path: "/networks", element: <SuspenseWrapper><NetworksPage /></SuspenseWrapper> },
+          // Credentials route
+          { path: "/credentials", element: <SuspenseWrapper><CredentialsPage /></SuspenseWrapper> },
+        ]
+      }
     ]
   },
   // 404 Route - must be last
