@@ -28,9 +28,23 @@ export default defineConfig({
     esbuildOptions: {
       target: 'es2020',
     },
+    include: ['react', 'react-dom', '@tanstack/react-query'],
   },
   build: {
     target: 'es2020',
     sourcemap: true,
-  }
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'react-vendor': ['react', 'react-dom'],
+          'query-vendor': ['@tanstack/react-query'],
+        },
+      },
+    },
+  },
+  experimental: {
+    renderBuiltUrl(filename: string) {
+      return filename;
+    },
+  },
 });
