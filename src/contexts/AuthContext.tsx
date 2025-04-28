@@ -30,24 +30,50 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [tempUserId, setTempUserId] = useState<string | null>(null);
 
   useEffect(() => {
+    let mounted = true;
+
     // Set up the auth state listener first
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, currentSession) => {
-        console.log('Auth state changed:', event);
-        setSession(currentSession);
-        setUser(currentSession?.user ?? null);
-        setLoading(false);
+      async (event, currentSession) => {
+        try {
+          console.log('Auth state changed:', event);
+          if (mounted) {
+            setSession(currentSession);
+            setUser(currentSession?.user ?? null);
+            setLoading(false);
+          }
+        } catch (error) {
+          console.error('Error in auth state change:', error);
+          if (mounted) {
+            setLoading(false);
+          }
+        }
       }
     );
 
     // Then check for existing session
-    supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
-      setSession(currentSession);
-      setUser(currentSession?.user ?? null);
-      setLoading(false);
-    });
+    const initializeAuth = async () => {
+      try {
+        const { data: { session: currentSession }, error } = await supabase.auth.getSession();
+        if (error) throw error;
+        
+        if (mounted) {
+          setSession(currentSession);
+          setUser(currentSession?.user ?? null);
+          setLoading(false);
+        }
+      } catch (error) {
+        console.error('Error getting session:', error);
+        if (mounted) {
+          setLoading(false);
+        }
+      }
+    };
+
+    initializeAuth();
 
     return () => {
+      mounted = false;
       subscription.unsubscribe();
     };
   }, []);
