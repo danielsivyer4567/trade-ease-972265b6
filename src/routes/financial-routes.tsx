@@ -13,6 +13,8 @@ const JobInvoicesPage = React.lazy(() => import('@/pages/Invoices/JobInvoices'))
 const InvoiceDetailPage = React.lazy(() => import('@/pages/Invoices/InvoiceDetail'));
 // Add the missing import for BankingPage
 const BankingPage = React.lazy(() => import('@/pages/Banking'));
+// Add the main Invoices page
+const InvoicesPage = React.lazy(() => import('@/pages/Invoices'));
 
 // Export routes as JSX elements
 export const financialRoutes = (
@@ -36,6 +38,11 @@ export const financialRoutes = (
       <Route path="/quotes-invoices" element={
         <Suspense fallback={<LoadingFallback />}>
           <QuotesInvoicesPage />
+        </Suspense>
+      } />
+      <Route path="/invoices" element={
+        <Suspense fallback={<LoadingFallback />}>
+          <InvoicesPage />
         </Suspense>
       } />
       <Route path="/invoices/new" element={

@@ -7,6 +7,8 @@ import { authRoutes } from './auth-routes';
 import { SettingsRoutes } from './settings-routes';
 import { templateRoutes } from './template-routes';
 import { paymentRoutes } from './payment-routes';
+import { financialRoutes } from './financial-routes';
+import { activityRoutes } from './activity-routes';
 import { AppLayoutWithTabs } from '@/components/AppLayoutWithTabs';
 
 // Development mode debugging component
@@ -128,6 +130,10 @@ const routeObjects: RouteObject[] = [
           templateRoutes,
           // Payment Routes
           paymentRoutes,
+          // Financial Routes
+          financialRoutes,
+          // Activity Routes
+          activityRoutes,
           // Customer routes
           {
             path: "/customers",

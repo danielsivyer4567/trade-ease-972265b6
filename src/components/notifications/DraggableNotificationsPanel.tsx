@@ -382,36 +382,44 @@ export const DraggableNotificationsPanel = ({
 
   // Handle click on page to place a new tag (for CREATION)
   const handlePlaceNewTag = useCallback((event: MouseEvent) => {
-    // Check basic conditions
-    if (!tagDropModeActive || isTagPopupOpen) return; 
-
-    const target = event.target as HTMLElement;
-
-    // Ignore clicks on the notification panel, existing tags, or interactive elements
-    if (
-      panelRef.current?.contains(target) || 
-      target.closest('.tag-marker, .tag-popup-content, .tag-view-popup-content, .drawing-overlay') ||
-      target.closest('button, a, input, textarea, select')
-    ) {
-      return; 
-    }
-
-    // If none of the above, proceed to place the tag
-    console.log("Placing new tag creation popup at", event.clientX, event.clientY);
+    // Prevent default behavior
+    event.preventDefault();
+    event.stopPropagation();
     
-    // Stop propagation
-    event.stopPropagation(); 
-    event.preventDefault(); 
-
-    // Position the popup offset from the click point to prevent immediate interference
-    setTagPopupCoords({ 
-      x: event.clientX - 190, // Offset to center the popup horizontally
-      y: event.clientY - 30   // Offset slightly above the click point
-    });
-    setIsTagPopupOpen(true);
-    document.body.style.cursor = 'default';
-
-  }, [tagDropModeActive, isTagPopupOpen]);
+    // Check if we're in tag drop mode
+    if (!tagDropModeActive) {
+      console.log('[handlePlaceNewTag] Not in tag drop mode, ignoring click');
+      return;
+    }
+    
+    // Check if the click is on a notification or the panel itself
+    const target = event.target as HTMLElement;
+    const isNotification = target.closest('.notification-item');
+    const isPanel = target.closest('.notifications-panel');
+    
+    if (!isNotification && !isPanel) {
+      console.log('[handlePlaceNewTag] Click not on notification or panel, ignoring');
+      return;
+    }
+    
+    // Get the coordinates relative to the viewport
+    const x = event.clientX;
+    const y = event.clientY;
+    
+    console.log('[handlePlaceNewTag] Setting tag coordinates:', { x, y });
+    
+    // Use a timeout to ensure state updates happen in the next tick
+    // This helps prevent race conditions with unmounting
+    setTimeout(() => {
+      // Check if the component is still mounted before updating state
+      if (document.querySelector('.notifications-panel')) {
+        setTagCoordinates({ x, y });
+        setShowTagPopup(true);
+      } else {
+        console.log('[handlePlaceNewTag] Component unmounted, not updating state');
+      }
+    }, 0);
+  }, [tagDropModeActive]);
 
 
   // --- Handlers for actions WITHIN the tag pop-up ---
@@ -574,7 +582,15 @@ export const DraggableNotificationsPanel = ({
   useEffect(() => {
     console.log('[TagDropEffect] Running effect. Mode active:', tagDropModeActive); // Log effect run
 
-    const listener = (event: MouseEvent) => handlePlaceNewTag(event);
+    // Create a ref to track if the component is mounted
+    const isMounted = { current: true };
+    
+    const listener = (event: MouseEvent) => {
+      // Only process the event if the component is still mounted
+      if (isMounted.current) {
+        handlePlaceNewTag(event);
+      }
+    };
 
     if (tagDropModeActive) {
         console.log('[TagDropEffect] Adding click listener.'); // Log listener add
@@ -587,6 +603,8 @@ export const DraggableNotificationsPanel = ({
     // Cleanup function
     return () => {
       console.log('[TagDropEffect] Cleanup: Removing click listener.'); // Log cleanup
+      // Mark component as unmounted to prevent state updates
+      isMounted.current = false;
       document.removeEventListener('click', listener, true);
       // Ensure cursor is reset if component unmounts while mode is active
       if (tagDropModeActive) {

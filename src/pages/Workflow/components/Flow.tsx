@@ -1,4 +1,3 @@
-
 import React, { useCallback, useState, useEffect, useRef } from 'react';
 import {
   ReactFlow,
@@ -24,6 +23,7 @@ import { toast } from 'sonner';
 import { AutomationIntegrationService } from '@/services/AutomationIntegrationService';
 import { WorkflowService } from '@/services/WorkflowService';
 import { supabase } from '@/integrations/supabase/client';
+import { useWorkflow } from '@/hooks/useWorkflow';
 
 // Define node data types for better type safety
 interface BaseNodeData {
@@ -62,6 +62,7 @@ export function Flow({ onInit, workflowId }: FlowProps) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const reactFlowInstance = useRef(null);
   const [existingAutomationIds, setExistingAutomationIds] = useState(new Set());
+  const { loadWorkflow, currentWorkflow } = useWorkflow();
 
   // Check authentication status
   useEffect(() => {
@@ -83,9 +84,38 @@ export function Flow({ onInit, workflowId }: FlowProps) {
   // Load workflow if ID is provided
   useEffect(() => {
     if (workflowId && isAuthenticated) {
-      loadWorkflow(workflowId);
+      const loadWorkflowData = async () => {
+        setIsLoading(true);
+        try {
+          await loadWorkflow(workflowId);
+        } catch (error) {
+          console.error("Error loading workflow:", error);
+          toast.error("Failed to load workflow. Trying localStorage as fallback.");
+          tryLoadFromLocalStorage();
+        } finally {
+          setIsLoading(false);
+        }
+      };
+      loadWorkflowData();
     }
-  }, [workflowId, isAuthenticated]);
+  }, [workflowId, isAuthenticated, loadWorkflow]);
+
+  // Update local state when currentWorkflow changes
+  useEffect(() => {
+    if (currentWorkflow && reactFlowInstance.current) {
+      setCurrentWorkflowId(currentWorkflow.id);
+      setWorkflowName(currentWorkflow.name);
+      setWorkflowDescription(currentWorkflow.description || "");
+      
+      if (currentWorkflow.data) {
+        const { nodes: flowNodes, edges: flowEdges } = currentWorkflow.data;
+        setNodes(flowNodes || []);
+        setEdges(flowEdges || []);
+        reactFlowInstance.current.fitView();
+        toast.success("Workflow loaded successfully!");
+      }
+    }
+  }, [currentWorkflow, setNodes, setEdges]);
 
   // Handle connections between nodes
   const onConnect = useCallback((params) => {
@@ -257,39 +287,6 @@ export function Flow({ onInit, workflowId }: FlowProps) {
       // Fallback to localStorage
       const flowData = reactFlowInstance.current.toObject();
       localStorage.setItem('workflow-data', JSON.stringify(flowData));
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Load workflow from Supabase
-  const loadWorkflow = async (id: string) => {
-    setIsLoading(true);
-    try {
-      const { success, workflow, error } = await WorkflowService.loadWorkflow(id);
-      
-      if (success && workflow) {
-        setCurrentWorkflowId(workflow.id);
-        setWorkflowName(workflow.name);
-        setWorkflowDescription(workflow.description || "");
-        
-        if (reactFlowInstance.current && workflow.data) {
-          // Load nodes and edges from the saved data
-          const { nodes: flowNodes, edges: flowEdges } = workflow.data;
-          setNodes(flowNodes || []);
-          setEdges(flowEdges || []);
-          reactFlowInstance.current.fitView();
-          toast.success("Workflow loaded successfully!");
-        }
-      } else {
-        throw new Error(error?.message || "Failed to load workflow");
-      }
-    } catch (error) {
-      console.error("Error loading workflow:", error);
-      toast.error("Failed to load workflow. Trying localStorage as fallback.");
-      
-      // Try to load from localStorage as fallback
-      tryLoadFromLocalStorage();
     } finally {
       setIsLoading(false);
     }
