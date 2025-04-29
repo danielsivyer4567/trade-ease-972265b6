@@ -7,6 +7,7 @@ export function ProtectedRoute() {
   
   // Development mode check - bypasses authentication in dev mode
   const isDevelopment = import.meta.env.DEV || window.location.hostname === 'localhost';
+  const bypassAuthInDev = import.meta.env.VITE_BYPASS_AUTH_IN_DEV !== 'false';
   
   if (loading) {
     // You can replace this with a loading spinner component
@@ -22,8 +23,11 @@ export function ProtectedRoute() {
   }
 
   // If in development mode and no user, log a message but allow access
-  if (!user && isDevelopment) {
-    console.warn('DEV MODE: Bypassing authentication for development');
+  if (!user && isDevelopment && bypassAuthInDev) {
+    // Only log in development mode and if bypass is enabled
+    if (import.meta.env.DEV) {
+      console.debug('DEV MODE: Bypassing authentication for development');
+    }
   }
 
   return <Outlet />;

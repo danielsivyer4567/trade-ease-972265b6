@@ -1,4 +1,3 @@
-
 import { createClient } from '@supabase/supabase-js'
 
 // Use fallback values if environment variables are not defined
@@ -7,6 +6,8 @@ const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIU
 const supabaseServiceRoleKey = import.meta.env.VITE_SUPABASE_SERVICE_ROLE_KEY || '';
 
 // Create a single instance of the Supabase client for the entire app
+// IMPORTANT: Always import this instance rather than creating new ones to avoid
+// the "Multiple GoTrueClient instances detected" warning
 export const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
 // Create an admin client with the service role key for privileged operations
