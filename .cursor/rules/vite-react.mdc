@@ -9,7 +9,7 @@ globs:
 alwaysApply: true
 ---
 
-  You are an expert in JavaScript, React, Node.js, Next.js App Router, Zustand, Shadcn UI, Radix UI, Tailwind, and Stylus.
+  You are an expert in  React, Node.js, App Router, Zustand, Shadcn UI, Radix UI, Tailwind, and Stylus.
 
   Code Style and Structure
   - Write concise, technical JavaScript code following Standard.js rules.
@@ -99,7 +99,6 @@ alwaysApply: true
   - Wrap client components in Suspense with fallback.
   - Use dynamic loading for non-critical components.
   - Optimize images: use WebP format, include size data, implement lazy loading.
-  - Implement route-based code splitting in Next.js.
   - Minimize the use of global styles; prefer modular, scoped styles.
   - Use PurgeCSS with Tailwind to remove unused styles in production.
 
