@@ -1,22 +1,20 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Handle, Position } from '@xyflow/react';
-import { Trash, Edit, GripVertical } from 'lucide-react';
+import { Trash } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 
-export function CustomNode({ data, id, selected }) {
-  const [isClicked, setIsClicked] = useState(false);
-  const [width, setWidth] = useState(data.width || 160);
-  const [height, setHeight] = useState(data.height || 80);
-  
-  const bgColor = data.color ? `${data.color}25` : '#f0f9ff';
-  const borderColor = data.color || '#3b82f6';
-  
-  // Reset click state when selection changes
-  useEffect(() => {
-    if (!selected) {
-      setIsClicked(false);
-    }
-  }, [selected]);
+interface BaseNodeProps {
+  data: any;
+  id: string;
+  selected: boolean;
+  type: string;
+  color?: string;
+  icon?: React.ReactNode;
+}
+
+export function BaseNode({ data, id, selected, type, color = '#3b82f6', icon }: BaseNodeProps) {
+  const bgColor = data.color ? `${data.color}25` : `${color}25`;
+  const borderColor = data.color || color;
 
   const handleDelete = () => {
     if (window.confirm('Are you sure you want to delete this node?')) {
@@ -28,7 +26,7 @@ export function CustomNode({ data, id, selected }) {
 
   return (
     <>
-      {isClicked && (
+      {selected && (
         <div className="absolute -top-14 left-1/2 transform -translate-x-1/2 flex gap-2 bg-white p-1 rounded shadow-md border border-gray-200 z-20">
           <Button variant="outline" size="sm" className="h-8 w-8 p-0" onClick={handleDelete}>
             <Trash className="h-4 w-4" />
@@ -40,27 +38,21 @@ export function CustomNode({ data, id, selected }) {
         className="bg-white rounded-md shadow-md p-2 border-2 relative"
         style={{ 
           borderColor,
-          width: `${width}px`,
-          height: `${height}px`,
-          minHeight: '60px',
-          overflow: 'auto'
-        }}
-        onClick={(e) => {
-          e.stopPropagation();
-          setIsClicked(true);
+          minWidth: '160px',
+          minHeight: '60px'
         }}
       >
         <Handle type="target" position={Position.Top} className="!bg-gray-400" />
-        <div className="flex items-start h-full">
+        <div className="flex items-start">
           <div 
             className="w-6 h-6 rounded-full flex items-center justify-center mr-2 flex-shrink-0"
             style={{ backgroundColor: bgColor }}
           >
-            <span className="text-xs">{data.icon || '⚙️'}</span>
+            {icon || <span className="text-xs">⚙️</span>}
           </div>
-          <div className="flex-1 overflow-auto">
-            <div className="text-xs text-gray-700 break-words whitespace-pre-wrap">
-              {data.label || ''}
+          <div className="flex-1">
+            <div className="text-sm font-medium text-gray-700">
+              {data.label || type}
             </div>
             {data.title && (
               <div className="text-xs text-gray-500 mt-1">
@@ -72,15 +64,15 @@ export function CustomNode({ data, id, selected }) {
                 Role: {data.assignedRole}
               </div>
             )}
+            {data.description && (
+              <div className="text-xs text-gray-600 mt-1">
+                {data.description}
+              </div>
+            )}
           </div>
-          {selected && (
-            <div className="absolute bottom-1 right-1 cursor-nwse-resize opacity-50 text-gray-400">
-              <GripVertical size={12} />
-            </div>
-          )}
         </div>
         <Handle type="source" position={Position.Bottom} className="!bg-gray-400" />
       </div>
     </>
   );
-}
+} 
