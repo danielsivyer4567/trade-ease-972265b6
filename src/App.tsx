@@ -86,14 +86,27 @@ declare global {
   interface Window {
     electron?: {
       ipcRenderer: {
-        send(channel: string): void;
+        send(channel: string, ...args: any[]): void;
+        on(channel: string, func: (...args: any[]) => void): void;
+        once(channel: string, func: (...args: any[]) => void): void;
+        invoke(channel: string, ...args: any[]): Promise<any>;
       };
     };
   }
 }
 
 if (window.electron) {
-  window.electron.ipcRenderer.send('to-main');
+  try {
+    window.electron.ipcRenderer.invoke('to-main')
+      .then(response => {
+        console.log('Received response from main process:', response);
+      })
+      .catch(error => {
+        console.error('Error communicating with main process:', error);
+      });
+  } catch (error) {
+    console.error('Failed to communicate with Electron main process:', error);
+  }
 }
 
 

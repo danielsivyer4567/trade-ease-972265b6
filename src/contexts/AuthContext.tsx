@@ -31,39 +31,39 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   useEffect(() => {
     let mounted = true;
+    let authSubscription: { data: { subscription: { unsubscribe: () => void } } } | null = null;
 
-    // Set up the auth state listener first
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, currentSession) => {
-        try {
-          console.log('Auth state changed:', event);
-          if (mounted) {
-            setSession(currentSession);
-            setUser(currentSession?.user ?? null);
-            setLoading(false);
-          }
-        } catch (error) {
-          console.error('Error in auth state change:', error);
-          if (mounted) {
-            setLoading(false);
-          }
-        }
-      }
-    );
-
-    // Then check for existing session
     const initializeAuth = async () => {
       try {
+        // Get initial session
         const { data: { session: currentSession }, error } = await supabase.auth.getSession();
         if (error) throw error;
         
         if (mounted) {
           setSession(currentSession);
           setUser(currentSession?.user ?? null);
-          setLoading(false);
         }
+
+        // Set up auth state listener
+        authSubscription = supabase.auth.onAuthStateChange(
+          async (event, currentSession) => {
+            if (!mounted) return;
+
+            try {
+              console.log('Auth state changed:', event);
+              setSession(currentSession);
+              setUser(currentSession?.user ?? null);
+            } catch (error) {
+              console.error('Error in auth state change:', error);
+            } finally {
+              if (mounted) {
+                setLoading(false);
+              }
+            }
+          }
+        );
       } catch (error) {
-        console.error('Error getting session:', error);
+        console.error('Error initializing auth:', error);
         if (mounted) {
           setLoading(false);
         }
@@ -74,7 +74,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     return () => {
       mounted = false;
-      subscription.unsubscribe();
+      if (authSubscription?.data.subscription) {
+        authSubscription.data.subscription.unsubscribe();
+      }
     };
   }, []);
 
