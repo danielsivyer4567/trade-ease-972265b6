@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { BaseLayout } from '@/components/ui/BaseLayout';
 import { ClipboardList } from 'lucide-react';

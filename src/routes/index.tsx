@@ -49,6 +49,7 @@ const CalendarPage = lazy(() => import('@/pages/Calendar'));
 const WorkflowPage = lazy(() => import('@/pages/Workflow'));
 const WorkflowListPage = lazy(() => import('@/pages/Workflow/WorkflowList'));
 const WorkflowTemplatesPage = lazy(() => import('@/pages/Workflow/WorkflowTemplates'));
+const AutomationsPage = lazy(() => import('@/pages/Automations'));
 
 // Communication
 const EmailPage = lazy(() => import('@/pages/Email'));
@@ -203,6 +204,7 @@ const routeObjects: RouteObject[] = [
           { path: "/workflow", element: <SuspenseWrapper><WorkflowPage /></SuspenseWrapper> },
           { path: "/workflow/list", element: <SuspenseWrapper><WorkflowListPage /></SuspenseWrapper> },
           { path: "/workflow/templates", element: <SuspenseWrapper><WorkflowTemplatesPage /></SuspenseWrapper> },
+          { path: "/automations", element: <SuspenseWrapper><AutomationsPage /></SuspenseWrapper> },
           { path: "/forms", element: <SuspenseWrapper><FormsPage /></SuspenseWrapper> },
           { path: "/tasks", element: <SuspenseWrapper><TasksPage /></SuspenseWrapper> },
           { path: "/ai-features", element: <SuspenseWrapper><AIFeaturesPage /></SuspenseWrapper> },

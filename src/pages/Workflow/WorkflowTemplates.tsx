@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { AppLayout } from "@/components/ui/AppLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -673,19 +672,49 @@ export default function WorkflowTemplates() {
   
   const handleTemplateSelect = async (template: Workflow) => {
     try {
-      // First save the template to the user's account
-      const { success, id } = await WorkflowService.saveWorkflow(template);
+      setIsLoading(true);
       
-      if (success) {
-        toast.success("Template saved to your account");
-        // Navigate to workflow editor with the saved template ID
+      // Create a new workflow from the template
+      const newWorkflow = {
+        ...template,
+        id: undefined, // Remove the template ID so a new one is generated
+        created_at: new Date().toISOString(),
+        is_template: false,
+        data: {
+          ...template.data,
+          created_at: new Date().toISOString()
+        }
+      };
+      
+      // Try to save to Supabase first
+      const { success, id, error } = await WorkflowService.saveWorkflow(newWorkflow);
+      
+      if (success && id) {
+        // Save to localStorage as backup
+        localStorage.setItem('workflow-data', JSON.stringify(newWorkflow.data));
+        localStorage.setItem('current-workflow-id', id);
+        
+        toast.success("Template loaded successfully");
         navigate(`/workflow?id=${id}`);
       } else {
-        toast.error("Failed to save template");
+        // If Supabase fails, save to localStorage only
+        console.warn("Failed to save to Supabase, using localStorage fallback", error);
+        localStorage.setItem('workflow-data', JSON.stringify(newWorkflow.data));
+        localStorage.removeItem('current-workflow-id'); // Clear any stale ID
+        
+        toast.success("Template loaded in local mode");
+        navigate('/workflow'); // Navigate without ID to use localStorage
       }
     } catch (error) {
       console.error("Error selecting template:", error);
-      toast.error("An error occurred");
+      // Final fallback - save to localStorage
+      localStorage.setItem('workflow-data', JSON.stringify(template.data));
+      localStorage.removeItem('current-workflow-id');
+      
+      toast.warning("Template loaded in offline mode");
+      navigate('/workflow');
+    } finally {
+      setIsLoading(false);
     }
   };
 
