@@ -15,6 +15,18 @@ import { Workflow, Search, Plus, Tag } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { AutomationIntegrationService } from '@/services/AutomationIntegrationService';
 import { Automation } from '@/pages/Automations/types';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Label } from "@/components/ui/label";
+import { toast } from 'sonner';
+import { AutomationService } from '@/services/AutomationService';
 
 interface AutomationNode {
   type: 'automationNode';
@@ -33,24 +45,30 @@ interface AutomationSelectorProps {
   onSelectAutomation: (automationNode: AutomationNode) => void;
   targetType?: 'job' | 'quote' | 'customer' | 'message' | 'social' | 'calendar';
   targetId?: string;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
 }
 
-export function AutomationSelector({ 
+export const AutomationSelector: React.FC<AutomationSelectorProps> = ({ 
   onSelectAutomation,
   targetType,
-  targetId
-}: AutomationSelectorProps) {
-  const [dialogOpen, setDialogOpen] = useState(false);
+  targetId,
+  open,
+  onOpenChange
+}) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [automations, setAutomations] = useState<Automation[]>([]);
   const [associatedAutomations, setAssociatedAutomations] = useState<number[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [showAddNew, setShowAddNew] = useState(false);
+  const [newAutomation, setNewAutomation] = useState({
+    name: '',
+    description: '',
+    type: 'workflow',
+  });
   const navigate = useNavigate();
   
-  // Fetch automations (this is mock data, but would come from your actual automations storage)
   useEffect(() => {
-    // For this example, we're using dummy data
-    // In a real implementation, you'd fetch from your database
     const mockAutomations = [
       {
         id: 1,
@@ -103,7 +121,6 @@ export function AutomationSelector({
     
     setAutomations(mockAutomations);
     
-    // If we have a target, load any associated automations
     if (targetType && targetId) {
       loadAssociatedAutomations();
     }
@@ -129,7 +146,6 @@ export function AutomationSelector({
     }
   };
   
-  // Filter automations based on search query
   const filteredAutomations = searchQuery 
     ? automations.filter(auto => 
         auto.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
@@ -137,7 +153,7 @@ export function AutomationSelector({
       )
     : automations;
     
-  const handleSelectAutomation = (automation) => {
+  const handleSelectAutomation = (automation: Automation) => {
     onSelectAutomation({
       type: 'automationNode',
       position: { x: 100, y: 100 },
@@ -151,20 +167,49 @@ export function AutomationSelector({
       }
     });
     
-    // If we have target data, associate this automation with the target
     if (targetType && targetId) {
       AutomationIntegrationService.associateAutomation(automation.id, targetType, targetId);
     }
     
-    setDialogOpen(false);
+    onOpenChange(false);
   };
   
   const navigateToAutomations = () => {
     navigate('/automations');
   };
 
+  const handleAddNew = async () => {
+    if (!newAutomation.name) {
+      toast.error('Please enter a name for the automation');
+      return;
+    }
+
+    try {
+      const result = await AutomationService.create({
+        title: newAutomation.name,
+        description: newAutomation.description,
+        isActive: true,
+        triggers: [],
+        actions: [],
+        category: 'custom',
+      });
+      
+      if (!result.success) {
+        throw new Error(result.error);
+      }
+      
+      toast.success('Automation created successfully');
+      setShowAddNew(false);
+      setNewAutomation({ name: '', description: '', type: 'workflow' });
+      loadAssociatedAutomations();
+    } catch (error) {
+      toast.error('Failed to create automation');
+      console.error('Error creating automation:', error);
+    }
+  };
+
   return (
-    <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogTrigger asChild>
         <Button variant="outline" className="flex gap-2 items-center">
           <Workflow className="h-4 w-4" />
@@ -195,58 +240,90 @@ export function AutomationSelector({
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
-          <Button variant="outline" onClick={navigateToAutomations}>
+          <Button variant="outline" onClick={() => setShowAddNew(true)}>
             <Plus className="h-4 w-4" />
           </Button>
         </div>
         
-        <div className="max-h-72 overflow-y-auto space-y-2 pr-1">
-          {isLoading ? (
-            <div className="text-center py-4">Loading...</div>
-          ) : filteredAutomations.length === 0 ? (
-            <div className="text-center py-4 text-sm text-gray-500">
-              No automations found
+        {showAddNew && (
+          <div className="border rounded-lg p-4 mb-4 space-y-4">
+            <h3 className="font-medium">New Automation</h3>
+            <div className="space-y-2">
+              <Label htmlFor="name">Name</Label>
+              <Input
+                id="name"
+                value={newAutomation.name}
+                onChange={(e) => setNewAutomation(prev => ({ ...prev, name: e.target.value }))}
+                placeholder="Enter automation name"
+              />
             </div>
-          ) : (
-            filteredAutomations.map(automation => (
-              <div 
-                key={automation.id}
-                className="p-3 border rounded-md hover:bg-gray-50 cursor-pointer"
-                onClick={() => handleSelectAutomation(automation)}
-              >
-                <div className="flex justify-between items-start mb-1">
-                  <div className="font-medium flex items-center">
-                    <Workflow className="h-4 w-4 text-blue-500 mr-1.5" />
-                    {automation.title}
-                    {associatedAutomations.includes(automation.id) && (
-                      <Badge variant="outline" className="ml-2 bg-green-50 text-green-600 border-green-200">
-                        Associated
-                      </Badge>
-                    )}
-                  </div>
-                  <div className="flex gap-1">
-                    {automation.premium && (
-                      <Badge variant="outline" className="text-xs bg-amber-50 text-amber-700 border-amber-200">
-                        <span className="mr-1">✨</span> Pro
-                      </Badge>
-                    )}
-                    <Badge variant="outline" className="text-xs">
-                      {automation.category}
-                    </Badge>
-                  </div>
-                </div>
-                <div className="text-sm text-gray-500">{automation.description}</div>
-              </div>
-            ))
-          )}
-        </div>
+            <div className="space-y-2">
+              <Label htmlFor="description">Description</Label>
+              <Input
+                id="description"
+                value={newAutomation.description}
+                onChange={(e) => setNewAutomation(prev => ({ ...prev, description: e.target.value }))}
+                placeholder="Enter automation description"
+              />
+            </div>
+            <div className="flex justify-end space-x-2">
+              <Button variant="outline" onClick={() => setShowAddNew(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleAddNew}>
+                Create Automation
+              </Button>
+            </div>
+          </div>
+        )}
+        
+        {isLoading ? (
+          <div className="text-center py-4">Loading...</div>
+        ) : filteredAutomations.length === 0 ? (
+          <div className="text-center py-4 text-sm text-gray-500">
+            No automations found
+          </div>
+        ) : (
+          <ScrollArea className="h-[400px] w-full rounded-md border">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Description</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredAutomations.map((automation) => (
+                  <TableRow key={automation.id}>
+                    <TableCell className="font-medium">
+                      {automation.title}
+                    </TableCell>
+                    <TableCell>
+                      {automation.description || 'No description'}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleSelectAutomation(automation)}
+                      >
+                        Select
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </ScrollArea>
+        )}
         
         <DialogFooter>
-          <Button variant="outline" onClick={() => setDialogOpen(false)}>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
             Cancel
           </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
   );
-}
+};

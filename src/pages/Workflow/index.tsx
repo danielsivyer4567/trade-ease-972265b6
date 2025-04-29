@@ -1,10 +1,9 @@
-
 import React, { useState, useCallback, useEffect } from 'react';
 import { AppLayout } from "@/components/ui/AppLayout";
 import { Flow } from './components/Flow';
 import { NodeSidebar } from './components/NodeSidebar';
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Save, Key, Check, FileText, ArrowRightLeft, Workflow, FolderOpen, Plus } from "lucide-react";
+import { ArrowLeft, Save, Key, Check, FileText, ArrowRightLeft, Workflow, FolderOpen, Plus, Settings2 } from "lucide-react";
 import { useNavigate, useLocation, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -17,6 +16,12 @@ import { WorkflowSaveDialog } from './components/WorkflowSaveDialog';
 import { WorkflowLoadDialog } from './components/WorkflowLoadDialog';
 import { useAuth } from '@/contexts/AuthContext';
 import { WorkflowNavigation } from './components/WorkflowNavigation';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 export default function WorkflowPage() {
   const navigate = useNavigate();
@@ -39,12 +44,17 @@ export default function WorkflowPage() {
   const [currentWorkflowId, setCurrentWorkflowId] = useState<string | undefined>(workflowId || undefined);
   const [workflowName, setWorkflowName] = useState("New Workflow");
   const [workflowDescription, setWorkflowDescription] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   
   const [targetData, setTargetData] = useState<{
     targetType?: 'job' | 'quote' | 'customer' | 'message' | 'social' | 'calendar';
     targetId?: string;
     createAutomationNode?: boolean;
   } | null>(null);
+
+  const isActive = useCallback((path: string) => {
+    return location.pathname === path;
+  }, [location.pathname]);
 
   useEffect(() => {
     checkGcpVisionApiKey();
@@ -231,35 +241,32 @@ export default function WorkflowPage() {
     }
   };
 
-  const handleSaveWorkflow = useCallback(() => {
-    if (!flowInstance) return;
-    
-    if (!user) {
-      toast.error("You need to be logged in to save workflows");
+  const handleSave = useCallback(async (name: string, description: string) => {
+    if (!flowInstance) {
+      toast.error('No workflow to save');
       return;
     }
-    
-    setSaveDialogOpen(true);
-  }, [flowInstance, user]);
 
-  const handleSaveConfirm = useCallback(async (name: string, description: string) => {
-    if (!flowInstance) return;
-    
-    setIsSaving(true);
-    setWorkflowName(name);
-    setWorkflowDescription(description);
-    
+    setIsLoading(true);
     try {
-      const flowData = flowInstance.toObject();
-      
-      flowInstance.saveWorkflow && await flowInstance.saveWorkflow(name);
-      
-      setSaveDialogOpen(false);
+      const flow = flowInstance.toObject();
+      // Here you would typically save to your backend
+      // For now, we'll save to localStorage
+      const workflows = JSON.parse(localStorage.getItem('workflows') || '[]');
+      const newWorkflow = {
+        id: Date.now().toString(),
+        name,
+        description,
+        flow,
+        createdAt: new Date().toISOString(),
+      };
+      workflows.push(newWorkflow);
+      localStorage.setItem('workflows', JSON.stringify(workflows));
     } catch (error) {
-      console.error("Error saving workflow:", error);
-      toast.error("Failed to save workflow");
+      console.error('Error saving workflow:', error);
+      toast.error('Failed to save workflow');
     } finally {
-      setIsSaving(false);
+      setIsLoading(false);
     }
   }, [flowInstance]);
 
@@ -302,97 +309,165 @@ export default function WorkflowPage() {
     toast.success(`Added "${automationNode.data.label}" automation to workflow`);
   }, [flowInstance, targetData]);
 
-  const handleNavigateToAutomations = () => {
+  const handleManageAutomations = () => {
     navigate('/automations');
   };
 
+  const handleLoadTemplate = () => {
+    navigate('/workflow/templates');
+  };
+
+  // Add keyboard shortcut handlers
+  useEffect(() => {
+    const handleKeyPress = (e: KeyboardEvent) => {
+      // Check if Ctrl/Cmd key is pressed
+      const ctrlPressed = e.ctrlKey || e.metaKey;
+      
+      if (ctrlPressed) {
+        switch (e.key.toLowerCase()) {
+          case 'o':
+            e.preventDefault();
+            setLoadDialogOpen(true);
+            break;
+          case 't':
+            e.preventDefault();
+            handleLoadTemplate();
+            break;
+          case 's':
+            e.preventDefault();
+            setSaveDialogOpen(true);
+            break;
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyPress);
+    return () => window.removeEventListener('keydown', handleKeyPress);
+  }, [handleLoadTemplate, setSaveDialogOpen]);
+
   return (
     <AppLayout>
-      <div className="p-4 h-full">
-        <WorkflowNavigation />
-        
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4 gap-2">
-          <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-bold">
-              {currentWorkflowId ? workflowName : "New Workflow"}
-            </h1>
-          </div>
-          <div className="flex flex-wrap items-center gap-2">
-            <Button 
-              variant="outline" 
-              size="sm"
-              className="flex items-center gap-2"
-              onClick={handleNavigateToAutomations}
-            >
-              <Workflow className="h-4 w-4" />
-              <span className="hidden sm:inline">Manage Automations</span>
-            </Button>
-            
-            <Button 
-              variant="outline" 
-              size="sm"
-              className="flex items-center gap-2"
-              onClick={() => setLoadDialogOpen(true)}
-            >
-              <FolderOpen className="h-4 w-4" />
-              <span className="hidden sm:inline">Load</span>
-            </Button>
-            
-            <AutomationSelector 
-              onSelectAutomation={handleAddAutomation} 
-              targetType={targetData?.targetType}
-              targetId={targetData?.targetId}
-            />
-            
-            <Dialog open={gcpVisionKeyDialogOpen} onOpenChange={setGcpVisionKeyDialogOpen}>
-              <DialogTrigger asChild>
-                <Button variant="outline" size="sm" className="flex items-center gap-2">
-                  <Key className="h-4 w-4" /> 
-                  <span className="hidden sm:inline">GCP Key</span>
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-[425px] bg-slate-200">
-                <DialogHeader>
-                  <DialogTitle>Google Cloud Vision API Configuration</DialogTitle>
-                  <DialogDescription>
-                    Enter your Google Cloud Vision API key to enable document text extraction and image analysis.
-                    <p className="mt-2 text-xs text-muted-foreground">
-                      This key will be securely stored in your Supabase database.
-                    </p>
-                  </DialogDescription>
-                </DialogHeader>
-                <GCPVisionForm gcpVisionKey={gcpVisionKey} setGcpVisionKey={setGcpVisionKey} />
-                <DialogFooter className="mt-4">
-                  <Button variant="outline" onClick={() => setGcpVisionKeyDialogOpen(false)}>
-                    Close
+      <div className="flex flex-col h-screen">
+        {/* Top Navigation Bar */}
+        <div className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+          <div className="flex h-16 items-center px-4">
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => navigate('/workflow/list')}
+                    className="mr-2"
+                  >
+                    <ArrowLeft className="h-4 w-4" />
                   </Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Back to Workflows</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
             
-            <Button 
-              variant="outline" 
-              size="sm"
-              className="flex items-center gap-2"
-              disabled={integrationStatus !== 'ready'}
-              onClick={handleSendToFinancials}
-            >
-              <ArrowRightLeft className="h-4 w-4" /> 
-              <span className="hidden sm:inline">Vision to Financials</span>
-            </Button>
-            
-            <Button 
-              onClick={handleSaveWorkflow}
-              size="sm" 
-              className="flex items-center gap-2"
-              disabled={!user}
-            >
-              <Save className="h-4 w-4" /> Save
-            </Button>
+            <h2 className="text-lg font-semibold flex-1">
+              {currentWorkflowId ? workflowName : "New Workflow"}
+            </h2>
+
+            <div className="flex items-center gap-2">
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleManageAutomations}
+                      className="flex items-center gap-2"
+                    >
+                      <Settings2 className="h-4 w-4" />
+                      Manage Automations
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Configure and manage automations</p>
+                  </TooltipContent>
+                </Tooltip>
+
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setLoadDialogOpen(true)}
+                      className="flex items-center gap-2"
+                    >
+                      <FolderOpen className="h-4 w-4" />
+                      Load Workflow
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Load existing workflow (Ctrl+O)</p>
+                  </TooltipContent>
+                </Tooltip>
+
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => navigate('/workflow/templates')}
+                      className="flex items-center gap-2"
+                    >
+                      <FileText className="h-4 w-4" />
+                      Templates
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Start from template (Ctrl+T)</p>
+                  </TooltipContent>
+                </Tooltip>
+
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="default"
+                      size="sm"
+                      onClick={() => setLoadDialogOpen(true)}
+                      className="flex items-center gap-2"
+                    >
+                      <Plus className="h-4 w-4" />
+                      Add Automation
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Add new automation to workflow</p>
+                  </TooltipContent>
+                </Tooltip>
+
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="default"
+                      size="sm"
+                      onClick={() => setSaveDialogOpen(true)}
+                      className="flex items-center gap-2"
+                      disabled={!user}
+                    >
+                      <Save className="h-4 w-4" />
+                      Save
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Save workflow (Ctrl+S)</p>
+                    {!user && <p className="text-xs text-muted-foreground">Login required to save</p>}
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </div>
           </div>
         </div>
 
-        <div className="flex h-[calc(100vh-200px)] border border-gray-200 rounded-lg overflow-hidden">
+        {/* Main Content */}
+        <div className="flex-1 flex">
           <NodeSidebar targetData={targetData} />
           <div className="flex-1 relative">
             <Flow onInit={setFlowInstance} workflowId={currentWorkflowId} />
@@ -457,10 +532,10 @@ export default function WorkflowPage() {
         <WorkflowSaveDialog 
           open={saveDialogOpen}
           onOpenChange={setSaveDialogOpen}
-          onSave={handleSaveConfirm}
-          isLoading={isSaving}
-          initialName={workflowName}
-          initialDescription={workflowDescription}
+          onSave={handleSave}
+          isLoading={isLoading}
+          initialName=""
+          initialDescription=""
         />
         
         <WorkflowLoadDialog 

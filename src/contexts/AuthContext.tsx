@@ -30,25 +30,53 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [tempUserId, setTempUserId] = useState<string | null>(null);
 
   useEffect(() => {
-    // Set up the auth state listener first
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, currentSession) => {
-        console.log('Auth state changed:', event);
-        setSession(currentSession);
-        setUser(currentSession?.user ?? null);
-        setLoading(false);
-      }
-    );
+    let mounted = true;
+    let authSubscription: { data: { subscription: { unsubscribe: () => void } } } | null = null;
 
-    // Then check for existing session
-    supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
-      setSession(currentSession);
-      setUser(currentSession?.user ?? null);
-      setLoading(false);
-    });
+    const initializeAuth = async () => {
+      try {
+        // Get initial session
+        const { data: { session: currentSession }, error } = await supabase.auth.getSession();
+        if (error) throw error;
+        
+        if (mounted) {
+          setSession(currentSession);
+          setUser(currentSession?.user ?? null);
+        }
+
+        // Set up auth state listener
+        authSubscription = supabase.auth.onAuthStateChange(
+          async (event, currentSession) => {
+            if (!mounted) return;
+
+            try {
+              console.log('Auth state changed:', event);
+              setSession(currentSession);
+              setUser(currentSession?.user ?? null);
+            } catch (error) {
+              console.error('Error in auth state change:', error);
+            } finally {
+              if (mounted) {
+                setLoading(false);
+              }
+            }
+          }
+        );
+      } catch (error) {
+        console.error('Error initializing auth:', error);
+        if (mounted) {
+          setLoading(false);
+        }
+      }
+    };
+
+    initializeAuth();
 
     return () => {
-      subscription.unsubscribe();
+      mounted = false;
+      if (authSubscription?.data.subscription) {
+        authSubscription.data.subscription.unsubscribe();
+      }
     };
   }, []);
 
