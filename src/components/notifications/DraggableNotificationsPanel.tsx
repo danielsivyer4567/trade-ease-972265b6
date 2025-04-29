@@ -296,6 +296,7 @@ export const DraggableNotificationsPanel = ({
   const { notifications, markAllAsRead } = useNotifications(); // Assuming this context provides notifications
 
   const SIDEBAR_WIDTH = 50;
+  const isDevelopment = import.meta.env.DEV;
 
   const getPanelWidth = () => {
     if (panelSize === 'minimized') return '60px';
@@ -335,7 +336,7 @@ export const DraggableNotificationsPanel = ({
   const toggleGeneralDrawingMode = () => setIsDrawingMode(!isDrawingMode);
 
   const showOverlay = isOpen && !isPinned;
-  const notificationCounts = { all: 98, team: 5, trades: 9, calendar: 3, comments: 6, account: 0, security: 0 }; // Mock counts
+  const notificationCounts = { all: 98, team: 5, trades: 9, calendar: 3, comments: 6, account: 0, security: 0 };
 
 
   // --- Tag Drop Core Logic ---
@@ -388,7 +389,7 @@ export const DraggableNotificationsPanel = ({
     
     // Check if we're in tag drop mode
     if (!tagDropModeActive) {
-      console.log('[handlePlaceNewTag] Not in tag drop mode, ignoring click');
+      if (isDevelopment) console.log('[handlePlaceNewTag] Not in tag drop mode, ignoring click');
       return;
     }
     
@@ -398,7 +399,7 @@ export const DraggableNotificationsPanel = ({
     const isPanel = target.closest('.notifications-panel');
     
     if (!isNotification && !isPanel) {
-      console.log('[handlePlaceNewTag] Click not on notification or panel, ignoring');
+      if (isDevelopment) console.log('[handlePlaceNewTag] Click not on notification or panel, ignoring');
       return;
     }
     
@@ -406,7 +407,7 @@ export const DraggableNotificationsPanel = ({
     const x = event.clientX;
     const y = event.clientY;
     
-    console.log('[handlePlaceNewTag] Setting tag coordinates:', { x, y });
+    if (isDevelopment) console.log('[handlePlaceNewTag] Setting tag coordinates:', { x, y });
     
     // Use a timeout to ensure state updates happen in the next tick
     // This helps prevent race conditions with unmounting
@@ -416,10 +417,10 @@ export const DraggableNotificationsPanel = ({
         setTagCoordinates({ x, y });
         setShowTagPopup(true);
       } else {
-        console.log('[handlePlaceNewTag] Component unmounted, not updating state');
+        if (isDevelopment) console.log('[handlePlaceNewTag] Component unmounted, not updating state');
       }
     }, 0);
-  }, [tagDropModeActive]);
+  }, [tagDropModeActive, isDevelopment]);
 
 
   // --- Handlers for actions WITHIN the tag pop-up ---
@@ -1263,6 +1264,33 @@ export const DraggableNotificationsPanel = ({
 
   const [tagCoordinates, setTagCoordinates] = useState<TagPopupPosition>({ x: 0, y: 0 });
   const [showTagPopup, setShowTagPopup] = useState(false);
+
+  // --- Tag Drop Effect ---
+  useEffect(() => {
+    if (isDevelopment) console.log('[TagDropEffect] Running effect. Mode active:', tagDropModeActive);
+    
+    if (tagDropModeActive) {
+      // Add click listener to the document
+      document.addEventListener('click', handlePlaceNewTag);
+      
+      // Add a class to the body to indicate tag drop mode
+      document.body.classList.add('tag-drop-mode-active');
+      
+      return () => {
+        if (isDevelopment) console.log('[TagDropEffect] Removing click listener.');
+        document.removeEventListener('click', handlePlaceNewTag);
+        document.body.classList.remove('tag-drop-mode-active');
+      };
+    } else {
+      // Clean up any existing listeners
+      document.removeEventListener('click', handlePlaceNewTag);
+      document.body.classList.remove('tag-drop-mode-active');
+      
+      return () => {
+        if (isDevelopment) console.log('[TagDropEffect] Cleanup: Removing click listener.');
+      };
+    }
+  }, [tagDropModeActive, handlePlaceNewTag, isDevelopment]);
 
   return (
     <>

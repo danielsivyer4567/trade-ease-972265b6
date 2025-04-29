@@ -10,6 +10,7 @@ import { paymentRoutes } from './payment-routes';
 import { financialRoutes } from './financial-routes';
 import { activityRoutes } from './activity-routes';
 import { AppLayoutWithTabs } from '@/components/AppLayoutWithTabs';
+import WorkflowPage from '@/pages/Workflow/index.new';
 
 // Development mode debugging component
 const DevelopmentEntry = lazy(() => import('@/pages/DevelopmentEntry'));
@@ -48,7 +49,6 @@ const TeamsPage = lazy(() => import('@/pages/Teams'));
 const CalendarPage = lazy(() => import('@/pages/Calendar'));
 
 // Workflow pages
-const WorkflowPage = lazy(() => import('@/pages/Workflow/index.new'));
 const WorkflowListPage = lazy(() => import('@/pages/Workflow/WorkflowList'));
 const WorkflowTemplatesPage = lazy(() => import('@/pages/Workflow/WorkflowTemplates'));
 
