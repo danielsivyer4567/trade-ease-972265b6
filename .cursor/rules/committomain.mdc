@@ -1,9 +1,0 @@
----
-description: 
-globs: 
-alwaysApply: true
----
-
-# Your rule content
-
-- always commit changes to main

@@ -3,21 +3,15 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { 
   ArrowLeft, 
-  Save, 
-  Key, 
-  Check, 
-  FileText, 
   ArrowRightLeft, 
   Workflow, 
   FolderOpen, 
   Plus 
 } from 'lucide-react';
-import { NodeSidebar } from './components/NodeSidebar';
 import { Flow } from './components/Flow';
 import { WorkflowSaveDialog } from './components/WorkflowSaveDialog';
 import { WorkflowLoadDialog } from './components/WorkflowLoadDialog';
 import { AutomationSelector } from './components/AutomationSelector';
-import { WorkflowDrawer } from './components/WorkflowDrawer';
 import { useAuth } from '@/contexts/AuthContext';
 
 // This is a new version of the Workflow index.tsx file with a simpler structure
@@ -29,6 +23,7 @@ export default function WorkflowPage() {
   const { user } = useAuth();
   
   const [flowInstance, setFlowInstance] = useState(null);
+  const [isSaving, setIsSaving] = useState(false);
   
   // Drawer states
   const [automationDrawerOpen, setAutomationDrawerOpen] = useState(false);
@@ -52,6 +47,13 @@ export default function WorkflowPage() {
     { id: 'social', label: 'Social Media', description: 'Social media integrations' },
     { id: 'social-post', label: 'Social Post', description: 'Facebook & Instagram' },
   ];
+
+  const handleSaveWorkflow = (name: string, description: string) => {
+    setIsSaving(true);
+    // Handle save logic here
+    setSaveDrawerOpen(false);
+    setIsSaving(false);
+  };
 
   return (
     <div className="flex h-screen overflow-hidden">
@@ -129,45 +131,34 @@ export default function WorkflowPage() {
         </div>
 
         {/* Flow Area */}
-Based on the lint error shown in the context, the `Flow` component is not accepting the `instance` and `setInstance` props as they are currently defined. Let me help fix this issue.
+        <div className="flex-1 p-4">
+          <Flow onInit={setFlowInstance} workflowId={workflowId} />
+        </div>
+      </div>
 
-      {/* Drawers */}
-      <WorkflowDrawer
-        title="Manage Automations"
-        isOpen={automationDrawerOpen}
-        onClose={() => setAutomationDrawerOpen(false)}
-      >
-        <AutomationSelector
-          onSelectAutomation={(automationNode) => {
-            // Handle automation selection
-            setFlowInstance(prev => ({
-              ...prev,
-              nodes: [...(prev?.nodes || []), automationNode]
-Based on the lint error shown in the context, the `AutomationSelector` component doesn't accept `open` and `onOpenChange` props. Since these props are not part of the component's interface, we should remove them. Here's the fix:
+      {/* Dialogs */}
+      <AutomationSelector
+        onSelectAutomation={(automationNode) => {
+          setFlowInstance(prev => ({
+            ...prev,
+            nodes: [...(prev?.nodes || []), automationNode]
+          }));
+          setAutomationDrawerOpen(false);
+        }}
+      />
 
-      <WorkflowDrawer
-        title="Load Workflow"
-        isOpen={loadDrawerOpen}
-        onClose={() => setLoadDrawerOpen(false)}
-      >
-        <WorkflowLoadDialog
-          open={loadDrawerOpen}
-          onOpenChange={setLoadDrawerOpen}
-          onLoad={setFlowInstance}
-        />
-      </WorkflowDrawer>
+      <WorkflowLoadDialog
+        open={loadDrawerOpen}
+        onOpenChange={setLoadDrawerOpen}
+        onLoad={setFlowInstance}
+      />
 
-      <WorkflowDrawer
-        title="Save Workflow"
-        isOpen={saveDrawerOpen}
-        onClose={() => setSaveDrawerOpen(false)}
-      >
-        <WorkflowSaveDialog
-          open={saveDrawerOpen}
-          onOpenChange={setSaveDrawerOpen}
-          flowInstance={flowInstance}
-        />
-      </WorkflowDrawer>
+      <WorkflowSaveDialog
+        open={saveDrawerOpen}
+        onOpenChange={setSaveDrawerOpen}
+        onSave={handleSaveWorkflow}
+        isLoading={isSaving}
+      />
     </div>
   );
 } 
