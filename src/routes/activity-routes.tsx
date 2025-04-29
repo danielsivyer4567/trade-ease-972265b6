@@ -1,68 +1,16 @@
-import React, { Suspense } from 'react';
-import { Route } from 'react-router-dom';
-import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
-import { LoadingFallback } from './loading-fallback';
+import { RouteObject } from 'react-router-dom';
+import { lazy } from 'react';
+import { SuspenseWrapper } from './utils/index';
 
-// Import pages
-const ActivityPage = React.lazy(() => import('@/pages/Activity'));
-const WorkflowPage = React.lazy(() => import('@/pages/Workflow'));
-const AutomationsPage = React.lazy(() => import('@/pages/Automations'));
-const SiteAuditsPage = React.lazy(() => import('@/pages/SiteAudits'));
-const FormsPage = React.lazy(() => import('@/pages/Forms'));
-const DatabasePage = React.lazy(() => import('@/pages/Database'));
-const WorkflowListPage = React.lazy(() => import('@/pages/Workflow/WorkflowList'));
-const WorkflowTemplatesPage = React.lazy(() => import('@/pages/Workflow/WorkflowTemplates'));
-const IntegrationsPage = React.lazy(() => import('@/pages/Integrations'));
+const ActivityPage = lazy(() => import('@/pages/Activity'));
+const StatisticsPage = lazy(() => import('@/pages/Statistics'));
+const PerformancePage = lazy(() => import('@/pages/Performance'));
 
-// Export routes as JSX elements
-export const activityRoutes = (
-  <>
-    <Route element={<ProtectedRoute />}>
-      <Route path="/activity" element={
-        <Suspense fallback={<LoadingFallback />}>
-          <ActivityPage />
-        </Suspense>
-      } />
-      <Route path="/workflow" element={
-        <Suspense fallback={<LoadingFallback />}>
-          <WorkflowPage />
-        </Suspense>
-      } />
-      <Route path="/workflow/list" element={
-        <Suspense fallback={<LoadingFallback />}>
-          <WorkflowListPage />
-        </Suspense>
-      } />
-      <Route path="/workflow/templates" element={
-        <Suspense fallback={<LoadingFallback />}>
-          <WorkflowTemplatesPage />
-        </Suspense>
-      } />
-      <Route path="/automations" element={
-        <Suspense fallback={<LoadingFallback />}>
-          <AutomationsPage />
-        </Suspense>
-      } />
-      <Route path="/site-audits" element={
-        <Suspense fallback={<LoadingFallback />}>
-          <SiteAuditsPage />
-        </Suspense>
-      } />
-      <Route path="/forms" element={
-        <Suspense fallback={<LoadingFallback />}>
-          <FormsPage />
-        </Suspense>
-      } />
-      <Route path="/database" element={
-        <Suspense fallback={<LoadingFallback />}>
-          <DatabasePage />
-        </Suspense>
-      } />
-      <Route path="/integrations" element={
-        <Suspense fallback={<LoadingFallback />}>
-          <IntegrationsPage />
-        </Suspense>
-      } />
-    </Route>
-  </>
-);
+export const activityRoutes: RouteObject = {
+  path: 'activity',
+  children: [
+    { path: '', element: <SuspenseWrapper><ActivityPage /></SuspenseWrapper> },
+    { path: 'statistics', element: <SuspenseWrapper><StatisticsPage /></SuspenseWrapper> },
+    { path: 'performance', element: <SuspenseWrapper><PerformancePage /></SuspenseWrapper> },
+  ]
+};

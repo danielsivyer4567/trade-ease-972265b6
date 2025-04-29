@@ -1,4 +1,3 @@
-
 import { ReactNode } from 'react';
 
 export interface Automation {
@@ -10,6 +9,7 @@ export interface Automation {
   actions: string[];
   category: string;
   premium?: boolean;
+  createdAt?: string;
 }
 
 export interface CategoryOption {

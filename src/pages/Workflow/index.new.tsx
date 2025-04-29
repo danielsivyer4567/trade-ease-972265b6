@@ -1,29 +1,43 @@
 import React, { useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { 
   ArrowLeft, 
+  Save, 
+  Key, 
+  Check, 
+  FileText, 
   ArrowRightLeft, 
   Workflow, 
   FolderOpen, 
   Plus 
 } from 'lucide-react';
+import { NodeSidebar } from './components/NodeSidebar';
 import { Flow } from './components/Flow';
 import { WorkflowSaveDialog } from './components/WorkflowSaveDialog';
 import { WorkflowLoadDialog } from './components/WorkflowLoadDialog';
 import { AutomationSelector } from './components/AutomationSelector';
+import { WorkflowDrawer } from './components/WorkflowDrawer';
 import { useAuth } from '@/contexts/AuthContext';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { AppLayout } from "@/components/ui/AppLayout";
 
-// This is a new version of the Workflow index.tsx file with a simpler structure
 export default function WorkflowPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [searchParams] = useSearchParams();
   const automationId = searchParams.get('automationId');
   const workflowId = searchParams.get('id');
   const { user } = useAuth();
   
   const [flowInstance, setFlowInstance] = useState(null);
-  const [isSaving, setIsSaving] = useState(false);
+  const [workflowName, setWorkflowName] = useState("New Workflow");
+  const [isLoading, setIsLoading] = useState(false);
   
   // Drawer states
   const [automationDrawerOpen, setAutomationDrawerOpen] = useState(false);
@@ -48,117 +62,129 @@ export default function WorkflowPage() {
     { id: 'social-post', label: 'Social Post', description: 'Facebook & Instagram' },
   ];
 
-  const handleSaveWorkflow = (name: string, description: string) => {
-    setIsSaving(true);
-    // Handle save logic here
-    setSaveDrawerOpen(false);
-    setIsSaving(false);
+  const handleSave = async (name: string, description: string) => {
+    setIsLoading(true);
+    try {
+      // TODO: Implement save functionality
+      setWorkflowName(name);
+      setSaveDrawerOpen(false);
+    } catch (error) {
+      console.error('Error saving workflow:', error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
-    <div className="flex h-screen overflow-hidden">
-      {/* Left Sidebar */}
-      <div className="w-64 border-r border-gray-200 bg-white overflow-y-auto">
-        <div className="p-4">
-          <h2 className="text-lg font-semibold mb-4">Workflow Nodes</h2>
-          <div className="space-y-4">
-            {workflowNodes.map(node => (
-              <div
-                key={node.id}
-                className="p-3 border rounded-lg cursor-pointer hover:bg-gray-50"
-                draggable
-              >
-                <h3 className="font-medium">{node.label}</h3>
-                <p className="text-sm text-gray-500">{node.description}</p>
-              </div>
-            ))}
-          </div>
+    <AppLayout>
+      <div className="flex flex-col h-screen">
+        {/* Top Navigation Bar */}
+        <div className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+          <div className="flex h-16 items-center px-4">
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => navigate('/workflow/list')}
+                    className="mr-2"
+                  >
+                    <ArrowLeft className="h-4 w-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Back to Workflows</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+            
+            <h2 className="text-lg font-semibold flex-1">
+              {workflowId ? workflowName : "New Workflow"}
+            </h2>
 
-          <h2 className="text-lg font-semibold mt-8 mb-4">Messaging Nodes</h2>
-          <div className="space-y-4">
-            {messagingNodes.map(node => (
-              <div
-                key={node.id}
-                className="p-3 border rounded-lg cursor-pointer hover:bg-gray-50"
-                draggable
-              >
-                <h3 className="font-medium">{node.label}</h3>
-                <p className="text-sm text-gray-500">{node.description}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col">
-        {/* Header */}
-        <div className="h-16 border-b border-gray-200 flex items-center justify-between px-4">
-          <div className="flex items-center space-x-4">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => navigate(-1)}
-            >
-              <ArrowLeft className="h-5 w-5" />
-            </Button>
-            <h1 className="text-xl font-semibold">New Workflow</h1>
-          </div>
-          
-          <div className="flex items-center space-x-2">
-            <Button
-              variant="outline"
-              onClick={() => setAutomationDrawerOpen(true)}
-            >
-              <ArrowRightLeft className="h-4 w-4 mr-2" />
-              Manage Automations
-            </Button>
-            <Button
-              variant="outline"
-              onClick={() => setLoadDrawerOpen(true)}
-            >
-              <FolderOpen className="h-4 w-4 mr-2" />
-              Load Workflow
-            </Button>
-            <Button
-              variant="default"
-              onClick={() => setSaveDrawerOpen(true)}
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              Add Automation
-            </Button>
+            <div className="flex items-center gap-2">
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setSaveDrawerOpen(true)}
+                      className="flex items-center gap-2"
+                      disabled={!user}
+                    >
+                      <Save className="h-4 w-4" />
+                      Save
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Save workflow (Ctrl+S)</p>
+                    {!user && <p className="text-xs text-muted-foreground">Login required to save</p>}
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </div>
           </div>
         </div>
 
         {/* Flow Area */}
-        <div className="flex-1 p-4">
-          <Flow onInit={setFlowInstance} workflowId={workflowId} />
+        <div className="flex-1 flex">
+          <NodeSidebar 
+            targetData={null}
+          />
+          <Flow 
+            onInit={setFlowInstance}
+            workflowId={workflowId || undefined}
+          />
         </div>
+
+        {/* Drawers */}
+        <WorkflowDrawer
+          title="Manage Automations"
+          isOpen={automationDrawerOpen}
+          onClose={() => setAutomationDrawerOpen(false)}
+        >
+          <AutomationSelector
+            onSelectAutomation={(automationNode) => {
+              setFlowInstance(prev => ({
+                ...prev,
+                nodes: [...(prev?.nodes || []), automationNode]
+              }));
+              setAutomationDrawerOpen(false);
+            }}
+            open={automationDrawerOpen}
+            onOpenChange={setAutomationDrawerOpen}
+          />
+        </WorkflowDrawer>
+
+        <WorkflowDrawer
+          title="Load Workflow"
+          isOpen={loadDrawerOpen}
+          onClose={() => setLoadDrawerOpen(false)}
+        >
+          <WorkflowLoadDialog
+            open={loadDrawerOpen}
+            onOpenChange={setLoadDrawerOpen}
+            onLoad={setFlowInstance}
+          />
+        </WorkflowDrawer>
+
+        <WorkflowDrawer
+          title="Save Workflow"
+          isOpen={saveDrawerOpen}
+          onClose={() => setSaveDrawerOpen(false)}
+        >
+          <WorkflowSaveDialog
+            open={saveDrawerOpen}
+            onOpenChange={setSaveDrawerOpen}
+            onSave={handleSave}
+            isLoading={isLoading}
+            initialName={workflowName}
+            initialDescription=""
+          />
+        </WorkflowDrawer>
       </div>
-
-      {/* Dialogs */}
-      <AutomationSelector
-        onSelectAutomation={(automationNode) => {
-          setFlowInstance(prev => ({
-            ...prev,
-            nodes: [...(prev?.nodes || []), automationNode]
-          }));
-          setAutomationDrawerOpen(false);
-        }}
-      />
-
-      <WorkflowLoadDialog
-        open={loadDrawerOpen}
-        onOpenChange={setLoadDrawerOpen}
-        onLoad={setFlowInstance}
-      />
-
-      <WorkflowSaveDialog
-        open={saveDrawerOpen}
-        onOpenChange={setSaveDrawerOpen}
-        onSave={handleSaveWorkflow}
-        isLoading={isSaving}
-      />
-    </div>
+    </AppLayout>
   );
-} 
+}

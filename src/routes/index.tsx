@@ -7,7 +7,10 @@ import { authRoutes } from './auth-routes';
 import { SettingsRoutes } from './settings-routes';
 import { templateRoutes } from './template-routes';
 import { paymentRoutes } from './payment-routes';
+import { financialRoutes } from './financial-routes';
+import { activityRoutes } from './activity-routes';
 import { AppLayoutWithTabs } from '@/components/AppLayoutWithTabs';
+import WorkflowPage from '@/pages/Workflow/index.new';
 
 // Development mode debugging component
 const DevelopmentEntry = lazy(() => import('@/pages/DevelopmentEntry'));
@@ -46,7 +49,6 @@ const TeamsPage = lazy(() => import('@/pages/Teams'));
 const CalendarPage = lazy(() => import('@/pages/Calendar'));
 
 // Workflow pages
-const WorkflowPage = lazy(() => import('@/pages/Workflow'));
 const WorkflowListPage = lazy(() => import('@/pages/Workflow/WorkflowList'));
 const WorkflowTemplatesPage = lazy(() => import('@/pages/Workflow/WorkflowTemplates'));
 const AutomationsPage = lazy(() => import('@/pages/Automations'));
@@ -129,6 +131,10 @@ const routeObjects: RouteObject[] = [
           templateRoutes,
           // Payment Routes
           paymentRoutes,
+          // Financial Routes
+          financialRoutes,
+          // Activity Routes
+          activityRoutes,
           // Customer routes
           {
             path: "/customers",

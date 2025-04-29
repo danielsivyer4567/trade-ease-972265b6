@@ -1,0 +1,38 @@
+{
+  "content-security-policy": {
+    "default-src": ["'self'"],
+    "script-src": [
+      "'self'",
+      "'unsafe-inline'",
+      "'unsafe-eval'",
+      "https://*.vercel.app",
+      "https://*.supabase.co"
+    ],
+    "style-src": [
+      "'self'",
+      "'unsafe-inline'",
+      "https://fonts.googleapis.com"
+    ],
+    "img-src": [
+      "'self'",
+      "data:",
+      "https://*.supabase.co",
+      "https://*.vercel.app"
+    ],
+    "font-src": [
+      "'self'",
+      "https://fonts.gstatic.com"
+    ],
+    "connect-src": [
+      "'self'",
+      "https://*.supabase.co",
+      "https://*.vercel.app"
+    ],
+    "frame-src": ["'self'"],
+    "object-src": ["'none'"],
+    "base-uri": ["'self'"],
+    "form-action": ["'self'"],
+    "frame-ancestors": ["'none'"],
+    "upgrade-insecure-requests": []
+  }
+} 

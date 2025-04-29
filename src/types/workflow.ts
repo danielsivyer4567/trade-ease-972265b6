@@ -89,5 +89,8 @@ export interface WorkflowTemplate {
   name: string;
   description: string;
   category: string;
-  recommended: boolean;
+  recommended?: boolean;
+  data?: WorkflowData;
+  user_id?: string;
+  created_at?: string;
 } 
