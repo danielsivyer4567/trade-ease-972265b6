@@ -10,6 +10,7 @@ import { NotificationProvider } from './components/notifications/NotificationCon
 import { TabsProvider } from './contexts/TabsContext';
 import { initializeTables } from './integrations/supabase/dbInit';
 import { ErrorBoundary } from 'react-error-boundary';
+import { SupabaseTest } from './components/SupabaseTest';
 import './App.css';
 
 const queryClient = new QueryClient({
@@ -65,35 +66,55 @@ function App() {
   }
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <NotificationProvider>
-          <ErrorBoundary FallbackComponent={ErrorFallback}>
-            <RouterProvider 
-              router={router} 
-              future={{ v7_startTransition: true }} 
-            />
-          </ErrorBoundary>
-        </NotificationProvider>
-      </AuthProvider>
-    </QueryClientProvider>
+    <ErrorBoundary FallbackComponent={ErrorFallback}>
+      <QueryClientProvider client={queryClient}>
+        <AuthProvider>
+          <NotificationProvider>
+            <AppWithTabsProvider>
+              <Suspense fallback={<LoadingFallback />}>
+                <div className="fixed top-4 right-4 z-50">
+                  <SupabaseTest />
+                </div>
+                <RouterProvider router={router} />
+              </Suspense>
+            </AppWithTabsProvider>
+          </NotificationProvider>
+        </AuthProvider>
+      </QueryClientProvider>
+    </ErrorBoundary>
   );
 }
 
 export default App;
 
+// Type definition for Electron
 declare global {
   interface Window {
     electron?: {
       ipcRenderer: {
-        send(channel: string): void;
+        send(channel: string, ...args: any[]): void;
+        on(channel: string, func: (...args: any[]) => void): void;
+        once(channel: string, func: (...args: any[]) => void): void;
+        invoke(channel: string, ...args: any[]): Promise<any>;
       };
     };
   }
 }
 
-if (window.electron) {
-  window.electron.ipcRenderer.send('to-main');
+// Only try to communicate with Electron if it's available
+// This prevents errors when running in a browser environment
+if (typeof window !== 'undefined' && window.electron && window.electron.ipcRenderer) {
+  try {
+    window.electron.ipcRenderer.invoke('to-main')
+      .then(response => {
+        console.log('Received response from main process:', response);
+      })
+      .catch(error => {
+        console.error('Error communicating with main process:', error);
+      });
+  } catch (error) {
+    console.error('Failed to communicate with Electron main process:', error);
+  }
 }
 
 

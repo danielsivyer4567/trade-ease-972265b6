@@ -296,6 +296,7 @@ export const DraggableNotificationsPanel = ({
   const { notifications, markAllAsRead } = useNotifications(); // Assuming this context provides notifications
 
   const SIDEBAR_WIDTH = 50;
+  const isDevelopment = import.meta.env.DEV;
 
   const getPanelWidth = () => {
     if (panelSize === 'minimized') return '60px';
@@ -335,7 +336,7 @@ export const DraggableNotificationsPanel = ({
   const toggleGeneralDrawingMode = () => setIsDrawingMode(!isDrawingMode);
 
   const showOverlay = isOpen && !isPinned;
-  const notificationCounts = { all: 98, team: 5, trades: 9, calendar: 3, comments: 6, account: 0, security: 0 }; // Mock counts
+  const notificationCounts = { all: 98, team: 5, trades: 9, calendar: 3, comments: 6, account: 0, security: 0 };
 
 
   // --- Tag Drop Core Logic ---
@@ -382,36 +383,44 @@ export const DraggableNotificationsPanel = ({
 
   // Handle click on page to place a new tag (for CREATION)
   const handlePlaceNewTag = useCallback((event: MouseEvent) => {
-    // Check basic conditions
-    if (!tagDropModeActive || isTagPopupOpen) return; 
-
-    const target = event.target as HTMLElement;
-
-    // Ignore clicks on the notification panel, existing tags, or interactive elements
-    if (
-      panelRef.current?.contains(target) || 
-      target.closest('.tag-marker, .tag-popup-content, .tag-view-popup-content, .drawing-overlay') ||
-      target.closest('button, a, input, textarea, select')
-    ) {
-      return; 
-    }
-
-    // If none of the above, proceed to place the tag
-    console.log("Placing new tag creation popup at", event.clientX, event.clientY);
+    // Prevent default behavior
+    event.preventDefault();
+    event.stopPropagation();
     
-    // Stop propagation
-    event.stopPropagation(); 
-    event.preventDefault(); 
-
-    // Position the popup offset from the click point to prevent immediate interference
-    setTagPopupCoords({ 
-      x: event.clientX - 190, // Offset to center the popup horizontally
-      y: event.clientY - 30   // Offset slightly above the click point
-    });
-    setIsTagPopupOpen(true);
-    document.body.style.cursor = 'default';
-
-  }, [tagDropModeActive, isTagPopupOpen]);
+    // Check if we're in tag drop mode
+    if (!tagDropModeActive) {
+      if (isDevelopment) console.log('[handlePlaceNewTag] Not in tag drop mode, ignoring click');
+      return;
+    }
+    
+    // Check if the click is on a notification or the panel itself
+    const target = event.target as HTMLElement;
+    const isNotification = target.closest('.notification-item');
+    const isPanel = target.closest('.notifications-panel');
+    
+    if (!isNotification && !isPanel) {
+      if (isDevelopment) console.log('[handlePlaceNewTag] Click not on notification or panel, ignoring');
+      return;
+    }
+    
+    // Get the coordinates relative to the viewport
+    const x = event.clientX;
+    const y = event.clientY;
+    
+    if (isDevelopment) console.log('[handlePlaceNewTag] Setting tag coordinates:', { x, y });
+    
+    // Use a timeout to ensure state updates happen in the next tick
+    // This helps prevent race conditions with unmounting
+    setTimeout(() => {
+      // Check if the component is still mounted before updating state
+      if (document.querySelector('.notifications-panel')) {
+        setTagCoordinates({ x, y });
+        setShowTagPopup(true);
+      } else {
+        if (isDevelopment) console.log('[handlePlaceNewTag] Component unmounted, not updating state');
+      }
+    }, 0);
+  }, [tagDropModeActive, isDevelopment]);
 
 
   // --- Handlers for actions WITHIN the tag pop-up ---
@@ -574,7 +583,15 @@ export const DraggableNotificationsPanel = ({
   useEffect(() => {
     console.log('[TagDropEffect] Running effect. Mode active:', tagDropModeActive); // Log effect run
 
-    const listener = (event: MouseEvent) => handlePlaceNewTag(event);
+    // Create a ref to track if the component is mounted
+    const isMounted = { current: true };
+    
+    const listener = (event: MouseEvent) => {
+      // Only process the event if the component is still mounted
+      if (isMounted.current) {
+        handlePlaceNewTag(event);
+      }
+    };
 
     if (tagDropModeActive) {
         console.log('[TagDropEffect] Adding click listener.'); // Log listener add
@@ -587,6 +604,8 @@ export const DraggableNotificationsPanel = ({
     // Cleanup function
     return () => {
       console.log('[TagDropEffect] Cleanup: Removing click listener.'); // Log cleanup
+      // Mark component as unmounted to prevent state updates
+      isMounted.current = false;
       document.removeEventListener('click', listener, true);
       // Ensure cursor is reset if component unmounts while mode is active
       if (tagDropModeActive) {
@@ -850,11 +869,25 @@ export const DraggableNotificationsPanel = ({
   
   // Set up page-wide canvas when drawing on page
   useEffect(() => {
-    // Log when the effect is triggered based on isDrawingOnPage
-    console.log(`[FullPage Draw Effect] Running. isDrawingOnPage: ${drawingState.isDrawingOnPage}`);
-
+    // Only log when the effect is actually creating or cleaning up
     if (drawingState.isDrawingOnPage) {
       console.log('[FullPage Draw Effect] Creating overlay canvas and controls...');
+    }
+
+    // Cleanup function for previous canvas if it exists
+    const cleanup = () => {
+      if (canvasContainerRef.current && canvasContainerRef.current.parentNode) {
+        console.log('[FullPage Draw Effect] Cleanup: Removing previous canvas...');
+        canvasContainerRef.current.parentNode.removeChild(canvasContainerRef.current);
+        pageCanvasRef.current = null;
+        canvasContainerRef.current = null;
+      }
+    };
+
+    // Clean up any existing canvas before creating a new one
+    cleanup();
+
+    if (drawingState.isDrawingOnPage) {
       // Create a full-page canvas overlay for drawing
       const container = document.createElement('div');
       container.style.position = 'fixed';
@@ -953,10 +986,10 @@ export const DraggableNotificationsPanel = ({
       
       canvasContainerRef.current = container;
       pageCanvasRef.current = canvas;
-      console.log('[FullPage Draw Effect] Overlay appended to body.');
 
       // Add event listeners for drawing - USE REFS HERE
       const mouseDownListener = (e: MouseEvent) => {
+        if (!canvas || !canvas.parentNode) return; // Check if canvas still exists
         console.log('[FullPage Canvas] Mouse Down Event', e.clientX, e.clientY);
         e.preventDefault();
         e.stopPropagation();
@@ -981,7 +1014,7 @@ export const DraggableNotificationsPanel = ({
       };
       
       const mouseMoveListener = (e: MouseEvent) => {
-        if (!isDrawingRef.current || !lastPointRef.current) return;
+        if (!canvas || !canvas.parentNode || !isDrawingRef.current || !lastPointRef.current) return;
         console.log('[FullPage Canvas] Mouse Move Event', e.clientX, e.clientY);
         
         e.preventDefault();
@@ -1020,8 +1053,10 @@ export const DraggableNotificationsPanel = ({
       };
       
       const mouseUpListener = (e: MouseEvent) => {
-         console.log('[FullPage Canvas] Mouse Up/Leave Event', e.clientX, e.clientY);
-         if (!isDrawingRef.current || !lastPointRef.current) {
+        if (!canvas || !canvas.parentNode) return;
+        console.log('[FullPage Canvas] Mouse Up/Leave Event', e.clientX, e.clientY);
+        
+        if (!isDrawingRef.current || !lastPointRef.current) {
           setIsDrawing(false); 
           setLastPoint(null); 
           return;
@@ -1089,90 +1124,22 @@ export const DraggableNotificationsPanel = ({
         setLastPoint(null); 
       };
       
-      console.log('[FullPage Draw Effect] Adding event listeners to full page canvas...');
       canvas.addEventListener('mousedown', mouseDownListener);
       canvas.addEventListener('mousemove', mouseMoveListener);
       canvas.addEventListener('mouseup', mouseUpListener);
       canvas.addEventListener('mouseleave', mouseUpListener);
 
-      // Button and Toolbar listeners (ensure they use setDrawingState)
-      const toolButtons = container.querySelectorAll('.tool-btn');
-      toolButtons.forEach(btn => {
-        btn.addEventListener('click', (e) => {
-          const btn = e.currentTarget as HTMLElement;
-          const toolType = Array.from(btn.classList)
-            .find(cls => ['pencil', 'eraser', 'line', 'arrow', 'rectangle', 'circle', 'star'].includes(cls));
-          if (toolType) {
-            setDrawingState(prev => ({ ...prev, tool: toolType as DrawingState['tool'] }));
-            toolButtons.forEach(b => { (b as HTMLElement).style.backgroundColor = '#f1f5f9'; (b as HTMLElement).style.border = '1px solid #ddd'; });
-            btn.style.backgroundColor = '#e6f0ff'; btn.style.border = '1px solid #3b82f6';
-          }
-        });
-      });
-      const brushSizeSelect = container.querySelector('.brush-width') as HTMLSelectElement;
-      if (brushSizeSelect) {
-        brushSizeSelect.addEventListener('change', () => {
-          setDrawingState(prev => ({ ...prev, lineWidth: parseInt(brushSizeSelect.value) }));
-        });
-      }
-      const colorButtons = container.querySelectorAll('.color-btn');
-      colorButtons.forEach(btn => {
-        btn.addEventListener('click', () => {
-          const colorBtn = btn as HTMLElement;
-          const color = colorBtn.dataset.color;
-          if (color) {
-            setDrawingState(prev => ({ ...prev, color }));
-            colorButtons.forEach(b => { (b as HTMLElement).style.border = (b as HTMLElement).getAttribute('data-color') === '#FFFFFF' ? '1px solid #ddd' : '1px solid #ddd'; });
-            colorBtn.style.border = '2px solid #3b82f6';
-          }
-        });
-      });
-      const doneButton = container.querySelector('.drawing-done-btn');
-      const cancelButton = container.querySelector('.drawing-cancel-btn');
-      if (doneButton) {
-        doneButton.addEventListener('click', () => {
-          const dataUrl = canvas.toDataURL('image/png');
-          const file = dataURLtoFile(dataUrl, `drawing_${Date.now()}.png`);
-          if (file) {
-            setUploadedFiles(prev => [...prev, { file, previewUrl: dataUrl, type: 'drawing' }]);
-          }
-          setDrawingState(prev => ({ ...prev, isDrawingOnPage: false }));
-        });
-      }
-      if (cancelButton) {
-        cancelButton.addEventListener('click', () => {
-          setDrawingState(prev => ({ ...prev, isDrawingOnPage: false }));
-        });
-      }
-        
-      // Cleanup function
+      // Return cleanup function
       return () => {
-        console.log('[FullPage Draw Effect] Cleanup: Removing listeners and overlay...');
+        console.log('[FullPage Draw Effect] Cleanup: Removing event listeners and canvas...');
         canvas.removeEventListener('mousedown', mouseDownListener);
         canvas.removeEventListener('mousemove', mouseMoveListener);
         canvas.removeEventListener('mouseup', mouseUpListener);
         canvas.removeEventListener('mouseleave', mouseUpListener);
-        
-        if (container && container.parentNode) {
-          console.log('[FullPage Draw Effect] Removing container from parentNode.');
-          container.parentNode.removeChild(container);
-        } else {
-          console.warn('[FullPage Draw Effect] Cleanup: Container or parentNode not found.');
-        }
-        pageCanvasRef.current = null;
-        canvasContainerRef.current = null;
+        cleanup();
       };
-    } else {
-        // Ensure cleanup if effect runs when isDrawingOnPage is false
-        if (canvasContainerRef.current && canvasContainerRef.current.parentNode) {
-            console.log('[FullPage Draw Effect] isDrawingOnPage is false, ensuring cleanup.');
-            canvasContainerRef.current.parentNode.removeChild(canvasContainerRef.current);
-            pageCanvasRef.current = null;
-            canvasContainerRef.current = null;
-        }
     }
-  // Keep dependencies minimal: only need isDrawingOnPage and stable functions
-  }, [drawingState.isDrawingOnPage, drawArrow, drawStar]);
+  }, [drawingState.isDrawingOnPage]); // Only depend on isDrawingOnPage
   
   // Helper to convert data URL to File
   const dataURLtoFile = (dataurl: string, filename: string): File | null => {
@@ -1294,6 +1261,36 @@ export const DraggableNotificationsPanel = ({
   };
 
   // Similar functions for other tools
+
+  const [tagCoordinates, setTagCoordinates] = useState<TagPopupPosition>({ x: 0, y: 0 });
+  const [showTagPopup, setShowTagPopup] = useState(false);
+
+  // --- Tag Drop Effect ---
+  useEffect(() => {
+    if (isDevelopment) console.log('[TagDropEffect] Running effect. Mode active:', tagDropModeActive);
+    
+    if (tagDropModeActive) {
+      // Add click listener to the document
+      document.addEventListener('click', handlePlaceNewTag);
+      
+      // Add a class to the body to indicate tag drop mode
+      document.body.classList.add('tag-drop-mode-active');
+      
+      return () => {
+        if (isDevelopment) console.log('[TagDropEffect] Removing click listener.');
+        document.removeEventListener('click', handlePlaceNewTag);
+        document.body.classList.remove('tag-drop-mode-active');
+      };
+    } else {
+      // Clean up any existing listeners
+      document.removeEventListener('click', handlePlaceNewTag);
+      document.body.classList.remove('tag-drop-mode-active');
+      
+      return () => {
+        if (isDevelopment) console.log('[TagDropEffect] Cleanup: Removing click listener.');
+      };
+    }
+  }, [tagDropModeActive, handlePlaceNewTag, isDevelopment]);
 
   return (
     <>
