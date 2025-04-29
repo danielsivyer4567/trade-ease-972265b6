@@ -1,56 +1,60 @@
-import { defineConfig } from "vite";
+import { defineConfig, loadEnv } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
 
-export default defineConfig({
-  server: {
-    port: 8080,
-    host: true,
-    open: true,
-    strictPort: false,
-    hmr: {
-      host: 'localhost',
-      protocol: 'ws',
+export default defineConfig(({ mode }) => {
+  const env = loadEnv(mode, process.cwd(), '');
+  
+  return {
+    server: {
+      port: 8080,
+      host: true,
+      open: true,
+      strictPort: false,
+      hmr: {
+        host: 'localhost',
+        protocol: 'ws',
+      },
+      watch: {
+        usePolling: true,
+      },
+      middlewareMode: false,
     },
-    watch: {
-      usePolling: true,
+    plugins: [react()],
+    resolve: {
+      alias: {
+        "@": path.resolve(__dirname, "./src"),
+      },
+      extensions: ['.mjs', '.js', '.ts', '.jsx', '.tsx', '.json'],
     },
-    middlewareMode: false,
-  },
-  plugins: [react()],
-  resolve: {
-    alias: {
-      "@": path.resolve(__dirname, "./src"),
+    optimizeDeps: {
+      esbuildOptions: {
+        target: 'es2020',
+      },
+      include: ['react', 'react-dom', '@tanstack/react-query'],
     },
-    extensions: ['.mjs', '.js', '.ts', '.jsx', '.tsx', '.json'],
-  },
-  optimizeDeps: {
-    esbuildOptions: {
+    build: {
       target: 'es2020',
-    },
-    include: ['react', 'react-dom', '@tanstack/react-query'],
-  },
-  build: {
-    target: 'es2020',
-    sourcemap: true,
-    rollupOptions: {
-      output: {
-        manualChunks: {
-          'react-vendor': ['react', 'react-dom'],
-          'query-vendor': ['@tanstack/react-query'],
+      sourcemap: true,
+      rollupOptions: {
+        output: {
+          manualChunks: {
+            'react-vendor': ['react', 'react-dom'],
+            'query-vendor': ['@tanstack/react-query'],
+          },
         },
       },
     },
-  },
-  experimental: {
-    renderBuiltUrl(filename: string) {
-      return filename;
+    experimental: {
+      renderBuiltUrl(filename: string) {
+        return filename;
+      },
     },
-  },
-  base: '/',
-  publicDir: 'public',
-  define: {
-    'import.meta.env.VITE_SUPABASE_URL': JSON.stringify(process.env.VITE_SUPABASE_URL),
-    'import.meta.env.VITE_SUPABASE_ANON_KEY': JSON.stringify(process.env.VITE_SUPABASE_ANON_KEY)
-  }
+    base: '/',
+    publicDir: 'public',
+    define: {
+      'import.meta.env.VITE_SUPABASE_URL': JSON.stringify(env.VITE_SUPABASE_URL),
+      'import.meta.env.VITE_SUPABASE_ANON_KEY': JSON.stringify(env.VITE_SUPABASE_ANON_KEY)
+    }
+  };
 });
