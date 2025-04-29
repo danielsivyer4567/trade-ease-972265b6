@@ -13,19 +13,25 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from 'sonner';
 
-interface WorkflowSaveDialogProps {
+export interface WorkflowSaveDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  flowInstance: any;
+  onSave: (name: string, description: string) => Promise<void>;
+  isLoading: boolean;
+  initialName: string;
+  initialDescription: string;
 }
 
 export function WorkflowSaveDialog({
   open,
   onOpenChange,
-  flowInstance,
+  onSave,
+  isLoading,
+  initialName,
+  initialDescription,
 }: WorkflowSaveDialogProps) {
-  const [name, setName] = useState('');
-  const [description, setDescription] = useState('');
+  const [name, setName] = useState(initialName);
+  const [description, setDescription] = useState(initialDescription);
   const [isSaving, setIsSaving] = useState(false);
 
   const handleSave = async () => {
@@ -34,27 +40,14 @@ export function WorkflowSaveDialog({
       return;
     }
 
-    if (!flowInstance) {
-      toast.error('No workflow to save');
+    if (!onSave) {
+      toast.error('No save function provided');
       return;
     }
 
     setIsSaving(true);
     try {
-      const flow = flowInstance.toObject();
-      // Here you would typically save to your backend
-      // For now, we'll save to localStorage
-      const workflows = JSON.parse(localStorage.getItem('workflows') || '[]');
-      const newWorkflow = {
-        id: Date.now().toString(),
-        name,
-        description,
-        flow,
-        createdAt: new Date().toISOString(),
-      };
-      workflows.push(newWorkflow);
-      localStorage.setItem('workflows', JSON.stringify(workflows));
-      
+      await onSave(name, description);
       toast.success('Workflow saved successfully');
       onOpenChange(false);
     } catch (error) {
