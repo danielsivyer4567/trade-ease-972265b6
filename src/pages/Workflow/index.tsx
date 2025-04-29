@@ -44,12 +44,17 @@ export default function WorkflowPage() {
   const [currentWorkflowId, setCurrentWorkflowId] = useState<string | undefined>(workflowId || undefined);
   const [workflowName, setWorkflowName] = useState("New Workflow");
   const [workflowDescription, setWorkflowDescription] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   
   const [targetData, setTargetData] = useState<{
     targetType?: 'job' | 'quote' | 'customer' | 'message' | 'social' | 'calendar';
     targetId?: string;
     createAutomationNode?: boolean;
   } | null>(null);
+
+  const isActive = useCallback((path: string) => {
+    return location.pathname === path;
+  }, [location.pathname]);
 
   useEffect(() => {
     checkGcpVisionApiKey();
@@ -236,35 +241,32 @@ export default function WorkflowPage() {
     }
   };
 
-  const handleSaveWorkflow = useCallback(() => {
-    if (!flowInstance) return;
-    
-    if (!user) {
-      toast.error("You need to be logged in to save workflows");
+  const handleSave = useCallback(async (name: string, description: string) => {
+    if (!flowInstance) {
+      toast.error('No workflow to save');
       return;
     }
-    
-    setSaveDialogOpen(true);
-  }, [flowInstance, user]);
 
-  const handleSaveConfirm = useCallback(async (name: string, description: string) => {
-    if (!flowInstance) return;
-    
-    setIsSaving(true);
-    setWorkflowName(name);
-    setWorkflowDescription(description);
-    
+    setIsLoading(true);
     try {
-      const flowData = flowInstance.toObject();
-      
-      flowInstance.saveWorkflow && await flowInstance.saveWorkflow(name);
-      
-      setSaveDialogOpen(false);
+      const flow = flowInstance.toObject();
+      // Here you would typically save to your backend
+      // For now, we'll save to localStorage
+      const workflows = JSON.parse(localStorage.getItem('workflows') || '[]');
+      const newWorkflow = {
+        id: Date.now().toString(),
+        name,
+        description,
+        flow,
+        createdAt: new Date().toISOString(),
+      };
+      workflows.push(newWorkflow);
+      localStorage.setItem('workflows', JSON.stringify(workflows));
     } catch (error) {
-      console.error("Error saving workflow:", error);
-      toast.error("Failed to save workflow");
+      console.error('Error saving workflow:', error);
+      toast.error('Failed to save workflow');
     } finally {
-      setIsSaving(false);
+      setIsLoading(false);
     }
   }, [flowInstance]);
 
@@ -333,7 +335,7 @@ export default function WorkflowPage() {
             break;
           case 's':
             e.preventDefault();
-            handleSaveWorkflow();
+            setSaveDialogOpen(true);
             break;
         }
       }
@@ -341,7 +343,7 @@ export default function WorkflowPage() {
 
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
-  }, [handleSaveWorkflow, handleLoadTemplate]);
+  }, [handleLoadTemplate, setSaveDialogOpen]);
 
   return (
     <AppLayout>
@@ -410,7 +412,7 @@ export default function WorkflowPage() {
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Button
-                      variant={isActive('/workflow/templates') ? "default" : "outline"}
+                      variant="outline"
                       size="sm"
                       onClick={() => navigate('/workflow/templates')}
                       className="flex items-center gap-2"
@@ -446,7 +448,7 @@ export default function WorkflowPage() {
                     <Button
                       variant="default"
                       size="sm"
-                      onClick={handleSaveWorkflow}
+                      onClick={() => setSaveDialogOpen(true)}
                       className="flex items-center gap-2"
                       disabled={!user}
                     >
@@ -530,10 +532,10 @@ export default function WorkflowPage() {
         <WorkflowSaveDialog 
           open={saveDialogOpen}
           onOpenChange={setSaveDialogOpen}
-          onSave={handleSaveConfirm}
-          isLoading={isSaving}
-          initialName={workflowName}
-          initialDescription={workflowDescription}
+          onSave={handleSave}
+          isLoading={isLoading}
+          initialName=""
+          initialDescription=""
         />
         
         <WorkflowLoadDialog 

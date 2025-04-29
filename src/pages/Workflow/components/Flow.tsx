@@ -48,16 +48,22 @@ const nodeTypes = {
 };
 
 interface FlowProps {
-  instance: any;
-  setInstance: (instance: any) => void;
+  onInit: (instance: any) => void;
+  workflowId?: string;
 }
 
 const defaultNodes = [];
 const defaultEdges = [];
 
-export function Flow({ instance, setInstance }: FlowProps) {
+export function Flow({ onInit, workflowId }: FlowProps) {
   const [nodes, setNodes, onNodesChange] = useNodesState(defaultNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(defaultEdges);
+  const [instance, setInstance] = useState(null);
+
+  const handleInit = useCallback((flowInstance) => {
+    setInstance(flowInstance);
+    onInit(flowInstance);
+  }, [onInit]);
 
   const onConnect = useCallback(
     (params) => setEdges((eds) => addEdge(params, eds)),
@@ -101,9 +107,10 @@ export function Flow({ instance, setInstance }: FlowProps) {
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
         onConnect={onConnect}
-        onInit={setInstance}
+        onInit={handleInit}
         onDrop={onDrop}
         onDragOver={onDragOver}
+        nodeTypes={nodeTypes}
         fitView
       >
         <Background />
