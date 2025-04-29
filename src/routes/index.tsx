@@ -48,7 +48,7 @@ const TeamsPage = lazy(() => import('@/pages/Teams'));
 const CalendarPage = lazy(() => import('@/pages/Calendar'));
 
 // Workflow pages
-const WorkflowPage = lazy(() => import('@/pages/Workflow'));
+const WorkflowPage = lazy(() => import('@/pages/Workflow/index.new'));
 const WorkflowListPage = lazy(() => import('@/pages/Workflow/WorkflowList'));
 const WorkflowTemplatesPage = lazy(() => import('@/pages/Workflow/WorkflowTemplates'));
 

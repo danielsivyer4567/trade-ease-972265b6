@@ -47,4 +47,6 @@ export default defineConfig({
       return filename;
     },
   },
+  base: '/',
+  publicDir: 'public',
 });

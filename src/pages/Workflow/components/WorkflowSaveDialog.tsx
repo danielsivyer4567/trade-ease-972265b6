@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import {
   Dialog,
@@ -10,82 +9,106 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Save } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import { toast } from 'sonner';
 
 interface WorkflowSaveDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSave: (name: string, description: string) => void;
-  isLoading: boolean;
-  initialName?: string;
-  initialDescription?: string;
+  flowInstance: any;
 }
 
 export function WorkflowSaveDialog({
   open,
   onOpenChange,
-  onSave,
-  isLoading,
-  initialName = "",
-  initialDescription = ""
+  flowInstance,
 }: WorkflowSaveDialogProps) {
-  const [name, setName] = useState(initialName);
-  const [description, setDescription] = useState(initialDescription);
+  const [name, setName] = useState('');
+  const [description, setDescription] = useState('');
+  const [isSaving, setIsSaving] = useState(false);
 
-  const handleSave = () => {
-    if (!name.trim()) {
+  const handleSave = async () => {
+    if (!name) {
+      toast.error('Please enter a name for your workflow');
       return;
     }
-    onSave(name, description);
+
+    if (!flowInstance) {
+      toast.error('No workflow to save');
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      const flow = flowInstance.toObject();
+      // Here you would typically save to your backend
+      // For now, we'll save to localStorage
+      const workflows = JSON.parse(localStorage.getItem('workflows') || '[]');
+      const newWorkflow = {
+        id: Date.now().toString(),
+        name,
+        description,
+        flow,
+        createdAt: new Date().toISOString(),
+      };
+      workflows.push(newWorkflow);
+      localStorage.setItem('workflows', JSON.stringify(workflows));
+      
+      toast.success('Workflow saved successfully');
+      onOpenChange(false);
+    } catch (error) {
+      console.error('Error saving workflow:', error);
+      toast.error('Failed to save workflow');
+    } finally {
+      setIsSaving(false);
+    }
   };
-  
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent>
         <DialogHeader>
           <DialogTitle>Save Workflow</DialogTitle>
           <DialogDescription>
-            Give your workflow a name and optional description
+            Give your workflow a name and description to save it.
           </DialogDescription>
         </DialogHeader>
         
-        <div className="grid gap-4 py-4">
-          <div className="grid gap-2">
-            <Label htmlFor="name">Workflow Name</Label>
+        <div className="space-y-4 py-4">
+          <div className="space-y-2">
+            <Label htmlFor="name">Name</Label>
             <Input
               id="name"
+              placeholder="Enter workflow name"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="My Workflow"
-              className="col-span-3"
             />
           </div>
           
-          <div className="grid gap-2">
-            <Label htmlFor="description">Description (optional)</Label>
+          <div className="space-y-2">
+            <Label htmlFor="description">Description</Label>
             <Textarea
               id="description"
+              placeholder="Enter workflow description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Enter a description for this workflow"
-              className="col-span-3"
             />
           </div>
         </div>
         
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
+          <Button
+            variant="outline"
+            onClick={() => onOpenChange(false)}
+          >
             Cancel
           </Button>
-          <Button onClick={handleSave} disabled={isLoading || !name.trim()}>
-            {isLoading ? "Saving..." : (
-              <>
-                <Save className="h-4 w-4 mr-2" />
-                Save Workflow
-              </>
-            )}
+          <Button
+            onClick={handleSave}
+            disabled={isSaving}
+          >
+            {isSaving ? 'Saving...' : 'Save Workflow'}
           </Button>
         </DialogFooter>
       </DialogContent>
