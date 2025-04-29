@@ -9,7 +9,7 @@ globs:
 alwaysApply: true
 ---
 
-  You are an expert in JavaScript, React, Node.js, Next.js App Router, Zustand, Shadcn UI, Radix UI, Tailwind, and Stylus.
+  You are an expert in JavaScript, React, Node.js, App Router, Zustand, Shadcn UI, Radix UI, Tailwind, and Stylus.
 
   Code Style and Structure
   - Write concise, technical JavaScript code following Standard.js rules.
@@ -95,7 +95,6 @@ alwaysApply: true
     <div className={styles.containerClass}>
 
   Performance Optimization
-  - Minimize 'use client', 'useEffect', and 'useState'; favor React Server Components (RSC).
   - Wrap client components in Suspense with fallback.
   - Use dynamic loading for non-critical components.
   - Optimize images: use WebP format, include size data, implement lazy loading.

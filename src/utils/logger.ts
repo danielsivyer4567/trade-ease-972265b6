@@ -1,10 +1,10 @@
-import { createClient } from '@supabase/supabase-js';
+import { supabase } from '@/integrations/supabase/client';
 
-// Initialize Supabase client for logging
-const supabase = createClient(
-  import.meta.env.VITE_SUPABASE_URL!,
-  import.meta.env.VITE_SUPABASE_ANON_KEY!
-);
+// No need to create a new client, use the existing one
+// const supabase = createClient(
+//   import.meta.env.VITE_SUPABASE_URL!,
+//   import.meta.env.VITE_SUPABASE_ANON_KEY!
+// );
 
 type LogLevel = 'info' | 'warn' | 'error' | 'debug';
 
@@ -91,4 +91,4 @@ class Logger {
   }
 }
 
-export const logger = Logger.getInstance(); 
+export const logger = Logger.getInstance();

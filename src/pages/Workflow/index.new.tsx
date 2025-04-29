@@ -1,173 +1,118 @@
-import React, { useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { 
-  ArrowLeft, 
-  Save, 
-  Key, 
-  Check, 
-  FileText, 
-  ArrowRightLeft, 
-  Workflow, 
-  FolderOpen, 
-  Plus 
-} from 'lucide-react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
+import { Button } from "@/components/ui/button";
+import { ArrowLeft, Save, Key, Check, FileText, ArrowRightLeft, Workflow, FolderOpen, Plus, Settings2 } from "lucide-react";
 import { NodeSidebar } from './components/NodeSidebar';
 import { Flow } from './components/Flow';
 import { WorkflowSaveDialog } from './components/WorkflowSaveDialog';
-import { WorkflowLoadDialog } from './components/WorkflowLoadDialog';
-import { AutomationSelector } from './components/AutomationSelector';
-import { WorkflowDrawer } from './components/WorkflowDrawer';
+import { toast } from "sonner";
+import { AutomationIntegrationService } from '@/services/AutomationIntegrationService';
 import { useAuth } from '@/contexts/AuthContext';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { AppLayout } from "@/components/ui/AppLayout";
 
-// This is a new version of the Workflow index.tsx file with a simpler structure
 export default function WorkflowPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [searchParams] = useSearchParams();
   const automationId = searchParams.get('automationId');
   const workflowId = searchParams.get('id');
   const { user } = useAuth();
   
   const [flowInstance, setFlowInstance] = useState(null);
+  const [saveDialogOpen, setSaveDialogOpen] = useState(false);
+  const [currentWorkflowId, setCurrentWorkflowId] = useState<string | undefined>(workflowId || undefined);
+  const [workflowName, setWorkflowName] = useState("New Workflow");
+  const [workflowDescription, setWorkflowDescription] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   
-  // Drawer states
-  const [automationDrawerOpen, setAutomationDrawerOpen] = useState(false);
-  const [loadDrawerOpen, setLoadDrawerOpen] = useState(false);
-  const [saveDrawerOpen, setSaveDrawerOpen] = useState(false);
+  const [targetData, setTargetData] = useState<{
+    targetType?: 'job' | 'quote' | 'customer' | 'message' | 'social' | 'calendar';
+    targetId?: string;
+    createAutomationNode?: boolean;
+  } | null>(null);
 
-  // Node categories for the sidebar
-  const workflowNodes = [
-    { id: 'customer', label: 'Customer', description: 'Contact info & history' },
-    { id: 'job', label: 'Job', description: 'Schedule & assignments' },
-    { id: 'quote', label: 'Quote', description: 'Terms & approvals' },
-    { id: 'task', label: 'Task', description: 'To-dos & assignments' },
-    { id: 'vision', label: 'Vision Analysis', description: 'Extract/process data' },
-    { id: 'custom', label: 'Custom', description: 'Blank node' },
-  ];
+  useEffect(() => {
+    if (location.state) {
+      const { targetType, targetId, createAutomationNode } = location.state as any;
+      if (targetType && targetId) {
+        setTargetData({
+          targetType,
+          targetId,
+          createAutomationNode: !!createAutomationNode
+        });
+      }
+    }
+  }, [location.state]);
 
-  const messagingNodes = [
-    { id: 'sms', label: 'SMS', description: 'Text notifications' },
-    { id: 'email', label: 'Email', description: 'Email notifications' },
-    { id: 'whatsapp', label: 'WhatsApp', description: 'WhatsApp messages' },
-    { id: 'social', label: 'Social Media', description: 'Social media integrations' },
-    { id: 'social-post', label: 'Social Post', description: 'Facebook & Instagram' },
-  ];
+  // ... existing code ...
 
   return (
-    <div className="flex h-screen overflow-hidden">
-      {/* Left Sidebar */}
-      <div className="w-64 border-r border-gray-200 bg-white overflow-y-auto">
-        <div className="p-4">
-          <h2 className="text-lg font-semibold mb-4">Workflow Nodes</h2>
-          <div className="space-y-4">
-            {workflowNodes.map(node => (
-              <div
-                key={node.id}
-                className="p-3 border rounded-lg cursor-pointer hover:bg-gray-50"
-                draggable
-              >
-                <h3 className="font-medium">{node.label}</h3>
-                <p className="text-sm text-gray-500">{node.description}</p>
-              </div>
-            ))}
-          </div>
+    <AppLayout>
+      <div className="flex flex-col h-screen">
+        {/* Top Navigation Bar */}
+        <div className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+          <div className="flex h-16 items-center px-4">
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => navigate('/workflow/list')}
+                    className="mr-2"
+                  >
+                    <ArrowLeft className="h-4 w-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Back to Workflows</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+            
+            <h2 className="text-lg font-semibold flex-1">
+              {currentWorkflowId ? workflowName : "New Workflow"}
+            </h2>
 
-          <h2 className="text-lg font-semibold mt-8 mb-4">Messaging Nodes</h2>
-          <div className="space-y-4">
-            {messagingNodes.map(node => (
-              <div
-                key={node.id}
-                className="p-3 border rounded-lg cursor-pointer hover:bg-gray-50"
-                draggable
-              >
-                <h3 className="font-medium">{node.label}</h3>
-                <p className="text-sm text-gray-500">{node.description}</p>
-              </div>
-            ))}
+            <div className="flex items-center gap-2">
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setSaveDialogOpen(true)}
+                      className="flex items-center gap-2"
+                      disabled={!user}
+                    >
+                      <Save className="h-4 w-4" />
+                      Save
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Save workflow (Ctrl+S)</p>
+                    {!user && <p className="text-xs text-muted-foreground">Login required to save</p>}
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </div>
+          </div>
+        </div>
+
+        {/* Main Content */}
+        <div className="flex-1 flex">
+          <NodeSidebar targetData={targetData} />
+          <div className="flex-1 relative">
+            <Flow onInit={setFlowInstance} workflowId={currentWorkflowId} />
           </div>
         </div>
       </div>
-
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col">
-        {/* Header */}
-        <div className="h-16 border-b border-gray-200 flex items-center justify-between px-4">
-          <div className="flex items-center space-x-4">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => navigate(-1)}
-            >
-              <ArrowLeft className="h-5 w-5" />
-            </Button>
-            <h1 className="text-xl font-semibold">New Workflow</h1>
-          </div>
-          
-          <div className="flex items-center space-x-2">
-            <Button
-              variant="outline"
-              onClick={() => setAutomationDrawerOpen(true)}
-            >
-              <ArrowRightLeft className="h-4 w-4 mr-2" />
-              Manage Automations
-            </Button>
-            <Button
-              variant="outline"
-              onClick={() => setLoadDrawerOpen(true)}
-            >
-              <FolderOpen className="h-4 w-4 mr-2" />
-              Load Workflow
-            </Button>
-            <Button
-              variant="default"
-              onClick={() => setSaveDrawerOpen(true)}
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              Add Automation
-            </Button>
-          </div>
-        </div>
-
-        {/* Flow Area */}
-Based on the lint error shown in the context, the `Flow` component is not accepting the `instance` and `setInstance` props as they are currently defined. Let me help fix this issue.
-
-      {/* Drawers */}
-      <WorkflowDrawer
-        title="Manage Automations"
-        isOpen={automationDrawerOpen}
-        onClose={() => setAutomationDrawerOpen(false)}
-      >
-        <AutomationSelector
-          onSelectAutomation={(automationNode) => {
-            // Handle automation selection
-            setFlowInstance(prev => ({
-              ...prev,
-              nodes: [...(prev?.nodes || []), automationNode]
-Based on the lint error shown in the context, the `AutomationSelector` component doesn't accept `open` and `onOpenChange` props. Since these props are not part of the component's interface, we should remove them. Here's the fix:
-
-      <WorkflowDrawer
-        title="Load Workflow"
-        isOpen={loadDrawerOpen}
-        onClose={() => setLoadDrawerOpen(false)}
-      >
-        <WorkflowLoadDialog
-          open={loadDrawerOpen}
-          onOpenChange={setLoadDrawerOpen}
-          onLoad={setFlowInstance}
-        />
-      </WorkflowDrawer>
-
-      <WorkflowDrawer
-        title="Save Workflow"
-        isOpen={saveDrawerOpen}
-        onClose={() => setSaveDrawerOpen(false)}
-      >
-        <WorkflowSaveDialog
-          open={saveDrawerOpen}
-          onOpenChange={setSaveDrawerOpen}
-          flowInstance={flowInstance}
-        />
-      </WorkflowDrawer>
-    </div>
+    </AppLayout>
   );
-} 
+}

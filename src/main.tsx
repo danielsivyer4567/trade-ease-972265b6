@@ -2,6 +2,10 @@ import React from 'react'
 import ReactDOM from 'react-dom/client'
 import App from './App.tsx'
 import './index.css'
+import { disableDevToolsOverlay } from './utils/disableDevToolsOverlay'
+
+// Disable React DevTools overlay to prevent message channel errors
+disableDevToolsOverlay();
 
 // Setup error handling for Vite HMR
 if (import.meta.hot) {

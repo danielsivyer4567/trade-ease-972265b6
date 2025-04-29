@@ -1,145 +1,127 @@
-
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { WorkflowService, Workflow } from '@/services/WorkflowService';
-import { Folder, Trash2, Clock } from "lucide-react";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from 'sonner';
+
+interface Workflow {
+  id: string;
+  name: string;
+  description: string;
+  flow: any;
+  createdAt: string;
+}
 
 interface WorkflowLoadDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onLoad: (workflowId: string) => void;
+  onLoad: (instance: any) => void;
 }
 
 export function WorkflowLoadDialog({
   open,
   onOpenChange,
-  onLoad
+  onLoad,
 }: WorkflowLoadDialogProps) {
   const [workflows, setWorkflows] = useState<Workflow[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     if (open) {
-      loadWorkflows();
+      // Load workflows from localStorage
+      const savedWorkflows = JSON.parse(localStorage.getItem('workflows') || '[]');
+      setWorkflows(savedWorkflows);
     }
   }, [open]);
 
-  const loadWorkflows = async () => {
-    setIsLoading(true);
+  const handleLoad = (workflow: Workflow) => {
     try {
-      const { success, workflows } = await WorkflowService.getUserWorkflows();
-      if (success && workflows) {
-        setWorkflows(workflows);
-      } else {
-        toast.error("Failed to load workflows");
-      }
+      onLoad(workflow.flow);
+      toast.success(`Loaded workflow: ${workflow.name}`);
+      onOpenChange(false);
     } catch (error) {
-      console.error("Error loading workflows:", error);
-      toast.error("Failed to load workflows");
-    } finally {
-      setIsLoading(false);
+      console.error('Error loading workflow:', error);
+      toast.error('Failed to load workflow');
     }
-  };
-
-  const handleDelete = async (id: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    setIsDeleting(true);
-    
-    try {
-      const { success } = await WorkflowService.deleteWorkflow(id);
-      if (success) {
-        toast.success("Workflow deleted");
-        loadWorkflows();
-      } else {
-        toast.error("Failed to delete workflow");
-      }
-    } catch (error) {
-      console.error("Error deleting workflow:", error);
-      toast.error("Failed to delete workflow");
-    } finally {
-      setIsDeleting(false);
-    }
-  };
-
-  const handleSelect = (workflowId: string) => {
-    onLoad(workflowId);
-    onOpenChange(false);
   };
 
   const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
   };
-  
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-[800px]">
         <DialogHeader>
           <DialogTitle>Load Workflow</DialogTitle>
           <DialogDescription>
-            Select a workflow to load
+            Select a workflow to load from your saved workflows.
           </DialogDescription>
         </DialogHeader>
-        
-        <div className="h-64 overflow-auto">
-          {isLoading ? (
-            <div className="flex items-center justify-center h-32">
-              <p>Loading workflows...</p>
-            </div>
-          ) : workflows.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-32 text-gray-500">
-              <Folder className="h-12 w-12 mb-2" />
-              <p>No saved workflows</p>
-            </div>
-          ) : (
-            <div className="space-y-2">
-              {workflows.map((workflow) => (
-                <div 
-                  key={workflow.id} 
-                  className="border rounded-md p-3 cursor-pointer hover:bg-gray-50"
-                  onClick={() => handleSelect(workflow.id)}
-                >
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <h4 className="font-medium">{workflow.name}</h4>
-                      {workflow.description && (
-                        <p className="text-sm text-gray-500">{workflow.description}</p>
-                      )}
-                      <div className="text-xs text-gray-400 flex items-center mt-1">
-                        <Clock className="h-3 w-3 mr-1" />
-                        {formatDate(workflow.data?.created_at)}
-                      </div>
-                    </div>
-                    <Button 
-                      variant="ghost" 
-                      size="sm"
-                      onClick={(e) => handleDelete(workflow.id, e)}
-                      disabled={isDeleting}
-                    >
-                      <Trash2 className="h-4 w-4 text-gray-400 hover:text-red-500" />
-                    </Button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-        
-        <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Cancel
-          </Button>
-        </DialogFooter>
+
+        <ScrollArea className="h-[400px] w-full rounded-md border">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Name</TableHead>
+                <TableHead>Description</TableHead>
+                <TableHead>Created</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {workflows.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={4} className="text-center">
+                    No saved workflows found
+                  </TableCell>
+                </TableRow>
+              ) : (
+                workflows.map((workflow) => (
+                  <TableRow key={workflow.id}>
+                    <TableCell className="font-medium">
+                      {workflow.name}
+                    </TableCell>
+                    <TableCell>
+                      {workflow.description || 'No description'}
+                    </TableCell>
+                    <TableCell>
+                      {formatDate(workflow.createdAt)}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleLoad(workflow)}
+                      >
+                        Load
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </ScrollArea>
       </DialogContent>
     </Dialog>
   );

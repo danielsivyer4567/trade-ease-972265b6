@@ -4,6 +4,7 @@ import {
   ReactFlowProvider,
   Background,
   Controls,
+  MiniMap,
   useNodesState,
   useEdgesState,
   addEdge,
@@ -24,6 +25,7 @@ import { toast } from 'sonner';
 import { AutomationIntegrationService } from '@/services/AutomationIntegrationService';
 import { WorkflowService } from '@/services/WorkflowService';
 import { supabase } from '@/integrations/supabase/client';
+import { useWorkflow } from '@/hooks/useWorkflow';
 
 // Define node data types for better type safety
 interface BaseNodeData {
@@ -47,141 +49,74 @@ const nodeTypes = {
 };
 
 interface FlowProps {
-  onInit?: (instance: any) => void;
+  onInit: (flowInstance: any) => void;
   workflowId?: string;
 }
 
+const defaultNodes = [];
+const defaultEdges = [];
+
 export function Flow({ onInit, workflowId }: FlowProps) {
-  const [nodes, setNodes, onNodesChange] = useNodesState([]);
-  const [edges, setEdges, onEdgesChange] = useEdgesState([]);
-  const [selectedNode, setSelectedNode] = useState(null);
-  const reactFlowInstance = useRef(null);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [nodes, setNodes, onNodesChange] = useNodesState(defaultNodes);
+  const [edges, setEdges, onEdgesChange] = useEdgesState(defaultEdges);
+  const [instance, setInstance] = useState(null);
 
-  // Check authentication status
-  useEffect(() => {
-    const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      setIsAuthenticated(!!session);
-    };
-    checkAuth();
-  }, []);
-
-  // Load workflow if ID is provided
-  useEffect(() => {
-    const loadWorkflow = async () => {
-      if (!workflowId) return;
-
-      try {
-        const { data: workflow, error } = await supabase
-          .from('workflows')
-          .select('*')
-          .eq('id', workflowId)
-          .single();
-
-        if (error) throw error;
-
-        if (workflow?.data) {
-          setNodes(workflow.data.nodes || []);
-          setEdges(workflow.data.edges || []);
-        }
-      } catch (error) {
-        console.error('Error loading workflow:', error);
-        toast.error('Failed to load workflow');
-      }
-    };
-
-    loadWorkflow();
-  }, [workflowId, setNodes, setEdges]);
+  const handleInit = useCallback((flowInstance) => {
+    setInstance(flowInstance);
+    onInit(flowInstance);
+  }, [onInit]);
 
   const onConnect = useCallback(
     (params) => setEdges((eds) => addEdge(params, eds)),
     [setEdges]
   );
 
-  const onNodeClick = useCallback((event, node) => {
+  const onDrop = useCallback(
+    (event) => {
+      event.preventDefault();
+
+      const type = event.dataTransfer.getData('application/reactflow');
+      if (!type) return;
+
+      const position = instance.screenToFlowPosition({
+        x: event.clientX,
+        y: event.clientY,
+      });
+
+      const newNode = {
+        id: `${type}-${Date.now()}`,
+        type,
+        position,
+        data: { label: type },
+      };
+
+      setNodes((nds) => nds.concat(newNode));
+    },
+    [instance]
+  );
+
+  const onDragOver = useCallback((event) => {
     event.preventDefault();
-    setSelectedNode(node);
+    event.dataTransfer.dropEffect = 'move';
   }, []);
 
-  const handleNodeUpdate = useCallback(async (nodeId, data) => {
-    setNodes((nds) =>
-      nds.map((node) =>
-        node.id === nodeId
-          ? { ...node, data: { ...node.data, ...data } }
-          : node
-      )
-    );
-
-    // Save workflow if authenticated
-    if (isAuthenticated && workflowId) {
-      try {
-        const { error } = await supabase
-          .from('workflows')
-          .update({
-            data: {
-              nodes: nodes.map(n => 
-                n.id === nodeId 
-                  ? { ...n, data: { ...n.data, ...data } }
-                  : n
-              ),
-              edges
-            },
-            updated_at: new Date().toISOString()
-          })
-          .eq('id', workflowId);
-
-        if (error) throw error;
-        toast.success('Workflow updated');
-      } catch (error) {
-        console.error('Error saving workflow:', error);
-        toast.error('Failed to save workflow');
-      }
-    }
-  }, [nodes, edges, isAuthenticated, workflowId]);
-
-  // Set up flow on init
-  const onInitFlow = useCallback((instance) => {
-    reactFlowInstance.current = instance;
-    onInit && onInit(instance);
-  }, [onInit]);
-
   return (
-    <ReactFlowProvider>
-      <div className="relative w-full h-full">
-        <ReactFlow
-          nodes={nodes}
-          edges={edges}
-          onNodesChange={onNodesChange}
-          onEdgesChange={onEdgesChange}
-          onConnect={onConnect}
-          onInit={onInitFlow}
-          onNodeClick={onNodeClick}
-          nodeTypes={nodeTypes}
-          fitView
-          className={selectedNode ? 'pr-[400px]' : ''}
-        >
-          <Background />
-          <Controls />
-          <Panel position="bottom-right">
-            <div className="bg-white p-2 rounded shadow text-xs">
-              Drag nodes from left sidebar • Connect nodes by dragging handles
-              {!isAuthenticated && (
-                <div className="mt-1 text-amber-600">
-                  Sign in to save workflows to cloud
-                </div>
-              )}
-            </div>
-          </Panel>
-        </ReactFlow>
-        {selectedNode && (
-          <NodeDetailsPanel
-            node={selectedNode}
-            onClose={() => setSelectedNode(null)}
-            onUpdate={handleNodeUpdate}
-          />
-        )}
-      </div>
-    </ReactFlowProvider>
+    <div className="h-full w-full">
+      <ReactFlow
+        nodes={nodes}
+        edges={edges}
+        onNodesChange={onNodesChange}
+        onEdgesChange={onEdgesChange}
+        onConnect={onConnect}
+        onInit={handleInit}
+        onDrop={onDrop}
+        onDragOver={onDragOver}
+        fitView
+      >
+        <Background />
+        <Controls />
+        <MiniMap />
+      </ReactFlow>
+    </div>
   );
 }
