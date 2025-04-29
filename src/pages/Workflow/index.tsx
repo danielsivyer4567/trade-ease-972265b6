@@ -1,10 +1,9 @@
-
 import React, { useState, useCallback, useEffect } from 'react';
 import { AppLayout } from "@/components/ui/AppLayout";
 import { Flow } from './components/Flow';
 import { NodeSidebar } from './components/NodeSidebar';
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Save, Key, Check, FileText, ArrowRightLeft, Workflow, FolderOpen, Plus } from "lucide-react";
+import { ArrowLeft, Save, Key, Check, FileText, ArrowRightLeft, Workflow, FolderOpen, Plus, FileTemplate } from "lucide-react";
 import { useNavigate, useLocation, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -306,93 +305,72 @@ export default function WorkflowPage() {
     navigate('/automations');
   };
 
+  const handleLoadTemplate = () => {
+    navigate('/workflow/templates');
+  };
+
   return (
     <AppLayout>
-      <div className="p-4 h-full">
-        <WorkflowNavigation />
-        
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4 gap-2">
-          <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-bold">
+      <div className="flex flex-col h-screen">
+        {/* Top Navigation Bar */}
+        <div className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+          <div className="flex h-16 items-center px-4">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => navigate('/workflow/list')}
+              className="mr-2"
+            >
+              <ArrowLeft className="h-4 w-4" />
+            </Button>
+            
+            <h2 className="text-lg font-semibold flex-1">
               {currentWorkflowId ? workflowName : "New Workflow"}
-            </h1>
-          </div>
-          <div className="flex flex-wrap items-center gap-2">
-            <Button 
-              variant="outline" 
-              size="sm"
-              className="flex items-center gap-2"
-              onClick={handleNavigateToAutomations}
-            >
-              <Workflow className="h-4 w-4" />
-              <span className="hidden sm:inline">Manage Automations</span>
-            </Button>
-            
-            <Button 
-              variant="outline" 
-              size="sm"
-              className="flex items-center gap-2"
-              onClick={() => setLoadDialogOpen(true)}
-            >
-              <FolderOpen className="h-4 w-4" />
-              <span className="hidden sm:inline">Load</span>
-            </Button>
-            
-            <AutomationSelector 
-              onSelectAutomation={handleAddAutomation} 
-              targetType={targetData?.targetType}
-              targetId={targetData?.targetId}
-            />
-            
-            <Dialog open={gcpVisionKeyDialogOpen} onOpenChange={setGcpVisionKeyDialogOpen}>
-              <DialogTrigger asChild>
-                <Button variant="outline" size="sm" className="flex items-center gap-2">
-                  <Key className="h-4 w-4" /> 
-                  <span className="hidden sm:inline">GCP Key</span>
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-[425px] bg-slate-200">
-                <DialogHeader>
-                  <DialogTitle>Google Cloud Vision API Configuration</DialogTitle>
-                  <DialogDescription>
-                    Enter your Google Cloud Vision API key to enable document text extraction and image analysis.
-                    <p className="mt-2 text-xs text-muted-foreground">
-                      This key will be securely stored in your Supabase database.
-                    </p>
-                  </DialogDescription>
-                </DialogHeader>
-                <GCPVisionForm gcpVisionKey={gcpVisionKey} setGcpVisionKey={setGcpVisionKey} />
-                <DialogFooter className="mt-4">
-                  <Button variant="outline" onClick={() => setGcpVisionKeyDialogOpen(false)}>
-                    Close
-                  </Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
-            
-            <Button 
-              variant="outline" 
-              size="sm"
-              className="flex items-center gap-2"
-              disabled={integrationStatus !== 'ready'}
-              onClick={handleSendToFinancials}
-            >
-              <ArrowRightLeft className="h-4 w-4" /> 
-              <span className="hidden sm:inline">Vision to Financials</span>
-            </Button>
-            
-            <Button 
-              onClick={handleSaveWorkflow}
-              size="sm" 
-              className="flex items-center gap-2"
-              disabled={!user}
-            >
-              <Save className="h-4 w-4" /> Save
-            </Button>
+            </h2>
+
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setLoadDialogOpen(true)}
+                className="flex items-center gap-2"
+              >
+                <FolderOpen className="h-4 w-4" />
+                Load Workflow
+              </Button>
+
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleLoadTemplate}
+                className="flex items-center gap-2"
+              >
+                <FileTemplate className="h-4 w-4" />
+                Load Template
+              </Button>
+
+              <AutomationSelector 
+                onSelectAutomation={handleAddAutomation} 
+                targetType={targetData?.targetType}
+                targetId={targetData?.targetId}
+              />
+
+              <Button
+                variant="default"
+                size="sm"
+                onClick={handleSaveWorkflow}
+                className="flex items-center gap-2"
+                disabled={!user}
+              >
+                <Save className="h-4 w-4" />
+                Save
+              </Button>
+            </div>
           </div>
         </div>
 
-        <div className="flex h-[calc(100vh-200px)] border border-gray-200 rounded-lg overflow-hidden">
+        {/* Main Content */}
+        <div className="flex-1 flex">
           <NodeSidebar targetData={targetData} />
           <div className="flex-1 relative">
             <Flow onInit={setFlowInstance} workflowId={currentWorkflowId} />

@@ -1,242 +1,140 @@
-import React, { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import React, { useState, useEffect } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Search, Sparkles } from "lucide-react";
+import { Search, Sparkles, AlertCircle, RefreshCcw, Calendar, User, ArrowRight } from "lucide-react";
 import { WorkflowTemplate } from '@/types/workflow';
+import { supabase } from '@/lib/supabaseClient';
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Skeleton } from "@/components/ui/skeleton";
+import { format } from 'date-fns';
 
 interface WorkflowTemplateSelectorProps {
   onSelect: (template: WorkflowTemplate | null) => void;
 }
 
-const templates: WorkflowTemplate[] = [
-  {
-    id: 'blank',
-    name: 'Start from scratch',
-    description: 'Start from scratch with a fresh, clean slate for your automation and add your own triggers and actions.',
-    category: 'blank',
-    recommended: false
-  },
-  {
-    id: 'import-campaign',
-    name: 'Import from a campaign',
-    description: 'Import all the steps from an already existing campaign.',
-    category: 'import',
-    recommended: false
-  },
-  {
-    id: 'abandoned-cart-single',
-    name: 'Stores - abandoned cart recovery email',
-    description: 'Send abandoned cart recovery email to customers after dropoff during checkout',
-    category: 'ecommerce',
-    recommended: true
-  },
-  {
-    id: 'abandoned-cart-double',
-    name: 'Stores - Recover abandoned carts with 2 emails',
-    description: 'Recover Ecommerce abandoned carts checkout by sending 2 emails to customers',
-    category: 'ecommerce',
-    recommended: true
-  },
-  {
-    id: 'lead-nurture-gpt',
-    name: 'Recipe - Lead Nurture Using GPT History',
-    description: 'The Lead Nurture template leverages the GPT action History feature to create a personalized experience for potential clients.',
-    category: 'ai',
-    recommended: false
-  },
-  {
-    id: 'shopify-gpt',
-    name: 'Recipe - Shopify Order + GPT History',
-    description: 'The Shopify + AI template integrates the AI Memory Key to optimize your interaction with the present and potential customers.',
-    category: 'ecommerce',
-    recommended: true
-  },
-  {
-    id: 'whatsapp-delivery',
-    name: 'WhatsApp Delivery Status',
-    description: 'Automatically send SMS or Email to customers when a WhatsApp message fails to deliver, ensuring no communication is missed',
-    category: 'messaging',
-    recommended: true
-  },
-  {
-    id: 'missed-call-whatsapp',
-    name: 'Recipe - Missed Call WhatsApp-Back',
-    description: 'If you miss a call from a lead, reply to them automatically via WhatsApp and notify the assigned user to get back ASAP',
-    category: 'messaging',
-    recommended: true
-  },
-  {
-    id: 'product-recommendation',
-    name: 'Recipe - Send product recommendation using GPT 4 Turbo',
-    description: 'Sending product recommendation using GPT 4 Turbo to prepare an Email and send to the customers who have bought a product in Shopify.',
-    category: 'ai',
-    recommended: true
-  },
-  {
-    id: 'instagram-comments',
-    name: 'Recipe - Instagram comment automation',
-    description: 'Use this recipe to automate the DM replies to comments on Instagram',
-    category: 'social',
-    recommended: true
-  },
-  {
-    id: 'facebook-comments-ai',
-    name: 'Recipe - Facebook comments + Workflow AI',
-    description: 'Expose the user comment to Workflow AI and use the output as a response to the comment. Also use Workflow AI to analyse the comment sentiment and respond accordingly.',
-    category: 'social',
-    recommended: true
-  },
-  {
-    id: 'facebook-comments',
-    name: 'Recipe - Facebook comment automation',
-    description: 'Use this recipe to automate the DM replies to comments on Facebook',
-    category: 'social',
-    recommended: true
-  },
-  {
-    id: 'ivr',
-    name: 'Recipe: IVR',
-    description: 'This IVR workflow streamlines communication, allowing callers to navigate through service options, leave messages, and connect with your team effortlessly.',
-    category: 'communication',
-    recommended: false
-  },
-  {
-    id: 'email-drip',
-    name: 'Recipe - Email Drip Sequence',
-    description: 'Add contacts to this workflow to drip them a series of Emails over time. This recipe uses the "Emailed Opened" condition to resend each email with a new subject if it wasn\'t opened within 24 hrs!',
-    category: 'email',
-    recommended: false
-  },
-  {
-    id: 'long-term-nurture',
-    name: 'Recipe - Long Term Nurture/Reactivation Email Sequence',
-    description: 'A long-term monthly email sequence that consistently nurtures and reactivates leads over time.',
-    category: 'email',
-    recommended: true
-  },
-  {
-    id: 'fast-five-lite',
-    name: 'Recipe - Fast 5 Lite',
-    description: 'Great for nurturing new leads into hot leads by automating email, SMS, Call Connects, and Voicemail Drops - all within five minutes!',
-    category: 'lead-nurturing',
-    recommended: false
-  },
-  {
-    id: 'faq-auto-reply',
-    name: 'Recipe - FAQ Auto Reply',
-    description: 'Automate replies to frequently asked questions across SMS, FB, Instagram, and Google chat!',
-    category: 'automation',
-    recommended: false
-  },
-  {
-    id: 'webinar-registration',
-    name: 'Recipe - Webinar Registration Confirmation & Reminders',
-    description: 'Use this recipe to send Webinar Registration Confirmations and reminders leading up to the webinar.',
-    category: 'events',
-    recommended: false
-  },
-  {
-    id: 'fast-five',
-    name: 'Recipe - Fast Five',
-    description: 'The odds of closing a lead decrease dramatically after 5 mins. This Workflow delivers the ULTIMATE first-5-minute lead nurture!',
-    category: 'lead-nurturing',
-    recommended: false
-  },
-  {
-    id: 'appointment-full',
-    name: 'Recipe - Appointment Confirmation + Reminder + Survey + Review Request',
-    description: 'For each new appointment, send a confirmation, send reminders, survey the result, and if the result was a sale, send a review request!',
-    category: 'appointments',
-    recommended: false
-  },
-  {
-    id: 'review-request',
-    name: 'Recipe - Send Review Request',
-    description: 'This workflow sends a review request to your customers when an opportunity is marked as won (or) an appointment is marked as showed (or) a tag is added',
-    category: 'feedback',
-    recommended: false
-  },
-  {
-    id: 'appointment-booking',
-    name: 'Recipe - Appointment Booking',
-    description: 'Detect intent on customer reply to send them booking link or create a manual SMS to help them make a decision',
-    category: 'appointments',
-    recommended: false
-  },
-  {
-    id: 'gmb-message',
-    name: 'Recipe - GMB Business Message',
-    description: 'Notify users & auto-respond to Google Business Messaging channel',
-    category: 'messaging',
-    recommended: false
-  },
-  {
-    id: 'fb-messenger',
-    name: 'Recipe - FB Messenger',
-    description: 'When an inbound FB message is waiting, reply & remove pending tag or we will prompt the lead to share phone number in 30 mins.',
-    category: 'messaging',
-    recommended: false
-  },
-  {
-    id: 'missed-call-text',
-    name: 'Recipe - Auto Missed Call Text-Back',
-    description: 'If you miss a call from a lead, reply to them automatically and notify the assigned user to get back ASAP.',
-    category: 'messaging',
-    recommended: false
-  },
-  {
-    id: 'no-show-nurture',
-    name: 'Recipe: No-Show Nurture',
-    description: 'Recover no-shows with this simple but powerful automation!',
-    category: 'appointments',
-    recommended: false
-  },
-  {
-    id: 'birthday',
-    name: 'Recipe - Birthday Template',
-    description: 'A workflow to do Birthday promotions',
-    category: 'marketing',
-    recommended: false
-  },
-  {
-    id: 'appointment-basic',
-    name: 'Recipe - Appointment Confirmation + Reminder',
-    description: 'Appointment confirmation and follow up reminder.',
-    category: 'appointments',
-    recommended: false
-  },
-  {
-    id: 'list-reactivation',
-    name: 'Recipe - List Reactivation',
-    description: 'An incredible way to generate leads for any business with a list. Requires no ad spend and AI filters positive responses!',
-    category: 'marketing',
-    recommended: false
-  }
-];
-
 const categories = [
   { id: 'all', name: 'All Templates' },
-  { id: 'blank', name: 'Blank' },
-  { id: 'ecommerce', name: 'E-commerce' },
-  { id: 'ai', name: 'AI & Automation' },
-  { id: 'messaging', name: 'Messaging' },
-  { id: 'social', name: 'Social Media' },
-  { id: 'communication', name: 'Communication' },
-  { id: 'email', name: 'Email' },
-  { id: 'lead-nurturing', name: 'Lead Nurturing' },
-  { id: 'automation', name: 'Automation' },
-  { id: 'events', name: 'Events' },
-  { id: 'appointments', name: 'Appointments' },
-  { id: 'feedback', name: 'Feedback' },
-  { id: 'marketing', name: 'Marketing' }
+  { id: 'residential', name: 'Residential' },
+  { id: 'commercial', name: 'Commercial' },
+  { id: 'document', name: 'Document Processing' },
+  { id: 'safety', name: 'Safety Management' },
+  { id: 'payment', name: 'Payment Processing' },
+  { id: 'project', name: 'Project Management' },
+  { id: 'messaging', name: 'Messaging' }
 ];
+
+function TemplateCardSkeleton() {
+  return (
+    <Card className="overflow-hidden">
+      <CardHeader>
+        <Skeleton className="h-6 w-3/4" />
+        <Skeleton className="h-4 w-full mt-2" />
+        <Skeleton className="h-4 w-2/3 mt-1" />
+      </CardHeader>
+      <CardFooter className="border-t pt-4">
+        <div className="flex justify-between items-center w-full">
+          <Skeleton className="h-4 w-24" />
+          <Skeleton className="h-8 w-8 rounded-full" />
+        </div>
+      </CardFooter>
+    </Card>
+  );
+}
+
+function TemplateCard({ template, onClick }: { template: WorkflowTemplate; onClick: () => void }) {
+  return (
+    <Card
+      className="cursor-pointer hover:border-primary transition-all hover:shadow-md overflow-hidden group"
+      onClick={onClick}
+    >
+      <CardHeader>
+        <div className="flex items-start justify-between">
+          <CardTitle className="text-lg group-hover:text-primary transition-colors">
+            {template.name}
+          </CardTitle>
+          {template.recommended && (
+            <div className="flex items-center gap-1 bg-yellow-100 dark:bg-yellow-900/30 px-2 py-1 rounded-full">
+              <Sparkles className="h-3 w-3 text-yellow-600 dark:text-yellow-400" />
+              <span className="text-xs text-yellow-800 dark:text-yellow-400">Recommended</span>
+            </div>
+          )}
+        </div>
+        <CardDescription className="line-clamp-2">
+          {template.description}
+        </CardDescription>
+      </CardHeader>
+      <CardFooter className="border-t pt-4">
+        <div className="flex justify-between items-center w-full text-sm text-muted-foreground">
+          <div className="flex items-center gap-2">
+            <Calendar className="h-4 w-4" />
+            <span>{format(new Date(template.created_at || Date.now()), 'MMM d, yyyy')}</span>
+          </div>
+          <ArrowRight className="h-5 w-5 text-primary opacity-0 group-hover:opacity-100 transition-opacity" />
+        </div>
+      </CardFooter>
+    </Card>
+  );
+}
 
 export function WorkflowTemplateSelector({ onSelect }: WorkflowTemplateSelectorProps) {
   const [search, setSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const [templates, setTemplates] = useState<WorkflowTemplate[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<{ message: string; details?: string } | null>(null);
+
+  const fetchTemplates = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const { data, error } = await supabase
+        .from('workflows')
+        .select('*')
+        .not('name', 'eq', 'EMPTY');
+
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      const formattedTemplates = data.map(template => ({
+        id: template.id,
+        name: template.name,
+        description: template.description || '',
+        category: getCategoryFromName(template.name),
+        data: template.data,
+        recommended: false,
+        user_id: template.user_id,
+        created_at: template.created_at
+      }));
+
+      setTemplates(formattedTemplates);
+    } catch (err) {
+      setError({
+        message: 'Failed to load templates',
+        details: err instanceof Error ? err.message : 'An unexpected error occurred'
+      });
+      console.error('Error:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchTemplates();
+  }, []);
+
+  const getCategoryFromName = (name: string): string => {
+    if (name.toLowerCase().includes('residential')) return 'residential';
+    if (name.toLowerCase().includes('commercial')) return 'commercial';
+    if (name.toLowerCase().includes('document')) return 'document';
+    if (name.toLowerCase().includes('safety')) return 'safety';
+    if (name.toLowerCase().includes('payment')) return 'payment';
+    if (name.toLowerCase().includes('project')) return 'project';
+    if (name.toLowerCase().includes('message')) return 'messaging';
+    return 'all';
+  };
 
   const filteredTemplates = templates.filter(template => {
     const matchesSearch = template.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -264,6 +162,7 @@ export function WorkflowTemplateSelector({ onSelect }: WorkflowTemplateSelectorP
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   className="pl-8"
+                  disabled={loading || !!error}
                 />
               </div>
             </div>
@@ -275,6 +174,7 @@ export function WorkflowTemplateSelector({ onSelect }: WorkflowTemplateSelectorP
                   variant={selectedCategory === category.id ? "default" : "outline"}
                   onClick={() => setSelectedCategory(category.id)}
                   className="whitespace-nowrap"
+                  disabled={loading || !!error}
                 >
                   {category.name}
                 </Button>
@@ -282,25 +182,80 @@ export function WorkflowTemplateSelector({ onSelect }: WorkflowTemplateSelectorP
             </div>
 
             <ScrollArea className="h-[600px]">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {filteredTemplates.map(template => (
-                  <Card
-                    key={template.id}
-                    className="cursor-pointer hover:border-primary transition-colors"
-                    onClick={() => onSelect(template)}
-                  >
-                    <CardHeader>
-                      <div className="flex items-start justify-between">
-                        <CardTitle className="text-lg">{template.name}</CardTitle>
-                        {template.recommended && (
-                          <Sparkles className="h-4 w-4 text-yellow-500" />
-                        )}
-                      </div>
-                      <CardDescription>{template.description}</CardDescription>
-                    </CardHeader>
-                  </Card>
-                ))}
-              </div>
+              {loading ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {Array.from({ length: 6 }).map((_, i) => (
+                    <TemplateCardSkeleton key={i} />
+                  ))}
+                </div>
+              ) : error ? (
+                <div className="space-y-4">
+                  <Alert variant="destructive">
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertTitle>{error.message}</AlertTitle>
+                    {error.details && (
+                      <AlertDescription className="mt-2">
+                        <div className="text-sm font-mono bg-destructive/10 p-2 rounded">
+                          {error.details}
+                        </div>
+                      </AlertDescription>
+                    )}
+                  </Alert>
+                  <div className="flex justify-center gap-2">
+                    <Button 
+                      variant="outline" 
+                      onClick={fetchTemplates}
+                      className="flex items-center space-x-2"
+                    >
+                      <RefreshCcw className="h-4 w-4" />
+                      <span>Try Again</span>
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      onClick={() => onSelect(null)}
+                    >
+                      Start from Scratch
+                    </Button>
+                  </div>
+                </div>
+              ) : filteredTemplates.length === 0 ? (
+                <div className="flex flex-col items-center justify-center h-40 space-y-4">
+                  <div className="text-center">
+                    <p className="text-lg font-medium">No templates found</p>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      {search ? 'Try adjusting your search or filters' : 'No templates available for this category'}
+                    </p>
+                  </div>
+                  {search && (
+                    <div className="flex gap-2">
+                      <Button 
+                        variant="outline" 
+                        onClick={() => setSearch('')}
+                        size="sm"
+                      >
+                        Clear search
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        onClick={() => setSelectedCategory('all')}
+                        size="sm"
+                      >
+                        Show all categories
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {filteredTemplates.map(template => (
+                    <TemplateCard
+                      key={template.id}
+                      template={template}
+                      onClick={() => onSelect(template)}
+                    />
+                  ))}
+                </div>
+              )}
             </ScrollArea>
           </div>
         </CardContent>
