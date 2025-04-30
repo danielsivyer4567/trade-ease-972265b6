@@ -51,12 +51,13 @@ const nodeTypes = {
 interface FlowProps {
   onInit: (flowInstance: any) => void;
   workflowId?: string;
+  onNodeSelect?: (node: any) => void;
 }
 
 const defaultNodes = [];
 const defaultEdges = [];
 
-export function Flow({ onInit, workflowId }: FlowProps) {
+export function Flow({ onInit, workflowId, onNodeSelect }: FlowProps) {
   const [nodes, setNodes, onNodesChange] = useNodesState(defaultNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(defaultEdges);
   const [instance, setInstance] = useState(null);
@@ -103,7 +104,8 @@ export function Flow({ onInit, workflowId }: FlowProps) {
 
   const onNodeClick = useCallback((event, node) => {
     setSelectedNode(node);
-  }, []);
+    onNodeSelect?.(node);
+  }, [onNodeSelect]);
 
   const handleClosePanel = () => setSelectedNode(null);
   const handleUpdateNode = (nodeId, data) => {

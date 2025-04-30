@@ -12,7 +12,10 @@ import {
   FolderOpen, 
   Plus,
   Construction,
-  Building
+  Building,
+  LayoutTemplate,
+  Zap,
+  Sparkles
 } from 'lucide-react';
 import { NodeSidebar } from './components/NodeSidebar';
 import { Flow } from './components/Flow';
@@ -29,6 +32,31 @@ import {
 } from "@/components/ui/tooltip";
 import { AppLayout } from "@/components/ui/AppLayout";
 import TemplateSelector from '@/components/workflow/TemplateSelector';
+import { WorkflowAIModal } from '@/components/workflow/WorkflowAIModal';
+import { TriggerSelector } from '@/components/workflow/TriggerSelector';
+
+interface Template {
+  id: string;
+  name: string;
+  description: string;
+  category: string;
+  nodes: number;
+  connections: number;
+}
+
+interface WorkflowNode {
+  id: string;
+  type: string;
+  position: { x: number; y: number };
+  data: { label: string; [key: string]: any };
+}
+
+interface WorkflowEdge {
+  id: string;
+  source: string;
+  target: string;
+  type?: string;
+}
 
 export default function WorkflowPage() {
   const navigate = useNavigate();
@@ -65,7 +93,12 @@ export default function WorkflowPage() {
     { id: 'social-post', label: 'Social Post', description: 'Facebook & Instagram' },
   ];
 
+  const [isTriggerSelectorOpen, setIsTriggerSelectorOpen] = useState(false);
   const [isTemplateSelectorOpen, setIsTemplateSelectorOpen] = useState(false);
+
+  const [isAIModalOpen, setIsAIModalOpen] = useState(false);
+
+  const [selectedNode, setSelectedNode] = useState(null);
 
   const handleSave = async (name: string, description: string) => {
     setIsLoading(true);
@@ -83,9 +116,157 @@ export default function WorkflowPage() {
   const [activeTab, setActiveTab] = useState('builder');
 
   const handleTriggerSelect = (triggerId: string) => {
-    // Handle trigger selection
     console.log('Selected trigger:', triggerId);
+    setIsTriggerSelectorOpen(false);
+  };
+
+  const handleTemplateSelect = (template: Template) => {
+    // Define node spacing
+    const nodeSpacing = { x: 250, y: 100 };
+    const startPosition = { x: 100, y: 100 };
+
+    // Create template-specific nodes
+    const nodes = [];
+    const edges = [];
+
+    // Add trigger node
+    nodes.push({
+      id: 'trigger',
+      type: 'triggerNode',
+      position: startPosition,
+      data: { label: 'Trigger' }
+    });
+
+    // Add template-specific nodes based on category
+    switch (template.category) {
+      case 'residential':
+        // Add residential-specific nodes
+        nodes.push(
+          {
+            id: 'client-consultation',
+            type: 'customerNode',
+            position: { x: startPosition.x + nodeSpacing.x, y: startPosition.y },
+            data: { label: 'Client Consultation' }
+          },
+          {
+            id: 'design-approval',
+            type: 'taskNode',
+            position: { x: startPosition.x + nodeSpacing.x * 2, y: startPosition.y },
+            data: { label: 'Design Approval' }
+          },
+          {
+            id: 'quote-preparation',
+            type: 'quoteNode',
+            position: { x: startPosition.x + nodeSpacing.x * 3, y: startPosition.y },
+            data: { label: 'Quote Preparation' }
+          }
+        );
+        
+        // Add connections
+        edges.push(
+          {
+            id: 'e1',
+            source: 'trigger',
+            target: 'client-consultation'
+          },
+          {
+            id: 'e2',
+            source: 'client-consultation',
+            target: 'design-approval'
+          },
+          {
+            id: 'e3',
+            source: 'design-approval',
+            target: 'quote-preparation'
+          }
+        );
+        break;
+
+      case 'commercial':
+        // Add commercial-specific nodes
+        nodes.push(
+          {
+            id: 'requirements-gathering',
+            type: 'customerNode',
+            position: { x: startPosition.x + nodeSpacing.x, y: startPosition.y },
+            data: { label: 'Requirements Gathering' }
+          },
+          {
+            id: 'site-inspection',
+            type: 'taskNode',
+            position: { x: startPosition.x + nodeSpacing.x * 2, y: startPosition.y },
+            data: { label: 'Site Inspection' }
+          },
+          {
+            id: 'proposal',
+            type: 'quoteNode',
+            position: { x: startPosition.x + nodeSpacing.x * 3, y: startPosition.y },
+            data: { label: 'Proposal & Quote' }
+          }
+        );
+        
+        // Add connections
+        edges.push(
+          {
+            id: 'e1',
+            source: 'trigger',
+            target: 'requirements-gathering'
+          },
+          {
+            id: 'e2',
+            source: 'requirements-gathering',
+            target: 'site-inspection'
+          },
+          {
+            id: 'e3',
+            source: 'site-inspection',
+            target: 'proposal'
+          }
+        );
+        break;
+
+      default:
+        // Add default nodes
+        nodes.push(
+          {
+            id: 'task',
+            type: 'taskNode',
+            position: { x: startPosition.x + nodeSpacing.x, y: startPosition.y },
+            data: { label: 'New Task' }
+          }
+        );
+        
+        edges.push({
+          id: 'e1',
+          source: 'trigger',
+          target: 'task'
+        });
+    }
+
+    // Update flow instance with template structure
+    setFlowInstance(prev => ({
+      ...prev,
+      nodes,
+      edges
+    }));
+
+    // Update workflow name
+    setWorkflowName(template.name);
+
+    // Close template selector
     setIsTemplateSelectorOpen(false);
+  };
+
+  const handleGenerateWorkflow = async (prompt: string) => {
+    // Here you would integrate with an AI service to generate the workflow
+    console.log('Generating workflow from prompt:', prompt);
+    
+    // For now, we'll close the modal
+    setIsAIModalOpen(false);
+  };
+
+  const handleNodeSelect = (node) => {
+    setSelectedNode(node);
   };
 
   return (
@@ -117,6 +298,15 @@ export default function WorkflowPage() {
               </h2>
               <div className="flex items-center gap-2">
                 <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => setIsAIModalOpen(true)}
+                  className="bg-purple-600 hover:bg-purple-700 text-white flex items-center gap-2 mr-2"
+                >
+                  <Sparkles className="h-4 w-4" />
+                  Workflow AI
+                </Button>
+                <Button
                   variant="outline"
                   size="sm"
                   onClick={() => setSaveDrawerOpen(true)}
@@ -129,73 +319,60 @@ export default function WorkflowPage() {
               </div>
             </div>
             {/* Tabs and Template Buttons */}
-            <div className="border-b px-4">
-              <div className="flex items-center justify-between">
-                <div className="flex -mb-px">
+            <div className="border-b px-4 flex justify-center">
+              <div className="flex items-center justify-center max-w-4xl w-full">
+                <div className="inline-flex -mb-px space-x-1 p-1 bg-gray-50 rounded-lg border-2 border-gray-200/50 shadow-sm">
                   <button
-                    className={`py-2 px-4 text-sm font-medium border-b-2 ${
+                    className={`py-2 px-6 text-sm font-semibold rounded-md transition-all duration-200 ${
                       activeTab === 'builder'
-                        ? 'border-primary text-primary'
-                        : 'border-transparent text-muted-foreground hover:text-foreground'
+                        ? 'border-2 border-primary bg-white text-gray-900 shadow-sm'
+                        : 'border-2 border-transparent text-gray-700 hover:text-gray-900 hover:bg-gray-100'
                     }`}
                     onClick={() => setActiveTab('builder')}
                   >
                     Builder
                   </button>
                   <button
-                    className={`py-2 px-4 text-sm font-medium border-b-2 ${
+                    className={`py-2 px-6 text-sm font-semibold rounded-md transition-all duration-200 ${
                       activeTab === 'settings'
-                        ? 'border-primary text-primary'
-                        : 'border-transparent text-muted-foreground hover:text-foreground'
+                        ? 'border-2 border-primary bg-white text-gray-900 shadow-sm'
+                        : 'border-2 border-transparent text-gray-700 hover:text-gray-900 hover:bg-gray-100'
                     }`}
                     onClick={() => setActiveTab('settings')}
                   >
                     Settings
                   </button>
                   <button
-                    className={`py-2 px-4 text-sm font-medium border-b-2 ${
+                    className={`py-2 px-6 text-sm font-semibold rounded-md transition-all duration-200 ${
                       activeTab === 'enrollment'
-                        ? 'border-primary text-primary'
-                        : 'border-transparent text-muted-foreground hover:text-foreground'
+                        ? 'border-2 border-primary bg-white text-gray-900 shadow-sm'
+                        : 'border-2 border-transparent text-gray-700 hover:text-gray-900 hover:bg-gray-100'
                     }`}
                     onClick={() => setActiveTab('enrollment')}
                   >
                     Enrollment History
                   </button>
                   <button
-                    className={`py-2 px-4 text-sm font-medium border-b-2 ${
+                    className={`py-2 px-6 text-sm font-semibold rounded-md transition-all duration-200 ${
                       activeTab === 'execution'
-                        ? 'border-primary text-primary'
-                        : 'border-transparent text-muted-foreground hover:text-foreground'
+                        ? 'border-2 border-primary bg-white text-gray-900 shadow-sm'
+                        : 'border-2 border-transparent text-gray-700 hover:text-gray-900 hover:bg-gray-100'
                     }`}
                     onClick={() => setActiveTab('execution')}
                   >
                     Execution Logs
                   </button>
-                </div>
-                <div className="flex items-center gap-2 py-1">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
-                      navigate('/workflow/templates', { state: { category: 'construction' } });
-                    }}
-                    className="flex items-center gap-2 whitespace-nowrap"
+                  <button
+                    className={`py-2 px-6 text-sm font-semibold rounded-md transition-all duration-200 flex items-center gap-2 ${
+                      isTemplateSelectorOpen
+                        ? 'border-2 border-primary bg-white text-gray-900 shadow-sm'
+                        : 'border-2 border-transparent text-gray-700 hover:text-gray-900 hover:bg-gray-100'
+                    }`}
+                    onClick={() => setIsTemplateSelectorOpen(true)}
                   >
-                    <Construction className="h-4 w-4" />
-                    Construction Templates
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
-                      navigate('/workflow/templates', { state: { category: 'admin' } });
-                    }}
-                    className="flex items-center gap-2 whitespace-nowrap"
-                  >
-                    <Building className="h-4 w-4" />
-                    Admin Templates
-                  </Button>
+                    <LayoutTemplate className="h-4 w-4" />
+                    Templates
+                  </button>
                 </div>
               </div>
             </div>
@@ -207,12 +384,18 @@ export default function WorkflowPage() {
           {activeTab === 'builder' && (
             <>
               <NodeSidebar 
-                targetData={null}
+                targetData={selectedNode ? {
+                  targetType: selectedNode.type?.replace('Node', '').toLowerCase(),
+                  targetId: selectedNode.id,
+                } : null}
               />
-              <Flow 
-                onInit={setFlowInstance}
-                workflowId={workflowId || undefined}
-              />
+              <div className="flex-1">
+                <Flow 
+                  onInit={setFlowInstance}
+                  workflowId={workflowId || undefined}
+                  onNodeSelect={handleNodeSelect}
+                />
+              </div>
             </>
           )}
           {activeTab === 'settings' && (
@@ -285,7 +468,21 @@ export default function WorkflowPage() {
         <TemplateSelector
           isOpen={isTemplateSelectorOpen}
           onClose={() => setIsTemplateSelectorOpen(false)}
+          onSelectTemplate={handleTemplateSelect}
+        />
+
+        {/* Trigger Selector Modal */}
+        <TriggerSelector
+          isOpen={isTriggerSelectorOpen}
+          onClose={() => setIsTriggerSelectorOpen(false)}
           onSelectTrigger={handleTriggerSelect}
+        />
+
+        {/* AI Modal */}
+        <WorkflowAIModal
+          isOpen={isAIModalOpen}
+          onClose={() => setIsAIModalOpen(false)}
+          onGenerateWorkflow={handleGenerateWorkflow}
         />
       </div>
     </AppLayout>
