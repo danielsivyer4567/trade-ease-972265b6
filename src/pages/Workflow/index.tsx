@@ -3,7 +3,7 @@ import { AppLayout } from "@/components/ui/AppLayout";
 import { Flow } from './components/Flow';
 import { NodeSidebar } from './components/NodeSidebar';
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Save, Key, Check, FileText, ArrowRightLeft, Workflow, FolderOpen, Plus, Settings2 } from "lucide-react";
+import { ArrowLeft, Save, Key, Check, FileText, ArrowRightLeft, Workflow, FolderOpen, Plus, Settings2, ListChecks, Construction, Building } from "lucide-react";
 import { useNavigate, useLocation, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -51,6 +51,8 @@ export default function WorkflowPage() {
     targetId?: string;
     createAutomationNode?: boolean;
   } | null>(null);
+
+  const [activeTab, setActiveTab] = useState('builder');
 
   const isActive = useCallback((path: string) => {
     return location.pathname === path;
@@ -329,10 +331,6 @@ export default function WorkflowPage() {
             e.preventDefault();
             setLoadDialogOpen(true);
             break;
-          case 't':
-            e.preventDefault();
-            handleLoadTemplate();
-            break;
           case 's':
             e.preventDefault();
             setSaveDialogOpen(true);
@@ -412,23 +410,6 @@ export default function WorkflowPage() {
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => navigate('/workflow/templates')}
-                      className="flex items-center gap-2"
-                    >
-                      <FileText className="h-4 w-4" />
-                      Templates
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Start from template (Ctrl+T)</p>
-                  </TooltipContent>
-                </Tooltip>
-
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
                       variant="default"
                       size="sm"
                       onClick={() => setLoadDialogOpen(true)}
@@ -462,6 +443,78 @@ export default function WorkflowPage() {
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
+            </div>
+          </div>
+
+          {/* Tabs and Template Buttons */}
+          <div className="border-b px-4">
+            <div className="flex items-center justify-between">
+              <div className="flex -mb-px">
+                <button
+                  className={`py-2 px-4 text-sm font-medium border-b-2 ${
+                    activeTab === 'builder'
+                      ? 'border-primary text-primary'
+                      : 'border-transparent text-muted-foreground hover:text-foreground'
+                  }`}
+                  onClick={() => setActiveTab('builder')}
+                >
+                  Builder
+                </button>
+                <button
+                  className={`py-2 px-4 text-sm font-medium border-b-2 ${
+                    activeTab === 'settings'
+                      ? 'border-primary text-primary'
+                      : 'border-transparent text-muted-foreground hover:text-foreground'
+                  }`}
+                  onClick={() => setActiveTab('settings')}
+                >
+                  Settings
+                </button>
+                <button
+                  className={`py-2 px-4 text-sm font-medium border-b-2 ${
+                    activeTab === 'enrollment'
+                      ? 'border-primary text-primary'
+                      : 'border-transparent text-muted-foreground hover:text-foreground'
+                  }`}
+                  onClick={() => setActiveTab('enrollment')}
+                >
+                  Enrollment History
+                </button>
+                <button
+                  className={`py-2 px-4 text-sm font-medium border-b-2 ${
+                    activeTab === 'execution'
+                      ? 'border-primary text-primary'
+                      : 'border-transparent text-muted-foreground hover:text-foreground'
+                  }`}
+                  onClick={() => setActiveTab('execution')}
+                >
+                  Execution Logs
+                </button>
+              </div>
+              <div className="flex items-center gap-2 py-1">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    navigate('/workflow/templates', { state: { category: 'construction' } });
+                  }}
+                  className="flex items-center gap-2"
+                >
+                  <Construction className="h-4 w-4" />
+                  Construction Templates
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    navigate('/workflow/templates', { state: { category: 'admin' } });
+                  }}
+                  className="flex items-center gap-2"
+                >
+                  <Building className="h-4 w-4" />
+                  Admin Templates
+                </Button>
+              </div>
             </div>
           </div>
         </div>
