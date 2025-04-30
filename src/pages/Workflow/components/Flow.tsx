@@ -21,6 +21,7 @@ import { VisionNode } from './nodes/VisionNode';
 import { AutomationNode } from './nodes/AutomationNode';
 import { MessagingNode } from './nodes/MessagingNode';
 import { NodeDetailsPanel } from './NodeDetailsPanel';
+import AnimatedEdge from './AnimatedEdge';
 import { toast } from 'sonner';
 import { AutomationIntegrationService } from '@/services/AutomationIntegrationService';
 import { WorkflowService } from '@/services/WorkflowService';
@@ -46,6 +47,10 @@ const nodeTypes = {
   emailNode: MessagingNode,
   whatsappNode: MessagingNode,
   socialNode: CustomNode,
+};
+
+const edgeTypes = {
+  animated: AnimatedEdge,
 };
 
 interface FlowProps {
@@ -114,16 +119,38 @@ export function Flow({ onInit, workflowId, onNodeSelect }: FlowProps) {
 
   return (
     <div className="h-full w-full">
+      <style>
+        {`
+          @keyframes electricity {
+            0% {
+              stroke-dashoffset: 0;
+            }
+            100% {
+              stroke-dashoffset: -20;
+            }
+          }
+        `}
+      </style>
       <ReactFlow
         nodes={nodes}
         edges={edges}
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
-        onConnect={onConnect}
+        onConnect={(params) => {
+          const newEdge = {
+            ...params,
+            type: 'animated',
+            animated: true,
+            style: { stroke: '#3b82f6' },
+          };
+          setEdges((eds) => addEdge(newEdge, eds));
+        }}
         onInit={handleInit}
         onDrop={onDrop}
         onDragOver={onDragOver}
         onNodeClick={onNodeClick}
+        nodeTypes={nodeTypes}
+        edgeTypes={edgeTypes}
         fitView
       >
         <Background />

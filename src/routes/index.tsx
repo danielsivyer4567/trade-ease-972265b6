@@ -10,6 +10,7 @@ import { financialRoutes } from './financial-routes';
 import { activityRoutes } from './activity-routes';
 import { AppLayoutWithTabs } from '@/components/AppLayoutWithTabs';
 import WorkflowPage from '@/pages/Workflow/index.new';
+import WorkflowTemplates from '@/pages/Workflow/templates';
 
 // Development mode debugging component
 const DevelopmentEntry = lazy(() => import('@/pages/DevelopmentEntry'));
@@ -204,7 +205,10 @@ const routeObjects: RouteObject[] = [
           { path: "/calculators/fencing", element: <SuspenseWrapper><FencingCalculator /></SuspenseWrapper> },
           { path: "/calculators/ncc-codes", element: <SuspenseWrapper><NCCCodesCalculator /></SuspenseWrapper> },
           { path: "/workflow", element: <SuspenseWrapper><WorkflowPage /></SuspenseWrapper> },
+          { path: "/workflow/new", element: <SuspenseWrapper><WorkflowPage /></SuspenseWrapper> },
+          { path: "/workflow/edit/:id", element: <SuspenseWrapper><WorkflowPage /></SuspenseWrapper> },
           { path: "/workflow/list", element: <SuspenseWrapper><WorkflowListPage /></SuspenseWrapper> },
+          { path: "/workflow/templates", element: <SuspenseWrapper><WorkflowTemplates /></SuspenseWrapper> },
           { path: "/automations", element: <SuspenseWrapper><AutomationsPage /></SuspenseWrapper> },
           { path: "/forms", element: <SuspenseWrapper><FormsPage /></SuspenseWrapper> },
           { path: "/tasks", element: <SuspenseWrapper><TasksPage /></SuspenseWrapper> },

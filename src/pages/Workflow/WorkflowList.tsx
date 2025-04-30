@@ -65,7 +65,6 @@ export default function WorkflowListPage() {
   const handleDuplicate = async (workflow: Workflow, e: React.MouseEvent) => {
     e.stopPropagation();
     try {
-      // Create a duplicate with required properties
       const newWorkflow: CreateWorkflowParams = {
         name: `${workflow.name} (Copy)`,
         description: workflow.description,
@@ -97,10 +96,8 @@ export default function WorkflowListPage() {
     return date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
   };
 
-  // Get unique categories from workflows
   const categories = [...new Set(workflows.map(w => w.category || 'Uncategorized'))];
 
-  // Filter workflows based on search term and category
   const filteredWorkflows = workflows.filter(workflow => {
     const matchesSearch = !searchTerm || 
       workflow.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
@@ -140,7 +137,7 @@ export default function WorkflowListPage() {
           <h1 className="text-xl md:text-2xl font-bold">My Workflows</h1>
           <div className="flex flex-wrap gap-2">
             <Button 
-              onClick={() => navigate("/workflow/new?template=true")}
+              onClick={() => navigate("/workflow")}
               size="sm"
               variant="outline"
               className="flex items-center gap-2 whitespace-nowrap"
@@ -180,18 +177,6 @@ export default function WorkflowListPage() {
             </Button>
           </div>
         </div>
-
-        {categoryFilter && (
-          <div className="flex flex-wrap gap-1 mb-4">
-            <Badge 
-              className="cursor-pointer" 
-              variant="outline"
-              onClick={() => setCategoryFilter(null)}
-            >
-              {categoryFilter} ×
-            </Badge>
-          </div>
-        )}
 
         {!categoryFilter && categories.length > 0 && (
           <div className="flex flex-wrap gap-1 mb-4">
@@ -238,7 +223,7 @@ export default function WorkflowListPage() {
                   Clear Filters
                 </Button>
                 <Button 
-                  onClick={() => navigate("/workflow/new?template=true")}
+                  onClick={() => navigate("/workflow")}
                   className="mt-2"
                   variant="outline"
                 >
