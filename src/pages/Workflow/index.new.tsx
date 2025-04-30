@@ -10,7 +10,9 @@ import {
   ArrowRightLeft, 
   Workflow, 
   FolderOpen, 
-  Plus 
+  Plus,
+  Construction,
+  Building
 } from 'lucide-react';
 import { NodeSidebar } from './components/NodeSidebar';
 import { Flow } from './components/Flow';
@@ -26,6 +28,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { AppLayout } from "@/components/ui/AppLayout";
+import TemplateSelector from '@/components/workflow/TemplateSelector';
 
 export default function WorkflowPage() {
   const navigate = useNavigate();
@@ -62,6 +65,8 @@ export default function WorkflowPage() {
     { id: 'social-post', label: 'Social Post', description: 'Facebook & Instagram' },
   ];
 
+  const [isTemplateSelectorOpen, setIsTemplateSelectorOpen] = useState(false);
+
   const handleSave = async (name: string, description: string) => {
     setIsLoading(true);
     try {
@@ -75,68 +80,159 @@ export default function WorkflowPage() {
     }
   };
 
+  const [activeTab, setActiveTab] = useState('builder');
+
+  const handleTriggerSelect = (triggerId: string) => {
+    // Handle trigger selection
+    console.log('Selected trigger:', triggerId);
+    setIsTemplateSelectorOpen(false);
+  };
+
   return (
     <AppLayout>
       <div className="flex flex-col h-screen">
         {/* Top Navigation Bar */}
         <div className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-          <div className="flex h-16 items-center px-4">
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => navigate('/workflow/list')}
-                    className="mr-2"
-                  >
-                    <ArrowLeft className="h-4 w-4" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Back to Workflows</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-            
-            <h2 className="text-lg font-semibold flex-1">
-              {workflowId ? workflowName : "New Workflow"}
-            </h2>
-
-            <div className="flex items-center gap-2">
+          <div className="flex flex-col w-full">
+            <div className="flex h-16 items-center px-4">
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setSaveDrawerOpen(true)}
-                      className="flex items-center gap-2"
-                      disabled={!user}
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => navigate('/workflow/list')}
+                      className="mr-2"
                     >
-                      <Save className="h-4 w-4" />
-                      Save
+                      <ArrowLeft className="h-4 w-4" />
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent>
-                    <p>Save workflow (Ctrl+S)</p>
-                    {!user && <p className="text-xs text-muted-foreground">Login required to save</p>}
+                    <p>Back to Workflows</p>
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
+              <h2 className="text-lg font-semibold flex-1">
+                {workflowId ? workflowName : "New Workflow"}
+              </h2>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setSaveDrawerOpen(true)}
+                  className="flex items-center gap-2"
+                  disabled={!user}
+                >
+                  <Save className="h-4 w-4" />
+                  Save
+                </Button>
+              </div>
+            </div>
+            {/* Tabs and Template Buttons */}
+            <div className="border-b px-4">
+              <div className="flex items-center justify-between">
+                <div className="flex -mb-px">
+                  <button
+                    className={`py-2 px-4 text-sm font-medium border-b-2 ${
+                      activeTab === 'builder'
+                        ? 'border-primary text-primary'
+                        : 'border-transparent text-muted-foreground hover:text-foreground'
+                    }`}
+                    onClick={() => setActiveTab('builder')}
+                  >
+                    Builder
+                  </button>
+                  <button
+                    className={`py-2 px-4 text-sm font-medium border-b-2 ${
+                      activeTab === 'settings'
+                        ? 'border-primary text-primary'
+                        : 'border-transparent text-muted-foreground hover:text-foreground'
+                    }`}
+                    onClick={() => setActiveTab('settings')}
+                  >
+                    Settings
+                  </button>
+                  <button
+                    className={`py-2 px-4 text-sm font-medium border-b-2 ${
+                      activeTab === 'enrollment'
+                        ? 'border-primary text-primary'
+                        : 'border-transparent text-muted-foreground hover:text-foreground'
+                    }`}
+                    onClick={() => setActiveTab('enrollment')}
+                  >
+                    Enrollment History
+                  </button>
+                  <button
+                    className={`py-2 px-4 text-sm font-medium border-b-2 ${
+                      activeTab === 'execution'
+                        ? 'border-primary text-primary'
+                        : 'border-transparent text-muted-foreground hover:text-foreground'
+                    }`}
+                    onClick={() => setActiveTab('execution')}
+                  >
+                    Execution Logs
+                  </button>
+                </div>
+                <div className="flex items-center gap-2 py-1">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      navigate('/workflow/templates', { state: { category: 'construction' } });
+                    }}
+                    className="flex items-center gap-2 whitespace-nowrap"
+                  >
+                    <Construction className="h-4 w-4" />
+                    Construction Templates
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      navigate('/workflow/templates', { state: { category: 'admin' } });
+                    }}
+                    className="flex items-center gap-2 whitespace-nowrap"
+                  >
+                    <Building className="h-4 w-4" />
+                    Admin Templates
+                  </Button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Flow Area */}
+        {/* Main Content */}
         <div className="flex-1 flex">
-          <NodeSidebar 
-            targetData={null}
-          />
-          <Flow 
-            onInit={setFlowInstance}
-            workflowId={workflowId || undefined}
-          />
+          {activeTab === 'builder' && (
+            <>
+              <NodeSidebar 
+                targetData={null}
+              />
+              <Flow 
+                onInit={setFlowInstance}
+                workflowId={workflowId || undefined}
+              />
+            </>
+          )}
+          {activeTab === 'settings' && (
+            <div className="p-4">
+              <h2 className="text-lg font-semibold mb-4">Workflow Settings</h2>
+              {/* Add settings content here */}
+            </div>
+          )}
+          {activeTab === 'enrollment' && (
+            <div className="p-4">
+              <h2 className="text-lg font-semibold mb-4">Enrollment History</h2>
+              {/* Add enrollment history content here */}
+            </div>
+          )}
+          {activeTab === 'execution' && (
+            <div className="p-4">
+              <h2 className="text-lg font-semibold mb-4">Execution Logs</h2>
+              {/* Add execution logs content here */}
+            </div>
+          )}
         </div>
 
         {/* Drawers */}
@@ -184,6 +280,13 @@ export default function WorkflowPage() {
             initialDescription=""
           />
         </WorkflowDrawer>
+
+        {/* Template Selector Modal */}
+        <TemplateSelector
+          isOpen={isTemplateSelectorOpen}
+          onClose={() => setIsTemplateSelectorOpen(false)}
+          onSelectTrigger={handleTriggerSelect}
+        />
       </div>
     </AppLayout>
   );

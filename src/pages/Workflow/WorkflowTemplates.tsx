@@ -3,7 +3,7 @@ import { AppLayout } from "@/components/ui/AppLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { toast } from 'sonner';
 import { Badge } from "@/components/ui/badge";
 import { Search, ArrowLeft, Workflow as WorkflowIcon, Building, Construction, CreditCard, HardHat, Truck, UserPlus, ClipboardList, Calendar, Zap, WrenchIcon, HomeIcon, ShieldCheck, Receipt, BarChart, Ruler, Clock, PlusCircle, Bookmark, Star } from "lucide-react";
@@ -583,6 +583,7 @@ const WORKFLOW_TEMPLATES = [
 
 export default function WorkflowTemplates() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredCategory, setFilteredCategory] = useState("");
   const [userWorkflows, setUserWorkflows] = useState<Workflow[]>([]);
@@ -592,6 +593,15 @@ export default function WorkflowTemplates() {
   const [saveDialogOpen, setSaveDialogOpen] = useState(false);
   const [selectedWorkflow, setSelectedWorkflow] = useState<Workflow | null>(null);
   
+  // Set initial active tab and category based on navigation state
+  useEffect(() => {
+    if (location.state?.category) {
+      const category = location.state.category.toLowerCase();
+      setActiveTab(category);
+      setFilteredCategory(category);
+    }
+  }, [location.state]);
+
   // Load user workflows and templates when component mounts
   useEffect(() => {
     loadUserWorkflows();
@@ -740,6 +750,7 @@ export default function WorkflowTemplates() {
   return (
     <AppLayout>
       <div className="p-4 md:p-6 space-y-6">
+        {/* Header Section */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
             <h1 className="text-2xl font-bold flex items-center">
@@ -750,14 +761,35 @@ export default function WorkflowTemplates() {
               Choose a template or recent workflow to use as a starting point
             </p>
           </div>
-          <Button
-            onClick={() => navigate("/workflow/list")}
-            variant="outline"
-            className="whitespace-nowrap"
-          >
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to My Workflows
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="lg"
+              className="whitespace-nowrap flex items-center"
+              onClick={() => setActiveTab("construction")}
+            >
+              <Construction className="mr-2 h-5 w-5" />
+              Construction Templates
+            </Button>
+            <Button
+              variant="outline"
+              size="lg"
+              className="whitespace-nowrap flex items-center"
+              onClick={() => setActiveTab("admin")}
+            >
+              <Building className="mr-2 h-5 w-5" />
+              Admin Templates
+            </Button>
+            <Button
+              onClick={() => navigate("/workflow/list")}
+              variant="outline"
+              size="lg"
+              className="whitespace-nowrap"
+            >
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Back to My Workflows
+            </Button>
+          </div>
         </div>
         
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">

@@ -60,6 +60,7 @@ export function Flow({ onInit, workflowId }: FlowProps) {
   const [nodes, setNodes, onNodesChange] = useNodesState(defaultNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(defaultEdges);
   const [instance, setInstance] = useState(null);
+  const [selectedNode, setSelectedNode] = useState(null);
 
   const handleInit = useCallback((flowInstance) => {
     setInstance(flowInstance);
@@ -100,6 +101,15 @@ export function Flow({ onInit, workflowId }: FlowProps) {
     event.dataTransfer.dropEffect = 'move';
   }, []);
 
+  const onNodeClick = useCallback((event, node) => {
+    setSelectedNode(node);
+  }, []);
+
+  const handleClosePanel = () => setSelectedNode(null);
+  const handleUpdateNode = (nodeId, data) => {
+    setNodes((nds) => nds.map((n) => n.id === nodeId ? { ...n, data: { ...n.data, ...data } } : n));
+  };
+
   return (
     <div className="h-full w-full">
       <ReactFlow
@@ -111,12 +121,20 @@ export function Flow({ onInit, workflowId }: FlowProps) {
         onInit={handleInit}
         onDrop={onDrop}
         onDragOver={onDragOver}
+        onNodeClick={onNodeClick}
         fitView
       >
         <Background />
         <Controls />
         <MiniMap />
       </ReactFlow>
+      {selectedNode && (
+        <NodeDetailsPanel
+          node={selectedNode}
+          onClose={handleClosePanel}
+          onUpdate={handleUpdateNode}
+        />
+      )}
     </div>
   );
 }

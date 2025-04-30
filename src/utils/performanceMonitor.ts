@@ -1,4 +1,3 @@
-
 // Performance monitoring utility for React apps
 
 // Track render counts for components to detect potential infinite loops
@@ -19,7 +18,7 @@ setInterval(() => {
 }, historyApiCalls.intervalMs);
 
 export const trackRender = (componentName: string): void => {
-  if (process.env.NODE_ENV !== 'production') {
+  if (import.meta.env.MODE !== 'production') {
     const currentCount = renderCounts.get(componentName) || 0;
     renderCounts.set(componentName, currentCount + 1);
     
@@ -31,7 +30,7 @@ export const trackRender = (componentName: string): void => {
 };
 
 export const trackHistoryCall = (): boolean => {
-  if (process.env.NODE_ENV !== 'production') {
+  if (import.meta.env.MODE !== 'production') {
     historyApiCalls.count += 1;
     
     // Check if we're approaching the browser limit
@@ -49,7 +48,7 @@ export const resetRenderCount = (componentName: string): void => {
 
 // Hook for tracking component renders
 export const useTrackRender = (componentName: string): void => {
-  if (process.env.NODE_ENV !== 'production') {
+  if (import.meta.env.MODE !== 'production') {
     trackRender(componentName);
   }
 };

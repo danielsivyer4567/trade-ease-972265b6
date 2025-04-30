@@ -12,7 +12,7 @@ export const useWebSocket = (
 
   const connect = useCallback(() => {
     try {
-      const WEBSOCKET_BASE_URL = process.env.VITE_WEBSOCKET_URL || "wss://api.yourcompany.com/ws";
+      const WEBSOCKET_BASE_URL = import.meta.env.VITE_WEBSOCKET_URL || "wss://api.yourcompany.com/ws";
       const userId = localStorage.getItem('userId') || 'anonymous';
       const authToken = localStorage.getItem('authToken');
 
