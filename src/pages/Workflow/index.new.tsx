@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { 
@@ -34,14 +34,28 @@ import { AppLayout } from "@/components/ui/AppLayout";
 import TemplateSelector from '@/components/workflow/TemplateSelector';
 import { WorkflowAIModal } from '@/components/workflow/WorkflowAIModal';
 import { TriggerSelector } from '@/components/workflow/TriggerSelector';
+import { WorkflowService } from '@/services/WorkflowService';
 
 interface Template {
   id: string;
   name: string;
   description: string;
   category: string;
-  nodes: number;
-  connections: number;
+  data: {
+    nodes: any[];
+    edges: any[];
+  };
+}
+
+interface WorkflowData {
+  nodes: any[];
+  edges: any[];
+}
+
+interface Workflow {
+  id: string;
+  name: string;
+  data: WorkflowData;
 }
 
 interface WorkflowNode {
@@ -74,6 +88,38 @@ export default function WorkflowPage() {
   const [automationDrawerOpen, setAutomationDrawerOpen] = useState(false);
   const [loadDrawerOpen, setLoadDrawerOpen] = useState(false);
   const [saveDrawerOpen, setSaveDrawerOpen] = useState(false);
+
+  // Load workflow data when ID is provided
+  useEffect(() => {
+    const loadWorkflow = async () => {
+      if (workflowId) {
+        setIsLoading(true);
+        try {
+          const { success, workflow } = await WorkflowService.getWorkflow(workflowId);
+          if (success && workflow) {
+            setWorkflowName(workflow.name);
+            if (flowInstance && workflow.data) {
+              try {
+                const workflowData = typeof workflow.data === 'string' 
+                  ? JSON.parse(workflow.data) 
+                  : workflow.data;
+                flowInstance.setNodes(workflowData.nodes || []);
+                flowInstance.setEdges(workflowData.edges || []);
+              } catch (error) {
+                console.error('Failed to parse workflow data:', error);
+              }
+            }
+          }
+        } catch (error) {
+          console.error('Failed to load workflow:', error);
+        } finally {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    loadWorkflow();
+  }, [workflowId, flowInstance]);
 
   // Node categories for the sidebar
   const workflowNodes = [
@@ -121,134 +167,17 @@ export default function WorkflowPage() {
   };
 
   const handleTemplateSelect = (template: Template) => {
-    // Define node spacing
-    const nodeSpacing = { x: 250, y: 100 };
-    const startPosition = { x: 100, y: 100 };
+    if (!flowInstance) return;
 
-    // Create template-specific nodes
-    const nodes = [];
-    const edges = [];
+    // Clear existing nodes and edges
+    flowInstance.setNodes([]);
+    flowInstance.setEdges([]);
 
-    // Add trigger node
-    nodes.push({
-      id: 'trigger',
-      type: 'triggerNode',
-      position: startPosition,
-      data: { label: 'Trigger' }
-    });
-
-    // Add template-specific nodes based on category
-    switch (template.category) {
-      case 'residential':
-        // Add residential-specific nodes
-        nodes.push(
-          {
-            id: 'client-consultation',
-            type: 'customerNode',
-            position: { x: startPosition.x + nodeSpacing.x, y: startPosition.y },
-            data: { label: 'Client Consultation' }
-          },
-          {
-            id: 'design-approval',
-            type: 'taskNode',
-            position: { x: startPosition.x + nodeSpacing.x * 2, y: startPosition.y },
-            data: { label: 'Design Approval' }
-          },
-          {
-            id: 'quote-preparation',
-            type: 'quoteNode',
-            position: { x: startPosition.x + nodeSpacing.x * 3, y: startPosition.y },
-            data: { label: 'Quote Preparation' }
-          }
-        );
-        
-        // Add connections
-        edges.push(
-          {
-            id: 'e1',
-            source: 'trigger',
-            target: 'client-consultation'
-          },
-          {
-            id: 'e2',
-            source: 'client-consultation',
-            target: 'design-approval'
-          },
-          {
-            id: 'e3',
-            source: 'design-approval',
-            target: 'quote-preparation'
-          }
-        );
-        break;
-
-      case 'commercial':
-        // Add commercial-specific nodes
-        nodes.push(
-          {
-            id: 'requirements-gathering',
-            type: 'customerNode',
-            position: { x: startPosition.x + nodeSpacing.x, y: startPosition.y },
-            data: { label: 'Requirements Gathering' }
-          },
-          {
-            id: 'site-inspection',
-            type: 'taskNode',
-            position: { x: startPosition.x + nodeSpacing.x * 2, y: startPosition.y },
-            data: { label: 'Site Inspection' }
-          },
-          {
-            id: 'proposal',
-            type: 'quoteNode',
-            position: { x: startPosition.x + nodeSpacing.x * 3, y: startPosition.y },
-            data: { label: 'Proposal & Quote' }
-          }
-        );
-        
-        // Add connections
-        edges.push(
-          {
-            id: 'e1',
-            source: 'trigger',
-            target: 'requirements-gathering'
-          },
-          {
-            id: 'e2',
-            source: 'requirements-gathering',
-            target: 'site-inspection'
-          },
-          {
-            id: 'e3',
-            source: 'site-inspection',
-            target: 'proposal'
-          }
-        );
-        break;
-
-      default:
-        // Add default nodes
-        nodes.push(
-          {
-            id: 'task',
-            type: 'taskNode',
-            position: { x: startPosition.x + nodeSpacing.x, y: startPosition.y },
-            data: { label: 'New Task' }
-          }
-        );
-        
-        edges.push({
-          id: 'e1',
-          source: 'trigger',
-          target: 'task'
-        });
+    // Add template nodes and edges
+    if (template.data) {
+      flowInstance.setNodes(template.data.nodes);
+      flowInstance.setEdges(template.data.edges);
     }
-
-    // Update flow instance with template structure
-    setFlowInstance(prev => ({
-      ...prev,
-      nodes,
-      edges
-    }));
 
     // Update workflow name
     setWorkflowName(template.name);
@@ -282,14 +211,14 @@ export default function WorkflowPage() {
                     <Button
                       variant="ghost"
                       size="icon"
-                      onClick={() => navigate('/workflow/list')}
+                      onClick={() => navigate('/')}
                       className="mr-2"
                     >
                       <ArrowLeft className="h-4 w-4" />
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent>
-                    <p>Back to Workflows</p>
+                    <p>Back to Main Menu</p>
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
@@ -362,17 +291,17 @@ export default function WorkflowPage() {
                   >
                     Execution Logs
                   </button>
-                  <button
-                    className={`py-2 px-6 text-sm font-semibold rounded-md transition-all duration-200 flex items-center gap-2 ${
-                      isTemplateSelectorOpen
-                        ? 'border-2 border-primary bg-white text-gray-900 shadow-sm'
-                        : 'border-2 border-transparent text-gray-700 hover:text-gray-900 hover:bg-gray-100'
-                    }`}
-                    onClick={() => setIsTemplateSelectorOpen(true)}
-                  >
-                    <LayoutTemplate className="h-4 w-4" />
-                    Templates
-                  </button>
+                  <div className="flex items-center gap-2 py-1">
+                    <Button
+                      variant="default"
+                      size="sm"
+                      onClick={() => navigate('/workflow/templates')}
+                      className="flex items-center gap-2"
+                    >
+                      <LayoutTemplate className="h-4 w-4" />
+                      Templates
+                    </Button>
+                  </div>
                 </div>
               </div>
             </div>
