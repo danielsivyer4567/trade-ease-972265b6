@@ -5,7 +5,6 @@ import { LoadingFallback } from './loading-fallback';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { authRoutes } from './auth-routes';
 import { SettingsRoutes } from './settings-routes';
-import { templateRoutes } from './template-routes';
 import { paymentRoutes } from './payment-routes';
 import { financialRoutes } from './financial-routes';
 import { activityRoutes } from './activity-routes';
@@ -50,7 +49,6 @@ const CalendarPage = lazy(() => import('@/pages/Calendar'));
 
 // Workflow pages
 const WorkflowListPage = lazy(() => import('@/pages/Workflow/WorkflowList'));
-const WorkflowTemplatesPage = lazy(() => import('@/pages/Workflow/WorkflowTemplates'));
 const AutomationsPage = lazy(() => import('@/pages/Automations'));
 
 // Communication
@@ -127,8 +125,6 @@ const routeObjects: RouteObject[] = [
             path: "settings", // Base path for settings
             children: settingsRouteObjects // Nest the objects returned by SettingsRoutes()
           },
-          // Template Routes
-          templateRoutes,
           // Payment Routes
           paymentRoutes,
           // Financial Routes
@@ -209,7 +205,6 @@ const routeObjects: RouteObject[] = [
           { path: "/calculators/ncc-codes", element: <SuspenseWrapper><NCCCodesCalculator /></SuspenseWrapper> },
           { path: "/workflow", element: <SuspenseWrapper><WorkflowPage /></SuspenseWrapper> },
           { path: "/workflow/list", element: <SuspenseWrapper><WorkflowListPage /></SuspenseWrapper> },
-          { path: "/workflow/templates", element: <SuspenseWrapper><WorkflowTemplatesPage /></SuspenseWrapper> },
           { path: "/automations", element: <SuspenseWrapper><AutomationsPage /></SuspenseWrapper> },
           { path: "/forms", element: <SuspenseWrapper><FormsPage /></SuspenseWrapper> },
           { path: "/tasks", element: <SuspenseWrapper><TasksPage /></SuspenseWrapper> },

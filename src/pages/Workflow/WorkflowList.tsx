@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { AppLayout } from "@/components/ui/AppLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -6,8 +5,9 @@ import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { WorkflowService, Workflow } from '@/services/WorkflowService';
+import { CreateWorkflowParams } from '@/types/workflow';
 import { toast } from 'sonner';
-import { Folder, Clock, Workflow as WorkflowIcon, Plus, Eye, Trash2, Copy, Filter } from "lucide-react";
+import { LayoutTemplate, Clock, Workflow as WorkflowIcon, Plus, Eye, Trash2, Copy, Filter } from "lucide-react";
 import { GlassCard } from '@/components/ui/GlassCard';
 import { Badge } from '@/components/ui/badge';
 
@@ -65,15 +65,17 @@ export default function WorkflowListPage() {
   const handleDuplicate = async (workflow: Workflow, e: React.MouseEvent) => {
     e.stopPropagation();
     try {
-      // Create a duplicate without the ID
-      const newWorkflow = {
-        ...workflow,
-        id: undefined,
+      // Create a duplicate with required properties
+      const newWorkflow: CreateWorkflowParams = {
         name: `${workflow.name} (Copy)`,
+        description: workflow.description,
+        data: workflow.data,
+        category: workflow.category,
+        isTemplate: workflow.is_template
       };
       
-      const { success, id } = await WorkflowService.saveWorkflow(newWorkflow);
-      if (success && id) {
+      const { success, workflow: createdWorkflow } = await WorkflowService.createWorkflow(newWorkflow);
+      if (success && createdWorkflow) {
         toast.success("Workflow duplicated");
         loadWorkflows();
       } else {
@@ -138,15 +140,15 @@ export default function WorkflowListPage() {
           <h1 className="text-xl md:text-2xl font-bold">My Workflows</h1>
           <div className="flex flex-wrap gap-2">
             <Button 
-              onClick={() => navigate("/workflow/templates")}
+              onClick={() => navigate("/workflow/new?template=true")}
               size="sm"
               variant="outline"
               className="flex items-center gap-2 whitespace-nowrap"
             >
-              <Folder className="h-4 w-4" /> Templates
+              <LayoutTemplate className="h-4 w-4" /> Templates
             </Button>
             <Button 
-              onClick={() => navigate("/workflow")}
+              onClick={() => navigate("/workflow/new")}
               size="sm"
               className="flex items-center gap-2 whitespace-nowrap"
             >
@@ -236,15 +238,15 @@ export default function WorkflowListPage() {
                   Clear Filters
                 </Button>
                 <Button 
-                  onClick={() => navigate("/workflow/templates")}
+                  onClick={() => navigate("/workflow/new?template=true")}
                   className="mt-2"
                   variant="outline"
                 >
-                  <Folder className="h-4 w-4 mr-2" />
+                  <LayoutTemplate className="h-4 w-4 mr-2" />
                   Browse Templates
                 </Button>
                 <Button 
-                  onClick={() => navigate("/workflow")}
+                  onClick={() => navigate("/workflow/new")}
                   className="mt-2"
                 >
                   <Plus className="h-4 w-4 mr-2" />

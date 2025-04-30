@@ -7,8 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { WorkflowIcon } from "@/components/icons/WorkflowIcon";
-import { Construction, Building, ArrowLeft, WorkflowIcon as LucideWorkflowIcon, Search, Clock, PlusCircle, Bookmark, Star } from "lucide-react";
+import { Construction, Building, ArrowLeft, Search, Clock, PlusCircle, Bookmark, Star, WorkflowIcon } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { GlassCard } from '@/components/ui/GlassCard';
 import { WorkflowService, Workflow } from '@/services/WorkflowService';
@@ -219,7 +218,7 @@ export default function WorkflowTemplates() {
                 {WORKFLOW_TEMPLATES
                   .filter(template => template.category === 'Construction')
                   .map((template) => (
-                    <Card key={template.id} className={`overflow-hidden hover:shadow-md transition-shadow border-l-4 ${getCardBorderColor(template)}`}>
+                    <Card key={template.id} className="overflow-hidden hover:shadow-md transition-shadow border-l-4 border-orange-500">
                       <CardHeader className="pb-2">
                         <div className="flex justify-between items-start">
                           <CardTitle className="text-lg">{template.name}</CardTitle>
@@ -233,7 +232,7 @@ export default function WorkflowTemplates() {
                           <div>Connections: {template.data.edges.length}</div>
                         </div>
                         <Button 
-                          onClick={() => handleTemplateSelect(template)} 
+                          onClick={() => handleTemplateSelect(template as WorkflowTemplate)} 
                           className="w-full mt-4"
                         >
                           Use This Template
@@ -248,7 +247,7 @@ export default function WorkflowTemplates() {
                 {WORKFLOW_TEMPLATES
                   .filter(template => template.category === 'Admin')
                   .map((template) => (
-                    <Card key={template.id} className={`overflow-hidden hover:shadow-md transition-shadow border-l-4 ${getCardBorderColor(template)}`}>
+                    <Card key={template.id} className="overflow-hidden hover:shadow-md transition-shadow border-l-4 border-blue-500">
                       <CardHeader className="pb-2">
                         <div className="flex justify-between items-start">
                           <CardTitle className="text-lg">{template.name}</CardTitle>
@@ -262,7 +261,7 @@ export default function WorkflowTemplates() {
                           <div>Connections: {template.data.edges.length}</div>
                         </div>
                         <Button 
-                          onClick={() => handleTemplateSelect(template)} 
+                          onClick={() => handleTemplateSelect(template as WorkflowTemplate)} 
                           className="w-full mt-4"
                         >
                           Use This Template

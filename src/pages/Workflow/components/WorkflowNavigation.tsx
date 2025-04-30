@@ -1,8 +1,7 @@
-
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Workflow, ListChecks, FileText, ArrowLeft } from "lucide-react";
+import { Workflow, ListChecks, ArrowLeft } from "lucide-react";
 
 export function WorkflowNavigation() {
   const navigate = useNavigate();
@@ -41,16 +40,6 @@ export function WorkflowNavigation() {
       >
         <ListChecks className="h-4 w-4" />
         My Workflows
-      </Button>
-      
-      <Button
-        variant={isActive('/workflow/templates') ? "default" : "outline"}
-        size="sm"
-        onClick={() => navigate('/workflow/templates')}
-        className="flex items-center gap-2"
-      >
-        <FileText className="h-4 w-4" />
-        Templates
       </Button>
     </div>
   );
