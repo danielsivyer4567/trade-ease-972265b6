@@ -4,7 +4,6 @@ import { WorkflowTemplate } from '@/types/workflow';
 import { AppLayout } from "@/components/ui/AppLayout";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Construction, Building, ArrowLeft, Search, Clock, PlusCircle, Bookmark, Star, WorkflowIcon } from "lucide-react";
@@ -42,10 +41,7 @@ export default function WorkflowTemplates() {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredCategory, setFilteredCategory] = useState("");
-  const [userWorkflows, setUserWorkflows] = useState<Workflow[]>([]);
-  const [userTemplates, setUserTemplates] = useState<Workflow[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState("templates");
 
   const handleTemplateSelect = (template: WorkflowTemplate | null) => {
     if (template) {
@@ -83,48 +79,32 @@ export default function WorkflowTemplates() {
           </div>
         </div>
 
-        <div className="p-6">
-          <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="mb-4">
-              <TabsTrigger value="templates">Predefined Templates</TabsTrigger>
-              <TabsTrigger value="user-templates">My Templates</TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="templates">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {WORKFLOW_TEMPLATES.map((template) => (
-                  <Card key={template.id} className="overflow-hidden hover:shadow-md transition-shadow border-l-4 border-primary">
-                    <CardHeader className="pb-2">
-                      <div className="flex justify-between items-start">
-                        <CardTitle className="text-lg">{template.name}</CardTitle>
-                        <Badge>{template.category}</Badge>
-                      </div>
-                      <CardDescription>{template.description}</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-sm text-gray-500">
-                        <div>Nodes: {template.data.nodes.length}</div>
-                        <div>Connections: {template.data.edges.length}</div>
-                      </div>
-                      <Button 
-                        onClick={() => handleTemplateSelect(template as WorkflowTemplate)} 
-                        className="w-full mt-4"
-                      >
-                        Use This Template
-                      </Button>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            </TabsContent>
-
-            <TabsContent value="user-templates">
-              {/* User templates content */}
-              <div className="text-center p-8">
-                <p className="text-gray-500">No user templates available yet.</p>
-              </div>
-            </TabsContent>
-          </Tabs>
+        <div className="p-6 max-w-[1400px] mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {WORKFLOW_TEMPLATES.map((template) => (
+              <Card key={template.id} className="overflow-hidden hover:shadow-md transition-shadow border-l-4 border-primary">
+                <CardHeader className="pb-2">
+                  <div className="flex justify-between items-start">
+                    <CardTitle className="text-lg">{template.name}</CardTitle>
+                    <Badge>{template.category}</Badge>
+                  </div>
+                  <CardDescription>{template.description}</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-sm text-gray-500">
+                    <div>Nodes: {template.data.nodes.length}</div>
+                    <div>Connections: {template.data.edges.length}</div>
+                  </div>
+                  <Button 
+                    onClick={() => handleTemplateSelect(template as WorkflowTemplate)} 
+                    className="w-full mt-4"
+                  >
+                    Use This Template
+                  </Button>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
         </div>
       </div>
     </AppLayout>

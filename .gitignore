@@ -27,4 +27,17 @@ dist-ssr
 .env
 .env.local
 .env.*.local
+.env.development
+.env.test
+.env.production
+
+# Vercel
+.vercel
+.vercel.json
+*.vercel.json
+
+# Tokens and secrets
+*.token
+*.secret
+*.key
 

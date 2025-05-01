@@ -18,7 +18,7 @@ export const technicalNavigation = {
       type: 'link' as const,
       icon: ChevronRightSquare,
       label: 'Workflow',
-      path: '/workflow/new',
+      path: '/workflow',
     },
     {
       type: 'link' as const,

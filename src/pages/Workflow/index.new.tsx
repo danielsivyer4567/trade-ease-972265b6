@@ -35,6 +35,9 @@ import TemplateSelector from '@/components/workflow/TemplateSelector';
 import { WorkflowAIModal } from '@/components/workflow/WorkflowAIModal';
 import { TriggerSelector } from '@/components/workflow/TriggerSelector';
 import { WorkflowService } from '@/services/WorkflowService';
+import { WorkflowSettings } from '@/components/workflow/WorkflowSettings';
+import { toast } from 'sonner';
+import { WorkflowEnrollmentHistory } from '@/components/workflow/WorkflowEnrollmentHistory';
 
 interface Template {
   id: string;
@@ -78,11 +81,13 @@ export default function WorkflowPage() {
   const [searchParams] = useSearchParams();
   const automationId = searchParams.get('automationId');
   const workflowId = searchParams.get('id');
+  const tab = searchParams.get('tab');
   const { user } = useAuth();
   
   const [flowInstance, setFlowInstance] = useState(null);
   const [workflowName, setWorkflowName] = useState("New Workflow");
   const [isLoading, setIsLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState(tab || 'builder');
   
   // Drawer states
   const [automationDrawerOpen, setAutomationDrawerOpen] = useState(false);
@@ -121,6 +126,21 @@ export default function WorkflowPage() {
     loadWorkflow();
   }, [workflowId, flowInstance]);
 
+  // Update active tab when URL changes
+  useEffect(() => {
+    if (tab) {
+      setActiveTab(tab);
+    }
+  }, [tab]);
+
+  // Update URL when active tab changes
+  const handleTabChange = (newTab: string) => {
+    setActiveTab(newTab);
+    const params = new URLSearchParams(location.search);
+    params.set('tab', newTab);
+    navigate(`${location.pathname}?${params.toString()}`, { replace: true });
+  };
+
   // Node categories for the sidebar
   const workflowNodes = [
     { id: 'customer', label: 'Customer', description: 'Contact info & history' },
@@ -146,6 +166,8 @@ export default function WorkflowPage() {
 
   const [selectedNode, setSelectedNode] = useState(null);
 
+  const [aiMessages, setAIMessages] = useState([]);
+
   const handleSave = async (name: string, description: string) => {
     setIsLoading(true);
     try {
@@ -158,8 +180,6 @@ export default function WorkflowPage() {
       setIsLoading(false);
     }
   };
-
-  const [activeTab, setActiveTab] = useState('builder');
 
   const handleTriggerSelect = (triggerId: string) => {
     console.log('Selected trigger:', triggerId);
@@ -187,15 +207,247 @@ export default function WorkflowPage() {
   };
 
   const handleGenerateWorkflow = async (prompt: string) => {
-    // Here you would integrate with an AI service to generate the workflow
-    console.log('Generating workflow from prompt:', prompt);
+    try {
+      // Add user message to history
+      const userMessage = { role: 'user', content: prompt };
+      setAIMessages(prev => [...prev, userMessage]);
+
+      // Show thinking message
+      const thinkingMessage = {
+        role: 'assistant',
+        content: 'Analyzing your requirements and generating a workflow...'
+      };
+      setAIMessages(prev => [...prev, thinkingMessage]);
+
+      // Generate workflow based on prompt
+      const workflowData = await generateWorkflowFromPrompt(prompt);
+      
+      if (!flowInstance) {
+        throw new Error('Flow instance not initialized');
+      }
+
+      // Clear existing nodes and edges
+      flowInstance.setNodes([]);
+      flowInstance.setEdges([]);
+
+      // Add generated nodes and edges
+      flowInstance.setNodes(workflowData.nodes);
+      flowInstance.setEdges(workflowData.edges);
+
+      // Update workflow name
+      setWorkflowName(workflowData.name);
+
+      // Add success message
+      const successMessage = {
+        role: 'assistant',
+        content: `I've generated a workflow for "${workflowData.name}". The workflow has been added to your canvas. You can now customize it further or save it.`
+      };
+      setAIMessages(prev => [...prev, successMessage]);
+
+      // Close the modal after a short delay
+      setTimeout(() => {
+        setIsAIModalOpen(false);
+      }, 2000);
+
+    } catch (error) {
+      console.error('Error generating workflow:', error);
+      
+      // Add error message
+      const errorMessage = {
+        role: 'assistant',
+        content: 'I apologize, but I encountered an error while generating the workflow. Please try again with a more specific prompt or try a different approach.'
+      };
+      setAIMessages(prev => [...prev, errorMessage]);
+    }
+  };
+
+  // Helper function to generate workflow from prompt
+  const generateWorkflowFromPrompt = async (prompt: string) => {
+    // This is where you would integrate with an actual AI service
+    // For now, we'll use a simple template-based approach
     
-    // For now, we'll close the modal
-    setIsAIModalOpen(false);
+    // Extract key information from the prompt
+    const promptLower = prompt.toLowerCase();
+    
+    // Determine workflow type based on keywords
+    let workflowType = 'general';
+    if (promptLower.includes('customer') || promptLower.includes('onboard')) {
+      workflowType = 'customer-onboarding';
+    } else if (promptLower.includes('job') || promptLower.includes('project')) {
+      workflowType = 'job-management';
+    } else if (promptLower.includes('quote') || promptLower.includes('estimate')) {
+      workflowType = 'quote-process';
+    }
+
+    // Generate appropriate workflow structure
+    const workflow = {
+      name: `Generated Workflow - ${new Date().toLocaleDateString()}`,
+      nodes: [],
+      edges: []
+    };
+
+    // Add nodes based on workflow type
+    switch (workflowType) {
+      case 'customer-onboarding':
+        workflow.nodes = [
+          {
+            id: 'create-customer',
+            type: 'customerNode',
+            position: { x: 100, y: 100 },
+            data: { label: 'Create Customer' }
+          },
+          {
+            id: 'send-welcome',
+            type: 'emailNode',
+            position: { x: 300, y: 100 },
+            data: { label: 'Send Welcome Email' }
+          },
+          {
+            id: 'schedule-followup',
+            type: 'taskNode',
+            position: { x: 500, y: 100 },
+            data: { label: 'Schedule Follow-up' }
+          }
+        ];
+        workflow.edges = [
+          { id: 'e1', source: 'create-customer', target: 'send-welcome' },
+          { id: 'e2', source: 'send-welcome', target: 'schedule-followup' }
+        ];
+        break;
+
+      case 'job-management':
+        workflow.nodes = [
+          {
+            id: 'create-job',
+            type: 'jobNode',
+            position: { x: 100, y: 100 },
+            data: { label: 'Create Job' }
+          },
+          {
+            id: 'assign-team',
+            type: 'taskNode',
+            position: { x: 300, y: 100 },
+            data: { label: 'Assign Team' }
+          },
+          {
+            id: 'notify-customer',
+            type: 'emailNode',
+            position: { x: 500, y: 100 },
+            data: { label: 'Notify Customer' }
+          }
+        ];
+        workflow.edges = [
+          { id: 'e1', source: 'create-job', target: 'assign-team' },
+          { id: 'e2', source: 'assign-team', target: 'notify-customer' }
+        ];
+        break;
+
+      case 'quote-process':
+        workflow.nodes = [
+          {
+            id: 'create-quote',
+            type: 'quoteNode',
+            position: { x: 100, y: 100 },
+            data: { label: 'Create Quote' }
+          },
+          {
+            id: 'send-quote',
+            type: 'emailNode',
+            position: { x: 300, y: 100 },
+            data: { label: 'Send Quote' }
+          },
+          {
+            id: 'follow-up',
+            type: 'taskNode',
+            position: { x: 500, y: 100 },
+            data: { label: 'Follow Up' }
+          }
+        ];
+        workflow.edges = [
+          { id: 'e1', source: 'create-quote', target: 'send-quote' },
+          { id: 'e2', source: 'send-quote', target: 'follow-up' }
+        ];
+        break;
+
+      default:
+        // Generic workflow
+        workflow.nodes = [
+          {
+            id: 'start',
+            type: 'customNode',
+            position: { x: 100, y: 100 },
+            data: { label: 'Start' }
+          },
+          {
+            id: 'process',
+            type: 'customNode',
+            position: { x: 300, y: 100 },
+            data: { label: 'Process' }
+          },
+          {
+            id: 'complete',
+            type: 'customNode',
+            position: { x: 500, y: 100 },
+            data: { label: 'Complete' }
+          }
+        ];
+        workflow.edges = [
+          { id: 'e1', source: 'start', target: 'process' },
+          { id: 'e2', source: 'process', target: 'complete' }
+        ];
+    }
+
+    return workflow;
   };
 
   const handleNodeSelect = (node) => {
     setSelectedNode(node);
+  };
+
+  const handleEditWorkflow = (nodeId: string, changes: any) => {
+    if (!flowInstance) return;
+
+    // Update the node in the flow
+    flowInstance.setNodes((nds) =>
+      nds.map((node) => {
+        if (node.id === nodeId) {
+          return {
+            ...node,
+            data: {
+              ...node.data,
+              ...changes
+            }
+          };
+        }
+        return node;
+      })
+    );
+
+    // Show success message
+    toast.success('Node updated successfully');
+  };
+
+  const handleDeleteNode = (nodeId: string) => {
+    if (!flowInstance) return;
+
+    // Remove the node and its connected edges
+    flowInstance.setNodes((nds) => nds.filter((node) => node.id !== nodeId));
+    flowInstance.setEdges((eds) =>
+      eds.filter((edge) => edge.source !== nodeId && edge.target !== nodeId)
+    );
+
+    // Show success message
+    toast.success('Node deleted successfully');
+  };
+
+  // Get available nodes for tagging
+  const getAvailableNodes = () => {
+    if (!flowInstance) return [];
+    return flowInstance.getNodes().map((node) => ({
+      id: node.id,
+      type: node.type || 'custom',
+      label: node.data.label
+    }));
   };
 
   return (
@@ -257,7 +509,7 @@ export default function WorkflowPage() {
                         ? 'border-2 border-primary bg-white text-gray-900 shadow-sm'
                         : 'border-2 border-transparent text-gray-700 hover:text-gray-900 hover:bg-gray-100'
                     }`}
-                    onClick={() => setActiveTab('builder')}
+                    onClick={() => handleTabChange('builder')}
                   >
                     Builder
                   </button>
@@ -267,7 +519,7 @@ export default function WorkflowPage() {
                         ? 'border-2 border-primary bg-white text-gray-900 shadow-sm'
                         : 'border-2 border-transparent text-gray-700 hover:text-gray-900 hover:bg-gray-100'
                     }`}
-                    onClick={() => setActiveTab('settings')}
+                    onClick={() => handleTabChange('settings')}
                   >
                     Settings
                   </button>
@@ -277,7 +529,7 @@ export default function WorkflowPage() {
                         ? 'border-2 border-primary bg-white text-gray-900 shadow-sm'
                         : 'border-2 border-transparent text-gray-700 hover:text-gray-900 hover:bg-gray-100'
                     }`}
-                    onClick={() => setActiveTab('enrollment')}
+                    onClick={() => handleTabChange('enrollment')}
                   >
                     Enrollment History
                   </button>
@@ -287,7 +539,7 @@ export default function WorkflowPage() {
                         ? 'border-2 border-primary bg-white text-gray-900 shadow-sm'
                         : 'border-2 border-transparent text-gray-700 hover:text-gray-900 hover:bg-gray-100'
                     }`}
-                    onClick={() => setActiveTab('execution')}
+                    onClick={() => handleTabChange('execution')}
                   >
                     Execution Logs
                   </button>
@@ -328,15 +580,18 @@ export default function WorkflowPage() {
             </>
           )}
           {activeTab === 'settings' && (
-            <div className="p-4">
-              <h2 className="text-lg font-semibold mb-4">Workflow Settings</h2>
-              {/* Add settings content here */}
+            <div className="flex-1 overflow-auto">
+              <WorkflowSettings 
+                onSettingsChange={(settings) => {
+                  console.log('Settings updated:', settings);
+                  // TODO: Implement settings update logic
+                }} 
+              />
             </div>
           )}
           {activeTab === 'enrollment' && (
-            <div className="p-4">
-              <h2 className="text-lg font-semibold mb-4">Enrollment History</h2>
-              {/* Add enrollment history content here */}
+            <div className="flex-1 overflow-auto">
+              <WorkflowEnrollmentHistory />
             </div>
           )}
           {activeTab === 'execution' && (
@@ -412,6 +667,13 @@ export default function WorkflowPage() {
           isOpen={isAIModalOpen}
           onClose={() => setIsAIModalOpen(false)}
           onGenerateWorkflow={handleGenerateWorkflow}
+          onEditWorkflow={handleEditWorkflow}
+          onDeleteNode={handleDeleteNode}
+          messages={aiMessages}
+          onUpdateMessages={setAIMessages}
+          availableNodes={getAvailableNodes()}
+          userId={user?.id || ''}
+          userRole={user?.role || 'user'}
         />
       </div>
     </AppLayout>
