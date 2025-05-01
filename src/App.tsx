@@ -10,7 +10,6 @@ import { NotificationProvider } from './components/notifications/NotificationCon
 import { TabsProvider } from './contexts/TabsContext';
 import { initializeTables } from './integrations/supabase/dbInit';
 import { ErrorBoundary } from 'react-error-boundary';
-import { SupabaseTest } from './components/SupabaseTest';
 import './App.css';
 
 const queryClient = new QueryClient({
@@ -72,26 +71,6 @@ function App() {
           <NotificationProvider>
             <AppWithTabsProvider>
               <Suspense fallback={<LoadingFallback />}>
-                {/* --- VARIANT 1: Top Left (active) --- */}
-                {/**
-                <div className="fixed top-4 left-4 z-50">
-                  <SupabaseTest />
-                </div>
-                */}
-
-                {/* --- VARIANT 2: Bottom Left --- */}
-                {/**
-                <div className="fixed bottom-4 left-4 z-50">
-                  <SupabaseTest />
-                </div>
-                */}
-
-                {/* --- VARIANT 3: Inline (default flow) --- */}
-                {/**
-                <div>
-                  <SupabaseTest />
-                </div>
-                */}
                 <RouterProvider router={router} />
               </Suspense>
             </AppWithTabsProvider>

@@ -11,6 +11,7 @@ import { activityRoutes } from './activity-routes';
 import { AppLayoutWithTabs } from '@/components/AppLayoutWithTabs';
 import WorkflowPage from '@/pages/Workflow/index.new';
 import WorkflowTemplates from '@/pages/Workflow/templates';
+import WorkflowEnrollmentHistory from '@/pages/Workflow/WorkflowEnrollmentHistory';
 
 // Development mode debugging component
 const DevelopmentEntry = lazy(() => import('@/pages/DevelopmentEntry'));
@@ -209,6 +210,7 @@ const routeObjects: RouteObject[] = [
           { path: "/workflow/edit/:id", element: <SuspenseWrapper><WorkflowPage /></SuspenseWrapper> },
           { path: "/workflow/list", element: <SuspenseWrapper><WorkflowListPage /></SuspenseWrapper> },
           { path: "/workflow/templates", element: <SuspenseWrapper><WorkflowTemplates /></SuspenseWrapper> },
+          { path: "/workflow/enrollment-history", element: <SuspenseWrapper><WorkflowEnrollmentHistory /></SuspenseWrapper> },
           { path: "/automations", element: <SuspenseWrapper><AutomationsPage /></SuspenseWrapper> },
           { path: "/forms", element: <SuspenseWrapper><FormsPage /></SuspenseWrapper> },
           { path: "/tasks", element: <SuspenseWrapper><TasksPage /></SuspenseWrapper> },

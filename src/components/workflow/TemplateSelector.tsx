@@ -20,12 +20,12 @@ export default function TemplateSelector({ isOpen, onClose, onSelectTemplate }: 
   return (
     <Button
       variant="outline"
-      size="lg"
-      className="whitespace-nowrap flex items-center"
+      size="sm"
       onClick={handleOpenTemplates}
+      className="flex items-center gap-2"
     >
-      <LayoutTemplate className="mr-2 h-5 w-5" />
-      Browse Templates
+      <LayoutTemplate className="h-4 w-4" />
+      Templates
     </Button>
   );
 } 

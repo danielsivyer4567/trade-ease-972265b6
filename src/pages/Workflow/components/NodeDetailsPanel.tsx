@@ -24,6 +24,19 @@ export function NodeDetailsPanel({ node, onClose, onUpdate }: NodeDetailsPanelPr
     assignedUser: node.data.assignedUser || ''
   });
 
+  // Update form data when node changes
+  useEffect(() => {
+    setFormData({
+      actionName: node.data.label || '',
+      type: node.type || 'notification',
+      title: node.data.title || '',
+      message: node.data.message || '',
+      redirectPage: node.data.redirectPage || 'contact',
+      assignedRole: node.data.assignedRole || '',
+      assignedUser: node.data.assignedUser || ''
+    });
+  }, [node]);
+
   const handleChange = (field: string, value: string) => {
     setFormData(prev => ({
       ...prev,
@@ -45,11 +58,11 @@ export function NodeDetailsPanel({ node, onClose, onUpdate }: NodeDetailsPanelPr
   };
 
   return (
-    <div className="absolute right-0 top-0 bottom-0 w-[400px] bg-white shadow-xl z-40">
+    <div className="absolute right-0 top-[116px] bottom-0 w-[400px] bg-white shadow-xl z-40">
       <Card className="h-full overflow-y-auto">
         <div className="sticky top-0 bg-white z-50 px-6 py-4 border-b">
           <div className="flex justify-between items-center">
-            <h2 className="text-xl font-semibold">Node Details</h2>
+            <h2 className="text-xl font-semibold">{formData.actionName || node.data.label || 'Node Details'}</h2>
             <Button variant="ghost" size="icon" onClick={onClose}>
               <X className="h-4 w-4" />
             </Button>
