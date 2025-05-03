@@ -1,4 +1,3 @@
-
 /* Base application styles */
 .app-container {
   min-height: 100vh;
@@ -8,3 +7,133 @@
 
 /* Any additional app-specific styling can be added here */
 /* Note: Most styling is handled by Tailwind CSS in index.css */
+
+/* Workflow Dark Mode Global Styles */
+.workflow-dark-mode {
+  background-color: #18140c !important;
+  color: #ffe082 !important;
+}
+
+.workflow-dark-mode .react-flow__pane {
+  background-color: #18140c !important;
+}
+
+.workflow-dark-mode .react-flow__node {
+  background-color: #211c15 !important;
+  color: #ffe082 !important;
+  border-color: #bfa14a !important;
+}
+
+.workflow-dark-mode .react-flow__controls,
+.workflow-dark-mode .react-flow__panel {
+  background-color: #18140c !important;
+  border-color: #bfa14a !important;
+}
+
+.workflow-dark-mode .react-flow__controls-button {
+  background-color: #211c15 !important;
+  border-color: #bfa14a !important;
+  color: #ffe082 !important;
+}
+
+.workflow-dark-mode .react-flow__minimap {
+  background-color: #211c15 !important;
+  border-color: #bfa14a !important;
+}
+
+.workflow-dark-mode .react-flow__edge path {
+  stroke: #bfa14a !important;
+}
+
+.workflow-dark-mode .react-flow__handle {
+  background-color: #bfa14a !important;
+}
+
+/* Dark mode for node types */
+.workflow-dark-mode .node-customer,
+.workflow-dark-mode .node-job,
+.workflow-dark-mode .node-task,
+.workflow-dark-mode .node-quote,
+.workflow-dark-mode .node-custom,
+.workflow-dark-mode .node-vision,
+.workflow-dark-mode .node-automation,
+.workflow-dark-mode .node-messaging {
+  background-color: #211c15 !important;
+  color: #ffe082 !important;
+  border-color: #bfa14a !important;
+}
+
+/* Force dark mode canvas */
+.workflow-dark-mode-flow {
+  background-color: #18140c !important;
+}
+
+/* Dark mode lock indicator */
+.dark-mode-locked .react-flow__pane,
+.dark-mode-locked .react-flow__node,
+.dark-mode-locked .react-flow__controls,
+.dark-mode-locked .react-flow__panel,
+.dark-mode-locked .react-flow__controls-button,
+.dark-mode-locked .react-flow__minimap,
+.dark-mode-locked .react-flow__background,
+.dark-mode-locked .react-flow__handle {
+  transition: all 0.3s ease-in-out !important;
+}
+
+.dark-mode-locked .react-flow__handle {
+  box-shadow: 0 0 0 2px #bfa14a, 0 0 8px 1px rgba(191, 161, 74, 0.6) !important;
+}
+
+.dark-mode-locked .react-flow__edge path {
+  stroke-width: 2px !important;
+  filter: drop-shadow(0 0 2px rgba(191, 161, 74, 0.6)) !important;
+}
+
+/* Additional styling for UI in locked mode */
+.dark-mode-lock-icon {
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 0.7;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Ensure ReactFlow controls are clickable */
+.react-flow__controls {
+  pointer-events: all !important;
+  z-index: 50 !important;
+}
+
+.react-flow__controls-button {
+  pointer-events: all !important;
+  cursor: pointer !important;
+  position: relative;
+  z-index: 55 !important;
+}
+
+/* Fix for dark mode controls */
+.workflow-dark-mode .react-flow__controls-button {
+  background-color: #211c15 !important;
+  border-color: #bfa14a !important;
+  color: #ffe082 !important;
+}
+
+/* Ensure higher specificity for these important controls */
+.react-flow__controls-button.react-flow__controls-zoomin,
+.react-flow__controls-button.react-flow__controls-zoomout,
+.react-flow__controls-button.react-flow__controls-fitview,
+.react-flow__controls-button.react-flow__controls-interactive {
+  pointer-events: all !important;
+  z-index: 1000 !important;
+}

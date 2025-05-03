@@ -1,4 +1,4 @@
-import React, { useCallback, useState, useEffect, useRef } from 'react';
+import React, { useCallback, useState, useEffect, useRef, CSSProperties } from 'react';
 import {
   ReactFlow,
   ReactFlowProvider,
@@ -10,6 +10,7 @@ import {
   addEdge,
   Panel,
   MarkerType,
+  PanelPosition
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { CustomerNode } from './nodes/CustomerNode';
@@ -27,14 +28,8 @@ import { AutomationIntegrationService } from '@/services/AutomationIntegrationSe
 import { WorkflowService } from '@/services/WorkflowService';
 import { supabase } from '@/integrations/supabase/client';
 import { useWorkflow } from '@/hooks/useWorkflow';
-import { Moon, Sun } from 'lucide-react';
+import { Moon, Sun, ZoomIn, ZoomOut, Maximize, Lock, Unlock } from 'lucide-react';
 import { useWorkflowDarkMode, DARK_GOLD, DARK_BG, DARK_TEXT, DARK_SECONDARY } from '@/contexts/WorkflowDarkModeContext';
-
-// Define node data types for better type safety
-interface BaseNodeData {
-  label: string;
-  [key: string]: any; // Allow additional properties
-}
 
 // Define node types
 const nodeTypes = {
@@ -66,7 +61,106 @@ interface FlowProps {
 const defaultNodes = [];
 const defaultEdges = [];
 
-export function Flow({ onInit, workflowId, onNodeSelect, workflowDarkMode, toggleDarkMode }: FlowProps) {
+// Custom Controls component
+function CustomControls({ instance, darkMode, onFitView }) {
+  const [isInteractive, setIsInteractive] = useState(true);
+
+  const handleZoomIn = () => {
+    if (instance) {
+      instance.zoomIn({ duration: 300 });
+    }
+  };
+
+  const handleZoomOut = () => {
+    if (instance) {
+      instance.zoomOut({ duration: 300 });
+    }
+  };
+
+  const handleFitView = () => {
+    if (instance) {
+      instance.fitView({ padding: 0.2, duration: 400 });
+    }
+  };
+
+  const toggleInteractivity = () => {
+    if (instance) {
+      const nextInteractiveValue = !isInteractive;
+      instance.setInteractive(nextInteractiveValue);
+      setIsInteractive(nextInteractiveValue);
+    }
+  };
+
+  const buttonStyles: CSSProperties = {
+    backgroundColor: darkMode ? DARK_SECONDARY : 'white',
+    color: darkMode ? DARK_TEXT : '#333',
+    border: `1px solid ${darkMode ? DARK_GOLD : '#ddd'}`,
+    width: '24px',
+    height: '24px',
+    borderRadius: '4px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    cursor: 'pointer',
+    marginBottom: '8px',
+    padding: '4px',
+    boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
+  };
+
+  const controlsContainerStyles: CSSProperties = {
+    display: 'flex',
+    flexDirection: 'column',
+    position: 'absolute',
+    bottom: '80px',
+    left: '16px',
+    zIndex: 1000,
+    backgroundColor: darkMode ? DARK_BG : 'white',
+    padding: '8px',
+    borderRadius: '4px',
+    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)',
+    border: `1px solid ${darkMode ? DARK_GOLD : '#ddd'}`
+  };
+
+  return (
+    <div style={controlsContainerStyles} className="custom-flow-controls">
+      <button
+        onClick={handleZoomIn}
+        style={buttonStyles}
+        title="Zoom in"
+        aria-label="zoom in"
+      >
+        <ZoomIn size={16} />
+      </button>
+      <button
+        onClick={handleZoomOut}
+        style={buttonStyles}
+        title="Zoom out"
+        aria-label="zoom out"
+      >
+        <ZoomOut size={16} />
+      </button>
+      <button
+        onClick={handleFitView}
+        style={buttonStyles}
+        title="Fit view"
+        aria-label="fit view"
+      >
+        <Maximize size={16} />
+      </button>
+      <button
+        onClick={toggleInteractivity}
+        style={buttonStyles}
+        title={isInteractive ? "Lock view" : "Unlock view"}
+        aria-label="toggle interactivity"
+      >
+        {isInteractive ? <Unlock size={16} /> : <Lock size={16} />}
+      </button>
+    </div>
+  );
+}
+
+// The actual Flow component content
+function FlowContent({ onInit, workflowId, onNodeSelect, workflowDarkMode, toggleDarkMode }: FlowProps) {
   // Use the global dark mode context
   const { darkMode: globalDarkMode, toggleDarkMode: toggleGlobalDarkMode, isDarkModeLocked } = useWorkflowDarkMode();
   
@@ -88,7 +182,21 @@ export function Flow({ onInit, workflowId, onNodeSelect, workflowDarkMode, toggl
   const handleInit = useCallback((flowInstance) => {
     setInstance(flowInstance);
     onInit(flowInstance);
+    
+    // Initial fit view after a small delay to ensure nodes are loaded
+    setTimeout(() => {
+      if (flowInstance) {
+        flowInstance.fitView({ padding: 0.2 });
+      }
+    }, 100);
   }, [onInit]);
+
+  // Custom fit view handler for the Controls component
+  const handleFitView = useCallback(() => {
+    if (instance) {
+      instance.fitView({ padding: 0.2, duration: 400 });
+    }
+  }, [instance]);
 
   const onConnect = useCallback(
     (params) => setEdges((eds) => addEdge(params, eds)),
@@ -101,6 +209,8 @@ export function Flow({ onInit, workflowId, onNodeSelect, workflowDarkMode, toggl
 
       const type = event.dataTransfer.getData('application/reactflow');
       if (!type) return;
+
+      if (!instance) return;
 
       const position = instance.screenToFlowPosition({
         x: event.clientX,
@@ -119,7 +229,7 @@ export function Flow({ onInit, workflowId, onNodeSelect, workflowDarkMode, toggl
 
       setNodes((nds) => nds.concat(newNode));
     },
-    [instance, actualDarkMode]
+    [instance, actualDarkMode, setNodes]
   );
 
   const onDragOver = useCallback((event) => {
@@ -168,14 +278,19 @@ export function Flow({ onInit, workflowId, onNodeSelect, workflowDarkMode, toggl
           }
           
           .react-flow__controls {
-            pointer-events: auto !important;
-            z-index: 5 !important;
+            pointer-events: all !important;
+            z-index: 50 !important;
+          }
+          
+          .react-flow__controls-button {
+            pointer-events: all !important;
+            cursor: pointer !important;
           }
           
           /* Dark mode specific styling for ReactFlow */
           .workflow-dark-mode .react-flow__pane {
             background-color: ${DARK_BG} !important;
-            background-image: radial-gradient(circle, rgba(255, 255, 255, 0.75) 0.6px, transparent 0.6px) !important;
+            background-image: radial-gradient(circle, rgba(255, 255, 255, 0.35) 0.6px, transparent 0.6px) !important;
             background-size: 14px 14px !important;
             background-position: 0px 0px !important;
           }
@@ -195,12 +310,6 @@ export function Flow({ onInit, workflowId, onNodeSelect, workflowDarkMode, toggl
           .workflow-dark-mode .react-flow__controls {
             background-color: ${DARK_BG} !important;
             border-color: ${DARK_GOLD} !important;
-          }
-          
-          .workflow-dark-mode .react-flow__controls-button {
-            background-color: ${DARK_SECONDARY} !important;
-            border-color: ${DARK_GOLD} !important;
-            color: ${DARK_TEXT} !important;
           }
           
           .workflow-dark-mode .react-flow__minimap {
@@ -283,6 +392,7 @@ export function Flow({ onInit, workflowId, onNodeSelect, workflowDarkMode, toggl
         nodeTypes={nodeTypes}
         edgeTypes={edgeTypes}
         fitView
+        fitViewOptions={{ padding: 0.2 }}
         className={`${actualDarkMode ? 'workflow-dark-mode-flow' : ''} ${isDarkModeLocked ? 'dark-mode-locked' : ''}`}
         style={actualDarkMode ? { 
           background: DARK_BG, 
@@ -298,6 +408,14 @@ export function Flow({ onInit, workflowId, onNodeSelect, workflowDarkMode, toggl
           }
         }}
         proOptions={{ hideAttribution: true }}
+        zoomOnScroll={true}
+        panOnScroll={false}
+        selectionOnDrag={false}
+        elementsSelectable={true}
+        nodesDraggable={true}
+        nodesConnectable={true}
+        zoomOnDoubleClick={true}
+        panOnDrag={true}
       >
         <Background 
           color={actualDarkMode ? "#ffffff" : undefined} 
@@ -305,16 +423,11 @@ export function Flow({ onInit, workflowId, onNodeSelect, workflowDarkMode, toggl
           size={actualDarkMode ? 1.2 : 1}
         />
         
-        <Controls 
-          className="!bottom-20 !left-4" 
-          style={actualDarkMode ? { 
-            color: DARK_GOLD,
-            background: DARK_BG, 
-            borderColor: DARK_GOLD,
-            borderWidth: '2px',
-            borderStyle: 'solid',
-            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)'
-          } : {}} 
+        {/* Use our custom controls instead */}
+        <CustomControls 
+          instance={instance} 
+          darkMode={actualDarkMode} 
+          onFitView={handleFitView} 
         />
         
         <MiniMap 
@@ -362,6 +475,39 @@ export function Flow({ onInit, workflowId, onNodeSelect, workflowDarkMode, toggl
           workflowDarkMode={actualDarkMode}
         />
       )}
+
+      {/* Floating fit view button is retained as an additional way to access the functionality */}
+      <div className="absolute bottom-4 right-4 z-10">
+        <button
+          onClick={handleFitView}
+          className="p-2 rounded-full shadow-lg focus:outline-none"
+          style={{
+            background: actualDarkMode ? DARK_GOLD : 'white',
+            border: `2px solid ${actualDarkMode ? DARK_GOLD : '#ccc'}`,
+            color: actualDarkMode ? '#18140c' : '#333',
+          }}
+          title="Fit View"
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path 
+              d="M4 4h6v6H4V4zm10 0h6v6h-6V4zM4 14h6v6H4v-6zm10 0h6v6h-6v-6z" 
+              stroke="currentColor" 
+              strokeWidth="2" 
+              strokeLinecap="round" 
+              strokeLinejoin="round"
+            />
+          </svg>
+        </button>
+      </div>
     </div>
+  );
+}
+
+// Export the Flow with ReactFlowProvider to fix the zustand error
+export function Flow(props: FlowProps) {
+  return (
+    <ReactFlowProvider>
+      <FlowContent {...props} />
+    </ReactFlowProvider>
   );
 }
