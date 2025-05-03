@@ -9,6 +9,7 @@ import { WorkflowSaveDialog } from './components/WorkflowSaveDialog';
 import { WorkflowLoadDialog } from './components/WorkflowLoadDialog';
 import { toast } from 'sonner';
 import { WorkflowService } from '@/services/WorkflowService';
+import { User, Briefcase, ClipboardList, FileText, MessageSquare, Eye, Zap, Share2, Layout } from 'lucide-react';
 
 export default function WorkflowPage() {
   const { id } = useParams();
@@ -25,6 +26,35 @@ export default function WorkflowPage() {
   const pendingTemplateData = useRef(null);
   const pendingWorkflowId = useRef(null);
 
+  // Node type to icon mapping
+  const nodeTypeIcons = {
+    customerNode: <User className="h-5 w-5" />,
+    jobNode: <Briefcase className="h-5 w-5" />,
+    taskNode: <ClipboardList className="h-5 w-5" />,
+    quoteNode: <FileText className="h-5 w-5" />,
+    messagingNode: <MessageSquare className="h-5 w-5" />,
+    emailNode: <MessageSquare className="h-5 w-5" />,
+    whatsappNode: <MessageSquare className="h-5 w-5" />,
+    visionNode: <Eye className="h-5 w-5" />,
+    automationNode: <Zap className="h-5 w-5" />,
+    socialNode: <Share2 className="h-5 w-5" />,
+    customNode: <Layout className="h-5 w-5" />
+  };
+
+  // Ensure node data has appropriate icon based on type
+  const ensureNodeIcon = (node) => {
+    const nodeType = node.type;
+    
+    return {
+      ...node,
+      data: {
+        ...node.data,
+        icon: node.data.icon || nodeTypeIcons[nodeType],
+        iconComponent: nodeTypeIcons[nodeType] // Add a direct reference to the icon component
+      }
+    };
+  };
+
   // Handle incoming location state when component mounts
   useEffect(() => {
     if (location.state) {
@@ -39,7 +69,7 @@ export default function WorkflowPage() {
         const templateData = location.state.templateData;
         
         if (templateData.nodes && Array.isArray(templateData.nodes)) {
-          setNodes(templateData.nodes.map(node => ({
+          setNodes(templateData.nodes.map(node => ensureNodeIcon({
             id: node.id,
             type: node.type,
             position: node.position,
@@ -86,7 +116,7 @@ export default function WorkflowPage() {
         const workflowData = result.workflow.data;
         
         if (workflowData.nodes && Array.isArray(workflowData.nodes)) {
-          setNodes(workflowData.nodes.map(node => ({
+          setNodes(workflowData.nodes.map(node => ensureNodeIcon({
             id: node.id,
             type: node.type,
             position: node.position,
@@ -154,11 +184,12 @@ export default function WorkflowPage() {
         automationId: location.state.automationId,
         title: location.state.automationTitle || `Automation ${location.state.automationId}`,
         description: location.state.automationDescription || '',
-        label: location.state.automationTitle || `Automation ${location.state.automationId}`
+        label: location.state.automationTitle || `Automation ${location.state.automationId}`,
+        icon: nodeTypeIcons.automationNode
       }
     };
     
-    setNodes(nds => [...nds, newNode]);
+    setNodes(nds => [...nds, ensureNodeIcon(newNode)]);
     toast.success(`Added automation: ${location.state.automationTitle || `Automation ${location.state.automationId}`}`);
   };
 
