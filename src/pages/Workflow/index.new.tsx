@@ -165,7 +165,7 @@ export default function WorkflowPage() {
         };
         
         // If we're not preserving existing content, clear the canvas
-        if (!location.state.preserveExisting) {
+        if (location.state.preserveExisting === false) {
           console.log('Clearing canvas for new automation (preserveExisting is false)');
           setNodes([]);
           setEdges([]);
@@ -180,6 +180,7 @@ export default function WorkflowPage() {
             location.state.automationTitle, 
             location.state.automationDescription
           );
+          pendingAutomationData.current = null; // Clear to prevent duplicate processing
         }
       } else {
         setIsCreatingAutomation(location.state.createAutomation || false);
@@ -265,8 +266,9 @@ export default function WorkflowPage() {
       // Handle pending automation node addition
       if (pendingAutomationData.current) {
         const { automationId, automationTitle, automationDescription } = pendingAutomationData.current;
+        console.log('Adding pending automation node from effect:', automationId);
         addAutomationNode(automationId, automationTitle, automationDescription);
-        pendingAutomationData.current = null;
+        pendingAutomationData.current = null; // Clear to prevent duplicate processing
       }
     }
   }, [flowInstance]);
@@ -278,6 +280,7 @@ export default function WorkflowPage() {
     // Calculate position - place it to the right of existing nodes if there are any
     const existingNodes = nodes;
     let xPosition = 100;
+    let yPosition = 100;
     
     if (existingNodes.length > 0) {
       // Find the rightmost node
@@ -286,10 +289,11 @@ export default function WorkflowPage() {
       }, existingNodes[0]);
       
       // Position the new node to the right with some spacing
-      xPosition = rightmostNode.position.x + 250; 
+      xPosition = rightmostNode.position.x + 250;
+      yPosition = rightmostNode.position.y; // Keep same Y coordinate as rightmost node
     }
     
-    const position = { x: xPosition, y: 100 };
+    const position = { x: xPosition, y: yPosition };
     
     // Create a unique ID with timestamp to avoid conflicts
     const uniqueId = `automation-${automationId}-${Date.now()}`;
@@ -308,14 +312,25 @@ export default function WorkflowPage() {
     };
     
     setNodes(nds => [...nds, ensureNodeIcon(newNode)]);
+    
+    // Auto-fit the view to show all nodes
+    setTimeout(() => {
+      if (flowInstance) {
+        flowInstance.fitView({ padding: 0.2 });
+      }
+    }, 100);
+    
     toast.success(`Added automation: ${automationTitle || `Automation ${automationId}`}`);
     
-    // If there are existing nodes, try to connect to the last one
+    // If there are existing nodes, try to connect to the rightmost one
     if (existingNodes.length > 0) {
-      const lastNodeId = existingNodes[existingNodes.length - 1].id;
+      const rightmostNode = existingNodes.reduce((rightmost, node) => {
+        return (node.position.x > rightmost.position.x) ? node : rightmost;
+      }, existingNodes[0]);
+      
       const newEdge = {
-        id: `e-${lastNodeId}-${uniqueId}`,
-        source: lastNodeId,
+        id: `e-${rightmostNode.id}-${uniqueId}`,
+        source: rightmostNode.id,
         target: uniqueId,
         type: 'animated',
         animated: true
