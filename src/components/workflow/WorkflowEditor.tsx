@@ -62,6 +62,9 @@ export function WorkflowEditor({ workflow, onSave, workflowDarkMode = false }: W
   // Store dark mode internally to ensure it's not lost when switching views
   const [localDarkMode, setLocalDarkMode] = useState(workflowDarkMode);
   
+  // Store the original dark mode value to restore it when needed
+  const [originalDarkMode] = useState(workflowDarkMode);
+  
   // Keep local dark mode in sync with prop
   useEffect(() => {
     console.log("workflowDarkMode prop changed to:", workflowDarkMode);
@@ -76,6 +79,40 @@ export function WorkflowEditor({ workflow, onSave, workflowDarkMode = false }: W
       localDarkMode 
     });
   }, [showTemplateSelector, workflowDarkMode, localDarkMode]);
+
+  // Force dark mode to true if it was originally true
+  useEffect(() => {
+    if (originalDarkMode) {
+      console.log("FORCING DARK MODE TO TRUE because originalDarkMode =", originalDarkMode);
+      setLocalDarkMode(true);
+      
+      // Immediately apply dark mode to all nodes
+      setTimeout(() => {
+        forceApplyDarkMode();
+      }, 10);
+    }
+  }, [showTemplateSelector]);
+  
+  // Force localDarkMode to match originalDarkMode when switching views
+  const handleShowTemplateSelector = () => {
+    console.log("Switching to template view, preserving dark mode:", originalDarkMode);
+    setLocalDarkMode(originalDarkMode);
+    setShowTemplateSelector(true);
+  };
+  
+  // When returning from template selection, ensure dark mode is preserved
+  const handleReturnFromTemplates = () => {
+    console.log("Returning from template view, preserving dark mode:", originalDarkMode);
+    setLocalDarkMode(originalDarkMode);
+    setShowTemplateSelector(false);
+    
+    // Force reapply dark mode after returning
+    setTimeout(() => {
+      if (originalDarkMode) {
+        forceApplyDarkMode();
+      }
+    }, 10);
+  };
 
   const onConnect = useCallback(
     (params: Connection) => setEdges((eds) => addEdge(params, eds)),
@@ -255,7 +292,7 @@ export function WorkflowEditor({ workflow, onSave, workflowDarkMode = false }: W
           <Button
             variant="outline"
             size="sm"
-            onClick={() => setShowTemplateSelector(false)}
+            onClick={handleReturnFromTemplates}
             style={localDarkMode ? {
               backgroundColor: DARK_BG,
               color: DARK_TEXT,
@@ -275,7 +312,7 @@ export function WorkflowEditor({ workflow, onSave, workflowDarkMode = false }: W
         <Button
           variant="outline"
           size="sm"
-          onClick={() => setShowTemplateSelector(true)}
+          onClick={handleShowTemplateSelector}
           style={localDarkMode ? {
             backgroundColor: DARK_BG,
             color: DARK_TEXT,
