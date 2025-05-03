@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import {
   ReactFlow,
   Node,
@@ -58,6 +58,24 @@ export function WorkflowEditor({ workflow, onSave, workflowDarkMode = false }: W
   const [error, setError] = useState<Error | null>(null);
   const [executionId, setExecutionId] = useState<string | null>(null);
   const [showTemplateSelector, setShowTemplateSelector] = useState(!workflow);
+  
+  // Store dark mode internally to ensure it's not lost when switching views
+  const [localDarkMode, setLocalDarkMode] = useState(workflowDarkMode);
+  
+  // Keep local dark mode in sync with prop
+  useEffect(() => {
+    console.log("workflowDarkMode prop changed to:", workflowDarkMode);
+    setLocalDarkMode(workflowDarkMode);
+  }, [workflowDarkMode]);
+  
+  // Log when template selector visibility changes
+  useEffect(() => {
+    console.log("Template selector visibility changed:", { 
+      showTemplateSelector, 
+      workflowDarkMode,
+      localDarkMode 
+    });
+  }, [showTemplateSelector, workflowDarkMode, localDarkMode]);
 
   const onConnect = useCallback(
     (params: Connection) => setEdges((eds) => addEdge(params, eds)),
@@ -127,8 +145,8 @@ export function WorkflowEditor({ workflow, onSave, workflowDarkMode = false }: W
 
     setIsLoading(true);
     try {
-      console.log("Selecting template with workflowDarkMode =", workflowDarkMode);
-      const { success, workflow: newWorkflow, error } = await WorkflowService.createWorkflowFromTemplate(template.id, workflowDarkMode);
+      console.log("Selecting template with workflowDarkMode =", localDarkMode);
+      const { success, workflow: newWorkflow, error } = await WorkflowService.createWorkflowFromTemplate(template.id, localDarkMode);
       if (!success) throw error;
 
       // Ensure dark mode is applied to all nodes including those from templates
@@ -143,7 +161,7 @@ export function WorkflowEditor({ workflow, onSave, workflowDarkMode = false }: W
         };
       });
 
-      console.log(`Setting ${nodesWithDarkMode.length} nodes with workflowDarkMode = ${workflowDarkMode}`);
+      console.log(`Setting ${nodesWithDarkMode.length} nodes with workflowDarkMode = ${localDarkMode}`);
       setNodes(nodesWithDarkMode);
       setEdges(newWorkflow.data.edges);
       setShowTemplateSelector(false);
@@ -158,7 +176,7 @@ export function WorkflowEditor({ workflow, onSave, workflowDarkMode = false }: W
       
       // Force re-apply dark mode after a short delay to ensure it takes effect
       setTimeout(() => {
-        if (workflowDarkMode) {
+        if (localDarkMode) {
           forceApplyDarkMode();
         }
       }, 100);
@@ -181,7 +199,7 @@ export function WorkflowEditor({ workflow, onSave, workflowDarkMode = false }: W
           ...node,
           data: { 
             ...node.data,
-            workflowDarkMode: true
+            workflowDarkMode: localDarkMode 
           }
         };
         console.log("Node after force apply:", node.id, updatedNode.data.workflowDarkMode);
@@ -191,15 +209,15 @@ export function WorkflowEditor({ workflow, onSave, workflowDarkMode = false }: W
   };
 
   // This will ensure all existing nodes get dark mode applied on each render
-  React.useEffect(() => {
-    if (workflowDarkMode) {
+  useEffect(() => {
+    if (localDarkMode) {
       forceApplyDarkMode();
     }
-  }, [nodes.length, workflowDarkMode]);
+  }, [nodes.length, localDarkMode]);
 
   if (showTemplateSelector) {
     return (
-      <div style={workflowDarkMode ? { 
+      <div style={localDarkMode ? { 
         background: DARK_BG, 
         color: DARK_TEXT,
         height: '100%',
@@ -208,7 +226,7 @@ export function WorkflowEditor({ workflow, onSave, workflowDarkMode = false }: W
       } : {}}>
         <WorkflowTemplateSelector 
           onSelect={handleTemplateSelect} 
-          workflowDarkMode={workflowDarkMode} 
+          workflowDarkMode={localDarkMode} 
           templates={[
             { 
               id: 'blank', 
@@ -238,7 +256,7 @@ export function WorkflowEditor({ workflow, onSave, workflowDarkMode = false }: W
             variant="outline"
             size="sm"
             onClick={() => setShowTemplateSelector(false)}
-            style={workflowDarkMode ? {
+            style={localDarkMode ? {
               backgroundColor: DARK_BG,
               color: DARK_TEXT,
               borderColor: DARK_GOLD,
@@ -258,7 +276,7 @@ export function WorkflowEditor({ workflow, onSave, workflowDarkMode = false }: W
           variant="outline"
           size="sm"
           onClick={() => setShowTemplateSelector(true)}
-          style={workflowDarkMode ? {
+          style={localDarkMode ? {
             backgroundColor: DARK_BG,
             color: DARK_TEXT,
             borderColor: DARK_GOLD,
@@ -271,7 +289,7 @@ export function WorkflowEditor({ workflow, onSave, workflowDarkMode = false }: W
           size="sm"
           onClick={handleSave}
           disabled={isLoading}
-          style={workflowDarkMode ? {
+          style={localDarkMode ? {
             backgroundColor: DARK_BG,
             color: DARK_TEXT,
             borderColor: DARK_GOLD,
@@ -289,7 +307,7 @@ export function WorkflowEditor({ workflow, onSave, workflowDarkMode = false }: W
           size="sm"
           onClick={handleExecute}
           disabled={isLoading}
-          style={workflowDarkMode ? {
+          style={localDarkMode ? {
             backgroundColor: DARK_GOLD,
             color: '#000000',
           } : {}}
@@ -304,7 +322,7 @@ export function WorkflowEditor({ workflow, onSave, workflowDarkMode = false }: W
       </div>
 
       <div className="absolute top-4 left-4 z-10">
-        <Card className="p-2" style={workflowDarkMode ? {
+        <Card className="p-2" style={localDarkMode ? {
           backgroundColor: DARK_BG,
           color: DARK_TEXT,
           borderColor: DARK_GOLD,
@@ -316,7 +334,7 @@ export function WorkflowEditor({ workflow, onSave, workflowDarkMode = false }: W
                 variant="outline"
                 size="sm"
                 onClick={() => handleAddNode(type)}
-                style={workflowDarkMode ? {
+                style={localDarkMode ? {
                   backgroundColor: DARK_BG,
                   color: DARK_TEXT,
                   borderColor: DARK_GOLD,
@@ -340,7 +358,7 @@ export function WorkflowEditor({ workflow, onSave, workflowDarkMode = false }: W
             ...params,
             type: 'animated',
             animated: true,
-            style: { stroke: workflowDarkMode ? DARK_GOLD : '#3b82f6' },
+            style: { stroke: localDarkMode ? DARK_GOLD : '#3b82f6' },
           };
           setEdges((eds) => addEdge(newEdge, eds));
         }}
@@ -352,20 +370,20 @@ export function WorkflowEditor({ workflow, onSave, workflowDarkMode = false }: W
           console.log('Node dark mode flag:', node.data.workflowDarkMode);
         }}
         onPaneClick={() => console.log('Current nodes:', nodes)}
-        style={workflowDarkMode ? { 
+        style={localDarkMode ? { 
           background: DARK_BG, 
           color: DARK_TEXT, 
           border: `3px solid ${DARK_GOLD}` 
         } : {}}
       >
         <Background 
-          color={workflowDarkMode ? DARK_GOLD : undefined} 
+          color={localDarkMode ? DARK_GOLD : undefined} 
           gap={16}
           size={1}
         />
         <Controls 
           className="!bottom-20 !left-4" 
-          style={workflowDarkMode ? { 
+          style={localDarkMode ? { 
             color: DARK_GOLD,
             background: DARK_BG, 
             borderColor: DARK_GOLD,
