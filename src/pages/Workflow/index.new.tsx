@@ -367,17 +367,17 @@ export default function WorkflowPage() {
   };
 
   return (
-    <div className="flex h-full">
+    <div className="flex h-screen">
       {/* Left sidebar for node types */}
       <NodeSidebar />
 
       {/* Main workflow area */}
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col h-full">
         {/* Top navigation */}
         <WorkflowNavigation />
 
         {/* Flow canvas */}
-        <div className="flex-1">
+        <div className="flex-1 h-full">
           <Flow 
             workflowId={id} 
             onNodeSelect={setSelectedNode}

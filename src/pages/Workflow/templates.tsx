@@ -176,7 +176,7 @@ const Templates: React.FC = () => {
 
   const handleUseTemplate = (template: WorkflowTemplate) => {
     // Navigate to workflow builder with template data
-    navigate('/workflow/new', { 
+    navigate('/workflow', { 
       state: { 
         useTemplate: true,
         templateId: template.id,
