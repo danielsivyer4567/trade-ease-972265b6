@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.38.4'
 
@@ -15,11 +14,11 @@ serve(async (req) => {
 
   try {
     const { searchQuery } = await req.json()
-    const apiKey = Deno.env.get('ARCGIS_API_KEY')
-
-    if (!apiKey) {
-      throw new Error('ArcGIS API key not configured')
-    }
+    // Make API key optional - use environment variable if available
+    const apiKey = Deno.env.get('ARCGIS_API_KEY') || ''
+    
+    // Add apiKey parameter to URL only if we have one
+    const apiKeyParam = apiKey ? `&token=${apiKey}` : ''
 
     if (!searchQuery) {
       throw new Error('Search query is required')
@@ -27,7 +26,7 @@ serve(async (req) => {
 
     // Call ArcGIS Geocoding API
     const response = await fetch(
-      `https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?f=json&singleLine=${encodeURIComponent(searchQuery)}&outFields=*&maxLocations=5&forStorage=false&token=${apiKey}`
+      `https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?f=json&singleLine=${encodeURIComponent(searchQuery)}&outFields=*&maxLocations=5&forStorage=false${apiKeyParam}`
     )
 
     const data = await response.json()

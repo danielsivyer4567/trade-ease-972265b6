@@ -1,4 +1,3 @@
-
 import React, { useCallback } from 'react';
 import { BaseLayout } from "@/components/ui/BaseLayout";
 import { Card, CardContent } from "@/components/ui/card";
@@ -7,6 +6,7 @@ import { PropertyList } from './components/PropertyList';
 import { PropertyInfo } from './components/PropertyInfo';
 import { PageHeader } from './components/PageHeader';
 import { AuthNotice } from './components/AuthNotice';
+import { AddressSearch } from './components/AddressSearch';
 import { usePropertyBoundaries } from './hooks/usePropertyBoundaries';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -57,7 +57,9 @@ const PropertyBoundaries: React.FC = () => {
         )}
         
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-1">
+          <div className="lg:col-span-1 space-y-6">
+            <AddressSearch />
+            
             <PropertyList
               properties={properties}
               selectedProperty={selectedProperty}
@@ -71,7 +73,7 @@ const PropertyBoundaries: React.FC = () => {
               onPropertyDelete={handleDeleteProperty}
             />
             
-            <Card className="mt-4">
+            <Card>
               <CardContent className="p-4">
                 <div className="flex flex-col items-center justify-center gap-2 p-4 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors" onClick={handleUploadClick}>
                   <Upload className="h-8 w-8 text-gray-400" />
