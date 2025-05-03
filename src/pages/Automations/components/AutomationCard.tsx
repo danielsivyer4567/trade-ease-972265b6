@@ -24,7 +24,8 @@ const AutomationCard = ({ automation, toggleAutomation }: AutomationCardProps) =
         addAutomation: true,
         automationId: automation.id,
         automationTitle: automation.title,
-        automationDescription: automation.description
+        automationDescription: automation.description,
+        preserveExisting: true
       } 
     });
   };

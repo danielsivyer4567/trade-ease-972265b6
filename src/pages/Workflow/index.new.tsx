@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useParams, useLocation } from 'react-router-dom';
+import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import Flow from './components/Flow';
 import { WorkflowNavigation } from './components/WorkflowNavigation';
 import { NodeSidebar } from './components/NodeSidebar';
@@ -14,6 +14,7 @@ import { User, Briefcase, ClipboardList, FileText, MessageSquare, Eye, Zap, Shar
 export default function WorkflowPage() {
   const { id } = useParams();
   const location = useLocation();
+  const navigate = useNavigate();
   const [selectedNode, setSelectedNode] = useState(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [isSaveDialogOpen, setIsSaveDialogOpen] = useState(false);
@@ -26,6 +27,15 @@ export default function WorkflowPage() {
   const pendingTemplateData = useRef(null);
   const pendingWorkflowId = useRef(null);
   const pendingAutomationData = useRef(null);
+  
+  // Clear location state to prevent the same action from happening again on refresh
+  useEffect(() => {
+    if (location.state) {
+      // This will clear the state but keep the current URL
+      const currentPath = location.pathname;
+      window.history.replaceState({}, '', currentPath);
+    }
+  }, []);
 
   // Node type to icon mapping
   const nodeTypeIcons = {
@@ -59,33 +69,80 @@ export default function WorkflowPage() {
   // Handle incoming location state when component mounts
   useEffect(() => {
     if (location.state) {
+      console.log('Processing location state:', location.state);
+      
       if (location.state.useTemplate && location.state.templateData) {
-        // Store template data for use after flow instance is initialized
-        pendingTemplateData.current = {
-          templateName: location.state.templateName,
-          templateData: location.state.templateData
-        };
-        
-        // Apply template data immediately to nodes and edges
-        const templateData = location.state.templateData;
-        
-        if (templateData.nodes && Array.isArray(templateData.nodes)) {
-          setNodes(templateData.nodes.map(node => ensureNodeIcon({
-            id: node.id,
-            type: node.type,
-            position: node.position,
-            data: node.data
-          })));
-        }
-        
-        if (templateData.edges && Array.isArray(templateData.edges)) {
-          setEdges(templateData.edges.map(edge => ({
-            id: edge.id,
-            source: edge.source,
-            target: edge.target,
-            type: 'animated',
-            animated: true
-          })));
+        // Check if we should preserve existing content
+        if (location.state.preserveExisting) {
+          console.log('Preserving existing content while applying template');
+          
+          // Store template data for use after flow instance is initialized
+          pendingTemplateData.current = {
+            templateName: location.state.templateName,
+            templateData: location.state.templateData,
+            preserveExisting: true
+          };
+          
+          // Apply template data by appending to existing nodes and edges
+          const templateData = location.state.templateData;
+          
+          if (templateData.nodes && Array.isArray(templateData.nodes)) {
+            // Create unique IDs for new nodes from template to avoid conflicts
+            const newTemplateNodes = templateData.nodes.map(node => ensureNodeIcon({
+              id: `template-${node.id}-${Date.now()}`,
+              type: node.type,
+              position: node.position,
+              data: node.data
+            }));
+            
+            // Append new nodes to existing ones
+            setNodes(currentNodes => [...currentNodes, ...newTemplateNodes]);
+          }
+          
+          if (templateData.edges && Array.isArray(templateData.edges)) {
+            // Create unique IDs for new edges, and update source/target references
+            const newTemplateEdges = templateData.edges.map(edge => ({
+              id: `template-${edge.id}-${Date.now()}`,
+              source: `template-${edge.source}-${Date.now()}`,
+              target: `template-${edge.target}-${Date.now()}`,
+              type: 'animated',
+              animated: true
+            }));
+            
+            // Append new edges to existing ones
+            setEdges(currentEdges => [...currentEdges, ...newTemplateEdges]);
+          }
+          
+        } else {
+          console.log('Replacing existing content with template');
+          
+          // Store template data for use after flow instance is initialized
+          pendingTemplateData.current = {
+            templateName: location.state.templateName,
+            templateData: location.state.templateData
+          };
+          
+          // Apply template data immediately to nodes and edges (replacing existing content)
+          const templateData = location.state.templateData;
+          
+          if (templateData.nodes && Array.isArray(templateData.nodes)) {
+            setNodes(templateData.nodes.map(node => ensureNodeIcon({
+              id: node.id,
+              type: node.type,
+              position: node.position,
+              data: node.data
+            })));
+          }
+          
+          if (templateData.edges && Array.isArray(templateData.edges)) {
+            setEdges(templateData.edges.map(edge => ({
+              id: edge.id,
+              source: edge.source,
+              target: edge.target,
+              type: 'animated',
+              animated: true
+            })));
+          }
         }
       } else if (location.state.addWorkflow && location.state.workflowId) {
         // Store workflow ID for loading after flow instance is initialized
@@ -97,16 +154,32 @@ export default function WorkflowPage() {
         // Fetch and apply workflow data
         loadWorkflowData(location.state.workflowId);
       } else if (location.state.addAutomation && location.state.automationId) {
+        console.log('Adding automation, preserveExisting:', location.state.preserveExisting);
+        
         // Store automation data for use after flow instance is initialized
         pendingAutomationData.current = {
           automationId: location.state.automationId,
           automationTitle: location.state.automationTitle,
-          automationDescription: location.state.automationDescription
+          automationDescription: location.state.automationDescription,
+          preserveExisting: location.state.preserveExisting !== false // Default to true if not specified
         };
+        
+        // If we're not preserving existing content, clear the canvas
+        if (!location.state.preserveExisting) {
+          console.log('Clearing canvas for new automation (preserveExisting is false)');
+          setNodes([]);
+          setEdges([]);
+        } else {
+          console.log('Preserving existing content for new automation');
+        }
 
         // If flowInstance is already available, add the automation node immediately
         if (flowInstance) {
-          addAutomationNode(location.state.automationId, location.state.automationTitle, location.state.automationDescription);
+          addAutomationNode(
+            location.state.automationId, 
+            location.state.automationTitle, 
+            location.state.automationDescription
+          );
         }
       } else {
         setIsCreatingAutomation(location.state.createAutomation || false);

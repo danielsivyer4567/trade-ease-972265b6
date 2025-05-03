@@ -25,7 +25,8 @@ export function AutomationWorkflowButton({
       navigate(`/workflow`, { 
         state: { 
           addAutomation: true,
-          automationId: automationId
+          automationId: automationId,
+          preserveExisting: true
         } 
       });
     } else {
