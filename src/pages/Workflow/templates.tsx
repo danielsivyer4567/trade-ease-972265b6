@@ -175,17 +175,29 @@ const Templates: React.FC = () => {
   };
 
   const handleUseTemplate = (template: WorkflowTemplate) => {
-    // Navigate to workflow builder with template data
-    navigate('/workflow', { 
-      state: { 
-        useTemplate: true,
+    // Store template data in localStorage to avoid large state objects in navigation
+    try {
+      localStorage.setItem('workflow_template_data', JSON.stringify({
         templateId: template.id,
         templateName: template.name,
         templateDescription: template.description,
-        templateData: template.data
-      } 
-    });
-    toast.success(`Template "${template.name}" applied to new workflow`);
+        templateData: template.data,
+        timestamp: Date.now() // Add timestamp to ensure freshness
+      }));
+      
+      // Navigate to workflow builder with minimal state
+      navigate('/workflow', { 
+        state: { 
+          useTemplate: true,
+          fromLocalStorage: true
+        } 
+      });
+      
+      toast.success(`Template "${template.name}" applied to new workflow`);
+    } catch (error) {
+      console.error('Error storing template data:', error);
+      toast.error('Failed to apply template. Please try again.');
+    }
   };
 
   const handleEditTemplate = (templateId: string) => {
