@@ -21,15 +21,39 @@ const AutomationCard = ({ automation, toggleAutomation }: AutomationCardProps) =
   const handleRunNow = () => {
     console.log('AutomationCard: navigating to workflow with automation', automation.id, 'preserveExisting: true');
     
-    navigate('/workflow', { 
-      state: { 
-        addAutomation: true,
+    try {
+      // Store in localStorage first to avoid message channel issues
+      localStorage.setItem('automation_workflow_data', JSON.stringify({
         automationId: automation.id,
         automationTitle: automation.title,
         automationDescription: automation.description,
-        preserveExisting: true // Explicitly set to true to ensure it preserves existing content
-      } 
-    });
+        timestamp: Date.now()
+      }));
+      
+      // Navigate with minimal state
+      navigate('/workflow', { 
+        state: { 
+          addAutomation: true,
+          fromLocalStorage: true,
+          preserveExisting: true
+        } 
+      });
+      
+      toast.success(`Added "${automation.title}" to workflow builder`);
+    } catch (error) {
+      console.error('Error storing automation data:', error);
+      
+      // Fallback to direct state if localStorage fails
+      navigate('/workflow', { 
+        state: { 
+          addAutomation: true,
+          automationId: automation.id,
+          automationTitle: automation.title,
+          automationDescription: automation.description,
+          preserveExisting: true
+        } 
+      });
+    }
   };
 
   return (
@@ -99,7 +123,13 @@ const AutomationCard = ({ automation, toggleAutomation }: AutomationCardProps) =
           <span>Run Now</span>
         </Button>
         <div className="flex gap-2">
-          <AutomationWorkflowButton automationId={automation.id} variant="ghost" size="sm">
+          <AutomationWorkflowButton 
+            automationId={automation.id} 
+            automationTitle={automation.title}
+            automationDescription={automation.description}
+            variant="ghost" 
+            size="sm"
+          >
             Add to Workflow
           </AutomationWorkflowButton>
           <Button variant="ghost" size="sm" className="text-blue-600">Edit</Button>
