@@ -1,13 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { Handle, Position } from '@xyflow/react';
-import { Trash, Edit, GripVertical } from 'lucide-react';
+import { Trash, Edit, GripVertical, Settings, ChevronDown, ChevronUp } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 
 export function CustomNode({ data, id, selected }) {
   const [isClicked, setIsClicked] = useState(false);
   const [width, setWidth] = useState(data.width || 160);
   const [height, setHeight] = useState(data.height || 80);
+  const [expanded, setExpanded] = useState(false);
   
+  // Check if we're in dark mode
+  const isDarkMode = data.workflowDarkMode;
+  const gold = '#bfa14a';
+  const darkBg = '#18140c';
+  const darkText = '#ffe082';
+
   const bgColor = data.color ? `${data.color}25` : '#f0f9ff';
   const borderColor = data.color || '#3b82f6';
   
@@ -26,60 +33,100 @@ export function CustomNode({ data, id, selected }) {
     }
   };
 
+  // Default data
+  const title = data.title || 'Custom Node';
+  const description = data.description || '';
+  const message = data.message || '';
+
   return (
     <>
       {isClicked && (
-        <div className="absolute -top-14 left-1/2 transform -translate-x-1/2 flex gap-2 bg-white p-1 rounded shadow-md border border-gray-200 z-20">
-          <Button variant="outline" size="sm" className="h-8 w-8 p-0" onClick={handleDelete}>
+        <div className="absolute -top-14 left-1/2 transform -translate-x-1/2 flex gap-2 z-20"
+             style={{ 
+               backgroundColor: isDarkMode ? darkBg : 'white',
+               borderColor: isDarkMode ? gold : '#e5e7eb',
+               color: isDarkMode ? darkText : 'inherit',
+               borderWidth: '1px',
+               borderStyle: 'solid',
+               borderRadius: '0.375rem',
+               padding: '0.25rem',
+               boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)'
+             }}>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="h-8 w-8 p-0" 
+            onClick={handleDelete}
+            style={{ 
+              backgroundColor: isDarkMode ? darkBg : 'white',
+              color: isDarkMode ? gold : 'inherit',
+              borderColor: isDarkMode ? gold : 'inherit'
+            }}
+          >
             <Trash className="h-4 w-4" />
           </Button>
         </div>
       )}
       
       <div
-        className="bg-white rounded-md shadow-md p-2 border-2 relative"
-        style={{ 
-          borderColor,
-          width: `${width}px`,
-          height: `${height}px`,
-          minHeight: '60px',
-          overflow: 'auto'
-        }}
-        onClick={(e) => {
-          e.stopPropagation();
-          setIsClicked(true);
+        className={`border-2 rounded-xl shadow-md p-3 transition-transform duration-150`}
+        style={{
+          backgroundColor: isDarkMode ? darkBg : 'white',
+          borderColor: isDarkMode ? gold : '#cbd5e1',
+          color: isDarkMode ? darkText : 'inherit',
+          width: expanded ? '280px' : '180px',
         }}
       >
-        <Handle type="target" position={Position.Top} className="!bg-gray-400" />
-        <div className="flex items-start h-full">
-          <div 
-            className="w-6 h-6 rounded-full flex items-center justify-center mr-2 flex-shrink-0"
-            style={{ backgroundColor: bgColor }}
+        <Handle type="target" position={Position.Top} style={{ backgroundColor: isDarkMode ? gold : '#64748b' }} />
+        
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center">
+            <div 
+              className={`w-8 h-8 rounded-full flex items-center justify-center mr-2`}
+              style={{ backgroundColor: isDarkMode ? darkBg : '#f1f5f9' }}
+            >
+              <Settings className="h-4 w-4" style={{ color: isDarkMode ? gold : '#64748b' }} />
+            </div>
+            <div className="font-semibold text-sm" style={{ color: isDarkMode ? darkText : '#334155' }}>
+              {title}
+            </div>
+          </div>
+          
+          <button 
+            onClick={() => setExpanded(!expanded)} 
+            className="p-1 rounded"
+            style={{ 
+              backgroundColor: isDarkMode ? 'rgba(191, 161, 74, 0.1)' : 'rgba(100, 116, 139, 0.1)',
+              color: isDarkMode ? gold : '#64748b'
+            }}
           >
-            <span className="text-xs">{data.icon || '⚙️'}</span>
-          </div>
-          <div className="flex-1 overflow-auto">
-            <div className="text-xs text-gray-700 break-words whitespace-pre-wrap">
-              {data.label || ''}
-            </div>
-            {data.title && (
-              <div className="text-xs text-gray-500 mt-1">
-                {data.title}
-              </div>
+            {expanded ? (
+              <ChevronUp className="h-4 w-4" />
+            ) : (
+              <ChevronDown className="h-4 w-4" />
             )}
-            {data.assignedRole && (
-              <div className="text-xs text-blue-500 mt-1">
-                Role: {data.assignedRole}
-              </div>
-            )}
-          </div>
-          {selected && (
-            <div className="absolute bottom-1 right-1 cursor-nwse-resize opacity-50 text-gray-400">
-              <GripVertical size={12} />
-            </div>
-          )}
+          </button>
         </div>
-        <Handle type="source" position={Position.Bottom} className="!bg-gray-400" />
+        
+        {description && (
+          <div className="text-xs mb-2" style={{ color: isDarkMode ? '#8e7a3c' : '#64748b' }}>
+            {description}
+          </div>
+        )}
+        
+        {expanded && message && (
+          <div 
+            className="text-xs mt-2 p-2 rounded"
+            style={{ 
+              backgroundColor: isDarkMode ? 'rgba(191, 161, 74, 0.1)' : '#f1f5f9',
+              color: isDarkMode ? darkText : '#334155' 
+            }}
+          >
+            {message}
+          </div>
+        )}
+        
+        <Handle type="source" position={Position.Bottom} style={{ backgroundColor: isDarkMode ? gold : '#64748b' }} />
       </div>
     </>
   );

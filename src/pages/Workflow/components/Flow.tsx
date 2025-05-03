@@ -27,6 +27,7 @@ import { AutomationIntegrationService } from '@/services/AutomationIntegrationSe
 import { WorkflowService } from '@/services/WorkflowService';
 import { supabase } from '@/integrations/supabase/client';
 import { useWorkflow } from '@/hooks/useWorkflow';
+import { Moon, Sun } from 'lucide-react';
 
 // Define node data types for better type safety
 interface BaseNodeData {
@@ -57,12 +58,14 @@ interface FlowProps {
   onInit: (flowInstance: any) => void;
   workflowId?: string;
   onNodeSelect?: (node: any) => void;
+  workflowDarkMode?: boolean;
+  toggleDarkMode?: () => void;
 }
 
 const defaultNodes = [];
 const defaultEdges = [];
 
-export function Flow({ onInit, workflowId, onNodeSelect }: FlowProps) {
+export function Flow({ onInit, workflowId, onNodeSelect, workflowDarkMode = false, toggleDarkMode }: FlowProps) {
   const [nodes, setNodes, onNodesChange] = useNodesState(defaultNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(defaultEdges);
   const [instance, setInstance] = useState(null);
@@ -94,12 +97,15 @@ export function Flow({ onInit, workflowId, onNodeSelect }: FlowProps) {
         id: `${type}-${Date.now()}`,
         type,
         position,
-        data: { label: type },
+        data: { 
+          label: type,
+          workflowDarkMode: workflowDarkMode
+        },
       };
 
       setNodes((nds) => nds.concat(newNode));
     },
-    [instance]
+    [instance, workflowDarkMode]
   );
 
   const onDragOver = useCallback((event) => {
@@ -117,8 +123,29 @@ export function Flow({ onInit, workflowId, onNodeSelect }: FlowProps) {
     setNodes((nds) => nds.map((n) => n.id === nodeId ? { ...n, data: { ...n.data, ...data } } : n));
   };
 
+  const gold = '#bfa14a';
+  const darkBg = '#18140c';
+  const darkText = '#ffe082';
+
+  useEffect(() => {
+    console.log('Flow dark mode state:', workflowDarkMode);
+  }, [workflowDarkMode]);
+
+  // Update all nodes when workflowDarkMode changes
+  useEffect(() => {
+    setNodes((nds) => 
+      nds.map(node => ({
+        ...node,
+        data: { 
+          ...node.data,
+          workflowDarkMode
+        }
+      }))
+    );
+  }, [workflowDarkMode, setNodes]);
+
   return (
-    <div className="h-full w-full">
+    <div className="h-full w-full relative" style={workflowDarkMode ? { background: darkBg, color: darkText, borderColor: gold } : {}}>
       <style>
         {`
           @keyframes electricity {
@@ -129,8 +156,14 @@ export function Flow({ onInit, workflowId, onNodeSelect }: FlowProps) {
               stroke-dashoffset: -20;
             }
           }
+          
+          .react-flow__controls {
+            pointer-events: auto !important;
+            z-index: 5 !important;
+          }
         `}
       </style>
+      
       <ReactFlow
         nodes={nodes}
         edges={edges}
@@ -141,7 +174,7 @@ export function Flow({ onInit, workflowId, onNodeSelect }: FlowProps) {
             ...params,
             type: 'animated',
             animated: true,
-            style: { stroke: '#3b82f6' },
+            style: { stroke: workflowDarkMode ? gold : '#3b82f6' },
           };
           setEdges((eds) => addEdge(newEdge, eds));
         }}
@@ -152,16 +185,46 @@ export function Flow({ onInit, workflowId, onNodeSelect }: FlowProps) {
         nodeTypes={nodeTypes}
         edgeTypes={edgeTypes}
         fitView
+        style={workflowDarkMode ? { 
+          background: darkBg, 
+          color: darkText, 
+          border: `3px solid ${gold}` 
+        } : {}}
       >
-        <Background />
-        <Controls className="!bottom-20 !left-4" />
-        <MiniMap className="!bottom-20 !right-4" />
+        <Background 
+          color={workflowDarkMode ? gold : undefined} 
+          gap={16}
+          size={1}
+        />
+        
+        <Controls 
+          className="!bottom-20 !left-4" 
+          style={workflowDarkMode ? { 
+            color: gold,
+            background: darkBg, 
+            borderColor: gold,
+            borderWidth: '2px',
+            borderStyle: 'solid'
+          } : {}} 
+        />
+        
+        <MiniMap 
+          className="!bottom-20 !right-4" 
+          style={workflowDarkMode ? { 
+            background: darkBg, 
+            borderColor: gold,
+            borderWidth: '2px',
+            borderStyle: 'solid'
+          } : {}} 
+        />
       </ReactFlow>
+
       {selectedNode && (
         <NodeDetailsPanel
           node={selectedNode}
           onClose={handleClosePanel}
           onUpdate={handleUpdateNode}
+          workflowDarkMode={workflowDarkMode}
         />
       )}
     </div>

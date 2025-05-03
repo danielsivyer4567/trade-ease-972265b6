@@ -27,6 +27,11 @@ import { WorkflowService } from '@/services/WorkflowService';
 import { WorkflowExecutionStatus } from './WorkflowExecutionStatus';
 import { WorkflowTemplateSelector } from './WorkflowTemplateSelector';
 
+// Constants for dark mode
+const DARK_GOLD = '#bfa14a';
+const DARK_BG = '#18140c';
+const DARK_TEXT = '#ffe082';
+
 // Node types
 const nodeTypes = {
   customerNode: CustomerNode,
@@ -43,9 +48,10 @@ const nodeTypes = {
 interface WorkflowEditorProps {
   workflow?: Workflow;
   onSave: (workflow: Workflow) => void;
+  workflowDarkMode?: boolean;
 }
 
-export function WorkflowEditor({ workflow, onSave }: WorkflowEditorProps) {
+export function WorkflowEditor({ workflow, onSave, workflowDarkMode = false }: WorkflowEditorProps) {
   const [nodes, setNodes, onNodesChange] = useNodesState(workflow?.data.nodes || []);
   const [edges, setEdges, onEdgesChange] = useEdgesState(workflow?.data.edges || []);
   const [isLoading, setIsLoading] = useState(false);
@@ -105,7 +111,10 @@ export function WorkflowEditor({ workflow, onSave }: WorkflowEditorProps) {
       id: `${type}-${Date.now()}`,
       type,
       position: { x: 100, y: 100 },
-      data: { label: type }
+      data: { 
+        label: type,
+        workflowDarkMode // Pass the dark mode flag to the node data
+      }
     };
     setNodes((nds) => [...nds, newNode]);
   };
@@ -118,10 +127,20 @@ export function WorkflowEditor({ workflow, onSave }: WorkflowEditorProps) {
 
     setIsLoading(true);
     try {
-      const { success, workflow: newWorkflow, error } = await WorkflowService.createWorkflowFromTemplate(template.id);
+      const { success, workflow: newWorkflow, error } = await WorkflowService.createWorkflowFromTemplate(template.id, workflowDarkMode);
       if (!success) throw error;
 
-      setNodes(newWorkflow.data.nodes);
+      // Since the service now applies workflowDarkMode to nodes, we don't need to do it here
+      // But we'll keep this code to ensure all nodes have the dark mode flag
+      const nodesWithDarkMode = newWorkflow.data.nodes.map(node => ({
+        ...node,
+        data: {
+          ...node.data,
+          workflowDarkMode
+        }
+      }));
+
+      setNodes(nodesWithDarkMode);
       setEdges(newWorkflow.data.edges);
       setShowTemplateSelector(false);
       onSave(newWorkflow);
@@ -135,8 +154,56 @@ export function WorkflowEditor({ workflow, onSave }: WorkflowEditorProps) {
     }
   };
 
+  // Force dark mode to all nodes - this can be called when templates still aren't showing dark mode
+  const forceApplyDarkMode = () => {
+    console.log("Force applying dark mode to all nodes");
+    setNodes((nds) => 
+      nds.map(node => {
+        console.log("Node before force apply:", node.id, node.data.workflowDarkMode);
+        const updatedNode = {
+          ...node,
+          data: { 
+            ...node.data,
+            workflowDarkMode: true
+          }
+        };
+        console.log("Node after force apply:", node.id, updatedNode.data.workflowDarkMode);
+        return updatedNode;
+      })
+    );
+  };
+
+  // This will ensure all existing nodes get dark mode applied on each render
+  React.useEffect(() => {
+    if (workflowDarkMode) {
+      forceApplyDarkMode();
+    }
+  }, [nodes.length, workflowDarkMode]);
+
   if (showTemplateSelector) {
-    return <WorkflowTemplateSelector onSelect={handleTemplateSelect} />;
+    return <WorkflowTemplateSelector onSelect={handleTemplateSelect} workflowDarkMode={workflowDarkMode} templates={[
+      { 
+        id: 'blank', 
+        name: 'Blank Canvas', 
+        description: 'Start with an empty canvas',
+        category: 'General',
+        data: { nodes: [], edges: [] }
+      },
+      {
+        id: 'customer-journey',
+        name: 'Customer Journey',
+        description: 'Template for customer onboarding',
+        category: 'Sales',
+        data: { nodes: [], edges: [] }
+      },
+      {
+        id: 'job-workflow',
+        name: 'Job Workflow',
+        description: 'Standard job process flow',
+        category: 'Operations',
+        data: { nodes: [], edges: [] }
+      }
+    ]} />;
   }
 
   return (
@@ -146,6 +213,11 @@ export function WorkflowEditor({ workflow, onSave }: WorkflowEditorProps) {
           variant="outline"
           size="sm"
           onClick={() => setShowTemplateSelector(true)}
+          style={workflowDarkMode ? {
+            backgroundColor: DARK_BG,
+            color: DARK_TEXT,
+            borderColor: DARK_GOLD,
+          } : {}}
         >
           Change Template
         </Button>
@@ -154,6 +226,11 @@ export function WorkflowEditor({ workflow, onSave }: WorkflowEditorProps) {
           size="sm"
           onClick={handleSave}
           disabled={isLoading}
+          style={workflowDarkMode ? {
+            backgroundColor: DARK_BG,
+            color: DARK_TEXT,
+            borderColor: DARK_GOLD,
+          } : {}}
         >
           {isLoading ? (
             <Loader2 className="h-4 w-4 animate-spin" />
@@ -167,6 +244,10 @@ export function WorkflowEditor({ workflow, onSave }: WorkflowEditorProps) {
           size="sm"
           onClick={handleExecute}
           disabled={isLoading}
+          style={workflowDarkMode ? {
+            backgroundColor: DARK_GOLD,
+            color: '#000000',
+          } : {}}
         >
           {isLoading ? (
             <Loader2 className="h-4 w-4 animate-spin" />
@@ -178,7 +259,11 @@ export function WorkflowEditor({ workflow, onSave }: WorkflowEditorProps) {
       </div>
 
       <div className="absolute top-4 left-4 z-10">
-        <Card className="p-2">
+        <Card className="p-2" style={workflowDarkMode ? {
+          backgroundColor: DARK_BG,
+          color: DARK_TEXT,
+          borderColor: DARK_GOLD,
+        } : {}}>
           <div className="flex flex-col space-y-2">
             {Object.keys(nodeTypes).map((type) => (
               <Button
@@ -186,6 +271,11 @@ export function WorkflowEditor({ workflow, onSave }: WorkflowEditorProps) {
                 variant="outline"
                 size="sm"
                 onClick={() => handleAddNode(type)}
+                style={workflowDarkMode ? {
+                  backgroundColor: DARK_BG,
+                  color: DARK_TEXT,
+                  borderColor: DARK_GOLD,
+                } : {}}
               >
                 <Plus className="h-4 w-4 mr-2" />
                 Add {type}
@@ -200,12 +290,44 @@ export function WorkflowEditor({ workflow, onSave }: WorkflowEditorProps) {
         edges={edges}
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
-        onConnect={onConnect}
+        onConnect={(params) => {
+          const newEdge = {
+            ...params,
+            type: 'animated',
+            animated: true,
+            style: { stroke: workflowDarkMode ? DARK_GOLD : '#3b82f6' },
+          };
+          setEdges((eds) => addEdge(newEdge, eds));
+        }}
         nodeTypes={nodeTypes}
         fitView
+        nodesDraggable={true}
+        onNodeDoubleClick={(event, node) => {
+          console.log('Node double-clicked:', node);
+          console.log('Node dark mode flag:', node.data.workflowDarkMode);
+        }}
+        onPaneClick={() => console.log('Current nodes:', nodes)}
+        style={workflowDarkMode ? { 
+          background: DARK_BG, 
+          color: DARK_TEXT, 
+          border: `3px solid ${DARK_GOLD}` 
+        } : {}}
       >
-        <Background />
-        <Controls />
+        <Background 
+          color={workflowDarkMode ? DARK_GOLD : undefined} 
+          gap={16}
+          size={1}
+        />
+        <Controls 
+          className="!bottom-20 !left-4" 
+          style={workflowDarkMode ? { 
+            color: DARK_GOLD,
+            background: DARK_BG, 
+            borderColor: DARK_GOLD,
+            borderWidth: '2px',
+            borderStyle: 'solid'
+          } : {}} 
+        />
         {executionId && <WorkflowExecutionStatus executionId={executionId} />}
       </ReactFlow>
     </div>
@@ -214,163 +336,271 @@ export function WorkflowEditor({ workflow, onSave }: WorkflowEditorProps) {
 
 // Node Components
 function CustomerNode({ data }: { data: any }) {
+  // Check if we're in dark mode
+  const isDarkMode = data.workflowDarkMode;
+  const gold = '#bfa14a';
+  const darkBg = '#18140c';
+  const darkText = '#ffe082';
+
   return (
-    <div className="bg-white border-2 border-stone-400 rounded-xl shadow-md p-3 w-44 transition-transform duration-150 hover:scale-105 hover:shadow-xl">
-      <Handle type="target" position={Position.Top} className="!bg-stone-500" />
+    <div className={`border-2 rounded-xl shadow-md p-3 w-44 transition-transform duration-150 hover:scale-105 hover:shadow-xl`}
+        style={{
+          backgroundColor: isDarkMode ? darkBg : 'white',
+          borderColor: isDarkMode ? gold : '#93c5fd',
+          color: isDarkMode ? darkText : 'inherit'
+        }}>
+      <Handle type="target" position={Position.Top} style={{ backgroundColor: isDarkMode ? gold : '#3b82f6' }} />
       <div className="flex items-center">
-        <div className="w-9 h-9 bg-stone-100 rounded-full flex items-center justify-center mr-3 shadow-sm">
-          <User className="h-5 w-5 text-stone-600" />
+        <div className={`w-9 h-9 rounded-full flex items-center justify-center mr-3 shadow-sm`}
+             style={{ backgroundColor: isDarkMode ? darkBg : '#dbeafe' }}>
+          <User className="h-5 w-5" style={{ color: isDarkMode ? gold : '#2563eb' }} />
         </div>
         <div>
-          <div className="font-bold text-sm text-gray-900">{data.label || 'Customer'}</div>
-          {data.subtitle && <div className="text-xs text-gray-500">{data.subtitle}</div>}
+          <div className="font-bold text-sm" style={{ color: isDarkMode ? darkText : '#111827' }}>{data.label || 'Customer'}</div>
+          {data.subtitle && <div className="text-xs" style={{ color: isDarkMode ? '#8e7a3c' : '#6b7280' }}>{data.subtitle}</div>}
         </div>
       </div>
-      <Handle type="source" position={Position.Bottom} className="!bg-stone-500" />
+      <Handle type="source" position={Position.Bottom} style={{ backgroundColor: isDarkMode ? gold : '#3b82f6' }} />
     </div>
   );
 }
 
 function JobNode({ data }: { data: any }) {
+  // Check if we're in dark mode
+  const isDarkMode = data.workflowDarkMode;
+  const gold = '#bfa14a';
+  const darkBg = '#18140c';
+  const darkText = '#ffe082';
+
   return (
-    <div className="bg-white border-2 border-green-300 rounded-xl shadow-md p-3 w-44 transition-transform duration-150 hover:scale-105 hover:shadow-xl">
-      <Handle type="target" position={Position.Top} className="!bg-green-500" />
+    <div className={`border-2 rounded-xl shadow-md p-3 w-44 transition-transform duration-150 hover:scale-105 hover:shadow-xl`}
+        style={{
+          backgroundColor: isDarkMode ? darkBg : 'white',
+          borderColor: isDarkMode ? gold : '#86efac',
+          color: isDarkMode ? darkText : 'inherit'
+        }}>
+      <Handle type="target" position={Position.Top} style={{ backgroundColor: isDarkMode ? gold : '#16a34a' }} />
       <div className="flex items-center">
-        <div className="w-9 h-9 bg-green-100 rounded-full flex items-center justify-center mr-3 shadow-sm">
-          <Briefcase className="h-5 w-5 text-green-600" />
+        <div className={`w-9 h-9 rounded-full flex items-center justify-center mr-3 shadow-sm`}
+             style={{ backgroundColor: isDarkMode ? darkBg : '#dcfce7' }}>
+          <Briefcase className="h-5 w-5" style={{ color: isDarkMode ? gold : '#16a34a' }} />
         </div>
         <div>
-          <div className="font-bold text-sm text-gray-900">{data.label || 'Job'}</div>
-          {data.subtitle && <div className="text-xs text-gray-500">{data.subtitle}</div>}
+          <div className="font-bold text-sm" style={{ color: isDarkMode ? darkText : '#111827' }}>{data.label || 'Job'}</div>
+          {data.subtitle && <div className="text-xs" style={{ color: isDarkMode ? '#8e7a3c' : '#6b7280' }}>{data.subtitle}</div>}
         </div>
       </div>
-      <Handle type="source" position={Position.Bottom} className="!bg-green-500" />
+      <Handle type="source" position={Position.Bottom} style={{ backgroundColor: isDarkMode ? gold : '#16a34a' }} />
     </div>
   );
 }
 
 function TaskNode({ data }: { data: any }) {
+  // Check if we're in dark mode
+  const isDarkMode = data.workflowDarkMode;
+  const gold = '#bfa14a';
+  const darkBg = '#18140c';
+  const darkText = '#ffe082';
+
   return (
-    <div className="bg-white border-2 border-blue-300 rounded-xl shadow-md p-3 w-44 transition-transform duration-150 hover:scale-105 hover:shadow-xl">
-      <Handle type="target" position={Position.Top} className="!bg-blue-500" />
+    <div className={`border-2 rounded-xl shadow-md p-3 w-44 transition-transform duration-150 hover:scale-105 hover:shadow-xl`}
+        style={{
+          backgroundColor: isDarkMode ? darkBg : 'white',
+          borderColor: isDarkMode ? gold : '#fcd34d',
+          color: isDarkMode ? darkText : 'inherit'
+        }}>
+      <Handle type="target" position={Position.Top} style={{ backgroundColor: isDarkMode ? gold : '#d97706' }} />
       <div className="flex items-center">
-        <div className="w-9 h-9 bg-blue-100 rounded-full flex items-center justify-center mr-3 shadow-sm">
-          <ClipboardList className="h-5 w-5 text-blue-600" />
+        <div className={`w-9 h-9 rounded-full flex items-center justify-center mr-3 shadow-sm`}
+             style={{ backgroundColor: isDarkMode ? darkBg : '#fef3c7' }}>
+          <ClipboardList className="h-5 w-5" style={{ color: isDarkMode ? gold : '#d97706' }} />
         </div>
         <div>
-          <div className="font-bold text-sm text-gray-900">{data.label || 'Task'}</div>
-          {data.subtitle && <div className="text-xs text-gray-500">{data.subtitle}</div>}
+          <div className="font-bold text-sm" style={{ color: isDarkMode ? darkText : '#111827' }}>{data.label || 'Task'}</div>
+          {data.subtitle && <div className="text-xs" style={{ color: isDarkMode ? '#8e7a3c' : '#6b7280' }}>{data.subtitle}</div>}
         </div>
       </div>
-      <Handle type="source" position={Position.Bottom} className="!bg-blue-500" />
+      <Handle type="source" position={Position.Bottom} style={{ backgroundColor: isDarkMode ? gold : '#d97706' }} />
     </div>
   );
 }
 
 function QuoteNode({ data }: { data: any }) {
+  // Check if we're in dark mode
+  const isDarkMode = data.workflowDarkMode;
+  const gold = '#bfa14a';
+  const darkBg = '#18140c';
+  const darkText = '#ffe082';
+
   return (
-    <div className="bg-white border-2 border-purple-300 rounded-xl shadow-md p-3 w-44 transition-transform duration-150 hover:scale-105 hover:shadow-xl">
-      <Handle type="target" position={Position.Top} className="!bg-purple-500" />
+    <div className={`border-2 rounded-xl shadow-md p-3 w-44 transition-transform duration-150 hover:scale-105 hover:shadow-xl`}
+        style={{
+          backgroundColor: isDarkMode ? darkBg : 'white',
+          borderColor: isDarkMode ? gold : '#f9a8d4',
+          color: isDarkMode ? darkText : 'inherit'
+        }}>
+      <Handle type="target" position={Position.Top} style={{ backgroundColor: isDarkMode ? gold : '#db2777' }} />
       <div className="flex items-center">
-        <div className="w-9 h-9 bg-purple-100 rounded-full flex items-center justify-center mr-3 shadow-sm">
-          <FileText className="h-5 w-5 text-purple-600" />
+        <div className={`w-9 h-9 rounded-full flex items-center justify-center mr-3 shadow-sm`}
+             style={{ backgroundColor: isDarkMode ? darkBg : '#fce7f3' }}>
+          <FileText className="h-5 w-5" style={{ color: isDarkMode ? gold : '#db2777' }} />
         </div>
         <div>
-          <div className="font-bold text-sm text-gray-900">{data.label || 'Quote'}</div>
-          {data.subtitle && <div className="text-xs text-gray-500">{data.subtitle}</div>}
+          <div className="font-bold text-sm" style={{ color: isDarkMode ? darkText : '#111827' }}>{data.label || 'Quote'}</div>
+          {data.subtitle && <div className="text-xs" style={{ color: isDarkMode ? '#8e7a3c' : '#6b7280' }}>{data.subtitle}</div>}
         </div>
       </div>
-      <Handle type="source" position={Position.Bottom} className="!bg-purple-500" />
+      <Handle type="source" position={Position.Bottom} style={{ backgroundColor: isDarkMode ? gold : '#db2777' }} />
     </div>
   );
 }
 
 function AutomationNode({ data }: { data: any }) {
+  // Check if we're in dark mode
+  const isDarkMode = data.workflowDarkMode;
+  const gold = '#bfa14a';
+  const darkBg = '#18140c';
+  const darkText = '#ffe082';
+
   return (
-    <div className="bg-white border-2 border-red-300 rounded-xl shadow-md p-3 w-44 transition-transform duration-150 hover:scale-105 hover:shadow-xl">
-      <Handle type="target" position={Position.Top} className="!bg-red-500" />
+    <div className={`border-2 rounded-xl shadow-md p-3 w-44 transition-transform duration-150 hover:scale-105 hover:shadow-xl`}
+        style={{
+          backgroundColor: isDarkMode ? darkBg : 'white',
+          borderColor: isDarkMode ? gold : '#fcd34d',
+          color: isDarkMode ? darkText : 'inherit'
+        }}>
+      <Handle type="target" position={Position.Top} style={{ backgroundColor: isDarkMode ? gold : '#dc2626' }} />
       <div className="flex items-center">
-        <div className="w-9 h-9 bg-red-100 rounded-full flex items-center justify-center mr-3 shadow-sm">
-          <Zap className="h-5 w-5 text-red-600" />
+        <div className={`w-9 h-9 rounded-full flex items-center justify-center mr-3 shadow-sm`}
+             style={{ backgroundColor: isDarkMode ? darkBg : '#fee2e2' }}>
+          <Zap className="h-5 w-5" style={{ color: isDarkMode ? gold : '#dc2626' }} />
         </div>
         <div>
-          <div className="font-bold text-sm text-gray-900">{data.label || 'Automation'}</div>
-          {data.subtitle && <div className="text-xs text-gray-500">{data.subtitle}</div>}
+          <div className="font-bold text-sm" style={{ color: isDarkMode ? darkText : '#111827' }}>{data.label || 'Automation'}</div>
+          {data.subtitle && <div className="text-xs" style={{ color: isDarkMode ? '#8e7a3c' : '#6b7280' }}>{data.subtitle}</div>}
         </div>
       </div>
-      <Handle type="source" position={Position.Bottom} className="!bg-red-500" />
+      <Handle type="source" position={Position.Bottom} style={{ backgroundColor: isDarkMode ? gold : '#dc2626' }} />
     </div>
   );
 }
 
 function MessagingNode({ data }: { data: any }) {
+  // Check if we're in dark mode
+  const isDarkMode = data.workflowDarkMode;
+  const gold = '#bfa14a';
+  const darkBg = '#18140c';
+  const darkText = '#ffe082';
+
   return (
-    <div className="bg-white border-2 border-yellow-300 rounded-xl shadow-md p-3 w-44 transition-transform duration-150 hover:scale-105 hover:shadow-xl">
-      <Handle type="target" position={Position.Top} className="!bg-yellow-500" />
+    <div className={`border-2 rounded-xl shadow-md p-3 w-44 transition-transform duration-150 hover:scale-105 hover:shadow-xl`}
+        style={{
+          backgroundColor: isDarkMode ? darkBg : 'white',
+          borderColor: isDarkMode ? gold : '#93c5fd',
+          color: isDarkMode ? darkText : 'inherit'
+        }}>
+      <Handle type="target" position={Position.Top} style={{ backgroundColor: isDarkMode ? gold : '#d97706' }} />
       <div className="flex items-center">
-        <div className="w-9 h-9 bg-yellow-100 rounded-full flex items-center justify-center mr-3 shadow-sm">
-          <MessageSquare className="h-5 w-5 text-yellow-600" />
+        <div className={`w-9 h-9 rounded-full flex items-center justify-center mr-3 shadow-sm`}
+             style={{ backgroundColor: isDarkMode ? darkBg : '#fef3c7' }}>
+          <MessageSquare className="h-5 w-5" style={{ color: isDarkMode ? gold : '#d97706' }} />
         </div>
         <div>
-          <div className="font-bold text-sm text-gray-900">{data.label || 'Message'}</div>
-          {data.subtitle && <div className="text-xs text-gray-500">{data.subtitle}</div>}
+          <div className="font-bold text-sm" style={{ color: isDarkMode ? darkText : '#111827' }}>{data.label || 'Message'}</div>
+          {data.subtitle && <div className="text-xs" style={{ color: isDarkMode ? '#8e7a3c' : '#6b7280' }}>{data.subtitle}</div>}
         </div>
       </div>
-      <Handle type="source" position={Position.Bottom} className="!bg-yellow-500" />
+      <Handle type="source" position={Position.Bottom} style={{ backgroundColor: isDarkMode ? gold : '#d97706' }} />
     </div>
   );
 }
 
 function VisionNode({ data }: { data: any }) {
+  // Check if we're in dark mode
+  const isDarkMode = data.workflowDarkMode;
+  const gold = '#bfa14a';
+  const darkBg = '#18140c';
+  const darkText = '#ffe082';
+
   return (
-    <div className="bg-white border-2 border-indigo-300 rounded-xl shadow-md p-3 w-44 transition-transform duration-150 hover:scale-105 hover:shadow-xl">
-      <Handle type="target" position={Position.Top} className="!bg-indigo-500" />
+    <div className={`border-2 rounded-xl shadow-md p-3 w-44 transition-transform duration-150 hover:scale-105 hover:shadow-xl`}
+        style={{
+          backgroundColor: isDarkMode ? darkBg : 'white',
+          borderColor: isDarkMode ? gold : '#a78bfa',
+          color: isDarkMode ? darkText : 'inherit'
+        }}>
+      <Handle type="target" position={Position.Top} style={{ backgroundColor: isDarkMode ? gold : '#7c3aed' }} />
       <div className="flex items-center">
-        <div className="w-9 h-9 bg-indigo-100 rounded-full flex items-center justify-center mr-3 shadow-sm">
-          <Eye className="h-5 w-5 text-indigo-600" />
+        <div className={`w-9 h-9 rounded-full flex items-center justify-center mr-3 shadow-sm`}
+             style={{ backgroundColor: isDarkMode ? darkBg : '#ede9fe' }}>
+          <Eye className="h-5 w-5" style={{ color: isDarkMode ? gold : '#7c3aed' }} />
         </div>
         <div>
-          <div className="font-bold text-sm text-gray-900">{data.label || 'Vision'}</div>
-          {data.subtitle && <div className="text-xs text-gray-500">{data.subtitle}</div>}
+          <div className="font-bold text-sm" style={{ color: isDarkMode ? darkText : '#111827' }}>{data.label || 'Vision'}</div>
+          {data.subtitle && <div className="text-xs" style={{ color: isDarkMode ? '#8e7a3c' : '#6b7280' }}>{data.subtitle}</div>}
         </div>
       </div>
-      <Handle type="source" position={Position.Bottom} className="!bg-indigo-500" />
+      <Handle type="source" position={Position.Bottom} style={{ backgroundColor: isDarkMode ? gold : '#7c3aed' }} />
     </div>
   );
 }
 
 function SocialNode({ data }: { data: any }) {
+  // Check if we're in dark mode
+  const isDarkMode = data.workflowDarkMode;
+  const gold = '#bfa14a';
+  const darkBg = '#18140c';
+  const darkText = '#ffe082';
+
   return (
-    <div className="bg-white border-2 border-pink-300 rounded-xl shadow-md p-3 w-44 transition-transform duration-150 hover:scale-105 hover:shadow-xl">
-      <Handle type="target" position={Position.Top} className="!bg-pink-500" />
+    <div className={`border-2 rounded-xl shadow-md p-3 w-44 transition-transform duration-150 hover:scale-105 hover:shadow-xl`}
+        style={{
+          backgroundColor: isDarkMode ? darkBg : 'white',
+          borderColor: isDarkMode ? gold : '#f9a8d4',
+          color: isDarkMode ? darkText : 'inherit'
+        }}>
+      <Handle type="target" position={Position.Top} style={{ backgroundColor: isDarkMode ? gold : '#db2777' }} />
       <div className="flex items-center">
-        <div className="w-9 h-9 bg-pink-100 rounded-full flex items-center justify-center mr-3 shadow-sm">
-          <Share2 className="h-5 w-5 text-pink-600" />
+        <div className={`w-9 h-9 rounded-full flex items-center justify-center mr-3 shadow-sm`}
+             style={{ backgroundColor: isDarkMode ? darkBg : '#fce7f3' }}>
+          <Share2 className="h-5 w-5" style={{ color: isDarkMode ? gold : '#db2777' }} />
         </div>
         <div>
-          <div className="font-bold text-sm text-gray-900">{data.label || 'Social'}</div>
-          {data.subtitle && <div className="text-xs text-gray-500">{data.subtitle}</div>}
+          <div className="font-bold text-sm" style={{ color: isDarkMode ? darkText : '#111827' }}>{data.label || 'Social'}</div>
+          {data.subtitle && <div className="text-xs" style={{ color: isDarkMode ? '#8e7a3c' : '#6b7280' }}>{data.subtitle}</div>}
         </div>
       </div>
-      <Handle type="source" position={Position.Bottom} className="!bg-pink-500" />
+      <Handle type="source" position={Position.Bottom} style={{ backgroundColor: isDarkMode ? gold : '#db2777' }} />
     </div>
   );
 }
 
 function CustomNode({ data }: { data: any }) {
+  // Check if we're in dark mode
+  const isDarkMode = data.workflowDarkMode;
+  const gold = '#bfa14a';
+  const darkBg = '#18140c';
+  const darkText = '#ffe082';
+
   return (
-    <div className="bg-white border-2 border-gray-300 rounded-xl shadow-md p-3 w-44 transition-transform duration-150 hover:scale-105 hover:shadow-xl">
-      <Handle type="target" position={Position.Top} className="!bg-gray-500" />
+    <div className={`border-2 rounded-xl shadow-md p-3 w-44 transition-transform duration-150 hover:scale-105 hover:shadow-xl`}
+        style={{
+          backgroundColor: isDarkMode ? darkBg : 'white',
+          borderColor: isDarkMode ? gold : '#cbd5e1',
+          color: isDarkMode ? darkText : 'inherit'
+        }}>
+      <Handle type="target" position={Position.Top} style={{ backgroundColor: isDarkMode ? gold : '#64748b' }} />
       <div className="flex items-center">
-        <div className="w-9 h-9 bg-gray-100 rounded-full flex items-center justify-center mr-3 shadow-sm">
-          <Settings className="h-5 w-5 text-gray-600" />
+        <div className={`w-9 h-9 rounded-full flex items-center justify-center mr-3 shadow-sm`}
+             style={{ backgroundColor: isDarkMode ? darkBg : '#f1f5f9' }}>
+          <Settings className="h-5 w-5" style={{ color: isDarkMode ? gold : '#64748b' }} />
         </div>
         <div>
-          <div className="font-bold text-sm text-gray-900">{data.label || 'Custom'}</div>
-          {data.subtitle && <div className="text-xs text-gray-500">{data.subtitle}</div>}
+          <div className="font-bold text-sm" style={{ color: isDarkMode ? darkText : '#111827' }}>{data.label || 'Custom'}</div>
+          {data.subtitle && <div className="text-xs" style={{ color: isDarkMode ? '#8e7a3c' : '#6b7280' }}>{data.subtitle}</div>}
         </div>
       </div>
-      <Handle type="source" position={Position.Bottom} className="!bg-gray-500" />
+      <Handle type="source" position={Position.Bottom} style={{ backgroundColor: isDarkMode ? gold : '#64748b' }} />
     </div>
   );
 } 

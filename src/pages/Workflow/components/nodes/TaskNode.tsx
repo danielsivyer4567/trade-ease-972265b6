@@ -3,19 +3,31 @@ import { Handle, Position } from '@xyflow/react';
 import { ClipboardList } from 'lucide-react';
 
 export function TaskNode({ data }) {
+  // Check if we're in dark mode
+  const isDarkMode = data.workflowDarkMode;
+  const gold = '#bfa14a';
+  const darkBg = '#18140c';
+  const darkText = '#ffe082';
+
   return (
-    <div className="bg-white border-2 border-purple-300 rounded-xl shadow-md p-3 w-44 transition-transform duration-150 hover:scale-105 hover:shadow-xl">
-      <Handle type="target" position={Position.Top} className="!bg-purple-500" />
+    <div className={`border-2 rounded-xl shadow-md p-3 w-44 transition-transform duration-150 hover:scale-105 hover:shadow-xl`}
+        style={{
+          backgroundColor: isDarkMode ? darkBg : 'white',
+          borderColor: isDarkMode ? gold : '#fcd34d',
+          color: isDarkMode ? darkText : 'inherit'
+        }}>
+      <Handle type="target" position={Position.Top} style={{ backgroundColor: isDarkMode ? gold : '#d97706' }} />
       <div className="flex items-center">
-        <div className="w-9 h-9 bg-purple-100 rounded-full flex items-center justify-center mr-3 shadow-sm">
-          <ClipboardList className="h-5 w-5 text-purple-600" />
+        <div className={`w-9 h-9 rounded-full flex items-center justify-center mr-3 shadow-sm`}
+             style={{ backgroundColor: isDarkMode ? darkBg : '#fef3c7' }}>
+          <ClipboardList className="h-5 w-5" style={{ color: isDarkMode ? gold : '#d97706' }} />
         </div>
         <div>
-          <div className="font-bold text-sm text-gray-900">{data.label || 'Task'}</div>
-          {data.subtitle && <div className="text-xs text-gray-500">{data.subtitle}</div>}
+          <div className="font-bold text-sm" style={{ color: isDarkMode ? darkText : '#111827' }}>{data.label || 'Task'}</div>
+          {data.subtitle && <div className="text-xs" style={{ color: isDarkMode ? '#8e7a3c' : '#6b7280' }}>{data.subtitle}</div>}
         </div>
       </div>
-      <Handle type="source" position={Position.Bottom} className="!bg-purple-500" />
+      <Handle type="source" position={Position.Bottom} style={{ backgroundColor: isDarkMode ? gold : '#d97706' }} />
     </div>
   );
 }
