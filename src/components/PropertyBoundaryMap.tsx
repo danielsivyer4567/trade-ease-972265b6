@@ -1,10 +1,10 @@
-
 import React, { useState, useEffect, useRef } from 'react';
-import { GoogleMap, LoadScript, Polygon } from '@react-google-maps/api';
+import { GoogleMap, Polygon } from '@react-google-maps/api';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { MapPin, Ruler, Copy, RotateCw, AlertCircle } from 'lucide-react';
 import { toast } from "sonner";
+import { WithGoogleMaps } from './GoogleMapsProvider';
 
 interface PropertyBoundaryMapProps {
   center: [number, number]; // [longitude, latitude]
@@ -70,41 +70,62 @@ const PropertyBoundaryMap = ({
     return length;
   };
 
-  // Calculate area in square meters
-  const calculateArea = (polygon: google.maps.Polygon): number => {
+  // Calculate boundary area in square meters
+  const calculateBoundaryArea = (polygon: google.maps.Polygon): number => {
     return google.maps.geometry.spherical.computeArea(polygon.getPath());
   };
 
-  const handleCalculate = () => {
-    if (polygonRefs.current.length === 0) {
-      toast.error("No boundaries available to measure");
-      return;
-    }
-    
+  // Calculate measurements for all polygons
+  const calculateAllMeasurements = () => {
     setIsCalculating(true);
-    
     let totalLength = 0;
     let totalArea = 0;
     
     polygonRefs.current.forEach(polygon => {
-      totalLength += calculateBoundaryLength(polygon);
-      totalArea += calculateArea(polygon);
+      const length = calculateBoundaryLength(polygon);
+      const area = calculateBoundaryArea(polygon);
+      
+      totalLength += length;
+      totalArea += area;
     });
     
     setBoundaryLength(totalLength);
     setBoundaryArea(totalArea);
     setIsCalculating(false);
-    
-    toast.success("Boundary measurements calculated");
   };
 
-  const handleCopyCoordinates = () => {
-    const formattedCoordinates = boundaries.map(boundary => 
-      boundary.map(coord => `[${coord[0]}, ${coord[1]}]`).join(',\n  ')
-    ).join('\n\n');
+  // Format measurements to display
+  const formatLength = (meters: number): string => {
+    if (meters < 1) return '0 m';
+    if (meters < 1000) return `${meters.toFixed(1)} m`;
+    return `${(meters / 1000).toFixed(2)} km`;
+  };
+
+  const formatArea = (squareMeters: number): string => {
+    if (squareMeters < 1) return '0 m²';
+    if (squareMeters < 10000) return `${squareMeters.toFixed(1)} m²`;
+    const hectares = squareMeters / 10000;
+    return `${hectares.toFixed(2)} ha`;
+  };
+
+  // Copy measurements to clipboard
+  const copyMeasurements = () => {
+    const text = `Property Boundary Measurements\n` +
+                `Perimeter: ${formatLength(boundaryLength)}\n` +
+                `Area: ${formatArea(boundaryArea)}`;
     
-    navigator.clipboard.writeText(`[\n  ${formattedCoordinates}\n]`);
-    toast.success("Coordinates copied to clipboard");
+    navigator.clipboard.writeText(text)
+      .then(() => toast.success("Measurements copied to clipboard"))
+      .catch(err => toast.error(`Failed to copy: ${err.message}`));
+  };
+
+  const handlePolygonLoad = (polygon: google.maps.Polygon, index: number) => {
+    polygonRefs.current[index] = polygon;
+    
+    // If this is the first boundary, calculate measurements automatically
+    if (index === 0 && boundaries.length > 0) {
+      calculateAllMeasurements();
+    }
   };
 
   const handleMapLoad = (map: google.maps.Map) => {
@@ -157,73 +178,107 @@ const PropertyBoundaryMap = ({
     }
   };
 
-  const handleLoadScriptError = (error: Error) => {
-    console.error("Google Maps script error:", error);
-    setMapError("Failed to load Google Maps script");
+  const handleMapError = (error: Error) => {
+    console.error("Google Maps error:", error);
+    setMapError("Failed to load map properly");
   };
 
-  const handlePolygonLoad = (polygon: google.maps.Polygon, index: number) => {
-    polygonRefs.current[index] = polygon;
-  };
-
+  // Polygon styling
   const polygonOptions = {
-    fillColor: "#9b87f5",
-    fillOpacity: 0.3,
-    strokeColor: "#6E59A5",
+    fillColor: "rgba(75, 85, 199, 0.3)",
+    fillOpacity: 0.5,
+    strokeColor: "#4B55C7",
     strokeOpacity: 1,
     strokeWeight: 3,
-    clickable: true,
-    editable: false,
+    clickable: false,
     draggable: false,
+    editable: false,
+    geodesic: false,
     zIndex: 1
+  };
+  
+  // Reset map view
+  const resetMapView = () => {
+    if (mapInstance) {
+      if (boundaries.length > 0) {
+        const bounds = new google.maps.LatLngBounds();
+        
+        boundaries.forEach(boundary => {
+          boundary.forEach(([lng, lat]) => {
+            bounds.extend(new google.maps.LatLng(lat, lng));
+          });
+        });
+        
+        mapInstance.fitBounds(bounds);
+      } else {
+        mapInstance.setCenter({ lat: center[1], lng: center[0] });
+        mapInstance.setZoom(15);
+      }
+    }
   };
 
   return (
-    <Card className="w-full">
-      <CardHeader>
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-2">
-          <div>
-            <CardTitle className="flex items-center gap-2">
-              <MapPin className="h-5 w-5 text-primary" />
-              {title}
-            </CardTitle>
-            <CardDescription>{description}</CardDescription>
-          </div>
+    <Card className="w-full h-full">
+      <CardHeader className="space-y-1">
+        <div className="flex justify-between items-center">
+          <CardTitle className="text-xl flex items-center">
+            <MapPin className="h-5 w-5 mr-2 text-primary" />
+            {title}
+          </CardTitle>
           
-          <div className="flex flex-wrap gap-2">
-            <Button 
-              variant="outline" 
-              size="sm"
-              onClick={handleCalculate}
-              disabled={isCalculating || !isMapLoaded}
-              className="flex items-center gap-1"
-            >
-              {isCalculating ? <RotateCw className="h-4 w-4 animate-spin" /> : <Ruler className="h-4 w-4" />}
-              <span>Measure Boundary</span>
-            </Button>
+          <div className="flex gap-2">
+            {isMapLoaded && (
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="flex items-center gap-1.5" 
+                onClick={resetMapView}
+                title="Reset map view"
+              >
+                <RotateCw className="h-3.5 w-3.5" />
+                <span className="hidden md:inline">Reset</span>
+              </Button>
+            )}
             
-            <Button 
-              variant="outline" 
-              size="sm"
-              onClick={handleCopyCoordinates}
-              className="flex items-center gap-1"
-            >
-              <Copy className="h-4 w-4" />
-              <span>Copy Coordinates</span>
-            </Button>
+            {boundaryArea > 0 && (
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="flex items-center gap-1.5" 
+                onClick={copyMeasurements}
+                title="Copy measurements"
+              >
+                <Copy className="h-3.5 w-3.5" />
+                <span className="hidden md:inline">Copy</span>
+              </Button>
+            )}
           </div>
         </div>
+        <CardDescription>{description}</CardDescription>
+        
+        {boundaryArea > 0 && (
+          <div className="flex flex-wrap gap-y-1 gap-x-3 text-sm mt-1">
+            <div className="flex items-center">
+              <Ruler className="h-4 w-4 mr-1 text-primary" />
+              <span className="text-muted-foreground">Perimeter:</span>
+              <span className="ml-1 font-medium">{formatLength(boundaryLength)}</span>
+            </div>
+            <div className="flex items-center">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-primary mr-1">
+                <path d="M3 6h18" />
+                <path d="M3 12h18" />
+                <path d="M3 18h18" />
+              </svg>
+              <span className="text-muted-foreground">Area:</span>
+              <span className="ml-1 font-medium">{formatArea(boundaryArea)}</span>
+            </div>
+          </div>
+        )}
       </CardHeader>
       
       <CardContent>
         <div ref={mapContainerRef} className="relative w-full" style={mapContainerStyle}>
-          <LoadScript 
-            googleMapsApiKey="AIzaSyAnIcvNA_ZjRUnN4aeyl-1MYpBSN-ODIvw"
-            libraries={["marker", "geometry"]}
-            onLoad={() => console.log("Google Maps script loaded")}
-            onError={handleLoadScriptError}
-            version="beta"
-          >
+          <WithGoogleMaps>
             <GoogleMap
               mapContainerStyle={mapContainerStyle}
               center={{ lat: center[1], lng: center[0] }}
@@ -247,7 +302,7 @@ const PropertyBoundaryMap = ({
                 />
               ))}
             </GoogleMap>
-          </LoadScript>
+          </WithGoogleMaps>
           
           {mapError && (
             <div className="absolute inset-0 flex items-center justify-center bg-gray-100 bg-opacity-80 rounded-lg">
@@ -262,36 +317,6 @@ const PropertyBoundaryMap = ({
             </div>
           )}
         </div>
-        
-        {(boundaryLength > 0 || boundaryArea > 0) && (
-          <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="bg-secondary/10 rounded-lg p-4">
-              <h3 className="text-sm font-medium mb-1 flex items-center gap-2">
-                <Ruler className="h-4 w-4" />
-                Boundary Length
-              </h3>
-              <div className="text-2xl font-bold">
-                {(boundaryLength).toFixed(2)} m
-              </div>
-              <div className="text-sm text-muted-foreground">
-                ({(boundaryLength / 1000).toFixed(2)} km)
-              </div>
-            </div>
-            
-            <div className="bg-secondary/10 rounded-lg p-4">
-              <h3 className="text-sm font-medium mb-1 flex items-center gap-2">
-                <MapPin className="h-4 w-4" />
-                Property Area
-              </h3>
-              <div className="text-2xl font-bold">
-                {(boundaryArea).toFixed(2)} m²
-              </div>
-              <div className="text-sm text-muted-foreground">
-                ({(boundaryArea / 10000).toFixed(4)} hectares)
-              </div>
-            </div>
-          </div>
-        )}
       </CardContent>
     </Card>
   );

@@ -2,8 +2,9 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { GoogleMap, LoadScript, InfoWindow, LoadScriptProps } from '@react-google-maps/api';
+import { GoogleMap, InfoWindow } from '@react-google-maps/api';
 import { MapPin, AlertCircle } from "lucide-react";
+import { WithGoogleMaps } from "../GoogleMapsProvider";
 
 // Define types for locations and map properties
 type Location = {
@@ -74,50 +75,29 @@ const JobSiteMap = () => {
     jobNumber: "HQ-001"
   }];
 
-  const handleLoadError = (error: Error) => {
-    console.error("Failed to load Google Maps:", error);
-    setMapError("Failed to load Google Maps. Please check your internet connection.");
+  const handleMapError = (error: Error) => {
+    console.error("Error with Google Maps:", error);
+    setMapError(error.message);
   };
 
   return (
-    <Card className="p-6 py-4 bg-slate-100 flex flex-col">
-      {mapError ? (
-        <div className="flex items-center justify-center p-8 bg-gray-100 rounded-md text-red-500">
-          <AlertCircle className="mr-2" />
-          <p>{mapError}</p>
-        </div>
-      ) : (
-        <div className="relative border-4 border-black rounded-md overflow-hidden">
-          {/* Job Site Map text overlay */}
-          <div className="absolute top-4 left-4 z-10 bg-black/30 px-3 py-1.5 rounded-md backdrop-blur-sm">
-            <h2 className="text-xl font-semibold text-white drop-shadow-md">Job Site Map</h2>
-          </div>
-          
-          {/* Map Controls - moved more to the left */}
-          <div className="absolute top-4 right-20 z-10 flex gap-2">
+    <Card className="mb-4 overflow-hidden">
+      <div className="relative">
+        {mapError ? (
+          <div className="p-8 bg-gray-100 text-center h-96 flex flex-col items-center justify-center">
+            <AlertCircle className="h-10 w-10 text-red-500 mb-2" />
+            <h3 className="text-lg font-medium">Map Failed to Load</h3>
+            <p className="text-sm text-gray-500 max-w-md mx-auto mt-2">{mapError}</p>
             <Button 
               variant="outline" 
-              className="bg-white/90 hover:bg-white text-xs md:text-sm shadow-md" 
-              onClick={() => navigate("/property-boundaries")}
+              className="mt-4"
+              onClick={() => window.location.reload()}
             >
-              <MapPin className="h-3 w-3 mr-1" />
-              Property Boundaries
-            </Button>
-            <Button 
-              variant="default" 
-              className="bg-primary/90 hover:bg-primary text-xs md:text-sm shadow-md" 
-              onClick={() => navigate("/jobs")}
-            >
-              View All Jobs
+              Reload Page
             </Button>
           </div>
-          
-          <LoadScript 
-            googleMapsApiKey="AIzaSyAnIcvNA_ZjRUnN4aeyl-1MYpBSN-ODIvw" 
-            libraries={["marker"]} 
-            version="beta"
-            onError={handleLoadError}
-          >
+        ) : (
+          <WithGoogleMaps>
             <GoogleMap 
               mapContainerStyle={mapContainerStyle} 
               center={center} 
@@ -155,44 +135,37 @@ const JobSiteMap = () => {
                     });
                   });
                 } catch (error) {
-                  console.error("Error setting up map:", error);
-                  setMapError("Error initializing map components.");
+                  handleMapError(error as Error);
                 }
               }}
             >
               {selectedLocation && (
-                <InfoWindow position={selectedLocation} onCloseClick={() => setSelectedLocation(null)}>
+                <InfoWindow
+                  position={selectedLocation}
+                  onCloseClick={() => setSelectedLocation(null)}
+                >
                   <div className="p-2">
-                    <h3 className="font-semibold">
-                      {locations.find(l => l.lat === selectedLocation.lat && l.lng === selectedLocation.lng)?.name || "Location"}
+                    <h3 className="font-bold mb-1">
+                      {locations.find(l => l.lat === selectedLocation.lat)?.name || "Location"}
                     </h3>
-                    <p className="text-sm text-gray-600">
-                      {locations.find(l => l.lat === selectedLocation.lat && l.lng === selectedLocation.lng)?.type || "Job Site"}
+                    <p className="text-xs text-gray-600">
+                      {locations.find(l => l.lat === selectedLocation.lat)?.type || "Unknown type"}
                     </p>
                     <Button 
-                      size="sm" 
-                      variant="default"
-                      className="mt-2 w-full bg-primary hover:bg-primary/90" 
-                      onClick={() => {
-                        const selectedJobInfo = locations.find(l => l.lat === selectedLocation?.lat && l.lng === selectedLocation?.lng);
-                        if (selectedJobInfo) {
-                          // Navigate to the specific job's details page using its ID
-                          navigate(`/jobs/${selectedJobInfo.id}`);
-                        } else {
-                          // Fallback to the jobs list if no specific job is found
-                          navigate("/jobs");
-                        }
-                      }}
+                      className="mt-2 w-full" 
+                      variant="secondary" 
+                      size="sm"
+                      onClick={() => navigate('/jobs')}
                     >
-                      View Job Details
+                      View Details
                     </Button>
                   </div>
                 </InfoWindow>
               )}
             </GoogleMap>
-          </LoadScript>
-        </div>
-      )}
+          </WithGoogleMaps>
+        )}
+      </div>
     </Card>
   );
 };
