@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { 
   SPAN_TABLE, 
@@ -41,7 +40,7 @@ export const useSpanTableCalculator = () => {
       // and the dimension is directly the spacing (since there is no width)
       let lookupGrade = grade;
       let lookupDimension = dimension;
-      let lookupSpacing = spacing;
+      const lookupSpacing = spacing;
       
       if (material === "James Hardie") {
         lookupGrade = grade; // Already in correct format (e.g., "10mm")

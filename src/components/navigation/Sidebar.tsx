@@ -31,6 +31,9 @@ export const Sidebar = () => {
     { path: '/settings', title: 'Settings', icon: <Settings className="w-5 h-5" /> },
   ];
 
+  // Use the hook at the component level, not inside a function
+  const activeRouteFn = useActiveRoute;
+
   return (
     <aside className="min-w-60 w-60 h-screen bg-white border-r border-gray-200 py-6 flex flex-col overflow-y-auto">
       <div className="px-4 mb-6 flex items-center">
@@ -41,7 +44,7 @@ export const Sidebar = () => {
       <nav className="flex-1">
         <ul className="space-y-1 px-2">
           {navItems.map(item => {
-            const isActive = useActiveRoute(item.path, { exact: item.path === '/' });
+            const isActive = activeRouteFn(item.path, { exact: item.path === '/' });
             
             return (
               <li key={item.path}>

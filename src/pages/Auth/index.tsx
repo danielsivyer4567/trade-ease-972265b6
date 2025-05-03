@@ -47,23 +47,22 @@ export default function Auth() {
     handleResendVerification 
   } = useEmailVerification(navigate);
   
-  // Load saved credentials when component mounts
+  // Load saved credentials and handle redirect
   useEffect(() => {
+    // Load saved credentials
     loadSavedCredentials();
-  }, []);
+    
+    // Check if user is authenticated and redirect
+    if (user) {
+      const from = location.state?.from?.pathname || '/';
+      navigate(from, { replace: true });
+    }
+  }, [user, navigate, location, loadSavedCredentials]);
 
   // Handle initial loading state from AuthProvider
   if (authLoading) {
     return <LoadingIndicator />;
   }
-
-  // Redirect if user is already authenticated (runs AFTER loading is false)
-  useEffect(() => {
-    if (user) {
-      const from = location.state?.from?.pathname || '/';
-      navigate(from, { replace: true });
-    }
-  }, [user, navigate, location]);
 
   // If verification is in progress, show the verification status
   if (verificationStatus !== 'idle') {
