@@ -21,7 +21,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Loader2, Save, Play, Plus, User, Briefcase, ClipboardList, FileText, Zap, MessageSquare, Eye, Share2, Settings } from 'lucide-react';
+import { Loader2, Save, Play, Plus, User, Briefcase, ClipboardList, FileText, Zap, MessageSquare, Eye, Share2, Settings, Lock, Unlock } from 'lucide-react';
 import { toast } from 'sonner';
 import { WorkflowService } from '@/services/WorkflowService';
 import { WorkflowExecutionStatus } from './WorkflowExecutionStatus';
@@ -48,26 +48,30 @@ interface WorkflowEditorProps {
 }
 
 export function WorkflowEditor({ workflow, onSave, workflowDarkMode = false }: WorkflowEditorProps) {
-  // Get dark mode from global context
-  const { darkMode, setDarkMode } = useWorkflowDarkMode();
+  // Get dark mode from global context with lock functionality
+  const { darkMode: globalDarkMode, setDarkMode: setGlobalDarkMode, isDarkModeLocked } = useWorkflowDarkMode();
+  
+  // Use provided prop if available, otherwise use global context
+  const effectiveDarkMode = isDarkModeLocked ? true : (workflowDarkMode !== undefined ? workflowDarkMode : globalDarkMode);
   
   // Keep local dark mode for backward compatibility and sync with global
-  const [localDarkMode, setLocalDarkMode] = useState(() => darkMode || workflowDarkMode);
+  const [localDarkMode, setLocalDarkMode] = useState(() => effectiveDarkMode);
   
   // Store the original dark mode value to restore it when needed
-  const [originalDarkMode] = useState(() => darkMode || workflowDarkMode);
+  const [originalDarkMode] = useState(() => effectiveDarkMode);
   
-  // Sync local dark mode with global dark mode
+  // Sync local dark mode with global dark mode and respect lock
   useEffect(() => {
-    console.log("Global dark mode changed:", darkMode);
-    setLocalDarkMode(darkMode); 
-  }, [darkMode]);
+    console.log("WorkflowEditor: Global dark mode changed:", globalDarkMode, "Lock state:", isDarkModeLocked);
+    // If dark mode is locked, always use dark mode
+    setLocalDarkMode(isDarkModeLocked ? true : effectiveDarkMode);
+  }, [globalDarkMode, effectiveDarkMode, isDarkModeLocked]);
   
   // Sync global dark mode with local when component mounts
   useEffect(() => {
-    if (workflowDarkMode !== darkMode) {
-      console.log("Setting global dark mode to:", workflowDarkMode);
-      setDarkMode(workflowDarkMode);
+    if (!isDarkModeLocked && workflowDarkMode !== undefined && workflowDarkMode !== globalDarkMode) {
+      console.log("WorkflowEditor: Setting global dark mode to:", workflowDarkMode);
+      setGlobalDarkMode(workflowDarkMode);
     }
   }, []);
 
@@ -109,13 +113,13 @@ export function WorkflowEditor({ workflow, onSave, workflowDarkMode = false }: W
   
   // When returning from template selection, ensure dark mode is properly synced
   const handleReturnFromTemplates = () => {
-    console.log("Returning from template view, syncing dark mode with global:", darkMode);
-    setLocalDarkMode(darkMode);
+    console.log("Returning from template view, syncing dark mode with global:", globalDarkMode);
+    setLocalDarkMode(globalDarkMode);
     setShowTemplateSelector(false);
     
     // Force reapply dark mode after returning
     setTimeout(() => {
-      if (darkMode) {
+      if (globalDarkMode) {
         forceApplyDarkMode();
       }
     }, 10);
@@ -243,7 +247,7 @@ export function WorkflowEditor({ workflow, onSave, workflowDarkMode = false }: W
           ...node,
           data: { 
             ...node.data,
-            workflowDarkMode: localDarkMode 
+            workflowDarkMode: true
           }
         };
         console.log("Node after force apply:", node.id, updatedNode.data.workflowDarkMode);

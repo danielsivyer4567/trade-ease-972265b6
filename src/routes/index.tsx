@@ -15,6 +15,7 @@ const WorkflowPage = lazy(() => import('@/pages/Workflow/index.new'));
 const WorkflowTemplates = lazy(() => import('@/pages/Workflow/templates'));
 const WorkflowEnrollmentHistory = lazy(() => import('@/pages/Workflow/WorkflowEnrollmentHistory'));
 const WorkflowExecutionLogs = lazy(() => import('@/pages/Workflow/WorkflowExecutionLogs'));
+const WorkflowAutomations = lazy(() => import('@/pages/Workflow/WorkflowAutomations'));
 
 // Development mode debugging component
 const DevelopmentEntry = lazy(() => import('@/pages/DevelopmentEntry'));
@@ -214,6 +215,7 @@ const routeObjects: RouteObject[] = [
           { path: "/workflow/list", element: <SuspenseWrapper><WorkflowListPage /></SuspenseWrapper> },
           { path: "/workflow/templates", element: <SuspenseWrapper><WorkflowTemplates /></SuspenseWrapper> },
           { path: "/workflow/enrollment-history", element: <SuspenseWrapper><WorkflowEnrollmentHistory /></SuspenseWrapper> },
+          { path: "/workflow/automations", element: <SuspenseWrapper><WorkflowAutomations /></SuspenseWrapper> },
           { path: "/workflow/execution-logs", element: <SuspenseWrapper><WorkflowExecutionLogs /></SuspenseWrapper> },
           { path: "/automations", element: <SuspenseWrapper><AutomationsPage /></SuspenseWrapper> },
           { path: "/forms", element: <SuspenseWrapper><FormsPage /></SuspenseWrapper> },

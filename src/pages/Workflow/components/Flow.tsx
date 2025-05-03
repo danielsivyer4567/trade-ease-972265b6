@@ -9,7 +9,8 @@ import {
   addEdge,
   Panel,
   MarkerType,
-  PanelPosition
+  PanelPosition,
+  BackgroundVariant
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { CustomerNode } from './nodes/CustomerNode';
@@ -206,6 +207,38 @@ function FlowContent({ onInit, workflowId, onNodeSelect, workflowDarkMode, toggl
       className={`h-full w-full relative ${actualDarkMode ? 'workflow-dark-mode' : ''} ${isDarkModeLocked ? 'dark-mode-locked' : ''}`} 
       style={actualDarkMode ? { background: DARK_BG, color: DARK_TEXT, borderColor: DARK_GOLD } : {}}
     >
+      {/* Add back styling for background dots */}
+      <style>
+        {`
+          @keyframes electricity {
+            0% {
+              stroke-dashoffset: 0;
+            }
+            100% {
+              stroke-dashoffset: -20;
+            }
+          }
+          
+          /* Dark mode specific styling for ReactFlow */
+          .workflow-dark-mode .react-flow__pane {
+            background-color: ${DARK_BG} !important;
+            background-image: radial-gradient(circle, rgba(255, 255, 255, 0.35) 0.6px, transparent 0.6px) !important;
+            background-size: 14px 14px !important;
+            background-position: 0px 0px !important;
+          }
+          
+          .workflow-dark-mode .react-flow__node.selected {
+            border-width: 2px !important;
+            box-shadow: 0 0 0 2px ${DARK_GOLD}, 0 4px 20px rgba(0, 0, 0, 0.7) !important;
+          }
+          
+          .workflow-dark-mode .react-flow__edge.animated path {
+            stroke-dasharray: 5, 5 !important;
+            animation: electricity 0.5s linear infinite !important;
+          }
+        `}
+      </style>
+      
       {/* Standalone Controls - Outside of ReactFlow */}
       <div 
         className="absolute bottom-20 left-4 z-50 flex flex-col"
@@ -318,6 +351,7 @@ function FlowContent({ onInit, workflowId, onNodeSelect, workflowDarkMode, toggl
           color={actualDarkMode ? "#ffffff" : undefined} 
           gap={20}
           size={actualDarkMode ? 1.2 : 1}
+          variant={BackgroundVariant.Dots}
         />
         
         <MiniMap 

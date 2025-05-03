@@ -1,7 +1,7 @@
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Workflow, ListChecks, ArrowLeft, History, Activity, LayoutTemplate } from "lucide-react";
+import { Workflow, ListChecks, ArrowLeft, History, Activity, LayoutTemplate, Zap } from "lucide-react";
 
 export function WorkflowNavigation() {
   const navigate = useNavigate();
@@ -60,6 +60,16 @@ export function WorkflowNavigation() {
       >
         <History className="h-4 w-4" />
         Enrollment History
+      </Button>
+      
+      <Button
+        variant={isActive('/workflow/automations') ? "default" : "outline"}
+        size="sm"
+        onClick={() => navigate('/workflow/automations')}
+        className="flex items-center gap-2"
+      >
+        <Zap className="h-4 w-4" />
+        Automations
       </Button>
 
       <Button

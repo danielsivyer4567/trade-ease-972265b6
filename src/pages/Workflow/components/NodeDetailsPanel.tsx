@@ -63,7 +63,7 @@ export function NodeDetailsPanel({ node, onClose, onUpdate, workflowDarkMode }: 
   const darkText = '#ffe082';
 
   return (
-    <div className="absolute right-0 top-[116px] bottom-0 w-[400px] shadow-xl z-40"
+    <div className="absolute right-0 top-0 bottom-0 w-[400px] shadow-xl z-50"
       style={workflowDarkMode ? { 
         background: darkBg, 
         color: darkText, 
@@ -167,19 +167,29 @@ export function NodeDetailsPanel({ node, onClose, onUpdate, workflowDarkMode }: 
           </div>
 
           <div>
-            <Label>REDIRECT PAGE</Label>
+            <Label className="text-sm font-medium" style={{ color: workflowDarkMode ? darkText : '' }}>
+              REDIRECT PAGE
+            </Label>
             <Select
               value={formData.redirectPage}
               onValueChange={(value) => handleChange('redirectPage', value)}
             >
-              <SelectTrigger>
+              <SelectTrigger style={workflowDarkMode ? { 
+                background: darkBg, 
+                color: darkText, 
+                borderColor: gold 
+              } : {}}>
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="contact">Contact</SelectItem>
-                <SelectItem value="dashboard">Dashboard</SelectItem>
-                <SelectItem value="jobs">Jobs</SelectItem>
-                <SelectItem value="quotes">Quotes</SelectItem>
+              <SelectContent style={workflowDarkMode ? { 
+                background: darkBg, 
+                color: darkText, 
+                borderColor: gold 
+              } : {}}>
+                <SelectItem value="contact" style={workflowDarkMode ? { color: darkText } : {}}>Contact</SelectItem>
+                <SelectItem value="dashboard" style={workflowDarkMode ? { color: darkText } : {}}>Dashboard</SelectItem>
+                <SelectItem value="jobs" style={workflowDarkMode ? { color: darkText } : {}}>Jobs</SelectItem>
+                <SelectItem value="quotes" style={workflowDarkMode ? { color: darkText } : {}}>Quotes</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -212,25 +222,38 @@ export function NodeDetailsPanel({ node, onClose, onUpdate, workflowDarkMode }: 
             </Select>
           </div>
 
-          <div>
-            <Label>ASSIGNED USER</Label>
+          <div className="space-y-2">
+            <Label className="text-sm font-medium" style={{ color: workflowDarkMode ? darkText : '' }}>
+              ASSIGNED USER
+            </Label>
             <Select
               value={formData.assignedUser}
               onValueChange={(value) => handleChange('assignedUser', value)}
             >
-              <SelectTrigger>
+              <SelectTrigger style={workflowDarkMode ? { 
+                background: darkBg, 
+                color: darkText, 
+                borderColor: gold 
+              } : {}}>
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="none">None</SelectItem>
-                <SelectItem value="user1">John Doe</SelectItem>
-                <SelectItem value="user2">Jane Smith</SelectItem>
-                <SelectItem value="user3">Bob Johnson</SelectItem>
+              <SelectContent style={workflowDarkMode ? { 
+                background: darkBg, 
+                color: darkText, 
+                borderColor: gold 
+              } : {}}>
+                <SelectItem value="none" style={workflowDarkMode ? { color: darkText } : {}}>None</SelectItem>
+                <SelectItem value="user1" style={workflowDarkMode ? { color: darkText } : {}}>John Doe</SelectItem>
+                <SelectItem value="user2" style={workflowDarkMode ? { color: darkText } : {}}>Jane Smith</SelectItem>
+                <SelectItem value="user3" style={workflowDarkMode ? { color: darkText } : {}}>Bob Johnson</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
-          <div className="sticky bottom-0 bg-white pt-4 pb-6 border-t mt-6">
+          <div className="sticky bottom-0 pt-4 pb-6 border-t mt-6" style={workflowDarkMode ? { 
+            background: darkBg, 
+            borderColor: gold 
+          } : { background: 'white' }}>
             <div className="flex justify-end space-x-2">
               <Button variant="outline" onClick={onClose} style={workflowDarkMode ? { 
                 background: darkBg, 
