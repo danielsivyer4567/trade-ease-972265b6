@@ -66,9 +66,9 @@ export function WorkflowNavigation() {
         variant={isActive('/workflow/automations') ? "default" : "outline"}
         size="sm"
         onClick={() => navigate('/workflow/automations')}
-        className="flex items-center gap-2"
+        className="flex items-center gap-2 bg-blue-100 border-blue-300 hover:bg-blue-200 min-w-[130px]"
       >
-        <Zap className="h-4 w-4" />
+        <Zap className="h-4 w-4 text-blue-600" />
         Automations
       </Button>
 

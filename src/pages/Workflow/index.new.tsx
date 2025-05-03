@@ -4,20 +4,10 @@ import { Button } from '@/components/ui/button';
 import { 
   ArrowLeft, 
   Save, 
-  Key, 
-  Check, 
-  FileText, 
-  ArrowRightLeft, 
-  Workflow, 
-  FolderOpen, 
-  Plus,
-  Construction,
-  Building,
-  LayoutTemplate,
-  Zap,
-  Sparkles,
   Sun,
-  Moon
+  Moon,
+  Sparkles,
+  LayoutTemplate
 } from 'lucide-react';
 import { NodeSidebar } from './components/NodeSidebar';
 import { Flow } from './components/Flow';
@@ -86,7 +76,6 @@ export default function WorkflowPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams] = useSearchParams();
-  const automationId = searchParams.get('automationId');
   const workflowId = searchParams.get('id');
   const tab = searchParams.get('tab');
   const { user } = useAuth();
@@ -95,11 +84,17 @@ export default function WorkflowPage() {
   const [workflowName, setWorkflowName] = useState("New Workflow");
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState(tab || 'builder');
+  const [workflowDarkMode, setWorkflowDarkMode] = useState(false);
   
   // Drawer states
   const [automationDrawerOpen, setAutomationDrawerOpen] = useState(false);
   const [loadDrawerOpen, setLoadDrawerOpen] = useState(false);
   const [saveDrawerOpen, setSaveDrawerOpen] = useState(false);
+  const [isTriggerSelectorOpen, setIsTriggerSelectorOpen] = useState(false);
+  const [isTemplateSelectorOpen, setIsTemplateSelectorOpen] = useState(false);
+  const [isAIModalOpen, setIsAIModalOpen] = useState(false);
+  const [selectedNode, setSelectedNode] = useState(null);
+  const [aiMessages, setAIMessages] = useState([]);
 
   // Load workflow data when ID is provided
   useEffect(() => {
@@ -119,11 +114,13 @@ export default function WorkflowPage() {
                 flowInstance.setEdges(workflowData.edges || []);
               } catch (error) {
                 console.error('Failed to parse workflow data:', error);
+                toast.error('Failed to parse workflow data');
               }
             }
           }
         } catch (error) {
           console.error('Failed to load workflow:', error);
+          toast.error('Failed to load workflow');
         } finally {
           setIsLoading(false);
         }
@@ -148,80 +145,142 @@ export default function WorkflowPage() {
     navigate(`${location.pathname}?${params.toString()}`, { replace: true });
   };
 
-  // Node categories for the sidebar
-  const workflowNodes = [
-    { id: 'customer', label: 'Customer', description: 'Contact info & history' },
-    { id: 'job', label: 'Job', description: 'Schedule & assignments' },
-    { id: 'quote', label: 'Quote', description: 'Terms & approvals' },
-    { id: 'task', label: 'Task', description: 'To-dos & assignments' },
-    { id: 'vision', label: 'Vision Analysis', description: 'Extract/process data' },
-    { id: 'custom', label: 'Custom', description: 'Blank node' },
-  ];
-
-  const messagingNodes = [
-    { id: 'sms', label: 'SMS', description: 'Text notifications' },
-    { id: 'email', label: 'Email', description: 'Email notifications' },
-    { id: 'whatsapp', label: 'WhatsApp', description: 'WhatsApp messages' },
-    { id: 'social', label: 'Social Media', description: 'Social media integrations' },
-    { id: 'social-post', label: 'Social Post', description: 'Facebook & Instagram' },
-  ];
-
-  const [isTriggerSelectorOpen, setIsTriggerSelectorOpen] = useState(false);
-  const [isTemplateSelectorOpen, setIsTemplateSelectorOpen] = useState(false);
-
-  const [isAIModalOpen, setIsAIModalOpen] = useState(false);
-
-  const [selectedNode, setSelectedNode] = useState(null);
-
-  const [aiMessages, setAIMessages] = useState([]);
-
-  const [workflowDarkMode, setWorkflowDarkMode] = useState(false);
-
   const handleSave = async (name: string, description: string) => {
     setIsLoading(true);
     try {
-      // TODO: Implement save functionality
-      setWorkflowName(name);
-      setSaveDrawerOpen(false);
+      if (!flowInstance) {
+        throw new Error('Flow instance not initialized');
+      }
+
+      const workflowData = {
+        nodes: flowInstance.getNodes(),
+        edges: flowInstance.getEdges()
+      };
+
+      const { success } = await WorkflowService.saveWorkflow({
+        id: workflowId,
+        name,
+        description,
+        data: workflowData
+      });
+
+      if (success) {
+        setWorkflowName(name);
+        setSaveDrawerOpen(false);
+        toast.success('Workflow saved successfully');
+      } else {
+        throw new Error('Failed to save workflow');
+      }
     } catch (error) {
       console.error('Error saving workflow:', error);
+      toast.error('Failed to save workflow');
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleTriggerSelect = (triggerId: string) => {
-    console.log('Selected trigger:', triggerId);
+    if (!flowInstance) return;
+
+    const triggerNode = {
+      id: `trigger-${Date.now()}`,
+      type: 'triggerNode',
+      position: { x: 100, y: 100 },
+      data: { 
+        label: `Trigger: ${triggerId}`,
+        triggerId
+      }
+    };
+
+    flowInstance.setNodes(prev => [...prev, triggerNode]);
     setIsTriggerSelectorOpen(false);
+    toast.success('Trigger added successfully');
   };
 
   const handleTemplateSelect = (template: Template) => {
     if (!flowInstance) return;
 
-    // Clear existing nodes and edges
-    flowInstance.setNodes([]);
-    flowInstance.setEdges([]);
+    try {
+      flowInstance.setNodes([]);
+      flowInstance.setEdges([]);
 
-    // Add template nodes and edges
-    if (template.data) {
-      flowInstance.setNodes(template.data.nodes);
-      flowInstance.setEdges(template.data.edges);
+      if (template.data) {
+        flowInstance.setNodes(template.data.nodes);
+        flowInstance.setEdges(template.data.edges);
+      }
+
+      setWorkflowName(template.name);
+      setIsTemplateSelectorOpen(false);
+      toast.success('Template loaded successfully');
+    } catch (error) {
+      console.error('Error loading template:', error);
+      toast.error('Failed to load template');
     }
-
-    // Update workflow name
-    setWorkflowName(template.name);
-
-    // Close template selector
-    setIsTemplateSelectorOpen(false);
   };
+
+  const handleNodeSelect = (node) => {
+    setSelectedNode(node);
+  };
+
+  const handleEditWorkflow = (nodeId: string, changes: any) => {
+    if (!flowInstance) return;
+
+    flowInstance.setNodes((nds) =>
+      nds.map((node) => {
+        if (node.id === nodeId) {
+          return {
+            ...node,
+            data: {
+              ...node.data,
+              ...changes
+            }
+          };
+        }
+        return node;
+      })
+    );
+
+    toast.success('Node updated successfully');
+  };
+
+  const handleDeleteNode = (nodeId: string) => {
+    if (!flowInstance) return;
+
+    flowInstance.setNodes((nds) => nds.filter((node) => node.id !== nodeId));
+    flowInstance.setEdges((eds) =>
+      eds.filter((edge) => edge.source !== nodeId && edge.target !== nodeId)
+    );
+
+    toast.success('Node deleted successfully');
+  };
+
+  const getAvailableNodes = () => {
+    if (!flowInstance) return [];
+    return flowInstance.getNodes().map((node) => ({
+      id: node.id,
+      type: node.type || 'custom',
+      label: node.data.label
+    }));
+  };
+
+  const toggleDarkMode = useCallback(() => {
+    setWorkflowDarkMode(prev => !prev);
+    toast.success(`Dark Mode ${!workflowDarkMode ? 'Enabled' : 'Disabled'}`, {
+      duration: 3000,
+      position: 'top-center',
+      style: {
+        backgroundColor: !workflowDarkMode ? DARK_BG : '#ffffff',
+        color: !workflowDarkMode ? DARK_GOLD : '#333333',
+        border: `2px solid ${!workflowDarkMode ? DARK_GOLD : '#dddddd'}`,
+      },
+    });
+  }, [workflowDarkMode]);
 
   const handleGenerateWorkflow = async (prompt: string) => {
     try {
-      // Add user message to history
       const userMessage = { role: 'user', content: prompt };
       setAIMessages(prev => [...prev, userMessage]);
 
-      // Show thinking message
       const thinkingMessage = {
         role: 'assistant',
         content: 'Analyzing your requirements and generating a workflow...'

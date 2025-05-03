@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate as useReactRouterNavigate, useLocation as useReactRouterLocation, NavigateFunction } from 'react-router-dom';
 import { trackHistoryCall } from '@/utils/performanceMonitor';
 
@@ -44,14 +44,14 @@ function useSafeLocation() {
 export function TabsProvider({ children }: { children: React.ReactNode }) {
   const [tabs, setTabs] = useState<Tab[]>([]);
   const [activeTabId, setActiveTabId] = useState<string | null>(null);
-  const [isInitialMount, setIsInitialMount] = useState(true);
+  const initialized = useRef(false);
   const [navigationInProgress, setNavigationInProgress] = useState(false);
   const navigate = useSafeNavigate();
   const location = useSafeLocation();
 
   // Initialize with current path on first mount
   useEffect(() => {
-    if (isInitialMount && location.pathname) {
+    if (!initialized.current && location.pathname) {
       // Create a default tab for the current location
       const defaultTabId = `tab-${Date.now()}`;
       const pathSegments = location.pathname.split('/');
@@ -68,9 +68,9 @@ export function TabsProvider({ children }: { children: React.ReactNode }) {
       }]);
       
       setActiveTabId(defaultTabId);
-      setIsInitialMount(false);
+      initialized.current = true;
     }
-  }, [isInitialMount, location.pathname]);
+  }, [location.pathname]);
 
   // Throttle function to prevent excessive calls
   const throttle = useCallback((callback: Function, delay: number = 300) => {
@@ -170,7 +170,7 @@ export function TabsProvider({ children }: { children: React.ReactNode }) {
 
   // Update tabs when location changes (external navigation)
   useEffect(() => {
-    if (!navigationInProgress && !isInitialMount) {
+    if (!navigationInProgress && !initialized.current) {
       // Check if this path is already open in a tab
       const existingTabIndex = tabs.findIndex(tab => tab.path === location.pathname);
       
@@ -194,7 +194,7 @@ export function TabsProvider({ children }: { children: React.ReactNode }) {
         setActiveTabId(newTab.id);
       }
     }
-  }, [location.pathname, navigationInProgress, isInitialMount, tabs]);
+  }, [location.pathname, navigationInProgress, initialized.current, tabs]);
 
   // Check if a tab with a specific path is already open
   const isTabOpen = useCallback((path: string) => {
