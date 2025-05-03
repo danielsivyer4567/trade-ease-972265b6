@@ -12,10 +12,12 @@ import { AppLayoutWithTabs } from '@/components/AppLayoutWithTabs';
 
 // Lazy load workflow pages
 const WorkflowPage = lazy(() => import('@/pages/Workflow/index.new'));
-const WorkflowTemplates = lazy(() => import('@/pages/Workflow/templates'));
-const WorkflowEnrollmentHistory = lazy(() => import('@/pages/Workflow/WorkflowEnrollmentHistory'));
-const WorkflowExecutionLogs = lazy(() => import('@/pages/Workflow/WorkflowExecutionLogs'));
-const WorkflowAutomations = lazy(() => import('@/pages/Workflow/WorkflowAutomations'));
+const WorkflowTemplates = lazy(() => import('@/components/workflow/WorkflowTemplates').then(module => ({ 
+  default: () => <module.WorkflowTemplates onSelectTemplate={(template) => {
+    console.log('Template selected:', template);
+    // TODO: Navigate to workflow editor with template data
+  }} />
+})));
 
 // Development mode debugging component
 const DevelopmentEntry = lazy(() => import('@/pages/DevelopmentEntry'));
@@ -54,8 +56,10 @@ const TeamsPage = lazy(() => import('@/pages/Teams'));
 const CalendarPage = lazy(() => import('@/pages/Calendar'));
 
 // Workflow pages
-const WorkflowListPage = lazy(() => import('@/pages/Workflow/WorkflowList'));
-const AutomationsPage = lazy(() => import('@/pages/Automations'));
+const WorkflowList = lazy(() => import('@/pages/Workflow/WorkflowList'));
+const EnrollmentHistory = lazy(() => import('@/pages/Workflow/EnrollmentHistory'));
+const ExecutionLogs = lazy(() => import('@/pages/Workflow/ExecutionLogs'));
+const AutomationsPage = lazy(() => import('@/pages/Automations').then(module => ({ default: module.default })));
 
 // Communication
 const EmailPage = lazy(() => import('@/pages/Email'));
@@ -212,11 +216,11 @@ const routeObjects: RouteObject[] = [
           { path: "/workflow", element: <SuspenseWrapper><WorkflowPage /></SuspenseWrapper> },
           { path: "/workflow/new", element: <SuspenseWrapper><WorkflowPage /></SuspenseWrapper> },
           { path: "/workflow/edit/:id", element: <SuspenseWrapper><WorkflowPage /></SuspenseWrapper> },
-          { path: "/workflow/list", element: <SuspenseWrapper><WorkflowListPage /></SuspenseWrapper> },
+          { path: "/workflow/list", element: <SuspenseWrapper><WorkflowList /></SuspenseWrapper> },
           { path: "/workflow/templates", element: <SuspenseWrapper><WorkflowTemplates /></SuspenseWrapper> },
-          { path: "/workflow/enrollment-history", element: <SuspenseWrapper><WorkflowEnrollmentHistory /></SuspenseWrapper> },
-          { path: "/workflow/automations", element: <SuspenseWrapper><WorkflowAutomations /></SuspenseWrapper> },
-          { path: "/workflow/execution-logs", element: <SuspenseWrapper><WorkflowExecutionLogs /></SuspenseWrapper> },
+          { path: "/workflow/enrollment-history", element: <SuspenseWrapper><EnrollmentHistory /></SuspenseWrapper> },
+          { path: "/workflow/execution-logs", element: <SuspenseWrapper><ExecutionLogs /></SuspenseWrapper> },
+          { path: "/workflow/automations", element: <SuspenseWrapper><AutomationsPage /></SuspenseWrapper> },
           { path: "/automations", element: <SuspenseWrapper><AutomationsPage /></SuspenseWrapper> },
           { path: "/forms", element: <SuspenseWrapper><FormsPage /></SuspenseWrapper> },
           { path: "/tasks", element: <SuspenseWrapper><TasksPage /></SuspenseWrapper> },
@@ -236,11 +240,9 @@ const routeObjects: RouteObject[] = [
   },
 ];
 
-// Create the browser router instance with the relativeSplatPath future flag
+// Create the browser router instance
 export const router = createBrowserRouter(routeObjects, {
   future: {
-    v7_relativeSplatPath: true,
-    // Add other future flags for createBrowserRouter here if needed
-    // e.g., v7_fetcherPersist, v7_normalizeFormMethod, etc.
+    v7_relativeSplatPath: true
   }
 });

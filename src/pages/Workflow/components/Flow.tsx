@@ -17,10 +17,10 @@ import { CustomerNode } from './nodes/CustomerNode';
 import { JobNode } from './nodes/JobNode';
 import { TaskNode } from './nodes/TaskNode';
 import { QuoteNode } from './nodes/QuoteNode';
-import { CustomNode } from './nodes/CustomNode';
+import { CustomNode } from './nodes/CustomNode.jsx';
 import { VisionNode } from './nodes/VisionNode';
-import { AutomationNode } from './nodes/AutomationNode';
-import { MessagingNode } from './nodes/MessagingNode';
+import { AutomationNode } from './nodes/AutomationNode.jsx';
+import { MessagingNode } from './nodes/MessagingNode.jsx';
 import { NodeDetailsPanel } from './NodeDetailsPanel';
 import AnimatedEdge from './AnimatedEdge';
 import { toast } from 'sonner';
@@ -428,7 +428,7 @@ function FlowContent({ onInit, workflowId, onNodeSelect, workflowDarkMode, toggl
 }
 
 // Export the Flow with ReactFlowProvider to fix the zustand error
-export function Flow(props: FlowProps) {
+export default function Flow(props: FlowProps) {
   return (
     <ReactFlowProvider>
       <FlowContent {...props} />

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -9,6 +8,7 @@ import { AutomationWorkflowButton } from '@/components/automation/AutomationWork
 import { toast } from "sonner";
 import { Automation } from '../types';
 import { AutomationIntegrationService } from '@/services/AutomationIntegrationService';
+import { useNavigate } from 'react-router-dom';
 
 interface AutomationCardProps {
   automation: Automation;
@@ -16,21 +16,17 @@ interface AutomationCardProps {
 }
 
 const AutomationCard = ({ automation, toggleAutomation }: AutomationCardProps) => {
-  const handleRunNow = async () => {
-    try {
-      await AutomationIntegrationService.triggerAutomation(automation.id, {
-        targetType: 'job',
-        targetId: 'manual-run',
-        additionalData: {
-          source: 'manual',
-          timestamp: new Date().toISOString()
-        }
-      });
-      toast.success(`Running automation: ${automation.title}`);
-    } catch (error) {
-      console.error('Failed to run automation:', error);
-      toast.error('Failed to run automation');
-    }
+  const navigate = useNavigate();
+
+  const handleRunNow = () => {
+    navigate('/workflow', { 
+      state: { 
+        addAutomation: true,
+        automationId: automation.id,
+        automationTitle: automation.title,
+        automationDescription: automation.description
+      } 
+    });
   };
 
   return (

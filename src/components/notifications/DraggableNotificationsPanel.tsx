@@ -5,6 +5,8 @@ import { Button } from '@/components/ui/button';
 import { NotificationItem } from './NotificationItem';
 import { cn } from '@/lib/utils';
 import { useNotifications, type Notification } from './NotificationContextProvider';
+import { createTag } from '@/services/tagService';
+import { toast } from 'react-toastify';
 
 type PanelSize = 'quarter' | 'half' | 'custom' | 'minimized';
 type ActiveTab = 'all' | 'team' | 'trades' | 'account' | 'security' | 'calendar' | 'comments';
@@ -343,14 +345,12 @@ export const DraggableNotificationsPanel = ({
 
   // Toggles the overall Tag Drop mode on/off
   const toggleTagDropMode = () => {
-    console.log('[TagDrop] toggleTagDropMode called.'); // Add log here
     setTagDropModeActive(prev => {
       const nextState = !prev;
-      console.log('[TagDrop] Setting tagDropModeActive to:', nextState); // Add log here
-      if (!nextState) { // Turning OFF
-        closeTagPopup(); // Close any open popup
+      if (!nextState) {
+        closeTagPopup();
         document.body.style.cursor = '';
-      } else { // Turning ON
+      } else {
         document.body.style.cursor = 'crosshair';
       }
       return nextState;
@@ -370,55 +370,40 @@ export const DraggableNotificationsPanel = ({
 
   // Closes the tag pop-up window and resets state
   const closeTagPopup = useCallback(() => {
-    if (isTagPopupOpen) {
-        if (activeTagPopupElement.current) {
-             // Potentially remove the element if dynamically created, or just hide if rendered conditionally
-        }
-        setIsTagPopupOpen(false);
-        resetTagPopupState();
-        // Restore cursor based on whether tag drop mode is still globally active
-        document.body.style.cursor = tagDropModeActive ? 'crosshair' : '';
-    }
-  }, [isTagPopupOpen, tagDropModeActive]); // Include tagDropModeActive
+    console.log('[TagDrop] closeTagPopup called');
+    setIsTagPopupOpen(false);
+    resetTagPopupState();
+    document.body.style.cursor = tagDropModeActive ? 'crosshair' : '';
+  }, [tagDropModeActive]);
 
   // Handle click on page to place a new tag (for CREATION)
   const handlePlaceNewTag = useCallback((event: MouseEvent) => {
-    // Prevent default behavior
     event.preventDefault();
     event.stopPropagation();
-    
-    // Check if we're in tag drop mode
+
     if (!tagDropModeActive) {
       if (isDevelopment) console.log('[handlePlaceNewTag] Not in tag drop mode, ignoring click');
       return;
     }
-    
-    // Check if the click is on a notification or the panel itself
+
     const target = event.target as HTMLElement;
     const isNotification = target.closest('.notification-item');
     const isPanel = target.closest('.notifications-panel');
-    
-    if (!isNotification && !isPanel) {
-      if (isDevelopment) console.log('[handlePlaceNewTag] Click not on notification or panel, ignoring');
+
+    if (isNotification || isPanel) {
+      if (isDevelopment) console.log('[handlePlaceNewTag] Click on notification or panel, ignoring');
       return;
     }
-    
-    // Get the coordinates relative to the viewport
-    const x = event.clientX;
-    const y = event.clientY;
-    
-    if (isDevelopment) console.log('[handlePlaceNewTag] Setting tag coordinates:', { x, y });
-    
-    // Use a timeout to ensure state updates happen in the next tick
-    // This helps prevent race conditions with unmounting
+
+    // Always open popup in the center of the screen
+    const popupWidth = 380;
+    const popupHeight = 400;
+    const x = window.innerWidth / 2 - popupWidth / 2;
+    const y = window.innerHeight / 2 - popupHeight / 2;
+
     setTimeout(() => {
-      // Check if the component is still mounted before updating state
-      if (document.querySelector('.notifications-panel')) {
-        setTagCoordinates({ x, y });
-        setShowTagPopup(true);
-      } else {
-        if (isDevelopment) console.log('[handlePlaceNewTag] Component unmounted, not updating state');
-      }
+      setTagPopupCoords({ x, y });
+      setIsTagPopupOpen(true);
     }, 0);
   }, [tagDropModeActive, isDevelopment]);
 
@@ -517,65 +502,61 @@ export const DraggableNotificationsPanel = ({
     }
     setStaffSelectionError(null);
 
-    const tagId = `tag_${currentUserId}_${Date.now()}`;
-    const originalCoords = tagPopupCoords;
-
-    // Capture drawing from canvas if available
-    let canvasDrawingData = null;
-    if (tagCanvasRef.current) {
-      canvasDrawingData = tagCanvasRef.current.toDataURL('image/png');
-    }
-
-    // 1. Close the popup first
-    closeTagPopup();
-
-    // 2. Upload files 
-    const uploadPromises = uploadedFiles.map(async (uploadedFile) => {
-      const folderPath = `tag_drops/${tagId}`;
-      let fileName = uploadedFile.file.name;
-      if (uploadedFile.type === 'drawing') fileName = 'drawing.png';
-      if (uploadedFile.type === 'audio') fileName = 'recording.mp3';
+    try {
+      // 1. Upload files first
+      const uploadPromises = uploadedFiles.map(async (uploadedFile) => {
+        const folderPath = `tag_drops/${Date.now()}`;
+        let fileName = uploadedFile.file.name;
+        if (uploadedFile.type === 'drawing') fileName = 'drawing.png';
+        if (uploadedFile.type === 'audio') fileName = 'recording.mp3';
+        
+        try {
+          const url = await uploadFileToSupabase(uploadedFile.file, folderPath, fileName);
+          return { ...uploadedFile, supabaseUrl: url };
+        } catch (error) {
+          console.error("Upload failed:", error);
+          return { ...uploadedFile, supabaseUrl: undefined };
+        }
+      });
       
-      try {
-        const url = await uploadFileToSupabase(uploadedFile.file, folderPath, fileName);
-        return { ...uploadedFile, supabaseUrl: url };
-      } catch (error) {
-        console.error("Upload failed:", error);
-        return { ...uploadedFile, supabaseUrl: undefined };
-      }
-    });
-    
-    const uploadedFilesWithUrls = await Promise.all(uploadPromises);
+      const uploadedFilesWithUrls = await Promise.all(uploadPromises);
 
-    // 3. Prepare tag data including the drawing
-    const tagDataPayload = {
-      id: tagId,
-      creatorId: currentUserId,
-      comment: tagComment,
-      taggedStaffIds: selectedStaff.map(s => s.id),
-      attachments: uploadedFilesWithUrls
+      // 2. Create tag data
+      const tagData = {
+        creatorId: currentUserId,
+        comment: tagComment,
+        taggedStaffIds: selectedStaff.map(s => s.id),
+        attachments: uploadedFilesWithUrls
           .filter(f => f.supabaseUrl)
           .map(f => ({ type: f.type, url: f.supabaseUrl })),
-      coords: originalCoords,
-      timestamp: Date.now(),
-      drawingData: canvasDrawingData, // Include the drawing data
-    };
-
-    console.log("[Save Tag] Data Payload:", tagDataPayload);
-    
-    // 4. Simulate sending notification
-    console.log(`[Simulate] Sending notification for tag ${tagId} to staff: ${selectedStaff.map(s => s.name).join(', ')}`);
-
-    // 5. Show temporary marker at original coordinates with drawing data
-    if (originalCoords) {
-      const newMarker: TagMarker = {
-        id: tagId,
-        x: originalCoords.x,
-        y: originalCoords.y,
-        timestamp: Date.now(),
-        drawingData: canvasDrawingData // Store drawing data with the marker
+        coords: tagPopupCoords!,
+        drawingData: tagCanvasRef.current?.toDataURL('image/png')
       };
-      setTagMarkers(prev => [...prev, newMarker]);
+
+      // 3. Save tag to database
+      const savedTag = await createTag(tagData);
+
+      // 4. Show success notification
+      toast.success('Tag created successfully!');
+
+      // 5. Close popup and reset state
+      closeTagPopup();
+
+      // 6. Add marker to the page
+      if (tagPopupCoords) {
+        const newMarker: TagMarker = {
+          id: savedTag.id,
+          x: tagPopupCoords.x,
+          y: tagPopupCoords.y,
+          timestamp: Date.now(),
+          drawingData: savedTag.drawingData
+        };
+        setTagMarkers(prev => [...prev, newMarker]);
+      }
+
+    } catch (error) {
+      console.error('Failed to save tag:', error);
+      toast.error('Failed to save tag. Please try again.');
     }
   };
 
@@ -1183,23 +1164,17 @@ export const DraggableNotificationsPanel = ({
   // Handle starting popup drag operation
   const handlePopupDragStart = (e: React.MouseEvent) => {
     if (activeTagPopupElement.current && tagPopupCoords) {
-      // Only allow dragging from the header element with the specific popup-drag-handle class
       const target = e.target as HTMLElement;
       const isDragHandle = target.closest('.popup-drag-handle');
-      
-      // If not clicking on the drag handle, don't start dragging
-      if (!isDragHandle) return;
-      
+      const isButton = target.closest('button, .button, [role="button"]');
+      // Only allow drag from header, and not from a button
+      if (!isDragHandle || isButton) return;
       setIsDraggingPopup(true);
-      
-      // Calculate offset between mouse position and popup top-left corner
       const rect = activeTagPopupElement.current.getBoundingClientRect();
       setDragOffset({
         x: e.clientX - rect.left,
         y: e.clientY - rect.top
       });
-      
-      // Prevent other events
       e.stopPropagation();
     }
   };
@@ -1292,6 +1267,13 @@ export const DraggableNotificationsPanel = ({
     }
   }, [tagDropModeActive, handlePlaceNewTag, isDevelopment]);
 
+  // Defensive: On mouseup anywhere, always stop dragging
+  useEffect(() => {
+    const stopDrag = () => setIsDraggingPopup(false);
+    document.addEventListener('mouseup', stopDrag);
+    return () => document.removeEventListener('mouseup', stopDrag);
+  }, []);
+
   return (
     <>
       {/* Overlay */}
@@ -1317,7 +1299,9 @@ export const DraggableNotificationsPanel = ({
               style={{ 
                 left: `${tagPopupCoords.x}px`, 
                 top: `${tagPopupCoords.y}px`,
-                cursor: isDraggingPopup ? 'move' : 'default'
+                cursor: isDraggingPopup ? 'move' : 'default',
+                pointerEvents: 'auto',
+                zIndex: 999999
               }}
           >
               {/* Header - Drag handle */}
