@@ -9,6 +9,7 @@ import { Toaster as SonnerToaster } from 'sonner';
 import { NotificationProvider } from './components/notifications/NotificationContextProvider';
 import { TabsProvider } from './contexts/TabsContext';
 import { WorkflowDarkModeProvider } from './contexts/WorkflowDarkModeContext';
+import { GoogleMapsProvider } from './components/GoogleMapsProvider';
 import { initializeTables } from './integrations/supabase/dbInit';
 import { ErrorBoundary } from 'react-error-boundary';
 import './App.css';
@@ -72,11 +73,13 @@ function App() {
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
           <NotificationProvider>
-            <AppWithTabsProvider>
-              <Suspense fallback={<LoadingFallback />}>
-                <RouterProvider router={router} />
-              </Suspense>
-            </AppWithTabsProvider>
+            <GoogleMapsProvider>
+              <AppWithTabsProvider>
+                <Suspense fallback={<LoadingFallback />}>
+                  <RouterProvider router={router} />
+                </Suspense>
+              </AppWithTabsProvider>
+            </GoogleMapsProvider>
           </NotificationProvider>
         </AuthProvider>
       </QueryClientProvider>
