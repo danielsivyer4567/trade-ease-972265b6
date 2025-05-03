@@ -175,6 +175,9 @@ export function Flow({ onInit, workflowId, onNodeSelect, workflowDarkMode, toggl
           /* Dark mode specific styling for ReactFlow */
           .workflow-dark-mode .react-flow__pane {
             background-color: ${DARK_BG} !important;
+            background-image: radial-gradient(circle, rgba(255, 255, 255, 0.75) 0.6px, transparent 0.6px) !important;
+            background-size: 14px 14px !important;
+            background-position: 0px 0px !important;
           }
           
           .workflow-dark-mode .react-flow__node {
@@ -245,13 +248,7 @@ export function Flow({ onInit, workflowId, onNodeSelect, workflowDarkMode, toggl
           }
           
           .workflow-dark-mode .react-flow__background {
-            background-size: 20px 20px !important;
-            background-image: radial-gradient(circle, rgba(255, 255, 255, 0.4) 1px, transparent 1px) !important;
-            background-position: 0px 0px !important;
-          }
-          
-          .workflow-dark-mode .react-flow__background-pattern {
-            color: rgba(255, 255, 255, 0.3) !important;
+            display: none !important; /* Hide the default background */
           }
         `}
       </style>
@@ -305,7 +302,7 @@ export function Flow({ onInit, workflowId, onNodeSelect, workflowDarkMode, toggl
         <Background 
           color={actualDarkMode ? "#ffffff" : undefined} 
           gap={20}
-          size={actualDarkMode ? 0.8 : 1}
+          size={actualDarkMode ? 1.2 : 1}
         />
         
         <Controls 
