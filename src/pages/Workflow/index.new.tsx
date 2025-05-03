@@ -8,6 +8,7 @@ import { WorkflowDrawer } from './components/WorkflowDrawer';
 import { WorkflowSaveDialog } from './components/WorkflowSaveDialog';
 import { WorkflowLoadDialog } from './components/WorkflowLoadDialog';
 import { toast } from 'sonner';
+import { WorkflowService } from '@/services/WorkflowService';
 
 export default function WorkflowPage() {
   const { id } = useParams();
@@ -22,6 +23,7 @@ export default function WorkflowPage() {
   const [nodes, setNodes] = useState([]);
   const [edges, setEdges] = useState([]);
   const pendingTemplateData = useRef(null);
+  const pendingWorkflowId = useRef(null);
 
   // Handle incoming location state when component mounts
   useEffect(() => {
@@ -54,6 +56,15 @@ export default function WorkflowPage() {
             animated: true
           })));
         }
+      } else if (location.state.addWorkflow && location.state.workflowId) {
+        // Store workflow ID for loading after flow instance is initialized
+        pendingWorkflowId.current = {
+          workflowId: location.state.workflowId,
+          workflowName: location.state.workflowName || 'Workflow'
+        };
+        
+        // Fetch and apply workflow data
+        loadWorkflowData(location.state.workflowId);
       } else if (location.state.addAutomation && location.state.automationId) {
         // Handle automation data
         if (flowInstance) {
@@ -67,6 +78,40 @@ export default function WorkflowPage() {
     }
   }, [location.state]);
 
+  // Load workflow data by ID
+  const loadWorkflowData = async (workflowId) => {
+    try {
+      const result = await WorkflowService.getWorkflow(workflowId);
+      if (result.success && result.workflow) {
+        const workflowData = result.workflow.data;
+        
+        if (workflowData.nodes && Array.isArray(workflowData.nodes)) {
+          setNodes(workflowData.nodes.map(node => ({
+            id: node.id,
+            type: node.type,
+            position: node.position,
+            data: node.data
+          })));
+        }
+        
+        if (workflowData.edges && Array.isArray(workflowData.edges)) {
+          setEdges(workflowData.edges.map(edge => ({
+            id: edge.id,
+            source: edge.source,
+            target: edge.target,
+            type: 'animated',
+            animated: true
+          })));
+        }
+      } else {
+        toast.error('Failed to load workflow data');
+      }
+    } catch (error) {
+      console.error('Error loading workflow data:', error);
+      toast.error('Failed to load workflow data');
+    }
+  };
+
   // Effect for handling changes to flowInstance
   useEffect(() => {
     if (flowInstance) {
@@ -77,6 +122,15 @@ export default function WorkflowPage() {
           flowInstance.fitView({ padding: 0.2 });
           toast.success(`Template "${pendingTemplateData.current.templateName}" applied to workflow`);
           pendingTemplateData.current = null;
+        }, 100);
+      }
+      
+      // Handle pending workflow data after flow instance is available
+      if (pendingWorkflowId.current) {
+        setTimeout(() => {
+          flowInstance.fitView({ padding: 0.2 });
+          toast.success(`Workflow "${pendingWorkflowId.current.workflowName}" added to canvas`);
+          pendingWorkflowId.current = null;
         }, 100);
       }
       
