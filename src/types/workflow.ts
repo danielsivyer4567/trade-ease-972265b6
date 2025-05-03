@@ -62,12 +62,85 @@ export interface WorkflowExecutionData {
   output?: any;
 }
 
+export interface WorkflowTemplate {
+  id: string;
+  name: string;
+  description: string;
+  category: string;
+  data: {
+    nodes: Array<{
+      id: string;
+      type: string;
+      position: {
+        x: number;
+        y: number;
+      };
+      data: {
+        label: string;
+        [key: string]: any;
+      };
+    }>;
+    edges: Array<{
+      id: string;
+      source: string;
+      target: string;
+    }>;
+  };
+}
+
+export interface Workflow {
+  id: string;
+  name: string;
+  description?: string;
+  category?: string;
+  is_template?: boolean;
+  data: {
+    nodes: Array<{
+      id: string;
+      type: string;
+      position: {
+        x: number;
+        y: number;
+      };
+      data: {
+        label: string;
+        [key: string]: any;
+      };
+    }>;
+    edges: Array<{
+      id: string;
+      source: string;
+      target: string;
+    }>;
+    created_at?: string;
+    updated_at?: string;
+  };
+}
+
 export interface CreateWorkflowParams {
   name: string;
   description?: string;
-  data: WorkflowData;
   category?: string;
   isTemplate?: boolean;
+  data: {
+    nodes: Array<{
+      id: string;
+      type: string;
+      position: {
+        x: number;
+        y: number;
+      };
+      data: {
+        label: string;
+        [key: string]: any;
+      };
+    }>;
+    edges: Array<{
+      id: string;
+      source: string;
+      target: string;
+    }>;
+  };
 }
 
 export interface UpdateWorkflowParams {
@@ -82,15 +155,4 @@ export interface UpdateWorkflowParams {
 export interface ExecuteWorkflowParams {
   workflowId: string;
   input?: any;
-}
-
-export interface WorkflowTemplate {
-  id: string;
-  name: string;
-  description: string;
-  category: string;
-  recommended?: boolean;
-  data?: WorkflowData;
-  user_id?: string;
-  created_at?: string;
 } 
