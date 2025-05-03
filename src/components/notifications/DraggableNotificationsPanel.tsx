@@ -759,7 +759,7 @@ export const DraggableNotificationsPanel = ({
         ctx.lineWidth = drawingState.lineWidth;
         ctx.stroke();
         break;
-      case 'circle':
+      case 'circle': {
         const radius = Math.sqrt(
           Math.pow(endPoint.x - lastPoint.x, 2) + Math.pow(endPoint.y - lastPoint.y, 2)
         );
@@ -769,10 +769,11 @@ export const DraggableNotificationsPanel = ({
         ctx.lineWidth = drawingState.lineWidth;
         ctx.stroke();
         break;
+      }
       case 'star':
         drawStar(ctx, lastPoint.x, lastPoint.y, 5, 
-            Math.sqrt(Math.pow(endPoint.x - lastPoint.x, 2) + Math.pow(endPoint.y - lastPoint.y, 2)), 
-            drawingState.color, drawingState.lineWidth);
+          Math.sqrt(Math.pow(endPoint.x - lastPoint.x, 2) + Math.pow(endPoint.y - lastPoint.y, 2)), 
+          drawingState.color, drawingState.lineWidth);
         break;
     }
     
@@ -830,7 +831,7 @@ export const DraggableNotificationsPanel = ({
     ctx.fillStyle = color;
     ctx.lineWidth = lineWidth;
     
-    let angle = Math.PI / points;
+    const angle = Math.PI / points;
     
     for (let i = 0; i < 2 * points; i++) {
       const r = i % 2 === 0 ? radius : radius / 2;
@@ -1084,7 +1085,7 @@ export const DraggableNotificationsPanel = ({
             ctx.lineWidth = currentLineWidth;
             ctx.stroke();
             break;
-          case 'circle':
+          case 'circle': {
             const radius = Math.sqrt(
               Math.pow(endPoint.x - currentLastPoint.x, 2) + Math.pow(endPoint.y - currentLastPoint.y, 2)
             );
@@ -1094,6 +1095,7 @@ export const DraggableNotificationsPanel = ({
             ctx.lineWidth = currentLineWidth;
             ctx.stroke();
             break;
+          }
           case 'star':
             drawStar(ctx, currentLastPoint.x, currentLastPoint.y, 5, 
                 Math.sqrt(Math.pow(endPoint.x - currentLastPoint.x, 2) + Math.pow(endPoint.y - currentLastPoint.y, 2)), 

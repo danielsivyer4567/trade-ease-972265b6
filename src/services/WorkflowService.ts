@@ -1,23 +1,16 @@
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { 
-  Workflow, 
+  Workflow,
+  WorkflowTemplate,
   WorkflowData, 
   CreateWorkflowParams, 
   UpdateWorkflowParams, 
   ExecuteWorkflowParams,
-  WorkflowExecutionData
+  WorkflowExecutionData,
+  WorkflowExecution
 } from '@/types/workflow';
 import { logger } from '@/utils/logger';
-
-export interface Workflow {
-  id: string;
-  name: string;
-  description?: string;
-  category?: string;
-  data: any;
-  is_template?: boolean;
-}
 
 export const WorkflowService = {
   /**
@@ -445,5 +438,60 @@ export const WorkflowService = {
       logger.error('Failed to create workflow from template:', error);
       return { success: false, error };
     }
-  }
+  },
+
+  /**
+   * List all workflow templates
+   */
+  listWorkflowTemplates: async (): Promise<{ success: boolean; templates?: WorkflowTemplate[]; error?: any }> => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        return { success: false, error: 'Authentication required' };
+      }
+
+      // First try to get user's own templates
+      const { data: userTemplates, error: userTemplatesError } = await supabase
+        .from('workflows')
+        .select('*')
+        .eq('user_id', session.user.id)
+        .eq('is_template', true)
+        .order('updated_at', { ascending: false });
+
+      if (userTemplatesError) throw userTemplatesError;
+
+      // Then get system templates
+      const { data: systemTemplates, error: systemTemplatesError } = await supabase
+        .from('workflow_templates')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (systemTemplatesError) throw systemTemplatesError;
+
+      // Combine and format the templates
+      const templates = [
+        ...(userTemplates || []).map(item => ({
+          id: item.id,
+          name: item.name,
+          description: item.description,
+          category: item.category || 'custom',
+          data: item.data || { nodes: [], edges: [] },
+          isUserTemplate: true
+        })),
+        ...(systemTemplates || []).map(item => ({
+          id: item.id,
+          name: item.name,
+          description: item.description,
+          category: item.category || 'system',
+          data: item.data || { nodes: [], edges: [] },
+          isUserTemplate: false
+        }))
+      ];
+
+      return { success: true, templates };
+    } catch (error) {
+      console.error('Failed to list workflow templates:', error);
+      return { success: false, error };
+    }
+  },
 };

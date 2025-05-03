@@ -1,4 +1,3 @@
-
 import { drawArrowHead } from './drawingHelpers';
 
 /**
@@ -23,7 +22,7 @@ export const drawWidthMeasurements = (
     { label: `${totalWidth.toFixed(2)} M`, width: totalWidth }
   ];
   
-  let currentYOffset = 10; // Start below the beam
+  const currentYOffset = 10; // Start below the beam
   widthMeasurements.forEach((measurement, index) => {
     const arrowY = baseY + 30 + (currentYOffset * index);
     const scaledWidth = (measurement.width / totalWidth) * roofWidth;

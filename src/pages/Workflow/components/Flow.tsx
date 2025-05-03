@@ -17,10 +17,10 @@ import { CustomerNode } from './nodes/CustomerNode';
 import { JobNode } from './nodes/JobNode';
 import { TaskNode } from './nodes/TaskNode';
 import { QuoteNode } from './nodes/QuoteNode';
-import { CustomNode } from './nodes/CustomNode.jsx';
+import CustomNode from './nodes/CustomNode.jsx';
 import { VisionNode } from './nodes/VisionNode';
-import { AutomationNode } from './nodes/AutomationNode.jsx';
-import { MessagingNode } from './nodes/MessagingNode.jsx';
+import AutomationNode from './nodes/AutomationNode.jsx';
+import MessagingNode from './nodes/MessagingNode.jsx';
 import { NodeDetailsPanel } from './NodeDetailsPanel';
 import AnimatedEdge from './AnimatedEdge';
 import { toast } from 'sonner';
@@ -56,13 +56,17 @@ interface FlowProps {
   onNodeSelect?: (node: any) => void;
   workflowDarkMode?: boolean;
   toggleDarkMode?: () => void;
+  nodes?: any[];
+  edges?: any[];
+  setNodes?: (nodes: any) => void;
+  setEdges?: (edges: any) => void;
 }
 
 const defaultNodes = [];
 const defaultEdges = [];
 
 // The actual Flow component content
-function FlowContent({ onInit, workflowId, onNodeSelect, workflowDarkMode, toggleDarkMode }: FlowProps) {
+function FlowContent({ onInit, workflowId, onNodeSelect, workflowDarkMode, toggleDarkMode, nodes: externalNodes, edges: externalEdges, setNodes: externalSetNodes, setEdges: externalSetEdges }: FlowProps) {
   // Use the global dark mode context
   const { darkMode: globalDarkMode, toggleDarkMode: toggleGlobalDarkMode, isDarkModeLocked } = useWorkflowDarkMode();
   
@@ -76,8 +80,89 @@ function FlowContent({ onInit, workflowId, onNodeSelect, workflowDarkMode, toggl
     console.log('Flow component received workflowDarkMode prop:', workflowDarkMode, 'Lock state:', isDarkModeLocked);
   }, [workflowDarkMode, isDarkModeLocked]);
 
-  const [nodes, setNodes, onNodesChange] = useNodesState(defaultNodes);
-  const [edges, setEdges, onEdgesChange] = useEdgesState(defaultEdges);
+  // Use external state if provided, otherwise use internal state
+  const [internalNodes, setInternalNodes, onNodesChange] = useNodesState(defaultNodes);
+  const [internalEdges, setInternalEdges, onEdgesChange] = useEdgesState(defaultEdges);
+  
+  const nodes = externalNodes || internalNodes;
+  const edges = externalEdges || internalEdges;
+
+  // Handle state updates based on whether external state is provided
+  const setNodes = useCallback((updater) => {
+    if (externalSetNodes) {
+      if (typeof updater === 'function') {
+        externalSetNodes(updater);
+      } else {
+        externalSetNodes(updater);
+      }
+    } else {
+      setInternalNodes(updater);
+    }
+  }, [externalSetNodes, setInternalNodes]);
+
+  const setEdges = useCallback((updater) => {
+    if (externalSetEdges) {
+      if (typeof updater === 'function') {
+        externalSetEdges(updater);
+      } else {
+        externalSetEdges(updater);
+      }
+    } else {
+      setInternalEdges(updater);
+    }
+  }, [externalSetEdges, setInternalEdges]);
+
+  // Handle node changes based on whether external state is provided
+  const handleNodesChange = useCallback((changes) => {
+    if (externalSetNodes) {
+      // Apply changes to external nodes
+      externalSetNodes((nds) => {
+        const nextNodes = [...nds];
+        changes.forEach((change) => {
+          if (change.type === 'remove') {
+            const index = nextNodes.findIndex((n) => n.id === change.id);
+            if (index !== -1) {
+              nextNodes.splice(index, 1);
+            }
+          } else if (change.type === 'add') {
+            nextNodes.push(change.item);
+          } else if (change.type === 'position' || change.type === 'dimensions') {
+            const index = nextNodes.findIndex((n) => n.id === change.id);
+            if (index !== -1) {
+              nextNodes[index] = { ...nextNodes[index], ...change };
+            }
+          }
+        });
+        return nextNodes;
+      });
+    } else {
+      onNodesChange(changes);
+    }
+  }, [externalSetNodes, onNodesChange]);
+
+  // Handle edge changes based on whether external state is provided
+  const handleEdgesChange = useCallback((changes) => {
+    if (externalSetEdges) {
+      // Apply changes to external edges
+      externalSetEdges((eds) => {
+        const nextEdges = [...eds];
+        changes.forEach((change) => {
+          if (change.type === 'remove') {
+            const index = nextEdges.findIndex((e) => e.id === change.id);
+            if (index !== -1) {
+              nextEdges.splice(index, 1);
+            }
+          } else if (change.type === 'add') {
+            nextEdges.push(change.item);
+          }
+        });
+        return nextEdges;
+      });
+    } else {
+      onEdgesChange(changes);
+    }
+  }, [externalSetEdges, onEdgesChange]);
+
   const [instance, setInstance] = useState(null);
   const [selectedNode, setSelectedNode] = useState(null);
   const [isInteractive, setIsInteractive] = useState(true);
@@ -295,8 +380,8 @@ function FlowContent({ onInit, workflowId, onNodeSelect, workflowDarkMode, toggl
       <ReactFlow
         nodes={nodes}
         edges={edges}
-        onNodesChange={onNodesChange}
-        onEdgesChange={onEdgesChange}
+        onNodesChange={handleNodesChange}
+        onEdgesChange={handleEdgesChange}
         onConnect={(params) => {
           const newEdge = {
             ...params,

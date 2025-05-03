@@ -1,4 +1,3 @@
-
 import { serve } from 'https://deno.land/std@0.177.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.7.1'
 
@@ -126,7 +125,7 @@ serve(async (req) => {
       
       // Simple regex to find dollar amounts (can be improved based on document formats)
       const currencyRegex = /\$\s*(\d{1,3}(,\d{3})*(\.\d{2})?)/g;
-      const dateRegex = /\b(0?[1-9]|1[0-2])[\/\-](0?[1-9]|[12]\d|3[01])[\/\-](19|20)?\d{2}\b/g;
+      const dateRegex = /\b(0?[1-9]|1[0-2])[/-](0?[1-9]|[12]\d|3[01])[/-](19|20)?\d{2}\b/g;
       
       const matches = [...fullText.matchAll(currencyRegex)];
       const dates = [...fullText.matchAll(dateRegex)];

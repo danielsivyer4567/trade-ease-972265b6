@@ -9,15 +9,9 @@ import { paymentRoutes } from './payment-routes';
 import { financialRoutes } from './financial-routes';
 import { activityRoutes } from './activity-routes';
 import { AppLayoutWithTabs } from '@/components/AppLayoutWithTabs';
-
 // Lazy load workflow pages
-const WorkflowPage = lazy(() => import('@/pages/Workflow/index.new'));
-const WorkflowTemplates = lazy(() => import('@/components/workflow/WorkflowTemplates').then(module => ({ 
-  default: () => <module.WorkflowTemplates onSelectTemplate={(template) => {
-    console.log('Template selected:', template);
-    // TODO: Navigate to workflow editor with template data
-  }} />
-})));
+const WorkflowPage = lazy(() => import('@/pages/Workflow/index.new').then(module => ({ default: module.default })));
+const WorkflowTemplates = lazy(() => import('@/pages/Workflow/templates').then(module => ({ default: module.default })));
 
 // Development mode debugging component
 const DevelopmentEntry = lazy(() => import('@/pages/DevelopmentEntry'));
