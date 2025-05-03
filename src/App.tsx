@@ -8,6 +8,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster as SonnerToaster } from 'sonner';
 import { NotificationProvider } from './components/notifications/NotificationContextProvider';
 import { TabsProvider } from './contexts/TabsContext';
+import { WorkflowDarkModeProvider } from './contexts/WorkflowDarkModeContext';
 import { initializeTables } from './integrations/supabase/dbInit';
 import { ErrorBoundary } from 'react-error-boundary';
 import './App.css';
@@ -42,10 +43,12 @@ const ErrorFallback = ({ error, resetErrorBoundary }) => (
 
 const AppWithTabsProvider = ({ children = null }) => (
   <TabsProvider>
-    {children}
-    <Toaster />
-    <SonnerToaster position="bottom-right" closeButton richColors />
-    <Analytics />
+    <WorkflowDarkModeProvider>
+      {children}
+      <Toaster />
+      <SonnerToaster position="bottom-right" closeButton richColors />
+      <Analytics />
+    </WorkflowDarkModeProvider>
   </TabsProvider>
 );
 

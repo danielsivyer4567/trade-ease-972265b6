@@ -26,11 +26,7 @@ import { toast } from 'sonner';
 import { WorkflowService } from '@/services/WorkflowService';
 import { WorkflowExecutionStatus } from './WorkflowExecutionStatus';
 import { WorkflowTemplateSelector } from './WorkflowTemplateSelector';
-
-// Constants for dark mode
-const DARK_GOLD = '#bfa14a';
-const DARK_BG = '#18140c';
-const DARK_TEXT = '#ffe082';
+import { useWorkflowDarkMode, DARK_GOLD, DARK_BG, DARK_TEXT } from '@/contexts/WorkflowDarkModeContext';
 
 // Node types
 const nodeTypes = {
@@ -52,24 +48,35 @@ interface WorkflowEditorProps {
 }
 
 export function WorkflowEditor({ workflow, onSave, workflowDarkMode = false }: WorkflowEditorProps) {
+  // Get dark mode from global context
+  const { darkMode, setDarkMode } = useWorkflowDarkMode();
+  
+  // Keep local dark mode for backward compatibility and sync with global
+  const [localDarkMode, setLocalDarkMode] = useState(() => darkMode || workflowDarkMode);
+  
+  // Store the original dark mode value to restore it when needed
+  const [originalDarkMode] = useState(() => darkMode || workflowDarkMode);
+  
+  // Sync local dark mode with global dark mode
+  useEffect(() => {
+    console.log("Global dark mode changed:", darkMode);
+    setLocalDarkMode(darkMode); 
+  }, [darkMode]);
+  
+  // Sync global dark mode with local when component mounts
+  useEffect(() => {
+    if (workflowDarkMode !== darkMode) {
+      console.log("Setting global dark mode to:", workflowDarkMode);
+      setDarkMode(workflowDarkMode);
+    }
+  }, []);
+
   const [nodes, setNodes, onNodesChange] = useNodesState(workflow?.data.nodes || []);
   const [edges, setEdges, onEdgesChange] = useEdgesState(workflow?.data.edges || []);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   const [executionId, setExecutionId] = useState<string | null>(null);
   const [showTemplateSelector, setShowTemplateSelector] = useState(!workflow);
-  
-  // Store dark mode internally to ensure it's not lost when switching views
-  const [localDarkMode, setLocalDarkMode] = useState(workflowDarkMode);
-  
-  // Store the original dark mode value to restore it when needed
-  const [originalDarkMode] = useState(workflowDarkMode);
-  
-  // Keep local dark mode in sync with prop
-  useEffect(() => {
-    console.log("workflowDarkMode prop changed to:", workflowDarkMode);
-    setLocalDarkMode(workflowDarkMode);
-  }, [workflowDarkMode]);
   
   // Log when template selector visibility changes
   useEffect(() => {
@@ -100,15 +107,15 @@ export function WorkflowEditor({ workflow, onSave, workflowDarkMode = false }: W
     setShowTemplateSelector(true);
   };
   
-  // When returning from template selection, ensure dark mode is preserved
+  // When returning from template selection, ensure dark mode is properly synced
   const handleReturnFromTemplates = () => {
-    console.log("Returning from template view, preserving dark mode:", originalDarkMode);
-    setLocalDarkMode(originalDarkMode);
+    console.log("Returning from template view, syncing dark mode with global:", darkMode);
+    setLocalDarkMode(darkMode);
     setShowTemplateSelector(false);
     
     // Force reapply dark mode after returning
     setTimeout(() => {
-      if (originalDarkMode) {
+      if (darkMode) {
         forceApplyDarkMode();
       }
     }, 10);

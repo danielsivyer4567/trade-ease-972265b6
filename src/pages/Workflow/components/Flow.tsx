@@ -28,6 +28,7 @@ import { WorkflowService } from '@/services/WorkflowService';
 import { supabase } from '@/integrations/supabase/client';
 import { useWorkflow } from '@/hooks/useWorkflow';
 import { Moon, Sun } from 'lucide-react';
+import { useWorkflowDarkMode, DARK_GOLD, DARK_BG, DARK_TEXT } from '@/contexts/WorkflowDarkModeContext';
 
 // Define node data types for better type safety
 interface BaseNodeData {
@@ -66,6 +67,13 @@ const defaultNodes = [];
 const defaultEdges = [];
 
 export function Flow({ onInit, workflowId, onNodeSelect, workflowDarkMode = false, toggleDarkMode }: FlowProps) {
+  // Use the global dark mode context
+  const { darkMode, toggleDarkMode: toggleGlobalDarkMode } = useWorkflowDarkMode();
+  
+  // Use either the prop or global state, preferring global
+  const actualDarkMode = workflowDarkMode || darkMode;
+  const actualToggleDarkMode = toggleDarkMode || toggleGlobalDarkMode;
+  
   const [nodes, setNodes, onNodesChange] = useNodesState(defaultNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(defaultEdges);
   const [instance, setInstance] = useState(null);
@@ -99,13 +107,13 @@ export function Flow({ onInit, workflowId, onNodeSelect, workflowDarkMode = fals
         position,
         data: { 
           label: type,
-          workflowDarkMode: workflowDarkMode
+          workflowDarkMode: actualDarkMode
         },
       };
 
       setNodes((nds) => nds.concat(newNode));
     },
-    [instance, workflowDarkMode]
+    [instance, actualDarkMode]
   );
 
   const onDragOver = useCallback((event) => {
@@ -123,29 +131,22 @@ export function Flow({ onInit, workflowId, onNodeSelect, workflowDarkMode = fals
     setNodes((nds) => nds.map((n) => n.id === nodeId ? { ...n, data: { ...n.data, ...data } } : n));
   };
 
-  const gold = '#bfa14a';
-  const darkBg = '#18140c';
-  const darkText = '#ffe082';
-
+  // Update all nodes when actualDarkMode changes
   useEffect(() => {
-    console.log('Flow dark mode state:', workflowDarkMode);
-  }, [workflowDarkMode]);
-
-  // Update all nodes when workflowDarkMode changes
-  useEffect(() => {
+    console.log('Flow dark mode state:', actualDarkMode);
     setNodes((nds) => 
       nds.map(node => ({
         ...node,
         data: { 
           ...node.data,
-          workflowDarkMode
+          workflowDarkMode: actualDarkMode
         }
       }))
     );
-  }, [workflowDarkMode, setNodes]);
+  }, [actualDarkMode, setNodes]);
 
   return (
-    <div className="h-full w-full relative" style={workflowDarkMode ? { background: darkBg, color: darkText, borderColor: gold } : {}}>
+    <div className="h-full w-full relative" style={actualDarkMode ? { background: DARK_BG, color: DARK_TEXT, borderColor: DARK_GOLD } : {}}>
       <style>
         {`
           @keyframes electricity {
@@ -174,7 +175,7 @@ export function Flow({ onInit, workflowId, onNodeSelect, workflowDarkMode = fals
             ...params,
             type: 'animated',
             animated: true,
-            style: { stroke: workflowDarkMode ? gold : '#3b82f6' },
+            style: { stroke: actualDarkMode ? DARK_GOLD : '#3b82f6' },
           };
           setEdges((eds) => addEdge(newEdge, eds));
         }}
@@ -185,24 +186,24 @@ export function Flow({ onInit, workflowId, onNodeSelect, workflowDarkMode = fals
         nodeTypes={nodeTypes}
         edgeTypes={edgeTypes}
         fitView
-        style={workflowDarkMode ? { 
-          background: darkBg, 
-          color: darkText, 
-          border: `3px solid ${gold}` 
+        style={actualDarkMode ? { 
+          background: DARK_BG, 
+          color: DARK_TEXT, 
+          border: `3px solid ${DARK_GOLD}` 
         } : {}}
       >
         <Background 
-          color={workflowDarkMode ? gold : undefined} 
+          color={actualDarkMode ? DARK_GOLD : undefined} 
           gap={16}
           size={1}
         />
         
         <Controls 
           className="!bottom-20 !left-4" 
-          style={workflowDarkMode ? { 
-            color: gold,
-            background: darkBg, 
-            borderColor: gold,
+          style={actualDarkMode ? { 
+            color: DARK_GOLD,
+            background: DARK_BG, 
+            borderColor: DARK_GOLD,
             borderWidth: '2px',
             borderStyle: 'solid'
           } : {}} 
@@ -210,9 +211,9 @@ export function Flow({ onInit, workflowId, onNodeSelect, workflowDarkMode = fals
         
         <MiniMap 
           className="!bottom-20 !right-4" 
-          style={workflowDarkMode ? { 
-            background: darkBg, 
-            borderColor: gold,
+          style={actualDarkMode ? { 
+            background: DARK_BG, 
+            borderColor: DARK_GOLD,
             borderWidth: '2px',
             borderStyle: 'solid'
           } : {}} 
@@ -224,7 +225,7 @@ export function Flow({ onInit, workflowId, onNodeSelect, workflowDarkMode = fals
           node={selectedNode}
           onClose={handleClosePanel}
           onUpdate={handleUpdateNode}
-          workflowDarkMode={workflowDarkMode}
+          workflowDarkMode={actualDarkMode}
         />
       )}
     </div>
