@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { 
@@ -15,7 +15,9 @@ import {
   Building,
   LayoutTemplate,
   Zap,
-  Sparkles
+  Sparkles,
+  Sun,
+  Moon
 } from 'lucide-react';
 import { NodeSidebar } from './components/NodeSidebar';
 import { Flow } from './components/Flow';
@@ -75,6 +77,10 @@ interface WorkflowEdge {
   target: string;
   type?: string;
 }
+
+const DARK_GOLD = '#bfa14a';
+const DARK_BG = '#18140c';
+const DARK_TEXT = '#ffe082';
 
 export default function WorkflowPage() {
   const navigate = useNavigate();
@@ -168,6 +174,8 @@ export default function WorkflowPage() {
   const [selectedNode, setSelectedNode] = useState(null);
 
   const [aiMessages, setAIMessages] = useState([]);
+
+  const [workflowDarkMode, setWorkflowDarkMode] = useState(false);
 
   const handleSave = async (name: string, description: string) => {
     setIsLoading(true);
@@ -451,6 +459,22 @@ export default function WorkflowPage() {
     }));
   };
 
+  const toggleDarkMode = useCallback(() => {
+    console.log("Toggle dark mode clicked, current state:", workflowDarkMode);
+    setWorkflowDarkMode(prev => !prev);
+    
+    // Show a very visible notification
+    toast.success(`Dark Mode ${!workflowDarkMode ? 'Enabled' : 'Disabled'}`, {
+      duration: 3000,
+      position: 'top-center',
+      style: {
+        backgroundColor: !workflowDarkMode ? DARK_BG : '#ffffff',
+        color: !workflowDarkMode ? DARK_GOLD : '#333333',
+        border: `2px solid ${!workflowDarkMode ? DARK_GOLD : '#dddddd'}`,
+      },
+    });
+  }, [workflowDarkMode]);
+
   return (
     <AppLayout>
       <div className="flex flex-col h-screen">
@@ -487,6 +511,20 @@ export default function WorkflowPage() {
                 >
                   <Sparkles className="h-4 w-4" />
                   Workflow AI
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={toggleDarkMode}
+                  className="flex items-center gap-2 mr-2 border-2"
+                  style={{
+                    backgroundColor: workflowDarkMode ? DARK_GOLD : 'white',
+                    color: workflowDarkMode ? '#000000' : '#333333',
+                    borderColor: workflowDarkMode ? DARK_GOLD : '#ccc',
+                  }}
+                >
+                  {workflowDarkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+                  {workflowDarkMode ? 'Light Mode' : 'Dark Mode'}
                 </Button>
                 <Button
                   variant="outline"
@@ -570,12 +608,14 @@ export default function WorkflowPage() {
                   targetType: selectedNode.type?.replace('Node', '').toLowerCase(),
                   targetId: selectedNode.id,
                 } : null}
+                workflowDarkMode={workflowDarkMode}
               />
               <div className="flex-1">
                 <Flow 
                   onInit={setFlowInstance}
                   workflowId={workflowId || undefined}
                   onNodeSelect={handleNodeSelect}
+                  workflowDarkMode={workflowDarkMode}
                 />
               </div>
             </>
@@ -675,6 +715,28 @@ export default function WorkflowPage() {
           userId={user?.id || ''}
           userRole={user?.role || 'user'}
         />
+
+        {/* Dark mode toggle - VISIBLE VERSION */}
+        <div className="fixed top-20 right-4 z-[99999]" style={{ pointerEvents: 'all' }}>
+          <button
+            onClick={toggleDarkMode}
+            className="flex items-center justify-center p-3 rounded-full shadow-2xl focus:outline-none transform hover:scale-105 transition-all duration-200"
+            style={{
+              backgroundColor: workflowDarkMode ? DARK_GOLD : '#ffffff',
+              color: workflowDarkMode ? '#000000' : '#333333',
+              border: `3px solid ${workflowDarkMode ? DARK_GOLD : '#dddddd'}`,
+              boxShadow: '0 4px 20px rgba(0, 0, 0, 0.25)',
+              width: '48px',
+              height: '48px'
+            }}
+          >
+            {workflowDarkMode ? (
+              <Sun size={24} />
+            ) : (
+              <Moon size={24} />
+            )}
+          </button>
+        </div>
       </div>
     </AppLayout>
   );

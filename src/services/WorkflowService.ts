@@ -371,7 +371,7 @@ export const WorkflowService = {
     }
   },
 
-  async createWorkflowFromTemplate(templateId: string): Promise<{ success: boolean; workflow?: Workflow; error?: any }> {
+  async createWorkflowFromTemplate(templateId: string, darkMode: boolean = false): Promise<{ success: boolean; workflow?: Workflow; error?: any }> {
     try {
       // Get template data from the database
       const { data: template, error: templateError } = await supabase
@@ -382,13 +382,41 @@ export const WorkflowService = {
 
       if (templateError) throw templateError;
 
-      // Create new workflow from template
+      // Apply darkMode to all nodes in the template
+      const templateData = { ...template.data };
+      
+      console.log("Template data before darkMode application:", JSON.stringify(templateData, null, 2));
+      
+      if (templateData.nodes && Array.isArray(templateData.nodes)) {
+        console.log(`Found ${templateData.nodes.length} nodes to apply darkMode=${darkMode} to`);
+        
+        templateData.nodes = templateData.nodes.map((node, index) => {
+          const updatedNode = {
+            ...node,
+            data: {
+              ...node.data,
+              workflowDarkMode: darkMode
+            }
+          };
+          
+          console.log(`Node ${index} (${node.id}) updated:`, {
+            before: node.data.workflowDarkMode,
+            after: updatedNode.data.workflowDarkMode
+          });
+          
+          return updatedNode;
+        });
+      }
+      
+      console.log("Template data after darkMode application:", JSON.stringify(templateData, null, 2));
+
+      // Create new workflow from template with darkMode applied
       const { data: workflow, error: workflowError } = await supabase
         .from('workflows')
         .insert({
           name: template.name,
           description: template.description,
-          data: template.data,
+          data: templateData,
           template_id: templateId
         })
         .select()
