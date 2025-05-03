@@ -127,24 +127,41 @@ export function WorkflowEditor({ workflow, onSave, workflowDarkMode = false }: W
 
     setIsLoading(true);
     try {
+      console.log("Selecting template with workflowDarkMode =", workflowDarkMode);
       const { success, workflow: newWorkflow, error } = await WorkflowService.createWorkflowFromTemplate(template.id, workflowDarkMode);
       if (!success) throw error;
 
-      // Since the service now applies workflowDarkMode to nodes, we don't need to do it here
-      // But we'll keep this code to ensure all nodes have the dark mode flag
-      const nodesWithDarkMode = newWorkflow.data.nodes.map(node => ({
-        ...node,
-        data: {
-          ...node.data,
-          workflowDarkMode
-        }
-      }));
+      // Ensure dark mode is applied to all nodes including those from templates
+      const nodesWithDarkMode = newWorkflow.data.nodes.map(node => {
+        console.log(`Processing node ${node.id} (${node.type}), current darkMode =`, node.data.workflowDarkMode);
+        return {
+          ...node,
+          data: {
+            ...node.data,
+            workflowDarkMode  // Make sure this matches the current editor state
+          }
+        };
+      });
 
+      console.log(`Setting ${nodesWithDarkMode.length} nodes with workflowDarkMode = ${workflowDarkMode}`);
       setNodes(nodesWithDarkMode);
       setEdges(newWorkflow.data.edges);
       setShowTemplateSelector(false);
-      onSave(newWorkflow);
+      onSave({
+        ...newWorkflow,
+        data: {
+          ...newWorkflow.data,
+          workflowDarkMode // Add at the root level too
+        }
+      });
       toast.success('Workflow template loaded successfully');
+      
+      // Force re-apply dark mode after a short delay to ensure it takes effect
+      setTimeout(() => {
+        if (workflowDarkMode) {
+          forceApplyDarkMode();
+        }
+      }, 100);
     } catch (error) {
       console.error('Failed to load template:', error);
       setError(error instanceof Error ? error : new Error('Failed to load template'));
@@ -181,29 +198,57 @@ export function WorkflowEditor({ workflow, onSave, workflowDarkMode = false }: W
   }, [nodes.length, workflowDarkMode]);
 
   if (showTemplateSelector) {
-    return <WorkflowTemplateSelector onSelect={handleTemplateSelect} workflowDarkMode={workflowDarkMode} templates={[
-      { 
-        id: 'blank', 
-        name: 'Blank Canvas', 
-        description: 'Start with an empty canvas',
-        category: 'General',
-        data: { nodes: [], edges: [] }
-      },
-      {
-        id: 'customer-journey',
-        name: 'Customer Journey',
-        description: 'Template for customer onboarding',
-        category: 'Sales',
-        data: { nodes: [], edges: [] }
-      },
-      {
-        id: 'job-workflow',
-        name: 'Job Workflow',
-        description: 'Standard job process flow',
-        category: 'Operations',
-        data: { nodes: [], edges: [] }
-      }
-    ]} />;
+    return (
+      <div style={workflowDarkMode ? { 
+        background: DARK_BG, 
+        color: DARK_TEXT,
+        height: '100%',
+        width: '100%',
+        border: `3px solid ${DARK_GOLD}`
+      } : {}}>
+        <WorkflowTemplateSelector 
+          onSelect={handleTemplateSelect} 
+          workflowDarkMode={workflowDarkMode} 
+          templates={[
+            { 
+              id: 'blank', 
+              name: 'Blank Canvas', 
+              description: 'Start with an empty canvas',
+              category: 'General',
+              data: { nodes: [], edges: [] }
+            },
+            {
+              id: 'customer-journey',
+              name: 'Customer Journey',
+              description: 'Template for customer onboarding',
+              category: 'Sales',
+              data: { nodes: [], edges: [] }
+            },
+            {
+              id: 'job-workflow',
+              name: 'Job Workflow',
+              description: 'Standard job process flow',
+              category: 'Operations',
+              data: { nodes: [], edges: [] }
+            }
+          ]} 
+        />
+        <div className="absolute top-4 right-4 z-50">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShowTemplateSelector(false)}
+            style={workflowDarkMode ? {
+              backgroundColor: DARK_BG,
+              color: DARK_TEXT,
+              borderColor: DARK_GOLD,
+            } : {}}
+          >
+            Back to Editor
+          </Button>
+        </div>
+      </div>
+    );
   }
 
   return (
