@@ -1,5 +1,6 @@
 import React, { useState, useCallback } from 'react';
-import ReactFlow, {
+import {
+  ReactFlow,
   Node,
   Edge,
   Controls,
@@ -8,9 +9,11 @@ import ReactFlow, {
   useEdgesState,
   addEdge,
   Connection,
-  Panel
-} from 'reactflow';
-import 'reactflow/dist/style.css';
+  Panel,
+  Handle,
+  Position
+} from '@xyflow/react';
+import '@xyflow/react/dist/style.css';
 import { Workflow, WorkflowNode, WorkflowEdge, WorkflowTemplate } from '@/types/workflow';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -18,7 +21,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Loader2, Save, Play, Plus } from 'lucide-react';
+import { Loader2, Save, Play, Plus, User, Briefcase, ClipboardList, FileText, Zap, MessageSquare, Eye, Share2, Settings } from 'lucide-react';
 import { toast } from 'sonner';
 import { WorkflowService } from '@/services/WorkflowService';
 import { WorkflowExecutionStatus } from './WorkflowExecutionStatus';
@@ -137,7 +140,7 @@ export function WorkflowEditor({ workflow, onSave }: WorkflowEditorProps) {
   }
 
   return (
-    <div className="h-full w-full">
+    <div className="h-full w-full border border-black">
       <div className="absolute top-4 right-4 z-10 flex space-x-2">
         <Button
           variant="outline"
@@ -212,108 +215,162 @@ export function WorkflowEditor({ workflow, onSave }: WorkflowEditorProps) {
 // Node Components
 function CustomerNode({ data }: { data: any }) {
   return (
-    <div className="px-4 py-2 shadow-md rounded-md bg-white border-2 border-stone-400">
+    <div className="bg-white border-2 border-stone-400 rounded-xl shadow-md p-3 w-44 transition-transform duration-150 hover:scale-105 hover:shadow-xl">
+      <Handle type="target" position={Position.Top} className="!bg-stone-500" />
       <div className="flex items-center">
-        <div className="ml-2">
-          <div className="text-lg font-bold">{data.label}</div>
+        <div className="w-9 h-9 bg-stone-100 rounded-full flex items-center justify-center mr-3 shadow-sm">
+          <User className="h-5 w-5 text-stone-600" />
+        </div>
+        <div>
+          <div className="font-bold text-sm text-gray-900">{data.label || 'Customer'}</div>
+          {data.subtitle && <div className="text-xs text-gray-500">{data.subtitle}</div>}
         </div>
       </div>
+      <Handle type="source" position={Position.Bottom} className="!bg-stone-500" />
     </div>
   );
 }
 
 function JobNode({ data }: { data: any }) {
   return (
-    <div className="px-4 py-2 shadow-md rounded-md bg-white border-2 border-blue-400">
+    <div className="bg-white border-2 border-green-300 rounded-xl shadow-md p-3 w-44 transition-transform duration-150 hover:scale-105 hover:shadow-xl">
+      <Handle type="target" position={Position.Top} className="!bg-green-500" />
       <div className="flex items-center">
-        <div className="ml-2">
-          <div className="text-lg font-bold">{data.label}</div>
+        <div className="w-9 h-9 bg-green-100 rounded-full flex items-center justify-center mr-3 shadow-sm">
+          <Briefcase className="h-5 w-5 text-green-600" />
+        </div>
+        <div>
+          <div className="font-bold text-sm text-gray-900">{data.label || 'Job'}</div>
+          {data.subtitle && <div className="text-xs text-gray-500">{data.subtitle}</div>}
         </div>
       </div>
+      <Handle type="source" position={Position.Bottom} className="!bg-green-500" />
     </div>
   );
 }
 
 function TaskNode({ data }: { data: any }) {
   return (
-    <div className="px-4 py-2 shadow-md rounded-md bg-white border-2 border-green-400">
+    <div className="bg-white border-2 border-blue-300 rounded-xl shadow-md p-3 w-44 transition-transform duration-150 hover:scale-105 hover:shadow-xl">
+      <Handle type="target" position={Position.Top} className="!bg-blue-500" />
       <div className="flex items-center">
-        <div className="ml-2">
-          <div className="text-lg font-bold">{data.label}</div>
+        <div className="w-9 h-9 bg-blue-100 rounded-full flex items-center justify-center mr-3 shadow-sm">
+          <ClipboardList className="h-5 w-5 text-blue-600" />
+        </div>
+        <div>
+          <div className="font-bold text-sm text-gray-900">{data.label || 'Task'}</div>
+          {data.subtitle && <div className="text-xs text-gray-500">{data.subtitle}</div>}
         </div>
       </div>
+      <Handle type="source" position={Position.Bottom} className="!bg-blue-500" />
     </div>
   );
 }
 
 function QuoteNode({ data }: { data: any }) {
   return (
-    <div className="px-4 py-2 shadow-md rounded-md bg-white border-2 border-purple-400">
+    <div className="bg-white border-2 border-purple-300 rounded-xl shadow-md p-3 w-44 transition-transform duration-150 hover:scale-105 hover:shadow-xl">
+      <Handle type="target" position={Position.Top} className="!bg-purple-500" />
       <div className="flex items-center">
-        <div className="ml-2">
-          <div className="text-lg font-bold">{data.label}</div>
+        <div className="w-9 h-9 bg-purple-100 rounded-full flex items-center justify-center mr-3 shadow-sm">
+          <FileText className="h-5 w-5 text-purple-600" />
+        </div>
+        <div>
+          <div className="font-bold text-sm text-gray-900">{data.label || 'Quote'}</div>
+          {data.subtitle && <div className="text-xs text-gray-500">{data.subtitle}</div>}
         </div>
       </div>
+      <Handle type="source" position={Position.Bottom} className="!bg-purple-500" />
     </div>
   );
 }
 
 function AutomationNode({ data }: { data: any }) {
   return (
-    <div className="px-4 py-2 shadow-md rounded-md bg-white border-2 border-red-400">
+    <div className="bg-white border-2 border-red-300 rounded-xl shadow-md p-3 w-44 transition-transform duration-150 hover:scale-105 hover:shadow-xl">
+      <Handle type="target" position={Position.Top} className="!bg-red-500" />
       <div className="flex items-center">
-        <div className="ml-2">
-          <div className="text-lg font-bold">{data.label}</div>
+        <div className="w-9 h-9 bg-red-100 rounded-full flex items-center justify-center mr-3 shadow-sm">
+          <Zap className="h-5 w-5 text-red-600" />
+        </div>
+        <div>
+          <div className="font-bold text-sm text-gray-900">{data.label || 'Automation'}</div>
+          {data.subtitle && <div className="text-xs text-gray-500">{data.subtitle}</div>}
         </div>
       </div>
+      <Handle type="source" position={Position.Bottom} className="!bg-red-500" />
     </div>
   );
 }
 
 function MessagingNode({ data }: { data: any }) {
   return (
-    <div className="px-4 py-2 shadow-md rounded-md bg-white border-2 border-yellow-400">
+    <div className="bg-white border-2 border-yellow-300 rounded-xl shadow-md p-3 w-44 transition-transform duration-150 hover:scale-105 hover:shadow-xl">
+      <Handle type="target" position={Position.Top} className="!bg-yellow-500" />
       <div className="flex items-center">
-        <div className="ml-2">
-          <div className="text-lg font-bold">{data.label}</div>
+        <div className="w-9 h-9 bg-yellow-100 rounded-full flex items-center justify-center mr-3 shadow-sm">
+          <MessageSquare className="h-5 w-5 text-yellow-600" />
+        </div>
+        <div>
+          <div className="font-bold text-sm text-gray-900">{data.label || 'Message'}</div>
+          {data.subtitle && <div className="text-xs text-gray-500">{data.subtitle}</div>}
         </div>
       </div>
+      <Handle type="source" position={Position.Bottom} className="!bg-yellow-500" />
     </div>
   );
 }
 
 function VisionNode({ data }: { data: any }) {
   return (
-    <div className="px-4 py-2 shadow-md rounded-md bg-white border-2 border-indigo-400">
+    <div className="bg-white border-2 border-indigo-300 rounded-xl shadow-md p-3 w-44 transition-transform duration-150 hover:scale-105 hover:shadow-xl">
+      <Handle type="target" position={Position.Top} className="!bg-indigo-500" />
       <div className="flex items-center">
-        <div className="ml-2">
-          <div className="text-lg font-bold">{data.label}</div>
+        <div className="w-9 h-9 bg-indigo-100 rounded-full flex items-center justify-center mr-3 shadow-sm">
+          <Eye className="h-5 w-5 text-indigo-600" />
+        </div>
+        <div>
+          <div className="font-bold text-sm text-gray-900">{data.label || 'Vision'}</div>
+          {data.subtitle && <div className="text-xs text-gray-500">{data.subtitle}</div>}
         </div>
       </div>
+      <Handle type="source" position={Position.Bottom} className="!bg-indigo-500" />
     </div>
   );
 }
 
 function SocialNode({ data }: { data: any }) {
   return (
-    <div className="px-4 py-2 shadow-md rounded-md bg-white border-2 border-pink-400">
+    <div className="bg-white border-2 border-pink-300 rounded-xl shadow-md p-3 w-44 transition-transform duration-150 hover:scale-105 hover:shadow-xl">
+      <Handle type="target" position={Position.Top} className="!bg-pink-500" />
       <div className="flex items-center">
-        <div className="ml-2">
-          <div className="text-lg font-bold">{data.label}</div>
+        <div className="w-9 h-9 bg-pink-100 rounded-full flex items-center justify-center mr-3 shadow-sm">
+          <Share2 className="h-5 w-5 text-pink-600" />
+        </div>
+        <div>
+          <div className="font-bold text-sm text-gray-900">{data.label || 'Social'}</div>
+          {data.subtitle && <div className="text-xs text-gray-500">{data.subtitle}</div>}
         </div>
       </div>
+      <Handle type="source" position={Position.Bottom} className="!bg-pink-500" />
     </div>
   );
 }
 
 function CustomNode({ data }: { data: any }) {
   return (
-    <div className="px-4 py-2 shadow-md rounded-md bg-white border-2 border-gray-400">
+    <div className="bg-white border-2 border-gray-300 rounded-xl shadow-md p-3 w-44 transition-transform duration-150 hover:scale-105 hover:shadow-xl">
+      <Handle type="target" position={Position.Top} className="!bg-gray-500" />
       <div className="flex items-center">
-        <div className="ml-2">
-          <div className="text-lg font-bold">{data.label}</div>
+        <div className="w-9 h-9 bg-gray-100 rounded-full flex items-center justify-center mr-3 shadow-sm">
+          <Settings className="h-5 w-5 text-gray-600" />
+        </div>
+        <div>
+          <div className="font-bold text-sm text-gray-900">{data.label || 'Custom'}</div>
+          {data.subtitle && <div className="text-xs text-gray-500">{data.subtitle}</div>}
         </div>
       </div>
+      <Handle type="source" position={Position.Bottom} className="!bg-gray-500" />
     </div>
   );
 } 

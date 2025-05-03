@@ -20,8 +20,8 @@ export function NodeDetailsPanel({ node, onClose, onUpdate }: NodeDetailsPanelPr
     title: node.data.title || '',
     message: node.data.message || '',
     redirectPage: node.data.redirectPage || 'contact',
-    assignedRole: node.data.assignedRole || '',
-    assignedUser: node.data.assignedUser || ''
+    assignedRole: node.data.assignedRole || 'none',
+    assignedUser: node.data.assignedUser || 'none'
   });
 
   // Update form data when node changes
@@ -32,8 +32,8 @@ export function NodeDetailsPanel({ node, onClose, onUpdate }: NodeDetailsPanelPr
       title: node.data.title || '',
       message: node.data.message || '',
       redirectPage: node.data.redirectPage || 'contact',
-      assignedRole: node.data.assignedRole || '',
-      assignedUser: node.data.assignedUser || ''
+      assignedRole: node.data.assignedRole || 'none',
+      assignedUser: node.data.assignedUser || 'none'
     });
   }, [node]);
 
@@ -86,7 +86,7 @@ export function NodeDetailsPanel({ node, onClose, onUpdate }: NodeDetailsPanelPr
               onValueChange={(value) => handleChange('type', value)}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Select type" />
+                <SelectValue />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="notification">Notification</SelectItem>
@@ -123,7 +123,7 @@ export function NodeDetailsPanel({ node, onClose, onUpdate }: NodeDetailsPanelPr
               onValueChange={(value) => handleChange('redirectPage', value)}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Select page" />
+                <SelectValue />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="contact">Contact</SelectItem>
@@ -141,9 +141,10 @@ export function NodeDetailsPanel({ node, onClose, onUpdate }: NodeDetailsPanelPr
               onValueChange={(value) => handleChange('assignedRole', value)}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Select page" />
+                <SelectValue />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value="none">None</SelectItem>
                 <SelectItem value="admin">Admin</SelectItem>
                 <SelectItem value="manager">Manager</SelectItem>
                 <SelectItem value="employee">Employee</SelectItem>
@@ -159,9 +160,10 @@ export function NodeDetailsPanel({ node, onClose, onUpdate }: NodeDetailsPanelPr
               onValueChange={(value) => handleChange('assignedUser', value)}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Select user" />
+                <SelectValue />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value="none">None</SelectItem>
                 <SelectItem value="user1">John Doe</SelectItem>
                 <SelectItem value="user2">Jane Smith</SelectItem>
                 <SelectItem value="user3">Bob Johnson</SelectItem>

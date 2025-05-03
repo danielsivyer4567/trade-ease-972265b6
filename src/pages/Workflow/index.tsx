@@ -448,7 +448,7 @@ export default function WorkflowPage() {
 
           {/* Tabs and Template Buttons */}
           <div className="border-b px-4">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between bg-white dark:bg-[#18181b]">
               <div className="flex -mb-px">
                 <button
                   className={`py-2 px-4 text-sm font-medium border-b-2 ${

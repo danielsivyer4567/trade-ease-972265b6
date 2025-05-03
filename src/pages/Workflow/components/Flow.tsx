@@ -154,8 +154,8 @@ export function Flow({ onInit, workflowId, onNodeSelect }: FlowProps) {
         fitView
       >
         <Background />
-        <Controls />
-        <MiniMap />
+        <Controls className="!bottom-20 !left-4" />
+        <MiniMap className="!bottom-20 !right-4" />
       </ReactFlow>
       {selectedNode && (
         <NodeDetailsPanel

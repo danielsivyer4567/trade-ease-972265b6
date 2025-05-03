@@ -38,6 +38,7 @@ import { WorkflowService } from '@/services/WorkflowService';
 import { WorkflowSettings } from '@/components/workflow/WorkflowSettings';
 import { toast } from 'sonner';
 import { WorkflowEnrollmentHistory } from '@/components/workflow/WorkflowEnrollmentHistory';
+import WorkflowExecutionLogs from './WorkflowExecutionLogs';
 
 interface Template {
   id: string;
@@ -454,7 +455,7 @@ export default function WorkflowPage() {
     <AppLayout>
       <div className="flex flex-col h-screen">
         {/* Top Navigation Bar */}
-        <div className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <div className="border border-black bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
           <div className="flex flex-col w-full">
             <div className="flex h-16 items-center px-4">
               <TooltipProvider>
@@ -502,7 +503,7 @@ export default function WorkflowPage() {
             {/* Tabs and Template Buttons */}
             <div className="border-b px-4 flex justify-center">
               <div className="flex items-center justify-center max-w-4xl w-full">
-                <div className="inline-flex -mb-px space-x-1 p-1 bg-gray-50 rounded-lg border-2 border-gray-200/50 shadow-sm">
+                <div className="inline-flex -mb-px space-x-1 p-1 bg-gray-50 rounded-lg border-2 border-gray-200/50 shadow-sm mt-2">
                   <button
                     className={`py-2 px-6 text-sm font-semibold rounded-md transition-all duration-200 ${
                       activeTab === 'builder'
@@ -595,9 +596,8 @@ export default function WorkflowPage() {
             </div>
           )}
           {activeTab === 'execution' && (
-            <div className="p-4">
-              <h2 className="text-lg font-semibold mb-4">Execution Logs</h2>
-              {/* Add execution logs content here */}
+            <div className="flex-1 overflow-auto">
+              <WorkflowExecutionLogs />
             </div>
           )}
         </div>

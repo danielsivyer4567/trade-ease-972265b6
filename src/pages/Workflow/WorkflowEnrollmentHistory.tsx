@@ -60,6 +60,27 @@ export default function WorkflowEnrollmentHistory() {
     }
   ];
 
+  const eventTypes = [
+    { value: "all", label: "All Events" },
+    { value: "tag-added", label: "Tag Added" },
+    { value: "form-submitted", label: "Form Submitted" },
+    { value: "manual", label: "Manual Entry" }
+  ];
+
+  const contactOptions = [
+    { value: "all", label: "All Contacts" },
+    ...enrollmentData.map(record => ({
+      value: record.contact.name.toLowerCase().replace(/\s+/g, '-'),
+      label: record.contact.name
+    }))
+  ];
+
+  const itemsPerPageOptions = [
+    { value: "10", label: "10 per page" },
+    { value: "20", label: "20 per page" },
+    { value: "50", label: "50 per page" }
+  ];
+
   return (
     <AppLayout>
       <div className="p-6">
@@ -104,27 +125,31 @@ export default function WorkflowEnrollmentHistory() {
             </div>
           </div>
 
-          <Select value={selectedEvent} onValueChange={setSelectedEvent}>
+          <Select defaultValue={selectedEvent} value={selectedEvent} onValueChange={setSelectedEvent}>
             <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="All Events" />
+              <SelectValue>
+                {eventTypes.find(e => e.value === selectedEvent)?.label}
+              </SelectValue>
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Events</SelectItem>
-              <SelectItem value="tag-added">Tag Added</SelectItem>
-              <SelectItem value="form-submitted">Form Submitted</SelectItem>
-              <SelectItem value="manual">Manual Entry</SelectItem>
+              {eventTypes.map(event => (
+                <SelectItem key={event.value} value={event.value}>
+                  {event.label}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
 
-          <Select value={selectedContact} onValueChange={setSelectedContact}>
+          <Select defaultValue={selectedContact} value={selectedContact} onValueChange={setSelectedContact}>
             <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Select Contact" />
+              <SelectValue>
+                {contactOptions.find(c => c.value === selectedContact)?.label}
+              </SelectValue>
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Contacts</SelectItem>
-              {enrollmentData.map((record, index) => (
-                <SelectItem key={index} value={record.contact.name.toLowerCase().replace(/\s+/g, '-')}>
-                  {record.contact.name}
+              {contactOptions.map(contact => (
+                <SelectItem key={contact.value} value={contact.value}>
+                  {contact.label}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -185,14 +210,18 @@ export default function WorkflowEnrollmentHistory() {
           <div className="p-4 border-t flex items-center justify-between">
             <div>Showing Page 1</div>
             <div className="flex items-center gap-2">
-              <Select value={itemsPerPage} onValueChange={setItemsPerPage}>
-                <SelectTrigger className="w-[70px]">
-                  <SelectValue placeholder="10" />
+              <Select defaultValue={itemsPerPage} value={itemsPerPage} onValueChange={setItemsPerPage}>
+                <SelectTrigger className="w-[120px]">
+                  <SelectValue>
+                    {itemsPerPageOptions.find(o => o.value === itemsPerPage)?.label}
+                  </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="10">10</SelectItem>
-                  <SelectItem value="20">20</SelectItem>
-                  <SelectItem value="50">50</SelectItem>
+                  {itemsPerPageOptions.map(option => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
               <Button variant="outline" disabled>

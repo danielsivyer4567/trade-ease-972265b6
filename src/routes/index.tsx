@@ -9,9 +9,12 @@ import { paymentRoutes } from './payment-routes';
 import { financialRoutes } from './financial-routes';
 import { activityRoutes } from './activity-routes';
 import { AppLayoutWithTabs } from '@/components/AppLayoutWithTabs';
-import WorkflowPage from '@/pages/Workflow/index.new';
-import WorkflowTemplates from '@/pages/Workflow/templates';
-import WorkflowEnrollmentHistory from '@/pages/Workflow/WorkflowEnrollmentHistory';
+
+// Lazy load workflow pages
+const WorkflowPage = lazy(() => import('@/pages/Workflow/index.new'));
+const WorkflowTemplates = lazy(() => import('@/pages/Workflow/templates'));
+const WorkflowEnrollmentHistory = lazy(() => import('@/pages/Workflow/WorkflowEnrollmentHistory'));
+const WorkflowExecutionLogs = lazy(() => import('@/pages/Workflow/WorkflowExecutionLogs'));
 
 // Development mode debugging component
 const DevelopmentEntry = lazy(() => import('@/pages/DevelopmentEntry'));
@@ -211,6 +214,7 @@ const routeObjects: RouteObject[] = [
           { path: "/workflow/list", element: <SuspenseWrapper><WorkflowListPage /></SuspenseWrapper> },
           { path: "/workflow/templates", element: <SuspenseWrapper><WorkflowTemplates /></SuspenseWrapper> },
           { path: "/workflow/enrollment-history", element: <SuspenseWrapper><WorkflowEnrollmentHistory /></SuspenseWrapper> },
+          { path: "/workflow/execution-logs", element: <SuspenseWrapper><WorkflowExecutionLogs /></SuspenseWrapper> },
           { path: "/automations", element: <SuspenseWrapper><AutomationsPage /></SuspenseWrapper> },
           { path: "/forms", element: <SuspenseWrapper><FormsPage /></SuspenseWrapper> },
           { path: "/tasks", element: <SuspenseWrapper><TasksPage /></SuspenseWrapper> },
