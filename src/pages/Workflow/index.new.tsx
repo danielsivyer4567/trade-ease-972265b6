@@ -25,6 +25,7 @@ export default function WorkflowPage() {
   const [edges, setEdges] = useState([]);
   const pendingTemplateData = useRef(null);
   const pendingWorkflowId = useRef(null);
+  const pendingAutomationData = useRef(null);
 
   // Node type to icon mapping
   const nodeTypeIcons = {
@@ -96,10 +97,16 @@ export default function WorkflowPage() {
         // Fetch and apply workflow data
         loadWorkflowData(location.state.workflowId);
       } else if (location.state.addAutomation && location.state.automationId) {
-        // Handle automation data
+        // Store automation data for use after flow instance is initialized
+        pendingAutomationData.current = {
+          automationId: location.state.automationId,
+          automationTitle: location.state.automationTitle,
+          automationDescription: location.state.automationDescription
+        };
+
+        // If flowInstance is already available, add the automation node immediately
         if (flowInstance) {
-          // Add automation node
-          addAutomationNode();
+          addAutomationNode(location.state.automationId, location.state.automationTitle, location.state.automationDescription);
         }
       } else {
         setIsCreatingAutomation(location.state.createAutomation || false);
@@ -116,22 +123,40 @@ export default function WorkflowPage() {
         const workflowData = result.workflow.data;
         
         if (workflowData.nodes && Array.isArray(workflowData.nodes)) {
-          setNodes(workflowData.nodes.map(node => ensureNodeIcon({
-            id: node.id,
-            type: node.type,
-            position: node.position,
-            data: node.data
-          })));
+          // Create a map of existing node IDs to check for duplicates
+          const existingNodeIds = new Set(nodes.map(node => node.id));
+          
+          // Get new nodes to add (avoid duplicates)
+          const newNodes = workflowData.nodes
+            .filter(node => !existingNodeIds.has(node.id))
+            .map(node => ensureNodeIcon({
+              id: node.id,
+              type: node.type,
+              position: node.position,
+              data: node.data
+            }));
+          
+          // Append new nodes to existing ones
+          setNodes(currentNodes => [...currentNodes, ...newNodes]);
         }
         
         if (workflowData.edges && Array.isArray(workflowData.edges)) {
-          setEdges(workflowData.edges.map(edge => ({
-            id: edge.id,
-            source: edge.source,
-            target: edge.target,
-            type: 'animated',
-            animated: true
-          })));
+          // Create a map of existing edge IDs to check for duplicates
+          const existingEdgeIds = new Set(edges.map(edge => edge.id));
+          
+          // Get new edges to add (avoid duplicates)
+          const newEdges = workflowData.edges
+            .filter(edge => !existingEdgeIds.has(edge.id))
+            .map(edge => ({
+              id: edge.id,
+              source: edge.source,
+              target: edge.target,
+              type: 'animated',
+              animated: true
+            }));
+          
+          // Append new edges to existing ones
+          setEdges(currentEdges => [...currentEdges, ...newEdges]);
         }
       } else {
         toast.error('Failed to load workflow data');
@@ -164,33 +189,67 @@ export default function WorkflowPage() {
         }, 100);
       }
       
-      // Handle automation node addition if needed
-      if (location.state?.addAutomation && location.state?.automationId) {
-        addAutomationNode();
+      // Handle pending automation node addition
+      if (pendingAutomationData.current) {
+        const { automationId, automationTitle, automationDescription } = pendingAutomationData.current;
+        addAutomationNode(automationId, automationTitle, automationDescription);
+        pendingAutomationData.current = null;
       }
     }
   }, [flowInstance]);
 
   // Function to add automation node
-  const addAutomationNode = () => {
-    if (!flowInstance || !location.state?.automationId) return;
+  const addAutomationNode = (automationId, automationTitle, automationDescription) => {
+    if (!flowInstance) return;
     
-    const position = { x: 100, y: 100 }; // Default position
+    // Calculate position - place it to the right of existing nodes if there are any
+    const existingNodes = nodes;
+    let xPosition = 100;
+    
+    if (existingNodes.length > 0) {
+      // Find the rightmost node
+      const rightmostNode = existingNodes.reduce((rightmost, node) => {
+        return (node.position.x > rightmost.position.x) ? node : rightmost;
+      }, existingNodes[0]);
+      
+      // Position the new node to the right with some spacing
+      xPosition = rightmostNode.position.x + 250; 
+    }
+    
+    const position = { x: xPosition, y: 100 };
+    
+    // Create a unique ID with timestamp to avoid conflicts
+    const uniqueId = `automation-${automationId}-${Date.now()}`;
+    
     const newNode = {
-      id: `automation-${location.state.automationId}`,
+      id: uniqueId,
       type: 'automation',
       position,
       data: {
-        automationId: location.state.automationId,
-        title: location.state.automationTitle || `Automation ${location.state.automationId}`,
-        description: location.state.automationDescription || '',
-        label: location.state.automationTitle || `Automation ${location.state.automationId}`,
+        automationId: automationId,
+        title: automationTitle || `Automation ${automationId}`,
+        description: automationDescription || '',
+        label: automationTitle || `Automation ${automationId}`,
         icon: nodeTypeIcons.automationNode
       }
     };
     
     setNodes(nds => [...nds, ensureNodeIcon(newNode)]);
-    toast.success(`Added automation: ${location.state.automationTitle || `Automation ${location.state.automationId}`}`);
+    toast.success(`Added automation: ${automationTitle || `Automation ${automationId}`}`);
+    
+    // If there are existing nodes, try to connect to the last one
+    if (existingNodes.length > 0) {
+      const lastNodeId = existingNodes[existingNodes.length - 1].id;
+      const newEdge = {
+        id: `e-${lastNodeId}-${uniqueId}`,
+        source: lastNodeId,
+        target: uniqueId,
+        type: 'animated',
+        animated: true
+      };
+      
+      setEdges(eds => [...eds, newEdge]);
+    }
   };
 
   return (
