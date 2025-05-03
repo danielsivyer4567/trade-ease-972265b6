@@ -16,19 +16,13 @@ import { WorkflowSaveDialog } from './components/WorkflowSaveDialog';
 import { WorkflowLoadDialog } from './components/WorkflowLoadDialog';
 import { useAuth } from '@/contexts/AuthContext';
 import { WorkflowNavigation } from './components/WorkflowNavigation';
+import { useWorkflowDarkMode, DARK_GOLD, DARK_BG, DARK_TEXT, DARK_SECONDARY } from '@/contexts/WorkflowDarkModeContext';
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-
-// Dark mode colors
-const DARK_GOLD = '#bfa14a';
-const DARK_GOLD_HOVER = '#d4b55e';
-const DARK_BG = '#18140c';
-const DARK_TEXT = '#ffe082';
-const DARK_SECONDARY = '#211c15';
 
 export default function WorkflowPage() {
   const navigate = useNavigate();
@@ -37,6 +31,8 @@ export default function WorkflowPage() {
   const automationId = searchParams.get('automationId');
   const workflowId = searchParams.get('id');
   const { user, session } = useAuth();
+  
+  const { darkMode, setDarkMode, toggleDarkMode } = useWorkflowDarkMode();
   
   const [flowInstance, setFlowInstance] = useState(null);
   const [gcpVisionKeyDialogOpen, setGcpVisionKeyDialogOpen] = useState(false);
@@ -52,7 +48,6 @@ export default function WorkflowPage() {
   const [workflowName, setWorkflowName] = useState("New Workflow");
   const [workflowDescription, setWorkflowDescription] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [workflowDarkMode, setWorkflowDarkMode] = useState(false);
   
   const [targetData, setTargetData] = useState<{
     targetType?: 'job' | 'quote' | 'customer' | 'message' | 'social' | 'calendar';
@@ -353,29 +348,22 @@ export default function WorkflowPage() {
 
   // Fix dark mode toggle function with logging
   useEffect(() => {
-    console.log("Dark mode state changed:", workflowDarkMode);
-  }, [workflowDarkMode]);
-
-  // Function to toggle dark mode
-  const toggleDarkMode = useCallback(() => {
-    console.log("Toggle dark mode clicked, current state:", workflowDarkMode);
-    setWorkflowDarkMode(prev => !prev);
-    console.log("New state will be:", !workflowDarkMode);
-  }, [workflowDarkMode]);
+    console.log("Dark mode state changed:", darkMode);
+  }, [darkMode]);
 
   return (
     <AppLayout>
       <div 
-        className={`flex flex-col h-screen ${workflowDarkMode ? 'workflow-dark-mode' : ''}`}
-        style={workflowDarkMode ? { 
+        className={`flex flex-col h-screen ${darkMode ? 'workflow-dark-mode' : ''}`}
+        style={darkMode ? { 
           background: DARK_BG, 
           color: DARK_TEXT
         } : {}}
       >
         {/* Top Navigation Bar */}
         <div 
-          className={`border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 ${workflowDarkMode ? 'border-[3px] border-b-[3px] border-gold-600' : ''}`}
-          style={workflowDarkMode ? { 
+          className={`border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 ${darkMode ? 'border-[3px] border-b-[3px] border-gold-600' : ''}`}
+          style={darkMode ? { 
             borderColor: DARK_GOLD, 
             background: DARK_BG, 
             color: DARK_TEXT,
@@ -482,12 +470,12 @@ export default function WorkflowPage() {
 
           {/* Tabs and Template Buttons */}
           <div 
-            className={`border-b px-4 ${workflowDarkMode ? 'border-gold-600' : ''}`}
-            style={workflowDarkMode ? { borderColor: DARK_GOLD } : {}}
+            className={`border-b px-4 ${darkMode ? 'border-gold-600' : ''}`}
+            style={darkMode ? { borderColor: DARK_GOLD } : {}}
           >
             <div 
-              className={`flex items-center justify-between ${workflowDarkMode ? 'bg-[#18140c]' : 'bg-white dark:bg-[#18181b]'}`}
-              style={workflowDarkMode ? { borderColor: DARK_GOLD, color: DARK_TEXT } : {}}
+              className={`flex items-center justify-between ${darkMode ? 'bg-[#18140c]' : 'bg-white dark:bg-[#18181b]'}`}
+              style={darkMode ? { borderColor: DARK_GOLD, color: DARK_TEXT } : {}}
             >
               <div className="flex -mb-px">
                 {['builder', 'settings', 'enrollment', 'execution'].map(tab => (
@@ -495,14 +483,14 @@ export default function WorkflowPage() {
                     key={tab}
                     className={`py-2 px-4 text-sm font-medium border-b-2 transition-all duration-200 ${
                       activeTab === tab
-                        ? workflowDarkMode
+                        ? darkMode
                           ? 'border-[3px] border-gold-600 text-gold-400 bg-[#18140c]' // active
                           : 'border-primary text-primary bg-white'
-                        : workflowDarkMode
+                        : darkMode
                           ? 'border-transparent text-gold-300 hover:text-gold-200 hover:bg-[#2a210c]' // inactive
                           : 'border-transparent text-muted-foreground hover:text-foreground hover:bg-gray-100'
                     }`}
-                    style={workflowDarkMode ? { borderColor: DARK_GOLD, color: DARK_TEXT } : {}}
+                    style={darkMode ? { borderColor: DARK_GOLD, color: DARK_TEXT } : {}}
                     onClick={() => setActiveTab(tab)}
                   >
                     {tab.charAt(0).toUpperCase() + tab.slice(1).replace('builder', 'Builder').replace('settings', 'Settings').replace('enrollment', 'Enrollment History').replace('execution', 'Execution Logs')}
@@ -511,27 +499,27 @@ export default function WorkflowPage() {
               </div>
               <div className="flex items-center gap-2 py-1">
                 <Button
-                  variant={workflowDarkMode ? "ghost" : "outline"}
+                  variant={darkMode ? "ghost" : "outline"}
                   size="sm"
                   onClick={() => {
                     navigate('/workflow/templates', { state: { category: 'construction' } });
                   }}
-                  className={`flex items-center gap-2 ${workflowDarkMode ? 'border-gold-500 text-gold-400 hover:text-gold-300 hover:border-gold-400' : ''}`}
-                  style={workflowDarkMode ? { borderColor: DARK_GOLD, color: DARK_TEXT } : {}}
+                  className={`flex items-center gap-2 ${darkMode ? 'border-gold-500 text-gold-400 hover:text-gold-300 hover:border-gold-400' : ''}`}
+                  style={darkMode ? { borderColor: DARK_GOLD, color: DARK_TEXT } : {}}
                 >
-                  <Construction className={`h-4 w-4 ${workflowDarkMode ? 'text-gold-400' : ''}`} />
+                  <Construction className={`h-4 w-4 ${darkMode ? 'text-gold-400' : ''}`} />
                   Construction Templates
                 </Button>
                 <Button
-                  variant={workflowDarkMode ? "ghost" : "outline"}
+                  variant={darkMode ? "ghost" : "outline"}
                   size="sm"
                   onClick={() => {
                     navigate('/workflow/templates', { state: { category: 'admin' } });
                   }}
-                  className={`flex items-center gap-2 ${workflowDarkMode ? 'border-gold-500 text-gold-400 hover:text-gold-300 hover:border-gold-400' : ''}`}
-                  style={workflowDarkMode ? { borderColor: DARK_GOLD, color: DARK_TEXT } : {}}
+                  className={`flex items-center gap-2 ${darkMode ? 'border-gold-500 text-gold-400 hover:text-gold-300 hover:border-gold-400' : ''}`}
+                  style={darkMode ? { borderColor: DARK_GOLD, color: DARK_TEXT } : {}}
                 >
-                  <Building className={`h-4 w-4 ${workflowDarkMode ? 'text-gold-400' : ''}`} />
+                  <Building className={`h-4 w-4 ${darkMode ? 'text-gold-400' : ''}`} />
                   Admin Templates
                 </Button>
               </div>
@@ -541,12 +529,12 @@ export default function WorkflowPage() {
 
         {/* Main Content */}
         <div className="flex-1 flex">
-          <NodeSidebar targetData={targetData} workflowDarkMode={workflowDarkMode} />
+          <NodeSidebar targetData={targetData} workflowDarkMode={darkMode} />
           <div className="flex-1 relative">
             <Flow 
               onInit={setFlowInstance} 
               workflowId={currentWorkflowId}
-              workflowDarkMode={workflowDarkMode} 
+              workflowDarkMode={darkMode} 
               toggleDarkMode={toggleDarkMode}
             />
           </div>
@@ -633,9 +621,9 @@ export default function WorkflowPage() {
             onClick={toggleDarkMode}
             className="w-12 h-12 rounded-full flex items-center justify-center shadow-lg focus:outline-none"
             style={{
-              background: workflowDarkMode ? DARK_GOLD : 'white',
-              border: `2px solid ${workflowDarkMode ? DARK_GOLD : '#ccc'}`,
-              color: workflowDarkMode ? '#18140c' : '#333',
+              background: darkMode ? DARK_GOLD : 'white',
+              border: `2px solid ${darkMode ? DARK_GOLD : '#ccc'}`,
+              color: darkMode ? '#18140c' : '#333',
               transform: 'scale(1)',
               transition: 'all 0.2s ease'
             }}
@@ -649,9 +637,9 @@ export default function WorkflowPage() {
               target.style.transform = 'scale(1)';
               target.style.boxShadow = '0 2px 6px rgba(0, 0, 0, 0.1)';
             }}
-            title={workflowDarkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
+            title={darkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
           >
-            {workflowDarkMode ? (
+            {darkMode ? (
               <Sun size={22} />
             ) : (
               <Moon size={22} />
@@ -662,13 +650,13 @@ export default function WorkflowPage() {
           <div
             className="absolute -top-6 left-0 right-0 text-center text-xs font-bold px-2 py-1 rounded"
             style={{
-              background: workflowDarkMode ? DARK_GOLD : 'white',
-              color: workflowDarkMode ? '#18140c' : '#333',
-              border: `1px solid ${workflowDarkMode ? DARK_GOLD : '#ccc'}`,
+              background: darkMode ? DARK_GOLD : 'white',
+              color: darkMode ? '#18140c' : '#333',
+              border: `1px solid ${darkMode ? DARK_GOLD : '#ccc'}`,
               opacity: 0.9
             }}
           >
-            {workflowDarkMode ? 'DARK' : 'LIGHT'}
+            {darkMode ? 'DARK' : 'LIGHT'}
           </div>
         </div>
       </div>
