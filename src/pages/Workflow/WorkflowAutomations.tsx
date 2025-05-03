@@ -40,6 +40,8 @@ export default function WorkflowAutomations() {
   const [activeTab, setActiveTab] = useState('all');
   const navigate = useNavigate();
   const { user } = useAuth();
+  
+  console.log("WorkflowAutomations component rendered");
 
   useEffect(() => {
     loadAutomations();
