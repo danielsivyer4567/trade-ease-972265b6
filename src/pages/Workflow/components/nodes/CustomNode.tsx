@@ -14,6 +14,7 @@ export function CustomNode({ data, id, selected }) {
   const gold = '#bfa14a';
   const darkBg = '#18140c';
   const darkText = '#ffe082';
+  const darkSecondary = '#211c15';
 
   const bgColor = data.color ? `${data.color}25` : '#f0f9ff';
   const borderColor = data.color || '#3b82f6';
@@ -69,23 +70,41 @@ export function CustomNode({ data, id, selected }) {
       )}
       
       <div
-        className={`border-2 rounded-xl shadow-md p-3 transition-transform duration-150`}
+        className={`border-2 rounded-xl shadow-md p-3 transition-transform duration-150 ${selected ? 'ring-2 ring-offset-1' : ''}`}
         style={{
           backgroundColor: isDarkMode ? darkBg : 'white',
           borderColor: isDarkMode ? gold : '#cbd5e1',
           color: isDarkMode ? darkText : 'inherit',
-          width: expanded ? '280px' : '180px',
+          width: expanded ? '280px' : '200px',
+          boxShadow: isDarkMode 
+            ? (selected ? '0 0 0 2px ' + gold + ', 0 4px 20px rgba(0, 0, 0, 0.7)' : '0 4px 12px rgba(0, 0, 0, 0.5)') 
+            : (selected ? '0 0 0 2px #3b82f6, 0 4px 8px rgba(59, 130, 246, 0.2)' : '0 2px 5px rgba(0, 0, 0, 0.1)'),
+          borderWidth: selected ? '2px' : '1px',
+          transform: selected ? 'scale(1.02)' : 'scale(1)'
         }}
       >
-        <Handle type="target" position={Position.Top} style={{ backgroundColor: isDarkMode ? gold : '#64748b' }} />
+        <Handle 
+          type="target" 
+          position={Position.Top} 
+          style={{ 
+            backgroundColor: isDarkMode ? gold : '#64748b',
+            width: '10px',
+            height: '10px',
+            border: isDarkMode ? `2px solid ${gold}` : '2px solid #64748b',
+            top: '-6px'
+          }} 
+        />
         
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center">
             <div 
-              className={`w-8 h-8 rounded-full flex items-center justify-center mr-2`}
-              style={{ backgroundColor: isDarkMode ? darkBg : '#f1f5f9' }}
+              className={`w-10 h-10 rounded-full flex items-center justify-center mr-3`}
+              style={{ 
+                backgroundColor: isDarkMode ? darkSecondary : '#f1f5f9',
+                border: isDarkMode ? `1px solid ${gold}` : '1px solid #e2e8f0'
+              }}
             >
-              <Settings className="h-4 w-4" style={{ color: isDarkMode ? gold : '#64748b' }} />
+              <Settings className="h-5 w-5" style={{ color: isDarkMode ? gold : '#64748b' }} />
             </div>
             <div className="font-semibold text-sm" style={{ color: isDarkMode ? darkText : '#334155' }}>
               {title}
@@ -109,24 +128,49 @@ export function CustomNode({ data, id, selected }) {
         </div>
         
         {description && (
-          <div className="text-xs mb-2" style={{ color: isDarkMode ? '#8e7a3c' : '#64748b' }}>
+          <div 
+            className="text-xs mb-2 px-2 py-1 rounded" 
+            style={{ 
+              color: isDarkMode ? '#8e7a3c' : '#64748b',
+              backgroundColor: isDarkMode ? 'rgba(191, 161, 74, 0.07)' : 'rgba(241, 245, 249, 0.7)'
+            }}
+          >
             {description}
           </div>
         )}
         
         {expanded && message && (
           <div 
-            className="text-xs mt-2 p-2 rounded"
+            className="text-xs mt-3 p-2 rounded"
             style={{ 
               backgroundColor: isDarkMode ? 'rgba(191, 161, 74, 0.1)' : '#f1f5f9',
-              color: isDarkMode ? darkText : '#334155' 
+              color: isDarkMode ? darkText : '#334155',
+              border: isDarkMode ? `1px solid ${gold}` : '1px solid #e2e8f0',
+              opacity: 0.9
             }}
           >
             {message}
           </div>
         )}
         
-        <Handle type="source" position={Position.Bottom} style={{ backgroundColor: isDarkMode ? gold : '#64748b' }} />
+        <div className="mt-2 border-t pt-2" style={{ borderColor: isDarkMode ? `rgba(191, 161, 74, 0.2)` : '#f1f5f9' }}>
+          <div className="text-xs flex items-center" style={{ color: isDarkMode ? `rgba(191, 161, 74, 0.6)` : '#94a3b8' }}>
+            <GripVertical className="h-3 w-3 mr-1" />
+            <span>{expanded ? 'Drag to move' : 'Item'}</span>
+          </div>
+        </div>
+        
+        <Handle 
+          type="source" 
+          position={Position.Bottom} 
+          style={{ 
+            backgroundColor: isDarkMode ? gold : '#64748b',
+            width: '10px',
+            height: '10px',
+            border: isDarkMode ? `2px solid ${gold}` : '2px solid #64748b',
+            bottom: '-6px'
+          }}
+        />
       </div>
     </>
   );
