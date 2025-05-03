@@ -1,61 +1,40 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
+import { Zap } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { Workflow } from 'lucide-react';
 
 interface AutomationWorkflowButtonProps {
-  automationId?: number; // Made optional
   variant?: 'default' | 'outline' | 'secondary' | 'destructive' | 'ghost' | 'link';
-  size?: 'default' | 'sm' | 'lg' | 'xl' | 'icon';
-  children?: React.ReactNode;
-  workflowId?: string; // Added workflowId prop
-  category?: string; // Added category prop
+  size?: 'default' | 'sm' | 'lg' | 'icon';
+  className?: string;
+  automationId?: number;
 }
 
-export function AutomationWorkflowButton({ 
-  automationId, 
-  variant = 'default', 
+export function AutomationWorkflowButton({
+  variant = 'default',
   size = 'default',
-  children = 'Add to Workflow',
-  workflowId,
-  category
+  className = '',
+  automationId
 }: AutomationWorkflowButtonProps) {
   const navigate = useNavigate();
-  
-  const handleClick = () => {
-    let path = '/workflow';
-    const params = new URLSearchParams();
-    
+
+  const handleNavigateToAutomations = () => {
     if (automationId) {
-      params.append('automationId', automationId.toString());
+      navigate(`/workflow?automationId=${automationId}`);
+    } else {
+      navigate('/workflow/automations');
     }
-    
-    if (workflowId) {
-      params.append('id', workflowId);
-    }
-    
-    if (category) {
-      params.append('category', category);
-    }
-    
-    const queryString = params.toString();
-    if (queryString) {
-      path += `?${queryString}`;
-    }
-    
-    navigate(path);
   };
 
   return (
     <Button
       variant={variant}
       size={size}
-      onClick={handleClick}
-      className="whitespace-nowrap"
+      className={`flex items-center gap-2 ${className}`}
+      onClick={handleNavigateToAutomations}
     >
-      <Workflow className="h-4 w-4 mr-2" />
-      {children}
+      <Zap className="h-4 w-4" />
+      Automations
     </Button>
   );
 }

@@ -3,7 +3,7 @@ import { AppLayout } from "@/components/ui/AppLayout";
 import { Flow } from './components/Flow';
 import { NodeSidebar } from './components/NodeSidebar';
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Save, Key, Check, FileText, ArrowRightLeft, Workflow, FolderOpen, Plus, Settings2, ListChecks, Construction, Building, Sun, Moon } from "lucide-react";
+import { ArrowLeft, Save, Key, Check, FileText, ArrowRightLeft, Workflow, FolderOpen, Plus, Settings2, ListChecks, Construction, Building, Sun, Moon, Lock, Unlock } from "lucide-react";
 import { useNavigate, useLocation, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -32,7 +32,7 @@ export default function WorkflowPage() {
   const workflowId = searchParams.get('id');
   const { user, session } = useAuth();
   
-  const { darkMode, setDarkMode, toggleDarkMode } = useWorkflowDarkMode();
+  const { darkMode, toggleDarkMode, isDarkModeLocked, toggleDarkModeLock } = useWorkflowDarkMode();
   
   const [flowInstance, setFlowInstance] = useState(null);
   const [gcpVisionKeyDialogOpen, setGcpVisionKeyDialogOpen] = useState(false);
@@ -348,13 +348,33 @@ export default function WorkflowPage() {
 
   // Fix dark mode toggle function with logging
   useEffect(() => {
-    console.log("Dark mode state changed:", darkMode);
+    console.log("Workflow page dark mode state:", darkMode);
   }, [darkMode]);
 
   return (
     <AppLayout>
+      <style>{`
+        /* Force top navigation to be compact */
+        .workflow-container .top-nav {
+          max-height: 30px !important;
+          overflow: hidden;
+          margin-bottom: -10px;
+          position: relative;
+          z-index: 10;
+        }
+        .workflow-container .top-nav > div {
+          transform: scale(0.85);
+          transform-origin: top left;
+        }
+        .workflow-container .canvas-container {
+          height: calc(100vh - 30px) !important;
+          margin-top: -5px;
+          position: relative;
+          z-index: 5;
+        }
+      `}</style>
       <div 
-        className={`flex flex-col h-screen ${darkMode ? 'workflow-dark-mode' : ''}`}
+        className={`flex flex-col h-screen workflow-container ${darkMode ? 'workflow-dark-mode' : ''} ${isDarkModeLocked ? 'dark-mode-locked' : ''}`}
         style={darkMode ? { 
           background: DARK_BG, 
           color: DARK_TEXT
@@ -362,7 +382,7 @@ export default function WorkflowPage() {
       >
         {/* Top Navigation Bar */}
         <div 
-          className={`border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 ${darkMode ? 'border-[3px] border-b-[3px] border-gold-600' : ''}`}
+          className={`border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 ${darkMode ? 'border-[3px] border-b-[3px] border-gold-600' : ''} top-nav`}
           style={darkMode ? { 
             borderColor: DARK_GOLD, 
             background: DARK_BG, 
@@ -370,7 +390,7 @@ export default function WorkflowPage() {
             boxShadow: `0 2px 4px rgba(0,0,0,0.3)`
           } : {}}
         >
-          <div className="flex h-16 items-center px-4">
+          <div className="flex h-12 items-center px-4">
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -470,7 +490,7 @@ export default function WorkflowPage() {
 
           {/* Tabs and Template Buttons */}
           <div 
-            className={`border-b px-4 ${darkMode ? 'border-gold-600' : ''}`}
+            className={`border-b px-2 ${darkMode ? 'border-gold-600' : ''}`}
             style={darkMode ? { borderColor: DARK_GOLD } : {}}
           >
             <div 
@@ -481,7 +501,7 @@ export default function WorkflowPage() {
                 {['builder', 'settings', 'enrollment', 'execution'].map(tab => (
                   <button
                     key={tab}
-                    className={`py-2 px-4 text-sm font-medium border-b-2 transition-all duration-200 ${
+                    className={`py-0.5 px-3 text-xs font-medium border-b-2 transition-all duration-200 ${
                       activeTab === tab
                         ? darkMode
                           ? 'border-[3px] border-gold-600 text-gold-400 bg-[#18140c]' // active
@@ -497,17 +517,17 @@ export default function WorkflowPage() {
                   </button>
                 ))}
               </div>
-              <div className="flex items-center gap-2 py-1">
+              <div className="flex items-center gap-1 py-0">
                 <Button
                   variant={darkMode ? "ghost" : "outline"}
                   size="sm"
                   onClick={() => {
                     navigate('/workflow/templates', { state: { category: 'construction' } });
                   }}
-                  className={`flex items-center gap-2 ${darkMode ? 'border-gold-500 text-gold-400 hover:text-gold-300 hover:border-gold-400' : ''}`}
+                  className={`flex items-center gap-1 text-xs h-6 ${darkMode ? 'border-gold-500 text-gold-400 hover:text-gold-300 hover:border-gold-400' : ''}`}
                   style={darkMode ? { borderColor: DARK_GOLD, color: DARK_TEXT } : {}}
                 >
-                  <Construction className={`h-4 w-4 ${darkMode ? 'text-gold-400' : ''}`} />
+                  <Construction className={`h-3 w-3 ${darkMode ? 'text-gold-400' : ''}`} />
                   Construction Templates
                 </Button>
                 <Button
@@ -516,10 +536,10 @@ export default function WorkflowPage() {
                   onClick={() => {
                     navigate('/workflow/templates', { state: { category: 'admin' } });
                   }}
-                  className={`flex items-center gap-2 ${darkMode ? 'border-gold-500 text-gold-400 hover:text-gold-300 hover:border-gold-400' : ''}`}
+                  className={`flex items-center gap-1 text-xs h-6 ${darkMode ? 'border-gold-500 text-gold-400 hover:text-gold-300 hover:border-gold-400' : ''}`}
                   style={darkMode ? { borderColor: DARK_GOLD, color: DARK_TEXT } : {}}
                 >
-                  <Building className={`h-4 w-4 ${darkMode ? 'text-gold-400' : ''}`} />
+                  <Building className={`h-3 w-3 ${darkMode ? 'text-gold-400' : ''}`} />
                   Admin Templates
                 </Button>
               </div>
@@ -528,30 +548,44 @@ export default function WorkflowPage() {
         </div>
 
         {/* Main Content */}
-        <div className="flex-1 flex">
+        <div className="flex-1 flex canvas-container">
           <NodeSidebar targetData={targetData} workflowDarkMode={darkMode} />
           <div className="flex-1 relative">
             <Flow 
               onInit={setFlowInstance} 
               workflowId={currentWorkflowId}
-              workflowDarkMode={darkMode} 
+              workflowDarkMode={darkMode}
               toggleDarkMode={toggleDarkMode}
             />
           </div>
         </div>
 
         {!isLoadingKey && (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+          <div 
+            className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4"
+            style={darkMode ? { color: DARK_TEXT } : {}}
+          >
             {hasGcpVisionKey && (
-              <Card>
+              <Card
+                style={darkMode ? { 
+                  background: DARK_SECONDARY, 
+                  color: DARK_TEXT, 
+                  borderColor: DARK_GOLD 
+                } : {}}
+              >
                 <CardHeader className="py-2">
-                  <CardTitle className="text-sm flex items-center gap-2">
+                  <CardTitle 
+                    className="text-sm flex items-center gap-2"
+                    style={darkMode ? { color: DARK_GOLD } : {}}
+                  >
                     <Key className="h-4 w-4 text-green-500" />
                     Google Cloud Vision API Status
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="py-2">
-                  <p className="text-sm text-green-600 flex items-center">
+                  <p 
+                    className={`text-sm flex items-center ${darkMode ? 'text-gold-400' : 'text-green-600'}`}
+                  >
                     <Check className="h-4 w-4 mr-1" />
                     Google Cloud Vision API key is configured and ready to use
                   </p>
@@ -559,15 +593,27 @@ export default function WorkflowPage() {
               </Card>
             )}
             
-            <Card>
+            <Card
+              style={darkMode ? { 
+                background: DARK_SECONDARY, 
+                color: DARK_TEXT, 
+                borderColor: DARK_GOLD 
+              } : {}}
+            >
               <CardHeader className="py-2">
-                <CardTitle className="text-sm flex items-center gap-2">
+                <CardTitle 
+                  className="text-sm flex items-center gap-2"
+                  style={darkMode ? { color: DARK_GOLD } : {}}
+                >
                   <FileText className="h-4 w-4 text-blue-500" />
                   Financial Integration Guide
                 </CardTitle>
               </CardHeader>
               <CardContent className="py-2">
-                <ol className="text-sm space-y-1 list-decimal pl-4">
+                <ol 
+                  className="text-sm space-y-1 list-decimal pl-4"
+                  style={darkMode ? { color: DARK_TEXT } : {}}
+                >
                   <li>Add a Vision Analysis node to your workflow</li>
                   <li>Connect it to a Quote or Custom node</li>
                   <li>Save your workflow to enable automated data extraction</li>
@@ -576,15 +622,27 @@ export default function WorkflowPage() {
               </CardContent>
             </Card>
             
-            <Card>
+            <Card
+              style={darkMode ? { 
+                background: DARK_SECONDARY, 
+                color: DARK_TEXT, 
+                borderColor: DARK_GOLD 
+              } : {}}
+            >
               <CardHeader className="py-2">
-                <CardTitle className="text-sm flex items-center gap-2">
+                <CardTitle 
+                  className="text-sm flex items-center gap-2"
+                  style={darkMode ? { color: DARK_GOLD } : {}}
+                >
                   <Workflow className="h-4 w-4 text-blue-500" />
                   Automation Integration Guide
                 </CardTitle>
               </CardHeader>
               <CardContent className="py-2">
-                <ol className="text-sm space-y-1 list-decimal pl-4">
+                <ol 
+                  className="text-sm space-y-1 list-decimal pl-4"
+                  style={darkMode ? { color: DARK_TEXT } : {}}
+                >
                   <li>Click "Add Automation" to include existing automations</li>
                   <li>Connect automation nodes to jobs, quotes, or customers</li>
                   <li>Save your workflow to enable the connected automations</li>
@@ -646,6 +704,41 @@ export default function WorkflowPage() {
             )}
           </button>
           
+          {/* Lock button */}
+          <button
+            onClick={toggleDarkModeLock}
+            className={`absolute -right-10 top-2 w-8 h-8 rounded-full flex items-center justify-center shadow-lg focus:outline-none ${isDarkModeLocked ? 'dark-mode-lock-icon' : ''}`}
+            style={{
+              background: darkMode ? DARK_GOLD : 'white',
+              border: `2px solid ${darkMode ? DARK_GOLD : '#ccc'}`,
+              color: darkMode ? '#18140c' : '#333',
+              transform: 'scale(1)',
+              transition: 'all 0.2s ease',
+              boxShadow: isDarkModeLocked ? '0 0 8px rgba(191, 161, 74, 0.8)' : ''
+            }}
+            onMouseOver={(e) => {
+              if (!isDarkModeLocked) {
+                const target = e.currentTarget as HTMLElement;
+                target.style.transform = 'scale(1.1)';
+                target.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.2)';
+              }
+            }}
+            onMouseOut={(e) => {
+              if (!isDarkModeLocked) {
+                const target = e.currentTarget as HTMLElement;
+                target.style.transform = 'scale(1)';
+                target.style.boxShadow = '0 2px 6px rgba(0, 0, 0, 0.1)';
+              }
+            }}
+            title={isDarkModeLocked ? "Unlock Dark Mode" : "Lock Dark Mode"}
+          >
+            {isDarkModeLocked ? (
+              <Lock size={16} />
+            ) : (
+              <Unlock size={16} />
+            )}
+          </button>
+          
           {/* Mode indicator */}
           <div
             className="absolute -top-6 left-0 right-0 text-center text-xs font-bold px-2 py-1 rounded"
@@ -656,7 +749,7 @@ export default function WorkflowPage() {
               opacity: 0.9
             }}
           >
-            {darkMode ? 'DARK' : 'LIGHT'}
+            {darkMode ? (isDarkModeLocked ? 'DARK 🔒' : 'DARK') : 'LIGHT'}
           </div>
         </div>
       </div>
