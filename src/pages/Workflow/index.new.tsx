@@ -124,6 +124,39 @@ export default function WorkflowPage() {
           console.error('Error loading template data from localStorage:', error);
           toast.error('Failed to load template data');
         }
+      } else if (location.state.addAutomation && location.state.fromLocalStorage) {
+        try {
+          const storedData = localStorage.getItem('automation_workflow_data');
+          if (storedData) {
+            const automationInfo = JSON.parse(storedData);
+            console.log('Retrieved automation data from localStorage:', automationInfo.automationTitle);
+            
+            // Store automation data for use after flow instance is initialized
+            pendingAutomationData.current = {
+              automationId: automationInfo.automationId,
+              automationTitle: automationInfo.automationTitle,
+              automationDescription: automationInfo.automationDescription,
+              preserveExisting: location.state.preserveExisting !== false // Default to true if not specified
+            };
+            
+            // If flowInstance is already available, add the automation node immediately
+            if (flowInstance) {
+              addAutomationNode(
+                automationInfo.automationId, 
+                automationInfo.automationTitle, 
+                automationInfo.automationDescription,
+                location.state.preserveExisting !== false // Pass the preserveExisting flag
+              );
+              pendingAutomationData.current = null; // Clear to prevent duplicate processing
+            }
+            
+            // Clean up localStorage after use to prevent stale data
+            localStorage.removeItem('automation_workflow_data');
+          }
+        } catch (error) {
+          console.error('Error loading automation data from localStorage:', error);
+          toast.error('Failed to load automation data');
+        }
       } else if (location.state.useTemplate && location.state.templateData) {
         // Original behavior for direct template data in state
         // Check if we should preserve existing content
