@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
-import { useNavigate as useReactRouterNavigate, useLocation as useReactRouterLocation, NavigateFunction } from 'react-router-dom';
+import { useNavigate, useLocation, NavigateFunction } from 'react-router-dom';
 import { trackHistoryCall } from '@/utils/performanceMonitor';
 
 export interface Tab {
@@ -21,33 +21,40 @@ interface TabsContextType {
 
 const TabsContext = createContext<TabsContextType | undefined>(undefined);
 
-// Safe hook that works outside Router context
-function useSafeNavigate(): NavigateFunction | null {
+// This is a component that only exists to check if we're in a Router context
+// It doesn't render anything, just passes props through
+function RouterContextChecker({ 
+  children, 
+  onHasRouter, 
+  onNoRouter 
+}: { 
+  children: React.ReactNode,
+  onHasRouter: () => void,
+  onNoRouter: () => void
+}) {
   try {
-    return useReactRouterNavigate();
+    // Try to use router hooks - will throw if not in router context
+    useLocation();
+    useNavigate();
+    
+    // If we get here, router context exists
+    onHasRouter();
+    return <>{children}</>;
   } catch (error) {
-    console.warn('useNavigate used outside Router context - navigation disabled');
-    return null;
+    // No router context
+    onNoRouter();
+    return <>{children}</>;
   }
 }
 
-// Safe hook for location that works outside Router context
-function useSafeLocation() {
-  try {
-    return useReactRouterLocation();
-  } catch (error) {
-    console.warn('useLocation used outside Router context - using default location');
-    return { pathname: '/' };
-  }
-}
-
-export function TabsProvider({ children }: { children: React.ReactNode }) {
+// Inner tabs provider that uses React Router
+function TabsProviderWithRouter({ children }: { children: React.ReactNode }) {
   const [tabs, setTabs] = useState<Tab[]>([]);
   const [activeTabId, setActiveTabId] = useState<string | null>(null);
   const initialized = useRef(false);
   const [navigationInProgress, setNavigationInProgress] = useState(false);
-  const navigate = useSafeNavigate();
-  const location = useSafeLocation();
+  const navigate = useNavigate();
+  const location = useLocation();
 
   // Initialize with current path on first mount
   useEffect(() => {
@@ -71,21 +78,6 @@ export function TabsProvider({ children }: { children: React.ReactNode }) {
       initialized.current = true;
     }
   }, [location.pathname]);
-
-  // Throttle function to prevent excessive calls
-  const throttle = useCallback((callback: Function, delay: number = 300) => {
-    let timeoutId: NodeJS.Timeout | null = null;
-    return (...args: any[]) => {
-      if (timeoutId) {
-        return;
-      }
-      
-      timeoutId = setTimeout(() => {
-        callback(...args);
-        timeoutId = null;
-      }, delay);
-    };
-  }, []);
 
   // Add a new tab - memoized to prevent rerenders
   const addTab = useCallback((tab: Omit<Tab, 'id'> & { id?: string }) => {
@@ -122,14 +114,14 @@ export function TabsProvider({ children }: { children: React.ReactNode }) {
         const newActiveTab = tabs[newActiveIndex] || tabs[tabIndex + 1];
         setActiveTabId(newActiveTab.id);
         
-        if (trackHistoryCall() && navigate) {
+        if (trackHistoryCall()) {
           setNavigationInProgress(true);
           navigate(newActiveTab.path, { replace: true });
         }
       } else {
         setActiveTabId(null);
         
-        if (trackHistoryCall() && navigate) {
+        if (trackHistoryCall()) {
           setNavigationInProgress(true);
           navigate('/', { replace: true }); // Default location if no tabs left
         }
@@ -148,7 +140,7 @@ export function TabsProvider({ children }: { children: React.ReactNode }) {
       setActiveTabId(tabId);
       
       // Only update history if it's safe to do so
-      if (trackHistoryCall() && navigate) {
+      if (trackHistoryCall()) {
         setNavigationInProgress(true);
         // Use replace instead of push to avoid filling history
         navigate(tab.path, { replace: true });
@@ -170,7 +162,7 @@ export function TabsProvider({ children }: { children: React.ReactNode }) {
 
   // Update tabs when location changes (external navigation)
   useEffect(() => {
-    if (!navigationInProgress && !initialized.current) {
+    if (!navigationInProgress && initialized.current) {
       // Check if this path is already open in a tab
       const existingTabIndex = tabs.findIndex(tab => tab.path === location.pathname);
       
@@ -194,7 +186,7 @@ export function TabsProvider({ children }: { children: React.ReactNode }) {
         setActiveTabId(newTab.id);
       }
     }
-  }, [location.pathname, navigationInProgress, initialized.current, tabs]);
+  }, [location.pathname, navigationInProgress, tabs]);
 
   // Check if a tab with a specific path is already open
   const isTabOpen = useCallback((path: string) => {
@@ -218,6 +210,89 @@ export function TabsProvider({ children }: { children: React.ReactNode }) {
   };
 
   return <TabsContext.Provider value={value}>{children}</TabsContext.Provider>;
+}
+
+// Simplified provider that doesn't rely on router - used when outside Router context
+function TabsProviderNoRouter({ children }: { children: React.ReactNode }) {
+  const [tabs, setTabs] = useState<Tab[]>([]);
+  const [activeTabId, setActiveTabId] = useState<string | null>(null);
+
+  // Stub implementations that don't use navigation
+  const addTab = useCallback((tab: Omit<Tab, 'id'> & { id?: string }) => {
+    const id = tab.id || `tab-${Date.now()}`;
+    const newTab = { ...tab, id };
+    setTabs(prev => [...prev, newTab]);
+    setActiveTabId(newTab.id);
+  }, []);
+
+  const removeTab = useCallback((tabId: string) => {
+    const tabIndex = tabs.findIndex(tab => tab.id === tabId);
+    if (tabIndex === -1) return;
+    
+    if (tabId === activeTabId) {
+      const newActiveIndex = Math.max(0, tabIndex - 1);
+      if (tabs.length > 1) {
+        const newActiveTab = tabs[newActiveIndex] || tabs[tabIndex + 1];
+        setActiveTabId(newActiveTab.id);
+      } else {
+        setActiveTabId(null);
+      }
+    }
+    
+    setTabs(prev => prev.filter(tab => tab.id !== tabId));
+  }, [tabs, activeTabId]);
+
+  const activateTab = useCallback((tabId: string) => {
+    if (tabs.find(tab => tab.id === tabId)) {
+      setActiveTabId(tabId);
+    }
+  }, [tabs]);
+
+  const isTabOpen = useCallback((path: string) => {
+    return tabs.some(tab => tab.path === path);
+  }, [tabs]);
+
+  const getTabById = useCallback((id: string) => {
+    return tabs.find(tab => tab.id === id);
+  }, [tabs]);
+
+  // Value object for provider
+  const value = {
+    tabs,
+    activeTabId,
+    addTab,
+    removeTab,
+    activateTab,
+    isTabOpen,
+    getTabById
+  };
+
+  return <TabsContext.Provider value={value}>{children}</TabsContext.Provider>;
+}
+
+// Main provider that decides which implementation to use
+export function TabsProvider({ children }: { children: React.ReactNode }) {
+  const [hasRouter, setHasRouter] = useState<boolean | null>(null);
+
+  // If we don't know if router context exists yet, use RouterContextChecker
+  if (hasRouter === null) {
+    return (
+      <RouterContextChecker
+        onHasRouter={() => setHasRouter(true)}
+        onNoRouter={() => setHasRouter(false)}
+      >
+        {/* Render nothing until we know if router context exists */}
+        <div style={{ display: 'none' }} />
+      </RouterContextChecker>
+    );
+  }
+
+  // Once we know, render the appropriate provider
+  return hasRouter ? (
+    <TabsProviderWithRouter>{children}</TabsProviderWithRouter>
+  ) : (
+    <TabsProviderNoRouter>{children}</TabsProviderNoRouter>
+  );
 }
 
 export function useTabs() {
