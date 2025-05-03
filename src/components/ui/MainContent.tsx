@@ -42,7 +42,7 @@ export function MainContent({
   return (
     <div
       className={cn(
-        "relative flex flex-col flex-1 overflow-x-hidden",
+        "relative flex flex-col flex-1 overflow-x-hidden h-full",
         sidebarOpen && "transition-all duration-300 ease-in-out",
         className
       )}
@@ -72,8 +72,8 @@ export function MainContent({
       <TabBar />
 
       {/* Main Content Area - Tab content */}
-      <ScrollArea className="flex-1 w-full">
-        <div className="relative w-full">
+      <ScrollArea className="flex-1 w-full h-full">
+        <div className="relative w-full h-full">
           {children}
         </div>
       </ScrollArea>

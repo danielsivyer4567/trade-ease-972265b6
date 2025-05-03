@@ -44,7 +44,7 @@ export function BaseLayout({
     <SidebarProvider>
       <SidebarThemeProvider defaultTheme="default">
         <div className={cn(
-          "relative flex min-h-screen w-full",
+          "relative flex min-h-screen h-screen w-full",
           className
         )}>
           {/* Sidebar - conditionally render based on the prop */}
@@ -66,7 +66,7 @@ export function BaseLayout({
 
           {/* Main Content */}
           <main className={cn(
-            "min-h-screen w-full bg-[#f0f4fa]",
+            "min-h-screen h-screen w-full bg-[#f0f4fa] flex flex-col",
             "transition-all duration-300 ease-in-out",
             sidebarOpen ? "md:pl-[240px]" : "md:pl-[64px]",
             isMobile ? "pl-0" : ""

@@ -80,7 +80,7 @@ export default function WorkflowList() {
 
   return (
     <BaseLayout>
-      <div className="p-4 md:p-6 space-y-4 md:space-y-6">
+      <div className="p-4 md:p-6 space-y-4 md:space-y-6 flex flex-col min-h-full h-full">
         {/* Header */}
         <div className="flex flex-col gap-4">
           <WorkflowNavigation />
@@ -103,14 +103,14 @@ export default function WorkflowList() {
 
         {/* Workflows Grid */}
         {loading ? (
-          <div className="text-center py-16 text-lg">Loading workflows...</div>
+          <div className="text-center py-16 text-lg flex-grow">Loading workflows...</div>
         ) : workflows.length === 0 ? (
-          <div className="text-center p-10 border border-dashed rounded-md">
+          <div className="text-center p-10 border border-dashed rounded-md flex-grow flex flex-col justify-center">
             <p className="text-muted-foreground">No workflows found.</p>
-            <Button onClick={() => navigate('/workflow/new')} className="mt-4">Create your first workflow</Button>
+            <Button onClick={() => navigate('/workflow/new')} className="mt-4 mx-auto">Create your first workflow</Button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6 flex-grow">
             {workflows.map((workflow) => (
               <Card key={workflow.id} className="hover:shadow-md transition-shadow duration-200">
                 <CardHeader className="pb-2">
