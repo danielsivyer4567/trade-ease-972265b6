@@ -36,7 +36,7 @@ export default function WorkflowList() {
     }
   };
 
-  const handleEdit = (id: string) => {
+  const handleEdit = (id: string | number) => {
     navigate(`/workflow/edit/${id}`);
   };
 
@@ -49,6 +49,33 @@ export default function WorkflowList() {
         workflowDescription: workflow.description
       } 
     });
+  };
+
+  // Helper function to safely get edge count
+  const getEdgeCount = (workflow: Workflow): number => {
+    if (!workflow.data) return 0;
+    if (typeof workflow.data !== 'object' || workflow.data === null) return 0;
+    
+    const data = workflow.data as any;
+    return Array.isArray(data.edges) ? data.edges.length : 0;
+  };
+
+  // Helper function to safely get node count
+  const getNodeCount = (workflow: Workflow): number => {
+    if (!workflow.data) return 0;
+    if (typeof workflow.data !== 'object' || workflow.data === null) return 0;
+    
+    const data = workflow.data as any;
+    return Array.isArray(data.nodes) ? data.nodes.length : 0;
+  };
+
+  // Helper function to safely get creation date
+  const getCreationDate = (workflow: Workflow): string => {
+    if (!workflow.data) return 'Unknown date';
+    if (typeof workflow.data !== 'object' || workflow.data === null) return 'Unknown date';
+    
+    const data = workflow.data as any;
+    return data.created_at ? new Date(data.created_at).toLocaleDateString() : 'Unknown date';
   };
 
   return (
@@ -106,16 +133,16 @@ export default function WorkflowList() {
                       <div className="mt-1 text-sm space-y-1">
                         <div className="flex items-center">
                           <span className="h-1 w-1 bg-slate-400 rounded-full mr-2"></span>
-                          Nodes: {workflow.data?.nodes?.length || 0}
+                          Nodes: {getNodeCount(workflow)}
                         </div>
                         <div className="flex items-center">
                           <span className="h-1 w-1 bg-slate-400 rounded-full mr-2"></span>
-                          Connections: {typeof workflow.data === 'object' && workflow.data !== null ? (workflow.data as any).edges?.length || 0 : 0}
+                          Connections: {getEdgeCount(workflow)}
                         </div>
                         <div className="flex items-center">
                           <span className="h-1 w-1 bg-slate-400 rounded-full mr-2"></span>
                           <Calendar className="h-3 w-3 mr-1" />
-                          {workflow.data?.created_at ? new Date(workflow.data.created_at).toLocaleDateString() : 'Unknown date'}
+                          {getCreationDate(workflow)}
                         </div>
                       </div>
                     </div>
