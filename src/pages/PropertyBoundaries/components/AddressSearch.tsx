@@ -1,15 +1,10 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Loader2, Search, MapPin, Plus } from "lucide-react";
 import { usePropertyBoundaries } from '../hooks/usePropertyBoundaries';
-import { searchAddress } from '../services/geocodeService';
-import { getPropertyBoundariesByAddress } from '../services/propertyBoundaryService';
-import { toast } from 'sonner';
-import { Property } from '../types';
-import { supabase } from '@/integrations/supabase/client';
 
 export const AddressSearch: React.FC = () => {
   const {
@@ -35,83 +30,6 @@ export const AddressSearch: React.FC = () => {
   const handleComponentsSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     handleAddressComponentSearch(houseNumber, streetName, suburb, postcode);
-  };
-
-  const handleSearch = useCallback(async () => {
-    if (!addressSearchQuery.trim()) {
-      toast.warning('Please enter an address to search');
-      return;
-    }
-    
-    setIsSearching(true);
-    
-    try {
-      const { data, error } = await getPropertyBoundariesByAddress(addressSearchQuery);
-      
-      if (error) {
-        toast.error(`Error searching address: ${error}`);
-        return;
-      }
-      
-      if (!data) {
-        toast.warning('No property found at this address');
-        return;
-      }
-      
-      // Create a property object from the results
-      const property: Property = {
-        id: `temp-${Date.now()}`,
-        name: `Property at ${data.display?.address || addressSearchQuery}`,
-        description: `Property found via address search`,
-        location: data.location,
-        boundaries: data.boundary?.coordinates || [],
-        address: data.display?.address || addressSearchQuery
-      };
-      
-      // Save the property
-      await saveProperty(property);
-      
-      toast.success('Property boundaries found and saved!');
-    } catch (error) {
-      console.error('Error during address search:', error);
-      toast.error('Failed to search for property');
-    } finally {
-      setIsSearching(false);
-    }
-  }, [addressSearchQuery]);
-  
-  const saveProperty = async (property: Property) => {
-    try {
-      // Check if user is logged in
-      const { data: { user } } = await supabase.auth.getUser();
-      
-      if (!user) {
-        toast.warning('Log in to save properties permanently');
-        return;
-      }
-      
-      // Save to Supabase
-      const { data, error } = await supabase
-        .from('property_boundaries')
-        .insert([{
-          name: property.name,
-          description: property.description,
-          address: property.address,
-          location: property.location,
-          boundaries: property.boundaries,
-          user_id: user.id
-        }])
-        .select();
-        
-      if (error) {
-        console.error('Error saving property:', error);
-        toast.error('Error saving property');
-      } else {
-        toast.success('Property saved to your account');
-      }
-    } catch (error) {
-      console.error('Error in save property:', error);
-    }
   };
 
   return (
@@ -253,13 +171,6 @@ export const AddressSearch: React.FC = () => {
           </div>
         )}
       </CardContent>
-      {searchResults.length > 0 && (
-        <CardFooter className="border-t pt-3 flex justify-between">
-          <p className="text-xs text-muted-foreground">
-            Click the + button to add a property to your list
-          </p>
-        </CardFooter>
-      )}
     </Card>
   );
 }; 
