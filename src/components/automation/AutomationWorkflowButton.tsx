@@ -22,11 +22,14 @@ export function AutomationWorkflowButton({
 
   const handleNavigateToAutomations = () => {
     if (automationId) {
+      console.log('AutomationWorkflowButton: navigating to workflow with automation', automationId, 'preserveExisting: true');
+      
+      // Route to workflow with automation data
       navigate(`/workflow`, { 
         state: { 
           addAutomation: true,
           automationId: automationId,
-          preserveExisting: true
+          preserveExisting: true // Explicitly set to true to ensure it's preserved
         } 
       });
     } else {

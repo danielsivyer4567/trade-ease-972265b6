@@ -27,15 +27,23 @@ export default function WorkflowPage() {
   const pendingTemplateData = useRef(null);
   const pendingWorkflowId = useRef(null);
   const pendingAutomationData = useRef(null);
+  const hasProcessedLocationState = useRef(false);
   
   // Clear location state to prevent the same action from happening again on refresh
   useEffect(() => {
-    if (location.state) {
+    if (location.state && !hasProcessedLocationState.current) {
+      // Mark as processed to prevent duplicate handling
+      hasProcessedLocationState.current = true;
+      
       // This will clear the state but keep the current URL
       const currentPath = location.pathname;
       window.history.replaceState({}, '', currentPath);
+      
+      console.log('Processing location state:', location.state);
+      
+      // Continue with location state processing...
     }
-  }, []);
+  }, [location]);
 
   // Node type to icon mapping
   const nodeTypeIcons = {
@@ -68,8 +76,10 @@ export default function WorkflowPage() {
 
   // Handle incoming location state when component mounts
   useEffect(() => {
-    if (location.state) {
-      console.log('Processing location state:', location.state);
+    if (location.state && !hasProcessedLocationState.current) {
+      // Mark as processed immediately to prevent duplicate handling
+      hasProcessedLocationState.current = true;
+      console.log('Processing location state once:', location.state);
       
       if (location.state.useTemplate && location.state.templateData) {
         // Check if we should preserve existing content
@@ -88,8 +98,9 @@ export default function WorkflowPage() {
           
           if (templateData.nodes && Array.isArray(templateData.nodes)) {
             // Create unique IDs for new nodes from template to avoid conflicts
+            const templateTimestamp = Date.now();
             const newTemplateNodes = templateData.nodes.map(node => ensureNodeIcon({
-              id: `template-${node.id}-${Date.now()}`,
+              id: `template-${node.id}-${templateTimestamp}`,
               type: node.type,
               position: node.position,
               data: node.data
@@ -101,10 +112,11 @@ export default function WorkflowPage() {
           
           if (templateData.edges && Array.isArray(templateData.edges)) {
             // Create unique IDs for new edges, and update source/target references
+            const templateTimestamp = Date.now();
             const newTemplateEdges = templateData.edges.map(edge => ({
-              id: `template-${edge.id}-${Date.now()}`,
-              source: `template-${edge.source}-${Date.now()}`,
-              target: `template-${edge.target}-${Date.now()}`,
+              id: `template-${edge.id}-${templateTimestamp}`,
+              source: `template-${edge.source}-${templateTimestamp}`,
+              target: `template-${edge.target}-${templateTimestamp}`,
               type: 'animated',
               animated: true
             }));
@@ -164,21 +176,16 @@ export default function WorkflowPage() {
           preserveExisting: location.state.preserveExisting !== false // Default to true if not specified
         };
         
-        // If we're not preserving existing content, clear the canvas
-        if (location.state.preserveExisting === false) {
-          console.log('Clearing canvas for new automation (preserveExisting is false)');
-          setNodes([]);
-          setEdges([]);
-        } else {
-          console.log('Preserving existing content for new automation');
-        }
-
+        // IMPORTANT: We DO NOT clear the canvas here, even if preserveExisting is false
+        // The actual node addition will happen in the flowInstance effect or directly if flowInstance is available
+        
         // If flowInstance is already available, add the automation node immediately
         if (flowInstance) {
           addAutomationNode(
             location.state.automationId, 
             location.state.automationTitle, 
-            location.state.automationDescription
+            location.state.automationDescription,
+            location.state.preserveExisting !== false // Pass the preserveExisting flag
           );
           pendingAutomationData.current = null; // Clear to prevent duplicate processing
         }
@@ -187,7 +194,7 @@ export default function WorkflowPage() {
         setAutomationCategory(location.state.category || '');
       }
     }
-  }, [location.state]);
+  }, [location.state, flowInstance]);
 
   // Load workflow data by ID
   const loadWorkflowData = async (workflowId) => {
@@ -265,78 +272,97 @@ export default function WorkflowPage() {
       
       // Handle pending automation node addition
       if (pendingAutomationData.current) {
-        const { automationId, automationTitle, automationDescription } = pendingAutomationData.current;
-        console.log('Adding pending automation node from effect:', automationId);
-        addAutomationNode(automationId, automationTitle, automationDescription);
+        const { automationId, automationTitle, automationDescription, preserveExisting } = pendingAutomationData.current;
+        console.log('Adding pending automation node from effect:', automationId, 'preserveExisting:', preserveExisting);
+        addAutomationNode(automationId, automationTitle, automationDescription, preserveExisting);
         pendingAutomationData.current = null; // Clear to prevent duplicate processing
       }
     }
   }, [flowInstance]);
 
   // Function to add automation node
-  const addAutomationNode = (automationId, automationTitle, automationDescription) => {
+  const addAutomationNode = (automationId, automationTitle, automationDescription, preserveExisting = true) => {
     if (!flowInstance) return;
     
-    // Calculate position - place it to the right of existing nodes if there are any
-    const existingNodes = nodes;
-    let xPosition = 100;
-    let yPosition = 100;
+    console.log('Adding automation node with preserveExisting =', preserveExisting);
     
-    if (existingNodes.length > 0) {
-      // Find the rightmost node
-      const rightmostNode = existingNodes.reduce((rightmost, node) => {
-        return (node.position.x > rightmost.position.x) ? node : rightmost;
-      }, existingNodes[0]);
+    // Only clear the canvas if explicitly told not to preserve existing content
+    if (preserveExisting === false) {
+      console.log('Clearing canvas before adding automation node');
+      setNodes([]);
+      setEdges([]);
       
-      // Position the new node to the right with some spacing
-      xPosition = rightmostNode.position.x + 250;
-      yPosition = rightmostNode.position.y; // Keep same Y coordinate as rightmost node
+      // Add the node after clearing
+      setTimeout(() => {
+        addNewAutomationNode();
+      }, 50);
+    } else {
+      // Simply add the node to existing canvas
+      addNewAutomationNode();
     }
     
-    const position = { x: xPosition, y: yPosition };
-    
-    // Create a unique ID with timestamp to avoid conflicts
-    const uniqueId = `automation-${automationId}-${Date.now()}`;
-    
-    const newNode = {
-      id: uniqueId,
-      type: 'automation',
-      position,
-      data: {
-        automationId: automationId,
-        title: automationTitle || `Automation ${automationId}`,
-        description: automationDescription || '',
-        label: automationTitle || `Automation ${automationId}`,
-        icon: nodeTypeIcons.automationNode
-      }
-    };
-    
-    setNodes(nds => [...nds, ensureNodeIcon(newNode)]);
-    
-    // Auto-fit the view to show all nodes
-    setTimeout(() => {
-      if (flowInstance) {
-        flowInstance.fitView({ padding: 0.2 });
-      }
-    }, 100);
-    
-    toast.success(`Added automation: ${automationTitle || `Automation ${automationId}`}`);
-    
-    // If there are existing nodes, try to connect to the rightmost one
-    if (existingNodes.length > 0) {
-      const rightmostNode = existingNodes.reduce((rightmost, node) => {
-        return (node.position.x > rightmost.position.x) ? node : rightmost;
-      }, existingNodes[0]);
+    function addNewAutomationNode() {
+      // Calculate position - place it to the right of existing nodes if there are any
+      const existingNodes = nodes;
+      let xPosition = 100;
+      let yPosition = 100;
       
-      const newEdge = {
-        id: `e-${rightmostNode.id}-${uniqueId}`,
-        source: rightmostNode.id,
-        target: uniqueId,
-        type: 'animated',
-        animated: true
+      if (existingNodes.length > 0) {
+        // Find the rightmost node
+        const rightmostNode = existingNodes.reduce((rightmost, node) => {
+          return (node.position.x > rightmost.position.x) ? node : rightmost;
+        }, existingNodes[0]);
+        
+        // Position the new node to the right with some spacing
+        xPosition = rightmostNode.position.x + 250;
+        yPosition = rightmostNode.position.y; // Keep same Y coordinate as rightmost node
+      }
+      
+      const position = { x: xPosition, y: yPosition };
+      
+      // Create a unique ID with timestamp to avoid conflicts
+      const uniqueId = `automation-${automationId}-${Date.now()}`;
+      
+      const newNode = {
+        id: uniqueId,
+        type: 'automation',
+        position,
+        data: {
+          automationId: automationId,
+          title: automationTitle || `Automation ${automationId}`,
+          description: automationDescription || '',
+          label: automationTitle || `Automation ${automationId}`,
+          icon: nodeTypeIcons.automationNode
+        }
       };
       
-      setEdges(eds => [...eds, newEdge]);
+      setNodes(nds => [...nds, ensureNodeIcon(newNode)]);
+      
+      // Auto-fit the view to show all nodes
+      setTimeout(() => {
+        if (flowInstance) {
+          flowInstance.fitView({ padding: 0.2 });
+        }
+      }, 100);
+      
+      toast.success(`Added automation: ${automationTitle || `Automation ${automationId}`}`);
+      
+      // If there are existing nodes, try to connect to the rightmost one
+      if (existingNodes.length > 0) {
+        const rightmostNode = existingNodes.reduce((rightmost, node) => {
+          return (node.position.x > rightmost.position.x) ? node : rightmost;
+        }, existingNodes[0]);
+        
+        const newEdge = {
+          id: `e-${rightmostNode.id}-${uniqueId}`,
+          source: rightmostNode.id,
+          target: uniqueId,
+          type: 'animated',
+          animated: true
+        };
+        
+        setEdges(eds => [...eds, newEdge]);
+      }
     }
   };
 

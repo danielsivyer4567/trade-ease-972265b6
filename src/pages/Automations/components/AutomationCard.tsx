@@ -19,13 +19,15 @@ const AutomationCard = ({ automation, toggleAutomation }: AutomationCardProps) =
   const navigate = useNavigate();
 
   const handleRunNow = () => {
+    console.log('AutomationCard: navigating to workflow with automation', automation.id, 'preserveExisting: true');
+    
     navigate('/workflow', { 
       state: { 
         addAutomation: true,
         automationId: automation.id,
         automationTitle: automation.title,
         automationDescription: automation.description,
-        preserveExisting: true
+        preserveExisting: true // Explicitly set to true to ensure it preserves existing content
       } 
     });
   };
