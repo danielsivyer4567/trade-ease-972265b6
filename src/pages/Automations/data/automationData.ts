@@ -306,5 +306,165 @@ export const automationData: Automation[] = [
     triggers: ['Job status changed to completed', 'Photos uploaded'],
     actions: ['Send email with photos', 'Update customer notification status'],
     category: 'customer'
+  },
+  {
+    id: 34,
+    title: 'Smart Inventory Replenishment',
+    description: 'Automatically reorder materials based on usage patterns and lead times',
+    isActive: true,
+    triggers: ['Inventory level < reorder point', 'Material usage rate > threshold'],
+    actions: ['Generate purchase order', 'Notify warehouse manager'],
+    category: 'inventory',
+    premium: true
+  },
+  {
+    id: 35,
+    title: 'Team Performance Analytics',
+    description: 'Track and analyze team performance metrics for continuous improvement',
+    isActive: true,
+    triggers: ['Job completed', 'Performance metrics updated'],
+    actions: ['Generate performance report', 'Schedule review meeting'],
+    category: 'team',
+    premium: true
+  },
+  {
+    id: 36,
+    title: 'Customer Anniversary Recognition',
+    description: 'Celebrate customer anniversaries with personalized messages and offers',
+    isActive: true,
+    triggers: ['Customer anniversary date', 'Account active > 1 year'],
+    actions: ['Send anniversary message', 'Generate special offer'],
+    category: 'customer'
+  },
+  {
+    id: 37,
+    title: 'Emergency Response Protocol',
+    description: 'Initiate emergency response procedures based on incident reports',
+    isActive: true,
+    triggers: ['Emergency incident reported', 'Safety protocol triggered'],
+    actions: ['Alert emergency contacts', 'Initiate evacuation if needed'],
+    category: 'compliance'
+  },
+  {
+    id: 38,
+    title: 'Smart Scheduling Optimization',
+    description: 'Optimize team schedules based on skills, availability, and job requirements',
+    isActive: true,
+    triggers: ['New job created', 'Team availability changed'],
+    actions: ['Generate optimal schedule', 'Notify affected team members'],
+    category: 'team',
+    premium: true
+  },
+  {
+    id: 39,
+    title: 'Quality Control Checklist',
+    description: 'Generate and track quality control checklists for different job types',
+    isActive: true,
+    triggers: ['Job type identified', 'Quality standards defined'],
+    actions: ['Create QC checklist', 'Assign inspection tasks'],
+    category: 'compliance'
+  },
+  {
+    id: 40,
+    title: 'Customer Feedback Analysis',
+    description: 'Analyze customer feedback to identify trends and improvement areas',
+    isActive: true,
+    triggers: ['New feedback received', 'Feedback analysis due'],
+    actions: ['Generate analysis report', 'Create improvement tasks'],
+    category: 'customer',
+    premium: true
+  },
+  {
+    id: 41,
+    title: 'Equipment Calibration Reminder',
+    description: 'Track and schedule equipment calibration to maintain accuracy',
+    isActive: true,
+    triggers: ['Calibration due date', 'Equipment usage threshold'],
+    actions: ['Schedule calibration', 'Notify equipment manager'],
+    category: 'equipment'
+  },
+  {
+    id: 42,
+    title: 'Smart Quote Generation',
+    description: 'Generate quotes based on job requirements and historical data',
+    isActive: true,
+    triggers: ['New job details received', 'Quote template selected'],
+    actions: ['Generate quote', 'Send for approval'],
+    category: 'sales',
+    premium: true
+  },
+  {
+    id: 43,
+    title: 'Team Training Scheduler',
+    description: 'Schedule and track team training requirements and certifications',
+    isActive: true,
+    triggers: ['Training requirement identified', 'Certification expiry approaching'],
+    actions: ['Schedule training session', 'Update training records'],
+    category: 'team'
+  },
+  {
+    id: 44,
+    title: 'Customer Onboarding Workflow',
+    description: 'Automate the customer onboarding process with personalized steps',
+    isActive: true,
+    triggers: ['New customer account created', 'Onboarding started'],
+    actions: ['Send welcome package', 'Schedule orientation call'],
+    category: 'customer'
+  },
+  {
+    id: 45,
+    title: 'Smart Material Allocation',
+    description: 'Optimize material allocation across multiple job sites',
+    isActive: true,
+    triggers: ['Material request received', 'Inventory levels updated'],
+    actions: ['Calculate optimal allocation', 'Update inventory records'],
+    category: 'inventory',
+    premium: true
+  },
+  {
+    id: 46,
+    title: 'Job Cost Monitoring',
+    description: 'Track and alert on job costs approaching budget limits',
+    isActive: true,
+    triggers: ['Cost threshold reached', 'Budget variance detected'],
+    actions: ['Generate cost report', 'Alert project manager'],
+    category: 'finance'
+  },
+  {
+    id: 47,
+    title: 'Team Communication Sync',
+    description: 'Sync important updates across team communication channels',
+    isActive: true,
+    triggers: ['Important update posted', 'Team notification required'],
+    actions: ['Post to all channels', 'Confirm delivery'],
+    category: 'team'
+  },
+  {
+    id: 48,
+    title: 'Customer Satisfaction Survey',
+    description: 'Send and analyze customer satisfaction surveys after service completion',
+    isActive: true,
+    triggers: ['Service completed', 'Survey due date'],
+    actions: ['Send survey', 'Track responses'],
+    category: 'customer'
+  },
+  {
+    id: 49,
+    title: 'Smart Route Optimization',
+    description: 'Optimize travel routes for field teams to minimize travel time',
+    isActive: true,
+    triggers: ['Multiple job sites assigned', 'Route planning required'],
+    actions: ['Generate optimal route', 'Update team schedule'],
+    category: 'team',
+    premium: true
+  },
+  {
+    id: 50,
+    title: 'Equipment Usage Analytics',
+    description: 'Track and analyze equipment usage patterns for maintenance planning',
+    isActive: true,
+    triggers: ['Equipment usage logged', 'Analytics update due'],
+    actions: ['Generate usage report', 'Schedule maintenance'],
+    category: 'equipment'
   }
 ];

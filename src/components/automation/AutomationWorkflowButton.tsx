@@ -8,19 +8,26 @@ interface AutomationWorkflowButtonProps {
   size?: 'default' | 'sm' | 'lg' | 'icon';
   className?: string;
   automationId?: number;
+  children?: React.ReactNode;
 }
 
 export function AutomationWorkflowButton({
   variant = 'default',
   size = 'default',
   className = '',
-  automationId
+  automationId,
+  children
 }: AutomationWorkflowButtonProps) {
   const navigate = useNavigate();
 
   const handleNavigateToAutomations = () => {
     if (automationId) {
-      navigate(`/workflow?automationId=${automationId}`);
+      navigate(`/workflow`, { 
+        state: { 
+          addAutomation: true,
+          automationId: automationId
+        } 
+      });
     } else {
       navigate('/workflow/automations');
     }
@@ -34,7 +41,7 @@ export function AutomationWorkflowButton({
       onClick={handleNavigateToAutomations}
     >
       <Zap className="h-4 w-4" />
-      Automations
+      {children || 'Automations'}
     </Button>
   );
 }
