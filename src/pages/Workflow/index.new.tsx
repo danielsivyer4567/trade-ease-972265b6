@@ -81,7 +81,51 @@ export default function WorkflowPage() {
       hasProcessedLocationState.current = true;
       console.log('Processing location state once:', location.state);
       
-      if (location.state.useTemplate && location.state.templateData) {
+      // Check if we should load template data from localStorage
+      if (location.state.useTemplate && location.state.fromLocalStorage) {
+        try {
+          const storedData = localStorage.getItem('workflow_template_data');
+          if (storedData) {
+            const templateInfo = JSON.parse(storedData);
+            console.log('Retrieved template data from localStorage:', templateInfo.templateName);
+            
+            // Apply template data
+            if (templateInfo.templateData) {
+              if (templateInfo.templateData.nodes && Array.isArray(templateInfo.templateData.nodes)) {
+                setNodes(templateInfo.templateData.nodes.map(node => ensureNodeIcon({
+                  id: node.id,
+                  type: node.type,
+                  position: node.position,
+                  data: node.data
+                })));
+              }
+              
+              if (templateInfo.templateData.edges && Array.isArray(templateInfo.templateData.edges)) {
+                setEdges(templateInfo.templateData.edges.map(edge => ({
+                  id: edge.id,
+                  source: edge.source,
+                  target: edge.target,
+                  type: 'animated',
+                  animated: true
+                })));
+              }
+            }
+            
+            // Store template data for use after flow instance is initialized
+            pendingTemplateData.current = {
+              templateName: templateInfo.templateName,
+              templateData: templateInfo.templateData
+            };
+            
+            // Clean up localStorage after use to prevent stale data
+            localStorage.removeItem('workflow_template_data');
+          }
+        } catch (error) {
+          console.error('Error loading template data from localStorage:', error);
+          toast.error('Failed to load template data');
+        }
+      } else if (location.state.useTemplate && location.state.templateData) {
+        // Original behavior for direct template data in state
         // Check if we should preserve existing content
         if (location.state.preserveExisting) {
           console.log('Preserving existing content while applying template');
