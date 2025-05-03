@@ -386,6 +386,7 @@ export const WorkflowService = {
       const templateData = { ...template.data };
       
       console.log("Template data before darkMode application:", JSON.stringify(templateData, null, 2));
+      console.log("Creating workflow template with darkMode =", darkMode);
       
       if (templateData.nodes && Array.isArray(templateData.nodes)) {
         console.log(`Found ${templateData.nodes.length} nodes to apply darkMode=${darkMode} to`);
@@ -408,7 +409,13 @@ export const WorkflowService = {
         });
       }
       
-      console.log("Template data after darkMode application:", JSON.stringify(templateData, null, 2));
+      console.log("Template data after darkMode application:", 
+        templateData.nodes.map(n => ({ 
+          id: n.id, 
+          type: n.type, 
+          darkMode: n.data.workflowDarkMode 
+        }))
+      );
 
       // Create new workflow from template with darkMode applied
       const { data: workflow, error: workflowError } = await supabase
@@ -416,7 +423,10 @@ export const WorkflowService = {
         .insert({
           name: template.name,
           description: template.description,
-          data: templateData,
+          data: {
+            ...templateData,
+            workflowDarkMode: darkMode  // Set at the root level too
+          },
           template_id: templateId
         })
         .select()
@@ -424,7 +434,12 @@ export const WorkflowService = {
 
       if (workflowError) throw workflowError;
 
-      logger.info(`Created workflow from template: ${templateId}`);
+      // Apply darkMode to returned workflow data for immediate use
+      if (workflow && workflow.data) {
+        workflow.data.workflowDarkMode = darkMode;
+      }
+
+      logger.info(`Created workflow from template: ${templateId} with darkMode=${darkMode}`);
       return { success: true, workflow };
     } catch (error) {
       logger.error('Failed to create workflow from template:', error);

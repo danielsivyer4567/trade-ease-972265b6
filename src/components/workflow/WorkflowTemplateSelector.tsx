@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -16,10 +16,62 @@ interface WorkflowTemplateSelectorProps {
 }
 
 export function WorkflowTemplateSelector({ onSelect, templates, workflowDarkMode = false }: WorkflowTemplateSelectorProps) {
+  // Debug logging to track dark mode state
+  useEffect(() => {
+    console.log("WorkflowTemplateSelector rendered with darkMode:", workflowDarkMode);
+  }, [workflowDarkMode]);
+
+  // Pre-process templates to ensure they have workflowDarkMode flag
+  const templatesWithDarkMode = templates.map(template => {
+    // Deep clone the template to avoid mutations
+    const processedTemplate = { ...template };
+    
+    // Ensure nodes have workflowDarkMode property
+    if (processedTemplate.data?.nodes?.length > 0) {
+      processedTemplate.data = { 
+        ...processedTemplate.data,
+        nodes: processedTemplate.data.nodes.map(node => ({
+          ...node,
+          data: {
+            ...node.data,
+            workflowDarkMode
+          }
+        }))
+      };
+    }
+    
+    return processedTemplate;
+  });
+
+  const handleTemplateSelect = (template: WorkflowTemplate) => {
+    // Manually add workflowDarkMode to template data before passing it up
+    const templateWithDarkMode = {
+      ...template,
+      workflowDarkMode,
+      data: {
+        ...template.data,
+        nodes: template.data.nodes.map(node => ({
+          ...node,
+          data: {
+            ...node.data,
+            workflowDarkMode
+          }
+        }))
+      }
+    };
+    
+    console.log("Selecting template with darkMode:", workflowDarkMode);
+    onSelect(templateWithDarkMode);
+  };
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-6" 
-         style={workflowDarkMode ? { background: DARK_BG } : {}}>
-      {templates.map((template) => (
+         style={workflowDarkMode ? { 
+           background: DARK_BG,
+           minHeight: '100%',
+           width: '100%'
+         } : {}}>
+      {templatesWithDarkMode.map((template) => (
         <Card 
           key={template.id} 
           className="overflow-hidden hover:shadow-md transition-shadow border-l-4" 
@@ -64,7 +116,7 @@ export function WorkflowTemplateSelector({ onSelect, templates, workflowDarkMode
               <div>Connections: {template.data.edges.length}</div>
             </div>
             <Button 
-              onClick={() => onSelect(template)} 
+              onClick={() => handleTemplateSelect(template)} 
               className="w-full mt-4"
               style={workflowDarkMode ? { 
                 backgroundColor: DARK_GOLD, 
