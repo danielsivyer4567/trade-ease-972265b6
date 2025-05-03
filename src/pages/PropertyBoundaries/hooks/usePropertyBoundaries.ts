@@ -2,6 +2,12 @@ import { useState, useCallback, useEffect, useTransition } from 'react';
 import { Property } from '../types';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
+import { 
+  getPropertyBoundariesByAddress, 
+  getPropertyBoundariesByComponents,
+  savePropertyBoundary 
+} from '../services/propertyBoundaryService';
+import { searchAddress } from '../services/geocodeService';
 
 // Sample mock properties for initial UI rendering when no data is available
 const mockProperties: Property[] = [
@@ -47,6 +53,9 @@ export const usePropertyBoundaries = () => {
   const [isMeasuring, setIsMeasuring] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isPending, startTransition] = useTransition();
+  const [addressSearchQuery, setAddressSearchQuery] = useState('');
+  const [isSearching, setIsSearching] = useState(false);
+  const [searchResults, setSearchResults] = useState<any[]>([]);
   
   // Fetch properties from Supabase on component mount
   useEffect(() => {
@@ -428,6 +437,243 @@ export const usePropertyBoundaries = () => {
     }
   }, [selectedProperty, properties]);
   
+  /**
+   * Search for a property by address
+   */
+  const handleAddressSearch = useCallback(async (address: string) => {
+    if (!address.trim()) {
+      toast.error('Please enter an address to search');
+      return;
+    }
+    
+    setIsSearching(true);
+    setSearchResults([]);
+    
+    try {
+      // First, geocode the address to find its location
+      const geocodeResult = await searchAddress(address);
+      
+      if (geocodeResult.error) {
+        toast.error(`Geocoding error: ${geocodeResult.error}`);
+        return;
+      }
+      
+      if (!geocodeResult.data || !geocodeResult.data.candidates || geocodeResult.data.candidates.length === 0) {
+        toast.error('No addresses found. Please try a different search.');
+        return;
+      }
+      
+      // We found some addresses, now get property boundaries for each one
+      const candidates = geocodeResult.data.candidates;
+      
+      // Get property boundaries for the top result
+      const topCandidate = candidates[0];
+      const { data: boundaryData, error: boundaryError } = await getPropertyBoundariesByAddress(topCandidate.address);
+      
+      if (boundaryError) {
+        toast.error(`Error fetching property boundaries: ${boundaryError}`);
+        return;
+      }
+      
+      if (!boundaryData) {
+        toast.error('No property boundaries found for this address.');
+        return;
+      }
+      
+      // If we have multiple properties, show them all
+      if (Array.isArray(boundaryData)) {
+        setSearchResults(boundaryData);
+        toast.success(`Found ${boundaryData.length} properties`);
+      } else {
+        // If we have a single property, add it to results
+        setSearchResults([boundaryData]);
+        toast.success('Found property boundaries');
+      }
+    } catch (error) {
+      console.error('Error in address search:', error);
+      toast.error('An error occurred during the search');
+    } finally {
+      setIsSearching(false);
+    }
+  }, []);
+  
+  /**
+   * Search for a property by address components
+   */
+  const handleAddressComponentSearch = useCallback(async (
+    houseNumber: string,
+    streetName: string,
+    suburb?: string,
+    postcode?: string
+  ) => {
+    setIsSearching(true);
+    setSearchResults([]);
+    
+    try {
+      const { data, error } = await getPropertyBoundariesByComponents(
+        houseNumber,
+        streetName,
+        suburb,
+        postcode
+      );
+      
+      if (error) {
+        toast.error(`Error: ${error}`);
+        return;
+      }
+      
+      if (!data) {
+        toast.error('No property boundaries found for these address details.');
+        return;
+      }
+      
+      // Handle results
+      if (Array.isArray(data)) {
+        setSearchResults(data);
+        toast.success(`Found ${data.length} properties`);
+      } else {
+        setSearchResults([data]);
+        toast.success('Found property boundaries');
+      }
+    } catch (error) {
+      console.error('Error in component search:', error);
+      toast.error('An error occurred during the search');
+    } finally {
+      setIsSearching(false);
+    }
+  }, []);
+  
+  /**
+   * Convert property boundary search result to Property type
+   */
+  const createPropertyFromBoundary = useCallback((boundaryData: any, name: string = ''): Property => {
+    // Check if the boundary data is properly structured
+    console.log('Creating property from boundary data:', boundaryData);
+    
+    // Extract coordinates for the property boundary
+    let boundaries: Array<Array<[number, number]>> = [];
+    
+    if (boundaryData.boundary && boundaryData.boundary.coordinates) {
+      boundaries = boundaryData.boundary.coordinates;
+    } else if (boundaryData.geometry && boundaryData.geometry.rings) {
+      // Direct geometry from ArcGIS
+      boundaries = boundaryData.geometry.rings;
+    } else {
+      // Create a fallback boundary if none exists
+      console.warn('No boundary coordinates found, creating fallback');
+      const centerX = boundaryData.location ? boundaryData.location.x : 152.9814;
+      const centerY = boundaryData.location ? boundaryData.location.y : -27.4698;
+      const size = 0.0004;
+      boundaries = [
+        [
+          [centerX - size, centerY - size],
+          [centerX + size, centerY - size],
+          [centerX + size, centerY + size],
+          [centerX - size, centerY + size],
+          [centerX - size, centerY - size]
+        ]
+      ];
+    }
+    
+    // Use the boundary data location or calculate centroid if not available
+    let location: [number, number] = [0, 0];
+    
+    if (boundaryData.location) {
+      location = Array.isArray(boundaryData.location) 
+        ? boundaryData.location 
+        : [boundaryData.location.x, boundaryData.location.y];
+    } else if (boundaries.length > 0 && boundaries[0].length > 0) {
+      // Calculate centroid from the first ring
+      const ring = boundaries[0];
+      const sumX = ring.reduce((sum: number, point: number[]) => sum + point[0], 0);
+      const sumY = ring.reduce((sum: number, point: number[]) => sum + point[1], 0);
+      location = [sumX / ring.length, sumY / ring.length];
+    }
+    
+    // Extract address from the boundary data
+    let address = '';
+    if (boundaryData.address) {
+      address = boundaryData.address;
+    } else if (boundaryData.properties && boundaryData.properties.Match_addr) {
+      address = boundaryData.properties.Match_addr;
+    } else if (boundaryData.attributes) {
+      // Construct from ArcGIS attributes
+      const attrs = boundaryData.attributes;
+      if (attrs.HOUSE_NUMBER) {
+        address += attrs.HOUSE_NUMBER;
+        if (attrs.HOUSE_NUMBER_SUFFIX) address += attrs.HOUSE_NUMBER_SUFFIX;
+        address += ' ';
+      }
+      if (attrs.CORRIDOR_NAME) {
+        address += attrs.CORRIDOR_NAME;
+        if (attrs.CORRIDOR_SUFFIX_CODE) address += ' ' + attrs.CORRIDOR_SUFFIX_CODE;
+        address += ', ';
+      }
+      if (attrs.SUBURB) address += attrs.SUBURB;
+      if (attrs.POSTCODE) address += ' ' + attrs.POSTCODE;
+    }
+    
+    // Generate a unique ID for the property
+    const id = `tmp_${Date.now().toString(36)}_${Math.random().toString(36).substr(2, 5)}`;
+    
+    return {
+      id,
+      name: name || address || 'New Property',
+      description: 'Property from address search',
+      location: location,
+      boundaries: boundaries,
+      address: address || ''
+    };
+  }, []);
+  
+  /**
+   * Add a property from search results to the properties list
+   */
+  const handleAddPropertyFromSearch = useCallback((boundaryData: any, name?: string) => {
+    try {
+      console.log('Adding property from search result:', boundaryData);
+      
+      const newProperty = createPropertyFromBoundary(boundaryData, name);
+      console.log('Created new property:', newProperty);
+      
+      // Add the property to the list
+      startTransition(() => {
+        setProperties(prev => [...prev, newProperty]);
+        setSelectedProperty(newProperty);
+      });
+      
+      toast.success('Property added');
+      
+      // Try to save to database if user is logged in
+      savePropertyBoundary(newProperty)
+        .then(({ data, error }) => {
+          if (error) {
+            console.error('Error saving property:', error);
+            toast.error('Property added locally only - could not save to database');
+          } else if (data) {
+            toast.success('Property saved to database');
+            // Update the temporary ID with the database ID
+            startTransition(() => {
+              setProperties(prev => 
+                prev.map(p => p.id === newProperty.id ? { ...p, id: data[0].id } : p)
+              );
+              
+              if (selectedProperty?.id === newProperty.id) {
+                setSelectedProperty(prev => prev ? { ...prev, id: data[0].id } : null);
+              }
+            });
+          }
+        })
+        .catch(err => {
+          console.error('Exception during save:', err);
+          toast.error('Error saving property to database');
+        });
+    } catch (error) {
+      console.error('Error adding property:', error);
+      toast.error('Failed to add property: ' + (error instanceof Error ? error.message : 'Unknown error'));
+    }
+  }, [properties, selectedProperty, startTransition, createPropertyFromBoundary]);
+  
   return {
     properties,
     selectedProperty,
@@ -442,6 +688,13 @@ export const usePropertyBoundaries = () => {
     handleSearchChange,
     handleToggleMeasurement,
     savePropertyToSupabase,
-    handleDeleteProperty
+    handleDeleteProperty,
+    addressSearchQuery,
+    isSearching,
+    searchResults,
+    handleAddressSearch,
+    handleAddressComponentSearch,
+    handleAddPropertyFromSearch,
+    setAddressSearchQuery
   };
 };

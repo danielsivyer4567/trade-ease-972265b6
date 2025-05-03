@@ -1,8 +1,9 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import CustomPropertyMap from '@/components/property-map/CustomPropertyMap';
+import { AerialPropertyMap } from './AerialPropertyMap';
 import { Property } from '../types';
 import { formatCoordinate } from '../utils/formatters';
 
@@ -57,23 +58,35 @@ export const PropertyInfo: React.FC<PropertyInfoProps> = ({
       <CardHeader>
         <CardTitle>{property.name}</CardTitle>
         <p className="text-sm text-muted-foreground">{property.address}</p>
+        {property.location && (
+          <p className="text-xs text-muted-foreground mt-1">
+            Location: {formatCoordinate(property.location[0])}, {formatCoordinate(property.location[1])}
+          </p>
+        )}
       </CardHeader>
       <CardContent className="p-0">
-        {property.location && (
-          <div className="mb-4 px-6">
-            <p className="text-sm text-muted-foreground">
-              <span className="font-medium">Location:</span> {formatCoordinate(property.location[0])}, {formatCoordinate(property.location[1])}
-            </p>
+        <Tabs defaultValue="aerial" className="w-full">
+          <div className="px-6 border-b">
+            <TabsList className="mb-2">
+              <TabsTrigger value="aerial">Aerial Map</TabsTrigger>
+              <TabsTrigger value="boundary">Boundary Map</TabsTrigger>
+            </TabsList>
           </div>
-        )}
-        
-        <CustomPropertyMap 
-          boundaries={processedBoundaries}
-          title={property.name}
-          description={property.description || property.address || "Property boundary view"}
-          centerPoint={property.location || [0, 0]}
-          measureMode={isMeasuring}
-        />
+
+          <TabsContent value="aerial" className="mt-0">
+            <AerialPropertyMap property={property} isLoading={isLoading} />
+          </TabsContent>
+          
+          <TabsContent value="boundary" className="mt-0">
+            <CustomPropertyMap 
+              boundaries={processedBoundaries}
+              title={property.name}
+              description={property.description || property.address || "Property boundary view"}
+              centerPoint={property.location || [0, 0]}
+              measureMode={isMeasuring}
+            />
+          </TabsContent>
+        </Tabs>
       </CardContent>
     </Card>
   );

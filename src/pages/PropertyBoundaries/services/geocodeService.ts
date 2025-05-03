@@ -1,5 +1,11 @@
-
 import { supabase } from '@/integrations/supabase/client';
+import { mockSearchAddress } from './mockArcGIS';
+import { directGeocode } from './directArcGISService';
+import { getArcGISToken } from '../utils/arcgisToken';
+
+// Environment detection - helps determine if we should use mock data
+const isDevelopment = process.env.NODE_ENV === 'development';
+const hasDirectToken = !!getArcGISToken();
 
 /**
  * Search for an address using ArcGIS Geocoding API
@@ -11,6 +17,12 @@ export const searchAddress = async (searchQuery: string) => {
     if (!searchQuery.trim()) {
       return { data: null, error: 'Search query is required' };
     }
+    
+    // If we have a direct token in the browser, use it instead of Edge Function
+    if (isDevelopment && hasDirectToken) {
+      console.log('Using direct ArcGIS API with token for geocoding...');
+      return await directGeocode(searchQuery);
+    }
 
     // Call our Supabase Edge Function
     const { data, error } = await supabase.functions.invoke('arcgis-geocode', {
@@ -19,12 +31,26 @@ export const searchAddress = async (searchQuery: string) => {
 
     if (error) {
       console.error('Error searching address:', error);
+      
+      // If we're in development, fall back to mock data
+      if (isDevelopment) {
+        console.log('Using mock data for geocoding in development...');
+        return mockSearchAddress(searchQuery);
+      }
+      
       return { data: null, error: error.message };
     }
 
     return { data, error: null };
   } catch (error) {
     console.error('Error in geocode service:', error);
+    
+    // If we're in development, fall back to mock data
+    if (isDevelopment) {
+      console.log('Using mock data for geocoding in development after error...');
+      return mockSearchAddress(searchQuery);
+    }
+    
     return { 
       data: null, 
       error: error instanceof Error ? error.message : 'Unknown error occurred' 
@@ -50,12 +76,32 @@ export const getPropertyBoundaries = async (location: [number, number]) => {
 
     if (error) {
       console.error('Error getting property boundaries:', error);
+      
+      // If we're in development, fall back to mock data
+      if (isDevelopment) {
+        console.log('Using mock data for boundaries in development...');
+        // Mock data will be based on coordinates
+        const mockAddress = `${location[1]}, ${location[0]}`; // Not a real address, just using coords
+        const { data: mockData } = await mockSearchAddress(mockAddress);
+        return { data: { features: mockData.candidates }, error: null };
+      }
+      
       return { data: null, error: error.message };
     }
 
     return { data, error: null };
   } catch (error) {
     console.error('Error in boundaries service:', error);
+    
+    // If we're in development, fall back to mock data
+    if (isDevelopment) {
+      console.log('Using mock data for boundaries in development after error...');
+      // Mock data will be based on coordinates
+      const mockAddress = `${location[1]}, ${location[0]}`; // Not a real address, just using coords
+      const { data: mockData } = await mockSearchAddress(mockAddress);
+      return { data: { features: mockData.candidates }, error: null };
+    }
+    
     return { 
       data: null, 
       error: error instanceof Error ? error.message : 'Unknown error occurred' 
