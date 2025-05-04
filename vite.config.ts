@@ -12,7 +12,8 @@ export default defineConfig({
     hmr: {
       host: 'localhost',
       protocol: 'ws',
-      overlay: false
+      overlay: false,
+      timeout: 5000
     },
     watch: {
       usePolling: true,
@@ -40,6 +41,7 @@ export default defineConfig({
       '@radix-ui/react-popover',
       '@radix-ui/react-slot',
     ],
+    force: true // Force optimization of dependencies
   },
   build: {
     target: 'es2020',
@@ -58,8 +60,17 @@ export default defineConfig({
             '@radix-ui/react-slot',
           ],
         },
+        // Improve module loading stability
+        compact: true,
+        sanitizeFileName: true
       },
     },
+  },
+  // Add specific configuration to handle React Refresh
+  define: {
+    // Add these to prevent "is not defined" errors in dev mode
+    'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'development'),
+    '__REACT_REFRESH_RUNTIME__': JSON.stringify(true)
   },
   experimental: {
     renderBuiltUrl(filename: string) {
