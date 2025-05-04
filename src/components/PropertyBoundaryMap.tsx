@@ -12,6 +12,13 @@ interface PropertyBoundaryMapProps {
   description?: string;
 }
 
+// Map view state type
+interface MapViewState {
+  zoom: number;
+  tilt: number;
+  center: google.maps.LatLngLiteral;
+}
+
 const PropertyBoundaryMap = ({ 
   center, 
   boundaries = [], 
@@ -27,9 +34,12 @@ const PropertyBoundaryMap = ({
   const [drawingMode, setDrawingMode] = useState<boolean>(false);
   const [measurementPath, setMeasurementPath] = useState<Array<{lat: number, lng: number}>>([]);
   const [measurementDistance, setMeasurementDistance] = useState<number>(0);
+  const [mapViewState, setMapViewState] = useState<MapViewState | null>(null);
   const polygonRefs = useRef<Array<google.maps.Polygon>>([]);
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const listenerRef = useRef<google.maps.MapsEventListener | null>(null);
+  const viewChangeListenerRef = useRef<google.maps.MapsEventListener | null>(null);
+  const isUserInteracting = useRef<boolean>(false);
 
   const mapContainerStyle = {
     width: '100%',
@@ -48,6 +58,48 @@ const PropertyBoundaryMap = ({
       }
     }
   }, []);
+
+  // Track map view changes, but only when map becomes idle after user interaction
+  useEffect(() => {
+    if (!mapInstance) return;
+    
+    // Set up user interaction detection
+    const dragStartListener = mapInstance.addListener('dragstart', () => {
+      isUserInteracting.current = true;
+    });
+    
+    const zoomChangedListener = mapInstance.addListener('zoom_changed', () => {
+      isUserInteracting.current = true;
+    });
+    
+    // Add listener to track map view state changes only when map becomes idle after user interaction
+    viewChangeListenerRef.current = mapInstance.addListener('idle', () => {
+      if (!mapInstance) return;
+      
+      // Only update the state if this was triggered by a user interaction
+      if (isUserInteracting.current) {
+        setMapViewState({
+          zoom: mapInstance.getZoom() || 15,
+          tilt: mapInstance.getTilt() || 0,
+          center: {
+            lat: mapInstance.getCenter()?.lat() || center[1],
+            lng: mapInstance.getCenter()?.lng() || center[0]
+          }
+        });
+        
+        // Reset the interaction flag
+        isUserInteracting.current = false;
+      }
+    });
+    
+    return () => {
+      if (viewChangeListenerRef.current) {
+        google.maps.event.removeListener(viewChangeListenerRef.current);
+      }
+      google.maps.event.removeListener(dragStartListener);
+      google.maps.event.removeListener(zoomChangedListener);
+    };
+  }, [mapInstance, center]);
 
   // Handle cleanup of map click listener
   useEffect(() => {
@@ -179,7 +231,7 @@ const PropertyBoundaryMap = ({
         toast.success(`Measured distance: ${formatDistance(measurementDistance)}`);
       }
     } else {
-      // If turning on drawing mode, reset previous measurements
+      // If turning on drawing mode, reset previous measurements but preserve view state
       setMeasurementPath([]);
       setMeasurementDistance(0);
     }
@@ -280,7 +332,7 @@ const PropertyBoundaryMap = ({
 
   return (
     <Card className="w-full">
-      <CardHeader>
+      <CardHeader className="pb-0">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-2">
           <div>
             <CardTitle className="flex items-center gap-2">
@@ -303,29 +355,6 @@ const PropertyBoundaryMap = ({
             </Button>
             
             <Button 
-              variant={drawingMode ? "secondary" : "outline"}
-              size="sm"
-              onClick={toggleDrawingMode}
-              disabled={!isMapLoaded}
-              className="flex items-center gap-1"
-            >
-              <Pencil className="h-4 w-4" />
-              <span>{drawingMode ? "Stop Measuring" : "Measure Distance"}</span>
-            </Button>
-            
-            {measurementPath.length > 0 && (
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={clearMeasurement}
-                className="flex items-center gap-1"
-              >
-                <X className="h-4 w-4" />
-                <span>Clear Measurement</span>
-              </Button>
-            )}
-            
-            <Button 
               variant="outline" 
               size="sm"
               onClick={handleCopyCoordinates}
@@ -346,8 +375,34 @@ const PropertyBoundaryMap = ({
         )}
       </CardHeader>
       
-      <CardContent>
+      <CardContent className="pt-2">
         <div ref={mapContainerRef} className="relative w-full" style={mapContainerStyle}>
+          {/* Measurement control buttons positioned on the top-left of the map */}
+          <div className="absolute top-3 left-3 z-10 flex gap-2">
+            <Button 
+              variant={drawingMode ? "secondary" : "default"}
+              size="sm"
+              onClick={toggleDrawingMode}
+              disabled={!isMapLoaded}
+              className="flex items-center gap-1 shadow-md bg-white/90 text-black hover:bg-white/100"
+            >
+              <Pencil className="h-4 w-4" />
+              <span>{drawingMode ? "Stop Measuring" : "Measure"}</span>
+            </Button>
+            
+            {measurementPath.length > 0 && (
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={clearMeasurement}
+                className="flex items-center gap-1 shadow-md bg-white/90 text-black hover:bg-white/100"
+              >
+                <X className="h-4 w-4" />
+                <span>Clear</span>
+              </Button>
+            )}
+          </div>
+          
           <LoadScript 
             googleMapsApiKey="AIzaSyAnIcvNA_ZjRUnN4aeyl-1MYpBSN-ODIvw"
             libraries={["marker", "geometry", "drawing"]}
@@ -357,11 +412,11 @@ const PropertyBoundaryMap = ({
           >
             <GoogleMap
               mapContainerStyle={mapContainerStyle}
-              center={{ lat: center[1], lng: center[0] }}
-              zoom={15}
+              center={mapViewState ? { lat: mapViewState.center.lat, lng: mapViewState.center.lng } : { lat: center[1], lng: center[0] }}
+              zoom={mapViewState?.zoom || 15}
               options={{
                 mapTypeId: 'satellite',
-                tilt: 0,
+                tilt: mapViewState?.tilt || 0,
                 streetViewControl: false,
                 mapTypeControl: true,
                 fullscreenControl: true,
