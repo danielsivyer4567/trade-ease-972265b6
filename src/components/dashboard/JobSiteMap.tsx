@@ -1,10 +1,10 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { GoogleMap, InfoWindow } from '@react-google-maps/api';
-import { MapPin, AlertCircle } from "lucide-react";
-import { WithGoogleMaps } from "../GoogleMapsProvider";
+import { GoogleMap, LoadScript, InfoWindow, LoadScriptProps, Polyline } from '@react-google-maps/api';
+import { MapPin, AlertCircle, Pencil, X, Ruler } from "lucide-react";
+import { toast } from "sonner";
 
 // Define types for locations and map properties
 type Location = {
@@ -23,6 +23,11 @@ const JobSiteMap = () => {
     lng: number;
   } | null>(null);
   const [mapError, setMapError] = useState<string | null>(null);
+  const [mapInstance, setMapInstance] = useState<google.maps.Map | null>(null);
+  const [drawingMode, setDrawingMode] = useState<boolean>(false);
+  const [measurementPath, setMeasurementPath] = useState<Array<{lat: number, lng: number}>>([]);
+  const [measurementDistance, setMeasurementDistance] = useState<number>(0);
+  const listenerRef = useRef<google.maps.MapsEventListener | null>(null);
 
   // Gold Coast coordinates
   const center = {
@@ -75,98 +80,286 @@ const JobSiteMap = () => {
     jobNumber: "HQ-001"
   }];
 
-  const handleMapError = (error: Error) => {
-    console.error("Error with Google Maps:", error);
-    setMapError(error.message);
+  // Handle cleanup of map click listener
+  useEffect(() => {
+    return () => {
+      if (listenerRef.current) {
+        google.maps.event.removeListener(listenerRef.current);
+      }
+    };
+  }, []);
+
+  // Effect to update measurement mode
+  useEffect(() => {
+    if (!mapInstance) return;
+    
+    if (drawingMode) {
+      // Set cursor and add click listener when drawing mode is active
+      mapInstance.setOptions({ draggableCursor: 'crosshair' });
+      
+      listenerRef.current = mapInstance.addListener('click', (e: google.maps.MapMouseEvent) => {
+        if (e.latLng) {
+          const newPoint = { 
+            lat: e.latLng.lat(), 
+            lng: e.latLng.lng() 
+          };
+          
+          setMeasurementPath(prev => {
+            const newPath = [...prev, newPoint];
+            
+            // Calculate distance if we have at least 2 points
+            if (newPath.length >= 2) {
+              let totalDistance = 0;
+              
+              for (let i = 1; i < newPath.length; i++) {
+                const p1 = new google.maps.LatLng(newPath[i-1].lat, newPath[i-1].lng);
+                const p2 = new google.maps.LatLng(newPath[i].lat, newPath[i].lng);
+                
+                totalDistance += google.maps.geometry.spherical.computeDistanceBetween(p1, p2);
+              }
+              
+              setMeasurementDistance(totalDistance);
+            }
+            
+            return newPath;
+          });
+        }
+      });
+      
+      toast.info("Measurement mode active. Click on the map to add points.", {
+        duration: 3000,
+      });
+    } else {
+      // Reset cursor when drawing mode is inactive
+      mapInstance.setOptions({ draggableCursor: '' });
+      
+      // Remove click listener
+      if (listenerRef.current) {
+        google.maps.event.removeListener(listenerRef.current);
+        listenerRef.current = null;
+      }
+    }
+  }, [drawingMode, mapInstance]);
+
+  const handleLoadError = (error: Error) => {
+    console.error("Failed to load Google Maps:", error);
+    setMapError("Failed to load Google Maps. Please check your internet connection.");
+  };
+
+  const formatDistance = (meters: number): string => {
+    if (meters >= 1000) {
+      return `${(meters / 1000).toFixed(2)} km`;
+    } else {
+      return `${Math.round(meters)} m`;
+    }
+  };
+
+  const toggleDrawingMode = () => {
+    setDrawingMode(prev => !prev);
+    if (drawingMode) {
+      // If turning off drawing mode, show the measurement result
+      if (measurementDistance > 0) {
+        toast.success(`Measured distance: ${formatDistance(measurementDistance)}`);
+      }
+    } else {
+      // If turning on drawing mode, reset previous measurements
+      setMeasurementPath([]);
+      setMeasurementDistance(0);
+    }
+  };
+
+  const clearMeasurement = () => {
+    setMeasurementPath([]);
+    setMeasurementDistance(0);
+    toast.info("Measurement cleared");
+  };
+
+  // Options for the measurement line
+  const polylineOptions = {
+    strokeColor: "#FF5722",
+    strokeOpacity: 1,
+    strokeWeight: 3,
+    zIndex: 2
   };
 
   return (
-    <Card className="mb-4 overflow-hidden">
-      <div className="relative">
-        {mapError ? (
-          <div className="p-8 bg-gray-100 text-center h-96 flex flex-col items-center justify-center">
-            <AlertCircle className="h-10 w-10 text-red-500 mb-2" />
-            <h3 className="text-lg font-medium">Map Failed to Load</h3>
-            <p className="text-sm text-gray-500 max-w-md mx-auto mt-2">{mapError}</p>
+    <Card className="w-full p-4">
+      <div className="flex items-center justify-between gap-2 mb-4">
+        <h2 className="text-lg font-semibold">Job Site Map</h2>
+        <div className="flex items-center gap-2">
+          <Button 
+            variant={drawingMode ? "secondary" : "outline"}
+            size="sm"
+            onClick={toggleDrawingMode}
+            className="flex items-center gap-1"
+          >
+            <Ruler className="h-4 w-4" />
+            <span>{drawingMode ? "Stop Measuring" : "Measure Distance"}</span>
+          </Button>
+          
+          {measurementPath.length > 0 && (
             <Button 
               variant="outline" 
-              className="mt-4"
-              onClick={() => window.location.reload()}
+              size="sm"
+              onClick={clearMeasurement}
+              className="flex items-center gap-1"
             >
-              Reload Page
+              <X className="h-4 w-4" />
+              <span>Clear</span>
             </Button>
+          )}
+        </div>
+      </div>
+      
+      {/* Display measurement result */}
+      {measurementDistance > 0 && (
+        <div className="mb-4 p-2 bg-secondary/20 rounded-md text-sm">
+          <p className="font-medium">Measured distance: {formatDistance(measurementDistance)}</p>
+          {drawingMode && <p className="text-xs text-muted-foreground">Continue clicking to add more points or click "Stop Measuring" when done.</p>}
+        </div>
+      )}
+      
+      <div className="relative">
+        {mapError && (
+          <div className="absolute inset-0 flex items-center justify-center z-10 bg-white/90 rounded-lg">
+            <div className="text-center p-4 max-w-md">
+              <AlertCircle className="mx-auto h-12 w-12 text-red-500" />
+              <h3 className="mt-2 text-lg font-semibold text-gray-900">Map Error</h3>
+              <p className="mt-1 text-sm text-gray-500">{mapError}</p>
+            </div>
           </div>
-        ) : (
-          <WithGoogleMaps>
-            <GoogleMap 
-              mapContainerStyle={mapContainerStyle} 
-              center={center} 
-              zoom={13} 
-              options={mapOptions} 
-              onLoad={map => {
-                try {
-                  // Set initial tilt for Earth-like view
-                  map.setTilt(45);
+        )}
+        
+        <LoadScript 
+          googleMapsApiKey="AIzaSyAnIcvNA_ZjRUnN4aeyl-1MYpBSN-ODIvw" 
+          libraries={["marker", "geometry"]}
+          version="beta"
+          onError={handleLoadError}
+        >
+          <GoogleMap 
+            mapContainerStyle={mapContainerStyle} 
+            center={center} 
+            zoom={13} 
+            options={mapOptions} 
+            onLoad={map => {
+              try {
+                setMapInstance(map);
+                
+                // Set initial tilt for Earth-like view
+                map.setTilt(45);
 
-                  // Place markers for each location
-                  locations.forEach(location => {
-                    const markerElement = document.createElement('div');
-                    markerElement.className = 'marker';
-                    markerElement.innerHTML = `
-                      <div class="flex items-center gap-2 font-semibold text-white bg-black/50 backdrop-blur-sm px-2 py-1 rounded-lg shadow-lg border border-white/20">
-                        <img src="/lovable-uploads/34bca7f1-d63b-45a0-b1ca-a562443686ad.png" alt="Trade Ease Logo" width="20" height="20" class="object-contain" />
-                        <span>${location.jobNumber || 'N/A'}</span>
-                      </div>
-                    `;
-                    const marker = new google.maps.marker.AdvancedMarkerElement({
-                      position: {
-                        lat: location.lat,
-                        lng: location.lng
-                      },
-                      map,
-                      content: markerElement,
-                      title: location.name
-                    });
-                    marker.addListener('gmp-click', () => {
-                      setSelectedLocation({
-                        lat: location.lat,
-                        lng: location.lng
-                      });
+                // Place markers for each location
+                locations.forEach(location => {
+                  const markerElement = document.createElement('div');
+                  markerElement.className = 'marker';
+                  markerElement.innerHTML = `
+                    <div class="flex items-center gap-2 font-semibold text-white bg-black/50 backdrop-blur-sm px-2 py-1 rounded-lg shadow-lg border border-white/20">
+                      <img src="/lovable-uploads/34bca7f1-d63b-45a0-b1ca-a562443686ad.png" alt="Trade Ease Logo" width="20" height="20" class="object-contain" />
+                      <span>${location.jobNumber || 'N/A'}</span>
+                    </div>
+                  `;
+                  const marker = new google.maps.marker.AdvancedMarkerElement({
+                    position: {
+                      lat: location.lat,
+                      lng: location.lng
+                    },
+                    map,
+                    content: markerElement,
+                    title: location.name
+                  });
+                  marker.addListener('gmp-click', () => {
+                    setSelectedLocation({
+                      lat: location.lat,
+                      lng: location.lng
                     });
                   });
-                } catch (error) {
-                  handleMapError(error as Error);
-                }
-              }}
-            >
-              {selectedLocation && (
-                <InfoWindow
-                  position={selectedLocation}
-                  onCloseClick={() => setSelectedLocation(null)}
-                >
-                  <div className="p-2">
-                    <h3 className="font-bold mb-1">
-                      {locations.find(l => l.lat === selectedLocation.lat)?.name || "Location"}
-                    </h3>
-                    <p className="text-xs text-gray-600">
-                      {locations.find(l => l.lat === selectedLocation.lat)?.type || "Unknown type"}
-                    </p>
-                    <Button 
-                      className="mt-2 w-full" 
-                      variant="secondary" 
-                      size="sm"
-                      onClick={() => navigate('/jobs')}
-                    >
-                      View Details
-                    </Button>
-                  </div>
-                </InfoWindow>
-              )}
-            </GoogleMap>
-          </WithGoogleMaps>
-        )}
+                });
+              }
+              catch (error) {
+                console.error("Error loading map:", error);
+                setMapError("Failed to initialize map components.");
+              }
+            }}
+          >
+            {selectedLocation && (
+              <InfoWindow
+                position={{
+                  lat: selectedLocation.lat,
+                  lng: selectedLocation.lng
+                }}
+                onCloseClick={() => setSelectedLocation(null)}
+              >
+                <div className="p-2">
+                  <h3 className="font-bold text-gray-900">Job Site</h3>
+                  <p className="text-gray-700 text-sm">Click to view details</p>
+                </div>
+              </InfoWindow>
+            )}
+            
+            {/* Render measurement line */}
+            {measurementPath.length > 1 && (
+              <Polyline
+                path={measurementPath}
+                options={polylineOptions}
+              />
+            )}
+            
+            {/* Render measurement points */}
+            {measurementPath.map((point, index) => (
+              <Marker
+                key={`measure-point-${index}`}
+                position={point}
+                label={index === 0 ? 'Start' : index === measurementPath.length - 1 ? 'End' : `${index}`}
+              />
+            ))}
+            
+          </GoogleMap>
+        </LoadScript>
       </div>
     </Card>
+  );
+};
+
+// Standard Marker component for measurement points
+const Marker = ({ position, label }) => {
+  return (
+    <div 
+      style={{
+        position: 'absolute',
+        transform: 'translate(-50%, -50%)',
+        zIndex: 1,
+        whiteSpace: 'nowrap'
+      }}
+    >
+      <div
+        style={{
+          width: '16px',
+          height: '16px',
+          borderRadius: '50%',
+          backgroundColor: '#FF5722',
+          border: '2px solid white',
+          boxShadow: '0 2px 4px rgba(0,0,0,0.3)'
+        }}
+      />
+      {label && (
+        <div
+          style={{
+            backgroundColor: 'rgba(0,0,0,0.6)',
+            color: 'white',
+            padding: '2px 6px',
+            borderRadius: '4px',
+            fontSize: '12px',
+            position: 'absolute',
+            top: '-24px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            whiteSpace: 'nowrap'
+          }}
+        >
+          {label}
+        </div>
+      )}
+    </div>
   );
 };
 
