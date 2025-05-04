@@ -1,4 +1,3 @@
-
 import { Coordinate, PropertyBoundary, BoundaryEdge } from './types';
 
 export const convertBoundariesToPropertyBoundaries = (
@@ -7,11 +6,37 @@ export const convertBoundariesToPropertyBoundaries = (
   if (!boundaries || !Array.isArray(boundaries)) return [];
   
   return boundaries.map((boundary, index) => {
+    if (!Array.isArray(boundary)) {
+      console.error('Invalid boundary format:', boundary);
+      return {
+        name: `Boundary ${index + 1}`,
+        points: []
+      };
+    }
+    
+    // Map and validate each point
+    const points = boundary.map(point => {
+      if (!Array.isArray(point) || point.length !== 2) {
+        console.error('Invalid boundary point format:', point);
+        return null;
+      }
+      
+      const x = typeof point[0] === 'number' ? point[0] : parseFloat(String(point[0]));
+      const y = typeof point[1] === 'number' ? point[1] : parseFloat(String(point[1]));
+      
+      if (isNaN(x) || isNaN(y)) {
+        console.error('NaN values in boundary point:', point);
+        return null;
+      }
+      
+      return { x, y };
+    }).filter(Boolean) as Coordinate[]; // Filter out null points
+    
     return {
       name: `Boundary ${index + 1}`,
-      points: boundary.map(([x, y]) => ({ x, y }))
+      points
     };
-  });
+  }).filter(boundary => boundary.points.length >= 3); // Require at least 3 points to form a polygon
 };
 
 export const calculateDistance = (point1: Coordinate, point2: Coordinate): number => {

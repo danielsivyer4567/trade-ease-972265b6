@@ -10,6 +10,7 @@ import { NotificationProvider } from './components/notifications/NotificationCon
 import { TabsProvider } from './contexts/TabsContext';
 import { WorkflowDarkModeProvider } from './contexts/WorkflowDarkModeContext';
 import { GoogleMapsProvider } from './components/GoogleMapsProvider';
+import { LeafletProvider } from './components/LeafletProvider';
 import { initializeTables } from './integrations/supabase/dbInit';
 import { ErrorBoundary } from 'react-error-boundary';
 import './App.css';
@@ -74,11 +75,13 @@ function App() {
         <AuthProvider>
           <NotificationProvider>
             <GoogleMapsProvider>
-              <AppWithTabsProvider>
-                <Suspense fallback={<LoadingFallback />}>
-                  <RouterProvider router={router} />
-                </Suspense>
-              </AppWithTabsProvider>
+              <LeafletProvider>
+                <AppWithTabsProvider>
+                  <Suspense fallback={<LoadingFallback />}>
+                    <RouterProvider router={router} />
+                  </Suspense>
+                </AppWithTabsProvider>
+              </LeafletProvider>
             </GoogleMapsProvider>
           </NotificationProvider>
         </AuthProvider>

@@ -237,7 +237,6 @@ const routeObjects: RouteObject[] = [
 // Create the browser router instance
 export const router = createBrowserRouter(routeObjects, {
   future: {
-    v7_relativeSplatPath: true,
-    v7_startTransition: true
+    v7_relativeSplatPath: true
   }
 });
