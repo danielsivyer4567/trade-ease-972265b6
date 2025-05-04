@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { Property } from '../types';
-import { MapContainer, TileLayer, Polygon, Marker, Popup } from 'react-leaflet';
-import { Button } from '@/components/ui/button';
+import { TileLayer, Polygon, Marker, Popup } from 'react-leaflet';
 import { Card, CardContent } from '@/components/ui/card';
 import { Loader2 } from 'lucide-react';
-import { LeafletProvider } from '@/components/LeafletProvider';
+import { LeafletProvider, MapWrapper } from '@/components/LeafletProvider';
 import { getArcGISToken } from '../utils/arcgisToken';
 
 interface AerialPropertyMapProps {
@@ -129,67 +128,82 @@ export const AerialPropertyMap: React.FC<AerialPropertyMapProps> = ({ property, 
   const areaInSquareMeters = hasBoundaries ? calculateArea(processedBoundaries[0]) : 0;
   const formattedArea = formatArea(areaInSquareMeters);
   
+  // Simple component to render map content only when Leaflet is loaded
+  const MapContent = () => {
+    // Only when window is defined and not in SSR
+    if (typeof window === 'undefined') return null;
+    
+    return (
+      <>
+        {/* Base map layer - ArcGIS or OpenStreetMap */}
+        {hasToken ? (
+          <TileLayer
+            url="https://services.arcgisonline.com/arcgis/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+            attribution="Esri, Maxar, GeoEye, Earthstar Geographics, CNES/Airbus DS"
+          />
+        ) : (
+          <TileLayer
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          />
+        )}
+        
+        {/* Add marker at the property location */}
+        <Marker position={center}>
+          <Popup>{property.name || property.address || 'Property Location'}</Popup>
+        </Marker>
+        
+        {/* Add polygons for each boundary */}
+        {hasBoundaries && processedBoundaries.map((boundary, index) => {
+          if (!boundary) return null;
+          return (
+            <Polygon
+              key={`boundary-${index}`}
+              positions={boundary}
+              pathOptions={{
+                fillColor: 'rgba(75, 85, 199, 0.3)',
+                weight: 3,
+                opacity: 1,
+                color: '#4B55C7',
+                fillOpacity: 0.5
+              }}
+            />
+          );
+        })}
+      </>
+    );
+  };
+  
   return (
-    <LeafletProvider>
-      <div className="w-full h-[400px] relative">
-        <MapContainer
-          className="w-full h-full"
-          center={center}
-          zoom={15}
-          scrollWheelZoom
-          whenReady={() => setMapLoaded(true)}
-        >
-          {/* Base map layer - ArcGIS or OpenStreetMap */}
-          {hasToken ? (
-            <TileLayer
-              url="https://services.arcgisonline.com/arcgis/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
-              attribution="Esri, Maxar, GeoEye, Earthstar Geographics, CNES/Airbus DS"
-            />
-          ) : (
-            <TileLayer
-              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-            />
+    <Card className="w-full">
+      <CardContent className="p-0 overflow-hidden">
+        <div style={{ height: '400px', width: '100%', position: 'relative' }}>
+          <LeafletProvider>
+            <MapWrapper
+              center={center}
+              zoom={15}
+              style={{ height: '100%', width: '100%' }}
+              onMapReady={() => setMapLoaded(true)}
+            >
+              <MapContent />
+            </MapWrapper>
+          </LeafletProvider>
+          
+          {!mapLoaded && (
+            <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-80 z-20">
+              <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+            </div>
           )}
           
-          {/* Add marker at the property location */}
-          <Marker position={center}>
-            <Popup>{property.name || property.address || 'Property Location'}</Popup>
-          </Marker>
-          
-          {/* Add polygons for each boundary */}
-          {hasBoundaries && processedBoundaries.map((boundary, index) => {
-            if (!boundary) return null;
-            return (
-              <Polygon
-                key={`boundary-${index}`}
-                positions={boundary}
-                pathOptions={{
-                  fillColor: 'rgba(75, 85, 199, 0.3)',
-                  weight: 3,
-                  opacity: 1,
-                  color: '#4B55C7',
-                  fillOpacity: 0.5
-                }}
-              />
-            );
-          })}
-        </MapContainer>
-        
-        {!mapLoaded && (
-          <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-80 z-20">
-            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-          </div>
-        )}
-        
-        {mapLoaded && processedBoundaries.length === 0 && (
-          <div className="absolute bottom-4 left-0 right-0 mx-auto w-max bg-white px-4 py-2 rounded-md shadow-md z-20">
-            <p className="text-sm text-muted-foreground">
-              No valid boundaries available for this property
-            </p>
-          </div>
-        )}
-      </div>
-    </LeafletProvider>
+          {mapLoaded && processedBoundaries.length === 0 && (
+            <div className="absolute bottom-4 left-0 right-0 mx-auto w-max bg-white px-4 py-2 rounded-md shadow-md z-20">
+              <p className="text-sm text-muted-foreground">
+                No valid boundaries available for this property
+              </p>
+            </div>
+          )}
+        </div>
+      </CardContent>
+    </Card>
   );
 }; 
