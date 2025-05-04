@@ -2,6 +2,7 @@ import React, { Suspense } from 'react';
 import { Route } from 'react-router-dom';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { LoadingFallback } from './loading-fallback';
+import ErrorBoundary from '@/components/ErrorBoundary';
 
 // Import pages
 const JobsPage = React.lazy(() => import('@/pages/Jobs'));
@@ -36,9 +37,11 @@ export const jobRoutes = (
         </Suspense>
       } />
       <Route path="/property-boundaries" element={
-        <Suspense fallback={<LoadingFallback />}>
-          <PropertyBoundariesPage />
-        </Suspense>
+        <ErrorBoundary>
+          <Suspense fallback={<LoadingFallback />}>
+            <PropertyBoundariesPage />
+          </Suspense>
+        </ErrorBoundary>
       } />
     </Route>
     

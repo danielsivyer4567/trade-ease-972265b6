@@ -9,8 +9,9 @@ import { AuthNotice } from './components/AuthNotice';
 import { AddressSearch } from './components/AddressSearch';
 import { usePropertyBoundaries } from './hooks/usePropertyBoundaries';
 import { supabase } from '@/integrations/supabase/client';
+import ErrorBoundary from '@/components/ErrorBoundary';
 
-const PropertyBoundaries: React.FC = () => {
+const PropertyBoundariesContent: React.FC = () => {
   const {
     properties,
     selectedProperty,
@@ -102,6 +103,15 @@ const PropertyBoundaries: React.FC = () => {
         </div>
       </div>
     </BaseLayout>
+  );
+};
+
+// Wrap with ErrorBoundary
+const PropertyBoundaries: React.FC = () => {
+  return (
+    <ErrorBoundary>
+      <PropertyBoundariesContent />
+    </ErrorBoundary>
   );
 };
 

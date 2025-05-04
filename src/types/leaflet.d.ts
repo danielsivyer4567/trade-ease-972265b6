@@ -1,17 +1,15 @@
-import { MapContainer, TileLayer } from 'react-leaflet';
+import L from 'leaflet';
 
-declare module 'react-leaflet' {
-  interface MapContainerProps {
-    center: [number, number];
-    zoom: number;
-    children?: React.ReactNode;
-    style?: React.CSSProperties;
-    className?: string;
-    whenReady?: () => void;
+// Simple types for the Leaflet library
+declare global {
+  interface Window {
+    L: typeof L;
   }
+}
 
-  interface TileLayerProps {
-    attribution: string;
-    url: string;
-  }
-} 
+// Add any custom extensions to Leaflet here if needed
+declare module 'leaflet' {
+  // No additional custom types needed at this time
+}
+
+export {}; 
