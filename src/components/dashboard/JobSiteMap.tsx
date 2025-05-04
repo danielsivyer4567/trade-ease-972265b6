@@ -16,6 +16,13 @@ type Location = {
   jobNumber: string;
 };
 
+// Map view state type
+interface MapViewState {
+  zoom: number;
+  tilt: number;
+  center: google.maps.LatLngLiteral;
+}
+
 const JobSiteMap = () => {
   const navigate = useNavigate();
   const [selectedLocation, setSelectedLocation] = useState<{
@@ -27,7 +34,10 @@ const JobSiteMap = () => {
   const [drawingMode, setDrawingMode] = useState<boolean>(false);
   const [measurementPath, setMeasurementPath] = useState<Array<{lat: number, lng: number}>>([]);
   const [measurementDistance, setMeasurementDistance] = useState<number>(0);
+  const [mapViewState, setMapViewState] = useState<MapViewState | null>(null);
   const listenerRef = useRef<google.maps.MapsEventListener | null>(null);
+  const viewChangeListenerRef = useRef<google.maps.MapsEventListener | null>(null);
+  const isUserInteracting = useRef<boolean>(false);
 
   // Gold Coast coordinates
   const center = {
@@ -79,6 +89,48 @@ const JobSiteMap = () => {
     type: "Office",
     jobNumber: "HQ-001"
   }];
+
+  // Track map view changes, but only when map becomes idle after user interaction
+  useEffect(() => {
+    if (!mapInstance) return;
+    
+    // Set up user interaction detection
+    const dragStartListener = mapInstance.addListener('dragstart', () => {
+      isUserInteracting.current = true;
+    });
+    
+    const zoomChangedListener = mapInstance.addListener('zoom_changed', () => {
+      isUserInteracting.current = true;
+    });
+    
+    // Add listener to track map view state changes only when map becomes idle after user interaction
+    viewChangeListenerRef.current = mapInstance.addListener('idle', () => {
+      if (!mapInstance) return;
+      
+      // Only update the state if this was triggered by a user interaction
+      if (isUserInteracting.current) {
+        setMapViewState({
+          zoom: mapInstance.getZoom() || mapOptions.zoom,
+          tilt: mapInstance.getTilt() || mapOptions.tilt,
+          center: {
+            lat: mapInstance.getCenter()?.lat() || center.lat,
+            lng: mapInstance.getCenter()?.lng() || center.lng
+          }
+        });
+        
+        // Reset the interaction flag
+        isUserInteracting.current = false;
+      }
+    });
+    
+    return () => {
+      if (viewChangeListenerRef.current) {
+        google.maps.event.removeListener(viewChangeListenerRef.current);
+      }
+      google.maps.event.removeListener(dragStartListener);
+      google.maps.event.removeListener(zoomChangedListener);
+    };
+  }, [mapInstance]);
 
   // Handle cleanup of map click listener
   useEffect(() => {
@@ -162,7 +214,7 @@ const JobSiteMap = () => {
         toast.success(`Measured distance: ${formatDistance(measurementDistance)}`);
       }
     } else {
-      // If turning on drawing mode, reset previous measurements
+      // If turning on drawing mode, reset previous measurements but preserve the view
       setMeasurementPath([]);
       setMeasurementDistance(0);
     }
@@ -183,18 +235,31 @@ const JobSiteMap = () => {
   };
 
   return (
-    <Card className="w-full p-4">
-      <div className="flex items-center justify-between gap-2 mb-4">
-        <h2 className="text-lg font-semibold">Job Site Map</h2>
-        <div className="flex items-center gap-2">
+    <Card className="w-full p-0 overflow-hidden">
+      {/* Display measurement result if needed above the map */}
+      {measurementDistance > 0 && (
+        <div className="p-2 bg-secondary/20 rounded-md text-sm m-2">
+          <p className="font-medium">Measured distance: {formatDistance(measurementDistance)}</p>
+          {drawingMode && <p className="text-xs text-muted-foreground">Continue clicking to add more points or click "Stop Measuring" when done.</p>}
+        </div>
+      )}
+      
+      <div className="relative">
+        {/* Title overlay */}
+        <div className="absolute top-3 left-3 z-10 bg-black/50 backdrop-blur-sm px-3 py-1.5 rounded-md text-white font-semibold shadow-lg">
+          <h2 className="text-lg">Job Site Map</h2>
+        </div>
+        
+        {/* Map control buttons - positioned on the left side below the title */}
+        <div className="absolute top-14 left-3 z-10 flex gap-2">
           <Button 
-            variant={drawingMode ? "secondary" : "outline"}
+            variant={drawingMode ? "secondary" : "default"}
             size="sm"
             onClick={toggleDrawingMode}
-            className="flex items-center gap-1"
+            className="flex items-center gap-1 shadow-md bg-white/90 text-black hover:bg-white/100"
           >
             <Ruler className="h-4 w-4" />
-            <span>{drawingMode ? "Stop Measuring" : "Measure Distance"}</span>
+            <span>{drawingMode ? "Stop Measuring" : "Measure"}</span>
           </Button>
           
           {measurementPath.length > 0 && (
@@ -202,24 +267,14 @@ const JobSiteMap = () => {
               variant="outline" 
               size="sm"
               onClick={clearMeasurement}
-              className="flex items-center gap-1"
+              className="flex items-center gap-1 shadow-md bg-white/90 text-black hover:bg-white/100"
             >
               <X className="h-4 w-4" />
               <span>Clear</span>
             </Button>
           )}
         </div>
-      </div>
-      
-      {/* Display measurement result */}
-      {measurementDistance > 0 && (
-        <div className="mb-4 p-2 bg-secondary/20 rounded-md text-sm">
-          <p className="font-medium">Measured distance: {formatDistance(measurementDistance)}</p>
-          {drawingMode && <p className="text-xs text-muted-foreground">Continue clicking to add more points or click "Stop Measuring" when done.</p>}
-        </div>
-      )}
-      
-      <div className="relative">
+        
         {mapError && (
           <div className="absolute inset-0 flex items-center justify-center z-10 bg-white/90 rounded-lg">
             <div className="text-center p-4 max-w-md">
@@ -238,15 +293,21 @@ const JobSiteMap = () => {
         >
           <GoogleMap 
             mapContainerStyle={mapContainerStyle} 
-            center={center} 
-            zoom={13} 
-            options={mapOptions} 
+            center={mapViewState?.center || center} 
+            zoom={mapViewState?.zoom || mapOptions.zoom} 
+            options={{
+              ...mapOptions,
+              // Use stored tilt if available to prevent resetting the view
+              tilt: mapViewState?.tilt || mapOptions.tilt
+            }}
             onLoad={map => {
               try {
                 setMapInstance(map);
                 
-                // Set initial tilt for Earth-like view
-                map.setTilt(45);
+                // Set initial tilt for Earth-like view (only on first load)
+                if (!mapViewState) {
+                  map.setTilt(45);
+                }
 
                 // Place markers for each location
                 locations.forEach(location => {
