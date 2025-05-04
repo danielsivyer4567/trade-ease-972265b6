@@ -1,4 +1,3 @@
-
 import { AppLayout } from "@/components/ui/AppLayout";
 import { Button } from "@/components/ui/button";
 import { Link, useNavigate } from "react-router-dom";
@@ -18,7 +17,7 @@ export default function Integrations() {
     <AppLayout>
       <div className="p-6 space-y-6">
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" onClick={() => navigate('/settings')} className="rounded-md border border-gray-300 px-3 py-1 bg-[#D3E4FD] hover:bg-[#B5D1F8] text-[#1E40AF] hover:text-[#1E3A8A]">
+          <Button variant="outline" size="sm" onClick={() => navigate('/settings/integrations')} className="rounded-md border border-gray-300 px-3 py-1 bg-[#D3E4FD] hover:bg-[#B5D1F8] text-[#1E40AF] hover:text-[#1E3A8A]">
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <h1 className="text-2xl font-bold">Integrations</h1>
