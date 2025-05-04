@@ -1,4 +1,3 @@
-
 import { useEffect } from 'react';
 import { RefObject } from 'react';
 import { PropertyBoundary, MapState, BoundaryEdge } from '../types';
@@ -18,6 +17,23 @@ export function useMapRendering(
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
+
+    // Add roundRect polyfill if not available
+    if (!ctx.roundRect) {
+      // @ts-ignore - Polyfill for roundRect
+      ctx.roundRect = function(x: number, y: number, width: number, height: number, radius: number) {
+        if (width < 2 * radius) radius = width / 2;
+        if (height < 2 * radius) radius = height / 2;
+        this.beginPath();
+        this.moveTo(x + radius, y);
+        this.arcTo(x + width, y, x + width, y + height, radius);
+        this.arcTo(x + width, y + height, x, y + height, radius);
+        this.arcTo(x, y + height, x, y, radius);
+        this.arcTo(x, y, x + width, y, radius);
+        this.closePath();
+        return this;
+      };
+    }
     
     // Set canvas dimensions based on container
     if (containerRef.current) {
