@@ -119,8 +119,13 @@ export const SimplePropertyMap: React.FC<{
     // Fix icons
     fixLeafletIcons();
     
+    // Validate center coordinates
+    const validCenter = center && center.length === 2 && 
+      !isNaN(Number(center[0])) && !isNaN(Number(center[1])) ?
+      [Number(center[0]), Number(center[1])] : [-27.5, 153.0];
+    
     // Create map
-    const map = L.map(mapRef.current).setView(center, zoom);
+    const map = L.map(mapRef.current).setView(validCenter, zoom);
     
     // Add OpenStreetMap tiles
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -128,28 +133,60 @@ export const SimplePropertyMap: React.FC<{
     }).addTo(map);
     
     // Add center marker
-    L.marker(center).addTo(map)
+    L.marker(validCenter).addTo(map)
       .bindPopup(title || 'Property Location')
       .openPopup();
     
     // Add boundaries if provided
-    if (boundaries && boundaries.length > 0) {
-      boundaries.forEach((boundary, index) => {
-        if (boundary && boundary.length >= 3) {
-          L.polygon(boundary, {
-            color: '#4B55C7',
-            fillColor: 'rgba(75, 85, 199, 0.3)',
-            fillOpacity: 0.5,
-            weight: 3
-          }).addTo(map);
+    const validBoundaries = boundaries.filter(boundary => 
+      Array.isArray(boundary) && boundary.length >= 3
+    );
+    
+    if (validBoundaries.length > 0) {
+      // Create an array to store valid polygons for fitBounds
+      const allPolygons = [];
+      
+      validBoundaries.forEach((boundary, index) => {
+        try {
+          // Validate all points in the boundary
+          const validPoints = boundary.filter(point => 
+            Array.isArray(point) && 
+            point.length === 2 && 
+            !isNaN(Number(point[0])) && 
+            !isNaN(Number(point[1]))
+          );
+          
+          if (validPoints.length >= 3) {
+            // Convert to numeric values
+            const normalizedPoints = validPoints.map(point => 
+              [Number(point[0]), Number(point[1])]
+            );
+            
+            // Create and add polygon
+            const polygon = L.polygon(normalizedPoints, {
+              color: '#4B55C7',
+              fillColor: 'rgba(75, 85, 199, 0.3)',
+              fillOpacity: 0.5,
+              weight: 3
+            }).addTo(map);
+            
+            allPolygons.push(polygon);
+          }
+        } catch (error) {
+          console.error('Error adding polygon boundary:', error);
         }
       });
       
-      // Fit bounds to show all boundaries
-      const allPoints = boundaries.flat();
-      if (allPoints.length > 0) {
-        const bounds = L.latLngBounds(allPoints);
-        map.fitBounds(bounds);
+      // Fit bounds to show all valid boundaries
+      if (allPolygons.length > 0) {
+        try {
+          const allPolygonBounds = L.featureGroup(allPolygons).getBounds();
+          map.fitBounds(allPolygonBounds);
+        } catch (error) {
+          console.error('Error fitting bounds:', error);
+          // If fitting bounds fails, center on marker
+          map.setView(validCenter, zoom);
+        }
       }
     }
     

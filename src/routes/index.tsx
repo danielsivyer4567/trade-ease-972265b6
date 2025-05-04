@@ -9,6 +9,7 @@ import { paymentRoutes } from './payment-routes';
 import { financialRoutes } from './financial-routes';
 import { activityRoutes } from './activity-routes';
 import { AppLayoutWithTabs } from '@/components/AppLayoutWithTabs';
+import ErrorBoundary from '@/components/ErrorBoundary';
 // Lazy load workflow pages
 const WorkflowPage = lazy(() => import('@/pages/Workflow/index.new').then(module => ({ default: module.default })));
 const WorkflowTemplates = lazy(() => import('@/pages/Workflow/templates').then(module => ({ default: module.default })));
@@ -85,7 +86,20 @@ const CalculatorsPage = lazy(() => import('@/pages/Calculators'));
 const FormsPage = lazy(() => import('@/pages/Forms'));
 const TasksPage = lazy(() => import('@/pages/Tasks'));
 const AIFeaturesPage = lazy(() => import('@/pages/AIFeatures'));
-const PropertyBoundariesPage = lazy(() => import('@/pages/PropertyBoundaries'));
+const PropertyBoundariesPage = lazy(() => 
+  import('@/pages/PropertyBoundaries').then(module => {
+    // Log import result to debug
+    console.log('PropertyBoundaries import successful');
+    return { default: module.default };
+  })
+  .catch(error => {
+    console.error('Error importing PropertyBoundaries:', error);
+    // Return a fallback component
+    return {
+      default: () => <div>Error loading Property Boundaries</div>
+    };
+  })
+);
 const NetworksPage = lazy(() => import('@/pages/Networks'));
 const CredentialsPage = lazy(() => import('@/pages/Credentials'));
 const JobCostCalculator = lazy(() => import('@/pages/Calculators/JobCostCalculator'));
@@ -219,7 +233,13 @@ const routeObjects: RouteObject[] = [
           { path: "/forms", element: <SuspenseWrapper><FormsPage /></SuspenseWrapper> },
           { path: "/tasks", element: <SuspenseWrapper><TasksPage /></SuspenseWrapper> },
           { path: "/ai-features", element: <SuspenseWrapper><AIFeaturesPage /></SuspenseWrapper> },
-          { path: "/property-boundaries", element: <SuspenseWrapper><PropertyBoundariesPage /></SuspenseWrapper> },
+          { path: "/property-boundaries", element: 
+            <ErrorBoundary>
+              <Suspense fallback={<LoadingFallback />}>
+                <PropertyBoundariesPage />
+              </Suspense>
+            </ErrorBoundary> 
+          },
           { path: "/networks", element: <SuspenseWrapper><NetworksPage /></SuspenseWrapper> },
           // Credentials route
           { path: "/credentials", element: <SuspenseWrapper><CredentialsPage /></SuspenseWrapper> },

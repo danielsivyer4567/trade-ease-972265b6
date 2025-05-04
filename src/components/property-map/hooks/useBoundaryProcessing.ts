@@ -40,14 +40,14 @@ export function useBoundaryProcessing(boundaries: Array<Array<[number, number]>>
       if (boundary.length < 3) return false; // Need at least 3 points to form a polygon
       
       // Check each point is a valid [number, number] tuple
-      return boundary.every(point => 
-        Array.isArray(point) && 
-        point.length === 2 && 
-        typeof point[0] === 'number' && 
-        typeof point[1] === 'number' &&
-        !isNaN(point[0]) && 
-        !isNaN(point[1])
-      );
+      return boundary.every(point => {
+        if (!Array.isArray(point) || point.length !== 2) return false;
+        
+        const lat = Number(point[0]);
+        const lng = Number(point[1]);
+        
+        return !isNaN(lat) && !isNaN(lng);
+      });
     });
     
     if (validBoundaries.length === 0) {
@@ -62,9 +62,14 @@ export function useBoundaryProcessing(boundaries: Array<Array<[number, number]>>
       return;
     }
     
+    // Convert valid boundaries to standard number format
+    const normalizedBoundaries = validBoundaries.map(boundary => 
+      boundary.map(point => [Number(point[0]), Number(point[1])] as [number, number])
+    );
+    
     // Process boundaries and convert to property boundaries format
     try {
-      const convertedBoundaries = convertBoundariesToPropertyBoundaries(validBoundaries);
+      const convertedBoundaries = convertBoundariesToPropertyBoundaries(normalizedBoundaries);
       setPropertyBoundaries(convertedBoundaries);
       
       // Calculate total measurements

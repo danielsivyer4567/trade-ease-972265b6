@@ -1,5 +1,9 @@
 import { Coordinate, PropertyBoundary, BoundaryEdge } from './types';
 
+/**
+ * Converts boundary coordinates to PropertyBoundary format
+ * Handles different coordinate formats with robust validation
+ */
 export const convertBoundariesToPropertyBoundaries = (
   boundaries: Array<Array<[number, number]>> = []
 ): PropertyBoundary[] => {
@@ -21,15 +25,16 @@ export const convertBoundariesToPropertyBoundaries = (
         return null;
       }
       
-      const x = typeof point[0] === 'number' ? point[0] : parseFloat(String(point[0]));
-      const y = typeof point[1] === 'number' ? point[1] : parseFloat(String(point[1]));
+      // Ensure we're working with numbers
+      const lat = Number(point[0]);
+      const lng = Number(point[1]);
       
-      if (isNaN(x) || isNaN(y)) {
+      if (isNaN(lat) || isNaN(lng)) {
         console.error('NaN values in boundary point:', point);
         return null;
       }
       
-      return { x, y };
+      return { x: lat, y: lng };
     }).filter(Boolean) as Coordinate[]; // Filter out null points
     
     return {

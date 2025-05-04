@@ -59,31 +59,38 @@ export const PropertyInfo: React.FC<PropertyInfoProps> = ({
   }
 
   // Convert boundaries from GeoJSON format to the format expected by CustomPropertyMap
-  // Make sure each boundary point is explicitly cast as [number, number]
+  // Process each boundary with careful validation and error handling
   const processedBoundaries = property.boundaries.map(boundary => {
+    // Validate boundary is an array
     if (!Array.isArray(boundary)) {
       console.error('Boundary is not an array:', boundary);
       return [];
     }
     
+    // Map each point in the boundary to a valid [lat, lng] tuple
     return boundary.map(point => {
+      // Validate point is an array with two elements
       if (!Array.isArray(point) || point.length !== 2) {
         console.error('Invalid boundary point:', point);
-        return [0, 0] as [number, number]; // Default value
+        return null;
       }
       
-      const x = typeof point[0] === 'number' ? point[0] : parseFloat(point[0]);
-      const y = typeof point[1] === 'number' ? point[1] : parseFloat(point[1]);
+      // Get lat/lng values and ensure they're numbers
+      let lat = point[0];
+      let lng = point[1];
       
-      if (isNaN(x) || isNaN(y)) {
+      if (typeof lat !== 'number') lat = parseFloat(String(lat));
+      if (typeof lng !== 'number') lng = parseFloat(String(lng));
+      
+      if (isNaN(lat) || isNaN(lng)) {
         console.error('NaN values in boundary point:', point);
-        return [0, 0] as [number, number]; // Default value
+        return null;
       }
       
-      // Ensure each point is a tuple of exactly two numbers [lng, lat]
-      return [y, x] as [number, number];
-    }).filter(point => point[0] !== 0 || point[1] !== 0); // Filter out default values
-  }).filter(boundary => boundary.length >= 3); // Require at least 3 points to form a polygon
+      // Return a valid [lat, lng] tuple for the map
+      return [lat, lng] as [number, number];
+    }).filter(point => point !== null); // Filter out invalid points
+  }).filter(boundary => Array.isArray(boundary) && boundary.length >= 3); // Require at least 3 points to form a polygon
 
   if (processedBoundaries.length === 0) {
     console.error('No valid boundaries after processing:', property.boundaries);

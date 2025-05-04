@@ -26,10 +26,8 @@ export const AerialPropertyMap: React.FC<AerialPropertyMapProps> = ({ property, 
         return boundary.every(point => 
           Array.isArray(point) && 
           point.length === 2 && 
-          typeof point[0] === 'number' && 
-          typeof point[1] === 'number' &&
-          !isNaN(point[0]) && 
-          !isNaN(point[1])
+          !isNaN(Number(point[0])) && 
+          !isNaN(Number(point[1]))
         );
       });
       
@@ -67,33 +65,36 @@ export const AerialPropertyMap: React.FC<AerialPropertyMapProps> = ({ property, 
   if (property.location && 
       Array.isArray(property.location) && 
       property.location.length === 2 && 
-      typeof property.location[0] === 'number' && 
-      typeof property.location[1] === 'number' &&
-      !isNaN(property.location[0]) && 
-      !isNaN(property.location[1])) {
-    // Leaflet uses [lat, lng] format while many GIS systems use [lng, lat]
-    center = [property.location[1], property.location[0]];
+      !isNaN(Number(property.location[0])) && 
+      !isNaN(Number(property.location[1]))) {
+    // For Leaflet we need to ensure valid numeric coordinates in [lat, lng] format
+    center = [
+      Number(property.location[0]), 
+      Number(property.location[1])
+    ];
   } else {
     console.warn('Invalid property location, using default:', property.location);
     center = [-27.5, 153.0]; // Default location
   }
   
-  // Process boundaries for Leaflet, with validation
+  // Process boundaries for Leaflet, with careful validation
   const processedBoundaries = property.boundaries ? property.boundaries.map(boundary => {
-    if (!Array.isArray(boundary)) return null;
-    if (boundary.length < 3) return null; // Need at least 3 points to form a polygon
+    if (!Array.isArray(boundary) || boundary.length < 3) return null;
     
-    return boundary.map(point => {
+    const validPoints = boundary.map(point => {
       if (!Array.isArray(point) || point.length !== 2) return null;
-      const x = typeof point[0] === 'number' ? point[0] : parseFloat(point[0]);
-      const y = typeof point[1] === 'number' ? point[1] : parseFloat(point[1]);
       
-      if (isNaN(x) || isNaN(y)) return null;
+      const lat = Number(point[0]);
+      const lng = Number(point[1]);
       
-      // Swap coordinates for Leaflet [lat, lng]
-      return [y, x] as [number, number];
-    }).filter(Boolean) as [number, number][]; // Filter out any null points
-  }).filter(boundary => boundary && boundary.length >= 3) as [number, number][][] : [];
+      if (isNaN(lat) || isNaN(lng)) return null;
+      
+      return [lat, lng] as [number, number];
+    }).filter(Boolean);
+    
+    // Only return boundary if it has at least 3 valid points
+    return validPoints.length >= 3 ? validPoints : null;
+  }).filter(Boolean) : [];
   
   return (
     <Card className="w-full">
