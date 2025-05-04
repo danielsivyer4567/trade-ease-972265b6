@@ -30,7 +30,16 @@ export default defineConfig({
     esbuildOptions: {
       target: 'es2020',
     },
-    include: ['react', 'react-dom', '@tanstack/react-query'],
+    include: [
+      'react', 
+      'react-dom', 
+      '@tanstack/react-query',
+      '@radix-ui/react-scroll-area',
+      '@radix-ui/react-tabs',
+      '@radix-ui/react-dialog',
+      '@radix-ui/react-popover',
+      '@radix-ui/react-slot',
+    ],
   },
   build: {
     target: 'es2020',
@@ -41,6 +50,13 @@ export default defineConfig({
         manualChunks: {
           'react-vendor': ['react', 'react-dom'],
           'query-vendor': ['@tanstack/react-query'],
+          'radix-vendor': [
+            '@radix-ui/react-scroll-area',
+            '@radix-ui/react-tabs',
+            '@radix-ui/react-dialog',
+            '@radix-ui/react-popover',
+            '@radix-ui/react-slot',
+          ],
         },
       },
     },
