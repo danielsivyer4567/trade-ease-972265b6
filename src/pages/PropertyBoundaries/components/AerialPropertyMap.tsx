@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Property } from '../types';
-import { TileLayer, Polygon, Marker, Popup } from 'react-leaflet';
 import { Card, CardContent } from '@/components/ui/card';
 import { Loader2 } from 'lucide-react';
-import { LeafletProvider, MapWrapper } from '@/components/LeafletProvider';
+import { SimplePropertyMap } from '@/components/LeafletProvider';
 import { getArcGISToken } from '../utils/arcgisToken';
 
 interface AerialPropertyMapProps {
@@ -92,102 +91,21 @@ export const AerialPropertyMap: React.FC<AerialPropertyMapProps> = ({ property, 
       if (isNaN(x) || isNaN(y)) return null;
       
       // Swap coordinates for Leaflet [lat, lng]
-      return [y, x];
-    }).filter(Boolean); // Filter out any null points
-  }).filter(boundary => boundary && boundary.length >= 3) : []; // Filter out invalid boundaries
-
-  // Use ArcGIS tiles if we have a token, otherwise use OpenStreetMap
-  const hasToken = !!getArcGISToken();
-  
-  // Calculate area in square meters
-  const calculateArea = (boundary: any[]) => {
-    if (!boundary || boundary.length < 3) return 0;
-    let area = 0;
-    
-    for (let i = 0; i < boundary.length; i++) {
-      const j = (i + 1) % boundary.length;
-      area += boundary[i][0] * boundary[j][1];
-      area -= boundary[j][0] * boundary[i][1];
-    }
-    
-    return Math.abs(area * 111319.9 * 111319.9) / 2;
-  };
-
-  // Format area into human-readable text
-  const formatArea = (squareMeters: number) => {
-    if (squareMeters < 1) return '0 m²';
-    if (squareMeters < 10000) {
-      return `${squareMeters.toFixed(1)} m²`;
-    } else {
-      const hectares = squareMeters / 10000;
-      return `${hectares.toFixed(2)} ha`;
-    }
-  };
-  
-  // Calculate area for the first boundary
-  const areaInSquareMeters = hasBoundaries ? calculateArea(processedBoundaries[0]) : 0;
-  const formattedArea = formatArea(areaInSquareMeters);
-  
-  // Simple component to render map content only when Leaflet is loaded
-  const MapContent = () => {
-    // Only when window is defined and not in SSR
-    if (typeof window === 'undefined') return null;
-    
-    return (
-      <>
-        {/* Base map layer - ArcGIS or OpenStreetMap */}
-        {hasToken ? (
-          <TileLayer
-            url="https://services.arcgisonline.com/arcgis/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
-            attribution="Esri, Maxar, GeoEye, Earthstar Geographics, CNES/Airbus DS"
-          />
-        ) : (
-          <TileLayer
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-          />
-        )}
-        
-        {/* Add marker at the property location */}
-        <Marker position={center}>
-          <Popup>{property.name || property.address || 'Property Location'}</Popup>
-        </Marker>
-        
-        {/* Add polygons for each boundary */}
-        {hasBoundaries && processedBoundaries.map((boundary, index) => {
-          if (!boundary) return null;
-          return (
-            <Polygon
-              key={`boundary-${index}`}
-              positions={boundary}
-              pathOptions={{
-                fillColor: 'rgba(75, 85, 199, 0.3)',
-                weight: 3,
-                opacity: 1,
-                color: '#4B55C7',
-                fillOpacity: 0.5
-              }}
-            />
-          );
-        })}
-      </>
-    );
-  };
+      return [y, x] as [number, number];
+    }).filter(Boolean) as [number, number][]; // Filter out any null points
+  }).filter(boundary => boundary && boundary.length >= 3) as [number, number][][] : [];
   
   return (
     <Card className="w-full">
       <CardContent className="p-0 overflow-hidden">
         <div style={{ height: '400px', width: '100%', position: 'relative' }}>
-          <LeafletProvider>
-            <MapWrapper
-              center={center}
-              zoom={15}
-              style={{ height: '100%', width: '100%' }}
-              onMapReady={() => setMapLoaded(true)}
-            >
-              <MapContent />
-            </MapWrapper>
-          </LeafletProvider>
+          <SimplePropertyMap 
+            center={center}
+            zoom={15}
+            boundaries={processedBoundaries}
+            title={property.name || property.address || 'Property Location'}
+            onMapReady={() => setMapLoaded(true)}
+          />
           
           {!mapLoaded && (
             <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-80 z-20">
