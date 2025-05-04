@@ -44,14 +44,61 @@ export const PropertyInfo: React.FC<PropertyInfoProps> = ({
     );
   }
 
+  // Ensure property.boundaries is valid
+  if (!property.boundaries || !Array.isArray(property.boundaries) || property.boundaries.length === 0) {
+    console.error('Invalid or missing boundaries in property:', property);
+    return (
+      <Card className="w-full h-full flex items-center justify-center">
+        <CardContent className="p-6 text-center">
+          <p className="text-muted-foreground">
+            This property has invalid or missing boundaries
+          </p>
+        </CardContent>
+      </Card>
+    );
+  }
+
   // Convert boundaries from GeoJSON format to the format expected by CustomPropertyMap
   // Make sure each boundary point is explicitly cast as [number, number]
   const processedBoundaries = property.boundaries.map(boundary => {
+    if (!Array.isArray(boundary)) {
+      console.error('Boundary is not an array:', boundary);
+      return [];
+    }
+    
     return boundary.map(point => {
+      if (!Array.isArray(point) || point.length !== 2) {
+        console.error('Invalid boundary point:', point);
+        return [0, 0] as [number, number]; // Default value
+      }
+      
+      const x = typeof point[0] === 'number' ? point[0] : parseFloat(point[0]);
+      const y = typeof point[1] === 'number' ? point[1] : parseFloat(point[1]);
+      
+      if (isNaN(x) || isNaN(y)) {
+        console.error('NaN values in boundary point:', point);
+        return [0, 0] as [number, number]; // Default value
+      }
+      
       // Ensure each point is a tuple of exactly two numbers [lng, lat]
-      return [point[1], point[0]] as [number, number];
-    });
-  });
+      return [y, x] as [number, number];
+    }).filter(point => point[0] !== 0 || point[1] !== 0); // Filter out default values
+  }).filter(boundary => boundary.length >= 3); // Require at least 3 points to form a polygon
+
+  if (processedBoundaries.length === 0) {
+    console.error('No valid boundaries after processing:', property.boundaries);
+    return (
+      <Card className="w-full h-full flex items-center justify-center">
+        <CardContent className="p-6 text-center">
+          <p className="text-muted-foreground">
+            Could not process property boundaries. The data may be corrupted.
+          </p>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  console.log('Processed boundaries:', processedBoundaries);
 
   return (
     <Card className="w-full">

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { PropertyBoundary, MapMeasurements, BoundaryEdge } from '../types';
 import { 
@@ -31,12 +30,41 @@ export function useBoundaryProcessing(boundaries: Array<Array<[number, number]>>
         individualBoundaries: [],
         edges: []
       });
+      console.log('No boundaries to process or boundaries is invalid:', boundaries);
+      return;
+    }
+    
+    // Validate boundaries format and ensure each boundary point is a valid coordinate
+    const validBoundaries = boundaries.filter(boundary => {
+      if (!Array.isArray(boundary)) return false;
+      if (boundary.length < 3) return false; // Need at least 3 points to form a polygon
+      
+      // Check each point is a valid [number, number] tuple
+      return boundary.every(point => 
+        Array.isArray(point) && 
+        point.length === 2 && 
+        typeof point[0] === 'number' && 
+        typeof point[1] === 'number' &&
+        !isNaN(point[0]) && 
+        !isNaN(point[1])
+      );
+    });
+    
+    if (validBoundaries.length === 0) {
+      console.error('No valid boundaries found after validation. Original boundaries:', boundaries);
+      setPropertyBoundaries([]);
+      setMeasurements({
+        boundaryLength: 0,
+        boundaryArea: 0,
+        individualBoundaries: [],
+        edges: []
+      });
       return;
     }
     
     // Process boundaries and convert to property boundaries format
     try {
-      const convertedBoundaries = convertBoundariesToPropertyBoundaries(boundaries);
+      const convertedBoundaries = convertBoundariesToPropertyBoundaries(validBoundaries);
       setPropertyBoundaries(convertedBoundaries);
       
       // Calculate total measurements
