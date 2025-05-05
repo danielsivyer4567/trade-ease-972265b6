@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
-import { setArcGISToken } from '../utils/arcgisToken';
+import { saveArcGISToken } from '../utils/arcgisToken';
 import { toast } from 'sonner';
 
 interface TokenInputProps {
@@ -26,7 +26,7 @@ export const TokenInput: React.FC<TokenInputProps> = ({ onTokenSet }) => {
     
     try {
       // Save the token
-      setArcGISToken(token);
+      saveArcGISToken(token);
       toast.success('ArcGIS token saved successfully');
       onTokenSet();
     } catch (error) {
