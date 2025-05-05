@@ -172,10 +172,10 @@ export function JobDetails() {
                   <div className="font-medium">{job.address || "123 Main Street, Suite 456"}</div>
                   <div className="text-sm">{job.city || "Springfield"}, {job.state || "ST"} {job.zipCode || "12345"}</div>
                   <div className="text-sm mt-2">
-                    Property Type: <span className="font-medium">{job.propertyType || "Commercial"}</span>
+                    Property Type: <span className="font-medium">Commercial</span>
                   </div>
                   <div className="text-sm">
-                    Access Instructions: <span className="font-medium">{job.accessInstructions || "Use side entrance. Gate code: 1234"}</span>
+                    Access Instructions: <span className="font-medium">Use side entrance. Gate code: 1234</span>
                   </div>
                 </div>
               </CardContent>
@@ -332,7 +332,7 @@ export function JobDetails() {
                     Safety Requirements: <span className="font-medium">{job.safetyRequirements || "Hard hats and safety vests required at all times. Daily safety briefing at 6:00 PM."}</span>
                   </div>
                   <div className="text-sm">
-                    Quality Standards: <span className="font-medium">{job.qualityStandards || "All work must meet or exceed local building codes. Client inspection required before final approval."}</span>
+                    Quality Standards: <span className="font-medium">All work must meet or exceed local building codes. Client inspection required before final approval.</span>
                   </div>
                 </div>
               </CardContent>
