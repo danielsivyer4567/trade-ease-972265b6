@@ -237,8 +237,13 @@ const routeObjects: RouteObject[] = [
 ];
 
 // Create the browser router instance
-export const router = createBrowserRouter(routeObjects, {
-  future: {
-    v7_relativeSplatPath: true
-  }
-});
+export function createRouter() {
+  return createBrowserRouter(routeObjects, {
+    future: {
+      v7_relativeSplatPath: true
+    }
+  });
+}
+
+// Create a singleton instance of the router
+export const router = createRouter();
