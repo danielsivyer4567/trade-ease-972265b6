@@ -17,6 +17,13 @@ export interface Job {
   date_undecided?: boolean;
   job_steps?: JobStep[];
   boundaries?: Array<Array<[number, number]>>; // Array of polygon coordinates
+  
+  // New fields
+  suburb?: string;
+  duration?: string;
+  jobType?: string;
+  whatsInvolved?: string;
+  selectedTeam?: string;
 }
 
 export interface JobStep {
