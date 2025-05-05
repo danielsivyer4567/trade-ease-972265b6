@@ -33,7 +33,7 @@ const SiteAuditsPage = lazy(() => import('@/pages/SiteAudits'));
 // Jobs
 const JobsPage = lazy(() => import('@/pages/Jobs'));
 const NewJobPage = lazy(() => import('@/pages/Jobs/NewJob'));
-const JobDetailsPage = lazy(() => import('@/pages/Jobs/JobDetails').then(module => ({ default: module.JobDetails })));
+const JobDetailsPage = lazy(() => import('@/pages/Jobs/JobDetails'));
 
 // Quotes and Invoices
 const QuotesPage = lazy(() => import('@/pages/Quotes'));
