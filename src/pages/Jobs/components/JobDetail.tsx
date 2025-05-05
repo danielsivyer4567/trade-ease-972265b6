@@ -2,7 +2,7 @@ import React, { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Mic, Coffee, PackageCheck, Share, Clock, Calendar, FileText, Box, BarChart4, MessageSquare, 
-  Upload, X, Camera, PlusCircle, Trash2, Info, Edit, Save, ArrowLeft, Image as ImageIcon, CheckCircle, RotateCcw, Settings, AlertTriangle, Check } from "lucide-react";
+  Upload, X, Camera, PlusCircle, Trash2, Info, Edit, Save, ArrowLeft, Image as ImageIcon, CheckCircle, RotateCcw, Settings, AlertTriangle, Check, FilePlus, Book, Plus, SaveAll } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import type { Job } from "@/types/job";
 import { Separator } from "@/components/ui/separator";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { toast } from "sonner";
 import { 
@@ -50,6 +50,21 @@ type ProcessStep = {
   isCompleted: boolean;
   photos: JobPhoto[];
   completedDate?: string;
+};
+
+// Define job template types
+type JobTemplateField = {
+  id: string;
+  label: string;
+  type: 'text' | 'textarea' | 'number' | 'checkbox';
+  placeholder?: string;
+};
+
+type JobTemplate = {
+  id: string;
+  name: string;
+  fields: JobTemplateField[];
+  isCustom?: boolean;
 };
 
 export const JobDetail = ({ job }: JobDetailProps) => {
@@ -121,6 +136,59 @@ export const JobDetail = ({ job }: JobDetailProps) => {
   });
   const [editingSection, setEditingSection] = useState<JobSection | null>(null);
   const [photoCaption, setPhotoCaption] = useState("");
+  
+  // Add template related states
+  const [showTemplateDialog, setShowTemplateDialog] = useState(false);
+  const [showCreateTemplateDialog, setShowCreateTemplateDialog] = useState(false);
+  const [selectedTemplate, setSelectedTemplate] = useState<JobTemplate | null>(null);
+  const [templateValues, setTemplateValues] = useState<Record<string, string>>({});
+  const [customTemplates, setCustomTemplates] = useState<JobTemplate[]>([]);
+  const [newTemplateName, setNewTemplateName] = useState('');
+  const [newTemplateFields, setNewTemplateFields] = useState<JobTemplateField[]>([]);
+  
+  // Pre-defined job templates
+  const predefinedTemplates: JobTemplate[] = [
+    {
+      id: 'fencing',
+      name: 'Fencing',
+      fields: [
+        { id: 'fence-description', label: 'Fence Description', type: 'textarea', placeholder: 'Describe the fence type and materials' },
+        { id: 'meterage', label: 'Meterage', type: 'text', placeholder: 'Length of fencing required' },
+        { id: 'colour', label: 'Colour', type: 'text', placeholder: 'Color of the fence' },
+        { id: 'sleepers', label: 'Sleepers', type: 'text', placeholder: 'Type and number of sleepers' },
+        { id: 'gates', label: 'Gates', type: 'text', placeholder: 'Number and type of gates required' },
+        { id: 'removal', label: 'Removal', type: 'text', placeholder: 'Details about old fence removal' },
+        { id: 'disposal', label: 'Disposal', type: 'text', placeholder: 'How to dispose of old materials' },
+        { id: 'customer-request', label: 'Customer request', type: 'textarea', placeholder: 'Any special requests from the customer' },
+        { id: 'access-issues', label: 'Issues with Access', type: 'textarea', placeholder: 'Describe any access issues' },
+        { id: 'parking-issues', label: 'Issues with Parking', type: 'textarea', placeholder: 'Describe any parking issues' },
+        { id: 'obstacles', label: 'Any potential obstacles that need to be cautious of?', type: 'textarea', placeholder: 'List any potential obstacles or hazards' }
+      ]
+    },
+    {
+      id: 'electrical',
+      name: 'Electrical Work',
+      fields: [
+        { id: 'electrical-scope', label: 'Scope of Work', type: 'textarea', placeholder: 'Describe the electrical work needed' },
+        { id: 'circuit-requirements', label: 'Circuit Requirements', type: 'text', placeholder: 'Number and type of circuits' },
+        { id: 'fixture-count', label: 'Fixtures', type: 'text', placeholder: 'Number and type of fixtures' },
+        { id: 'special-requirements', label: 'Special Requirements', type: 'textarea', placeholder: 'Any special electrical requirements' }
+      ]
+    },
+    {
+      id: 'plumbing',
+      name: 'Plumbing',
+      fields: [
+        { id: 'plumbing-description', label: 'Plumbing Description', type: 'textarea', placeholder: 'Describe the plumbing work needed' },
+        { id: 'fixtures', label: 'Fixtures', type: 'text', placeholder: 'List fixtures to be installed/repaired' },
+        { id: 'pipe-materials', label: 'Pipe Materials', type: 'text', placeholder: 'Type of pipes to be used' },
+        { id: 'water-pressure', label: 'Water Pressure Issues', type: 'text', placeholder: 'Any water pressure concerns' }
+      ]
+    }
+  ];
+
+  // Combine predefined and custom templates
+  const jobTemplates = [...predefinedTemplates, ...customTemplates];
   
   // Process steps functions
   const initializeProcessSteps = () => {
@@ -382,6 +450,98 @@ export const JobDetail = ({ job }: JobDetailProps) => {
     setShowProcessSettingsDialog(false);
   };
 
+  // Handle applying a template
+  const applyTemplate = (template: JobTemplate) => {
+    setSelectedTemplate(template);
+    setShowTemplateDialog(true);
+    // Initialize empty values for all fields
+    const initialValues: Record<string, string> = {};
+    template.fields.forEach(field => {
+      initialValues[field.id] = '';
+    });
+    setTemplateValues(initialValues);
+  };
+
+  // Handle template field change
+  const handleTemplateFieldChange = (fieldId: string, value: string) => {
+    setTemplateValues(prev => ({
+      ...prev,
+      [fieldId]: value
+    }));
+  };
+
+  // Add template section to job
+  const addTemplateSection = () => {
+    if (!selectedTemplate) return;
+    
+    const templateId = `template-${Date.now()}`;
+    const templateContent = selectedTemplate.fields.map(field => 
+      `${field.label}: ${templateValues[field.id] || 'N/A'}`
+    ).join('\n\n');
+    
+    setSections([...sections, {
+      id: templateId,
+      title: `${selectedTemplate.name} Details`,
+      description: templateContent,
+      photos: []
+    }]);
+    
+    setShowTemplateDialog(false);
+    setSelectedTemplate(null);
+    toast.success(`${selectedTemplate.name} template added`);
+  };
+
+  // Create new template functions
+  const startCreateTemplate = () => {
+    setShowCreateTemplateDialog(true);
+    setNewTemplateName('');
+    setNewTemplateFields([
+      { id: `field-${Date.now()}`, label: 'Field 1', type: 'text', placeholder: '' }
+    ]);
+  };
+
+  const addTemplateField = () => {
+    setNewTemplateFields([
+      ...newTemplateFields,
+      { id: `field-${Date.now()}`, label: `Field ${newTemplateFields.length + 1}`, type: 'text', placeholder: '' }
+    ]);
+  };
+
+  const updateTemplateField = (index: number, field: Partial<JobTemplateField>) => {
+    setNewTemplateFields(prev => {
+      const updated = [...prev];
+      updated[index] = { ...updated[index], ...field };
+      return updated;
+    });
+  };
+
+  const removeTemplateField = (index: number) => {
+    setNewTemplateFields(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const saveNewTemplate = () => {
+    if (!newTemplateName.trim()) {
+      toast.error('Template name is required');
+      return;
+    }
+
+    if (newTemplateFields.length === 0) {
+      toast.error('At least one field is required');
+      return;
+    }
+
+    const newTemplate: JobTemplate = {
+      id: `custom-${Date.now()}`,
+      name: newTemplateName,
+      fields: newTemplateFields,
+      isCustom: true
+    };
+
+    setCustomTemplates(prev => [...prev, newTemplate]);
+    setShowCreateTemplateDialog(false);
+    toast.success(`Template "${newTemplateName}" created`);
+  };
+
   return (
     <>
       <div className="w-full h-full bg-gray-100">
@@ -445,6 +605,9 @@ export const JobDetail = ({ job }: JobDetailProps) => {
             <TabsTrigger value="details" className="text-xs md:text-sm py-2 data-[state=active]:border-b-2 data-[state=active]:border-blue-500">
               Details
             </TabsTrigger>
+            <TabsTrigger value="templates" className="text-xs md:text-sm py-2 data-[state=active]:border-b-2 data-[state=active]:border-blue-500">
+              <Book className="h-4 w-4 md:mr-1 md:inline hidden" /> Templates
+            </TabsTrigger>
             <TabsTrigger value="notes" className="text-xs md:text-sm py-2 data-[state=active]:border-b-2 data-[state=active]:border-blue-500">
               <FileText className="h-4 w-4 md:mr-1 md:inline hidden" /> Notes
             </TabsTrigger>
@@ -506,6 +669,54 @@ export const JobDetail = ({ job }: JobDetailProps) => {
                       <div>
                         <p className="text-sm text-gray-500">Date</p>
                         <p>{job.date}</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+                
+                {/* Standalone Job Templates Section */}
+                <Card className="bg-blue-50 border border-blue-100">
+                  <CardContent className="p-4">
+                    <div className="flex flex-col items-center text-center">
+                      <Book className="h-10 w-10 mb-2 text-blue-700" />
+                      <h3 className="text-lg font-bold text-blue-800 mb-1">Job Templates</h3>
+                      <p className="text-sm text-blue-600 mb-4">Add structured job details with pre-defined templates</p>
+                      
+                      <div className="flex flex-wrap gap-2 justify-center w-full">
+                        <Button
+                          className="bg-blue-600 hover:bg-blue-700"
+                          onClick={() => {
+                            const fencingTemplate = predefinedTemplates.find(t => t.id === 'fencing');
+                            if (fencingTemplate) applyTemplate(fencingTemplate);
+                          }}
+                        >
+                          Fencing Template
+                        </Button>
+                        <Button
+                          className="bg-blue-600 hover:bg-blue-700"
+                          onClick={() => {
+                            const electricalTemplate = predefinedTemplates.find(t => t.id === 'electrical');
+                            if (electricalTemplate) applyTemplate(electricalTemplate);
+                          }}
+                        >
+                          Electrical Template
+                        </Button>
+                        <Button
+                          className="bg-blue-600 hover:bg-blue-700"
+                          onClick={() => {
+                            const plumbingTemplate = predefinedTemplates.find(t => t.id === 'plumbing');
+                            if (plumbingTemplate) applyTemplate(plumbingTemplate);
+                          }}
+                        >
+                          Plumbing Template
+                        </Button>
+                        <Button
+                          variant="outline"
+                          className="text-blue-700 border-blue-300"
+                          onClick={() => setShowTemplateDialog(true)}
+                        >
+                          Browse All Templates
+                        </Button>
                       </div>
                     </div>
                   </CardContent>
@@ -645,7 +856,8 @@ export const JobDetail = ({ job }: JobDetailProps) => {
                                         <img 
                                           src={photo.url} 
                                           alt={photo.caption} 
-                                          className="w-full h-24 object-cover" 
+                                          className="w-full h-48 object-cover cursor-pointer" 
+                                          onClick={() => setSelectedPhoto(photo)}
                                         />
                                         <div className="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                                           <div className="flex space-x-1">
@@ -1009,7 +1221,7 @@ export const JobDetail = ({ job }: JobDetailProps) => {
                             <img 
                               src={photo.url} 
                               alt={photo.caption} 
-                              className="w-full h-32 object-cover cursor-pointer" 
+                              className="w-full h-48 object-cover cursor-pointer" 
                               onClick={() => setSelectedPhoto(photo)}
                             />
                             <div className="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
@@ -1207,6 +1419,87 @@ export const JobDetail = ({ job }: JobDetailProps) => {
             </Dialog>
           </TabsContent>
 
+          <TabsContent value="templates" className="p-4">
+            <div className="max-w-4xl mx-auto">
+              <Card className="bg-blue-50 border border-blue-200 mb-6">
+                <CardHeader>
+                  <CardTitle className="text-blue-800">Job Templates</CardTitle>
+                  <CardDescription className="text-blue-700">
+                    Apply pre-made templates or create your own to standardize job details
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <Button 
+                      size="lg" 
+                      className="h-auto py-6 flex flex-col items-center justify-center bg-white border-2 border-blue-300 text-blue-700 hover:bg-blue-50"
+                      onClick={() => setShowTemplateDialog(true)}
+                    >
+                      <Book className="h-8 w-8 mb-2" />
+                      <span className="text-lg font-medium">Select Template</span>
+                      <span className="text-sm mt-1">Choose from available templates</span>
+                    </Button>
+                    
+                    <Button 
+                      size="lg" 
+                      className="h-auto py-6 flex flex-col items-center justify-center bg-white border-2 border-green-300 text-green-700 hover:bg-green-50"
+                      onClick={startCreateTemplate}
+                    >
+                      <Plus className="h-8 w-8 mb-2" />
+                      <span className="text-lg font-medium">Create New Template</span>
+                      <span className="text-sm mt-1">Design a custom template</span>
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <h2 className="text-xl font-bold mb-4">Available Templates</h2>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {jobTemplates.map(template => (
+                  <Card key={template.id} className={template.isCustom ? 'border-green-200' : 'border-blue-200'}>
+                    <CardHeader className={`pb-2 ${template.isCustom ? 'bg-green-50' : 'bg-blue-50'}`}>
+                      <div className="flex justify-between items-start">
+                        <CardTitle className="text-base">{template.name}</CardTitle>
+                        {template.isCustom && (
+                          <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">
+                            Custom
+                          </span>
+                        )}
+                      </div>
+                      <CardDescription>
+                        {template.fields.length} fields
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="pt-4">
+                      <div className="space-y-1 mb-4 text-sm text-gray-500">
+                        {/* Show first 3 fields as preview */}
+                        {template.fields.slice(0, 3).map(field => (
+                          <div key={field.id} className="flex items-center">
+                            <Check className="h-3 w-3 mr-1 text-gray-400" />
+                            <span>{field.label}</span>
+                          </div>
+                        ))}
+                        {template.fields.length > 3 && (
+                          <div className="text-xs text-gray-400 italic pl-4">
+                            +{template.fields.length - 3} more fields
+                          </div>
+                        )}
+                      </div>
+                      <Button 
+                        className="w-full" 
+                        onClick={() => applyTemplate(template)}
+                        variant={template.isCustom ? "outline" : "default"}
+                      >
+                        Apply Template
+                      </Button>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          </TabsContent>
+
           <TabsContent value="notes" className="p-4">
             <Card className="p-4 mb-4">
               <h2 className="text-lg font-semibold mb-2">Add New Note</h2>
@@ -1359,6 +1652,206 @@ export const JobDetail = ({ job }: JobDetailProps) => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Template Selection Dialog */}
+      <Dialog open={showTemplateDialog} onOpenChange={setShowTemplateDialog}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle>Select Job Template</DialogTitle>
+            <DialogDescription>
+              Choose a template to add pre-defined job details
+            </DialogDescription>
+          </DialogHeader>
+          
+          {!selectedTemplate ? (
+            // Template selection view
+            <div className="space-y-4 py-2">
+              <div className="grid grid-cols-1 gap-3">
+                {jobTemplates.map(template => (
+                  <Button
+                    key={template.id}
+                    variant="outline"
+                    className={`justify-start h-auto py-3 px-4 ${template.isCustom ? 'border-green-200 bg-green-50' : ''}`}
+                    onClick={() => applyTemplate(template)}
+                  >
+                    <Book className={`h-4 w-4 mr-2 ${template.isCustom ? 'text-green-600' : 'text-blue-600'}`} />
+                    <div className="text-left">
+                      <div className="flex items-center">
+                        <p className="font-medium">{template.name}</p>
+                        {template.isCustom && (
+                          <span className="ml-2 text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">Custom</span>
+                        )}
+                      </div>
+                      <p className="text-xs text-gray-500">{template.fields.length} fields</p>
+                    </div>
+                  </Button>
+                ))}
+              </div>
+              
+              <div className="flex justify-between pt-4 border-t border-gray-200">
+                <Button 
+                  variant="outline" 
+                  onClick={() => setShowTemplateDialog(false)}
+                >
+                  Cancel
+                </Button>
+                <Button 
+                  variant="outline"
+                  onClick={startCreateTemplate}
+                >
+                  <Plus className="h-4 w-4 mr-1" /> Create New Template
+                </Button>
+              </div>
+            </div>
+          ) : (
+            // Template field filling view
+            <>
+              <div className="space-y-4 py-2 max-h-[60vh] overflow-y-auto">
+                {selectedTemplate.fields.map(field => (
+                  <div key={field.id} className="space-y-2">
+                    <Label htmlFor={field.id}>{field.label}</Label>
+                    {field.type === 'textarea' ? (
+                      <Textarea
+                        id={field.id}
+                        placeholder={field.placeholder}
+                        value={templateValues[field.id] || ''}
+                        onChange={(e) => handleTemplateFieldChange(field.id, e.target.value)}
+                        rows={3}
+                      />
+                    ) : (
+                      <Input
+                        id={field.id}
+                        type={field.type === 'number' ? 'number' : 'text'}
+                        placeholder={field.placeholder}
+                        value={templateValues[field.id] || ''}
+                        onChange={(e) => handleTemplateFieldChange(field.id, e.target.value)}
+                      />
+                    )}
+                  </div>
+                ))}
+              </div>
+              <div className="flex justify-between space-x-2 pt-4 border-t border-gray-200">
+                <Button
+                  variant="outline"
+                  onClick={() => setSelectedTemplate(null)}
+                >
+                  Back
+                </Button>
+                <Button onClick={addTemplateSection}>
+                  Add to Job
+                </Button>
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
+      
+      {/* Create Template Dialog */}
+      <Dialog open={showCreateTemplateDialog} onOpenChange={setShowCreateTemplateDialog}>
+        <DialogContent className="max-w-4xl">
+          <DialogHeader>
+            <DialogTitle>Create New Template</DialogTitle>
+            <DialogDescription>
+              Design a custom template for your job details
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4 py-2">
+            <div className="space-y-2">
+              <Label htmlFor="template-name">Template Name</Label>
+              <Input
+                id="template-name"
+                placeholder="e.g., Roofing Template"
+                value={newTemplateName}
+                onChange={(e) => setNewTemplateName(e.target.value)}
+              />
+            </div>
+            
+            <div className="space-y-3">
+              <div className="flex justify-between items-center">
+                <h3 className="font-medium">Template Fields</h3>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={addTemplateField}
+                >
+                  <Plus className="h-4 w-4 mr-1" /> Add Field
+                </Button>
+              </div>
+              
+              <div className="space-y-4 max-h-[40vh] overflow-y-auto">
+                {newTemplateFields.map((field, index) => (
+                  <div key={field.id} className="border border-gray-200 rounded-md p-3 space-y-3">
+                    <div className="flex justify-between items-center">
+                      <h4 className="font-medium text-sm">Field {index + 1}</h4>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-7 w-7 p-0 text-red-500"
+                        onClick={() => removeTemplateField(index)}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      <div className="space-y-2">
+                        <Label htmlFor={`field-label-${index}`}>Field Label</Label>
+                        <Input
+                          id={`field-label-${index}`}
+                          value={field.label}
+                          onChange={(e) => updateTemplateField(index, { label: e.target.value })}
+                          placeholder="e.g., Material Type"
+                        />
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor={`field-type-${index}`}>Field Type</Label>
+                        <select
+                          id={`field-type-${index}`}
+                          value={field.type}
+                          onChange={(e) => updateTemplateField(index, { type: e.target.value as 'text' | 'textarea' | 'number' | 'checkbox' })}
+                          className="w-full rounded-md border border-gray-300 p-2"
+                        >
+                          <option value="text">Text (Single line)</option>
+                          <option value="textarea">Text Area (Multiple lines)</option>
+                          <option value="number">Number</option>
+                          <option value="checkbox">Checkbox</option>
+                        </select>
+                      </div>
+                      
+                      <div className="space-y-2 md:col-span-2">
+                        <Label htmlFor={`field-placeholder-${index}`}>Placeholder Text</Label>
+                        <Input
+                          id={`field-placeholder-${index}`}
+                          value={field.placeholder || ''}
+                          onChange={(e) => updateTemplateField(index, { placeholder: e.target.value })}
+                          placeholder="e.g., Enter material specifications..."
+                        />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+          
+          <div className="flex justify-between pt-4 border-t border-gray-200">
+            <Button
+              variant="outline"
+              onClick={() => setShowCreateTemplateDialog(false)}
+            >
+              Cancel
+            </Button>
+            <Button 
+              onClick={saveNewTemplate}
+              className="bg-green-600 hover:bg-green-700"
+            >
+              <SaveAll className="h-4 w-4 mr-1" /> Save Template
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }; 
