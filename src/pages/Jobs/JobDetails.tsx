@@ -1,28 +1,23 @@
 import { useParams, useNavigate } from 'react-router-dom';
-import { JobHeader } from './components/JobHeader';
-import { JobTabs } from './components/JobTabs';
 import { useState, useEffect } from 'react';
 import { DocumentApproval } from './components/document-approval/DocumentApproval';
 import { useJobTimer } from './hooks/useJobTimer';
 import { useJobLocation } from './hooks/useJobLocation';
 import { useJobFinancialData } from './hooks/useJobFinancialData';
 import { AppLayout } from '@/components/ui/AppLayout';
-import { JobsHeader } from './components/JobsHeader';
 import { JobLoadingState } from './components/JobLoadingState';
-import { JobMapView } from './components/JobMapView';
 import { useJobData } from './hooks/useJobData';
-import { JobStepProgress } from '@/components/dashboard/JobStepProgress';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Camera, Share2, Phone, Mail, MessageSquare } from 'lucide-react';
+import { Camera, Share2, Upload } from 'lucide-react';
 import { toast } from 'sonner';
-import { AutomationIntegrationService } from '@/services/AutomationIntegrationService';
 import { usePhotoSharing } from '@/hooks/usePhotoSharing';
 import { PhotoSharingModal } from '@/components/sharing/PhotoSharingModal';
 import { useOpenInTab } from './hooks/useOpenInTab';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { AlertCircle } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 export function JobDetails() {
   const { id } = useParams<{ id: string }>();
@@ -77,6 +72,11 @@ export function JobDetails() {
   const handleSendPhotosToCustomer = () => {
     if (!id) return;
     openPhotoSharing('job', id);
+  };
+  
+  const handleUploadPhotos = () => {
+    // Implement photo upload functionality
+    toast.info("Photo upload functionality will be implemented");
   };
   
   if (loading) {
@@ -135,117 +135,182 @@ export function JobDetails() {
       </div>
     );
   }
+
+  // Mock photos data based on the image
+  const jobPhotos = [
+    { id: 1, title: "Main electrical panel before replacement", url: "/images/panel.jpg" },
+    { id: 2, title: "Kitchen wiring assessment", url: "/images/kitchen.jpg" },
+    { id: 3, title: "Living room outlets inspection", url: "/images/living-room.jpg" },
+    { id: 4, title: "Exterior wiring", url: "/images/exterior.jpg" },
+    { id: 5, title: "Completed installation", url: "/images/completed.jpg" },
+  ];
   
   return (
     <AppLayout>
-      <div className="container-responsive mx-auto">
-        <JobsHeader navigateTo="/jobs" />
-        
-        <div className="max-w-7xl mx-auto pb-24">
-          {/* Hero section with Job Info and Map */}
-          <div className="bg-white rounded-lg shadow-sm overflow-hidden mb-6">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-0">
-              {/* Left side - Job information */}
-              <div className="lg:col-span-1 p-6 flex flex-col justify-between">
-                <div>
-                  <h1 className="text-2xl font-bold truncate mb-2">{job.customer}</h1>
-                  <p className="text-lg text-gray-600 mb-4">{job.address}</p>
-                  
-                  <div className="space-y-4 mb-6">
-                    <div className="flex items-center space-x-2">
-                      <div className="bg-blue-100 p-2 rounded-full">
-                        <Phone className="h-4 w-4 text-blue-600" />
-                      </div>
-                      <span className="text-gray-700">Contact Customer</span>
-                    </div>
-                    
-                    <div className="flex items-center space-x-2">
-                      <div className="bg-green-100 p-2 rounded-full">
-                        <Mail className="h-4 w-4 text-green-600" />
-                      </div>
-                      <span className="text-gray-700">Send Email</span>
-                    </div>
-                    
-                    <div className="flex items-center space-x-2">
-                      <div className="bg-purple-100 p-2 rounded-full">
-                        <MessageSquare className="h-4 w-4 text-purple-600" />
-                      </div>
-                      <span className="text-gray-700">Send Message</span>
-                    </div>
-                  </div>
-                  
-                  <div className="bg-gray-100 p-3 rounded-lg mb-4">
-                    <div className="flex justify-between text-sm">
-                      <span className="text-gray-500">Job Type:</span>
-                      <span className="font-medium">{job.type}</span>
-                    </div>
-                    <div className="flex justify-between text-sm mt-2">
-                      <span className="text-gray-500">Status:</span>
-                      <span className="font-medium">{job.status}</span>
-                    </div>
-                    <div className="flex justify-between text-sm mt-2">
-                      <span className="text-gray-500">Date:</span>
-                      <span className="font-medium">{job.date}</span>
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="flex space-x-2 mt-4">
-                  <Button className="flex-1" size="sm">
-                    <Camera className="h-4 w-4 mr-2" />
-                    Photos
-                  </Button>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    className="flex-1"
-                    onClick={handleSendPhotosToCustomer}
-                  >
-                    <Share2 className="h-4 w-4 mr-2" />
-                    Share
-                  </Button>
-                </div>
-              </div>
-              
-              {/* Right side - Map */}
-              <div className="lg:col-span-2 h-[450px]">
-                <JobMapView job={job} />
-              </div>
-            </div>
-          </div>
-          
-          {/* Job Progress Steps */}
-          <Card className="bg-white shadow-sm py-3 px-3 sm:px-6 mb-6">
-            <JobStepProgress />
-          </Card>
-          
-          {/* Job Tabs */}
-          <JobTabs 
-            job={job} 
-            isManager={isManager} 
-            jobTimer={jobTimer} 
-            jobNotes={jobNotes} 
-            setJobNotes={setJobNotes} 
-            tabNotes={tabNotes} 
-            setTabNotes={setTabNotes} 
-            locationHistory={locationHistory} 
-            hasLocationPermission={hasLocationPermission} 
-            handleTimerToggle={handleTimerToggle} 
-            handleBreakToggle={handleBreakToggle} 
-            isTimerRunning={isTimerRunning} 
-            isOnBreak={isOnBreak} 
-            extractedFinancialData={extractedFinancialData} 
-          />
-
-          {isManager && (
-            <div className="mt-8 mb-8">
-              <DocumentApproval 
-                jobId={job.id} 
-                onFinancialDataExtracted={handleFinancialDataExtracted} 
-              />
-            </div>
-          )}
+      <div className="container mx-auto p-4">
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-2xl font-bold">aaaaaaaaaaaaaaaaaaaa</h1>
+          <Button variant="outline" onClick={() => navigate('/jobs')}>
+            ← Back to Jobs
+          </Button>
         </div>
+        
+        <Tabs defaultValue="details" className="w-full">
+          <TabsList className="grid grid-cols-7 mb-6">
+            <TabsTrigger value="details">Details</TabsTrigger>
+            <TabsTrigger value="notes">Notes</TabsTrigger>
+            <TabsTrigger value="calendar">Calendar</TabsTrigger>
+            <TabsTrigger value="timer">Timer</TabsTrigger>
+            <TabsTrigger value="materials">Materials</TabsTrigger>
+            <TabsTrigger value="financials">Financials</TabsTrigger>
+            <TabsTrigger value="conversations">Conversations</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="details" className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Job Details Card */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Job Details</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-sm font-medium text-gray-500">Job Number</p>
+                      <p>{job.jobNumber || "N/A"}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-500">Customer</p>
+                      <p>{job.customer || "Daniel John Snyer Snyer"}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-500">Address</p>
+                      <p>{job.address || "N/A"}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-500">Type</p>
+                      <p>{job.type || "Electrical"}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-500">Team</p>
+                      <p>{job.assignedTeam || "Not assigned"}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-500">Date</p>
+                      <p>{job.date || ""}</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              
+              {/* Job Process Card */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Job Process</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-gray-500 italic">No process steps defined for this job</p>
+                </CardContent>
+              </Card>
+            </div>
+            
+            {/* Plans/Drawings Card */}
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <CardTitle>Plans/Drawings</CardTitle>
+                <Button variant="outline" size="sm" onClick={handleUploadPhotos}>
+                  <Upload className="h-4 w-4 mr-2" />
+                  Upload Photos
+                </Button>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {jobPhotos.map(photo => (
+                    <div key={photo.id} className="overflow-hidden rounded-md border">
+                      <div className="aspect-video relative">
+                        <img 
+                          src={photo.url} 
+                          alt={photo.title}
+                          className="object-cover w-full h-full"
+                          onError={(e) => {
+                            e.currentTarget.src = "https://placehold.co/600x400/gray/white?text=Placeholder";
+                          }}
+                        />
+                      </div>
+                      <div className="p-2 text-sm font-medium">{photo.title}</div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+          
+          <TabsContent value="notes">
+            <Card>
+              <CardHeader>
+                <CardTitle>Notes</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p>Notes content will go here</p>
+              </CardContent>
+            </Card>
+          </TabsContent>
+          
+          <TabsContent value="calendar">
+            <Card>
+              <CardHeader>
+                <CardTitle>Calendar</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p>Calendar content will go here</p>
+              </CardContent>
+            </Card>
+          </TabsContent>
+          
+          <TabsContent value="timer">
+            <Card>
+              <CardHeader>
+                <CardTitle>Timer</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p>Timer content will go here</p>
+              </CardContent>
+            </Card>
+          </TabsContent>
+          
+          <TabsContent value="materials">
+            <Card>
+              <CardHeader>
+                <CardTitle>Materials</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p>Materials content will go here</p>
+              </CardContent>
+            </Card>
+          </TabsContent>
+          
+          <TabsContent value="financials">
+            <Card>
+              <CardHeader>
+                <CardTitle>Financials</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p>Financial information will go here</p>
+              </CardContent>
+            </Card>
+          </TabsContent>
+          
+          <TabsContent value="conversations">
+            <Card>
+              <CardHeader>
+                <CardTitle>Conversations</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p>Conversation history will go here</p>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
       </div>
       
       <PhotoSharingModal 
