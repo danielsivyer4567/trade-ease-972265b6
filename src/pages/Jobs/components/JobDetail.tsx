@@ -13,6 +13,7 @@ import { Separator } from "@/components/ui/separator";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { toast } from "sonner";
+import JobMap from "@/components/JobMap";
 import { 
   AlertDialog,
   AlertDialogAction,
@@ -548,11 +549,14 @@ export const JobDetail = ({ job }: JobDetailProps) => {
         {/* Map/Location header section */}
         <div className="relative h-64 bg-gray-300">
           <div className="absolute inset-0">
-            {/* This would be a map component */}
-            <img 
-              src="https://maps.googleapis.com/maps/api/staticmap?center=-33.8688,151.2093&zoom=14&size=800x250&key=YOUR_API_KEY" 
-              alt="Location map"
-              className="w-full h-full object-cover"
+            <JobMap 
+              center={job.location}
+              zoom={15}
+              markers={[{
+                position: [job.location[1], job.location[0]] as [number, number],
+                title: job.jobNumber
+              }]}
+              boundaries={job.boundaries}
             />
           </div>
         </div>
