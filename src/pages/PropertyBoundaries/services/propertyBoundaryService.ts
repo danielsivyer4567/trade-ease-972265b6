@@ -4,15 +4,9 @@ import {
   mockGetPropertyBoundaries, 
   mockGetAdvancedPropertyBoundaries 
 } from './mockArcGIS';
-import {
-  directPropertyBoundariesByAddress,
-  directPropertyBoundariesByComponents
-} from './directArcGISService';
-import { getArcGISToken } from '../utils/arcgisToken';
 
 // Environment detection - helps determine if we should use mock data
 const isDevelopment = process.env.NODE_ENV === 'development';
-const hasDirectToken = !!getArcGISToken();
 
 /**
  * Get property boundaries by address
@@ -23,22 +17,6 @@ export const getPropertyBoundariesByAddress = async (address: string) => {
   try {
     if (!address.trim()) {
       return { data: null, error: 'Address is required' };
-    }
-    
-    // If we have a direct token in the browser, use it instead of Edge Function
-    if (isDevelopment && hasDirectToken) {
-      console.log('Using direct ArcGIS API with token for address search...');
-      const result = await directPropertyBoundariesByAddress(address);
-      if (result.data) {
-        const processedData = processArcGISResponse(result.data);
-        return { data: processedData, error: null };
-      }
-      // If direct API fails, fall back to mock data
-      if (isDevelopment) {
-        console.log('Direct API failed, using mock data...');
-        return await mockGetAdvancedPropertyBoundaries(address);
-      }
-      return result;
     }
 
     // Call our Supabase Edge Function
@@ -101,33 +79,6 @@ export const getPropertyBoundariesByComponents = async (
   try {
     if (!houseNumber || !streetName) {
       return { data: null, error: 'House number and street name are required' };
-    }
-    
-    // If we have a direct token in the browser, use it instead of Edge Function
-    if (isDevelopment && hasDirectToken) {
-      console.log('Using direct ArcGIS API with token for component search...');
-      const result = await directPropertyBoundariesByComponents(
-        houseNumber, 
-        streetName, 
-        suburb, 
-        postcode
-      );
-      if (result.data) {
-        const processedData = processArcGISResponse(result.data);
-        return { data: processedData, error: null };
-      }
-      // If direct API fails, fall back to mock data
-      if (isDevelopment) {
-        console.log('Direct API failed, using mock data...');
-        return await mockGetPropertyBoundaries(
-          undefined, 
-          houseNumber, 
-          streetName, 
-          suburb, 
-          postcode
-        );
-      }
-      return result;
     }
 
     // Call our Supabase Edge Function
@@ -233,16 +184,12 @@ export const getPropertyBoundariesByLocation = async (location: [number, number]
  * @returns Processed property data
  */
 const processArcGISResponse = (arcgisResponse: any) => {
-  console.log('Processing ArcGIS response:', arcgisResponse);
-  
   // Handle response from full address search which contains both geocode and boundaries
   if (arcgisResponse.geocode && arcgisResponse.boundaries) {
-    console.log('Processing combined geocode and boundaries response');
     const { geocode, boundaries } = arcgisResponse;
     
     // Extract boundary information from features
     if (boundaries.features && boundaries.features.length > 0) {
-      console.log('Found boundary features:', boundaries.features.length);
       const feature = boundaries.features[0];
       
       // Extract boundary coordinates
@@ -253,10 +200,10 @@ const processArcGISResponse = (arcgisResponse: any) => {
       const location: [number, number] = [geocode.location.x, geocode.location.y];
       
       // Build a structured property object
-      const result = {
+      return {
         boundary: {
           coordinates: boundaryCoordinates,
-          type: feature.geometry.type || 'Polygon'
+          type: feature.geometry.type
         },
         properties: feature.attributes,
         location,
@@ -268,52 +215,11 @@ const processArcGISResponse = (arcgisResponse: any) => {
           location_type: geocode.location_type
         }
       };
-      
-      console.log('Processed combined result:', result);
-      return result;
-    } else {
-      console.warn('No boundary features found in combined response');
-      // Create a fallback boundary
-      const size = 0.0004; // Roughly 50 meters
-      const centerX = geocode.location.x;
-      const centerY = geocode.location.y;
-      
-      const fallbackBoundary = [
-        [
-          [centerX - size, centerY - size],
-          [centerX + size, centerY - size],
-          [centerX + size, centerY + size],
-          [centerX - size, centerY + size],
-          [centerX - size, centerY - size]
-        ]
-      ];
-      
-      // Create fallback result
-      const result = {
-        boundary: {
-          coordinates: fallbackBoundary,
-          type: 'Polygon'
-        },
-        properties: {
-          address: geocode.address
-        },
-        location: [geocode.location.x, geocode.location.y] as [number, number],
-        address: geocode.address || '',
-        display: {
-          address: geocode.address,
-          score: geocode.score,
-          location_type: geocode.location_type
-        }
-      };
-      
-      console.log('Created fallback result for combined response:', result);
-      return result;
     }
   }
   
   // Handle direct query responses (address components or location)
   if (arcgisResponse.features && arcgisResponse.features.length > 0) {
-    console.log('Processing direct features response, found features:', arcgisResponse.features.length);
     const features = arcgisResponse.features;
     
     return features.map((feature: any) => {
@@ -348,11 +254,10 @@ const processArcGISResponse = (arcgisResponse: any) => {
         if (attrs.POSTCODE) address += ' ' + attrs.POSTCODE;
       }
       
-      // For consistency with other code that expects specific format
-      const processedFeature = {
+      return {
         boundary: {
           coordinates: boundaryCoordinates,
-          type: feature.geometry.type || 'Polygon'
+          type: feature.geometry.type
         },
         properties: feature.attributes,
         location,
@@ -360,13 +265,9 @@ const processArcGISResponse = (arcgisResponse: any) => {
         // Raw geometry for rendering
         geometry: feature.geometry
       };
-      
-      console.log('Processed feature:', processedFeature);
-      return processedFeature;
     });
   }
   
-  console.warn('No recognizable format in ArcGIS response, returning null');
   // Return empty result if no features found
   return null;
 };

@@ -1,11 +1,8 @@
 import { supabase } from '@/integrations/supabase/client';
 import { mockSearchAddress } from './mockArcGIS';
-import { directGeocode } from './directArcGISService';
-import { getArcGISToken } from '../utils/arcgisToken';
 
 // Environment detection - helps determine if we should use mock data
 const isDevelopment = process.env.NODE_ENV === 'development';
-const hasDirectToken = !!getArcGISToken();
 
 /**
  * Search for an address using ArcGIS Geocoding API
@@ -16,12 +13,6 @@ export const searchAddress = async (searchQuery: string) => {
   try {
     if (!searchQuery.trim()) {
       return { data: null, error: 'Search query is required' };
-    }
-    
-    // If we have a direct token in the browser, use it instead of Edge Function
-    if (isDevelopment && hasDirectToken) {
-      console.log('Using direct ArcGIS API with token for geocoding...');
-      return await directGeocode(searchQuery);
     }
 
     // Call our Supabase Edge Function

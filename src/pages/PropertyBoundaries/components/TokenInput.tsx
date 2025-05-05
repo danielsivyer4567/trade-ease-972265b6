@@ -1,114 +1,83 @@
-import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
-import { getArcGISToken, setArcGISToken } from '../utils/arcgisToken';
-import { Loader2, MapPin, Key } from 'lucide-react';
+import { setArcGISToken } from '../utils/arcgisToken';
 import { toast } from 'sonner';
 
 interface TokenInputProps {
-  onTokenSet?: () => void;
+  onTokenSet: () => void;
 }
 
 export const TokenInput: React.FC<TokenInputProps> = ({ onTokenSet }) => {
-  const [token, setToken] = useState<string>('');
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [hasToken, setHasToken] = useState<boolean>(false);
-  
-  // Check if we already have a token
-  useEffect(() => {
-    const existingToken = getArcGISToken();
-    setHasToken(!!existingToken);
-    if (existingToken) {
-      setToken(existingToken);
-    }
-  }, []);
-  
-  const handleTokenSave = () => {
-    if (!token || token.trim().length < 10) {
+  const [token, setToken] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!token.trim()) {
       toast.error('Please enter a valid token');
       return;
     }
     
-    setIsLoading(true);
+    setIsSubmitting(true);
     
-    // Simulate token validation
-    setTimeout(() => {
-      try {
-        setArcGISToken(token.trim());
-        setHasToken(true);
-        toast.success('Token saved successfully');
-        
-        if (onTokenSet) {
-          onTokenSet();
-        }
-      } catch (error) {
-        console.error('Error saving token:', error);
-        toast.error('Failed to save token');
-      } finally {
-        setIsLoading(false);
-      }
-    }, 600);
+    try {
+      // Save the token
+      setArcGISToken(token);
+      toast.success('ArcGIS token saved successfully');
+      onTokenSet();
+    } catch (error) {
+      console.error('Error saving token:', error);
+      toast.error('Failed to save token');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
-  
+
   return (
-    <Card className="w-full shadow-md">
-      <CardHeader className="bg-slate-50 border-b border-slate-100">
-        <CardTitle className="text-lg flex items-center gap-2">
-          <Key className="h-5 w-5 text-blue-600" />
-          ArcGIS Configuration
-        </CardTitle>
+    <Card className="w-full mb-4">
+      <CardHeader>
+        <CardTitle>ArcGIS Token Configuration</CardTitle>
+        <CardDescription>
+          Enter your ArcGIS token to access property boundary data
+        </CardDescription>
       </CardHeader>
-      <CardContent className="pt-6">
-        <div className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="arcgis-token">ArcGIS API Token</Label>
-            <Input
-              id="arcgis-token"
-              placeholder="Enter your ArcGIS token here..."
-              value={token}
-              onChange={(e) => setToken(e.target.value)}
-              className="font-mono text-sm"
-            />
+      <form onSubmit={handleSubmit}>
+        <CardContent>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="token">ArcGIS Token</Label>
+              <Input 
+                id="token"
+                type="text" 
+                value={token} 
+                onChange={(e) => setToken(e.target.value)}
+                placeholder="Enter your ArcGIS token"
+                disabled={isSubmitting}
+              />
+            </div>
           </div>
-          
-          <div className="text-sm text-muted-foreground">
-            {hasToken ? (
-              <div className="p-2 bg-green-50 text-green-700 rounded-md flex items-center gap-2">
-                <MapPin className="h-4 w-4" />
-                <span>Token is set and ready to use</span>
-              </div>
-            ) : (
-              <div className="p-2 bg-amber-50 text-amber-700 rounded-md">
-                A valid ArcGIS token is required to view property boundaries on the map.
-              </div>
-            )}
-          </div>
-        </div>
-      </CardContent>
-      <CardFooter className="border-t bg-slate-50 flex justify-end gap-2 p-3">
-        <Button
-          variant="outline"
-          onClick={() => setToken('')}
-          disabled={isLoading || !token}
-        >
-          Clear
-        </Button>
-        <Button
-          onClick={handleTokenSave}
-          disabled={isLoading || !token || token === getArcGISToken()}
-        >
-          {isLoading ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Saving...
-            </>
-          ) : (
-            'Save Token'
-          )}
-        </Button>
-      </CardFooter>
+        </CardContent>
+        <CardFooter className="flex justify-between">
+          <Button 
+            type="button" 
+            variant="outline" 
+            onClick={() => onTokenSet()}
+            disabled={isSubmitting}
+          >
+            Skip
+          </Button>
+          <Button 
+            type="submit"
+            disabled={!token.trim() || isSubmitting}
+          >
+            {isSubmitting ? 'Saving...' : 'Save Token'}
+          </Button>
+        </CardFooter>
+      </form>
     </Card>
   );
 }; 
