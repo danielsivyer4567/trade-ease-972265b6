@@ -1,6 +1,5 @@
-
-import React, { useState } from 'react';
-import { GoogleMap, LoadScript, InfoWindow, Polygon } from '@react-google-maps/api';
+import React, { useState, useEffect } from 'react';
+import { GoogleMap, LoadScript, InfoWindow, Polygon, useLoadScript } from '@react-google-maps/api';
 import type { Job } from '@/types/job';
 import { Briefcase } from 'lucide-react';
 
@@ -15,7 +14,11 @@ interface JobMapProps {
   boundaries?: Array<Array<[number, number]>>;
 }
 
-const JobMap = ({ jobs = [], center, zoom = 14, markers = [], boundaries = [] }: JobMapProps) => {
+// Define libraries to load
+const libraries = ["marker"];
+
+// Create a separate map component without the LoadScript wrapper
+const MapComponent = ({ jobs = [], center, zoom = 14, markers = [], boundaries = [] }: JobMapProps) => {
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
 
   const mapContainerStyle = {
@@ -133,33 +136,46 @@ const JobMap = ({ jobs = [], center, zoom = 14, markers = [], boundaries = [] }:
   };
 
   return (
-    <LoadScript 
-      googleMapsApiKey="AIzaSyAnIcvNA_ZjRUnN4aeyl-1MYpBSN-ODIvw"
-      libraries={["marker"]}
-      version="beta"
+    <GoogleMap
+      mapContainerStyle={mapContainerStyle}
+      center={mapCenter}
+      zoom={zoom}
+      options={options}
+      onLoad={onLoad}
     >
-      <GoogleMap
-        mapContainerStyle={mapContainerStyle}
-        center={mapCenter}
-        zoom={zoom}
-        options={options}
-        onLoad={onLoad}
-      >
-        {selectedJob && (
-          <InfoWindow
-            position={{ lat: selectedJob.location[1], lng: selectedJob.location[0] }}
-            onCloseClick={() => setSelectedJob(null)}
-          >
-            <div>
-              <h3 className="font-semibold">{selectedJob.customer}</h3>
-              <p>{selectedJob.type}</p>
-              <p className="text-sm text-gray-500">{selectedJob.date}</p>
-            </div>
-          </InfoWindow>
-        )}
-      </GoogleMap>
-    </LoadScript>
+      {selectedJob && (
+        <InfoWindow
+          position={{ lat: selectedJob.location[1], lng: selectedJob.location[0] }}
+          onCloseClick={() => setSelectedJob(null)}
+        >
+          <div>
+            <h3 className="font-semibold">{selectedJob.customer}</h3>
+            <p>{selectedJob.type}</p>
+            <p className="text-sm text-gray-500">{selectedJob.date}</p>
+          </div>
+        </InfoWindow>
+      )}
+    </GoogleMap>
   );
+};
+
+// Main JobMap component using useLoadScript hook
+const JobMap = (props: JobMapProps) => {
+  const { isLoaded, loadError } = useLoadScript({
+    googleMapsApiKey: "AIzaSyAnIcvNA_ZjRUnN4aeyl-1MYpBSN-ODIvw",
+    libraries: libraries as any,
+    version: "beta"
+  });
+
+  if (loadError) {
+    return <div className="p-4 text-red-500">Error loading maps</div>;
+  }
+
+  if (!isLoaded) {
+    return <div className="p-4">Loading maps...</div>;
+  }
+
+  return <MapComponent {...props} />;
 };
 
 export default JobMap;
