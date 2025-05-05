@@ -286,7 +286,7 @@ export const SimpleJobDetail = ({ job }: JobDetailProps) => {
               {/* Photos Gallery */}
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle>Photos Gallery /Plans</CardTitle>
+                  <CardTitle>Plans/Drawings</CardTitle>
                   <div>
                     <label htmlFor="photo-upload-main" className="cursor-pointer">
                       <Button variant="outline" size="sm" asChild>
@@ -317,7 +317,7 @@ export const SimpleJobDetail = ({ job }: JobDetailProps) => {
                           <img 
                             src={photo.url} 
                             alt={photo.caption} 
-                            className="w-full h-32 object-cover cursor-pointer" 
+                            className="w-full h-48 object-cover cursor-pointer" 
                             onClick={() => setSelectedPhoto(photo)}
                           />
                           <div className="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
