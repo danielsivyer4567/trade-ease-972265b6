@@ -1,259 +1,48 @@
 import { useParams, useNavigate } from 'react-router-dom';
-import { JobHeader } from './components/JobHeader';
-import { JobTabs } from './components/JobTabs';
-import { useState, useEffect } from 'react';
-import { DocumentApproval } from './components/document-approval/DocumentApproval';
-import { useJobTimer } from './hooks/useJobTimer';
-import { useJobLocation } from './hooks/useJobLocation';
-import { useJobFinancialData } from './hooks/useJobFinancialData';
-import { AppLayout } from '@/components/ui/AppLayout';
-import { JobsHeader } from './components/JobsHeader';
-import { JobLoadingState } from './components/JobLoadingState';
-import { JobMapView } from './components/JobMapView';
-import { useJobData } from './hooks/useJobData';
-import { JobStepProgress } from '@/components/dashboard/JobStepProgress';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Camera, Share2, Phone, Mail, MessageSquare } from 'lucide-react';
-import { toast } from 'sonner';
-import { AutomationIntegrationService } from '@/services/AutomationIntegrationService';
-import { usePhotoSharing } from '@/hooks/usePhotoSharing';
-import { PhotoSharingModal } from '@/components/sharing/PhotoSharingModal';
-import { useOpenInTab } from './hooks/useOpenInTab';
+import { useState } from 'react';
+import { Button } from "@/components/ui/button";
+import { ArrowLeft } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { AlertCircle } from 'lucide-react';
+import { useJobData } from './hooks/useJobData';
+import { JobDetail } from './components/JobDetail';
+import { Card, CardContent } from '@/components/ui/card';
 
-export function JobDetails() {
+export default function JobDetails() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [jobNotes, setJobNotes] = useState("");
-  const isManager = true;
-  
   const { job, loading, error } = useJobData(id);
-  
-  // Use the openInTab hook to automatically handle tab management
-  const { openInTab } = useOpenInTab();
-  
-  // Add an effect to handle tab creation when job data is loaded
-  useEffect(() => {
-    if (job && !loading && id) {
-      // Create a tab with the job information
-      openInTab(`/jobs/${id}`, job.title || job.jobNumber, `job-${id}`);
-    }
-  }, [job, loading, id, openInTab]);
-  
-  const {
-    jobTimer,
-    isTimerRunning,
-    isOnBreak,
-    setIsTimerRunning,
-    handleBreakToggle
-  } = useJobTimer();
-  
-  const {
-    hasLocationPermission,
-    locationHistory,
-    handleTimerToggle: locationHandleTimerToggle
-  } = useJobLocation();
-  
-  const {
-    extractedFinancialData,
-    tabNotes,
-    setTabNotes,
-    handleFinancialDataExtracted
-  } = useJobFinancialData(id);
-  
-  const {
-    isPhotoSharingOpen,
-    openPhotoSharing,
-    closePhotoSharing
-  } = usePhotoSharing();
-  
-  const handleTimerToggle = () => {
-    locationHandleTimerToggle(isTimerRunning, setIsTimerRunning);
-  };
-  
-  const handleSendPhotosToCustomer = () => {
-    if (!id) return;
-    openPhotoSharing('job', id);
-  };
-  
+
   if (loading) {
     return (
-      <div className="container mx-auto p-4">
+      <div className="container mx-auto py-6">
+        <Skeleton className="h-8 w-48 mb-4" />
+        <Skeleton className="h-48 w-full mb-4" />
+        <Skeleton className="h-96 w-full" />
+      </div>
+    );
+  }
+
+  if (error || !job) {
+    return (
+      <div className="container mx-auto py-6">
+        <Button 
+          variant="ghost" 
+          className="mb-4"
+          onClick={() => navigate('/jobs')}
+        >
+          <ArrowLeft className="mr-2 h-4 w-4" /> Back to Jobs
+        </Button>
         <Card>
-          <CardHeader>
-            <Skeleton className="h-8 w-1/3" />
-          </CardHeader>
-          <CardContent>
-            <Skeleton className="h-4 w-full mb-4" />
-            <Skeleton className="h-4 w-3/4 mb-4" />
-            <Skeleton className="h-4 w-1/2" />
+          <CardContent className="pt-6">
+            <div className="text-center py-8">
+              <h2 className="text-2xl font-semibold mb-2">Error</h2>
+              <p className="text-muted-foreground">{error || 'Job not found'}</p>
+            </div>
           </CardContent>
         </Card>
       </div>
     );
   }
 
-  if (error) {
-    return (
-      <div className="container mx-auto p-4">
-        <Alert variant="destructive">
-          <AlertCircle className="h-4 w-4" />
-          <AlertTitle>Error</AlertTitle>
-          <AlertDescription>
-            {error === "Job not found" 
-              ? "The job you're looking for doesn't exist or has been removed."
-              : error}
-          </AlertDescription>
-          <div className="mt-4">
-            <Button onClick={() => navigate('/jobs')}>
-              Back to Jobs
-            </Button>
-          </div>
-        </Alert>
-      </div>
-    );
-  }
-
-  if (!job) {
-    return (
-      <div className="container mx-auto p-4">
-        <Alert variant="destructive">
-          <AlertCircle className="h-4 w-4" />
-          <AlertTitle>Error</AlertTitle>
-          <AlertDescription>
-            Unable to load job details. Please try again later.
-          </AlertDescription>
-          <div className="mt-4">
-            <Button onClick={() => navigate('/jobs')}>
-              Back to Jobs
-            </Button>
-          </div>
-        </Alert>
-      </div>
-    );
-  }
-  
-  return (
-    <AppLayout>
-      <div className="container-responsive mx-auto">
-        <JobsHeader navigateTo="/jobs" />
-        
-        <div className="max-w-7xl mx-auto pb-24">
-          {/* Hero section with Job Info and Map */}
-          <div className="bg-white rounded-lg shadow-sm overflow-hidden mb-6">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-0">
-              {/* Left side - Job information */}
-              <div className="lg:col-span-1 p-6 flex flex-col justify-between">
-                <div>
-                  <h1 className="text-2xl font-bold truncate mb-2">{job.customer}</h1>
-                  <p className="text-lg text-gray-600 mb-4">{job.address}</p>
-                  
-                  <div className="space-y-4 mb-6">
-                    <div className="flex items-center space-x-2">
-                      <div className="bg-blue-100 p-2 rounded-full">
-                        <Phone className="h-4 w-4 text-blue-600" />
-                      </div>
-                      <span className="text-gray-700">Contact Customer</span>
-                    </div>
-                    
-                    <div className="flex items-center space-x-2">
-                      <div className="bg-green-100 p-2 rounded-full">
-                        <Mail className="h-4 w-4 text-green-600" />
-                      </div>
-                      <span className="text-gray-700">Send Email</span>
-                    </div>
-                    
-                    <div className="flex items-center space-x-2">
-                      <div className="bg-purple-100 p-2 rounded-full">
-                        <MessageSquare className="h-4 w-4 text-purple-600" />
-                      </div>
-                      <span className="text-gray-700">Send Message</span>
-                    </div>
-                  </div>
-                  
-                  <div className="bg-gray-100 p-3 rounded-lg mb-4">
-                    <div className="flex justify-between text-sm">
-                      <span className="text-gray-500">Job Type:</span>
-                      <span className="font-medium">{job.type}</span>
-                    </div>
-                    <div className="flex justify-between text-sm mt-2">
-                      <span className="text-gray-500">Status:</span>
-                      <span className="font-medium">{job.status}</span>
-                    </div>
-                    <div className="flex justify-between text-sm mt-2">
-                      <span className="text-gray-500">Date:</span>
-                      <span className="font-medium">{job.date}</span>
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="flex space-x-2 mt-4">
-                  <Button className="flex-1" size="sm">
-                    <Camera className="h-4 w-4 mr-2" />
-                    Photos
-                  </Button>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    className="flex-1"
-                    onClick={handleSendPhotosToCustomer}
-                  >
-                    <Share2 className="h-4 w-4 mr-2" />
-                    Share
-                  </Button>
-                </div>
-              </div>
-              
-              {/* Right side - Map */}
-              <div className="lg:col-span-2 h-[450px]">
-                <JobMapView job={job} />
-              </div>
-            </div>
-          </div>
-          
-          {/* Job Progress Steps */}
-          <Card className="bg-white shadow-sm py-3 px-3 sm:px-6 mb-6">
-            <JobStepProgress />
-          </Card>
-          
-          {/* Job Tabs */}
-          <JobTabs 
-            job={job} 
-            isManager={isManager} 
-            jobTimer={jobTimer} 
-            jobNotes={jobNotes} 
-            setJobNotes={setJobNotes} 
-            tabNotes={tabNotes} 
-            setTabNotes={setTabNotes} 
-            locationHistory={locationHistory} 
-            hasLocationPermission={hasLocationPermission} 
-            handleTimerToggle={handleTimerToggle} 
-            handleBreakToggle={handleBreakToggle} 
-            isTimerRunning={isTimerRunning} 
-            isOnBreak={isOnBreak} 
-            extractedFinancialData={extractedFinancialData} 
-          />
-
-          {isManager && (
-            <div className="mt-8 mb-8">
-              <DocumentApproval 
-                jobId={job.id} 
-                onFinancialDataExtracted={handleFinancialDataExtracted} 
-              />
-            </div>
-          )}
-        </div>
-      </div>
-      
-      <PhotoSharingModal 
-        isOpen={isPhotoSharingOpen} 
-        onClose={closePhotoSharing} 
-        initialSource="job"
-        jobId={id}
-      />
-    </AppLayout>
-  );
+  return <JobDetail job={job} />;
 }
