@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
+import JobMap from "@/components/JobMap";
 
 interface JobDetailProps {
   job: Job;
@@ -32,11 +33,11 @@ export const SimpleJobDetail = ({ job }: JobDetailProps) => {
       {/* Map/Location header section */}
       <div className="relative h-64 bg-gray-300">
         <div className="absolute inset-0">
-          {/* This would be a map component */}
-          <img 
-            src="https://maps.googleapis.com/maps/api/staticmap?center=-33.8688,151.2093&zoom=14&size=800x250&key=YOUR_API_KEY" 
-            alt="Location map"
-            className="w-full h-full object-cover"
+          {/* Real Google Maps component instead of static image */}
+          <JobMap 
+            jobs={[job]}
+            center={job.location}
+            zoom={15}
           />
         </div>
       </div>
@@ -52,6 +53,16 @@ export const SimpleJobDetail = ({ job }: JobDetailProps) => {
                 {job.status}
               </span>
               <span className="ml-2 text-sm text-gray-500">{job.date}</span>
+            </div>
+            
+            {/* Job address information */}
+            <div className="mt-3 text-sm text-gray-600">
+              <p>
+                <strong>Address:</strong> {job.address || 'N/A'}
+                {job.city && job.state && job.zipCode && (
+                  <span>, {job.city}, {job.state} {job.zipCode}</span>
+                )}
+              </p>
             </div>
           </div>
           

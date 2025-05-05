@@ -90,10 +90,13 @@ function JobsDetailPage() {
 
   return (
     <div className="h-screen flex flex-col">
-      <div className="p-4">
-        <Button variant="outline" onClick={() => navigate('/jobs')}>
-          <ArrowLeft className="mr-2 h-4 w-4" /> Back to Jobs
-        </Button>
+      <div className="p-4 bg-white shadow-sm">
+        <div className="flex justify-between items-center">
+          <h1 className="text-xl font-bold hidden md:block">{job.title || `Job: ${job.jobNumber}`}</h1>
+          <Button variant="outline" onClick={() => navigate('/jobs')}>
+            <ArrowLeft className="mr-2 h-4 w-4" /> Back to Jobs
+          </Button>
+        </div>
       </div>
       
       {/* Use our new SimpleJobDetail component */}
