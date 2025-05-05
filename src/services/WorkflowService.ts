@@ -295,7 +295,10 @@ export const WorkflowService = {
           description: item.description,
           category: item.category,
           data: item.data,
-          is_template: item.is_template
+          is_template: item.is_template,
+          created_at: item.created_at,
+          updated_at: item.updated_at,
+          user_id: item.user_id
         }))
       };
     } catch (error) {
@@ -325,7 +328,10 @@ export const WorkflowService = {
           description: item.description,
           category: item.category,
           data: item.data,
-          is_template: item.is_template
+          is_template: item.is_template,
+          created_at: item.created_at,
+          updated_at: item.updated_at,
+          user_id: item.user_id
         }))
       };
     } catch (error) {
