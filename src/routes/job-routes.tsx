@@ -7,7 +7,7 @@ import ErrorBoundary from '@/components/ErrorBoundary';
 // Import pages
 const JobsPage = React.lazy(() => import('@/pages/Jobs'));
 const NewJobPage = React.lazy(() => import('@/pages/Jobs/NewJob'));
-const JobDetailsPage = React.lazy(() => import('@/pages/Jobs/JobDetails').then(module => ({ default: module.JobDetails })));
+const JobDetailsPage = React.lazy(() => import('@/pages/Jobs/JobDetails'));
 const NewTemplatePage = React.lazy(() => import('@/pages/Jobs/NewTemplate'));
 const PropertyBoundariesPage = React.lazy(() => import('@/pages/PropertyBoundaries'));
 const CustomerProgressPage = React.lazy(() => import('@/pages/Jobs/CustomerProgress'));
