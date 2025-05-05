@@ -81,63 +81,69 @@ export function JobDetails() {
   
   if (loading) {
     return (
-      <div className="container mx-auto p-4">
-        <Card>
-          <CardHeader>
-            <Skeleton className="h-8 w-1/3" />
-          </CardHeader>
-          <CardContent>
-            <Skeleton className="h-4 w-full mb-4" />
-            <Skeleton className="h-4 w-3/4 mb-4" />
-            <Skeleton className="h-4 w-1/2" />
-          </CardContent>
-        </Card>
-      </div>
+      <AppLayout showQuickTabs={true}>
+        <div className="container mx-auto p-4">
+          <Card>
+            <CardHeader>
+              <Skeleton className="h-8 w-1/3" />
+            </CardHeader>
+            <CardContent>
+              <Skeleton className="h-4 w-full mb-4" />
+              <Skeleton className="h-4 w-3/4 mb-4" />
+              <Skeleton className="h-4 w-1/2" />
+            </CardContent>
+          </Card>
+        </div>
+      </AppLayout>
     );
   }
 
   if (error) {
     return (
-      <div className="container mx-auto p-4">
-        <Alert variant="destructive">
-          <AlertCircle className="h-4 w-4" />
-          <AlertTitle>Error</AlertTitle>
-          <AlertDescription>
-            {error === "Job not found" 
-              ? "The job you're looking for doesn't exist or has been removed."
-              : error}
-          </AlertDescription>
-          <div className="mt-4">
-            <Button onClick={() => navigate('/jobs')}>
-              Back to Jobs
-            </Button>
-          </div>
-        </Alert>
-      </div>
+      <AppLayout showQuickTabs={true}>
+        <div className="container mx-auto p-4">
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>Error</AlertTitle>
+            <AlertDescription>
+              {error === "Job not found" 
+                ? "The job you're looking for doesn't exist or has been removed."
+                : error}
+            </AlertDescription>
+            <div className="mt-4">
+              <Button onClick={() => navigate('/jobs')}>
+                Back to Jobs
+              </Button>
+            </div>
+          </Alert>
+        </div>
+      </AppLayout>
     );
   }
 
   if (!job) {
     return (
-      <div className="container mx-auto p-4">
-        <Alert variant="destructive">
-          <AlertCircle className="h-4 w-4" />
-          <AlertTitle>Error</AlertTitle>
-          <AlertDescription>
-            Unable to load job details. Please try again later.
-          </AlertDescription>
-          <div className="mt-4">
-            <Button onClick={() => navigate('/jobs')}>
-              Back to Jobs
-            </Button>
-          </div>
-        </Alert>
-      </div>
+      <AppLayout showQuickTabs={true}>
+        <div className="container mx-auto p-4">
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>Error</AlertTitle>
+            <AlertDescription>
+              Unable to load job details. Please try again later.
+            </AlertDescription>
+            <div className="mt-4">
+              <Button onClick={() => navigate('/jobs')}>
+                Back to Jobs
+              </Button>
+            </div>
+          </Alert>
+        </div>
+      </AppLayout>
     );
   }
   
   return (
-    <AppLayout>
+    <AppLayout showQuickTabs={true}>
       <div className="container-responsive mx-auto">
         <JobsHeader navigateTo="/jobs" />
         <div className="space-y-4 sm:space-y-6 p-2 sm:p-4 max-w-7xl mx-auto pb-24 bg-slate-200">
