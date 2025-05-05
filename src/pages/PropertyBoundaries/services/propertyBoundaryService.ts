@@ -3,7 +3,7 @@ import { Property } from '../types';
 import { 
   mockGetPropertyBoundaries, 
   mockGetAdvancedPropertyBoundaries 
-} from './mockData';
+} from './mockArcGIS';
 
 // Environment detection - helps determine if we should use mock data
 const isDevelopment = process.env.NODE_ENV === 'development';
