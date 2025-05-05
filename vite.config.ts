@@ -72,11 +72,6 @@ export default defineConfig({
     'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'development'),
     '__REACT_REFRESH_RUNTIME__': JSON.stringify(true)
   },
-  experimental: {
-    renderBuiltUrl(filename: string) {
-      return filename;
-    },
-  },
   base: '/',
   publicDir: 'public'
 });
