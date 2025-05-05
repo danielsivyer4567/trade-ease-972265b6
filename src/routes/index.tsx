@@ -34,7 +34,6 @@ const SiteAuditsPage = lazy(() => import('@/pages/SiteAudits'));
 const JobsPage = lazy(() => import('@/pages/Jobs'));
 const NewJobPage = lazy(() => import('@/pages/Jobs/NewJob'));
 const JobDetailsPage = lazy(() => import('@/pages/Jobs/JobDetails').then(module => ({ default: module.JobDetails })));
-const JobsDetailPage = lazy(() => import('@/pages/Jobs/JobsDetailPage'));
 
 // Quotes and Invoices
 const QuotesPage = lazy(() => import('@/pages/Quotes'));
@@ -160,7 +159,7 @@ const routeObjects: RouteObject[] = [
             children: [
               { index: true, element: <SuspenseWrapper><JobsPage /></SuspenseWrapper> },
               { path: "new", element: <SuspenseWrapper><NewJobPage /></SuspenseWrapper> },
-              { path: ":id", element: <SuspenseWrapper><JobsDetailPage /></SuspenseWrapper> },
+              { path: ":id", element: <SuspenseWrapper><JobDetailsPage /></SuspenseWrapper> },
               { path: ":id/detail", element: <SuspenseWrapper><JobDetailsPage /></SuspenseWrapper> },
             ],
           },
