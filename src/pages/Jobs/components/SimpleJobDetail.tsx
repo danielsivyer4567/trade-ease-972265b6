@@ -286,7 +286,7 @@ export const SimpleJobDetail = ({ job }: JobDetailProps) => {
               {/* Photos Gallery */}
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle>Photos Gallery</CardTitle>
+                  <CardTitle>Photos Gallery /Plans</CardTitle>
                   <div>
                     <label htmlFor="photo-upload-main" className="cursor-pointer">
                       <Button variant="outline" size="sm" asChild>
