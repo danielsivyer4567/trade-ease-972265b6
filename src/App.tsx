@@ -7,12 +7,9 @@ import { Analytics } from '@vercel/analytics/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster as SonnerToaster } from 'sonner';
 import { NotificationProvider } from './components/notifications/NotificationContextProvider';
-import { TabsProvider } from './contexts/TabsContext';
 import { WorkflowDarkModeProvider } from './contexts/WorkflowDarkModeContext';
-import { GoogleMapsProvider } from './components/GoogleMapsProvider';
-import { LeafletProvider } from './components/LeafletProvider';
 import { initializeTables } from './integrations/supabase/dbInit';
-import ErrorBoundary from '@/components/ErrorBoundary';
+import { ErrorBoundary } from 'react-error-boundary';
 import './App.css';
 
 const queryClient = new QueryClient({
@@ -30,15 +27,27 @@ const LoadingFallback = () => (
   </div>
 );
 
-const AppWithTabsProvider = ({ children = null }) => (
-  <TabsProvider>
-    <WorkflowDarkModeProvider>
-      {children}
-      <Toaster />
-      <SonnerToaster position="bottom-right" closeButton richColors />
-      <Analytics />
-    </WorkflowDarkModeProvider>
-  </TabsProvider>
+const ErrorFallback = ({ error, resetErrorBoundary }) => (
+  <div className="flex h-screen w-screen flex-col items-center justify-center p-6 text-center">
+    <h2 className="text-2xl font-bold text-red-600">Something went wrong!</h2>
+    <p className="mt-2 mb-4">{error.message || 'An unexpected error occurred'}</p>
+    <button
+      onClick={resetErrorBoundary}
+      className="rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
+    >
+      Try again
+    </button>
+  </div>
+);
+
+// Base UI components that don't depend on router
+const AppUIComponents = ({ children = null }) => (
+  <WorkflowDarkModeProvider>
+    {children}
+    <Toaster />
+    <SonnerToaster position="bottom-right" closeButton richColors />
+    <Analytics />
+  </WorkflowDarkModeProvider>
 );
 
 function App() {
@@ -57,19 +66,15 @@ function App() {
   }
 
   return (
-    <ErrorBoundary>
+    <ErrorBoundary FallbackComponent={ErrorFallback}>
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
           <NotificationProvider>
-            <GoogleMapsProvider>
-              <LeafletProvider>
-                <AppWithTabsProvider>
-                  <Suspense fallback={<LoadingFallback />}>
-                    <RouterProvider router={router} />
-                  </Suspense>
-                </AppWithTabsProvider>
-              </LeafletProvider>
-            </GoogleMapsProvider>
+            <AppUIComponents>
+              <Suspense fallback={<LoadingFallback />}>
+                <RouterProvider router={router} />
+              </Suspense>
+            </AppUIComponents>
           </NotificationProvider>
         </AuthProvider>
       </QueryClientProvider>

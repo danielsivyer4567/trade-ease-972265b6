@@ -1,7 +1,6 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Loader2, Calendar as CalendarIcon, CheckCircle, XCircle } from "lucide-react";
+import { Loader2, Calendar as CalendarIcon, CheckCircle, Eye, FileText, ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import type { Job } from "@/types/job";
@@ -30,89 +29,83 @@ export const JobActions = ({ job, actionLoading, onStatusChange }: JobActionsPro
   };
 
   return (
-    <div className="flex space-x-2">
+    <div className="flex items-center space-x-1.5">
       <Button
-        variant="outline"
+        variant="ghost" 
         size="sm"
         onClick={(e) => {
           e.stopPropagation();
           navigate(`/jobs/${job.id}`);
         }}
+        className="h-8 w-8 p-0 text-gray-700 hover:text-blue-600 hover:bg-blue-50"
       >
-        View
+        <Eye className="h-4 w-4" />
       </Button>
       
       {job.status === 'in-progress' && (
         <Button 
-          variant="outline" 
+          variant="ghost" 
           size="sm"
           onClick={(e) => {
             e.stopPropagation();
             onStatusChange(job.id, 'to-invoice');
           }}
           disabled={actionLoading === job.id}
+          className="h-8 w-8 p-0 text-gray-700 hover:text-green-600 hover:bg-green-50"
         >
           {actionLoading === job.id ? (
             <Loader2 className="h-4 w-4 animate-spin" />
           ) : (
-            <CheckCircle className="h-4 w-4 mr-1" />
+            <CheckCircle className="h-4 w-4" />
           )}
-          <span>Complete</span>
         </Button>
       )}
       
       {job.status === 'to-invoice' && (
         <Button 
-          variant="outline" 
+          variant="ghost" 
           size="sm"
           onClick={(e) => {
             e.stopPropagation();
             onStatusChange(job.id, 'invoiced');
           }}
           disabled={actionLoading === job.id}
+          className="h-8 w-8 p-0 text-gray-700 hover:text-purple-600 hover:bg-purple-50"
         >
           {actionLoading === job.id ? (
             <Loader2 className="h-4 w-4 animate-spin" />
           ) : (
-            <span>Invoice</span>
+            <FileText className="h-4 w-4" />
           )}
         </Button>
       )}
       
-      {job.date && job.status !== 'clean-required' && (
+      {job.date && (
         <Button 
-          variant="outline" 
+          variant="ghost" 
           size="sm"
           onClick={(e) => {
             e.stopPropagation();
             viewInCalendar(job);
           }}
-          className="text-blue-600 border-blue-300 hover:bg-blue-50"
+          className="h-8 w-8 p-0 text-gray-700 hover:text-blue-600 hover:bg-blue-50"
         >
-          <CalendarIcon className="h-4 w-4 mr-1" />
-          <span>Calendar</span>
+          <CalendarIcon className="h-4 w-4" />
         </Button>
       )}
       
-      {job.status !== 'clean-required' && job.status !== 'invoiced' && (
-        <Button 
-          variant="outline" 
-          size="sm"
-          onClick={(e) => {
-            e.stopPropagation();
-            onStatusChange(job.id, 'clean-required');
-          }}
-          disabled={actionLoading === job.id}
-          className="text-red-600 border-red-300 hover:bg-red-50"
-        >
-          {actionLoading === job.id ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
-          ) : (
-            <XCircle className="h-4 w-4 mr-1" />
-          )}
-          <span>Mark for Cleaning</span>
-        </Button>
-      )}
+      <Button
+        variant="ghost" 
+        size="sm"
+        onClick={(e) => {
+          e.stopPropagation();
+          navigate(`/jobs/${job.id}/progress`);
+        }}
+        className="flex h-8 px-3 items-center text-xs text-blue-600 hover:bg-blue-50 hover:text-blue-700"
+      >
+        <span className="mr-1">Details</span>
+        <ArrowRight className="h-3 w-3" />
+      </Button>
     </div>
   );
 };

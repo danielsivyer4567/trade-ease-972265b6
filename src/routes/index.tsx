@@ -9,7 +9,6 @@ import { paymentRoutes } from './payment-routes';
 import { financialRoutes } from './financial-routes';
 import { activityRoutes } from './activity-routes';
 import { AppLayoutWithTabs } from '@/components/AppLayoutWithTabs';
-import ErrorBoundary from '@/components/ErrorBoundary';
 // Lazy load workflow pages
 const WorkflowPage = lazy(() => import('@/pages/Workflow/index.new').then(module => ({ default: module.default })));
 const WorkflowTemplates = lazy(() => import('@/pages/Workflow/templates').then(module => ({ default: module.default })));
@@ -35,6 +34,7 @@ const SiteAuditsPage = lazy(() => import('@/pages/SiteAudits'));
 const JobsPage = lazy(() => import('@/pages/Jobs'));
 const NewJobPage = lazy(() => import('@/pages/Jobs/NewJob'));
 const JobDetailsPage = lazy(() => import('@/pages/Jobs/JobDetails').then(module => ({ default: module.JobDetails })));
+const JobsDetailPage = lazy(() => import('@/pages/Jobs/JobsDetailPage'));
 
 // Quotes and Invoices
 const QuotesPage = lazy(() => import('@/pages/Quotes'));
@@ -86,20 +86,7 @@ const CalculatorsPage = lazy(() => import('@/pages/Calculators'));
 const FormsPage = lazy(() => import('@/pages/Forms'));
 const TasksPage = lazy(() => import('@/pages/Tasks'));
 const AIFeaturesPage = lazy(() => import('@/pages/AIFeatures'));
-const PropertyBoundariesPage = lazy(() => 
-  import('@/pages/PropertyBoundaries').then(module => {
-    // Log import result to debug
-    console.log('PropertyBoundaries import successful');
-    return { default: module.default };
-  })
-  .catch(error => {
-    console.error('Error importing PropertyBoundaries:', error);
-    // Return a fallback component
-    return {
-      default: () => <div>Error loading Property Boundaries</div>
-    };
-  })
-);
+const PropertyBoundariesPage = lazy(() => import('@/pages/PropertyBoundaries'));
 const NetworksPage = lazy(() => import('@/pages/Networks'));
 const CredentialsPage = lazy(() => import('@/pages/Credentials'));
 const JobCostCalculator = lazy(() => import('@/pages/Calculators/JobCostCalculator'));
@@ -173,7 +160,8 @@ const routeObjects: RouteObject[] = [
             children: [
               { index: true, element: <SuspenseWrapper><JobsPage /></SuspenseWrapper> },
               { path: "new", element: <SuspenseWrapper><NewJobPage /></SuspenseWrapper> },
-              { path: ":id", element: <SuspenseWrapper><JobDetailsPage /></SuspenseWrapper> },
+              { path: ":id", element: <SuspenseWrapper><JobsDetailPage /></SuspenseWrapper> },
+              { path: ":id/detail", element: <SuspenseWrapper><JobDetailsPage /></SuspenseWrapper> },
             ],
           },
           // Quote routes
@@ -233,13 +221,7 @@ const routeObjects: RouteObject[] = [
           { path: "/forms", element: <SuspenseWrapper><FormsPage /></SuspenseWrapper> },
           { path: "/tasks", element: <SuspenseWrapper><TasksPage /></SuspenseWrapper> },
           { path: "/ai-features", element: <SuspenseWrapper><AIFeaturesPage /></SuspenseWrapper> },
-          { path: "/property-boundaries", element: 
-            <ErrorBoundary>
-              <Suspense fallback={<LoadingFallback />}>
-                <PropertyBoundariesPage />
-              </Suspense>
-            </ErrorBoundary> 
-          },
+          { path: "/property-boundaries", element: <SuspenseWrapper><PropertyBoundariesPage /></SuspenseWrapper> },
           { path: "/networks", element: <SuspenseWrapper><NetworksPage /></SuspenseWrapper> },
           // Credentials route
           { path: "/credentials", element: <SuspenseWrapper><CredentialsPage /></SuspenseWrapper> },

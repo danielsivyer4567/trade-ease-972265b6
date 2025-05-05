@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback } from 'react';
 import { BaseLayout } from "@/components/ui/BaseLayout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Upload } from "lucide-react";
@@ -7,13 +7,10 @@ import { PropertyInfo } from './components/PropertyInfo';
 import { PageHeader } from './components/PageHeader';
 import { AuthNotice } from './components/AuthNotice';
 import { AddressSearch } from './components/AddressSearch';
-import { TokenInput } from './components/TokenInput';
 import { usePropertyBoundaries } from './hooks/usePropertyBoundaries';
 import { supabase } from '@/integrations/supabase/client';
-import ErrorBoundary from '@/components/ErrorBoundary';
-import { getArcGISToken } from './utils/arcgisToken';
 
-const PropertyBoundariesContent: React.FC = () => {
+const PropertyBoundaries: React.FC = () => {
   const {
     properties,
     selectedProperty,
@@ -30,8 +27,6 @@ const PropertyBoundariesContent: React.FC = () => {
     handleDeleteProperty
   } = usePropertyBoundaries();
 
-  const [tokenConfigVisible, setTokenConfigVisible] = useState(!getArcGISToken());
-
   const handleUploadClick = useCallback(() => {
     document.getElementById('file-upload')?.click();
   }, []);
@@ -41,20 +36,11 @@ const PropertyBoundariesContent: React.FC = () => {
 
   React.useEffect(() => {
     const checkAuth = async () => {
-      try {
-        const { data } = await supabase.auth.getUser();
-        setIsAuthenticated(!!data.user);
-      } catch (error) {
-        console.error("Error checking authentication:", error);
-        setIsAuthenticated(false);
-      }
+      const { data } = await supabase.auth.getUser();
+      setIsAuthenticated(!!data.user);
     };
     
     checkAuth();
-  }, []);
-
-  const handleTokenSet = useCallback(() => {
-    setTokenConfigVisible(false);
   }, []);
 
   return (
@@ -65,11 +51,6 @@ const PropertyBoundariesContent: React.FC = () => {
           description="View, search and manage property boundaries"
           onFileUploadClick={handleUploadClick}
         />
-        
-        {/* Only show token config if no token is available or if explicitly opened */}
-        {tokenConfigVisible && (
-          <TokenInput onTokenSet={handleTokenSet} />
-        )}
         
         {!isAuthenticated && (
           <AuthNotice />
@@ -109,18 +90,6 @@ const PropertyBoundariesContent: React.FC = () => {
                 </div>
               </CardContent>
             </Card>
-            
-            {/* Add button to open token configuration if hidden */}
-            {!tokenConfigVisible && (
-              <div className="flex justify-center">
-                <button 
-                  onClick={() => setTokenConfigVisible(true)}
-                  className="text-xs text-blue-600 hover:text-blue-800 underline"
-                >
-                  Configure ArcGIS Token
-                </button>
-              </div>
-            )}
           </div>
           
           <div className="lg:col-span-2">
@@ -133,15 +102,6 @@ const PropertyBoundariesContent: React.FC = () => {
         </div>
       </div>
     </BaseLayout>
-  );
-};
-
-// Wrap with ErrorBoundary
-const PropertyBoundaries: React.FC = () => {
-  return (
-    <ErrorBoundary>
-      <PropertyBoundariesContent />
-    </ErrorBoundary>
   );
 };
 

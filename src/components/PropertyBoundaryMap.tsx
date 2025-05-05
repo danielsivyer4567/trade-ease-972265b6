@@ -40,6 +40,8 @@ const PropertyBoundaryMap = ({
   const listenerRef = useRef<google.maps.MapsEventListener | null>(null);
   const viewChangeListenerRef = useRef<google.maps.MapsEventListener | null>(null);
   const isUserInteracting = useRef<boolean>(false);
+  const userControlledZoom = useRef<number | null>(null);
+  const zoomChangeTimeout = useRef<NodeJS.Timeout | null>(null);
 
   const mapContainerStyle = {
     width: '100%',
@@ -68,8 +70,17 @@ const PropertyBoundaryMap = ({
       isUserInteracting.current = true;
     });
     
+    // Improved zoom change handling with throttling to prevent zoom oscillation
     const zoomChangedListener = mapInstance.addListener('zoom_changed', () => {
       isUserInteracting.current = true;
+      
+      // Store the current zoom level as user controlled
+      userControlledZoom.current = mapInstance.getZoom();
+      
+      // Clear any existing timeout to prevent multiple rapid updates
+      if (zoomChangeTimeout.current) {
+        clearTimeout(zoomChangeTimeout.current);
+      }
     });
     
     // Add listener to track map view state changes only when map becomes idle after user interaction
@@ -78,17 +89,22 @@ const PropertyBoundaryMap = ({
       
       // Only update the state if this was triggered by a user interaction
       if (isUserInteracting.current) {
-        setMapViewState({
-          zoom: mapInstance.getZoom() || 15,
-          tilt: mapInstance.getTilt() || 0,
-          center: {
-            lat: mapInstance.getCenter()?.lat() || center[1],
-            lng: mapInstance.getCenter()?.lng() || center[0]
-          }
-        });
-        
-        // Reset the interaction flag
-        isUserInteracting.current = false;
+        // Small delay to ensure the zoom operation has fully completed
+        zoomChangeTimeout.current = setTimeout(() => {
+          const currentZoom = mapInstance.getZoom();
+          
+          setMapViewState({
+            zoom: currentZoom || 15,
+            tilt: mapInstance.getTilt() || 0,
+            center: {
+              lat: mapInstance.getCenter()?.lat() || center[1],
+              lng: mapInstance.getCenter()?.lng() || center[0]
+            }
+          });
+          
+          // Reset the interaction flag
+          isUserInteracting.current = false;
+        }, 100); // Short delay to ensure zoom is settled
       }
     });
     
@@ -98,6 +114,9 @@ const PropertyBoundaryMap = ({
       }
       google.maps.event.removeListener(dragStartListener);
       google.maps.event.removeListener(zoomChangedListener);
+      if (zoomChangeTimeout.current) {
+        clearTimeout(zoomChangeTimeout.current);
+      }
     };
   }, [mapInstance, center]);
 
@@ -251,6 +270,7 @@ const PropertyBoundaryMap = ({
     }
   };
 
+  // Prevent re-renders from resetting zoom by using a consistent callback
   const handleMapLoad = (map: google.maps.Map) => {
     console.log("Map loaded successfully");
     setMapInstance(map);

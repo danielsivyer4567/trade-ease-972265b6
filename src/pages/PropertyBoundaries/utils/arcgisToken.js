@@ -5,27 +5,18 @@
 // Default token expiration (24 hours in milliseconds)
 const DEFAULT_EXPIRATION = 24 * 60 * 60 * 1000;
 
-interface ArcGISToken {
-  token: string;
-  expires: number;
-  server: string;
-}
-
-// Local storage key for token
-const TOKEN_KEY = 'arcgis_token';
-
 /**
  * Saves the ArcGIS token to localStorage
  */
-export const saveArcGISToken = (token: string, expiresIn: number = DEFAULT_EXPIRATION, server: string = 'https://www.arcgis.com'): void => {
-  const tokenData: ArcGISToken = {
+export const saveArcGISToken = (token, expiresIn = DEFAULT_EXPIRATION, server = 'https://www.arcgis.com') => {
+  const tokenData = {
     token,
     expires: Date.now() + expiresIn,
     server
   };
   
   try {
-    localStorage.setItem(TOKEN_KEY, JSON.stringify(tokenData));
+    localStorage.setItem('arcgis_token', JSON.stringify(tokenData));
     console.log('ArcGIS token saved successfully');
   } catch (error) {
     console.error('Error saving ArcGIS token:', error);
@@ -36,21 +27,21 @@ export const saveArcGISToken = (token: string, expiresIn: number = DEFAULT_EXPIR
  * Retrieves a valid ArcGIS token from localStorage
  * Returns null if no token exists or if token is expired
  */
-export const getArcGISToken = (): string | null => {
+export const getArcGISToken = () => {
   try {
-    const tokenData = localStorage.getItem(TOKEN_KEY);
+    const tokenData = localStorage.getItem('arcgis_token');
     
     if (!tokenData) {
       console.log('No ArcGIS token found');
       return null;
     }
     
-    const parsedData: ArcGISToken = JSON.parse(tokenData);
+    const parsedData = JSON.parse(tokenData);
     
     // Check if token is expired
     if (parsedData.expires < Date.now()) {
       console.log('ArcGIS token expired');
-      localStorage.removeItem(TOKEN_KEY);
+      localStorage.removeItem('arcgis_token');
       return null;
     }
     
@@ -64,9 +55,9 @@ export const getArcGISToken = (): string | null => {
 /**
  * Clears the saved ArcGIS token
  */
-export const clearArcGISToken = (): void => {
+export const clearArcGISToken = () => {
   try {
-    localStorage.removeItem(TOKEN_KEY);
+    localStorage.removeItem('arcgis_token');
     console.log('ArcGIS token cleared');
   } catch (error) {
     console.error('Error clearing ArcGIS token:', error);
@@ -76,7 +67,7 @@ export const clearArcGISToken = (): void => {
 /**
  * Checks if a valid token exists
  */
-export const hasValidToken = (): boolean => {
+export const hasValidToken = () => {
   return getArcGISToken() !== null;
 };
 
@@ -84,15 +75,15 @@ export const hasValidToken = (): boolean => {
  * Gets token expiration time
  * Returns null if no valid token exists
  */
-export const getTokenExpiration = (): Date | null => {
+export const getTokenExpiration = () => {
   try {
-    const tokenData = localStorage.getItem(TOKEN_KEY);
+    const tokenData = localStorage.getItem('arcgis_token');
     
     if (!tokenData) {
       return null;
     }
     
-    const parsedData: ArcGISToken = JSON.parse(tokenData);
+    const parsedData = JSON.parse(tokenData);
     return new Date(parsedData.expires);
   } catch (error) {
     console.error('Error getting token expiration:', error);
@@ -102,9 +93,7 @@ export const getTokenExpiration = (): Date | null => {
 
 /**
  * Format a token for API use
- * @param token The raw token string
- * @returns Formatted token ready for API use
  */
-export const formatTokenForApi = (token: string): string => {
+export const formatTokenForApi = (token) => {
   return token.trim();
 }; 

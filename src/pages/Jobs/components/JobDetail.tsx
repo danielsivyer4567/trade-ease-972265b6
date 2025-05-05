@@ -373,9 +373,17 @@ export const JobDetail = ({ job }: JobDetailProps) => {
     setSelectedPhoto(null);
     toast.success("Photo caption updated");
   };
+  
+  // Function to save process settings
+  const saveProcessSettings = () => {
+    // Here we would typically save settings to backend
+    // For now just showing feedback to the user
+    toast.success("Process settings saved successfully");
+    setShowProcessSettingsDialog(false);
+  };
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="w-full h-full bg-gray-100">
       {/* Map/Location header section */}
       <div className="relative h-64 bg-gray-300">
         <div className="absolute inset-0">
@@ -749,7 +757,8 @@ export const JobDetail = ({ job }: JobDetailProps) => {
                           </div>
                           <Button
                             onClick={() => {
-                              toast.success("Process settings saved");
+                              // Save settings to state or backend
+                              toast.success("Process settings saved successfully");
                               setShowProcessSettingsDialog(false);
                             }}
                             className="w-full"

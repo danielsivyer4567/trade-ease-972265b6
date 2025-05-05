@@ -156,10 +156,7 @@ export const AddressSearch: React.FC = () => {
                     <Button 
                       variant="ghost" 
                       size="sm" 
-                      onClick={() => {
-                        console.log('Attempting to add property from search result:', result);
-                        handleAddPropertyFromSearch(result);
-                      }}
+                      onClick={() => handleAddPropertyFromSearch(result)}
                       title="Add this property"
                     >
                       <Plus className="h-4 w-4" />
@@ -171,6 +168,13 @@ export const AddressSearch: React.FC = () => {
           </div>
         )}
       </CardContent>
+      {searchResults.length > 0 && (
+        <CardFooter className="border-t pt-3 flex justify-between">
+          <p className="text-xs text-muted-foreground">
+            Click the + button to add a property to your list
+          </p>
+        </CardFooter>
+      )}
     </Card>
   );
 }; 

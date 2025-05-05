@@ -38,6 +38,8 @@ const JobSiteMap = () => {
   const listenerRef = useRef<google.maps.MapsEventListener | null>(null);
   const viewChangeListenerRef = useRef<google.maps.MapsEventListener | null>(null);
   const isUserInteracting = useRef<boolean>(false);
+  const userControlledZoom = useRef<number | null>(null);
+  const zoomChangeTimeout = useRef<NodeJS.Timeout | null>(null);
 
   // Gold Coast coordinates
   const center = {
@@ -99,8 +101,17 @@ const JobSiteMap = () => {
       isUserInteracting.current = true;
     });
     
+    // Improved zoom change handling with throttling to prevent zoom oscillation
     const zoomChangedListener = mapInstance.addListener('zoom_changed', () => {
       isUserInteracting.current = true;
+      
+      // Store the current zoom level as user controlled
+      userControlledZoom.current = mapInstance.getZoom();
+      
+      // Clear any existing timeout to prevent multiple rapid updates
+      if (zoomChangeTimeout.current) {
+        clearTimeout(zoomChangeTimeout.current);
+      }
     });
     
     // Add listener to track map view state changes only when map becomes idle after user interaction
@@ -109,17 +120,22 @@ const JobSiteMap = () => {
       
       // Only update the state if this was triggered by a user interaction
       if (isUserInteracting.current) {
-        setMapViewState({
-          zoom: mapInstance.getZoom() || mapOptions.zoom,
-          tilt: mapInstance.getTilt() || mapOptions.tilt,
-          center: {
-            lat: mapInstance.getCenter()?.lat() || center.lat,
-            lng: mapInstance.getCenter()?.lng() || center.lng
-          }
-        });
-        
-        // Reset the interaction flag
-        isUserInteracting.current = false;
+        // Small delay to ensure the zoom operation has fully completed
+        zoomChangeTimeout.current = setTimeout(() => {
+          const currentZoom = mapInstance.getZoom();
+          
+          setMapViewState({
+            zoom: currentZoom || mapOptions.zoom,
+            tilt: mapInstance.getTilt() || mapOptions.tilt,
+            center: {
+              lat: mapInstance.getCenter()?.lat() || center.lat,
+              lng: mapInstance.getCenter()?.lng() || center.lng
+            }
+          });
+          
+          // Reset the interaction flag
+          isUserInteracting.current = false;
+        }, 100); // Short delay to ensure zoom is settled
       }
     });
     
@@ -129,6 +145,9 @@ const JobSiteMap = () => {
       }
       google.maps.event.removeListener(dragStartListener);
       google.maps.event.removeListener(zoomChangedListener);
+      if (zoomChangeTimeout.current) {
+        clearTimeout(zoomChangeTimeout.current);
+      }
     };
   }, [mapInstance]);
 
@@ -234,6 +253,50 @@ const JobSiteMap = () => {
     zIndex: 2
   };
 
+  // Prevent re-renders from resetting zoom by using a consistent callback
+  const handleMapLoad = (map) => {
+    console.log("Map loaded");
+    setMapInstance(map);
+    
+    // Set initial tilt for Earth-like view (only on first load)
+    if (!mapViewState) {
+      map.setTilt(45);
+    }
+
+    // Place markers for each location
+    try {
+      locations.forEach(location => {
+        const markerElement = document.createElement('div');
+        markerElement.className = 'marker';
+        markerElement.innerHTML = `
+          <div class="flex items-center gap-2 font-semibold text-white bg-black/50 backdrop-blur-sm px-2 py-1 rounded-lg shadow-lg border border-white/20">
+            <img src="/lovable-uploads/34bca7f1-d63b-45a0-b1ca-a562443686ad.png" alt="Trade Ease Logo" width="20" height="20" class="object-contain" />
+            <span>${location.jobNumber || 'N/A'}</span>
+          </div>
+        `;
+        const marker = new google.maps.marker.AdvancedMarkerElement({
+          position: {
+            lat: location.lat,
+            lng: location.lng
+          },
+          map,
+          content: markerElement,
+          title: location.name
+        });
+        marker.addListener('gmp-click', () => {
+          setSelectedLocation({
+            lat: location.lat,
+            lng: location.lng
+          });
+        });
+      });
+    }
+    catch (error) {
+      console.error("Error loading map:", error);
+      setMapError("Failed to initialize map components.");
+    }
+  };
+
   return (
     <Card className="w-full p-0 overflow-hidden">
       {/* Display measurement result if needed above the map */}
@@ -300,47 +363,7 @@ const JobSiteMap = () => {
               // Use stored tilt if available to prevent resetting the view
               tilt: mapViewState?.tilt || mapOptions.tilt
             }}
-            onLoad={map => {
-              try {
-                setMapInstance(map);
-                
-                // Set initial tilt for Earth-like view (only on first load)
-                if (!mapViewState) {
-                  map.setTilt(45);
-                }
-
-                // Place markers for each location
-                locations.forEach(location => {
-                  const markerElement = document.createElement('div');
-                  markerElement.className = 'marker';
-                  markerElement.innerHTML = `
-                    <div class="flex items-center gap-2 font-semibold text-white bg-black/50 backdrop-blur-sm px-2 py-1 rounded-lg shadow-lg border border-white/20">
-                      <img src="/lovable-uploads/34bca7f1-d63b-45a0-b1ca-a562443686ad.png" alt="Trade Ease Logo" width="20" height="20" class="object-contain" />
-                      <span>${location.jobNumber || 'N/A'}</span>
-                    </div>
-                  `;
-                  const marker = new google.maps.marker.AdvancedMarkerElement({
-                    position: {
-                      lat: location.lat,
-                      lng: location.lng
-                    },
-                    map,
-                    content: markerElement,
-                    title: location.name
-                  });
-                  marker.addListener('gmp-click', () => {
-                    setSelectedLocation({
-                      lat: location.lat,
-                      lng: location.lng
-                    });
-                  });
-                });
-              }
-              catch (error) {
-                console.error("Error loading map:", error);
-                setMapError("Failed to initialize map components.");
-              }
-            }}
+            onLoad={handleMapLoad}
           >
             {selectedLocation && (
               <InfoWindow

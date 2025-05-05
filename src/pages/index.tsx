@@ -21,13 +21,14 @@ export default function DashboardPage() {
     <BaseLayout showQuickTabs>
       <div className="pb-10 pt-0">
         <div className="p-0 space-y-4">
-          <div className="text-center absolute top-12 left-0 right-0 z-10">
-            <p className="text-xl font-semibold text-white drop-shadow-md border border-black bg-black/20 px-3 py-1 rounded inline-block backdrop-blur-sm">Welcome back to your dashboard.</p>
-          </div>
-          
-          {/* Job Site Map - Google Maps Satellite View */}
-          <div className="mt-0">
+          {/* Job Site Map - Google Maps Satellite View with welcome message overlay */}
+          <div className="mt-0 relative">
             <JobSiteMap />
+            
+            {/* Welcome message as absolute overlay inside the map */}
+            <div className="absolute top-0 left-0 right-0 z-10 text-center mt-4">
+              <p className="text-xl font-semibold text-white drop-shadow-md border border-black bg-black/60 px-3 py-1 rounded inline-block backdrop-blur-sm">Welcome back to your dashboard.</p>
+            </div>
           </div>
 
           {/* Jobs Today, Tomorrow, and Finished */}

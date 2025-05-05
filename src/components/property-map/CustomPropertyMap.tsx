@@ -1,4 +1,3 @@
-
 import React, { useRef, useState, useEffect } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { toast } from "sonner";
@@ -19,6 +18,33 @@ const CustomPropertyMap = ({
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [showEdgeMeasurements, setShowEdgeMeasurements] = useState(measureMode);
+  const [hasValidBoundaries, setHasValidBoundaries] = useState(false);
+  
+  // Validate boundaries
+  useEffect(() => {
+    if (!Array.isArray(boundaries)) {
+      console.error("Boundaries is not an array:", boundaries);
+      setHasValidBoundaries(false);
+      return;
+    }
+    
+    const valid = boundaries.some(boundary => 
+      Array.isArray(boundary) && 
+      boundary.length >= 3 && 
+      boundary.every(point => 
+        Array.isArray(point) && 
+        point.length === 2 && 
+        !isNaN(Number(point[0])) && 
+        !isNaN(Number(point[1]))
+      )
+    );
+    
+    setHasValidBoundaries(valid);
+    if (!valid && boundaries.length > 0) {
+      console.error("No valid boundaries found:", boundaries);
+    }
+  }, [boundaries]);
+  
   const {
     measurements,
     mapEventHandlers,
@@ -39,6 +65,29 @@ const CustomPropertyMap = ({
     setShowEdgeMeasurements(prev => !prev);
     toast.success(showEdgeMeasurements ? "Edge measurements hidden" : "Edge measurements shown");
   };
+
+  // If there are no valid boundaries, show a message
+  if (!hasValidBoundaries) {
+    return (
+      <Card className="w-full">
+        <MapHeader 
+          title={title} 
+          description={description} 
+          boundaries={[]} 
+          onReset={handleReset} 
+          onToggleEdgeMeasurements={handleToggleEdgeMeasurements} 
+          showEdgeMeasurements={false} 
+          measureMode={false} 
+        />
+        <CardContent className="p-4 flex items-center justify-center min-h-[400px]">
+          <div className="text-center text-muted-foreground">
+            <p className="mb-2">No valid boundary data available for this property.</p>
+            <p className="text-sm">Please select a different property or upload a valid GeoJSON file.</p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card className="w-full">
@@ -72,7 +121,7 @@ const CustomPropertyMap = ({
           )}
         </div>
         
-        {showEdgeMeasurements && boundaries.length > 0 && (
+        {showEdgeMeasurements && hasValidBoundaries && (
           <BoundaryMeasurements 
             edges={measurements.edges} 
             showMeasurements={true} 

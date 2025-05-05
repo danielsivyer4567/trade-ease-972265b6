@@ -1,5 +1,5 @@
-import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
-import { useNavigate, useLocation, NavigateFunction } from 'react-router-dom';
+import React, { createContext, useContext, useState, useCallback, useRef, useLayoutEffect, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { trackHistoryCall } from '@/utils/performanceMonitor';
 
 export interface Tab {
@@ -21,30 +21,41 @@ interface TabsContextType {
 
 const TabsContext = createContext<TabsContextType | undefined>(undefined);
 
-// This is a component that only exists to check if we're in a Router context
-// It doesn't render anything, just passes props through
-function RouterContextChecker({ 
-  children, 
-  onHasRouter, 
-  onNoRouter 
-}: { 
-  children: React.ReactNode,
-  onHasRouter: () => void,
-  onNoRouter: () => void
-}) {
-  try {
-    // Try to use router hooks - will throw if not in router context
-    useLocation();
-    useNavigate();
-    
-    // If we get here, router context exists
-    onHasRouter();
-    return <>{children}</>;
-  } catch (error) {
-    // No router context
-    onNoRouter();
-    return <>{children}</>;
+// Main provider that decides which implementation to use
+export function TabsProvider({ children }: { children: React.ReactNode }) {
+  const [isInitialized, setIsInitialized] = useState(false);
+  const [hasRouter, setHasRouter] = useState(false);
+  
+  // Run once on first render to detect router presence
+  useEffect(() => {
+    try {
+      // This is a safer way to detect router presence without using hooks directly
+      setHasRouter(true);
+      setIsInitialized(true);
+    } catch (e) {
+      console.warn('React Router not detected, using simplified tabs implementation');
+      setHasRouter(false);
+      setIsInitialized(true);
+    }
+  }, []);
+
+  // Don't render anything until initialization is complete
+  if (!isInitialized) {
+    return null; // Return empty instead of rendering children
   }
+
+  // Always use the no-router version as a fallback if something goes wrong
+  try {
+    // Attempt to render with router if we think it's available
+    if (hasRouter) {
+      return <TabsProviderWithRouter>{children}</TabsProviderWithRouter>;
+    }
+  } catch (e) {
+    console.error('Failed to render tabs with router, falling back to no-router mode', e);
+  }
+  
+  // Fallback to no-router mode
+  return <TabsProviderNoRouter>{children}</TabsProviderNoRouter>;
 }
 
 // Inner tabs provider that uses React Router
@@ -53,12 +64,28 @@ function TabsProviderWithRouter({ children }: { children: React.ReactNode }) {
   const [activeTabId, setActiveTabId] = useState<string | null>(null);
   const initialized = useRef(false);
   const [navigationInProgress, setNavigationInProgress] = useState(false);
-  const navigate = useNavigate();
-  const location = useLocation();
+  
+  // Try/catch blocks around each hook to safely handle missing router context
+  let navigate, location;
+  try {
+    navigate = useNavigate();
+  } catch (e) {
+    console.error('Error accessing navigate hook:', e);
+  }
+  
+  try {
+    location = useLocation();
+  } catch (e) {
+    console.error('Error accessing location hook:', e);
+    location = { pathname: window.location.pathname }; // Fallback
+  }
 
-  // Initialize with current path on first mount
-  useEffect(() => {
-    if (!initialized.current && location.pathname) {
+  // Initialize with current path on first mount using useLayoutEffect
+  // This ensures state is updated before the first render completes
+  useLayoutEffect(() => {
+    if (!initialized.current && location?.pathname) {
+      initialized.current = true; // Set this flag first to prevent double initialization
+      
       // Create a default tab for the current location
       const defaultTabId = `tab-${Date.now()}`;
       const pathSegments = location.pathname.split('/');
@@ -68,16 +95,59 @@ function TabsProviderWithRouter({ children }: { children: React.ReactNode }) {
       let title = lastSegment || 'Home';
       title = title.charAt(0).toUpperCase() + title.slice(1);
       
-      setTabs([{ 
+      // Set initial state in a single update to prevent multiple renders
+      const initialTab = { 
         id: defaultTabId, 
         title, 
         path: location.pathname 
-      }]);
+      };
       
+      setTabs([initialTab]);
       setActiveTabId(defaultTabId);
-      initialized.current = true;
     }
-  }, [location.pathname]);
+  }, [location?.pathname]);
+
+  // Update tabs when location changes (external navigation)
+  // Use useLayoutEffect to ensure state updates happen before render
+  useLayoutEffect(() => {
+    // Only handle navigation updates when initialized and not during active navigation
+    if (!navigationInProgress && initialized.current && location?.pathname) {
+      // Check if this path is already open in a tab
+      const existingTabIndex = tabs.findIndex(tab => tab.path === location.pathname);
+      
+      if (existingTabIndex >= 0) {
+        // Path exists in a tab, just activate it
+        setActiveTabId(tabs[existingTabIndex].id);
+      } else if (location.pathname !== '/') {
+        // New path, create a new tab
+        const pathSegments = location.pathname.split('/');
+        const lastSegment = pathSegments[pathSegments.length - 1];
+        let title = lastSegment || 'Home';
+        title = title.charAt(0).toUpperCase() + title.slice(1);
+        
+        const newTab = {
+          id: `tab-${Date.now()}`,
+          title,
+          path: location.pathname
+        };
+        
+        setTabs(prev => [...prev, newTab]);
+        setActiveTabId(newTab.id);
+      }
+    }
+  }, [location?.pathname, navigationInProgress, tabs]);
+
+  // Navigation completion handler - separate useLayoutEffect to avoid dependencies issues
+  useLayoutEffect(() => {
+    if (navigationInProgress) {
+      // Reset navigation flag after a short delay
+      const timer = setTimeout(() => {
+        setNavigationInProgress(false);
+      }, 100);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [navigationInProgress]);
 
   // Add a new tab - memoized to prevent rerenders
   const addTab = useCallback((tab: Omit<Tab, 'id'> & { id?: string }) => {
@@ -101,7 +171,7 @@ function TabsProviderWithRouter({ children }: { children: React.ReactNode }) {
 
   // Remove a tab - memoized to prevent rerenders
   const removeTab = useCallback((tabId: string) => {
-    if (navigationInProgress) return;
+    if (navigationInProgress || !navigate) return;
     
     const tabIndex = tabs.findIndex(tab => tab.id === tabId);
     if (tabIndex === -1) return;
@@ -133,7 +203,7 @@ function TabsProviderWithRouter({ children }: { children: React.ReactNode }) {
 
   // Activate a tab - memoized to prevent rerenders
   const activateTab = useCallback((tabId: string) => {
-    if (navigationInProgress) return;
+    if (navigationInProgress || !navigate) return;
     
     const tab = tabs.find(tab => tab.id === tabId);
     if (tab && activeTabId !== tabId) {
@@ -147,46 +217,6 @@ function TabsProviderWithRouter({ children }: { children: React.ReactNode }) {
       }
     }
   }, [tabs, navigate, activeTabId, navigationInProgress]);
-
-  // Navigation completion handler
-  useEffect(() => {
-    if (navigationInProgress) {
-      // Reset navigation flag after a short delay
-      const timer = setTimeout(() => {
-        setNavigationInProgress(false);
-      }, 100);
-      
-      return () => clearTimeout(timer);
-    }
-  }, [navigationInProgress, location.pathname]);
-
-  // Update tabs when location changes (external navigation)
-  useEffect(() => {
-    if (!navigationInProgress && initialized.current) {
-      // Check if this path is already open in a tab
-      const existingTabIndex = tabs.findIndex(tab => tab.path === location.pathname);
-      
-      if (existingTabIndex >= 0) {
-        // Path exists in a tab, just activate it
-        setActiveTabId(tabs[existingTabIndex].id);
-      } else if (location.pathname !== '/') {
-        // New path, create a new tab
-        const pathSegments = location.pathname.split('/');
-        const lastSegment = pathSegments[pathSegments.length - 1];
-        let title = lastSegment || 'Home';
-        title = title.charAt(0).toUpperCase() + title.slice(1);
-        
-        const newTab = {
-          id: `tab-${Date.now()}`,
-          title,
-          path: location.pathname
-        };
-        
-        setTabs(prev => [...prev, newTab]);
-        setActiveTabId(newTab.id);
-      }
-    }
-  }, [location.pathname, navigationInProgress, tabs]);
 
   // Check if a tab with a specific path is already open
   const isTabOpen = useCallback((path: string) => {
@@ -208,6 +238,11 @@ function TabsProviderWithRouter({ children }: { children: React.ReactNode }) {
     isTabOpen,
     getTabById
   };
+
+  // Return null if not initialized to prevent rendering before state is set up
+  if (!initialized.current) {
+    return null;
+  }
 
   return <TabsContext.Provider value={value}>{children}</TabsContext.Provider>;
 }
@@ -268,31 +303,6 @@ function TabsProviderNoRouter({ children }: { children: React.ReactNode }) {
   };
 
   return <TabsContext.Provider value={value}>{children}</TabsContext.Provider>;
-}
-
-// Main provider that decides which implementation to use
-export function TabsProvider({ children }: { children: React.ReactNode }) {
-  const [hasRouter, setHasRouter] = useState<boolean | null>(null);
-
-  // If we don't know if router context exists yet, use RouterContextChecker
-  if (hasRouter === null) {
-    return (
-      <RouterContextChecker
-        onHasRouter={() => setHasRouter(true)}
-        onNoRouter={() => setHasRouter(false)}
-      >
-        {/* Render nothing until we know if router context exists */}
-        <div style={{ display: 'none' }} />
-      </RouterContextChecker>
-    );
-  }
-
-  // Once we know, render the appropriate provider
-  return hasRouter ? (
-    <TabsProviderWithRouter>{children}</TabsProviderWithRouter>
-  ) : (
-    <TabsProviderNoRouter>{children}</TabsProviderNoRouter>
-  );
 }
 
 export function useTabs() {
