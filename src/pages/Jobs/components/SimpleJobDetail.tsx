@@ -220,174 +220,180 @@ export const SimpleJobDetail = ({ job }: JobDetailProps) => {
 
         <TabsContent value="details" className="p-4">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Job Details</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <p className="text-sm text-gray-500">Job Number</p>
-                    <p>{job.jobNumber}</p>
+            {/* Left column with job details and process */}
+            <div className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Job Details</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-sm text-gray-500">Job Number</p>
+                      <p>{job.jobNumber}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500">Customer</p>
+                      <p>{job.customer}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500">Address</p>
+                      <p>{job.address || 'N/A'}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500">Type</p>
+                      <p>{job.type}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500">Team</p>
+                      <p>{job.assignedTeam || 'Not assigned'}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500">Date</p>
+                      <p>{job.date}</p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-sm text-gray-500">Customer</p>
-                    <p>{job.customer}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-500">Address</p>
-                    <p>{job.address || 'N/A'}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-500">Type</p>
-                    <p>{job.type}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-500">Team</p>
-                    <p>{job.assignedTeam || 'Not assigned'}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-500">Date</p>
-                    <p>{job.date}</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardHeader>
-                <CardTitle>Job Process</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {job.job_steps && job.job_steps.length > 0 ? (
-                    job.job_steps.map((step, index) => (
-                      <div key={index} className="flex items-center space-x-3">
-                        <div className={`w-6 h-6 rounded-full flex items-center justify-center ${
-                          step.isCompleted ? 'bg-green-500 text-white' : 'border border-gray-300'
-                        }`}>
-                          {step.isCompleted && '✓'}
-                        </div>
-                        <span>{step.title}</span>
-                      </div>
-                    ))
-                  ) : (
-                    <p className="text-gray-500">No process steps defined for this job</p>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-            
-            {/* Photos Gallery */}
-            <Card className="lg:col-span-2">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle>Photos Gallery</CardTitle>
-                <div>
-                  <label htmlFor="photo-upload-main" className="cursor-pointer">
-                    <Button variant="outline" size="sm" asChild>
-                      <div>
-                        <Upload className="h-4 w-4 mr-1" /> Upload Photos
-                      </div>
-                    </Button>
-                    <input 
-                      id="photo-upload-main"
-                      type="file"
-                      multiple
-                      className="hidden"
-                      accept="image/*"
-                      onChange={handleFileUpload}
-                      ref={fileInputRef}
-                    />
-                  </label>
-                </div>
-              </CardHeader>
-              <CardContent>
-                {photos.length > 0 ? (
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                    {photos.map((photo) => (
-                      <div 
-                        key={photo.id} 
-                        className="relative group rounded-md overflow-hidden border border-gray-200"
-                      >
-                        <img 
-                          src={photo.url} 
-                          alt={photo.caption} 
-                          className="w-full h-32 object-cover cursor-pointer" 
-                          onClick={() => setSelectedPhoto(photo)}
-                        />
-                        <div className="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                          <div className="flex space-x-2">
-                            <Button 
-                              variant="ghost" 
-                              size="icon" 
-                              className="h-8 w-8 rounded-full bg-white text-gray-700 hover:text-black"
-                              onClick={() => setSelectedPhoto(photo)}
-                            >
-                              <Info className="h-4 w-4" />
-                            </Button>
-                            <Button 
-                              variant="ghost" 
-                              size="icon" 
-                              className="h-8 w-8 rounded-full bg-white text-red-500 hover:text-red-700"
-                              onClick={() => removePhoto(photo.id)}
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardHeader>
+                  <CardTitle>Job Process</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {job.job_steps && job.job_steps.length > 0 ? (
+                      job.job_steps.map((step, index) => (
+                        <div key={index} className="flex items-center space-x-3">
+                          <div className={`w-6 h-6 rounded-full flex items-center justify-center ${
+                            step.isCompleted ? 'bg-green-500 text-white' : 'border border-gray-300'
+                          }`}>
+                            {step.isCompleted && '✓'}
                           </div>
+                          <span>{step.title}</span>
                         </div>
-                        <div className="absolute bottom-0 left-0 right-0 bg-black/70 p-1">
-                          <p className="text-xs text-white truncate">{photo.caption}</p>
-                        </div>
-                      </div>
-                    ))}
+                      ))
+                    ) : (
+                      <p className="text-gray-500">No process steps defined for this job</p>
+                    )}
                   </div>
-                ) : (
-                  <div className="text-center py-12 border-2 border-dashed border-gray-300 rounded-lg">
-                    <Camera className="h-12 w-12 mx-auto text-gray-400 mb-2" />
-                    <p className="text-gray-500 mb-2">No photos uploaded yet</p>
-                    <label htmlFor="photo-upload-empty" className="cursor-pointer">
-                      <Button variant="outline">
-                        <Upload className="h-4 w-4 mr-2" /> Upload Photos
+                </CardContent>
+              </Card>
+            </div>
+            
+            {/* Right column with photos */}
+            <div className="space-y-6">
+              {/* Photos Gallery */}
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle>Photos Gallery</CardTitle>
+                  <div>
+                    <label htmlFor="photo-upload-main" className="cursor-pointer">
+                      <Button variant="outline" size="sm" asChild>
+                        <div>
+                          <Upload className="h-4 w-4 mr-1" /> Upload Photos
+                        </div>
                       </Button>
                       <input 
-                        id="photo-upload-empty"
+                        id="photo-upload-main"
                         type="file"
                         multiple
                         className="hidden"
                         accept="image/*"
                         onChange={handleFileUpload}
+                        ref={fileInputRef}
                       />
                     </label>
                   </div>
-                )}
-              </CardContent>
-            </Card>
-            
-            {/* Site (Audit) Photos */}
-            <Card className="lg:col-span-2">
-              <CardHeader>
-                <CardTitle>Site (Audit) Photos</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                  {[1, 2, 3, 4].map((i) => (
-                    <div 
-                      key={`site-${i}`} 
-                      className="relative group rounded-md overflow-hidden border border-gray-200"
-                    >
-                      <img 
-                        src={`https://source.unsplash.com/random/300x200?site,${i}`} 
-                        alt={`Site (Audit) photo ${i}`} 
-                        className="w-full h-32 object-cover" 
-                      />
-                      <div className="absolute bottom-0 left-0 right-0 bg-black/70 p-1">
-                        <p className="text-xs text-white truncate">{`Site photo ${i}`}</p>
-                      </div>
+                </CardHeader>
+                <CardContent>
+                  {photos.length > 0 ? (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      {photos.map((photo) => (
+                        <div 
+                          key={photo.id} 
+                          className="relative group rounded-md overflow-hidden border border-gray-200"
+                        >
+                          <img 
+                            src={photo.url} 
+                            alt={photo.caption} 
+                            className="w-full h-32 object-cover cursor-pointer" 
+                            onClick={() => setSelectedPhoto(photo)}
+                          />
+                          <div className="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                            <div className="flex space-x-2">
+                              <Button 
+                                variant="ghost" 
+                                size="icon" 
+                                className="h-8 w-8 rounded-full bg-white text-gray-700 hover:text-black"
+                                onClick={() => setSelectedPhoto(photo)}
+                              >
+                                <Info className="h-4 w-4" />
+                              </Button>
+                              <Button 
+                                variant="ghost" 
+                                size="icon" 
+                                className="h-8 w-8 rounded-full bg-white text-red-500 hover:text-red-700"
+                                onClick={() => removePhoto(photo.id)}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </div>
+                          <div className="absolute bottom-0 left-0 right-0 bg-black/70 p-1">
+                            <p className="text-xs text-white truncate">{photo.caption}</p>
+                          </div>
+                        </div>
+                      ))}
                     </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
+                  ) : (
+                    <div className="text-center py-12 border-2 border-dashed border-gray-300 rounded-lg">
+                      <Camera className="h-12 w-12 mx-auto text-gray-400 mb-2" />
+                      <p className="text-gray-500 mb-2">No photos uploaded yet</p>
+                      <label htmlFor="photo-upload-empty" className="cursor-pointer">
+                        <Button variant="outline">
+                          <Upload className="h-4 w-4 mr-2" /> Upload Photos
+                        </Button>
+                        <input 
+                          id="photo-upload-empty"
+                          type="file"
+                          multiple
+                          className="hidden"
+                          accept="image/*"
+                          onChange={handleFileUpload}
+                        />
+                      </label>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+              
+              {/* Site (Audit) Photos */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Site (Audit) Photos</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {[1, 2, 3, 4].map((i) => (
+                      <div 
+                        key={`site-${i}`} 
+                        className="relative group rounded-md overflow-hidden border border-gray-200"
+                      >
+                        <img 
+                          src={`https://source.unsplash.com/random/300x200?site,${i}`} 
+                          alt={`Site (Audit) photo ${i}`} 
+                          className="w-full h-32 object-cover" 
+                        />
+                        <div className="absolute bottom-0 left-0 right-0 bg-black/70 p-1">
+                          <p className="text-xs text-white truncate">{`Site photo ${i}`}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           </div>
         </TabsContent>
 
