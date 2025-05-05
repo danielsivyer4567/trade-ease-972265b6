@@ -14,7 +14,7 @@ import { useJobData } from './hooks/useJobData';
 import { JobStepProgress } from '@/components/dashboard/JobStepProgress';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Camera, Share2 } from 'lucide-react';
+import { Camera, Share2, Phone, Mail, MessageSquare } from 'lucide-react';
 import { toast } from 'sonner';
 import { AutomationIntegrationService } from '@/services/AutomationIntegrationService';
 import { usePhotoSharing } from '@/hooks/usePhotoSharing';
@@ -140,28 +140,86 @@ export function JobDetails() {
     <AppLayout>
       <div className="container-responsive mx-auto">
         <JobsHeader navigateTo="/jobs" />
-        <div className="space-y-4 sm:space-y-6 p-2 sm:p-4 max-w-7xl mx-auto pb-24 bg-slate-200">
-          {/* Job Progress Steps above map */}
-          <Card className="bg-white shadow-sm py-3 px-3 sm:px-6">
+        
+        <div className="max-w-7xl mx-auto pb-24">
+          {/* Hero section with Job Info and Map */}
+          <div className="bg-white rounded-lg shadow-sm overflow-hidden mb-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-0">
+              {/* Left side - Job information */}
+              <div className="lg:col-span-1 p-6 flex flex-col justify-between">
+                <div>
+                  <h1 className="text-2xl font-bold truncate mb-2">{job.customer}</h1>
+                  <p className="text-lg text-gray-600 mb-4">{job.address}</p>
+                  
+                  <div className="space-y-4 mb-6">
+                    <div className="flex items-center space-x-2">
+                      <div className="bg-blue-100 p-2 rounded-full">
+                        <Phone className="h-4 w-4 text-blue-600" />
+                      </div>
+                      <span className="text-gray-700">Contact Customer</span>
+                    </div>
+                    
+                    <div className="flex items-center space-x-2">
+                      <div className="bg-green-100 p-2 rounded-full">
+                        <Mail className="h-4 w-4 text-green-600" />
+                      </div>
+                      <span className="text-gray-700">Send Email</span>
+                    </div>
+                    
+                    <div className="flex items-center space-x-2">
+                      <div className="bg-purple-100 p-2 rounded-full">
+                        <MessageSquare className="h-4 w-4 text-purple-600" />
+                      </div>
+                      <span className="text-gray-700">Send Message</span>
+                    </div>
+                  </div>
+                  
+                  <div className="bg-gray-100 p-3 rounded-lg mb-4">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-500">Job Type:</span>
+                      <span className="font-medium">{job.type}</span>
+                    </div>
+                    <div className="flex justify-between text-sm mt-2">
+                      <span className="text-gray-500">Status:</span>
+                      <span className="font-medium">{job.status}</span>
+                    </div>
+                    <div className="flex justify-between text-sm mt-2">
+                      <span className="text-gray-500">Date:</span>
+                      <span className="font-medium">{job.date}</span>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="flex space-x-2 mt-4">
+                  <Button className="flex-1" size="sm">
+                    <Camera className="h-4 w-4 mr-2" />
+                    Photos
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="flex-1"
+                    onClick={handleSendPhotosToCustomer}
+                  >
+                    <Share2 className="h-4 w-4 mr-2" />
+                    Share
+                  </Button>
+                </div>
+              </div>
+              
+              {/* Right side - Map */}
+              <div className="lg:col-span-2 h-[450px]">
+                <JobMapView job={job} />
+              </div>
+            </div>
+          </div>
+          
+          {/* Job Progress Steps */}
+          <Card className="bg-white shadow-sm py-3 px-3 sm:px-6 mb-6">
             <JobStepProgress />
           </Card>
           
-          <JobMapView job={job} />
-
-          <JobHeader job={job} />
-          
-          <div className="flex justify-end space-x-2">
-            <Button 
-              size="sm"
-              variant="outline"
-              onClick={handleSendPhotosToCustomer}
-              className="mb-2"
-            >
-              <Share2 className="h-4 w-4 mr-2" />
-              Share Photos
-            </Button>
-          </div>
-
+          {/* Job Tabs */}
           <JobTabs 
             job={job} 
             isManager={isManager} 
