@@ -1,3 +1,4 @@
 // Re-export services for easy importing
 
-export * from './CustomerService'; 
+export * from './CustomerService';
+export * from './GeocodingService'; 

@@ -12,14 +12,23 @@ interface JobMapProps {
     title: string;
   }>;
   boundaries?: Array<Array<[number, number]>>;
+  autoFit?: boolean; // New prop to control whether map should auto-fit to markers
 }
 
 // Define libraries to load
 const libraries = ["marker"];
 
 // Create a separate map component without the LoadScript wrapper
-const MapComponent = ({ jobs = [], center, zoom = 14, markers = [], boundaries = [] }: JobMapProps) => {
+const MapComponent = ({ 
+  jobs = [], 
+  center, 
+  zoom = 14, 
+  markers = [], 
+  boundaries = [],
+  autoFit = true 
+}: JobMapProps) => {
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
+  const [map, setMap] = useState<google.maps.Map | null>(null);
 
   const mapContainerStyle = {
     width: '100%',
@@ -44,10 +53,49 @@ const MapComponent = ({ jobs = [], center, zoom = 14, markers = [], boundaries =
     mapId: '8f348c1e276da9d5' // Added Map ID for Advanced Markers
   };
 
-  const onLoad = (map: google.maps.Map) => {
+  // Function to auto-fit map to all markers
+  const fitMapToMarkers = (map: google.maps.Map) => {
+    if (!map || (!jobs.length && !markers.length)) return;
+    
+    const bounds = new google.maps.LatLngBounds();
+    
+    // Add job locations to bounds
+    jobs.forEach(job => {
+      if (job.location && job.location[0] && job.location[1]) {
+        bounds.extend({ lat: job.location[1], lng: job.location[0] });
+      }
+    });
+    
+    // Add individual markers to bounds
+    markers.forEach(marker => {
+      bounds.extend({ lat: marker.position[0], lng: marker.position[1] });
+    });
+    
+    // Skip if no valid bounds
+    if (bounds.isEmpty()) return;
+    
+    // Fit the map to the bounds
+    map.fitBounds(bounds);
+    
+    // Add some padding if there's only one marker
+    if ((jobs.length + markers.length) <= 1) {
+      // Don't zoom in too much for single markers
+      const currentZoom = map.getZoom();
+      if (currentZoom && currentZoom > 15) {
+        map.setZoom(15);
+      }
+    }
+  };
+
+  const onLoad = (mapInstance: google.maps.Map) => {
+    setMap(mapInstance);
+    
     // Add markers from jobs if provided
     if (jobs.length > 0) {
       jobs.forEach((job) => {
+        // Skip if job has no location
+        if (!job.location || !job.location[0] || !job.location[1]) return;
+        
         // Create marker element
         const markerElement = document.createElement('div');
         markerElement.className = 'marker';
@@ -61,7 +109,7 @@ const MapComponent = ({ jobs = [], center, zoom = 14, markers = [], boundaries =
         // Create the advanced marker
         const marker = new google.maps.marker.AdvancedMarkerElement({
           position: { lat: job.location[1], lng: job.location[0] },
-          map,
+          map: mapInstance,
           content: markerElement,
           title: job.customer
         });
@@ -87,7 +135,7 @@ const MapComponent = ({ jobs = [], center, zoom = 14, markers = [], boundaries =
 
         new google.maps.marker.AdvancedMarkerElement({
           position: { lat: marker.position[0], lng: marker.position[1] },
-          map,
+          map: mapInstance,
           content: markerElement,
           title: marker.title
         });
@@ -106,7 +154,7 @@ const MapComponent = ({ jobs = [], center, zoom = 14, markers = [], boundaries =
 
       new google.maps.marker.AdvancedMarkerElement({
         position: mapCenter,
-        map,
+        map: mapInstance,
         content: centerMarkerElement,
         title: "Location"
       });
@@ -129,11 +177,23 @@ const MapComponent = ({ jobs = [], center, zoom = 14, markers = [], boundaries =
           strokeWeight: 3,
           fillColor: '#9b87f5',
           fillOpacity: 0.35,
-          map: map
+          map: mapInstance
         });
       });
     }
+    
+    // Auto fit the map to markers if enabled
+    if (autoFit) {
+      fitMapToMarkers(mapInstance);
+    }
   };
+  
+  // Effect to handle changes in jobs or markers
+  useEffect(() => {
+    if (map && autoFit) {
+      fitMapToMarkers(map);
+    }
+  }, [jobs, markers, map, autoFit]);
 
   return (
     <GoogleMap
