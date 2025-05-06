@@ -78,7 +78,7 @@ export interface Invoice {
   payment_date?: string;
 }
 
-class CustomerService {
+export class CustomerService {
   // Customer Profile Methods
   async getCustomerProfile(customerId: string): Promise<CustomerProfile | null> {
     try {
@@ -92,6 +92,24 @@ class CustomerService {
       return data;
     } catch (error) {
       console.error("Error fetching customer profile:", error);
+      return null;
+    }
+  }
+
+  // Add function to get customer details by name
+  async getCustomerDetails(customerName: string): Promise<CustomerProfile | null> {
+    try {
+      const { data, error } = await supabase
+        .from('customers')
+        .select('*')
+        .ilike('name', `%${customerName}%`)
+        .limit(1)
+        .single();
+      
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      console.error("Error fetching customer details by name:", error);
       return null;
     }
   }
@@ -341,4 +359,8 @@ class CustomerService {
   }
 }
 
-export const customerService = new CustomerService(); 
+// Export a singleton instance
+export const customerService = new CustomerService();
+
+// Also export as default
+export default CustomerService; 

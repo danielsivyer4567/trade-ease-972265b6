@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Mic, Coffee, PackageCheck, Share, Clock, Calendar, FileText, Box, BarChart4, MessageSquare, 
@@ -14,6 +14,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Dialog
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { toast } from "sonner";
 import JobMap from "@/components/JobMap";
+import { customerService } from "@/services/CustomerService";
+import { supabase } from "@/integrations/supabase/client";
 import { 
   AlertDialog,
   AlertDialogAction,
@@ -543,6 +545,64 @@ export const JobDetail = ({ job }: JobDetailProps) => {
     toast.success(`Template "${newTemplateName}" created`);
   };
 
+  // Add state for customer details
+  const [jobData, setJobData] = useState<Job>(job);
+  
+  // Function to update job on the server
+  const updateJobDetails = async (jobId: string, updates: Partial<Job>) => {
+    try {
+      const { error } = await supabase
+        .from('jobs')
+        .update(updates)
+        .eq('id', jobId);
+      
+      if (error) {
+        throw error;
+      }
+      
+      toast.success("Job details updated");
+      return true;
+    } catch (error) {
+      console.error("Error updating job details:", error);
+      toast.error("Failed to update job details");
+      return false;
+    }
+  };
+  
+  // Effect to fetch customer details when customer name is available
+  useEffect(() => {
+    const fetchCustomerDetails = async () => {
+      if (job.customer && (!job.address || job.address === 'N/A')) {
+        try {
+          // Use the customerService singleton instance
+          const customerDetails = await customerService.getCustomerDetails(job.customer);
+          if (customerDetails && customerDetails.address) {
+            // Update local state
+            setJobData(prev => ({
+              ...prev,
+              address: customerDetails.address
+            }));
+            
+            // Update job on the server if we have a job ID
+            if (job.id) {
+              await updateJobDetails(job.id, { 
+                address: customerDetails.address,
+                // Include other address components if needed
+                city: customerDetails.city,
+                state: customerDetails.state,
+                zipCode: customerDetails.zipCode
+              });
+            }
+          }
+        } catch (error) {
+          console.error("Error fetching customer details:", error);
+        }
+      }
+    };
+
+    fetchCustomerDetails();
+  }, [job.customer, job.id]);
+
   return (
     <>
       <div className="w-full h-full bg-gray-100">
@@ -550,13 +610,13 @@ export const JobDetail = ({ job }: JobDetailProps) => {
         <div className="relative h-64 bg-gray-300">
           <div className="absolute inset-0">
             <JobMap 
-              center={job.location}
+              center={jobData.location || job.location}
               zoom={15}
               markers={[{
-                position: [job.location[1], job.location[0]] as [number, number],
-                title: job.jobNumber
+                position: [jobData.location?.[1] || job.location[1], jobData.location?.[0] || job.location[0]] as [number, number],
+                title: jobData.jobNumber || job.jobNumber
               }]}
-              boundaries={job.boundaries}
+              boundaries={jobData.boundaries || job.boundaries}
             />
           </div>
         </div>
@@ -565,13 +625,13 @@ export const JobDetail = ({ job }: JobDetailProps) => {
         <div className="bg-gray-100 p-6">
           <div className="flex justify-between items-start">
             <div>
-              <h1 className="text-2xl font-bold text-gray-800 lowercase">{job.customer}</h1>
-              <p className="text-gray-600">{job.type}</p>
+              <h1 className="text-2xl font-bold text-gray-800 lowercase">{jobData.customer || job.customer}</h1>
+              <p className="text-gray-600">{jobData.type || job.type}</p>
               <div className="flex items-center mt-1">
                 <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-500 text-white">
-                  {job.status}
+                  {jobData.status || job.status}
                 </span>
-                <span className="ml-2 text-sm text-gray-500">{job.date}</span>
+                <span className="ml-2 text-sm text-gray-500">{jobData.date || job.date}</span>
               </div>
             </div>
             
@@ -652,27 +712,27 @@ export const JobDetail = ({ job }: JobDetailProps) => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
                         <p className="text-sm text-gray-500">Job Number</p>
-                        <p>{job.jobNumber}</p>
+                        <p>{jobData.jobNumber || job.jobNumber}</p>
                       </div>
                       <div>
                         <p className="text-sm text-gray-500">Customer</p>
-                        <p>{job.customer}</p>
+                        <p>{jobData.customer || job.customer}</p>
                       </div>
                       <div>
                         <p className="text-sm text-gray-500">Address</p>
-                        <p>{job.address || 'N/A'}</p>
+                        <p>{jobData.address || job.address || 'N/A'}</p>
                       </div>
                       <div>
                         <p className="text-sm text-gray-500">Type</p>
-                        <p>{job.type}</p>
+                        <p>{jobData.type || job.type}</p>
                       </div>
                       <div>
                         <p className="text-sm text-gray-500">Team</p>
-                        <p>{job.assignedTeam || 'Not assigned'}</p>
+                        <p>{jobData.assignedTeam || job.assignedTeam || 'Not assigned'}</p>
                       </div>
                       <div>
                         <p className="text-sm text-gray-500">Date</p>
-                        <p>{job.date}</p>
+                        <p>{jobData.date || job.date}</p>
                       </div>
                     </div>
                   </CardContent>
