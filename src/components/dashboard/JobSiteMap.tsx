@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useCallback, memo } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -29,7 +29,41 @@ interface MapViewState {
   center: google.maps.LatLngLiteral;
 }
 
-const JobSiteMap = () => {
+// Define libraries to load OUTSIDE of the component
+// This prevents the array from being recreated on each render
+const mapLibraries = ["marker", "geometry"] as ["marker", "geometry"];
+
+// Google Maps API key - defined once outside component
+const GOOGLE_MAPS_API_KEY = "AIzaSyAnIcvNA_ZjRUnN4aeyl-1MYpBSN-ODIvw";
+
+// Default map center - Gold Coast coordinates
+const DEFAULT_CENTER = {
+  lat: -28.017112731933594,
+  lng: 153.4014129638672
+};
+
+// Default map options
+const DEFAULT_MAP_OPTIONS = {
+  mapTypeId: 'satellite',
+  tilt: 45,
+  zoom: 13,
+  mapTypeControl: false,
+  streetViewControl: true,
+  fullscreenControl: true,
+  mapId: '8f348c1e276da9d5'
+};
+
+// Default map container style
+const MAP_CONTAINER_STYLE = {
+  width: '100%',
+  height: '400px',
+  borderRadius: '0.5rem',
+  position: 'relative' as 'relative',
+  border: '4px solid black'
+};
+
+// Use React.memo to prevent unnecessary rerenders
+const JobSiteMap = memo(() => {
   const navigate = useNavigate();
   const [selectedLocation, setSelectedLocation] = useState<Location | null>(null);
   const [mapError, setMapError] = useState<string | null>(null);
@@ -47,6 +81,9 @@ const JobSiteMap = () => {
   const userControlledZoom = useRef<number | null>(null);
   const zoomChangeTimeout = useRef<NodeJS.Timeout | null>(null);
   const initialFitDone = useRef<boolean>(false);
+  
+  // Load script reference - used to force stability
+  const loadScriptRef = useRef<any>(null);
 
   // Fetch jobs data
   useEffect(() => {
@@ -68,28 +105,6 @@ const JobSiteMap = () => {
     
     fetchJobs();
   }, []);
-
-  // Gold Coast coordinates
-  const center = {
-    lat: -28.017112731933594,
-    lng: 153.4014129638672
-  };
-  const mapContainerStyle = {
-    width: '100%',
-    height: '400px',
-    borderRadius: '0.5rem',
-    position: 'relative' as 'relative',
-    border: '4px solid black'
-  };
-  const mapOptions = {
-    mapTypeId: 'satellite',
-    tilt: 45,
-    zoom: 13,
-    mapTypeControl: false,
-    streetViewControl: true,
-    fullscreenControl: true,
-    mapId: '8f348c1e276da9d5'
-  };
 
   // Process jobs into locations for the map
   const extractLocations = (): Location[] => {
@@ -146,16 +161,30 @@ const JobSiteMap = () => {
   useEffect(() => {
     if (!mapInstance) return;
     
+    // Record initial map state when first loaded (but only once)
+    if (!mapViewState) {
+      const initialState = {
+        zoom: mapInstance.getZoom() || DEFAULT_MAP_OPTIONS.zoom,
+        tilt: mapInstance.getTilt() || DEFAULT_MAP_OPTIONS.tilt,
+        center: {
+          lat: mapInstance.getCenter()?.lat() || DEFAULT_CENTER.lat,
+          lng: mapInstance.getCenter()?.lng() || DEFAULT_CENTER.lng
+        }
+      };
+      setMapViewState(initialState);
+      console.log("Recorded initial map state:", initialState);
+    }
+    
     // Set up user interaction detection
     const dragStartListener = mapInstance.addListener('dragstart', () => {
       isUserInteracting.current = true;
-      setPreventAutoZoom(true);
+      setPreventAutoZoom(true); // Prevent auto-zoom after user starts dragging
     });
     
     // Improved zoom change handling with throttling to prevent zoom oscillation
     const zoomChangedListener = mapInstance.addListener('zoom_changed', () => {
       isUserInteracting.current = true;
-      setPreventAutoZoom(true);
+      setPreventAutoZoom(true); // Prevent auto-zoom after user changes zoom
       
       // Store the current zoom level as user controlled
       userControlledZoom.current = mapInstance.getZoom();
@@ -176,14 +205,18 @@ const JobSiteMap = () => {
         zoomChangeTimeout.current = setTimeout(() => {
           const currentZoom = mapInstance.getZoom();
           
-          setMapViewState({
-            zoom: currentZoom || mapOptions.zoom,
-            tilt: mapInstance.getTilt() || mapOptions.tilt,
+          // Store the updated map state
+          const newState = {
+            zoom: currentZoom || DEFAULT_MAP_OPTIONS.zoom,
+            tilt: mapInstance.getTilt() || DEFAULT_MAP_OPTIONS.tilt,
             center: {
-              lat: mapInstance.getCenter()?.lat() || center.lat,
-              lng: mapInstance.getCenter()?.lng() || center.lng
+              lat: mapInstance.getCenter()?.lat() || DEFAULT_CENTER.lat,
+              lng: mapInstance.getCenter()?.lng() || DEFAULT_CENTER.lng
             }
-          });
+          };
+          
+          setMapViewState(newState);
+          console.log("Updated map state after user interaction:", newState);
           
           // Reset the interaction flag
           isUserInteracting.current = false;
@@ -264,34 +297,6 @@ const JobSiteMap = () => {
     }
   }, [drawingMode, mapInstance]);
 
-  // Effect to handle jobs or locations change - but DON'T auto-fit if user has interacted with the map
-  useEffect(() => {
-    if (!mapInstance || preventAutoZoom || initialFitDone.current) return;
-    
-    if (locations.length > 0) {
-      // Only do initial fit if we have locations and user hasn't interacted with map yet
-      const bounds = new google.maps.LatLngBounds();
-      
-      // Add all locations to bounds
-      locations.forEach(location => {
-        bounds.extend({ lat: location.lat, lng: location.lng });
-      });
-      
-      // Fit map to these bounds
-      mapInstance.fitBounds(bounds);
-      
-      // If there's only one marker, don't zoom in too much
-      if (locations.length === 1) {
-        const listener = mapInstance.addListener('idle', () => {
-          if (mapInstance.getZoom() > 15) mapInstance.setZoom(15);
-          google.maps.event.removeListener(listener);
-        });
-      }
-      
-      initialFitDone.current = true;
-    }
-  }, [mapInstance, locations, preventAutoZoom]);
-
   const handleLoadError = (error: Error) => {
     console.error("Failed to load Google Maps:", error);
     setMapError("Failed to load Google Maps. Please check your internet connection.");
@@ -333,9 +338,17 @@ const JobSiteMap = () => {
     zIndex: 2
   };
 
-  // Prevent re-renders from resetting zoom by using a consistent callback
-  const handleMapLoad = (map) => {
+  // Make the handleMapLoad a stable callback with useCallback
+  const handleMapLoad = useCallback((map) => {
     console.log("Map loaded");
+    
+    // Don't reset the map instance if it already exists
+    // This is crucial to avoid recreating the map on re-renders
+    if (mapInstance === map) {
+      console.log("Map instance already set, skipping initialization");
+      return;
+    }
+    
     setMapInstance(map);
     
     // Set initial tilt for Earth-like view (only on first load)
@@ -345,6 +358,7 @@ const JobSiteMap = () => {
 
     // Place markers for each location
     try {
+      // Clear any existing markers first to avoid duplicates
       locations.forEach(location => {
         const markerElement = document.createElement('div');
         markerElement.className = 'marker';
@@ -368,8 +382,10 @@ const JobSiteMap = () => {
         });
       });
 
-      // Only fit to markers on initial load and if we have locations
-      if (!initialFitDone.current && locations.length > 0) {
+      // Only fit to bounds once on initial load when we don't have a saved state
+      if (!mapViewState && !initialFitDone.current && locations.length > 0) {
+        console.log("Initial fit to bounds");
+        
         // Create bounds object
         const bounds = new google.maps.LatLngBounds();
         
@@ -390,13 +406,21 @@ const JobSiteMap = () => {
         }
         
         initialFitDone.current = true;
+      } 
+      else if (mapViewState) {
+        // If we have saved state, explicitly use it
+        // This ensures we maintain the user's view when the map reloads
+        console.log("Restoring saved map state:", mapViewState);
+        map.setZoom(mapViewState.zoom);
+        map.setCenter(mapViewState.center);
+        map.setTilt(mapViewState.tilt);
       }
     }
     catch (error) {
       console.error("Error loading map:", error);
       setMapError("Failed to initialize map components.");
     }
-  };
+  }, [mapViewState, locations, mapInstance]);
 
   return (
     <Card className="w-full p-0 overflow-hidden">
@@ -437,6 +461,40 @@ const JobSiteMap = () => {
               <span>Clear</span>
             </Button>
           )}
+          
+          {/* Reset map view button */}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              if (!mapInstance) return;
+              
+              // Reset to show all markers
+              if (locations.length > 0) {
+                const bounds = new google.maps.LatLngBounds();
+                locations.forEach(location => {
+                  bounds.extend({ lat: location.lat, lng: location.lng });
+                });
+                mapInstance.fitBounds(bounds);
+                
+                // Don't zoom in too much for single markers
+                if (locations.length === 1) {
+                  setTimeout(() => {
+                    if (mapInstance.getZoom() > 15) mapInstance.setZoom(15);
+                  }, 100);
+                }
+              } else {
+                // Reset to default view
+                mapInstance.setZoom(DEFAULT_MAP_OPTIONS.zoom);
+                mapInstance.setCenter(DEFAULT_CENTER);
+              }
+              
+              toast.success("Map view reset");
+            }}
+            className="flex items-center gap-1 shadow-md bg-white/90 text-black hover:bg-white/100"
+          >
+            <span>Reset View</span>
+          </Button>
         </div>
         
         {mapError && (
@@ -450,19 +508,23 @@ const JobSiteMap = () => {
         )}
         
         <LoadScript 
-          googleMapsApiKey="AIzaSyAnIcvNA_ZjRUnN4aeyl-1MYpBSN-ODIvw" 
-          libraries={["marker", "geometry"]}
+          googleMapsApiKey={GOOGLE_MAPS_API_KEY} 
+          libraries={mapLibraries}
           version="beta"
           onError={handleLoadError}
+          onLoad={() => console.log("Google Maps script loaded")}
+          loadingElement={<div className="h-full w-full flex items-center justify-center">Loading Maps...</div>}
+          id="google-map-script"
+          ref={loadScriptRef}
         >
           <GoogleMap 
-            mapContainerStyle={mapContainerStyle} 
-            center={mapViewState?.center || center} 
-            zoom={mapViewState?.zoom || mapOptions.zoom} 
+            mapContainerStyle={MAP_CONTAINER_STYLE} 
+            center={mapViewState?.center || DEFAULT_CENTER} 
+            zoom={mapViewState?.zoom || DEFAULT_MAP_OPTIONS.zoom} 
             options={{
-              ...mapOptions,
+              ...DEFAULT_MAP_OPTIONS,
               // Use stored tilt if available to prevent resetting the view
-              tilt: mapViewState?.tilt || mapOptions.tilt
+              tilt: mapViewState?.tilt || DEFAULT_MAP_OPTIONS.tilt
             }}
             onLoad={handleMapLoad}
           >
@@ -524,7 +586,7 @@ const JobSiteMap = () => {
       </div>
     </Card>
   );
-};
+});
 
 // Standard Marker component for measurement points
 const Marker = ({ position, label }) => {
