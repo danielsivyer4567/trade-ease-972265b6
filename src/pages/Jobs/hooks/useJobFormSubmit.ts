@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
@@ -68,7 +67,11 @@ export function useJobFormSubmit() {
     type: string,
     date: string,
     dateUndecided: boolean,
-    team: string
+    team: string,
+    address: string = "",
+    city: string = "",
+    state: string = "",
+    zipCode: string = ""
   ) => {
     return {
       job_number: jobNumber,
@@ -80,7 +83,11 @@ export function useJobFormSubmit() {
       date_undecided: dateUndecided,
       status: "ready",
       location: [151.2093, -33.8688],
-      assigned_team: team !== "tba" ? team : null
+      assigned_team: team !== "tba" ? team : null,
+      address,
+      city,
+      state,
+      zipCode
     };
   };
 
