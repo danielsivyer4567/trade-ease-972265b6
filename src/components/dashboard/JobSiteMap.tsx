@@ -5,15 +5,21 @@ import { Card } from "@/components/ui/card";
 import { GoogleMap, LoadScript, InfoWindow, LoadScriptProps, Polyline } from '@react-google-maps/api';
 import { MapPin, AlertCircle, Pencil, X, Ruler } from "lucide-react";
 import { toast } from "sonner";
+import type { Job } from "@/types/job";
+import { supabase } from "@/integrations/supabase/client";
 
 // Define types for locations and map properties
 type Location = {
-  id: number;
+  id: string;
   name: string;
   lat: number;
   lng: number;
   type: string;
   jobNumber: string;
+  jobTitle: string;
+  customer: string;
+  status: Job['status'];
+  locationLabel?: string;
 };
 
 // Map view state type
@@ -25,21 +31,41 @@ interface MapViewState {
 
 const JobSiteMap = () => {
   const navigate = useNavigate();
-  const [selectedLocation, setSelectedLocation] = useState<{
-    lat: number;
-    lng: number;
-  } | null>(null);
+  const [selectedLocation, setSelectedLocation] = useState<Location | null>(null);
   const [mapError, setMapError] = useState<string | null>(null);
   const [mapInstance, setMapInstance] = useState<google.maps.Map | null>(null);
   const [drawingMode, setDrawingMode] = useState<boolean>(false);
   const [measurementPath, setMeasurementPath] = useState<Array<{lat: number, lng: number}>>([]);
   const [measurementDistance, setMeasurementDistance] = useState<number>(0);
   const [mapViewState, setMapViewState] = useState<MapViewState | null>(null);
+  const [jobs, setJobs] = useState<Job[]>([]);
+  const [loading, setLoading] = useState(true);
   const listenerRef = useRef<google.maps.MapsEventListener | null>(null);
   const viewChangeListenerRef = useRef<google.maps.MapsEventListener | null>(null);
   const isUserInteracting = useRef<boolean>(false);
   const userControlledZoom = useRef<number | null>(null);
   const zoomChangeTimeout = useRef<NodeJS.Timeout | null>(null);
+
+  // Fetch jobs data
+  useEffect(() => {
+    const fetchJobs = async () => {
+      setLoading(true);
+      try {
+        const { data, error } = await supabase.from('jobs').select('*');
+        if (error) {
+          console.error("Failed to fetch jobs:", error);
+        } else {
+          setJobs(data || []);
+        }
+      } catch (err) {
+        console.error("Error fetching jobs:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchJobs();
+  }, []);
 
   // Gold Coast coordinates
   const center = {
@@ -62,35 +88,97 @@ const JobSiteMap = () => {
     fullscreenControl: true,
     mapId: '8f348c1e276da9d5'
   };
-  const locations: Location[] = [{
-    id: 1,
-    name: "Job Site 1",
-    lat: -28.012,
-    lng: 153.402,
-    type: "Plumbing",
-    jobNumber: "PLM-001"
-  }, {
-    id: 2,
-    name: "Job Site 2",
-    lat: -28.025,
-    lng: 153.410,
-    type: "Electrical",
-    jobNumber: "ELE-001"
-  }, {
-    id: 3,
-    name: "Job Site 3",
-    lat: -28.020,
-    lng: 153.422,
-    type: "HVAC",
-    jobNumber: "HVAC-001"
-  }, {
-    id: 4,
-    name: "Headquarters",
-    lat: -28.017,
-    lng: 153.401,
-    type: "Office",
-    jobNumber: "HQ-001"
-  }];
+
+  // Process jobs into locations for the map
+  const extractLocations = (): Location[] => {
+    if (jobs.length === 0) {
+      // Fallback to default sample data
+      return [{
+        id: "1",
+        name: "Job Site 1",
+        lat: -28.012,
+        lng: 153.402,
+        type: "Plumbing",
+        jobNumber: "PLM-001",
+        jobTitle: "Plumbing Repair",
+        customer: "John Smith",
+        status: "in-progress"
+      }, {
+        id: "2",
+        name: "Job Site 2",
+        lat: -28.025,
+        lng: 153.410,
+        type: "Electrical",
+        jobNumber: "ELE-001",
+        jobTitle: "Electrical Installation",
+        customer: "Sarah Johnson",
+        status: "ready"
+      }, {
+        id: "3",
+        name: "Job Site 3",
+        lat: -28.020,
+        lng: 153.422,
+        type: "HVAC",
+        jobNumber: "HVAC-001",
+        jobTitle: "HVAC Maintenance",
+        customer: "Michael Brown",
+        status: "to-invoice"
+      }, {
+        id: "4",
+        name: "Headquarters",
+        lat: -28.017,
+        lng: 153.401,
+        type: "Office",
+        jobNumber: "HQ-001",
+        jobTitle: "Office",
+        customer: "Trade Ease",
+        status: "ready"
+      }];
+    }
+
+    // Extract all job locations
+    const locations: Location[] = [];
+
+    jobs.forEach(job => {
+      // Process locations array if available
+      if (job.locations && job.locations.length > 0) {
+        job.locations.forEach((location, index) => {
+          if (location.coordinates && location.coordinates[0] && location.coordinates[1]) {
+            locations.push({
+              id: `${job.id}-loc-${index}`,
+              name: job.title || `Job ${job.jobNumber}`,
+              lat: location.coordinates[1],
+              lng: location.coordinates[0],
+              type: job.type || "Job",
+              jobNumber: job.jobNumber || "N/A",
+              jobTitle: job.title || "Unnamed Job",
+              customer: job.customer || "N/A",
+              status: job.status,
+              locationLabel: location.label || (index === 0 ? "Primary" : `Location ${index + 1}`)
+            });
+          }
+        });
+      } 
+      // Fallback to legacy location field
+      else if (job.location && job.location[0] && job.location[1]) {
+        locations.push({
+          id: job.id,
+          name: job.title || `Job ${job.jobNumber}`,
+          lat: job.location[1],
+          lng: job.location[0],
+          type: job.type || "Job",
+          jobNumber: job.jobNumber || "N/A",
+          jobTitle: job.title || "Unnamed Job",
+          customer: job.customer || "N/A",
+          status: job.status
+        });
+      }
+    });
+
+    return locations;
+  };
+  
+  const locations = extractLocations();
 
   // Track map view changes, but only when map becomes idle after user interaction
   useEffect(() => {
@@ -271,7 +359,7 @@ const JobSiteMap = () => {
         markerElement.innerHTML = `
           <div class="flex items-center gap-2 font-semibold text-white bg-black/50 backdrop-blur-sm px-2 py-1 rounded-lg shadow-lg border border-white/20">
             <img src="/lovable-uploads/34bca7f1-d63b-45a0-b1ca-a562443686ad.png" alt="Trade Ease Logo" width="20" height="20" class="object-contain" />
-            <span>${location.jobNumber || 'N/A'}</span>
+            <span>${location.jobNumber || 'N/A'}${location.locationLabel ? ` - ${location.locationLabel}` : ''}</span>
           </div>
         `;
         const marker = new google.maps.marker.AdvancedMarkerElement({
@@ -284,10 +372,7 @@ const JobSiteMap = () => {
           title: location.name
         });
         marker.addListener('gmp-click', () => {
-          setSelectedLocation({
-            lat: location.lat,
-            lng: location.lng
-          });
+          setSelectedLocation(location);
         });
       });
     }
@@ -373,9 +458,30 @@ const JobSiteMap = () => {
                 }}
                 onCloseClick={() => setSelectedLocation(null)}
               >
-                <div className="p-2">
-                  <h3 className="font-bold text-gray-900">Job Site</h3>
-                  <p className="text-gray-700 text-sm">Click to view details</p>
+                <div className="p-2 max-w-[250px]">
+                  <div className="flex justify-between items-start mb-1">
+                    <h3 className="font-bold text-gray-900">{selectedLocation.jobTitle}</h3>
+                    <span className="px-2 py-0.5 text-xs rounded-full bg-gray-100">
+                      {selectedLocation.status === 'ready' && 'Ready'}
+                      {selectedLocation.status === 'in-progress' && 'In Progress'}
+                      {selectedLocation.status === 'to-invoice' && 'To Invoice'}
+                      {selectedLocation.status === 'invoiced' && 'Invoiced'}
+                    </span>
+                  </div>
+                  <p className="text-gray-700 text-sm font-medium">#{selectedLocation.jobNumber}</p>
+                  <p className="text-gray-700 text-sm">{selectedLocation.customer}</p>
+                  {selectedLocation.locationLabel && (
+                    <p className="text-blue-600 text-xs font-medium mt-1">{selectedLocation.locationLabel}</p>
+                  )}
+                  <div className="mt-2">
+                    <Button 
+                      className="w-full text-sm mt-1" 
+                      size="sm"
+                      onClick={() => navigate(`/jobs/${selectedLocation.id.split('-')[0]}`)}
+                    >
+                      View Job Details
+                    </Button>
+                  </div>
                 </div>
               </InfoWindow>
             )}
