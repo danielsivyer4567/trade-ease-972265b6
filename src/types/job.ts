@@ -4,7 +4,12 @@ export interface Job {
   type: string;
   status: 'ready' | 'in-progress' | 'to-invoice' | 'invoiced';
   date: string;
-  location: [number, number];
+  location?: [number, number]; // Keep for backward compatibility
+  locations?: Array<{
+    coordinates: [number, number];
+    address?: string;
+    label?: string;
+  }>;
   address?: string;
   city?: string;
   state?: string;

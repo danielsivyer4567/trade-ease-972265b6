@@ -11,6 +11,11 @@ interface JobMapProps {
     position: [number, number];
     title: string;
   }>;
+  locationMarkers?: Array<{
+    coordinates: [number, number];
+    job: Job;
+    label?: string;
+  }>;
   boundaries?: Array<Array<[number, number]>>;
   autoFit?: boolean; // New prop to control whether map should auto-fit to markers
 }
@@ -24,10 +29,12 @@ const MapComponent = ({
   center, 
   zoom = 14, 
   markers = [], 
+  locationMarkers = [],
   boundaries = [],
   autoFit = true 
 }: JobMapProps) => {
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
+  const [selectedLocation, setSelectedLocation] = useState<{coordinates: [number, number], label?: string} | null>(null);
   const [map, setMap] = useState<google.maps.Map | null>(null);
 
   const mapContainerStyle = {
@@ -55,15 +62,20 @@ const MapComponent = ({
 
   // Function to auto-fit map to all markers
   const fitMapToMarkers = (map: google.maps.Map) => {
-    if (!map || (!jobs.length && !markers.length)) return;
+    if (!map || (!jobs.length && !markers.length && !locationMarkers.length)) return;
     
     const bounds = new google.maps.LatLngBounds();
     
-    // Add job locations to bounds
+    // Add job locations to bounds (legacy)
     jobs.forEach(job => {
       if (job.location && job.location[0] && job.location[1]) {
         bounds.extend({ lat: job.location[1], lng: job.location[0] });
       }
+    });
+    
+    // Add location markers to bounds
+    locationMarkers.forEach(marker => {
+      bounds.extend({ lat: marker.coordinates[1], lng: marker.coordinates[0] });
     });
     
     // Add individual markers to bounds
@@ -78,7 +90,7 @@ const MapComponent = ({
     map.fitBounds(bounds);
     
     // Add some padding if there's only one marker
-    if ((jobs.length + markers.length) <= 1) {
+    if ((jobs.length + markers.length + locationMarkers.length) <= 1) {
       // Don't zoom in too much for single markers
       const currentZoom = map.getZoom();
       if (currentZoom && currentZoom > 15) {
@@ -90,7 +102,7 @@ const MapComponent = ({
   const onLoad = (mapInstance: google.maps.Map) => {
     setMap(mapInstance);
     
-    // Add markers from jobs if provided
+    // Add markers from jobs if provided (legacy support)
     if (jobs.length > 0) {
       jobs.forEach((job) => {
         // Skip if job has no location
@@ -117,6 +129,41 @@ const MapComponent = ({
         // Add click listener using the recommended 'gmp-click' event
         marker.addListener('gmp-click', () => {
           setSelectedJob(job);
+          setSelectedLocation(null);
+        });
+      });
+    }
+
+    // Add markers from locationMarkers prop (new primary way)
+    if (locationMarkers.length > 0) {
+      locationMarkers.forEach(locMarker => {
+        const { coordinates, job, label } = locMarker;
+        
+        // Skip if invalid coordinates
+        if (!coordinates || !coordinates[0] || !coordinates[1]) return;
+        
+        // Create marker element
+        const markerElement = document.createElement('div');
+        markerElement.className = 'marker';
+        markerElement.innerHTML = `
+          <div class="flex items-center gap-2 font-semibold text-white bg-black/50 backdrop-blur-sm px-2 py-1 rounded-lg shadow-lg border border-white/20">
+            <img src="/lovable-uploads/34bca7f1-d63b-45a0-b1ca-a562443686ad.png" alt="Trade Ease Logo" width="20" height="20" class="object-contain" />
+            <span>${job.jobNumber || 'N/A'}${label ? ` - ${label}` : ''}</span>
+          </div>
+        `;
+
+        // Create the advanced marker
+        const marker = new google.maps.marker.AdvancedMarkerElement({
+          position: { lat: coordinates[1], lng: coordinates[0] },
+          map: mapInstance,
+          content: markerElement,
+          title: job.customer
+        });
+
+        // Add click listener
+        marker.addListener('gmp-click', () => {
+          setSelectedJob(job);
+          setSelectedLocation({ coordinates, label });
         });
       });
     }
@@ -143,7 +190,7 @@ const MapComponent = ({
     }
 
     // Add a marker for the center location if no other markers are provided
-    if (jobs.length === 0 && markers.length === 0) {
+    if (jobs.length === 0 && markers.length === 0 && locationMarkers.length === 0) {
       const centerMarkerElement = document.createElement('div');
       centerMarkerElement.className = 'marker';
       centerMarkerElement.innerHTML = `
@@ -193,7 +240,7 @@ const MapComponent = ({
     if (map && autoFit) {
       fitMapToMarkers(map);
     }
-  }, [jobs, markers, map, autoFit]);
+  }, [jobs, markers, locationMarkers, map, autoFit]);
 
   return (
     <GoogleMap
@@ -203,7 +250,25 @@ const MapComponent = ({
       options={options}
       onLoad={onLoad}
     >
-      {selectedJob && (
+      {selectedJob && selectedLocation && (
+        <InfoWindow
+          position={{ lat: selectedLocation.coordinates[1], lng: selectedLocation.coordinates[0] }}
+          onCloseClick={() => {
+            setSelectedJob(null);
+            setSelectedLocation(null);
+          }}
+        >
+          <div>
+            <h3 className="font-semibold">{selectedJob.customer}</h3>
+            <p>{selectedJob.title} - {selectedJob.type}</p>
+            {selectedLocation.label && (
+              <p className="text-sm text-blue-600">{selectedLocation.label}</p>
+            )}
+            <p className="text-sm text-gray-500">{selectedJob.date}</p>
+          </div>
+        </InfoWindow>
+      )}
+      {selectedJob && !selectedLocation && selectedJob.location && (
         <InfoWindow
           position={{ lat: selectedJob.location[1], lng: selectedJob.location[0] }}
           onCloseClick={() => setSelectedJob(null)}
