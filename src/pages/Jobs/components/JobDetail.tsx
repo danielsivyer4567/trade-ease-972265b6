@@ -15,6 +15,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { toast } from "sonner";
 import JobMap from "@/components/JobMap";
 import { customerService } from "@/services/CustomerService";
+import { geocodingService } from "@/services"; // Import through the services index
 import { supabase } from "@/integrations/supabase/client";
 import { 
   AlertDialog,
@@ -603,20 +604,61 @@ export const JobDetail = ({ job }: JobDetailProps) => {
     fetchCustomerDetails();
   }, [job.customer, job.id]);
 
+  // Update the geocoding useEffect for better handling of address changes
+  useEffect(() => {
+    const geocodeAddress = async () => {
+      // Only try to geocode if we have an address and don't have coordinates
+      const address = jobData.address || job.address;
+      const hasLocation = jobData.location?.[0] && jobData.location?.[1];
+      const shouldGeocode = address && 
+                            address !== 'N/A' && 
+                            (!hasLocation || jobData.address !== job.address);
+      
+      if (shouldGeocode) {
+        try {
+          console.log(`Geocoding address: ${address}`);
+          const coordinates = await geocodingService.geocodeAddress(address);
+          if (coordinates) {
+            console.log(`Geocoded coordinates: [${coordinates[0]}, ${coordinates[1]}]`);
+            // Update local state with the coordinates
+            setJobData(prev => ({
+              ...prev,
+              location: coordinates
+            }));
+            
+            // Update job on the server if we have a job ID
+            if (job.id) {
+              await updateJobDetails(job.id, { 
+                location: coordinates
+              });
+            }
+          }
+        } catch (error) {
+          console.error("Error geocoding address:", error);
+        }
+      }
+    };
+
+    geocodeAddress();
+  }, [jobData.address, job.address, job.id]);
+
   return (
     <>
       <div className="w-full h-full bg-gray-100">
-        {/* Map/Location header section */}
+        {/* Map/Location header section with updated map data handling */}
         <div className="relative h-64 bg-gray-300">
           <div className="absolute inset-0">
             <JobMap 
               center={jobData.location || job.location}
               zoom={15}
-              markers={[{
-                position: [jobData.location?.[1] || job.location[1], jobData.location?.[0] || job.location[0]] as [number, number],
-                title: jobData.jobNumber || job.jobNumber
-              }]}
+              markers={jobData.location ? [
+                {
+                  position: [jobData.location[1], jobData.location[0]] as [number, number],
+                  title: jobData.address || job.address || jobData.jobNumber || job.jobNumber
+                }
+              ] : []}
               boundaries={jobData.boundaries || job.boundaries}
+              autoFit={true}
             />
           </div>
         </div>

@@ -3,10 +3,31 @@ import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useAuth } from '@/contexts/AuthContext';
+import { toast } from 'sonner';
+import { useNavigate } from 'react-router-dom';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const { signIn } = useAuth();
+  const navigate = useNavigate();
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    
+    try {
+      await signIn(email, password);
+      // Navigation will be handled by the AuthContext's onAuthStateChange
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to sign in');
+      console.error('Sign in error:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen w-full relative overflow-hidden">
@@ -30,7 +51,7 @@ export default function LoginPage() {
             <CardTitle className="text-2xl font-bold text-center">Welcome Back</CardTitle>
           </CardHeader>
           <CardContent>
-            <form className="space-y-4">
+            <form className="space-y-4" onSubmit={handleSubmit}>
               <div className="space-y-2">
                 <Input
                   type="email"
@@ -38,6 +59,7 @@ export default function LoginPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="w-full"
+                  required
                 />
               </div>
               <div className="space-y-2">
@@ -47,9 +69,12 @@ export default function LoginPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="w-full"
+                  required
                 />
               </div>
-              <Button className="w-full">Sign In</Button>
+              <Button className="w-full" type="submit" disabled={loading}>
+                {loading ? 'Signing In...' : 'Sign In'}
+              </Button>
             </form>
           </CardContent>
         </Card>
