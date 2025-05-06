@@ -17,100 +17,11 @@ interface JobTableProps {
 
 export function JobTable({ 
   searchQuery = "", 
-  jobs: propJobs, 
+  jobs = [], 
   actionLoading = null,
   onStatusChange = async () => {} 
 }: JobTableProps) {
   const navigate = useNavigate();
-  
-  // Sample jobs data - use prop jobs if provided, otherwise use sample data
-  const defaultJobs = [
-    {
-      id: "1",
-      title: "Plumbing Repair",
-      customer: "John Smith",
-      jobNumber: "PLM-001",
-      type: "Plumbing",
-      status: "in-progress" as "in-progress",
-      date: "2023-05-15",
-      location: [151.2093, -33.8688] as [number, number],
-      // Adding multiple locations example
-      locations: [
-        {
-          coordinates: [151.2093, -33.8688] as [number, number],
-          address: "123 Main St, Sydney NSW",
-          label: "Primary Site"
-        },
-        {
-          coordinates: [151.2293, -33.8888] as [number, number],
-          address: "456 Second St, Sydney NSW",
-          label: "Secondary Site"
-        }
-      ],
-      assignedTeam: "Team Blue",
-      job_steps: [
-        { id: 1, title: "Initial Assessment", tasks: [], isCompleted: true },
-        { id: 2, title: "Parts Procurement", tasks: [], isCompleted: true },
-        { id: 3, title: "Installation", tasks: [], isCompleted: false },
-        { id: 4, title: "Testing", tasks: [], isCompleted: false },
-      ]
-    },
-    {
-      id: "2",
-      title: "Electrical Installation",
-      customer: "Sarah Johnson",
-      jobNumber: "ELE-001",
-      type: "Electrical",
-      status: "ready" as "ready",
-      date: "2023-05-16",
-      location: [151.2093, -33.8688] as [number, number],
-      // Adding multiple locations example
-      locations: [
-        {
-          coordinates: [151.2093, -33.8688] as [number, number],
-          address: "789 Park Ave, Sydney NSW",
-          label: "Main Building"
-        },
-        {
-          coordinates: [151.2193, -33.8788] as [number, number],
-          address: "790 Park Ave, Sydney NSW",
-          label: "Warehouse"
-        },
-        {
-          coordinates: [151.2293, -33.8888] as [number, number],
-          address: "800 Park Ave, Sydney NSW",
-          label: "Office Building"
-        }
-      ],
-      assignedTeam: "Team Red",
-      job_steps: [
-        { id: 1, title: "Initial Consultation", tasks: [], isCompleted: true },
-        { id: 2, title: "Quote Provided", tasks: [], isCompleted: true },
-        { id: 3, title: "Materials Ordered", tasks: [], isCompleted: true },
-        { id: 4, title: "Installation", tasks: [], isCompleted: false },
-        { id: 5, title: "Testing", tasks: [], isCompleted: false },
-      ]
-    },
-    {
-      id: "3",
-      title: "HVAC Maintenance",
-      customer: "Michael Brown",
-      jobNumber: "HVAC-001",
-      type: "HVAC",
-      status: "to-invoice" as "to-invoice",
-      date: "2023-05-17",
-      location: [151.2093, -33.8688] as [number, number],
-      assignedTeam: "Team Green",
-      job_steps: [
-        { id: 1, title: "System Inspection", tasks: [], isCompleted: true },
-        { id: 2, title: "Filter Replacement", tasks: [], isCompleted: true },
-        { id: 3, title: "System Cleaning", tasks: [], isCompleted: true },
-        { id: 4, title: "Performance Testing", tasks: [], isCompleted: true },
-      ]
-    }
-  ];
-  
-  const jobs = propJobs || defaultJobs;
   
   // Filter jobs based on search query
   const filteredJobs = searchQuery
@@ -127,6 +38,16 @@ export function JobTable({
     if (!job.job_steps || job.job_steps.length === 0) return 0;
     const completed = job.job_steps.filter(step => step.isCompleted).length;
     return Math.round((completed / job.job_steps.length) * 100);
+  };
+  
+  // Helper to count the number of locations
+  const getLocationCount = (job: Job): number => {
+    if (job.locations && job.locations.length > 0) {
+      return job.locations.length;
+    } else if (job.location && job.location[0] && job.location[1]) {
+      return 1;
+    }
+    return 0;
   };
   
   return (
@@ -147,7 +68,7 @@ export function JobTable({
               const progress = getJobProgress(job);
               const completedSteps = job.job_steps?.filter(s => s.isCompleted).length || 0;
               const totalSteps = job.job_steps?.length || 0;
-              const locationCount = job.locations?.length || 0;
+              const locationCount = getLocationCount(job);
               
               return (
                 <TableRow 
@@ -159,10 +80,10 @@ export function JobTable({
                     <div>
                       <div className="font-semibold">{job.title}</div>
                       <div className="text-xs text-gray-500">#{job.jobNumber}</div>
-                      {locationCount > 1 && (
+                      {locationCount > 0 && (
                         <div className="text-xs text-blue-600 mt-1 flex items-center">
                           <MapPin className="h-3 w-3 mr-1" />
-                          {locationCount} locations
+                          {locationCount > 1 ? `${locationCount} locations` : '1 location'}
                         </div>
                       )}
                     </div>
@@ -188,7 +109,7 @@ export function JobTable({
                       <Progress value={progress} className="h-1.5" />
                     </div>
                   </TableCell>
-                  <TableCell onClick={(e) => e.stopPropagation()} className="whitespace-nowrap">
+                  <TableCell>
                     <JobActions 
                       job={job}
                       actionLoading={actionLoading}

@@ -7,19 +7,35 @@ interface JobMapViewProps {
 }
 
 export const JobMapView = ({ job }: JobMapViewProps) => {
-  // Create a marker from the job data
-  const jobMarker = {
-    position: [job.location[1], job.location[0]] as [number, number],
-    title: job.title || job.jobNumber || 'Job Location'
-  };
+  // Create location markers array for the job
+  const locationMarkers = job.locations?.map(location => ({
+    coordinates: location.coordinates,
+    job: job,
+    label: location.label
+  })) || [];
+  
+  // If no locations array but has legacy location, add that as a fallback
+  if (locationMarkers.length === 0 && job.location) {
+    locationMarkers.push({
+      coordinates: job.location,
+      job: job,
+      label: "Main Location"
+    });
+  }
+  
+  // Determine center coordinates for the map
+  const centerCoords = locationMarkers.length > 0 
+    ? locationMarkers[0].coordinates 
+    : [-28.017112731933594, 153.4014129638672] as [number, number]; // Default to Gold Coast
   
   return (
     <div className="h-full w-full">
       <JobMap 
-        center={[job.location[0], job.location[1]]} 
+        center={centerCoords} 
         zoom={15} 
-        markers={[jobMarker]} 
+        locationMarkers={locationMarkers} 
         boundaries={job.boundaries || []}
+        autoFit={true}
       />
     </div>
   );
