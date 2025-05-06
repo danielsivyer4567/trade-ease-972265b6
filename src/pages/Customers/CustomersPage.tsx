@@ -257,7 +257,7 @@ function CustomersPage() {
             <Badge variant="outline" className="ml-2">{filteredAndSortedCustomers.length}</Badge>
           </div>
           <div className="flex gap-2">
-            <Button variant="outline">Add Customer</Button>
+            <Button variant="outline" onClick={() => navigate('/customers/new')}>Add Customer</Button>
             <Button>New Job</Button>
           </div>
         </div>

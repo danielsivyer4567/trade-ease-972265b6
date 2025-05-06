@@ -26,6 +26,7 @@ const AuthPage = lazy(() => import('@/pages/Auth'));
 // Customer related pages
 const CustomersPage = lazy(() => import('@/pages/Customers/CustomersPage'));
 const CustomerDetailsPage = lazy(() => import('@/pages/Customers/CustomerDetail'));
+const NewCustomerPage = lazy(() => import('@/pages/Customers/NewCustomer'));
 
 // Site Audits
 const SiteAuditsPage = lazy(() => import('@/pages/SiteAudits'));
@@ -140,6 +141,7 @@ const routeObjects: RouteObject[] = [
             path: "/customers",
             children: [
               { index: true, element: <SuspenseWrapper><CustomersPage /></SuspenseWrapper> },
+              { path: "new", element: <SuspenseWrapper><NewCustomerPage /></SuspenseWrapper> },
               { path: ":auditId", element: <SuspenseWrapper><CustomersPage /></SuspenseWrapper> },
               { path: ":auditId/:customerId", element: <SuspenseWrapper><CustomerDetailsPage /></SuspenseWrapper> },
             ],

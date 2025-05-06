@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { AppLayout } from "@/components/ui/AppLayout";
 import { JobForm } from "./components/JobForm";
@@ -21,6 +20,10 @@ export default function NewJob() {
   const [jobNumber, setJobNumber] = useState("");
   const [title, setTitle] = useState("");
   const [customer, setCustomer] = useState("");
+  const [address, setAddress] = useState("");
+  const [city, setCity] = useState("");
+  const [state, setState] = useState("");
+  const [zipCode, setZipCode] = useState("");
   const [description, setDescription] = useState("");
   const [type, setType] = useState("");
   const [date, setDate] = useState("");
@@ -74,6 +77,14 @@ export default function NewJob() {
             setTitle={setTitle}
             customer={customer}
             setCustomer={setCustomer}
+            address={address}
+            setAddress={setAddress}
+            city={city}
+            setCity={setCity}
+            state={state}
+            setState={setState}
+            zipCode={zipCode}
+            setZipCode={setZipCode}
             description={description}
             setDescription={setDescription}
             type={type}

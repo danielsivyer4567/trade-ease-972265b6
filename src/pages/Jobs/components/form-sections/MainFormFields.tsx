@@ -1,4 +1,3 @@
-
 import React from "react";
 import { JobNumberGenerator } from "../JobNumberGenerator";
 import { JobDateSelector } from "../JobDateSelector";
@@ -17,6 +16,10 @@ interface MainFormFieldsProps {
   setTitle: (title: string) => void;
   customer: string;
   setCustomer: (customer: string) => void;
+  setAddress: (address: string) => void;
+  setCity: (city: string) => void; 
+  setState: (state: string) => void;
+  setZipCode: (zipCode: string) => void;
   type: string;
   setType: (type: string) => void;
   date: string;
@@ -36,6 +39,10 @@ export function MainFormFields({
   setTitle,
   customer,
   setCustomer,
+  setAddress,
+  setCity,
+  setState,
+  setZipCode,
   type,
   setType,
   date,
@@ -58,7 +65,14 @@ export function MainFormFields({
         setDateUndecided={setDateUndecided} 
       />
       
-      <CustomerDetails customer={customer} setCustomer={setCustomer} />
+      <CustomerDetails 
+        customer={customer} 
+        setCustomer={setCustomer} 
+        setAddress={setAddress}
+        setCity={setCity}
+        setState={setState}
+        setZipCode={setZipCode}
+      />
       
       <div className="space-y-2">
         <Label htmlFor="title">Job Title *</Label>

@@ -1,4 +1,3 @@
-
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"; 
@@ -13,6 +12,10 @@ import { zodResolver } from "@hookform/resolvers/zod";
 interface CustomerDetailsProps {
   customer: string;
   setCustomer: (customer: string) => void;
+  setAddress?: (address: string) => void;
+  setCity?: (city: string) => void;
+  setState?: (state: string) => void;
+  setZipCode?: (zipCode: string) => void;
 }
 
 // Define schema for the form
@@ -23,13 +26,20 @@ const formSchema = z.object({
   zipCode: z.string().optional()
 });
 
-export function CustomerDetails({ customer, setCustomer }: CustomerDetailsProps) {
+export function CustomerDetails({ 
+  customer, 
+  setCustomer,
+  setAddress,
+  setCity, 
+  setState,
+  setZipCode
+}: CustomerDetailsProps) {
   const { customers, fetchCustomers } = useCustomers();
-  const [useExistingCustomer, setUseExistingCustomer] = useState<boolean>(false);
-  const [selectedCustomerId, setSelectedCustomerId] = useState<string>("");
-  const [showAddressFields, setShowAddressFields] = useState<boolean>(false);
+  const [useExistingCustomer, setUseExistingCustomer] = useState(false);
+  const [selectedCustomerId, setSelectedCustomerId] = useState("");
+  const [showAddressFields, setShowAddressFields] = useState(false);
   
-  // Initialize the form
+  // Initialize the form with empty values
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -40,30 +50,57 @@ export function CustomerDetails({ customer, setCustomer }: CustomerDetailsProps)
     }
   });
 
+  // Watch form values and update parent component
   useEffect(() => {
-    console.log("Fetching customers");
-    fetchCustomers();
-  }, []);
-
-  // When a customer is selected from dropdown, set the customer name
+    const subscription = form.watch((value) => {
+      if (setAddress && value.address !== undefined) {
+        setAddress(value.address);
+      }
+      if (setCity && value.city !== undefined) {
+        setCity(value.city);
+      }
+      if (setState && value.state !== undefined) {
+        setState(value.state);
+      }
+      if (setZipCode && value.zipCode !== undefined) {
+        setZipCode(value.zipCode);
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, [form, setAddress, setCity, setState, setZipCode]);
+  
   useEffect(() => {
-    if (selectedCustomerId && useExistingCustomer) {
+    // Fetch customers if needed
+    if (useExistingCustomer && customers.length === 0) {
+      fetchCustomers();
+    }
+  }, [useExistingCustomer, customers.length, fetchCustomers]);
+  
+  useEffect(() => {
+    // When a customer is selected, populate the customer name and address fields
+    if (selectedCustomerId && customers.length > 0) {
       const selectedCustomer = customers.find(c => c.id === selectedCustomerId);
       if (selectedCustomer) {
-        console.log("Selected customer:", selectedCustomer);
         setCustomer(selectedCustomer.name);
         
-        // Set the address fields values
+        // Set form values for address fields
         form.setValue("address", selectedCustomer.address || "");
         form.setValue("city", selectedCustomer.city || "");
         form.setValue("state", selectedCustomer.state || "");
-        form.setValue("zipCode", selectedCustomer.zipCode || ""); // Make sure it uses zipCode not zipcode
+        form.setValue("zipCode", selectedCustomer.zipCode || "");
         
-        // Show address fields when a customer is selected
+        // Push the values up to parent component
+        if (setAddress) setAddress(selectedCustomer.address || "");
+        if (setCity) setCity(selectedCustomer.city || "");
+        if (setState) setState(selectedCustomer.state || "");
+        if (setZipCode) setZipCode(selectedCustomer.zipCode || "");
+        
         setShowAddressFields(true);
       }
+    } else {
+      setShowAddressFields(false);
     }
-  }, [selectedCustomerId, useExistingCustomer, customers]);
+  }, [selectedCustomerId, customers, setCustomer, form, setAddress, setCity, setState, setZipCode]);
 
   return (
     <div className="space-y-3">
@@ -103,15 +140,21 @@ export function CustomerDetails({ customer, setCustomer }: CustomerDetailsProps)
           )}
         </div>
       ) : (
-        <div className="space-y-2">
-          <Label htmlFor="customer">Customer Name *</Label>
-          <Input 
-            id="customer" 
-            value={customer} 
-            onChange={e => setCustomer(e.target.value)} 
-            placeholder="e.g., John Smith" 
-            required 
-          />
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="customer">Customer Name *</Label>
+            <Input 
+              id="customer" 
+              value={customer} 
+              onChange={e => setCustomer(e.target.value)} 
+              placeholder="e.g., John Smith" 
+              required 
+            />
+          </div>
+          
+          <Form {...form}>
+            <AddressFields form={form} className="mt-2" />
+          </Form>
         </div>
       )}
     </div>

@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
@@ -17,6 +16,14 @@ interface JobFormProps {
   setTitle: (title: string) => void;
   customer: string;
   setCustomer: (customer: string) => void;
+  address: string;
+  setAddress: (address: string) => void;
+  city: string;
+  setCity: (city: string) => void;
+  state: string;
+  setState: (state: string) => void;
+  zipCode: string;
+  setZipCode: (zipCode: string) => void;
   description: string;
   setDescription: (description: string) => void;
   type: string;
@@ -39,6 +46,14 @@ export function JobForm({
   setTitle,
   customer,
   setCustomer,
+  address,
+  setAddress,
+  city,
+  setCity,
+  state,
+  setState,
+  zipCode,
+  setZipCode,
   description,
   setDescription,
   type,
@@ -70,7 +85,11 @@ export function JobForm({
       type, 
       date, 
       dateUndecided, 
-      team
+      team,
+      address,
+      city,
+      state,
+      zipCode
     );
     
     const { success, data } = await saveJobToDatabase(jobData);
@@ -103,6 +122,10 @@ export function JobForm({
             setTitle={setTitle}
             customer={customer}
             setCustomer={setCustomer}
+            setAddress={setAddress}
+            setCity={setCity}
+            setState={setState}
+            setZipCode={setZipCode}
             type={type}
             setType={setType}
             date={date}
