@@ -35,63 +35,8 @@ const UpcomingJobs = () => {
     fetchJobs();
   }, []);
   
-  // If no jobs from the server, use sample data
-  const defaultJobs = [
-    {
-      id: "1",
-      title: "Plumbing Repair",
-      customer: "John Smith",
-      jobNumber: "PLM-001",
-      type: "Plumbing",
-      status: "in-progress" as "in-progress",
-      date: "2023-05-15",
-      locations: [
-        {
-          coordinates: [151.2093, -33.8688] as [number, number],
-          address: "123 Main St, Sydney NSW",
-          label: "Primary Site"
-        },
-        {
-          coordinates: [151.2293, -33.8888] as [number, number],
-          address: "456 Second St, Sydney NSW",
-          label: "Secondary Site"
-        }
-      ]
-    },
-    {
-      id: "2",
-      title: "Electrical Installation",
-      customer: "Sarah Johnson",
-      jobNumber: "ELE-001",
-      type: "Electrical",
-      status: "ready" as "ready",
-      date: "2023-05-16",
-      locations: [
-        {
-          coordinates: [151.2093, -33.8688] as [number, number],
-          address: "789 Park Ave, Sydney NSW",
-          label: "Main Building"
-        },
-        {
-          coordinates: [151.2193, -33.8788] as [number, number],
-          address: "790 Park Ave, Sydney NSW",
-          label: "Warehouse"
-        }
-      ]
-    },
-    {
-      id: "3",
-      title: "HVAC Maintenance",
-      customer: "Michael Brown", 
-      jobNumber: "HVAC-001",
-      type: "HVAC",
-      status: "to-invoice" as "to-invoice",
-      date: "2023-05-17"
-    }
-  ];
-  
-  const displayJobs = jobs.length > 0 ? jobs : defaultJobs;
-  const jobsToShow = displayJobs.slice(0, 5); // Show at most 5 jobs
+  // Display only real jobs from the database
+  const jobsToShow = jobs.slice(0, 5); // Show at most 5 jobs
   
   return (
     <Card className="p-6 bg-slate-50">
