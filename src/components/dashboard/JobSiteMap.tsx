@@ -81,8 +81,9 @@ const JobSiteMap = memo(() => {
   const userControlledZoom = useRef<number | null>(null);
   const zoomChangeTimeout = useRef<NodeJS.Timeout | null>(null);
   const initialFitDone = useRef<boolean>(false);
+  const mapListeners = useRef<google.maps.MapsEventListener[]>([]);
   
-  // Load script reference - used to force stability
+  // Keep a stable reference to prevent script reloading issues
   const loadScriptRef = useRef<any>(null);
 
   // Fetch jobs data
@@ -107,7 +108,7 @@ const JobSiteMap = memo(() => {
   }, []);
 
   // Process jobs into locations for the map
-  const extractLocations = (): Location[] => {
+  const extractLocations = useCallback((): Location[] => {
     if (jobs.length === 0) {
       // Return empty array instead of mockup data
       return [];
@@ -153,13 +154,30 @@ const JobSiteMap = memo(() => {
     });
 
     return locations;
-  };
+  }, [jobs]);
   
   const locations = extractLocations();
+
+  // Clean up map listeners when component unmounts
+  useEffect(() => {
+    return () => {
+      // Clean up all listeners when component unmounts
+      mapListeners.current.forEach(listener => {
+        google.maps.event.removeListener(listener);
+      });
+      mapListeners.current = [];
+    };
+  }, []);
 
   // Track map view changes, but only when map becomes idle after user interaction
   useEffect(() => {
     if (!mapInstance) return;
+    
+    // Clean up any existing listeners first
+    mapListeners.current.forEach(listener => {
+      google.maps.event.removeListener(listener);
+    });
+    mapListeners.current = [];
     
     // Record initial map state when first loaded (but only once)
     if (!mapViewState) {
@@ -180,6 +198,7 @@ const JobSiteMap = memo(() => {
       isUserInteracting.current = true;
       setPreventAutoZoom(true); // Prevent auto-zoom after user starts dragging
     });
+    mapListeners.current.push(dragStartListener);
     
     // Improved zoom change handling with throttling to prevent zoom oscillation
     const zoomChangedListener = mapInstance.addListener('zoom_changed', () => {
@@ -193,142 +212,167 @@ const JobSiteMap = memo(() => {
       if (zoomChangeTimeout.current) {
         clearTimeout(zoomChangeTimeout.current);
       }
+      
+      // Update the map view state after a delay to avoid multiple updates
+      zoomChangeTimeout.current = setTimeout(() => {
+        if (mapInstance) {
+          setMapViewState(prev => ({
+            ...prev!,
+            zoom: mapInstance.getZoom() || prev!.zoom,
+            center: {
+              lat: mapInstance.getCenter()?.lat() || prev!.center.lat,
+              lng: mapInstance.getCenter()?.lng() || prev!.center.lng
+            }
+          }));
+        }
+      }, 300);
     });
+    mapListeners.current.push(zoomChangedListener);
     
     // Add listener to track map view state changes only when map becomes idle after user interaction
-    viewChangeListenerRef.current = mapInstance.addListener('idle', () => {
+    const idleListener = mapInstance.addListener('idle', () => {
       if (!mapInstance) return;
       
-      // Only update the state if this was triggered by a user interaction
       if (isUserInteracting.current) {
-        // Small delay to ensure the zoom operation has fully completed
-        zoomChangeTimeout.current = setTimeout(() => {
-          const currentZoom = mapInstance.getZoom();
-          
-          // Store the updated map state
-          const newState = {
-            zoom: currentZoom || DEFAULT_MAP_OPTIONS.zoom,
-            tilt: mapInstance.getTilt() || DEFAULT_MAP_OPTIONS.tilt,
-            center: {
-              lat: mapInstance.getCenter()?.lat() || DEFAULT_CENTER.lat,
-              lng: mapInstance.getCenter()?.lng() || DEFAULT_CENTER.lng
-            }
-          };
-          
-          setMapViewState(newState);
-          console.log("Updated map state after user interaction:", newState);
-          
-          // Reset the interaction flag
-          isUserInteracting.current = false;
-        }, 100); // Short delay to ensure zoom is settled
+        // User just finished interacting with the map, save the new state
+        setMapViewState({
+          zoom: mapInstance.getZoom() || DEFAULT_MAP_OPTIONS.zoom,
+          tilt: mapInstance.getTilt() || DEFAULT_MAP_OPTIONS.tilt,
+          center: {
+            lat: mapInstance.getCenter()?.lat() || DEFAULT_CENTER.lat,
+            lng: mapInstance.getCenter()?.lng() || DEFAULT_CENTER.lng
+          }
+        });
+        
+        isUserInteracting.current = false;
       }
     });
+    mapListeners.current.push(idleListener);
     
     return () => {
-      if (viewChangeListenerRef.current) {
-        google.maps.event.removeListener(viewChangeListenerRef.current);
-      }
-      google.maps.event.removeListener(dragStartListener);
-      google.maps.event.removeListener(zoomChangedListener);
-      if (zoomChangeTimeout.current) {
-        clearTimeout(zoomChangeTimeout.current);
-      }
+      // Clean up listeners when dependencies change
+      mapListeners.current.forEach(listener => {
+        google.maps.event.removeListener(listener);
+      });
+      mapListeners.current = [];
     };
-  }, [mapInstance]);
-
-  // Handle cleanup of map click listener
-  useEffect(() => {
-    return () => {
-      if (listenerRef.current) {
-        google.maps.event.removeListener(listenerRef.current);
-      }
-    };
-  }, []);
-
-  // Effect to update measurement mode
-  useEffect(() => {
-    if (!mapInstance) return;
+  }, [mapInstance, mapViewState]);
+  
+  // Define handleMapLoad using useCallback to prevent recreation on re-renders
+  const handleMapLoad = useCallback((mapInstance: google.maps.Map) => {
+    console.log("Map loaded");
+    setMapInstance(mapInstance);
     
-    if (drawingMode) {
-      // Set cursor and add click listener when drawing mode is active
-      mapInstance.setOptions({ draggableCursor: 'crosshair' });
+    // Only auto-fit to locations if we haven't done so yet or if user hasn't interacted
+    if (locations.length > 0 && (!initialFitDone.current || !preventAutoZoom)) {
+      const bounds = new google.maps.LatLngBounds();
+      locations.forEach(location => {
+        bounds.extend({ lat: location.lat, lng: location.lng });
+      });
       
-      listenerRef.current = mapInstance.addListener('click', (e: google.maps.MapMouseEvent) => {
-        if (e.latLng) {
-          const newPoint = { 
-            lat: e.latLng.lat(), 
-            lng: e.latLng.lng() 
-          };
-          
-          setMeasurementPath(prev => {
-            const newPath = [...prev, newPoint];
-            
-            // Calculate distance if we have at least 2 points
-            if (newPath.length >= 2) {
-              let totalDistance = 0;
-              
-              for (let i = 1; i < newPath.length; i++) {
-                const p1 = new google.maps.LatLng(newPath[i-1].lat, newPath[i-1].lng);
-                const p2 = new google.maps.LatLng(newPath[i].lat, newPath[i].lng);
-                
-                totalDistance += google.maps.geometry.spherical.computeDistanceBetween(p1, p2);
-              }
-              
-              setMeasurementDistance(totalDistance);
-            }
-            
-            return newPath;
-          });
+      mapInstance.fitBounds(bounds);
+      
+      // Set minimum and maximum zoom levels to prevent extreme zoom levels
+      const listener = mapInstance.addListener('idle', () => {
+        if (mapInstance.getZoom() > 17) {
+          mapInstance.setZoom(17);
+        } else if (mapInstance.getZoom() < 8 && locations.length < 5) {
+          mapInstance.setZoom(12);
         }
+        
+        // Remove the listener after first bounds_changed event
+        google.maps.event.removeListener(listener);
+        initialFitDone.current = true;
       });
-      
-      toast.info("Measurement mode active. Click on the map to add points.", {
-        duration: 3000,
+    }
+    // Otherwise, restore the previous state if available
+    else if (mapViewState) {
+      mapInstance.setZoom(mapViewState.zoom);
+      mapInstance.setCenter(mapViewState.center);
+      mapInstance.setTilt(mapViewState.tilt);
+    }
+    
+    // If the component is in drawing mode, configure the listeners
+    if (drawingMode) {
+      configureDrawingListeners(mapInstance);
+    }
+  }, [locations, preventAutoZoom, mapViewState, drawingMode]);
+  
+  // Define the configureDrawingListeners function using useCallback
+  const configureDrawingListeners = useCallback((mapInstance: google.maps.Map) => {
+    // Remove any existing listener
+    if (listenerRef.current) {
+      google.maps.event.removeListener(listenerRef.current);
+      listenerRef.current = null;
+    }
+    
+    // Add click listener for drawing mode
+    if (drawingMode) {
+      listenerRef.current = mapInstance.addListener('click', (e: google.maps.MapMouseEvent) => {
+        if (!e.latLng) return;
+        
+        const newPoint = {
+          lat: e.latLng.lat(),
+          lng: e.latLng.lng()
+        };
+        
+        setMeasurementPath(prevPath => {
+          const newPath = [...prevPath, newPoint];
+          
+          // Calculate total distance
+          let totalDistance = 0;
+          for (let i = 1; i < newPath.length; i++) {
+            const p1 = new google.maps.LatLng(newPath[i-1].lat, newPath[i-1].lng);
+            const p2 = new google.maps.LatLng(newPath[i].lat, newPath[i].lng);
+            totalDistance += google.maps.geometry.spherical.computeDistanceBetween(p1, p2);
+          }
+          
+          setMeasurementDistance(totalDistance);
+          return newPath;
+        });
       });
+    }
+  }, [drawingMode]);
+  
+  // Handle load error
+  const handleLoadError = useCallback((error: Error) => {
+    console.error("Error loading Google Maps:", error);
+    setMapError("Failed to load Google Maps. Please refresh and try again.");
+  }, []);
+  
+  // Format distance for display
+  const formatDistance = useCallback((meters: number): string => {
+    if (meters < 1000) {
+      return `${meters.toFixed(1)} m`;
     } else {
-      // Reset cursor when drawing mode is inactive
-      mapInstance.setOptions({ draggableCursor: '' });
-      
-      // Remove click listener
+      return `${(meters / 1000).toFixed(2)} km`;
+    }
+  }, []);
+  
+  // Toggle drawing mode
+  const toggleDrawingMode = useCallback(() => {
+    setDrawingMode(prev => !prev);
+    if (!drawingMode) {
+      // Entering drawing mode
+      setMeasurementPath([]);
+      setMeasurementDistance(0);
+      if (mapInstance) {
+        configureDrawingListeners(mapInstance);
+      }
+    } else {
+      // Exiting drawing mode
       if (listenerRef.current) {
         google.maps.event.removeListener(listenerRef.current);
         listenerRef.current = null;
       }
     }
-  }, [drawingMode, mapInstance]);
-
-  const handleLoadError = (error: Error) => {
-    console.error("Failed to load Google Maps:", error);
-    setMapError("Failed to load Google Maps. Please check your internet connection.");
-  };
-
-  const formatDistance = (meters: number): string => {
-    if (meters >= 1000) {
-      return `${(meters / 1000).toFixed(2)} km`;
-    } else {
-      return `${Math.round(meters)} m`;
-    }
-  };
-
-  const toggleDrawingMode = () => {
-    setDrawingMode(prev => !prev);
-    if (drawingMode) {
-      // If turning off drawing mode, show the measurement result
-      if (measurementDistance > 0) {
-        toast.success(`Measured distance: ${formatDistance(measurementDistance)}`);
-      }
-    } else {
-      // If turning on drawing mode, reset previous measurements but preserve the view
-      setMeasurementPath([]);
-      setMeasurementDistance(0);
-    }
-  };
-
-  const clearMeasurement = () => {
+  }, [drawingMode, mapInstance, configureDrawingListeners]);
+  
+  // Clear measurement
+  const clearMeasurement = useCallback(() => {
     setMeasurementPath([]);
     setMeasurementDistance(0);
-    toast.info("Measurement cleared");
-  };
+  }, []);
 
   // Options for the measurement line
   const polylineOptions = {
@@ -337,90 +381,6 @@ const JobSiteMap = memo(() => {
     strokeWeight: 3,
     zIndex: 2
   };
-
-  // Make the handleMapLoad a stable callback with useCallback
-  const handleMapLoad = useCallback((map) => {
-    console.log("Map loaded");
-    
-    // Don't reset the map instance if it already exists
-    // This is crucial to avoid recreating the map on re-renders
-    if (mapInstance === map) {
-      console.log("Map instance already set, skipping initialization");
-      return;
-    }
-    
-    setMapInstance(map);
-    
-    // Set initial tilt for Earth-like view (only on first load)
-    if (!mapViewState) {
-      map.setTilt(45);
-    }
-
-    // Place markers for each location
-    try {
-      // Clear any existing markers first to avoid duplicates
-      locations.forEach(location => {
-        const markerElement = document.createElement('div');
-        markerElement.className = 'marker';
-        markerElement.innerHTML = `
-          <div class="flex items-center gap-2 font-semibold text-white bg-black/50 backdrop-blur-sm px-2 py-1 rounded-lg shadow-lg border border-white/20">
-            <img src="/lovable-uploads/34bca7f1-d63b-45a0-b1ca-a562443686ad.png" alt="Trade Ease Logo" width="20" height="20" class="object-contain" />
-            <span>${location.jobNumber || 'N/A'}${location.locationLabel ? ` - ${location.locationLabel}` : ''}</span>
-          </div>
-        `;
-        const marker = new google.maps.marker.AdvancedMarkerElement({
-          position: {
-            lat: location.lat,
-            lng: location.lng
-          },
-          map,
-          content: markerElement,
-          title: location.name
-        });
-        marker.addListener('gmp-click', () => {
-          setSelectedLocation(location);
-        });
-      });
-
-      // Only fit to bounds once on initial load when we don't have a saved state
-      if (!mapViewState && !initialFitDone.current && locations.length > 0) {
-        console.log("Initial fit to bounds");
-        
-        // Create bounds object
-        const bounds = new google.maps.LatLngBounds();
-        
-        // Add all locations to bounds
-        locations.forEach(location => {
-          bounds.extend({ lat: location.lat, lng: location.lng });
-        });
-        
-        // Fit map to these bounds
-        map.fitBounds(bounds);
-        
-        // If there's only one marker, don't zoom in too much
-        if (locations.length === 1) {
-          const listener = map.addListener('idle', () => {
-            if (map.getZoom() > 15) map.setZoom(15);
-            google.maps.event.removeListener(listener);
-          });
-        }
-        
-        initialFitDone.current = true;
-      } 
-      else if (mapViewState) {
-        // If we have saved state, explicitly use it
-        // This ensures we maintain the user's view when the map reloads
-        console.log("Restoring saved map state:", mapViewState);
-        map.setZoom(mapViewState.zoom);
-        map.setCenter(mapViewState.center);
-        map.setTilt(mapViewState.tilt);
-      }
-    }
-    catch (error) {
-      console.error("Error loading map:", error);
-      setMapError("Failed to initialize map components.");
-    }
-  }, [mapViewState, locations, mapInstance]);
 
   return (
     <Card className="w-full p-0 overflow-hidden">
