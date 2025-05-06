@@ -21,37 +21,76 @@ const JobSiteMapView = ({ jobs }: JobSiteMapViewProps) => {
       
       const jobsToProcess = [...jobs];
       const updatedJobs: Job[] = [];
-      const jobUpdatesToSave: { id: string, location: [number, number] }[] = [];
+      const jobUpdatesToSave: { id: string, location?: [number, number], locations?: Array<{coordinates: [number, number], address?: string}> }[] = [];
 
       // Process each job sequentially
       for (const job of jobsToProcess) {
         let jobWithLocation = { ...job };
         
-        // Check if the job has an address but no location
+        // Check if the job has an address but no location/locations
         const hasAddress = job.address && job.address !== 'N/A';
         const hasLocation = job.location && job.location[0] && job.location[1];
+        const hasLocations = job.locations && job.locations.length > 0;
         
-        if (hasAddress && !hasLocation) {
+        if (hasAddress && !hasLocation && !hasLocations) {
           try {
             console.log(`Geocoding address for job ${job.id}: ${job.address}`);
             const coordinates = await geocodingService.geocodeAddress(job.address);
             
             if (coordinates) {
+              // Add to both location (legacy) and locations (new format)
               jobWithLocation = {
                 ...jobWithLocation,
-                location: coordinates
+                location: coordinates,
+                locations: [
+                  {
+                    coordinates,
+                    address: job.address,
+                    label: 'Primary'
+                  }
+                ]
               };
               
               // Add to list of jobs to update in database
               if (job.id) {
                 jobUpdatesToSave.push({
                   id: job.id,
-                  location: coordinates
+                  location: coordinates,
+                  locations: [
+                    {
+                      coordinates,
+                      address: job.address
+                    }
+                  ]
                 });
               }
             }
           } catch (error) {
             console.error(`Error geocoding address for job ${job.id}:`, error);
+          }
+        } else if (hasLocation && !hasLocations) {
+          // Convert legacy location to new locations format
+          jobWithLocation = {
+            ...jobWithLocation,
+            locations: [
+              {
+                coordinates: job.location,
+                address: job.address,
+                label: 'Primary'
+              }
+            ]
+          };
+          
+          if (job.id) {
+            jobUpdatesToSave.push({
+              id: job.id,
+              locations: [
+                {
+                  coordinates: job.location,
+                  address: job.address
+                }
+              ]
+            });
           }
         }
         
@@ -64,7 +103,10 @@ const JobSiteMapView = ({ jobs }: JobSiteMapViewProps) => {
           for (const jobUpdate of jobUpdatesToSave) {
             await supabase
               .from('jobs')
-              .update({ location: jobUpdate.location })
+              .update({ 
+                location: jobUpdate.location,
+                locations: jobUpdate.locations
+              })
               .eq('id', jobUpdate.id);
           }
           console.log(`Updated ${jobUpdatesToSave.length} jobs with geocoded locations`);
@@ -80,10 +122,42 @@ const JobSiteMapView = ({ jobs }: JobSiteMapViewProps) => {
     geocodeJobAddresses();
   }, [jobs]);
 
-  // Filter jobs to only include those with valid locations
-  const jobsWithLocations = processedJobs.filter(
-    job => job.location && job.location[0] && job.location[1]
-  );
+  // Extract all location markers from jobs
+  const getAllLocationMarkers = () => {
+    const markers: Array<{
+      coordinates: [number, number];
+      job: Job;
+      label?: string;
+    }> = [];
+
+    processedJobs.forEach(job => {
+      // Add markers from the new locations array if available
+      if (job.locations && job.locations.length > 0) {
+        job.locations.forEach(location => {
+          if (location.coordinates && location.coordinates[0] && location.coordinates[1]) {
+            markers.push({
+              coordinates: location.coordinates,
+              job,
+              label: location.label
+            });
+          }
+        });
+      } 
+      // Fallback to legacy location if no locations array
+      else if (job.location && job.location[0] && job.location[1]) {
+        markers.push({
+          coordinates: job.location,
+          job,
+          label: 'Primary'
+        });
+      }
+    });
+
+    return markers;
+  };
+
+  const locationMarkers = getAllLocationMarkers();
+  const hasLocations = locationMarkers.length > 0;
 
   return (
     <div className="w-full h-full relative">
@@ -96,13 +170,13 @@ const JobSiteMapView = ({ jobs }: JobSiteMapViewProps) => {
         </div>
       )}
       
-      {/* Use the JobMap component */}
+      {/* Use the JobMap component with all location markers */}
       <JobMap 
-        jobs={jobsWithLocations}
-        zoom={jobsWithLocations.length > 1 ? 10 : 13} // Zoom out more if we have multiple jobs
+        locationMarkers={locationMarkers}
+        zoom={locationMarkers.length > 1 ? 10 : 13} // Zoom out more if we have multiple locations
       />
       
-      {jobsWithLocations.length === 0 && !loading && (
+      {!hasLocations && !loading && (
         <div className="absolute inset-0 flex items-center justify-center bg-gray-100 rounded-lg">
           <div className="text-center p-6">
             <MapPin className="h-12 w-12 mx-auto text-gray-400 mb-4" />

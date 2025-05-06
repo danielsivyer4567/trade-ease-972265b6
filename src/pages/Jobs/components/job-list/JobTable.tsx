@@ -34,6 +34,19 @@ export function JobTable({
       status: "in-progress" as "in-progress",
       date: "2023-05-15",
       location: [151.2093, -33.8688] as [number, number],
+      // Adding multiple locations example
+      locations: [
+        {
+          coordinates: [151.2093, -33.8688] as [number, number],
+          address: "123 Main St, Sydney NSW",
+          label: "Primary Site"
+        },
+        {
+          coordinates: [151.2293, -33.8888] as [number, number],
+          address: "456 Second St, Sydney NSW",
+          label: "Secondary Site"
+        }
+      ],
       assignedTeam: "Team Blue",
       job_steps: [
         { id: 1, title: "Initial Assessment", tasks: [], isCompleted: true },
@@ -51,6 +64,24 @@ export function JobTable({
       status: "ready" as "ready",
       date: "2023-05-16",
       location: [151.2093, -33.8688] as [number, number],
+      // Adding multiple locations example
+      locations: [
+        {
+          coordinates: [151.2093, -33.8688] as [number, number],
+          address: "789 Park Ave, Sydney NSW",
+          label: "Main Building"
+        },
+        {
+          coordinates: [151.2193, -33.8788] as [number, number],
+          address: "790 Park Ave, Sydney NSW",
+          label: "Warehouse"
+        },
+        {
+          coordinates: [151.2293, -33.8888] as [number, number],
+          address: "800 Park Ave, Sydney NSW",
+          label: "Office Building"
+        }
+      ],
       assignedTeam: "Team Red",
       job_steps: [
         { id: 1, title: "Initial Consultation", tasks: [], isCompleted: true },
@@ -116,6 +147,7 @@ export function JobTable({
               const progress = getJobProgress(job);
               const completedSteps = job.job_steps?.filter(s => s.isCompleted).length || 0;
               const totalSteps = job.job_steps?.length || 0;
+              const locationCount = job.locations?.length || 0;
               
               return (
                 <TableRow 
@@ -127,6 +159,12 @@ export function JobTable({
                     <div>
                       <div className="font-semibold">{job.title}</div>
                       <div className="text-xs text-gray-500">#{job.jobNumber}</div>
+                      {locationCount > 1 && (
+                        <div className="text-xs text-blue-600 mt-1 flex items-center">
+                          <MapPin className="h-3 w-3 mr-1" />
+                          {locationCount} locations
+                        </div>
+                      )}
                     </div>
                   </TableCell>
                   <TableCell>
