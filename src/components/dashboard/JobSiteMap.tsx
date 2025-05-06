@@ -40,11 +40,13 @@ const JobSiteMap = () => {
   const [mapViewState, setMapViewState] = useState<MapViewState | null>(null);
   const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(true);
+  const [preventAutoZoom, setPreventAutoZoom] = useState(false);
   const listenerRef = useRef<google.maps.MapsEventListener | null>(null);
   const viewChangeListenerRef = useRef<google.maps.MapsEventListener | null>(null);
   const isUserInteracting = useRef<boolean>(false);
   const userControlledZoom = useRef<number | null>(null);
   const zoomChangeTimeout = useRef<NodeJS.Timeout | null>(null);
+  const initialFitDone = useRef<boolean>(false);
 
   // Fetch jobs data
   useEffect(() => {
@@ -92,48 +94,8 @@ const JobSiteMap = () => {
   // Process jobs into locations for the map
   const extractLocations = (): Location[] => {
     if (jobs.length === 0) {
-      // Fallback to default sample data
-      return [{
-        id: "1",
-        name: "Job Site 1",
-        lat: -28.012,
-        lng: 153.402,
-        type: "Plumbing",
-        jobNumber: "PLM-001",
-        jobTitle: "Plumbing Repair",
-        customer: "John Smith",
-        status: "in-progress"
-      }, {
-        id: "2",
-        name: "Job Site 2",
-        lat: -28.025,
-        lng: 153.410,
-        type: "Electrical",
-        jobNumber: "ELE-001",
-        jobTitle: "Electrical Installation",
-        customer: "Sarah Johnson",
-        status: "ready"
-      }, {
-        id: "3",
-        name: "Job Site 3",
-        lat: -28.020,
-        lng: 153.422,
-        type: "HVAC",
-        jobNumber: "HVAC-001",
-        jobTitle: "HVAC Maintenance",
-        customer: "Michael Brown",
-        status: "to-invoice"
-      }, {
-        id: "4",
-        name: "Headquarters",
-        lat: -28.017,
-        lng: 153.401,
-        type: "Office",
-        jobNumber: "HQ-001",
-        jobTitle: "Office",
-        customer: "Trade Ease",
-        status: "ready"
-      }];
+      // Return empty array instead of mockup data
+      return [];
     }
 
     // Extract all job locations
@@ -187,11 +149,13 @@ const JobSiteMap = () => {
     // Set up user interaction detection
     const dragStartListener = mapInstance.addListener('dragstart', () => {
       isUserInteracting.current = true;
+      setPreventAutoZoom(true);
     });
     
     // Improved zoom change handling with throttling to prevent zoom oscillation
     const zoomChangedListener = mapInstance.addListener('zoom_changed', () => {
       isUserInteracting.current = true;
+      setPreventAutoZoom(true);
       
       // Store the current zoom level as user controlled
       userControlledZoom.current = mapInstance.getZoom();
@@ -300,6 +264,34 @@ const JobSiteMap = () => {
     }
   }, [drawingMode, mapInstance]);
 
+  // Effect to handle jobs or locations change - but DON'T auto-fit if user has interacted with the map
+  useEffect(() => {
+    if (!mapInstance || preventAutoZoom || initialFitDone.current) return;
+    
+    if (locations.length > 0) {
+      // Only do initial fit if we have locations and user hasn't interacted with map yet
+      const bounds = new google.maps.LatLngBounds();
+      
+      // Add all locations to bounds
+      locations.forEach(location => {
+        bounds.extend({ lat: location.lat, lng: location.lng });
+      });
+      
+      // Fit map to these bounds
+      mapInstance.fitBounds(bounds);
+      
+      // If there's only one marker, don't zoom in too much
+      if (locations.length === 1) {
+        const listener = mapInstance.addListener('idle', () => {
+          if (mapInstance.getZoom() > 15) mapInstance.setZoom(15);
+          google.maps.event.removeListener(listener);
+        });
+      }
+      
+      initialFitDone.current = true;
+    }
+  }, [mapInstance, locations, preventAutoZoom]);
+
   const handleLoadError = (error: Error) => {
     console.error("Failed to load Google Maps:", error);
     setMapError("Failed to load Google Maps. Please check your internet connection.");
@@ -375,6 +367,30 @@ const JobSiteMap = () => {
           setSelectedLocation(location);
         });
       });
+
+      // Only fit to markers on initial load and if we have locations
+      if (!initialFitDone.current && locations.length > 0) {
+        // Create bounds object
+        const bounds = new google.maps.LatLngBounds();
+        
+        // Add all locations to bounds
+        locations.forEach(location => {
+          bounds.extend({ lat: location.lat, lng: location.lng });
+        });
+        
+        // Fit map to these bounds
+        map.fitBounds(bounds);
+        
+        // If there's only one marker, don't zoom in too much
+        if (locations.length === 1) {
+          const listener = map.addListener('idle', () => {
+            if (map.getZoom() > 15) map.setZoom(15);
+            google.maps.event.removeListener(listener);
+          });
+        }
+        
+        initialFitDone.current = true;
+      }
     }
     catch (error) {
       console.error("Error loading map:", error);
