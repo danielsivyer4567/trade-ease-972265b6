@@ -93,7 +93,7 @@ function CustomersPage() {
   };
 
   const handleEditCustomer = (customerId: string) => {
-    navigate(`/customers/${customerId}/edit`);
+    navigate(`/customers/${customerId}`);
   };
 
   // Filter and sort customers
