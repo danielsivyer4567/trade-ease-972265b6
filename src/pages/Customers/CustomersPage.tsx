@@ -28,6 +28,7 @@ import { Progress } from '@/components/ui/progress';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
+import { fetchCustomersFromAPI } from '@/services/api';
 
 // Define the interface for your Customer object
 interface Customer {
@@ -45,85 +46,9 @@ interface Customer {
   totalSteps?: number;
 }
 
-// Mock data for customers
-const MOCK_CUSTOMERS: Customer[] = [
-  {
-    id: 'CUST-1001',
-    name: 'John Smith',
-    email: 'john.smith@example.com',
-    phone: '(555) 123-4567',
-    address: '123 Main St, Anytown, ST 12345',
-    status: 'active',
-    progress: 43,
-    lastContact: '2023-12-01',
-    jobId: 'JOB-7923',
-    jobTitle: 'Basic Maintenance',
-    stepCompleted: 3,
-    totalSteps: 7
-  },
-  {
-    id: 'CUST-1002',
-    name: 'Sarah Johnson',
-    email: 'sarah.j@example.com',
-    phone: '(555) 987-6543',
-    address: '456 Oak Ave, Somewhere, ST 67890',
-    status: 'active',
-    progress: 75,
-    lastContact: '2023-12-05',
-    jobId: 'JOB-8042',
-    jobTitle: 'Kitchen Renovation',
-    stepCompleted: 6,
-    totalSteps: 8
-  },
-  {
-    id: 'CUST-1003',
-    name: 'Michael Barnes',
-    email: 'mbarnes@example.com',
-    phone: '(555) 234-5678',
-    address: '789 Pine Dr, Elsewhere, ST 54321',
-    status: 'inactive',
-    progress: 20,
-    lastContact: '2023-11-15',
-    jobId: 'JOB-7854',
-    jobTitle: 'Bathroom Remodel',
-    stepCompleted: 2,
-    totalSteps: 10
-  },
-  {
-    id: 'CUST-1004',
-    name: 'Emily Chen',
-    email: 'echen@example.com',
-    phone: '(555) 345-6789',
-    address: '101 Maple Ln, Nowhere, ST 13579',
-    status: 'active',
-    progress: 90,
-    lastContact: '2023-12-10',
-    jobId: 'JOB-8115',
-    jobTitle: 'Roof Repair',
-    stepCompleted: 9,
-    totalSteps: 10
-  },
-  {
-    id: 'CUST-1005',
-    name: 'David Wilson',
-    email: 'dwilson@example.com',
-    phone: '(555) 456-7890',
-    address: '202 Cedar St, Anywhere, ST 24680',
-    status: 'active',
-    progress: 60,
-    lastContact: '2023-12-08',
-    jobId: 'JOB-8076',
-    jobTitle: 'Deck Installation',
-    stepCompleted: 6,
-    totalSteps: 10
-  },
-];
-
-// Simulating API call with mock data
+// API function to fetch customers
 const fetchCustomers = async (): Promise<Customer[]> => {
-  // Simulate API latency
-  await new Promise(resolve => setTimeout(resolve, 500));
-  return MOCK_CUSTOMERS;
+  return fetchCustomersFromAPI();
 };
 
 type SortField = 'name' | 'status' | 'progress';
@@ -152,7 +77,7 @@ function CustomersPage() {
 
   const handleCopyLink = () => {
     if (selectedCustomer) {
-      const link = `https://1b024d1a-36c6-4c1f-bf9e-27b08a6c3df4.lovableproject.com/progress/0cd951be-9809-464b-9419-08f143d51477`;
+      const link = `${window.location.origin}/progress/${selectedCustomer.id}`;
       navigator.clipboard.writeText(link);
       toast({
         title: "Link copied to clipboard",
@@ -388,10 +313,6 @@ function CustomersPage() {
                           <Calendar className="w-5 h-5 text-muted-foreground" />
                           <span>Last Contact: {selectedCustomer.lastContact}</span>
                         </div>
-                        <div className="flex items-center gap-2">
-                          <Clock className="w-5 h-5 text-muted-foreground" />
-                          <span>Customer since: January 2023</span>
-                        </div>
                       </div>
                     </div>
                   </CardContent>
@@ -425,7 +346,7 @@ function CustomersPage() {
                           <input 
                             type="text" 
                             readOnly
-                            value="https://1b024d1a-36c6-4c1f-bf9e-27b08a6c3df4.lovableproject.com/progress/0cd951be-9809-464b-9419-08f143d51477"
+                            value={`${window.location.origin}/progress/${selectedCustomer.id}`}
                             className="w-full p-2 pr-10 border border-gray-300 rounded-lg bg-muted"
                           />
                         </div>
@@ -444,120 +365,6 @@ function CustomersPage() {
                         <span>Preview Link</span>
                       </Button>
                     </div>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader className="bg-muted pb-2">
-                    <CardTitle>Progress Portal Preview</CardTitle>
-                  </CardHeader>
-                  <CardContent className="p-6 space-y-4">
-                    <Tabs defaultValue="progress">
-                      <TabsList className="mb-4">
-                        <TabsTrigger value="progress">Progress</TabsTrigger>
-                        <TabsTrigger value="photos">Photos</TabsTrigger>
-                        <TabsTrigger value="documents">Documents</TabsTrigger>
-                        <TabsTrigger value="comments">Comments</TabsTrigger>
-                        <TabsTrigger value="settings">Settings</TabsTrigger>
-                      </TabsList>
-                      
-                      <TabsContent value="progress">
-                        <div className="space-y-6">
-                          <div>
-                            <div className="flex justify-between mb-1">
-                              <span>Progress: {selectedCustomer.stepCompleted} of {selectedCustomer.totalSteps} steps completed</span>
-                              <span>{selectedCustomer.progress}%</span>
-                            </div>
-                            <Progress value={selectedCustomer.progress} className="h-2" />
-                          </div>
-                          
-                          <div>
-                            <h3 className="font-semibold mb-4">Job Steps</h3>
-                            <div className="space-y-4">
-                              <div className="flex items-center gap-3">
-                                <CheckCircle2 className="text-green-500 h-5 w-5" />
-                                <div>
-                                  <div className="font-medium">Initial Consultation</div>
-                                  <div className="text-sm text-muted-foreground">Completed 2023-12-01</div>
-                                </div>
-                              </div>
-                              
-                              <div className="flex items-center gap-3">
-                                <CheckCircle2 className="text-green-500 h-5 w-5" />
-                                <div>
-                                  <div className="font-medium">Quote Provided</div>
-                                  <div className="text-sm text-muted-foreground">Completed 2023-12-05</div>
-                                </div>
-                              </div>
-                              
-                              <div className="flex items-center gap-3">
-                                <CheckCircle2 className="text-green-500 h-5 w-5" />
-                                <div>
-                                  <div className="font-medium">Materials Ordered</div>
-                                  <div className="text-sm text-muted-foreground">Completed 2023-12-10</div>
-                                </div>
-                              </div>
-                              
-                              <div className="flex items-center gap-3">
-                                <Circle className="text-gray-300 h-5 w-5" />
-                                <div>
-                                  <div className="font-medium text-muted-foreground">Materials Delivered</div>
-                                  <div className="text-sm text-muted-foreground">Pending</div>
-                                </div>
-                              </div>
-                              
-                              <div className="flex items-center gap-3">
-                                <Circle className="text-gray-300 h-5 w-5" />
-                                <div>
-                                  <div className="font-medium text-muted-foreground">Work In Progress</div>
-                                  <div className="text-sm text-muted-foreground">Pending</div>
-                                </div>
-                              </div>
-                              
-                              <div className="flex items-center gap-3">
-                                <Circle className="text-gray-300 h-5 w-5" />
-                                <div>
-                                  <div className="font-medium text-muted-foreground">Quality Check</div>
-                                  <div className="text-sm text-muted-foreground">Pending</div>
-                                </div>
-                              </div>
-                              
-                              <div className="flex items-center gap-3">
-                                <Circle className="text-gray-300 h-5 w-5" />
-                                <div>
-                                  <div className="font-medium text-muted-foreground">Job Completed</div>
-                                  <div className="text-sm text-muted-foreground">Pending</div>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </TabsContent>
-                      
-                      <TabsContent value="photos">
-                        <div className="text-center py-12">
-                          <p className="text-muted-foreground">No photos uploaded yet.</p>
-                        </div>
-                      </TabsContent>
-
-                      <TabsContent value="documents">
-                        <div className="text-center py-12">
-                          <p className="text-muted-foreground">No documents uploaded yet.</p>
-                        </div>
-                      </TabsContent>
-
-                      <TabsContent value="comments">
-                        <div className="text-center py-12">
-                          <p className="text-muted-foreground">No comments yet.</p>
-                        </div>
-                      </TabsContent>
-
-                      <TabsContent value="settings">
-                        <div className="text-center py-12">
-                          <p className="text-muted-foreground">Portal settings will appear here.</p>
-                        </div>
-                      </TabsContent>
-                    </Tabs>
                   </CardContent>
                 </Card>
               </>
