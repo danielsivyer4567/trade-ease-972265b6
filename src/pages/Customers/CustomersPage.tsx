@@ -30,15 +30,10 @@ import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { fetchCustomersFromAPI } from '@/services/api';
+import { CustomerData } from '@/pages/Customers/components/CustomerCard';
 
-// Define the interface for your Customer object
-interface Customer {
-  id: string;
-  name: string;
-  email?: string;
-  phone?: string;
-  address?: string;
-  status?: 'active' | 'inactive';
+// Extended interface for Customer with additional fields needed for the page
+interface Customer extends CustomerData {
   progress?: number;
   lastContact?: string;
   jobId?: string;
@@ -49,7 +44,8 @@ interface Customer {
 
 // API function to fetch customers
 const fetchCustomers = async (): Promise<Customer[]> => {
-  return fetchCustomersFromAPI();
+  // Type assertion to handle conversion from CustomerData to Customer
+  return fetchCustomersFromAPI() as unknown as Promise<Customer[]>;
 };
 
 type SortField = 'name' | 'status' | 'progress';
