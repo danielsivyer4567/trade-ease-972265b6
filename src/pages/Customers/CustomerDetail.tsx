@@ -69,6 +69,12 @@ export default function CustomerDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
+  
+  // Log the ID parameter to help with debugging
+  useEffect(() => {
+    console.log("CustomerDetail loaded with ID parameter:", id);
+  }, [id]);
+  
   const { customers, isLoading, fetchCustomers } = useCustomers();
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredCustomers, setFilteredCustomers] = useState<any[]>([]);
