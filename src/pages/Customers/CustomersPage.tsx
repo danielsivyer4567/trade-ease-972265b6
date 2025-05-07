@@ -96,8 +96,8 @@ function CustomersPage() {
     console.log("Edit button clicked for customer ID:", customerId);
     
     // Navigate directly to customer detail page using the proper route format
-    // Based on the routes/index.tsx, we need to use /customers/:auditId/:customerId pattern
-    window.location.href = `/customers/edit/${customerId}`;
+    // Based on the customer-routes.tsx, we need to use /customers/:id route pattern
+    window.location.href = `/customers/${customerId}`;
   };
 
   // Filter and sort customers
