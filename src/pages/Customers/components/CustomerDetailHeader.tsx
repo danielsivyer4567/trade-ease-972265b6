@@ -31,7 +31,16 @@ export const CustomerDetailHeader = ({ customerId, customerName }: CustomerDetai
         <Button 
           variant="outline" 
           size="sm"
-          onClick={() => navigate(`/customers/${customerId}/edit`)} 
+          onClick={() => {
+            try {
+              console.log(`Navigating to edit page for customer: ${customerId}`);
+              navigate(`/customers/${customerId}/edit`);
+            } catch (error) {
+              console.error("Navigation error:", error);
+              // Fallback
+              window.location.href = `/customers/${customerId}/edit`;
+            }
+          }} 
           className="flex items-center gap-1"
         >
           <Edit className="h-4 w-4" />

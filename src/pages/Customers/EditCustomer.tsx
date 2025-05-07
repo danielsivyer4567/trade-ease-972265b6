@@ -31,7 +31,9 @@ export default function EditCustomer() {
   const { toast } = useToast();
   const { updateCustomer } = useCustomers();
   const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [customer, setCustomer] = useState<any>(null);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -57,6 +59,8 @@ export default function EditCustomer() {
 
       try {
         setIsLoading(true);
+        console.log("Fetching customer data for ID:", id);
+        
         const { data: session } = await supabase.auth.getSession();
         if (!session?.session?.user) {
           throw new Error("You must be logged in to edit customer details");
@@ -69,12 +73,16 @@ export default function EditCustomer() {
           .single();
 
         if (error) {
+          console.error("Database error:", error);
           throw error;
         }
 
         if (!data) {
           throw new Error("Customer not found");
         }
+
+        console.log("Customer data retrieved:", data);
+        setCustomer(data);
 
         // Set form values
         form.reset({
@@ -86,6 +94,8 @@ export default function EditCustomer() {
           state: data.state || "",
           zipCode: data.zipcode || ""
         });
+        
+        console.log("Form values set:", form.getValues());
       } catch (err: any) {
         console.error("Error fetching customer data:", err);
         setError(err.message || "Failed to load customer details");
@@ -102,6 +112,65 @@ export default function EditCustomer() {
     fetchCustomerData();
   }, [id, form, toast]);
 
+  // Direct update function bypassing the hook
+  const updateCustomerDirectly = async (customerData: any) => {
+    try {
+      setIsSaving(true);
+      console.log("Updating customer directly:", customerData);
+      
+      const { data: session } = await supabase.auth.getSession();
+      if (!session?.session?.user) {
+        throw new Error("You must be logged in to update customer details");
+      }
+
+      // Map zipCode to zipcode for the database
+      const customerUpdate = {
+        name: customerData.name,
+        email: customerData.email,
+        phone: customerData.phone,
+        address: customerData.address,
+        city: customerData.city,
+        state: customerData.state,
+        zipcode: customerData.zipCode
+      };
+      
+      console.log("Sending update to database:", customerUpdate);
+      
+      const { data, error } = await supabase
+        .from('customers')
+        .update(customerUpdate)
+        .eq('id', id)
+        .select()
+        .single();
+      
+      if (error) {
+        console.error("Update error:", error);
+        throw error;
+      }
+      
+      console.log("Update successful, response:", data);
+      
+      toast({
+        title: "Success",
+        description: "Customer updated successfully"
+      });
+      
+      // Navigate back to customer detail
+      navigate(`/customers/${id}`);
+      return true;
+    } catch (err: any) {
+      console.error("Error updating customer:", err);
+      toast({
+        title: "Error",
+        description: err.message || "Failed to update customer",
+        variant: "destructive"
+      });
+      return false;
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   const onSubmit = async (data: z.infer<typeof formSchema>) => {
     if (!id) {
       toast({
@@ -112,25 +181,39 @@ export default function EditCustomer() {
       return;
     }
 
-    console.log("Updating customer data:", data);
+    console.log("Form submitted with data:", data);
+    setIsSaving(true);
     
-    const customerData: CustomerFormValues = {
-      name: data.name,
-      email: data.email,
-      phone: data.phone,
-      address: data.address,
-      city: data.city,
-      state: data.state,
-      zipCode: data.zipCode
-    };
+    try {
+      // First try with the hook
+      const customerData: CustomerFormValues = {
+        name: data.name,
+        email: data.email,
+        phone: data.phone,
+        address: data.address,
+        city: data.city,
+        state: data.state,
+        zipCode: data.zipCode
+      };
 
-    const result = await updateCustomer(id, customerData);
-    if (result.success) {
-      toast({
-        title: "Success",
-        description: "Customer updated successfully"
-      });
-      navigate(`/customers/${id}`);
+      const result = await updateCustomer(id, customerData);
+      if (result.success) {
+        toast({
+          title: "Success",
+          description: "Customer updated successfully"
+        });
+        navigate(`/customers/${id}`);
+      } else {
+        // If hook fails, try direct update
+        console.log("Hook update failed, trying direct update");
+        await updateCustomerDirectly(data);
+      }
+    } catch (err) {
+      console.error("Error in submission:", err);
+      // If any error, try direct update
+      await updateCustomerDirectly(data);
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -195,9 +278,9 @@ export default function EditCustomer() {
                 </Button>
                 <Button 
                   type="submit" 
-                  disabled={form.formState.isSubmitting || !form.formState.isDirty}
+                  disabled={isSaving || (!form.formState.isDirty && !form.formState.isSubmitting)}
                 >
-                  {form.formState.isSubmitting ? "Saving..." : "Save Changes"}
+                  {isSaving ? "Saving..." : "Save Changes"}
                 </Button>
               </div>
             </form>
