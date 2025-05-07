@@ -21,6 +21,11 @@ interface TabsContextType {
 
 const TabsContext = createContext<TabsContextType | undefined>(undefined);
 
+// Helper function to generate unique tab IDs
+const generateUniqueTabId = (): string => {
+  return `tab-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+};
+
 // Main provider that decides which implementation to use
 export function TabsProvider({ children }: { children: React.ReactNode }) {
   const [isInitialized, setIsInitialized] = useState(false);
@@ -81,13 +86,12 @@ function TabsProviderWithRouter({ children }: { children: React.ReactNode }) {
   }
 
   // Initialize with current path on first mount using useLayoutEffect
-  // This ensures state is updated before the first render completes
   useLayoutEffect(() => {
     if (!initialized.current && location?.pathname) {
       initialized.current = true; // Set this flag first to prevent double initialization
       
       // Create a default tab for the current location
-      const defaultTabId = `tab-${Date.now()}`;
+      const defaultTabId = generateUniqueTabId();
       const pathSegments = location.pathname.split('/');
       const lastSegment = pathSegments[pathSegments.length - 1];
       
@@ -126,7 +130,7 @@ function TabsProviderWithRouter({ children }: { children: React.ReactNode }) {
         title = title.charAt(0).toUpperCase() + title.slice(1);
         
         const newTab = {
-          id: `tab-${Date.now()}`,
+          id: generateUniqueTabId(),
           title,
           path: location.pathname
         };
@@ -153,7 +157,7 @@ function TabsProviderWithRouter({ children }: { children: React.ReactNode }) {
   const addTab = useCallback((tab: Omit<Tab, 'id'> & { id?: string }) => {
     if (navigationInProgress) return;
     
-    const id = tab.id || `tab-${Date.now()}`;
+    const id = tab.id || generateUniqueTabId();
     const newTab = { ...tab, id };
     
     // Check if tab with same path exists
@@ -254,7 +258,7 @@ function TabsProviderNoRouter({ children }: { children: React.ReactNode }) {
 
   // Stub implementations that don't use navigation
   const addTab = useCallback((tab: Omit<Tab, 'id'> & { id?: string }) => {
-    const id = tab.id || `tab-${Date.now()}`;
+    const id = tab.id || generateUniqueTabId();
     const newTab = { ...tab, id };
     setTabs(prev => [...prev, newTab]);
     setActiveTabId(newTab.id);
