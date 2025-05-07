@@ -239,11 +239,8 @@ const routeObjects: RouteObject[] = [
 
 // Create the browser router instance
 export function createRouter() {
-  return createBrowserRouter(routeObjects, {
-    future: {
-      v7_relativeSplatPath: true
-    }
-  });
+  // Using React Router v7.5.3+ which already includes the startTransition optimizations by default
+  return createBrowserRouter(routeObjects);
 }
 
 // Create a singleton instance of the router
