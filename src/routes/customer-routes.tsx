@@ -28,6 +28,11 @@ export const customerRoutes = (
           <CustomerDetailPage />
         </Suspense>
       } />
+      <Route path=":id/edit" element={
+        <Suspense fallback={<LoadingFallback />}>
+          <CustomerDetailPage />
+        </Suspense>
+      } />
       <Route path=":id/statement" element={
         <Suspense fallback={<LoadingFallback />}>
           <CustomerStatementPage />
