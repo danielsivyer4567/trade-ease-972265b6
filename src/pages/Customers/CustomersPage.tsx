@@ -95,9 +95,8 @@ function CustomersPage() {
   const handleEditCustomer = (customerId: string) => {
     console.log("Edit button clicked for customer ID:", customerId);
     
-    // Navigate directly to the customer detail page
-    // This matches the route pattern in customer-routes.tsx which is "/customers/:id"
-    window.open(`/customers/${customerId}`, '_blank');
+    // Navigate directly to customer detail page using the correct route format
+    window.location.href = `/customers/${customerId}`;
   };
 
   // Filter and sort customers
