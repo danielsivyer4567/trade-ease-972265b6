@@ -134,7 +134,15 @@ function CustomersPage() {
     console.log("Edit button clicked for customer ID:", customerId);
     
     // Navigate to the customer edit page
-    navigate(`/customers/${customerId}/edit`);
+    // Use navigate to go to edit page, which should trigger a page load
+    try {
+      console.log(`Navigating to: /customers/${customerId}/edit`);
+      navigate(`/customers/${customerId}/edit`);
+    } catch (error) {
+      console.error("Navigation error:", error);
+      // Fallback: try direct window location change
+      window.location.href = `/customers/${customerId}/edit`;
+    }
   };
 
   // Filter and sort customers
