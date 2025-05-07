@@ -93,6 +93,7 @@ function CustomersPage() {
   };
 
   const handleEditCustomer = (customerId: string) => {
+    console.log("Edit button clicked for customer ID:", customerId);
     navigate(`/customers/${customerId}`);
   };
 
@@ -293,7 +294,10 @@ function CustomersPage() {
                           variant="outline" 
                           size="sm" 
                           className="flex items-center gap-1"
-                          onClick={() => handleEditCustomer(selectedCustomer.id)}
+                          onClick={(e) => {
+                            e.stopPropagation(); // Prevent event from bubbling up
+                            handleEditCustomer(selectedCustomer.id);
+                          }}
                         >
                           <PenLine className="h-4 w-4" />
                           <span>Edit</span>
