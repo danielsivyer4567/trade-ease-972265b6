@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from "@/hooks/use-toast";
@@ -18,6 +17,11 @@ export const useCustomerDetail = (id: string | undefined) => {
     if (!id) {
       setIsLoadingData(false);
       setError("No customer ID provided");
+      toast({
+        title: "Error",
+        description: "Customer ID is required to view details",
+        variant: "destructive"
+      });
       return;
     }
     
