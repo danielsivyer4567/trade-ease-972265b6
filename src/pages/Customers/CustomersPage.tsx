@@ -17,7 +17,8 @@ import {
   Link as LinkIcon, 
   Copy, 
   CheckCircle2, 
-  Circle
+  Circle,
+  PenLine
 } from 'lucide-react';
 import { BaseLayout } from '@/components/ui/BaseLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -93,6 +94,10 @@ function CustomersPage() {
       setSortField(field);
       setSortOrder('asc');
     }
+  };
+
+  const handleEditCustomer = (customerId: string) => {
+    navigate(`/customers/${customerId}/edit`);
   };
 
   // Filter and sort customers
@@ -287,9 +292,20 @@ function CustomersPage() {
                   <CardHeader className="bg-muted pb-2">
                     <div className="flex justify-between items-center">
                       <CardTitle>{selectedCustomer.name}</CardTitle>
-                      <Badge variant={selectedCustomer.status === 'active' ? 'default' : 'secondary'}>
-                        {selectedCustomer.status}
-                      </Badge>
+                      <div className="flex items-center gap-2">
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="flex items-center gap-1"
+                          onClick={() => handleEditCustomer(selectedCustomer.id)}
+                        >
+                          <PenLine className="h-4 w-4" />
+                          <span>Edit</span>
+                        </Button>
+                        <Badge variant={selectedCustomer.status === 'active' ? 'default' : 'secondary'}>
+                          {selectedCustomer.status}
+                        </Badge>
+                      </div>
                     </div>
                   </CardHeader>
                   <CardContent className="p-6">
