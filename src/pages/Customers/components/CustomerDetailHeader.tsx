@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { useNavigate } from 'react-router-dom';
@@ -32,7 +31,7 @@ export const CustomerDetailHeader = ({ customerId, customerName }: CustomerDetai
         <Button 
           variant="outline" 
           size="sm"
-          onClick={() => navigate(`/customers/edit/${customerId}`)} 
+          onClick={() => navigate(`/customers/${customerId}/edit`)} 
           className="flex items-center gap-1"
         >
           <Edit className="h-4 w-4" />

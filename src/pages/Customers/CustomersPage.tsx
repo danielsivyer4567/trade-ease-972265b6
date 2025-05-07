@@ -133,9 +133,8 @@ function CustomersPage() {
   const handleEditCustomer = (customerId: string) => {
     console.log("Edit button clicked for customer ID:", customerId);
     
-    // Use React Router navigation instead of direct window.location
-    // to ensure proper parameter passing
-    navigate(`/customers/${customerId}`);
+    // Navigate to the customer edit page
+    navigate(`/customers/${customerId}/edit`);
   };
 
   // Filter and sort customers

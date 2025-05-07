@@ -8,6 +8,7 @@ const CustomersPage = React.lazy(() => import('@/pages/Customers/index'));
 const CustomerDetailPage = React.lazy(() => import('@/pages/Customers/CustomerDetail'));
 const CustomerStatementPage = React.lazy(() => import('@/pages/Customers/CustomerStatement'));
 const NewCustomerPage = React.lazy(() => import('@/pages/Customers/NewCustomer'));
+const EditCustomerPage = React.lazy(() => import('@/pages/Customers/EditCustomer'));
 const NetworksPage = React.lazy(() => import('@/pages/Networks'));
 const CustomerProgressPage = React.lazy(() => import('@/pages/Jobs/CustomerProgress'));
 const JobMaterialOrderingPage = React.lazy(() => import('@/pages/Jobs/JobMaterialOrdering'));
@@ -30,7 +31,7 @@ export const customerRoutes = (
       } />
       <Route path=":id/edit" element={
         <Suspense fallback={<LoadingFallback />}>
-          <CustomerDetailPage />
+          <EditCustomerPage />
         </Suspense>
       } />
       <Route path=":id/statement" element={
