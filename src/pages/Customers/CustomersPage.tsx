@@ -95,8 +95,8 @@ function CustomersPage() {
   const handleEditCustomer = (customerId: string) => {
     console.log("Edit button clicked for customer ID:", customerId);
     
-    // Use direct navigation to customer detail page instead of opening in a new tab
-    window.location.href = `/customers/${customerId}`;
+    // Use navigate with replace option to avoid creating a new history entry
+    navigate(`/customers/${customerId}`, { replace: true });
   };
 
   // Filter and sort customers
