@@ -31,6 +31,7 @@ import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { fetchCustomersFromAPI } from '@/services/api';
 import { CustomerData } from '@/pages/Customers/components/CustomerCard';
+import { supabase } from '@/integrations/supabase/client';
 
 // Extended interface for Customer with additional fields needed for the page
 interface Customer extends CustomerData {
@@ -44,8 +45,45 @@ interface Customer extends CustomerData {
 
 // API function to fetch customers
 const fetchCustomers = async (): Promise<Customer[]> => {
-  // Type assertion to handle conversion from CustomerData to Customer
-  return fetchCustomersFromAPI() as unknown as Promise<Customer[]>;
+  try {
+    // Use directly from database via useCustomers hook
+    const { data: session } = await supabase.auth.getSession();
+    if (!session?.session?.user) {
+      throw new Error("Authentication required to view customers");
+    }
+
+    const { data, error } = await supabase
+      .from('customers')
+      .select('*')
+      .eq('user_id', session.session.user.id)
+      .order('name');
+      
+    if (error) {
+      throw error;
+    }
+    
+    // Map database fields to match the Customer interface format
+    const formattedData = data.map(customer => ({
+      id: customer.id,
+      name: customer.name,
+      email: customer.email || '',
+      phone: customer.phone || '',
+      address: customer.address || '',
+      city: customer.city || '',
+      state: customer.state || '',
+      zipCode: customer.zipcode || '',
+      status: customer.status as 'active' | 'inactive',
+      progress: Math.floor(Math.random() * 100), // TODO: Replace with actual progress from jobs table
+      lastContact: customer.last_contact || new Date().toISOString().split('T')[0],
+      jobId: `JOB-${customer.id.substring(0, 4)}`, // TODO: Replace with latest job ID
+      jobTitle: 'Current Job' // TODO: Replace with actual job title
+    }));
+    
+    return formattedData;
+  } catch (error) {
+    console.error('Error fetching customers from database:', error);
+    throw error;
+  }
 };
 
 type SortField = 'name' | 'status' | 'progress';
