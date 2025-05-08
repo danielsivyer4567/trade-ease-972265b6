@@ -143,7 +143,7 @@ export default function NewCustomer() {
   return (
     <AppLayout>
       <div className="p-4 md:p-6 space-y-6">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 bg-blue-50 p-2 rounded mb-4">
           <Link to="/customers" className="hover:text-blue-500">
             <ArrowLeft className="h-5 w-5 md:h-6 md:w-6" />
           </Link>
@@ -155,27 +155,27 @@ export default function NewCustomer() {
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               <CustomerContactFields form={form} />
               
-              <AddressFields form={form} />
+              <AddressFields form={form} inputClassName="max-w-xs w-full border border-gray-700 rounded p-2" />
               
               {/* Business Details Section */}
               <div>
                 <h3 className="text-lg font-medium mb-2">Business Details</h3>
-                <div className="mb-2 border border-gray-700 rounded p-2">
+                <div className="mb-2 max-w-xs w-full border border-gray-700 rounded p-2">
                   <label className="block text-sm font-medium">Business Name</label>
                   <input {...form.register("business_name")} className="input" placeholder="Business Name" />
                 </div>
-                <div className="mb-2 border border-gray-700 rounded p-2">
+                <div className="mb-2 max-w-xs w-full border border-gray-700 rounded p-2">
                   <label className="block text-sm font-medium">ABN</label>
                   <input {...form.register("abn")} className="input" placeholder="ABN" onBlur={handleAbnBlur} />
                   {abnStatus === 'valid' && <span className="text-green-600">Valid ABN: {form.watch('abn_entity_name')}</span>}
                   {abnStatus === 'invalid' && <span className="text-red-600">Invalid ABN</span>}
                   {abnStatus === 'checking' && <span>Checking ABN...</span>}
                 </div>
-                <div className="mb-2 border border-gray-700 rounded p-2">
+                <div className="mb-2 max-w-xs w-full border border-gray-700 rounded p-2">
                   <label className="block text-sm font-medium">ACN</label>
                   <input {...form.register("acn")} className="input" placeholder="ACN" />
                 </div>
-                <div className="mb-2 border border-gray-700 rounded p-2">
+                <div className="mb-2 max-w-xs w-full border border-gray-700 rounded p-2">
                   <label className="block text-sm font-medium">State License</label>
                   <select {...form.register("state_licence_state")} className="input">
                     <option value="">Select State</option>
@@ -190,11 +190,11 @@ export default function NewCustomer() {
                   </select>
                   <input {...form.register("state_licence_number")} className="input mt-2" placeholder="State License Number" />
                 </div>
-                <div className="mb-2 border border-gray-700 rounded p-2">
+                <div className="mb-2 border border-gray-700 rounded p-2 max-w-md w-full">
                   <label className="block text-sm font-medium">National Certifications</label>
                   <div className="flex flex-col gap-1">
                     {certifications.map((cert, idx) => (
-                      <div key={cert} className="mb-2 border border-gray-700 rounded p-2">
+                      <div key={cert} className="mb-2 border border-gray-700 rounded p-2 max-w-md w-full">
                         <label>
                           <input
                             type="checkbox"
@@ -203,7 +203,7 @@ export default function NewCustomer() {
                           /> {cert}
                         </label>
                         {watchedCerts.includes(cert) && (
-                          <div className="mt-1 border border-gray-700 rounded p-2">
+                          <div className="mt-1 border border-gray-700 rounded p-2 max-w-md w-full">
                             <input
                               className="input"
                               placeholder={`Enter ${cert} number/details`}
@@ -215,12 +215,6 @@ export default function NewCustomer() {
                     ))}
                   </div>
                 </div>
-              </div>
-              
-              {/* Multiple Emails Section */}
-              <div>
-                <h3 className="text-lg font-medium mb-2">Email Addresses</h3>
-                <CustomerEmailFields form={form} />
               </div>
               
               <FormActions 

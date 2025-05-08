@@ -24,7 +24,9 @@ export function CustomerContactFields({
           <FormItem>
             <FormLabel>Full Name</FormLabel>
             <FormControl>
-              <Input placeholder="Enter customer name" {...field} />
+              <div className="max-w-xs w-full">
+                <Input placeholder="Enter customer name" {...field} />
+              </div>
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -40,7 +42,9 @@ export function CustomerContactFields({
           <FormItem>
             <FormLabel>Phone</FormLabel>
             <FormControl>
-              <Input placeholder="Enter phone number" {...field} />
+              <div className="max-w-[6.5rem] w-full">
+                <Input placeholder="Enter phone number" maxLength={15} {...field} />
+              </div>
             </FormControl>
             <FormMessage />
           </FormItem>

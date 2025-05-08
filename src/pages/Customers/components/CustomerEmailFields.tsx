@@ -18,35 +18,41 @@ export function CustomerEmailFields({ form, className }: CustomerEmailFieldsProp
         {/* Default Contact */}
         <div className="flex flex-col items-start max-w-xs w-full">
           <span className="font-semibold mb-1">Default Contact</span>
-          <Input
-            {...register('emails.0.address')}
-            className="input"
-            placeholder="Contact email address"
-            type="email"
-            error={!!errors?.emails?.[0]?.address}
-          />
+          <div className="border border-gray-700 rounded p-2 w-full">
+            <Input
+              {...register('emails.0.address')}
+              className="input"
+              placeholder="Contact email address"
+              type="email"
+              error={!!errors?.emails?.[0]?.address}
+            />
+          </div>
         </div>
         {/* Default Invoice Recipient */}
         <div className="flex flex-col items-start max-w-xs w-full">
           <span className="font-semibold mb-1">Default Invoice Recipient</span>
-          <Input
-            {...register('emails.1.address')}
-            className="input"
-            placeholder="Invoice recipient email"
-            type="email"
-            error={!!errors?.emails?.[1]?.address}
-          />
+          <div className="border border-gray-700 rounded p-2 w-full">
+            <Input
+              {...register('emails.1.address')}
+              className="input"
+              placeholder="Invoice recipient email"
+              type="email"
+              error={!!errors?.emails?.[1]?.address}
+            />
+          </div>
         </div>
         {/* Default CC */}
         <div className="flex flex-col items-start max-w-xs w-full">
           <span className="font-semibold mb-1">Default CC</span>
-          <Input
-            {...register('emails.2.address')}
-            className="input"
-            placeholder="CC email address"
-            type="email"
-            error={!!errors?.emails?.[2]?.address}
-          />
+          <div className="border border-gray-700 rounded p-2 w-full">
+            <Input
+              {...register('emails.2.address')}
+              className="input"
+              placeholder="CC email address"
+              type="email"
+              error={!!errors?.emails?.[2]?.address}
+            />
+          </div>
         </div>
       </div>
     </div>

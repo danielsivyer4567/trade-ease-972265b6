@@ -8,12 +8,11 @@ import { UseFormReturn } from "react-hook-form";
 interface AddressFieldsProps {
   form: UseFormReturn<any>;
   className?: string;
+  inputClassName?: string;
 }
 
-export function AddressFields({
-  form,
-  className
-}: AddressFieldsProps) {
+export function AddressFields(props: AddressFieldsProps) {
+  const { form, className, inputClassName = "" } = props;
   return (
     <div className={`space-y-4 ${className}`}>
       <h3 className="text-lg font-medium">Address</h3>
@@ -25,14 +24,16 @@ export function AddressFields({
           <FormItem className="md:col-span-2">
             <FormLabel>Street Address</FormLabel>
             <FormControl>
-              <Textarea placeholder="Enter street address" {...field} />
+              <div className={`${inputClassName} max-w-xs w-full border border-gray-700 rounded p-2`}>
+                <Textarea placeholder="Enter street address" {...field} />
+              </div>
             </FormControl>
             <FormMessage />
           </FormItem>
         )} 
       />
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+      <div className="flex flex-col md:flex-row gap-2 mt-4">
         <FormField 
           control={form.control} 
           name="city" 
@@ -40,42 +41,44 @@ export function AddressFields({
             <FormItem>
               <FormLabel>City</FormLabel>
               <FormControl>
-                <Input placeholder="Enter city" {...field} />
+                <div className={`${inputClassName} max-w-xs w-full border border-gray-700 rounded p-2`}>
+                  <Input placeholder="Enter city" {...field} />
+                </div>
               </FormControl>
               <FormMessage />
             </FormItem>
           )} 
         />
-
-        <div className="grid grid-cols-2 gap-4">
-          <FormField 
-            control={form.control} 
-            name="state" 
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>State/Province</FormLabel>
-                <FormControl>
+        <FormField 
+          control={form.control} 
+          name="state" 
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>State/Province</FormLabel>
+              <FormControl>
+                <div className={`${inputClassName} max-w-xs w-full border border-gray-700 rounded p-2`}>
                   <Input placeholder="Enter state" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )} 
-          />
-
-          <FormField 
-            control={form.control} 
-            name="zipCode" 
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Zip/Postal Code</FormLabel>
-                <FormControl>
+                </div>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )} 
+        />
+        <FormField 
+          control={form.control} 
+          name="zipCode" 
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Zip/Postal Code</FormLabel>
+              <FormControl>
+                <div className={`${inputClassName} max-w-xs w-full border border-gray-700 rounded p-2`}>
                   <Input placeholder="Enter postal code" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )} 
-          />
-        </div>
+                </div>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )} 
+        />
       </div>
     </div>
   );
