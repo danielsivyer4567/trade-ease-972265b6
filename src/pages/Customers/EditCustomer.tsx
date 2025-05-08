@@ -357,7 +357,7 @@ const customerData: CustomerFormValues = {
           <h1 className="text-xl md:text-2xl font-bold">Edit Customer</h1>
         </div>
 
-        <Card className="p-4 md:p-6">
+        <Card className="p-4 md:p-6 border-2 border-gray-700">
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               <CustomerContactFields form={form} />
@@ -444,10 +444,10 @@ const customerData: CustomerFormValues = {
                   <div key={field.id} className="flex items-center gap-2 mb-2">
                     <input
                       {...register(`emails.${index}.address`)}
-                      className="input"
+                      className="input border-2 border-gray-700"
                       placeholder="Email address"
                     />
-                    <select {...register(`emails.${index}.type`)} className="input">
+                    <select {...register(`emails.${index}.type`)} className="input border-2 border-gray-700">
                       <option value="general">General</option>
                       <option value="general_and_quotes">General & Quotes</option>
                       <option value="invoices">Invoices Only</option>
