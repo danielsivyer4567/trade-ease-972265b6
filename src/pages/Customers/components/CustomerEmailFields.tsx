@@ -1,7 +1,6 @@
 import React from 'react';
-import { useFieldArray, UseFormReturn } from 'react-hook-form';
+import { UseFormReturn } from 'react-hook-form';
 import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
 
 interface CustomerEmailFieldsProps {
   form: UseFormReturn<any>;
@@ -9,36 +8,47 @@ interface CustomerEmailFieldsProps {
 }
 
 export function CustomerEmailFields({ form, className }: CustomerEmailFieldsProps) {
-  const { control, register } = form;
-  const { fields, append, remove } = useFieldArray({
-    control,
-    name: 'emails',
-  });
+  const { register, formState } = form;
+  const errors = formState.errors as any;
 
   return (
-    <div className={`space-y-2 ${className || ''}`}>
+    <div className={`space-y-4 ${className || ''}`}>
       <h3 className="text-lg font-medium mb-2">Email Addresses</h3>
-      {fields.map((field, index) => (
-        <div key={field.id} className="flex items-center gap-2 mb-2">
+      <div className="flex flex-wrap gap-2">
+        {/* Default Contact */}
+        <div className="flex flex-col items-start max-w-xs w-full">
+          <span className="font-semibold mb-1">Default Contact</span>
           <Input
-            {...register(`emails.${index}.address`)}
+            {...register('emails.0.address')}
             className="input"
-            placeholder="Email address"
+            placeholder="Contact email address"
             type="email"
+            error={!!errors?.emails?.[0]?.address}
           />
-          <select {...register(`emails.${index}.type`)} className="input">
-            <option value="general">General</option>
-            <option value="general_and_quotes">General & Quotes</option>
-            <option value="invoices">Invoices Only</option>
-          </select>
-          {fields.length > 1 && (
-            <Button type="button" variant="destructive" onClick={() => remove(index)}>-</Button>
-          )}
         </div>
-      ))}
-      <Button type="button" variant="outline" onClick={() => append({ address: '', type: 'general' })}>
-        Add Email
-      </Button>
+        {/* Default Invoice Recipient */}
+        <div className="flex flex-col items-start max-w-xs w-full">
+          <span className="font-semibold mb-1">Default Invoice Recipient</span>
+          <Input
+            {...register('emails.1.address')}
+            className="input"
+            placeholder="Invoice recipient email"
+            type="email"
+            error={!!errors?.emails?.[1]?.address}
+          />
+        </div>
+        {/* Default CC */}
+        <div className="flex flex-col items-start max-w-xs w-full">
+          <span className="font-semibold mb-1">Default CC</span>
+          <Input
+            {...register('emails.2.address')}
+            className="input"
+            placeholder="CC email address"
+            type="email"
+            error={!!errors?.emails?.[2]?.address}
+          />
+        </div>
+      </div>
     </div>
   );
 } 
