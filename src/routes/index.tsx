@@ -27,6 +27,7 @@ const AuthPage = lazy(() => import('@/pages/Auth'));
 const CustomersPage = lazy(() => import('@/pages/Customers/CustomersPage'));
 const CustomerDetailsPage = lazy(() => import('@/pages/Customers/CustomerDetail'));
 const NewCustomerPage = lazy(() => import('@/pages/Customers/NewCustomer'));
+const EditCustomerPage = lazy(() => import('@/pages/Customers/EditCustomer'));
 
 // Site Audits
 const SiteAuditsPage = lazy(() => import('@/pages/SiteAudits'));
@@ -144,6 +145,7 @@ const routeObjects: RouteObject[] = [
               { path: "new", element: <SuspenseWrapper><NewCustomerPage /></SuspenseWrapper> },
               { path: ":auditId", element: <SuspenseWrapper><CustomersPage /></SuspenseWrapper> },
               { path: ":auditId/:customerId", element: <SuspenseWrapper><CustomerDetailsPage /></SuspenseWrapper> },
+              { path: ":id/edit", element: <SuspenseWrapper><EditCustomerPage /></SuspenseWrapper> },
             ],
           },
           // Site Audits routes
