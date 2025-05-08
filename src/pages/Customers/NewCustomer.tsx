@@ -5,7 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Link, useNavigate } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { Form } from "@/components/ui/form";
-import { useForm } from "react-hook-form";
+import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { CustomerFormValues, useCustomers } from './hooks/useCustomers';
@@ -15,7 +15,10 @@ import { FormActions } from './components/FormActions';
 
 const formSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
-  email: z.string().email("Invalid email address"),
+  emails: z.array(z.object({
+    address: z.string().email("Invalid email address"),
+    type: z.enum(["general", "general_and_quotes", "invoices"])
+  })).min(1, "At least one email is required"),
   phone: z.string().min(5, "Please enter a valid phone number"),
   address: z.string().min(5, "Please enter a valid street address"),
   city: z.string().min(2, "City is required"),
@@ -40,7 +43,7 @@ export default function NewCustomer() {
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
-      email: "",
+      emails: [{ address: "", type: "general" }],
       phone: "",
       address: "",
       city: "",
@@ -55,6 +58,11 @@ export default function NewCustomer() {
       state_licence_number: "",
       national_certifications: []
     }
+  });
+
+  const { fields: emailFields, append: appendEmail, remove: removeEmail } = useFieldArray({
+    control: form.control,
+    name: "emails"
   });
 
   const [abnStatus, setAbnStatus] = useState<'valid' | 'invalid' | 'checking' | null>(null);
@@ -92,7 +100,7 @@ export default function NewCustomer() {
     
     const customerData: CustomerFormValues = {
       name: data.name,
-      email: data.email,
+      emails: data.emails,
       phone: data.phone,
       address: data.address,
       city: data.city,
@@ -173,6 +181,29 @@ export default function NewCustomer() {
                     <label><input type="checkbox" value="Electrical Contractor's License" {...form.register("national_certifications")} /> Electrical Contractor's License</label>
                   </div>
                 </div>
+              </div>
+              
+              {/* Multiple Emails Section */}
+              <div>
+                <h3 className="text-lg font-medium mb-2">Email Addresses</h3>
+                {emailFields.map((field, index) => (
+                  <div key={field.id} className="flex items-center gap-2 mb-2">
+                    <input
+                      {...form.register(`emails.${index}.address`)}
+                      className="input"
+                      placeholder="Email address"
+                    />
+                    <select {...form.register(`emails.${index}.type`)} className="input">
+                      <option value="general">General</option>
+                      <option value="general_and_quotes">General & Quotes</option>
+                      <option value="invoices">Invoices Only</option>
+                    </select>
+                    {emailFields.length > 1 && (
+                      <Button type="button" variant="destructive" onClick={() => removeEmail(index)}>-</Button>
+                    )}
+                  </div>
+                ))}
+                <Button type="button" variant="outline" onClick={() => appendEmail({ address: "", type: "general" })}>Add Email</Button>
               </div>
               
               <FormActions 
