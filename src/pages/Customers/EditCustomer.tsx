@@ -137,7 +137,11 @@ export default function EditCustomer() {
         // Set form values
         form.reset({
           name: data.name || "",
-          emails: data.emails && data.emails.length > 0 ? data.emails : [{ address: data.email || "", type: "general" }],
+          emails: Array.isArray(data.emails)
+            ? data.emails.map(e => typeof e === 'string'
+                ? { address: e, type: 'general' }
+                : { address: e.address, type: e.type || 'general' })
+            : [{ address: data.email || '', type: 'general' }],
           phone: data.phone || "",
           address: data.address || "",
           city: data.city || "",
