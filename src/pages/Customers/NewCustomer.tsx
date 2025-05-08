@@ -5,7 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Link, useNavigate } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { Form } from "@/components/ui/form";
-import { useForm, useFieldArray } from "react-hook-form";
+import { useForm, useFieldArray, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { CustomerFormValues, useCustomers } from './hooks/useCustomers';
@@ -17,9 +17,8 @@ import { CustomerEmailFields } from './components/CustomerEmailFields';
 const formSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
   emails: z.array(z.object({
-    address: z.string().email("Invalid email address"),
-    type: z.enum(["general", "general_and_quotes", "invoices"])
-  })).min(1, "At least one email is required"),
+    address: z.string().email("Invalid email address").optional().or(z.literal("")),
+  })).length(3),
   phone: z.string().min(5, "Please enter a valid phone number"),
   address: z.string().min(5, "Please enter a valid street address"),
   city: z.string().min(2, "City is required"),
@@ -33,8 +32,21 @@ const formSchema = z.object({
   abn_validated: z.boolean().optional(),
   state_licence_state: z.string().optional(),
   state_licence_number: z.string().optional(),
-  national_certifications: z.array(z.string()).optional()
-});
+  national_certifications: z.array(z.string()).optional(),
+  certification_details: z.record(z.string()).optional()
+}).refine(
+  (data) => {
+    const emails = data.emails || [];
+    return (
+      (emails[0]?.address && emails[0].address.trim() !== "") ||
+      (emails[1]?.address && emails[1].address.trim() !== "")
+    );
+  },
+  {
+    message: "At least one of Default Contact or Default Invoice Recipient email must be filled.",
+    path: ["emails"]
+  }
+);
 
 export default function NewCustomer() {
   const navigate = useNavigate();
@@ -44,7 +56,11 @@ export default function NewCustomer() {
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
-      emails: [{ address: "", type: "general" }],
+      emails: [
+        { address: "" },
+        { address: "" },
+        { address: "" }
+      ],
       phone: "",
       address: "",
       city: "",
@@ -57,7 +73,8 @@ export default function NewCustomer() {
       abn_validated: false,
       state_licence_state: "",
       state_licence_number: "",
-      national_certifications: []
+      national_certifications: [],
+      certification_details: {}
     }
   });
 
@@ -101,20 +118,12 @@ export default function NewCustomer() {
     
     const customerData: CustomerFormValues = {
       name: data.name,
-      emails: data.emails,
+      email: data.emails[0]?.address || data.emails[1]?.address || "",
       phone: data.phone,
       address: data.address,
       city: data.city,
       state: data.state,
-      zipCode: data.zipCode,
-      businessName: data.business_name,
-      abn: data.abn,
-      acn: data.acn,
-      abnEntityName: data.abn_entity_name,
-      abnValidated: data.abn_validated,
-      state_licence_state: data.state_licence_state,
-      state_licence_number: data.state_licence_number,
-      national_certifications: data.national_certifications
+      zipCode: data.zipCode
     };
 
     const result = await createCustomer(customerData);
@@ -122,6 +131,14 @@ export default function NewCustomer() {
       navigate("/customers");
     }
   };
+
+  const certifications = [
+    "Australian Builder's License",
+    "White Card",
+    "Plumbing Industry Commission License",
+    "Electrical Contractor's License"
+  ];
+  const watchedCerts = form.watch('national_certifications') || [];
 
   return (
     <AppLayout>
@@ -143,22 +160,22 @@ export default function NewCustomer() {
               {/* Business Details Section */}
               <div>
                 <h3 className="text-lg font-medium mb-2">Business Details</h3>
-                <div className="mb-2">
+                <div className="mb-2 border border-gray-700 rounded p-2">
                   <label className="block text-sm font-medium">Business Name</label>
                   <input {...form.register("business_name")} className="input" placeholder="Business Name" />
                 </div>
-                <div className="mb-2">
+                <div className="mb-2 border border-gray-700 rounded p-2">
                   <label className="block text-sm font-medium">ABN</label>
                   <input {...form.register("abn")} className="input" placeholder="ABN" onBlur={handleAbnBlur} />
                   {abnStatus === 'valid' && <span className="text-green-600">Valid ABN: {form.watch('abn_entity_name')}</span>}
                   {abnStatus === 'invalid' && <span className="text-red-600">Invalid ABN</span>}
                   {abnStatus === 'checking' && <span>Checking ABN...</span>}
                 </div>
-                <div className="mb-2">
+                <div className="mb-2 border border-gray-700 rounded p-2">
                   <label className="block text-sm font-medium">ACN</label>
                   <input {...form.register("acn")} className="input" placeholder="ACN" />
                 </div>
-                <div className="mb-2">
+                <div className="mb-2 border border-gray-700 rounded p-2">
                   <label className="block text-sm font-medium">State License</label>
                   <select {...form.register("state_licence_state")} className="input">
                     <option value="">Select State</option>
@@ -173,13 +190,29 @@ export default function NewCustomer() {
                   </select>
                   <input {...form.register("state_licence_number")} className="input mt-2" placeholder="State License Number" />
                 </div>
-                <div className="mb-2">
+                <div className="mb-2 border border-gray-700 rounded p-2">
                   <label className="block text-sm font-medium">National Certifications</label>
                   <div className="flex flex-col gap-1">
-                    <label><input type="checkbox" value="Australian Builder's License" {...form.register("national_certifications")} /> Australian Builder's License</label>
-                    <label><input type="checkbox" value="White Card" {...form.register("national_certifications")} /> National Construction Induction Card (White Card)</label>
-                    <label><input type="checkbox" value="Plumbing Industry Commission License" {...form.register("national_certifications")} /> Plumbing Industry Commission License</label>
-                    <label><input type="checkbox" value="Electrical Contractor's License" {...form.register("national_certifications")} /> Electrical Contractor's License</label>
+                    {certifications.map((cert, idx) => (
+                      <div key={cert} className="mb-2 border border-gray-700 rounded p-2">
+                        <label>
+                          <input
+                            type="checkbox"
+                            value={cert}
+                            {...form.register("national_certifications")}
+                          /> {cert}
+                        </label>
+                        {watchedCerts.includes(cert) && (
+                          <div className="mt-1 border border-gray-700 rounded p-2">
+                            <input
+                              className="input"
+                              placeholder={`Enter ${cert} number/details`}
+                              {...form.register(`certification_details.${cert}` as const)}
+                            />
+                          </div>
+                        )}
+                      </div>
+                    ))}
                   </div>
                 </div>
               </div>
