@@ -12,6 +12,7 @@ import { CustomerFormValues, useCustomers } from './hooks/useCustomers';
 import { CustomerContactFields } from './components/CustomerContactFields';
 import { AddressFields } from './components/AddressFields';
 import { FormActions } from './components/FormActions';
+import { CustomerEmailFields } from './components/CustomerEmailFields';
 
 const formSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -186,24 +187,7 @@ export default function NewCustomer() {
               {/* Multiple Emails Section */}
               <div>
                 <h3 className="text-lg font-medium mb-2">Email Addresses</h3>
-                {emailFields.map((field, index) => (
-                  <div key={field.id} className="flex items-center gap-2 mb-2">
-                    <input
-                      {...form.register(`emails.${index}.address`)}
-                      className="input"
-                      placeholder="Email address"
-                    />
-                    <select {...form.register(`emails.${index}.type`)} className="input">
-                      <option value="general">General</option>
-                      <option value="general_and_quotes">General & Quotes</option>
-                      <option value="invoices">Invoices Only</option>
-                    </select>
-                    {emailFields.length > 1 && (
-                      <Button type="button" variant="destructive" onClick={() => removeEmail(index)}>-</Button>
-                    )}
-                  </div>
-                ))}
-                <Button type="button" variant="outline" onClick={() => appendEmail({ address: "", type: "general" })}>Add Email</Button>
+                <CustomerEmailFields form={form} />
               </div>
               
               <FormActions 

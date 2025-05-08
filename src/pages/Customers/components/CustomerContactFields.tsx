@@ -2,6 +2,7 @@ import React from 'react';
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { UseFormReturn } from "react-hook-form";
+import { CustomerEmailFields } from './CustomerEmailFields';
 
 interface CustomerContactFieldsProps {
   form: UseFormReturn<any>;
@@ -30,19 +31,7 @@ export function CustomerContactFields({
         )} 
       />
 
-      <FormField 
-        control={form.control} 
-        name="email" 
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Email</FormLabel>
-            <FormControl>
-              <Input type="email" placeholder="Enter email address" {...field} />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )} 
-      />
+      <CustomerEmailFields form={form} />
 
       <FormField 
         control={form.control} 

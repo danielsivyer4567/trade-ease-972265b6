@@ -13,6 +13,7 @@ import { CustomerContactFields } from './components/CustomerContactFields';
 import { AddressFields } from './components/AddressFields';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { CustomerEmailFields } from './components/CustomerEmailFields';
 
 // Customer form schema
 const formSchema = z.object({
@@ -438,27 +439,7 @@ const customerData: CustomerFormValues = {
               </div>
               
               {/* Multiple Emails Section */}
-              <div>
-                <h3 className="text-lg font-medium mb-2">Email Addresses</h3>
-                {emailFields.map((field, index) => (
-                  <div key={field.id} className="flex items-center gap-2 mb-2">
-                    <input
-                      {...register(`emails.${index}.address`)}
-                      className="input border-2 border-gray-700"
-                      placeholder="Email address"
-                    />
-                    <select {...register(`emails.${index}.type`)} className="input border-2 border-gray-700">
-                      <option value="general">General</option>
-                      <option value="general_and_quotes">General & Quotes</option>
-                      <option value="invoices">Invoices Only</option>
-                    </select>
-                    {emailFields.length > 1 && (
-                      <Button type="button" variant="destructive" onClick={() => removeEmail(index)}>-</Button>
-                    )}
-                  </div>
-                ))}
-                <Button type="button" variant="outline" onClick={() => appendEmail({ address: "", type: "general" })}>Add Email</Button>
-              </div>
+              <CustomerEmailFields form={form} />
               
               <div className="flex gap-2 justify-center mt-8">
                 <Button 
