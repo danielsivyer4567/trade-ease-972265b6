@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -7,6 +6,7 @@ import { CustomerContactFields } from "./CustomerContactFields";
 import { AddressFields } from "./AddressFields";
 import { UseFormReturn } from "react-hook-form";
 import * as z from "zod";
+import { CustomerEmailFields } from './CustomerEmailFields';
 
 interface CustomerEditModalProps {
   open: boolean;
@@ -31,6 +31,7 @@ export const CustomerEditModal = ({
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <CustomerContactFields form={form} className="mt-2" />
+            <CustomerEmailFields form={form} />
             <AddressFields form={form} className="mt-4" />
 
             <DialogFooter className="mt-6">
