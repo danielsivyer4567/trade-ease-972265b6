@@ -1,5 +1,4 @@
-
-import React from 'react';
+import React, { useState } from 'react';
 import { AppLayout } from "@/components/ui/AppLayout";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -21,7 +20,16 @@ const formSchema = z.object({
   address: z.string().min(5, "Please enter a valid street address"),
   city: z.string().min(2, "City is required"),
   state: z.string().min(2, "State is required"),
-  zipCode: z.string().min(3, "Zip/Postal code is required")
+  zipCode: z.string().min(3, "Zip/Postal code is required"),
+  // Business details
+  business_name: z.string().optional(),
+  abn: z.string().optional(),
+  acn: z.string().optional(),
+  abn_entity_name: z.string().optional(),
+  abn_validated: z.boolean().optional(),
+  state_licence_state: z.string().optional(),
+  state_licence_number: z.string().optional(),
+  national_certifications: z.array(z.string()).optional()
 });
 
 export default function NewCustomer() {
@@ -37,9 +45,47 @@ export default function NewCustomer() {
       address: "",
       city: "",
       state: "",
-      zipCode: ""
+      zipCode: "",
+      business_name: "",
+      abn: "",
+      acn: "",
+      abn_entity_name: "",
+      abn_validated: false,
+      state_licence_state: "",
+      state_licence_number: "",
+      national_certifications: []
     }
   });
+
+  const [abnStatus, setAbnStatus] = useState<'valid' | 'invalid' | 'checking' | null>(null);
+
+  const handleAbnBlur = async (e: React.FocusEvent<HTMLInputElement>) => {
+    const abn = e.target.value;
+    if (!abn || abn.length < 11) {
+      setAbnStatus(null);
+      form.setValue('abn_validated', false);
+      form.setValue('abn_entity_name', '');
+      return;
+    }
+    setAbnStatus('checking');
+    try {
+      const res = await fetch(`http://localhost:4000/api/abn-lookup?abn=${abn}`);
+      const data = await res.json();
+      if (data.Abn && data.EntityName) {
+        setAbnStatus('valid');
+        form.setValue('abn_validated', true);
+        form.setValue('abn_entity_name', data.EntityName);
+      } else {
+        setAbnStatus('invalid');
+        form.setValue('abn_validated', false);
+        form.setValue('abn_entity_name', '');
+      }
+    } catch {
+      setAbnStatus('invalid');
+      form.setValue('abn_validated', false);
+      form.setValue('abn_entity_name', '');
+    }
+  };
 
   const onSubmit = async (data: z.infer<typeof formSchema>) => {
     console.log("Submitting customer data:", data);
@@ -51,7 +97,15 @@ export default function NewCustomer() {
       address: data.address,
       city: data.city,
       state: data.state,
-      zipCode: data.zipCode
+      zipCode: data.zipCode,
+      businessName: data.business_name,
+      abn: data.abn,
+      acn: data.acn,
+      abnEntityName: data.abn_entity_name,
+      abnValidated: data.abn_validated,
+      state_licence_state: data.state_licence_state,
+      state_licence_number: data.state_licence_number,
+      national_certifications: data.national_certifications
     };
 
     const result = await createCustomer(customerData);
@@ -76,6 +130,50 @@ export default function NewCustomer() {
               <CustomerContactFields form={form} />
               
               <AddressFields form={form} />
+              
+              {/* Business Details Section */}
+              <div>
+                <h3 className="text-lg font-medium mb-2">Business Details</h3>
+                <div className="mb-2">
+                  <label className="block text-sm font-medium">Business Name</label>
+                  <input {...form.register("business_name")} className="input" placeholder="Business Name" />
+                </div>
+                <div className="mb-2">
+                  <label className="block text-sm font-medium">ABN</label>
+                  <input {...form.register("abn")} className="input" placeholder="ABN" onBlur={handleAbnBlur} />
+                  {abnStatus === 'valid' && <span className="text-green-600">Valid ABN: {form.watch('abn_entity_name')}</span>}
+                  {abnStatus === 'invalid' && <span className="text-red-600">Invalid ABN</span>}
+                  {abnStatus === 'checking' && <span>Checking ABN...</span>}
+                </div>
+                <div className="mb-2">
+                  <label className="block text-sm font-medium">ACN</label>
+                  <input {...form.register("acn")} className="input" placeholder="ACN" />
+                </div>
+                <div className="mb-2">
+                  <label className="block text-sm font-medium">State License</label>
+                  <select {...form.register("state_licence_state")} className="input">
+                    <option value="">Select State</option>
+                    <option value="QLD">Queensland (QBCC)</option>
+                    <option value="NSW">New South Wales (NSW Fair Trading)</option>
+                    <option value="VIC">Victoria (VBA)</option>
+                    <option value="WA">Western Australia (DMIRS)</option>
+                    <option value="SA">South Australia (CBS)</option>
+                    <option value="TAS">Tasmania (CBOS)</option>
+                    <option value="ACT">Australian Capital Territory (Access Canberra)</option>
+                    <option value="NT">Northern Territory (NT Building Practitioners Board)</option>
+                  </select>
+                  <input {...form.register("state_licence_number")} className="input mt-2" placeholder="State License Number" />
+                </div>
+                <div className="mb-2">
+                  <label className="block text-sm font-medium">National Certifications</label>
+                  <div className="flex flex-col gap-1">
+                    <label><input type="checkbox" value="Australian Builder's License" {...form.register("national_certifications")} /> Australian Builder's License</label>
+                    <label><input type="checkbox" value="White Card" {...form.register("national_certifications")} /> National Construction Induction Card (White Card)</label>
+                    <label><input type="checkbox" value="Plumbing Industry Commission License" {...form.register("national_certifications")} /> Plumbing Industry Commission License</label>
+                    <label><input type="checkbox" value="Electrical Contractor's License" {...form.register("national_certifications")} /> Electrical Contractor's License</label>
+                  </div>
+                </div>
+              </div>
               
               <FormActions 
                 isSubmitting={form.formState.isSubmitting}

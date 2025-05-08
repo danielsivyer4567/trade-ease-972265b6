@@ -10,6 +10,7 @@ export const useCustomerDetail = (id: string | undefined) => {
   const [customer, setCustomer] = useState<any>(null);
   const [notes, setNotes] = useState<CustomerNote[]>([]);
   const [jobHistory, setJobHistory] = useState<CustomerJobHistory[]>([]);
+  const [addresses, setAddresses] = useState<any[]>([]);
   const [isLoadingData, setIsLoadingData] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -110,6 +111,17 @@ export const useCustomerDetail = (id: string | undefined) => {
           
           setNotes(formattedNotes);
         }
+
+        // Fetch job site addresses from database
+        const { data: addressesData, error: addressesError } = await supabase
+          .from('customer_addresses')
+          .select('*')
+          .eq('customer_id', id);
+        if (addressesError) {
+          console.error("Error fetching addresses:", addressesError);
+        } else {
+          setAddresses(addressesData || []);
+        }
       } catch (error) {
         console.error("Error in useCustomerDetail:", error);
         const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred";
@@ -158,6 +170,7 @@ export const useCustomerDetail = (id: string | undefined) => {
     customer,
     notes,
     jobHistory,
+    addresses,
     isLoadingData,
     error,
     handleAddNote
