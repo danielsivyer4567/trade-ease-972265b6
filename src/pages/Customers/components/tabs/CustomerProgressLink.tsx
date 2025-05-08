@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -101,55 +100,14 @@ export function CustomerProgressLink({ customerId }: CustomerProgressLinkProps) 
     }
   };
   
-  // Mock data for job steps
-  const jobSteps = [
-    { id: 1, name: "Initial Consultation", complete: true, date: "2023-12-01" },
-    { id: 2, name: "Quote Provided", complete: true, date: "2023-12-05" },
-    { id: 3, name: "Materials Ordered", complete: true, date: "2023-12-10" },
-    { id: 4, name: "Materials Delivered", complete: false, date: null },
-    { id: 5, name: "Work In Progress", complete: false, date: null },
-    { id: 6, name: "Quality Check", complete: false, date: null },
-    { id: 7, name: "Job Completed", complete: false, date: null }
-  ];
-  
-  // Mock job documents
-  const jobDocuments = [
-    { id: 1, name: "Initial Quote.pdf", type: "quote", date: "2023-12-05" },
-    { id: 2, name: "Contract Agreement.pdf", type: "contract", date: "2023-12-07" },
-    { id: 3, name: "Material List.pdf", type: "materials", date: "2023-12-10" }
-  ];
-  
-  // Mock images for carousel
-  const progressImages = [
-    "/placeholder.svg",
-    "/placeholder.svg",
-    "/placeholder.svg"
-  ];
-  
-  // Mock comments
-  const comments = [
-    { 
-      id: 1, 
-      user: "Customer", 
-      text: "When will the materials be delivered?", 
-      date: "2023-12-12", 
-      time: "14:30",
-      replies: [
-        { id: 101, user: "Project Manager", text: "Scheduled for December 15th", date: "2023-12-12", time: "15:45" }
-      ]
-    },
-    { 
-      id: 2, 
-      user: "Site Supervisor", 
-      text: "Updated the timeline for the next steps", 
-      date: "2023-12-13", 
-      time: "09:15",
-      replies: []
-    }
-  ];
+  // Remove mock data for job steps, documents, images, and comments
+  const jobSteps = [];
+  const jobDocuments = [];
+  const progressImages = [];
+  const comments = [];
   
   const renderProgressBar = () => {
-    const completedSteps = jobSteps.filter(step => step.complete).length;
+    const completedSteps = jobSteps.length;
     const progressPercentage = (completedSteps / jobSteps.length) * 100;
     
     return (
