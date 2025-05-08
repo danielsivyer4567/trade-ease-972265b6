@@ -17,7 +17,10 @@ import { useToast } from '@/hooks/use-toast';
 // Customer form schema
 const formSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
-  emails: z.array(z.string().email("Invalid email address")).min(1, "At least one email is required"),
+  emails: z.array(z.object({
+    address: z.string().email("Invalid email address"),
+    type: z.enum(["general", "general_and_quotes", "invoices"])
+  })).min(1, "At least one email is required"),
   phone: z.string().min(5, "Please enter a valid phone number"),
   address: z.string().min(5, "Please enter a valid street address"),
   city: z.string().min(2, "City is required"),
@@ -59,7 +62,7 @@ export default function EditCustomer() {
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
-      emails: [""],
+      emails: [{ address: "", type: "general" }],
       phone: "",
       address: "",
       city: "",
@@ -134,7 +137,7 @@ export default function EditCustomer() {
         // Set form values
         form.reset({
           name: data.name || "",
-          emails: data.emails && data.emails.length > 0 ? data.emails : [data.email || ""],
+          emails: data.emails && data.emails.length > 0 ? data.emails : [{ address: data.email || "", type: "general" }],
           phone: data.phone || "",
           address: data.address || "",
           city: data.city || "",
@@ -248,13 +251,13 @@ export default function EditCustomer() {
     
     try {
       // Update customer main fields
-      const customerData: CustomerFormValues = {
-        name: data.name,
-        email: data.emails[0],
-        phone: data.phone,
-        address: data.address,
-        city: data.city,
-        state: data.state,
+const customerData: CustomerFormValues = {
+  name: data.name,
+  email: data.emails.map((email: any) => email.value).join(', '),
+  phone: data.phone,
+  address: data.address,
+  city: data.city,
+  state: data.state,
         zipCode: data.zipCode
       };
       const result = await updateCustomer(id, customerData);
@@ -436,16 +439,21 @@ export default function EditCustomer() {
                 {emailFields.map((field, index) => (
                   <div key={field.id} className="flex items-center gap-2 mb-2">
                     <input
-                      {...register(`emails.${index}`)}
+                      {...register(`emails.${index}.address`)}
                       className="input"
                       placeholder="Email address"
                     />
+                    <select {...register(`emails.${index}.type`)} className="input">
+                      <option value="general">General</option>
+                      <option value="general_and_quotes">General & Quotes</option>
+                      <option value="invoices">Invoices Only</option>
+                    </select>
                     {emailFields.length > 1 && (
                       <Button type="button" variant="destructive" onClick={() => removeEmail(index)}>-</Button>
                     )}
                   </div>
                 ))}
-                <Button type="button" variant="outline" onClick={() => appendEmail("")}>Add Email</Button>
+                <Button type="button" variant="outline" onClick={() => appendEmail({ address: "", type: "general" })}>Add Email</Button>
               </div>
               
               <div className="flex gap-2 justify-center mt-8">
