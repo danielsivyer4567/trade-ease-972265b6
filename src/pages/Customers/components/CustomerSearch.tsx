@@ -1,8 +1,8 @@
-
 import React, { useRef, useEffect } from 'react';
 import { Input } from "@/components/ui/input";
 import { Search, User } from "lucide-react";
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useNavigate } from 'react-router-dom';
 
 interface CustomerSearchProps {
   searchQuery: string;
@@ -24,6 +24,7 @@ export const CustomerSearch = ({
   const resultsRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const isMobile = useIsMobile();
+  const navigate = useNavigate();
   
   // Close search results when clicking outside
   useEffect(() => {
@@ -43,6 +44,12 @@ export const CustomerSearch = ({
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [setShowSearchResults]);
+  
+  const handleCustomerClick = (customerId: string) => {
+    onCustomerChange(customerId);
+    setShowSearchResults(false);
+    navigate(`/customers/${customerId}`);
+  };
   
   return (
     <div className="relative flex-1 min-w-0">
@@ -67,7 +74,7 @@ export const CustomerSearch = ({
             <div
               key={customer.id}
               className="p-2 hover:bg-gray-100 cursor-pointer flex items-center"
-              onClick={() => onCustomerChange(customer.id)}
+              onClick={() => handleCustomerClick(customer.id)}
             >
               <User className="h-4 w-4 mr-2 text-gray-500" />
               <div className="truncate">

@@ -192,6 +192,7 @@ export function CustomersPageContent() {
           setSearchQuery={setSearchQuery}
           selectedFilter={selectedFilter}
           setSelectedFilter={setSelectedFilter}
+          filteredCustomers={filteredCustomers}
         />
       </div>
 
