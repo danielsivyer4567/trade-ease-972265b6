@@ -21,6 +21,7 @@ interface CustomerWithDetails extends CustomerData {
   certification_details?: Record<string, string>;
   created_at?: string;
   last_contact?: string;
+  customer_code?: string;
 }
 
 interface Quote {
@@ -132,7 +133,8 @@ const CustomerPortfolio = () => {
           national_certifications: data.national_certifications || [],
           certification_details: data.certification_details || {},
           created_at: data.created_at,
-          last_contact: data.last_contact
+          last_contact: data.last_contact,
+          customer_code: data.customer_code
         });
         
         // In a real implementation, we would fetch related data here
@@ -227,7 +229,14 @@ const CustomerPortfolio = () => {
                   <div className="w-24 h-24 bg-primary/10 rounded-full flex items-center justify-center mb-4">
                     <User className="h-12 w-12 text-primary" />
                   </div>
-                  <h2 className="text-xl font-bold">{customer.name}</h2>
+                  <h2 className="text-xl font-bold">
+                    {customer.name}
+                    {customer.customer_code && (
+                      <span className="ml-2 text-sm bg-gray-100 px-2 py-0.5 rounded-full text-gray-600">
+                        {customer.customer_code}
+                      </span>
+                    )}
+                  </h2>
                   <div className="mt-2">
                     <span className={`inline-block px-3 py-1 text-sm rounded-full ${
                       customer.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'

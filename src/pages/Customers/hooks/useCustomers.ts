@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -16,6 +15,7 @@ export interface Customer {
   status: 'active' | 'inactive';
   created_at: string;
   user_id: string;
+  customer_code?: string;
 }
 
 export type CustomerFormValues = Omit<Customer, 'id' | 'status' | 'created_at' | 'user_id'>;
