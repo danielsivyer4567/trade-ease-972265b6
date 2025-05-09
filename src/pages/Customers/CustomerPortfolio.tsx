@@ -75,6 +75,18 @@ const CustomerPortfolio = () => {
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("overview");
   
+  // Define the animation style for the electrical effect
+  const electricAnimationStyle = `
+    @keyframes moveDown {
+      0% {
+        transform: translateY(-100%);
+      }
+      100% {
+        transform: translateY(100%);
+      }
+    }
+  `;
+  
   // Mock data (would be fetched from API in production)
   const [quotes, setQuotes] = useState<Quote[]>([
     { id: '1', title: 'Bathroom Renovation', date: '2023-10-15', amount: 5200, status: 'accepted' },
@@ -287,6 +299,9 @@ const CustomerPortfolio = () => {
 
   return (
     <AppLayout>
+      {/* Inject the CSS animation for the electrical effect */}
+      <style dangerouslySetInnerHTML={{ __html: electricAnimationStyle }} />
+      
       <div className="container mx-auto p-6">
         <div className="flex items-center gap-2 mb-6">
           <Button variant="ghost" onClick={() => navigate('/customers')}>
@@ -705,13 +720,29 @@ const CustomerPortfolio = () => {
                       {index < workflowSteps.length - 1 && (
                         <>
                           {step.status === 'current' ? (
-                            <div 
-                              className="absolute top-16 left-1/2 -translate-x-1/2 text-blue-500 z-10 animate-pulse"
-                              style={{
-                                transform: 'translateX(-50%)'
-                              }}
-                            >
-                              <Zap className="h-5 w-5 text-blue-500" />
+                            <div className="absolute top-14 left-1/2 h-20 flex flex-col items-center justify-center pointer-events-none overflow-hidden">
+                              {/* Base connector line */}
+                              <div className="absolute h-full w-1 bg-blue-100 rounded-full"></div>
+                              
+                              {/* Flowing electrical current effect */}
+                              <div className="absolute h-full w-1 overflow-hidden">
+                                <div className="h-4 w-full bg-blue-500 relative" 
+                                  style={{
+                                    boxShadow: '0 0 8px 2px rgba(59, 130, 246, 0.5)',
+                                    background: 'linear-gradient(to bottom, rgba(59, 130, 246, 0.1), rgba(59, 130, 246, 0.8), rgba(59, 130, 246, 0.1))',
+                                    animation: 'moveDown 1.5s infinite',
+                                    animationTimingFunction: 'ease-in-out',
+                                    transform: 'translateY(-100%)'
+                                  }}
+                                ></div>
+                              </div>
+                              
+                              {/* Pulsing glow effect */}
+                              <div className="absolute h-full w-1 bg-transparent animate-pulse opacity-70"
+                                style={{
+                                  boxShadow: '0 0 10px 4px rgba(59, 130, 246, 0.4)'
+                                }}
+                              ></div>
                             </div>
                           ) : (
                             <div className={`absolute top-16 left-1/2 -translate-x-1/2 
