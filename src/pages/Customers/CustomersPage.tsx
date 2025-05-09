@@ -302,7 +302,15 @@ function CustomersPage() {
                     <CardContent className="p-4">
                       <div className="flex justify-between items-center mb-2">
                         <div>
-                          <h3 className="font-medium">{customer.name}</h3>
+                          <h3 
+                            className="font-medium cursor-pointer hover:text-blue-600 hover:underline"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              navigate(`/customers/${customer.id}`);
+                            }}
+                          >
+                            {customer.name}
+                          </h3>
                           <p className="text-xs text-muted-foreground">{customer.jobTitle}</p>
                         </div>
                         <Badge variant={customer.status === 'active' ? 'default' : 'secondary'}>
@@ -336,7 +344,12 @@ function CustomersPage() {
                 <Card>
                   <CardHeader className="bg-muted pb-2">
                     <div className="flex justify-between items-center">
-                      <CardTitle>{selectedCustomer.name}</CardTitle>
+                      <CardTitle 
+                        className="cursor-pointer hover:text-blue-600 hover:underline"
+                        onClick={() => navigate(`/customers/${selectedCustomer.id}`)}
+                      >
+                        {selectedCustomer.name}
+                      </CardTitle>
                       <div className="flex items-center gap-2">
                         <Button 
                           variant="outline" 
