@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { User, Phone, Mail, MapPin, Edit, ExternalLink } from "lucide-react";
 import { openCustomer } from "@/services/api";
 import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from 'react-router-dom';
 
 export interface CustomerData {
   id: string;
@@ -25,6 +26,7 @@ interface CustomerCardProps {
 
 export const CustomerCard = ({ customer, onCustomerClick, onEditClick }: CustomerCardProps) => {
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const handleOpenClick = async (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -44,9 +46,9 @@ export const CustomerCard = ({ customer, onCustomerClick, onEditClick }: Custome
     }
   };
   
-  const handleNameClick = async (e: React.MouseEvent) => {
+  const handleNameClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    handleOpenClick(e);
+    navigate(`/customers/${customer.id}`);
   };
 
   return (
