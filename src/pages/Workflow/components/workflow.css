@@ -1,0 +1,75 @@
+/* Workflow component styles */
+
+/* Electricity animation */
+@keyframes electricFlow {
+  0% {
+    filter: drop-shadow(0 0 2px rgba(59, 130, 246, 0.5));
+  }
+  50% {
+    filter: drop-shadow(0 0 5px rgba(59, 130, 246, 0.8));
+  }
+  100% {
+    filter: drop-shadow(0 0 2px rgba(59, 130, 246, 0.5));
+  }
+}
+
+/* Dark mode electricity animation */
+@keyframes electricFlowDark {
+  0% {
+    filter: drop-shadow(0 0 2px rgba(191, 161, 74, 0.5));
+  }
+  50% {
+    filter: drop-shadow(0 0 5px rgba(191, 161, 74, 0.8));
+  }
+  100% {
+    filter: drop-shadow(0 0 2px rgba(191, 161, 74, 0.5));
+  }
+}
+
+/* Active connection class */
+.workflow-edge-active path {
+  animation: electricFlow 1.5s infinite;
+}
+
+/* Dark mode active connection */
+.workflow-dark-mode .workflow-edge-active path {
+  animation: electricFlowDark 1.5s infinite;
+}
+
+/* Edge pulse effect */
+.edge-pulse-light {
+  animation: edgePulseLight 2s infinite;
+}
+
+.edge-pulse-dark {
+  animation: edgePulseDark 2s infinite;
+}
+
+@keyframes edgePulseLight {
+  0% {
+    stroke-opacity: 0.3;
+  }
+  50% {
+    stroke-opacity: 1;
+  }
+  100% {
+    stroke-opacity: 0.3;
+  }
+}
+
+@keyframes edgePulseDark {
+  0% {
+    stroke-opacity: 0.3;
+  }
+  50% {
+    stroke-opacity: 1;
+  }
+  100% {
+    stroke-opacity: 0.3;
+  }
+}
+
+/* Add this class to the ReactFlow container when edges are active */
+.workflow-active-edges .react-flow__edge path {
+  transition: all 0.3s ease;
+} 

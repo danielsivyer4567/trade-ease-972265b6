@@ -11,6 +11,7 @@ import { WorkflowDarkModeProvider } from './contexts/WorkflowDarkModeContext';
 import { initializeTables } from './integrations/supabase/dbInit';
 import { ErrorBoundary } from 'react-error-boundary';
 import './App.css';
+import './pages/Workflow/components/workflow.css';
 
 const queryClient = new QueryClient({
   defaultOptions: {

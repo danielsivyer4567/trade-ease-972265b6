@@ -108,34 +108,32 @@ const CustomerPortfolio = () => {
     
     @keyframes glow {
       0% {
-        box-shadow: 0 0 5px rgba(59, 130, 246, 0.3);
+        box-shadow: 0 0 8px rgba(59, 130, 246, 0.4);
       }
       50% {
-        box-shadow: 0 0 12px rgba(59, 130, 246, 0.6);
+        box-shadow: 0 0 20px rgba(59, 130, 246, 0.8);
       }
       100% {
-        box-shadow: 0 0 5px rgba(59, 130, 246, 0.3);
+        box-shadow: 0 0 8px rgba(59, 130, 246, 0.4);
       }
     }
     
     @keyframes noodlePulse {
       0% {
-        opacity: 0;
-        height: 4px;
-        transform: translateY(0);
+        opacity: 0.2;
+        transform: translateY(-5px) scale(0.8);
       }
-      30% {
+      20% {
         opacity: 1;
-        height: 10px;
+        transform: translateY(0) scale(1);
       }
-      70% {
+      80% {
         opacity: 1;
-        height: 10px;
+        transform: translateY(20px) scale(1);
       }
       100% {
-        opacity: 0;
-        height: 4px;
-        transform: translateY(100%);
+        opacity: 0.2;
+        transform: translateY(30px) scale(0.8);
       }
     }
   `;
@@ -746,8 +744,15 @@ const CustomerPortfolio = () => {
           {/* Customer Journey Workflow - Now with node style */}
           <div className="lg:col-span-3">
             <Card className="h-full overflow-hidden relative">
-              {/* Background pattern with dots similar to n8n */}
-              <div className="absolute inset-0 bg-gradient-to-br from-pink-50 to-indigo-50 z-0">
+              {/* Background image with dots overlay */}
+              <div className="absolute inset-0 z-0">
+                <img 
+                  src="/backgrounds/construction.png" 
+                  alt="Background" 
+                  className="w-full h-full object-cover"
+                  style={{ opacity: 0.15 }}
+                />
+                {/* Dots overlay */}
                 <div className="absolute inset-0" 
                   style={{
                     backgroundImage: 'radial-gradient(circle, rgba(0,0,0,0.05) 1px, transparent 1px)',
@@ -764,7 +769,7 @@ const CustomerPortfolio = () => {
               </CardHeader>
               <CardContent className="p-4 relative z-10">
                 {/* Dashed connector line for background */}
-                <div className="absolute top-0 bottom-0 left-1/2 w-0.5 border-l-2 border-dashed border-gray-200 -translate-x-1/2 z-0"></div>
+                <div className="absolute top-0 bottom-0 left-1/2 w-0.5 border-l-2 border-dashed border-gray-400 -translate-x-1/2 z-0"></div>
                 
                 <div className="relative z-10">
                   {workflowSteps.map((step, index) => (
@@ -773,67 +778,76 @@ const CustomerPortfolio = () => {
                       {index < workflowSteps.length - 1 && (
                         <>
                           {step.status === 'current' ? (
-                            <div className="absolute top-14 left-1/2 h-20 flex flex-col items-center justify-center pointer-events-none overflow-hidden">
-                              {/* Base connector line */}
-                              <div className="absolute h-full w-2 bg-blue-100 rounded-full"></div>
+                            <div className="absolute top-14 left-1/2 h-20 flex flex-col items-center justify-center pointer-events-none overflow-hidden z-20">
+                              {/* Base connector line - making it more visible with width and color */}
+                              <div className="absolute h-full w-3 bg-blue-200 rounded-full"></div>
                               
                               {/* Visual scripting noodle effect with multiple pulses */}
-                              <div className="absolute h-full w-full overflow-hidden flex justify-center">
-                                {/* First pulse */}
+                              <div className="absolute h-full w-full overflow-visible flex justify-center">
+                                {/* First pulse - increased size and opacity */}
                                 <div 
                                   className="bg-blue-500 rounded-full absolute"
                                   style={{
-                                    width: '6px',
-                                    animation: 'noodlePulse 1.8s infinite',
-                                    background: 'linear-gradient(to bottom, rgba(59, 130, 246, 0.1), rgba(59, 130, 246, 0.9), rgba(59, 130, 246, 0.1))',
-                                    boxShadow: '0 0 8px rgba(59, 130, 246, 0.6)'
+                                    width: '8px',
+                                    height: '12px',
+                                    animation: 'noodlePulse 2s infinite',
+                                    background: 'linear-gradient(to bottom, rgba(59, 130, 246, 0.2), rgba(59, 130, 246, 1), rgba(59, 130, 246, 0.2))',
+                                    boxShadow: '0 0 10px rgba(59, 130, 246, 0.8)'
                                   }}
                                 ></div>
                                 
-                                {/* Second pulse (delayed) */}
+                                {/* Second pulse (delayed) - increased size and opacity */}
                                 <div 
                                   className="bg-blue-400 rounded-full absolute"
                                   style={{
-                                    width: '6px',
-                                    animation: 'noodlePulse 1.8s infinite',
-                                    animationDelay: '0.6s',
-                                    background: 'linear-gradient(to bottom, rgba(96, 165, 250, 0.1), rgba(96, 165, 250, 0.9), rgba(96, 165, 250, 0.1))',
-                                    boxShadow: '0 0 8px rgba(96, 165, 250, 0.5)'
+                                    width: '8px',
+                                    height: '12px',
+                                    animation: 'noodlePulse 2s infinite',
+                                    animationDelay: '0.7s',
+                                    background: 'linear-gradient(to bottom, rgba(96, 165, 250, 0.2), rgba(96, 165, 250, 1), rgba(96, 165, 250, 0.2))',
+                                    boxShadow: '0 0 10px rgba(96, 165, 250, 0.7)'
                                   }}
                                 ></div>
                                 
-                                {/* Third pulse (more delayed) */}
+                                {/* Third pulse (more delayed) - increased size and opacity */}
                                 <div 
                                   className="bg-blue-300 rounded-full absolute"
                                   style={{
-                                    width: '6px',
-                                    animation: 'noodlePulse 1.8s infinite',
-                                    animationDelay: '1.2s',
-                                    background: 'linear-gradient(to bottom, rgba(147, 197, 253, 0.1), rgba(147, 197, 253, 0.9), rgba(147, 197, 253, 0.1))',
-                                    boxShadow: '0 0 8px rgba(147, 197, 253, 0.4)'
+                                    width: '8px',
+                                    height: '12px',
+                                    animation: 'noodlePulse 2s infinite',
+                                    animationDelay: '1.4s',
+                                    background: 'linear-gradient(to bottom, rgba(147, 197, 253, 0.2), rgba(147, 197, 253, 1), rgba(147, 197, 253, 0.2))',
+                                    boxShadow: '0 0 10px rgba(147, 197, 253, 0.6)'
                                   }}
                                 ></div>
                               </div>
                               
-                              {/* Pulsing glow effect */}
-                              <div className="absolute h-full w-1 bg-transparent"
+                              {/* Pulsing glow effect - enhanced glow */}
+                              <div className="absolute h-full w-2 bg-transparent"
                                 style={{
-                                  boxShadow: '0 0 10px 4px rgba(59, 130, 246, 0.4)',
-                                  animation: 'glow 2s infinite ease-in-out'
+                                  boxShadow: '0 0 20px 8px rgba(59, 130, 246, 0.6)',
+                                  animation: 'glow 1.5s infinite ease-in-out'
                                 }}
                               ></div>
                               
                               {/* Arrow indicator showing direction */}
                               <div className="absolute bottom-0 left-1/2 -translate-x-1/2 text-blue-500 animate-bounce">
-                                <ChevronDown className="h-4 w-4" />
+                                <ChevronDown className="h-5 w-5" />
                               </div>
                             </div>
                           ) : (
-                            <div className={`absolute top-16 left-1/2 -translate-x-1/2 
-                              ${step.status === 'completed' ? 'text-gray-400' : 'text-gray-200'} 
-                              ${step.status === 'completed' ? 'animate-bounce' : ''}`}
-                            >
-                              <ChevronDown className="h-5 w-5" />
+                            <div className="absolute top-14 left-1/2 h-20 flex flex-col items-center justify-center pointer-events-none overflow-hidden z-20">
+                              {/* Base connector line for non-current steps - making it more visible */}
+                              <div className={`absolute h-full w-1.5 rounded-full ${step.status === 'completed' ? 'bg-gray-400' : 'bg-gray-300'}`}></div>
+                              
+                              {/* Arrow indicator */}
+                              <div className={`absolute bottom-0 left-1/2 -translate-x-1/2 
+                                ${step.status === 'completed' ? 'text-gray-500' : 'text-gray-300'} 
+                                ${step.status === 'completed' ? 'animate-bounce' : ''}`}
+                              >
+                                <ChevronDown className="h-5 w-5" />
+                              </div>
                             </div>
                           )}
                         </>
