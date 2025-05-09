@@ -16,9 +16,9 @@ import { ErrorBoundary } from "react-error-boundary";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { supabase } from "@/lib/supabase";
-import { DocuSealWrapper } from "./components/DocuSealWrapper";
+import { supabase } from "@/integrations/supabase/client";
 import { createSignatureRequest, getSignatureStatus } from '@/services/docuSealService';
+import { DocuSealWrapper } from './components/DocuSealWrapper';
 
 // Quote status options
 const statusFilters = [
@@ -797,7 +797,16 @@ const QuotesMain = () => {
                     </div>
                   </div>
                   <div className="p-5 max-h-[700px] overflow-y-auto bg-gray-50">
-                    <QuotePreview quoteItems={quoteItems} onPrevTab={() => {}} />
+                    <QuotePreview 
+                      quoteItems={quoteItems} 
+                      onPrevTab={() => {}} 
+                      customerEmail={customerEmail}
+                      showSignatureSection={true}
+                      onRequestSignature={handleRequestSignature}
+                      signingUrl={signingUrl}
+                      documentSigned={documentSigned}
+                      onDocumentSigned={handleDocumentSigned}
+                    />
                   </div>
                 </div>
               </div>
