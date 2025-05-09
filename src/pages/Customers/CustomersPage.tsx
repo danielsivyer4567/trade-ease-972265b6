@@ -18,7 +18,8 @@ import {
   Copy, 
   CheckCircle2, 
   Circle,
-  PenLine
+  PenLine,
+  ExternalLink
 } from 'lucide-react';
 import { BaseLayout } from '@/components/ui/BaseLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -306,16 +307,43 @@ function CustomersPage() {
                             className="font-medium cursor-pointer hover:text-blue-600 hover:underline"
                             onClick={(e) => {
                               e.stopPropagation();
-                              navigate(`/customers/${customer.id}`);
+                              try {
+                                navigate(`/customers/${customer.id}`);
+                              } catch (error) {
+                                console.error('Navigation error:', error);
+                                // Fallback to direct URL change
+                                window.location.href = `/customers/${customer.id}`;
+                              }
                             }}
                           >
                             {customer.name}
                           </h3>
                           <p className="text-xs text-muted-foreground">{customer.jobTitle}</p>
                         </div>
-                        <Badge variant={customer.status === 'active' ? 'default' : 'secondary'}>
-                          {customer.status}
-                        </Badge>
+                        {customer.status === 'active' ? (
+                          <Button 
+                            variant="default"
+                            size="sm"
+                            className="flex items-center gap-1"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              try {
+                                navigate(`/customers/${customer.id}`);
+                              } catch (error) {
+                                console.error('Navigation error:', error);
+                                // Fallback to direct URL change
+                                window.location.href = `/customers/${customer.id}`;
+                              }
+                            }}
+                          >
+                            <ExternalLink className="h-4 w-4 mr-1" />
+                            <span>Open Portfolio</span>
+                          </Button>
+                        ) : (
+                          <Badge variant="secondary">
+                            {customer.status}
+                          </Badge>
+                        )}
                       </div>
                       <Progress value={customer.progress} className="h-2 mb-2" />
                       <div className="text-xs text-muted-foreground flex justify-between">
@@ -344,12 +372,7 @@ function CustomersPage() {
                 <Card>
                   <CardHeader className="bg-muted pb-2">
                     <div className="flex justify-between items-center">
-                      <CardTitle 
-                        className="cursor-pointer hover:text-blue-600 hover:underline"
-                        onClick={() => navigate(`/customers/${selectedCustomer.id}`)}
-                      >
-                        {selectedCustomer.name}
-                      </CardTitle>
+                      <CardTitle>{selectedCustomer.name}</CardTitle>
                       <div className="flex items-center gap-2">
                         <Button 
                           variant="outline" 
@@ -363,9 +386,29 @@ function CustomersPage() {
                           <PenLine className="h-4 w-4" />
                           <span>Edit</span>
                         </Button>
-                        <Badge variant={selectedCustomer.status === 'active' ? 'default' : 'secondary'}>
-                          {selectedCustomer.status}
-                        </Badge>
+                        {selectedCustomer.status === 'active' ? (
+                          <Button 
+                            variant="default"
+                            size="sm"
+                            className="flex items-center gap-1"
+                            onClick={() => {
+                              try {
+                                navigate(`/customers/${selectedCustomer.id}`);
+                              } catch (error) {
+                                console.error('Navigation error:', error);
+                                // Fallback to direct URL change
+                                window.location.href = `/customers/${selectedCustomer.id}`;
+                              }
+                            }}
+                          >
+                            <ExternalLink className="h-4 w-4 mr-1" />
+                            <span>Open Portfolio</span>
+                          </Button>
+                        ) : (
+                          <Badge variant="secondary">
+                            {selectedCustomer.status}
+                          </Badge>
+                        )}
                       </div>
                     </div>
                   </CardHeader>

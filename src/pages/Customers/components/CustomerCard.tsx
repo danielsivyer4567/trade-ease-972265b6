@@ -48,7 +48,13 @@ export const CustomerCard = ({ customer, onCustomerClick, onEditClick }: Custome
   
   const handleNameClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    navigate(`/customers/${customer.id}`);
+    try {
+      navigate(`/customers/${customer.id}`);
+    } catch (error) {
+      console.error('Navigation error:', error);
+      // Fallback to direct URL change if navigation fails
+      window.location.href = `/customers/${customer.id}`;
+    }
   };
 
   return (
@@ -68,17 +74,25 @@ export const CustomerCard = ({ customer, onCustomerClick, onEditClick }: Custome
               {customer.name}
             </span>
             <Button 
-              variant="outline" 
+              variant="default" 
               size="sm"
-              onClick={handleOpenClick}
+              onClick={(e) => {
+                e.stopPropagation();
+                try {
+                  navigate(`/customers/${customer.id}`);
+                } catch (error) {
+                  console.error('Navigation error:', error);
+                  // Fallback to direct URL change if navigation fails
+                  window.location.href = `/customers/${customer.id}`;
+                }
+              }}
               className="px-2 py-1 h-7 text-xs ml-2"
             >
               <ExternalLink className="h-3 w-3 mr-1" />
-              Open
+              Open Portfolio
             </Button>
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-sm px-2 py-1 rounded-full bg-blue-100 text-blue-800">{customer.status === 'active' ? 'Active' : 'Inactive'}</span>
             <Button 
               variant="ghost" 
               size="sm"
