@@ -228,9 +228,13 @@ const CustomerPortfolio = () => {
                     <User className="h-12 w-12 text-primary" />
                   </div>
                   <h2 className="text-xl font-bold">{customer.name}</h2>
-                  <Badge variant={customer.status === 'active' ? 'default' : 'secondary'} className="mt-2">
-                    {customer.status}
-                  </Badge>
+                  <div className="mt-2">
+                    <span className={`inline-block px-3 py-1 text-sm rounded-full ${
+                      customer.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                    }`}>
+                      {customer.status}
+                    </span>
+                  </div>
                   
                   {customer.business_name && (
                     <p className="text-sm text-muted-foreground mt-2">{customer.business_name}</p>
