@@ -1,18 +1,39 @@
-import React from "react";
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Save, SendHorizontal, FileImage, Download, Mail } from "lucide-react";
+import { Save, SendHorizontal, FileImage, Download, Mail, Send, FileSignature } from "lucide-react";
 import { QuoteItem } from "./QuoteItemsForm";
+import { DocuSealWrapper } from "./DocuSealWrapper";
 
 interface QuotePreviewProps {
   quoteItems: QuoteItem[];
   onPrevTab: () => void;
+  customerEmail?: string;
+  showSignatureSection?: boolean;
+  onRequestSignature?: () => void;
+  signingUrl?: string;
+  documentSigned?: boolean;
+  onDocumentSigned?: () => void;
 }
 
 export const QuotePreview = ({
   quoteItems,
-  onPrevTab
+  onPrevTab,
+  customerEmail = "",
+  showSignatureSection = false,
+  onRequestSignature,
+  signingUrl = "",
+  documentSigned = false,
+  onDocumentSigned = () => {}
 }: QuotePreviewProps) => {
   const totalAmount = quoteItems.reduce((sum, item) => sum + item.total, 0);
+  const [showDocuSeal, setShowDocuSeal] = useState(false);
+
+  const handleRequestSignature = () => {
+    if (onRequestSignature) {
+      onRequestSignature();
+      setShowDocuSeal(true);
+    }
+  };
 
   return (
     <div className="space-y-4">
@@ -57,7 +78,7 @@ export const QuotePreview = ({
               <p className="text-xs text-slate-600">456 Residential Ave</p>
               <p className="text-xs text-slate-600">City, State ZIP</p>
               <p className="text-xs text-slate-600">Phone: (555) 123-4567</p>
-              <p className="text-xs text-slate-600">Email: john@example.com</p>
+              <p className="text-xs text-slate-600">Email: {customerEmail || "john@example.com"}</p>
             </div>
           </div>
         </div>
@@ -117,6 +138,44 @@ export const QuotePreview = ({
           </div>
           <p className="text-xs mt-2 text-slate-600">Payment due within 14 days of quote acceptance. This quote is valid for 30 days from the date of issue.</p>
         </div>
+        
+        {/* Electronic Signature Section */}
+        {showSignatureSection && (
+          <div className="p-4 border-t border-slate-200 bg-blue-50">
+            <div className="bg-blue-600 text-white text-xs p-2 rounded-md flex items-center mb-3">
+              <FileSignature className="h-3.5 w-3.5 mr-1.5" />
+              <span className="font-semibold">Electronic Signature</span>
+            </div>
+            
+            {documentSigned ? (
+              <div className="bg-green-50 border border-green-200 rounded-md p-3 text-center">
+                <p className="text-green-700 text-sm font-medium">Document has been signed electronically</p>
+                <p className="text-xs text-green-600 mt-1">A copy has been sent to your email</p>
+              </div>
+            ) : showDocuSeal && signingUrl ? (
+              <div className="border border-blue-200 rounded-md overflow-hidden">
+                <DocuSealWrapper url={signingUrl} onDocumentSigned={onDocumentSigned} />
+              </div>
+            ) : (
+              <div className="flex flex-col space-y-3">
+                <p className="text-xs text-blue-700">
+                  By clicking "Sign Electronically" below, you agree to accept this quote electronically. A link will be sent to {customerEmail || "your email"} to complete the signing process.
+                </p>
+                <div className="flex justify-center">
+                  <Button 
+                    onClick={handleRequestSignature}
+                    disabled={!customerEmail}
+                    className="bg-blue-600 hover:bg-blue-700 text-white text-xs flex items-center"
+                    size="sm"
+                  >
+                    <Send className="h-3.5 w-3.5 mr-1.5" />
+                    Sign Electronically
+                  </Button>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
       </div>
       
       {/* Actions */}

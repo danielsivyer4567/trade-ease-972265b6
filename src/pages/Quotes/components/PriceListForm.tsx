@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/lib/supabase";
+import { supabase } from "@/integrations/supabase/client";
 import { PriceListSearch } from "./PriceList/PriceListSearch";
 import { NewPriceItemForm } from "./PriceList/NewPriceItemForm";
 import { PriceListTable } from "./PriceList/PriceListTable";

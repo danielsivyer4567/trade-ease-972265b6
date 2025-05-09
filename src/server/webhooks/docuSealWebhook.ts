@@ -1,8 +1,8 @@
-import express from 'express';
-import bodyParser from 'body-parser';
+import { Router } from 'express';
+import { json } from 'body-parser';
 import { processWebhookEvent } from '../../services/docuSealService';
 
-const router = express.Router();
+const router = Router();
 
 // Parse JSON bodies
 router.use(bodyParser.json());

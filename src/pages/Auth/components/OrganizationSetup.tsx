@@ -5,7 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/lib/supabase";
+import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Copy, CheckCircle, Building, Users, Scan, QrCode } from "lucide-react";
 import { useUserConfig } from "@/components/messaging/hooks/useUserConfig";
