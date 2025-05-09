@@ -85,6 +85,21 @@ const CustomerPortfolio = () => {
         transform: translateY(100%);
       }
     }
+    
+    @keyframes flowPulse {
+      0% {
+        opacity: 0.4;
+        stroke-dashoffset: 20;
+      }
+      50% {
+        opacity: 1;
+        stroke-dashoffset: 10;
+      }
+      100% {
+        opacity: 0.4;
+        stroke-dashoffset: 0;
+      }
+    }
   `;
   
   // Mock data (would be fetched from API in production)
@@ -265,6 +280,61 @@ const CustomerPortfolio = () => {
   };
   
   const workflowSteps = getWorkflowSteps();
+
+  // Function to render SVG connectors between nodes
+  const renderConnectors = () => {
+    if (!workflowSteps.length) return null;
+    
+    return (
+      <svg className="absolute top-0 left-0 w-full h-full" style={{ pointerEvents: 'none', zIndex: 5 }}>
+        {workflowSteps.map((step, index) => {
+          if (index === workflowSteps.length - 1) return null;
+          
+          const nextStep = workflowSteps[index + 1];
+          const isActiveConnection = step.status === 'current';
+          
+          return (
+            <g key={`connector-${step.id}-${nextStep.id}`}>
+              <path
+                d={`M 160 ${index * 110 + 60} L 160 ${(index + 1) * 110 + 20}`}
+                stroke={isActiveConnection ? "#3b82f6" : "#cbd5e1"}
+                strokeWidth="2"
+                fill="none"
+                strokeDasharray={isActiveConnection ? "5,3" : "none"}
+                style={{
+                  animation: isActiveConnection ? "flowPulse 2s infinite" : "none"
+                }}
+              />
+              {isActiveConnection && (
+                <>
+                  {/* Glow effect for active connections */}
+                  <path
+                    d={`M 160 ${index * 110 + 60} L 160 ${(index + 1) * 110 + 20}`}
+                    stroke="#3b82f6"
+                    strokeWidth="4"
+                    strokeOpacity="0.2"
+                    fill="none"
+                    style={{
+                      filter: 'blur(4px)'
+                    }}
+                  />
+                  {/* Animated electric effect */}
+                  <path
+                    d={`M 160 ${index * 110 + 60} L 160 ${(index + 1) * 110 + 20}`}
+                    stroke="#60a5fa"
+                    strokeWidth="2"
+                    fill="none"
+                    strokeDasharray="4,3"
+                    className="animate-pulse"
+                  />
+                </>
+              )}
+            </g>
+          );
+        })}
+      </svg>
+    );
+  };
 
   if (loading) {
     return (
@@ -694,10 +764,10 @@ const CustomerPortfolio = () => {
           <div className="lg:col-span-3">
             <Card className="h-full overflow-hidden relative">
               {/* Background pattern with dots similar to n8n */}
-              <div className="absolute inset-0 bg-gradient-to-br from-pink-50 to-indigo-50 z-0">
+              <div className="absolute inset-0 bg-gradient-to-br from-purple-50 to-blue-50 z-0">
                 <div className="absolute inset-0" 
                   style={{
-                    backgroundImage: 'radial-gradient(circle, rgba(0,0,0,0.05) 1px, transparent 1px)',
+                    backgroundImage: 'radial-gradient(circle, rgba(0,0,0,0.03) 1px, transparent 1px)',
                     backgroundSize: '20px 20px'
                   }}
                 ></div>
@@ -710,80 +780,66 @@ const CustomerPortfolio = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-4 relative z-10">
-                {/* Dashed connector line for background */}
-                <div className="absolute top-0 bottom-0 left-1/2 w-0.5 border-l-2 border-dashed border-gray-200 -translate-x-1/2 z-0"></div>
+                {/* Central vertical line connecting all nodes */}
+                <div className="absolute left-1/2 top-10 bottom-10 w-0.5 bg-gray-200 -translate-x-1/2 z-0"></div>
                 
-                <div className="relative z-10">
+                <div className="relative z-10 py-4 flex flex-col items-center">
                   {workflowSteps.map((step, index) => (
-                    <div key={step.id} className="mb-8 relative">
-                      {/* Electric connector between current node and next node */}
+                    <div key={step.id} className="mb-16 relative w-full flex flex-col items-center" style={{ zIndex: workflowSteps.length - index }}>
+                      {/* Node with icon */}
+                      <div 
+                        className={`rounded-md w-64 h-16 flex items-center px-4
+                          ${step.status === 'completed' ? 'bg-green-100 text-green-700 border border-green-200 shadow-md' : 
+                            step.status === 'current' ? 'bg-pink-100 text-pink-700 border border-pink-200 shadow-md' : 
+                            'bg-gray-100/70 text-gray-500 border border-gray-200/70'} 
+                          transition-all duration-300 hover:scale-105 cursor-pointer
+                          ${step.status === 'upcoming' ? 'opacity-70' : 'opacity-100'}`}
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className={`p-2 rounded-full 
+                            ${step.status === 'completed' ? 'bg-green-50' : 
+                              step.status === 'current' ? 'bg-pink-50' : 
+                              'bg-gray-50'}`}
+                          >
+                            {step.icon}
+                          </div>
+                          <span className="text-sm font-medium">{step.title}</span>
+                        </div>
+                      </div>
+                      
+                      {/* Node label and date */}
+                      <div className={`mt-2 text-center w-full ${step.status === 'upcoming' ? 'opacity-70' : 'opacity-100'}`}>
+                        <p className="text-sm text-gray-500 text-center">{step.shortInfo}</p>
+                        {step.date && (
+                          <div className="flex justify-center mt-1">
+                            <span className="px-2 py-0.5 text-blue-500 text-xs">
+                              {step.date}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                      
+                      {/* Connector to next node - only if not the last node */}
                       {index < workflowSteps.length - 1 && (
-                        <>
-                          {step.status === 'current' ? (
-                            <div className="absolute top-14 left-1/2 h-20 flex flex-col items-center justify-center pointer-events-none overflow-hidden">
-                              {/* Base connector line */}
-                              <div className="absolute h-full w-1 bg-blue-100 rounded-full"></div>
-                              
-                              {/* Flowing electrical current effect */}
-                              <div className="absolute h-full w-1 overflow-hidden">
-                                <div className="h-4 w-full bg-blue-500 relative" 
-                                  style={{
-                                    boxShadow: '0 0 8px 2px rgba(59, 130, 246, 0.5)',
-                                    background: 'linear-gradient(to bottom, rgba(59, 130, 246, 0.1), rgba(59, 130, 246, 0.8), rgba(59, 130, 246, 0.1))',
-                                    animation: 'moveDown 1.5s infinite',
-                                    animationTimingFunction: 'ease-in-out',
-                                    transform: 'translateY(-100%)'
-                                  }}
-                                ></div>
-                              </div>
-                              
-                              {/* Pulsing glow effect */}
-                              <div className="absolute h-full w-1 bg-transparent animate-pulse opacity-70"
+                        <div className="absolute top-16 left-1/2 h-16 w-0.5 -translate-x-1/2" style={{ zIndex: -1 }}>
+                          {/* Static connector line */}
+                          <div className="h-full w-full bg-gray-200"></div>
+                          
+                          {/* Animated pulse for current step to next step */}
+                          {step.status === 'current' && (
+                            <div className="absolute top-0 left-0 h-full w-full overflow-hidden">
+                              <div 
+                                className="h-4 w-full bg-blue-400 absolute animate-pulse"
                                 style={{
-                                  boxShadow: '0 0 10px 4px rgba(59, 130, 246, 0.4)'
+                                  animation: 'moveDown 1.5s infinite linear',
+                                  background: 'linear-gradient(to bottom, rgba(96, 165, 250, 0), rgba(96, 165, 250, 1), rgba(96, 165, 250, 0))',
+                                  boxShadow: '0 0 8px rgba(96, 165, 250, 0.6)'
                                 }}
                               ></div>
                             </div>
-                          ) : (
-                            <div className={`absolute top-16 left-1/2 -translate-x-1/2 
-                              ${step.status === 'completed' ? 'text-gray-400' : 'text-gray-200'} 
-                              ${step.status === 'completed' ? 'animate-bounce' : ''}`}
-                            >
-                              <ChevronDown className="h-5 w-5" />
-                            </div>
                           )}
-                        </>
+                        </div>
                       )}
-                      
-                      {/* Node - now rectangular instead of circular */}
-                      <div className="flex flex-col items-center">
-                        {/* Node rectangle with icon */}
-                        <div 
-                          className={`rounded-md w-32 h-14 flex items-center justify-center
-                            ${step.status === 'completed' ? 'bg-green-100 text-green-600 border border-green-200 shadow-md' : 
-                              step.status === 'current' ? 'bg-pink-100 text-pink-600 border border-pink-200 animate-pulse shadow-md' : 
-                              'bg-gray-100/50 text-gray-400/70 border border-gray-200/50'} 
-                            transition-all duration-300 hover:scale-105 cursor-pointer
-                            ${step.status === 'upcoming' ? 'opacity-60' : 'opacity-100'}`}
-                        >
-                          <div className="flex items-center gap-2">
-                            {step.icon}
-                            <span className="text-xs font-medium">{step.title}</span>
-                          </div>
-                        </div>
-                        
-                        {/* Node label */}
-                        <div className={`mt-2 text-center w-full ${step.status === 'upcoming' ? 'opacity-60' : 'opacity-100'}`}>
-                          <p className="text-xs text-muted-foreground text-center">{step.shortInfo}</p>
-                          {step.date && (
-                            <div className="flex justify-center mt-1">
-                              <span className="px-2 py-0.5 bg-white/80 rounded-full text-xs text-primary">
-                                {step.date}
-                              </span>
-                            </div>
-                          )}
-                        </div>
-                      </div>
                     </div>
                   ))}
                 </div>
