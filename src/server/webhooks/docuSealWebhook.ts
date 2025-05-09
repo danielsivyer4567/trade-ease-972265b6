@@ -1,20 +1,22 @@
-import { Router } from 'express';
-import { json } from 'body-parser';
-import { processWebhookEvent } from '../../services/docuSealService';
+import { processWebhookEvent } from '@/services/docuSealService';
 
-const router = Router();
-
-// Parse JSON bodies
-router.use(bodyParser.json());
-
-// Webhook endpoint
-router.post('/webhooks/docuseal', async (req, res) => {
+/**
+ * Handler for DocuSeal webhook requests.
+ * This can be used with a framework-specific router implementation.
+ * 
+ * @param req - The incoming request object
+ * @param res - The response object
+ */
+export async function handleDocuSealWebhook(req: any, res: any) {
   try {
-    // Verify webhook signature if DocuSeal provides one
-    const signature = req.headers['x-docuseal-signature'];
+    // Verify webhook signature from DocuSeal
+    const signature = req.headers?.['x-docuseal-signature'];
     
     if (!signature || typeof signature !== 'string') {
-      return res.status(401).send('Invalid signature');
+      return {
+        status: 401,
+        body: 'Invalid signature'
+      };
     }
     
     const event = req.body;
@@ -22,12 +24,19 @@ router.post('/webhooks/docuseal', async (req, res) => {
     // Process the webhook event
     await processWebhookEvent(event, signature);
     
-    // Acknowledge receipt of the webhook
-    res.status(200).send('Webhook received');
+    // Return successful response
+    return {
+      status: 200,
+      body: 'Webhook received'
+    };
   } catch (error) {
-    console.error('Error processing webhook:', error);
-    res.status(500).send('Error processing webhook');
+    console.error('Error processing DocuSeal webhook:', error);
+    return {
+      status: 500,
+      body: 'Error processing webhook'
+    };
   }
-});
+}
 
-export default router; 
+// For use with React Router or similar - export a handler that can be used as middleware
+export default handleDocuSealWebhook; 

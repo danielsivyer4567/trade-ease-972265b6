@@ -9,6 +9,7 @@ import { paymentRoutes } from './payment-routes';
 import { financialRoutes } from './financial-routes';
 import { activityRoutes } from './activity-routes';
 import { AppLayoutWithTabs } from '@/components/AppLayoutWithTabs';
+import { apiRoutes } from './api-routes';
 // Lazy load workflow pages
 const WorkflowPage = lazy(() => import('@/pages/Workflow/index.new').then(module => ({ default: module.default })));
 const WorkflowTemplates = lazy(() => import('@/pages/Workflow/templates').then(module => ({ default: module.default })));
@@ -115,6 +116,8 @@ const routeObjects: RouteObject[] = [
     path: "/dev",
     element: <Suspense fallback={<LoadingFallback />}><DevelopmentEntry /></Suspense>
   },
+  // API Routes
+  apiRoutes,
   // Auth Route as RouteObject
   authRoutes,
   {
