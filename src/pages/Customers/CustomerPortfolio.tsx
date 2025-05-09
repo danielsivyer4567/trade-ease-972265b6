@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, User, Phone, Mail, Home, Calendar, FileText, Clock, Briefcase, FileSignature, History, PenLine, Trash2, MessageSquare, Download, CheckCircle, CircleDashed, MoveRight, AlertCircle, ChevronDown, FileCheck, Package, CheckSquare } from 'lucide-react';
+import { ArrowLeft, User, Phone, Mail, Home, Calendar, FileText, Clock, Briefcase, FileSignature, History, PenLine, Trash2, MessageSquare, Download, CheckCircle, CircleDashed, MoveRight, AlertCircle, ChevronDown, FileCheck, Package, CheckSquare, Zap } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { Separator } from '@/components/ui/separator';
@@ -677,43 +677,72 @@ const CustomerPortfolio = () => {
           
           {/* Customer Journey Workflow - Now with node style */}
           <div className="lg:col-span-3">
-            <Card className="h-full overflow-hidden bg-gradient-to-br from-pink-50 to-indigo-50">
-              <CardHeader className="pb-4 flex justify-center border-b border-gray-500/30">
+            <Card className="h-full overflow-hidden relative">
+              {/* Background pattern with dots similar to n8n */}
+              <div className="absolute inset-0 bg-gradient-to-br from-pink-50 to-indigo-50 z-0">
+                <div className="absolute inset-0" 
+                  style={{
+                    backgroundImage: 'radial-gradient(circle, rgba(0,0,0,0.05) 1px, transparent 1px)',
+                    backgroundSize: '20px 20px'
+                  }}
+                ></div>
+              </div>
+              
+              <CardHeader className="pb-4 flex justify-center border-b border-gray-500/30 relative z-10">
                 <CardTitle className="text-lg flex items-center gap-2 justify-center">
                   <History className="h-5 w-5 text-primary" />
                   Customer Journey
                 </CardTitle>
               </CardHeader>
-              <CardContent className="p-4 relative">
+              <CardContent className="p-4 relative z-10">
                 {/* Dashed connector line for background */}
                 <div className="absolute top-0 bottom-0 left-1/2 w-0.5 border-l-2 border-dashed border-gray-200 -translate-x-1/2 z-0"></div>
                 
                 <div className="relative z-10">
                   {workflowSteps.map((step, index) => (
                     <div key={step.id} className="mb-8 relative">
-                      {/* Connector arrow between nodes */}
+                      {/* Electric connector between current node and next node */}
                       {index < workflowSteps.length - 1 && (
-                        <div className="absolute top-16 left-1/2 -translate-x-1/2 text-gray-400 animate-bounce">
-                          <ChevronDown className="h-5 w-5" />
-                        </div>
+                        <>
+                          {step.status === 'current' ? (
+                            <div 
+                              className="absolute top-16 left-1/2 -translate-x-1/2 text-blue-500 z-10 animate-pulse"
+                              style={{
+                                transform: 'translateX(-50%)'
+                              }}
+                            >
+                              <Zap className="h-5 w-5 text-blue-500" />
+                            </div>
+                          ) : (
+                            <div className={`absolute top-16 left-1/2 -translate-x-1/2 
+                              ${step.status === 'completed' ? 'text-gray-400' : 'text-gray-200'} 
+                              ${step.status === 'completed' ? 'animate-bounce' : ''}`}
+                            >
+                              <ChevronDown className="h-5 w-5" />
+                            </div>
+                          )}
+                        </>
                       )}
                       
-                      {/* Node */}
+                      {/* Node - now rectangular instead of circular */}
                       <div className="flex flex-col items-center">
-                        {/* Node circle with icon */}
+                        {/* Node rectangle with icon */}
                         <div 
-                          className={`rounded-full w-16 h-16 flex items-center justify-center
-                            ${step.status === 'completed' ? 'bg-green-100 text-green-600 shadow-md shadow-green-200' : 
-                              step.status === 'current' ? 'bg-pink-100 text-pink-600 animate-pulse shadow-md shadow-pink-200' : 
-                              'bg-gray-100 text-gray-400'} 
-                            transition-all duration-300 hover:scale-110 cursor-pointer`}
+                          className={`rounded-md w-32 h-14 flex items-center justify-center
+                            ${step.status === 'completed' ? 'bg-green-100 text-green-600 border border-green-200 shadow-md' : 
+                              step.status === 'current' ? 'bg-pink-100 text-pink-600 border border-pink-200 animate-pulse shadow-md' : 
+                              'bg-gray-100/50 text-gray-400/70 border border-gray-200/50'} 
+                            transition-all duration-300 hover:scale-105 cursor-pointer
+                            ${step.status === 'upcoming' ? 'opacity-60' : 'opacity-100'}`}
                         >
-                          {step.icon}
+                          <div className="flex items-center gap-2">
+                            {step.icon}
+                            <span className="text-xs font-medium">{step.title}</span>
+                          </div>
                         </div>
                         
                         {/* Node label */}
-                        <div className="mt-2 text-center w-full">
-                          <h3 className="font-medium text-sm text-center">{step.title}</h3>
+                        <div className={`mt-2 text-center w-full ${step.status === 'upcoming' ? 'opacity-60' : 'opacity-100'}`}>
                           <p className="text-xs text-muted-foreground text-center">{step.shortInfo}</p>
                           {step.date && (
                             <div className="flex justify-center mt-1">
