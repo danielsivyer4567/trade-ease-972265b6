@@ -63,22 +63,19 @@ export function CustomerContactFields({
                 />
               </FormControl>
               
-              <Button 
-                type="button"
-                size="sm"
-                variant="outline"
-                className="border-2 border-gray-700 p-2 h-9 w-12 flex items-center justify-center" 
-                onClick={() => handleSendMessage(field.value)}
-                aria-label="Auto text message"
-              >
-                <MessageSquare className="h-5 w-5" />
-              </Button>
-            </div>
-            <div className="flex items-start space-x-4 mt-1">
-              <div className="w-[6.5rem]">
-                {/* spacer */}
+              <div>
+                <div className="text-xs text-gray-600 mb-1">auto text</div>
+                <Button 
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  className="border-2 border-gray-700 h-9 w-12 flex items-center justify-center p-0" 
+                  onClick={() => handleSendMessage(field.value)}
+                  aria-label="Auto text message"
+                >
+                  <MessageSquare className="h-5 w-5" />
+                </Button>
               </div>
-              <span className="text-xs text-gray-600">auto text</span>
             </div>
             <FormMessage />
           </FormItem>
