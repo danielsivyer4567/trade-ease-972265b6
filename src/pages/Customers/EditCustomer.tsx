@@ -5,7 +5,7 @@ import { Card } from "@/components/ui/card";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import { Form } from "@/components/ui/form";
-import { useForm, useFieldArray } from "react-hook-form";
+import { useForm, useFieldArray, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { CustomerFormValues, useCustomers } from './hooks/useCustomers';
@@ -444,10 +444,17 @@ const customerData: CustomerFormValues = {
                         </label>
                         {watch("national_certifications")?.includes(cert) && (
                           <div className="mt-1 border border-gray-700 rounded p-2 max-w-md w-full">
-                            <input
-                              className="input"
-                              placeholder={`Enter ${cert} number/details`}
-                              {...register(`certification_details.${cert}` as const)}
+                            <Controller
+                              name={`certification_details.${cert}`}
+                              control={control}
+                              defaultValue=""
+                              render={({ field }) => (
+                                <input
+                                  className="input"
+                                  placeholder={`Enter ${cert} number/details`}
+                                  {...field}
+                                />
+                              )}
                             />
                           </div>
                         )}
