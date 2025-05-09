@@ -52,10 +52,9 @@ export function CustomerContactFields({
         name="phone" 
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Phone</FormLabel>
             <div>
               <div className="flex mb-1">
-                <div className="w-[6.5rem]"></div>
+                <div className="w-[6.5rem] text-xs">Phone</div>
                 <div className="text-xs text-gray-600 ml-4">auto text</div>
               </div>
               <div className="flex items-center space-x-4">
