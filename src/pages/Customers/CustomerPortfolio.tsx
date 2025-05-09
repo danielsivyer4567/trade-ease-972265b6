@@ -12,6 +12,8 @@ import { Separator } from '@/components/ui/separator';
 import { CustomerData } from './components/CustomerCard';
 import ErrorBoundary from '@/components/error/ErrorBoundary';
 import Noodle from './components/Noodle';
+import { Timeline } from './components/Timeline';
+import './components/pulseLine.css';
 
 interface CustomerWithDetails extends CustomerData {
   business_name?: string;
@@ -76,6 +78,7 @@ const CustomerPortfolio = () => {
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("overview");
   const nodeRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const containerRef = useRef<HTMLDivElement | null>(null);
   const [nodePositions, setNodePositions] = useState<{ x: number; y: number }[]>([]);
   
   // Early check for missing customer ID
@@ -321,14 +324,14 @@ const CustomerPortfolio = () => {
   const workflowSteps = getWorkflowSteps();
 
   useEffect(() => {
-    // After render, measure node positions
+    if (!containerRef.current) return;
+    const containerRect = containerRef.current.getBoundingClientRect();
     const positions = nodeRefs.current.map(ref => {
       if (!ref) return { x: 0, y: 0 };
       const rect = ref.getBoundingClientRect();
-      // Center bottom of the node
       return {
-        x: rect.left + rect.width / 2,
-        y: rect.top + rect.height,
+        x: rect.left + rect.width / 2 - containerRect.left,
+        y: rect.top + rect.height - containerRect.top,
       };
     });
     setNodePositions(positions);
@@ -783,81 +786,7 @@ const CustomerPortfolio = () => {
           
           {/* Customer Journey Workflow - Now with node style */}
           <div className="lg:col-span-3">
-            <Card className="h-full overflow-hidden relative">
-              {/* Background image with dots overlay */}
-              <div className="absolute inset-0 z-0">
-                <img 
-                  src="/backgrounds/construction.png" 
-                  alt="Background" 
-                  className="w-full h-full object-cover"
-                  style={{ opacity: 0.15 }}
-                />
-                {/* Dots overlay */}
-                <div className="absolute inset-0" 
-                  style={{
-                    backgroundImage: 'radial-gradient(circle, rgba(0,0,0,0.05) 1px, transparent 1px)',
-                    backgroundSize: '20px 20px'
-                  }}
-                ></div>
-              </div>
-              
-              <CardHeader className="pb-4 flex justify-center border-b border-gray-500/30 relative z-10">
-                <CardTitle className="text-lg flex items-center gap-2 justify-center">
-                  <History className="h-5 w-5 text-primary" />
-                  Customer Journey
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-4 relative z-10">
-                <div className="relative z-10">
-                  {workflowSteps.map((step, index) => (
-                    <React.Fragment key={step.id}>
-                      {/* Node - now rectangular instead of circular */}
-                      <div
-                        ref={el => (nodeRefs.current[index] = el)}
-                        className="flex flex-col items-center mb-24 relative"
-                      >
-                        {/* Node rectangle with icon */}
-                        <div
-                          className={`rounded-md w-32 h-14 flex items-center justify-center
-                            ${step.status === 'completed' ? 'bg-green-100 text-green-600 border border-green-200 shadow-md' :
-                              step.status === 'current' ? 'bg-pink-100 text-pink-600 border border-pink-200 shadow-md' :
-                              'bg-gray-100/50 text-gray-400/70 border border-gray-200/50'}
-                            transition-all duration-300 hover:scale-105 cursor-pointer
-                            ${step.status === 'upcoming' ? 'opacity-60' : 'opacity-100'}`}
-                          style={step.status === 'current' ? {
-                            animation: 'slowFlash 3s infinite ease-in-out',
-                          } : {}}
-                        >
-                          <div className="flex items-center gap-2">
-                            {step.icon}
-                            <span className="text-xs font-medium">{step.title}</span>
-                          </div>
-                        </div>
-                        {/* Node label */}
-                        <div className={`mt-2 text-center w-full ${step.status === 'upcoming' ? 'opacity-60' : 'opacity-100'}`}>
-                          <p className="text-xs text-muted-foreground text-center">{step.shortInfo}</p>
-                          {step.date && (
-                            <div className="flex justify-center mt-1">
-                              <span className="px-2 py-0.5 bg-white/80 rounded-full text-xs text-primary">
-                                {step.date}
-                              </span>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                      {/* Render noodle between this node and the next node */}
-                      {index < workflowSteps.length - 1 && nodePositions[index] && nodePositions[index + 1] && (
-                        <Noodle
-                          from={{ x: 100, y: 0 }} // Placeholder, will fix below
-                          to={{ x: 100, y: 120 }} // Placeholder, will fix below
-                          isActive={step.status === 'current'}
-                        />
-                      )}
-                    </React.Fragment>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
+            <Timeline />
           </div>
         </div>
       </div>
