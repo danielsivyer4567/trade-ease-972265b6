@@ -134,7 +134,7 @@ export default function NewCustomer() {
 
   const certifications = [
     "Australian Builder's License",
-    "White Card",
+    "National Construction Induction Card (White Card)",
     "Plumbing Industry Commission License",
     "Electrical Contractor's License"
   ];

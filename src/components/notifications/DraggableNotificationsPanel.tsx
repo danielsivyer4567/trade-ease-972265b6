@@ -345,12 +345,16 @@ export const DraggableNotificationsPanel = ({
 
   // Toggles the overall Tag Drop mode on/off
   const toggleTagDropMode = () => {
+    console.log('[TagDropMode] Toggling tag drop mode. Current state:', tagDropModeActive);
     setTagDropModeActive(prev => {
       const nextState = !prev;
+      console.log('[TagDropMode] New state will be:', nextState);
       if (!nextState) {
+        console.log('[TagDropMode] Deactivating - closing popup and resetting cursor');
         closeTagPopup();
         document.body.style.cursor = '';
       } else {
+        console.log('[TagDropMode] Activating - setting cursor to crosshair');
         document.body.style.cursor = 'crosshair';
       }
       return nextState;
@@ -366,11 +370,14 @@ export const DraggableNotificationsPanel = ({
       setIsDrawingActive(false);
       setStaffSelectionError(null);
       setTagPopupCoords(null);
+      setDrawingPreviewUrl(null); // NEW: reset drawing preview
   };
+
+  // NEW: Store the preview URL of the drawing
+  const [drawingPreviewUrl, setDrawingPreviewUrl] = useState<string | null>(null);
 
   // Closes the tag pop-up window and resets state
   const closeTagPopup = useCallback(() => {
-    console.log('[TagDrop] closeTagPopup called');
     setIsTagPopupOpen(false);
     resetTagPopupState();
     document.body.style.cursor = tagDropModeActive ? 'crosshair' : '';
@@ -378,11 +385,12 @@ export const DraggableNotificationsPanel = ({
 
   // Handle click on page to place a new tag (for CREATION)
   const handlePlaceNewTag = useCallback((event: MouseEvent) => {
-    event.preventDefault();
-    event.stopPropagation();
-
+    console.log('[TagDrop] Handling click event. Mode active:', tagDropModeActive);
+    
+    // Don't prevent default or stop propagation immediately
+    // Only do this if we're actually going to handle the click
     if (!tagDropModeActive) {
-      if (isDevelopment) console.log('[handlePlaceNewTag] Not in tag drop mode, ignoring click');
+      console.log('[TagDrop] Mode not active, ignoring click');
       return;
     }
 
@@ -391,21 +399,30 @@ export const DraggableNotificationsPanel = ({
     const isPanel = target.closest('.notifications-panel');
 
     if (isNotification || isPanel) {
-      if (isDevelopment) console.log('[handlePlaceNewTag] Click on notification or panel, ignoring');
+      console.log('[TagDrop] Click was on notification or panel, ignoring');
       return;
     }
 
-    // Always open popup in the center of the screen
+    // Now we know we're handling this click
+    event.preventDefault();
+    event.stopPropagation();
+
+    console.log('[TagDrop] Placing new tag at:', event.clientX, event.clientY);
+
+    // Place popup at click location (with bounds check)
     const popupWidth = 380;
     const popupHeight = 400;
-    const x = window.innerWidth / 2 - popupWidth / 2;
-    const y = window.innerHeight / 2 - popupHeight / 2;
+    let x = event.clientX;
+    let y = event.clientY;
+    if (x + popupWidth > window.innerWidth) x = window.innerWidth - popupWidth - 10;
+    if (y + popupHeight > window.innerHeight) y = window.innerHeight - popupHeight - 10;
 
     setTimeout(() => {
+      console.log('[TagDrop] Setting popup coordinates:', x, y);
       setTagPopupCoords({ x, y });
       setIsTagPopupOpen(true);
     }, 0);
-  }, [tagDropModeActive, isDevelopment]);
+  }, [tagDropModeActive]);
 
 
   // --- Handlers for actions WITHIN the tag pop-up ---
@@ -441,31 +458,12 @@ export const DraggableNotificationsPanel = ({
   
   // Placeholder for drawing
   const handleToggleDrawing = () => {
-    console.log('[handleToggleDrawing] Called. Current isDrawingActive:', isDrawingActive);
     const nextIsDrawingActive = !isDrawingActive;
     setIsDrawingActive(nextIsDrawingActive);
-    console.log('[handleToggleDrawing] Set isDrawingActive to:', nextIsDrawingActive);
-    
-    // Update drawing state
-    setDrawingState(prev => ({
-      ...prev,
-      isActive: nextIsDrawingActive // Use the calculated next state
-    }));
-    
-    // If not already added and turning on drawing
-    if (nextIsDrawingActive && !uploadedFiles.some(f => f.type === 'drawing')) {
-      // Placeholder for real drawing component
-      const drawingPlaceholder: UploadedFile = {
-        file: new File([], "drawing.png"), // Dummy file
-        previewUrl: "https://via.placeholder.com/64/cccccc/888888?text=Drawing",
-        type: 'drawing'
-      };
-      setUploadedFiles(prev => [...prev, drawingPlaceholder]);
-      console.log('[handleToggleDrawing] Added drawing placeholder.');
-    } else if (!nextIsDrawingActive) {
-      // Turning off - in real app we would save the drawing data
+    setDrawingState(prev => ({ ...prev, isActive: nextIsDrawingActive }));
+    if (!nextIsDrawingActive) {
+      setDrawingPreviewUrl(null);
       setUploadedFiles(prev => prev.filter(f => f.type !== 'drawing'));
-      console.log('[handleToggleDrawing] Removed drawing placeholder/data.');
     }
   };
 
@@ -530,7 +528,7 @@ export const DraggableNotificationsPanel = ({
           .filter(f => f.supabaseUrl)
           .map(f => ({ type: f.type, url: f.supabaseUrl })),
         coords: tagPopupCoords!,
-        drawingData: tagCanvasRef.current?.toDataURL('image/png')
+        drawingData: drawingPreviewUrl || tagCanvasRef.current?.toDataURL('image/png') // Use preview if available
       };
 
       // 3. Save tag to database
@@ -549,7 +547,7 @@ export const DraggableNotificationsPanel = ({
           x: tagPopupCoords.x,
           y: tagPopupCoords.y,
           timestamp: Date.now(),
-          drawingData: savedTag.drawingData
+          drawingData: drawingPreviewUrl || savedTag.drawingData // Use preview if available
         };
         setTagMarkers(prev => [...prev, newMarker]);
       }
@@ -576,10 +574,10 @@ export const DraggableNotificationsPanel = ({
 
     if (tagDropModeActive) {
         console.log('[TagDropEffect] Adding click listener.'); // Log listener add
-        document.addEventListener('click', listener, true); 
+        document.addEventListener('click', listener); // Removed true parameter for bubbling
     } else {
         console.log('[TagDropEffect] Removing click listener.'); // Log listener remove
-        document.removeEventListener('click', listener, true);
+        document.removeEventListener('click', listener);
     }
     
     // Cleanup function
@@ -587,7 +585,7 @@ export const DraggableNotificationsPanel = ({
       console.log('[TagDropEffect] Cleanup: Removing click listener.'); // Log cleanup
       // Mark component as unmounted to prevent state updates
       isMounted.current = false;
-      document.removeEventListener('click', listener, true);
+      document.removeEventListener('click', listener);
       // Ensure cursor is reset if component unmounts while mode is active
       if (tagDropModeActive) {
           console.log('[TagDropEffect] Cleanup: Resetting cursor.'); // Log cursor reset
@@ -1276,6 +1274,65 @@ export const DraggableNotificationsPanel = ({
     return () => document.removeEventListener('mouseup', stopDrag);
   }, []);
 
+  // --- Full-page Drawing Overlay ---
+  // Add a callback to handle Done/Cancel
+  const handleFullPageDrawingDone = () => {
+    if (pageCanvasRef.current) {
+      const url = pageCanvasRef.current.toDataURL('image/png');
+      setDrawingPreviewUrl(url);
+      setUploadedFiles(prev => {
+        const others = prev.filter(f => f.type !== 'drawing');
+        return [
+          ...others,
+          {
+            file: dataURLtoFile(url, 'drawing.png')!,
+            previewUrl: url,
+            type: 'drawing',
+          },
+        ];
+      });
+    }
+    setDrawingState(prev => ({ ...prev, isDrawingOnPage: false, isActive: false }));
+    setIsDrawingActive(false);
+  };
+  const handleFullPageDrawingCancel = () => {
+    setDrawingState(prev => ({ ...prev, isDrawingOnPage: false, isActive: false }));
+    setIsDrawingActive(false);
+  };
+  // ... existing code ...
+  // In the full-page drawing overlay effect, wire up the buttons
+  useEffect(() => {
+    if (!drawingState.isDrawingOnPage || !canvasContainerRef.current) return;
+    const doneBtn = canvasContainerRef.current.querySelector('.drawing-done-btn');
+    const cancelBtn = canvasContainerRef.current.querySelector('.drawing-cancel-btn');
+    if (doneBtn) doneBtn.addEventListener('click', handleFullPageDrawingDone);
+    if (cancelBtn) cancelBtn.addEventListener('click', handleFullPageDrawingCancel);
+    return () => {
+      if (doneBtn) doneBtn.removeEventListener('click', handleFullPageDrawingDone);
+      if (cancelBtn) cancelBtn.removeEventListener('click', handleFullPageDrawingCancel);
+    };
+  }, [drawingState.isDrawingOnPage]);
+  // ... existing code ...
+  // When drawing is finished in the popup, update preview
+  const handleDrawingFinish = () => {
+    if (tagCanvasRef.current) {
+      const url = tagCanvasRef.current.toDataURL('image/png');
+      setDrawingPreviewUrl(url);
+      // Add/replace drawing in uploadedFiles
+      setUploadedFiles(prev => {
+        const others = prev.filter(f => f.type !== 'drawing');
+        return [
+          ...others,
+          {
+            file: dataURLtoFile(url, 'drawing.png')!,
+            previewUrl: url,
+            type: 'drawing',
+          },
+        ];
+      });
+    }
+  };
+
   return (
     <>
       {/* Overlay */}
@@ -1285,11 +1342,15 @@ export const DraggableNotificationsPanel = ({
       {tagMarkers.map(marker => (
         <div
           key={marker.id}
-          className="tag-marker fixed z-[99] transform -translate-x-1/2 -translate-y-1/2 cursor-pointer transition-opacity duration-300 pointer-events-none" // No pointer events for marker
-          style={{ left: `${marker.x}px`, top: `${marker.y}px`, opacity: 1 }} // Opacity handled by cleanup effect
+          className="tag-marker fixed z-[99] transform -translate-x-1/2 -translate-y-1/2 cursor-pointer transition-opacity duration-300 pointer-events-none"
+          style={{ left: `${marker.x}px`, top: `${marker.y}px`, opacity: 1 }}
           title="Tag placed"
         >
-          <img src={businessLogoUrl} alt="Tag marker" className="w-8 h-8 drop-shadow-lg" />
+          {marker.drawingData ? (
+            <img src={marker.drawingData} alt="Tag Drawing" className="w-8 h-8 drop-shadow-lg rounded-full border-2 border-blue-400 bg-white" />
+          ) : (
+            <img src={businessLogoUrl} alt="Tag marker" className="w-8 h-8 drop-shadow-lg" />
+          )}
         </div>
       ))}
 
@@ -1311,19 +1372,17 @@ export const DraggableNotificationsPanel = ({
                 className="popup-drag-handle flex justify-between items-center p-3 border-b bg-slate-400 rounded-t-lg cursor-move"
                 onMouseDown={handlePopupDragStart} 
               >
-                  <div className="flex items-center gap-2 text-white"> {/* Added text-white for better contrast */}
-                      <Tag className="h-5 w-5" /> {/* Added Tag icon */}
-                      <span className="font-semibold">Create Tag</span> {/* Removed business logo img */}
+                  <div className="flex items-center gap-2 text-white">
+                      <Tag className="h-5 w-5" />
+                      <span className="font-semibold">Create Tag</span>
                   </div>
-                  <Button variant="ghost" size="icon" className="h-7 w-7 text-white hover:bg-slate-500" onClick={closeTagPopup}> {/* Added text-white */}
+                  <Button variant="ghost" size="icon" className="h-7 w-7 text-white hover:bg-slate-500" onClick={closeTagPopup}>
                       <X className="h-4 w-4" />
                   </Button>
               </div>
 
               {/* Content Area */}
-              <div 
-                  className="p-4 flex flex-col gap-4 overflow-y-auto max-h-[70vh]"
-              >
+              <div className="p-4 flex flex-col gap-4 overflow-y-auto max-h-[70vh]">
                   {/* Comment */}
                   <textarea
                       className="w-full p-2 text-sm border rounded-md resize-none focus:ring-1 focus:ring-blue-500 focus:outline-none"
@@ -1334,9 +1393,7 @@ export const DraggableNotificationsPanel = ({
                   />
 
                   {/* Staff Selection */}
-                  <div 
-                      className="border rounded-md p-3"
-                  >
+                  <div className="border rounded-md p-3">
                       <label className="text-sm font-medium text-gray-700 block mb-2">Notify Staff <span className="text-red-500">*</span></label>
                       <div className="max-h-24 overflow-y-auto mb-2 border-t border-b py-1">
                           {availableStaff.map(staff => (
@@ -1376,12 +1433,15 @@ export const DraggableNotificationsPanel = ({
                                       {uploadedFile.type === 'image' && (
                                          <img src={uploadedFile.previewUrl} alt="Preview" className="w-full h-full object-cover rounded border" />
                                       )}
-                                      {uploadedFile.type === 'drawing' && (
-                                         <div className="w-full h-full flex items-center justify-center bg-gray-200 rounded border">
-                                              <Brush className="h-6 w-6 text-gray-600"/>
-                                         </div>
+                                      {uploadedFile.type === 'drawing' && uploadedFile.previewUrl && (
+                                        <img src={uploadedFile.previewUrl} alt="Drawing Preview" className="w-full h-full object-cover rounded border bg-white" />
                                       )}
-                                       {uploadedFile.type === 'audio' && (
+                                      {uploadedFile.type === 'drawing' && !uploadedFile.previewUrl && (
+                                        <div className="w-full h-full flex items-center justify-center bg-gray-200 rounded border">
+                                          <Brush className="h-6 w-6 text-gray-600"/>
+                                        </div>
+                                      )}
+                                      {uploadedFile.type === 'audio' && (
                                          <div className="w-full h-full flex items-center justify-center bg-gray-200 rounded border">
                                              <Mic className="h-6 w-6 text-gray-600"/>
                                          </div>
@@ -1415,7 +1475,10 @@ export const DraggableNotificationsPanel = ({
                                    "flex-1 text-xs gap-1", 
                                    isDrawingActive ? 'bg-blue-100 text-blue-700 border-blue-300' : '' 
                                )} 
-                               onClick={handleToggleDrawing}
+                               onClick={() => {
+                                   setIsDrawingActive(!isDrawingActive);
+                                   setDrawingState(prev => ({ ...prev, isActive: !isDrawingActive }));
+                               }}
                            >
                                <Brush className="h-3.5 w-3.5"/> Draw
                            </Button>
@@ -1426,162 +1489,171 @@ export const DraggableNotificationsPanel = ({
                                    "flex-1 text-xs gap-1", 
                                    isRecordingAudio ? 'bg-red-100 text-red-700 border-red-300' : '' 
                                )} 
-                               onClick={handleToggleAudioRecord}
+                               onClick={() => {
+                                   setIsRecordingAudio(!isRecordingAudio);
+                                   if (!isRecordingAudio && !uploadedFiles.some(f => f.type === 'audio')) {
+                                       const audioPlaceholder: UploadedFile = {
+                                           file: new File([], "recording.mp3"),
+                                           previewUrl: "",
+                                           type: 'audio'
+                                       };
+                                       setUploadedFiles(prev => [...prev, audioPlaceholder]);
+                                   } else if (isRecordingAudio) {
+                                       setUploadedFiles(prev => prev.filter(f => f.type !== 'audio'));
+                                   }
+                               }}
                            >
                                <Mic className="h-3.5 w-3.5"/> Voice
                            </Button>
                       </div>
                       
-                      {/* --- Drawing Toolbar (Updated) --- */}
+                      {/* Drawing Toolbar */}
                       {isDrawingActive && (
-                          <>
-                            {/* Use useEffect for logging when isDrawingActive changes */}
-                            <EffectLogger active={isDrawingActive} />
-                             <div 
-                                 className="mt-3 pt-3 border-t border-gray-200 flex flex-col gap-3"
-                             >
-                                 {/* Row 1: Tools & Brush Options */}
-                                 <div className="flex items-center gap-4">
-                                     {/* Tools Section */}
-                                     <div className="flex items-center gap-1 border-r pr-3">
-                                         <span className="text-xs font-medium mr-1">Tools:</span>
-                                         {/* Interactive Tool Buttons */}
-                                         <Button 
-                                             variant={drawingState.tool === 'pencil' ? 'default' : 'ghost'} 
-                                             size="icon" 
-                                             className="h-7 w-7" 
-                                             title="Pencil"
-                                             onClick={() => handleToolChange('pencil')}
-                                         >
-                                             <Edit3 className="h-4 w-4" />
-                                         </Button>
-                                         <Button 
-                                             variant={drawingState.tool === 'eraser' ? 'default' : 'ghost'} 
-                                             size="icon" 
-                                             className="h-7 w-7" 
-                                             title="Eraser"
-                                             onClick={() => handleToolChange('eraser')}
-                                         >
-                                             <Trash2 className="h-4 w-4" />
-                                         </Button>
-                                     </div>
-                                     {/* Brush Section */}
-                                     <div className="flex items-center gap-1">
-                                          <span className="text-xs font-medium mr-1">Brush:</span>
-                                          {/* Functional brush size selector */}
-                                          <select 
-                                              className="text-xs border rounded px-1 py-0.5"
-                                              value={drawingState.lineWidth}
-                                              onChange={(e) => handleBrushSizeChange(Number(e.target.value))}
-                                          >
-                                             <option value="1">Thin</option>
-                                             <option value="3">Normal</option>
-                                             <option value="5">Thick</option>
-                                             <option value="10">Extra Thick</option>
-                                          </select>
-                                     </div>
-                                 </div>
-                                 
-                                 {/* Row 2: Shapes & Colors */}
-                                 <div className="flex items-center gap-4">
-                                     {/* Shapes Section */}
-                                     <div className="flex items-center gap-1 border-r pr-3 flex-wrap">
-                                         <span className="text-xs font-medium mr-1 w-full mb-1">Shapes:</span>
-                                         {/* Re-add shape buttons */}
-                                        <Button 
-                                            variant={drawingState.tool === 'line' ? 'default' : 'ghost'} 
-                                            size="icon" 
-                                            className="h-6 w-6"
-                                            onClick={() => handleToolChange('line')}
-                                        >
-                                            <Minus className="h-4 w-4"/>
-                                        </Button>
-                                        <Button 
-                                            variant={drawingState.tool === 'arrow' ? 'default' : 'ghost'} 
-                                            size="icon" 
-                                            className="h-6 w-6"
-                                            onClick={() => handleToolChange('arrow')}
-                                        >
-                                            <MoveUpRight className="h-4 w-4"/>
-                                        </Button>
-                                        <Button 
-                                            variant={drawingState.tool === 'rectangle' ? 'default' : 'ghost'} 
-                                            size="icon" 
-                                            className="h-6 w-6"
-                                            onClick={() => handleToolChange('rectangle')}
-                                        >
-                                            <Square className="h-4 w-4"/>
-                                        </Button>
-                                        <Button 
-                                            variant={drawingState.tool === 'circle' ? 'default' : 'ghost'} 
-                                            size="icon" 
-                                            className="h-6 w-6"
-                                            onClick={() => handleToolChange('circle')}
-                                        >
-                                            <Circle className="h-4 w-4"/>
-                                        </Button>
-                                        <Button 
-                                            variant={drawingState.tool === 'star' ? 'default' : 'ghost'} 
-                                            size="icon" 
-                                            className="h-6 w-6"
-                                            onClick={() => handleToolChange('star')}
-                                        >
-                                            <Star className="h-4 w-4"/>
-                                        </Button>
-                                     </div>
-                                     {/* Colors Section */}
-                                     <div className="flex items-center gap-1 flex-wrap">
-                                         <span className="text-xs font-medium mr-1 w-full mb-1">Colors:</span>
-                                         {/* Re-add color swatches */}
-                                         {['#FF0000', '#000000', '#FFFFFF', '#CCCCCC', '#888888', '#FFFF00', '#00FF00', '#0000FF', '#FF00FF', '#00FFFF'].map(color => (
-                                             <Button 
-                                                 key={color} 
-                                                 variant="outline" 
-                                                 size="icon" 
-                                                 className={cn(
-                                                   "h-5 w-5 p-0 border rounded-full", 
-                                                   drawingState.color === color ? "ring-2 ring-offset-1 ring-blue-500" : ""
-                                                 )} 
-                                                 style={{ backgroundColor: color }} 
-                                                 title={color}
-                                                 onClick={() => handleColorChange(color)}
-                                             />
-                                         ))}
-                                     </div>
-                                 </div>
-                                 
-                                 {/* Row 3: Canvas and Drawing Outside the Tag */}
-                                 <div className="mt-2">
-                                     <DrawingCanvas 
-                                       width={340} 
-                                       height={200} 
-                                       drawingState={drawingState} 
-                                       canvasRef={tagCanvasRef}
-                                       drawArrow={drawArrow}
-                                       drawStar={drawStar}
-                                     />
-                                     
-                                     {/* Draw Outside Tag Button */}
-                                     <Button
-                                         variant="outline"
-                                         size="sm"
-                                         className="mt-2 w-full text-xs"
-                                         onClick={handleTogglePageDrawing}
-                                     >
-                                         <Brush className="h-3.5 w-3.5 mr-1" />
-                                         Draw Outside Tag (Full Page)
-                                     </Button>
-                                 </div>
-                             </div>
-                          </>
+                          <div className="mt-3 pt-3 border-t border-gray-200 flex flex-col gap-3">
+                              {/* Row 1: Tools & Brush Options */}
+                              <div className="flex items-center gap-4">
+                                  {/* Tools Section */}
+                                  <div className="flex items-center gap-1 border-r pr-3">
+                                      <span className="text-xs font-medium mr-1">Tools:</span>
+                                      <Button 
+                                          variant={drawingState.tool === 'pencil' ? 'default' : 'ghost'} 
+                                          size="icon" 
+                                          className="h-7 w-7" 
+                                          title="Pencil"
+                                          onClick={() => setDrawingState(prev => ({ ...prev, tool: 'pencil' }))}
+                                      >
+                                          <Edit3 className="h-4 w-4" />
+                                      </Button>
+                                      <Button 
+                                          variant={drawingState.tool === 'eraser' ? 'default' : 'ghost'} 
+                                          size="icon" 
+                                          className="h-7 w-7" 
+                                          title="Eraser"
+                                          onClick={() => setDrawingState(prev => ({ ...prev, tool: 'eraser' }))}
+                                      >
+                                          <Trash2 className="h-4 w-4" />
+                                      </Button>
+                                  </div>
+                                  {/* Brush Section */}
+                                  <div className="flex items-center gap-1">
+                                      <span className="text-xs font-medium mr-1">Brush:</span>
+                                      <select 
+                                          className="text-xs border rounded px-1 py-0.5"
+                                          value={drawingState.lineWidth}
+                                          onChange={(e) => setDrawingState(prev => ({ ...prev, lineWidth: Number(e.target.value) }))}
+                                      >
+                                          <option value="1">Thin</option>
+                                          <option value="3">Normal</option>
+                                          <option value="5">Thick</option>
+                                          <option value="10">Extra Thick</option>
+                                      </select>
+                                  </div>
+                              </div>
+
+                              {/* Row 2: Shapes & Colors */}
+                              <div className="flex items-center gap-4">
+                                  {/* Shapes Section */}
+                                  <div className="flex items-center gap-1 border-r pr-3 flex-wrap">
+                                      <span className="text-xs font-medium mr-1 w-full mb-1">Shapes:</span>
+                                      <Button 
+                                          variant={drawingState.tool === 'line' ? 'default' : 'ghost'} 
+                                          size="icon" 
+                                          className="h-6 w-6"
+                                          onClick={() => setDrawingState(prev => ({ ...prev, tool: 'line' }))}
+                                      >
+                                          <Minus className="h-4 w-4"/>
+                                      </Button>
+                                      <Button 
+                                          variant={drawingState.tool === 'arrow' ? 'default' : 'ghost'} 
+                                          size="icon" 
+                                          className="h-6 w-6"
+                                          onClick={() => setDrawingState(prev => ({ ...prev, tool: 'arrow' }))}
+                                      >
+                                          <MoveUpRight className="h-4 w-4"/>
+                                      </Button>
+                                      <Button 
+                                          variant={drawingState.tool === 'rectangle' ? 'default' : 'ghost'} 
+                                          size="icon" 
+                                          className="h-6 w-6"
+                                          onClick={() => setDrawingState(prev => ({ ...prev, tool: 'rectangle' }))}
+                                      >
+                                          <Square className="h-4 w-4"/>
+                                      </Button>
+                                      <Button 
+                                          variant={drawingState.tool === 'circle' ? 'default' : 'ghost'} 
+                                          size="icon" 
+                                          className="h-6 w-6"
+                                          onClick={() => setDrawingState(prev => ({ ...prev, tool: 'circle' }))}
+                                      >
+                                          <Circle className="h-4 w-4"/>
+                                      </Button>
+                                      <Button 
+                                          variant={drawingState.tool === 'star' ? 'default' : 'ghost'} 
+                                          size="icon" 
+                                          className="h-6 w-6"
+                                          onClick={() => setDrawingState(prev => ({ ...prev, tool: 'star' }))}
+                                      >
+                                          <Star className="h-4 w-4"/>
+                                      </Button>
+                                  </div>
+                                  {/* Colors Section */}
+                                  <div className="flex items-center gap-1 flex-wrap">
+                                      <span className="text-xs font-medium mr-1 w-full mb-1">Colors:</span>
+                                      {['#FF0000', '#000000', '#FFFFFF', '#CCCCCC', '#888888', '#FFFF00', '#00FF00', '#0000FF', '#FF00FF', '#00FFFF'].map(color => (
+                                          <Button 
+                                              key={color} 
+                                              variant="outline" 
+                                              size="icon" 
+                                              className={cn(
+                                                  "h-5 w-5 p-0 border rounded-full", 
+                                                  drawingState.color === color ? "ring-2 ring-offset-1 ring-blue-500" : ""
+                                              )} 
+                                              style={{ backgroundColor: color }} 
+                                              title={color}
+                                              onClick={() => setDrawingState(prev => ({ ...prev, color }))}
+                                          />
+                                      ))}
+                                  </div>
+                              </div>
+
+                              {/* Row 3: Canvas and Drawing Outside the Tag */}
+                              <div className="mt-2">
+                                  <DrawingCanvas 
+                                      width={340} 
+                                      height={200} 
+                                      drawingState={drawingState} 
+                                      canvasRef={tagCanvasRef}
+                                      drawArrow={drawArrow}
+                                      drawStar={drawStar}
+                                  />
+                                  {/* Save Drawing Button */}
+                                  <Button
+                                      variant="outline"
+                                      size="sm"
+                                      className="mt-2 w-full text-xs"
+                                      onClick={handleDrawingFinish}
+                                  >
+                                      <Save className="h-3.5 w-3.5 mr-1" />
+                                      Save Drawing to Attachments
+                                  </Button>
+                                  {/* Draw Outside Tag Button */}
+                                  <Button
+                                      variant="outline"
+                                      size="sm"
+                                      className="mt-2 w-full text-xs"
+                                      onClick={() => setDrawingState(prev => ({ ...prev, isDrawingOnPage: true }))}
+                                  >
+                                      <Brush className="h-3.5 w-3.5 mr-1" />
+                                      Draw Outside Tag (Full Page)
+                                  </Button>
+                              </div>
+                          </div>
                       )}
                   </div>
               </div>
 
               {/* Footer Actions */}
-              <div 
-                  className="flex justify-end gap-3 p-3 border-t bg-gray-50 rounded-b-lg"
-              >
+              <div className="flex justify-end gap-3 p-3 border-t bg-gray-50 rounded-b-lg">
                   <Button 
                       variant="ghost" 
                       onClick={closeTagPopup}
