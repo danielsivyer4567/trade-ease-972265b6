@@ -55,7 +55,7 @@ interface SignedDocument {
 }
 
 const CustomerPortfolio = () => {
-  const { customerId } = useParams<{ customerId: string }>();
+  const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [customer, setCustomer] = useState<CustomerWithDetails | null>(null);
@@ -87,7 +87,7 @@ const CustomerPortfolio = () => {
 
   useEffect(() => {
     const fetchCustomerData = async () => {
-      if (!customerId) {
+      if (!id) {
         setError("No customer ID provided");
         setLoading(false);
         return;
@@ -104,7 +104,7 @@ const CustomerPortfolio = () => {
         const { data, error } = await supabase
           .from('customers')
           .select('*')
-          .eq('id', customerId)
+          .eq('id', id)
           .single();
 
         if (error) {
@@ -154,7 +154,7 @@ const CustomerPortfolio = () => {
     };
 
     fetchCustomerData();
-  }, [customerId, toast]);
+  }, [id, toast]);
 
   const handleAddNote = () => {
     const newNote = {
@@ -277,7 +277,7 @@ const CustomerPortfolio = () => {
                   <Button 
                     variant="outline" 
                     className="w-full flex items-center gap-2 justify-start"
-                    onClick={() => navigate(`/customers/${customerId}/edit`)}
+                    onClick={() => navigate(`/customers/${id}/edit`)}
                   >
                     <PenLine className="h-4 w-4" />
                     <span>Edit Customer</span>
