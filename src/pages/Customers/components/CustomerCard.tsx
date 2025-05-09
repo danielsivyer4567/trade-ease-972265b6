@@ -16,6 +16,7 @@ export interface CustomerData {
   state: string;
   zipCode: string;
   status: 'active' | 'inactive';
+  customer_code?: string;
 }
 
 interface CustomerCardProps {
@@ -73,6 +74,11 @@ export const CustomerCard = ({ customer, onCustomerClick, onEditClick }: Custome
             >
               {customer.name}
             </span>
+            {customer.customer_code && (
+              <span className="text-xs bg-gray-100 px-2 py-0.5 rounded-full text-gray-600">
+                {customer.customer_code}
+              </span>
+            )}
             <Button 
               variant="default" 
               size="sm"

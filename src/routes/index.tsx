@@ -29,6 +29,7 @@ const CustomersPage = lazy(() => import('@/pages/Customers/CustomersPage'));
 const CustomerDetailsPage = lazy(() => import('@/pages/Customers/CustomerDetail'));
 const NewCustomerPage = lazy(() => import('@/pages/Customers/NewCustomer'));
 const EditCustomerPage = lazy(() => import('@/pages/Customers/EditCustomer'));
+const CustomerPortfolioPage = lazy(() => import('@/pages/Customers/CustomerPortfolio'));
 
 // Site Audits
 const SiteAuditsPage = lazy(() => import('@/pages/SiteAudits'));
@@ -146,8 +147,8 @@ const routeObjects: RouteObject[] = [
             children: [
               { index: true, element: <SuspenseWrapper><CustomersPage /></SuspenseWrapper> },
               { path: "new", element: <SuspenseWrapper><NewCustomerPage /></SuspenseWrapper> },
-              { path: ":auditId", element: <SuspenseWrapper><CustomersPage /></SuspenseWrapper> },
-              { path: ":auditId/:customerId", element: <SuspenseWrapper><CustomerDetailsPage /></SuspenseWrapper> },
+              { path: ":id", element: <SuspenseWrapper><CustomerPortfolioPage /></SuspenseWrapper> },
+              { path: ":id/details", element: <SuspenseWrapper><CustomerDetailsPage /></SuspenseWrapper> },
               { path: ":id/edit", element: <SuspenseWrapper><EditCustomerPage /></SuspenseWrapper> },
             ],
           },

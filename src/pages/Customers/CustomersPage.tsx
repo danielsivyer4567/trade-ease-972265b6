@@ -42,6 +42,7 @@ interface Customer extends CustomerData {
   jobTitle?: string;
   stepCompleted?: number;
   totalSteps?: number;
+  customer_code?: string;
 }
 
 // API function to fetch customers
@@ -77,7 +78,8 @@ const fetchCustomers = async (): Promise<Customer[]> => {
       progress: Math.floor(Math.random() * 100), // TODO: Replace with actual progress from jobs table
       lastContact: customer.last_contact || new Date().toISOString().split('T')[0],
       jobId: `JOB-${customer.id.substring(0, 4)}`, // TODO: Replace with latest job ID
-      jobTitle: 'Current Job' // TODO: Replace with actual job title
+      jobTitle: 'Current Job', // TODO: Replace with actual job title
+      customer_code: customer.customer_code // Include the customer_code
     }));
     
     return formattedData;
@@ -372,7 +374,14 @@ function CustomersPage() {
                 <Card>
                   <CardHeader className="bg-muted pb-2">
                     <div className="flex justify-between items-center">
-                      <CardTitle>{selectedCustomer.name}</CardTitle>
+                      <CardTitle>
+                        {selectedCustomer.name}
+                        {selectedCustomer.customer_code && (
+                          <span className="ml-2 text-sm bg-gray-100 px-2 py-0.5 rounded-full text-gray-600">
+                            {selectedCustomer.customer_code}
+                          </span>
+                        )}
+                      </CardTitle>
                       <div className="flex items-center gap-2">
                         <Button 
                           variant="outline" 
