@@ -80,24 +80,41 @@ const CustomerPortfolio = () => {
     @keyframes moveDown {
       0% {
         transform: translateY(-100%);
-      }
-      100% {
-        transform: translateY(100%);
-      }
-    }
-    
-    @keyframes flowPulse {
-      0% {
-        opacity: 0.4;
-        stroke-dashoffset: 20;
+        opacity: 0.3;
       }
       50% {
         opacity: 1;
-        stroke-dashoffset: 10;
       }
       100% {
-        opacity: 0.4;
-        stroke-dashoffset: 0;
+        transform: translateY(100%);
+        opacity: 0.3;
+      }
+    }
+    
+    @keyframes slowFlash {
+      0% {
+        opacity: 0.7;
+        box-shadow: 0 0 5px rgba(219, 39, 119, 0.3);
+      }
+      50% {
+        opacity: 1;
+        box-shadow: 0 0 15px rgba(219, 39, 119, 0.6);
+      }
+      100% {
+        opacity: 0.7;
+        box-shadow: 0 0 5px rgba(219, 39, 119, 0.3);
+      }
+    }
+    
+    @keyframes glow {
+      0% {
+        box-shadow: 0 0 5px rgba(59, 130, 246, 0.3);
+      }
+      50% {
+        box-shadow: 0 0 12px rgba(59, 130, 246, 0.6);
+      }
+      100% {
+        box-shadow: 0 0 5px rgba(59, 130, 246, 0.3);
       }
     }
   `;
@@ -752,12 +769,30 @@ const CustomerPortfolio = () => {
                                 ></div>
                               </div>
                               
+                              {/* Multiple flowing pulses */}
+                              <div className="absolute h-full w-1 overflow-hidden">
+                                <div className="h-3 w-full bg-blue-400 absolute" 
+                                  style={{
+                                    animation: 'moveDown 2s infinite',
+                                    animationDelay: '0.5s',
+                                    background: 'linear-gradient(to bottom, rgba(96, 165, 250, 0), rgba(96, 165, 250, 0.7), rgba(96, 165, 250, 0))',
+                                    transform: 'translateY(-100%)'
+                                  }}
+                                ></div>
+                              </div>
+                              
                               {/* Pulsing glow effect */}
-                              <div className="absolute h-full w-1 bg-transparent animate-pulse opacity-70"
+                              <div className="absolute h-full w-1 bg-transparent"
                                 style={{
-                                  boxShadow: '0 0 10px 4px rgba(59, 130, 246, 0.4)'
+                                  boxShadow: '0 0 10px 4px rgba(59, 130, 246, 0.4)',
+                                  animation: 'glow 2s infinite ease-in-out'
                                 }}
                               ></div>
+                              
+                              {/* Arrow indicator showing direction */}
+                              <div className="absolute bottom-0 left-1/2 -translate-x-1/2 text-blue-500 animate-bounce">
+                                <ChevronDown className="h-4 w-4" />
+                              </div>
                             </div>
                           ) : (
                             <div className={`absolute top-16 left-1/2 -translate-x-1/2 
@@ -776,10 +811,13 @@ const CustomerPortfolio = () => {
                         <div 
                           className={`rounded-md w-32 h-14 flex items-center justify-center
                             ${step.status === 'completed' ? 'bg-green-100 text-green-600 border border-green-200 shadow-md' : 
-                              step.status === 'current' ? 'bg-pink-100 text-pink-600 border border-pink-200 animate-pulse shadow-md' : 
+                              step.status === 'current' ? 'bg-pink-100 text-pink-600 border border-pink-200 shadow-md' : 
                               'bg-gray-100/50 text-gray-400/70 border border-gray-200/50'} 
                             transition-all duration-300 hover:scale-105 cursor-pointer
                             ${step.status === 'upcoming' ? 'opacity-60' : 'opacity-100'}`}
+                          style={step.status === 'current' ? { 
+                            animation: 'slowFlash 3s infinite ease-in-out',
+                          } : {}}
                         >
                           <div className="flex items-center gap-2">
                             {step.icon}
