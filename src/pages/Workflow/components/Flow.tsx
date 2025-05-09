@@ -23,7 +23,7 @@ import { VisionNode } from './nodes/VisionNode';
 import { AutomationNode } from './nodes/AutomationNode';
 import { MessagingNode } from './nodes/MessagingNode';
 import { NodeDetailsPanel } from './NodeDetailsPanel';
-import AnimatedEdge from './AnimatedEdge';
+import { AnimatedEdge } from './AnimatedEdge';
 import { WorkflowAnimationExample } from './WorkflowAnimationExample';
 import { toast } from 'sonner';
 import { AutomationIntegrationService } from '@/services/AutomationIntegrationService';
