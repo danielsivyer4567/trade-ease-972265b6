@@ -64,119 +64,6 @@ interface WorkflowStep {
   date?: string;
 }
 
-// Customer Workflow component
-const CustomerWorkflow = ({ 
-  customer, 
-  quotes, 
-  jobs 
-}: { 
-  customer: CustomerWithDetails, 
-  quotes: Quote[], 
-  jobs: Job[] 
-}) => {
-  // Define the workflow steps based on customer data
-  const getWorkflowSteps = (): WorkflowStep[] => {
-    const steps: WorkflowStep[] = [
-      { 
-        id: 'inquiry', 
-        title: 'Customer Inquiry', 
-        description: 'Initial contact and information gathering',
-        status: 'completed',
-        date: customer.created_at ? new Date(customer.created_at).toLocaleDateString() : undefined
-      },
-      { 
-        id: 'quote', 
-        title: 'Quote Creation', 
-        description: 'Preparing and sending quotes',
-        status: quotes.length > 0 ? 'completed' : 'upcoming',
-        date: quotes.length > 0 ? quotes[0].date : undefined
-      },
-      { 
-        id: 'approval', 
-        title: 'Quote Approval', 
-        description: 'Customer reviews and approves quote',
-        status: quotes.some(q => q.status === 'accepted') ? 'completed' : quotes.some(q => q.status === 'sent') ? 'current' : 'upcoming'
-      },
-      { 
-        id: 'job', 
-        title: 'Job Creation', 
-        description: 'Converting quote to job and scheduling work',
-        status: jobs.length > 0 ? 'completed' : quotes.some(q => q.status === 'accepted') ? 'current' : 'upcoming',
-        date: jobs.length > 0 ? jobs[0].date : undefined
-      },
-      { 
-        id: 'execution', 
-        title: 'Job Execution', 
-        description: 'Work in progress and tracking',
-        status: jobs.some(j => j.status === 'in_progress') ? 'current' : jobs.some(j => j.status === 'completed') ? 'completed' : 'upcoming'
-      },
-      { 
-        id: 'completion', 
-        title: 'Job Completion', 
-        description: 'Work completed and customer sign-off',
-        status: jobs.some(j => j.status === 'completed') ? 'completed' : 'upcoming'
-      }
-    ];
-    
-    return steps;
-  };
-  
-  const workflowSteps = getWorkflowSteps();
-
-  return (
-    <Card className="mb-6">
-      <CardHeader className="pb-2">
-        <CardTitle className="text-lg flex items-center gap-2">
-          <History className="h-5 w-5 text-primary" />
-          Customer Journey Workflow
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="flex flex-row items-start overflow-x-auto pb-2">
-          {workflowSteps.map((step, index) => (
-            <div key={step.id} className="flex flex-row items-center min-w-[200px]">
-              <div className="flex flex-col items-center">
-                <div className={`rounded-full w-10 h-10 flex items-center justify-center
-                  ${step.status === 'completed' ? 'bg-green-100 text-green-600' : 
-                    step.status === 'current' ? 'bg-blue-100 text-blue-600' : 
-                    'bg-gray-100 text-gray-400'}`}
-                >
-                  {step.status === 'completed' ? (
-                    <CheckCircle className="h-6 w-6" />
-                  ) : step.status === 'current' ? (
-                    <CircleDashed className="h-6 w-6" />
-                  ) : (
-                    <CircleDashed className="h-6 w-6" />
-                  )}
-                </div>
-                <div className="h-14 flex-grow">
-                  {index < workflowSteps.length - 1 && (
-                    <div className={`w-px h-full mx-auto 
-                      ${step.status === 'completed' ? 'bg-green-400' : 
-                        step.status === 'current' ? 'bg-blue-400' : 
-                        'bg-gray-200'}`}
-                    ></div>
-                  )}
-                </div>
-              </div>
-              <div className="ml-3 mb-6">
-                <h3 className="text-sm font-medium">{step.title}</h3>
-                <p className="text-xs text-muted-foreground">{step.description}</p>
-                {step.date && (
-                  <p className="text-xs mt-1 text-primary">{step.date}</p>
-                )}
-              </div>
-              {index < workflowSteps.length - 1 && (
-                <MoveRight className="h-4 w-4 mx-2 text-muted-foreground self-center" />
-              )}
-            </div>
-          ))}
-        </div>
-      </CardContent>
-    </Card>
-  );
-};
-
 const CustomerPortfolio = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -302,6 +189,57 @@ const CustomerPortfolio = () => {
     });
   };
 
+  // Define the workflow steps based on customer data
+  const getWorkflowSteps = (): WorkflowStep[] => {
+    if (!customer) return [];
+    
+    const steps: WorkflowStep[] = [
+      { 
+        id: 'inquiry', 
+        title: 'Customer Inquiry', 
+        description: 'Initial contact and information gathering',
+        status: 'completed',
+        date: customer.created_at ? new Date(customer.created_at).toLocaleDateString() : undefined
+      },
+      { 
+        id: 'quote', 
+        title: 'Quote Creation', 
+        description: 'Preparing and sending quotes',
+        status: quotes.length > 0 ? 'completed' : 'upcoming',
+        date: quotes.length > 0 ? quotes[0].date : undefined
+      },
+      { 
+        id: 'approval', 
+        title: 'Quote Approval', 
+        description: 'Customer reviews and approves quote',
+        status: quotes.some(q => q.status === 'accepted') ? 'completed' : quotes.some(q => q.status === 'sent') ? 'current' : 'upcoming'
+      },
+      { 
+        id: 'job', 
+        title: 'Job Creation', 
+        description: 'Converting quote to job and scheduling work',
+        status: jobs.length > 0 ? 'completed' : quotes.some(q => q.status === 'accepted') ? 'current' : 'upcoming',
+        date: jobs.length > 0 ? jobs[0].date : undefined
+      },
+      { 
+        id: 'execution', 
+        title: 'Job Execution', 
+        description: 'Work in progress and tracking',
+        status: jobs.some(j => j.status === 'in_progress') ? 'current' : jobs.some(j => j.status === 'completed') ? 'completed' : 'upcoming'
+      },
+      { 
+        id: 'completion', 
+        title: 'Job Completion', 
+        description: 'Work completed and customer sign-off',
+        status: jobs.some(j => j.status === 'completed') ? 'completed' : 'upcoming'
+      }
+    ];
+    
+    return steps;
+  };
+  
+  const workflowSteps = getWorkflowSteps();
+
   if (loading) {
     return (
       <AppLayout>
@@ -343,12 +281,9 @@ const CustomerPortfolio = () => {
           <h1 className="text-2xl font-bold">Customer Portfolio</h1>
         </div>
         
-        {/* Customer Workflow/Journey Timeline */}
-        <CustomerWorkflow customer={customer} quotes={quotes} jobs={jobs} />
-        
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* Sidebar */}
-          <div className="lg:col-span-1">
+          <div className="lg:col-span-3">
             <Card>
               <CardContent className="p-6">
                 <div className="flex flex-col items-center text-center mb-6">
@@ -414,7 +349,7 @@ const CustomerPortfolio = () => {
           </div>
           
           {/* Main Content */}
-          <div className="lg:col-span-3">
+          <div className="lg:col-span-6">
             <Card>
               <Tabs defaultValue={activeTab} onValueChange={setActiveTab} className="w-full">
                 <CardHeader className="p-4 pb-2 border-b">
@@ -723,6 +658,59 @@ const CustomerPortfolio = () => {
                   </TabsContent>
                 </CardContent>
               </Tabs>
+            </Card>
+          </div>
+          
+          {/* Customer Journey Workflow - Now on the right side */}
+          <div className="lg:col-span-3">
+            <Card className="h-full">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <History className="h-5 w-5 text-primary" />
+                  Customer Journey
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-4">
+                <div className="flex flex-col gap-4">
+                  {workflowSteps.map((step, index) => (
+                    <div key={step.id} className="relative">
+                      {/* Connector line */}
+                      {index < workflowSteps.length - 1 && (
+                        <div 
+                          className={`absolute left-5 top-10 w-0.5 h-full -z-10
+                            ${step.status === 'completed' ? 'bg-green-400' : 
+                              step.status === 'current' ? 'bg-blue-400' : 
+                              'bg-gray-200'}`}
+                        ></div>
+                      )}
+                      
+                      <div className="flex items-start gap-3">
+                        <div className={`rounded-full w-10 h-10 flex items-center justify-center flex-shrink-0
+                          ${step.status === 'completed' ? 'bg-green-100 text-green-600' : 
+                            step.status === 'current' ? 'bg-blue-100 text-blue-600' : 
+                            'bg-gray-100 text-gray-400'}`}
+                        >
+                          {step.status === 'completed' ? (
+                            <CheckCircle className="h-6 w-6" />
+                          ) : step.status === 'current' ? (
+                            <CircleDashed className="h-6 w-6" />
+                          ) : (
+                            <CircleDashed className="h-6 w-6" />
+                          )}
+                        </div>
+                        
+                        <div className="flex-1">
+                          <h3 className="font-medium text-sm">{step.title}</h3>
+                          <p className="text-xs text-muted-foreground">{step.description}</p>
+                          {step.date && (
+                            <p className="text-xs mt-1 text-primary">{step.date}</p>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
             </Card>
           </div>
         </div>
