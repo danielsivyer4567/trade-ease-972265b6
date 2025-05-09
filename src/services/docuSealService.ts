@@ -1,9 +1,126 @@
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/integrations/supabase/client';
 
 // DocuSeal API configuration
 const DOCUSEAL_API_URL = process.env.DOCUSEAL_API_URL || 'https://api.docuseal.co';
 const DOCUSEAL_API_KEY = process.env.DOCUSEAL_API_KEY || 'your-docuseal-api-key';
 const WEBHOOK_SECRET = process.env.DOCUSEAL_WEBHOOK_SECRET || 'your-webhook-secret';
+
+/**
+ * DocuSeal Integration Class
+ * Handles communication with the DocuSeal API
+ */
+export class DocuSealIntegration {
+  private apiKey: string;
+  private apiUrl: string;
+
+  constructor(apiKey: string = DOCUSEAL_API_KEY, apiUrl: string = DOCUSEAL_API_URL) {
+    this.apiKey = apiKey;
+    this.apiUrl = apiUrl;
+  }
+
+  /**
+   * Create a new DocuSeal submission for a template
+   * @param templateId The template ID to create a submission for
+   * @param submissionData The data for the submission (recipients, etc.)
+   */
+  async createSubmission(templateId: string, submissionData: any) {
+    try {
+      // In a real implementation, this would call the DocuSeal API
+      // The actual API call would look something like this:
+      // const response = await fetch(`${this.apiUrl}/api/v1/submissions`, {
+      //   method: 'POST',
+      //   headers: {
+      //     'Content-Type': 'application/json',
+      //     'Authorization': `Bearer ${this.apiKey}`
+      //   },
+      //   body: JSON.stringify({
+      //     template_id: templateId,
+      //     ...submissionData
+      //   })
+      // });
+      // const data = await response.json();
+      
+      // For demo purposes, create a mock response
+      const mockSubmissionId = `sub_${Math.random().toString(36).substring(2, 10)}`;
+      const mockSigningUrl = `https://docuseal.example/sign/${mockSubmissionId}`;
+      
+      // Save the submission ID to the database
+      if (submissionData.quoteId) {
+        await this.saveSubmissionToDatabase(
+          submissionData.quoteId,
+          mockSubmissionId,
+          submissionData.recipients[0].email
+        );
+      }
+      
+      return {
+        id: mockSubmissionId,
+        signing_url: mockSigningUrl
+      };
+    } catch (error) {
+      console.error('Error creating DocuSeal submission:', error);
+      throw new Error('Failed to create signature request');
+    }
+  }
+
+  /**
+   * Get the status of a submission
+   * @param submissionId The ID of the submission to check
+   */
+  async getSubmissionStatus(submissionId: string) {
+    try {
+      // In a real implementation, this would call the DocuSeal API
+      // const response = await fetch(`${this.apiUrl}/api/v1/submissions/${submissionId}`, {
+      //   method: 'GET',
+      //   headers: {
+      //     'Authorization': `Bearer ${this.apiKey}`
+      //   }
+      // });
+      // return await response.json();
+      
+      // For demo purposes, return a mock status
+      return {
+        id: submissionId,
+        status: 'pending',
+        created_at: new Date().toISOString()
+      };
+    } catch (error) {
+      console.error('Error getting submission status:', error);
+      throw new Error('Failed to get submission status');
+    }
+  }
+
+  /**
+   * Save the DocuSeal submission ID to the database
+   */
+  private async saveSubmissionToDatabase(
+    quoteId: string,
+    submissionId: string,
+    signerEmail: string
+  ) {
+    try {
+      const { error } = await supabase
+        .from('docuseal_submissions')
+        .insert({
+          quote_id: quoteId,
+          submission_id: submissionId,
+          signer_email: signerEmail,
+          status: 'pending',
+          created_at: new Date().toISOString()
+        });
+        
+      if (error) {
+        throw error;
+      }
+    } catch (error) {
+      console.error('Error saving submission to database:', error);
+      throw new Error('Failed to save submission');
+    }
+  }
+}
+
+// Create a singleton instance for the app to use
+export const docuSealClient = new DocuSealIntegration();
 
 /**
  * Create a new DocuSeal submission for a quote
@@ -17,71 +134,28 @@ export const createSignatureRequest = async (
   documentData: any
 ) => {
   try {
-    // In a real implementation, this would call the DocuSeal API
-    // Here we're just simulating the API call
-
-    // The actual API call would look something like this:
-    // const response = await fetch(`${DOCUSEAL_API_URL}/api/v1/submissions`, {
-    //   method: 'POST',
-    //   headers: {
-    //     'Content-Type': 'application/json',
-    //     'Authorization': `Bearer ${DOCUSEAL_API_KEY}`
-    //   },
-    //   body: JSON.stringify({
-    //     template_id: 'your-template-id',
-    //     signers: [
-    //       {
-    //         name: documentData.customerName,
-    //         email: customerEmail,
-    //         role: 'Customer'
-    //       }
-    //     ],
-    //     data: documentData
-    //   })
-    // });
+    // Use the DocuSealIntegration class
+    const templateId = 'template_default'; // In a real app, you'd have this stored somewhere
     
-    // For demo purposes, create a mock response
-    const mockSubmissionId = `sub_${Math.random().toString(36).substring(2, 10)}`;
-    const mockSigningUrl = `https://docuseal.example/sign/${mockSubmissionId}`;
-    
-    // Save the submission ID to your database
-    await saveSubmissionToDatabase(quoteId, mockSubmissionId, customerEmail);
+    const submission = await docuSealClient.createSubmission(templateId, {
+      quoteId: quoteId,
+      recipients: [
+        {
+          email: customerEmail,
+          name: documentData.customerName || 'Customer',
+          role: 'Customer'
+        }
+      ],
+      data: documentData
+    });
     
     return {
-      submissionId: mockSubmissionId,
-      signingUrl: mockSigningUrl
+      submissionId: submission.id,
+      signingUrl: submission.signing_url
     };
   } catch (error) {
     console.error('Error creating DocuSeal submission:', error);
     throw new Error('Failed to create signature request');
-  }
-};
-
-/**
- * Save the DocuSeal submission ID to the database
- */
-const saveSubmissionToDatabase = async (
-  quoteId: string,
-  submissionId: string,
-  signerEmail: string
-) => {
-  try {
-    const { error } = await supabase
-      .from('docuseal_submissions')
-      .insert({
-        quote_id: quoteId,
-        submission_id: submissionId,
-        signer_email: signerEmail,
-        status: 'pending',
-        created_at: new Date().toISOString()
-      });
-      
-    if (error) {
-      throw error;
-    }
-  } catch (error) {
-    console.error('Error saving submission to database:', error);
-    throw new Error('Failed to save submission');
   }
 };
 
