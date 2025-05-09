@@ -1,9 +1,9 @@
 import { Database } from '@/integrations/supabase/types';
 
-export type Workflow = Database['public']['Tables']['workflows']['Row'];
-export type WorkflowNode = Database['public']['Tables']['workflow_nodes']['Row'];
-export type WorkflowEdge = Database['public']['Tables']['workflow_edges']['Row'];
-export type WorkflowExecution = Database['public']['Tables']['workflow_executions']['Row'];
+export type DatabaseWorkflow = Database['public']['Tables']['workflows']['Row'];
+export type WorkflowNode = any; // Database['public']['Tables']['workflow_nodes']['Row']
+export type WorkflowEdge = any; // Database['public']['Tables']['workflow_edges']['Row']
+export type WorkflowExecution = any; // Database['public']['Tables']['workflow_executions']['Row']
 
 export type NodeType = 
   | 'customerNode'
@@ -24,6 +24,7 @@ export interface NodeData {
   automationId?: number;
   targetType?: 'job' | 'quote' | 'customer' | 'message' | 'social' | 'calendar';
   targetId?: string;
+  workflowDarkMode?: boolean;
   [key: string]: any;
 }
 
