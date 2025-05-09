@@ -136,6 +136,24 @@ const CustomerPortfolio = () => {
         transform: translateY(30px) scale(0.8);
       }
     }
+    
+    @keyframes progressPulse {
+      0% {
+        transform: translateY(0) scale(0.8);
+        opacity: 0.7;
+        box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+      }
+      50% {
+        transform: translateY(40px) scale(1.3);
+        opacity: 1;
+        box-shadow: 0 0 20px rgba(59, 130, 246, 0.9);
+      }
+      100% {
+        transform: translateY(80px) scale(0.8);
+        opacity: 0;
+        box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+      }
+    }
   `;
   
   // Mock data (would be fetched from API in production)
@@ -781,6 +799,30 @@ const CustomerPortfolio = () => {
                             <div className="absolute top-14 left-1/2 h-20 flex flex-col items-center justify-center pointer-events-none overflow-hidden z-20">
                               {/* Base connector line - making it more visible with width and color */}
                               <div className="absolute h-full w-3 bg-blue-200 rounded-full"></div>
+                              
+                              {/* Progress indicator - showing movement toward next step */}
+                              <div className="absolute top-1 h-6 w-6 bg-blue-500 rounded-full"
+                                style={{
+                                  animation: 'progressPulse 3s infinite ease-in-out',
+                                  boxShadow: '0 0 15px rgba(59, 130, 246, 0.8)'
+                                }}
+                              ></div>
+                              {/* Second progress indicator with delay */}
+                              <div className="absolute top-1 h-6 w-6 bg-blue-400 rounded-full"
+                                style={{
+                                  animation: 'progressPulse 3s infinite ease-in-out',
+                                  animationDelay: '1s',
+                                  boxShadow: '0 0 15px rgba(96, 165, 250, 0.7)'
+                                }}
+                              ></div>
+                              {/* Third progress indicator with more delay */}
+                              <div className="absolute top-1 h-6 w-6 bg-blue-300 rounded-full"
+                                style={{
+                                  animation: 'progressPulse 3s infinite ease-in-out',
+                                  animationDelay: '2s',
+                                  boxShadow: '0 0 15px rgba(147, 197, 253, 0.6)'
+                                }}
+                              ></div>
                               
                               {/* Visual scripting noodle effect with multiple pulses */}
                               <div className="absolute h-full w-full overflow-visible flex justify-center">

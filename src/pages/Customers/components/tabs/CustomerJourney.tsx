@@ -85,6 +85,51 @@ const flowAnimationKeyframes = `
     }
   }
 
+  @keyframes electricPulse {
+    0% {
+      stroke-width: 1.5;
+      stroke-opacity: 0.2;
+      filter: drop-shadow(0 0 1px #3b82f6);
+    }
+    50% {
+      stroke-width: 2.5;
+      stroke-opacity: 0.8;
+      filter: drop-shadow(0 0 3px #3b82f6);
+    }
+    100% {
+      stroke-width: 1.5;
+      stroke-opacity: 0.2;
+      filter: drop-shadow(0 0 1px #3b82f6);
+    }
+  }
+
+  @keyframes electricFlow {
+    0% {
+      stroke-dashoffset: 100;
+    }
+    100% {
+      stroke-dashoffset: 0;
+    }
+  }
+
+  @keyframes sparkleOpacity {
+    0%, 100% { opacity: 0; }
+    50% { opacity: 1; }
+  }
+
+  .electric-path {
+    stroke-dasharray: 4, 7;
+    animation: electricFlow 1.5s linear infinite;
+  }
+
+  .electric-pulse {
+    animation: electricPulse 2s ease-in-out infinite;
+  }
+
+  .sparkle {
+    animation: sparkleOpacity 0.8s infinite;
+  }
+
   .animated-line-vertical {
     stroke-dasharray: 5;
     stroke-dashoffset: 0;
@@ -256,54 +301,90 @@ export function CustomerJourney({ customerId }: CustomerJourneyProps) {
     }
   };
   
-  // Simplified animated connector component
-  const AnimatedConnector = ({ label = "" }: { label?: string }) => {
+  // Electric connector component
+  const ElectricConnector = ({ 
+    label = "", 
+    isActive = true, 
+    direction = "down"
+  }: { 
+    label?: string; 
+    isActive?: boolean;
+    direction?: "down" | "up" | "left" | "right";
+  }) => {
+    const height = direction === "down" || direction === "up" ? 64 : 4;
+    const width = direction === "left" || direction === "right" ? 64 : 4;
+    const sparklePositions = [
+      { x: width / 2, y: height * 0.2 },
+      { x: width / 2, y: height * 0.5 },
+      { x: width / 2, y: height * 0.8 }
+    ];
+
     return (
       <div className="relative h-16 flex items-center justify-center mx-auto w-full max-w-[2px]">
         {/* Background line */}
         <div className="absolute h-full w-[2px] bg-gray-200"></div>
         
-        {/* SVG with animated path */}
-        <svg width="4" height="64" className="absolute">
+        {/* Main SVG with animation */}
+        <svg width={width} height={height} className="absolute">
           <defs>
-            <linearGradient id="lineGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.3" />
-              <stop offset="50%" stopColor="#3b82f6" stopOpacity="1" />
-              <stop offset="100%" stopColor="#3b82f6" stopOpacity="0.3" />
+            <filter id="electric-glow" x="-50%" y="-50%" width="200%" height="200%">
+              <feGaussianBlur in="SourceGraphic" stdDeviation="1.5" result="blur" />
+              <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0.3  0 0 1 0 1  0 0 0 10 -5" result="glow" />
+              <feBlend in="SourceGraphic" in2="glow" mode="normal" />
+            </filter>
+            
+            <linearGradient id="electricGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stopColor="#4f46e5" stopOpacity="0.8" />
+              <stop offset="50%" stopColor="#60a5fa" stopOpacity="1" />
+              <stop offset="100%" stopColor="#4f46e5" stopOpacity="0.8" />
             </linearGradient>
           </defs>
-          <line 
-            x1="2" 
-            y1="0" 
-            x2="2" 
-            y2="64" 
-            stroke="url(#lineGradient)" 
-            strokeWidth="2"
-            className="animated-line-vertical"
-          />
+          
+          {/* Main electric path */}
+          {isActive && (
+            <>
+              <path 
+                d={`M2,0 Q2,${height/3} 2,${height/2} Q2,${2*height/3} 2,${height}`}
+                stroke="url(#electricGradient)" 
+                strokeWidth="2"
+                fill="none"
+                className="electric-path electric-pulse"
+                style={{ filter: 'url(#electric-glow)' }}
+              />
+              
+              {/* Additional decorative sparks */}
+              {sparklePositions.map((pos, i) => (
+                <circle 
+                  key={i}
+                  cx={pos.x} 
+                  cy={pos.y} 
+                  r="1.5"
+                  fill="#60a5fa"
+                  className="sparkle"
+                  style={{ animationDelay: `${i * 0.3}s` }}
+                />
+              ))}
+            </>
+          )}
+          
+          {/* Static line when not active */}
+          {!isActive && (
+            <line 
+              x1="2" 
+              y1="0" 
+              x2="2" 
+              y2={height} 
+              stroke="#e2e8f0" 
+              strokeWidth="2"
+            />
+          )}
         </svg>
-        
-        {/* Animated dots that move along the path */}
-        <div className="absolute top-0 left-0 w-full h-full pointer-events-none overflow-hidden">
-          <div 
-            className="absolute h-2 w-2 rounded-full bg-blue-500 animated-dot-vertical"
-            style={{left: "1px", transform: "translateX(-50%)"}}
-          ></div>
-          <div 
-            className="absolute h-2 w-2 rounded-full bg-blue-500 animated-dot-vertical"
-            style={{left: "1px", transform: "translateX(-50%)", animationDelay: "0.5s"}}
-          ></div>
-          <div 
-            className="absolute h-2 w-2 rounded-full bg-blue-500 animated-dot-vertical"
-            style={{left: "1px", transform: "translateX(-50%)", animationDelay: "1s"}}
-          ></div>
-        </div>
         
         {/* Center dot */}
         <div 
-          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-3 w-3 rounded-full bg-blue-500 z-10"
+          className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-3 w-3 rounded-full bg-blue-500 z-10 ${isActive ? 'animate-pulse' : ''}`}
           style={{
-            boxShadow: "0 0 8px rgba(59, 130, 246, 0.6)"
+            boxShadow: isActive ? "0 0 8px rgba(59, 130, 246, 0.8)" : "0 0 4px rgba(59, 130, 246, 0.4)"
           }}
         ></div>
         
@@ -323,8 +404,20 @@ export function CustomerJourney({ customerId }: CustomerJourneyProps) {
     );
   };
 
-  // Simplified horizontal connector
-  const HorizontalConnector = ({ width = 40 }: { width?: number }) => {
+  // Electric horizontal connector
+  const ElectricHorizontalConnector = ({ 
+    width = 40,
+    isActive = true
+  }: { 
+    width?: number;
+    isActive?: boolean;
+  }) => {
+    const sparklePositions = [
+      { x: width * 0.3, y: 2 },
+      { x: width * 0.6, y: 2 },
+      { x: width * 0.9, y: 2 }
+    ];
+    
     return (
       <div className="relative h-2 mx-2" style={{ width: `${width}px` }}>
         {/* Background line */}
@@ -333,34 +426,71 @@ export function CustomerJourney({ customerId }: CustomerJourneyProps) {
         {/* SVG with animated path */}
         <svg width={width} height="4" className="absolute top-1/2 -translate-y-1/2">
           <defs>
-            <linearGradient id="horizontalGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.3" />
-              <stop offset="70%" stopColor="#3b82f6" stopOpacity="1" />
-              <stop offset="100%" stopColor="#3b82f6" stopOpacity="1" />
+            <filter id="electric-glow-horiz" x="-50%" y="-50%" width="200%" height="200%">
+              <feGaussianBlur in="SourceGraphic" stdDeviation="1" result="blur" />
+              <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0.3  0 0 1 0 1  0 0 0 8 -5" result="glow" />
+              <feBlend in="SourceGraphic" in2="glow" mode="normal" />
+            </filter>
+            
+            <linearGradient id="horizontalElectricGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor="#4f46e5" stopOpacity="0.8" />
+              <stop offset="70%" stopColor="#60a5fa" stopOpacity="1" />
+              <stop offset="100%" stopColor="#4f46e5" stopOpacity="0.8" />
             </linearGradient>
           </defs>
-          <line 
-            x1="0" 
-            y1="2" 
-            x2={width - 6} 
-            y2="2" 
-            stroke="url(#horizontalGradient)" 
-            strokeWidth="2"
-            className="animated-line-horizontal"
-          />
-          <polygon 
-            points={`${width-6},0 ${width},2 ${width-6},4`} 
-            fill="#3b82f6"
-          />
+          
+          {/* Main path with electricity effect */}
+          {isActive && (
+            <>
+              <path 
+                d={`M0,2 Q${width/3},2 ${width/2},2 Q${2*width/3},2 ${width-6},2`}
+                stroke="url(#horizontalElectricGradient)" 
+                strokeWidth="2"
+                fill="none"
+                className="electric-path electric-pulse"
+                style={{ filter: 'url(#electric-glow-horiz)' }}
+              />
+              
+              {/* Arrow tip */}
+              <polygon 
+                points={`${width-6},0 ${width},2 ${width-6},4`} 
+                fill="#60a5fa"
+                className={isActive ? "animate-pulse" : ""}
+              />
+              
+              {/* Additional decorative sparks */}
+              {sparklePositions.map((pos, i) => (
+                <circle 
+                  key={i}
+                  cx={pos.x} 
+                  cy={pos.y} 
+                  r="1.2"
+                  fill="#60a5fa"
+                  className="sparkle"
+                  style={{ animationDelay: `${i * 0.3}s` }}
+                />
+              ))}
+            </>
+          )}
+          
+          {/* Static path when not active */}
+          {!isActive && (
+            <>
+              <line 
+                x1="0" 
+                y1="2" 
+                x2={width - 6} 
+                y2="2" 
+                stroke="#e2e8f0" 
+                strokeWidth="2"
+              />
+              <polygon 
+                points={`${width-6},0 ${width},2 ${width-6},4`} 
+                fill="#e2e8f0"
+              />
+            </>
+          )}
         </svg>
-        
-        {/* Animated dots that move along the path */}
-        <div className="absolute top-0 left-0 w-full h-full pointer-events-none overflow-hidden">
-          <div 
-            className="absolute h-2 w-2 rounded-full bg-blue-500 animated-dot-horizontal"
-            style={{top: "50%", transform: "translateY(-50%)"}}
-          ></div>
-        </div>
       </div>
     );
   };
@@ -401,17 +531,17 @@ export function CustomerJourney({ customerId }: CustomerJourneyProps) {
               <div className="w-3 h-3 rounded-full bg-blue-600 mr-1"></div>
               <span>Audit</span>
             </div>
-            <HorizontalConnector width={40} />
+            <ElectricHorizontalConnector width={40} isActive={true} />
             <div className="flex items-center">
               <div className="w-3 h-3 rounded-full bg-amber-600 mr-1"></div>
               <span>Quote</span>
             </div>
-            <HorizontalConnector width={40} />
+            <ElectricHorizontalConnector width={40} isActive={true} />
             <div className="flex items-center">
               <div className="w-3 h-3 rounded-full bg-green-600 mr-1"></div>
               <span>Job</span>
             </div>
-            <HorizontalConnector width={40} />
+            <ElectricHorizontalConnector width={40} isActive={true} />
             <div className="flex items-center">
               <div className="w-3 h-3 rounded-full bg-violet-600 mr-1"></div>
               <span>Invoice</span>
@@ -508,7 +638,7 @@ export function CustomerJourney({ customerId }: CustomerJourneyProps) {
         </Card>
         
         {/* Animated connector between Audits and Quotes */}
-        <AnimatedConnector label="Creates" />
+        <ElectricConnector label="Creates" isActive={audits.length > 0} />
         
         {/* Quotes Section */}
         <Card className={`border border-gray-200 bg-white hover:border-gray-300 transition-all ${expandedSection === 'quotes' ? 'shadow-md' : ''}`}>
@@ -583,7 +713,7 @@ export function CustomerJourney({ customerId }: CustomerJourneyProps) {
         </Card>
         
         {/* Animated connector between Quotes and Jobs */}
-        <AnimatedConnector label="Converts to" />
+        <ElectricConnector label="Converts to" isActive={quotes.length > 0} />
         
         {/* Jobs Section */}
         <Card className={`border border-gray-200 bg-white hover:border-gray-300 transition-all ${expandedSection === 'jobs' ? 'shadow-md' : ''}`}>
@@ -663,7 +793,7 @@ export function CustomerJourney({ customerId }: CustomerJourneyProps) {
         </Card>
         
         {/* Animated connector between Jobs and Invoices */}
-        <AnimatedConnector label="Generates" />
+        <ElectricConnector label="Generates" isActive={jobs.length > 0} />
         
         {/* Invoices Section */}
         <Card className={`border border-gray-200 bg-white hover:border-gray-300 transition-all ${expandedSection === 'invoices' ? 'shadow-md' : ''}`}>

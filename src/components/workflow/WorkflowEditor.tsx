@@ -14,7 +14,7 @@ import {
   Position
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
-import { Workflow, WorkflowNode, WorkflowEdge, WorkflowTemplate } from '@/types/workflow';
+import { Workflow, WorkflowNode, WorkflowEdge, WorkflowTemplate, NodeType, WorkflowData, UpdateWorkflowParams } from '@/types/workflow';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -75,8 +75,8 @@ export function WorkflowEditor({ workflow, onSave, workflowDarkMode = false }: W
     }
   }, []);
 
-  const [nodes, setNodes, onNodesChange] = useNodesState(workflow?.data.nodes || []);
-  const [edges, setEdges, onEdgesChange] = useEdgesState(workflow?.data.edges || []);
+  const [nodes, setNodes, onNodesChange] = useNodesState((workflow?.data as any)?.nodes || []);
+  const [edges, setEdges, onEdgesChange] = useEdgesState((workflow?.data as any)?.edges || []);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   const [executionId, setExecutionId] = useState<string | null>(null);
@@ -133,18 +133,45 @@ export function WorkflowEditor({ workflow, onSave, workflowDarkMode = false }: W
   const handleSave = async () => {
     setIsLoading(true);
     try {
-      const updatedWorkflow = {
-        ...workflow,
+      // Convert nodes to the expected format before saving
+      const formattedNodes = nodes.map(node => ({
+        id: node.id,
+        type: node.type as NodeType,
+        position: { 
+          x: node.position.x, 
+          y: node.position.y 
+        },
         data: {
-          nodes,
-          edges
+          label: String(node.data.label || node.type),
+          ...node.data
         }
+      }));
+
+      // Create a properly typed workflow data
+      const workflowData: WorkflowData = {
+        nodes: formattedNodes,
+        edges
       };
 
-      const { success, error } = await WorkflowService.updateWorkflow(updatedWorkflow);
+      // Use the proper UpdateWorkflowParams structure
+      const params: UpdateWorkflowParams = {
+        id: workflow.id,
+        name: workflow.name,
+        description: workflow.description,
+        category: workflow.category,
+        isTemplate: workflow.is_template,
+        data: workflowData
+      };
+
+      const { success, error } = await WorkflowService.updateWorkflow(params);
+      
       if (!success) throw error;
 
-      onSave(updatedWorkflow);
+      onSave({
+        ...workflow,
+        data: workflowData
+      } as any);
+      
       toast.success('Workflow saved successfully');
     } catch (error) {
       console.error('Failed to save workflow:', error);
