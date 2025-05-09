@@ -42,7 +42,8 @@ const formSchema = z.object({
   acn: z.string().optional(),
   state_licence_state: z.string().optional(),
   state_licence_number: z.string().optional(),
-  national_certifications: z.array(z.string()).optional()
+  national_certifications: z.array(z.string()).optional(),
+  certification_details: z.record(z.string()).optional()
 });
 
 export default function EditCustomer() {
@@ -75,11 +76,12 @@ export default function EditCustomer() {
       acn: "",
       state_licence_state: "",
       state_licence_number: "",
-      national_certifications: []
+      national_certifications: [],
+      certification_details: {}
     }
   });
 
-  const { control, register } = form;
+  const { control, register, watch } = form;
   const { fields, append, remove } = useFieldArray({
     control,
     name: "jobSiteAddresses"
@@ -162,7 +164,8 @@ export default function EditCustomer() {
           acn: data.acn || "",
           state_licence_state: data.state_licence_state || "",
           state_licence_number: data.state_licence_number || "",
-          national_certifications: data.national_certifications || []
+          national_certifications: data.national_certifications || [],
+          certification_details: data.certification_details || {}
         });
         
         console.log("Form values set:", form.getValues());
@@ -430,10 +433,26 @@ const customerData: CustomerFormValues = {
                 <div className="mb-2">
                   <label className="block text-sm font-medium">National Certifications</label>
                   <div className="flex flex-col gap-1">
-                    <label><input type="checkbox" value="Australian Builder's License" {...register("national_certifications")} /> Australian Builder's License</label>
-                    <label><input type="checkbox" value="White Card" {...register("national_certifications")} /> National Construction Induction Card (White Card)</label>
-                    <label><input type="checkbox" value="Plumbing Industry Commission License" {...register("national_certifications")} /> Plumbing Industry Commission License</label>
-                    <label><input type="checkbox" value="Electrical Contractor's License" {...register("national_certifications")} /> Electrical Contractor's License</label>
+                    {["Australian Builder's License", "National Construction Induction Card (White Card)", "Plumbing Industry Commission License", "Electrical Contractor's License"].map((cert) => (
+                      <div key={cert} className="mb-2 border border-gray-700 rounded p-2 max-w-md w-full">
+                        <label>
+                          <input
+                            type="checkbox"
+                            value={cert}
+                            {...register("national_certifications")}
+                          /> {cert}
+                        </label>
+                        {watch("national_certifications")?.includes(cert) && (
+                          <div className="mt-1 border border-gray-700 rounded p-2 max-w-md w-full">
+                            <input
+                              className="input"
+                              placeholder={`Enter ${cert} number/details`}
+                              {...register(`certification_details.${cert}` as const)}
+                            />
+                          </div>
+                        )}
+                      </div>
+                    ))}
                   </div>
                 </div>
               </div>
