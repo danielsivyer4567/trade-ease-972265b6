@@ -14,6 +14,7 @@ import ErrorBoundary from '@/components/error/ErrorBoundary';
 import Noodle from './components/Noodle';
 import { Timeline } from './components/Timeline';
 import './components/pulseLine.css';
+import { ElectricNoodle } from './components/ElectricNoodle';
 
 interface CustomerWithDetails extends CustomerData {
   business_name?: string;
