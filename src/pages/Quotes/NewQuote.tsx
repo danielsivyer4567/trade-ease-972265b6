@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { AppLayout } from "@/components/ui/AppLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { ArrowLeft, Upload, FilePlus, FileText, BarChartBig, Paperclip, Palette, Settings, CheckCircle, Layers, Search, Download, MessageSquare, Filter } from "lucide-react";
+import { ArrowLeft, Upload, FilePlus, FileText, BarChartBig, Paperclip, Palette, Settings, CheckCircle, Layers, Search, Download, MessageSquare, Filter, FileSignature, Send, Mail } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { CustomerForm } from "./components/CustomerForm";
 import { QuoteItemsForm, QuoteItem } from "./components/QuoteItemsForm";
@@ -17,6 +17,8 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/lib/supabase";
+import { DocuSealWrapper } from "./components/DocuSealWrapper";
+import { createSignatureRequest, getSignatureStatus } from '@/services/docuSealService';
 
 // Quote status options
 const statusFilters = [
@@ -59,6 +61,12 @@ const QuotesMain = () => {
   const [showNotifications, setShowNotifications] = useState(false);
   const [selectedTemplateCategory, setSelectedTemplateCategory] = useState("All Categories");
   const [userTemplates, setUserTemplates] = useState([]);
+  
+  // New DocuSeal state
+  const [showDocuSeal, setShowDocuSeal] = useState(false);
+  const [signingUrl, setSigningUrl] = useState("");
+  const [customerEmail, setCustomerEmail] = useState("");
+  const [documentSigned, setDocumentSigned] = useState(false);
 
   const handleBack = () => {
     navigate("/quotes");
@@ -135,6 +143,60 @@ const QuotesMain = () => {
     fetchUserTemplates();
   }, []);
 
+  // Update handleRequestSignature to use the docuSealService
+  const handleRequestSignature = async () => {
+    try {
+      // For demo purposes we're using a hardcoded quote ID
+      // In a real application, this would be the actual quote ID
+      const quoteId = "quote_" + Math.random().toString(36).substring(2, 10);
+      
+      // Get the customer data from the form/state
+      const documentData = {
+        customerName: "Sample Customer", // In a real app, this would come from a form
+        quoteName: quoteName,
+        quoteItems: quoteItems,
+        total: quoteItems.reduce((sum, item) => sum + (item.total || 0), 0),
+        // Other quote data...
+      };
+      
+      // Create the signature request
+      const { signingUrl } = await createSignatureRequest(
+        quoteId,
+        customerEmail,
+        documentData
+      );
+      
+      setSigningUrl(signingUrl);
+      setShowDocuSeal(true);
+      
+      toast({
+        title: "Signature Request Sent",
+        description: "The customer will receive an email with signing instructions"
+      });
+    } catch (error) {
+      console.error("Error requesting signature:", error);
+      toast({
+        title: "Error",
+        description: "Failed to request signature",
+        variant: "destructive"
+      });
+    }
+  };
+  
+  // New function to handle when document is signed
+  const handleDocumentSigned = () => {
+    setDocumentSigned(true);
+    setShowDocuSeal(false);
+    
+    toast({
+      title: "Document Signed",
+      description: "The quote has been signed by the customer and saved to their profile"
+    });
+    
+    // In a real implementation, this would be triggered by the webhook
+    // Here we're just simulating the flow
+  };
+
   // Render the active section component
   const renderActiveSection = () => {
     switch (activeSection) {
@@ -197,6 +259,67 @@ const QuotesMain = () => {
               onPrevTab={() => setActiveSection("request")} 
               onNextTab={() => setActiveSection("terms")} 
             />
+          </div>
+        );
+      case "signature":
+        return (
+          <div className="space-y-4">
+            <h3 className="text-lg font-medium text-slate-800">Request Customer Signature</h3>
+            <div className="space-y-3">
+              <div>
+                <label className="block text-sm font-medium text-slate-700">Customer Email</label>
+                <Input 
+                  type="email" 
+                  placeholder="customer@example.com"
+                  value={customerEmail}
+                  onChange={(e) => setCustomerEmail(e.target.value)}
+                  className="mt-1"
+                />
+              </div>
+              
+              <div className="p-4 bg-blue-50 border border-blue-200 rounded-md">
+                <h4 className="font-medium text-blue-700 flex items-center">
+                  <FileSignature className="w-4 h-4 mr-2" />
+                  DocuSeal Integration
+                </h4>
+                <p className="text-sm text-blue-600 mt-1">
+                  When you request a signature, the customer will receive an email with a link to sign the document electronically.
+                  Once signed, both you and the customer will receive copies of the signed document.
+                </p>
+              </div>
+              
+              {documentSigned ? (
+                <div className="flex flex-col items-center p-6 bg-green-50 border border-green-200 rounded-md">
+                  <CheckCircle className="w-12 h-12 text-green-500 mb-2" />
+                  <h4 className="font-medium text-green-700">Document Signed Successfully</h4>
+                  <p className="text-sm text-green-600 text-center mt-1">
+                    The signed document has been saved to the customer's profile.
+                  </p>
+                </div>
+              ) : (
+                <div className="flex justify-center">
+                  <Button 
+                    onClick={handleRequestSignature}
+                    disabled={!customerEmail}
+                    className="bg-gradient-to-r from-blue-500 to-blue-700 hover:from-blue-600 hover:to-blue-800 flex items-center"
+                  >
+                    <Send className="w-4 h-4 mr-2" />
+                    Request Signature
+                  </Button>
+                </div>
+              )}
+            </div>
+            
+            {showDocuSeal && (
+              <div className="mt-4 border border-gray-200 rounded-md p-4">
+                <h4 className="font-medium text-gray-700 mb-2">Preview Signing Experience</h4>
+                {/* This is a placeholder for the actual DocuSeal component */}
+                <DocuSealWrapper 
+                  url={signingUrl} 
+                  onDocumentSigned={handleDocumentSigned}
+                />
+              </div>
+            )}
           </div>
         );
       default:
@@ -601,6 +724,20 @@ const QuotesMain = () => {
                       >
                         <BarChartBig className="h-4 w-4 mr-2" />
                         Estimates & Costings
+                      </Button>
+                    </div>
+                    
+                    {/* Add Signature section */}
+                    <div className="p-1">
+                      <Button 
+                        variant={activeSection === "signature" ? "default" : "ghost"} 
+                        className={`justify-start w-full ${activeSection === "signature" 
+                          ? "bg-blue-500 text-white hover:bg-blue-600" 
+                          : "text-slate-700 hover:text-slate-900 hover:bg-slate-100"}`}
+                        onClick={() => setActiveSection("signature")}
+                      >
+                        <FileSignature className="h-4 w-4 mr-2" />
+                        Customer Signature
                       </Button>
                     </div>
                     
