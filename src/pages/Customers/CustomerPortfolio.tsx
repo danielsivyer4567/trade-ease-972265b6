@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, User, Phone, Mail, Home, Calendar, FileText, Clock, Briefcase, FileSignature, History, PenLine, Trash2, MessageSquare, Download, CheckCircle, CircleDashed, MoveRight, AlertCircle } from 'lucide-react';
+import { ArrowLeft, User, Phone, Mail, Home, Calendar, FileText, Clock, Briefcase, FileSignature, History, PenLine, Trash2, MessageSquare, Download, CheckCircle, CircleDashed, MoveRight, AlertCircle, ChevronDown, FileCheck, Package, CheckSquare } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { Separator } from '@/components/ui/separator';
@@ -55,13 +55,15 @@ interface SignedDocument {
   document_url: string;
 }
 
-// Interface for workflow step
+// Enhanced WorkflowStep with icon information
 interface WorkflowStep {
   id: string;
   title: string;
   description: string;
   status: 'completed' | 'current' | 'upcoming';
   date?: string;
+  icon: React.ReactNode;
+  shortInfo?: string;
 }
 
 const CustomerPortfolio = () => {
@@ -197,41 +199,53 @@ const CustomerPortfolio = () => {
       { 
         id: 'inquiry', 
         title: 'Customer Inquiry', 
-        description: 'Initial contact and information gathering',
+        description: 'Initial contact', 
         status: 'completed',
-        date: customer.created_at ? new Date(customer.created_at).toLocaleDateString() : undefined
+        date: customer.created_at ? new Date(customer.created_at).toLocaleDateString() : undefined,
+        icon: <User className="h-6 w-6" />,
+        shortInfo: 'New Contact'
       },
       { 
         id: 'quote', 
         title: 'Quote Creation', 
-        description: 'Preparing and sending quotes',
+        description: 'Preparing estimates',
         status: quotes.length > 0 ? 'completed' : 'upcoming',
-        date: quotes.length > 0 ? quotes[0].date : undefined
+        date: quotes.length > 0 ? quotes[0].date : undefined,
+        icon: <FileText className="h-6 w-6" />,
+        shortInfo: quotes.length > 0 ? `${quotes.length} Quotes` : 'No Quotes'
       },
       { 
         id: 'approval', 
         title: 'Quote Approval', 
-        description: 'Customer reviews and approves quote',
-        status: quotes.some(q => q.status === 'accepted') ? 'completed' : quotes.some(q => q.status === 'sent') ? 'current' : 'upcoming'
+        description: 'Customer review',
+        status: quotes.some(q => q.status === 'accepted') ? 'completed' : quotes.some(q => q.status === 'sent') ? 'current' : 'upcoming',
+        icon: <FileCheck className="h-6 w-6" />,
+        shortInfo: quotes.some(q => q.status === 'accepted') ? 'Approved' : 'Pending'
       },
       { 
         id: 'job', 
         title: 'Job Creation', 
-        description: 'Converting quote to job and scheduling work',
+        description: 'Schedule work',
         status: jobs.length > 0 ? 'completed' : quotes.some(q => q.status === 'accepted') ? 'current' : 'upcoming',
-        date: jobs.length > 0 ? jobs[0].date : undefined
+        date: jobs.length > 0 ? jobs[0].date : undefined,
+        icon: <Briefcase className="h-6 w-6" />,
+        shortInfo: jobs.length > 0 ? `${jobs.length} Jobs` : 'No Jobs'
       },
       { 
         id: 'execution', 
         title: 'Job Execution', 
-        description: 'Work in progress and tracking',
-        status: jobs.some(j => j.status === 'in_progress') ? 'current' : jobs.some(j => j.status === 'completed') ? 'completed' : 'upcoming'
+        description: 'Work in progress',
+        status: jobs.some(j => j.status === 'in_progress') ? 'current' : jobs.some(j => j.status === 'completed') ? 'completed' : 'upcoming',
+        icon: <Package className="h-6 w-6" />,
+        shortInfo: jobs.some(j => j.status === 'in_progress') ? 'In Progress' : 'Not Started'
       },
       { 
         id: 'completion', 
         title: 'Job Completion', 
-        description: 'Work completed and customer sign-off',
-        status: jobs.some(j => j.status === 'completed') ? 'completed' : 'upcoming'
+        description: 'Customer sign-off',
+        status: jobs.some(j => j.status === 'completed') ? 'completed' : 'upcoming',
+        icon: <CheckSquare className="h-6 w-6" />,
+        shortInfo: jobs.some(j => j.status === 'completed') ? 'Complete' : 'Pending'
       }
     ];
     
@@ -661,49 +675,52 @@ const CustomerPortfolio = () => {
             </Card>
           </div>
           
-          {/* Customer Journey Workflow - Now on the right side */}
+          {/* Customer Journey Workflow - Now with node style */}
           <div className="lg:col-span-3">
-            <Card className="h-full">
+            <Card className="h-full overflow-hidden bg-gradient-to-br from-pink-50 to-indigo-50">
               <CardHeader className="pb-2">
                 <CardTitle className="text-lg flex items-center gap-2">
                   <History className="h-5 w-5 text-primary" />
                   Customer Journey
                 </CardTitle>
               </CardHeader>
-              <CardContent className="p-4">
-                <div className="flex flex-col gap-4">
+              <CardContent className="p-4 relative">
+                {/* Dashed connector line for background */}
+                <div className="absolute top-0 bottom-0 left-1/2 w-0.5 border-l-2 border-dashed border-gray-200 -translate-x-1/2 z-0"></div>
+                
+                <div className="relative z-10">
                   {workflowSteps.map((step, index) => (
-                    <div key={step.id} className="relative">
-                      {/* Connector line */}
+                    <div key={step.id} className="mb-8 relative">
+                      {/* Connector arrow between nodes */}
                       {index < workflowSteps.length - 1 && (
-                        <div 
-                          className={`absolute left-5 top-10 w-0.5 h-full -z-10
-                            ${step.status === 'completed' ? 'bg-green-400' : 
-                              step.status === 'current' ? 'bg-blue-400' : 
-                              'bg-gray-200'}`}
-                        ></div>
+                        <div className="absolute top-16 left-1/2 -translate-x-1/2 text-gray-400 animate-bounce">
+                          <ChevronDown className="h-5 w-5" />
+                        </div>
                       )}
                       
-                      <div className="flex items-start gap-3">
-                        <div className={`rounded-full w-10 h-10 flex items-center justify-center flex-shrink-0
-                          ${step.status === 'completed' ? 'bg-green-100 text-green-600' : 
-                            step.status === 'current' ? 'bg-blue-100 text-blue-600' : 
-                            'bg-gray-100 text-gray-400'}`}
+                      {/* Node */}
+                      <div className="flex flex-col items-center">
+                        {/* Node circle with icon */}
+                        <div 
+                          className={`rounded-full w-16 h-16 flex items-center justify-center
+                            ${step.status === 'completed' ? 'bg-green-100 text-green-600 shadow-md shadow-green-200' : 
+                              step.status === 'current' ? 'bg-pink-100 text-pink-600 animate-pulse shadow-md shadow-pink-200' : 
+                              'bg-gray-100 text-gray-400'} 
+                            transition-all duration-300 hover:scale-110 cursor-pointer`}
                         >
-                          {step.status === 'completed' ? (
-                            <CheckCircle className="h-6 w-6" />
-                          ) : step.status === 'current' ? (
-                            <CircleDashed className="h-6 w-6" />
-                          ) : (
-                            <CircleDashed className="h-6 w-6" />
-                          )}
+                          {step.icon}
                         </div>
                         
-                        <div className="flex-1">
-                          <h3 className="font-medium text-sm">{step.title}</h3>
-                          <p className="text-xs text-muted-foreground">{step.description}</p>
+                        {/* Node label */}
+                        <div className="mt-2 text-center w-full">
+                          <h3 className="font-medium text-sm text-center">{step.title}</h3>
+                          <p className="text-xs text-muted-foreground text-center">{step.shortInfo}</p>
                           {step.date && (
-                            <p className="text-xs mt-1 text-primary">{step.date}</p>
+                            <div className="flex justify-center mt-1">
+                              <span className="px-2 py-0.5 bg-white/80 rounded-full text-xs text-primary">
+                                {step.date}
+                              </span>
+                            </div>
                           )}
                         </div>
                       </div>
