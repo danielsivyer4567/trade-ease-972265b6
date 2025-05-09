@@ -78,6 +78,11 @@ const CustomerPortfolio = () => {
   const nodeRefs = useRef<(HTMLDivElement | null)[]>([]);
   const [nodePositions, setNodePositions] = useState<{ x: number; y: number }[]>([]);
   
+  // Early check for missing customer ID
+  if (!id) {
+    return <div className="p-8 text-center text-red-500">No customer ID provided in the URL.</div>;
+  }
+
   // Define the animation style for the electrical effect
   const electricAnimationStyle = `
     @keyframes moveDown {
@@ -252,43 +257,6 @@ const CustomerPortfolio = () => {
     fetchCustomerData();
   }, [id, toast]);
 
-  useEffect(() => {
-    // After render, measure node positions
-    const positions = nodeRefs.current.map(ref => {
-      if (!ref) return { x: 0, y: 0 };
-      const rect = ref.getBoundingClientRect();
-      // Center bottom of the node
-      return {
-        x: rect.left + rect.width / 2,
-        y: rect.top + rect.height,
-      };
-    });
-    setNodePositions(positions);
-  }, [loading, workflowSteps.length]);
-
-  const handleAddNote = () => {
-    const newNote = {
-      id: `new-${Date.now()}`,
-      text: 'New customer note...',
-      date: new Date().toISOString().split('T')[0],
-      user: 'Current User'
-    };
-    
-    setNotes([newNote, ...notes]);
-    
-    toast({
-      title: "Note Added",
-      description: "Your note has been added successfully"
-    });
-  };
-
-  const handleSendMessage = () => {
-    toast({
-      title: "Message Sent",
-      description: "Your message has been sent to the customer"
-    });
-  };
-
   // Define the workflow steps based on customer data
   const getWorkflowSteps = (): WorkflowStep[] => {
     if (!customer) return [];
@@ -351,6 +319,43 @@ const CustomerPortfolio = () => {
   };
   
   const workflowSteps = getWorkflowSteps();
+
+  useEffect(() => {
+    // After render, measure node positions
+    const positions = nodeRefs.current.map(ref => {
+      if (!ref) return { x: 0, y: 0 };
+      const rect = ref.getBoundingClientRect();
+      // Center bottom of the node
+      return {
+        x: rect.left + rect.width / 2,
+        y: rect.top + rect.height,
+      };
+    });
+    setNodePositions(positions);
+  }, [loading, workflowSteps.length]);
+
+  const handleAddNote = () => {
+    const newNote = {
+      id: `new-${Date.now()}`,
+      text: 'New customer note...',
+      date: new Date().toISOString().split('T')[0],
+      user: 'Current User'
+    };
+    
+    setNotes([newNote, ...notes]);
+    
+    toast({
+      title: "Note Added",
+      description: "Your note has been added successfully"
+    });
+  };
+
+  const handleSendMessage = () => {
+    toast({
+      title: "Message Sent",
+      description: "Your message has been sent to the customer"
+    });
+  };
 
   if (loading) {
     return (
