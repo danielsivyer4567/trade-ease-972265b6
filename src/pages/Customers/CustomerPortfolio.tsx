@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { AppLayout } from "@/components/ui/AppLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -11,6 +11,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Separator } from '@/components/ui/separator';
 import { CustomerData } from './components/CustomerCard';
 import ErrorBoundary from '@/components/error/ErrorBoundary';
+import Noodle from './components/Noodle';
 
 interface CustomerWithDetails extends CustomerData {
   business_name?: string;
@@ -74,6 +75,8 @@ const CustomerPortfolio = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("overview");
+  const nodeRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const [nodePositions, setNodePositions] = useState<{ x: number; y: number }[]>([]);
   
   // Define the animation style for the electrical effect
   const electricAnimationStyle = `
@@ -248,6 +251,20 @@ const CustomerPortfolio = () => {
 
     fetchCustomerData();
   }, [id, toast]);
+
+  useEffect(() => {
+    // After render, measure node positions
+    const positions = nodeRefs.current.map(ref => {
+      if (!ref) return { x: 0, y: 0 };
+      const rect = ref.getBoundingClientRect();
+      // Center bottom of the node
+      return {
+        x: rect.left + rect.width / 2,
+        y: rect.top + rect.height,
+      };
+    });
+    setNodePositions(positions);
+  }, [loading, workflowSteps.length]);
 
   const handleAddNote = () => {
     const newNote = {
@@ -786,126 +803,23 @@ const CustomerPortfolio = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-4 relative z-10">
-                {/* Dashed connector line for background */}
-                <div className="absolute top-0 bottom-0 left-1/2 w-0.5 border-l-2 border-dashed border-gray-400 -translate-x-1/2 z-0"></div>
-                
                 <div className="relative z-10">
                   {workflowSteps.map((step, index) => (
-                    <div key={step.id} className="mb-8 relative">
-                      {/* Electric connector between current node and next node */}
-                      {index < workflowSteps.length - 1 && (
-                        <>
-                          {step.status === 'current' ? (
-                            <div className="absolute top-14 left-1/2 h-20 flex flex-col items-center justify-center pointer-events-none overflow-hidden z-20">
-                              {/* Base connector line - making it more visible with width and color */}
-                              <div className="absolute h-full w-3 bg-blue-200 rounded-full"></div>
-                              
-                              {/* Progress indicator - showing movement toward next step */}
-                              <div className="absolute top-1 h-6 w-6 bg-blue-500 rounded-full"
-                                style={{
-                                  animation: 'progressPulse 3s infinite ease-in-out',
-                                  boxShadow: '0 0 15px rgba(59, 130, 246, 0.8)'
-                                }}
-                              ></div>
-                              {/* Second progress indicator with delay */}
-                              <div className="absolute top-1 h-6 w-6 bg-blue-400 rounded-full"
-                                style={{
-                                  animation: 'progressPulse 3s infinite ease-in-out',
-                                  animationDelay: '1s',
-                                  boxShadow: '0 0 15px rgba(96, 165, 250, 0.7)'
-                                }}
-                              ></div>
-                              {/* Third progress indicator with more delay */}
-                              <div className="absolute top-1 h-6 w-6 bg-blue-300 rounded-full"
-                                style={{
-                                  animation: 'progressPulse 3s infinite ease-in-out',
-                                  animationDelay: '2s',
-                                  boxShadow: '0 0 15px rgba(147, 197, 253, 0.6)'
-                                }}
-                              ></div>
-                              
-                              {/* Visual scripting noodle effect with multiple pulses */}
-                              <div className="absolute h-full w-full overflow-visible flex justify-center">
-                                {/* First pulse - increased size and opacity */}
-                                <div 
-                                  className="bg-blue-500 rounded-full absolute"
-                                  style={{
-                                    width: '8px',
-                                    height: '12px',
-                                    animation: 'noodlePulse 2s infinite',
-                                    background: 'linear-gradient(to bottom, rgba(59, 130, 246, 0.2), rgba(59, 130, 246, 1), rgba(59, 130, 246, 0.2))',
-                                    boxShadow: '0 0 10px rgba(59, 130, 246, 0.8)'
-                                  }}
-                                ></div>
-                                
-                                {/* Second pulse (delayed) - increased size and opacity */}
-                                <div 
-                                  className="bg-blue-400 rounded-full absolute"
-                                  style={{
-                                    width: '8px',
-                                    height: '12px',
-                                    animation: 'noodlePulse 2s infinite',
-                                    animationDelay: '0.7s',
-                                    background: 'linear-gradient(to bottom, rgba(96, 165, 250, 0.2), rgba(96, 165, 250, 1), rgba(96, 165, 250, 0.2))',
-                                    boxShadow: '0 0 10px rgba(96, 165, 250, 0.7)'
-                                  }}
-                                ></div>
-                                
-                                {/* Third pulse (more delayed) - increased size and opacity */}
-                                <div 
-                                  className="bg-blue-300 rounded-full absolute"
-                                  style={{
-                                    width: '8px',
-                                    height: '12px',
-                                    animation: 'noodlePulse 2s infinite',
-                                    animationDelay: '1.4s',
-                                    background: 'linear-gradient(to bottom, rgba(147, 197, 253, 0.2), rgba(147, 197, 253, 1), rgba(147, 197, 253, 0.2))',
-                                    boxShadow: '0 0 10px rgba(147, 197, 253, 0.6)'
-                                  }}
-                                ></div>
-                              </div>
-                              
-                              {/* Pulsing glow effect - enhanced glow */}
-                              <div className="absolute h-full w-2 bg-transparent"
-                                style={{
-                                  boxShadow: '0 0 20px 8px rgba(59, 130, 246, 0.6)',
-                                  animation: 'glow 1.5s infinite ease-in-out'
-                                }}
-                              ></div>
-                              
-                              {/* Arrow indicator showing direction */}
-                              <div className="absolute bottom-0 left-1/2 -translate-x-1/2 text-blue-500 animate-bounce">
-                                <ChevronDown className="h-5 w-5" />
-                              </div>
-                            </div>
-                          ) : (
-                            <div className="absolute top-14 left-1/2 h-20 flex flex-col items-center justify-center pointer-events-none overflow-hidden z-20">
-                              {/* Base connector line for non-current steps - making it more visible */}
-                              <div className={`absolute h-full w-1.5 rounded-full ${step.status === 'completed' ? 'bg-gray-400' : 'bg-gray-300'}`}></div>
-                              
-                              {/* Arrow indicator */}
-                              <div className={`absolute bottom-0 left-1/2 -translate-x-1/2 
-                                ${step.status === 'completed' ? 'text-gray-500' : 'text-gray-300'} 
-                                ${step.status === 'completed' ? 'animate-bounce' : ''}`}
-                              >
-                                <ChevronDown className="h-5 w-5" />
-                              </div>
-                            </div>
-                          )}
-                        </>
-                      )}
-                      
+                    <React.Fragment key={step.id}>
                       {/* Node - now rectangular instead of circular */}
-                      <div className="flex flex-col items-center">
+                      <div
+                        ref={el => (nodeRefs.current[index] = el)}
+                        className="flex flex-col items-center mb-24 relative"
+                      >
                         {/* Node rectangle with icon */}
-                        <div 
+                        <div
                           className={`rounded-md w-32 h-14 flex items-center justify-center
-                            ${step.status === 'completed' ? 'bg-green-100 text-green-600 border border-green-200 shadow-md' : 
-                              step.status === 'current' ? 'bg-pink-100 text-pink-600 border border-pink-200 shadow-md' : 
-                              'bg-gray-100/50 text-gray-400/70 border border-gray-200/50'} 
+                            ${step.status === 'completed' ? 'bg-green-100 text-green-600 border border-green-200 shadow-md' :
+                              step.status === 'current' ? 'bg-pink-100 text-pink-600 border border-pink-200 shadow-md' :
+                              'bg-gray-100/50 text-gray-400/70 border border-gray-200/50'}
                             transition-all duration-300 hover:scale-105 cursor-pointer
                             ${step.status === 'upcoming' ? 'opacity-60' : 'opacity-100'}`}
-                          style={step.status === 'current' ? { 
+                          style={step.status === 'current' ? {
                             animation: 'slowFlash 3s infinite ease-in-out',
                           } : {}}
                         >
@@ -914,7 +828,6 @@ const CustomerPortfolio = () => {
                             <span className="text-xs font-medium">{step.title}</span>
                           </div>
                         </div>
-                        
                         {/* Node label */}
                         <div className={`mt-2 text-center w-full ${step.status === 'upcoming' ? 'opacity-60' : 'opacity-100'}`}>
                           <p className="text-xs text-muted-foreground text-center">{step.shortInfo}</p>
@@ -927,7 +840,15 @@ const CustomerPortfolio = () => {
                           )}
                         </div>
                       </div>
-                    </div>
+                      {/* Render noodle between this node and the next node */}
+                      {index < workflowSteps.length - 1 && nodePositions[index] && nodePositions[index + 1] && (
+                        <Noodle
+                          from={{ x: 100, y: 0 }} // Placeholder, will fix below
+                          to={{ x: 100, y: 120 }} // Placeholder, will fix below
+                          isActive={step.status === 'current'}
+                        />
+                      )}
+                    </React.Fragment>
                   ))}
                 </div>
               </CardContent>
