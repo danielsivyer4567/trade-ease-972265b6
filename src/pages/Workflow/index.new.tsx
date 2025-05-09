@@ -11,6 +11,42 @@ import { toast } from 'sonner';
 import { WorkflowService } from '@/services/WorkflowService';
 import { User, Briefcase, ClipboardList, FileText, MessageSquare, Eye, Zap, Share2, Layout } from 'lucide-react';
 
+// Define interfaces for workflow data
+interface NodeData {
+  label?: string;
+  title?: string;
+  description?: string;
+  icon?: React.ReactNode;
+  iconComponent?: React.ReactNode;
+  automationId?: string;
+  [key: string]: any;
+}
+
+interface Node {
+  id: string;
+  type: string;
+  position: { x: number; y: number };
+  data: NodeData;
+}
+
+interface Edge {
+  id: string;
+  source: string;
+  target: string;
+  type?: string;
+  animated?: boolean;
+  data?: {
+    isActive: boolean;
+    [key: string]: any;
+  };
+}
+
+interface WorkflowData {
+  nodes?: Node[];
+  edges?: Edge[];
+  [key: string]: any;
+}
+
 export default function WorkflowPage() {
   const { id } = useParams();
   const location = useLocation();
@@ -22,8 +58,8 @@ export default function WorkflowPage() {
   const [isCreatingAutomation, setIsCreatingAutomation] = useState(false);
   const [automationCategory, setAutomationCategory] = useState('');
   const [flowInstance, setFlowInstance] = useState(null);
-  const [nodes, setNodes] = useState([]);
-  const [edges, setEdges] = useState([]);
+  const [nodes, setNodes] = useState<Node[]>([]);
+  const [edges, setEdges] = useState<Edge[]>([]);
   const pendingTemplateData = useRef(null);
   const pendingWorkflowId = useRef(null);
   const pendingAutomationData = useRef(null);
@@ -278,9 +314,9 @@ export default function WorkflowPage() {
     try {
       const result = await WorkflowService.getWorkflow(workflowId);
       if (result.success && result.workflow) {
-        const workflowData = result.workflow.data;
+        const workflowData = result.workflow.data as WorkflowData;
         
-        if (workflowData.nodes && Array.isArray(workflowData.nodes)) {
+        if (workflowData && workflowData.nodes && Array.isArray(workflowData.nodes)) {
           // Create a map of existing node IDs to check for duplicates
           const existingNodeIds = new Set(nodes.map(node => node.id));
           
@@ -298,7 +334,7 @@ export default function WorkflowPage() {
           setNodes(currentNodes => [...currentNodes, ...newNodes]);
         }
         
-        if (workflowData.edges && Array.isArray(workflowData.edges)) {
+        if (workflowData && workflowData.edges && Array.isArray(workflowData.edges)) {
           // Create a map of existing edge IDs to check for duplicates
           const existingEdgeIds = new Set(edges.map(edge => edge.id));
           
@@ -310,7 +346,10 @@ export default function WorkflowPage() {
               source: edge.source,
               target: edge.target,
               type: 'animated',
-              animated: true
+              animated: true,
+              data: {
+                isActive: false // Start with inactive state
+              }
             }));
           
           // Append new edges to existing ones
@@ -435,7 +474,10 @@ export default function WorkflowPage() {
           source: rightmostNode.id,
           target: uniqueId,
           type: 'animated',
-          animated: true
+          animated: true,
+          data: {
+            isActive: false // Default to inactive
+          }
         };
         
         setEdges(eds => [...eds, newEdge]);

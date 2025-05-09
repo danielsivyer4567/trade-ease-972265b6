@@ -13,21 +13,24 @@ import {
   BackgroundVariant
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
+import './workflow.css'; // Import our custom workflow CSS
 import { CustomerNode } from './nodes/CustomerNode';
 import { JobNode } from './nodes/JobNode';
 import { TaskNode } from './nodes/TaskNode';
 import { QuoteNode } from './nodes/QuoteNode';
-import CustomNode from './nodes/CustomNode.jsx';
+import { CustomNode } from './nodes/CustomNode';
 import { VisionNode } from './nodes/VisionNode';
-import AutomationNode from './nodes/AutomationNode.jsx';
-import MessagingNode from './nodes/MessagingNode.jsx';
+import { AutomationNode } from './nodes/AutomationNode';
+import { MessagingNode } from './nodes/MessagingNode';
 import { NodeDetailsPanel } from './NodeDetailsPanel';
 import AnimatedEdge from './AnimatedEdge';
+import { WorkflowAnimationExample } from './WorkflowAnimationExample';
 import { toast } from 'sonner';
 import { AutomationIntegrationService } from '@/services/AutomationIntegrationService';
 import { WorkflowService } from '@/services/WorkflowService';
 import { supabase } from '@/integrations/supabase/client';
 import { useWorkflow } from '@/hooks/useWorkflow';
+import { useWorkflowAnimation } from '@/hooks/useWorkflowAnimation';
 import { Moon, Sun, ZoomIn, ZoomOut, Maximize, Lock, Unlock } from 'lucide-react';
 import { useWorkflowDarkMode, DARK_GOLD, DARK_BG, DARK_TEXT, DARK_SECONDARY } from '@/contexts/WorkflowDarkModeContext';
 
@@ -206,9 +209,101 @@ function FlowContent({ onInit, workflowId, onNodeSelect, workflowDarkMode, toggl
     }
   };
 
+  // Track active nodes and edges
+  const [activeNodeIds, setActiveNodeIds] = useState<Set<string>>(new Set());
+  const [activeEdges, setActiveEdges] = useState<Set<string>>(new Set());
+  
+  // Handle setting an edge as active
+  const setEdgeActive = useCallback((edgeId: string, isActive: boolean) => {
+    setActiveEdges(prev => {
+      const newSet = new Set(prev);
+      if (isActive) {
+        newSet.add(edgeId);
+      } else {
+        newSet.delete(edgeId);
+      }
+      return newSet;
+    });
+  }, []);
+
+  // Handle setting a node as active
+  const setNodeActive = useCallback((nodeId: string, isActive: boolean) => {
+    setActiveNodeIds(prev => {
+      const newSet = new Set(prev);
+      if (isActive) {
+        newSet.add(nodeId);
+      } else {
+        newSet.delete(nodeId);
+      }
+      return newSet;
+    });
+
+    // Also activate connected edges
+    if (isActive) {
+      // Find all edges that have this node as source
+      const connectedEdges = edges.filter(edge => edge.source === nodeId);
+      connectedEdges.forEach(edge => {
+        setEdgeActive(edge.id, true);
+      });
+    }
+  }, [edges, setEdgeActive]);
+
+  // Update edges with active state
+  useEffect(() => {
+    if (!edges.length) return;
+
+    const updatedEdges = edges.map(edge => {
+      // Check if this edge is active
+      const isActive = activeEdges.has(edge.id);
+      
+      // Only update if the active state changed
+      if (isActive !== edge.data?.isActive) {
+        return {
+          ...edge,
+          data: {
+            ...edge.data,
+            isActive
+          },
+          className: isActive ? 'workflow-edge-active' : ''
+        };
+      }
+      return edge;
+    });
+    
+    // Only update if there were changes
+    if (JSON.stringify(updatedEdges) !== JSON.stringify(edges)) {
+      if (externalSetEdges) {
+        externalSetEdges(updatedEdges);
+      } else {
+        setEdges(updatedEdges);
+      }
+    }
+  }, [edges, activeEdges, externalSetEdges, setEdges]);
+
   const onConnect = useCallback(
-    (params) => setEdges((eds) => addEdge(params, eds)),
-    [setEdges]
+    (params) => {
+      const newEdge = {
+        ...params,
+        type: 'animated',
+        animated: true,
+        data: {
+          isActive: false // Start inactive
+        },
+        style: { 
+          stroke: actualDarkMode ? DARK_GOLD : '#3b82f6',
+          strokeWidth: actualDarkMode ? 2 : 1.5
+        },
+        markerEnd: {
+          type: MarkerType.ArrowClosed,
+          color: actualDarkMode ? DARK_GOLD : '#3b82f6',
+          width: 15,
+          height: 15
+        }
+      };
+      
+      setEdges((eds) => addEdge(newEdge, eds));
+    },
+    [actualDarkMode, setEdges]
   );
 
   const onDrop = useCallback(
@@ -245,10 +340,36 @@ function FlowContent({ onInit, workflowId, onNodeSelect, workflowDarkMode, toggl
     event.dataTransfer.dropEffect = 'move';
   }, []);
 
-  const onNodeClick = useCallback((event, node) => {
+  // Initialize the animation hook
+  const {
+    activeEdges: animationActiveEdges,
+    activateEdge: animationActivateEdge,
+    deactivateEdge: animationDeactivateEdge,
+    activateNodeOutgoingEdges: animationActivateNodeOutgoingEdges,
+    activateEdgePath: animationActivateEdgePath,
+    deactivateAllEdges: animationDeactivateAllEdges
+  } = useWorkflowAnimation({ 
+    edges, 
+    setEdges: (newEdges) => {
+      if (externalSetEdges) {
+        externalSetEdges(newEdges);
+      } else {
+        setEdges(newEdges);
+      }
+    },
+    animationDuration: 3000 // 3 seconds by default
+  });
+
+  // Handle node click with activation
+  const onNodeClick = (event, node) => {
+    if (onNodeSelect) {
+      onNodeSelect(node);
+    }
     setSelectedNode(node);
-    onNodeSelect?.(node);
-  }, [onNodeSelect]);
+    
+    // Activate all outgoing edges from this node
+    animationActivateNodeOutgoingEdges(node.id);
+  };
 
   const handleClosePanel = () => setSelectedNode(null);
   const handleUpdateNode = (nodeId, data) => {
@@ -289,117 +410,19 @@ function FlowContent({ onInit, workflowId, onNodeSelect, workflowDarkMode, toggl
 
   return (
     <div 
-      className={`h-full w-full relative ${actualDarkMode ? 'workflow-dark-mode' : ''} ${isDarkModeLocked ? 'dark-mode-locked' : ''}`} 
-      style={actualDarkMode ? { background: DARK_BG, color: DARK_TEXT, borderColor: DARK_GOLD } : {}}
+      style={{ 
+        width: '100%', 
+        height: '100%',
+        position: 'relative'
+      }}
+      className={animationActiveEdges.size > 0 ? 'workflow-active-edges' : ''}
     >
-      {/* Add back styling for background dots */}
-      <style>
-        {`
-          @keyframes electricity {
-            0% {
-              stroke-dashoffset: 0;
-            }
-            100% {
-              stroke-dashoffset: -20;
-            }
-          }
-          
-          /* Dark mode specific styling for ReactFlow */
-          .workflow-dark-mode .react-flow__pane {
-            background-color: ${DARK_BG} !important;
-            background-image: radial-gradient(circle, rgba(255, 255, 255, 0.35) 0.6px, transparent 0.6px) !important;
-            background-size: 14px 14px !important;
-            background-position: 0px 0px !important;
-          }
-          
-          .workflow-dark-mode .react-flow__node.selected {
-            border-width: 2px !important;
-            box-shadow: 0 0 0 2px ${DARK_GOLD}, 0 4px 20px rgba(0, 0, 0, 0.7) !important;
-          }
-          
-          .workflow-dark-mode .react-flow__edge.animated path {
-            stroke-dasharray: 5, 5 !important;
-            animation: electricity 0.5s linear infinite !important;
-          }
-        `}
-      </style>
-      
-      {/* Standalone Controls - Outside of ReactFlow */}
-      <div 
-        className="absolute bottom-20 left-4 z-50 flex flex-col"
-        style={{
-          zIndex: 5000,
-          pointerEvents: 'all'
-        }}
-      >
-        <button
-          type="button"
-          onClick={handleZoomIn}
-          style={controlButtonStyle}
-          className="control-button zoom-in"
-          title="Zoom In"
-          aria-label="Zoom in"
-        >
-          <ZoomIn size={20} />
-        </button>
-        
-        <button
-          type="button"
-          onClick={handleZoomOut}
-          style={controlButtonStyle}
-          className="control-button zoom-out"
-          title="Zoom Out"
-          aria-label="Zoom out"
-        >
-          <ZoomOut size={20} />
-        </button>
-        
-        <button
-          type="button"
-          onClick={handleFitView}
-          style={controlButtonStyle}
-          className="control-button fit-view"
-          title="Fit View"
-          aria-label="Fit view"
-        >
-          <Maximize size={20} />
-        </button>
-        
-        <button
-          type="button"
-          onClick={toggleInteractivity}
-          style={controlButtonStyle}
-          className="control-button toggle-interactive"
-          title={isInteractive ? "Lock View" : "Unlock View"}
-          aria-label="Toggle interactivity"
-        >
-          {isInteractive ? <Unlock size={20} /> : <Lock size={20} />}
-        </button>
-      </div>
-      
       <ReactFlow
         nodes={nodes}
         edges={edges}
         onNodesChange={handleNodesChange}
         onEdgesChange={handleEdgesChange}
-        onConnect={(params) => {
-          const newEdge = {
-            ...params,
-            type: 'animated',
-            animated: true,
-            style: { 
-              stroke: actualDarkMode ? DARK_GOLD : '#3b82f6',
-              strokeWidth: actualDarkMode ? 2 : 1.5
-            },
-            markerEnd: {
-              type: MarkerType.ArrowClosed,
-              color: actualDarkMode ? DARK_GOLD : '#3b82f6',
-              width: 15,
-              height: 15
-            }
-          };
-          setEdges((eds) => addEdge(newEdge, eds));
-        }}
+        onConnect={onConnect}
         onInit={handleInit}
         onDrop={onDrop}
         onDragOver={onDragOver}
@@ -416,10 +439,15 @@ function FlowContent({ onInit, workflowId, onNodeSelect, workflowDarkMode, toggl
           boxShadow: 'inset 0 0 40px rgba(0, 0, 0, 0.3)'
         } : {}}
         defaultEdgeOptions={{
+          type: 'animated',
+          animated: true,
           style: { strokeWidth: actualDarkMode ? 2 : 1.5 },
           markerEnd: {
             type: MarkerType.ArrowClosed,
             color: actualDarkMode ? DARK_GOLD : '#3b82f6'
+          },
+          data: {
+            isActive: false
           }
         }}
         proOptions={{ hideAttribution: true }}
@@ -474,6 +502,16 @@ function FlowContent({ onInit, workflowId, onNodeSelect, workflowDarkMode, toggl
             )}
           </button>
         </Panel>
+
+        {/* Add a panel with animation controls for demo purposes */}
+        <Panel position="top-right">
+          <button 
+            onClick={animationDeactivateAllEdges}
+            className="px-2 py-1 rounded bg-gray-200 text-xs mr-2"
+          >
+            Reset Animations
+          </button>
+        </Panel>
       </ReactFlow>
 
       {selectedNode && (
@@ -508,6 +546,21 @@ function FlowContent({ onInit, workflowId, onNodeSelect, workflowDarkMode, toggl
           </svg>
         </button>
       </div>
+
+      {/* Add the animation example component */}
+      {nodes.length > 0 && (
+        <WorkflowAnimationExample
+          nodes={nodes}
+          edges={edges}
+          setEdges={(newEdges) => {
+            if (externalSetEdges) {
+              externalSetEdges(newEdges);
+            } else {
+              setEdges(newEdges);
+            }
+          }}
+        />
+      )}
     </div>
   );
 }

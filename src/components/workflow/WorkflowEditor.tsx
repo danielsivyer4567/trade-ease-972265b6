@@ -407,6 +407,9 @@ export function WorkflowEditor({ workflow, onSave, workflowDarkMode = false }: W
             type: 'animated',
             animated: true,
             style: { stroke: localDarkMode ? DARK_GOLD : '#3b82f6' },
+            data: {
+              isActive: false // Start with inactive state
+            }
           };
           setEdges((eds) => addEdge(newEdge, eds));
         }}
