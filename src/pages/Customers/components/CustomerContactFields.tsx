@@ -54,21 +54,21 @@ export function CustomerContactFields({
           <FormItem>
             <FormLabel>Phone</FormLabel>
             <FormControl>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-4">
                 <div className="max-w-[6.5rem] w-full">
                   <Input placeholder="Enter phone number" maxLength={15} {...field} />
                 </div>
                 <div className="flex flex-col items-center">
-                  <span className="text-xs text-gray-600 mb-1">auto text feature</span>
+                  <span className="text-xs text-gray-600 mb-1">auto text</span>
                   <Button 
                     type="button"
                     size="sm"
                     variant="outline"
-                    className="border border-gray-700 p-2"
+                    className="border-2 border-gray-700 p-2 h-9 w-12 flex items-center justify-center"
                     onClick={() => handleSendMessage(field.value)}
                     title="Send auto message via email"
                   >
-                    <MessageSquare className="h-4 w-4" />
+                    <MessageSquare className="h-5 w-5" />
                   </Button>
                 </div>
               </div>
