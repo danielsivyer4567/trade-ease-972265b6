@@ -53,18 +53,21 @@ export function CustomerContactFields({
         render={({ field }) => (
           <FormItem>
             <FormLabel>Phone</FormLabel>
-            <div className="flex items-center space-x-4">
-              <FormControl>
-                <Input 
-                  placeholder="Enter phone number" 
-                  maxLength={15} 
-                  {...field} 
-                  className="max-w-[6.5rem] w-full" 
-                />
-              </FormControl>
-              
-              <div>
-                <div className="text-xs text-gray-600 mb-1">auto text</div>
+            <div>
+              <div className="flex mb-1">
+                <div className="w-[6.5rem]"></div>
+                <div className="text-xs text-gray-600 ml-4">auto text</div>
+              </div>
+              <div className="flex items-center space-x-4">
+                <FormControl>
+                  <Input 
+                    placeholder="Enter phone number" 
+                    maxLength={15} 
+                    {...field} 
+                    className="max-w-[6.5rem] w-full" 
+                  />
+                </FormControl>
+                
                 <Button 
                   type="button"
                   size="sm"
