@@ -53,26 +53,33 @@ export function CustomerContactFields({
         render={({ field }) => (
           <FormItem>
             <FormLabel>Phone</FormLabel>
-            <FormControl>
-              <div className="flex items-center gap-4">
-                <div className="max-w-[6.5rem] w-full">
-                  <Input placeholder="Enter phone number" maxLength={15} {...field} />
-                </div>
-                <div className="flex flex-col items-center">
-                  <span className="text-xs text-gray-600 mb-1">auto text</span>
-                  <Button 
-                    type="button"
-                    size="sm"
-                    variant="outline"
-                    className="border-2 border-gray-700 p-2 h-9 w-12 flex items-center justify-center"
-                    onClick={() => handleSendMessage(field.value)}
-                    title="Send auto message via email"
-                  >
-                    <MessageSquare className="h-5 w-5" />
-                  </Button>
-                </div>
+            <div className="flex items-center space-x-4">
+              <FormControl>
+                <Input 
+                  placeholder="Enter phone number" 
+                  maxLength={15} 
+                  {...field} 
+                  className="max-w-[6.5rem] w-full" 
+                />
+              </FormControl>
+              
+              <Button 
+                type="button"
+                size="sm"
+                variant="outline"
+                className="border-2 border-gray-700 p-2 h-9 w-12 flex items-center justify-center" 
+                onClick={() => handleSendMessage(field.value)}
+                aria-label="Auto text message"
+              >
+                <MessageSquare className="h-5 w-5" />
+              </Button>
+            </div>
+            <div className="flex items-start space-x-4 mt-1">
+              <div className="w-[6.5rem]">
+                {/* spacer */}
               </div>
-            </FormControl>
+              <span className="text-xs text-gray-600">auto text</span>
+            </div>
             <FormMessage />
           </FormItem>
         )} 
