@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { UseFormReturn } from "react-hook-form";
@@ -15,11 +15,19 @@ export function CustomerContactFields({
   form,
   className
 }: CustomerContactFieldsProps) {
+  const [buttonClicked, setButtonClicked] = useState(false);
+
   const handleSendMessage = (phone: string) => {
     // This would be replaced with actual email sending logic
     if (phone) {
       console.log(`Auto message will be sent to ${phone}`);
       alert(`Message will be sent to ${phone}`);
+      setButtonClicked(true);
+      
+      // Reset the button color after 2 seconds
+      setTimeout(() => {
+        setButtonClicked(false);
+      }, 2000);
     } else {
       alert('Please enter a phone number first');
     }
@@ -71,11 +79,11 @@ export function CustomerContactFields({
                   type="button"
                   size="sm"
                   variant="outline"
-                  className="border-2 border-gray-700 h-9 w-12 flex items-center justify-center p-0" 
+                  className={`border-2 ${buttonClicked ? 'border-green-500 bg-green-50' : 'border-gray-700'} h-9 w-12 flex items-center justify-center p-0`} 
                   onClick={() => handleSendMessage(field.value)}
                   aria-label="Auto text message"
                 >
-                  <MessageSquare className="h-5 w-5" />
+                  <MessageSquare className={`h-5 w-5 ${buttonClicked ? 'text-green-500' : ''}`} />
                 </Button>
               </div>
             </div>
