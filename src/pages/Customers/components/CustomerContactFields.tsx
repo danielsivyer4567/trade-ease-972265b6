@@ -58,16 +58,19 @@ export function CustomerContactFields({
                 <div className="max-w-[6.5rem] w-full">
                   <Input placeholder="Enter phone number" maxLength={15} {...field} />
                 </div>
-                <Button 
-                  type="button"
-                  size="sm"
-                  variant="outline"
-                  className="border border-gray-700 p-2"
-                  onClick={() => handleSendMessage(field.value)}
-                  title="Send auto message via email"
-                >
-                  <MessageSquare className="h-4 w-4" />
-                </Button>
+                <div className="flex flex-col items-center">
+                  <span className="text-xs text-gray-600 mb-1">auto text feature</span>
+                  <Button 
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    className="border border-gray-700 p-2"
+                    onClick={() => handleSendMessage(field.value)}
+                    title="Send auto message via email"
+                  >
+                    <MessageSquare className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
             </FormControl>
             <FormMessage />
