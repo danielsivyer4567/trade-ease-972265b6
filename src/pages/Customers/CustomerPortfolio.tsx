@@ -678,8 +678,8 @@ const CustomerPortfolio = () => {
           {/* Customer Journey Workflow - Now with node style */}
           <div className="lg:col-span-3">
             <Card className="h-full overflow-hidden bg-gradient-to-br from-pink-50 to-indigo-50">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-lg flex items-center gap-2">
+              <CardHeader className="pb-4 flex justify-center border-b border-gray-500/30">
+                <CardTitle className="text-lg flex items-center gap-2 justify-center">
                   <History className="h-5 w-5 text-primary" />
                   Customer Journey
                 </CardTitle>
