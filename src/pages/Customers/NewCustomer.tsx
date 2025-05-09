@@ -204,10 +204,17 @@ export default function NewCustomer() {
                         </label>
                         {watchedCerts.includes(cert) && (
                           <div className="mt-1 border border-gray-700 rounded p-2 max-w-md w-full">
-                            <input
-                              className="input"
-                              placeholder={`Enter ${cert} number/details`}
-                              {...form.register(`certification_details.${cert}` as const)}
+                            <Controller
+                              name={`certification_details.${cert}`}
+                              control={form.control}
+                              defaultValue=""
+                              render={({ field }) => (
+                                <input
+                                  className="input"
+                                  placeholder={`Enter ${cert} number/details`}
+                                  {...field}
+                                />
+                              )}
                             />
                           </div>
                         )}
