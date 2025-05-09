@@ -464,8 +464,7 @@ const customerData: CustomerFormValues = {
                 </div>
               </div>
               
-              {/* Multiple Emails Section */}
-              <CustomerEmailFields form={form} />
+              {/* Remove duplicate email fields section */}
               
               <div className="flex gap-2 justify-center mt-8">
                 <Button 
