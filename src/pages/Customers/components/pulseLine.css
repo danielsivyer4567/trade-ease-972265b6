@@ -1,0 +1,7 @@
+@keyframes pulse-line {
+  0%, 100% { opacity: 0.7; box-shadow: 0 0 0 0 #3b82f6; }
+  50% { opacity: 1; box-shadow: 0 0 12px 4px #3b82f6; }
+}
+.animate-pulse-line {
+  animation: pulse-line 1.5s infinite;
+} 
