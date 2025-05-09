@@ -117,6 +117,27 @@ const CustomerPortfolio = () => {
         box-shadow: 0 0 5px rgba(59, 130, 246, 0.3);
       }
     }
+    
+    @keyframes noodlePulse {
+      0% {
+        opacity: 0;
+        height: 4px;
+        transform: translateY(0);
+      }
+      30% {
+        opacity: 1;
+        height: 10px;
+      }
+      70% {
+        opacity: 1;
+        height: 10px;
+      }
+      100% {
+        opacity: 0;
+        height: 4px;
+        transform: translateY(100%);
+      }
+    }
   `;
   
   // Mock data (would be fetched from API in production)
@@ -754,29 +775,42 @@ const CustomerPortfolio = () => {
                           {step.status === 'current' ? (
                             <div className="absolute top-14 left-1/2 h-20 flex flex-col items-center justify-center pointer-events-none overflow-hidden">
                               {/* Base connector line */}
-                              <div className="absolute h-full w-1 bg-blue-100 rounded-full"></div>
+                              <div className="absolute h-full w-2 bg-blue-100 rounded-full"></div>
                               
-                              {/* Flowing electrical current effect */}
-                              <div className="absolute h-full w-1 overflow-hidden">
-                                <div className="h-4 w-full bg-blue-500 relative" 
+                              {/* Visual scripting noodle effect with multiple pulses */}
+                              <div className="absolute h-full w-full overflow-hidden flex justify-center">
+                                {/* First pulse */}
+                                <div 
+                                  className="bg-blue-500 rounded-full absolute"
                                   style={{
-                                    boxShadow: '0 0 8px 2px rgba(59, 130, 246, 0.5)',
-                                    background: 'linear-gradient(to bottom, rgba(59, 130, 246, 0.1), rgba(59, 130, 246, 0.8), rgba(59, 130, 246, 0.1))',
-                                    animation: 'moveDown 1.5s infinite',
-                                    animationTimingFunction: 'ease-in-out',
-                                    transform: 'translateY(-100%)'
+                                    width: '6px',
+                                    animation: 'noodlePulse 1.8s infinite',
+                                    background: 'linear-gradient(to bottom, rgba(59, 130, 246, 0.1), rgba(59, 130, 246, 0.9), rgba(59, 130, 246, 0.1))',
+                                    boxShadow: '0 0 8px rgba(59, 130, 246, 0.6)'
                                   }}
                                 ></div>
-                              </div>
-                              
-                              {/* Multiple flowing pulses */}
-                              <div className="absolute h-full w-1 overflow-hidden">
-                                <div className="h-3 w-full bg-blue-400 absolute" 
+                                
+                                {/* Second pulse (delayed) */}
+                                <div 
+                                  className="bg-blue-400 rounded-full absolute"
                                   style={{
-                                    animation: 'moveDown 2s infinite',
-                                    animationDelay: '0.5s',
-                                    background: 'linear-gradient(to bottom, rgba(96, 165, 250, 0), rgba(96, 165, 250, 0.7), rgba(96, 165, 250, 0))',
-                                    transform: 'translateY(-100%)'
+                                    width: '6px',
+                                    animation: 'noodlePulse 1.8s infinite',
+                                    animationDelay: '0.6s',
+                                    background: 'linear-gradient(to bottom, rgba(96, 165, 250, 0.1), rgba(96, 165, 250, 0.9), rgba(96, 165, 250, 0.1))',
+                                    boxShadow: '0 0 8px rgba(96, 165, 250, 0.5)'
+                                  }}
+                                ></div>
+                                
+                                {/* Third pulse (more delayed) */}
+                                <div 
+                                  className="bg-blue-300 rounded-full absolute"
+                                  style={{
+                                    width: '6px',
+                                    animation: 'noodlePulse 1.8s infinite',
+                                    animationDelay: '1.2s',
+                                    background: 'linear-gradient(to bottom, rgba(147, 197, 253, 0.1), rgba(147, 197, 253, 0.9), rgba(147, 197, 253, 0.1))',
+                                    boxShadow: '0 0 8px rgba(147, 197, 253, 0.4)'
                                   }}
                                 ></div>
                               </div>
