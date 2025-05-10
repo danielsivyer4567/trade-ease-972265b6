@@ -192,14 +192,14 @@ export function Timeline({ steps, onStepAction }: TimelineProps) {
                   {step.status === 'current' && (
                     <>
                       <img
-                        src="/lovable-uploads/point-right.png" // Assumed filename
+                        src="/lovable-uploads/point right.png" // Corrected filename with space
                         alt="Focus arrow pointing right"
-                        className="absolute left-4 top-1/2 -translate-y-1/2 h-12 w-12 z-50 border-2 border-red-500" // Test: left-4, z-50, red border
+                        className="absolute left-4 top-1/2 -translate-y-1/2 h-12 w-12 z-50 border-2 border-black" // Changed border to black, kept other debug styles
                       />
                       <img
-                        src="/lovable-uploads/point-left.png" // Assumed filename
+                        src="/lovable-uploads/point left.png" // Corrected filename with space
                         alt="Focus arrow pointing left"
-                        className="absolute right-4 top-1/2 -translate-y-1/2 h-12 w-12 z-50 border-2 border-red-500" // Test: right-4, z-50, red border
+                        className="absolute right-4 top-1/2 -translate-y-1/2 h-12 w-12 z-50 border-2 border-black" // Changed border to black, kept other debug styles
                       />
                     </>
                   )}
