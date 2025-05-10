@@ -188,18 +188,18 @@ export function Timeline({ steps, onStepAction }: TimelineProps) {
                     </div>
                   )}
 
-                  {/* Arrows for current step */} NGFGT
+                  {/* Arrows for current step */}
                   {step.status === 'current' && (
                     <>
                       <img
                         src="/lovable-uploads/point right.png" // Corrected filename with space
                         alt="Focus arrow pointing right"
-                        className="absolute left-4 top-1/2 -translate-y-1/2 h-12 w-12 z-50 border-2 border-black" // Changed border to black, kept other debug styles
+                        className="absolute left-[-1rem] top-1/2 -translate-y-1/2 h-12 w-12 z-0"
                       />
                       <img
                         src="/lovable-uploads/point left.png" // Corrected filename with space
                         alt="Focus arrow pointing left"
-                        className="absolute right-4 top-1/2 -translate-y-1/2 h-12 w-12 z-50 border-2 border-black" // Changed border to black, kept other debug styles
+                        className="absolute right-[-1rem] top-1/2 -translate-y-1/2 h-12 w-12 z-0"
                       />
                     </>
                   )}
