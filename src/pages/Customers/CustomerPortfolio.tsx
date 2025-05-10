@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, User, Phone, Mail, Home, Calendar, FileText, Clock, Briefcase, FileSignature, History, PenLine, Trash2, MessageSquare, Download, CheckCircle, CircleDashed, MoveRight, AlertCircle, ChevronDown, FileCheck, Package, CheckSquare, Zap } from 'lucide-react';
+import { ArrowLeft, User, Phone, Mail, Home, Calendar, FileText, Clock, Briefcase, FileSignature, History, PenLine, Trash2, MessageSquare, Download, CheckCircle, CircleDashed, MoveRight, AlertCircle, ChevronDown, FileCheck, Package, CheckSquare, Zap, Camera, DollarSign, Share2, ListChecks, NotebookText, Files, Users2, Route, BellOff, MessageCircle, PhoneIncoming, Info, Tag, X } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { Separator } from '@/components/ui/separator';
@@ -16,7 +16,7 @@ import { Timeline } from './components/Timeline';
 import './components/pulseLine.css';
 import { ElectricNoodle } from './components/ElectricNoodle';
 
-interface CustomerWithDetails extends CustomerData {
+export interface CustomerWithDetails extends CustomerData {
   business_name?: string;
   abn?: string;
   acn?: string;
@@ -60,7 +60,7 @@ interface SignedDocument {
 }
 
 // Enhanced WorkflowStep with icon information
-interface WorkflowStep {
+export interface WorkflowStep {
   id: string;
   title: string;
   description: string;
@@ -68,7 +68,25 @@ interface WorkflowStep {
   date?: string;
   icon: React.ReactNode;
   shortInfo?: string;
+  requiresAction?: boolean; // Added for hazard signal
+  isActioned?: boolean;    // Added for hazard signal
 }
+
+// Define the workflow steps based on customer data (this is an existing comment, placing new const near it)
+const rightNavItems = [
+  { id: 'customerJourney', label: 'Customer Journey', icon: Clock },
+  { id: 'tasks', label: 'Tasks', icon: CheckSquare },
+  { id: 'notes', label: 'Notes', icon: PenLine },
+  { id: 'calendar', label: 'Calendar', icon: Calendar },
+  { id: 'documents', label: 'Documents', icon: FileText },
+  { id: 'payments', label: 'Payments', icon: DollarSign },
+  { id: 'associations', label: 'Associations', icon: Share2 },
+];
+
+// Helper function to toggle accordion sections
+const toggleSection = (sectionId: string, setExpandedSectionsFunc: React.Dispatch<React.SetStateAction<Record<string, boolean>>>) => {
+  setExpandedSectionsFunc(prev => ({ ...prev, [sectionId]: !prev[sectionId] }));
+};
 
 const CustomerPortfolio = () => {
   const { id } = useParams<{ id: string }>();
@@ -78,10 +96,81 @@ const CustomerPortfolio = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("overview");
+  const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
+    contactInfo: true, // Default open for contact info
+    businessDetails: true, // Default open for business details
+    commandTags: false, // Add commandTags, default closed
+    dndSettings: false, // Add DND settings, default closed
+  }); // State for accordion sections
   const nodeRefs = useRef<(HTMLDivElement | null)[]>([]);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [nodePositions, setNodePositions] = useState<{ x: number; y: number }[]>([]);
+  const [rightColumnActiveTab, setRightColumnActiveTab] = useState('customerJourney'); // New state for right column nav
   
+  // State for DND options
+  const [dndOptions, setDndOptions] = useState({
+    allChannels: false,
+    emails: false,
+    textMessages: false,
+    callsVoicemails: false,
+    gbp: false,
+    inboundCallsSms: false,
+  });
+
+  // State for Command Tags
+  const [commandTagInput, setCommandTagInput] = useState('');
+  const [commandTagsList, setCommandTagsList] = useState<string[]>(['new enquiry', '01_base_assistant']); // Initial example tags
+
+  const handleDndChange = (option: keyof typeof dndOptions) => {
+    setDndOptions(prev => {
+      const newState = { ...prev, [option]: !prev[option] };
+      if (option === 'allChannels' && newState.allChannels) {
+        // If "allChannels" is checked, check all individual channels except inboundCallsSms
+        return {
+          allChannels: true,
+          emails: true,
+          textMessages: true,
+          callsVoicemails: true,
+          gbp: true,
+          inboundCallsSms: newState.inboundCallsSms, // Preserve its state
+        };
+      } else if (option === 'allChannels' && !newState.allChannels) {
+        // If "allChannels" is unchecked, uncheck all individual channels
+        return {
+          allChannels: false,
+          emails: false,
+          textMessages: false,
+          callsVoicemails: false,
+          gbp: false,
+          inboundCallsSms: newState.inboundCallsSms, // Preserve its state
+        };
+      } else if (['emails', 'textMessages', 'callsVoicemails', 'gbp'].includes(option) && !newState[option]) {
+        // If any individual channel is unchecked, uncheck "allChannels"
+        newState.allChannels = false;
+      } else if (newState.emails && newState.textMessages && newState.callsVoicemails && newState.gbp) {
+        // If all individual channels are checked, check "allChannels"
+        newState.allChannels = true;
+      }
+      return newState;
+    });
+  };
+
+  const handleAddCommandTag = () => {
+    if (commandTagInput.trim() !== '' && !commandTagsList.includes(commandTagInput.trim())) {
+      setCommandTagsList([...commandTagsList, commandTagInput.trim()]);
+      setCommandTagInput('');
+      toast({ title: "Tag Added", description: `Tag "${commandTagInput.trim()}" added.` });
+    } else if (commandTagsList.includes(commandTagInput.trim())) {
+      toast({ title: "Tag Exists", description: "This tag has already been added.", variant: "destructive" });
+    }
+    setCommandTagInput(''); // Clear input even if tag exists or is empty
+  };
+
+  const handleRemoveCommandTag = (tagToRemove: string) => {
+    setCommandTagsList(commandTagsList.filter(tag => tag !== tagToRemove));
+    toast({ title: "Tag Removed", description: `Tag "${tagToRemove}" removed.` });
+  };
+
   // Early check for missing customer ID
   if (!id) {
     return <div className="p-8 text-center text-red-500">No customer ID provided in the URL.</div>;
@@ -265,64 +354,87 @@ const CustomerPortfolio = () => {
   const getWorkflowSteps = (): WorkflowStep[] => {
     if (!customer) return [];
     
-    const steps: WorkflowStep[] = [
-      { 
-        id: 'inquiry', 
-        title: 'Customer Inquiry', 
-        description: 'Initial contact', 
+    let steps: WorkflowStep[] = [
+      {
+        id: 'inquiry',
+        title: 'Customer Inquiry',
+        description: 'Initial contact',
         status: 'completed',
         date: customer.created_at ? new Date(customer.created_at).toLocaleDateString() : undefined,
         icon: <User className="h-6 w-6" />,
         shortInfo: 'New Contact'
       },
-      { 
-        id: 'quote', 
-        title: 'Quote Creation', 
+      {
+        id: 'quote',
+        title: 'Quote Creation',
         description: 'Preparing estimates',
         status: quotes.length > 0 ? 'completed' : 'upcoming',
         date: quotes.length > 0 ? quotes[0].date : undefined,
         icon: <FileText className="h-6 w-6" />,
         shortInfo: quotes.length > 0 ? `${quotes.length} Quotes` : 'No Quotes'
       },
-      { 
-        id: 'approval', 
-        title: 'Quote Approval', 
+      {
+        id: 'approval',
+        title: 'Quote Approval',
         description: 'Customer review',
         status: quotes.some(q => q.status === 'accepted') ? 'completed' : quotes.some(q => q.status === 'sent') ? 'current' : 'upcoming',
         icon: <FileCheck className="h-6 w-6" />,
         shortInfo: quotes.some(q => q.status === 'accepted') ? 'Approved' : 'Pending'
       },
-      { 
-        id: 'job', 
-        title: 'Job Creation', 
+      {
+        id: 'job',
+        title: 'Job Creation',
         description: 'Schedule work',
         status: jobs.length > 0 ? 'completed' : quotes.some(q => q.status === 'accepted') ? 'current' : 'upcoming',
         date: jobs.length > 0 ? jobs[0].date : undefined,
         icon: <Briefcase className="h-6 w-6" />,
         shortInfo: jobs.length > 0 ? `${jobs.length} Jobs` : 'No Jobs'
       },
-      { 
-        id: 'execution', 
-        title: 'Job Execution', 
+      {
+        id: 'execution',
+        title: 'Job Execution',
         description: 'Work in progress',
         status: jobs.some(j => j.status === 'in_progress') ? 'current' : jobs.some(j => j.status === 'completed') ? 'completed' : 'upcoming',
         icon: <Package className="h-6 w-6" />,
         shortInfo: jobs.some(j => j.status === 'in_progress') ? 'In Progress' : 'Not Started'
       },
-      { 
-        id: 'completion', 
-        title: 'Job Completion', 
+      {
+        id: 'completion',
+        title: 'Job Completion',
         description: 'Customer sign-off',
         status: jobs.some(j => j.status === 'completed') ? 'completed' : 'upcoming',
         icon: <CheckSquare className="h-6 w-6" />,
         shortInfo: jobs.some(j => j.status === 'completed') ? 'Complete' : 'Pending'
       }
     ];
-    
+
+    // Add requiresAction and isActioned flags
+    steps = steps.map(step => ({
+      ...step,
+      requiresAction: step.status === 'current', // Example: current steps require action
+      isActioned: step.isActioned || false, // Initialize isActioned if not present
+    }));
+
     return steps;
   };
   
-  const workflowSteps = getWorkflowSteps();
+  const [workflowSteps, setWorkflowSteps] = useState<WorkflowStep[]>([]);
+
+  useEffect(() => {
+    setWorkflowSteps(getWorkflowSteps());
+  }, [customer, quotes, jobs]); // Re-calculate when these change
+
+  const handleWorkflowStepAction = (stepId: string) => {
+    setWorkflowSteps(prevSteps =>
+      prevSteps.map(step =>
+        step.id === stepId ? { ...step, isActioned: true, requiresAction: false } : step
+      )
+    );
+    toast({
+      title: "Step Actioned",
+      description: `Step "${workflowSteps.find(s => s.id === stepId)?.title}" marked as actioned.`,
+    });
+  };
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -397,77 +509,280 @@ const CustomerPortfolio = () => {
       {/* Inject the CSS animation for the electrical effect */}
       <style dangerouslySetInnerHTML={{ __html: electricAnimationStyle }} />
       
-      <div className="container mx-auto p-6">
-        <div className="flex items-center gap-2 mb-6">
-          <Button variant="ghost" onClick={() => navigate('/customers')}>
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
-          <h1 className="text-2xl font-bold">Customer Portfolio</h1>
-        </div>
-        
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      <div className="w-full px-3 py-4">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
           {/* Sidebar */}
-          <div className="lg:col-span-3">
-            <Card>
-              <CardContent className="p-6">
-                <div className="flex flex-col items-center text-center mb-6">
-                  <div className="w-24 h-24 bg-primary/10 rounded-full flex items-center justify-center mb-4">
-                    <User className="h-12 w-12 text-primary" />
+          <div className="lg:col-span-3 flex flex-col h-full">
+            <Card className="h-full flex flex-col">
+              <CardHeader className="p-3">
+                <div className="flex items-center gap-2 mb-1">
+                  <Button variant="ghost" size="sm" onClick={() => navigate('/customers')} className="p-1">
+                    <ArrowLeft className="h-5 w-5" />
+                  </Button>
+                  <h1 className="text-xl font-semibold text-gray-700">Customer Portfolio</h1>
+                </div>
+                <div className="pl-[calc(theme(spacing.1)+theme(spacing.5)+theme(spacing.2))] mb-3">
+                  <div className="w-3/4 border-b border-gray-300"></div>
+                </div>
+                <div className="flex flex-col items-center text-center">
+                  {/* Avatar Circle */}
+                  <div className="relative w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mb-2">
+                    <User className="h-10 w-10 text-primary" />
                   </div>
-                  <h2 className="text-xl font-bold">
+                  <h2 className="text-md font-semibold">
                     {customer.name}
                     {customer.customer_code && (
-                      <span className="ml-2 text-sm bg-gray-100 px-2 py-0.5 rounded-full text-gray-600">
+                      <span className="ml-2 text-xs bg-gray-100 px-1.5 py-0.5 rounded-full text-gray-600">
                         {customer.customer_code}
                       </span>
                     )}
                   </h2>
-                  <div className="mt-2">
-                    <span className={`inline-block px-3 py-1 text-sm rounded-full ${
+                  <div className="mt-1">
+                    <span className={`inline-block px-2 py-0.5 text-xs rounded-full ${
                       customer.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
                     }`}>
                       {customer.status}
                     </span>
                   </div>
-                  
                   {customer.business_name && (
-                    <p className="text-sm text-muted-foreground mt-2">{customer.business_name}</p>
+                    <p className="text-xs text-muted-foreground mt-1">{customer.business_name}</p>
                   )}
                 </div>
+              </CardHeader>
+              
+              <Separator />
+
+              {/* Accordion Sections Start Here */}
+              <CardContent className="p-3 flex-grow space-y-1 overflow-y-auto"> {/* Reduced space-y, added overflow */}
                 
-                <Separator className="my-4" />
-                
-                <div className="space-y-3">
-                  <div className="flex items-center gap-2">
-                    <Mail className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-sm">{customer.email}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Phone className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-sm">{customer.phone}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Home className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-sm">{customer.address}, {customer.city}, {customer.state} {customer.zipCode}</span>
-                  </div>
-                </div>
-                
-                <Separator className="my-4" />
-                
-                <div className="flex flex-col gap-2">
-                  <Button variant="outline" className="w-full flex items-center gap-2 justify-start" onClick={handleSendMessage}>
-                    <MessageSquare className="h-4 w-4" />
-                    <span>Send Message</span>
-                  </Button>
-                  <Button 
-                    variant="outline" 
-                    className="w-full flex items-center gap-2 justify-start"
-                    onClick={() => navigate(`/customers/${id}/edit`)}
+                {/* Contact Info Accordion Item */}
+                <div className="border-b border-gray-200 last:border-b-0">
+                  <button 
+                    onClick={() => toggleSection('contactInfo', setExpandedSections)}
+                    className="w-full flex justify-between items-center py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 rounded-t-md"
                   >
-                    <PenLine className="h-4 w-4" />
-                    <span>Edit Customer</span>
-                  </Button>
+                    <span>Contact Info</span>
+                    <ChevronDown className={`h-4 w-4 transition-transform ${expandedSections['contactInfo'] ? 'rotate-180' : ''}`} />
+                  </button>
+                  {expandedSections['contactInfo'] && (
+                    <div className="pt-1 pb-2 space-y-1.5 pl-2 pr-1"> {/* Content padding */}
+                      <div className="space-y-1.5">
+                        {/* Email, Phone, Address */}
+                        <div className="flex items-center gap-2">
+                          <Mail className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                          <span className="text-sm truncate" title={customer.email}>{customer.email}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Phone className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                          <span className="text-sm truncate" title={customer.phone}>{customer.phone}</span>
+                        </div>
+                        <div className="flex items-start gap-2">
+                          <Home className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
+                          <span className="text-sm">
+                            {customer.address}, {customer.city}, {customer.state} {customer.zipCode}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="flex flex-col gap-1.5 pt-2">
+                        {/* Send Message, Edit Customer Buttons */}
+                        <Button variant="outline" size="sm" className="w-full flex items-center gap-2 justify-start" onClick={handleSendMessage}>
+                          <MessageSquare className="h-4 w-4" />
+                          <span>Send Message</span>
+                        </Button>
+                        <Button variant="outline" size="sm" className="w-full flex items-center gap-2 justify-start" onClick={() => navigate(`/customers/${id}/edit`)}>
+                          <PenLine className="h-4 w-4" />
+                          <span>Edit Customer</span>
+                        </Button>
+                      </div>
+                    </div>
+                  )}
                 </div>
+
+                {/* Business Details Accordion Item */}
+                <div className="border-b border-gray-200 last:border-b-0">
+                  <button 
+                    onClick={() => toggleSection('businessDetails', setExpandedSections)}
+                    className="w-full flex justify-between items-center py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                  >
+                    <span>Business Details</span>
+                    <ChevronDown className={`h-4 w-4 transition-transform ${expandedSections['businessDetails'] ? 'rotate-180' : ''}`} />
+                  </button>
+                  {expandedSections['businessDetails'] && (
+                    <div className="pt-1 pb-2 space-y-1.5 pl-2 pr-1"> {/* Content padding */}
+                      <div>
+                        <p className="text-xs font-medium">Business Name</p>
+                        <p className="text-xs text-muted-foreground">{customer.business_name || 'N/A'}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs font-medium">ABN</p>
+                        <p className="text-xs text-muted-foreground">{customer.abn || 'N/A'}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs font-medium">ACN</p>
+                        <p className="text-xs text-muted-foreground">{customer.acn || 'N/A'}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs font-medium">State License</p>
+                        <p className="text-xs text-muted-foreground">
+                          {customer.state_licence_state && customer.state_licence_number
+                            ? `${customer.state_licence_state}: ${customer.state_licence_number}`
+                            : 'N/A'}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* COMMANDEMENTS Section */}
+                <div className="pt-2">
+                  <h3 className="px-1 pt-3 pb-1 text-xs font-semibold uppercase text-muted-foreground tracking-wider">
+                    COMMANDEMENTS
+                  </h3>
+                  {/* Command Tags Accordion Item */}
+                  <div className="border-b border-gray-200 last:border-b-0">
+                    <button
+                      onClick={() => toggleSection('commandTags', setExpandedSections)}
+                      className="w-full flex justify-between items-center py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 rounded-t-md"
+                    >
+                      <span className="flex items-center">
+                        <Tag className="h-4 w-4 mr-2 text-muted-foreground flex-shrink-0" />
+                        Command Tags
+                      </span>
+                      <ChevronDown className={`h-4 w-4 transition-transform ${expandedSections['commandTags'] ? 'rotate-180' : ''}`} />
+                    </button>
+                    {expandedSections['commandTags'] && (
+                      <div className="pt-2 pb-3 space-y-3 pl-2 pr-1">
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="text"
+                            placeholder="Add Tags"
+                            value={commandTagInput}
+                            onChange={(e) => setCommandTagInput(e.target.value)}
+                            onKeyPress={(e) => e.key === 'Enter' && handleAddCommandTag()}
+                            className="flex-grow p-1.5 border border-gray-300 rounded-md text-xs focus:ring-primary focus:border-primary"
+                          />
+                          <Button size="sm" onClick={handleAddCommandTag} className="text-xs px-2.5 py-1.5">Add</Button>
+                        </div>
+                        {commandTagsList.length > 0 && (
+                          <div className="flex flex-wrap gap-1.5 pt-1">
+                            {commandTagsList.map((tag) => (
+                              <Badge key={tag} variant="secondary" className="text-xs font-normal pl-2 pr-1 py-0.5">
+                                {tag}
+                                <button
+                                  onClick={() => handleRemoveCommandTag(tag)}
+                                  className="ml-1.5 p-0.5 rounded-full hover:bg-muted-foreground/20"
+                                  aria-label={`Remove ${tag}`}
+                                >
+                                  <X className="h-3 w-3" />
+                                </button>
+                              </Badge>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                  {/* Placeholder for future Automation and Opportunities sections within COMMANDEMENTS */}
+                </div>
+
+                {/* DND Settings Accordion Item */}
+                <div className="border-b border-gray-200 last:border-b-0 pt-2"> {/* Added pt-2 for spacing */}
+                  <button
+                    onClick={() => toggleSection('dndSettings', setExpandedSections)}
+                    className="w-full flex justify-between items-center py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                  >
+                    <span>DND Settings</span>
+                    <ChevronDown className={`h-4 w-4 transition-transform ${expandedSections['dndSettings'] ? 'rotate-180' : ''}`} />
+                  </button>
+                  {expandedSections['dndSettings'] && (
+                    <div className="pt-2 pb-3 space-y-2.5 pl-2 pr-1">
+                      {/* DND all channels */}
+                      <div className="flex items-center space-x-2">
+                        <input
+                          type="checkbox"
+                          id="dndAll"
+                          checked={dndOptions.allChannels}
+                          onChange={() => handleDndChange('allChannels')}
+                          className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
+                        />
+                        <label htmlFor="dndAll" className="text-xs font-medium text-gray-700 flex items-center">
+                          <BellOff className="h-4 w-4 mr-1.5 text-muted-foreground" /> DND all channels
+                        </label>
+                      </div>
+
+                      <div className="relative my-2">
+                        <div className="absolute inset-0 flex items-center" aria-hidden="true">
+                          <div className="w-full border-t border-gray-300" />
+                        </div>
+                        <div className="relative flex justify-center">
+                          <span className="bg-white px-2 text-xs text-gray-500">OR</span>
+                        </div>
+                      </div>
+
+                      {/* Individual DND options */}
+                      {[
+                        { id: 'emails', label: 'Emails', icon: Mail, optionKey: 'emails' as keyof typeof dndOptions },
+                        { id: 'textMessages', label: 'Text Messages', icon: MessageSquare, optionKey: 'textMessages' as keyof typeof dndOptions },
+                        { id: 'callsVoicemails', label: 'Calls & Voicemails', icon: PhoneIncoming, optionKey: 'callsVoicemails' as keyof typeof dndOptions },
+                        { id: 'gbp', label: 'GBP', icon: Users2, optionKey: 'gbp' as keyof typeof dndOptions }, // Assuming Users2 for GBP, replace if a better icon exists
+                      ].map(item => (
+                        <div key={item.id} className="flex items-center space-x-2 pl-1">
+                          <input
+                            type="checkbox"
+                            id={item.id}
+                            checked={dndOptions[item.optionKey]}
+                            onChange={() => handleDndChange(item.optionKey)}
+                            className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
+                            disabled={dndOptions.allChannels && item.optionKey !== 'inboundCallsSms'}
+                          />
+                          <label htmlFor={item.id} className="text-xs text-gray-600 flex items-center">
+                            <item.icon className="h-4 w-4 mr-1.5 text-muted-foreground" /> {item.label}
+                          </label>
+                        </div>
+                      ))}
+                      
+                      <Separator className="my-2.5" />
+
+                      {/* DND Inbound Calls and SMS */}
+                      <div className="flex items-center space-x-2">
+                        <input
+                          type="checkbox"
+                          id="dndInbound"
+                          checked={dndOptions.inboundCallsSms}
+                          onChange={() => handleDndChange('inboundCallsSms')}
+                          className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
+                        />
+                        <label htmlFor="dndInbound" className="text-xs font-medium text-gray-700 flex items-center">
+                          DND Inbound Calls and SMS
+                          <span /* title="This setting affects direct inbound calls and SMS messages only." */ >
+                            <Info className="h-3.5 w-3.5 ml-1 text-muted-foreground cursor-pointer" />
+                          </span>
+                        </label>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Placeholder Accordion Items */}
+                {[
+                  'General Info', 'Additional Info', 'Forms', 'Automations', 
+                  'Opportunities', 'Client Portal', 'Groups'
+                ].map(sectionTitle => (
+                  <div key={sectionTitle} className="border-b border-gray-200 last:border-b-0">
+                    <button 
+                      onClick={() => toggleSection(sectionTitle.toLowerCase().replace(' ', ''), setExpandedSections)}
+                      className="w-full flex justify-between items-center py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                    >
+                      <span>{sectionTitle}</span>
+                      <ChevronDown className={`h-4 w-4 transition-transform ${expandedSections[sectionTitle.toLowerCase().replace(' ', '')] ? 'rotate-180' : ''}`} />
+                    </button>
+                    {expandedSections[sectionTitle.toLowerCase().replace(' ', '')] && (
+                      <div className="pt-1 pb-2 pl-2 pr-1 text-xs text-muted-foreground">
+                        Inputs and custom fields for {sectionTitle} to be added here.
+                      </div>
+                    )}
+                  </div>
+                ))}
               </CardContent>
             </Card>
           </div>
@@ -563,13 +878,16 @@ const CustomerPortfolio = () => {
                                     <p className="text-sm font-medium">{quote.title}</p>
                                     <p className="text-xs text-muted-foreground">{quote.date}</p>
                                   </div>
-                                  <Badge variant={
-                                    quote.status === 'accepted' ? 'default' : 
-                                    quote.status === 'sent' ? 'secondary' : 
-                                    'outline'
-                                  }>
-                                    {quote.status}
-                                  </Badge>
+                                  <div className="flex items-center gap-2">
+                                    <Badge variant={
+                                      quote.status === 'accepted' ? 'default' : 
+                                      quote.status === 'sent' ? 'secondary' : 
+                                      'outline'
+                                    }>
+                                      {quote.status}
+                                    </Badge>
+                                    <Button variant="outline" size="sm">View</Button>
+                                  </div>
                                 </div>
                               ))}
                               <Button variant="link" onClick={() => setActiveTab("quotes")} className="p-0 h-auto">
@@ -785,9 +1103,50 @@ const CustomerPortfolio = () => {
             </Card>
           </div>
           
-          {/* Customer Journey Workflow - Now with node style */}
+          {/* === Right Column - Transformed === */}
           <div className="lg:col-span-3">
-            <Timeline />
+            <Card className="h-full flex flex-col">
+              {/* Icon Navigation Bar */}
+              <div className="p-1.5 border-b flex justify-around items-center bg-slate-50 rounded-t-md">
+                {rightNavItems.map(item => (
+                  <Button
+                    key={item.id}
+                    variant="ghost"
+                    size="icon"
+                    className={`h-8 w-8 p-1.5 ${rightColumnActiveTab === item.id ? 'bg-primary/20 text-primary' : 'text-muted-foreground hover:text-primary'}`}
+                    onClick={() => setRightColumnActiveTab(item.id)}
+                    title={item.label}
+                  >
+                    <item.icon className="h-5 w-5" />
+                  </Button>
+                ))}
+              </div>
+
+              {/* Content Area for Right Column */}
+              <CardContent className="flex-grow p-0 overflow-y-auto">
+                {rightColumnActiveTab === 'customerJourney' && (
+                  <Timeline steps={workflowSteps} onStepAction={handleWorkflowStepAction} />
+                )}
+                {rightColumnActiveTab === 'tasks' && (
+                  <div className="p-4 text-sm text-muted-foreground">Tasks content will go here.</div>
+                )}
+                {rightColumnActiveTab === 'notes' && (
+                  <div className="p-4 text-sm text-muted-foreground">Notes content will go here.</div>
+                )}
+                {rightColumnActiveTab === 'calendar' && (
+                  <div className="p-4 text-sm text-muted-foreground">Calendar content will go here.</div>
+                )}
+                {rightColumnActiveTab === 'documents' && (
+                  <div className="p-4 text-sm text-muted-foreground">Documents content will go here.</div>
+                )}
+                {rightColumnActiveTab === 'payments' && (
+                  <div className="p-4 text-sm text-muted-foreground">Payments content will go here.</div>
+                )}
+                {rightColumnActiveTab === 'associations' && (
+                  <div className="p-4 text-sm text-muted-foreground">Associations content will go here.</div>
+                )}
+              </CardContent>
+            </Card>
           </div>
         </div>
       </div>

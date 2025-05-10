@@ -80,10 +80,33 @@ module.exports = {
           from: { height: "var(--radix-accordion-content-height)" },
           to: { height: "0" },
         },
+        pulseLine: {
+          '0%, 100%': { 
+            opacity: '0.7',
+            boxShadow: '0 0 0 0 rgba(59, 130, 246, 0.4)'
+          },
+          '50%': { 
+            opacity: '1',
+            boxShadow: '0 0 12px 6px rgba(59, 130, 246, 0.7)'
+          },
+        },
+        connectorPulse: {
+          '0%, 100%': { opacity: '0.3' },
+          '50%': { opacity: '1' },
+        },
+        ropeShake: {
+          '0%, 100%': { transform: 'translateX(0px)' },
+          '25%': { transform: 'translateX(-2.5px)' },
+          '50%': { transform: 'translateX(0px)' },
+          '75%': { transform: 'translateX(2.5px)' },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        'pulse-line': 'pulseLine 1.5s ease-in-out infinite',
+        'connector-pulse': 'connectorPulse 2s ease-in-out infinite',
+        'rope-shake': 'ropeShake 0.6s ease-in-out infinite',
       },
     },
   },

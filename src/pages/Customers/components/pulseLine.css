@@ -4,4 +4,10 @@
 }
 .animate-pulse-line {
   animation: pulse-line 1.5s infinite;
+}
+
+@keyframes electric-dash-move {
+  to {
+    stroke-dashoffset: -22; /* Should be sum of dasharray values or multiple */
+  }
 } 

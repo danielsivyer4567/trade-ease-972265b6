@@ -21,6 +21,7 @@ export const ElectricNoodle: React.FC<ElectricNoodleProps> = ({ from, to, isActi
         height: "100%",
         overflow: "visible",
         zIndex: 2,
+        border: "2px dashed red",
       }}
     >
       <defs>
@@ -33,11 +34,10 @@ export const ElectricNoodle: React.FC<ElectricNoodleProps> = ({ from, to, isActi
       </defs>
       <path
         d={path}
-        stroke="#222"
+        stroke="red"
         strokeWidth={5}
         fill="none"
         strokeDasharray="14 10"
-        filter="url(#electric-glow)"
         style={{
           animation: isActive ? "dash-move 1.2s linear infinite" : "none",
           strokeLinejoin: "round",
