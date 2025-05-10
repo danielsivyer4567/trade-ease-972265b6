@@ -31,8 +31,8 @@ export function ProfilePictureUpload({
 
   const generateStreetViewUrl = (location: string) => {
     const encodedLocation = encodeURIComponent(location);
-    // Using a square aspect ratio for the profile picture
-    return `https://maps.googleapis.com/maps/api/streetview?size=400x400&location=${encodedLocation}&key=${API_KEY}&pitch=10&fov=90`;
+    // Optimized parameters for a better property view
+    return `https://maps.googleapis.com/maps/api/streetview?size=400x400&location=${encodedLocation}&key=${API_KEY}&pitch=0&fov=90&heading=0&source=outdoor`;
   };
 
   const updateStreetView = async (location: string) => {
@@ -48,10 +48,16 @@ export function ProfilePictureUpload({
       if (geocodeData.status === 'OK') {
         const formattedAddress = geocodeData.results[0].formatted_address;
         const streetViewUrl = generateStreetViewUrl(formattedAddress);
-        setStreetViewUrl(streetViewUrl);
         
-        if (onAddressUpdate) {
-          onAddressUpdate(formattedAddress);
+        // Verify if Street View is available
+        const streetViewResponse = await fetch(streetViewUrl);
+        if (streetViewResponse.ok) {
+          setStreetViewUrl(streetViewUrl);
+          if (onAddressUpdate) {
+            onAddressUpdate(formattedAddress);
+          }
+        } else {
+          throw new Error('Street View not available for this location');
         }
       } else {
         throw new Error('Address not found');
@@ -84,7 +90,11 @@ export function ProfilePictureUpload({
               <MapPin className="h-8 w-8 animate-pulse text-primary" />
             </div>
           ) : streetViewUrl ? (
-            <AvatarImage src={streetViewUrl} alt="Street View" />
+            <AvatarImage 
+              src={streetViewUrl} 
+              alt="Property Street View" 
+              className="object-cover"
+            />
           ) : (
             <AvatarFallback className="text-2xl">
               {customerId.slice(0, 2).toUpperCase()}
@@ -94,7 +104,7 @@ export function ProfilePictureUpload({
       </div>
       
       <div className="text-sm text-muted-foreground text-center">
-        <p className="font-medium">Current Address:</p>
+        <p className="font-medium">Property Address:</p>
         <p>{address}, {city}, {state} {zipCode}</p>
       </div>
     </div>
