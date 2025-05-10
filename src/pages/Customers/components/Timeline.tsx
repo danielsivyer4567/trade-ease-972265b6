@@ -191,16 +191,37 @@ export function Timeline({ steps, onStepAction }: TimelineProps) {
                   {/* Arrows for current step */}
                   {step.status === 'current' && (
                     <>
-                      <img
-                        src="/lovable-uploads/point right.png" // Corrected filename with space
-                        alt="Focus arrow pointing right"
-                        className="absolute left-[-1rem] top-1/2 -translate-y-1/2 h-12 w-12 z-0"
-                      />
-                      <img
-                        src="/lovable-uploads/point left.png" // Corrected filename with space
-                        alt="Focus arrow pointing left"
-                        className="absolute right-[-1rem] top-1/2 -translate-y-1/2 h-12 w-12 z-0"
-                      />
+                      {/* Left Arrow (rotated to point right, near edge) */}
+                      <svg
+                        width="40"
+                        height="40"
+                        viewBox="0 0 40 40"
+                        style={{
+                          position: "absolute",
+                          left: -80, // push further left, near edge
+                          top: "50%",
+                          transform: "translateY(-50%) rotate(180deg)",
+                          zIndex: 11
+                        }}
+                      >
+                        <polygon points="0,20 40,0 40,40" fill="black" />
+                      </svg>
+
+                      {/* Right Arrow (no flip, near edge) */}
+                      <svg
+                        width="40"
+                        height="40"
+                        viewBox="0 0 40 40"
+                        style={{
+                          position: "absolute",
+                          right: -80, // push further right, near edge
+                          top: "50%",
+                          transform: "translateY(-50%)",
+                          zIndex: 11
+                        }}
+                      >
+                        <polygon points="0,20 40,0 40,40" fill="black" />
+                      </svg>
                     </>
                   )}
 

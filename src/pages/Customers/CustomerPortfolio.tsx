@@ -793,7 +793,7 @@ const CustomerPortfolio = () => {
               <Tabs defaultValue={activeTab} onValueChange={setActiveTab} className="w-full">
                 <CardHeader className="p-4 pb-2 border-b">
                   <TabsList className="grid grid-cols-5">
-                    <TabsTrigger value="overview">Overview</TabsTrigger>
+                    <TabsTrigger value="overview">Communications</TabsTrigger>
                     <TabsTrigger value="quotes">Quotes</TabsTrigger>
                     <TabsTrigger value="jobs">Jobs</TabsTrigger>
                     <TabsTrigger value="documents">Documents</TabsTrigger>
@@ -803,133 +803,141 @@ const CustomerPortfolio = () => {
                 
                 <CardContent className="p-6">
                   <TabsContent value="overview" className="mt-0">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <Card>
-                        <CardHeader className="pb-2">
-                          <CardTitle className="text-lg flex items-center gap-2">
-                            <Briefcase className="h-5 w-5 text-primary" />
-                            Business Details
-                          </CardTitle>
-                        </CardHeader>
-                        <CardContent className="pt-2">
-                          <div className="space-y-2">
-                            <div>
-                              <p className="text-sm font-medium">Business Name</p>
-                              <p className="text-sm text-muted-foreground">{customer.business_name || 'Not specified'}</p>
-                            </div>
-                            <div>
-                              <p className="text-sm font-medium">ABN</p>
-                              <p className="text-sm text-muted-foreground">{customer.abn || 'Not specified'}</p>
-                            </div>
-                            <div>
-                              <p className="text-sm font-medium">ACN</p>
-                              <p className="text-sm text-muted-foreground">{customer.acn || 'Not specified'}</p>
-                            </div>
-                            <div>
-                              <p className="text-sm font-medium">State License</p>
-                              <p className="text-sm text-muted-foreground">
-                                {customer.state_licence_state && customer.state_licence_number
-                                  ? `${customer.state_licence_state}: ${customer.state_licence_number}`
-                                  : 'Not specified'}
-                              </p>
+                    {/* --- CALL HISTORY SECTION --- */}
+                    <div className="space-y-6">
+                      {/* Outgoing Call Card */}
+                      <div className="border rounded-xl p-4 bg-white shadow-sm mb-2">
+                        <div className="flex items-center justify-between mb-1">
+                          <div className="flex items-center gap-2">
+                            <Phone className="h-5 w-5 text-primary" />
+                            <span className="font-bold text-lg text-gray-900">Outgoing Call</span>
+                          </div>
+                          <span className="font-bold text-base text-gray-700">15:23 <span className="uppercase">EAST</span></span>
+                        </div>
+                        <div className="flex items-center gap-6 mb-2">
+                          <span className="font-semibold text-gray-700">Duration: <span className="font-bold">12:45</span></span>
+                          <span className="font-bold text-gray-500">2 days ago</span>
+                        </div>
+                        <div className="flex gap-2">
+                          <Button variant="outline" size="sm" className="font-semibold flex items-center gap-1"><svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M5 3l14 9-14 9V3z" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>Play Recording</Button>
+                          <Button variant="outline" size="sm" className="font-semibold flex items-center gap-1"><svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2v16z" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>Save to Vault</Button>
+                          <Button variant="outline" size="sm" className="font-semibold flex items-center gap-1"><Share2 className="h-4 w-4" />Share</Button>
+                        </div>
+                      </div>
+
+                      {/* Conversation Thread */}
+                      <div className="bg-slate-50 rounded-xl p-6 shadow-inner">
+                        {/* Date Separator */}
+                        <div className="flex justify-center mb-6">
+                          <span className="bg-white px-4 py-1 rounded-full font-bold text-lg text-gray-700 shadow">9th May, 2025</span>
+                        </div>
+                        {/* Outgoing Message */}
+                        <div className="flex justify-end mb-2">
+                          <div className="max-w-xl">
+                            <div className="flex items-end gap-2">
+                              <div className="flex flex-col items-end">
+                                <span className="text-xs text-black mb-1">SMS</span>
+                                <div className="bg-primary text-white rounded-2xl px-5 py-3 text-base font-medium shadow-md">
+                                  Hi Sajad. This is Ana from Affordable Fencing Gold Coast. I need to confirm which colour sleeper you would like for your retaining wall?
+                                  <br />
+                                  <a href="https://storage.googleapis.com/msgsndr/AxB6SfBsvJhVRvNHszfZ/media/681d97d3263b9d6b8e6407f5.png" className="underline text-white font-semibold" target="_blank" rel="noopener noreferrer">View Image</a>
+                                </div>
+                                <span className="font-bold text-xs text-gray-700 mt-1">15:52 <span className="uppercase">EAST</span></span>
+                              </div>
+                              <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center font-bold text-primary">AR</div>
                             </div>
                           </div>
-                        </CardContent>
-                      </Card>
-                      
-                      <Card>
-                        <CardHeader className="pb-2">
-                          <CardTitle className="text-lg flex items-center gap-2">
-                            <FileSignature className="h-5 w-5 text-primary" />
-                            Certifications
-                          </CardTitle>
-                        </CardHeader>
-                        <CardContent className="pt-2">
-                          {customer.national_certifications?.length ? (
-                            <div className="space-y-2">
-                              {customer.national_certifications.map((cert, index) => (
-                                <div key={index}>
-                                  <p className="text-sm font-medium">{cert}</p>
-                                  <p className="text-sm text-muted-foreground">
-                                    {customer.certification_details?.[cert] || 'No license number provided'}
-                                  </p>
+                        </div>
+                        {/* Incoming Message */}
+                        <div className="flex justify-start mb-2">
+                          <div className="max-w-xl">
+                            <div className="flex items-end gap-2">
+                              <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center font-bold text-gray-600">N</div>
+                              <div className="flex flex-col items-start">
+                                <span className="text-xs text-black mb-1">SMS</span>
+                                <div className="bg-white border border-gray-200 rounded-2xl px-5 py-3 text-base font-medium text-gray-900 shadow-sm">
+                                  Hi, could we please get monument? thanks
                                 </div>
-                              ))}
-                            </div>
-                          ) : (
-                            <p className="text-sm text-muted-foreground">No certifications listed</p>
-                          )}
-                        </CardContent>
-                      </Card>
-                      
-                      <Card>
-                        <CardHeader className="pb-2">
-                          <CardTitle className="text-lg flex items-center gap-2">
-                            <FileText className="h-5 w-5 text-primary" />
-                            Recent Quotes
-                          </CardTitle>
-                        </CardHeader>
-                        <CardContent className="pt-2">
-                          {quotes.length > 0 ? (
-                            <div className="space-y-2">
-                              {quotes.slice(0, 3).map((quote) => (
-                                <div key={quote.id} className="flex justify-between items-center">
-                                  <div>
-                                    <p className="text-sm font-medium">{quote.title}</p>
-                                    <p className="text-xs text-muted-foreground">{quote.date}</p>
-                                  </div>
-                                  <div className="flex items-center gap-2">
-                                    <Badge variant={
-                                      quote.status === 'accepted' ? 'default' : 
-                                      quote.status === 'sent' ? 'secondary' : 
-                                      'outline'
-                                    }>
-                                      {quote.status}
-                                    </Badge>
-                                    <Button variant="outline" size="sm">View</Button>
-                                  </div>
-                                </div>
-                              ))}
-                              <Button variant="link" onClick={() => setActiveTab("quotes")} className="p-0 h-auto">
-                                View all quotes
-                              </Button>
-                            </div>
-                          ) : (
-                            <p className="text-sm text-muted-foreground">No quotes available</p>
-                          )}
-                        </CardContent>
-                      </Card>
-                      
-                      <Card>
-                        <CardHeader className="pb-2">
-                          <CardTitle className="text-lg flex items-center gap-2">
-                            <History className="h-5 w-5 text-primary" />
-                            Activity History
-                          </CardTitle>
-                        </CardHeader>
-                        <CardContent className="pt-2">
-                          <div className="space-y-2">
-                            <div>
-                              <p className="text-sm font-medium">Customer Since</p>
-                              <p className="text-sm text-muted-foreground">
-                                {customer.created_at ? new Date(customer.created_at).toLocaleDateString() : 'Unknown'}
-                              </p>
-                            </div>
-                            <div>
-                              <p className="text-sm font-medium">Last Contact</p>
-                              <p className="text-sm text-muted-foreground">
-                                {customer.last_contact ? new Date(customer.last_contact).toLocaleDateString() : 'Unknown'}
-                              </p>
-                            </div>
-                            <div>
-                              <p className="text-sm font-medium">Active Jobs</p>
-                              <p className="text-sm text-muted-foreground">
-                                {jobs.filter(j => j.status === 'in_progress').length}
-                              </p>
+                                <span className="font-bold text-xs text-gray-700 mt-1">17:07 <span className="uppercase">EAST</span></span>
+                              </div>
                             </div>
                           </div>
-                        </CardContent>
-                      </Card>
+                        </div>
+                        {/* Outgoing Message */}
+                        <div className="flex justify-end mb-2">
+                          <div className="max-w-xl">
+                            <div className="flex items-end gap-2">
+                              <div className="flex flex-col items-end">
+                                <span className="text-xs text-black mb-1">SMS</span>
+                                <div className="bg-primary text-white rounded-2xl px-5 py-3 text-base font-medium shadow-md">
+                                  You sure can. Thank you
+                                </div>
+                                <span className="font-bold text-xs text-gray-700 mt-1">17:41 <span className="uppercase">EAST</span></span>
+                              </div>
+                              <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center font-bold text-primary">AR</div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Incoming Call Card */}
+                      <div className="border rounded-xl p-4 bg-white shadow-sm mt-6">
+                        <div className="flex items-center justify-between mb-1">
+                          <div className="flex items-center gap-2">
+                            <Phone className="h-5 w-5 text-primary" />
+                            <span className="font-bold text-lg text-gray-900">Incoming Call</span>
+                          </div>
+                          <span className="font-bold text-base text-gray-700">08:45 <span className="uppercase">EAST</span></span>
+                        </div>
+                        <div className="flex items-center gap-6 mb-2">
+                          <span className="font-semibold text-gray-700">Duration: <span className="font-bold">05:12</span></span>
+                          <span className="font-bold text-gray-500">1 week ago</span>
+                        </div>
+                        <div className="flex gap-2">
+                          <Button variant="outline" size="sm" className="font-semibold flex items-center gap-1"><svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M5 3l14 9-14 9V3z" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>Play Recording</Button>
+                          <Button variant="outline" size="sm" className="font-semibold flex items-center gap-1"><svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2v16z" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>Save to Vault</Button>
+                          <Button variant="outline" size="sm" className="font-semibold flex items-center gap-1"><Share2 className="h-4 w-4" />Share</Button>
+                        </div>
+                      </div>
+
+                      {/* --- MESSAGE INPUT BAR --- */}
+                      <div className="mt-8 bg-white rounded-xl shadow p-4">
+                        <div className="flex flex-wrap gap-2 mb-2">
+                          <Button variant="ghost" size="sm" className="font-bold text-primary">SMS</Button>
+                          <Button variant="ghost" size="sm">WhatsApp</Button>
+                          <Button variant="ghost" size="sm">Email</Button>
+                          <Button variant="ghost" size="sm">Facebook</Button>
+                          <Button variant="ghost" size="sm">TikTok</Button>
+                          <Button variant="ghost" size="sm">Instagram</Button>
+                          <Button variant="ghost" size="sm">GBP</Button>
+                          <Button variant="ghost" size="sm">Website</Button>
+                          <span className="ml-auto text-xs text-gray-400">Internal Comment</span>
+                        </div>
+                        <div className="flex items-center gap-2 mb-2">
+                          <span className="text-xs text-gray-500">From:</span>
+                          <input className="border rounded px-2 py-1 text-xs w-40" value={customer.phone} readOnly />
+                          <span className="text-xs text-gray-500">To:</span>
+                          <input className="border rounded px-2 py-1 text-xs w-40" value={customer.phone} readOnly />
+                        </div>
+                        <div className="flex items-center gap-2 mb-2">
+                          <input className="flex-grow border rounded px-3 py-2 text-base" placeholder="Type a message" />
+                          <Button variant="outline" size="icon"><svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10" strokeWidth="2"/><path d="M8 12l2 2 4-4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg></Button>
+                          <Button variant="outline" size="icon"><svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/><polyline points="17 8 12 3 7 8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/><line x1="12" y1="3" x2="12" y2="15" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg></Button>
+                          <Button variant="outline" size="icon"><svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10" strokeWidth="2"/><path d="M8 12l2 2 4-4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg></Button>
+                        </div>
+                        <div className="flex flex-wrap gap-2 mb-2">
+                          <Badge variant="secondary" className="text-xs font-normal">new client form</Badge>
+                          <Badge variant="secondary" className="text-xs font-normal">basic contract</Badge>
+                          <Badge variant="secondary" className="text-xs font-normal">defect form</Badge>
+                          <Badge variant="secondary" className="text-xs font-normal">variation approval</Badge>
+                          <Badge variant="secondary" className="text-xs font-normal">job preference form</Badge>
+                        </div>
+                        <div className="flex gap-2 mt-2">
+                          <Button variant="outline" size="sm" className="font-semibold">Call Customer</Button>
+                          <Button variant="outline" size="sm">Clear</Button>
+                          <Button variant="default" size="sm" className="font-semibold">Send</Button>
+                        </div>
+                      </div>
                     </div>
                   </TabsContent>
                   

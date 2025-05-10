@@ -1,0 +1,13 @@
+/* Rectangle ring for customer journey node */
+.journey-rect-ring {
+  width: 120px !important;
+  height: 80px !important;
+  border-width: 8px !important;
+  border-style: solid !important;
+  border-radius: 0 !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  background-clip: padding-box;
+} 
