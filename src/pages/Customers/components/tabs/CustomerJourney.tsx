@@ -167,14 +167,6 @@ export function CustomerJourney({ customerId }: CustomerJourneyProps) {
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [auditPhotos, setAuditPhotos] = useState<Record<string, SiteAuditPhoto[]>>({});
   
-  // Create unique IDs for SVG markers - no longer needed in simplified implementation
-  // const auditToQuoteArrowId = React.useId();
-  // const quoteToJobArrowId = React.useId();
-  // const jobToInvoiceArrowId = React.useId();
-  // const legend1ArrowId = React.useId();
-  // const legend2ArrowId = React.useId();
-  // const legend3ArrowId = React.useId();
-
   useEffect(() => {
     async function loadCustomerJourney() {
       try {
@@ -509,7 +501,7 @@ export function CustomerJourney({ customerId }: CustomerJourneyProps) {
   return (
     <div className="p-4 space-y-0 relative">
       {/* Background gradient with dotted pattern */}
-      <div className="absolute inset-0 bg-gradient-to-br from-pink-50 to-indigo-50 z-0 rounded-lg">
+      <div className="absolute inset-0 z-0 rounded-lg"> 
         <div 
           className="absolute inset-0" 
           style={{

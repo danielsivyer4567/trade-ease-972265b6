@@ -3,6 +3,7 @@ import { NavItem } from './NavItem';
 import { DropdownMenu } from './DropdownMenu';
 import { LogoutButton } from './LogoutButton';
 import { LucideIcon } from 'lucide-react';
+import { ThemeSwitcher } from '../theme/ThemeSwitcher';
 
 // Define strict literal types for navigation items
 export interface NavItemType {
@@ -56,7 +57,14 @@ export const NavigationGroup: React.FC<NavigationGroupProps> = ({
           sidebarExpanded={isExpanded} />; // Use sidebarExpanded instead of isExpanded
       }
       if (item.type === 'button' && item.action === 'logout') {
-        return <LogoutButton key={`logout-${index}`} isExpanded={isExpanded} onLogout={onLogout} />;
+        return (
+          <div key={`logout-theme-container-${index}`} className="flex items-center gap-2 px-2">
+            <div className="flex-grow">
+              <LogoutButton isExpanded={isExpanded} onLogout={onLogout} />
+            </div>
+            <ThemeSwitcher />
+          </div>
+        );
       }
       if (item.type === 'dropdown' && item.items) {
         return <DropdownMenu key={`dropdown-${item.label}-${index}`} label={item.label} icon={item.icon} items={item.items} isExpanded={isExpanded} />;
