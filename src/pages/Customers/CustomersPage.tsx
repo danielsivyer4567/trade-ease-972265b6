@@ -20,7 +20,13 @@ import {
   Circle,
   PenLine,
   ExternalLink,
-  Share2
+  Share2,
+  FileText,
+  FileCheck,
+  Briefcase,
+  Package,
+  CheckSquare,
+  DollarSign
 } from 'lucide-react';
 import { BaseLayout } from '@/components/ui/BaseLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -35,6 +41,8 @@ import { fetchCustomersFromAPI } from '@/services/api';
 import { CustomerData } from '@/pages/Customers/components/CustomerCard';
 import { supabase } from '@/integrations/supabase/client';
 import { customerService } from '@/services/CustomerService';
+import { Timeline } from './components/Timeline';
+import type { WorkflowStep } from './CustomerPortfolio';
 
 // Extended interface for Customer with additional fields needed for the page
 interface Customer extends CustomerData {
@@ -115,6 +123,7 @@ function CustomersPage() {
   const [sortOrder, setSortOrder] = useState<SortOrder>('asc');
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
   const [quotesStats, setQuotesStats] = useState<Record<string, { total: number; accepted: number; denied: number }>>({});
+  const [showJourneyModal, setShowJourneyModal] = useState(false);
 
   const { isLoading, isError, data: customers, error } = useQuery({
     queryKey: ['customers'], 
@@ -225,6 +234,94 @@ function CustomersPage() {
     fetchAllQuotesStats();
   }, [customers]);
 
+  // Build workflow steps for selected customer
+  const workflowSteps: WorkflowStep[] = useMemo(() => {
+    if (!selectedCustomer) return [];
+    const stats = quotesStats[selectedCustomer.id] || { total: 0, accepted: 0, denied: 0 };
+    const jobs = selectedCustomer.jobsQty || 0;
+    // Build steps dynamically
+    const steps: WorkflowStep[] = [];
+    // Always start with Inquiry
+    steps.push({
+      id: 'inquiry',
+      title: 'Customer Inquiry',
+      description: 'Initial contact',
+      status: 'completed',
+      icon: <User className="h-6 w-6" />, // always completed for now
+      shortInfo: 'New Contact',
+    });
+    // If they have a quote booked
+    if (stats.total > 0) {
+      steps.push({
+        id: 'quote',
+        title: 'Quote Booked',
+        description: 'Preparing estimates',
+        status: 'completed',
+        icon: <FileText className="h-6 w-6" />,
+        shortInfo: `${stats.total} Quotes`,
+      });
+      // If they have an accepted quote
+      if (stats.accepted > 0) {
+        steps.push({
+          id: 'quote-completed',
+          title: 'Quote Accepted',
+          description: 'Customer approved quote',
+          status: 'completed',
+          icon: <FileCheck className="h-6 w-6" />,
+          shortInfo: `${stats.accepted} Accepted`,
+        });
+        // If they have a job
+        if (jobs > 0) {
+          steps.push({
+            id: 'job',
+            title: 'Job Scheduled',
+            description: 'Work scheduled',
+            status: 'completed',
+            icon: <Briefcase className="h-6 w-6" />,
+            shortInfo: `${jobs} Jobs`,
+          });
+          // Next step could be job execution, but only if you have job status data
+          // For now, stop here
+        } else {
+          // Next actionable step: Job Scheduled
+          steps.push({
+            id: 'job-next',
+            title: 'Job Scheduled',
+            description: 'Schedule work',
+            status: 'current',
+            icon: <Briefcase className="h-6 w-6" />,
+            shortInfo: 'Pending',
+          });
+        }
+      } else {
+        // Next actionable step: Quote Accepted
+        steps.push({
+          id: 'quote-completed',
+          title: 'Quote Accepted',
+          description: 'Customer approved quote',
+          status: 'current',
+          icon: <FileCheck className="h-6 w-6" />,
+          shortInfo: 'Pending',
+        });
+      }
+    } else {
+      // Next actionable step: Quote Booked
+      steps.push({
+        id: 'quote',
+        title: 'Quote Booked',
+        description: 'Preparing estimates',
+        status: 'current',
+        icon: <FileText className="h-6 w-6" />,
+        shortInfo: 'Pending',
+      });
+    }
+    return steps;
+  }, [selectedCustomer, quotesStats]);
+
+  const handleWorkflowStepAction = (stepId: string) => {
+    // Optionally handle marking steps as actioned
+  };
+
   if (isLoading) {
     return (
       <BaseLayout>
@@ -269,7 +366,7 @@ function CustomersPage() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-6 gap-0">
+        <div className="grid grid-cols-1 md:grid-cols-8 gap-0">
           {/* Customer List Panel */}
           <div className="md:col-span-3 space-y-4 pl-4">
             <div className="flex gap-2 mb-4">
@@ -432,7 +529,7 @@ function CustomersPage() {
             </div>
           </div>
 
-          {/* Customer Details Panel */}
+          {/* Main Content Panel (Conversation, etc.) */}
           <div className="md:col-span-3 space-y-6 px-4 border-l">
             {selectedCustomer ? (
               <>
@@ -601,6 +698,47 @@ function CustomersPage() {
               </div>
             )}
           </div>
+
+          {/* Customer Journey Sidebar (Desktop/Tablet) */}
+          <div className="hidden md:block md:col-span-2 pl-4">
+            {selectedCustomer && (
+              <Card className="h-full flex flex-col">
+                <CardHeader className="p-3">
+                  <h3 className="text-lg font-semibold text-gray-700">Customer Journey</h3>
+                </CardHeader>
+                <CardContent className="flex-grow p-0 overflow-y-auto">
+                  <Timeline steps={workflowSteps} onStepAction={handleWorkflowStepAction} />
+                </CardContent>
+              </Card>
+            )}
+          </div>
+
+          {/* Floating Button for Mobile */}
+          <button
+            className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50 md:hidden bg-blue-600 text-white rounded-full shadow-lg p-4 flex items-center justify-center"
+            onClick={() => setShowJourneyModal(true)}
+            style={{ display: selectedCustomer ? 'flex' : 'none' }}
+            aria-label="Show Customer Journey"
+          >
+            <Briefcase className="h-6 w-6" />
+          </button>
+
+          {/* Modal for Customer Journey on Mobile */}
+          {showJourneyModal && selectedCustomer && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+              <div className="bg-white rounded-lg shadow-lg w-11/12 max-w-md mx-auto p-4 relative">
+                <button
+                  className="absolute top-2 right-2 text-gray-500 hover:text-gray-700"
+                  onClick={() => setShowJourneyModal(false)}
+                  aria-label="Close"
+                >
+                  &times;
+                </button>
+                <h3 className="text-lg font-semibold text-gray-700 mb-4">Customer Journey</h3>
+                <Timeline steps={workflowSteps} onStepAction={handleWorkflowStepAction} />
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </BaseLayout>
