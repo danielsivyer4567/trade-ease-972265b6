@@ -19,7 +19,8 @@ import {
   CheckCircle2, 
   Circle,
   PenLine,
-  ExternalLink
+  ExternalLink,
+  Share2
 } from 'lucide-react';
 import { BaseLayout } from '@/components/ui/BaseLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -33,6 +34,7 @@ import { useToast } from '@/hooks/use-toast';
 import { fetchCustomersFromAPI } from '@/services/api';
 import { CustomerData } from '@/pages/Customers/components/CustomerCard';
 import { supabase } from '@/integrations/supabase/client';
+import { customerService } from '@/services/CustomerService';
 
 // Extended interface for Customer with additional fields needed for the page
 interface Customer extends CustomerData {
@@ -43,6 +45,11 @@ interface Customer extends CustomerData {
   stepCompleted?: number;
   totalSteps?: number;
   customer_code?: string;
+  jobsQty?: number;
+  quotesQty?: number;
+  invoicesQty?: number;
+  quickPayment?: boolean;
+  status: 'active' | 'inactive' | 'previous';
 }
 
 // API function to fetch customers
@@ -74,12 +81,16 @@ const fetchCustomers = async (): Promise<Customer[]> => {
       city: customer.city || '',
       state: customer.state || '',
       zipCode: customer.zipcode || '',
-      status: customer.status as 'active' | 'inactive',
+      status: customer.status as 'active' | 'inactive' | 'previous',
       progress: Math.floor(Math.random() * 100), // TODO: Replace with actual progress from jobs table
       lastContact: customer.last_contact || new Date().toISOString().split('T')[0],
       jobId: `JOB-${customer.id.substring(0, 4)}`, // TODO: Replace with latest job ID
       jobTitle: 'Current Job', // TODO: Replace with actual job title
-      customer_code: customer.customer_code // Include the customer_code
+      customer_code: customer.customer_code, // Include the customer_code
+      jobsQty: customer.jobs_qty || 0,
+      quotesQty: customer.quotes_qty || 0,
+      invoicesQty: customer.invoices_qty || 0,
+      quickPayment: customer.quick_payment === 'yes'
     }));
     
     return formattedData;
@@ -99,10 +110,11 @@ function CustomersPage() {
   
   // State for search, filter, and sort
   const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'inactive'>('all');
+  const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'inactive' | 'previous'>('all');
   const [sortField, setSortField] = useState<SortField>('name');
   const [sortOrder, setSortOrder] = useState<SortOrder>('asc');
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
+  const [quotesStats, setQuotesStats] = useState<Record<string, { total: number; accepted: number; denied: number }>>({});
 
   const { isLoading, isError, data: customers, error } = useQuery({
     queryKey: ['customers'], 
@@ -196,6 +208,23 @@ function CustomersPage() {
     }
   }, [filteredAndSortedCustomers, selectedCustomer]);
 
+  useEffect(() => {
+    async function fetchAllQuotesStats() {
+      if (!customers) return;
+      const stats: Record<string, { total: number; accepted: number; denied: number }> = {};
+      await Promise.all(customers.map(async (customer) => {
+        const quotes = await customerService.getCustomerQuotes(customer.id);
+        stats[customer.id] = {
+          total: quotes.length,
+          accepted: quotes.filter(q => q.status === 'approved').length,
+          denied: quotes.filter(q => q.status === 'rejected').length,
+        };
+      }));
+      setQuotesStats(stats);
+    }
+    fetchAllQuotesStats();
+  }, [customers]);
+
   if (isLoading) {
     return (
       <BaseLayout>
@@ -228,21 +257,21 @@ function CustomersPage() {
 
   return (
     <BaseLayout>
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex items-center justify-between mb-6">
+      <div className="container mx-auto px-0 py-8">
+        <div className="flex items-center justify-between mb-6 px-4">
           <div className="flex items-center gap-2">
             <h2 className="text-2xl font-bold text-gray-900">Customers</h2>
             <Badge variant="outline" className="ml-2">{filteredAndSortedCustomers.length}</Badge>
           </div>
           <div className="flex gap-2">
-            <Button variant="outline" onClick={() => navigate('/customers/new')}>Add Customer</Button>
-            <Button>New Job</Button>
+            <Button variant="outline" className="w-48" onClick={() => navigate('/customers/new')}>Add Customer</Button>
+            <Button className="w-48">New Job</Button>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-6 gap-0">
           {/* Customer List Panel */}
-          <div className="md:col-span-1 space-y-4">
+          <div className="md:col-span-3 space-y-4 pl-4">
             <div className="flex gap-2 mb-4">
               <div className="relative flex-grow">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
@@ -256,12 +285,13 @@ function CustomersPage() {
               </div>
               <select
                 value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value as 'all' | 'active' | 'inactive')}
+                onChange={(e) => setStatusFilter(e.target.value as 'all' | 'active' | 'inactive' | 'previous')}
                 className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
               >
                 <option value="all">All</option>
                 <option value="active">Active</option>
                 <option value="inactive">Inactive</option>
+                <option value="previous">Previous</option>
               </select>
             </div>
 
@@ -273,22 +303,6 @@ function CustomersPage() {
                 className={sortField === 'name' ? 'bg-muted' : ''}
               >
                 Name {sortField === 'name' && (sortOrder === 'asc' ? <SortAsc className="w-4 h-4 ml-1" /> : <SortDesc className="w-4 h-4 ml-1" />)}
-              </Button>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={() => handleSort('progress')}
-                className={sortField === 'progress' ? 'bg-muted' : ''}
-              >
-                Progress {sortField === 'progress' && (sortOrder === 'asc' ? <SortAsc className="w-4 h-4 ml-1" /> : <SortDesc className="w-4 h-4 ml-1" />)}
-              </Button>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={() => handleSort('status')}
-                className={sortField === 'status' ? 'bg-muted' : ''}
-              >
-                Status {sortField === 'status' && (sortOrder === 'asc' ? <SortAsc className="w-4 h-4 ml-1" /> : <SortDesc className="w-4 h-4 ml-1" />)}
               </Button>
             </div>
 
@@ -303,37 +317,96 @@ function CustomersPage() {
                     onClick={() => handleViewCustomerDetails(customer)}
                   >
                     <CardContent className="p-4">
-                      <div className="flex justify-between items-center mb-2">
-                        <div>
-                          <h3 
-                            className="font-medium cursor-pointer hover:text-blue-600 hover:underline"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              try {
-                                navigate(`/customers/${customer.id}`);
-                              } catch (error) {
-                                console.error('Navigation error:', error);
-                                // Fallback to direct URL change
-                                window.location.href = `/customers/${customer.id}`;
-                              }
-                            }}
-                          >
-                            {customer.name}
-                          </h3>
-                          <p className="text-xs text-muted-foreground">{customer.jobTitle}</p>
+                      <div className="flex justify-between items-start mb-2">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-3 pb-2 border-b border-gray-300">
+                            {customer.status === 'active' ? (
+                              <>
+                                <div className="w-2.5 h-2.5 rounded-full bg-green-500"></div>
+                                <span className="text-xs text-green-600 font-medium">Active</span>
+                              </>
+                            ) : customer.status === 'previous' ? (
+                              <>
+                                <div className="w-2.5 h-2.5 rounded-full bg-yellow-500"></div>
+                                <span className="text-xs text-yellow-600 font-medium">Previous</span>
+                              </>
+                            ) : (
+                              <>
+                                <div className="w-2.5 h-2.5 rounded-full bg-red-500"></div>
+                                <span className="text-xs text-red-600 font-medium">Inactive</span>
+                              </>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-2 mb-3 pb-2 border-b border-gray-300">
+                            <h3 
+                              className="font-medium cursor-pointer hover:text-blue-600 hover:underline"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                try {
+                                  navigate(`/customers/${customer.id}`);
+                                } catch (error) {
+                                  console.error('Navigation error:', error);
+                                  window.location.href = `/customers/${customer.id}`;
+                                }
+                              }}
+                            >
+                              {customer.name}
+                            </h3>
+                          </div>
+                          <div className="text-sm text-muted-foreground mb-3 pb-2 border-b border-gray-300">
+                            {customer.address && (
+                              <div className="flex items-center gap-1">
+                                <Home className="h-3 w-3" />
+                                <span>{customer.address}</span>
+                              </div>
+                            )}
+                            {(customer.city || customer.state) && (
+                              <div className="text-xs text-muted-foreground ml-4">
+                                {[customer.city, customer.state].filter(Boolean).join(', ')}
+                              </div>
+                            )}
+                          </div>
+                          <p className="text-xs text-muted-foreground mb-3 pb-2 border-b border-gray-300">{customer.jobTitle}</p>
+                          <div className="text-xs text-muted-foreground space-y-1">
+                            <div className="flex justify-between mb-2 pb-2 border-b border-gray-300">
+                              <span>Job Progress: {customer.progress}%</span>
+                              <span>Last Contact: {customer.lastContact}</span>
+                            </div>
+                            <div className="grid grid-cols-2 gap-2 mt-2">
+                              <div className="flex items-center gap-1 p-2 border border-gray-300 rounded">
+                                <span className="font-medium">Jobs:</span>
+                                <span>{customer.jobsQty || 0}</span>
+                              </div>
+                              <div className="flex flex-col gap-1 p-2 border border-gray-300 rounded">
+                                <span className="font-medium">Quotes:</span>
+                                <span>Total: {quotesStats[customer.id]?.total ?? 0}</span>
+                                <span className="text-green-700">Accepted: {quotesStats[customer.id]?.accepted ?? 0}</span>
+                                <span className="text-red-700">Denied: {quotesStats[customer.id]?.denied ?? 0}</span>
+                              </div>
+                              <div className="flex items-center gap-1 p-2 border border-gray-300 rounded">
+                                <span className="font-medium">Invoices:</span>
+                                <span>{customer.invoicesQty || 0}</span>
+                              </div>
+                            </div>
+                            {customer.phone && (
+                              <div className="flex items-center gap-1 mt-2 p-2 border border-gray-300 rounded">
+                                <Phone className="h-3 w-3" />
+                                <span>{customer.phone}</span>
+                              </div>
+                            )}
+                          </div>
                         </div>
-                        {customer.status === 'active' ? (
+                        {customer.status === 'active' && (
                           <Button 
                             variant="default"
                             size="sm"
-                            className="flex items-center gap-1"
+                            className="flex items-center gap-1 ml-4"
                             onClick={(e) => {
                               e.stopPropagation();
                               try {
                                 navigate(`/customers/${customer.id}`);
                               } catch (error) {
                                 console.error('Navigation error:', error);
-                                // Fallback to direct URL change
                                 window.location.href = `/customers/${customer.id}`;
                               }
                             }}
@@ -341,17 +414,9 @@ function CustomersPage() {
                             <ExternalLink className="h-4 w-4 mr-1" />
                             <span>Open Portfolio</span>
                           </Button>
-                        ) : (
-                          <Badge variant="secondary">
-                            {customer.status}
-                          </Badge>
                         )}
                       </div>
                       <Progress value={customer.progress} className="h-2 mb-2" />
-                      <div className="text-xs text-muted-foreground flex justify-between">
-                        <span>Job Progress: {customer.progress}%</span>
-                        <span>Last Contact: {customer.lastContact}</span>
-                      </div>
                     </CardContent>
                   </Card>
                 ))
@@ -368,133 +433,162 @@ function CustomersPage() {
           </div>
 
           {/* Customer Details Panel */}
-          <div className="md:col-span-2 space-y-6">
+          <div className="md:col-span-3 space-y-6 px-4 border-l">
             {selectedCustomer ? (
               <>
+                {/* Customer Portfolio Chat Mode Layout */}
                 <Card>
-                  <CardHeader className="bg-muted pb-2">
-                    <div className="flex justify-between items-center">
-                      <CardTitle>
-                        {selectedCustomer.name}
-                        {selectedCustomer.customer_code && (
-                          <span className="ml-2 text-sm bg-gray-100 px-2 py-0.5 rounded-full text-gray-600">
-                            {selectedCustomer.customer_code}
-                          </span>
-                        )}
-                      </CardTitle>
-                      <div className="flex items-center gap-2">
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
-                          className="flex items-center gap-1"
-                          onClick={(e) => {
-                            e.stopPropagation(); // Prevent event from bubbling up
-                            handleEditCustomer(selectedCustomer.id);
-                          }}
-                        >
-                          <PenLine className="h-4 w-4" />
-                          <span>Edit</span>
-                        </Button>
-                        {selectedCustomer.status === 'active' ? (
-                          <Button 
-                            variant="default"
-                            size="sm"
-                            className="flex items-center gap-1"
-                            onClick={() => {
-                              try {
-                                navigate(`/customers/${selectedCustomer.id}`);
-                              } catch (error) {
-                                console.error('Navigation error:', error);
-                                // Fallback to direct URL change
-                                window.location.href = `/customers/${selectedCustomer.id}`;
-                              }
-                            }}
-                          >
-                            <ExternalLink className="h-4 w-4 mr-1" />
-                            <span>Open Portfolio</span>
-                          </Button>
-                        ) : (
-                          <Badge variant="secondary">
-                            {selectedCustomer.status}
-                          </Badge>
-                        )}
-                      </div>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="p-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div className="space-y-4">
-                        <div className="flex items-center gap-2">
-                          <Mail className="w-5 h-5 text-muted-foreground" />
-                          <span>{selectedCustomer.email}</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Phone className="w-5 h-5 text-muted-foreground" />
-                          <span>{selectedCustomer.phone}</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Home className="w-5 h-5 text-muted-foreground" />
-                          <span>{selectedCustomer.address}</span>
-                        </div>
-                      </div>
-                      <div className="space-y-4">
-                        <div className="flex items-center gap-2">
-                          <Calendar className="w-5 h-5 text-muted-foreground" />
-                          <span>Last Contact: {selectedCustomer.lastContact}</span>
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
+                  <Tabs defaultValue="communications" className="w-full">
+                    <CardHeader className="p-4 pb-2 border-b">
+                      <TabsList className="grid grid-cols-5">
+                        <TabsTrigger value="communications">Communications</TabsTrigger>
+                        <TabsTrigger value="quotes">Quotes</TabsTrigger>
+                        <TabsTrigger value="jobs">Jobs</TabsTrigger>
+                        <TabsTrigger value="documents">Documents</TabsTrigger>
+                        <TabsTrigger value="notes">Notes</TabsTrigger>
+                      </TabsList>
+                    </CardHeader>
+                    <CardContent className="p-6">
+                      <TabsContent value="communications" className="mt-0">
+                        <div className="space-y-6">
+                          {/* Outgoing Call Card */}
+                          <div className="border rounded-xl p-4 bg-white shadow-sm mb-2">
+                            <div className="flex items-center justify-between mb-1">
+                              <div className="flex items-center gap-2">
+                                <Phone className="h-5 w-5 text-primary" />
+                                <span className="font-bold text-lg text-gray-900">Outgoing Call</span>
+                              </div>
+                              <span className="font-bold text-base text-gray-700">15:23 <span className="uppercase">EAST</span></span>
+                            </div>
+                            <div className="flex items-center gap-6 mb-2">
+                              <span className="font-semibold text-gray-700">Duration: <span className="font-bold">12:45</span></span>
+                              <span className="font-bold text-gray-500">2 days ago</span>
+                            </div>
+                            <div className="flex gap-2">
+                              <Button variant="outline" size="sm" className="font-semibold flex items-center gap-1"><svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M5 3l14 9-14 9V3z" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>Play Recording</Button>
+                              <Button variant="outline" size="sm" className="font-semibold flex items-center gap-1"><svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2v16z" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>Save to Vault</Button>
+                              <Button variant="outline" size="sm" className="font-semibold flex items-center gap-1"><Share2 className="h-4 w-4" />Share</Button>
+                            </div>
+                          </div>
 
-                <Card>
-                  <CardHeader className="bg-muted pb-2">
-                    <CardTitle>Customer Progress Link</CardTitle>
-                  </CardHeader>
-                  <CardContent className="p-6 space-y-4">
-                    <p className="text-sm text-muted-foreground">
-                      Share this link with your customer to keep them updated on job progress
-                    </p>
-                    
-                    <div className="flex flex-col gap-4">
-                      <div className="flex items-center">
-                        <div className="font-medium">Select Job for Progress Link</div>
-                      </div>
-                      
-                      <select 
-                        className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        defaultValue={selectedCustomer.jobId}
-                      >
-                        <option value={selectedCustomer.jobId}>
-                          {selectedCustomer.jobTitle} ({selectedCustomer.jobId})
-                        </option>
-                      </select>
-                      
-                      <div className="flex justify-between items-center">
-                        <div className="relative flex-1">
-                          <input 
-                            type="text" 
-                            readOnly
-                            value={`${window.location.origin}/progress/${selectedCustomer.id}`}
-                            className="w-full p-2 pr-10 border border-gray-300 rounded-lg bg-muted"
-                          />
-                        </div>
-                        <Button variant="outline" size="icon" className="ml-2" onClick={handleCopyLink}>
-                          <Copy className="h-4 w-4" />
-                        </Button>
-                      </div>
+                          {/* Conversation Thread */}
+                          <div className="bg-slate-50 rounded-xl p-6 shadow-inner">
+                            {/* Date Separator */}
+                            <div className="flex justify-center mb-6">
+                              <span className="bg-white px-4 py-1 rounded-full font-bold text-lg text-gray-700 shadow">9th May, 2025</span>
+                            </div>
+                            {/* Outgoing Message */}
+                            <div className="flex justify-end mb-2">
+                              <div className="max-w-xl">
+                                <div className="flex items-end gap-2">
+                                  <div className="flex flex-col items-end">
+                                    <span className="text-xs text-black mb-1">SMS</span>
+                                    <div className="bg-primary text-white rounded-2xl px-5 py-3 text-base font-medium shadow-md">
+                                      Hi Sajad. This is Ana from Affordable Fencing Gold Coast. I need to confirm which colour sleeper you would like for your retaining wall?
+                                      <br />
+                                      <a href="#" className="underline text-white font-semibold">View Image</a>
+                                    </div>
+                                    <span className="font-bold text-xs text-gray-700 mt-1">15:52 <span className="uppercase">EAST</span></span>
+                                  </div>
+                                  <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center font-bold text-primary">AR</div>
+                                </div>
+                              </div>
+                            </div>
+                            {/* Incoming Message */}
+                            <div className="flex justify-start mb-2">
+                              <div className="max-w-xl">
+                                <div className="flex items-end gap-2">
+                                  <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center font-bold text-gray-600">N</div>
+                                  <div className="flex flex-col items-start">
+                                    <span className="text-xs text-black mb-1">SMS</span>
+                                    <div className="bg-white border border-gray-200 rounded-2xl px-5 py-3 text-base font-medium text-gray-900 shadow-sm">
+                                      Hi, could we please get monument? thanks
+                                    </div>
+                                    <span className="font-bold text-xs text-gray-700 mt-1">17:07 <span className="uppercase">EAST</span></span>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                            {/* Outgoing Message */}
+                            <div className="flex justify-end mb-2">
+                              <div className="max-w-xl">
+                                <div className="flex items-end gap-2">
+                                  <div className="flex flex-col items-end">
+                                    <span className="text-xs text-black mb-1">SMS</span>
+                                    <div className="bg-primary text-white rounded-2xl px-5 py-3 text-base font-medium shadow-md">
+                                      You sure can. Thank you
+                                    </div>
+                                    <span className="font-bold text-xs text-gray-700 mt-1">17:41 <span className="uppercase">EAST</span></span>
+                                  </div>
+                                  <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center font-bold text-primary">AR</div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
 
-                      <div className="flex items-center gap-2">
-                        <input type="checkbox" id="enable-notifications" className="rounded" defaultChecked />
-                        <label htmlFor="enable-notifications">Enable notifications</label>
-                      </div>
-                      
-                      <Button variant="outline" className="flex items-center gap-2 w-fit">
-                        <LinkIcon className="h-4 w-4" />
-                        <span>Preview Link</span>
-                      </Button>
-                    </div>
-                  </CardContent>
+                          {/* Incoming Call Card */}
+                          <div className="border rounded-xl p-4 bg-white shadow-sm mt-6">
+                            <div className="flex items-center justify-between mb-1">
+                              <div className="flex items-center gap-2">
+                                <Phone className="h-5 w-5 text-primary" />
+                                <span className="font-bold text-lg text-gray-900">Incoming Call</span>
+                              </div>
+                              <span className="font-bold text-base text-gray-700">08:45 <span className="uppercase">EAST</span></span>
+                            </div>
+                            <div className="flex items-center gap-6 mb-2">
+                              <span className="font-semibold text-gray-700">Duration: <span className="font-bold">05:12</span></span>
+                              <span className="font-bold text-gray-500">1 week ago</span>
+                            </div>
+                            <div className="flex gap-2">
+                              <Button variant="outline" size="sm" className="font-semibold flex items-center gap-1"><svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M5 3l14 9-14 9V3z" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>Play Recording</Button>
+                              <Button variant="outline" size="sm" className="font-semibold flex items-center gap-1"><svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2v16z" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>Save to Vault</Button>
+                              <Button variant="outline" size="sm" className="font-semibold flex items-center gap-1"><Share2 className="h-4 w-4" />Share</Button>
+                            </div>
+                          </div>
+
+                          {/* Message Input Bar */}
+                          <div className="mt-8 bg-white rounded-xl shadow p-4">
+                            <div className="flex flex-wrap gap-2 mb-2">
+                              <Button variant="ghost" size="sm" className="font-bold text-primary">SMS</Button>
+                              <Button variant="ghost" size="sm">WhatsApp</Button>
+                              <Button variant="ghost" size="sm">Email</Button>
+                              <Button variant="ghost" size="sm">Facebook</Button>
+                              <Button variant="ghost" size="sm">TikTok</Button>
+                              <Button variant="ghost" size="sm">Instagram</Button>
+                              <Button variant="ghost" size="sm">GBP</Button>
+                              <Button variant="ghost" size="sm">Website</Button>
+                              <span className="ml-auto text-xs text-gray-400">Internal Comment</span>
+                            </div>
+                            <div className="flex items-center gap-2 mb-2">
+                              <span className="text-xs text-gray-500">From:</span>
+                              <input className="border rounded px-2 py-1 text-xs w-40" value={selectedCustomer.phone} readOnly />
+                              <span className="text-xs text-gray-500">To:</span>
+                              <input className="border rounded px-2 py-1 text-xs w-40" value={selectedCustomer.phone} readOnly />
+                            </div>
+                            <div className="flex items-center gap-2 mb-2">
+                              <input className="flex-grow border rounded px-3 py-2 text-base" placeholder="Type a message" />
+                              <Button variant="outline" size="icon"><svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10" strokeWidth="2"/><path d="M8 12l2 2 4-4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg></Button>
+                              <Button variant="outline" size="icon"><svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/><polyline points="17 8 12 3 7 8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/><line x1="12" y1="3" x2="12" y2="15" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg></Button>
+                              <Button variant="outline" size="icon"><svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10" strokeWidth="2"/><path d="M8 12l2 2 4-4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg></Button>
+                            </div>
+                            <div className="flex flex-wrap gap-2 mb-2">
+                              <Badge variant="secondary" className="text-xs font-normal">new client form</Badge>
+                              <Badge variant="secondary" className="text-xs font-normal">basic contract</Badge>
+                              <Badge variant="secondary" className="text-xs font-normal">defect form</Badge>
+                              <Badge variant="secondary" className="text-xs font-normal">variation approval</Badge>
+                              <Badge variant="secondary" className="text-xs font-normal">job preference form</Badge>
+                            </div>
+                            <div className="flex gap-2 mt-2">
+                              <Button variant="outline" size="sm" className="font-semibold">Call Customer</Button>
+                              <Button variant="outline" size="sm">Clear</Button>
+                              <Button variant="default" size="sm" className="font-semibold">Send</Button>
+                            </div>
+                          </div>
+                        </div>
+                      </TabsContent>
+                      {/* Other tabs can be filled in as needed */}
+                    </CardContent>
+                  </Tabs>
                 </Card>
               </>
             ) : (
