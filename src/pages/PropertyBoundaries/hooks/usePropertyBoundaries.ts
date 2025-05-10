@@ -636,13 +636,15 @@ export const usePropertyBoundaries = () => {
       const newProperty = createPropertyFromBoundary(boundaryData, name);
       console.log('Created new property:', newProperty);
       
-      // Add the property to the list
+      // Add the property to the list and select it immediately
       startTransition(() => {
         setProperties(prev => [...prev, newProperty]);
         setSelectedProperty(newProperty);
+        // Enable measurement mode by default when adding a new property
+        setIsMeasuring(true);
       });
       
-      toast.success('Property added');
+      toast.success('Property added and selected');
       
       // Try to save to database if user is logged in
       savePropertyBoundary(newProperty)
@@ -672,7 +674,7 @@ export const usePropertyBoundaries = () => {
       console.error('Error adding property:', error);
       toast.error('Failed to add property: ' + (error instanceof Error ? error.message : 'Unknown error'));
     }
-  }, [properties, selectedProperty, startTransition, createPropertyFromBoundary]);
+  }, [properties, selectedProperty, startTransition, createPropertyFromBoundary, setIsMeasuring]);
   
   return {
     properties,
