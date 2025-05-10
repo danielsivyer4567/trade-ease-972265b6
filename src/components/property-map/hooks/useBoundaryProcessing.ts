@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { PropertyBoundary, MapMeasurements, BoundaryEdge } from '../types';
 import { 
   convertBoundariesToPropertyBoundaries, 
@@ -19,23 +19,13 @@ export function useBoundaryProcessing(boundaries: Array<Array<[number, number]>>
     edges: []
   });
 
-  useEffect(() => {
-    // Check if boundaries is null, undefined, or empty
+  // Memoize the validation of boundaries to prevent unnecessary processing
+  const validBoundaries = useMemo(() => {
     if (!boundaries || !Array.isArray(boundaries) || boundaries.length === 0) {
-      // Set default values when no boundaries are present
-      setPropertyBoundaries([]);
-      setMeasurements({
-        boundaryLength: 0,
-        boundaryArea: 0,
-        individualBoundaries: [],
-        edges: []
-      });
-      console.log('No boundaries to process or boundaries is invalid:', boundaries);
-      return;
+      return [];
     }
     
-    // Validate boundaries format and ensure each boundary point is a valid coordinate
-    const validBoundaries = boundaries.filter(boundary => {
+    return boundaries.filter(boundary => {
       if (!Array.isArray(boundary)) return false;
       if (boundary.length < 3) return false; // Need at least 3 points to form a polygon
       
@@ -49,9 +39,11 @@ export function useBoundaryProcessing(boundaries: Array<Array<[number, number]>>
         return !isNaN(lat) && !isNaN(lng);
       });
     });
-    
+  }, [boundaries]);
+
+  // Process boundaries only when validBoundaries changes
+  useEffect(() => {
     if (validBoundaries.length === 0) {
-      console.error('No valid boundaries found after validation. Original boundaries:', boundaries);
       setPropertyBoundaries([]);
       setMeasurements({
         boundaryLength: 0,
@@ -62,52 +54,56 @@ export function useBoundaryProcessing(boundaries: Array<Array<[number, number]>>
       return;
     }
     
-    // Convert valid boundaries to standard number format
-    const normalizedBoundaries = validBoundaries.map(boundary => 
-      boundary.map(point => [Number(point[0]), Number(point[1])] as [number, number])
-    );
-    
-    // Process boundaries and convert to property boundaries format
     try {
-      const convertedBoundaries = convertBoundariesToPropertyBoundaries(normalizedBoundaries);
-      setPropertyBoundaries(convertedBoundaries);
-      
-      // Calculate total measurements
-      const { totalLength, totalArea } = calculateBoundaryMeasurements(convertedBoundaries);
-      
-      // Calculate individual boundary measurements
-      const individualMeasurements = convertedBoundaries.map((boundary, index) => {
-        const { length, area } = calculateSingleBoundaryMeasurements(boundary.points);
-        return {
-          name: `Boundary ${index + 1}`,
-          length,
-          area
-        };
-      });
-      
-      // Calculate boundary edges with measurements
-      const edges = convertedBoundaries.flatMap((boundary, boundaryIndex) => 
-        calculateBoundaryEdges(boundary.points, boundaryIndex)
+      // Convert valid boundaries to standard number format
+      const normalizedBoundaries = validBoundaries.map(boundary => 
+        boundary.map(point => [Number(point[0]), Number(point[1])] as [number, number])
       );
       
-      // Update measurements state
-      setMeasurements({
-        boundaryLength: totalLength,
-        boundaryArea: totalArea,
-        individualBoundaries: individualMeasurements,
-        edges
-      });
+      // Process boundaries and convert to property boundaries format
+      const convertedBoundaries = convertBoundariesToPropertyBoundaries(normalizedBoundaries);
       
-      console.log('Boundary measurements calculated:', {
-        totalLength,
-        totalArea,
-        individualMeasurements,
-        edgesCount: edges.length
-      });
+      // Calculate measurements only if we have valid boundaries
+      if (convertedBoundaries.length > 0) {
+        const { totalLength, totalArea } = calculateBoundaryMeasurements(convertedBoundaries);
+        
+        // Calculate individual boundary measurements
+        const individualMeasurements = convertedBoundaries.map((boundary, index) => {
+          const { length, area } = calculateSingleBoundaryMeasurements(boundary.points);
+          return {
+            name: `Boundary ${index + 1}`,
+            length,
+            area
+          };
+        });
+        
+        // Calculate boundary edges with measurements
+        const edges = convertedBoundaries.flatMap((boundary, boundaryIndex) => 
+          calculateBoundaryEdges(boundary.points, boundaryIndex)
+        );
+        
+        // Update state with new values
+        setPropertyBoundaries(convertedBoundaries);
+        setMeasurements({
+          boundaryLength: totalLength,
+          boundaryArea: totalArea,
+          individualBoundaries: individualMeasurements,
+          edges
+        });
+      } else {
+        // Reset state if no valid boundaries after conversion
+        setPropertyBoundaries([]);
+        setMeasurements({
+          boundaryLength: 0,
+          boundaryArea: 0,
+          individualBoundaries: [],
+          edges: []
+        });
+      }
     } catch (error) {
       console.error('Error processing boundaries:', error);
       
-      // Set default values on error
+      // Reset state on error
       setPropertyBoundaries([]);
       setMeasurements({
         boundaryLength: 0,
@@ -116,7 +112,7 @@ export function useBoundaryProcessing(boundaries: Array<Array<[number, number]>>
         edges: []
       });
     }
-  }, [boundaries]);
+  }, [validBoundaries]); // Only re-run when validBoundaries changes
 
   return {
     propertyBoundaries,

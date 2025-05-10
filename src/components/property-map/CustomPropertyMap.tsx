@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState, useEffect, useMemo } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { toast } from "sonner";
 import { CustomPropertyMapProps } from './types';
@@ -18,17 +18,15 @@ const CustomPropertyMap = ({
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [showEdgeMeasurements, setShowEdgeMeasurements] = useState(measureMode);
-  const [hasValidBoundaries, setHasValidBoundaries] = useState(false);
   
-  // Validate boundaries
-  useEffect(() => {
+  // Memoize boundary validation to prevent unnecessary re-renders
+  const hasValidBoundaries = useMemo(() => {
     if (!Array.isArray(boundaries)) {
       console.error("Boundaries is not an array:", boundaries);
-      setHasValidBoundaries(false);
-      return;
+      return false;
     }
     
-    const valid = boundaries.some(boundary => 
+    return boundaries.some(boundary => 
       Array.isArray(boundary) && 
       boundary.length >= 3 && 
       boundary.every(point => 
@@ -38,11 +36,6 @@ const CustomPropertyMap = ({
         !isNaN(Number(point[1]))
       )
     );
-    
-    setHasValidBoundaries(valid);
-    if (!valid && boundaries.length > 0) {
-      console.error("No valid boundaries found:", boundaries);
-    }
   }, [boundaries]);
   
   const {
@@ -90,42 +83,29 @@ const CustomPropertyMap = ({
   }
 
   return (
-    <Card className="w-full">
+    <Card className="w-full h-full flex flex-col">
       <MapHeader 
-        title={title} 
-        description={description} 
-        boundaries={boundaries} 
-        onReset={handleReset} 
-        onToggleEdgeMeasurements={handleToggleEdgeMeasurements} 
-        showEdgeMeasurements={showEdgeMeasurements} 
-        measureMode={measureMode} 
+        title={title}
+        description={description}
+        onReset={handleReset}
+        boundaries={boundaries}
+        onToggleEdgeMeasurements={handleToggleEdgeMeasurements}
+        showEdgeMeasurements={showEdgeMeasurements}
+        measureMode={measureMode}
       />
-      
-      <CardContent className="p-0 relative">
-        <div ref={containerRef} className="relative overflow-hidden">
-          <MapCanvas 
-            ref={canvasRef} 
-            onMouseDown={mapEventHandlers.handleMouseDown}
-            onMouseMove={mapEventHandlers.handleMouseMove}
-            onMouseUp={mapEventHandlers.handleMouseUp}
-            onTouchStart={mapEventHandlers.handleTouchStart}
-            onTouchMove={mapEventHandlers.handleTouchMove}
-            onTouchEnd={mapEventHandlers.handleTouchEnd}
-          />
-          {measurements.boundaryArea > 0 && (
-            <MeasurementsDisplay
-              boundaryArea={measurements.boundaryArea}
-              boundaryLength={measurements.boundaryLength}
-              individualBoundaries={measurements.individualBoundaries}
-            />
-          )}
-        </div>
-        
-        {showEdgeMeasurements && hasValidBoundaries && (
-          <BoundaryMeasurements 
-            edges={measurements.edges} 
-            showMeasurements={true} 
-          />
+      <CardContent className="flex-1 p-0 relative">
+        <MapCanvas
+          ref={canvasRef}
+          containerRef={containerRef}
+          {...mapEventHandlers}
+        />
+        {hasValidBoundaries && (
+          <>
+            <MeasurementsDisplay measurements={measurements} />
+            {showEdgeMeasurements && (
+              <BoundaryMeasurements measurements={measurements} />
+            )}
+          </>
         )}
       </CardContent>
     </Card>
