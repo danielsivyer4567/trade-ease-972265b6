@@ -104,8 +104,9 @@ const CustomPropertyMap = ({
           onTouchEnd={mapEventHandlers.handleTouchEnd}
         />
         <MeasurementsDisplay
-          measurementData={measurements}
-          showEdgeMeasurements={showEdgeMeasurements}
+          boundaryLength={measurements.boundaryLength}
+          boundaryArea={measurements.boundaryArea}
+          individualBoundaries={measurements.individualBoundaries}
         />
       </CardContent>
     </Card>
