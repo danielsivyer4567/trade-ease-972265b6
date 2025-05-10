@@ -1,20 +1,19 @@
-
 import React from 'react';
 import { IndividualBoundaryMeasurement } from './types';
 import { MapPin, Ruler } from 'lucide-react';
 
 export interface MeasurementsDisplayProps {
-  boundaryLength: number;
-  boundaryArea: number;
-  individualBoundaries: IndividualBoundaryMeasurement[];
+  boundaryLength?: number;
+  boundaryArea?: number;
+  individualBoundaries?: IndividualBoundaryMeasurement[];
 }
 
 export const MeasurementsDisplay: React.FC<MeasurementsDisplayProps> = ({
-  boundaryLength,
-  boundaryArea,
-  individualBoundaries
+  boundaryLength = 0,
+  boundaryArea = 0,
+  individualBoundaries = []
 }) => {
-  if (boundaryLength <= 0 && boundaryArea <= 0) {
+  if (!boundaryLength && !boundaryArea) {
     return null;
   }
   
@@ -28,25 +27,25 @@ export const MeasurementsDisplay: React.FC<MeasurementsDisplayProps> = ({
       <div className="grid grid-cols-2 gap-2">
         <div className="text-xs">
           <span className="text-gray-500">Total length:</span>
-          <div className="font-semibold">{boundaryLength.toFixed(2)} m</div>
-          <div className="text-gray-400 text-xs">({(boundaryLength / 1000).toFixed(4)} km)</div>
+          <div className="font-semibold">{boundaryLength?.toFixed(2) || '0.00'} m</div>
+          <div className="text-gray-400 text-xs">({(boundaryLength / 1000)?.toFixed(4) || '0.0000'} km)</div>
         </div>
         
         <div className="text-xs">
           <span className="text-gray-500">Total area:</span>
-          <div className="font-semibold">{boundaryArea.toFixed(2)} m²</div>
-          <div className="text-gray-400 text-xs">({(boundaryArea / 10000).toFixed(4)} hectares)</div>
+          <div className="font-semibold">{boundaryArea?.toFixed(2) || '0.00'} m²</div>
+          <div className="text-gray-400 text-xs">({(boundaryArea / 10000)?.toFixed(4) || '0.0000'} hectares)</div>
         </div>
       </div>
       
-      {individualBoundaries.length > 1 && (
+      {individualBoundaries?.length > 1 && (
         <div className="mt-2 pt-2 border-t border-gray-200">
           <h4 className="text-xs font-medium mb-1">Individual Boundaries:</h4>
           <div className="max-h-20 overflow-y-auto">
             {individualBoundaries.map((boundary, index) => (
               <div key={index} className="flex justify-between text-xs mb-1">
                 <span>{boundary.name}:</span>
-                <span>{boundary.area.toFixed(2)} m²</span>
+                <span>{boundary.area?.toFixed(2) || '0.00'} m²</span>
               </div>
             ))}
           </div>

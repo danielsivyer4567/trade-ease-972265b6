@@ -35,12 +35,12 @@ serve(async (req: Request) => {
       }
       
       if (streetName) {
-        // Remove suffixes like St, Road etc for better matching
-        const streetBase = streetName.includes(' ') ? streetName.split(' ')[0] : streetName
+        // Clean street name but keep full name for better matching
+        const cleanStreetName = streetName.replace(/\s+/g, ' ').trim()
         if (queryString) {
           queryString += "AND "
         }
-        queryString += `CORRIDOR_NAME LIKE '%${streetBase}%' `
+        queryString += `STREET_NAME LIKE '%${cleanStreetName}%' `
       }
       
       if (suburb) {
@@ -62,7 +62,26 @@ serve(async (req: Request) => {
         `${BRISBANE_PROPERTY_URL}/query?f=json&where=${encodeURIComponent(queryString)}&outFields=*&returnGeometry=true${apiKeyParam}`
       )
 
+      if (!response.ok) {
+        throw new Error(`ArcGIS API error: ${response.statusText}`)
+      }
+
       const data = await response.json()
+      
+      if (data.error) {
+        throw new Error(`ArcGIS API error: ${data.error.message || 'Unknown error'}`)
+      }
+
+      if (!data.features || data.features.length === 0) {
+        return new Response(JSON.stringify({ 
+          message: 'No property boundaries found for the given address',
+          query: queryString 
+        }), {
+          status: 404,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        })
+      }
+
       return new Response(JSON.stringify(data), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       })
