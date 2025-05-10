@@ -6,10 +6,8 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-// Brisbane Property Boundaries FeatureServer URL
+// Base URLs for ArcGIS services
 const BRISBANE_PROPERTY_URL = "https://services2.arcgis.com/dEKgZETqwmDAh1rP/arcgis/rest/services/property_boundaries_holding/FeatureServer/0"
-
-// Brisbane Roads/Streets FeatureServer URL (for identifying front/back of house)
 const BRISBANE_ROADS_URL = "https://services2.arcgis.com/dEKgZETqwmDAh1rP/arcgis/rest/services/Road_corridor/FeatureServer/0"
 
 serve(async (req) => {
@@ -18,12 +16,14 @@ serve(async (req) => {
   }
 
   try {
-    const { location, address, houseNumber, streetName, suburb, postcode } = await req.json()
-    // Make API key optional - use environment variable if available
-    const apiKey = Deno.env.get('ARCGIS_API_KEY') || ''
+    const { location, address, houseNumber, streetName, suburb, postcode, apiKey } = await req.json()
     
-    // Add apiKey parameter to URL only if we have one
-    const apiKeyParam = apiKey ? `&token=${apiKey}` : ''
+    if (!apiKey) {
+      throw new Error('API key is required')
+    }
+    
+    // Add apiKey parameter to URL
+    const apiKeyParam = `&token=${apiKey}`
 
     // Case 1: Direct query by address components
     if (houseNumber && streetName) {

@@ -1,23 +1,27 @@
 import { supabase } from '@/integrations/supabase/client';
 import { mockSearchAddress } from './mockArcGIS';
+import { ARCGIS_CONFIG } from '@/config/arcgis';
 
 // Environment detection - helps determine if we should use mock data
 const isDevelopment = process.env.NODE_ENV === 'development';
 
 /**
- * Search for an address using ArcGIS Geocoding API
- * @param searchQuery The address to search for
- * @returns Geocoded address results
+ * Search for an address using ArcGIS geocoding service
+ * @param address The address to search for
+ * @returns Geocoding results
  */
-export const searchAddress = async (searchQuery: string) => {
+export const searchAddress = async (address: string) => {
   try {
-    if (!searchQuery.trim()) {
-      return { data: null, error: 'Search query is required' };
+    if (!address.trim()) {
+      return { data: null, error: 'Address is required' };
     }
 
     // Call our Supabase Edge Function
-    const { data, error } = await supabase.functions.invoke('arcgis-geocode', {
-      body: { searchQuery }
+    const { data, error } = await supabase.functions.invoke('arcgis-boundaries', {
+      body: { 
+        address,
+        apiKey: ARCGIS_CONFIG.apiKey
+      }
     });
 
     if (error) {
@@ -26,7 +30,7 @@ export const searchAddress = async (searchQuery: string) => {
       // If we're in development, fall back to mock data
       if (isDevelopment) {
         console.log('Using mock data for geocoding in development...');
-        return mockSearchAddress(searchQuery);
+        return mockSearchAddress(address);
       }
       
       return { data: null, error: error.message };
@@ -39,7 +43,7 @@ export const searchAddress = async (searchQuery: string) => {
     // If we're in development, fall back to mock data
     if (isDevelopment) {
       console.log('Using mock data for geocoding in development after error...');
-      return mockSearchAddress(searchQuery);
+      return mockSearchAddress(address);
     }
     
     return { 
@@ -62,7 +66,10 @@ export const getPropertyBoundaries = async (location: [number, number]) => {
 
     // Call our Supabase Edge Function
     const { data, error } = await supabase.functions.invoke('arcgis-boundaries', {
-      body: { location: { x: location[0], y: location[1] } }
+      body: { 
+        location: { x: location[0], y: location[1] },
+        apiKey: ARCGIS_CONFIG.apiKey
+      }
     });
 
     if (error) {
