@@ -15,7 +15,7 @@ export interface CustomerData {
   city: string;
   state: string;
   zipCode: string;
-  status: 'active' | 'inactive';
+  status: 'active' | 'inactive' | 'previous';
   customer_code?: string;
 }
 
