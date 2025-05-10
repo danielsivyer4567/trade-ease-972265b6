@@ -31,10 +31,13 @@ export function AddressStreetView({
 
   const generateStreetViewUrl = (location: string) => {
     const encodedLocation = encodeURIComponent(location);
-    return `https://maps.googleapis.com/maps/api/streetview?size=400x300&location=${encodedLocation}&key=${API_KEY}`;
+    // Changed dimensions to be more rectangular (600x400)
+    return `https://maps.googleapis.com/maps/api/streetview?size=600x400&location=${encodedLocation}&key=${API_KEY}&pitch=10&fov=90`;
   };
 
   const updateStreetView = async (location: string) => {
+    if (!location.trim()) return;
+    
     setIsLoading(true);
     try {
       // First, verify the address using Geocoding API
@@ -50,11 +53,6 @@ export function AddressStreetView({
         if (onAddressUpdate) {
           onAddressUpdate(formattedAddress);
         }
-        
-        toast({
-          title: "Address Found",
-          description: "Street View updated successfully",
-        });
       } else {
         throw new Error('Address not found');
       }
@@ -69,6 +67,7 @@ export function AddressStreetView({
     }
   };
 
+  // Load Street View immediately when component mounts or address changes
   useEffect(() => {
     const fullAddress = `${address}, ${city}, ${state} ${zipCode}`.trim();
     if (fullAddress) {
@@ -85,20 +84,7 @@ export function AddressStreetView({
 
   return (
     <div className={`space-y-4 ${className}`}>
-      <form onSubmit={handleSearch} className="flex gap-2">
-        <Input
-          type="text"
-          placeholder="Search for an address..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="flex-1"
-        />
-        <Button type="submit" size="icon" disabled={isLoading}>
-          <Search className="h-4 w-4" />
-        </Button>
-      </form>
-
-      <div className="relative aspect-video bg-muted rounded-lg overflow-hidden">
+      <div className="relative w-full h-[400px] bg-muted rounded-lg overflow-hidden">
         {isLoading ? (
           <div className="absolute inset-0 flex items-center justify-center bg-background/80">
             <RefreshCw className="h-8 w-8 animate-spin text-primary" />
@@ -116,6 +102,19 @@ export function AddressStreetView({
           </div>
         )}
       </div>
+
+      <form onSubmit={handleSearch} className="flex gap-2">
+        <Input
+          type="text"
+          placeholder="Search for a different address..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="flex-1"
+        />
+        <Button type="submit" size="icon" disabled={isLoading}>
+          <Search className="h-4 w-4" />
+        </Button>
+      </form>
 
       <div className="text-sm text-muted-foreground">
         <p className="font-medium">Current Address:</p>
