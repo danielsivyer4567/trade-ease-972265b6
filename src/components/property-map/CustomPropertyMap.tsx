@@ -95,18 +95,22 @@ const CustomPropertyMap = ({
       />
       <CardContent className="flex-1 p-0 relative">
         <MapCanvas
-          ref={canvasRef}
-          containerRef={containerRef}
-          {...mapEventHandlers}
+          onMouseDown={function (e: React.MouseEvent<HTMLCanvasElement>): void {
+            throw new Error('Function not implemented.');
+          } } onMouseMove={function (e: React.MouseEvent<HTMLCanvasElement>): void {
+            throw new Error('Function not implemented.');
+          } } onMouseUp={function (): void {
+            throw new Error('Function not implemented.');
+          } } ref={canvasRef}
+          {...mapEventHandlers}        />
+        <MeasurementsDisplay
+          measurementData={measurements}
+          showEdgeMeasurements={showEdgeMeasurements}
         />
-        {hasValidBoundaries && (
-          <>
-            <MeasurementsDisplay measurements={measurements} />
-            {showEdgeMeasurements && (
-              <BoundaryMeasurements measurements={measurements} />
-            )}
-          </>
-        )}
+        <MeasurementsDisplay
+          measurementData={measurements}
+          showEdgeMeasurements={showEdgeMeasurements}
+        />
       </CardContent>
     </Card>
   );

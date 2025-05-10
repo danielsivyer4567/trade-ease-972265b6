@@ -1,5 +1,5 @@
-import { serve } from "https://deno.land/std@0.177.0/http/server.ts"
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3'
+import { serve } from "std/http/server.ts"
+import { createClient } from '@supabase/supabase-js'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -9,8 +9,8 @@ const corsHeaders = {
 // Base URLs for ArcGIS services
 const BRISBANE_PROPERTY_URL = "https://services2.arcgis.com/dEKgZETqwmDAh1rP/arcgis/rest/services/property_boundaries_holding/FeatureServer/0"
 const BRISBANE_ROADS_URL = "https://services2.arcgis.com/dEKgZETqwmDAh1rP/arcgis/rest/services/Road_corridor/FeatureServer/0"
-
-serve(async (req) => {
+ 
+serve(async (req: Request) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders })
   }
