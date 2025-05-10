@@ -4,6 +4,7 @@ import {
   mockGetPropertyBoundaries, 
   mockGetAdvancedPropertyBoundaries 
 } from './mockArcGIS';
+import { ARCGIS_CONFIG } from '@/config/arcgis';
 
 // Environment detection - helps determine if we should use mock data
 const isDevelopment = process.env.NODE_ENV === 'development';
@@ -21,7 +22,10 @@ export const getPropertyBoundariesByAddress = async (address: string) => {
 
     // Call our Supabase Edge Function
     const { data, error } = await supabase.functions.invoke('arcgis-boundaries', {
-      body: { address }
+      body: { 
+        address,
+        apiKey: ARCGIS_CONFIG.apiKey
+      }
     });
 
     if (error) {
@@ -83,7 +87,13 @@ export const getPropertyBoundariesByComponents = async (
 
     // Call our Supabase Edge Function
     const { data, error } = await supabase.functions.invoke('arcgis-boundaries', {
-      body: { houseNumber, streetName, suburb, postcode }
+      body: { 
+        houseNumber, 
+        streetName, 
+        suburb, 
+        postcode,
+        apiKey: ARCGIS_CONFIG.apiKey
+      }
     });
 
     if (error) {
@@ -143,7 +153,10 @@ export const getPropertyBoundariesByLocation = async (location: [number, number]
 
     // Call our Supabase Edge Function
     const { data, error } = await supabase.functions.invoke('arcgis-boundaries', {
-      body: { location: { x: location[0], y: location[1] } }
+      body: { 
+        location: { x: location[0], y: location[1] },
+        apiKey: ARCGIS_CONFIG.apiKey
+      }
     });
 
     if (error) {
