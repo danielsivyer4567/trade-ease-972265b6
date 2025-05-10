@@ -194,15 +194,12 @@ export function Timeline({ steps, onStepAction }: TimelineProps) {
                       <img
                         src="/lovable-uploads/point-right.png" // Assumed filename
                         alt="Focus arrow pointing right"
-                        className="absolute left-[-50px] top-1/2 -translate-y-1/2 h-12 w-12 z-20" // Adjusted left, added z-index
-                        // Example: left-[-50px] to pull it leftwards outside the card bounds
-                        // Size h-12 w-12 is a placeholder, adjust as needed
+                        className="absolute left-4 top-1/2 -translate-y-1/2 h-12 w-12 z-50 border-2 border-red-500" // Test: left-4, z-50, red border
                       />
                       <img
                         src="/lovable-uploads/point-left.png" // Assumed filename
                         alt="Focus arrow pointing left"
-                        className="absolute right-[-50px] top-1/2 -translate-y-1/2 h-12 w-12 z-20" // Adjusted right, added z-index
-                        // Example: right-[-50px] to pull it rightwards outside the card bounds
+                        className="absolute right-4 top-1/2 -translate-y-1/2 h-12 w-12 z-50 border-2 border-red-500" // Test: right-4, z-50, red border
                       />
                     </>
                   )}
