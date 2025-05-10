@@ -1,13 +1,6 @@
 import { supabase } from '@/integrations/supabase/client';
 import { Property } from '../types';
-import { 
-  mockGetPropertyBoundaries, 
-  mockGetAdvancedPropertyBoundaries 
-} from './mockArcGIS';
 import { ARCGIS_CONFIG } from '@/config/arcgis';
-
-// Environment detection - helps determine if we should use mock data
-const isDevelopment = process.env.NODE_ENV === 'development';
 
 /**
  * Get property boundaries by address
@@ -30,35 +23,14 @@ export const getPropertyBoundariesByAddress = async (address: string) => {
 
     if (error) {
       console.error('Error getting property boundaries by address:', error);
-      
-      // If we're in development, fall back to mock data
-      if (isDevelopment) {
-        console.log('Using mock data for address boundaries in development...');
-        const mockResult = await mockGetAdvancedPropertyBoundaries(address);
-        
-        // Mock data is already processed, no need to call processArcGISResponse
-        return mockResult;
-      }
-      
       return { data: null, error: error.message };
     }
 
     // Process the response data to extract boundary information
     const processedData = processArcGISResponse(data);
-    
     return { data: processedData, error: null };
   } catch (error) {
     console.error('Error in property boundary service:', error);
-    
-    // If we're in development, fall back to mock data
-    if (isDevelopment) {
-      console.log('Using mock data for address boundaries after error...');
-      const mockResult = await mockGetAdvancedPropertyBoundaries(address);
-      
-      // Mock data is already processed, no need to call processArcGISResponse
-      return mockResult;
-    }
-    
     return { 
       data: null, 
       error: error instanceof Error ? error.message : 'Unknown error occurred' 
@@ -98,41 +70,14 @@ export const getPropertyBoundariesByComponents = async (
 
     if (error) {
       console.error('Error getting property boundaries by components:', error);
-      
-      // If we're in development, fall back to mock data
-      if (isDevelopment) {
-        console.log('Using mock data for component boundaries in development...');
-        return await mockGetPropertyBoundaries(
-          undefined, 
-          houseNumber, 
-          streetName, 
-          suburb, 
-          postcode
-        );
-      }
-      
       return { data: null, error: error.message };
     }
 
     // Process the response data to extract boundary information
     const processedData = processArcGISResponse(data);
-    
     return { data: processedData, error: null };
   } catch (error) {
     console.error('Error in property boundary service:', error);
-    
-    // If we're in development, fall back to mock data
-    if (isDevelopment) {
-      console.log('Using mock data for component boundaries after error...');
-      return await mockGetPropertyBoundaries(
-        undefined, 
-        houseNumber, 
-        streetName, 
-        suburb, 
-        postcode
-      );
-    }
-    
     return { 
       data: null, 
       error: error instanceof Error ? error.message : 'Unknown error occurred' 
@@ -161,29 +106,14 @@ export const getPropertyBoundariesByLocation = async (location: [number, number]
 
     if (error) {
       console.error('Error getting property boundaries by location:', error);
-      
-      // If we're in development, fall back to mock data
-      if (isDevelopment) {
-        console.log('Using mock data for location boundaries in development...');
-        return await mockGetAdvancedPropertyBoundaries(`${location[1]}, ${location[0]}`);
-      }
-      
       return { data: null, error: error.message };
     }
 
     // Process the response data to extract boundary information
     const processedData = processArcGISResponse(data);
-    
     return { data: processedData, error: null };
   } catch (error) {
     console.error('Error in property boundary service:', error);
-    
-    // If we're in development, fall back to mock data
-    if (isDevelopment) {
-      console.log('Using mock data for location boundaries after error...');
-      return await mockGetAdvancedPropertyBoundaries(`${location[1]}, ${location[0]}`);
-    }
-    
     return { 
       data: null, 
       error: error instanceof Error ? error.message : 'Unknown error occurred' 
