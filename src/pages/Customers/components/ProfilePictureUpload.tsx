@@ -1,96 +1,102 @@
-import React, { useState, useRef } from 'react';
-import { Button } from "@/components/ui/button";
+import React, { useState, useEffect } from 'react';
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Camera, X } from 'lucide-react';
+import { MapPin } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { AddressStreetView } from './AddressStreetView';
 
 interface ProfilePictureUploadProps {
   customerId: string;
-  currentImage?: string;
   address?: string;
   city?: string;
   state?: string;
   zipCode?: string;
-  onImageUpdate?: (imageUrl: string) => void;
   onAddressUpdate?: (address: string) => void;
   className?: string;
 }
 
 export function ProfilePictureUpload({
   customerId,
-  currentImage,
   address = '',
   city = '',
   state = '',
   zipCode = '',
-  onImageUpdate,
   onAddressUpdate,
   className = ''
 }: ProfilePictureUploadProps) {
-  const [image, setImage] = useState<string | null>(currentImage || null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [streetViewUrl, setStreetViewUrl] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
-  const handleRemoveImage = async () => {
+  // Google Maps API key - should be moved to environment variables
+  const API_KEY = "AIzaSyAnIcvNA_ZjRUnN4aeyl-1MYpBSN-ODIvw";
+
+  const generateStreetViewUrl = (location: string) => {
+    const encodedLocation = encodeURIComponent(location);
+    // Using a square aspect ratio for the profile picture
+    return `https://maps.googleapis.com/maps/api/streetview?size=400x400&location=${encodedLocation}&key=${API_KEY}&pitch=10&fov=90`;
+  };
+
+  const updateStreetView = async (location: string) => {
+    if (!location.trim()) return;
+    
+    setIsLoading(true);
     try {
-      const response = await fetch(`/api/remove-profile-picture/${customerId}`, {
-        method: 'DELETE',
-      });
+      // First, verify the address using Geocoding API
+      const geocodeUrl = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(location)}&key=${API_KEY}`;
+      const geocodeResponse = await fetch(geocodeUrl);
+      const geocodeData = await geocodeResponse.json();
 
-      if (!response.ok) throw new Error('Failed to remove image');
-
-      setImage(null);
-      if (onImageUpdate) {
-        onImageUpdate('');
+      if (geocodeData.status === 'OK') {
+        const formattedAddress = geocodeData.results[0].formatted_address;
+        const streetViewUrl = generateStreetViewUrl(formattedAddress);
+        setStreetViewUrl(streetViewUrl);
+        
+        if (onAddressUpdate) {
+          onAddressUpdate(formattedAddress);
+        }
+      } else {
+        throw new Error('Address not found');
       }
-
-      toast({
-        title: "Success",
-        description: "Profile picture removed successfully",
-      });
     } catch (error) {
       toast({
         title: "Error",
-        description: "Failed to remove profile picture",
+        description: "Could not find Street View for this address",
         variant: "destructive",
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
+  // Load Street View immediately when component mounts or address changes
+  useEffect(() => {
+    const fullAddress = `${address}, ${city}, ${state} ${zipCode}`.trim();
+    if (fullAddress) {
+      updateStreetView(fullAddress);
+    }
+  }, [address, city, state, zipCode]);
+
   return (
-    <div className={`space-y-6 ${className}`}>
-      <div className="flex flex-col items-center space-y-4">
-        <div className="relative">
-          <Avatar className="h-32 w-32">
-            <AvatarImage src={image || undefined} alt="Profile" />
+    <div className={`flex flex-col items-center space-y-4 ${className}`}>
+      <div className="relative">
+        <Avatar className="h-32 w-32">
+          {isLoading ? (
+            <div className="w-full h-full flex items-center justify-center bg-muted">
+              <MapPin className="h-8 w-8 animate-pulse text-primary" />
+            </div>
+          ) : streetViewUrl ? (
+            <AvatarImage src={streetViewUrl} alt="Street View" />
+          ) : (
             <AvatarFallback className="text-2xl">
               {customerId.slice(0, 2).toUpperCase()}
             </AvatarFallback>
-          </Avatar>
-          {image && (
-            <Button
-              variant="destructive"
-              size="icon"
-              className="absolute -top-2 -right-2 h-6 w-6"
-              onClick={handleRemoveImage}
-            >
-              <X className="h-4 w-4" />
-            </Button>
           )}
-        </div>
+        </Avatar>
       </div>
-
-      {/* Always show Street View if address components are available */}
-      {(address || city || state || zipCode) && (
-        <AddressStreetView
-          address={address}
-          city={city}
-          state={state}
-          zipCode={zipCode}
-          onAddressUpdate={onAddressUpdate}
-        />
-      )}
+      
+      <div className="text-sm text-muted-foreground text-center">
+        <p className="font-medium">Current Address:</p>
+        <p>{address}, {city}, {state} {zipCode}</p>
+      </div>
     </div>
   );
 } 
