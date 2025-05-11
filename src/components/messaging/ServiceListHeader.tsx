@@ -1,7 +1,6 @@
 import React from 'react';
 import { Button } from "@/components/ui/button";
-import { Plus, RefreshCw, Loader2 } from "lucide-react";
-import messagingPlatformsImg from '@/assets/messaging-platforms.png';
+import { Plus, RefreshCw, Loader2, MessageSquare } from "lucide-react";
 
 interface ServiceListHeaderProps {
   isLoading: boolean;
@@ -18,8 +17,11 @@ export const ServiceListHeader = ({
 }: ServiceListHeaderProps) => {
   return (
     <div className="flex flex-col items-center mb-4">
-      <img src={messagingPlatformsImg} alt="Multiple Messaging Platforms" className="w-48 h-auto mb-4" />
-      <div className="flex justify-between items-center">
+      <div className="flex items-center gap-2 mb-4">
+        <MessageSquare className="h-8 w-8 text-blue-600" />
+        <h2 className="text-xl font-semibold">Messaging Services</h2>
+      </div>
+      <div className="flex justify-between items-center w-full">
         <p className="text-sm text-gray-600">Enable automatic sync for connected services</p>
         <div className="flex gap-2">
           <Button 
