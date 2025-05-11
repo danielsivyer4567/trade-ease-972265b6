@@ -19,7 +19,8 @@ import {
   CheckCircle2, 
   Circle,
   PenLine,
-  ExternalLink
+  ExternalLink,
+  Briefcase
 } from 'lucide-react';
 import { BaseLayout } from '@/components/ui/BaseLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -33,6 +34,7 @@ import { useToast } from '@/hooks/use-toast';
 import { fetchCustomersFromAPI } from '@/services/api';
 import { CustomerData } from '@/pages/Customers/components/CustomerCard';
 import { supabase } from '@/integrations/supabase/client';
+import { Timeline } from './components/Timeline';
 
 // Extended interface for Customer with additional fields needed for the page
 interface Customer extends CustomerData {
@@ -114,6 +116,7 @@ function CustomersPage() {
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
   const [quotesStats, setQuotesStats] = useState<Record<string, { total: number; accepted: number; denied: number }>>({});
   const [showJourneyModal, setShowJourneyModal] = useState(false);
+  const [workflowSteps, setWorkflowSteps] = useState([]);
 
   const { isLoading, isError, data: customers, error } = useQuery({
     queryKey: ['customers'], 
@@ -157,6 +160,10 @@ function CustomersPage() {
       // Fallback: try direct window location change
       window.location.href = `/customers/${customerId}/edit`;
     }
+  };
+
+  const handleWorkflowStepAction = (stepId) => {
+    setWorkflowSteps(prevSteps => prevSteps.map(step => step.id === stepId ? { ...step, isActioned: true, requiresAction: false } : step));
   };
 
   // Filter and sort customers
