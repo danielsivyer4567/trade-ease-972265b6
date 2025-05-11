@@ -1,7 +1,6 @@
-import { Router } from 'express';
+const express = require('express');
+const router = express.Router();
 import { MessagingService } from '@/services/MessagingService';
-
-const router = Router();
 
 router.post('/send', async (req, res) => {
   const { to, body } = req.body;
