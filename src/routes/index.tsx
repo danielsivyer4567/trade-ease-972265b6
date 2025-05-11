@@ -25,7 +25,7 @@ const NotFoundPage = lazy(() => import('@/pages/NotFound'));
 const AuthPage = lazy(() => import('@/pages/Auth'));
 
 // Customer related pages
-const CustomersPage = lazy(() => import('@/pages/Customers/CustomersPage'));
+const CustomersPage = lazy(() => import('@/pages/Customers/index').then(module => ({ default: module.default })));
 const CustomerDetailsPage = lazy(() => import('@/pages/Customers/CustomerDetail'));
 const NewCustomerPage = lazy(() => import('@/pages/Customers/NewCustomer'));
 const EditCustomerPage = lazy(() => import('@/pages/Customers/EditCustomer'));
