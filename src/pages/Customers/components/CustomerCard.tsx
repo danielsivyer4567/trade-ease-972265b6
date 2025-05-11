@@ -17,6 +17,13 @@ export interface CustomerData {
   zipCode: string;
   status: 'active' | 'inactive' | 'previous';
   customer_code?: string;
+  business_name?: string;
+  abn?: string;
+  acn?: string;
+  state_licence_state?: string;
+  state_licence_number?: string;
+  national_certifications?: string[];
+  certification_details?: Record<string, string>;
 }
 
 interface CustomerCardProps {
@@ -60,69 +67,45 @@ export const CustomerCard = ({ customer, onCustomerClick, onEditClick }: Custome
 
   return (
     <Card 
-      key={customer.id} 
-      className="hover:shadow-md transition-all cursor-pointer"
+      className="cursor-pointer hover:shadow-md transition-shadow"
       onClick={() => onCustomerClick(customer.id)}
     >
-      <CardHeader className="py-3 bg-slate-300">
-        <CardTitle className="text-lg flex items-center justify-between text-slate-950">
-          <div className="flex items-center gap-2">
-            <User className="h-5 w-5 text-gray-500" />
-            <span 
-              className="cursor-pointer hover:text-blue-600 hover:underline"
+      <CardHeader className="pb-2">
+        <div className="flex justify-between items-start">
+          <div>
+            <CardTitle 
+              className="text-lg font-semibold hover:text-blue-600 hover:underline"
               onClick={handleNameClick}
             >
               {customer.name}
-            </span>
+            </CardTitle>
             {customer.customer_code && (
-              <span className="text-xs bg-gray-100 px-2 py-0.5 rounded-full text-gray-600">
-                {customer.customer_code}
-              </span>
+              <span className="text-sm text-gray-500">Code: {customer.customer_code}</span>
             )}
-            <Button 
-              variant="default" 
-              size="sm"
-              onClick={(e) => {
-                e.stopPropagation();
-                try {
-                  navigate(`/customers/${customer.id}`);
-                } catch (error) {
-                  console.error('Navigation error:', error);
-                  // Fallback to direct URL change if navigation fails
-                  window.location.href = `/customers/${customer.id}`;
-                }
-              }}
-              className="px-2 py-1 h-7 text-xs ml-2"
-            >
-              <ExternalLink className="h-3 w-3 mr-1" />
-              Open Portfolio
-            </Button>
           </div>
-          <div className="flex items-center gap-2">
-            <Button 
-              variant="ghost" 
-              size="sm"
-              onClick={(e) => onEditClick(e, customer)}
-              className="ml-2 p-1"
-            >
-              <Edit className="h-4 w-4 text-gray-600" />
-            </Button>
-          </div>
-        </CardTitle>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={(e) => onEditClick(e, customer)}
+            className="p-1"
+          >
+            <Edit className="h-4 w-4" />
+          </Button>
+        </div>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent>
         <div className="space-y-2">
           <div className="flex items-center gap-2 text-sm">
-            <Phone className="h-4 w-4 text-gray-500" />
-            {customer.phone}
+            <Mail className="h-4 w-4 text-gray-500" />
+            <span>{customer.email}</span>
           </div>
           <div className="flex items-center gap-2 text-sm">
-            <Mail className="h-4 w-4 text-gray-500" />
-            {customer.email}
+            <Phone className="h-4 w-4 text-gray-500" />
+            <span>{customer.phone}</span>
           </div>
           <div className="flex items-center gap-2 text-sm">
             <MapPin className="h-4 w-4 text-gray-500" />
-            {customer.address}, {customer.city}, {customer.state} {customer.zipCode}
+            <span>{`${customer.address}, ${customer.city}, ${customer.state} ${customer.zipCode}`}</span>
           </div>
         </div>
       </CardContent>
