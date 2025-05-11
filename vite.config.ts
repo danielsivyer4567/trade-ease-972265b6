@@ -68,12 +68,23 @@ export default defineConfig({
         // Ensure proper chunk loading
         chunkFileNames: 'assets/[name]-[hash].js',
         entryFileNames: 'assets/[name]-[hash].js',
-        assetFileNames: 'assets/[name]-[hash].[ext]'
+        assetFileNames: 'assets/[name]-[hash].[ext]',
+        // Add code splitting optimization
+        minifyInternalExports: true,
+        // Improve chunk loading
+        hoistTransitiveImports: true,
+        // Add module preload
+        experimentalMinChunkSize: 10000
       },
     },
     // Add module preload
     modulePreload: {
       polyfill: true
+    },
+    // Add dynamic import optimization
+    dynamicImportVarsOptions: {
+      warnOnError: true,
+      exclude: []
     }
   },
   // Add specific configuration to handle React Refresh

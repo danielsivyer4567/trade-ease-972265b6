@@ -1,11 +1,12 @@
-
 import { AppLayout } from "@/components/ui/AppLayout";
 import { CustomersPageContent } from "./components/CustomersPageContent";
 
-export default function Customers() {
+const CustomersPage = () => {
   return (
     <AppLayout>
       <CustomersPageContent />
     </AppLayout>
   );
-}
+};
+
+export default CustomersPage;
