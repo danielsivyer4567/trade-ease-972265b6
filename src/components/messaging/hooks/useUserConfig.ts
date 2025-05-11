@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from "@/integrations/supabase/client";
 
@@ -12,16 +11,19 @@ export const useUserConfig = () => {
     messaging_enabled: false,
     organization_id: null
   });
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     loadUserConfig();
   }, []);
 
   const loadUserConfig = async () => {
+    setIsLoading(true);
     try {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
         console.log('No user session found');
+        setIsLoading(false);
         return;
       }
       
@@ -45,14 +47,18 @@ export const useUserConfig = () => {
       }
     } catch (error) {
       console.error('Error loading user configuration:', error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const updateUserOrganization = async (organizationId: string | null) => {
+    setIsLoading(true);
     try {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
         console.log('No user session found');
+        setIsLoading(false);
         return false;
       }
 
@@ -65,6 +71,7 @@ export const useUserConfig = () => {
         
       if (error) {
         console.error('Error updating user organization:', error);
+        setIsLoading(false);
         return false;
       }
       
@@ -73,12 +80,14 @@ export const useUserConfig = () => {
         organization_id: organizationId
       }));
       
+      setIsLoading(false);
       return true;
     } catch (error) {
       console.error('Error updating user organization:', error);
+      setIsLoading(false);
       return false;
     }
   };
 
-  return { userConfig, setUserConfig, updateUserOrganization };
+  return { userConfig, setUserConfig, updateUserOrganization, isLoading };
 };

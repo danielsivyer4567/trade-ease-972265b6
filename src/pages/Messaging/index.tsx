@@ -1,8 +1,7 @@
-
 import { AppLayout } from "@/components/ui/AppLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
-import { MessageSquare, ArrowLeft, RefreshCw, Mail, Share2 } from "lucide-react";
+import { MessageSquare, ArrowLeft, RefreshCw, Mail, Share2, Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { ServiceSyncCard } from "@/components/messaging/ServiceSyncCard";
 import { PhoneNumberInput } from "@/components/messaging/PhoneNumberInput";
@@ -18,13 +17,15 @@ import { ConnectedAppsOverview } from "@/components/messaging/crm/ConnectedAppsO
 import { CrmPipeline } from "@/components/messaging/crm/CrmPipeline";
 import { useServicesFetch } from "@/components/messaging/hooks/useServicesFetch";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function Messaging() {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   
   const {
-    userConfig
+    userConfig,
+    isLoading: isUserConfigLoading
   } = useUserConfig();
   
   const {
@@ -50,8 +51,66 @@ export default function Messaging() {
   } = useTwilioConnection(updateConnectedNumbers);
   
   const {
-    services
+    services,
+    isLoading: isServicesLoading
   } = useServicesFetch();
+
+  const isLoading = isUserConfigLoading || isServicesLoading;
+  
+  if (isLoading) {
+    return (
+      <AppLayout>
+        <div className="w-full h-full px-3 md:px-4">
+          <div className="space-y-4">
+            <Card className="overflow-hidden">
+              <CardHeader className="bg-slate-200 pb-2">
+                <Skeleton className="h-8 w-48" />
+                <Skeleton className="h-4 w-72 mt-2" />
+              </CardHeader>
+            </Card>
+            
+            <div className="space-y-4">
+              <Skeleton className="h-10 w-full" />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Skeleton className="h-[200px] w-full" />
+                <Skeleton className="h-[200px] w-full" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </AppLayout>
+    );
+  }
+
+  if (!userConfig?.messaging_enabled) {
+    return (
+      <AppLayout>
+        <div className="w-full h-full px-3 md:px-4">
+          <div className="space-y-4">
+            <Card className="overflow-hidden">
+              <CardHeader className="bg-slate-200 pb-2">
+                <CardTitle className="flex items-center gap-2 text-2xl md:text-3xl">
+                  <MessageSquare className="h-5 w-5 text-blue-600" />
+                  Messaging CRM
+                </CardTitle>
+                <CardDescription className="py-[8px]">
+                  Messaging features are not enabled for your account
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="p-6">
+                <Button 
+                  onClick={() => navigate("/settings")}
+                  className="w-full md:w-auto"
+                >
+                  Enable Messaging Features
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </AppLayout>
+    );
+  }
   
   return (
     <AppLayout>
@@ -98,9 +157,18 @@ export default function Messaging() {
                     <CardDescription>Manage your connected phone numbers</CardDescription>
                   </CardHeader>
                   <CardContent className="pt-4 bg-slate-200">
-                    <PhoneNumberInput phoneNumber={phoneNumber} isConnecting={isConnectingPhone} onChange={handlePhoneNumberChange} onConnect={handleConnect} />
+                    <PhoneNumberInput 
+                      phoneNumber={phoneNumber} 
+                      isConnecting={isConnectingPhone} 
+                      onChange={handlePhoneNumberChange} 
+                      onConnect={handleConnect} 
+                    />
                     <div className="mt-4">
-                      <ConnectedPhonesList connectedNumbers={connectedNumbers} onRemoveNumber={handleRemoveNumber} onAddTwilioAccount={() => setTwilioDialogOpen(true)} />
+                      <ConnectedPhonesList 
+                        connectedNumbers={connectedNumbers} 
+                        onRemoveNumber={handleRemoveNumber} 
+                        onAddTwilioAccount={() => setTwilioDialogOpen(true)} 
+                      />
                     </div>
                   </CardContent>
                 </Card>
@@ -108,7 +176,14 @@ export default function Messaging() {
                 <ServiceSyncCard />
               </div>
               
-              <TwilioConfigDialog open={twilioDialogOpen} onOpenChange={setTwilioDialogOpen} config={twilioConfig} setConfig={setTwilioConfig} onConnect={handleTwilioConnect} isConnecting={isConnectingTwilio} />
+              <TwilioConfigDialog 
+                open={twilioDialogOpen} 
+                onOpenChange={setTwilioDialogOpen} 
+                config={twilioConfig} 
+                setConfig={setTwilioConfig} 
+                onConnect={handleTwilioConnect} 
+                isConnecting={isConnectingTwilio} 
+              />
             </TabsContent>
             
             <TabsContent value="email" className="space-y-4">
