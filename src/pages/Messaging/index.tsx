@@ -61,6 +61,16 @@ export default function Messaging() {
     return (
       <AppLayout>
         <div className="w-full h-full px-3 md:px-4">
+          <div className="flex flex-col items-center justify-center py-4">
+            <img
+              src="/lovable-uploads/latest logo.png"
+              alt="Multi messaging platform capabilities"
+              className="max-w-xs w-full h-auto mb-2 rounded-lg shadow-md"
+            />
+            <div className="text-center text-gray-700 text-base font-medium">
+              Connect and manage all your messaging platforms in one place
+            </div>
+          </div>
           <div className="space-y-4">
             <Card className="overflow-hidden">
               <CardHeader className="bg-slate-200 pb-2">
@@ -86,6 +96,16 @@ export default function Messaging() {
     return (
       <AppLayout>
         <div className="w-full h-full px-3 md:px-4">
+          <div className="flex flex-col items-center justify-center py-4">
+            <img
+              src="/lovable-uploads/latest logo.png"
+              alt="Multi messaging platform capabilities"
+              className="max-w-xs w-full h-auto mb-2 rounded-lg shadow-md"
+            />
+            <div className="text-center text-gray-700 text-base font-medium">
+              Connect and manage all your messaging platforms in one place
+            </div>
+          </div>
           <div className="space-y-4">
             <Card className="overflow-hidden">
               <CardHeader className="bg-slate-200 pb-2">
@@ -115,6 +135,16 @@ export default function Messaging() {
   return (
     <AppLayout>
       <div className="w-full h-full px-3 md:px-4">
+        <div className="flex flex-col items-center justify-center py-4">
+          <img
+            src="/lovable-uploads/latest logo.png"
+            alt="Multi messaging platform capabilities"
+            className="max-w-xs w-full h-auto mb-2 rounded-lg shadow-md"
+          />
+          <div className="text-center text-gray-700 text-base font-medium">
+            Connect and manage all your messaging platforms in one place
+          </div>
+        </div>
         <div className="space-y-4">
           <Card className="overflow-hidden">
             <CardHeader className="bg-slate-200 pb-2">
