@@ -33,7 +33,7 @@ export function CustomersPageContent() {
   const [apiError, setApiError] = useState<string | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { customers, isLoading, fetchCustomers } = useCustomers();
+  const { customers, isLoading, fetchCustomers, updateCustomer } = useCustomers();
   
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -115,66 +115,37 @@ export function CustomersPageContent() {
     });
     setEditModalOpen(true);
   };
-  
+
   const onSubmit = async (data: z.infer<typeof formSchema>) => {
+    if (!selectedCustomer) return;
+
     try {
-      const { data: session } = await supabase.auth.getSession();
-      if (!session?.session?.user) {
-        toast({
-          title: "Authentication Error",
-          description: "You must be logged in to update customer information",
-          variant: "destructive"
-        });
-        return;
-      }
-
-      if (!selectedCustomer) {
-        toast({
-          title: "Error",
-          description: "No customer selected for update",
-          variant: "destructive"
-        });
-        return;
-      }
-
+      // Ensure all required fields are present
       const customerData = {
-        name: data.name,
-        email: data.email,
-        phone: data.phone,
-        address: data.address,
-        city: data.city,
-        state: data.state,
-        zipcode: data.zipCode
+        name: data.name || "",
+        email: data.email || "",
+        phone: data.phone || "",
+        address: data.address || "",
+        city: data.city || "",
+        state: data.state || "",
+        zipCode: data.zipCode || ""
       };
 
-      const { error } = await supabase
-        .from('customers')
-        .update(customerData)
-        .eq('id', selectedCustomer.id);
-
-      if (error) {
-        console.error("Error updating customer:", error);
+      const result = await updateCustomer(selectedCustomer.id, customerData);
+      if (result.success) {
         toast({
-          title: "Error",
-          description: "Failed to update customer information",
-          variant: "destructive"
+          title: "Success",
+          description: "Customer updated successfully"
         });
-        return;
+        setEditModalOpen(false);
+      } else {
+        throw new Error("Failed to update customer");
       }
-
-      toast({
-        title: "Success",
-        description: "Customer information updated successfully"
-      });
-      
-      setEditModalOpen(false);
-      fetchCustomers();
-      fetchApiCustomers(); // Refresh API customers as well
     } catch (error) {
-      console.error("Exception updating customer:", error);
+      console.error("Error updating customer:", error);
       toast({
         title: "Error",
-        description: "An unexpected error occurred",
+        description: "Failed to update customer",
         variant: "destructive"
       });
     }

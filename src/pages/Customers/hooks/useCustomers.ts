@@ -16,6 +16,13 @@ export interface Customer {
   created_at: string;
   user_id: string;
   customer_code?: string;
+  business_name?: string;
+  abn?: string;
+  acn?: string;
+  state_licence_state?: string;
+  state_licence_number?: string;
+  national_certifications?: string[];
+  certification_details?: Record<string, string>;
 }
 
 export type CustomerFormValues = Omit<Customer, 'id' | 'status' | 'created_at' | 'user_id'>;
@@ -56,7 +63,14 @@ export function useCustomers() {
       // Map database fields to our interface format
       const formattedData = data.map(customer => ({
         ...customer,
-        zipCode: customer.zipcode // Map zipcode from DB to zipCode in our interface
+        zipCode: customer.zipcode, // Map zipcode from DB to zipCode in our interface
+        business_name: customer.business_name || undefined,
+        abn: customer.abn || undefined,
+        acn: customer.acn || undefined,
+        state_licence_state: customer.state_licence_state || undefined,
+        state_licence_number: customer.state_licence_number || undefined,
+        national_certifications: customer.national_certifications || undefined,
+        certification_details: customer.certification_details || undefined
       }));
 
       setCustomers(formattedData);
@@ -111,7 +125,14 @@ export function useCustomers() {
         state: customerData.state,
         zipcode: customerData.zipCode, // Explicitly map zipCode to zipcode for DB
         status: 'active',
-        user_id: session.session.user.id
+        user_id: session.session.user.id,
+        business_name: customerData.business_name,
+        abn: customerData.abn,
+        acn: customerData.acn,
+        state_licence_state: customerData.state_licence_state,
+        state_licence_number: customerData.state_licence_number,
+        national_certifications: customerData.national_certifications,
+        certification_details: customerData.certification_details
       };
       
       console.log("Transformed data for Supabase:", customerWithUserId);
@@ -131,7 +152,14 @@ export function useCustomers() {
       // Map the returned data to match our interface, ensuring zipCode is properly set
       const formattedData = {
         ...data,
-        zipCode: data.zipcode
+        zipCode: data.zipcode,
+        business_name: data.business_name || undefined,
+        abn: data.abn || undefined,
+        acn: data.acn || undefined,
+        state_licence_state: data.state_licence_state || undefined,
+        state_licence_number: data.state_licence_number || undefined,
+        national_certifications: data.national_certifications || undefined,
+        certification_details: data.certification_details || undefined
       };
       
       // Update the local customer list with the new customer
@@ -178,7 +206,14 @@ export function useCustomers() {
         address: customerData.address,
         city: customerData.city,
         state: customerData.state,
-        zipcode: customerData.zipCode
+        zipcode: customerData.zipCode,
+        business_name: customerData.business_name,
+        abn: customerData.abn,
+        acn: customerData.acn,
+        state_licence_state: customerData.state_licence_state,
+        state_licence_number: customerData.state_licence_number,
+        national_certifications: customerData.national_certifications,
+        certification_details: customerData.certification_details
       };
       
       const { data, error } = await supabase
@@ -198,7 +233,14 @@ export function useCustomers() {
       // Map the returned data to match our interface
       const formattedData = {
         ...data,
-        zipCode: data.zipcode
+        zipCode: data.zipcode,
+        business_name: data.business_name || undefined,
+        abn: data.abn || undefined,
+        acn: data.acn || undefined,
+        state_licence_state: data.state_licence_state || undefined,
+        state_licence_number: data.state_licence_number || undefined,
+        national_certifications: data.national_certifications || undefined,
+        certification_details: data.certification_details || undefined
       };
       
       // Update the local customer list
