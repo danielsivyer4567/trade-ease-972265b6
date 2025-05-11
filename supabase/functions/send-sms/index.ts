@@ -15,8 +15,8 @@ serve(async (req) => {
     const { to, body } = await req.json();
 
     // Get Twilio credentials from environment variables
-    const accountSid = Deno.env.get(AC73c2f0da681e3dab36cb7efe9a20d353);
-    const authToken = Deno.env.get("23e5200bd07157c4abc9b4bfbbb31370");
+    const accountSid = Deno.env.get("TWILIO_SID");
+    const authToken = Deno.env.get("TWILIO_AUTH_TOKEN");
     const from = Deno.env.get("TWILIO_PHONE_NUMBER");
 
     if (!accountSid || !authToken || !from) {
@@ -25,8 +25,16 @@ serve(async (req) => {
 
     const twilio = new Twilio(accountSid, authToken);
 
-    // Send the SMS
-    const result = await twilio.messages.create({ to, from, body });
+    // Send the SMS with error handling
+    const result = await twilio.messages.create({
+      to,
+      from,
+      body,
+      statusCallback: `${Deno.env.get('SUPABASE_URL')}/functions/sms-status-callback`
+    }).catch(error => {
+      console.error('Failed to send SMS:', error);
+      throw new Error(`SMS delivery failed: ${error.message}`);
+    });
 
     return new Response(
       JSON.stringify({ success: true, sid: result.sid }),
