@@ -61,16 +61,6 @@ export default function Messaging() {
     return (
       <AppLayout>
         <div className="w-full h-full px-3 md:px-4">
-          <div className="flex flex-col items-center justify-center py-4">
-            <img
-              src="/lovable-uploads/latest logo.png"
-              alt="Multi messaging platform capabilities"
-              className="max-w-xs w-full h-auto mb-2 rounded-lg shadow-md"
-            />
-            <div className="text-center text-gray-700 text-base font-medium">
-              Connect and manage all your messaging platforms in one place
-            </div>
-          </div>
           <div className="space-y-4">
             <Card className="overflow-hidden">
               <CardHeader className="bg-slate-200 pb-2">
@@ -95,38 +85,26 @@ export default function Messaging() {
   if (!userConfig?.messaging_enabled) {
     return (
       <AppLayout>
-        <div className="w-full h-full px-3 md:px-4">
-          <div className="flex flex-col items-center justify-center py-4">
-            <img
-              src="/lovable-uploads/latest logo.png"
-              alt="Multi messaging platform capabilities"
-              className="max-w-xs w-full h-auto mb-2 rounded-lg shadow-md"
-            />
-            <div className="text-center text-gray-700 text-base font-medium">
-              Connect and manage all your messaging platforms in one place
-            </div>
-          </div>
-          <div className="space-y-4">
-            <Card className="overflow-hidden">
-              <CardHeader className="bg-slate-200 pb-2">
-                <CardTitle className="flex items-center gap-2 text-2xl md:text-3xl">
-                  <MessageSquare className="h-5 w-5 text-blue-600" />
-                  Messaging CRM
-                </CardTitle>
-                <CardDescription className="py-[8px]">
-                  Messaging features are not enabled for your account
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="p-6">
-                <Button 
-                  onClick={() => navigate("/settings")}
-                  className="w-full md:w-auto"
-                >
-                  Enable Messaging Features
-                </Button>
-              </CardContent>
-            </Card>
-          </div>
+        <div className="space-y-4">
+          <Card className="overflow-hidden">
+            <CardHeader className="bg-slate-200 pb-2">
+              <CardTitle className="flex items-center gap-2 text-2xl md:text-3xl">
+                <MessageSquare className="h-5 w-5 text-blue-600" />
+                Messaging CRM
+              </CardTitle>
+              <CardDescription className="py-[8px]">
+                Messaging features are not enabled for your account
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="p-6">
+              <Button 
+                onClick={() => navigate("/settings")}
+                className="w-full md:w-auto"
+              >
+                Enable Messaging Features
+              </Button>
+            </CardContent>
+          </Card>
         </div>
       </AppLayout>
     );
@@ -135,16 +113,6 @@ export default function Messaging() {
   return (
     <AppLayout>
       <div className="w-full h-full px-3 md:px-4">
-        <div className="flex flex-col items-center justify-center py-4">
-          <img
-            src="/lovable-uploads/latest logo.png"
-            alt="Multi messaging platform capabilities"
-            className="max-w-xs w-full h-auto mb-2 rounded-lg shadow-md"
-          />
-          <div className="text-center text-gray-700 text-base font-medium">
-            Connect and manage all your messaging platforms in one place
-          </div>
-        </div>
         <div className="space-y-4">
           <Card className="overflow-hidden">
             <CardHeader className="bg-slate-200 pb-2">
