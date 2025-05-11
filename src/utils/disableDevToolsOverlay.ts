@@ -48,7 +48,7 @@ export function disableDevToolsOverlay() {
     
     // Disable the error overlay
     window.addEventListener('error', (event) => {
-      if (event.message.includes('message channel closed')) {
+      if (event.message && event.message.includes('message channel closed')) {
         event.stopPropagation();
         event.preventDefault();
       }

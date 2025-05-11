@@ -62,9 +62,19 @@ export default defineConfig({
         },
         // Improve module loading stability
         compact: true,
-        sanitizeFileName: true
+        sanitizeFileName: true,
+        // Add dynamic import handling
+        dynamicImportInCjs: true,
+        // Ensure proper chunk loading
+        chunkFileNames: 'assets/[name]-[hash].js',
+        entryFileNames: 'assets/[name]-[hash].js',
+        assetFileNames: 'assets/[name]-[hash].[ext]'
       },
     },
+    // Add module preload
+    modulePreload: {
+      polyfill: true
+    }
   },
   // Add specific configuration to handle React Refresh
   define: {
