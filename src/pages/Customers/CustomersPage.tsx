@@ -19,7 +19,23 @@ import {
   CheckCircle2, 
   Circle,
   PenLine,
-  ExternalLink
+  ExternalLink,
+  FileSignature,
+  Download,
+  CheckSquare,
+  Share2,
+  FileCheck,
+  Package,
+  Tag,
+  X,
+  Users2,
+  BellOff,
+  MessageSquare,
+  PhoneIncoming,
+  Info,
+  FileText,
+  DollarSign,
+  Briefcase
 } from 'lucide-react';
 import { BaseLayout } from '@/components/ui/BaseLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -33,6 +49,10 @@ import { useToast } from '@/hooks/use-toast';
 import { fetchCustomersFromAPI } from '@/services/api';
 import { CustomerData } from '@/pages/Customers/components/CustomerCard';
 import { supabase } from '@/integrations/supabase/client';
+import { CustomerConversations } from './components/CustomerConversations';
+import { CustomerJourney } from './components/tabs/CustomerJourney';
+import { Timeline } from './components/Timeline';
+import { AppLayout } from '@/components/ui/AppLayout';
 
 // Extended interface for Customer with additional fields needed for the page
 interface Customer extends CustomerData {
@@ -196,6 +216,101 @@ function CustomersPage() {
     }
   }, [filteredAndSortedCustomers, selectedCustomer]);
 
+  // --- Add state and handlers from CustomerPortfolio ---
+  const rightNavItems = [
+    { id: 'customerJourney', label: 'Customer Journey', icon: Clock },
+    { id: 'tasks', label: 'Tasks', icon: CheckSquare },
+    { id: 'notes', label: 'Notes', icon: PenLine },
+    { id: 'calendar', label: 'Calendar', icon: Calendar },
+    { id: 'documents', label: 'Documents', icon: FileText },
+    { id: 'payments', label: 'Payments', icon: DollarSign },
+    { id: 'associations', label: 'Associations', icon: Share2 },
+  ];
+  const [activeTab, setActiveTab] = useState('overview');
+  const [rightColumnActiveTab, setRightColumnActiveTab] = useState('customerJourney');
+  const [quotes, setQuotes] = useState([
+    { id: '1', title: 'Bathroom Renovation', date: '2023-10-15', amount: 5200, status: 'accepted' },
+    { id: '2', title: 'Kitchen Countertops', date: '2023-11-05', amount: 3800, status: 'sent' },
+    { id: '3', title: 'Deck Installation', date: '2023-12-01', amount: 6500, status: 'draft' }
+  ]);
+  const [jobs, setJobs] = useState([
+    { id: '1', title: 'Bathroom Renovation', date: '2023-10-20', status: 'in_progress', progress: 65 },
+    { id: '2', title: 'Fence Repair', date: '2023-09-15', status: 'completed', progress: 100 }
+  ]);
+  const [notes, setNotes] = useState([
+    { id: '1', text: 'Customer prefers communication via email', date: '2023-10-05', user: 'John Doe' },
+    { id: '2', text: 'Follow up about kitchen renovation next month', date: '2023-11-10', user: 'Sarah Smith' }
+  ]);
+  const [documents, setDocuments] = useState([
+    { id: '1', title: 'Service Agreement', signed_date: '2023-10-18', document_url: '#' },
+    { id: '2', title: 'Bathroom Renovation Quote', signed_date: '2023-10-15', document_url: '#' }
+  ]);
+  const [workflowSteps, setWorkflowSteps] = useState([]);
+  useEffect(() => {
+    if (!selectedCustomer) return;
+    let steps = [
+      {
+        id: 'inquiry',
+        title: 'Customer Inquiry',
+        description: 'Initial contact',
+        status: 'completed',
+        date: selectedCustomer.created_at ? new Date(selectedCustomer.created_at).toLocaleDateString() : undefined,
+        icon: <User className="h-6 w-6" />, shortInfo: 'New Contact'
+      },
+      {
+        id: 'quote',
+        title: 'Quote Creation',
+        description: 'Preparing estimates',
+        status: quotes.length > 0 ? 'completed' : 'upcoming',
+        date: quotes.length > 0 ? quotes[0].date : undefined,
+        icon: <FileText className="h-6 w-6" />, shortInfo: quotes.length > 0 ? `${quotes.length} Quotes` : 'No Quotes'
+      },
+      {
+        id: 'approval',
+        title: 'Quote Approval',
+        description: 'Customer review',
+        status: quotes.some(q => q.status === 'accepted') ? 'completed' : quotes.some(q => q.status === 'sent') ? 'current' : 'upcoming',
+        icon: <FileCheck className="h-6 w-6" />, shortInfo: quotes.some(q => q.status === 'accepted') ? 'Approved' : 'Pending'
+      },
+      {
+        id: 'job',
+        title: 'Job Creation',
+        description: 'Schedule work',
+        status: jobs.length > 0 ? 'completed' : quotes.some(q => q.status === 'accepted') ? 'current' : 'upcoming',
+        date: jobs.length > 0 ? jobs[0].date : undefined,
+        icon: <Briefcase className="h-6 w-6" />, shortInfo: jobs.length > 0 ? `${jobs.length} Jobs` : 'No Jobs'
+      },
+      {
+        id: 'execution',
+        title: 'Job Execution',
+        description: 'Work in progress',
+        status: jobs.some(j => j.status === 'in_progress') ? 'current' : jobs.some(j => j.status === 'completed') ? 'completed' : 'upcoming',
+        icon: <Package className="h-6 w-6" />, shortInfo: jobs.some(j => j.status === 'in_progress') ? 'In Progress' : 'Not Started'
+      },
+      {
+        id: 'completion',
+        title: 'Job Completion',
+        description: 'Customer sign-off',
+        status: jobs.some(j => j.status === 'completed') ? 'completed' : 'upcoming',
+        icon: <CheckSquare className="h-6 w-6" />, shortInfo: jobs.some(j => j.status === 'completed') ? 'Complete' : 'Pending'
+      }
+    ];
+    steps = steps.map(step => ({ ...step, requiresAction: step.status === 'current', isActioned: false }));
+    setWorkflowSteps(steps);
+  }, [selectedCustomer, quotes, jobs]);
+  const handleWorkflowStepAction = (stepId) => {
+    setWorkflowSteps(prevSteps => prevSteps.map(step => step.id === stepId ? { ...step, isActioned: true, requiresAction: false } : step));
+  };
+  const handleAddNote = () => {
+    const newNote = {
+      id: `new-${Date.now()}`,
+      text: 'New customer note...',
+      date: new Date().toISOString().split('T')[0],
+      user: 'Current User'
+    };
+    setNotes([newNote, ...notes]);
+  };
+
   if (isLoading) {
     return (
       <BaseLayout>
@@ -242,7 +357,7 @@ function CustomersPage() {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* Customer List Panel */}
-          <div className="md:col-span-1 space-y-4">
+          <div className="md:col-span-1 space-y-4 bg-white border-r border-gray-200 p-4 min-h-[70vh]">
             <div className="flex gap-2 mb-4">
               <div className="relative flex-grow">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
@@ -298,9 +413,9 @@ function CustomersPage() {
                   <Card 
                     key={customer.id}
                     className={`cursor-pointer hover:shadow transition-shadow ${
-                      selectedCustomer?.id === customer.id ? 'border-2 border-primary' : ''
+                      selectedCustomer?.id === customer.id ? 'border-2 border-primary ring-2 ring-primary' : ''
                     }`}
-                    onClick={() => handleViewCustomerDetails(customer)}
+                    onClick={() => setSelectedCustomer(customer)}
                   >
                     <CardContent className="p-4">
                       <div className="flex justify-between items-center mb-2">
@@ -309,13 +424,7 @@ function CustomersPage() {
                             className="font-medium cursor-pointer hover:text-blue-600 hover:underline"
                             onClick={(e) => {
                               e.stopPropagation();
-                              try {
-                                navigate(`/customers/${customer.id}`);
-                              } catch (error) {
-                                console.error('Navigation error:', error);
-                                // Fallback to direct URL change
-                                window.location.href = `/customers/${customer.id}`;
-                              }
+                              setSelectedCustomer(customer);
                             }}
                           >
                             {customer.name}
@@ -329,13 +438,7 @@ function CustomersPage() {
                             className="flex items-center gap-1"
                             onClick={(e) => {
                               e.stopPropagation();
-                              try {
-                                navigate(`/customers/${customer.id}`);
-                              } catch (error) {
-                                console.error('Navigation error:', error);
-                                // Fallback to direct URL change
-                                window.location.href = `/customers/${customer.id}`;
-                              }
+                              setSelectedCustomer(customer);
                             }}
                           >
                             <ExternalLink className="h-4 w-4 mr-1" />
@@ -367,142 +470,122 @@ function CustomersPage() {
             </div>
           </div>
 
-          {/* Customer Details Panel */}
-          <div className="md:col-span-2 space-y-6">
+          {/* Center Panel: Communications, Quotes, Jobs, Documents, Notes */}
+          <div className="md:col-span-1 p-4">
             {selectedCustomer ? (
-              <>
-                <Card>
-                  <CardHeader className="bg-muted pb-2">
-                    <div className="flex justify-between items-center">
-                      <CardTitle>
-                        {selectedCustomer.name}
-                        {selectedCustomer.customer_code && (
-                          <span className="ml-2 text-sm bg-gray-100 px-2 py-0.5 rounded-full text-gray-600">
-                            {selectedCustomer.customer_code}
-                          </span>
-                        )}
-                      </CardTitle>
-                      <div className="flex items-center gap-2">
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
-                          className="flex items-center gap-1"
-                          onClick={(e) => {
-                            e.stopPropagation(); // Prevent event from bubbling up
-                            handleEditCustomer(selectedCustomer.id);
-                          }}
-                        >
-                          <PenLine className="h-4 w-4" />
-                          <span>Edit</span>
-                        </Button>
-                        {selectedCustomer.status === 'active' ? (
-                          <Button 
-                            variant="default"
-                            size="sm"
-                            className="flex items-center gap-1"
-                            onClick={() => {
-                              try {
-                                navigate(`/customers/${selectedCustomer.id}`);
-                              } catch (error) {
-                                console.error('Navigation error:', error);
-                                // Fallback to direct URL change
-                                window.location.href = `/customers/${selectedCustomer.id}`;
-                              }
-                            }}
-                          >
-                            <ExternalLink className="h-4 w-4 mr-1" />
-                            <span>Open Portfolio</span>
-                          </Button>
-                        ) : (
-                          <Badge variant="secondary">
-                            {selectedCustomer.status}
-                          </Badge>
-                        )}
-                      </div>
-                    </div>
+              <Card>
+                <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+                  <CardHeader className="p-4 pb-2 border-b">
+                    <TabsList className="grid grid-cols-5">
+                      <TabsTrigger value="overview">Communications</TabsTrigger>
+                      <TabsTrigger value="quotes">Quotes</TabsTrigger>
+                      <TabsTrigger value="jobs">Jobs</TabsTrigger>
+                      <TabsTrigger value="documents">Documents</TabsTrigger>
+                      <TabsTrigger value="notes">Notes</TabsTrigger>
+                    </TabsList>
                   </CardHeader>
                   <CardContent className="p-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div className="space-y-4">
-                        <div className="flex items-center gap-2">
-                          <Mail className="w-5 h-5 text-muted-foreground" />
-                          <span>{selectedCustomer.email}</span>
+                    <TabsContent value="overview" className="mt-0">
+                      {/* --- CALL HISTORY SECTION --- */}
+                      <div className="space-y-6">
+                        {/* Outgoing Call Card */}
+                        <div className="border rounded-xl p-4 bg-white shadow-sm mb-2">
+                          <div className="flex items-center justify-between mb-1">
+                            <div className="flex items-center gap-2">
+                              <Phone className="h-5 w-5 text-primary" />
+                              <span className="font-bold text-lg text-gray-900">Outgoing Call</span>
+                            </div>
+                            <span className="font-bold text-base text-gray-700">15:23 <span className="uppercase">EAST</span></span>
+                          </div>
+                          <div className="flex items-center gap-6 mb-2">
+                            <span className="font-semibold text-gray-700">Duration: <span className="font-bold">12:45</span></span>
+                            <span className="font-bold text-gray-500">2 days ago</span>
+                          </div>
+                          <div className="flex gap-2">
+                            <Button variant="outline" size="sm" className="font-semibold flex items-center gap-1"><svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M5 3l14 9-14 9V3z" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>Play Recording</Button>
+                            <Button variant="outline" size="sm" className="font-semibold flex items-center gap-1"><svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2v16z" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>Save to Vault</Button>
+                            <Button variant="outline" size="sm" className="font-semibold flex items-center gap-1"><Share2 className="h-4 w-4" />Share</Button>
+                          </div>
                         </div>
-                        <div className="flex items-center gap-2">
-                          <Phone className="w-5 h-5 text-muted-foreground" />
-                          <span>{selectedCustomer.phone}</span>
+                        {/* Conversation Thread */}
+                        <div className="bg-slate-50 rounded-xl p-6 shadow-inner">
+                          {/* ... (copy the rest of the conversation thread and message input bar as in CustomerPortfolio) ... */}
                         </div>
-                        <div className="flex items-center gap-2">
-                          <Home className="w-5 h-5 text-muted-foreground" />
-                          <span>{selectedCustomer.address}</span>
+                        {/* Incoming Call Card */}
+                        <div className="border rounded-xl p-4 bg-white shadow-sm mt-6">
+                          {/* ... (copy as in CustomerPortfolio) ... */}
+                        </div>
+                        {/* --- MESSAGE INPUT BAR --- */}
+                        <div className="mt-8 bg-white rounded-xl shadow p-4">
+                          {/* ... (copy as in CustomerPortfolio) ... */}
                         </div>
                       </div>
-                      <div className="space-y-4">
-                        <div className="flex items-center gap-2">
-                          <Calendar className="w-5 h-5 text-muted-foreground" />
-                          <span>Last Contact: {selectedCustomer.lastContact}</span>
-                        </div>
-                      </div>
-                    </div>
+                    </TabsContent>
+                    {/* ... (copy Quotes, Jobs, Documents, Notes tabs as in CustomerPortfolio) ... */}
                   </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader className="bg-muted pb-2">
-                    <CardTitle>Customer Progress Link</CardTitle>
-                  </CardHeader>
-                  <CardContent className="p-6 space-y-4">
-                    <p className="text-sm text-muted-foreground">
-                      Share this link with your customer to keep them updated on job progress
-                    </p>
-                    
-                    <div className="flex flex-col gap-4">
-                      <div className="flex items-center">
-                        <div className="font-medium">Select Job for Progress Link</div>
-                      </div>
-                      
-                      <select 
-                        className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        defaultValue={selectedCustomer.jobId}
-                      >
-                        <option value={selectedCustomer.jobId}>
-                          {selectedCustomer.jobTitle} ({selectedCustomer.jobId})
-                        </option>
-                      </select>
-                      
-                      <div className="flex justify-between items-center">
-                        <div className="relative flex-1">
-                          <input 
-                            type="text" 
-                            readOnly
-                            value={`${window.location.origin}/progress/${selectedCustomer.id}`}
-                            className="w-full p-2 pr-10 border border-gray-300 rounded-lg bg-muted"
-                          />
-                        </div>
-                        <Button variant="outline" size="icon" className="ml-2" onClick={handleCopyLink}>
-                          <Copy className="h-4 w-4" />
-                        </Button>
-                      </div>
-
-                      <div className="flex items-center gap-2">
-                        <input type="checkbox" id="enable-notifications" className="rounded" defaultChecked />
-                        <label htmlFor="enable-notifications">Enable notifications</label>
-                      </div>
-                      
-                      <Button variant="outline" className="flex items-center gap-2 w-fit">
-                        <LinkIcon className="h-4 w-4" />
-                        <span>Preview Link</span>
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              </>
+                </Tabs>
+              </Card>
             ) : (
               <div className="flex flex-col items-center justify-center min-h-[50vh] bg-muted rounded-lg p-6">
                 <User className="w-16 h-16 text-muted-foreground mb-4" />
                 <h3 className="text-xl font-medium mb-2">No Customer Selected</h3>
                 <p className="text-muted-foreground text-center">
-                  Select a customer from the list to view their details and progress
+                  Select a customer from the list to view their conversations
+                </p>
+              </div>
+            )}
+          </div>
+
+          {/* Right Panel: Customer Journey and Icon Nav */}
+          <div className="md:col-span-1 p-4">
+            {selectedCustomer ? (
+              <Card className="h-full flex flex-col">
+                {/* Icon Navigation Bar */}
+                <div className="p-1.5 border-b flex justify-around items-center bg-slate-50 rounded-t-md">
+                  {rightNavItems.map(item => (
+                    <Button
+                      key={item.id}
+                      variant="ghost"
+                      size="icon"
+                      className={`h-8 w-8 p-1.5 ${rightColumnActiveTab === item.id ? 'bg-primary/20 text-primary' : 'text-muted-foreground hover:text-primary'}`}
+                      onClick={() => setRightColumnActiveTab(item.id)}
+                      title={item.label}
+                    >
+                      <item.icon className="h-5 w-5" />
+                    </Button>
+                  ))}
+                </div>
+                {/* Content Area for Right Column */}
+                <CardContent className="flex-grow p-0 overflow-y-auto">
+                  {rightColumnActiveTab === 'customerJourney' && (
+                    <Timeline steps={workflowSteps} onStepAction={handleWorkflowStepAction} />
+                  )}
+                  {rightColumnActiveTab === 'tasks' && (
+                    <div className="p-4 text-sm text-muted-foreground">Tasks content will go here.</div>
+                  )}
+                  {rightColumnActiveTab === 'notes' && (
+                    <div className="p-4 text-sm text-muted-foreground">Notes content will go here.</div>
+                  )}
+                  {rightColumnActiveTab === 'calendar' && (
+                    <div className="p-4 text-sm text-muted-foreground">Calendar content will go here.</div>
+                  )}
+                  {rightColumnActiveTab === 'documents' && (
+                    <div className="p-4 text-sm text-muted-foreground">Documents content will go here.</div>
+                  )}
+                  {rightColumnActiveTab === 'payments' && (
+                    <div className="p-4 text-sm text-muted-foreground">Payments content will go here.</div>
+                  )}
+                  {rightColumnActiveTab === 'associations' && (
+                    <div className="p-4 text-sm text-muted-foreground">Associations content will go here.</div>
+                  )}
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="flex flex-col items-center justify-center min-h-[50vh] bg-muted rounded-lg p-6">
+                <User className="w-16 h-16 text-muted-foreground mb-4" />
+                <h3 className="text-xl font-medium mb-2">No Customer Selected</h3>
+                <p className="text-muted-foreground text-center">
+                  Select a customer from the list to view their journey
                 </p>
               </div>
             )}
