@@ -15,6 +15,8 @@ import Noodle from './components/Noodle';
 import { Timeline } from './components/Timeline';
 import './components/pulseLine.css';
 import { ElectricNoodle } from './components/ElectricNoodle';
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { useState as useLocalState } from "react";
 
 export interface CustomerWithDetails extends CustomerData {
   business_name?: string;
@@ -525,10 +527,11 @@ const CustomerPortfolio = () => {
                   <div className="w-3/4 border-b border-gray-300"></div>
                 </div>
                 <div className="flex flex-col items-center text-center">
-                  {/* Avatar Circle */}
-                  <div className="relative w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mb-2">
-                    <User className="h-10 w-10 text-primary" />
-                  </div>
+                  {/* Avatar/Profile Picture with upload & Street View */}
+                  <ProfilePictureUpload
+                    customer={customer}
+                    customerId={id}
+                  />
                   <h2 className="text-md font-semibold">
                     {customer.name}
                     {customer.customer_code && (
@@ -1161,6 +1164,99 @@ const CustomerPortfolio = () => {
     </AppLayout>
   );
 };
+
+function ProfilePictureUpload({ customer, customerId }: { customer: any, customerId: string }) {
+  const [profileUrl, setProfileUrl] = useLocalState<string | null>(null);
+  const [streetViewUrl, setStreetViewUrl] = useLocalState<string | null>(null);
+  const [showStreetView, setShowStreetView] = useLocalState(false);
+  const [uploading, setUploading] = useLocalState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Generate Google Street View image URL
+  const getStreetViewUrl = () => {
+    const address = encodeURIComponent(
+      `${customer.address || ''}, ${customer.city || ''}, ${customer.state || ''} ${customer.zipCode || ''}`
+    );
+    // You may want to use your own Google Maps API key here
+    const apiKey = "AIzaSyAnIcvNA_ZjRUnN4aeyl-1MYpBSN-ODIvw";
+    return `https://maps.googleapis.com/maps/api/streetview?size=200x200&location=${address}&key=${apiKey}`;
+  };
+
+  useEffect(() => {
+    if (customer && customer.address) {
+      setStreetViewUrl(getStreetViewUrl());
+    }
+    // Optionally, load existing profileUrl from customer.profile_url if available
+    if (customer && customer.profile_url) {
+      setProfileUrl(customer.profile_url);
+    }
+  }, [customer]);
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    // Upload to Supabase Storage (or your backend)
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${customerId}/profile.${fileExt}`;
+    const { data, error } = await supabase.storage.from('customer_photos').upload(fileName, file, { upsert: true });
+    if (error) {
+      setUploading(false);
+      alert('Upload failed');
+      return;
+    }
+    // Get public URL
+    const { data: urlData } = supabase.storage.from('customer_photos').getPublicUrl(fileName);
+    setProfileUrl(urlData.publicUrl);
+    setShowStreetView(false);
+    setUploading(false);
+    // Optionally, update customer profile in DB
+    await supabase.from('customers').update({ profile_url: urlData.publicUrl }).eq('id', customerId);
+  };
+
+  return (
+    <div className="relative w-20 h-20 mb-2 flex flex-col items-center group">
+      <Avatar className="w-20 h-20">
+        {showStreetView && streetViewUrl ? (
+          <AvatarImage src={streetViewUrl} alt="Street View" />
+        ) : profileUrl ? (
+          <AvatarImage src={profileUrl} alt="Profile" />
+        ) : (
+          <AvatarFallback>
+            <User className="h-10 w-10 text-primary" />
+          </AvatarFallback>
+        )}
+      </Avatar>
+      <div className="flex gap-1 mt-2">
+        <Button
+          size="sm"
+          variant="outline"
+          className="text-xs px-2 py-1"
+          onClick={() => fileInputRef.current?.click()}
+          disabled={uploading}
+        >
+          Upload
+        </Button>
+        <Button
+          size="sm"
+          variant={showStreetView ? "default" : "outline"}
+          className="text-xs px-2 py-1"
+          onClick={() => setShowStreetView((v) => !v)}
+          disabled={!streetViewUrl}
+        >
+          {showStreetView ? "Profile" : "Street View"}
+        </Button>
+      </div>
+      <input
+        type="file"
+        accept="image/*"
+        className="hidden"
+        ref={fileInputRef}
+        onChange={handleFileChange}
+      />
+    </div>
+  );
+}
 
 export default function CustomerPortfolioPage() {
   return (
