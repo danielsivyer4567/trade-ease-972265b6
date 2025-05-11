@@ -64,11 +64,11 @@ export function CustomersPageContent() {
     } catch (error) {
       console.error("Error fetching customers from API:", error);
       setApiError("Failed to fetch customers from external API");
-      toast({
-        title: "API Error",
-        description: "Failed to fetch customers from external API",
-        variant: "destructive"
-      });
+      // toast({
+      //   title: "API Error",
+      //   description: "Failed to fetch customers from external API",
+      //   variant: "destructive"
+      // });
     } finally {
       setIsApiLoading(false);
     }
