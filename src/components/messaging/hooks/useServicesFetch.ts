@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -6,8 +5,8 @@ import { ServiceInfo } from "../types";
 import { getDefaultServices, getServiceIconByType, getServiceNameByType } from "../utils/serviceUtils";
 
 export const useServicesFetch = () => {
-  const [isLoading, setIsLoading] = useState(false);
-  const [services, setServices] = useState<ServiceInfo[]>(getDefaultServices());
+  const [isLoading, setIsLoading] = useState(true);
+  const [services, setServices] = useState<ServiceInfo[]>([]);
 
   const mapAccountToService = (account: any): ServiceInfo => {
     return {
@@ -35,6 +34,7 @@ export const useServicesFetch = () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
         console.log('No user session found');
+        setServices(getDefaultServices());
         setIsLoading(false);
         return;
       }
@@ -49,6 +49,7 @@ export const useServicesFetch = () => {
       if (error) {
         console.error('Error fetching messaging accounts:', error);
         toast.error('Failed to load messaging accounts');
+        setServices(getDefaultServices());
         setIsLoading(false);
         return;
       }
@@ -87,10 +88,13 @@ export const useServicesFetch = () => {
         });
         
         setServices(updatedServices);
+      } else {
+        setServices(getDefaultServices());
       }
     } catch (error) {
       console.error('Error in fetchMessagingAccounts:', error);
       toast.error('Failed to load messaging accounts');
+      setServices(getDefaultServices());
     } finally {
       setIsLoading(false);
     }
