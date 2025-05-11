@@ -253,76 +253,43 @@ function CustomersPage() {
             <Badge variant="outline" className="ml-2">{filteredAndSortedCustomers.length}</Badge>
           </div>
           <div className="flex gap-2">
-            <Button variant="outline" className="w-48" onClick={() => navigate('/customers/new')}>Add Customer</Button>
-            <Button className="w-48">New Job</Button>
+            <Button variant="outline" className="w-48" onClick={() => navigate('/customers/console')}>Customer Console</Button>
+            <Button variant="outline" className="w-48" onClick={() => navigate('/customers/external')}>External View</Button>
+            <Button className="w-48" onClick={() => navigate('/customers/new')}>Add Customer</Button>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-0">
-          {/* Customer List Panel */}
-          <div className="md:col-span-1 space-y-4">
-            <div className="flex gap-2 mb-4">
-              <div className="relative flex-grow">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                <Input
-                  type="text"
-                  placeholder="Search customers..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10"
-                />
+        <div className="grid grid-cols-12 gap-4">
+          {/* Left: Customer List */}
+          <div className="col-span-12 md:col-span-3 bg-white rounded-lg shadow-md flex flex-col h-[80vh]">
+            {/* Sticky header for search/filters */}
+            <div className="sticky top-0 z-10 bg-white p-4 border-b flex flex-col gap-2">
+              <Input
+                type="text"
+                placeholder="Search customers by name, email, ..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-10"
+              />
+              <div className="flex gap-2">
+                <Button size="sm" variant={statusFilter === 'all' ? 'default' : 'outline'} onClick={() => setStatusFilter('all')}>All</Button>
+                <Button size="sm" variant={statusFilter === 'active' ? 'default' : 'outline'} onClick={() => setStatusFilter('active')}>Active</Button>
+                <Button size="sm" variant={statusFilter === 'inactive' ? 'default' : 'outline'} onClick={() => setStatusFilter('inactive')}>Inactive</Button>
               </div>
-              <select
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value as 'all' | 'active' | 'inactive' | 'previous')}
-                className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
-              >
-                <option value="all">All</option>
-                <option value="active">Active</option>
-                <option value="inactive">Inactive</option>
-                <option value="previous">Previous</option>
-              </select>
             </div>
-
-            <div className="flex gap-2 mb-4">
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={() => handleSort('name')}
-                className={sortField === 'name' ? 'bg-muted' : ''}
-              >
-                Name {sortField === 'name' && (sortOrder === 'asc' ? <SortAsc className="w-4 h-4 ml-1" /> : <SortDesc className="w-4 h-4 ml-1" />)}
-              </Button>
-            </div>
-
-            <div className="space-y-2 max-h-[70vh] overflow-y-auto pr-2">
+            {/* Customer cards list */}
+            <div className="overflow-y-auto flex-1 p-2">
               {filteredAndSortedCustomers.length > 0 ? (
                 filteredAndSortedCustomers.map((customer) => (
                   <Card 
                     key={customer.id}
-                    className={`cursor-pointer hover:shadow transition-shadow ${
-                      selectedCustomer?.id === customer.id ? 'border-2 border-primary ring-2 ring-primary' : ''
-                    }`}
+                    className={`mb-2 cursor-pointer hover:shadow transition-shadow ${selectedCustomer?.id === customer.id ? 'border-2 border-primary ring-2 ring-primary' : ''}`}
                     onClick={() => setSelectedCustomer(customer)}
                   >
                     <CardContent className="p-4">
                       <div className="flex justify-between items-center mb-2">
                         <div>
-                          <h3 
-                            className="font-medium cursor-pointer hover:text-blue-600 hover:underline"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              try {
-                                navigate(`/customers/${customer.id}`);
-                              } catch (error) {
-                                console.error('Navigation error:', error);
-                                // Fallback to direct URL change
-                                window.location.href = `/customers/${customer.id}`;
-                              }
-                            }}
-                          >
-                            {customer.name}
-                          </h3>
+                          <h3 className="font-medium cursor-pointer hover:text-blue-600 hover:underline">{customer.name}</h3>
                           <p className="text-xs text-muted-foreground">{customer.jobTitle}</p>
                         </div>
                         {customer.status === 'active' && (
@@ -332,21 +299,18 @@ function CustomersPage() {
                             className="flex items-center gap-1 ml-4"
                             onClick={(e) => {
                               e.stopPropagation();
-                              try {
-                                navigate(`/customers/${customer.id}`);
-                              } catch (error) {
-                                console.error('Navigation error:', error);
-                                // Fallback to direct URL change
-                                window.location.href = `/customers/${customer.id}`;
-                              }
+                              navigate(`/customers/${customer.id}`);
                             }}
                           >
                             <ExternalLink className="h-4 w-4 mr-1" />
-                            <span>Open Portfolio</span>
+                            <span>Open</span>
                           </Button>
                         )}
                       </div>
                       <Progress value={customer.progress} className="h-2 mb-2" />
+                      <div className="text-xs text-gray-500">{customer.email}</div>
+                      <div className="text-xs text-gray-500">{customer.phone}</div>
+                      <div className="text-xs text-gray-500">{customer.address}</div>
                     </CardContent>
                   </Card>
                 ))
@@ -362,187 +326,43 @@ function CustomersPage() {
             </div>
           </div>
 
-          {/* Customer Details Panel */}
-          <div className="md:col-span-2 space-y-6">
-            {selectedCustomer ? (
-              <>
-                <Card>
-                  <CardHeader className="bg-muted pb-2">
-                    <div className="flex justify-between items-center">
-                      <CardTitle>
-                        {selectedCustomer.name}
-                        {selectedCustomer.customer_code && (
-                          <span className="ml-2 text-sm bg-gray-100 px-2 py-0.5 rounded-full text-gray-600">
-                            {selectedCustomer.customer_code}
-                          </span>
-                        )}
-                      </CardTitle>
-                      <div className="flex items-center gap-2">
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
-                          className="flex items-center gap-1"
-                          onClick={(e) => {
-                            e.stopPropagation(); // Prevent event from bubbling up
-                            handleEditCustomer(selectedCustomer.id);
-                          }}
-                        >
-                          <PenLine className="h-4 w-4" />
-                          <span>Edit</span>
-                        </Button>
-                        {selectedCustomer.status === 'active' ? (
-                          <Button 
-                            variant="default"
-                            size="sm"
-                            className="flex items-center gap-1"
-                            onClick={() => {
-                              try {
-                                navigate(`/customers/${selectedCustomer.id}`);
-                              } catch (error) {
-                                console.error('Navigation error:', error);
-                                // Fallback to direct URL change
-                                window.location.href = `/customers/${selectedCustomer.id}`;
-                              }
-                            }}
-                          >
-                            <ExternalLink className="h-4 w-4 mr-1" />
-                            <span>Open Portfolio</span>
-                          </Button>
-                        ) : (
-                          <Badge variant="secondary">
-                            {selectedCustomer.status}
-                          </Badge>
-                        )}
-                      </div>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="p-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div className="space-y-4">
-                        <div className="flex items-center gap-2">
-                          <Mail className="w-5 h-5 text-muted-foreground" />
-                          <span>{selectedCustomer.email}</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Phone className="w-5 h-5 text-muted-foreground" />
-                          <span>{selectedCustomer.phone}</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Home className="w-5 h-5 text-muted-foreground" />
-                          <span>{selectedCustomer.address}</span>
-                        </div>
-                      </div>
-                      <div className="space-y-4">
-                        <div className="flex items-center gap-2">
-                          <Calendar className="w-5 h-5 text-muted-foreground" />
-                          <span>Last Contact: {selectedCustomer.lastContact}</span>
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader className="bg-muted pb-2">
-                    <CardTitle>Customer Progress Link</CardTitle>
-                  </CardHeader>
-                  <CardContent className="p-6 space-y-4">
-                    <p className="text-sm text-muted-foreground">
-                      Share this link with your customer to keep them updated on job progress
-                    </p>
-                    
-                    <div className="flex flex-col gap-4">
-                      <div className="flex items-center">
-                        <div className="font-medium">Select Job for Progress Link</div>
-                      </div>
-                      
-                      <select 
-                        className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        defaultValue={selectedCustomer.jobId}
-                      >
-                        <option value={selectedCustomer.jobId}>
-                          {selectedCustomer.jobTitle} ({selectedCustomer.jobId})
-                        </option>
-                      </select>
-                      
-                      <div className="flex justify-between items-center">
-                        <div className="relative flex-1">
-                          <input 
-                            type="text" 
-                            readOnly
-                            value={`${window.location.origin}/progress/${selectedCustomer.id}`}
-                            className="w-full p-2 pr-10 border border-gray-300 rounded-lg bg-muted"
-                          />
-                        </div>
-                        <Button variant="outline" size="icon" className="ml-2" onClick={handleCopyLink}>
-                          <Copy className="h-4 w-4" />
-                        </Button>
-                      </div>
-
-                      <div className="flex items-center gap-2">
-                        <input type="checkbox" id="enable-notifications" className="rounded" defaultChecked />
-                        <label htmlFor="enable-notifications">Enable notifications</label>
-                      </div>
-                      
-                      <Button variant="outline" className="flex items-center gap-2 w-fit">
-                        <LinkIcon className="h-4 w-4" />
-                        <span>Preview Link</span>
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              </>
-            ) : (
-              <div className="flex flex-col items-center justify-center min-h-[50vh] bg-muted rounded-lg p-6">
-                <User className="w-16 h-16 text-muted-foreground mb-4" />
-                <h3 className="text-xl font-medium mb-2">No Customer Selected</h3>
-                <p className="text-muted-foreground text-center">
-                  Select a customer from the list to view their journey
-                </p>
-              </div>
-            )}
+          {/* Center: Tabs and Details */}
+          <div className="col-span-12 md:col-span-6 flex flex-col h-[80vh] bg-white rounded-lg shadow-md">
+            <Tabs defaultValue="communications" className="flex-1 flex flex-col">
+              <TabsList className="flex gap-4 p-4 border-b bg-white sticky top-0 z-10">
+                <TabsTrigger value="communications">Communications</TabsTrigger>
+                <TabsTrigger value="quotes">Quotes</TabsTrigger>
+                <TabsTrigger value="jobs">Jobs</TabsTrigger>
+                <TabsTrigger value="documents">Documents</TabsTrigger>
+                <TabsTrigger value="notes">Notes</TabsTrigger>
+              </TabsList>
+              <TabsContent value="communications" className="flex-1 overflow-y-auto p-4">
+                {/* Placeholder for communications content */}
+                <div className="bg-gray-50 rounded-lg p-4 min-h-[60vh]">Communications content goes here.</div>
+              </TabsContent>
+              <TabsContent value="quotes" className="flex-1 overflow-y-auto p-4">
+                <div className="bg-gray-50 rounded-lg p-4 min-h-[60vh]">Quotes content goes here.</div>
+              </TabsContent>
+              <TabsContent value="jobs" className="flex-1 overflow-y-auto p-4">
+                <div className="bg-gray-50 rounded-lg p-4 min-h-[60vh]">Jobs content goes here.</div>
+              </TabsContent>
+              <TabsContent value="documents" className="flex-1 overflow-y-auto p-4">
+                <div className="bg-gray-50 rounded-lg p-4 min-h-[60vh]">Documents content goes here.</div>
+              </TabsContent>
+              <TabsContent value="notes" className="flex-1 overflow-y-auto p-4">
+                <div className="bg-gray-50 rounded-lg p-4 min-h-[60vh]">Notes content goes here.</div>
+              </TabsContent>
+            </Tabs>
           </div>
 
-          {/* Customer Journey Sidebar (Desktop/Tablet) */}
-          <div className="hidden md:block md:col-span-2 pl-4">
-            {selectedCustomer && (
-              <Card className="h-full flex flex-col">
-                <CardHeader className="p-3">
-                  <h3 className="text-lg font-semibold text-gray-700">Customer Journey</h3>
-                </CardHeader>
-                <CardContent className="flex-grow p-0 overflow-y-auto">
-                  <Timeline steps={workflowSteps} onStepAction={handleWorkflowStepAction} />
-                </CardContent>
-              </Card>
-            )}
-          </div>
-
-          {/* Floating Button for Mobile */}
-          <button
-            className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50 md:hidden bg-blue-600 text-white rounded-full shadow-lg p-4 flex items-center justify-center"
-            onClick={() => setShowJourneyModal(true)}
-            style={{ display: selectedCustomer ? 'flex' : 'none' }}
-            aria-label="Show Customer Journey"
-          >
-            <Briefcase className="h-6 w-6" />
-          </button>
-
-          {/* Modal for Customer Journey on Mobile */}
-          {showJourneyModal && selectedCustomer && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-              <div className="bg-white rounded-lg shadow-lg w-11/12 max-w-md mx-auto p-4 relative">
-                <button
-                  className="absolute top-2 right-2 text-gray-500 hover:text-gray-700"
-                  onClick={() => setShowJourneyModal(false)}
-                  aria-label="Close"
-                >
-                  &times;
-                </button>
-                <h3 className="text-lg font-semibold text-gray-700 mb-4">Customer Journey</h3>
-                <Timeline steps={workflowSteps} onStepAction={handleWorkflowStepAction} />
-              </div>
+          {/* Right: Journey/Progress */}
+          <div className="col-span-12 md:col-span-3 flex flex-col h-[80vh] bg-white rounded-lg shadow-md p-4">
+            <h3 className="text-lg font-semibold mb-4">Job Journey</h3>
+            {/* Placeholder for journey/progress tracker */}
+            <div className="flex-1 flex flex-col items-center justify-center bg-gray-50 rounded-lg">
+              <span className="text-gray-400">Journey/Progress tracker goes here.</span>
             </div>
-          )}
+          </div>
         </div>
       </div>
     </BaseLayout>
