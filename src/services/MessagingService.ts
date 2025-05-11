@@ -1,9 +1,25 @@
 import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/utils/logger';
+const twilio = require('twilio');
+
+const twilioSid = process.env.TWILIO_SID;
+const twilioAuthToken = process.env.TWILIO_AUTH_TOKEN;
+const twilioPhoneNumber = process.env.TWILIO_PHONE_NUMBER;
+const twilioClient = twilio(twilioSid, twilioAuthToken);
 
 export const MessagingService = {
   async sendMessage(messageData: any) {
     try {
+      // If platform is SMS, send via Twilio first
+      if (messageData.platform === 'sms') {
+        const smsResult = await twilioClient.messages.create({
+          body: messageData.body,
+          from: twilioPhoneNumber,
+          to: messageData.to
+        });
+        logger.info('Twilio SMS sent:', smsResult);
+      }
+      // Save message to Supabase
       const { data: message, error } = await supabase
         .from('messages')
         .insert([messageData])
@@ -11,11 +27,7 @@ export const MessagingService = {
         .single();
 
       if (error) throw error;
-
-      // Here you would typically integrate with actual messaging services
-      // like SendGrid for email, Twilio for SMS/WhatsApp, etc.
       logger.info('Message sent:', messageData);
-
       return { success: true, message };
     } catch (error) {
       logger.error('Failed to send message:', error);
