@@ -26,11 +26,10 @@ serve(async (req) => {
     const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
     // Parse request body
-    const requestData = await req.json().catch(error => {
+    const requestData = await req.json().catch((error: Error) => {
       console.error('Error parsing request body:', error);
       throw new Error('Invalid request body format');
     });
-    
     const { searchQuery, userId, limit = 20, offset = 0 } = requestData;
     
     console.log(`Search request received: query="${searchQuery}", userId=${userId}, limit=${limit}, offset=${offset}`);
