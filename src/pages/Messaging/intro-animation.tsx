@@ -23,24 +23,25 @@ export const MessagingIntro: React.FC<MessagingIntroProps> = ({
 
   return (
     <motion.div 
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black"
+      className="fixed inset-0 z-10 pointer-events-none"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.5 }}
     >
-      {/* Neon messaging hub image with electrical connections to social platforms - full screen */}
+      {/* Neon messaging hub image as background - positioned behind content */}
       <motion.div 
-        className="relative w-full h-full"
+        className="absolute inset-0 w-full h-full"
         initial={{ opacity: 0 }}
         animate={{ 
-          opacity: introPhase >= 1 ? [0, 1, 1, 0] : 0
+          opacity: introPhase >= 1 ? [0, 0.5, 0.5, 0] : 0
         }}
         transition={{ 
           duration: 4,
           times: [0, 0.2, 0.8, 1],
         }}
       >
+        <div className="absolute inset-0 bg-gradient-to-br from-indigo-600/80 via-purple-600/80 to-pink-600/80 mix-blend-multiply z-20" />
         <img 
           src="/images/messaging/neon-messaging-hub.jpg" 
           alt="Messaging Hub with Social Platform Connections"
