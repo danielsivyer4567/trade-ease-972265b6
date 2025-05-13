@@ -1,7 +1,7 @@
 import { AppLayout } from "@/components/ui/AppLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
-import { MessageSquare, ArrowLeft, RefreshCw, Mail, Share2, Loader2 } from "lucide-react";
+import { MessageSquare, ArrowLeft, RefreshCw, Mail, Share2, Loader2, Sparkles, Bell } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { ServiceSyncCard } from "@/components/messaging/ServiceSyncCard";
 import { PhoneNumberInput } from "@/components/messaging/PhoneNumberInput";
@@ -18,6 +18,7 @@ import { CrmPipeline } from "@/components/messaging/crm/CrmPipeline";
 import { useServicesFetch } from "@/components/messaging/hooks/useServicesFetch";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Skeleton } from "@/components/ui/skeleton";
+import { motion } from "framer-motion";
 
 export default function Messaging() {
   const navigate = useNavigate();
@@ -63,9 +64,9 @@ export default function Messaging() {
         <div className="w-full h-full px-3 md:px-4">
           <div className="space-y-4">
             <Card className="overflow-hidden">
-              <CardHeader className="bg-slate-200 pb-2">
-                <Skeleton className="h-8 w-48" />
-                <Skeleton className="h-4 w-72 mt-2" />
+              <CardHeader className="bg-gradient-to-r from-blue-600 to-purple-600 pb-2">
+                <Skeleton className="h-8 w-48 bg-white/30" />
+                <Skeleton className="h-4 w-72 mt-2 bg-white/30" />
               </CardHeader>
             </Card>
             
@@ -86,20 +87,20 @@ export default function Messaging() {
     return (
       <AppLayout>
         <div className="space-y-4">
-          <Card className="overflow-hidden">
-            <CardHeader className="bg-slate-200 pb-2">
-              <CardTitle className="flex items-center gap-2 text-2xl md:text-3xl">
-                <MessageSquare className="h-5 w-5 text-blue-600" />
+          <Card className="overflow-hidden shadow-lg border-0">
+            <CardHeader className="bg-gradient-to-r from-blue-600 to-purple-600 pb-2">
+              <CardTitle className="flex items-center gap-2 text-2xl md:text-3xl text-white">
+                <MessageSquare className="h-5 w-5 text-white" />
                 Messaging CRM
               </CardTitle>
-              <CardDescription className="py-[8px]">
+              <CardDescription className="py-[8px] text-white/90">
                 Messaging features are not enabled for your account
               </CardDescription>
             </CardHeader>
-            <CardContent className="p-6">
+            <CardContent className="p-6 bg-white">
               <Button 
                 onClick={() => navigate("/settings")}
-                className="w-full md:w-auto"
+                className="w-full md:w-auto bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium transition-all duration-300 shadow-md hover:shadow-lg"
               >
                 Enable Messaging Features
               </Button>
@@ -114,47 +115,71 @@ export default function Messaging() {
     <AppLayout>
       <div className="w-full h-full px-3 md:px-4">
         <div className="space-y-4">
-          <Card className="overflow-hidden">
-            <CardHeader className="bg-slate-200 pb-2">
-              <CardTitle className="flex items-center gap-2 text-2xl md:text-3xl">
-                <MessageSquare className="h-5 w-5 text-blue-600" />
-                Messaging CRM
-              </CardTitle>
-              <CardDescription className="py-[8px]">
-                Manage customer communications and track sales pipeline in one place
-              </CardDescription>
-            </CardHeader>
-          </Card>
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <Card className="overflow-hidden shadow-xl border-0">
+              <CardHeader className="bg-gradient-to-r from-blue-600 to-purple-600 pb-4 relative">
+                <div className="absolute inset-0 bg-[url('/patterns/pattern-1.svg')] opacity-10"></div>
+                <CardTitle className="flex items-center gap-2 text-2xl md:text-3xl text-white z-10 relative">
+                  <MessageSquare className="h-6 w-6 text-white" />
+                  Messaging CRM
+                  <Sparkles className="h-5 w-5 text-yellow-300 ml-2" />
+                </CardTitle>
+                <CardDescription className="py-[8px] text-white/90 z-10 relative text-base">
+                  Manage customer communications and track sales pipeline in one elegant workspace
+                </CardDescription>
+              </CardHeader>
+            </Card>
+          </motion.div>
 
           <Tabs defaultValue="crm" className="w-full">
-            <TabsList className={`grid ${isMobile ? 'grid-cols-4' : 'w-[600px] grid-cols-4'} mb-4`}>
-              <TabsTrigger value="crm" className="bg-slate-500 hover:bg-slate-400 text-gray-950">
+            <TabsList className={`grid ${isMobile ? 'grid-cols-4' : 'w-[600px] grid-cols-4'} mb-4 bg-gradient-to-r from-blue-600/20 to-purple-600/20 p-1 rounded-xl shadow-md`}>
+              <TabsTrigger value="crm" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-indigo-600 data-[state=active]:text-white transition-all duration-300 rounded-lg">
                 Pipelines
               </TabsTrigger>
-              <TabsTrigger value="connections" className="bg-slate-400 hover:bg-slate-300">
+              <TabsTrigger value="connections" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-indigo-600 data-[state=active]:text-white transition-all duration-300 rounded-lg">
                 Connections
               </TabsTrigger>
-              <TabsTrigger value="email" className="bg-slate-400 hover:bg-slate-300">
+              <TabsTrigger value="email" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-indigo-600 data-[state=active]:text-white transition-all duration-300 rounded-lg">
                 Email
               </TabsTrigger>
-              <TabsTrigger value="social" className="bg-slate-400 hover:bg-slate-300">
+              <TabsTrigger value="social" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-indigo-600 data-[state=active]:text-white transition-all duration-300 rounded-lg">
                 Social
               </TabsTrigger>
             </TabsList>
             
             <TabsContent value="crm" className="space-y-4">
-              <ConnectedAppsOverview connectedNumbers={connectedNumbers} services={services} />
-              <CrmPipeline />
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.5, delay: 0.2 }}
+              >
+                <ConnectedAppsOverview connectedNumbers={connectedNumbers} services={services} />
+              </motion.div>
+              
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.5, delay: 0.3 }}
+              >
+                <CrmPipeline />
+              </motion.div>
             </TabsContent>
             
             <TabsContent value="connections" className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Card>
-                  <CardHeader className="bg-slate-200 pb-2">
-                    <CardTitle className="text-lg">Phone Numbers</CardTitle>
-                    <CardDescription>Manage your connected phone numbers</CardDescription>
+                <Card className="overflow-hidden shadow-lg border-0 transition-all duration-300 hover:shadow-xl">
+                  <CardHeader className="bg-gradient-to-r from-blue-500 to-indigo-600 pb-2">
+                    <CardTitle className="text-lg text-white flex items-center">
+                      <Bell className="h-4 w-4 mr-2" />
+                      Phone Numbers
+                    </CardTitle>
+                    <CardDescription className="text-white/90">Manage your connected phone numbers</CardDescription>
                   </CardHeader>
-                  <CardContent className="pt-4 bg-slate-200">
+                  <CardContent className="pt-4 bg-gradient-to-b from-slate-100 to-white">
                     <PhoneNumberInput 
                       phoneNumber={phoneNumber} 
                       isConnecting={isConnectingPhone} 
@@ -185,20 +210,20 @@ export default function Messaging() {
             </TabsContent>
             
             <TabsContent value="email" className="space-y-4">
-              <Card>
-                <CardHeader className="bg-slate-200">
-                  <CardTitle className="flex items-center gap-2">
+              <Card className="overflow-hidden shadow-lg border-0 transition-all duration-300 hover:shadow-xl">
+                <CardHeader className="bg-gradient-to-r from-blue-500 to-indigo-600">
+                  <CardTitle className="flex items-center gap-2 text-white">
                     <Mail className="h-5 w-5" />
                     Email Management
                   </CardTitle>
-                  <CardDescription>
+                  <CardDescription className="text-white/90">
                     Manage your email communications and templates
                   </CardDescription>
                 </CardHeader>
-                <CardContent className="p-6">
+                <CardContent className="p-6 bg-gradient-to-b from-slate-100 to-white">
                   <Button 
                     onClick={() => navigate("/email")}
-                    className="w-full md:w-auto"
+                    className="w-full md:w-auto bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium transition-all duration-300 shadow-md hover:shadow-lg"
                   >
                     Go to Email Dashboard
                   </Button>
@@ -207,20 +232,20 @@ export default function Messaging() {
             </TabsContent>
             
             <TabsContent value="social" className="space-y-4">
-              <Card>
-                <CardHeader className="bg-slate-200">
-                  <CardTitle className="flex items-center gap-2">
+              <Card className="overflow-hidden shadow-lg border-0 transition-all duration-300 hover:shadow-xl">
+                <CardHeader className="bg-gradient-to-r from-blue-500 to-indigo-600">
+                  <CardTitle className="flex items-center gap-2 text-white">
                     <Share2 className="h-5 w-5" />
                     Social Media
                   </CardTitle>
-                  <CardDescription>
+                  <CardDescription className="text-white/90">
                     Manage your social media accounts and posts
                   </CardDescription>
                 </CardHeader>
-                <CardContent className="p-6">
+                <CardContent className="p-6 bg-gradient-to-b from-slate-100 to-white">
                   <Button 
                     onClick={() => navigate("/social")}
-                    className="w-full md:w-auto"
+                    className="w-full md:w-auto bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium transition-all duration-300 shadow-md hover:shadow-lg"
                   >
                     Go to Social Media Dashboard
                   </Button>
