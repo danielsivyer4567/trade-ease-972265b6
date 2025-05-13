@@ -56,7 +56,7 @@ export const MessagingIntro: React.FC<MessagingIntroProps> = ({
             transition={{ delay: 1, duration: 0.8 }}
           >
             <img 
-              src="/latest logo.png" 
+              src="/images/messaging-hub.svg" 
               alt="Multi Messaging Platform"
               className="w-[650px] h-auto"
             />
