@@ -15,7 +15,7 @@ export const MessagingIntro: React.FC<MessagingIntroProps> = ({
     if (introPhase >= 1) {
       const timer = setTimeout(() => {
         onAnimationComplete();
-      }, 3500); // Show for 3.5 seconds
+      }, 4000); // Show for 4 seconds
       
       return () => clearTimeout(timer);
     }
@@ -30,19 +30,19 @@ export const MessagingIntro: React.FC<MessagingIntroProps> = ({
       transition={{ duration: 0.5 }}
     >
       <motion.div 
-        className="relative max-w-4xl w-full flex flex-col items-center"
+        className="relative max-w-md w-full flex flex-col items-center"
         initial={{ opacity: 0 }}
         animate={{ 
           opacity: introPhase >= 1 ? [0, 1, 1, 0] : 0
         }}
         transition={{ 
-          duration: 3.5,
+          duration: 4,
           times: [0, 0.2, 0.8, 1],
         }}
       >
-        {/* Custom messaging hub image */}
+        {/* Messaging hub image with neon connections */}
         <img 
-          src="/images/Screenshot 2025-04-21 125049.png" 
+          src="/images/messaging/Screenshot 2025-04-21 125049.png" 
           alt="Messaging Hub"
           className="w-full h-auto object-contain"
         />
