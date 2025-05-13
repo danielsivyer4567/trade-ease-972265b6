@@ -40,10 +40,10 @@ export const MessagingIntro: React.FC<MessagingIntroProps> = ({
           times: [0, 0.2, 0.8, 1],
         }}
       >
-        {/* Messaging hub image with neon connections */}
+        {/* Neon messaging hub image with electrical connections to social platforms */}
         <img 
-          src="/images/messaging/Screenshot 2025-04-21 125049.png" 
-          alt="Messaging Hub"
+          src="/images/messaging/neon-messaging-hub.jpg" 
+          alt="Messaging Hub with Social Platform Connections"
           className="w-full h-auto object-contain"
         />
       </motion.div>
