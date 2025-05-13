@@ -1,7 +1,8 @@
+import React, { useEffect, useState } from "react";
 import { AppLayout } from "@/components/ui/AppLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
-import { MessageSquare, ArrowLeft, RefreshCw, Mail, Share2, Loader2, Sparkles, Bell } from "lucide-react";
+import { MessageSquare, ArrowLeft, RefreshCw, Mail, Share2, Loader2, Sparkles, Bell, Facebook, Instagram, Linkedin } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { ServiceSyncCard } from "@/components/messaging/ServiceSyncCard";
 import { PhoneNumberInput } from "@/components/messaging/PhoneNumberInput";
@@ -19,7 +20,6 @@ import { useServicesFetch } from "@/components/messaging/hooks/useServicesFetch"
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Skeleton } from "@/components/ui/skeleton";
 import { motion, AnimatePresence } from "framer-motion";
-import { useEffect, useState } from "react";
 
 export default function Messaging() {
   const navigate = useNavigate();
