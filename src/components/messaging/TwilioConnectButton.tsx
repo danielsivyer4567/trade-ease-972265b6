@@ -1,19 +1,20 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { TwilioOrderNumberDialog } from './twilio/TwilioOrderNumberDialog';
+import { TwilioOrderNumberDialog } from './TwilioOrderNumberDialog';
 import { ConnectSection } from './twilio/ConnectSection';
 import { BuyNumberSection } from './twilio/BuyNumberSection';
 import { TermsAndConditionsDialog } from './twilio/TermsAndConditionsDialog';
 import { PhoneNumberForSale } from './twilio/types';
+import { messagingService } from './utils/messagingService';
 
 export const TwilioConnectButton = () => {
   const [orderDialogOpen, setOrderDialogOpen] = useState(false);
   const [twilioCredentials, setTwilioCredentials] = useState({
     accountSid: '',
-    authToken: ''
+    authToken: '',
+    phoneNumber: ''
   });
   const [activeTab, setActiveTab] = useState<"connect" | "buy">("connect");
   const [availableNumber, setAvailableNumber] = useState<string | null>(null);
@@ -21,56 +22,69 @@ export const TwilioConnectButton = () => {
   const [termsDialogOpen, setTermsDialogOpen] = useState(false);
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [currentPhoneNumber, setCurrentPhoneNumber] = useState<string | null>(null);
+  const [isConnected, setIsConnected] = useState(false);
+
+  useEffect(() => {
+    checkConnectionStatus();
+  }, []);
+
+  const checkConnectionStatus = async () => {
+    try {
+      const status = await messagingService.getConnectionStatus();
+      setIsConnected(status);
+    } catch (error) {
+      console.error('Error checking connection status:', error);
+      setIsConnected(false);
+    }
+  };
+
+  const handleConnect = async () => {
+    try {
+      setIsLoading(true);
+      await messagingService.initialize(twilioCredentials);
+      setIsConnected(true);
+      toast.success('Successfully connected to Twilio');
+      setOrderDialogOpen(false);
+    } catch (error) {
+      console.error('Error connecting to Twilio:', error);
+      toast.error('Failed to connect to Twilio');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Function to update Twilio credentials
+  const updateCredentials = (phoneNumber: string) => {
+    setTwilioCredentials(prev => ({
+      ...prev,
+      phoneNumber
+    }));
+  };
 
   // Function to handle opening dialog with correct credentials
   const handleOrderNumber = () => {
-    // In a real app, you might want to get these from a stored location or context
-    const accountSid = prompt('Enter your Twilio Account SID:');
-    const authToken = prompt('Enter your Twilio Auth Token:');
-    if (accountSid && authToken) {
-      setTwilioCredentials({
-        accountSid,
-        authToken
-      });
-      setOrderDialogOpen(true);
-    }
+    setOrderDialogOpen(true);
   };
 
   // Function to load phone numbers available for sale
   const loadAvailableForSale = async () => {
     setIsLoading(true);
     try {
-      const {
-        data: {
-          session
-        }
-      } = await supabase.auth.getSession();
-      if (!session) {
-        toast.error('You must be logged in to view available numbers');
-        return;
-      }
+      const { data, error } = await supabase
+        .from('phone_numbers_for_sale')
+        .select('*')
+        .eq('status', 'available');
 
-      // Use proper type assertion for the PhoneNumberForSale table
-      const {
-        data,
-        error
-      } = (await supabase.from('phone_numbers_for_sale').select('*').eq('status', 'available')) as {
-        data: PhoneNumberForSale[] | null;
-        error: any;
-      };
       if (error) throw error;
+      
       if (!data || data.length === 0) {
-        // Use a single authentic-looking number if no numbers are available in DB
         setAvailableNumber('+1(415)555-0123');
       } else {
-        // Take the first available phone number
         setAvailableNumber(data[0].phone_number);
       }
     } catch (error) {
       console.error('Error loading numbers for sale:', error);
       toast.error('Failed to load available numbers');
-
-      // Fallback to a single authentic-looking number
       setAvailableNumber('+1(415)555-0123');
     } finally {
       setIsLoading(false);
@@ -87,28 +101,24 @@ export const TwilioConnectButton = () => {
   // Handle purchase of a phone number
   const handlePurchaseNumber = async (phoneNumber: string) => {
     try {
-      const {
-        data: {
-          session
-        }
-      } = await supabase.auth.getSession();
-      if (!session) {
-        toast.error('You must be logged in to purchase a number');
-        return;
-      }
-
-      // This would connect to your payment processing system
       toast.loading('Processing purchase...');
+      
+      // Update the phone number in the credentials
+      setTwilioCredentials(prev => ({
+        ...prev,
+        phoneNumber
+      }));
 
-      // Mock successful purchase
-      setTimeout(() => {
-        // This would update your database to assign the number to the user
-        toast.dismiss();
-        toast.success(`Successfully purchased ${phoneNumber}`);
+      // Initialize messaging service with new phone number
+      await messagingService.initialize({
+        ...twilioCredentials,
+        phoneNumber
+      });
 
-        // Clear the available number
-        setAvailableNumber(null);
-      }, 2000);
+      toast.dismiss();
+      toast.success(`Successfully purchased ${phoneNumber}`);
+      setAvailableNumber(null);
+      setIsConnected(true);
     } catch (error) {
       console.error('Error purchasing number:', error);
       toast.error('Failed to complete purchase');
@@ -140,7 +150,7 @@ export const TwilioConnectButton = () => {
             value="connect" 
             className="text-gray-950 bg-slate-400 hover:bg-slate-300 mx-[14px]"
           >
-            Connect 
+            {isConnected ? 'Connected' : 'Connect'}
           </TabsTrigger>
           <TabsTrigger 
             value="buy" 
@@ -151,7 +161,10 @@ export const TwilioConnectButton = () => {
         </TabsList>
         
         <TabsContent value="connect" className="w-full">
-          <ConnectSection handleOrderNumber={handleOrderNumber} />
+          <ConnectSection 
+            handleOrderNumber={handleOrderNumber}
+            isConnected={isConnected}
+          />
         </TabsContent>
         
         <TabsContent value="buy" className="w-full">
@@ -168,7 +181,10 @@ export const TwilioConnectButton = () => {
         isOpen={orderDialogOpen} 
         onOpenChange={setOrderDialogOpen} 
         accountSid={twilioCredentials.accountSid} 
-        authToken={twilioCredentials.authToken} 
+        authToken={twilioCredentials.authToken}
+        onConnect={handleConnect}
+        isLoading={isLoading}
+        updateCredentials={updateCredentials}
       />
       
       <TermsAndConditionsDialog 
