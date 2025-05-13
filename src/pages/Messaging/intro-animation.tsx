@@ -29,8 +29,9 @@ export const MessagingIntro: React.FC<MessagingIntroProps> = ({
       exit={{ opacity: 0 }}
       transition={{ duration: 0.5 }}
     >
+      {/* Neon messaging hub image with electrical connections to social platforms - full screen */}
       <motion.div 
-        className="relative max-w-md w-full flex flex-col items-center"
+        className="relative w-full h-full"
         initial={{ opacity: 0 }}
         animate={{ 
           opacity: introPhase >= 1 ? [0, 1, 1, 0] : 0
@@ -40,11 +41,10 @@ export const MessagingIntro: React.FC<MessagingIntroProps> = ({
           times: [0, 0.2, 0.8, 1],
         }}
       >
-        {/* Neon messaging hub image with electrical connections to social platforms */}
         <img 
           src="/images/messaging/neon-messaging-hub.jpg" 
           alt="Messaging Hub with Social Platform Connections"
-          className="w-full h-auto object-contain"
+          className="w-full h-full object-cover absolute inset-0"
         />
       </motion.div>
     </motion.div>
