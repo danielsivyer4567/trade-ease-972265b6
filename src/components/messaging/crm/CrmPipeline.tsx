@@ -2,9 +2,10 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Mail, Facebook, Linkedin, MessageSquare, Plus, Info, Check, Clock, AlertTriangle } from "lucide-react";
+import { Plus, Info, Check, Clock, AlertTriangle } from "lucide-react";
 import { useCrmContacts } from "../hooks/useCrmContacts";
 import { motion } from "framer-motion";
+import { ChannelIcon } from '../ChannelIcons';
 
 const STAGES = [
   { id: 'new', label: 'New', color: 'bg-gradient-to-b from-blue-500 to-blue-600', icon: <Plus className="h-4 w-4 text-white" /> },
@@ -14,11 +15,15 @@ const STAGES = [
   { id: 'done', label: 'Done', color: 'bg-gradient-to-b from-gray-500 to-gray-600', icon: <Check className="h-4 w-4 text-white" /> },
 ];
 
+// Map platform names to our icon components
 const PLATFORM_ICONS = {
-  whatsapp: <MessageSquare className="h-4 w-4 text-green-500" />,
-  email: <Mail className="h-4 w-4 text-blue-500" />,
-  facebook: <Facebook className="h-4 w-4 text-blue-700" />,
-  linkedin: <Linkedin className="h-4 w-4 text-blue-600" />,
+  whatsapp: <ChannelIcon name="whatsapp" size="sm" className="drop-shadow-md" />,
+  email: <ChannelIcon name="email" size="sm" className="drop-shadow-md" />,
+  facebook: <ChannelIcon name="facebook" size="sm" className="drop-shadow-md" />,
+  linkedin: <ChannelIcon name="linkedin" size="sm" className="drop-shadow-md" />,
+  tiktok: <ChannelIcon name="tiktok" size="sm" className="drop-shadow-md" />,
+  sms: <ChannelIcon name="sms" size="sm" className="drop-shadow-md" />,
+  phone: <ChannelIcon name="phone" size="sm" className="drop-shadow-md" />,
 };
 
 export const CrmPipeline: React.FC = () => {
@@ -151,7 +156,9 @@ export const CrmPipeline: React.FC = () => {
                     <span className="font-medium text-base text-gray-800">{contact.name}</span>
                     <div className="flex gap-1 ml-auto">
                       {contact.platforms && contact.platforms.map(p => (
-                        <span key={p} className="bg-gray-100 p-1 rounded-full">{PLATFORM_ICONS[p]}</span>
+                        <span key={p} className="bg-gray-100 p-1 rounded-full">
+                          {PLATFORM_ICONS[p]}
+                        </span>
                       ))}
                     </div>
                   </div>
@@ -162,7 +169,7 @@ export const CrmPipeline: React.FC = () => {
                       size="sm"
                       onClick={() => updateContactStatus(contact.id, 'needs-reply')}
                     >
-                      <MessageSquare className="h-4 w-4 mr-1" /> Send Message
+                      <ChannelIcon name="sms" size="sm" className="mr-1" /> Send Message
                     </Button>
                     <Button
                       className="w-full" size="sm" variant="outline"
@@ -207,7 +214,7 @@ export const CrmPipeline: React.FC = () => {
           onClick={handleBulkMessage} 
           disabled={selected.length === 0}
         >
-          <MessageSquare className="h-4 w-4 mr-2" />
+          <ChannelIcon name="sms" size="sm" className="mr-2" />
           Send Message to Selected ({selected.length})
         </Button>
         <Button 
