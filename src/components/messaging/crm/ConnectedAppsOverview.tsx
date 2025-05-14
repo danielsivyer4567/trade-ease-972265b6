@@ -1,8 +1,9 @@
 import React from 'react';
 import { Card, CardContent } from "@/components/ui/card";
-import { Phone, MessageSquare, Mail, MessageCircle, Facebook, Instagram, Store, Youtube, Sparkles } from "lucide-react";
+import { Sparkles } from "lucide-react";
 import { ServiceInfo } from "../types";
 import { motion } from "framer-motion";
+import { ChannelIconWithBg, BRAND_COLORS } from '../ChannelIcons';
 
 interface ConnectedAppsOverviewProps {
   connectedNumbers: string[];
@@ -17,19 +18,6 @@ export const ConnectedAppsOverview: React.FC<ConnectedAppsOverviewProps> = ({
     return services.filter(s => s.serviceType === type && s.isConnected);
   };
   
-  const getServiceIcon = (type: string) => {
-    switch (type) {
-      case 'email':
-        return <Mail className="h-4 w-4 text-orange-500" />;
-      case 'sms':
-        return <MessageSquare className="h-4 w-4 text-blue-500" />;
-      case 'whatsapp':
-        return <MessageCircle className="h-4 w-4 text-green-500" />;
-      default:
-        return <MessageSquare className="h-4 w-4 text-gray-500" />;
-    }
-  };
-  
   return (
     <div className="p-1">
       <div className="flex items-center mb-4">
@@ -41,68 +29,68 @@ export const ConnectedAppsOverview: React.FC<ConnectedAppsOverviewProps> = ({
           {connectedNumbers.length + services.filter(s => s.isConnected).length} Total Connections
         </div>
       </div>
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+      <div className="grid grid-cols-4 md:grid-cols-8 gap-3">
         <ConnectedAppCard 
           title="Phone" 
           count={connectedNumbers.length} 
-          icon={<Phone className="h-5 w-5 text-white" />} 
-          gradient="from-blue-500 to-blue-700"
+          icon="phone" 
+          bgColor={BRAND_COLORS.phone}
           delay={0.1}
         />
         
         <ConnectedAppCard 
           title="Email" 
           count={getServicesByType('email').length} 
-          icon={<Mail className="h-5 w-5 text-white" />} 
-          gradient="from-amber-500 to-amber-700"
+          icon="email" 
+          bgColor={BRAND_COLORS.email}
           delay={0.2} 
         />
         
         <ConnectedAppCard 
           title="SMS" 
           count={getServicesByType('sms').length} 
-          icon={<MessageSquare className="h-5 w-5 text-white" />} 
-          gradient="from-indigo-500 to-indigo-700"
+          icon="sms" 
+          bgColor={BRAND_COLORS.sms}
           delay={0.3}
         />
         
         <ConnectedAppCard 
           title="WhatsApp" 
           count={getServicesByType('whatsapp').length} 
-          icon={<MessageCircle className="h-5 w-5 text-white" />} 
-          gradient="from-green-500 to-green-700"
+          icon="whatsapp" 
+          bgColor={BRAND_COLORS.whatsapp}
           delay={0.4}
         />
         
         <ConnectedAppCard 
           title="Facebook" 
           count={getServicesByType('facebook').length} 
-          icon={<Facebook className="h-5 w-5 text-white" />} 
-          gradient="from-blue-600 to-blue-800"
+          icon="facebook" 
+          bgColor={BRAND_COLORS.facebook}
           delay={0.5}
         />
         
         <ConnectedAppCard 
           title="Instagram" 
           count={getServicesByType('instagram').length} 
-          icon={<Instagram className="h-5 w-5 text-white" />} 
-          gradient="from-pink-500 to-purple-600"
+          icon="instagram" 
+          bgColor={BRAND_COLORS.instagram}
           delay={0.6}
         />
         
         <ConnectedAppCard 
           title="TikTok" 
           count={getServicesByType('tiktok').length} 
-          icon={<Youtube className="h-5 w-5 text-white" />} 
-          gradient="from-gray-700 to-gray-900"
+          icon="tiktok" 
+          bgColor={BRAND_COLORS.tiktok}
           delay={0.7}
         />
         
         <ConnectedAppCard 
-          title="Google Business" 
+          title="Google" 
           count={getServicesByType('google_business').length} 
-          icon={<Store className="h-5 w-5 text-white" />} 
-          gradient="from-red-500 to-red-700"
+          icon="google" 
+          bgColor={BRAND_COLORS.google}
           delay={0.8}
         />
       </div>
@@ -113,8 +101,8 @@ export const ConnectedAppsOverview: React.FC<ConnectedAppsOverviewProps> = ({
 interface ConnectedAppCardProps {
   title: string;
   count: number;
-  icon: React.ReactNode;
-  gradient: string;
+  icon: string;
+  bgColor: string;
   delay: number;
 }
 
@@ -122,7 +110,7 @@ const ConnectedAppCard: React.FC<ConnectedAppCardProps> = ({
   title,
   count,
   icon,
-  gradient,
+  bgColor,
   delay
 }) => {
   return (
@@ -130,32 +118,24 @@ const ConnectedAppCard: React.FC<ConnectedAppCardProps> = ({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay }}
-      whileHover={{ scale: 1.03, transition: { duration: 0.2 } }}
+      whileHover={{ scale: 1.1, transition: { duration: 0.2 } }}
+      className="flex flex-col items-center"
     >
-      <Card className="overflow-hidden shadow-md hover:shadow-lg transition-all duration-300 border-0">
-        <CardContent className="p-0">
-          <div className={`bg-gradient-to-r ${gradient} p-3 text-white relative overflow-hidden`}>
-            <div className="absolute -bottom-6 -right-6 w-16 h-16 bg-white/10 rounded-full"></div>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <div className="bg-white/20 p-2 rounded-full">
-                  {icon}
-                </div>
-                <span className="font-medium">{title}</span>
-              </div>
-              <div className="w-8 h-8 flex items-center justify-center font-semibold text-white bg-black/20 rounded-full text-lg">
-                {count}
-              </div>
-            </div>
+      <div className="relative">
+        <ChannelIconWithBg 
+          name={icon as any} 
+          size="lg" 
+          bgColor={bgColor} 
+          className="mb-2 drop-shadow-md"
+        />
+        {count > 0 && (
+          <div className="absolute -top-1 -right-1 w-5 h-5 flex items-center justify-center text-xs font-bold bg-white text-blue-600 rounded-full border-2 border-blue-500 shadow-md">
+            {count}
           </div>
-          <div className="p-2 bg-gradient-to-b from-gray-50 to-white">
-            <div className="flex items-center justify-between text-xs text-gray-500">
-              <span>Connected</span>
-              <span className="font-medium">{count > 0 ? "Active" : "Inactive"}</span>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+        )}
+      </div>
+      <span className="text-xs font-medium text-gray-700">{title}</span>
+      <span className="text-xs text-gray-500">{count > 0 ? "Active" : "Inactive"}</span>
     </motion.div>
   );
 };
