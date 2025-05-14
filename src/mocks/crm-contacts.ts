@@ -36,7 +36,7 @@ export const generateMockContacts = (): CrmContact[] => {
       status: 'new',
       pipeline: 'pre-quote',
       platforms: ['email', 'whatsapp'],
-      last_message: 'Hello, I'm interested in your services. Can you send me a quote for a website?',
+      last_message: "Hello, I'm interested in your services. Can you send me a quote for a website?",
       last_updated: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(), // 2 hours ago
       priority: 'medium',
       tags: ['new lead', 'website']
@@ -50,7 +50,7 @@ export const generateMockContacts = (): CrmContact[] => {
       status: 'needs-reply',
       pipeline: 'pre-quote',
       platforms: ['facebook', 'email'],
-      last_message: 'I need to get a quote for my business. We need branding and a website.',
+      last_message: "I need to get a quote for my business. We need branding and a website.",
       last_updated: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(), // 1 day ago
       priority: 'high',
       tags: ['branding', 'website']
@@ -64,7 +64,7 @@ export const generateMockContacts = (): CrmContact[] => {
       status: 'responded',
       pipeline: 'pre-quote',
       platforms: ['whatsapp', 'sms'],
-      last_message: 'Thanks for the information! I'll review the details and get back to you.',
+      last_message: "Thanks for the information! I'll review the details and get back to you.",
       last_updated: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(), // 5 hours ago
       priority: 'medium',
       assigned_to: 'sales-rep-1',
@@ -79,7 +79,7 @@ export const generateMockContacts = (): CrmContact[] => {
       status: 'follow-up',
       pipeline: 'pre-quote',
       platforms: ['linkedin', 'email'],
-      last_message: 'I haven't heard back from you in a while. Are you still interested in our services?',
+      last_message: "I haven't heard back from you in a while. Are you still interested in our services?",
       last_updated: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(), // 3 days ago
       priority: 'low',
       tags: ['follow-up', 'cold lead']
@@ -93,7 +93,7 @@ export const generateMockContacts = (): CrmContact[] => {
       status: 'done',
       pipeline: 'pre-quote',
       platforms: ['email', 'phone'],
-      last_message: 'I've decided to go with another provider. Thanks for your time.',
+      last_message: "I've decided to go with another provider. Thanks for your time.",
       last_updated: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(), // 5 days ago
       priority: 'low',
       tags: ['lost deal']
@@ -111,7 +111,7 @@ export const generateMockContacts = (): CrmContact[] => {
       status: 'accepted',
       pipeline: 'post-quote',
       platforms: ['email', 'whatsapp'],
-      last_message: 'I've approved the quote. When can we start?',
+      last_message: "I've approved the quote. When can we start?",
       last_updated: new Date(Date.now() - 8 * 60 * 60 * 1000).toISOString(), // 8 hours ago
       priority: 'high',
       quote_id: 'QUOTE-001',
@@ -127,7 +127,7 @@ export const generateMockContacts = (): CrmContact[] => {
       status: 'processing',
       pipeline: 'post-quote',
       platforms: ['sms', 'email'],
-      last_message: 'Thanks for the update. Looking forward to seeing the first draft.',
+      last_message: "Thanks for the update. Looking forward to seeing the first draft.",
       last_updated: new Date(Date.now() - 1.5 * 24 * 60 * 60 * 1000).toISOString(), // 1.5 days ago
       priority: 'medium',
       quote_id: 'QUOTE-002',
@@ -144,7 +144,7 @@ export const generateMockContacts = (): CrmContact[] => {
       status: 'shipped',
       pipeline: 'post-quote',
       platforms: ['email', 'phone'],
-      last_message: 'We've shipped your order. Here's the tracking information: TRK123456789',
+      last_message: "We've shipped your order. Here's the tracking information: TRK123456789",
       last_updated: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(), // 2 days ago
       priority: 'medium',
       quote_id: 'QUOTE-003',
@@ -160,7 +160,7 @@ export const generateMockContacts = (): CrmContact[] => {
       status: 'delivered',
       pipeline: 'post-quote',
       platforms: ['whatsapp', 'email'],
-      last_message: 'I've received the product. It looks great!',
+      last_message: "I've received the product. It looks great!",
       last_updated: new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString(), // 12 hours ago
       priority: 'low',
       quote_id: 'QUOTE-004',
@@ -176,7 +176,7 @@ export const generateMockContacts = (): CrmContact[] => {
       status: 'feedback',
       pipeline: 'post-quote',
       platforms: ['facebook', 'email'],
-      last_message: 'I'm very happy with the service. I'll definitely recommend you to others!',
+      last_message: "I'm very happy with the service. I'll definitely recommend you to others!",
       last_updated: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(), // 3 days ago
       priority: 'low',
       quote_id: 'QUOTE-005',
@@ -196,7 +196,7 @@ export const generateMockContacts = (): CrmContact[] => {
       status: 'new-complaint',
       pipeline: 'complaints',
       platforms: ['email', 'phone'],
-      last_message: 'The product I received was damaged during shipping. I'd like a replacement.',
+      last_message: "The product I received was damaged during shipping. I'd like a replacement.",
       last_updated: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(), // 4 hours ago
       priority: 'high',
       quote_id: 'QUOTE-006',
@@ -212,7 +212,7 @@ export const generateMockContacts = (): CrmContact[] => {
       status: 'investigating',
       pipeline: 'complaints',
       platforms: ['twitter', 'email'],
-      last_message: 'I'm still waiting for a response about my refund request from last week.',
+      last_message: "I'm still waiting for a response about my refund request from last week.",
       last_updated: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(), // 2 days ago
       priority: 'urgent',
       quote_id: 'QUOTE-007',
@@ -229,7 +229,7 @@ export const generateMockContacts = (): CrmContact[] => {
       status: 'responding',
       pipeline: 'complaints',
       platforms: ['facebook', 'email'],
-      last_message: 'Thank you for looking into this issue. I appreciate your help.',
+      last_message: "Thank you for looking into this issue. I appreciate your help.",
       last_updated: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(), // 1 day ago
       priority: 'medium',
       quote_id: 'QUOTE-008',
@@ -246,7 +246,7 @@ export const generateMockContacts = (): CrmContact[] => {
       status: 'resolved',
       pipeline: 'complaints',
       platforms: ['whatsapp', 'email'],
-      last_message: 'Issue has been resolved to my satisfaction. Thank you for your assistance.',
+      last_message: "Issue has been resolved to my satisfaction. Thank you for your assistance.",
       last_updated: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(), // 5 hours ago
       priority: 'low',
       quote_id: 'QUOTE-009',
