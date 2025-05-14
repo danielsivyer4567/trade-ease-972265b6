@@ -21,6 +21,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { Skeleton } from "@/components/ui/skeleton";
 import { motion, AnimatePresence } from "framer-motion";
 import { MessagingIntro } from "./intro-animation";
+import { ChannelIcon, ChannelIconWithBg } from "@/components/messaging/ChannelIcons";
 
 export default function Messaging() {
   const navigate = useNavigate();
@@ -250,47 +251,135 @@ export default function Messaging() {
             </TabsContent>
             
             <TabsContent value="email" className="space-y-4">
-              <Card className="overflow-hidden shadow-lg border-0 transition-all duration-300 hover:shadow-xl">
-                <CardHeader className="bg-gradient-to-r from-blue-500 to-indigo-600">
-                  <CardTitle className="flex items-center gap-2 text-white">
-                    <Mail className="h-5 w-5" />
-                    Email Management
-                  </CardTitle>
-                  <CardDescription className="text-white/90">
-                    Manage your email communications and templates
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="p-6 bg-gradient-to-b from-slate-100 to-white">
-                  <Button 
-                    onClick={() => navigate("/email")}
-                    className="w-full md:w-auto bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium transition-all duration-300 shadow-md hover:shadow-lg"
-                  >
-                    Go to Email Dashboard
-                  </Button>
-                </CardContent>
-              </Card>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5 }}
+                  whileHover={{ scale: 1.02, transition: { duration: 0.2 } }}
+                >
+                  <Card className="overflow-hidden shadow-lg border-0 transition-all duration-300 hover:shadow-xl">
+                    <CardHeader className="bg-gradient-to-r from-orange-500 to-amber-600">
+                      <div className="flex items-center gap-3 text-white">
+                        <div className="p-2 bg-white/20 rounded-full backdrop-blur-sm">
+                          <ChannelIcon name="email" size="md" />
+                        </div>
+                        <div>
+                          <CardTitle className="text-xl">Email Campaigns</CardTitle>
+                          <CardDescription className="text-white/90">
+                            Create and manage email marketing campaigns
+                          </CardDescription>
+                        </div>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="p-6 bg-gradient-to-b from-slate-100 to-white">
+                      <div className="flex items-center justify-between mb-4">
+                        <div>
+                          <p className="text-gray-500 text-sm">Active Campaigns</p>
+                          <p className="text-2xl font-semibold text-blue-600">3</p>
+                        </div>
+                        <div>
+                          <p className="text-gray-500 text-sm">Total Subscribers</p>
+                          <p className="text-2xl font-semibold text-blue-600">2,548</p>
+                        </div>
+                      </div>
+                      <Button 
+                        onClick={() => navigate("/email")}
+                        className="w-full bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 text-white font-medium transition-all duration-300 shadow-md hover:shadow-lg"
+                      >
+                        Manage Campaigns
+                      </Button>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: 0.2 }}
+                  whileHover={{ scale: 1.02, transition: { duration: 0.2 } }}
+                >
+                  <Card className="overflow-hidden shadow-lg border-0 transition-all duration-300 hover:shadow-xl">
+                    <CardHeader className="bg-gradient-to-r from-blue-500 to-indigo-600">
+                      <div className="flex items-center gap-3 text-white">
+                        <div className="p-2 bg-white/20 rounded-full backdrop-blur-sm">
+                          <ChannelIcon name="email" size="md" />
+                        </div>
+                        <div>
+                          <CardTitle className="text-xl">Email Templates</CardTitle>
+                          <CardDescription className="text-white/90">
+                            Design and save reusable email templates
+                          </CardDescription>
+                        </div>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="p-6 bg-gradient-to-b from-slate-100 to-white">
+                      <div className="flex items-center justify-between mb-4">
+                        <div>
+                          <p className="text-gray-500 text-sm">Saved Templates</p>
+                          <p className="text-2xl font-semibold text-blue-600">12</p>
+                        </div>
+                        <div>
+                          <p className="text-gray-500 text-sm">Recent Edits</p>
+                          <p className="text-2xl font-semibold text-blue-600">5</p>
+                        </div>
+                      </div>
+                      <Button 
+                        onClick={() => navigate("/email")}
+                        className="w-full bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white font-medium transition-all duration-300 shadow-md hover:shadow-lg"
+                      >
+                        Manage Templates
+                      </Button>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              </div>
             </TabsContent>
             
             <TabsContent value="social" className="space-y-4">
-              <Card className="overflow-hidden shadow-lg border-0 transition-all duration-300 hover:shadow-xl">
-                <CardHeader className="bg-gradient-to-r from-blue-500 to-indigo-600">
-                  <CardTitle className="flex items-center gap-2 text-white">
-                    <Share2 className="h-5 w-5" />
-                    Social Media
-                  </CardTitle>
-                  <CardDescription className="text-white/90">
-                    Manage your social media accounts and posts
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="p-6 bg-gradient-to-b from-slate-100 to-white">
-                  <Button 
-                    onClick={() => navigate("/social")}
-                    className="w-full md:w-auto bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium transition-all duration-300 shadow-md hover:shadow-lg"
-                  >
-                    Go to Social Media Dashboard
-                  </Button>
-                </CardContent>
-              </Card>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <SocialPlatformCard 
+                  platform="facebook" 
+                  title="Facebook" 
+                  stats={{ followers: 12548, messages: 56 }}
+                  gradient="from-blue-500 to-blue-700"
+                />
+                
+                <SocialPlatformCard 
+                  platform="instagram" 
+                  title="Instagram" 
+                  stats={{ followers: 18432, messages: 127 }}
+                  gradient="from-pink-500 to-purple-600"
+                />
+                
+                <SocialPlatformCard 
+                  platform="linkedin" 
+                  title="LinkedIn" 
+                  stats={{ followers: 5283, messages: 21 }}
+                  gradient="from-blue-600 to-blue-800"
+                />
+                
+                <SocialPlatformCard 
+                  platform="tiktok" 
+                  title="TikTok" 
+                  stats={{ followers: 8763, messages: 34 }}
+                  gradient="from-gray-700 to-gray-900"
+                />
+                
+                <SocialPlatformCard 
+                  platform="twitter" 
+                  title="Twitter" 
+                  stats={{ followers: 9621, messages: 43 }}
+                  gradient="from-blue-400 to-blue-600"
+                />
+                
+                <SocialPlatformCard 
+                  platform="youtube" 
+                  title="YouTube" 
+                  stats={{ followers: 6238, messages: 85 }}
+                  gradient="from-red-500 to-red-700"
+                />
+              </div>
             </TabsContent>
           </Tabs>
         </div>
@@ -298,3 +387,60 @@ export default function Messaging() {
     </AppLayout>
   );
 }
+
+interface SocialPlatformCardProps {
+  platform: 'facebook' | 'instagram' | 'linkedin' | 'tiktok' | 'twitter' | 'youtube';
+  title: string;
+  stats: {
+    followers: number;
+    messages: number;
+  };
+  gradient: string;
+}
+
+const SocialPlatformCard: React.FC<SocialPlatformCardProps> = ({
+  platform,
+  title,
+  stats,
+  gradient
+}) => {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      whileHover={{ scale: 1.03, transition: { duration: 0.2 } }}
+    >
+      <Card className="overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 border-0">
+        <CardHeader className={`bg-gradient-to-r ${gradient} p-4 pb-6`}>
+          <div className="flex items-center gap-3 text-white">
+            <div className="p-2 bg-white/20 rounded-full backdrop-blur-sm">
+              <ChannelIcon name={platform} size="md" />
+            </div>
+            <CardTitle className="text-xl">{title}</CardTitle>
+          </div>
+        </CardHeader>
+        
+        <CardContent className="p-4 bg-gradient-to-b from-slate-100 to-white">
+          <div className="grid grid-cols-2 gap-4 mb-4">
+            <div className="text-center p-2 bg-white rounded-lg shadow-sm">
+              <p className="text-gray-500 text-sm">Followers</p>
+              <p className="text-xl font-semibold text-blue-600">{stats.followers.toLocaleString()}</p>
+            </div>
+            <div className="text-center p-2 bg-white rounded-lg shadow-sm">
+              <p className="text-gray-500 text-sm">Messages</p>
+              <p className="text-xl font-semibold text-indigo-600">{stats.messages}</p>
+            </div>
+          </div>
+          
+          <Button 
+            className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700"
+          >
+            <Share2 className="h-4 w-4 mr-2" />
+            Manage Account
+          </Button>
+        </CardContent>
+      </Card>
+    </motion.div>
+  );
+};
