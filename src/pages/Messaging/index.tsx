@@ -198,7 +198,7 @@ export default function Messaging() {
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.5, delay: 0.2 }}
               >
-                <ConnectedAppsOverview connectedNumbers={connectedNumbers} services={services} />
+                <CrmPipeline />
               </motion.div>
               
               <motion.div
@@ -206,7 +206,7 @@ export default function Messaging() {
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.5, delay: 0.3 }}
               >
-                <CrmPipeline />
+                <ConnectedAppsOverview connectedNumbers={connectedNumbers} services={services} />
               </motion.div>
             </TabsContent>
             

@@ -1,15 +1,39 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { mockCrmContacts } from "@/mocks/crm-contacts";
+
+export type CrmPipelineType = 'pre-quote' | 'post-quote' | 'complaints';
+
+export interface CrmContact {
+  id: string;
+  name: string;
+  email: string;
+  phone?: string;
+  avatar: string;
+  status: string;
+  pipeline: CrmPipelineType;
+  platforms: string[];
+  last_message: string;
+  last_updated: string;
+  quote_id?: string;
+  customer_id?: string;
+  priority?: 'low' | 'medium' | 'high' | 'urgent';
+  assigned_to?: string;
+  tags?: string[];
+}
 
 export function useCrmContacts() {
-  const [contacts, setContacts] = useState([]);
+  const [contacts, setContacts] = useState<CrmContact[]>([]);
   const [loading, setLoading] = useState(true);
+  const [activePipeline, setActivePipeline] = useState<CrmPipelineType>('pre-quote');
 
   useEffect(() => {
+    // Simulate API call with mock data
     async function fetchContacts() {
       setLoading(true);
-      const { data, error } = await supabase.from("crm_contacts").select("*");
-      if (!error) setContacts(data);
+      // Simulate network delay
+      await new Promise(resolve => setTimeout(resolve, 800));
+      setContacts(mockCrmContacts);
       setLoading(false);
     }
     fetchContacts();
@@ -17,9 +41,37 @@ export function useCrmContacts() {
 
   // Update contact status
   async function updateContactStatus(id: string, status: string) {
-    await supabase.from("crm_contacts").update({ status, last_updated: new Date().toISOString() }).eq("id", id);
+    // In a real app, we would call the API here
+    // For now, just update the local state
     setContacts(prev => prev.map(c => c.id === id ? { ...c, status, last_updated: new Date().toISOString() } : c));
   }
 
-  return { contacts, setContacts, loading, updateContactStatus };
+  // Update contact pipeline
+  async function updateContactPipeline(id: string, pipeline: CrmPipelineType) {
+    // In a real app, we would call the API here
+    // For now, just update the local state
+    setContacts(prev => prev.map(c => c.id === id ? { ...c, pipeline, last_updated: new Date().toISOString() } : c));
+  }
+
+  // Update contact priority
+  async function updateContactPriority(id: string, priority: 'low' | 'medium' | 'high' | 'urgent') {
+    // In a real app, we would call the API here
+    // For now, just update the local state
+    setContacts(prev => prev.map(c => c.id === id ? { ...c, priority, last_updated: new Date().toISOString() } : c));
+  }
+
+  // Get contacts filtered by active pipeline
+  const filteredContacts = contacts.filter(contact => contact.pipeline === activePipeline);
+
+  return { 
+    contacts: filteredContacts, 
+    allContacts: contacts,
+    setContacts, 
+    loading, 
+    activePipeline,
+    setActivePipeline,
+    updateContactStatus,
+    updateContactPipeline,
+    updateContactPriority
+  };
 } 
