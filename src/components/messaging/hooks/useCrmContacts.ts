@@ -26,6 +26,7 @@ export function useCrmContacts() {
   const [contacts, setContacts] = useState<CrmContact[]>([]);
   const [loading, setLoading] = useState(true);
   const [activePipeline, setActivePipeline] = useState<CrmPipelineType>('pre-quote');
+  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
     // Simulate API call with mock data
@@ -38,6 +39,13 @@ export function useCrmContacts() {
     }
     fetchContacts();
   }, []);
+
+  // Add new contact
+  const addContact = (contact: CrmContact) => {
+    // In a real app, we would call the API here
+    // For now, just update the local state
+    setContacts(prev => [contact, ...prev]);
+  };
 
   // Update contact status
   async function updateContactStatus(id: string, status: string) {
@@ -60,8 +68,31 @@ export function useCrmContacts() {
     setContacts(prev => prev.map(c => c.id === id ? { ...c, priority, last_updated: new Date().toISOString() } : c));
   }
 
-  // Get contacts filtered by active pipeline
-  const filteredContacts = contacts.filter(contact => contact.pipeline === activePipeline);
+  // Delete contact
+  const deleteContact = (id: string) => {
+    // In a real app, we would call the API here
+    // For now, just update the local state
+    setContacts(prev => prev.filter(c => c.id !== id));
+  };
+
+  // Search contacts
+  const searchContacts = (term: string) => {
+    setSearchTerm(term);
+  };
+
+  // Filter contacts by search term
+  const searchedContacts = searchTerm
+    ? contacts.filter(contact => 
+        contact.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        contact.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (contact.phone && contact.phone.includes(searchTerm)) ||
+        (contact.tags && contact.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()))) ||
+        contact.last_message.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+    : contacts;
+
+  // Get contacts filtered by active pipeline and search term
+  const filteredContacts = searchedContacts.filter(contact => contact.pipeline === activePipeline);
 
   return { 
     contacts: filteredContacts, 
@@ -70,6 +101,10 @@ export function useCrmContacts() {
     loading, 
     activePipeline,
     setActivePipeline,
+    searchTerm,
+    searchContacts,
+    addContact,
+    deleteContact,
     updateContactStatus,
     updateContactPipeline,
     updateContactPriority

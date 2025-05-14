@@ -1,0 +1,82 @@
+/* Custom scrollbar for the kanban board */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.03);
+  border-radius: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.2);
+}
+
+/* Animation for highlighting new items */
+@keyframes highlight {
+  0% {
+    background-color: rgba(59, 130, 246, 0.1);
+    border-color: rgba(59, 130, 246, 0.3);
+  }
+  50% {
+    background-color: rgba(79, 70, 229, 0.1);
+    border-color: rgba(79, 70, 229, 0.3);
+  }
+  100% {
+    background-color: transparent;
+    border-color: rgba(209, 213, 219, 1);
+  }
+}
+
+.highlight-new {
+  animation: highlight 3s ease-in-out;
+}
+
+/* Animation for the avatar indicator */
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 5px rgba(16, 185, 129, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+  }
+}
+
+.online-indicator {
+  animation: pulse 2s infinite;
+}
+
+/* Animations for card dragging */
+.dragging {
+  transform: scale(1.05);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  opacity: 0.9;
+  border: 2px dashed rgba(59, 130, 246, 0.7);
+}
+
+.drop-target {
+  background-color: rgba(59, 130, 246, 0.1);
+}
+
+/* Reverse spin animation for the loading indicator */
+@keyframes reverse-spin {
+  from {
+    transform: rotate(360deg);
+  }
+  to {
+    transform: rotate(0deg);
+  }
+}
+
+.animate-reverse-spin {
+  animation: reverse-spin 1.5s linear infinite;
+} 
