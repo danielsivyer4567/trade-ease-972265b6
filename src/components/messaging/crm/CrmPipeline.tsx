@@ -1,756 +1,500 @@
-import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   Plus, 
-  Info, 
-  Check, 
-  Clock, 
-  AlertTriangle, 
-  MessageCircle, 
-  ShieldAlert, 
-  Hourglass, 
-  UserCheck, 
-  ReceiptText, 
-  Truck, 
-  PackageOpen, 
-  HeartHandshake, 
-  Star, 
-  ThumbsUp,
-  Search,
-  Trash2,
-  Filter,
-  MoreHorizontal,
   Phone,
   Calendar,
-  Tag,
-  ArrowRight,
-  Settings,
-  Bell,
-  RefreshCw
+  Mail,
+  Send,
+  Check,
+  Star,
+  Search,
+  Paperclip,
+  Clock,
+  MoreVertical,
+  CheckCircle2,
+  Trash2,
+  Clock3,
+  ThumbsUp,
+  ChevronDown,
+  Smile,
+  BellRing,
+  User
 } from "lucide-react";
 import { useCrmContacts, CrmPipelineType, CrmContact } from "../hooks/useCrmContacts";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChannelIcon } from '../ChannelIcons';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { AddContactDialog } from './AddContactDialog';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import './CrmPipeline.css';
-
-// Define all pipeline stages with updated modern colors
-const PRE_QUOTE_STAGES = [
-  { id: 'new', label: 'New', color: 'bg-gradient-to-br from-blue-500 to-blue-600', icon: <Plus className="h-4 w-4 text-white" /> },
-  { id: 'needs-reply', label: 'Needs Reply', color: 'bg-gradient-to-br from-amber-500 to-amber-600', icon: <Clock className="h-4 w-4 text-white" /> },
-  { id: 'responded', label: 'Responded', color: 'bg-gradient-to-br from-green-500 to-green-600', icon: <MessageCircle className="h-4 w-4 text-white" /> },
-  { id: 'follow-up', label: 'Follow Up', color: 'bg-gradient-to-br from-purple-500 to-purple-600', icon: <Hourglass className="h-4 w-4 text-white" /> },
-  { id: 'done', label: 'Done', color: 'bg-gradient-to-br from-gray-500 to-gray-600', icon: <Check className="h-4 w-4 text-white" /> },
-];
-
-const POST_QUOTE_STAGES = [
-  { id: 'accepted', label: 'Quote Accepted', color: 'bg-gradient-to-br from-green-500 to-green-600', icon: <UserCheck className="h-4 w-4 text-white" /> },
-  { id: 'processing', label: 'Processing', color: 'bg-gradient-to-br from-blue-500 to-blue-600', icon: <ReceiptText className="h-4 w-4 text-white" /> },
-  { id: 'shipped', label: 'Shipped', color: 'bg-gradient-to-br from-indigo-500 to-indigo-600', icon: <Truck className="h-4 w-4 text-white" /> },
-  { id: 'delivered', label: 'Delivered', color: 'bg-gradient-to-br from-purple-500 to-purple-600', icon: <PackageOpen className="h-4 w-4 text-white" /> },
-  { id: 'feedback', label: 'Feedback', color: 'bg-gradient-to-br from-amber-500 to-amber-600', icon: <Star className="h-4 w-4 text-white" /> },
-  { id: 'completed', label: 'Completed', color: 'bg-gradient-to-br from-teal-500 to-teal-600', icon: <HeartHandshake className="h-4 w-4 text-white" /> },
-];
-
-const COMPLAINT_STAGES = [
-  { id: 'new-complaint', label: 'New Complaint', color: 'bg-gradient-to-br from-red-500 to-red-600', icon: <ShieldAlert className="h-4 w-4 text-white" /> },
-  { id: 'investigating', label: 'Investigating', color: 'bg-gradient-to-br from-amber-500 to-amber-600', icon: <AlertTriangle className="h-4 w-4 text-white" /> },
-  { id: 'responding', label: 'Responding', color: 'bg-gradient-to-br from-blue-500 to-blue-600', icon: <MessageCircle className="h-4 w-4 text-white" /> },
-  { id: 'resolved', label: 'Resolved', color: 'bg-gradient-to-br from-green-500 to-green-600', icon: <ThumbsUp className="h-4 w-4 text-white" /> },
-];
-
-// Map platform names to icons
-const PLATFORM_ICONS = {
-  whatsapp: <ChannelIcon name="whatsapp" size="sm" className="drop-shadow-md" />,
-  email: <ChannelIcon name="email" size="sm" className="drop-shadow-md" />,
-  facebook: <ChannelIcon name="facebook" size="sm" className="drop-shadow-md" />,
-  linkedin: <ChannelIcon name="linkedin" size="sm" className="drop-shadow-md" />,
-  tiktok: <ChannelIcon name="tiktok" size="sm" className="drop-shadow-md" />,
-  sms: <ChannelIcon name="sms" size="sm" className="drop-shadow-md" />,
-  phone: <ChannelIcon name="phone" size="sm" className="drop-shadow-md" />,
-  twitter: <ChannelIcon name="twitter" size="sm" className="drop-shadow-md" />,
-  instagram: <ChannelIcon name="instagram" size="sm" className="drop-shadow-md" />,
-};
-
-// Priority colors with updated styling
-const PRIORITY_COLORS = {
-  low: 'bg-blue-50 text-blue-800 border border-blue-200',
-  medium: 'bg-yellow-50 text-yellow-800 border border-yellow-200',
-  high: 'bg-orange-50 text-orange-800 border border-orange-200',
-  urgent: 'bg-red-50 text-red-800 border border-red-200',
-};
 
 export const CrmPipeline: React.FC = () => {
   const { 
     contacts, 
-    allContacts,
     loading, 
     activePipeline, 
-    setActivePipeline,
-    searchTerm,
-    searchContacts,
-    addContact,
-    deleteContact,
-    updateContactStatus,
-    updateContactPipeline,
-    updateContactPriority 
+    setActivePipeline
   } = useCrmContacts();
   
-  const [draggedContact, setDraggedContact] = React.useState<string | null>(null);
-  const [showTooltip, setShowTooltip] = React.useState(true);
-  const [selected, setSelected] = React.useState<string[]>([]);
-  const [activeStage, setActiveStage] = React.useState<string | null>(null);
-  const [addDialogOpen, setAddDialogOpen] = React.useState(false);
-  const [confirmDelete, setConfirmDelete] = React.useState<string | null>(null);
-  const [viewType, setViewType] = React.useState<'kanban' | 'list'>('kanban');
+  const [selectedContact, setSelectedContact] = useState<CrmContact | null>(null);
+  const [messageText, setMessageText] = useState('');
+  const [searchText, setSearchText] = useState('');
 
-  // Get stages based on active pipeline
-  const getStages = () => {
-    switch (activePipeline) {
-      case 'pre-quote':
-        return PRE_QUOTE_STAGES;
-      case 'post-quote':
-        return POST_QUOTE_STAGES;
-      case 'complaints':
-        return COMPLAINT_STAGES;
-      default:
-        return PRE_QUOTE_STAGES;
+  // Mock appointment data
+  const appointments = [
+    {
+      id: 1,
+      date: "28 May 2025",
+      time: "10:30 am (AEST)",
+      status: "Confirmed",
+      location: "Centre of Gold Coast (Zone 2)",
+      assignedUser: "Chef Account"
     }
-  };
+  ];
 
-  const stages = getStages();
+  // Mock conversation data
+  const conversations = [
+    { id: 5, sender: 'customer', message: 'Look forward to you coming on site', time: '20:48' },
+    { id: 6, sender: 'agent', message: 'I\'ll book a date for you next for a a quote - chat will come out if its not suitable let me know :-)', time: '20:49' },
+    { id: 7, sender: 'customer', message: 'Great stuff mate.\nI would appreciate that', time: '20:50' },
+    { id: 8, sender: 'system', message: 'New appointment created', time: '20:51', appointment: {
+      date: 'May 28, 2025',
+      time: '10:30 AM (AEST)'
+    }}
+  ];
 
   if (loading) return (
     <div className="p-8 text-center flex justify-center items-center h-[80vh]">
       <div className="animate-pulse flex flex-col items-center gap-3">
         <div className="w-12 h-12 rounded-full bg-gradient-to-r from-blue-500 to-indigo-600 animate-spin flex items-center justify-center">
-          <RefreshCw className="h-6 w-6 text-white animate-reverse-spin" />
+          <Clock className="h-6 w-6 text-white animate-reverse-spin" />
         </div>
         <p className="text-lg font-medium text-gray-700">Loading CRM contacts...</p>
       </div>
     </div>
   );
 
-  const moveContact = (contactId: string, targetStatus: string) => {
-    updateContactStatus(contactId, targetStatus);
+  const handleSelectContact = (contact: CrmContact) => {
+    setSelectedContact(contact);
   };
 
-  const handleDragStart = (contactId: string) => {
-    setDraggedContact(contactId);
-  };
-  
-  const handleDragOver = (e: React.DragEvent<HTMLDivElement>, stageId: string) => {
-    e.preventDefault();
-    setActiveStage(stageId);
-  };
-  
-  const handleDragLeave = () => {
-    setActiveStage(null);
-  };
-  
-  const handleDrop = (e: React.DragEvent<HTMLDivElement>, targetStatus: string) => {
-    e.preventDefault();
-    if (draggedContact) {
-      moveContact(draggedContact, targetStatus);
-      setDraggedContact(null);
-      setActiveStage(null);
+  const handleSendMessage = () => {
+    if (messageText.trim()) {
+      console.log('Sending message:', messageText);
+      
+      // Only attempt to send the message if we have a selected contact
+      if (selectedContact && selectedContact.phone) {
+        sendMessageToContact(selectedContact, messageText.trim())
+          .then(() => {
+            // Add the message to the conversation immediately for UI feedback
+            console.log('Message sent successfully to', selectedContact.name);
+            // Clear the input field
+            setMessageText('');
+          })
+          .catch(error => {
+            console.error('Error sending message:', error);
+            alert('Failed to send message. Please try again.');
+          });
+      } else {
+        console.error('Cannot send message: No contact selected or contact has no phone number');
+        setMessageText('');
+      }
     }
   };
 
-  // Bulk actions
-  const handleSelect = (id: string) => {
-    setSelected(sel => sel.includes(id) ? sel.filter(s => s !== id) : [...sel, id]);
-  };
-  
-  const handleSelectAll = (status: string) => {
-    const ids = contacts.filter(c => c.status === status).map(c => c.id);
-    setSelected(sel => {
-      const allSelected = ids.every(id => sel.includes(id));
-      return allSelected ? sel.filter(id => !ids.includes(id)) : [...sel, ...ids.filter(id => !sel.includes(id))];
-    });
-  };
-  
-  const handleBulkMessage = () => {
-    alert(`Send message to: ${selected.join(', ')}`);
-  };
-  
-  const handleBulkMove = (targetStatus: string) => {
-    selected.forEach(id => updateContactStatus(id, targetStatus));
-    setSelected([]);
-  };
-
-  const handlePipelineChange = (value: CrmPipelineType) => {
-    setActivePipeline(value);
-    setSelected([]);
+  // Function to send a message to a contact
+  const sendMessageToContact = async (contact: CrmContact, message: string) => {
+    // In a production app, this would call a secure backend endpoint
+    // For testing, we'll just simulate success
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    // Here you would typically make an API call to your backend:
+    // const response = await fetch('/api/send-message', {
+    //   method: 'POST',
+    //   headers: { 'Content-Type': 'application/json' },
+    //   body: JSON.stringify({
+    //     to: contact.phone,
+    //     message: message,
+    //     contactId: contact.id
+    //   })
+    // });
+    
+    // return response.json();
+    
+    // For now, just return success
+    return { success: true };
   };
 
-  const handleMoveToPipeline = (contactId: string, pipeline: CrmPipelineType) => {
-    updateContactPipeline(contactId, pipeline);
+  const filterContacts = () => {
+    if (!searchText) return contacts;
+    return contacts.filter(c => 
+      c.name.toLowerCase().includes(searchText.toLowerCase()) ||
+      (c.last_message && c.last_message.toLowerCase().includes(searchText.toLowerCase()))
+    );
   };
-
-  const handlePriorityChange = (contactId: string, priority: 'low' | 'medium' | 'high' | 'urgent') => {
-    updateContactPriority(contactId, priority);
-  };
-
-  const handleDeleteContact = (id: string) => {
-    if (confirmDelete === id) {
-      deleteContact(id);
-      setConfirmDelete(null);
-    } else {
-      setConfirmDelete(id);
-      // Auto-reset confirmation after 3 seconds
-      setTimeout(() => {
-        setConfirmDelete(null);
-      }, 3000);
-    }
-  };
-
-  const handleAddContact = (contactData: CrmContact) => {
-    addContact(contactData);
-  };
-
-  const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
-    searchContacts(event.target.value);
-  };
-
-  const DAY = 24 * 60 * 60 * 1000;
 
   return (
-    <motion.div 
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.3 }}
-      className="space-y-4 max-w-full px-1"
-    >
-      <div className="grid grid-cols-1 gap-4">
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100">
-          {/* Header Section */}
-          <div className="p-4 sm:p-6 border-b border-gray-100">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-              <div>
-                <h1 className="text-2xl font-semibold text-gray-900 flex items-center gap-2">
-                  <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">Messaging CRM</span>
-                  <Badge variant="outline" className="ml-2 bg-blue-50 text-blue-700 border-blue-200 font-normal">
-                    {contacts.length} Contacts
-                  </Badge>
-                </h1>
-                <p className="text-gray-500 mt-1">Manage your customer relationships and conversations</p>
+    <div className="flex h-[calc(100vh-7rem)] bg-gray-50">
+      {/* Left sidebar - contacts */}
+      <div className="w-80 border-r border-gray-200 bg-white flex flex-col">
+        <div className="p-3 border-b border-gray-200">
+          <div className="flex justify-between items-center mb-3">
+            <h2 className="text-base font-semibold text-gray-800">Contacts</h2>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button size="sm" variant="ghost">
+                  <Plus className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem>New Contact</DropdownMenuItem>
+                <DropdownMenuItem>Import Contacts</DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+          
+          <div className="relative">
+            <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <Input 
+              placeholder="Search contacts..." 
+              className="pl-8 h-8 bg-gray-50 border-gray-200"
+              value={searchText}
+              onChange={(e) => setSearchText(e.target.value)}
+            />
+          </div>
+        </div>
+        
+        <div className="overflow-y-auto flex-1 scrollbar-hide">
+          <div className="flex p-2 border-b border-gray-100 sticky top-0 bg-white z-10">
+            <Tabs defaultValue="all" className="w-full">
+              <TabsList className="w-full grid grid-cols-4 h-7 bg-gray-100/80">
+                <TabsTrigger value="all" className="text-xs">All</TabsTrigger>
+                <TabsTrigger value="unread" className="text-xs">Unread</TabsTrigger>
+                <TabsTrigger value="starred" className="text-xs">Starred</TabsTrigger>
+                <TabsTrigger value="recent" className="text-xs">Recent</TabsTrigger>
+              </TabsList>
+            </Tabs>
+          </div>
+          
+          <AnimatePresence>
+            {filterContacts().map((contact, index) => (
+              <motion.div
+                key={contact.id}
+                className={`p-1 border-b border-gray-100 hover:bg-gray-50 cursor-pointer ${selectedContact?.id === contact.id ? 'bg-blue-50' : ''}`}
+                onClick={() => handleSelectContact(contact)}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.2, delay: index * 0.05 }}
+              >
+                <div className="flex items-center gap-3">
+                  <Avatar className="h-10 w-10 flex-shrink-0">
+                    <AvatarImage src={contact.avatar} alt={contact.name} />
+                    <AvatarFallback className="bg-gradient-to-br from-blue-500 to-indigo-600 text-white">
+                      {contact.name.slice(0, 2).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                  
+                  <div className="flex-1 min-w-0">
+                    <div className="flex justify-between">
+                      <p className="font-medium text-gray-900 truncate">{contact.name}</p>
+                      <p className="text-xs text-gray-500">3m</p>
+                    </div>
+                    <p className="text-sm text-gray-500 truncate">{contact.last_message}</p>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </AnimatePresence>
+        </div>
+      </div>
+
+      {/* Main content - conversation */}
+      <div className="flex-1 flex flex-col bg-gray-50 h-full">
+        {selectedContact ? (
+          <div className="flex flex-col h-full">
+            {/* Conversation header */}
+            <div className="bg-white border-b border-gray-200 py-1 px-3 flex items-center justify-between flex-shrink-0">
+              <div className="flex items-center gap-2">
+                <Avatar className="h-8 w-8">
+                  <AvatarImage src={selectedContact.avatar} alt={selectedContact.name} />
+                  <AvatarFallback className="bg-gradient-to-br from-blue-500 to-indigo-600 text-white text-xs">
+                    {selectedContact.name.slice(0, 2).toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+                
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h2 className="font-medium text-gray-900">{selectedContact.name}</h2>
+                    {selectedContact.priority === 'high' && (
+                      <Badge variant="outline" className="bg-orange-50 text-orange-700 border-orange-200">High Priority</Badge>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2 text-xs text-gray-500">
+                    <span className="inline-flex items-center">
+                      <span className="h-2 w-2 rounded-full bg-green-500 mr-1"></span>
+                      Online
+                    </span>
+                    <span>•</span>
+                    <span>Last active: Just now</span>
+                  </div>
+                </div>
               </div>
               
-              <div className="flex items-center gap-3 self-end">
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button size="icon" variant="ghost" className="text-gray-500 hover:text-gray-700">
-                        <Bell className="h-5 w-5" />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>Notifications</TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-                
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button size="icon" variant="ghost" className="text-gray-500 hover:text-gray-700">
-                        <Settings className="h-5 w-5" />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>Settings</TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-                
-                <Button 
-                  className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700 rounded-lg shadow-md hover:shadow-lg transition-all duration-200"
-                  onClick={() => setAddDialogOpen(true)}
-                >
-                  <Plus className="h-4 w-4 mr-2" /> Add Contact
+              <div className="flex items-center gap-2">
+                <Button size="icon" variant="ghost">
+                  <Phone className="h-5 w-5 text-gray-500" />
+                </Button>
+                <Button size="icon" variant="ghost">
+                  <Calendar className="h-5 w-5 text-gray-500" />
+                </Button>
+                <Button size="icon" variant="ghost">
+                  <MoreVertical className="h-5 w-5 text-gray-500" />
                 </Button>
               </div>
             </div>
             
-            {/* Tabs and Search */}
-            <div className="mt-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-              <Tabs 
-                defaultValue={activePipeline}
-                className="w-auto"
-                onValueChange={(value) => handlePipelineChange(value as CrmPipelineType)}
-              >
-                <TabsList className="bg-gray-100/70 p-1 rounded-lg">
-                  <TabsTrigger 
-                    value="pre-quote" 
-                    className="data-[state=active]:bg-white data-[state=active]:text-blue-700 data-[state=active]:shadow-sm rounded-md"
-                  >
-                    Pre-Quote
-                  </TabsTrigger>
-                  <TabsTrigger 
-                    value="post-quote" 
-                    className="data-[state=active]:bg-white data-[state=active]:text-blue-700 data-[state=active]:shadow-sm rounded-md"
-                  >
-                    Post-Quote
-                  </TabsTrigger>
-                  <TabsTrigger 
-                    value="complaints" 
-                    className="data-[state=active]:bg-white data-[state=active]:text-blue-700 data-[state=active]:shadow-sm rounded-md"
-                  >
-                    Complaints
-                  </TabsTrigger>
-                </TabsList>
-              </Tabs>
-              
-              <div className="flex items-center gap-3 w-full sm:w-auto">
-                <div className="relative flex-1 min-w-[200px] sm:min-w-[300px]">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
-                  <Input 
-                    placeholder="Search contacts..." 
-                    value={searchTerm}
-                    onChange={handleSearch}
-                    className="pl-10 border-gray-200 rounded-lg bg-gray-50 focus:bg-white transition-all duration-200"
-                  />
-                </div>
-                
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="outline" size="icon" className="rounded-lg border-gray-200">
-                      <Filter className="h-4 w-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem>Filter by date</DropdownMenuItem>
-                    <DropdownMenuItem>Filter by priority</DropdownMenuItem>
-                    <DropdownMenuItem>Filter by platform</DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-            </div>
-          </div>
-        
-          {/* Main Content */}
-          <div className="p-4 sm:p-6">
-            {showTooltip && (
-              <motion.div 
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5 }}
-                className="mb-6 flex items-center gap-2 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-3 shadow-sm"
-              >
-                <Info className="h-5 w-5 text-blue-500 flex-shrink-0" />
-                <span className="text-blue-800">Drag contacts between stages to update status. Select multiple to perform bulk actions.</span>
-                <Button size="sm" variant="ghost" onClick={() => setShowTooltip(false)} className="ml-auto text-blue-700 hover:text-blue-900 hover:bg-blue-100/50">
-                  Dismiss
-                </Button>
-              </motion.div>
-            )}
-
-            <div className="flex gap-4 overflow-x-auto pb-6 -mx-2 px-2 snap-x custom-scrollbar">
-              {stages.map(stage => (
-                <motion.div
-                  key={stage.id}
-                  className={`${
-                    activeStage === stage.id 
-                      ? 'bg-blue-50 ring-2 ring-blue-400 drop-target' 
-                      : 'bg-white border border-gray-200 hover:border-blue-300'
-                  } rounded-xl p-4 min-w-[300px] flex-1 shadow-sm hover:shadow-md transition-all duration-300 ease-in-out snap-start`}
-                  onDragOver={(e) => handleDragOver(e, stage.id)}
-                  onDragLeave={handleDragLeave}
-                  onDrop={e => handleDrop(e, stage.id)}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.4, delay: stages.findIndex(s => s.id === stage.id) * 0.1 }}
-                >
-                  <div className={`flex items-center justify-between mb-4 p-3 rounded-lg ${stage.color} shadow-md`}>
-                    <h3 className="font-medium text-base flex items-center gap-2">
-                      {stage.icon}
-                      {stage.label}
-                    </h3>
-                    <div className="flex items-center gap-1">
-                      <Badge variant="secondary" className="bg-white/20 hover:bg-white/30 text-white">
-                        {contacts.filter(c => c.status === stage.id).length}
-                      </Badge>
-                      <Button size="sm" variant="ghost" onClick={() => handleSelectAll(stage.id)} className="text-white/90 hover:text-white hover:bg-white/10">
-                        Select All
-                      </Button>
-                    </div>
-                  </div>
-                  <div className="space-y-3 max-h-[calc(100vh-350px)] overflow-y-auto pr-1 custom-scrollbar">
-                    <AnimatePresence>
-                      {contacts.filter(c => c.status === stage.id).map((contact, index) => (
-                        <ContactCard 
-                          key={contact.id}
-                          contact={contact}
-                          index={index}
-                          isSelected={selected.includes(contact.id)}
-                          onSelect={() => handleSelect(contact.id)}
-                          onDragStart={() => handleDragStart(contact.id)}
-                          onStatusChange={(status) => updateContactStatus(contact.id, status)}
-                          onPipelineChange={(pipeline) => handleMoveToPipeline(contact.id, pipeline)}
-                          onPriorityChange={(priority) => handlePriorityChange(contact.id, priority)}
-                          onDelete={() => handleDeleteContact(contact.id)}
-                          confirmDelete={confirmDelete === contact.id}
-                          stages={stages}
-                          activePipeline={activePipeline}
-                        />
-                      ))}
-                    </AnimatePresence>
-                    {contacts.filter(c => c.status === stage.id).length === 0 && (
-                      <div className="text-center py-6 text-gray-400 bg-gray-50/50 rounded-lg border border-dashed border-gray-200">
-                        <p>No contacts in this stage</p>
-                        <Button 
-                          variant="ghost" 
-                          size="sm"
-                          className="mt-2 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-                          onClick={() => setAddDialogOpen(true)}
-                        >
-                          <Plus className="h-3 w-3 mr-1" /> Add Contact
-                        </Button>
+            {/* Conversation area - matching middle sections height */}
+            <div className="flex-grow overflow-y-auto scrollbar-hide" style={{ height: 'calc(100% - 70px)' }}>
+              <div className="p-2 space-y-2 max-w-4xl mx-auto">
+                {conversations.map((msg) => (
+                  <div key={msg.id} className={`flex ${msg.sender === 'agent' ? 'justify-end' : msg.sender === 'system' ? 'justify-center' : 'justify-start'}`}>
+                    {msg.sender === 'system' ? (
+                      <div className="bg-white rounded-lg shadow-sm p-2 inline-block border border-gray-200 my-1">
+                        <div className="flex items-center gap-2">
+                          <Badge className="bg-blue-100 text-blue-700 hover:bg-blue-100">New</Badge>
+                          <span className="font-medium text-gray-700">{msg.message}</span>
+                        </div>
+                        {msg.appointment && (
+                          <div className="mt-2 bg-gray-50 rounded p-2 text-sm">
+                            <div className="flex items-center gap-1 text-gray-700">
+                              <Calendar className="h-4 w-4 text-blue-600" />
+                              <span>{msg.appointment.date}</span>
+                              <span className="px-1">•</span>
+                              <Clock className="h-4 w-4 text-blue-600" />
+                              <span>{msg.appointment.time}</span>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="max-w-[80%]">
+                        {msg.sender === 'customer' && (
+                          <div className="flex items-center gap-2 mb-1">
+                            <Avatar className="h-6 w-6">
+                              <AvatarImage src={selectedContact.avatar} alt={selectedContact.name} />
+                              <AvatarFallback className="bg-gradient-to-br from-blue-500 to-indigo-600 text-xs text-white">
+                                {selectedContact.name.slice(0, 2).toUpperCase()}
+                              </AvatarFallback>
+                            </Avatar>
+                            <span className="text-sm font-medium text-gray-700">{selectedContact.name}</span>
+                            <span className="text-xs text-gray-500">{msg.time}</span>
+                          </div>
+                        )}
+                        <div className={`p-1.5 rounded-lg ${
+                          msg.sender === 'agent' 
+                            ? 'bg-blue-600 text-white ml-auto rounded-br-none' 
+                            : 'bg-white border border-gray-200 mr-auto rounded-tl-none'
+                        }`}>
+                          <p className="whitespace-pre-line">{msg.message}</p>
+                          {msg.sender === 'agent' && (
+                            <div className="flex justify-end items-center mt-1 gap-1">
+                              <span className="text-xs text-blue-100">{msg.time}</span>
+                              <Check className="h-3 w-3 text-blue-100" />
+                            </div>
+                          )}
+                        </div>
                       </div>
                     )}
                   </div>
-                </motion.div>
-              ))}
+                ))}
+              </div>
             </div>
             
-            {/* Bulk actions toolbar */}
-            {selected.length > 0 && (
-              <motion.div 
-                className="mt-6 p-3 bg-white border border-gray-200 rounded-lg shadow-lg fixed bottom-6 left-1/2 transform -translate-x-1/2 flex gap-3 z-50"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 20 }}
-                transition={{ duration: 0.3 }}
-              >
-                <Button 
-                  className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700 shadow-md hover:shadow-lg transition-all" 
-                  onClick={handleBulkMessage} 
-                >
-                  <ChannelIcon name="sms" size="sm" className="mr-2" />
-                  Message Selected ({selected.length})
-                </Button>
-                
-                <Select onValueChange={(value) => handleBulkMove(value)}>
-                  <SelectTrigger className="w-auto border-gray-200">
-                    <SelectValue placeholder="Move to stage..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {stages.map(stage => (
-                      <SelectItem key={stage.id} value={stage.id}>
-                        <div className="flex items-center gap-2">
-                          <div className={`w-2 h-2 rounded-full ${stage.color.replace('bg-gradient-to-br', 'bg')}`}></div>
-                          {stage.label}
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                
-                <Button 
-                  className="border-gray-200 hover:bg-gray-100" 
-                  variant="outline"
-                  onClick={() => setSelected([])} 
-                >
-                  Clear Selection
-                </Button>
-              </motion.div>
-            )}
-          </div>
-        </div>
-      </div>
-
-      <AddContactDialog 
-        open={addDialogOpen} 
-        onOpenChange={setAddDialogOpen}
-        onAddContact={handleAddContact}
-      />
-    </motion.div>
-  );
-};
-
-// Contact card component
-interface ContactCardProps {
-  contact: CrmContact;
-  index: number;
-  isSelected: boolean;
-  confirmDelete: boolean;
-  onSelect: () => void;
-  onDragStart: () => void;
-  onStatusChange: (status: string) => void;
-  onPipelineChange: (pipeline: CrmPipelineType) => void;
-  onPriorityChange: (priority: 'low' | 'medium' | 'high' | 'urgent') => void;
-  onDelete: () => void;
-  stages: { id: string; label: string; color: string; icon: JSX.Element }[];
-  activePipeline: CrmPipelineType;
-}
-
-const ContactCard: React.FC<ContactCardProps> = ({
-  contact,
-  index,
-  isSelected,
-  confirmDelete,
-  onSelect,
-  onDragStart,
-  onStatusChange,
-  onPipelineChange,
-  onPriorityChange,
-  onDelete,
-  stages,
-  activePipeline
-}) => {
-  const [expanded, setExpanded] = React.useState(false);
-  const [showActions, setShowActions] = React.useState(false);
-  const [showActionMenu, setShowActionMenu] = React.useState(false);
-  const [isDragging, setIsDragging] = React.useState(false);
-
-  // Format timestamp (just for display purposes)
-  const getTimeAgo = () => {
-    const options: Intl.DateTimeFormatOptions = { 
-      month: 'short', 
-      day: 'numeric', 
-      hour: '2-digit', 
-      minute: '2-digit' 
-    };
-    return new Date(Date.now()).toLocaleString('en-US', options);
-  };
-
-  // Get appropriate icon based on priority
-  const getPriorityIcon = () => {
-    switch (contact.priority) {
-      case 'urgent':
-        return <AlertTriangle className="h-3 w-3 text-red-600" />;
-      case 'high':
-        return <ArrowRight className="h-3 w-3 text-orange-600" />;
-      case 'medium':
-        return <ArrowRight className="h-3 w-3 text-yellow-600" />;
-      case 'low':
-        return <ArrowRight className="h-3 w-3 text-blue-600" />;
-      default:
-        return null;
-    }
-  };
-
-  return (
-    <motion.div
-      className={`${
-        isSelected ? 'bg-blue-50 border-blue-300' : 'bg-white hover:bg-gray-50/80'
-      } ${isDragging ? 'dragging' : ''} rounded-xl shadow-sm hover:shadow p-3 flex flex-col gap-2 cursor-move border border-gray-200 transition-all duration-200 highlight-new`}
-      draggable
-      onDragStart={() => {
-        setIsDragging(true);
-        onDragStart();
-      }}
-      onDragEnd={() => setIsDragging(false)}
-      initial={{ opacity: 0, x: -10 }}
-      animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: 0, x: 10 }}
-      transition={{ duration: 0.3, delay: index * 0.05 }}
-      whileHover={{ y: -2 }}
-      onMouseEnter={() => setShowActions(true)}
-      onMouseLeave={() => setShowActions(false)}
-    >
-      <div className="flex items-center gap-3">
-        <div className="flex-shrink-0">
-          <input
-            type="checkbox"
-            checked={isSelected}
-            onChange={onSelect}
-            className="rounded text-blue-600 focus:ring-blue-500 focus:ring-offset-2 transition-all"
-          />
-        </div>
-        
-        <div className="relative">
-          <Avatar className="h-10 w-10 border-2 border-white shadow-sm">
-            <AvatarImage src={contact.avatar} alt={contact.name} />
-            <AvatarFallback className="bg-gradient-to-br from-blue-500 to-indigo-600 text-white">
-              {contact.name.slice(0, 2).toUpperCase()}
-            </AvatarFallback>
-          </Avatar>
-          
-          {/* Online indicator would go here if we had that property */}
-        </div>
-        
-        <div className="flex flex-col min-w-0">
-          <div className="flex items-center gap-1">
-            <span className="font-medium text-gray-900 truncate">{contact.name}</span>
-            {getPriorityIcon()}
-          </div>
-          
-          <div className="flex items-center gap-1 text-xs text-gray-500">
-            <Phone className="h-3 w-3" />
-            <span>{contact.phone || "+1 (415) 555-0123"}</span>
-          </div>
-        </div>
-        
-        <div className="flex items-center gap-2 ml-auto">
-          {contact.platforms && contact.platforms.map(p => (
-            <span key={p} className="bg-gray-100 p-1.5 rounded-full flex items-center justify-center shadow-sm">
-              {PLATFORM_ICONS[p]}
-            </span>
-          ))}
-          
-          {showActions && (
-            <DropdownMenu open={showActionMenu} onOpenChange={setShowActionMenu}>
-              <DropdownMenuTrigger asChild>
-                <Button 
-                  size="sm" 
-                  variant="ghost" 
-                  className="h-8 w-8 p-0 rounded-full" 
-                >
-                  <MoreHorizontal className="h-4 w-4 text-gray-500" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-52">
-                <DropdownMenuItem onClick={() => {}}>
-                  <MessageCircle className="h-4 w-4 mr-2" /> Start conversation
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => {}}>
-                  <Calendar className="h-4 w-4 mr-2" /> Schedule follow-up
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => {}}>
-                  <Tag className="h-4 w-4 mr-2" /> Add tags
-                </DropdownMenuItem>
-                <DropdownMenuItem 
-                  onClick={onDelete}
-                  className={confirmDelete ? "text-red-600 bg-red-50" : "text-red-600 hover:bg-red-50"}
-                >
-                  <Trash2 className="h-4 w-4 mr-2" /> 
-                  {confirmDelete ? "Confirm delete" : "Delete contact"}
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          )}
-        </div>
-      </div>
-      
-      {/* Last message bubble */}
-      <div className="flex gap-2 mt-1">
-        <div className="w-6"></div> {/* Spacer to align with avatar */}
-        <div className="text-sm text-gray-700 bg-gray-50 p-3 rounded-xl rounded-tl-none border border-gray-100 flex-1">
-          {contact.last_message.length > 80 && !expanded 
-            ? `${contact.last_message.substring(0, 80)}...` 
-            : contact.last_message}
-          {contact.last_message.length > 80 && (
-            <button 
-              type="button"
-              onClick={() => setExpanded(!expanded)} 
-              className="text-blue-600 hover:text-blue-700 ml-1 font-medium text-xs"
-            >
-              {expanded ? 'Show less' : 'Show more'}
-            </button>
-          )}
-          <div className="text-xs text-gray-400 mt-1 flex items-center justify-end">
-            {getTimeAgo()} 
-            <Check className="h-3 w-3 ml-1 text-blue-600" />
-          </div>
-        </div>
-      </div>
-      
-      {/* Action buttons */}
-      <div className="flex flex-col gap-2 mt-1">
-        <div className="flex gap-2">
-          <Button
-            className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700 shadow-sm transition-all" 
-            size="sm"
-            onClick={() => {}}
-          >
-            <ChannelIcon name="sms" size="sm" className="mr-1" /> Message
-          </Button>
-          
-          <Select onValueChange={onPriorityChange} defaultValue={contact.priority}>
-            <SelectTrigger className="flex-1 h-9 border-gray-200">
-              <SelectValue placeholder="Priority" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="low">
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-blue-500"></div>
-                  Low
-                </div>
-              </SelectItem>
-              <SelectItem value="medium">
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-yellow-500"></div>
-                  Medium
-                </div>
-              </SelectItem>
-              <SelectItem value="high">
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-orange-500"></div>
-                  High
-                </div>
-              </SelectItem>
-              <SelectItem value="urgent">
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-red-500"></div>
-                  Urgent
-                </div>
-              </SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-        
-        <div className="flex gap-2">
-          <Select onValueChange={onStatusChange}>
-            <SelectTrigger className="flex-1 h-9 border-gray-200">
-              <SelectValue placeholder="Change Stage" />
-            </SelectTrigger>
-            <SelectContent>
-              {stages.map(stage => (
-                <SelectItem key={stage.id} value={stage.id}>
-                  <div className="flex items-center gap-2">
-                    <div className={`w-2 h-2 rounded-full ${stage.color.replace('bg-gradient-to-br', 'bg')}`}></div>
-                    {stage.label}
+            {/* Message input - aligned with Tags section */}
+            <div className="bg-white border-t border-gray-200 p-1.5 z-10 flex-shrink-0" style={{ height: '40px' }}>
+              <div className="flex items-center gap-2">
+                <div className="flex-1 relative">
+                  <Input 
+                    placeholder="Type a message..." 
+                    className="pr-10 h-7"
+                    value={messageText}
+                    onChange={(e) => setMessageText(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
+                  />
+                  <div className="absolute right-2 top-1/2 transform -translate-y-1/2">
+                    <Button size="icon" variant="ghost" className="h-5 w-5 text-gray-400 hover:text-gray-600">
+                      <Smile className="h-3 w-3" />
+                    </Button>
                   </div>
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          
-          {activePipeline === 'pre-quote' && (
-            <Button
-              size="sm"
-              className="flex-1 bg-green-600 hover:bg-green-700 text-white shadow-sm"
-              onClick={() => {
-                onPipelineChange('post-quote');
-                onStatusChange('accepted');
-              }}
-            >
-              <Check className="h-4 w-4 mr-1" /> Accept Quote
-            </Button>
-          )}
-          
-          {activePipeline !== 'complaints' && (
-            <Button
-              size="sm"
-              variant="outline"
-              className="flex-1 text-red-600 border-red-200 hover:bg-red-50"
-              onClick={() => {
-                onPipelineChange('complaints');
-                onStatusChange('new-complaint');
-              }}
-            >
-              <AlertTriangle className="h-4 w-4 mr-1" /> Issue
-            </Button>
-          )}
-        </div>
+                </div>
+                <Button size="icon" variant="ghost" className="h-7 w-7 text-gray-400 hover:text-gray-600">
+                  <Paperclip className="h-3 w-3" />
+                </Button>
+                <Button 
+                  size="icon"
+                  className="bg-blue-600 hover:bg-blue-700 text-white h-7 w-7"
+                  onClick={handleSendMessage}
+                  disabled={!messageText.trim()}
+                >
+                  <Send className="h-3 w-3" />
+                </Button>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="flex flex-col items-center justify-center h-full text-center p-8">
+            <div className="bg-gray-100 rounded-full p-4 mb-4">
+              <Mail className="h-10 w-10 text-gray-400" />
+            </div>
+            <h3 className="text-xl font-medium text-gray-800 mb-2">Select a conversation</h3>
+            <p className="text-gray-500 max-w-sm">
+              Choose a contact from the list to view your conversation history and continue chatting.
+            </p>
+          </div>
+        )}
       </div>
-      
-      {/* Tags section */}
-      {contact.tags && contact.tags.length > 0 && (
-        <div className="flex flex-wrap gap-1 mt-2">
-          {contact.tags.map(tag => (
-            <Badge key={tag} variant="secondary" className="text-xs bg-gray-100/70 text-gray-700 hover:bg-gray-200/70 transition-colors">
-              {tag}
-            </Badge>
-          ))}
-        </div>
-      )}
-    </motion.div>
+
+      {/* Right sidebar - contact details */}
+      <div className="w-80 border-l border-gray-200 bg-white flex flex-col overflow-hidden">
+        {selectedContact ? (
+          <>
+            <div className="p-1.5 border-b border-gray-200">
+              <h3 className="font-medium text-gray-800 mb-1.5">Contact</h3>
+              
+              <div className="flex items-center gap-2 mb-2">
+                <Avatar className="h-8 w-8">
+                  <AvatarImage src={selectedContact.avatar} alt={selectedContact.name} />
+                  <AvatarFallback className="bg-gradient-to-br from-blue-500 to-indigo-600 text-white text-sm">
+                    {selectedContact.name.slice(0, 2).toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+                
+                <div>
+                  <h4 className="font-medium text-gray-900 text-sm">{selectedContact.name}</h4>
+                  <p className="text-xs text-gray-500">Customer</p>
+                </div>
+              </div>
+              
+              <div className="space-y-1.5">
+                <div className="flex items-center gap-2">
+                  <Mail className="h-4 w-4 text-gray-400" />
+                  <span className="text-sm text-gray-600">Email</span>
+                  <ChevronDown className="h-3 w-3 text-gray-400 ml-auto" />
+                </div>
+                <div className="flex items-center gap-2">
+                  <Phone className="h-4 w-4 text-gray-400" />
+                  <span className="text-sm text-gray-600">+61 413 583 063</span>
+                  <ChevronDown className="h-3 w-3 text-gray-400 ml-auto" />
+                </div>
+              </div>
+            </div>
+            
+            <div className="p-1.5 border-b border-gray-200">
+              <div className="flex items-center justify-between mb-1.5">
+                <h3 className="font-medium text-gray-800">Appointments</h3>
+                <Button size="sm" variant="outline" className="h-8 text-xs">
+                  <Plus className="h-3 w-3 mr-1" /> Add
+                </Button>
+              </div>
+              
+              <div className="space-y-2">
+                {appointments.map((appointment, index) => (
+                  <div key={index} className="bg-gray-50 rounded-lg p-2 border border-gray-100">
+                    <div className="flex justify-between mb-1">
+                      <div className="flex items-center gap-1">
+                        <Calendar className="h-4 w-4 text-gray-500" />
+                        <span className="text-sm font-medium">{appointment.date}, {appointment.time}</span>
+                      </div>
+                      <div className="flex gap-1">
+                        <Button size="icon" variant="ghost" className="h-6 w-6">
+                          <CheckCircle2 className="h-3.5 w-3.5 text-gray-400" />
+                        </Button>
+                        <Button size="icon" variant="ghost" className="h-6 w-6">
+                          <Trash2 className="h-3.5 w-3.5 text-gray-400" />
+                        </Button>
+                      </div>
+                    </div>
+                    <div>
+                      <Badge className={
+                        appointment.status === "Confirmed" 
+                          ? "bg-green-100 text-green-700 hover:bg-green-100"
+                          : "bg-blue-100 text-blue-700 hover:bg-blue-100"
+                      }>
+                        {appointment.status}
+                      </Badge>
+                      <div className="text-xs text-gray-500 mt-1">
+                        Calendar: {appointment.location}
+                      </div>
+                      <div className="text-xs text-gray-500">
+                        Assigned User: {appointment.assignedUser}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+            
+            <div className="p-1.5 border-b border-gray-200">
+              <div className="flex items-center justify-between mb-1.5">
+                <h3 className="font-medium text-gray-800">Tags</h3>
+                <Button size="sm" variant="ghost">
+                  <Plus className="h-3 w-3" />
+                </Button>
+              </div>
+              
+              <div className="flex flex-wrap gap-2">
+                <Badge variant="outline" className="bg-gray-100 text-gray-700 hover:bg-gray-200 cursor-pointer">
+                  stop koi
+                </Badge>
+                <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-100 hover:bg-blue-100 cursor-pointer">
+                  + Add Tag
+                </Badge>
+              </div>
+            </div>
+            
+            <div className="flex-1 overflow-y-auto scrollbar-hide">
+              <div className="p-1.5">
+                <h3 className="font-medium text-gray-800 mb-1">Activity</h3>
+                
+                <div className="space-y-1">
+                  <div className="flex gap-2">
+                    <div className="bg-blue-100 rounded-full p-0.5 h-5 w-5 flex items-center justify-center flex-shrink-0">
+                      <BellRing className="h-3 w-3 text-blue-600" />
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-800">Appointment scheduled</p>
+                      <p className="text-xs text-gray-500">3 Apr 2023, 9:15 AM</p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex gap-2">
+                    <div className="bg-green-100 rounded-full p-0.5 h-5 w-5 flex items-center justify-center flex-shrink-0">
+                      <Check className="h-3 w-3 text-green-600" />
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-800">Quote accepted</p>
+                      <p className="text-xs text-gray-500">1 Apr 2023, 2:30 PM</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </>
+        ) : (
+          <div className="flex flex-col items-center justify-center h-full text-center p-8">
+            <div className="bg-gray-100 rounded-full p-4 mb-4">
+              <User className="h-10 w-10 text-gray-400" />
+            </div>
+            <h3 className="text-xl font-medium text-gray-800 mb-2">Contact details</h3>
+            <p className="text-gray-500 max-w-sm">
+              Select a contact to view their details, appointments, and activity history.
+            </p>
+          </div>
+        )}
+      </div>
+    </div>
   );
 };

@@ -1,59 +1,61 @@
-
-import { TabsContent } from "@/components/ui/tabs";
-import { TeamCalendar } from "@/components/team/TeamCalendar";
-import type { Job } from "@/types/job";
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
-import { CalendarDays } from "lucide-react";
+import React from 'react';
+import { DashboardCalendar } from '@/components/dashboard/DashboardCalendar';
+import { useParams } from 'react-router-dom';
+import { Job } from '@/types/job';
+import { TabsContent } from '@/components/ui/tabs';
+import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
+import { CalendarDays } from 'lucide-react';
+import { useJobCalendarData } from '../../hooks/useJobCalendarData';
 
 interface JobCalendarTabProps {
-  job: Job;
+  job?: Job;
+  teamJobs?: Job[];
 }
 
-export const JobCalendarTab = ({ job }: JobCalendarTabProps) => {
-  const [date, setDate] = useState<Date | undefined>(job.date ? new Date(job.date) : undefined);
-  const navigate = useNavigate();
+export function JobCalendarTab({ job, teamJobs = [] }: JobCalendarTabProps) {
+  const params = useParams();
+  const jobId = params.id || job?.id;
+  
+  // Use our custom hook for calendar data
+  const { jobs, isLoading } = useJobCalendarData({
+    jobId,
+    job,
+    teamId: job?.assignedTeam
+  });
 
-  const handleJobAssign = (jobId: string, date: Date) => {
-    // Navigate to the job details page when a job is clicked
-    navigate(`/jobs/${jobId}`);
-  };
-
-  const getTeamColor = (teamName: string | undefined) => {
-    if (!teamName) return 'gray';
-    
-    if (teamName.toLowerCase().includes('red')) return 'red';
-    if (teamName.toLowerCase().includes('blue')) return 'blue';
-    if (teamName.toLowerCase().includes('green')) return 'green';
-    
-    return 'gray';
+  // Calculate the initial date based on the job's date
+  const getInitialDate = () => {
+    if (job?.date) {
+      return new Date(job.date);
+    }
+    return new Date();
   };
 
   return (
     <TabsContent value="calendar" className="space-y-4">
-      {job.date_undecided ? (
+      {job?.date_undecided ? (
         <Alert>
           <CalendarDays className="h-4 w-4" />
-          <AlertTitle>No scheduled date</AlertTitle>
+          <AlertTitle>Job date is currently undecided</AlertTitle>
           <AlertDescription>
-            This job doesn't have a scheduled date yet. Add a date to see it on the calendar.
+            This job's date has not been confirmed yet. 
+            Use the calendar to schedule this job.
           </AlertDescription>
         </Alert>
-      ) : (
-        <div className="border rounded-lg p-4">
-          <div className="flex flex-col space-y-4">
-            <h3 className="text-lg font-semibold">Job Schedule</h3>
-            <TeamCalendar
-              date={date}
-              setDate={setDate}
-              teamColor={getTeamColor(job.assignedTeam)}
-              assignedJobs={[job]}
-              onJobAssign={handleJobAssign}
+      ) : null}
+      
+      <div className="rounded-lg border">
+        <div className="p-6">
+          <h3 className="text-xl font-semibold">Job Schedule</h3>
+          <div className="min-h-[600px] w-full">
+            <DashboardCalendar 
+              jobId={jobId} 
+              initialDate={getInitialDate()}
+              jobs={jobs.length > 0 ? jobs : teamJobs}
             />
           </div>
         </div>
-      )}
+      </div>
     </TabsContent>
   );
-};
+}

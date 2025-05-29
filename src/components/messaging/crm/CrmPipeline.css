@@ -18,6 +18,16 @@
   background: rgba(0, 0, 0, 0.2);
 }
 
+/* Hide scrollbar for all browsers */
+.scrollbar-hide {
+  -ms-overflow-style: none;  /* Internet Explorer and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;  /* Chrome, Safari and Opera */
+}
+
 /* Animation for highlighting new items */
 @keyframes highlight {
   0% {

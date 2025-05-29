@@ -102,6 +102,9 @@ const NCCCodesCalculator = lazy(() => import('@/pages/Calculators/NCCCodesCalcul
 const SettingsPage = lazy(() => import('@/pages/Settings'));
 const IntegrationsPage = lazy(() => import('@/pages/Integrations'));
 
+// Import SetupDatabasePage
+import SetupDatabasePage from "@/pages/Settings/integrations/database/SetupDatabasePage";
+
 // Helper component for Suspense boundary
 const SuspenseWrapper = ({ children }) => (
   <Suspense fallback={<LoadingFallback />}>{children}</Suspense>
@@ -232,6 +235,11 @@ const routeObjects: RouteObject[] = [
           { path: "/networks", element: <SuspenseWrapper><NetworksPage /></SuspenseWrapper> },
           // Credentials route
           { path: "/credentials", element: <SuspenseWrapper><CredentialsPage /></SuspenseWrapper> },
+          // Add the route to the settings routes
+          {
+            path: "/settings/integrations/database",
+            element: <SetupDatabasePage />,
+          },
         ]
       }
     ]

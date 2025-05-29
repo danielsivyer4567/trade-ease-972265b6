@@ -27,52 +27,185 @@ export function useCrmContacts() {
   const [loading, setLoading] = useState(true);
   const [activePipeline, setActivePipeline] = useState<CrmPipelineType>('pre-quote');
   const [searchTerm, setSearchTerm] = useState('');
+  const [isUsingMockData, setIsUsingMockData] = useState(true);
 
   useEffect(() => {
-    // Simulate API call with mock data
     async function fetchContacts() {
       setLoading(true);
-      // Simulate network delay
-      await new Promise(resolve => setTimeout(resolve, 800));
-      setContacts(mockCrmContacts);
-      setLoading(false);
+      
+      try {
+        // First check if user is authenticated
+        const { data: sessionData } = await supabase.auth.getSession();
+        const userId = sessionData?.session?.user?.id;
+        
+        if (!userId) {
+          console.log('No authenticated user, using mock data');
+          await new Promise(resolve => setTimeout(resolve, 800));
+          setContacts(mockCrmContacts);
+          setIsUsingMockData(true);
+          setLoading(false);
+          return;
+        }
+        
+        // Try to fetch real contacts from customers table
+        const { data: customerData, error: customerError } = await supabase
+          .from('customers')
+          .select('*')
+          .eq('user_id', userId);
+          
+        if (customerError || !customerData || customerData.length === 0) {
+          console.log('No customer data found or error occurred, using mock data:', customerError);
+          await new Promise(resolve => setTimeout(resolve, 800));
+          setContacts(mockCrmContacts);
+          setIsUsingMockData(true);
+        } else {
+          // Transform customer data to CRM contact format
+          const transformedContacts: CrmContact[] = customerData.map(customer => ({
+            id: customer.id,
+            name: customer.name,
+            email: customer.email,
+            phone: customer.phone,
+            avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(customer.name)}&background=4299E1&color=fff`,
+            status: customer.status || 'new',
+            pipeline: 'pre-quote' as CrmPipelineType,
+            platforms: ['email'],
+            last_message: '',
+            last_updated: customer.created_at,
+            priority: 'medium',
+          }));
+          
+          setContacts(transformedContacts);
+          setIsUsingMockData(false);
+        }
+      } catch (error) {
+        console.error('Error fetching contacts:', error);
+        setContacts(mockCrmContacts);
+        setIsUsingMockData(true);
+      } finally {
+        setLoading(false);
+      }
     }
+    
     fetchContacts();
   }, []);
 
   // Add new contact
-  const addContact = (contact: CrmContact) => {
-    // In a real app, we would call the API here
-    // For now, just update the local state
-    setContacts(prev => [contact, ...prev]);
+  const addContact = async (contact: CrmContact) => {
+    if (isUsingMockData) {
+      // Just update local state with mock data
+      setContacts(prev => [contact, ...prev]);
+      return;
+    }
+
+    try {
+      // Get current user ID
+      const { data: sessionData } = await supabase.auth.getSession();
+      const userId = sessionData?.session?.user?.id;
+      
+      if (!userId) {
+        throw new Error('No authenticated user');
+      }
+      
+      // Insert into customers table
+      const { data, error } = await supabase
+        .from('customers')
+        .insert({
+          name: contact.name,
+          email: contact.email,
+          phone: contact.phone || '',
+          status: contact.status,
+          user_id: userId,
+          address: '',
+          city: '',
+          state: '',
+          zipcode: ''
+        })
+        .select();
+        
+      if (error) {
+        throw error;
+      }
+      
+      if (data && data[0]) {
+        // Transform back to CrmContact and update state
+        const newContact: CrmContact = {
+          ...contact,
+          id: data[0].id,
+        };
+        
+        setContacts(prev => [newContact, ...prev]);
+      }
+    } catch (error) {
+      console.error('Error adding contact:', error);
+      // Fallback to local update
+      setContacts(prev => [contact, ...prev]);
+    }
   };
 
   // Update contact status
   async function updateContactStatus(id: string, status: string) {
-    // In a real app, we would call the API here
-    // For now, just update the local state
-    setContacts(prev => prev.map(c => c.id === id ? { ...c, status, last_updated: new Date().toISOString() } : c));
+    if (isUsingMockData) {
+      // Just update local state with mock data
+      setContacts(prev => prev.map(c => c.id === id ? { ...c, status, last_updated: new Date().toISOString() } : c));
+      return;
+    }
+    
+    try {
+      const { error } = await supabase
+        .from('customers')
+        .update({ status })
+        .eq('id', id);
+        
+      if (error) {
+        throw error;
+      }
+      
+      // Update local state
+      setContacts(prev => prev.map(c => c.id === id ? { ...c, status, last_updated: new Date().toISOString() } : c));
+    } catch (error) {
+      console.error('Error updating contact status:', error);
+      // Fallback to local update
+      setContacts(prev => prev.map(c => c.id === id ? { ...c, status, last_updated: new Date().toISOString() } : c));
+    }
   }
 
   // Update contact pipeline
   async function updateContactPipeline(id: string, pipeline: CrmPipelineType) {
-    // In a real app, we would call the API here
-    // For now, just update the local state
+    // Currently pipelines aren't stored in the database, just update local state
     setContacts(prev => prev.map(c => c.id === id ? { ...c, pipeline, last_updated: new Date().toISOString() } : c));
   }
 
   // Update contact priority
   async function updateContactPriority(id: string, priority: 'low' | 'medium' | 'high' | 'urgent') {
-    // In a real app, we would call the API here
-    // For now, just update the local state
+    // Currently priority isn't stored in the database, just update local state
     setContacts(prev => prev.map(c => c.id === id ? { ...c, priority, last_updated: new Date().toISOString() } : c));
   }
 
   // Delete contact
-  const deleteContact = (id: string) => {
-    // In a real app, we would call the API here
-    // For now, just update the local state
-    setContacts(prev => prev.filter(c => c.id !== id));
+  const deleteContact = async (id: string) => {
+    if (isUsingMockData) {
+      // Just update local state with mock data
+      setContacts(prev => prev.filter(c => c.id !== id));
+      return;
+    }
+    
+    try {
+      const { error } = await supabase
+        .from('customers')
+        .delete()
+        .eq('id', id);
+        
+      if (error) {
+        throw error;
+      }
+      
+      // Update local state
+      setContacts(prev => prev.filter(c => c.id !== id));
+    } catch (error) {
+      console.error('Error deleting contact:', error);
+      // Fallback to local update
+      setContacts(prev => prev.filter(c => c.id !== id));
+    }
   };
 
   // Search contacts
@@ -107,6 +240,7 @@ export function useCrmContacts() {
     deleteContact,
     updateContactStatus,
     updateContactPipeline,
-    updateContactPriority
+    updateContactPriority,
+    isUsingMockData
   };
 } 
