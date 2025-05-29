@@ -35,6 +35,7 @@ import { fetchCustomersFromAPI } from '@/services/api';
 import { CustomerData } from '@/pages/Customers/components/CustomerCard';
 import { supabase } from '@/integrations/supabase/client';
 import { Timeline } from './components/Timeline';
+import { useAuth } from '@/contexts/AuthContext';
 
 // Extended interface for Customer with additional fields needed for the page
 interface Customer extends CustomerData {
@@ -54,13 +55,18 @@ interface Customer extends CustomerData {
 
 // API function to fetch customers
 const fetchCustomers = async (): Promise<Customer[]> => {
+  console.log('Fetching customers...');
   try {
     // Use directly from database via useCustomers hook
     const { data: session } = await supabase.auth.getSession();
+    console.log('Auth session:', session);
+    
     if (!session?.session?.user) {
+      console.error('No authenticated user found');
       throw new Error("Authentication required to view customers");
     }
 
+    console.log('Fetching customers for user:', session.session.user.id);
     const { data, error } = await supabase
       .from('customers')
       .select('*')
@@ -68,8 +74,11 @@ const fetchCustomers = async (): Promise<Customer[]> => {
       .order('name');
       
     if (error) {
+      console.error('Supabase error:', error);
       throw error;
     }
+    
+    console.log('Customers fetched successfully:', data?.length || 0);
     
     // Map database fields to match the Customer interface format
     const formattedData = data.map(customer => ({
@@ -107,6 +116,7 @@ function CustomersPage() {
   const { auditId } = useParams<{ auditId: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { user, loading: authLoading } = useAuth();
   
   // State for search, filter, and sort
   const [searchTerm, setSearchTerm] = useState('');
@@ -118,10 +128,21 @@ function CustomersPage() {
   const [showJourneyModal, setShowJourneyModal] = useState(false);
   const [workflowSteps, setWorkflowSteps] = useState([]);
 
-  const { isLoading, isError, data: customers, error } = useQuery({
+  const { isLoading, isError, data: customers, error, refetch } = useQuery({
     queryKey: ['customers'], 
     queryFn: fetchCustomers,
+    enabled: !!user, // Only run query when user is authenticated
+    retry: 2,
   });
+
+  // Try to refetch when auth state changes
+  useEffect(() => {
+    if (user && !authLoading) {
+      refetch().catch(err => {
+        console.error('Error refetching customers:', err);
+      });
+    }
+  }, [user, authLoading, refetch]);
 
   const handleViewCustomerDetails = (customer: Customer) => {
     setSelectedCustomer(customer);
@@ -214,6 +235,36 @@ function CustomersPage() {
     }
   }, [filteredAndSortedCustomers, selectedCustomer]);
 
+  if (authLoading) {
+    return (
+      <BaseLayout>
+        <div className="flex items-center justify-center min-h-screen">
+          <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
+          <span className="ml-2 text-lg">Checking authentication...</span>
+        </div>
+      </BaseLayout>
+    );
+  }
+  
+  if (!user) {
+    return (
+      <BaseLayout>
+        <div className="flex flex-col items-center justify-center min-h-screen p-4">
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4 max-w-md">
+            <h3 className="text-red-800 font-medium">Authentication Required</h3>
+            <p className="text-red-600 mt-1">You need to be signed in to view customers.</p>
+            <Button 
+              onClick={() => navigate('/auth')} 
+              className="mt-4 px-4 py-2 bg-red-100 text-red-700 rounded hover:bg-red-200 transition-colors"
+            >
+              Sign In
+            </Button>
+          </div>
+        </div>
+      </BaseLayout>
+    );
+  }
+
   if (isLoading) {
     return (
       <BaseLayout>
@@ -231,13 +282,22 @@ function CustomersPage() {
         <div className="flex flex-col items-center justify-center min-h-screen p-4">
           <div className="bg-red-50 border border-red-200 rounded-lg p-4 max-w-md">
             <h3 className="text-red-800 font-medium">Error loading customers</h3>
-            <p className="text-red-600 mt-1">{error?.message}</p>
-            <button 
-              onClick={() => window.location.reload()} 
-              className="mt-4 px-4 py-2 bg-red-100 text-red-700 rounded hover:bg-red-200 transition-colors"
-            >
-              Try Again
-            </button>
+            <p className="text-red-600 mt-1">{error instanceof Error ? error.message : "Unknown error"}</p>
+            <div className="flex gap-2 mt-4">
+              <Button 
+                onClick={() => refetch()} 
+                className="px-4 py-2 bg-red-100 text-red-700 rounded hover:bg-red-200 transition-colors"
+              >
+                Try Again
+              </Button>
+              <Button 
+                onClick={() => navigate('/')} 
+                variant="outline"
+                className="px-4 py-2 rounded"
+              >
+                Back to Dashboard
+              </Button>
+            </div>
           </div>
         </div>
       </BaseLayout>
