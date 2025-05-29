@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Calendar } from '@/components/ui/calendar';
 import { Job } from '@/types/job';
@@ -38,9 +37,9 @@ export function TeamCalendar({
   } = useCalendarHandlers(onJobAssign);
 
   return (
-    <section className={miniView ? 'mini-calendar' : ''}>
+    <section className={`${miniView ? 'mini-calendar' : ''} relative z-10`}>
       {!miniView && (
-        <div className="p-6 rounded-lg shadow-md bg-slate-300 my-[32px] px-0 py-[31px] mx-px">
+        <div className="p-6 rounded-lg shadow-md bg-white dark:bg-slate-800 my-[32px] px-0 py-[31px] mx-px">
           <TeamCalendarHeader 
             assignedJobs={assignedJobs} 
             date={date} 
@@ -77,7 +76,7 @@ export function TeamCalendar({
           }
         }}
         classNames={getCalendarClassNames(teamColor)}
-        className={`${miniView ? 'w-full bg-white' : 'w-full bg-slate-200'}`}
+        className={`${miniView ? 'w-full bg-white' : 'w-full bg-white dark:bg-slate-800 p-4 rounded-lg shadow-sm'}`}
       />
 
       {!miniView && (

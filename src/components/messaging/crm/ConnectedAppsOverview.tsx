@@ -1,141 +1,117 @@
 import React from 'react';
-import { Card, CardContent } from "@/components/ui/card";
-import { Sparkles } from "lucide-react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Check, Clock, Phone, X } from "lucide-react";
 import { ServiceInfo } from "../types";
-import { motion } from "framer-motion";
-import { ChannelIconWithBg, BRAND_COLORS } from '../ChannelIcons';
+import { ChannelIconWithBg } from "../ChannelIcons";
 
 interface ConnectedAppsOverviewProps {
   connectedNumbers: string[];
   services: ServiceInfo[];
 }
 
-export const ConnectedAppsOverview: React.FC<ConnectedAppsOverviewProps> = ({
+export const ConnectedAppsOverview: React.FC<ConnectedAppsOverviewProps> = ({ 
   connectedNumbers,
   services
 }) => {
-  const getServicesByType = (type: string) => {
-    return services.filter(s => s.serviceType === type && s.isConnected);
-  };
-  
   return (
-    <div className="p-1">
-      <div className="flex items-center mb-4">
-        <h2 className="text-xl font-semibold text-gray-800 flex items-center">
-          <Sparkles className="h-5 w-5 text-amber-400 mr-2" />
-          Connected Channels
-        </h2>
-        <div className="ml-auto text-sm bg-gradient-to-r from-blue-100 to-indigo-100 px-3 py-1 rounded-full text-blue-800 font-medium">
-          {connectedNumbers.length + services.filter(s => s.isConnected).length} Total Connections
-        </div>
-      </div>
-      <div className="grid grid-cols-4 md:grid-cols-8 gap-3">
-        <ConnectedAppCard 
-          title="Phone" 
-          count={connectedNumbers.length} 
-          icon="phone" 
-          bgColor={BRAND_COLORS.phone}
-          delay={0.1}
-        />
-        
-        <ConnectedAppCard 
-          title="Email" 
-          count={getServicesByType('email').length} 
-          icon="email" 
-          bgColor={BRAND_COLORS.email}
-          delay={0.2} 
-        />
-        
-        <ConnectedAppCard 
-          title="SMS" 
-          count={getServicesByType('sms').length} 
-          icon="sms" 
-          bgColor={BRAND_COLORS.sms}
-          delay={0.3}
-        />
-        
-        <ConnectedAppCard 
-          title="WhatsApp" 
-          count={getServicesByType('whatsapp').length} 
-          icon="whatsapp" 
-          bgColor={BRAND_COLORS.whatsapp}
-          delay={0.4}
-        />
-        
-        <ConnectedAppCard 
-          title="Facebook" 
-          count={getServicesByType('facebook').length} 
-          icon="facebook" 
-          bgColor={BRAND_COLORS.facebook}
-          delay={0.5}
-        />
-        
-        <ConnectedAppCard 
-          title="Instagram" 
-          count={getServicesByType('instagram').length} 
-          icon="instagram" 
-          bgColor={BRAND_COLORS.instagram}
-          delay={0.6}
-        />
-        
-        <ConnectedAppCard 
-          title="TikTok" 
-          count={getServicesByType('tiktok').length} 
-          icon="tiktok" 
-          bgColor={BRAND_COLORS.tiktok}
-          delay={0.7}
-        />
-        
-        <ConnectedAppCard 
-          title="Google" 
-          count={getServicesByType('google_business').length} 
-          icon="google" 
-          bgColor={BRAND_COLORS.google}
-          delay={0.8}
-        />
-      </div>
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <Card className="overflow-hidden">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base">Connected Phone Numbers</CardTitle>
+          <CardDescription>Numbers available for SMS and calling</CardDescription>
+        </CardHeader>
+        <CardContent>
+          {connectedNumbers.length > 0 ? (
+            <div className="space-y-2">
+              {connectedNumbers.map((number, index) => (
+                <div key={index} className="flex items-center gap-2">
+                  <div className="h-8 w-8 rounded-full bg-green-100 flex items-center justify-center">
+                    <Phone className="h-4 w-4 text-green-600" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium">{number}</p>
+                    <p className="text-xs text-gray-500">Active</p>
+                  </div>
+                  <Badge variant="outline" className="ml-auto border-green-200 text-green-700 bg-green-50">
+                    <Check className="h-3 w-3 mr-1" /> Connected
+                  </Badge>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-6">
+              <div className="h-12 w-12 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-3">
+                <X className="h-5 w-5 text-gray-400" />
+              </div>
+              <p className="text-sm text-gray-500">No phone numbers connected</p>
+              <p className="text-xs text-gray-400 mt-1">Add a phone number in the Messaging settings</p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      <Card className="overflow-hidden">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base">Messaging Services</CardTitle>
+          <CardDescription>Connected messaging platforms</CardDescription>
+        </CardHeader>
+        <CardContent>
+          {services.length > 0 ? (
+            <div className="space-y-2">
+              {services.map((service) => (
+                <div key={service.id} className="flex items-center gap-2">
+                  <ChannelIconWithBg 
+                    name={getServiceIconName(service.serviceType)} 
+                    size="sm" 
+                  />
+                  <div>
+                    <p className="text-sm font-medium">{service.name}</p>
+                    <p className="text-xs text-gray-500">
+                      {service.syncEnabled ? 'Syncing enabled' : 'Syncing disabled'}
+                    </p>
+                  </div>
+                  {service.syncEnabled ? (
+                    <Badge variant="outline" className="ml-auto border-blue-200 text-blue-700 bg-blue-50">
+                      <Clock className="h-3 w-3 mr-1" /> {service.lastSynced}
+                    </Badge>
+                  ) : (
+                    <Badge variant="outline" className="ml-auto border-amber-200 text-amber-700 bg-amber-50">
+                      Disabled
+                    </Badge>
+                  )}
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-6">
+              <div className="h-12 w-12 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-3">
+                <X className="h-5 w-5 text-gray-400" />
+              </div>
+              <p className="text-sm text-gray-500">No messaging services connected</p>
+              <p className="text-xs text-gray-400 mt-1">Add services in the Messaging settings</p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 };
 
-interface ConnectedAppCardProps {
-  title: string;
-  count: number;
-  icon: string;
-  bgColor: string;
-  delay: number;
-}
-
-const ConnectedAppCard: React.FC<ConnectedAppCardProps> = ({
-  title,
-  count,
-  icon,
-  bgColor,
-  delay
-}) => {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, delay }}
-      whileHover={{ scale: 1.1, transition: { duration: 0.2 } }}
-      className="flex flex-col items-center"
-    >
-      <div className="relative">
-        <ChannelIconWithBg 
-          name={icon as any} 
-          size="lg" 
-          bgColor={bgColor} 
-          className="mb-2 drop-shadow-md"
-        />
-        {count > 0 && (
-          <div className="absolute -top-1 -right-1 w-5 h-5 flex items-center justify-center text-xs font-bold bg-white text-blue-600 rounded-full border-2 border-blue-500 shadow-md">
-            {count}
-          </div>
-        )}
-      </div>
-      <span className="text-xs font-medium text-gray-700">{title}</span>
-      <span className="text-xs text-gray-500">{count > 0 ? "Active" : "Inactive"}</span>
-    </motion.div>
-  );
+// Helper function to map service type to icon name
+const getServiceIconName = (serviceType: string): 'phone' | 'sms' | 'email' | 'whatsapp' | 'facebook' | 'instagram' | 'tiktok' | 'google' | 'linkedin' | 'twitter' | 'youtube' => {
+  switch (serviceType) {
+    case 'twilio': return 'phone';
+    case 'sms': return 'sms';
+    case 'email': return 'email';
+    case 'whatsapp': return 'whatsapp';
+    case 'facebook': return 'facebook';
+    case 'instagram': return 'instagram';
+    case 'tiktok': return 'tiktok';
+    case 'google_business': return 'google';
+    case 'linkedin': return 'linkedin';
+    case 'twitter': return 'twitter';
+    case 'youtube': return 'youtube';
+    default: return 'email';
+  }
 };
