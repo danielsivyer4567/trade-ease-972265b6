@@ -31,14 +31,23 @@ import { Progress } from '@/components/ui/progress';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { fetchCustomersFromAPI } from '@/services/api';
-import { CustomerData } from '@/pages/Customers/components/CustomerCard';
 import { supabase } from '@/integrations/supabase/client';
 import { Timeline } from './components/Timeline';
 import { useAuth } from '@/contexts/AuthContext';
+import { useCustomers, Customer as CustomerType } from './hooks/useCustomers';
+import { CreateDemoUser } from '../Auth/components/CreateDemoUser';
 
 // Extended interface for Customer with additional fields needed for the page
-interface Customer extends CustomerData {
+interface Customer {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  address: string;
+  city: string;
+  state: string;
+  zipCode: string;
+  status: 'active' | 'inactive' | 'previous';
   progress?: number;
   lastContact?: string;
   jobId?: string;
@@ -50,27 +59,23 @@ interface Customer extends CustomerData {
   quotesQty?: number;
   invoicesQty?: number;
   quickPayment?: boolean;
-  status: 'active' | 'inactive' | 'previous';
 }
 
 // API function to fetch customers
-const fetchCustomers = async (): Promise<Customer[]> => {
+const fetchCustomers = async (user): Promise<Customer[]> => {
   console.log('Fetching customers...');
   try {
-    // Use directly from database via useCustomers hook
-    const { data: session } = await supabase.auth.getSession();
-    console.log('Auth session:', session);
-    
-    if (!session?.session?.user) {
+    // Check for authenticated user
+    if (!user) {
       console.error('No authenticated user found');
       throw new Error("Authentication required to view customers");
     }
 
-    console.log('Fetching customers for user:', session.session.user.id);
+    console.log('Fetching customers for user:', user.id);
     const { data, error } = await supabase
       .from('customers')
       .select('*')
-      .eq('user_id', session.session.user.id)
+      .eq('user_id', user.id)
       .order('name');
       
     if (error) {
@@ -128,21 +133,58 @@ function CustomersPage() {
   const [showJourneyModal, setShowJourneyModal] = useState(false);
   const [workflowSteps, setWorkflowSteps] = useState([]);
 
-  const { isLoading, isError, data: customers, error, refetch } = useQuery({
+  // Use the custom hook to get the actual implementation
+  const { customers: hookCustomers, isLoading: hookLoading, error: hookError } = useCustomers();
+
+  // Fallback to React Query if the hook fails
+  const { isLoading: queryLoading, isError: queryIsError, data: queryCustomers, error: queryError, refetch } = useQuery({
     queryKey: ['customers'], 
-    queryFn: fetchCustomers,
-    enabled: !!user, // Only run query when user is authenticated
+    queryFn: () => fetchCustomers(user),
+    enabled: !!user && (!hookCustomers || hookCustomers.length === 0), // Only run if hook failed
     retry: 2,
+    staleTime: 5 * 60 * 1000, // 5 minutes
   });
+
+  // Determine actual data source - make sure types are compatible
+  const customers: Customer[] = useMemo(() => {
+    if (hookCustomers && hookCustomers.length > 0) {
+      // Map hookCustomers to our Customer interface
+      return hookCustomers.map(c => ({
+        id: c.id,
+        name: c.name,
+        email: c.email,
+        phone: c.phone,
+        address: c.address,
+        city: c.city,
+        state: c.state,
+        zipCode: c.zipCode,
+        status: c.status as 'active' | 'inactive' | 'previous',
+        progress: Math.floor(Math.random() * 100),
+        lastContact: c.created_at?.split('T')[0] || new Date().toISOString().split('T')[0],
+        jobId: `JOB-${c.id.substring(0, 4)}`,
+        jobTitle: 'Current Job',
+        customer_code: c.customer_code,
+        jobsQty: 0,
+        quotesQty: 0,
+        invoicesQty: 0,
+        quickPayment: false
+      }));
+    }
+    return queryCustomers || [];
+  }, [hookCustomers, queryCustomers]);
+
+  const isLoading = authLoading || hookLoading || queryLoading;
+  const error = hookError || queryError;
+  const isError = !!error || (queryIsError && (!customers || customers.length === 0));
 
   // Try to refetch when auth state changes
   useEffect(() => {
-    if (user && !authLoading) {
+    if (user && !authLoading && (!customers || customers.length === 0)) {
       refetch().catch(err => {
         console.error('Error refetching customers:', err);
       });
     }
-  }, [user, authLoading, refetch]);
+  }, [user, authLoading, refetch, customers]);
 
   const handleViewCustomerDetails = (customer: Customer) => {
     setSelectedCustomer(customer);
@@ -183,8 +225,10 @@ function CustomersPage() {
     }
   };
 
-  const handleWorkflowStepAction = (stepId) => {
-    setWorkflowSteps(prevSteps => prevSteps.map(step => step.id === stepId ? { ...step, isActioned: true, requiresAction: false } : step));
+  const handleWorkflowStepAction = (stepId: string) => {
+    setWorkflowSteps(prevSteps => prevSteps.map(step => 
+      step.id === stepId ? { ...step, isActioned: true, requiresAction: false } : step
+    ));
   };
 
   // Filter and sort customers
@@ -253,12 +297,25 @@ function CustomersPage() {
           <div className="bg-red-50 border border-red-200 rounded-lg p-4 max-w-md">
             <h3 className="text-red-800 font-medium">Authentication Required</h3>
             <p className="text-red-600 mt-1">You need to be signed in to view customers.</p>
-            <Button 
-              onClick={() => navigate('/auth')} 
-              className="mt-4 px-4 py-2 bg-red-100 text-red-700 rounded hover:bg-red-200 transition-colors"
-            >
-              Sign In
-            </Button>
+            <div className="mt-4 space-y-4">
+              <Button 
+                onClick={() => navigate('/auth')} 
+                className="w-full px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
+              >
+                Sign In
+              </Button>
+              <CreateDemoUser />
+              <div className="border-t border-gray-200 pt-4">
+                <p className="text-sm text-gray-600 mb-2">Having issues with authentication?</p>
+                <Button
+                  variant="outline"
+                  className="w-full"
+                  onClick={() => navigate('/debug/auth')}
+                >
+                  Run Authentication Diagnostics
+                </Button>
+              </div>
+            </div>
           </div>
         </div>
       </BaseLayout>

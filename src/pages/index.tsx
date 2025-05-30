@@ -14,9 +14,18 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Calendar as ReactCalendar } from "@/components/ui/calendar";
 import { DashboardCalendar } from "@/components/dashboard/DashboardCalendar";
+import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
 export default function DashboardPage() {
   const [calendarDate, setCalendarDate] = useState<Date | undefined>(new Date());
+  const navigate = useNavigate();
+  
+  const handleJobClick = (jobName: string) => {
+    // Since these are mock jobs, we'll navigate to the jobs page with a toast
+    toast.info(`Navigating to ${jobName}`);
+    navigate('/jobs');
+  };
   
   return (
     <BaseLayout showQuickTabs>
@@ -35,7 +44,7 @@ export default function DashboardPage() {
           {/* Jobs Today, Tomorrow, and Finished */}
           <div className="px-4">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-              <Card className="shadow-md">
+              <Card className="shadow-md border-2 border-gray-400">
                 <div className="p-6 bg-white">
                   <div className="flex items-center justify-between mb-4">
                     <h2 className="text-xl font-semibold">Jobs Today</h2>
@@ -48,11 +57,17 @@ export default function DashboardPage() {
                     </Button>
                   </div>
                   <div className="space-y-4">
-                    <div className="border-b pb-2">
+                    <div 
+                      className="border-b pb-2 cursor-pointer hover:bg-gray-50 -mx-2 px-2 rounded transition-colors"
+                      onClick={() => handleJobClick('Bathroom Renovation')}
+                    >
                       <p className="font-medium">Bathroom Renovation</p>
                       <p className="text-sm text-gray-500">Today, 9:00 AM</p>
                     </div>
-                    <div className="border-b pb-2">
+                    <div 
+                      className="border-b pb-2 cursor-pointer hover:bg-gray-50 -mx-2 px-2 rounded transition-colors"
+                      onClick={() => handleJobClick('Kitchen Plumbing')}
+                    >
                       <p className="font-medium">Kitchen Plumbing</p>
                       <p className="text-sm text-gray-500">Today, 11:30 AM</p>
                     </div>
@@ -60,7 +75,7 @@ export default function DashboardPage() {
                 </div>
               </Card>
               
-              <Card className="shadow-md">
+              <Card className="shadow-md border-2 border-gray-400">
                 <div className="p-6 bg-white">
                   <div className="flex items-center justify-between mb-4">
                     <h2 className="text-xl font-semibold">Jobs Tomorrow</h2>
@@ -73,11 +88,17 @@ export default function DashboardPage() {
                     </Button>
                   </div>
                   <div className="space-y-4">
-                    <div className="border-b pb-2">
+                    <div 
+                      className="border-b pb-2 cursor-pointer hover:bg-gray-50 -mx-2 px-2 rounded transition-colors"
+                      onClick={() => handleJobClick('Water Heater Installation')}
+                    >
                       <p className="font-medium">Water Heater Installation</p>
                       <p className="text-sm text-gray-500">Tomorrow, 9:00 AM</p>
                     </div>
-                    <div className="border-b pb-2">
+                    <div 
+                      className="border-b pb-2 cursor-pointer hover:bg-gray-50 -mx-2 px-2 rounded transition-colors"
+                      onClick={() => handleJobClick('Roof Repair')}
+                    >
                       <p className="font-medium">Roof Repair</p>
                       <p className="text-sm text-gray-500">Tomorrow, 10:00 AM</p>
                     </div>
@@ -85,7 +106,7 @@ export default function DashboardPage() {
                 </div>
               </Card>
               
-              <Card className="shadow-md">
+              <Card className="shadow-md border-2 border-gray-400">
                 <div className="p-6 bg-white">
                   <div className="flex items-center justify-between mb-4">
                     <h2 className="text-xl font-semibold">Jobs Recently Finished</h2>
@@ -98,11 +119,17 @@ export default function DashboardPage() {
                     </Button>
                   </div>
                   <div className="space-y-4">
-                    <div className="border-b pb-2">
+                    <div 
+                      className="border-b pb-2 cursor-pointer hover:bg-gray-50 -mx-2 px-2 rounded transition-colors"
+                      onClick={() => handleJobClick('Water Heater Installation')}
+                    >
                       <p className="font-medium">Water Heater Installation</p>
                       <p className="text-sm text-gray-500">Completed by Team Red</p>
                     </div>
-                    <div className="border-b pb-2">
+                    <div 
+                      className="border-b pb-2 cursor-pointer hover:bg-gray-50 -mx-2 px-2 rounded transition-colors"
+                      onClick={() => handleJobClick('Electrical Panel Upgrade')}
+                    >
                       <p className="font-medium">Electrical Panel Upgrade</p>
                       <p className="text-sm text-gray-500">Completed by Team Blue</p>
                     </div>

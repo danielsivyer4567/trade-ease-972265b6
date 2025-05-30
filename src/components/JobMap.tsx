@@ -56,8 +56,7 @@ const MapComponent = ({
   const options = {
     mapTypeId: 'satellite',
     streetViewControl: false,
-    mapTypeControl: false,
-    mapId: '8f348c1e276da9d5' // Added Map ID for Advanced Markers
+    mapTypeControl: false
   };
 
   // Function to auto-fit map to all markers
@@ -112,8 +111,8 @@ const MapComponent = ({
         const markerElement = document.createElement('div');
         markerElement.className = 'marker';
         markerElement.innerHTML = `
-          <div class="flex items-center gap-2 font-semibold text-white bg-black/50 backdrop-blur-sm px-2 py-1 rounded-lg shadow-lg border border-white/20">
-            <img src="/lovable-uploads/34bca7f1-d63b-45a0-b1ca-a562443686ad.png" alt="Trade Ease Logo" width="20" height="20" class="object-contain" />
+          <div class="flex items-center gap-2 font-semibold text-white bg-black/70 backdrop-blur-sm px-3 py-2 rounded-lg shadow-lg border border-white/30">
+            <img src="/lovable-uploads/34bca7f1-d63b-45a0-b1ca-a562443686ad.png" alt="Trade Ease Logo" width="24" height="24" class="object-contain" />
             <span>${job.jobNumber || 'N/A'}</span>
           </div>
         `;
@@ -123,7 +122,8 @@ const MapComponent = ({
           position: { lat: job.location[1], lng: job.location[0] },
           map: mapInstance,
           content: markerElement,
-          title: job.customer
+          title: job.customer,
+          zIndex: 1000 // Ensure markers appear above other elements
         });
 
         // Add click listener using the recommended 'gmp-click' event
@@ -146,8 +146,8 @@ const MapComponent = ({
         const markerElement = document.createElement('div');
         markerElement.className = 'marker';
         markerElement.innerHTML = `
-          <div class="flex items-center gap-2 font-semibold text-white bg-black/50 backdrop-blur-sm px-2 py-1 rounded-lg shadow-lg border border-white/20">
-            <img src="/lovable-uploads/34bca7f1-d63b-45a0-b1ca-a562443686ad.png" alt="Trade Ease Logo" width="20" height="20" class="object-contain" />
+          <div class="flex items-center gap-2 font-semibold text-white bg-black/70 backdrop-blur-sm px-3 py-2 rounded-lg shadow-lg border border-white/30">
+            <img src="/lovable-uploads/34bca7f1-d63b-45a0-b1ca-a562443686ad.png" alt="Trade Ease Logo" width="24" height="24" class="object-contain" />
             <span>${job.jobNumber || 'N/A'}${label ? ` - ${label}` : ''}</span>
           </div>
         `;
@@ -157,7 +157,8 @@ const MapComponent = ({
           position: { lat: coordinates[1], lng: coordinates[0] },
           map: mapInstance,
           content: markerElement,
-          title: job.customer
+          title: job.customer,
+          zIndex: 1000 // Ensure markers appear above other elements
         });
 
         // Add click listener
@@ -174,8 +175,8 @@ const MapComponent = ({
         const markerElement = document.createElement('div');
         markerElement.className = 'marker';
         markerElement.innerHTML = `
-          <div class="flex items-center gap-2 font-semibold text-white bg-black/50 backdrop-blur-sm px-2 py-1 rounded-lg shadow-lg border border-white/20">
-            <img src="/lovable-uploads/34bca7f1-d63b-45a0-b1ca-a562443686ad.png" alt="Trade Ease Logo" width="20" height="20" class="object-contain" />
+          <div class="flex items-center gap-2 font-semibold text-white bg-black/70 backdrop-blur-sm px-3 py-2 rounded-lg shadow-lg border border-white/30">
+            <img src="/lovable-uploads/34bca7f1-d63b-45a0-b1ca-a562443686ad.png" alt="Trade Ease Logo" width="24" height="24" class="object-contain" />
             <span>${marker.title || 'N/A'}</span>
           </div>
         `;
@@ -184,7 +185,8 @@ const MapComponent = ({
           position: { lat: marker.position[0], lng: marker.position[1] },
           map: mapInstance,
           content: markerElement,
-          title: marker.title
+          title: marker.title,
+          zIndex: 1000 // Ensure markers appear above other elements
         });
       });
     }
@@ -194,8 +196,9 @@ const MapComponent = ({
       const centerMarkerElement = document.createElement('div');
       centerMarkerElement.className = 'marker';
       centerMarkerElement.innerHTML = `
-        <div class="text-white bg-blue-500/70 backdrop-blur-sm px-2 py-1 rounded-lg shadow-lg border border-white/20 font-semibold">
-          Location
+        <div class="flex items-center gap-2 font-semibold text-white bg-blue-500/70 backdrop-blur-sm px-3 py-2 rounded-lg shadow-lg border border-white/30">
+          <img src="/lovable-uploads/34bca7f1-d63b-45a0-b1ca-a562443686ad.png" alt="Trade Ease Logo" width="24" height="24" class="object-contain" />
+          <span>Location</span>
         </div>
       `;
 
@@ -203,7 +206,8 @@ const MapComponent = ({
         position: mapCenter,
         map: mapInstance,
         content: centerMarkerElement,
-        title: "Location"
+        title: "Location",
+        zIndex: 1000
       });
     }
     
@@ -259,7 +263,10 @@ const MapComponent = ({
           }}
         >
           <div>
-            <h3 className="font-semibold">{selectedJob.customer}</h3>
+            <div className="flex items-center gap-2 mb-1">
+              <img src="/lovable-uploads/34bca7f1-d63b-45a0-b1ca-a562443686ad.png" alt="Trade Ease Logo" width="20" height="20" className="object-contain" />
+              <h3 className="font-semibold">{selectedJob.customer}</h3>
+            </div>
             <p>{selectedJob.title} - {selectedJob.type}</p>
             {selectedLocation.label && (
               <p className="text-sm text-blue-600">{selectedLocation.label}</p>
@@ -274,7 +281,10 @@ const MapComponent = ({
           onCloseClick={() => setSelectedJob(null)}
         >
           <div>
-            <h3 className="font-semibold">{selectedJob.customer}</h3>
+            <div className="flex items-center gap-2 mb-1">
+              <img src="/lovable-uploads/34bca7f1-d63b-45a0-b1ca-a562443686ad.png" alt="Trade Ease Logo" width="20" height="20" className="object-contain" />
+              <h3 className="font-semibold">{selectedJob.customer}</h3>
+            </div>
             <p>{selectedJob.type}</p>
             <p className="text-sm text-gray-500">{selectedJob.date}</p>
           </div>
@@ -287,7 +297,7 @@ const MapComponent = ({
 // Main JobMap component using useLoadScript hook
 const JobMap = (props: JobMapProps) => {
   const { isLoaded, loadError } = useLoadScript({
-    googleMapsApiKey: "AIzaSyAnIcvNA_ZjRUnN4aeyl-1MYpBSN-ODIvw",
+    googleMapsApiKey: "AIzaSyCVHBYlen8sLxyI69WC67znnfi9SU4J0BY",
     libraries: libraries as any,
     version: "beta"
   });

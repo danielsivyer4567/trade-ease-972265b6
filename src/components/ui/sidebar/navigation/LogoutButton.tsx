@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { LogOut } from 'lucide-react';
 import { Button } from '../../button';
@@ -21,12 +20,12 @@ export const LogoutButton: React.FC<LogoutButtonProps> = ({ isExpanded, onLogout
       size="sm" 
       onClick={onLogout} 
       className={cn(
-        "py-[15px] px-2 text-left rounded-lg w-full",
+        "py-[8px] px-2 text-left rounded-lg w-full",
         navItemVariants({ theme })
       )}
     >
-      <LogOut className={iconVariants({ theme })} />
-      {isExpanded && <span className="ml-2 text-sm overflow-hidden text-ellipsis">Logout</span>}
+      <LogOut className={cn(iconVariants({ theme }), "h-4 w-4")} />
+      {isExpanded && <span className="ml-2 text-xs overflow-hidden text-ellipsis">Logout</span>}
     </Button>
   );
   

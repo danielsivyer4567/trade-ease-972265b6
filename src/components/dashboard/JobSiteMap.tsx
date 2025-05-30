@@ -7,6 +7,7 @@ import { MapPin, AlertCircle, Pencil, X, Ruler } from "lucide-react";
 import { toast } from "sonner";
 import type { Job } from "@/types/job";
 import { supabase } from "@/integrations/supabase/client";
+import { GOOGLE_MAPS_CONFIG } from "@/config/google-maps";
 
 // Define types for locations and map properties
 type Location = {
@@ -34,7 +35,10 @@ interface MapViewState {
 const mapLibraries = ["marker", "geometry"] as ["marker", "geometry"];
 
 // Google Maps API key - defined once outside component
-const GOOGLE_MAPS_API_KEY = "AIzaSyAnIcvNA_ZjRUnN4aeyl-1MYpBSN-ODIvw";
+const GOOGLE_MAPS_API_KEY = GOOGLE_MAPS_CONFIG.apiKey;
+
+// Log the API key (partial) for debugging
+console.log("Google Maps API Key loaded:", GOOGLE_MAPS_API_KEY ? `${GOOGLE_MAPS_API_KEY.substring(0, 10)}...` : "NOT LOADED");
 
 // Default map center - Gold Coast coordinates
 const DEFAULT_CENTER = {
@@ -49,8 +53,7 @@ const DEFAULT_MAP_OPTIONS = {
   zoom: 13,
   mapTypeControl: false,
   streetViewControl: true,
-  fullscreenControl: true,
-  mapId: '8f348c1e276da9d5'
+  fullscreenControl: true
 };
 
 // Default map container style
@@ -337,7 +340,13 @@ const JobSiteMap = memo(() => {
   // Handle load error
   const handleLoadError = useCallback((error: Error) => {
     console.error("Error loading Google Maps:", error);
-    setMapError("Failed to load Google Maps. Please refresh and try again.");
+    console.error("API Key present:", !!GOOGLE_MAPS_API_KEY);
+    console.error("Error details:", {
+      message: error.message,
+      stack: error.stack,
+      name: error.name
+    });
+    setMapError("Failed to load Google Maps. Please check browser console for details.");
   }, []);
   
   // Format distance for display
@@ -463,6 +472,22 @@ const JobSiteMap = memo(() => {
               <AlertCircle className="mx-auto h-12 w-12 text-red-500" />
               <h3 className="mt-2 text-lg font-semibold text-gray-900">Map Error</h3>
               <p className="mt-1 text-sm text-gray-500">{mapError}</p>
+              <div className="mt-4 text-left bg-gray-100 p-3 rounded-md">
+                <p className="text-xs font-semibold mb-2">Troubleshooting Steps:</p>
+                <ol className="text-xs space-y-1">
+                  <li>1. Check Google Cloud Console for API key configuration</li>
+                  <li>2. Verify billing is set up correctly</li>
+                  <li>3. Ensure Maps JavaScript API is enabled</li>
+                  <li>4. Add your domain to allowed referrers</li>
+                </ol>
+              </div>
+              <Button 
+                onClick={() => window.location.reload()} 
+                className="mt-4"
+                size="sm"
+              >
+                Try Again
+              </Button>
             </div>
           </div>
         )}

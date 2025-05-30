@@ -10,6 +10,8 @@ import { financialRoutes } from './financial-routes';
 import { activityRoutes } from './activity-routes';
 import { AppLayoutWithTabs } from '@/components/AppLayoutWithTabs';
 import { apiRoutes } from './api-routes';
+import { AuthDebugger } from '@/components/debug/AuthDebugger';
+
 // Lazy load workflow pages
 const WorkflowPage = lazy(() => import('@/pages/Workflow/index.new').then(module => ({ default: module.default })));
 const WorkflowTemplates = lazy(() => import('@/pages/Workflow/templates').then(module => ({ default: module.default })));
@@ -20,6 +22,7 @@ const DevelopmentEntry = lazy(() => import('@/pages/DevelopmentEntry'));
 // Lazy load main page components
 const DashboardPage = lazy(() => import('@/pages/index'));
 const NotFoundPage = lazy(() => import('@/pages/NotFound'));
+const DebugMapsPage = lazy(() => import('@/pages/debug-maps'));
 
 // Auth pages
 const AuthPage = lazy(() => import('@/pages/Auth'));
@@ -119,6 +122,11 @@ const routeObjects: RouteObject[] = [
   {
     path: "/dev",
     element: <Suspense fallback={<LoadingFallback />}><DevelopmentEntry /></Suspense>
+  },
+  // Debug route for authentication
+  {
+    path: "/debug/auth",
+    element: <Suspense fallback={<LoadingFallback />}><AuthDebugger /></Suspense>
   },
   // API Routes
   apiRoutes,
@@ -235,6 +243,8 @@ const routeObjects: RouteObject[] = [
           { path: "/networks", element: <SuspenseWrapper><NetworksPage /></SuspenseWrapper> },
           // Credentials route
           { path: "/credentials", element: <SuspenseWrapper><CredentialsPage /></SuspenseWrapper> },
+          // Debug Maps route
+          { path: "/debug-maps", element: <SuspenseWrapper><DebugMapsPage /></SuspenseWrapper> },
           // Add the route to the settings routes
           {
             path: "/settings/integrations/database",
