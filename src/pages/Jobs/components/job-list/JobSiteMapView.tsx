@@ -138,7 +138,7 @@ const JobSiteMapView = ({ jobs }: JobSiteMapViewProps) => {
             markers.push({
               coordinates: location.coordinates,
               job,
-              label: location.label
+              label: location.label || location.address
             });
           }
         });
@@ -148,11 +148,16 @@ const JobSiteMapView = ({ jobs }: JobSiteMapViewProps) => {
         markers.push({
           coordinates: job.location,
           job,
-          label: 'Primary'
+          label: job.address || 'Primary'
         });
+      }
+      // If the job has an address but no coordinates, try to use the address
+      else if (job.address && job.address !== 'N/A') {
+        console.log(`Job ${job.id} has address (${job.address}) but no coordinates`);
       }
     });
 
+    console.log(`Created ${markers.length} location markers for ${processedJobs.length} jobs`);
     return markers;
   };
 
@@ -174,6 +179,7 @@ const JobSiteMapView = ({ jobs }: JobSiteMapViewProps) => {
       <JobMap 
         locationMarkers={locationMarkers}
         zoom={locationMarkers.length > 1 ? 10 : 13} // Zoom out more if we have multiple locations
+        autoFit={true}
       />
       
       {!hasLocations && !loading && (

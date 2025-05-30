@@ -27,7 +27,7 @@ export function ProfilePictureUpload({
   const { toast } = useToast();
 
   // Google Maps API key - should be moved to environment variables
-  const API_KEY = "AIzaSyAnIcvNA_ZjRUnN4aeyl-1MYpBSN-ODIvw";
+  const API_KEY = "AIzaSyCVHBYlen8sLxyI69WC67znnfi9SU4J0BY";
 
   const generateStreetViewUrl = (location: string) => {
     const encodedLocation = encodeURIComponent(location);

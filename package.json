@@ -10,7 +10,10 @@
     "build": "vite build",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "db:setup": "node scripts/db-setup.js",
+    "db:reset": "npx supabase db reset",
+    "start:with-db": "npm run db:setup && npm run dev"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.3.4",
@@ -43,7 +46,7 @@
     "@radix-ui/react-toggle-group": "^1.0.4",
     "@radix-ui/react-tooltip": "^1.0.7",
     "@react-google-maps/api": "^2.19.2",
-    "@supabase/supabase-js": "^2.49.4",
+    "@supabase/supabase-js": "^2.49.8",
     "@tanstack/react-query": "^5.17.19",
     "@vercel/analytics": "^1.1.2",
     "@xyflow/react": "^12.6.0",
@@ -52,6 +55,7 @@
     "clsx": "^2.0.0",
     "cmdk": "^0.2.1",
     "date-fns": "^3.6.0",
+    "dotenv": "^16.5.0",
     "embla-carousel-react": "^8.0.0",
     "esbuild": "^0.25.2",
     "framer-motion": "^12.9.2",

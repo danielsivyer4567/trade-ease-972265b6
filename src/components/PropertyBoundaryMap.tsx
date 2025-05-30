@@ -424,7 +424,7 @@ const PropertyBoundaryMap = ({
           </div>
           
           <LoadScript 
-            googleMapsApiKey="AIzaSyAnIcvNA_ZjRUnN4aeyl-1MYpBSN-ODIvw"
+            googleMapsApiKey="AIzaSyCVHBYlen8sLxyI69WC67znnfi9SU4J0BY"
             libraries={["marker", "geometry", "drawing"]}
             onLoad={() => console.log("Google Maps script loaded")}
             onError={handleLoadScriptError}
@@ -439,8 +439,7 @@ const PropertyBoundaryMap = ({
                 tilt: mapViewState?.tilt || 0,
                 streetViewControl: false,
                 mapTypeControl: true,
-                fullscreenControl: true,
-                mapId: '8f348c1e276da9d5'
+                fullscreenControl: true
               }}
               onLoad={handleMapLoad}
             >

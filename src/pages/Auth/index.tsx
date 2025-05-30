@@ -7,6 +7,7 @@ import { AuthContainer } from './components/AuthContainer';
 import { AuthTabs } from './components/AuthTabs';
 import VerificationStatus from './components/VerificationStatus';
 import TwoFactorVerification from './components/TwoFactorVerification';
+import { CreateDemoUser } from './components/CreateDemoUser';
 
 // Hooks
 import { useEmailVerification } from './hooks/useEmailVerification';
@@ -101,6 +102,11 @@ export default function Auth() {
         onSignUp={handleSignUp}
         inviteCode={inviteCode}
       />
+
+      {/* Add the CreateDemoUser component */}
+      <div className="mt-8">
+        <CreateDemoUser />
+      </div>
     </AuthContainer>
   );
 }

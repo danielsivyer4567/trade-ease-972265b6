@@ -1178,7 +1178,7 @@ function ProfilePictureUpload({ customer, customerId }: { customer: any, custome
       `${customer.address || ''}, ${customer.city || ''}, ${customer.state || ''} ${customer.zipCode || ''}`
     );
     // You may want to use your own Google Maps API key here
-    const apiKey = "AIzaSyAnIcvNA_ZjRUnN4aeyl-1MYpBSN-ODIvw";
+    const apiKey = "AIzaSyCVHBYlen8sLxyI69WC67znnfi9SU4J0BY";
     return `https://maps.googleapis.com/maps/api/streetview?size=200x200&location=${address}&key=${apiKey}`;
   };
 

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { ChevronDown, LucideIcon } from 'lucide-react';
@@ -37,11 +36,11 @@ export const DropdownMenu: React.FC<DropdownMenuProps> = ({
         <Button 
           variant="ghost" 
           size="sm" 
-          className="w-full justify-between h-10 px-2"
+          className="w-full justify-between h-8 px-2"
         >
           <div className="flex items-center">
             <DropdownIcon className="h-4 w-4 text-muted-foreground" />
-            <span className="ml-2 text-sm overflow-hidden text-ellipsis">{label}</span>
+            <span className="ml-2 text-xs overflow-hidden text-ellipsis">{label}</span>
           </div>
           <ChevronDown className="h-3 w-3" />
         </Button>
@@ -59,13 +58,13 @@ export const DropdownMenu: React.FC<DropdownMenuProps> = ({
               variant={isSubActive ? "secondary" : "ghost"} 
               size="sm" 
               className={cn(
-                "w-full justify-start h-9 pl-8", 
+                "w-full justify-start h-7 pl-8", 
                 isSubActive && "bg-white border border-foreground/10"
               )}
             >
               <Link to={subItem.path}>
-                <SubIcon className={cn("h-4 w-4", isSubActive ? "text-primary" : "text-muted-foreground")} />
-                <span className="ml-2 text-sm font-medium overflow-hidden text-ellipsis">{subItem.label}</span>
+                <SubIcon className={cn("h-3.5 w-3.5", isSubActive ? "text-primary" : "text-muted-foreground")} />
+                <span className="ml-2 text-xs font-medium overflow-hidden text-ellipsis">{subItem.label}</span>
               </Link>
             </Button>
           );
