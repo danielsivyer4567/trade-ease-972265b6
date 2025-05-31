@@ -35,7 +35,9 @@ export function WorkflowNavigation({
         fontFamily: "'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif", 
         padding: '8px 12px',
         borderBottom: `1px solid ${darkGold}`,
-        backgroundColor: darkBg
+        backgroundColor: darkBg,
+        backgroundImage: 'linear-gradient(to right, rgba(23, 25, 57, 0.8), rgba(14, 14, 32, 0.8))',
+        backdropFilter: 'blur(5px)'
       }}
     >
       <Button 

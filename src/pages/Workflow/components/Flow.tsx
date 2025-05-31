@@ -31,7 +31,7 @@ import { WorkflowService } from '@/services/WorkflowService';
 import { supabase } from '@/integrations/supabase/client';
 import { useWorkflow } from '@/hooks/useWorkflow';
 import { useWorkflowAnimation } from '@/hooks/useWorkflowAnimation';
-import { ZoomIn, ZoomOut, Maximize, Lock, Unlock } from 'lucide-react';
+import { ZoomIn, ZoomOut, Maximize, Lock, Unlock, User, Briefcase, ClipboardList, FileText, MessageSquare, Eye, Zap, Share2, Layout } from 'lucide-react';
 import { DARK_GOLD, DARK_BG, DARK_TEXT, DARK_SECONDARY } from '@/contexts/WorkflowDarkModeContext';
 
 // Define node types
@@ -47,6 +47,21 @@ const nodeTypes = {
   emailNode: MessagingNode,
   whatsappNode: MessagingNode,
   socialNode: CustomNode,
+};
+
+// Node type to icon mapping
+const nodeTypeIcons = {
+  customerNode: <User className="h-5 w-5 text-white" />,
+  jobNode: <Briefcase className="h-5 w-5 text-white" />,
+  taskNode: <ClipboardList className="h-5 w-5 text-white" />,
+  quoteNode: <FileText className="h-5 w-5 text-white" />,
+  messagingNode: <MessageSquare className="h-5 w-5 text-white" />,
+  emailNode: <MessageSquare className="h-5 w-5 text-white" />,
+  whatsappNode: <MessageSquare className="h-5 w-5 text-white" />,
+  visionNode: <Eye className="h-5 w-5 text-white" />,
+  automationNode: <Zap className="h-5 w-5 text-white" />,
+  socialNode: <Share2 className="h-5 w-5 text-white" />,
+  customNode: <Layout className="h-5 w-5 text-white" />
 };
 
 const edgeTypes = {
@@ -246,6 +261,9 @@ function FlowContent({ onInit, workflowId, onNodeSelect, workflowDarkMode = true
       // Check if this edge is active
       const isActive = activeEdges.has(edge.id);
       
+      // Get source node type for color styling
+      const sourceType = edge.data?.sourceType || '';
+      
       // Only update if the active state changed
       if (isActive !== edge.data?.isActive) {
         return {
@@ -254,9 +272,18 @@ function FlowContent({ onInit, workflowId, onNodeSelect, workflowDarkMode = true
             ...edge.data,
             isActive
           },
-          className: isActive ? 'workflow-edge-active' : ''
+          className: isActive ? `workflow-edge-active ${sourceType}` : sourceType
         };
       }
+      
+      // Ensure the class is always added, even if active state didn't change
+      if (!edge.className && sourceType) {
+        return {
+          ...edge,
+          className: isActive ? `workflow-edge-active ${sourceType}` : sourceType
+        };
+      }
+      
       return edge;
     });
     
@@ -272,20 +299,25 @@ function FlowContent({ onInit, workflowId, onNodeSelect, workflowDarkMode = true
 
   const onConnect = useCallback(
     (params) => {
+      // Find source node to get its type for coloring
+      const sourceNode = nodes.find(node => node.id === params.source);
+      const sourceType = sourceNode ? sourceNode.type : null;
+      
       const newEdge = {
         ...params,
         type: 'animated',
         animated: true,
         data: {
-          isActive: false // Start inactive
+          isActive: false, // Start inactive
+          sourceType: sourceType // Store source type for coloring
         },
         style: { 
-          stroke: actualDarkMode ? DARK_GOLD : '#3b82f6',
+          stroke: actualDarkMode ? 'rgba(165, 149, 255, 0.6)' : '#3b82f6',
           strokeWidth: actualDarkMode ? 2 : 1.5
         },
         markerEnd: {
           type: MarkerType.ArrowClosed,
-          color: actualDarkMode ? DARK_GOLD : '#3b82f6',
+          color: actualDarkMode ? 'rgba(165, 149, 255, 0.8)' : '#3b82f6',
           width: 15,
           height: 15
         }
@@ -293,7 +325,7 @@ function FlowContent({ onInit, workflowId, onNodeSelect, workflowDarkMode = true
       
       setEdges((eds) => addEdge(newEdge, eds));
     },
-    [actualDarkMode, setEdges]
+    [actualDarkMode, setEdges, nodes]
   );
 
   const onDrop = useCallback(
@@ -310,14 +342,21 @@ function FlowContent({ onInit, workflowId, onNodeSelect, workflowDarkMode = true
         y: event.clientY,
       });
 
+      // Create a unique ID with timestamp to avoid conflicts
+      const uniqueId = `${type}-${Date.now()}`;
+      
       const newNode = {
-        id: `${type}-${Date.now()}`,
+        id: uniqueId,
         type,
         position,
         data: { 
           label: type,
-          workflowDarkMode: actualDarkMode
+          workflowDarkMode: actualDarkMode,
+          icon: nodeTypeIcons[type] || null,
+          // Add default description based on node type
+          description: getNodeDescription(type)
         },
+        className: `resizable ${type}`,
       };
 
       setNodes((nds) => nds.concat(newNode));
@@ -357,6 +396,16 @@ function FlowContent({ onInit, workflowId, onNodeSelect, workflowDarkMode = true
     }
     setSelectedNode(node);
     
+    // Add active class to the node
+    setNodes(nds => 
+      nds.map(n => ({
+        ...n,
+        className: n.id === node.id 
+          ? `resizable ${n.type} active-node` 
+          : `resizable ${n.type}`
+      }))
+    );
+    
     // Activate all outgoing edges from this node
     animationActivateNodeOutgoingEdges(node.id);
   };
@@ -384,6 +433,21 @@ function FlowContent({ onInit, workflowId, onNodeSelect, workflowDarkMode = true
     zIndex: 5000
   };
 
+  // Update all nodes when dark mode changes
+  useEffect(() => {
+    console.log('Flow dark mode state:', actualDarkMode);
+    setNodes((nds) => 
+      nds.map(node => ({
+        ...node,
+        data: { 
+          ...node.data,
+          workflowDarkMode: actualDarkMode
+        },
+        className: `resizable ${node.type}`
+      }))
+    );
+  }, [actualDarkMode, setNodes]);
+
   return (
     <div 
       style={{ 
@@ -409,21 +473,28 @@ function FlowContent({ onInit, workflowId, onNodeSelect, workflowDarkMode = true
         fitViewOptions={{ padding: 0.2 }}
         className={`${actualDarkMode ? 'workflow-dark-mode-flow' : ''}`}
         style={actualDarkMode ? { 
-          background: DARK_BG, 
+          background: `linear-gradient(135deg, ${DARK_SECONDARY} 0%, ${DARK_BG} 50%, #0a0a18 100%)`, 
           color: DARK_TEXT, 
-          border: `3px solid ${DARK_GOLD}`,
-          boxShadow: 'inset 0 0 40px rgba(0, 0, 0, 0.3)',
-          fontFamily: "'Roboto', sans-serif"
+          border: `3px solid rgba(165, 149, 255, 0.3)`,
+          boxShadow: 'inset 0 0 40px rgba(86, 28, 198, 0.15)',
+          fontFamily: "'Roboto', sans-serif",
+          backgroundSize: '400% 400%',
+          animation: 'gradientFlow 15s ease infinite'
         } : {
           fontFamily: "'Roboto', sans-serif"
         }}
         defaultEdgeOptions={{
           type: 'animated',
           animated: true,
-          style: { strokeWidth: actualDarkMode ? 2 : 1.5 },
+          style: { 
+            strokeWidth: actualDarkMode ? 2 : 1.5,
+            stroke: actualDarkMode ? 'rgba(165, 149, 255, 0.6)' : '#3b82f6'
+          },
           markerEnd: {
             type: MarkerType.ArrowClosed,
-            color: actualDarkMode ? DARK_GOLD : '#3b82f6'
+            color: actualDarkMode ? 'rgba(165, 149, 255, 0.8)' : '#3b82f6',
+            width: 15,
+            height: 15
           },
           data: {
             isActive: false
@@ -536,3 +607,21 @@ export default function Flow(props: FlowProps) {
     </ReactFlowProvider>
   );
 }
+
+// Helper function to get node description
+const getNodeDescription = (nodeType: string): string => {
+  switch (nodeType) {
+    case 'customerNode': return 'Customer data';
+    case 'jobNode': return 'Job details';
+    case 'taskNode': return 'Task assignment';
+    case 'quoteNode': return 'Quote details';
+    case 'visionNode': return 'Vision analysis';
+    case 'messagingNode': return 'SMS notifications';
+    case 'emailNode': return 'Email messages';
+    case 'whatsappNode': return 'WhatsApp messages';
+    case 'socialNode': return 'Social media';
+    case 'automationNode': return 'Automated workflow';
+    case 'calendarNode': return 'Calendar events';
+    default: return 'Custom component';
+  }
+};
