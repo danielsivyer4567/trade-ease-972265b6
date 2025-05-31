@@ -40,6 +40,11 @@ const GOOGLE_MAPS_API_KEY = GOOGLE_MAPS_CONFIG.apiKey;
 // Log the API key (partial) for debugging
 console.log("Google Maps API Key loaded:", GOOGLE_MAPS_API_KEY ? `${GOOGLE_MAPS_API_KEY.substring(0, 10)}...` : "NOT LOADED");
 
+// Add comprehensive error checking
+if (!GOOGLE_MAPS_API_KEY) {
+  console.error("CRITICAL: Google Maps API key is not configured!");
+}
+
 // Default map center - Gold Coast coordinates
 const DEFAULT_CENTER = {
   lat: -28.017112731933594,
@@ -346,7 +351,23 @@ const JobSiteMap = memo(() => {
       stack: error.stack,
       name: error.name
     });
-    setMapError("Failed to load Google Maps. Please check browser console for details.");
+    
+    // Check for specific error types
+    let specificError = "Failed to load Google Maps. ";
+    
+    if (error.message?.includes('RefererNotAllowedMapError')) {
+      specificError += "API key referrer restrictions issue. Please check Google Cloud Console.";
+    } else if (error.message?.includes('ApiNotActivatedMapError')) {
+      specificError += "Maps JavaScript API is not activated. Please enable it in Google Cloud Console.";
+    } else if (error.message?.includes('InvalidKeyMapError')) {
+      specificError += "Invalid API key. Please check your API key configuration.";
+    } else if (error.message?.includes('OverQuotaMapError')) {
+      specificError += "API quota exceeded. Please check your Google Cloud billing.";
+    } else {
+      specificError += "Please check browser console for details.";
+    }
+    
+    setMapError(specificError);
   }, []);
   
   // Format distance for display
@@ -495,12 +516,20 @@ const JobSiteMap = memo(() => {
         <LoadScript 
           googleMapsApiKey={GOOGLE_MAPS_API_KEY} 
           libraries={mapLibraries}
-          version="beta"
+          version="weekly"
           onError={handleLoadError}
-          onLoad={() => console.log("Google Maps script loaded")}
+          onLoad={() => {
+            console.log("Google Maps script loaded successfully");
+            // Check if google.maps is available
+            if ((window as any).google && (window as any).google.maps) {
+              console.log("Google Maps API is available");
+            } else {
+              console.error("Google Maps API not available after script load");
+            }
+          }}
           loadingElement={<div className="h-full w-full flex items-center justify-center">Loading Maps...</div>}
           id="google-map-script"
-          ref={loadScriptRef}
+          preventGoogleFontsLoading={true}
         >
           <GoogleMap 
             mapContainerStyle={MAP_CONTAINER_STYLE} 
