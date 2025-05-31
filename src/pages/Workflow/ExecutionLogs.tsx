@@ -1,92 +1,71 @@
 import React from 'react';
+import { BaseLayout } from '@/components/ui/BaseLayout';
+import { Activity } from 'lucide-react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { WorkflowNavigation } from './components/WorkflowNavigation';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
+import { useWorkflowDarkMode, DARK_BG, DARK_TEXT, DARK_GOLD, DARK_SECONDARY } from '@/contexts/WorkflowDarkModeContext';
 
 export default function ExecutionLogs() {
-  // TODO: Implement actual execution logs data fetching
-  const mockLogs = [
-    {
-      id: 1,
-      workflowName: 'Customer Onboarding',
-      executedAt: '2024-03-20T10:30:00',
-      status: 'Completed',
-      duration: '2m 30s',
-      triggeredBy: 'System'
-    },
-    {
-      id: 2,
-      workflowName: 'Invoice Processing',
-      executedAt: '2024-03-20T09:15:00',
-      status: 'Failed',
-      duration: '45s',
-      triggeredBy: 'John Doe'
-    },
-    {
-      id: 3,
-      workflowName: 'Data Sync',
-      executedAt: '2024-03-20T08:00:00',
-      status: 'Running',
-      duration: '5m',
-      triggeredBy: 'Schedule'
-    }
-  ];
-
-  const getStatusBadgeColor = (status: string) => {
-    switch (status.toLowerCase()) {
-      case 'completed':
-        return 'bg-green-100 text-green-800';
-      case 'failed':
-        return 'bg-red-100 text-red-800';
-      case 'running':
-        return 'bg-blue-100 text-blue-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
-  };
-
+  const { darkMode: workflowDarkMode } = useWorkflowDarkMode();
+  
   return (
-    <div className="container mx-auto p-4">
-      <WorkflowNavigation />
-      
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold">Workflow Execution Logs</h1>
-        <p className="text-gray-500 mt-2">Monitor and track workflow executions</p>
-      </div>
+    <BaseLayout>
+      <div className={`p-4 md:p-6 space-y-4 md:space-y-6 ${workflowDarkMode ? 'bg-[#18140c]' : ''}`}>
+        <WorkflowNavigation workflowDarkMode={workflowDarkMode} />
+        
+        <div>
+          <h1 className={`text-2xl font-bold flex items-center gap-2 ${workflowDarkMode ? 'text-[#ffe082]' : ''}`}>
+            <Activity className={`h-6 w-6 ${workflowDarkMode ? 'text-[#bfa14a]' : 'text-blue-600'}`} />
+            Workflow Execution Logs
+          </h1>
+          <p className={`mt-1 ${workflowDarkMode ? 'text-[#ffe082] opacity-80' : 'text-muted-foreground'}`}>
+            Track the execution history of your workflow automations
+          </p>
+        </div>
 
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Workflow Name</TableHead>
-            <TableHead>Executed At</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead>Duration</TableHead>
-            <TableHead>Triggered By</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {mockLogs.map((log) => (
-            <TableRow key={log.id}>
-              <TableCell className="font-medium">{log.workflowName}</TableCell>
-              <TableCell>{new Date(log.executedAt).toLocaleString()}</TableCell>
-              <TableCell>
-                <span className={`px-2 py-1 rounded-full text-sm ${getStatusBadgeColor(log.status)}`}>
-                  {log.status}
-                </span>
-              </TableCell>
-              <TableCell>{log.duration}</TableCell>
-              <TableCell>{log.triggeredBy}</TableCell>
-            </TableRow>
+        <div className="space-y-4">
+          {/* Example log entries */}
+          {[1, 2, 3].map((i) => (
+            <Card key={i} className={workflowDarkMode ? 'bg-[#211c15] border-[#bfa14a]' : ''}>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <CardTitle className={`text-lg ${workflowDarkMode ? 'text-[#bfa14a]' : ''}`}>
+                    Customer Onboarding Workflow
+                  </CardTitle>
+                  <Badge variant={i === 1 ? "default" : "outline"} className={
+                    workflowDarkMode ? (
+                      i === 1 ? 'bg-[#bfa14a] text-[#18140c]' : 'border-[#bfa14a] text-[#ffe082]'
+                    ) : ''
+                  }>
+                    {i === 1 ? 'Running' : 'Completed'}
+                  </Badge>
+                </div>
+                <CardDescription className={workflowDarkMode ? 'text-[#ffe082] opacity-70' : ''}>
+                  Execution #{1000 + i} • Started 2 hours ago
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  <div className={`flex items-center gap-2 text-sm ${workflowDarkMode ? 'text-[#ffe082]' : ''}`}>
+                    <span className={`h-2 w-2 rounded-full ${i === 1 ? (workflowDarkMode ? 'bg-[#bfa14a]' : 'bg-green-500') : (workflowDarkMode ? 'bg-[#bfa14a]' : 'bg-blue-500')}`}></span>
+                    {i === 1 ? 'Processing customer data...' : 'Workflow completed successfully'}
+                  </div>
+                  <div className={`text-xs ${workflowDarkMode ? 'text-[#ffe082] opacity-60' : 'text-gray-500'}`}>
+                    Duration: {i === 1 ? '2m 15s' : '5m 32s'} • Nodes executed: {i === 1 ? '3/5' : '5/5'}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           ))}
-        </TableBody>
-      </Table>
-    </div>
+        </div>
+
+        <div className={`text-center p-10 border border-dashed rounded-md ${workflowDarkMode ? 'border-[#bfa14a]' : ''}`}>
+          <p className={workflowDarkMode ? 'text-[#ffe082] opacity-80' : 'text-muted-foreground'}>
+            More execution logs will appear here as your workflows run
+          </p>
+        </div>
+      </div>
+    </BaseLayout>
   );
 } 

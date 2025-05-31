@@ -3,50 +3,59 @@
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
+
+/* Import Roboto font for matching n8n's style */
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
 
 /* Any additional app-specific styling can be added here */
 /* Note: Most styling is handled by Tailwind CSS in index.css */
 
 /* Workflow Dark Mode Global Styles */
 .workflow-dark-mode {
-  background-color: #18140c !important;
-  color: #ffe082 !important;
+  background-color: #2b2b2b !important;
+  color: #f8f8f8 !important;
+  font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
 
 .workflow-dark-mode .react-flow__pane {
-  background-color: #18140c !important;
+  background-color: #2b2b2b !important;
+  background-image: radial-gradient(circle, rgba(255, 255, 255, 0.04) 1px, transparent 1px) !important;
+  background-size: 20px 20px !important;
 }
 
 .workflow-dark-mode .react-flow__node {
-  background-color: #211c15 !important;
-  color: #ffe082 !important;
-  border-color: #bfa14a !important;
+  background-color: #2a2a3a !important;
+  color: #f8f8f8 !important;
+  border-color: #a0a0a0 !important;
+  border-radius: 4px !important;
+  font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
 
 .workflow-dark-mode .react-flow__controls,
 .workflow-dark-mode .react-flow__panel {
-  background-color: #18140c !important;
-  border-color: #bfa14a !important;
+  background-color: #1e1e2f !important;
+  border-color: #a0a0a0 !important;
 }
 
 .workflow-dark-mode .react-flow__controls-button {
-  background-color: #211c15 !important;
-  border-color: #bfa14a !important;
-  color: #ffe082 !important;
+  background-color: #2a2a3a !important;
+  border-color: #a0a0a0 !important;
+  color: #f8f8f8 !important;
 }
 
 .workflow-dark-mode .react-flow__minimap {
-  background-color: #211c15 !important;
-  border-color: #bfa14a !important;
+  background-color: #2a2a3a !important;
+  border-color: #a0a0a0 !important;
 }
 
 .workflow-dark-mode .react-flow__edge path {
-  stroke: #bfa14a !important;
+  stroke: #a0a0a0 !important;
 }
 
 .workflow-dark-mode .react-flow__handle {
-  background-color: #bfa14a !important;
+  background-color: #a0a0a0 !important;
 }
 
 /* Dark mode for node types */
@@ -58,14 +67,14 @@
 .workflow-dark-mode .node-vision,
 .workflow-dark-mode .node-automation,
 .workflow-dark-mode .node-messaging {
-  background-color: #211c15 !important;
-  color: #ffe082 !important;
-  border-color: #bfa14a !important;
+  background-color: #2a2a3a !important;
+  color: #f8f8f8 !important;
+  border-color: #a0a0a0 !important;
 }
 
 /* Force dark mode canvas */
 .workflow-dark-mode-flow {
-  background-color: #18140c !important;
+  background-color: #1e1e2f !important;
 }
 
 /* Dark mode lock indicator */
@@ -81,12 +90,12 @@
 }
 
 .dark-mode-locked .react-flow__handle {
-  box-shadow: 0 0 0 2px #bfa14a, 0 0 8px 1px rgba(191, 161, 74, 0.6) !important;
+  box-shadow: 0 0 0 2px #a0a0a0, 0 0 8px 1px rgba(160, 160, 160, 0.6) !important;
 }
 
 .dark-mode-locked .react-flow__edge path {
   stroke-width: 2px !important;
-  filter: drop-shadow(0 0 2px rgba(191, 161, 74, 0.6)) !important;
+  filter: drop-shadow(0 0 2px rgba(160, 160, 160, 0.6)) !important;
 }
 
 /* Additional styling for UI in locked mode */
@@ -124,9 +133,9 @@
 
 /* Fix for dark mode controls */
 .workflow-dark-mode .react-flow__controls-button {
-  background-color: #211c15 !important;
-  border-color: #bfa14a !important;
-  color: #ffe082 !important;
+  background-color: #2a2a3a !important;
+  border-color: #a0a0a0 !important;
+  color: #f8f8f8 !important;
 }
 
 /* Ensure higher specificity for these important controls */

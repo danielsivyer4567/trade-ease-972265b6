@@ -7,9 +7,11 @@ import { NodeDetailsPanel } from './components/NodeDetailsPanel';
 import { WorkflowDrawer } from './components/WorkflowDrawer';
 import { WorkflowSaveDialog } from './components/WorkflowSaveDialog';
 import { WorkflowLoadDialog } from './components/WorkflowLoadDialog';
+import { WorkflowAIAssistant } from './components/WorkflowAIAssistant';
 import { toast } from 'sonner';
 import { WorkflowService } from '@/services/WorkflowService';
 import { User, Briefcase, ClipboardList, FileText, MessageSquare, Eye, Zap, Share2, Layout } from 'lucide-react';
+import { useWorkflowDarkMode, DARK_BG, DARK_TEXT, DARK_GOLD, DARK_SECONDARY } from '@/contexts/WorkflowDarkModeContext';
 
 // Define interfaces for workflow data
 interface NodeData {
@@ -51,6 +53,7 @@ export default function WorkflowPage() {
   const { id } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
+  const { darkMode: workflowDarkMode, setDarkMode } = useWorkflowDarkMode();
   const [selectedNode, setSelectedNode] = useState(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [isSaveDialogOpen, setIsSaveDialogOpen] = useState(false);
@@ -60,11 +63,19 @@ export default function WorkflowPage() {
   const [flowInstance, setFlowInstance] = useState(null);
   const [nodes, setNodes] = useState<Node[]>([]);
   const [edges, setEdges] = useState<Edge[]>([]);
+  const [isAIAssistantCollapsed, setIsAIAssistantCollapsed] = useState(false);
+  const [showAIAssistant, setShowAIAssistant] = useState(true);
   const pendingTemplateData = useRef(null);
   const pendingWorkflowId = useRef(null);
   const pendingAutomationData = useRef(null);
   const hasProcessedLocationState = useRef(false);
   
+  // Enable dark mode on component mount
+  useEffect(() => {
+    setDarkMode(true);
+    toast.success("Dark mode enabled for workflow canvas");
+  }, [setDarkMode]);
+
   // Clear location state to prevent the same action from happening again on refresh
   useEffect(() => {
     if (location.state && !hasProcessedLocationState.current) {
@@ -486,14 +497,18 @@ export default function WorkflowPage() {
   };
 
   return (
-    <div className="flex h-screen">
+    <div className={`flex h-screen ${workflowDarkMode ? 'bg-[#2b2b2b]' : 'bg-white'}`}>
       {/* Left sidebar for node types */}
-      <NodeSidebar />
+      <NodeSidebar workflowDarkMode={workflowDarkMode} />
 
       {/* Main workflow area */}
-      <div className="flex-1 flex flex-col h-full">
+      <div className={`flex-1 flex flex-col h-full ${workflowDarkMode ? 'bg-[#2b2b2b]' : ''} relative`}>
         {/* Top navigation */}
-        <WorkflowNavigation />
+        <WorkflowNavigation 
+          workflowDarkMode={workflowDarkMode} 
+          onToggleAIAssistant={() => setShowAIAssistant(!showAIAssistant)}
+          showAIAssistant={showAIAssistant}
+        />
 
         {/* Flow canvas */}
         <div className="flex-1 h-full">
@@ -512,8 +527,19 @@ export default function WorkflowPage() {
             edges={edges}
             setNodes={setNodes}
             setEdges={setEdges}
+            workflowDarkMode={workflowDarkMode}
           />
         </div>
+
+        {/* AI Assistant */}
+        {showAIAssistant && (
+          <WorkflowAIAssistant 
+            workflowDarkMode={workflowDarkMode}
+            isCollapsed={isAIAssistantCollapsed}
+            onToggleCollapse={() => setIsAIAssistantCollapsed(!isAIAssistantCollapsed)}
+            onClose={() => setShowAIAssistant(false)}
+          />
+        )}
       </div>
 
       {/* Right panel for node details */}
@@ -522,6 +548,7 @@ export default function WorkflowPage() {
           node={selectedNode}
           onClose={() => setSelectedNode(null)}
           onUpdate={(updatedNode) => setSelectedNode(updatedNode)}
+          workflowDarkMode={workflowDarkMode}
         />
       )}
 

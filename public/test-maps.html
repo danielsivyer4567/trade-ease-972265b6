@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Google Maps API Test</title>
+    <style>
+        #map {
+            height: 400px;
+            width: 100%;
+            border: 2px solid #333;
+        }
+        .info {
+            margin: 20px;
+            padding: 20px;
+            background-color: #f0f0f0;
+            border-radius: 5px;
+        }
+        .error {
+            color: red;
+            font-weight: bold;
+        }
+        .success {
+            color: green;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="info">
+        <h1>Google Maps API Direct Test</h1>
+        <p>API Key: AIzaSyCVHBYlen8sLxyI69WC67znnfi9SU4J0BY</p>
+        <p>Status: <span id="status">Loading...</span></p>
+        <p>Check the browser console (F12) for detailed error messages</p>
+    </div>
+    
+    <div id="map"></div>
+    
+    <div class="info">
+        <h2>Common Fixes:</h2>
+        <ol>
+            <li>Open <a href="https://console.cloud.google.com/apis/credentials" target="_blank">Google Cloud Console</a></li>
+            <li>Click on your API key</li>
+            <li>Under "Application restrictions", select "HTTP referrers"</li>
+            <li>Add these:
+                <ul>
+                    <li>localhost:5173/*</li>
+                    <li>localhost/*</li>
+                    <li>http://localhost:*</li>
+                    <li>file:///*</li>
+                </ul>
+            </li>
+            <li>Under "API restrictions", make sure "Maps JavaScript API" is enabled</li>
+            <li>Check that billing is enabled in your Google Cloud account</li>
+        </ol>
+    </div>
+
+    <script>
+        function initMap() {
+            console.log('initMap called - Google Maps loaded successfully');
+            document.getElementById('status').innerHTML = '<span class="success">Google Maps Loaded!</span>';
+            
+            try {
+                const map = new google.maps.Map(document.getElementById('map'), {
+                    center: { lat: -28.0167, lng: 153.4000 },
+                    zoom: 12
+                });
+                
+                console.log('Map created successfully', map);
+                document.getElementById('status').innerHTML = '<span class="success">Map Created Successfully!</span>';
+                
+                // Add a marker
+                new google.maps.Marker({
+                    position: { lat: -28.0167, lng: 153.4000 },
+                    map: map,
+                    title: 'Gold Coast'
+                });
+                
+            } catch (error) {
+                console.error('Error creating map:', error);
+                document.getElementById('status').innerHTML = '<span class="error">Error creating map: ' + error + '</span>';
+            }
+        }
+        
+        // Global error handler
+        window.gm_authFailure = function() {
+            console.error('Google Maps authentication failed');
+            document.getElementById('status').innerHTML = '<span class="error">Authentication Failed - Check API Key Settings</span>';
+        };
+    </script>
+    
+    <script async defer
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCVHBYlen8sLxyI69WC67znnfi9SU4J0BY&callback=initMap"
+        onerror="document.getElementById('status').innerHTML = '<span class=\'error\'>Failed to load Google Maps script</span>'">
+    </script>
+</body>
+</html> 

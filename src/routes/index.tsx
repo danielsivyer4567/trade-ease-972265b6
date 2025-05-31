@@ -23,6 +23,8 @@ const DevelopmentEntry = lazy(() => import('@/pages/DevelopmentEntry'));
 const DashboardPage = lazy(() => import('@/pages/index'));
 const NotFoundPage = lazy(() => import('@/pages/NotFound'));
 const DebugMapsPage = lazy(() => import('@/pages/debug-maps'));
+const TestMapsPage = lazy(() => import('@/pages/test-maps'));
+const GoogleCloudFixPage = lazy(() => import('@/pages/google-cloud-fix'));
 
 // Auth pages
 const AuthPage = lazy(() => import('@/pages/Auth'));
@@ -45,6 +47,9 @@ const JobDetailsPage = lazy(() => import('@/pages/Jobs/JobDetails'));
 // Quotes and Invoices
 const QuotesPage = lazy(() => import('@/pages/Quotes'));
 const NewQuotePage = lazy(() => import('@/pages/Quotes/NewQuote'));
+const InvoicesPage = lazy(() => import('@/pages/Invoices'));
+const NewInvoicePage = lazy(() => import('@/pages/Invoices/NewInvoice'));
+const InvoiceDetailPage = lazy(() => import('@/pages/Invoices/InvoiceDetail'));
 
 // Teams
 const TeamRedPage = lazy(() => import('@/pages/TeamRed'));
@@ -192,6 +197,15 @@ const routeObjects: RouteObject[] = [
               { path: "new", element: <SuspenseWrapper><NewQuotePage /></SuspenseWrapper> },
             ],
           },
+          // Invoices routes
+          {
+            path: "/invoices",
+            children: [
+              { index: true, element: <SuspenseWrapper><InvoicesPage /></SuspenseWrapper> },
+              { path: "new", element: <SuspenseWrapper><NewInvoicePage /></SuspenseWrapper> },
+              { path: ":id", element: <SuspenseWrapper><InvoiceDetailPage /></SuspenseWrapper> },
+            ],
+          },
           // Team routes
           { path: "/teams", element: <SuspenseWrapper><TeamsPage /></SuspenseWrapper> },
           { path: "/team-red", element: <SuspenseWrapper><TeamRedPage /></SuspenseWrapper> },
@@ -245,6 +259,10 @@ const routeObjects: RouteObject[] = [
           { path: "/credentials", element: <SuspenseWrapper><CredentialsPage /></SuspenseWrapper> },
           // Debug Maps route
           { path: "/debug-maps", element: <SuspenseWrapper><DebugMapsPage /></SuspenseWrapper> },
+          // Test Maps route
+          { path: "/test-maps", element: <SuspenseWrapper><TestMapsPage /></SuspenseWrapper> },
+          // Google Cloud Fix route
+          { path: "/google-cloud-fix", element: <SuspenseWrapper><GoogleCloudFixPage /></SuspenseWrapper> },
           // Add the route to the settings routes
           {
             path: "/settings/integrations/database",
