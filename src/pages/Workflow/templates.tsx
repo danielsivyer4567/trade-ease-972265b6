@@ -9,6 +9,8 @@ import { Search, Plus, Workflow, ArrowLeft, LayoutTemplate, Loader2 } from 'luci
 import { WorkflowService } from '@/services/WorkflowService';
 import { WorkflowTemplate } from '@/types/workflow';
 import { toast } from 'sonner';
+import { WorkflowNavigation } from './components/WorkflowNavigation';
+import { useWorkflowDarkMode, DARK_BG, DARK_TEXT, DARK_GOLD, DARK_SECONDARY } from '@/contexts/WorkflowDarkModeContext';
 
 const categoryOptions = [
   { value: 'all', label: 'All Templates' },
@@ -134,6 +136,7 @@ const exampleTemplates: WorkflowTemplate[] = [
 
 const Templates: React.FC = () => {
   const navigate = useNavigate();
+  const { darkMode: workflowDarkMode } = useWorkflowDarkMode();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [templates, setTemplates] = useState<WorkflowTemplate[]>([]);
@@ -213,32 +216,22 @@ const Templates: React.FC = () => {
 
   return (
     <BaseLayout>
-      <div className="p-4 md:p-6 space-y-4 md:space-y-6">
+      <div className={`p-4 md:p-6 space-y-4 md:space-y-6 ${workflowDarkMode ? 'bg-[#18140c]' : ''}`}>
         {/* Header */}
         <div className="flex flex-col gap-4">
-          <div className="flex items-center">
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              className="mr-2" 
-              onClick={handleBack}
-            >
-              <ArrowLeft className="h-4 w-4 mr-1" />
-              Back
-            </Button>
-          </div>
+          <WorkflowNavigation workflowDarkMode={workflowDarkMode} />
           <div className="flex justify-between items-center flex-wrap gap-4">
             <div>
-              <h1 className="text-2xl font-bold flex items-center">
-                <LayoutTemplate className="mr-2 h-6 w-6" />
+              <h1 className={`text-2xl font-bold flex items-center ${workflowDarkMode ? 'text-[#ffe082]' : ''}`}>
+                <LayoutTemplate className={`mr-2 h-6 w-6 ${workflowDarkMode ? 'text-[#bfa14a]' : ''}`} />
                 Workflow Templates
               </h1>
-              <p className="text-muted-foreground mt-1">
+              <p className={`mt-1 ${workflowDarkMode ? 'text-[#ffe082] opacity-80' : 'text-muted-foreground'}`}>
                 Pre-built workflow templates to help you get started quickly
               </p>
             </div>
             <Button 
-              className="flex items-center gap-2"
+              className={`flex items-center gap-2 ${workflowDarkMode ? 'bg-[#bfa14a] text-[#18140c] hover:bg-[#a08838]' : ''}`}
               onClick={handleCreateTemplate}
             >
               <Plus className="h-4 w-4" />
@@ -250,12 +243,12 @@ const Templates: React.FC = () => {
         {/* Search and Category Filter */}
         <div className="flex flex-col md:flex-row gap-4">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
+            <Search className={`absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 ${workflowDarkMode ? 'text-[#bfa14a]' : 'text-gray-500'}`} />
             <Input
               placeholder="Search templates..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10"
+              className={`pl-10 ${workflowDarkMode ? 'bg-[#211c15] border-[#bfa14a] text-[#ffe082] placeholder:text-[#ffe082]/50' : ''}`}
             />
           </div>
           <div className="flex flex-wrap gap-2">
@@ -265,6 +258,11 @@ const Templates: React.FC = () => {
                 variant={selectedCategory === category.value ? "default" : "outline"}
                 size="sm"
                 onClick={() => setSelectedCategory(category.value)}
+                className={workflowDarkMode ? (
+                  selectedCategory === category.value 
+                    ? 'bg-[#bfa14a] text-[#18140c] hover:bg-[#a08838]' 
+                    : 'border-[#bfa14a] text-[#ffe082] hover:bg-[#211c15]'
+                ) : ''}
               >
                 {category.label}
               </Button>
@@ -275,38 +273,49 @@ const Templates: React.FC = () => {
         {/* Templates Grid */}
         {isLoading ? (
           <div className="text-center py-16 flex flex-col items-center">
-            <Loader2 className="h-8 w-8 text-blue-500 animate-spin mb-2" />
-            <p className="text-muted-foreground">Loading templates...</p>
+            <Loader2 className={`h-8 w-8 animate-spin mb-2 ${workflowDarkMode ? 'text-[#bfa14a]' : 'text-blue-500'}`} />
+            <p className={workflowDarkMode ? 'text-[#ffe082]' : 'text-muted-foreground'}>Loading templates...</p>
           </div>
         ) : (
           <>
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6">
               {filteredTemplates.map(template => (
-                <Card key={template.id} className="hover:shadow-md transition-shadow duration-200">
+                <Card 
+                  key={template.id} 
+                  className={`hover:shadow-md transition-shadow duration-200 ${workflowDarkMode ? 'bg-[#211c15] border-[#bfa14a]' : ''}`}
+                >
                   <CardHeader className="pb-2">
                     <div className="flex items-center justify-between">
-                      <CardTitle className="text-lg">{template.name}</CardTitle>
-                      <Badge variant="outline">{template.category}</Badge>
+                      <CardTitle className={`text-lg ${workflowDarkMode ? 'text-[#bfa14a]' : ''}`}>{template.name}</CardTitle>
+                      <Badge 
+                        variant="outline" 
+                        className={workflowDarkMode ? 'border-[#bfa14a] text-[#ffe082]' : ''}
+                      >
+                        {template.category}
+                      </Badge>
                     </div>
-                    <CardDescription className="mt-1">{template.description}</CardDescription>
+                    <CardDescription className={`mt-1 ${workflowDarkMode ? 'text-[#ffe082] opacity-70' : ''}`}>
+                      {template.description}
+                    </CardDescription>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
                       <div>
-                        <p className="text-sm font-medium text-amber-600">
+                        <p className={`text-sm font-medium ${workflowDarkMode ? 'text-[#bfa14a]' : 'text-amber-600'}`}>
                           Nodes: {template.data.nodes.length}
                         </p>
-                        <p className="text-sm font-medium text-blue-600">
+                        <p className={`text-sm font-medium ${workflowDarkMode ? 'text-[#ffe082]' : 'text-blue-600'}`}>
                           Connections: {template.data.edges.length}
                         </p>
                       </div>
                     </div>
                   </CardContent>
-                  <CardFooter className="flex justify-between pt-4 border-t">
+                  <CardFooter className={`flex justify-between pt-4 border-t ${workflowDarkMode ? 'border-[#bfa14a]' : ''}`}>
                     <Button 
                       variant="outline" 
                       size="sm"
                       onClick={() => handleUseTemplate(template)}
+                      className={workflowDarkMode ? 'border-[#bfa14a] text-[#ffe082] hover:bg-[#211c15]' : ''}
                     >
                       Use Template
                     </Button>
@@ -314,6 +323,7 @@ const Templates: React.FC = () => {
                       variant="ghost" 
                       size="sm"
                       onClick={() => handleEditTemplate(template.id)}
+                      className={workflowDarkMode ? 'text-[#bfa14a] hover:bg-[#211c15]' : ''}
                     >
                       Edit
                     </Button>
@@ -323,8 +333,8 @@ const Templates: React.FC = () => {
             </div>
 
             {filteredTemplates.length === 0 && !isLoading && (
-              <div className="text-center p-10 border border-dashed rounded-md">
-                <p className="text-muted-foreground">No templates found.</p>
+              <div className={`text-center p-10 border border-dashed rounded-md ${workflowDarkMode ? 'border-[#bfa14a] text-[#ffe082]' : ''}`}>
+                <p className={workflowDarkMode ? 'text-[#ffe082] opacity-80' : 'text-muted-foreground'}>No templates found.</p>
               </div>
             )}
           </>

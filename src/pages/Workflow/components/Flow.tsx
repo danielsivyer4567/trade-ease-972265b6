@@ -436,8 +436,11 @@ function FlowContent({ onInit, workflowId, onNodeSelect, workflowDarkMode, toggl
           background: DARK_BG, 
           color: DARK_TEXT, 
           border: `3px solid ${DARK_GOLD}`,
-          boxShadow: 'inset 0 0 40px rgba(0, 0, 0, 0.3)'
-        } : {}}
+          boxShadow: 'inset 0 0 40px rgba(0, 0, 0, 0.3)',
+          fontFamily: "'Roboto', sans-serif"
+        } : {
+          fontFamily: "'Roboto', sans-serif"
+        }}
         defaultEdgeOptions={{
           type: 'animated',
           animated: true,
@@ -461,10 +464,17 @@ function FlowContent({ onInit, workflowId, onNodeSelect, workflowDarkMode, toggl
         panOnDrag={true}
       >
         <Background 
-          color={actualDarkMode ? "#ffffff" : undefined} 
+          color={actualDarkMode ? "#ffffff" : "#999"} 
           gap={20}
-          size={actualDarkMode ? 1.2 : 1}
+          size={actualDarkMode ? 0.6 : 1}
           variant={BackgroundVariant.Dots}
+          style={{
+            opacity: actualDarkMode ? 0.04 : 0.15,
+            backgroundImage: actualDarkMode ? 
+              'radial-gradient(circle, rgba(255, 255, 255, 0.04) 1px, transparent 1px)' : 
+              'radial-gradient(circle, rgba(0, 0, 0, 0.15) 1px, transparent 1px)',
+            backgroundSize: '20px 20px'
+          }}
         />
         
         <MiniMap 

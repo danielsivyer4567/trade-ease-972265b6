@@ -14,6 +14,8 @@ import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export function JobsMain() {
+  console.log("JobsMain component is rendering");
+  
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [actionLoading, setActionLoading] = useState<string | null>(null);
@@ -24,17 +26,26 @@ export function JobsMain() {
 
   useEffect(() => {
     const fetchJobs = async () => {
+      console.log("Fetching jobs from supabase...");
       setLoading(true);
-      const { data, error } = await supabase.from('jobs').select('*');
-      if (error) {
-        toast.error("Failed to fetch jobs");
-      } else {
-        setJobs(data || []);
-        if (data && data.length > 0) {
-          setSelectedJob(data[0].id);
+      try {
+        const { data, error } = await supabase.from('jobs').select('*');
+        console.log("Supabase response:", { data, error });
+        if (error) {
+          console.error("Supabase error:", error);
+          toast.error("Failed to fetch jobs");
+        } else {
+          setJobs(data || []);
+          if (data && data.length > 0) {
+            setSelectedJob(data[0].id);
+          }
         }
+      } catch (err) {
+        console.error("Error in fetchJobs:", err);
+        toast.error("Failed to fetch jobs");
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
     fetchJobs();
   }, []);

@@ -494,21 +494,33 @@ const JobSiteMap = memo(() => {
               <h3 className="mt-2 text-lg font-semibold text-gray-900">Map Error</h3>
               <p className="mt-1 text-sm text-gray-500">{mapError}</p>
               <div className="mt-4 text-left bg-gray-100 p-3 rounded-md">
-                <p className="text-xs font-semibold mb-2">Troubleshooting Steps:</p>
+                <p className="text-xs font-semibold mb-2">Quick Fix:</p>
                 <ol className="text-xs space-y-1">
-                  <li>1. Check Google Cloud Console for API key configuration</li>
-                  <li>2. Verify billing is set up correctly</li>
-                  <li>3. Ensure Maps JavaScript API is enabled</li>
-                  <li>4. Add your domain to allowed referrers</li>
+                  <li>1. Go to <a href="https://console.cloud.google.com/apis/credentials" target="_blank" className="text-blue-600 underline">Google Cloud Console</a></li>
+                  <li>2. Click on your API key: {GOOGLE_MAPS_API_KEY.substring(0, 10)}...</li>
+                  <li>3. Under "Application restrictions" → "HTTP referrers"</li>
+                  <li>4. Add: <code className="bg-gray-200 px-1">localhost:5173/*</code></li>
+                  <li>5. Enable "Maps JavaScript API" in <a href="https://console.cloud.google.com/apis/library" target="_blank" className="text-blue-600 underline">API Library</a></li>
+                  <li>6. Check <a href="https://console.cloud.google.com/billing" target="_blank" className="text-blue-600 underline">Billing</a> is enabled</li>
                 </ol>
               </div>
-              <Button 
-                onClick={() => window.location.reload()} 
-                className="mt-4"
-                size="sm"
-              >
-                Try Again
-              </Button>
+              <div className="mt-3 flex gap-2">
+                <Button 
+                  onClick={() => window.location.reload()} 
+                  className="flex-1"
+                  size="sm"
+                >
+                  Try Again
+                </Button>
+                <Button 
+                  onClick={() => window.open('/test-maps', '_blank')} 
+                  className="flex-1"
+                  size="sm"
+                  variant="outline"
+                >
+                  Run Diagnostics
+                </Button>
+              </div>
             </div>
           </div>
         )}
