@@ -89,7 +89,7 @@ export function WorkflowAIAssistant({
           top: '120px',
           bottom: '20px',
           backgroundColor: workflowDarkMode ? DARK_SECONDARY : '#fff',
-          border: `1px solid ${workflowDarkMode ? DARK_GOLD : '#eaeaea'}`,
+          border: `1px solid ${workflowDarkMode ? '#383838' : '#eaeaea'}`,
           borderRight: 'none',
           borderTopLeftRadius: '8px',
           borderBottomLeftRadius: '8px',
@@ -115,7 +115,7 @@ export function WorkflowAIAssistant({
         top: '120px',
         bottom: '20px',
         backgroundColor: workflowDarkMode ? DARK_SECONDARY : '#fff',
-        border: `1px solid ${workflowDarkMode ? DARK_GOLD : '#eaeaea'}`,
+        border: `1px solid ${workflowDarkMode ? '#383838' : '#eaeaea'}`,
         borderRight: 'none',
         borderTopLeftRadius: '8px',
         borderBottomLeftRadius: '8px',
@@ -125,7 +125,7 @@ export function WorkflowAIAssistant({
       <div 
         className="flex items-center justify-between p-3"
         style={{ 
-          borderBottom: `1px solid ${workflowDarkMode ? DARK_GOLD : '#eaeaea'}`,
+          borderBottom: `1px solid ${workflowDarkMode ? '#383838' : '#eaeaea'}`,
           backgroundColor: workflowDarkMode ? DARK_BG : '#f9f9f9'
         }}
       >
@@ -158,7 +158,7 @@ export function WorkflowAIAssistant({
         className="flex-1 overflow-y-auto p-4"
         style={{ 
           backgroundColor: workflowDarkMode ? DARK_BG : '#fff',
-          borderBottom: `1px solid ${workflowDarkMode ? DARK_GOLD : '#eaeaea'}`
+          borderBottom: `1px solid ${workflowDarkMode ? '#383838' : '#eaeaea'}`
         }}
       >
         {chatHistory.map((chat, index) => (
@@ -170,16 +170,17 @@ export function WorkflowAIAssistant({
               style={{
                 maxWidth: '85%',
                 backgroundColor: chat.type === 'assistant' 
-                  ? (workflowDarkMode ? 'rgba(160, 160, 160, 0.05)' : 'rgba(235, 235, 235, 0.5)') 
-                  : (workflowDarkMode ? '#333333' : '#e9f5ff'),
+                  ? (workflowDarkMode ? '#2d2d2d' : 'rgba(235, 235, 235, 0.5)') 
+                  : (workflowDarkMode ? '#2a2a2a' : '#e9f5ff'),
                 padding: '10px 14px',
                 borderRadius: '12px',
                 color: workflowDarkMode ? DARK_TEXT : '#333',
+                border: workflowDarkMode ? '1px solid #383838' : 'none'
               }}
             >
               <div className="flex items-center mb-1">
                 {chat.type === 'assistant' ? (
-                  <Bot size={14} className="mr-1" color={workflowDarkMode ? DARK_GOLD : '#555'} />
+                  <Bot size={14} className="mr-1" color={workflowDarkMode ? '#a0a0a0' : '#555'} />
                 ) : (
                   <User size={14} className="mr-1" color={workflowDarkMode ? DARK_TEXT : '#2563eb'} />
                 )}
@@ -202,14 +203,15 @@ export function WorkflowAIAssistant({
             <div 
               style={{
                 maxWidth: '85%',
-                backgroundColor: workflowDarkMode ? 'rgba(160, 160, 160, 0.1)' : 'rgba(235, 235, 235, 0.5)',
+                backgroundColor: workflowDarkMode ? '#2d2d2d' : 'rgba(235, 235, 235, 0.5)',
                 padding: '10px 14px',
                 borderRadius: '12px',
                 color: workflowDarkMode ? DARK_TEXT : '#333',
+                border: workflowDarkMode ? '1px solid #383838' : 'none'
               }}
             >
               <div className="flex items-center">
-                <Bot size={14} className="mr-1" color={workflowDarkMode ? DARK_GOLD : '#555'} />
+                <Bot size={14} className="mr-1" color={workflowDarkMode ? '#a0a0a0' : '#555'} />
                 <Loader size={16} className="animate-spin ml-2" color={workflowDarkMode ? DARK_TEXT : '#555'} />
               </div>
             </div>
@@ -228,7 +230,7 @@ export function WorkflowAIAssistant({
           className="flex items-center"
           style={{
             backgroundColor: workflowDarkMode ? DARK_BG : '#fff',
-            border: `1px solid ${workflowDarkMode ? DARK_GOLD : '#ddd'}`,
+            border: `1px solid ${workflowDarkMode ? '#383838' : '#ddd'}`,
             borderRadius: '8px',
             padding: '8px 12px',
           }}
@@ -251,7 +253,7 @@ export function WorkflowAIAssistant({
             disabled={!message.trim() || isThinking}
             className={`ml-2 p-2 rounded-full ${!message.trim() || isThinking ? 'opacity-50' : 'opacity-100'}`}
             style={{ 
-              backgroundColor: workflowDarkMode ? DARK_GOLD : '#2563eb',
+              backgroundColor: workflowDarkMode ? '#505050' : '#2563eb',
               display: 'flex',
               justifyContent: 'center',
               alignItems: 'center',

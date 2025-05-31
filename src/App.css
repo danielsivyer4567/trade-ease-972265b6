@@ -14,14 +14,14 @@
 
 /* Workflow Dark Mode Global Styles */
 .workflow-dark-mode {
-  background-color: #2b2b2b !important;
+  background-color: #232323 !important;
   color: #f8f8f8 !important;
   font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
 
 .workflow-dark-mode .react-flow__pane {
-  background-color: #2b2b2b !important;
-  background-image: radial-gradient(circle, rgba(255, 255, 255, 0.04) 1px, transparent 1px) !important;
+  background-color: #232323 !important;
+  background-image: radial-gradient(circle, rgba(255, 255, 255, 0.06) 1px, transparent 1px) !important;
   background-size: 20px 20px !important;
 }
 

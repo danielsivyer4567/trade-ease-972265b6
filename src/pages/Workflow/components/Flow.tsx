@@ -31,8 +31,8 @@ import { WorkflowService } from '@/services/WorkflowService';
 import { supabase } from '@/integrations/supabase/client';
 import { useWorkflow } from '@/hooks/useWorkflow';
 import { useWorkflowAnimation } from '@/hooks/useWorkflowAnimation';
-import { Moon, Sun, ZoomIn, ZoomOut, Maximize, Lock, Unlock } from 'lucide-react';
-import { useWorkflowDarkMode, DARK_GOLD, DARK_BG, DARK_TEXT, DARK_SECONDARY } from '@/contexts/WorkflowDarkModeContext';
+import { ZoomIn, ZoomOut, Maximize, Lock, Unlock } from 'lucide-react';
+import { DARK_GOLD, DARK_BG, DARK_TEXT, DARK_SECONDARY } from '@/contexts/WorkflowDarkModeContext';
 
 // Define node types
 const nodeTypes = {
@@ -69,20 +69,10 @@ const defaultNodes = [];
 const defaultEdges = [];
 
 // The actual Flow component content
-function FlowContent({ onInit, workflowId, onNodeSelect, workflowDarkMode, toggleDarkMode, nodes: externalNodes, edges: externalEdges, setNodes: externalSetNodes, setEdges: externalSetEdges }: FlowProps) {
-  // Use the global dark mode context
-  const { darkMode: globalDarkMode, toggleDarkMode: toggleGlobalDarkMode, isDarkModeLocked } = useWorkflowDarkMode();
+function FlowContent({ onInit, workflowId, onNodeSelect, workflowDarkMode = true, nodes: externalNodes, edges: externalEdges, setNodes: externalSetNodes, setEdges: externalSetEdges }: FlowProps) {
+  // Always use dark mode
+  const actualDarkMode = true;
   
-  // Respect props if provided, otherwise use global state
-  // When dark mode is locked, always use dark mode regardless of props
-  const actualDarkMode = isDarkModeLocked ? true : (workflowDarkMode !== undefined ? workflowDarkMode : globalDarkMode);
-  const actualToggleDarkMode = toggleDarkMode || toggleGlobalDarkMode;
-  
-  // Sync with global state when props change
-  useEffect(() => {
-    console.log('Flow component received workflowDarkMode prop:', workflowDarkMode, 'Lock state:', isDarkModeLocked);
-  }, [workflowDarkMode, isDarkModeLocked]);
-
   // Use external state if provided, otherwise use internal state
   const [internalNodes, setInternalNodes, onNodesChange] = useNodesState(defaultNodes);
   const [internalEdges, setInternalEdges, onEdgesChange] = useEdgesState(defaultEdges);
@@ -376,20 +366,6 @@ function FlowContent({ onInit, workflowId, onNodeSelect, workflowDarkMode, toggl
     setNodes((nds) => nds.map((n) => n.id === nodeId ? { ...n, data: { ...n.data, ...data } } : n));
   };
 
-  // Update all nodes when dark mode changes
-  useEffect(() => {
-    console.log('Flow dark mode state:', actualDarkMode);
-    setNodes((nds) => 
-      nds.map(node => ({
-        ...node,
-        data: { 
-          ...node.data,
-          workflowDarkMode: actualDarkMode
-        }
-      }))
-    );
-  }, [actualDarkMode, setNodes]);
-
   // Styles for the standalone control buttons
   const controlButtonStyle: CSSProperties = {
     width: '36px',
@@ -431,7 +407,7 @@ function FlowContent({ onInit, workflowId, onNodeSelect, workflowDarkMode, toggl
         edgeTypes={edgeTypes}
         fitView
         fitViewOptions={{ padding: 0.2 }}
-        className={`${actualDarkMode ? 'workflow-dark-mode-flow' : ''} ${isDarkModeLocked ? 'dark-mode-locked' : ''}`}
+        className={`${actualDarkMode ? 'workflow-dark-mode-flow' : ''}`}
         style={actualDarkMode ? { 
           background: DARK_BG, 
           color: DARK_TEXT, 
@@ -466,12 +442,12 @@ function FlowContent({ onInit, workflowId, onNodeSelect, workflowDarkMode, toggl
         <Background 
           color={actualDarkMode ? "#ffffff" : "#999"} 
           gap={20}
-          size={actualDarkMode ? 0.6 : 1}
+          size={actualDarkMode ? 0.8 : 1}
           variant={BackgroundVariant.Dots}
           style={{
-            opacity: actualDarkMode ? 0.04 : 0.15,
+            opacity: actualDarkMode ? 0.05 : 0.15,
             backgroundImage: actualDarkMode ? 
-              'radial-gradient(circle, rgba(255, 255, 255, 0.04) 1px, transparent 1px)' : 
+              'radial-gradient(circle, rgba(255, 255, 255, 0.06) 1px, transparent 1px)' : 
               'radial-gradient(circle, rgba(0, 0, 0, 0.15) 1px, transparent 1px)',
             backgroundSize: '20px 20px'
           }}
@@ -490,29 +466,6 @@ function FlowContent({ onInit, workflowId, onNodeSelect, workflowDarkMode, toggl
           maskColor={actualDarkMode ? 'rgba(24, 20, 12, 0.6)' : undefined}
         />
         
-        {/* Add dark mode toggle button inside flow */}
-        <Panel position="top-right" className="mt-2 mr-2">
-          <button
-            onClick={actualToggleDarkMode}
-            className="w-8 h-8 rounded-full flex items-center justify-center shadow-lg focus:outline-none"
-            style={{
-              background: actualDarkMode ? DARK_GOLD : 'white',
-              border: `2px solid ${actualDarkMode ? DARK_GOLD : '#ccc'}`,
-              color: actualDarkMode ? '#18140c' : '#333',
-              transform: 'scale(1)',
-              transition: 'all 0.2s ease',
-              boxShadow: '0 2px 10px rgba(0, 0, 0, 0.2)'
-            }}
-            title={actualDarkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
-          >
-            {actualDarkMode ? (
-              <Sun size={16} />
-            ) : (
-              <Moon size={16} />
-            )}
-          </button>
-        </Panel>
-
         {/* Add a panel with animation controls for demo purposes */}
         <Panel position="top-right">
           <button 

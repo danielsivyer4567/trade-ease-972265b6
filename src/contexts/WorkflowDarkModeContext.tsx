@@ -2,9 +2,9 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 
 // Define the dark mode colors once to use across components
 export const DARK_GOLD = '#a0a0a0';
-export const DARK_BG = '#2b2b2b';
+export const DARK_BG = '#232323'; // Dark gray/charcoal to match the image
 export const DARK_TEXT = '#f8f8f8';
-export const DARK_SECONDARY = '#333333';
+export const DARK_SECONDARY = '#2a2a2a'; // Slightly lighter than bg
 
 // Create the context with a default value
 type WorkflowDarkModeContextType = {
