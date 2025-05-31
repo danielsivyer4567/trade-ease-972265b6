@@ -10,7 +10,7 @@ interface NodeData {
   [key: string]: any;
 }
 
-function JobNode({ data, isConnectable }: NodeProps) {
+function CustomNode({ data, isConnectable, selected }: NodeProps) {
   const nodeData = data as NodeData;
   const workflowDarkMode = nodeData?.workflowDarkMode || false;
   
@@ -19,7 +19,8 @@ function JobNode({ data, isConnectable }: NodeProps) {
       <Handle
         type="target"
         position={Position.Left}
-        style={{ background: workflowDarkMode ? '#c04aff' : '#555' }}
+        style={{ background: workflowDarkMode ? '#a595ff' : '#555' }}
+        onConnect={(params) => console.log('handle onConnect', params)}
         isConnectable={isConnectable}
       />
       
@@ -33,18 +34,18 @@ function JobNode({ data, isConnectable }: NodeProps) {
         <div 
           className="text-center font-medium"
           style={{ 
-            color: '#ffffff',
+            color: workflowDarkMode ? DARK_TEXT : '#333',
             fontSize: '0.9rem'
           }}
         >
-          {nodeData.label || 'Job'}
+          {nodeData.label || 'Custom Node'}
         </div>
         
         {nodeData.description && (
           <div 
             className="text-center text-xs mt-1"
             style={{ 
-              color: 'rgba(255, 255, 255, 0.8)',
+              color: workflowDarkMode ? 'rgba(248, 248, 248, 0.7)' : '#666',
             }}
           >
             {nodeData.description}
@@ -55,11 +56,11 @@ function JobNode({ data, isConnectable }: NodeProps) {
       <Handle
         type="source"
         position={Position.Right}
-        style={{ background: workflowDarkMode ? '#c04aff' : '#555' }}
+        style={{ background: workflowDarkMode ? '#a595ff' : '#555' }}
         isConnectable={isConnectable}
       />
     </>
   );
 }
 
-export default memo(JobNode);
+export default memo(CustomNode); 

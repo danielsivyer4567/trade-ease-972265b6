@@ -1,95 +1,47 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, ReactNode } from 'react';
 
-// Define the dark mode colors once to use across components
-export const DARK_GOLD = '#a0a0a0';
-export const DARK_BG = '#232323'; // Dark gray/charcoal to match the image
-export const DARK_TEXT = '#f8f8f8';
-export const DARK_SECONDARY = '#2a2a2a'; // Slightly lighter than bg
+// Define color constants for dark mode
+export const DARK_BG = '#0e0e20';        // dark blue/purple background
+export const DARK_SECONDARY = '#171939'; // slightly lighter blue/purple for secondary elements
+export const DARK_TEXT = '#f8f8f8';      // off-white text
+export const DARK_GOLD = '#a595ff';      // light purple accent (instead of light gray)
+
+// Define the shape of the context value
+interface WorkflowDarkModeContextType {
+  darkMode: boolean;
+  isDarkModeLocked: boolean;
+}
 
 // Create the context with a default value
-type WorkflowDarkModeContextType = {
-  darkMode: boolean;
-  setDarkMode: (value: boolean) => void;
-  toggleDarkMode: () => void;
-  isDarkModeLocked: boolean;
-  toggleDarkModeLock: () => void;
-};
-
 const WorkflowDarkModeContext = createContext<WorkflowDarkModeContextType>({
-  darkMode: false,
-  setDarkMode: () => {},
-  toggleDarkMode: () => {},
-  isDarkModeLocked: false,
-  toggleDarkModeLock: () => {},
+  darkMode: true,
+  isDarkModeLocked: true
 });
 
+// Define the provider props
+interface WorkflowDarkModeProviderProps {
+  children: ReactNode;
+}
+
 // Create a provider component
-export const WorkflowDarkModeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  // Get dark mode from localStorage or default to false
-  const [darkMode, setDarkMode] = useState(() => {
-    const saved = localStorage.getItem('workflowDarkMode');
-    return saved === 'true';
-  });
-
-  // Get dark mode lock state from localStorage
-  const [isDarkModeLocked, setIsDarkModeLocked] = useState(() => {
-    const savedLock = localStorage.getItem('workflowDarkModeLocked');
-    return savedLock === 'true';
-  });
-
-  // Update localStorage when darkMode changes
-  useEffect(() => {
-    localStorage.setItem('workflowDarkMode', darkMode.toString());
-    console.log('WorkflowDarkMode set to:', darkMode);
-    
-    // If dark mode is locked, make sure it stays on
-    if (isDarkModeLocked && !darkMode) {
-      setDarkMode(true);
-    }
-  }, [darkMode, isDarkModeLocked]);
-
-  // Update localStorage when lock state changes
-  useEffect(() => {
-    localStorage.setItem('workflowDarkModeLocked', isDarkModeLocked.toString());
-    console.log('WorkflowDarkMode lock set to:', isDarkModeLocked);
-    
-    // If we're locking dark mode, ensure dark mode is enabled
-    if (isDarkModeLocked) {
-      setDarkMode(true);
-    }
-  }, [isDarkModeLocked]);
-
-  // Toggle function
-  const toggleDarkMode = () => {
-    // Only allow turning off dark mode if it's not locked
-    if (isDarkModeLocked && darkMode) {
-      console.log('Dark mode is locked and cannot be disabled');
-      return;
-    }
-    setDarkMode(prev => !prev);
-  };
-
-  // Toggle lock function
-  const toggleDarkModeLock = () => {
-    setIsDarkModeLocked(prev => !prev);
+export function WorkflowDarkModeProvider({ children }: WorkflowDarkModeProviderProps) {
+  // Dark mode is always on
+  const [darkMode] = useState(true);
+  const [isDarkModeLocked] = useState(true);
+  
+  const value = {
+    darkMode,
+    isDarkModeLocked
   };
 
   return (
-    <WorkflowDarkModeContext.Provider 
-      value={{ 
-        darkMode, 
-        setDarkMode, 
-        toggleDarkMode,
-        isDarkModeLocked,
-        toggleDarkModeLock
-      }}
-    >
+    <WorkflowDarkModeContext.Provider value={value}>
       {children}
     </WorkflowDarkModeContext.Provider>
   );
-};
+}
 
-// Custom hook to use the context
+// Create a custom hook for accessing the context
 export function useWorkflowDarkMode() {
   return useContext(WorkflowDarkModeContext);
 } 

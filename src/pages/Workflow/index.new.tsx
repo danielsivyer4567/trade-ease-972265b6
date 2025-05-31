@@ -490,12 +490,12 @@ export default function WorkflowPage() {
   };
 
   return (
-    <div className="flex h-screen bg-[#232323]">
+    <div className="flex h-screen bg-[#0e0e20]">
       {/* Left sidebar for node types */}
       <NodeSidebar workflowDarkMode={true} />
 
       {/* Main workflow area */}
-      <div className="flex-1 flex flex-col h-full bg-[#232323] relative">
+      <div className="flex-1 flex flex-col h-full bg-[#0e0e20] relative">
         {/* Top navigation */}
         <WorkflowNavigation 
           workflowDarkMode={true}

@@ -9,113 +9,245 @@
 /* Import Roboto font for matching n8n's style */
 @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
 
+/* Gradient animation for the workflow canvas */
+@keyframes gradientFlow {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
 /* Any additional app-specific styling can be added here */
 /* Note: Most styling is handled by Tailwind CSS in index.css */
 
-/* Workflow Dark Mode Global Styles */
-.workflow-dark-mode {
-  background-color: #232323 !important;
+/* Workflow Dark Mode Global Styles - always applied now */
+.workflow-dark-mode-flow {
+  background-color: #0e0e20 !important;
+  background-image: radial-gradient(circle at 10% 10%, #171939 0%, #0e0e20 50%, #0a0a18 100%) !important;
   color: #f8f8f8 !important;
   font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
 
-.workflow-dark-mode .react-flow__pane {
-  background-color: #232323 !important;
-  background-image: radial-gradient(circle, rgba(255, 255, 255, 0.06) 1px, transparent 1px) !important;
+/* Vibrant node styles - specialized types for different node categories */
+.workflow-dark-mode-flow .react-flow__node.vibrant-purple {
+  background-image: linear-gradient(135deg, #7928ca, #a95fff) !important;
+  box-shadow: 0 0 20px rgba(169, 95, 255, 0.4) !important;
+  border-color: rgba(200, 100, 255, 0.5) !important;
+}
+
+.workflow-dark-mode-flow .react-flow__node.vibrant-blue {
+  background-image: linear-gradient(135deg, #2563eb, #38bdf8) !important;
+  box-shadow: 0 0 20px rgba(56, 189, 248, 0.4) !important;
+  border-color: rgba(56, 189, 248, 0.5) !important;
+}
+
+.workflow-dark-mode-flow .react-flow__node.vibrant-pink {
+  background-image: linear-gradient(135deg, #e11d48, #fb7185) !important;
+  box-shadow: 0 0 20px rgba(251, 113, 133, 0.4) !important;
+  border-color: rgba(251, 113, 133, 0.5) !important;
+}
+
+.workflow-dark-mode-flow .react-flow__pane {
+  background-color: transparent !important;
+  background-image: radial-gradient(circle, rgba(255, 255, 255, 0.03) 1px, transparent 1px) !important;
   background-size: 20px 20px !important;
 }
 
-.workflow-dark-mode .react-flow__node {
-  background-color: #2a2a3a !important;
+.workflow-dark-mode-flow .react-flow__node {
+  position: relative;
+  transform-style: preserve-3d;
+  perspective: 800px;
+  transition: all 0.3s ease;
+  min-width: 100px;
+  min-height: 100px;
+  backdrop-filter: blur(2px) !important;
+}
+
+.workflow-dark-mode-flow .react-flow__node.node-active {
+  box-shadow: 0 0 25px rgba(230, 100, 255, 0.4) !important;
+}
+
+.workflow-dark-mode-flow .react-flow__controls,
+.workflow-dark-mode-flow .react-flow__panel {
+  background-color: rgba(30, 30, 47, 0.8) !important;
+  border-color: rgba(160, 160, 255, 0.2) !important;
+  backdrop-filter: blur(5px) !important;
+}
+
+.workflow-dark-mode-flow .react-flow__controls-button {
+  background-color: rgba(42, 42, 58, 0.9) !important;
+  border-color: rgba(160, 160, 255, 0.2) !important;
   color: #f8f8f8 !important;
-  border-color: #a0a0a0 !important;
-  border-radius: 4px !important;
-  font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
 
-.workflow-dark-mode .react-flow__controls,
-.workflow-dark-mode .react-flow__panel {
-  background-color: #1e1e2f !important;
-  border-color: #a0a0a0 !important;
+.workflow-dark-mode-flow .react-flow__minimap {
+  background-color: rgba(42, 42, 58, 0.5) !important;
+  border-color: rgba(160, 160, 255, 0.2) !important;
+  backdrop-filter: blur(3px) !important;
 }
 
-.workflow-dark-mode .react-flow__controls-button {
-  background-color: #2a2a3a !important;
-  border-color: #a0a0a0 !important;
+/* Edge styling */
+.workflow-dark-mode-flow .react-flow__edge path {
+  stroke: rgba(160, 160, 255, 0.6) !important;
+  filter: drop-shadow(0 0 3px rgba(230, 100, 255, 0.3)) !important;
+  transition: all 0.3s ease;
+}
+
+.workflow-dark-mode-flow .react-flow__handle {
+  background-color: rgba(230, 100, 255, 0.7) !important;
+  box-shadow: 0 0 5px rgba(230, 100, 255, 0.5) !important;
+}
+
+/* Customized edge styling for different node types */
+.workflow-dark-mode-flow .react-flow__edge.customerNode path {
+  stroke: rgba(255, 86, 225, 0.6) !important;
+  filter: drop-shadow(0 0 4px rgba(255, 86, 225, 0.4)) !important;
+}
+
+.workflow-dark-mode-flow .react-flow__edge.jobNode path {
+  stroke: rgba(192, 74, 255, 0.6) !important;
+  filter: drop-shadow(0 0 4px rgba(192, 74, 255, 0.4)) !important;
+}
+
+.workflow-dark-mode-flow .react-flow__edge.quoteNode path {
+  stroke: rgba(110, 140, 255, 0.6) !important;
+  filter: drop-shadow(0 0 4px rgba(110, 140, 255, 0.4)) !important;
+}
+
+.workflow-dark-mode-flow .react-flow__edge.taskNode path {
+  stroke: rgba(106, 71, 255, 0.6) !important;
+  filter: drop-shadow(0 0 4px rgba(106, 71, 255, 0.4)) !important;
+}
+
+.workflow-dark-mode-flow .react-flow__edge.visionNode path {
+  stroke: rgba(255, 86, 193, 0.6) !important;
+  filter: drop-shadow(0 0 4px rgba(255, 86, 193, 0.4)) !important;
+}
+
+.workflow-dark-mode-flow .react-flow__edge.customNode path {
+  stroke: rgba(177, 86, 255, 0.6) !important;
+  filter: drop-shadow(0 0 4px rgba(177, 86, 255, 0.4)) !important;
+}
+
+/* Active edge styling with vibrant glow based on node type */
+.workflow-dark-mode-flow .workflow-edge-active.customerNode path {
+  stroke: rgba(255, 86, 225, 0.8) !important;
+  filter: drop-shadow(0 0 5px rgba(255, 86, 225, 0.6)) !important;
+  stroke-width: 3px !important;
+}
+
+.workflow-dark-mode-flow .workflow-edge-active.jobNode path {
+  stroke: rgba(192, 74, 255, 0.8) !important;
+  filter: drop-shadow(0 0 5px rgba(192, 74, 255, 0.6)) !important;
+  stroke-width: 3px !important;
+}
+
+.workflow-dark-mode-flow .workflow-edge-active.quoteNode path {
+  stroke: rgba(110, 140, 255, 0.8) !important;
+  filter: drop-shadow(0 0 5px rgba(110, 140, 255, 0.6)) !important;
+  stroke-width: 3px !important;
+}
+
+.workflow-dark-mode-flow .workflow-edge-active path {
+  stroke: rgba(230, 100, 255, 0.8) !important;
+  filter: drop-shadow(0 0 5px rgba(230, 100, 255, 0.6)) !important;
+  stroke-width: 3px !important;
+}
+
+/* Dark mode for node types with glow effects */
+.workflow-dark-mode-flow .node-customer,
+.workflow-dark-mode-flow .node-job,
+.workflow-dark-mode-flow .node-task,
+.workflow-dark-mode-flow .node-quote,
+.workflow-dark-mode-flow .node-custom,
+.workflow-dark-mode-flow .node-vision,
+.workflow-dark-mode-flow .node-automation,
+.workflow-dark-mode-flow .node-messaging {
+  background-color: rgba(42, 42, 70, 0.8) !important;
+  background-image: linear-gradient(135deg, rgba(60, 60, 90, 0.8), rgba(40, 40, 70, 0.8)) !important;
   color: #f8f8f8 !important;
+  border-color: rgba(160, 160, 255, 0.2) !important;
+  box-shadow: 0 0 15px rgba(130, 80, 230, 0.2) !important;
+  backdrop-filter: blur(2px) !important;
 }
 
-.workflow-dark-mode .react-flow__minimap {
-  background-color: #2a2a3a !important;
-  border-color: #a0a0a0 !important;
+/* Active node styling with stronger glow */
+.workflow-dark-mode-flow .react-flow__node.active-node {
+  transform: translateY(-8px) rotateX(15deg) rotateY(-15deg) !important;
+  box-shadow: 0 0 30px rgba(230, 100, 255, 0.6) !important;
+  z-index: 20;
 }
 
-.workflow-dark-mode .react-flow__edge path {
-  stroke: #a0a0a0 !important;
+/* Node glow intensity based on interaction */
+.workflow-dark-mode-flow .react-flow__node.active-node .node-content {
+  filter: brightness(1.2);
+  box-shadow: 0 0 30px rgba(230, 100, 255, 0.6) !important;
 }
 
-.workflow-dark-mode .react-flow__handle {
-  background-color: #a0a0a0 !important;
+/* Node hover effect */
+.workflow-dark-mode-flow .react-flow__node:hover {
+  transform: translateY(-5px) rotateX(10deg) rotateY(-10deg) !important;
+  z-index: 10;
 }
 
-/* Dark mode for node types */
-.workflow-dark-mode .node-customer,
-.workflow-dark-mode .node-job,
-.workflow-dark-mode .node-task,
-.workflow-dark-mode .node-quote,
-.workflow-dark-mode .node-custom,
-.workflow-dark-mode .node-vision,
-.workflow-dark-mode .node-automation,
-.workflow-dark-mode .node-messaging {
-  background-color: #2a2a3a !important;
-  color: #f8f8f8 !important;
-  border-color: #a0a0a0 !important;
+/* 3D Cube Node styling */
+.cube-container {
+  width: 60px;
+  height: 85px;
+  margin-bottom: 10px;
+  cursor: move;
+  perspective: 800px;
 }
 
-/* Force dark mode canvas */
-.workflow-dark-mode-flow {
-  background-color: #1e1e2f !important;
+.cube {
+  width: 60px;
+  height: 60px;
+  position: relative;
+  transform-style: preserve-3d;
+  transform: rotateX(-20deg) rotateY(32deg);
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  filter: drop-shadow(0 10px 15px rgba(0, 0, 0, 0.3));
 }
 
-/* Dark mode lock indicator */
-.dark-mode-locked .react-flow__pane,
-.dark-mode-locked .react-flow__node,
-.dark-mode-locked .react-flow__controls,
-.dark-mode-locked .react-flow__panel,
-.dark-mode-locked .react-flow__controls-button,
-.dark-mode-locked .react-flow__minimap,
-.dark-mode-locked .react-flow__background,
-.dark-mode-locked .react-flow__handle {
-  transition: all 0.3s ease-in-out !important;
+.cube-container:hover .cube {
+  transform: rotateX(-25deg) rotateY(40deg) translateY(-5px);
+  filter: brightness(1.1) drop-shadow(0 15px 15px rgba(0, 0, 0, 0.4));
 }
 
-.dark-mode-locked .react-flow__handle {
-  box-shadow: 0 0 0 2px #a0a0a0, 0 0 8px 1px rgba(160, 160, 160, 0.6) !important;
+.cube-face {
+  position: absolute;
+  width: 60px;
+  height: 60px;
+  backface-visibility: visible;
+  border-radius: 8px;
 }
 
-.dark-mode-locked .react-flow__edge path {
-  stroke-width: 2px !important;
-  filter: drop-shadow(0 0 2px rgba(160, 160, 160, 0.6)) !important;
+.cube-face-front {
+  transform: translateZ(30px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 15px rgba(130, 80, 230, 0.2);
+  z-index: 2;
 }
 
-/* Additional styling for UI in locked mode */
-.dark-mode-lock-icon {
-  animation: pulse 2s infinite;
+.cube-face-right {
+  right: -30px;
+  transform: rotateY(90deg);
+  opacity: 0.9;
+  z-index: 1;
 }
 
-@keyframes pulse {
-  0% {
-    transform: scale(1);
-    opacity: 1;
-  }
-  50% {
-    transform: scale(1.1);
-    opacity: 0.7;
-  }
-  100% {
-    transform: scale(1);
-    opacity: 1;
-  }
+.cube-face-top {
+  top: -30px;
+  transform: rotateX(90deg);
+  opacity: 0.95;
+  z-index: 1;
 }
 
 /* Ensure ReactFlow controls are clickable */
@@ -131,13 +263,6 @@
   z-index: 55 !important;
 }
 
-/* Fix for dark mode controls */
-.workflow-dark-mode .react-flow__controls-button {
-  background-color: #2a2a3a !important;
-  border-color: #a0a0a0 !important;
-  color: #f8f8f8 !important;
-}
-
 /* Ensure higher specificity for these important controls */
 .react-flow__controls-button.react-flow__controls-zoomin,
 .react-flow__controls-button.react-flow__controls-zoomout,
@@ -145,4 +270,187 @@
 .react-flow__controls-button.react-flow__controls-interactive {
   pointer-events: all !important;
   z-index: 1000 !important;
+}
+
+/* 2D Node styling for sidebar */
+.node-item {
+  cursor: move;
+  transition: transform 0.2s ease;
+}
+
+.node-item:hover {
+  transform: translateY(-2px);
+}
+
+.node-card {
+  width: 100%;
+  height: 70px;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.node-item:hover .node-card {
+  filter: brightness(1.1);
+  box-shadow: 0 6px 16px rgba(130, 80, 230, 0.4) !important;
+}
+
+/* Styles for nodes on the canvas - 3D Cube appearance */
+.workflow-dark-mode-flow .react-flow__node .node-content {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  transform: translateZ(25px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  box-shadow: 0 0 15px rgba(130, 80, 230, 0.2);
+  z-index: 3;
+  background-color: rgba(42, 42, 70, 0.8) !important;
+}
+
+/* Right side face */
+.workflow-dark-mode-flow .react-flow__node::before {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(30, 30, 60, 0.8);
+  transform: rotateY(90deg) translateZ(calc(100% - 25px)) translateX(25px);
+  transform-origin: right center;
+  border-radius: 8px;
+  z-index: 1;
+}
+
+/* Top face */
+.workflow-dark-mode-flow .react-flow__node::after {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(50, 50, 80, 0.8);
+  transform: rotateX(-90deg) translateZ(calc(100% - 25px)) translateY(25px);
+  transform-origin: center top;
+  border-radius: 8px;
+  z-index: 2;
+}
+
+/* Node-specific styling based on type */
+.workflow-dark-mode-flow .react-flow__node.customerNode .node-content {
+  background-image: linear-gradient(135deg, rgba(255, 86, 225, 0.8), rgba(161, 82, 255, 0.8)) !important;
+  box-shadow: 0 0 20px rgba(255, 86, 225, 0.3) !important;
+  border: 1px solid rgba(255, 86, 225, 0.5) !important;
+}
+
+.workflow-dark-mode-flow .react-flow__node.customerNode::before {
+  background-color: rgba(161, 82, 200, 0.6) !important;
+}
+
+.workflow-dark-mode-flow .react-flow__node.customerNode::after {
+  background-color: rgba(255, 86, 200, 0.6) !important;
+}
+
+.workflow-dark-mode-flow .react-flow__node.jobNode .node-content {
+  background-image: linear-gradient(135deg, rgba(255, 86, 225, 0.8), rgba(109, 66, 252, 0.8)) !important;
+  box-shadow: 0 0 20px rgba(192, 74, 255, 0.3) !important;
+  border: 1px solid rgba(192, 74, 255, 0.5) !important;
+}
+
+.workflow-dark-mode-flow .react-flow__node.jobNode::before {
+  background-color: rgba(109, 66, 200, 0.6) !important;
+}
+
+.workflow-dark-mode-flow .react-flow__node.jobNode::after {
+  background-color: rgba(192, 74, 200, 0.6) !important;
+}
+
+.workflow-dark-mode-flow .react-flow__node.quoteNode .node-content {
+  background-image: linear-gradient(135deg, rgba(110, 140, 255, 0.8), rgba(59, 90, 252, 0.8)) !important;
+  box-shadow: 0 0 20px rgba(110, 140, 255, 0.3) !important;
+  border: 1px solid rgba(110, 140, 255, 0.5) !important;
+}
+
+.workflow-dark-mode-flow .react-flow__node.quoteNode::before {
+  background-color: rgba(59, 90, 200, 0.6) !important;
+}
+
+.workflow-dark-mode-flow .react-flow__node.quoteNode::after {
+  background-color: rgba(110, 140, 200, 0.6) !important;
+}
+
+.workflow-dark-mode-flow .react-flow__node.taskNode .node-content {
+  background-image: linear-gradient(135deg, rgba(106, 71, 255, 0.8), rgba(66, 144, 255, 0.8)) !important;
+  box-shadow: 0 0 20px rgba(106, 71, 255, 0.3) !important;
+  border: 1px solid rgba(106, 71, 255, 0.5) !important;
+}
+
+.workflow-dark-mode-flow .react-flow__node.visionNode .node-content {
+  background-image: linear-gradient(135deg, rgba(255, 86, 193, 0.8), rgba(255, 77, 154, 0.8)) !important;
+  box-shadow: 0 0 20px rgba(255, 86, 193, 0.3) !important;
+  border: 1px solid rgba(255, 86, 193, 0.5) !important;
+}
+
+.workflow-dark-mode-flow .react-flow__node.customNode .node-content {
+  background-image: linear-gradient(135deg, rgba(177, 86, 255, 0.8), rgba(140, 86, 255, 0.8)) !important;
+  box-shadow: 0 0 20px rgba(177, 86, 255, 0.3) !important;
+  border: 1px solid rgba(177, 86, 255, 0.5) !important;
+}
+
+.workflow-dark-mode-flow .react-flow__node.messagingNode .node-content,
+.workflow-dark-mode-flow .react-flow__node.emailNode .node-content,
+.workflow-dark-mode-flow .react-flow__node.whatsappNode .node-content {
+  background-image: linear-gradient(135deg, rgba(255, 86, 170, 0.8), rgba(255, 112, 122, 0.8)) !important;
+  box-shadow: 0 0 20px rgba(255, 86, 170, 0.3) !important;
+  border: 1px solid rgba(255, 86, 170, 0.5) !important;
+}
+
+.workflow-dark-mode-flow .react-flow__node.socialNode .node-content {
+  background-image: linear-gradient(135deg, rgba(255, 86, 119, 0.8), rgba(255, 124, 86, 0.8)) !important;
+  box-shadow: 0 0 20px rgba(255, 86, 119, 0.3) !important;
+  border: 1px solid rgba(255, 86, 119, 0.5) !important;
+}
+
+.workflow-dark-mode-flow .react-flow__node.automationNode .node-content {
+  background-image: linear-gradient(135deg, rgba(192, 74, 255, 0.8), rgba(126, 74, 255, 0.8)) !important;
+  box-shadow: 0 0 20px rgba(192, 74, 255, 0.3) !important;
+  border: 1px solid rgba(192, 74, 255, 0.5) !important;
+}
+
+.workflow-dark-mode-flow .react-flow__node.calendarNode .node-content {
+  background-image: linear-gradient(135deg, rgba(74, 86, 255, 0.8), rgba(86, 194, 255, 0.8)) !important;
+  box-shadow: 0 0 20px rgba(74, 86, 255, 0.3) !important;
+  border: 1px solid rgba(74, 86, 255, 0.5) !important;
+}
+
+/* Diagonally resizable nodes */
+.react-flow__node.resizable {
+  resize: both;
+  overflow: visible;
+  min-width: 100px;
+  min-height: 100px;
+}
+
+.react-flow__node.resizable::after {
+  content: '';
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+  width: 10px;
+  height: 10px;
+  cursor: nwse-resize;
+  background-image: radial-gradient(circle, rgba(255, 255, 255, 0.8) 1px, transparent 2px);
+  background-size: 3px 3px;
+  background-position: bottom right;
+  z-index: 10;
+}
+
+/* Ensure ReactFlow controls are clickable */
+.react-flow__controls {
+  pointer-events: all !important;
+  z-index: 50 !important;
 }

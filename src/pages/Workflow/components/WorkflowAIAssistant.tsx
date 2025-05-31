@@ -115,18 +115,21 @@ export function WorkflowAIAssistant({
         top: '120px',
         bottom: '20px',
         backgroundColor: workflowDarkMode ? DARK_SECONDARY : '#fff',
-        border: `1px solid ${workflowDarkMode ? '#383838' : '#eaeaea'}`,
+        border: `1px solid ${workflowDarkMode ? 'rgba(165, 149, 255, 0.3)' : '#eaeaea'}`,
         borderRight: 'none',
         borderTopLeftRadius: '8px',
         borderBottomLeftRadius: '8px',
+        boxShadow: workflowDarkMode ? '0 0 25px rgba(23, 25, 57, 0.5)' : '0 2px 10px rgba(0, 0, 0, 0.1)',
       }}
     >
       {/* Header */}
       <div 
         className="flex items-center justify-between p-3"
         style={{ 
-          borderBottom: `1px solid ${workflowDarkMode ? '#383838' : '#eaeaea'}`,
-          backgroundColor: workflowDarkMode ? DARK_BG : '#f9f9f9'
+          borderBottom: `1px solid ${workflowDarkMode ? 'rgba(165, 149, 255, 0.3)' : '#eaeaea'}`,
+          backgroundColor: workflowDarkMode ? 'rgba(23, 25, 57, 0.9)' : '#f9f9f9',
+          backgroundImage: workflowDarkMode ? 'linear-gradient(to right, rgba(86, 28, 198, 0.1), rgba(23, 25, 57, 0.9))' : '',
+          backdropFilter: 'blur(5px)'
         }}
       >
         <div className="flex items-center">
@@ -170,12 +173,13 @@ export function WorkflowAIAssistant({
               style={{
                 maxWidth: '85%',
                 backgroundColor: chat.type === 'assistant' 
-                  ? (workflowDarkMode ? '#2d2d2d' : 'rgba(235, 235, 235, 0.5)') 
-                  : (workflowDarkMode ? '#2a2a2a' : '#e9f5ff'),
+                  ? (workflowDarkMode ? 'rgba(86, 28, 198, 0.15)' : 'rgba(235, 235, 235, 0.5)') 
+                  : (workflowDarkMode ? 'rgba(165, 149, 255, 0.15)' : '#e9f5ff'),
                 padding: '10px 14px',
                 borderRadius: '12px',
                 color: workflowDarkMode ? DARK_TEXT : '#333',
-                border: workflowDarkMode ? '1px solid #383838' : 'none'
+                border: workflowDarkMode ? '1px solid rgba(165, 149, 255, 0.2)' : 'none',
+                boxShadow: workflowDarkMode ? '0 2px 10px rgba(0, 0, 0, 0.15)' : 'none'
               }}
             >
               <div className="flex items-center mb-1">
@@ -203,11 +207,12 @@ export function WorkflowAIAssistant({
             <div 
               style={{
                 maxWidth: '85%',
-                backgroundColor: workflowDarkMode ? '#2d2d2d' : 'rgba(235, 235, 235, 0.5)',
+                backgroundColor: workflowDarkMode ? 'rgba(86, 28, 198, 0.15)' : 'rgba(235, 235, 235, 0.5)',
                 padding: '10px 14px',
                 borderRadius: '12px',
                 color: workflowDarkMode ? DARK_TEXT : '#333',
-                border: workflowDarkMode ? '1px solid #383838' : 'none'
+                border: workflowDarkMode ? '1px solid rgba(165, 149, 255, 0.2)' : 'none',
+                boxShadow: workflowDarkMode ? '0 2px 10px rgba(0, 0, 0, 0.15)' : 'none'
               }}
             >
               <div className="flex items-center">
@@ -224,15 +229,19 @@ export function WorkflowAIAssistant({
       {/* Input area */}
       <div 
         className="p-3"
-        style={{ backgroundColor: workflowDarkMode ? DARK_SECONDARY : '#f9f9f9' }}
+        style={{ 
+          backgroundColor: workflowDarkMode ? DARK_SECONDARY : '#f9f9f9',
+          backgroundImage: workflowDarkMode ? 'linear-gradient(to bottom, rgba(23, 25, 57, 0.9), rgba(14, 14, 32, 0.9))' : '',
+        }}
       >
         <div 
           className="flex items-center"
           style={{
-            backgroundColor: workflowDarkMode ? DARK_BG : '#fff',
-            border: `1px solid ${workflowDarkMode ? '#383838' : '#ddd'}`,
+            backgroundColor: workflowDarkMode ? 'rgba(14, 14, 32, 0.6)' : '#fff',
+            border: `1px solid ${workflowDarkMode ? 'rgba(165, 149, 255, 0.3)' : '#ddd'}`,
             borderRadius: '8px',
             padding: '8px 12px',
+            boxShadow: workflowDarkMode ? 'inset 0 1px 3px rgba(0, 0, 0, 0.2)' : 'none',
           }}
         >
           <textarea
@@ -253,10 +262,11 @@ export function WorkflowAIAssistant({
             disabled={!message.trim() || isThinking}
             className={`ml-2 p-2 rounded-full ${!message.trim() || isThinking ? 'opacity-50' : 'opacity-100'}`}
             style={{ 
-              backgroundColor: workflowDarkMode ? '#505050' : '#2563eb',
+              backgroundColor: workflowDarkMode ? 'rgba(165, 149, 255, 0.8)' : '#2563eb',
               display: 'flex',
               justifyContent: 'center',
               alignItems: 'center',
+              boxShadow: workflowDarkMode ? '0 2px 8px rgba(165, 149, 255, 0.4)' : 'none',
             }}
           >
             <Send size={16} color="#fff" />
