@@ -10,7 +10,7 @@ interface NodeData {
   [key: string]: any;
 }
 
-function VisionNode({ data, isConnectable }: NodeProps) {
+function MessagingNode({ data, isConnectable }: NodeProps) {
   const nodeData = data as NodeData;
   const workflowDarkMode = nodeData?.workflowDarkMode || false;
   
@@ -19,7 +19,7 @@ function VisionNode({ data, isConnectable }: NodeProps) {
       <Handle
         type="target"
         position={Position.Left}
-        style={{ background: workflowDarkMode ? '#ff56c1' : '#555' }}
+        style={{ background: workflowDarkMode ? '#ff56aa' : '#555' }}
         isConnectable={isConnectable}
       />
       
@@ -37,7 +37,7 @@ function VisionNode({ data, isConnectable }: NodeProps) {
             fontSize: '0.9rem'
           }}
         >
-          {nodeData.label || 'Vision Analysis'}
+          {nodeData.label || 'Message'}
         </div>
         
         {nodeData.description && (
@@ -55,11 +55,11 @@ function VisionNode({ data, isConnectable }: NodeProps) {
       <Handle
         type="source"
         position={Position.Right}
-        style={{ background: workflowDarkMode ? '#ff56c1' : '#555' }}
+        style={{ background: workflowDarkMode ? '#ff56aa' : '#555' }}
         isConnectable={isConnectable}
       />
     </>
   );
 }
 
-export default memo(VisionNode);
+export default memo(MessagingNode); 
