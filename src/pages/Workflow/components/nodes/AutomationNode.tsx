@@ -7,10 +7,12 @@ interface NodeData {
   label?: string;
   description?: string;
   icon?: ReactNode;
+  automationId?: string;
+  title?: string;
   [key: string]: any;
 }
 
-function VisionNode({ data, isConnectable }: NodeProps) {
+function AutomationNode({ data, isConnectable }: NodeProps) {
   const nodeData = data as NodeData;
   const workflowDarkMode = nodeData?.workflowDarkMode || false;
   
@@ -19,7 +21,7 @@ function VisionNode({ data, isConnectable }: NodeProps) {
       <Handle
         type="target"
         position={Position.Left}
-        style={{ background: workflowDarkMode ? '#ff56c1' : '#555' }}
+        style={{ background: workflowDarkMode ? '#c04aff' : '#555' }}
         isConnectable={isConnectable}
       />
       
@@ -37,7 +39,7 @@ function VisionNode({ data, isConnectable }: NodeProps) {
             fontSize: '0.9rem'
           }}
         >
-          {nodeData.label || 'Vision Analysis'}
+          {nodeData.title || nodeData.label || 'Automation'}
         </div>
         
         {nodeData.description && (
@@ -50,16 +52,29 @@ function VisionNode({ data, isConnectable }: NodeProps) {
             {nodeData.description}
           </div>
         )}
+
+        {nodeData.automationId && (
+          <div 
+            className="text-center text-xs mt-1 p-1 rounded"
+            style={{ 
+              color: 'rgba(255, 255, 255, 0.8)',
+              backgroundColor: 'rgba(192, 74, 255, 0.2)',
+              fontSize: '0.7rem'
+            }}
+          >
+            ID: {nodeData.automationId.substring(0, 8)}
+          </div>
+        )}
       </div>
       
       <Handle
         type="source"
         position={Position.Right}
-        style={{ background: workflowDarkMode ? '#ff56c1' : '#555' }}
+        style={{ background: workflowDarkMode ? '#c04aff' : '#555' }}
         isConnectable={isConnectable}
       />
     </>
   );
 }
 
-export default memo(VisionNode);
+export default memo(AutomationNode); 

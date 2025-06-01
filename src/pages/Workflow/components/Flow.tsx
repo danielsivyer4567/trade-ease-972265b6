@@ -14,12 +14,12 @@ import {
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import './workflow.css'; // Import our custom workflow CSS
-import { CustomerNode } from './nodes/CustomerNode';
-import { JobNode } from './nodes/JobNode';
-import { TaskNode } from './nodes/TaskNode';
-import { QuoteNode } from './nodes/QuoteNode';
+import CustomerNode from './nodes/CustomerNode';
+import JobNode from './nodes/JobNode';
+import TaskNode from './nodes/TaskNode';
+import QuoteNode from './nodes/QuoteNode';
 import CustomNode from './nodes/CustomNode';
-import { VisionNode } from './nodes/VisionNode';
+import VisionNode from './nodes/VisionNode';
 import AutomationNode from './nodes/AutomationNode';
 import MessagingNode from './nodes/MessagingNode';
 import { NodeDetailsPanel } from './NodeDetailsPanel';
