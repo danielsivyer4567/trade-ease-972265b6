@@ -22,6 +22,41 @@
   }
 }
 
+/* Workflow animated background */
+@keyframes floatParticle {
+  0% {
+    transform: translateY(0) translateX(0);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-100vh) translateX(100px);
+    opacity: 0;
+  }
+}
+
+.workflow-background {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, rgba(23, 25, 57, 0.95), rgba(14, 14, 32, 0.95));
+  overflow: hidden;
+  z-index: 0;
+}
+
+.particle {
+  position: absolute;
+  background: rgba(165, 149, 255, 0.7);
+  border-radius: 50%;
+  box-shadow: 0 0 10px rgba(165, 149, 255, 0.5);
+  pointer-events: none;
+}
+
 /* Any additional app-specific styling can be added here */
 /* Note: Most styling is handled by Tailwind CSS in index.css */
 
