@@ -40,6 +40,27 @@
   }
 }
 
+/* Smoke animation */
+@keyframes smoke {
+  0% {
+    transform: translateY(0) scale(1);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.2;
+  }
+  50% {
+    opacity: 0.3;
+  }
+  90% {
+    opacity: 0.1;
+  }
+  100% {
+    transform: translateY(-20vh) scale(3);
+    opacity: 0;
+  }
+}
+
 .workflow-background {
   position: absolute;
   width: 100%;
@@ -55,6 +76,14 @@
   border-radius: 50%;
   box-shadow: 0 0 15px rgba(255, 86, 225, 0.7); /* Brighter glow */
   pointer-events: none;
+}
+
+.smoke {
+  position: absolute;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0) 70%);
+  pointer-events: none;
+  filter: blur(10px);
 }
 
 /* Any additional app-specific styling can be added here */

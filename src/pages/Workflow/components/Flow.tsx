@@ -460,6 +460,22 @@ function FlowContent({ onInit, workflowId, onNodeSelect, workflowDarkMode = true
     >
       {/* Animated Background */}
       <div className="workflow-background">
+        {/* Smoke effect */}
+        {Array.from({ length: 10 }).map((_, i) => (
+          <div 
+            key={`smoke-${i}`} 
+            className="smoke"
+            style={{
+              width: `${Math.random() * 150 + 100}px`,
+              height: `${Math.random() * 150 + 100}px`,
+              top: `${Math.random() * 100}%`,
+              left: `${Math.random() * 100}%`,
+              animation: `smoke ${Math.random() * 20 + 15}s ease-out infinite`,
+              animationDelay: `${Math.random() * 10}s`,
+            }}
+          />
+        ))}
+        
         {/* Animated particles */}
         {Array.from({ length: 50 }).map((_, i) => (
           <div 
