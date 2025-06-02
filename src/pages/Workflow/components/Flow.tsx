@@ -463,6 +463,8 @@ function FlowContent({ onInit, workflowId, onNodeSelect, workflowDarkMode = true
         autoPlay
         loop
         muted
+        playsInline
+        crossOrigin="anonymous"
         style={{
           position: 'absolute',
           width: '100%',
@@ -471,9 +473,12 @@ function FlowContent({ onInit, workflowId, onNodeSelect, workflowDarkMode = true
           zIndex: 0,
           opacity: 0.2, // Adjust opacity as needed
         }}
+        onError={(e) => {
+          console.error("Video loading error:", e);
+        }}
       >
         <source src="https://wxwbxupdisbofesaygqj.supabase.co/storage/v1/object/sign/publicvideos/workflow-background.mp4..mp4?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9mZGU0Y2FiMy0zZTc4LTRkOWMtYjA4ZS00NTVjNDFkZjZiMjYiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJwdWJsaWN2aWRlb3Mvd29ya2Zsb3ctYmFja2dyb3VuZC5tcDQuLm1wNCIsImlhdCI6MTc0ODg4MzE0NiwiZXhwIjoxNzgwNDE5MTQ2fQ.bMS3YBMRBfkcqgjuQUXZ9c6GG4O2F59RlgMw-a_lEsg" type="video/mp4" />
-        Your browser does not support the video tag.
+        Background video could not be loaded. Please ensure your browser supports HTML5 video.
       </video>
 
       <ReactFlow
