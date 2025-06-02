@@ -1,12 +1,14 @@
 import React, { memo, ReactNode } from 'react';
 import { Handle, Position, NodeProps } from '@xyflow/react';
 import { DARK_BG, DARK_TEXT } from '@/contexts/WorkflowDarkModeContext';
+import { Eye } from 'lucide-react';
 
 interface NodeData {
   workflowDarkMode?: boolean;
   label?: string;
   description?: string;
   icon?: ReactNode;
+  iconComponent?: ReactNode;
   [key: string]: any;
 }
 
@@ -24,11 +26,9 @@ function VisionNode({ data, isConnectable }: NodeProps) {
       />
       
       <div className="node-content">
-        {nodeData.icon && (
-          <div className="flex items-center justify-center mb-2">
-            {nodeData.icon}
-          </div>
-        )}
+        <div className="flex items-center justify-center mb-2">
+          {nodeData.icon || nodeData.iconComponent || <Eye className="h-5 w-5 text-white" />}
+        </div>
         
         <div 
           className="text-center font-medium"
@@ -37,7 +37,7 @@ function VisionNode({ data, isConnectable }: NodeProps) {
             fontSize: '0.9rem'
           }}
         >
-          {nodeData.label || 'Vision Analysis'}
+          {nodeData.label || 'Vision'}
         </div>
         
         {nodeData.description && (

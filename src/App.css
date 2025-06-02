@@ -60,8 +60,6 @@
 
 .workflow-dark-mode-flow .react-flow__node {
   position: relative;
-  transform-style: preserve-3d;
-  perspective: 800px;
   transition: all 0.3s ease;
   min-width: 100px;
   min-height: 100px;
@@ -178,7 +176,7 @@
 
 /* Active node styling with stronger glow */
 .workflow-dark-mode-flow .react-flow__node.active-node {
-  transform: translateY(-8px) rotateX(15deg) rotateY(-15deg) !important;
+  transform: translateY(-8px) !important;
   box-shadow: 0 0 30px rgba(230, 100, 255, 0.6) !important;
   z-index: 20;
 }
@@ -191,7 +189,7 @@
 
 /* Node hover effect */
 .workflow-dark-mode-flow .react-flow__node:hover {
-  transform: translateY(-5px) rotateX(10deg) rotateY(-10deg) !important;
+  transform: translateY(-5px) !important;
   z-index: 10;
 }
 
@@ -201,21 +199,19 @@
   height: 85px;
   margin-bottom: 10px;
   cursor: move;
-  perspective: 800px;
 }
 
 .cube {
   width: 60px;
   height: 60px;
   position: relative;
-  transform-style: preserve-3d;
-  transform: rotateX(-20deg) rotateY(32deg);
+  transform: translateY(0);
   transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   filter: drop-shadow(0 10px 15px rgba(0, 0, 0, 0.3));
 }
 
 .cube-container:hover .cube {
-  transform: rotateX(-25deg) rotateY(40deg) translateY(-5px);
+  transform: translateY(-5px);
   filter: brightness(1.1) drop-shadow(0 15px 15px rgba(0, 0, 0, 0.4));
 }
 
@@ -223,12 +219,10 @@
   position: absolute;
   width: 60px;
   height: 60px;
-  backface-visibility: visible;
   border-radius: 8px;
 }
 
 .cube-face-front {
-  transform: translateZ(30px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -236,18 +230,8 @@
   z-index: 2;
 }
 
-.cube-face-right {
-  right: -30px;
-  transform: rotateY(90deg);
-  opacity: 0.9;
-  z-index: 1;
-}
-
-.cube-face-top {
-  top: -30px;
-  transform: rotateX(90deg);
-  opacity: 0.95;
-  z-index: 1;
+.cube-face-right, .cube-face-top {
+  display: none;
 }
 
 /* Ensure ReactFlow controls are clickable */
@@ -298,12 +282,11 @@
   box-shadow: 0 6px 16px rgba(130, 80, 230, 0.4) !important;
 }
 
-/* Styles for nodes on the canvas - 3D Cube appearance */
+/* Styles for nodes on the canvas - Flat 2D appearance */
 .workflow-dark-mode-flow .react-flow__node .node-content {
   position: absolute;
   width: 100%;
   height: 100%;
-  transform: translateZ(25px);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -314,30 +297,14 @@
   background-color: rgba(42, 42, 70, 0.8) !important;
 }
 
-/* Right side face */
+/* Remove right side face */
 .workflow-dark-mode-flow .react-flow__node::before {
-  content: '';
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(30, 30, 60, 0.8);
-  transform: rotateY(90deg) translateZ(calc(100% - 25px)) translateX(25px);
-  transform-origin: right center;
-  border-radius: 8px;
-  z-index: 1;
+  display: none;
 }
 
-/* Top face */
+/* Remove top face */
 .workflow-dark-mode-flow .react-flow__node::after {
-  content: '';
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(50, 50, 80, 0.8);
-  transform: rotateX(-90deg) translateZ(calc(100% - 25px)) translateY(25px);
-  transform-origin: center top;
-  border-radius: 8px;
-  z-index: 2;
+  display: none;
 }
 
 /* Node-specific styling based on type */

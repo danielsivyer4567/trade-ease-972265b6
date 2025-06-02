@@ -350,9 +350,10 @@ function FlowContent({ onInit, workflowId, onNodeSelect, workflowDarkMode = true
         type,
         position,
         data: { 
-          label: type,
+          label: type.replace('Node', ''),
           workflowDarkMode: actualDarkMode,
-          icon: nodeTypeIcons[type] || null,
+          icon: nodeTypeIcons[type],
+          iconComponent: nodeTypeIcons[type],
           // Add default description based on node type
           description: getNodeDescription(type)
         },
@@ -457,6 +458,24 @@ function FlowContent({ onInit, workflowId, onNodeSelect, workflowDarkMode = true
       }}
       className={animationActiveEdges.size > 0 ? 'workflow-active-edges' : ''}
     >
+      {/* Video Background */}
+      <video
+        autoPlay
+        loop
+        muted
+        style={{
+          position: 'absolute',
+          width: '100%',
+          height: '100%',
+          objectFit: 'cover',
+          zIndex: 0,
+          opacity: 0.2, // Adjust opacity as needed
+        }}
+      >
+        <source src="/videos/workflow-background.mp4" type="video/mp4" />
+        Your browser does not support the video tag.
+      </video>
+
       <ReactFlow
         nodes={nodes}
         edges={edges}
@@ -479,9 +498,13 @@ function FlowContent({ onInit, workflowId, onNodeSelect, workflowDarkMode = true
           boxShadow: 'inset 0 0 40px rgba(86, 28, 198, 0.15)',
           fontFamily: "'Roboto', sans-serif",
           backgroundSize: '400% 400%',
-          animation: 'gradientFlow 15s ease infinite'
+          animation: 'gradientFlow 15s ease infinite',
+          position: 'relative',
+          zIndex: 1 // Ensure it's above the video
         } : {
-          fontFamily: "'Roboto', sans-serif"
+          fontFamily: "'Roboto', sans-serif",
+          position: 'relative',
+          zIndex: 1 // Ensure it's above the video
         }}
         defaultEdgeOptions={{
           type: 'animated',
