@@ -461,16 +461,16 @@ function FlowContent({ onInit, workflowId, onNodeSelect, workflowDarkMode = true
       {/* Animated Background */}
       <div className="workflow-background">
         {/* Animated particles */}
-        {Array.from({ length: 30 }).map((_, i) => (
+        {Array.from({ length: 50 }).map((_, i) => (
           <div 
             key={i} 
             className="particle"
             style={{
-              width: `${Math.random() * 5 + 2}px`,
-              height: `${Math.random() * 5 + 2}px`,
+              width: `${Math.random() * 10 + 5}px`, // Larger particles
+              height: `${Math.random() * 10 + 5}px`, // Larger particles
               top: `${Math.random() * 100}%`,
               left: `${Math.random() * 100}%`,
-              animation: `floatParticle ${Math.random() * 10 + 10}s linear infinite`,
+              animation: `floatParticle ${Math.random() * 15 + 10}s linear infinite`,
               animationDelay: `${Math.random() * 5}s`,
             }}
           />
