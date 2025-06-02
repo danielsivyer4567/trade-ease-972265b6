@@ -1,20 +1,24 @@
 import React, { memo, ReactNode } from 'react';
 import { Handle, Position, NodeProps } from '@xyflow/react';
 import { DARK_BG, DARK_TEXT } from '@/contexts/WorkflowDarkModeContext';
+import { Zap } from 'lucide-react';
 
 interface NodeData {
   workflowDarkMode?: boolean;
   label?: string;
-  description?: string;
-  icon?: ReactNode;
-  automationId?: string;
   title?: string;
+  description?: string;
+  automationId?: string;
+  icon?: ReactNode;
+  iconComponent?: ReactNode;
   [key: string]: any;
 }
 
 function AutomationNode({ data, isConnectable }: NodeProps) {
   const nodeData = data as NodeData;
   const workflowDarkMode = nodeData?.workflowDarkMode || false;
+  
+  const displayTitle = nodeData.title || nodeData.label || `Automation ${nodeData.automationId || ''}`;
   
   return (
     <>
@@ -26,11 +30,9 @@ function AutomationNode({ data, isConnectable }: NodeProps) {
       />
       
       <div className="node-content">
-        {nodeData.icon && (
-          <div className="flex items-center justify-center mb-2">
-            {nodeData.icon}
-          </div>
-        )}
+        <div className="flex items-center justify-center mb-2">
+          {nodeData.icon || nodeData.iconComponent || <Zap className="h-5 w-5 text-white" />}
+        </div>
         
         <div 
           className="text-center font-medium"
@@ -39,7 +41,7 @@ function AutomationNode({ data, isConnectable }: NodeProps) {
             fontSize: '0.9rem'
           }}
         >
-          {nodeData.title || nodeData.label || 'Automation'}
+          {displayTitle}
         </div>
         
         {nodeData.description && (
@@ -52,17 +54,15 @@ function AutomationNode({ data, isConnectable }: NodeProps) {
             {nodeData.description}
           </div>
         )}
-
-        {nodeData.automationId && (
+        
+        {nodeData.automationId && !nodeData.description && (
           <div 
-            className="text-center text-xs mt-1 p-1 rounded"
+            className="text-center text-xs mt-1"
             style={{ 
               color: 'rgba(255, 255, 255, 0.8)',
-              backgroundColor: 'rgba(192, 74, 255, 0.2)',
-              fontSize: '0.7rem'
             }}
           >
-            ID: {nodeData.automationId.substring(0, 8)}
+            ID: {nodeData.automationId}
           </div>
         )}
       </div>
