@@ -472,7 +472,7 @@ function FlowContent({ onInit, workflowId, onNodeSelect, workflowDarkMode = true
           opacity: 0.2, // Adjust opacity as needed
         }}
       >
-        <source src="/videos/workflow-background.mp4" type="video/mp4" />
+        <source src="https://wxwbxupdisbofesaygqj.supabase.co/storage/v1/object/sign/publicvideos/workflow-background.mp4..mp4?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9mZGU0Y2FiMy0zZTc4LTRkOWMtYjA4ZS00NTVjNDFkZjZiMjYiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJwdWJsaWN2aWRlb3Mvd29ya2Zsb3ctYmFja2dyb3VuZC5tcDQuLm1wNCIsImlhdCI6MTc0ODg4MzE0NiwiZXhwIjoxNzgwNDE5MTQ2fQ.bMS3YBMRBfkcqgjuQUXZ9c6GG4O2F59RlgMw-a_lEsg" type="video/mp4" />
         Your browser does not support the video tag.
       </video>
 
