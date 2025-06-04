@@ -2,6 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { GoogleMap, LoadScript, InfoWindow, Polygon, useLoadScript } from '@react-google-maps/api';
 import type { Job } from '@/types/job';
 import { Briefcase } from 'lucide-react';
+import { GOOGLE_MAPS_CONFIG, getMapId } from '@/config/google-maps';
+import { toast } from 'sonner';
+
+// Get the map ID from config
+const mapId = getMapId();
 
 interface JobMapProps {
   jobs?: Job[];
@@ -39,8 +44,8 @@ const MapComponent = ({
 
   const mapContainerStyle = {
     width: '100%',
-    height: '400px',
-    borderRadius: '0.5rem'
+    height: '100%',
+    borderRadius: '0'
   };
 
   // Default coordinates for Gold Coast, Queensland if no center provided
@@ -55,8 +60,9 @@ const MapComponent = ({
 
   const options = {
     mapTypeId: 'satellite',
-    streetViewControl: false,
-    mapTypeControl: false
+    streetViewControl: true, // Enable Street View control
+    mapTypeControl: false,
+    mapId: mapId // Add mapId for Advanced Markers
   };
 
   // Function to auto-fit map to all markers
@@ -101,6 +107,79 @@ const MapComponent = ({
   const onLoad = (mapInstance: google.maps.Map) => {
     setMap(mapInstance);
     
+    // Helper function to activate Street View for a location
+    const activateStreetView = (
+      map: google.maps.Map, 
+      location: google.maps.LatLngLiteral, 
+      address?: string
+    ) => {
+      try {
+        // Get the Street View service
+        const streetViewService = new google.maps.StreetViewService();
+        
+        // If address is provided and geocoding is needed, we could add that here
+        // For now we'll use the coordinates directly
+        
+        // Check for Street View availability and activate if available
+        streetViewService.getPanorama(
+          { location, radius: 50 },
+          (data, status) => {
+            if (status === google.maps.StreetViewStatus.OK) {
+              // Street View is available, activate it
+              const panorama = map.getStreetView();
+              panorama.setPosition(location);
+              panorama.setPov({
+                heading: 0,
+                pitch: 0
+              });
+              panorama.setVisible(true);
+              console.log("Street View activated for location:", location);
+            } else {
+              console.log("Street View not available at this location");
+              toast.info("Street View not available at this location");
+            }
+          }
+        );
+      } catch (error) {
+        console.error("Error initializing Street View:", error);
+      }
+    };
+    
+    // Activate Street View automatically on load
+    try {
+      // Determine which point to use for Street View
+      let streetViewPoint;
+      
+      if (locationMarkers.length > 0) {
+        // Use the first location marker
+        streetViewPoint = { 
+          lat: locationMarkers[0].coordinates[1], 
+          lng: locationMarkers[0].coordinates[0]
+        };
+      } else if (jobs.length > 0 && jobs[0].location) {
+        // Use the first job location
+        streetViewPoint = { 
+          lat: jobs[0].location[1], 
+          lng: jobs[0].location[0]
+        };
+      } else if (markers.length > 0) {
+        // Use the first marker
+        streetViewPoint = { 
+          lat: markers[0].position[0], 
+          lng: markers[0].position[1]
+        };
+      } else {
+        // Use the map center
+        streetViewPoint = mapCenter;
+      }
+      
+      // Activate Street View using our helper function
+      activateStreetView(mapInstance, streetViewPoint);
+      
+    } catch (error) {
+      console.error("Error initializing Street View:", error);
+    }
+    
     // Add markers from jobs if provided (legacy support)
     if (jobs.length > 0) {
       jobs.forEach((job) => {
@@ -130,6 +209,9 @@ const MapComponent = ({
         marker.addListener('gmp-click', () => {
           setSelectedJob(job);
           setSelectedLocation(null);
+          
+          // Activate Street View for the clicked job location
+          activateStreetView(mapInstance, { lat: job.location[1], lng: job.location[0] }, job.address);
         });
       });
     }
@@ -165,6 +247,9 @@ const MapComponent = ({
         marker.addListener('gmp-click', () => {
           setSelectedJob(job);
           setSelectedLocation({ coordinates, label });
+          
+          // Activate Street View for the clicked location
+          activateStreetView(mapInstance, { lat: coordinates[1], lng: coordinates[0] }, job.address);
         });
       });
     }
@@ -299,7 +384,8 @@ const JobMap = (props: JobMapProps) => {
   const { isLoaded, loadError } = useLoadScript({
     googleMapsApiKey: "AIzaSyCVHBYlen8sLxyI69WC67znnfi9SU4J0BY",
     libraries: libraries as any,
-    version: "beta"
+    version: "beta",
+    mapIds: [mapId] // Add mapId for Advanced Markers
   });
 
   if (loadError) {

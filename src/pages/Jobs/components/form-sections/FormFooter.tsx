@@ -1,9 +1,8 @@
-
 import React from "react";
 import { CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import { Loader2 } from "lucide-react";
+import { Loader2, Save, X } from "lucide-react";
 
 interface FormFooterProps {
   isSaving: boolean;
@@ -14,19 +13,20 @@ export function FormFooter({ isSaving, onSubmit }: FormFooterProps) {
   const navigate = useNavigate();
   
   return (
-    <CardFooter className="flex justify-between">
+    <CardFooter className="flex justify-between py-6 px-6">
       <Button 
         type="button" 
         variant="outline" 
         onClick={() => navigate("/jobs")} 
-        className="bg-slate-400 hover:bg-slate-300"
+        className="border-gray-300 text-gray-700 hover:bg-gray-100"
         disabled={isSaving}
       >
+        <X className="h-4 w-4 mr-2" />
         Cancel
       </Button>
       <Button 
         type="submit" 
-        className="bg-slate-400 hover:bg-slate-300"
+        className="bg-blue-600 hover:bg-blue-700 text-white"
         disabled={isSaving}
         onClick={onSubmit}
       >
@@ -36,7 +36,10 @@ export function FormFooter({ isSaving, onSubmit }: FormFooterProps) {
             Saving...
           </>
         ) : (
-          'Create Job'
+          <>
+            <Save className="h-4 w-4 mr-2" />
+            Create Job
+          </>
         )}
       </Button>
     </CardFooter>

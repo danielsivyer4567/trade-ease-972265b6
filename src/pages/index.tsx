@@ -2,7 +2,7 @@ import { BaseLayout } from "@/components/ui/BaseLayout";
 import JobSiteMap from "@/components/dashboard/JobSiteMap";
 import UpcomingJobs from "@/components/dashboard/UpcomingJobs";
 import { Card } from "@/components/ui/card";
-import { ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Calendar } from "lucide-react";
+import { ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Calendar, MapPin } from "lucide-react";
 import { TeamCalendar } from "@/components/team/TeamCalendar";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -20,6 +20,7 @@ import { toast } from "sonner";
 export default function DashboardPage() {
   const [calendarDate, setCalendarDate] = useState<Date | undefined>(new Date());
   const navigate = useNavigate();
+  const [showFullMap, setShowFullMap] = useState(false);
   
   const handleJobClick = (jobName: string) => {
     // Since these are mock jobs, we'll navigate to the jobs page with a toast
@@ -33,7 +34,23 @@ export default function DashboardPage() {
         <div className="p-0 space-y-4">
           {/* Job Site Map - Google Maps Satellite View with welcome message overlay */}
           <div className="mt-0 relative">
-            <JobSiteMap />
+            <div className="flex justify-between items-center px-4 py-2">
+              <h2 className="text-2xl font-semibold flex items-center gap-2">
+                <MapPin className="h-5 w-5 text-primary" />
+                Job Site Map
+              </h2>
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => setShowFullMap(!showFullMap)}
+              >
+                {showFullMap ? "Compact View" : "Expand Map"}
+              </Button>
+            </div>
+            
+            <div className={`transition-all duration-300 ease-in-out ${showFullMap ? 'h-[600px]' : 'h-[400px]'}`}>
+              <JobSiteMap />
+            </div>
             
             {/* Welcome message as absolute overlay inside the map */}
             <div className="absolute top-0 left-0 right-0 z-10 text-center mt-4">
@@ -52,6 +69,10 @@ export default function DashboardPage() {
                       variant="default" 
                       size="sm" 
                       className="bg-primary hover:bg-primary/90"
+                      onClick={() => {
+                        navigate('/jobs?filter=today');
+                        toast.info('Viewing today\'s jobs');
+                      }}
                     >
                       View All
                     </Button>
@@ -83,6 +104,10 @@ export default function DashboardPage() {
                       variant="default" 
                       size="sm" 
                       className="bg-primary hover:bg-primary/90"
+                      onClick={() => {
+                        navigate('/jobs?filter=tomorrow');
+                        toast.info('Viewing tomorrow\'s jobs');
+                      }}
                     >
                       View All
                     </Button>
@@ -114,6 +139,10 @@ export default function DashboardPage() {
                       variant="default" 
                       size="sm" 
                       className="bg-primary hover:bg-primary/90"
+                      onClick={() => {
+                        navigate('/jobs?filter=completed');
+                        toast.info('Viewing completed jobs');
+                      }}
                     >
                       View All
                     </Button>

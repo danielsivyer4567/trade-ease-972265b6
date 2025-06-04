@@ -1,9 +1,10 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { GoogleMap, LoadScript, Polygon, Polyline } from '@react-google-maps/api';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { GoogleMap, LoadScript, Polygon, Polyline, Marker as GoogleMapsMarker } from '@react-google-maps/api';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { MapPin, Ruler, Copy, RotateCw, AlertCircle, Pencil, X } from 'lucide-react';
+import { MapPin, Ruler, Copy, RotateCw, AlertCircle, Pencil, X, Move, Maximize, Download, XCircle, Check, Plus, Trash2 } from 'lucide-react';
 import { toast } from "sonner";
+import { getMapId } from '@/config/google-maps';
 
 interface PropertyBoundaryMapProps {
   center: [number, number]; // [longitude, latitude]
@@ -18,6 +19,9 @@ interface MapViewState {
   tilt: number;
   center: google.maps.LatLngLiteral;
 }
+
+// Get the map ID from config
+const mapId = getMapId();
 
 const PropertyBoundaryMap = ({ 
   center, 
@@ -429,6 +433,7 @@ const PropertyBoundaryMap = ({
             onLoad={() => console.log("Google Maps script loaded")}
             onError={handleLoadScriptError}
             version="beta"
+            mapIds={[mapId]}
           >
             <GoogleMap
               mapContainerStyle={mapContainerStyle}
@@ -439,7 +444,8 @@ const PropertyBoundaryMap = ({
                 tilt: mapViewState?.tilt || 0,
                 streetViewControl: false,
                 mapTypeControl: true,
-                fullscreenControl: true
+                fullscreenControl: true,
+                mapId: mapId
               }}
               onLoad={handleMapLoad}
             >
@@ -462,7 +468,7 @@ const PropertyBoundaryMap = ({
               
               {/* Render measurement points */}
               {measurementPath.map((point, index) => (
-                <Marker
+                <GoogleMapsMarker
                   key={`measure-point-${index}`}
                   position={point}
                   label={index === 0 ? 'Start' : index === measurementPath.length - 1 ? 'End' : `${index}`}

@@ -51,7 +51,7 @@ export function JobTable({
   };
   
   return (
-    <div className="h-full">
+    <div className="w-full">
       <Table>
         <TableHeader>
           <TableRow className="bg-transparent border-b border-gray-200">

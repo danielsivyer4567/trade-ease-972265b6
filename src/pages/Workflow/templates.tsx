@@ -18,7 +18,16 @@ const categoryOptions = [
   { value: 'operations', label: 'Operations' },
   { value: 'customer', label: 'Customer Service' },
   { value: 'marketing', label: 'Marketing' },
-  { value: 'finance', label: 'Finance' }
+  { value: 'finance', label: 'Finance' },
+  { value: 'tech', label: 'Tech & IT' },
+  { value: 'business', label: 'Business Services' },
+  { value: 'finance_insurance', label: 'Finance & Insurance' },
+  { value: 'construction', label: 'Construction' },
+  { value: 'real_estate', label: 'Real Estate' },
+  { value: 'hospitality', label: 'Hospitality & Events' },
+  { value: 'health', label: 'Health & Fitness' },
+  { value: 'legal', label: 'Legal Services' },
+  { value: 'creative', label: 'Creative Services' }
 ];
 
 // Example template data - will be replaced by API call
@@ -207,6 +216,11 @@ const Templates: React.FC = () => {
     navigate(`/workflow/edit/${templateId}`);
   };
 
+  const handleCategoryClick = (categoryValue: string) => {
+    setSelectedCategory(categoryValue);
+    toast.success(`Showing ${categoryValue === 'all' ? 'all templates' : `templates for ${categoryOptions.find(c => c.value === categoryValue)?.label}`}`);
+  };
+
   const filteredTemplates = templates.filter(template => {
     const matchesSearch = template.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          template.description.toLowerCase().includes(searchQuery.toLowerCase());
@@ -251,18 +265,18 @@ const Templates: React.FC = () => {
               className={`pl-10 ${workflowDarkMode ? 'bg-[#211c15] border-[#bfa14a] text-[#ffe082] placeholder:text-[#ffe082]/50' : ''}`}
             />
           </div>
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-2 overflow-x-auto" style={{ maxWidth: '100%' }}>
             {categoryOptions.map(category => (
               <Button
                 key={category.value}
                 variant={selectedCategory === category.value ? "default" : "outline"}
                 size="sm"
-                onClick={() => setSelectedCategory(category.value)}
-                className={workflowDarkMode ? (
+                onClick={() => handleCategoryClick(category.value)}
+                className={`whitespace-nowrap ${workflowDarkMode ? (
                   selectedCategory === category.value 
                     ? 'bg-[#bfa14a] text-[#18140c] hover:bg-[#a08838]' 
                     : 'border-[#bfa14a] text-[#ffe082] hover:bg-[#211c15]'
-                ) : ''}
+                ) : ''}`}
               >
                 {category.label}
               </Button>
@@ -282,7 +296,8 @@ const Templates: React.FC = () => {
               {filteredTemplates.map(template => (
                 <Card 
                   key={template.id} 
-                  className={`hover:shadow-md transition-shadow duration-200 ${workflowDarkMode ? 'bg-[#211c15] border-[#bfa14a]' : ''}`}
+                  className={`hover:shadow-md transition-shadow duration-200 cursor-pointer ${workflowDarkMode ? 'bg-[#211c15] border-[#bfa14a]' : ''}`}
+                  onClick={() => handleUseTemplate(template)}
                 >
                   <CardHeader className="pb-2">
                     <div className="flex items-center justify-between">
@@ -314,7 +329,10 @@ const Templates: React.FC = () => {
                     <Button 
                       variant="outline" 
                       size="sm"
-                      onClick={() => handleUseTemplate(template)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleUseTemplate(template);
+                      }}
                       className={workflowDarkMode ? 'border-[#bfa14a] text-[#ffe082] hover:bg-[#211c15]' : ''}
                     >
                       Use Template
@@ -322,7 +340,10 @@ const Templates: React.FC = () => {
                     <Button 
                       variant="ghost" 
                       size="sm"
-                      onClick={() => handleEditTemplate(template.id)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleEditTemplate(template.id);
+                      }}
                       className={workflowDarkMode ? 'text-[#bfa14a] hover:bg-[#211c15]' : ''}
                     >
                       Edit
@@ -334,7 +355,7 @@ const Templates: React.FC = () => {
 
             {filteredTemplates.length === 0 && !isLoading && (
               <div className={`text-center p-10 border border-dashed rounded-md ${workflowDarkMode ? 'border-[#bfa14a] text-[#ffe082]' : ''}`}>
-                <p className={workflowDarkMode ? 'text-[#ffe082] opacity-80' : 'text-muted-foreground'}>No templates found.</p>
+                <p className={workflowDarkMode ? 'text-[#ffe082] opacity-80' : 'text-muted-foreground'}>No templates found for this category. Try another category or search term.</p>
               </div>
             )}
           </>

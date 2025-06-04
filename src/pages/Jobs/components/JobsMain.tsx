@@ -3,11 +3,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useNavigate } from "react-router-dom";
 import { JobTable } from "./job-list/JobTable";
-import { Filter, Plus, Calendar, Link, Copy } from "lucide-react";
+import { Filter, Plus, Calendar, Link, Copy, MapPin } from "lucide-react";
 import JobSiteMapView from "./job-list/JobSiteMapView";
 import { toast } from "sonner";
 import type { Job } from "@/types/job";
-import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { Progress } from "@/components/ui/progress";
@@ -23,6 +22,7 @@ export function JobsMain() {
   const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedJob, setSelectedJob] = useState<string | null>(null);
+  const [notificationsEnabled, setNotificationsEnabled] = useState(false);
 
   useEffect(() => {
     const fetchJobs = async () => {
@@ -73,108 +73,138 @@ export function JobsMain() {
     `https://1b024d1a-36c6-4c1f-bf9e-27b08a6c3df4.lovableproject.com/progress/${selectedJob}` : '';
 
   return (
-    <div className="w-full h-full p-4">
+    <div className="w-full h-full p-2">
+      <div className="bg-white/80 backdrop-blur-sm rounded-lg shadow-sm p-3 mb-3">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-3">
+          <h1 className="text-xl font-bold mb-2 md:mb-0">Job Management</h1>
+          <div className="flex items-center space-x-1 w-full md:w-auto">
+            <div className="relative w-full md:w-auto flex-1 md:flex-initial">
+              <Input
+                type="text"
+                placeholder="Search jobs..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-8 h-9"
+              />
+              <Filter className="absolute left-2 top-2 h-4 w-4 text-gray-500" />
+            </div>
+            <Button 
+              onClick={() => navigate("/jobs/new")} 
+              className="whitespace-nowrap h-9"
+            >
+              <Plus className="mr-1 h-4 w-4" /> New Job
+            </Button>
+          </div>
+        </div>
+        
+        {loading ? (
+          <div className="h-[200px] flex items-center justify-center">
+            <div className="flex flex-col items-center">
+              <div className="h-8 w-8 border-4 border-t-blue-500 border-r-transparent border-b-transparent border-l-transparent rounded-full animate-spin mb-2"></div>
+              <p className="text-gray-500">Loading jobs data...</p>
+            </div>
+          </div>
+        ) : (
+          <div className="w-full mb-3">
+            <div className="bg-gray-50 p-2 rounded-t-lg border border-gray-200 border-b-0">
+              <div className="flex justify-between items-center">
+                <h2 className="text-sm font-medium flex items-center">
+                  <MapPin className="h-3 w-3 mr-1 text-blue-500" /> 
+                  Job Locations
+                </h2>
+                <div className="text-xs text-gray-500">
+                  {jobs.filter(job => 
+                    (job.location && job.location[0] && job.location[1]) || 
+                    (job.locations && job.locations.length > 0)
+                  ).length} jobs with locations
+                </div>
+              </div>
+            </div>
+            <div className="h-[200px] bg-gray-50 rounded-b-lg border border-gray-200">
+              <JobSiteMapView jobs={jobs} />
+            </div>
+          </div>
+        )}
+      </div>
+      
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="flex space-x-6 mb-6 border-b pb-4 w-full bg-transparent justify-start">
-          <TabsTrigger value="overview" className="px-4 py-2 data-[state=active]:border-b-2 data-[state=active]:border-black data-[state=active]:font-medium data-[state=inactive]:text-gray-500">
+        <TabsList className="flex space-x-4 mb-3 border-b pb-2 w-full bg-transparent justify-start">
+          <TabsTrigger value="overview" className="px-3 py-1 data-[state=active]:border-b-2 data-[state=active]:border-black data-[state=active]:font-medium data-[state=inactive]:text-gray-500">
             Overview
           </TabsTrigger>
-          <TabsTrigger value="jobs" className="px-4 py-2 data-[state=active]:border-b-2 data-[state=active]:border-black data-[state=active]:font-medium data-[state=inactive]:text-gray-500">
+          <TabsTrigger value="jobs" className="px-3 py-1 data-[state=active]:border-b-2 data-[state=active]:border-black data-[state=active]:font-medium data-[state=inactive]:text-gray-500">
             Jobs & Quotes
           </TabsTrigger>
-          <TabsTrigger value="conversations" className="px-4 py-2 data-[state=active]:border-b-2 data-[state=active]:border-black data-[state=active]:font-medium data-[state=inactive]:text-gray-500">
+          <TabsTrigger value="conversations" className="px-3 py-1 data-[state=active]:border-b-2 data-[state=active]:border-black data-[state=active]:font-medium data-[state=inactive]:text-gray-500">
             Conversations
           </TabsTrigger>
-          <TabsTrigger value="photos" className="px-4 py-2 data-[state=active]:border-b-2 data-[state=active]:border-black data-[state=active]:font-medium data-[state=inactive]:text-gray-500">
+          <TabsTrigger value="photos" className="px-3 py-1 data-[state=active]:border-b-2 data-[state=active]:border-black data-[state=active]:font-medium data-[state=inactive]:text-gray-500">
             Photos
           </TabsTrigger>
-          <TabsTrigger value="notes" className="px-4 py-2 data-[state=active]:border-b-2 data-[state=active]:border-black data-[state=active]:font-medium data-[state=inactive]:text-gray-500">
+          <TabsTrigger value="notes" className="px-3 py-1 data-[state=active]:border-b-2 data-[state=active]:border-black data-[state=active]:font-medium data-[state=inactive]:text-gray-500">
             Notes
           </TabsTrigger>
-          <TabsTrigger value="financials" className="px-4 py-2 data-[state=active]:border-b-2 data-[state=active]:border-black data-[state=active]:font-medium data-[state=inactive]:text-gray-500">
+          <TabsTrigger value="financials" className="px-3 py-1 data-[state=active]:border-b-2 data-[state=active]:border-black data-[state=active]:font-medium data-[state=inactive]:text-gray-500">
             Financials
           </TabsTrigger>
-          <TabsTrigger value="forms" className="px-4 py-2 data-[state=active]:border-b-2 data-[state=active]:border-black data-[state=active]:font-medium data-[state=inactive]:text-gray-500">
+          <TabsTrigger value="forms" className="px-3 py-1 data-[state=active]:border-b-2 data-[state=active]:border-black data-[state=active]:font-medium data-[state=inactive]:text-gray-500">
             Forms
           </TabsTrigger>
-          <TabsTrigger value="reviews" className="px-4 py-2 data-[state=active]:border-b-2 data-[state=active]:border-black data-[state=active]:font-medium data-[state=inactive]:text-gray-500">
+          <TabsTrigger value="reviews" className="px-3 py-1 data-[state=active]:border-b-2 data-[state=active]:border-black data-[state=active]:font-medium data-[state=inactive]:text-gray-500">
             Reviews
           </TabsTrigger>
-          <TabsTrigger value="progress" className="px-4 py-2 data-[state=active]:border-b-2 data-[state=active]:border-black data-[state=active]:font-medium data-[state=inactive]:text-gray-500">
+          <TabsTrigger value="progress" className="px-3 py-1 data-[state=active]:border-b-2 data-[state=active]:border-black data-[state=active]:font-medium data-[state=inactive]:text-gray-500">
             Progress Link
           </TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview">
-          <div className="text-center py-10 text-gray-500">
+          <div className="text-center py-4 text-gray-500">
             Overview content will be displayed here.
           </div>
         </TabsContent>
 
         <TabsContent value="jobs">
-          <div className="bg-white/80 backdrop-blur-sm rounded-lg shadow-sm p-6 mb-6">
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
-              <h1 className="text-2xl font-bold mb-2 md:mb-0">Job Management</h1>
-              <div className="flex items-center space-x-2 w-full md:w-auto">
-                <div className="relative w-full md:w-auto flex-1 md:flex-initial">
-                  <Input
-                    type="text"
-                    placeholder="Search jobs..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-8"
-                  />
-                  <Filter className="absolute left-2 top-2.5 h-4 w-4 text-gray-500" />
+          <div className="bg-white/80 backdrop-blur-sm rounded-lg shadow-sm p-3 mb-3">
+            {!loading && (
+              <div className="bg-white rounded-lg border border-gray-200">
+                <div className="p-2 border-b border-gray-200 bg-gray-50">
+                  <div className="flex justify-between items-center">
+                    <h2 className="text-sm font-medium flex items-center">
+                      <Calendar className="h-3 w-3 mr-1 text-blue-500" /> 
+                      All Jobs
+                    </h2>
+                    <div className="text-xs text-gray-500">
+                      {jobs.length} total jobs
+                    </div>
+                  </div>
                 </div>
-                <Button 
-                  onClick={() => navigate("/jobs/new")} 
-                  className="whitespace-nowrap"
-                >
-                  <Plus className="mr-1 h-4 w-4" /> New Job
-                </Button>
+                <JobTable 
+                  searchQuery={searchQuery} 
+                  jobs={jobs}
+                  actionLoading={actionLoading}
+                  onStatusChange={handleStatusChange}
+                />
               </div>
-            </div>
-            
-            <div className="h-[calc(100vh-220px)]">
-              <ResizablePanelGroup direction="horizontal" className="rounded-lg">
-                <ResizablePanel defaultSize={40} minSize={30}>
-                  <div className="h-full overflow-y-auto">
-                    <JobTable 
-                      searchQuery={searchQuery} 
-                      jobs={jobs}
-                      actionLoading={actionLoading}
-                      onStatusChange={handleStatusChange}
-                    />
-                  </div>
-                </ResizablePanel>
-                
-                <ResizableHandle withHandle />
-                
-                <ResizablePanel defaultSize={60} minSize={30}>
-                  <div className="h-full p-1">
-                    <JobSiteMapView jobs={jobs} />
-                  </div>
-                </ResizablePanel>
-              </ResizablePanelGroup>
-            </div>
+            )}
           </div>
         </TabsContent>
 
         <TabsContent value="progress">
-          <div className="bg-white/80 backdrop-blur-sm rounded-lg shadow-sm p-6 mb-6">
-            <div className="flex flex-col space-y-6">
+          <div className="bg-white/80 backdrop-blur-sm rounded-lg shadow-sm p-3 mb-3">
+            <div className="flex flex-col space-y-3">
               <div>
-                <h1 className="text-2xl font-bold">Customer Progress Link</h1>
-                <p className="text-gray-500">Share this link with your customer to keep them updated on job progress</p>
+                <h1 className="text-xl font-bold">Customer Progress Link</h1>
+                <p className="text-gray-500 text-sm">Share this link with your customer to keep them updated on job progress</p>
               </div>
               
               <div>
-                <h2 className="font-medium mb-2">Select Job for Progress Link</h2>
+                <h2 className="font-medium mb-1 text-sm">Select Job for Progress Link</h2>
                 <Select 
                   value={selectedJob || ''} 
                   onValueChange={setSelectedJob}
                 >
-                  <SelectTrigger className="w-full md:w-[400px]">
+                  <SelectTrigger className="w-full md:w-[400px] h-9">
                     <SelectValue placeholder="Select a job" />
                   </SelectTrigger>
                   <SelectContent>
@@ -187,15 +217,16 @@ export function JobsMain() {
                 </Select>
               </div>
               
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-1">
                 <Input
                   value={progressLink}
                   readOnly
-                  className="flex-1 bg-gray-50"
+                  className="flex-1 bg-gray-50 h-9"
                 />
                 <Button 
                   variant="outline" 
                   size="icon"
+                  className="h-9 w-9"
                   onClick={() => {
                     navigator.clipboard.writeText(progressLink);
                     toast.success("Link copied to clipboard");
@@ -205,57 +236,76 @@ export function JobsMain() {
                 </Button>
               </div>
               
-              <div className="flex items-center space-x-2">
-                <Button variant="outline" className="flex items-center">
-                  <Link className="h-4 w-4 mr-2" />
+              <div className="flex items-center space-x-1">
+                <Button 
+                  variant="outline" 
+                  className="flex items-center h-9"
+                  onClick={() => {
+                    if (selectedJob) {
+                      window.open(`/preview-progress/${selectedJob}`, '_blank');
+                      toast.success("Opening preview in new tab");
+                    } else {
+                      toast.error("Please select a job first");
+                    }
+                  }}
+                >
+                  <Link className="h-4 w-4 mr-1" />
                   Preview Link
                 </Button>
-                <div className="flex items-center space-x-2">
-                  <span className="text-sm font-medium">Enable notifications</span>
-                  <div className="w-10 h-5 bg-gray-200 rounded-full relative cursor-pointer">
-                    <div className="w-4 h-4 bg-white rounded-full absolute right-0.5 top-0.5"></div>
+                <div className="flex items-center space-x-1">
+                  <span className="text-xs font-medium">Enable notifications</span>
+                  <div 
+                    className={`w-8 h-4 ${notificationsEnabled ? 'bg-blue-500' : 'bg-gray-200'} rounded-full relative cursor-pointer transition-colors duration-200`}
+                    onClick={() => {
+                      setNotificationsEnabled(!notificationsEnabled);
+                      toast.success(notificationsEnabled ? "Notifications disabled" : "Notifications enabled");
+                    }}
+                  >
+                    <div 
+                      className={`w-3 h-3 bg-white rounded-full absolute ${notificationsEnabled ? 'right-0.5' : 'left-0.5'} top-0.5 transition-all duration-200`}
+                    ></div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
 
-          <div className="bg-white/80 backdrop-blur-sm rounded-lg shadow-sm p-6 mb-6">
-            <h2 className="text-xl font-bold mb-4">Progress Portal Preview</h2>
+          <div className="bg-white/80 backdrop-blur-sm rounded-lg shadow-sm p-3 mb-3">
+            <h2 className="text-lg font-bold mb-2">Progress Portal Preview</h2>
             
-            <div className="border rounded-lg p-4 mb-6">
+            <div className="border rounded-lg p-3 mb-3">
               <Tabs defaultValue="portal-progress">
-                <TabsList className="flex space-x-6 mb-6 border-b pb-4 bg-transparent justify-start">
-                  <TabsTrigger value="portal-progress" className="px-4 py-2 data-[state=active]:border-b-2 data-[state=active]:border-black data-[state=active]:font-medium data-[state=inactive]:text-gray-500">Progress</TabsTrigger>
-                  <TabsTrigger value="portal-photos" className="px-4 py-2 data-[state=active]:border-b-2 data-[state=active]:border-black data-[state=active]:font-medium data-[state=inactive]:text-gray-500">Photos</TabsTrigger>
-                  <TabsTrigger value="portal-documents" className="px-4 py-2 data-[state=active]:border-b-2 data-[state=active]:border-black data-[state=active]:font-medium data-[state=inactive]:text-gray-500">Documents</TabsTrigger>
-                  <TabsTrigger value="portal-comments" className="px-4 py-2 data-[state=active]:border-b-2 data-[state=active]:border-black data-[state=active]:font-medium data-[state=inactive]:text-gray-500">Comments</TabsTrigger>
-                  <TabsTrigger value="portal-settings" className="px-4 py-2 data-[state=active]:border-b-2 data-[state=active]:border-black data-[state=active]:font-medium data-[state=inactive]:text-gray-500">Settings</TabsTrigger>
-                  <TabsTrigger value="portal-conversations" className="px-4 py-2 data-[state=active]:border-b-2 data-[state=active]:border-black data-[state=active]:font-medium data-[state=inactive]:text-gray-500">Conversations</TabsTrigger>
+                <TabsList className="flex space-x-4 mb-3 border-b pb-2 bg-transparent justify-start">
+                  <TabsTrigger value="portal-progress" className="px-3 py-1 data-[state=active]:border-b-2 data-[state=active]:border-black data-[state=active]:font-medium data-[state=inactive]:text-gray-500">Progress</TabsTrigger>
+                  <TabsTrigger value="portal-photos" className="px-3 py-1 data-[state=active]:border-b-2 data-[state=active]:border-black data-[state=active]:font-medium data-[state=inactive]:text-gray-500">Photos</TabsTrigger>
+                  <TabsTrigger value="portal-documents" className="px-3 py-1 data-[state=active]:border-b-2 data-[state=active]:border-black data-[state=active]:font-medium data-[state=inactive]:text-gray-500">Documents</TabsTrigger>
+                  <TabsTrigger value="portal-comments" className="px-3 py-1 data-[state=active]:border-b-2 data-[state=active]:border-black data-[state=active]:font-medium data-[state=inactive]:text-gray-500">Comments</TabsTrigger>
+                  <TabsTrigger value="portal-settings" className="px-3 py-1 data-[state=active]:border-b-2 data-[state=active]:border-black data-[state=active]:font-medium data-[state=inactive]:text-gray-500">Settings</TabsTrigger>
+                  <TabsTrigger value="portal-conversations" className="px-3 py-1 data-[state=active]:border-b-2 data-[state=active]:border-black data-[state=active]:font-medium data-[state=inactive]:text-gray-500">Conversations</TabsTrigger>
                 </TabsList>
                 
                 <TabsContent value="portal-progress">
-                  <div className="mb-6">
-                    <div className="flex justify-between mb-2">
-                      <p className="text-sm">Progress: {completedSteps} of {totalSteps} steps completed</p>
-                      <p className="text-sm font-medium">{progressPercentage}%</p>
+                  <div className="mb-3">
+                    <div className="flex justify-between mb-1">
+                      <p className="text-xs">Progress: {completedSteps} of {totalSteps} steps completed</p>
+                      <p className="text-xs font-medium">{progressPercentage}%</p>
                     </div>
-                    <Progress value={progressPercentage} className="h-2" />
+                    <Progress value={progressPercentage} className="h-1.5" />
                   </div>
                   
                   <div>
-                    <h3 className="font-medium mb-4">Job Steps</h3>
-                    <div className="space-y-4">
+                    <h3 className="font-medium mb-2 text-sm">Job Steps</h3>
+                    <div className="space-y-2">
                       {selectedJobData?.job_steps?.map((step, index) => (
-                        <div key={step.id} className="border rounded-lg p-4 flex justify-between items-center">
+                        <div key={step.id} className="border rounded-lg p-2 flex justify-between items-center">
                           <div className="flex items-center">
-                            <div className={`w-6 h-6 rounded-full mr-3 flex items-center justify-center ${step.isCompleted ? 'bg-green-500 text-white' : 'border border-gray-300'}`}>
+                            <div className={`w-5 h-5 rounded-full mr-2 flex items-center justify-center ${step.isCompleted ? 'bg-green-500 text-white' : 'border border-gray-300'}`}>
                               {step.isCompleted && '✓'}
                             </div>
-                            <span className="font-medium">{step.title}</span>
+                            <span className="font-medium text-sm">{step.title}</span>
                           </div>
                           {step.isCompleted && (
-                            <span className="text-sm bg-gray-100 px-2 py-1 rounded-full">
+                            <span className="text-xs bg-gray-100 px-2 py-0.5 rounded-full">
                               Completed 2023-12-{index + 1 < 10 ? '0' + (index + 1) : index + 1}
                             </span>
                           )}
@@ -263,7 +313,7 @@ export function JobsMain() {
                       ))}
                       
                       {(!selectedJobData?.job_steps || selectedJobData.job_steps.length === 0) && (
-                        <div className="text-center text-gray-500 py-4">
+                        <div className="text-center text-gray-500 py-2 text-sm">
                           No job steps defined for this job
                         </div>
                       )}
@@ -272,31 +322,31 @@ export function JobsMain() {
                 </TabsContent>
                 
                 <TabsContent value="portal-photos">
-                  <div className="text-center text-gray-500 py-4">
+                  <div className="text-center text-gray-500 py-2 text-sm">
                     Photos will be displayed here
                   </div>
                 </TabsContent>
                 
                 <TabsContent value="portal-documents">
-                  <div className="text-center text-gray-500 py-4">
+                  <div className="text-center text-gray-500 py-2 text-sm">
                     Documents will be displayed here
                   </div>
                 </TabsContent>
                 
                 <TabsContent value="portal-comments">
-                  <div className="text-center text-gray-500 py-4">
+                  <div className="text-center text-gray-500 py-2 text-sm">
                     Comments will be displayed here
                   </div>
                 </TabsContent>
                 
                 <TabsContent value="portal-settings">
-                  <div className="text-center text-gray-500 py-4">
+                  <div className="text-center text-gray-500 py-2 text-sm">
                     Settings will be displayed here
                   </div>
                 </TabsContent>
                 
                 <TabsContent value="portal-conversations">
-                  <div className="text-center text-gray-500 py-4">
+                  <div className="text-center text-gray-500 py-2 text-sm">
                     Conversations will be displayed here
                   </div>
                 </TabsContent>
@@ -306,37 +356,37 @@ export function JobsMain() {
         </TabsContent>
 
         <TabsContent value="conversations">
-          <div className="text-center py-10 text-gray-500">
+          <div className="text-center py-4 text-gray-500">
             Conversations content will be displayed here.
           </div>
         </TabsContent>
 
         <TabsContent value="photos">
-          <div className="text-center py-10 text-gray-500">
+          <div className="text-center py-4 text-gray-500">
             Photos content will be displayed here.
           </div>
         </TabsContent>
 
         <TabsContent value="notes">
-          <div className="text-center py-10 text-gray-500">
+          <div className="text-center py-4 text-gray-500">
             Notes content will be displayed here.
           </div>
         </TabsContent>
 
         <TabsContent value="financials">
-          <div className="text-center py-10 text-gray-500">
+          <div className="text-center py-4 text-gray-500">
             Financials content will be displayed here.
           </div>
         </TabsContent>
 
         <TabsContent value="forms">
-          <div className="text-center py-10 text-gray-500">
+          <div className="text-center py-4 text-gray-500">
             Forms content will be displayed here.
           </div>
         </TabsContent>
 
         <TabsContent value="reviews">
-          <div className="text-center py-10 text-gray-500">
+          <div className="text-center py-4 text-gray-500">
             Reviews content will be displayed here.
           </div>
         </TabsContent>
