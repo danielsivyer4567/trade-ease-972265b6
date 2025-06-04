@@ -9,6 +9,7 @@ vi.mock('react-router-dom', () => ({
   useLocation: () => ({ pathname: '/' }),
   Outlet: () => <div data-testid="outlet" />,
   RouterProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  createBrowserRouter: vi.fn().mockReturnValue({ routes: [] }),
 }));
 
 // Mock the router module
@@ -28,6 +29,6 @@ describe('App Component', () => {
   it('contains application structure', () => {
     render(<App />);
     // Check for presence of a div at minimum
-    expect(document.body.querySelector('div')).toBeInTheDocument();
+    expect(document.body.querySelector('div')).not.toBeNull();
   });
 }); 
