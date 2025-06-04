@@ -92,6 +92,8 @@
   "devDependencies": {
     "@eslint/js": "^8.56.0",
     "@tailwindcss/typography": "^0.5.10",
+    "@testing-library/jest-dom": "^6.1.4",
+    "@testing-library/react": "^14.0.0",
     "@types/node": "^20.11.19",
     "@types/react": "^18.2.57",
     "@types/react-dom": "^18.2.19",
@@ -101,13 +103,12 @@
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.5",
     "globals": "^13.24.0",
+    "jsdom": "^26.1.0",
     "postcss": "^8.4.35",
     "tailwindcss": "^3.4.1",
     "typescript": "^5.3.3",
     "typescript-eslint": "^7.0.1",
     "vite": "^6.3.2",
-    "vitest": "^1.0.0",
-    "@testing-library/jest-dom": "^6.1.4",
-    "@testing-library/react": "^14.0.0"
+    "vitest": "^1.0.0"
   }
 }
