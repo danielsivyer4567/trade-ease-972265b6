@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -8,11 +7,15 @@ import { RecentTrades } from './RecentTrades';
 import { WatchList } from './WatchList';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { DashboardStats } from '@/pages/TradeDash/components/DashboardStats';
+import JobSiteMap from "@/components/dashboard/JobSiteMap";
+import { Button } from "@/components/ui/button";
+import { MapPin } from "lucide-react";
 
 const TradeDashboard = () => {
   const [activeTab, setActiveTab] = useState("overview");
   const { toast } = useToast();
   const isMobile = useIsMobile();
+  const [showFullMap, setShowFullMap] = useState(false);
   
   return (
     <div className="space-y-4">
@@ -20,6 +23,27 @@ const TradeDashboard = () => {
         <h1 className="text-3xl font-bold tracking-tight">Trade Dashboard</h1>
         <p className="text-muted-foreground">Monitor construction jobs and manage activities</p>
       </header>
+      
+      {/* Job Site Map */}
+      <div className="mt-0 relative mb-6">
+        <div className="flex justify-between items-center px-4 py-2">
+          <h2 className="text-2xl font-semibold flex items-center gap-2">
+            <MapPin className="h-5 w-5 text-primary" />
+            Job Site Map
+          </h2>
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={() => setShowFullMap(!showFullMap)}
+          >
+            {showFullMap ? "Compact View" : "Expand Map"}
+          </Button>
+        </div>
+        
+        <div className={`transition-all duration-300 ease-in-out ${showFullMap ? 'h-[600px]' : 'h-[400px]'}`}>
+          <JobSiteMap />
+        </div>
+      </div>
       
       <DashboardStats 
         creditsBalance={25}

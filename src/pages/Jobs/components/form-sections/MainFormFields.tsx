@@ -55,15 +55,30 @@ export function MainFormFields({
   applyTemplate
 }: MainFormFieldsProps) {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-      <JobNumberGenerator jobNumber={jobNumber} setJobNumber={setJobNumber} />
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 gap-6">
+        <div className="space-y-2">
+          <Label htmlFor="title" className="text-sm font-medium text-gray-700">Job Title *</Label>
+          <Input 
+            id="title" 
+            value={title} 
+            onChange={e => setTitle(e.target.value)} 
+            placeholder="e.g., Kitchen Renovation" 
+            required 
+            className="bg-gray-50 border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+          />
+        </div>
+      </div>
       
-      <JobDateSelector 
-        date={date} 
-        setDate={setDate} 
-        dateUndecided={dateUndecided} 
-        setDateUndecided={setDateUndecided} 
-      />
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+        <JobNumberGenerator jobNumber={jobNumber} setJobNumber={setJobNumber} />
+        <JobDateSelector 
+          date={date} 
+          setDate={setDate} 
+          dateUndecided={dateUndecided} 
+          setDateUndecided={setDateUndecided} 
+        />
+      </div>
       
       <CustomerDetails 
         customer={customer} 
@@ -74,20 +89,10 @@ export function MainFormFields({
         setZipCode={setZipCode}
       />
       
-      <div className="space-y-2">
-        <Label htmlFor="title">Job Title *</Label>
-        <Input 
-          id="title" 
-          value={title} 
-          onChange={e => setTitle(e.target.value)} 
-          placeholder="e.g., Kitchen Renovation" 
-          required 
-        />
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+        <JobTypeSelector type={type} setType={setType} />
+        <TeamSelector team={team} setTeam={setTeam} />
       </div>
-      
-      <JobTypeSelector type={type} setType={setType} />
-      
-      <TeamSelector team={team} setTeam={setTeam} />
       
       <TemplateSelector 
         onShowTemplateSearch={onShowTemplateSearch} 

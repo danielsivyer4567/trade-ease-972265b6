@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -47,26 +46,27 @@ export function JobNumberGenerator({ jobNumber, setJobNumber, isEditing = false 
 
   return (
     <div className="space-y-2">
-      <Label htmlFor="jobNumber">Job Number *</Label>
-      <div className="flex">
+      <Label htmlFor="jobNumber" className="text-sm font-medium text-gray-700">Job Number *</Label>
+      <div className="relative">
         <Input 
           id="jobNumber" 
           value={jobNumber} 
           onChange={(e) => setJobNumber(e.target.value)} 
           placeholder="Auto-generated" 
-          className="flex-1"
+          className="pr-12 bg-gray-50 border-gray-300 focus:border-blue-500 focus:ring-blue-500"
           readOnly 
         />
         <Button 
           type="button" 
-          variant="outline" 
+          variant="ghost" 
           onClick={handleRefreshJobNumber}
-          className="ml-2 h-10 w-10 p-0 flex items-center justify-center bg-slate-300 hover:bg-slate-400"
+          className="absolute right-0 top-0 h-full px-3 text-gray-500 hover:text-blue-600 hover:bg-gray-100 rounded-l-none rounded-r-md transition-colors duration-200"
           title="Generate new job number"
         >
           <RefreshCcw className="h-4 w-4" />
         </Button>
       </div>
+      <p className="text-xs text-gray-500 mt-1">Unique identifier for this job</p>
     </div>
   );
 }

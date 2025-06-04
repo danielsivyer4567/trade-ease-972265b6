@@ -47,13 +47,13 @@
     opacity: 0;
   }
   10% {
-    opacity: 0.2;
-  }
-  50% {
     opacity: 0.3;
   }
+  50% {
+    opacity: 0.5;
+  }
   90% {
-    opacity: 0.1;
+    opacity: 0.2;
   }
   100% {
     transform: translateY(-20vh) scale(3);
@@ -68,6 +68,8 @@
   background: linear-gradient(135deg, rgba(23, 25, 57, 0.95), rgba(14, 14, 32, 0.95));
   overflow: hidden;
   z-index: 0;
+  will-change: transform; /* Performance optimization */
+  pointer-events: none; /* Ensure it doesn't interfere with interactions */
 }
 
 .particle {
@@ -76,14 +78,16 @@
   border-radius: 50%;
   box-shadow: 0 0 15px rgba(255, 86, 225, 0.7); /* Brighter glow */
   pointer-events: none;
+  will-change: transform, opacity; /* Performance optimization */
 }
 
 .smoke {
   position: absolute;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0) 70%);
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0) 70%);
   pointer-events: none;
   filter: blur(10px);
+  will-change: transform, opacity; /* Performance optimization */
 }
 
 /* Any additional app-specific styling can be added here */
@@ -123,8 +127,12 @@
 }
 
 .workflow-dark-mode-flow .react-flow__node {
+  z-index: 10 !important;
+  transform: none !important; /* Ensure no 3D transforms */
+  transform-style: flat !important; /* Ensure flat rendering */
+  backface-visibility: visible !important;
+  transition: box-shadow 0.3s ease, opacity 0.3s ease !important; /* Simplify transitions */
   position: relative;
-  transition: all 0.3s ease;
   min-width: 100px;
   min-height: 100px;
   backdrop-filter: blur(2px) !important;
@@ -253,8 +261,8 @@
 
 /* Node hover effect */
 .workflow-dark-mode-flow .react-flow__node:hover {
-  transform: translateY(-5px) !important;
-  z-index: 10;
+  transform: translateY(-5px) !important; /* Simple 2D transform */
+  z-index: 15 !important;
 }
 
 /* 3D Cube Node styling */

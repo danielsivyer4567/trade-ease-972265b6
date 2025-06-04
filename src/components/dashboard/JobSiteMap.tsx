@@ -7,7 +7,7 @@ import { MapPin, AlertCircle, Pencil, X, Ruler } from "lucide-react";
 import { toast } from "sonner";
 import type { Job } from "@/types/job";
 import { supabase } from "@/integrations/supabase/client";
-import { GOOGLE_MAPS_CONFIG } from "@/config/google-maps";
+import { GOOGLE_MAPS_CONFIG, validateGoogleMapsApiKey, getSafeApiKey, getMapId } from "@/config/google-maps";
 
 // Define types for locations and map properties
 type Location = {
@@ -35,14 +35,17 @@ interface MapViewState {
 const mapLibraries = ["marker", "geometry"] as ["marker", "geometry"];
 
 // Google Maps API key - defined once outside component
-const GOOGLE_MAPS_API_KEY = GOOGLE_MAPS_CONFIG.apiKey;
+// Use the validateGoogleMapsApiKey function to check if API key is valid
+const isApiKeyValid = validateGoogleMapsApiKey();
+let GOOGLE_MAPS_API_KEY = '';
 
-// Log the API key (partial) for debugging
-console.log("Google Maps API Key loaded:", GOOGLE_MAPS_API_KEY ? `${GOOGLE_MAPS_API_KEY.substring(0, 10)}...` : "NOT LOADED");
-
-// Add comprehensive error checking
-if (!GOOGLE_MAPS_API_KEY) {
-  console.error("CRITICAL: Google Maps API key is not configured!");
+// Only set the API key if it's valid to prevent errors
+try {
+  GOOGLE_MAPS_API_KEY = isApiKeyValid ? getSafeApiKey() : '';
+  // Log the API key (partial) for debugging
+  console.log("Google Maps API Key loaded:", GOOGLE_MAPS_API_KEY ? `${GOOGLE_MAPS_API_KEY.substring(0, 10)}...` : "NOT LOADED");
+} catch (error) {
+  console.error("Failed to get Google Maps API key:", error);
 }
 
 // Default map center - Gold Coast coordinates
@@ -58,13 +61,14 @@ const DEFAULT_MAP_OPTIONS = {
   zoom: 13,
   mapTypeControl: false,
   streetViewControl: true,
-  fullscreenControl: true
+  fullscreenControl: true,
+  mapId: getMapId()
 };
 
 // Default map container style
 const MAP_CONTAINER_STYLE = {
   width: '100%',
-  height: '400px',
+  height: '100%',
   borderRadius: '0.5rem',
   position: 'relative' as 'relative',
   border: '4px solid black'
@@ -363,6 +367,8 @@ const JobSiteMap = memo(() => {
       specificError += "Invalid API key. Please check your API key configuration.";
     } else if (error.message?.includes('OverQuotaMapError')) {
       specificError += "API quota exceeded. Please check your Google Cloud billing.";
+    } else if (!GOOGLE_MAPS_API_KEY) {
+      specificError += "API key not configured. Please add VITE_GOOGLE_MAPS_API_KEY to your .env file.";
     } else {
       specificError += "Please check browser console for details.";
     }
@@ -413,7 +419,7 @@ const JobSiteMap = memo(() => {
   };
 
   return (
-    <Card className="w-full p-0 overflow-hidden">
+    <Card className="w-full h-full p-0 overflow-hidden">
       {/* Display measurement result if needed above the map */}
       {measurementDistance > 0 && (
         <div className="p-2 bg-secondary/20 rounded-md text-sm m-2">
@@ -422,7 +428,7 @@ const JobSiteMap = memo(() => {
         </div>
       )}
       
-      <div className="relative">
+      <div className="relative h-full">
         {/* Title overlay */}
         <div className="absolute top-3 left-3 z-10 bg-black/50 backdrop-blur-sm px-3 py-1.5 rounded-md text-white font-semibold shadow-lg">
           <h2 className="text-lg">Job Site Map</h2>
@@ -493,17 +499,7 @@ const JobSiteMap = memo(() => {
               <AlertCircle className="mx-auto h-12 w-12 text-red-500" />
               <h3 className="mt-2 text-lg font-semibold text-gray-900">Map Error</h3>
               <p className="mt-1 text-sm text-gray-500">{mapError}</p>
-              <div className="mt-4 text-left bg-gray-100 p-3 rounded-md">
-                <p className="text-xs font-semibold mb-2">Quick Fix:</p>
-                <ol className="text-xs space-y-1">
-                  <li>1. Go to <a href="https://console.cloud.google.com/apis/credentials" target="_blank" className="text-blue-600 underline">Google Cloud Console</a></li>
-                  <li>2. Click on your API key: {GOOGLE_MAPS_API_KEY.substring(0, 10)}...</li>
-                  <li>3. Under "Application restrictions" → "HTTP referrers"</li>
-                  <li>4. Add: <code className="bg-gray-200 px-1">localhost:5173/*</code></li>
-                  <li>5. Enable "Maps JavaScript API" in <a href="https://console.cloud.google.com/apis/library" target="_blank" className="text-blue-600 underline">API Library</a></li>
-                  <li>6. Check <a href="https://console.cloud.google.com/billing" target="_blank" className="text-blue-600 underline">Billing</a> is enabled</li>
-                </ol>
-              </div>
+              
               <div className="mt-3 flex gap-2">
                 <Button 
                   onClick={() => window.location.reload()} 
@@ -513,7 +509,7 @@ const JobSiteMap = memo(() => {
                   Try Again
                 </Button>
                 <Button 
-                  onClick={() => window.open('/test-maps', '_blank')} 
+                  onClick={() => window.open('/debug-maps', '_blank')} 
                   className="flex-1"
                   size="sm"
                   variant="outline"
@@ -525,90 +521,113 @@ const JobSiteMap = memo(() => {
           </div>
         )}
         
-        <LoadScript 
-          googleMapsApiKey={GOOGLE_MAPS_API_KEY} 
-          libraries={mapLibraries}
-          version="weekly"
-          onError={handleLoadError}
-          onLoad={() => {
-            console.log("Google Maps script loaded successfully");
-            // Check if google.maps is available
-            if ((window as any).google && (window as any).google.maps) {
-              console.log("Google Maps API is available");
-            } else {
-              console.error("Google Maps API not available after script load");
-            }
-          }}
-          loadingElement={<div className="h-full w-full flex items-center justify-center">Loading Maps...</div>}
-          id="google-map-script"
-          preventGoogleFontsLoading={true}
-        >
-          <GoogleMap 
-            mapContainerStyle={MAP_CONTAINER_STYLE} 
-            center={mapViewState?.center || DEFAULT_CENTER} 
-            zoom={mapViewState?.zoom || DEFAULT_MAP_OPTIONS.zoom} 
-            options={{
-              ...DEFAULT_MAP_OPTIONS,
-              // Use stored tilt if available to prevent resetting the view
-              tilt: mapViewState?.tilt || DEFAULT_MAP_OPTIONS.tilt
+        {!isApiKeyValid ? (
+          <div className="absolute inset-0 flex items-center justify-center z-10 bg-white/90 rounded-lg">
+            <div className="text-center p-4 max-w-md">
+              <AlertCircle className="mx-auto h-12 w-12 text-red-500" />
+              <h3 className="mt-2 text-lg font-semibold text-gray-900">API Key Missing</h3>
+              <p className="mt-1 text-sm text-gray-500">
+                Google Maps API key is not configured or invalid. Please add a valid key to your .env file.
+              </p>
+              <div className="mt-3">
+                <Button 
+                  onClick={() => window.open('/debug-maps', '_blank')} 
+                  className="w-full"
+                  size="sm"
+                >
+                  Go to Maps Diagnostic Page
+                </Button>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <LoadScript 
+            googleMapsApiKey={GOOGLE_MAPS_API_KEY} 
+            libraries={mapLibraries}
+            version="weekly"
+            onError={handleLoadError}
+            mapIds={[getMapId()]}
+            onLoad={() => {
+              console.log("Google Maps script loaded successfully");
+              // Check if google.maps is available
+              if ((window as any).google && (window as any).google.maps) {
+                console.log("Google Maps API is available");
+              } else {
+                console.error("Google Maps API not available after script load");
+                setMapError("Google Maps API not available after script load. Please check the console for details.");
+              }
             }}
-            onLoad={handleMapLoad}
+            loadingElement={<div className="h-full w-full flex items-center justify-center">Loading Maps...</div>}
+            id="google-map-script"
+            preventGoogleFontsLoading={false}
           >
-            {selectedLocation && (
-              <InfoWindow
-                position={{
-                  lat: selectedLocation.lat,
-                  lng: selectedLocation.lng
-                }}
-                onCloseClick={() => setSelectedLocation(null)}
-              >
-                <div className="p-2 max-w-[250px]">
-                  <div className="flex justify-between items-start mb-1">
-                    <h3 className="font-bold text-gray-900">{selectedLocation.jobTitle}</h3>
-                    <span className="px-2 py-0.5 text-xs rounded-full bg-gray-100">
-                      {selectedLocation.status === 'ready' && 'Ready'}
-                      {selectedLocation.status === 'in-progress' && 'In Progress'}
-                      {selectedLocation.status === 'to-invoice' && 'To Invoice'}
-                      {selectedLocation.status === 'invoiced' && 'Invoiced'}
-                    </span>
+            <GoogleMap 
+              mapContainerStyle={MAP_CONTAINER_STYLE} 
+              center={mapViewState?.center || DEFAULT_CENTER} 
+              zoom={mapViewState?.zoom || DEFAULT_MAP_OPTIONS.zoom} 
+              options={{
+                ...DEFAULT_MAP_OPTIONS,
+                // Use stored tilt if available to prevent resetting the view
+                tilt: mapViewState?.tilt || DEFAULT_MAP_OPTIONS.tilt
+              }}
+              onLoad={handleMapLoad}
+            >
+              {selectedLocation && (
+                <InfoWindow
+                  position={{
+                    lat: selectedLocation.lat,
+                    lng: selectedLocation.lng
+                  }}
+                  onCloseClick={() => setSelectedLocation(null)}
+                >
+                  <div className="p-2 max-w-[250px]">
+                    <div className="flex justify-between items-start mb-1">
+                      <h3 className="font-bold text-gray-900">{selectedLocation.jobTitle}</h3>
+                      <span className="px-2 py-0.5 text-xs rounded-full bg-gray-100">
+                        {selectedLocation.status === 'ready' && 'Ready'}
+                        {selectedLocation.status === 'in-progress' && 'In Progress'}
+                        {selectedLocation.status === 'to-invoice' && 'To Invoice'}
+                        {selectedLocation.status === 'invoiced' && 'Invoiced'}
+                      </span>
+                    </div>
+                    <p className="text-gray-700 text-sm font-medium">#{selectedLocation.jobNumber}</p>
+                    <p className="text-gray-700 text-sm">{selectedLocation.customer}</p>
+                    {selectedLocation.locationLabel && (
+                      <p className="text-blue-600 text-xs font-medium mt-1">{selectedLocation.locationLabel}</p>
+                    )}
+                    <div className="mt-2">
+                      <Button 
+                        className="w-full text-sm mt-1" 
+                        size="sm"
+                        onClick={() => navigate(`/jobs/${selectedLocation.id.split('-')[0]}`)}
+                      >
+                        View Job Details
+                      </Button>
+                    </div>
                   </div>
-                  <p className="text-gray-700 text-sm font-medium">#{selectedLocation.jobNumber}</p>
-                  <p className="text-gray-700 text-sm">{selectedLocation.customer}</p>
-                  {selectedLocation.locationLabel && (
-                    <p className="text-blue-600 text-xs font-medium mt-1">{selectedLocation.locationLabel}</p>
-                  )}
-                  <div className="mt-2">
-                    <Button 
-                      className="w-full text-sm mt-1" 
-                      size="sm"
-                      onClick={() => navigate(`/jobs/${selectedLocation.id.split('-')[0]}`)}
-                    >
-                      View Job Details
-                    </Button>
-                  </div>
-                </div>
-              </InfoWindow>
-            )}
-            
-            {/* Render measurement line */}
-            {measurementPath.length > 1 && (
-              <Polyline
-                path={measurementPath}
-                options={polylineOptions}
-              />
-            )}
-            
-            {/* Render measurement points */}
-            {measurementPath.map((point, index) => (
-              <Marker
-                key={`measure-point-${index}`}
-                position={point}
-                label={index === 0 ? 'Start' : index === measurementPath.length - 1 ? 'End' : `${index}`}
-              />
-            ))}
-            
-          </GoogleMap>
-        </LoadScript>
+                </InfoWindow>
+              )}
+              
+              {/* Render measurement line */}
+              {measurementPath.length > 1 && (
+                <Polyline
+                  path={measurementPath}
+                  options={polylineOptions}
+                />
+              )}
+              
+              {/* Render measurement points */}
+              {measurementPath.map((point, index) => (
+                <Marker
+                  key={`measure-point-${index}`}
+                  position={point}
+                  label={index === 0 ? 'Start' : index === measurementPath.length - 1 ? 'End' : `${index}`}
+                />
+              ))}
+              
+            </GoogleMap>
+          </LoadScript>
+        )}
       </div>
     </Card>
   );

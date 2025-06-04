@@ -351,6 +351,21 @@ const QuotesMain = () => {
       ? templates 
       : templates.filter(t => t.category === selectedTemplateCategory);
 
+    const handleCategorySelect = (category: string) => {
+      setSelectedTemplateCategory(category);
+      toast({
+        title: `${category} Templates`,
+        description: `Showing templates for ${category}`,
+      });
+    };
+
+    const handlePurchaseTemplate = (templateId: number, templateName: string) => {
+      toast({
+        title: "Template Purchase",
+        description: `Purchasing "${templateName}" template`,
+      });
+    };
+
     return (
       <div className="flex h-full">
         {/* Categories Sidebar */}
@@ -374,7 +389,13 @@ const QuotesMain = () => {
                     ? "bg-blue-50 text-blue-700" 
                     : "text-slate-700 hover:bg-slate-100"
                 }`}
-                onClick={() => setSelectedTemplateCategory("All Categories")}
+                onClick={() => {
+                  setSelectedTemplateCategory("All Categories");
+                  toast({
+                    title: "All Templates",
+                    description: "Showing all available templates",
+                  });
+                }}
               >
                 All Categories
               </button>
@@ -387,7 +408,7 @@ const QuotesMain = () => {
                       ? "bg-blue-50 text-blue-700" 
                       : "text-slate-700 hover:bg-slate-100"
                   }`}
-                  onClick={() => setSelectedTemplateCategory(category)}
+                  onClick={() => handleCategorySelect(category)}
                 >
                   {category}
                 </button>
@@ -399,7 +420,14 @@ const QuotesMain = () => {
             <h3 className="text-sm font-medium text-slate-700 mb-3">Popular Tags</h3>
             <div className="flex flex-wrap gap-2">
               {["New", "Popular", "Premium", "Free", "Simple", "Professional"].map(tag => (
-                <Badge key={tag} className="bg-slate-100 text-slate-700 hover:bg-slate-200 cursor-pointer">
+                <Badge 
+                  key={tag} 
+                  className="bg-slate-100 text-slate-700 hover:bg-slate-200 cursor-pointer"
+                  onClick={() => toast({
+                    title: `${tag} Templates`,
+                    description: `Showing ${tag.toLowerCase()} templates`,
+                  })}
+                >
                   {tag}
                 </Badge>
               ))}
@@ -416,7 +444,14 @@ const QuotesMain = () => {
 
           <div className="flex justify-between items-center mb-6">
             <div className="flex items-center space-x-3">
-              <Button variant="outline" className="rounded-full flex items-center gap-2">
+              <Button 
+                variant="outline" 
+                className="rounded-full flex items-center gap-2"
+                onClick={() => toast({
+                  title: "Filters",
+                  description: "Filter options would appear here",
+                })}
+              >
                 <Filter className="h-4 w-4" />
                 <span>Filters</span>
               </Button>
@@ -427,14 +462,38 @@ const QuotesMain = () => {
                 <Input 
                   placeholder="Search for a Template" 
                   className="pl-10 h-10 border-slate-300 focus:border-blue-500"
+                  onChange={(e) => {
+                    if (e.target.value.length > 2) {
+                      toast({
+                        title: "Searching",
+                        description: `Searching for "${e.target.value}"`,
+                      });
+                    }
+                  }}
                 />
               </div>
-              <select className="h-10 px-4 rounded-md border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+              <select 
+                className="h-10 px-4 rounded-md border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                onChange={(e) => toast({
+                  title: "Sort Changed",
+                  description: `Sorting by ${e.target.value}`,
+                })}
+              >
                 <option>Most Popular</option>
                 <option>Newest</option>
                 <option>Highest Rated</option>
               </select>
-              <Button variant="outline" className="bg-slate-300 text-slate-700 hover:bg-slate-400 rounded-lg flex items-center justify-center w-full h-12" onClick={() => document.getElementById('template-upload').click()}>
+              <Button 
+                variant="outline" 
+                className="bg-slate-300 text-slate-700 hover:bg-slate-400 rounded-lg flex items-center justify-center w-full h-12" 
+                onClick={() => {
+                  document.getElementById('template-upload').click();
+                  toast({
+                    title: "Upload Template",
+                    description: "Please select a template file to upload",
+                  });
+                }}
+              >
                 <Upload className="h-6 w-6 mr-2" />
                 <span>Upload Template</span>
               </Button>
@@ -449,7 +508,14 @@ const QuotesMain = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredTemplates.map(template => (
-              <div key={template.id} className="group relative overflow-hidden rounded-lg shadow-md hover:shadow-xl transition-all duration-300 border border-slate-200">
+              <div 
+                key={template.id} 
+                className="group relative overflow-hidden rounded-lg shadow-md hover:shadow-xl transition-all duration-300 border border-slate-200 cursor-pointer"
+                onClick={() => toast({
+                  title: "Template Selected",
+                  description: `Selected template: ${template.name}`,
+                })}
+              >
                 <div 
                   className="absolute inset-0 bg-cover bg-center" 
                   style={{ backgroundImage: `url(${template.imgUrl})` }}
@@ -459,7 +525,16 @@ const QuotesMain = () => {
                   <div className="flex justify-between">
                     <Badge className="bg-blue-500/80 hover:bg-blue-600 backdrop-blur-sm text-white">{template.industry}</Badge>
                     <div className="flex space-x-1">
-                      <button className="h-8 w-8 rounded-full bg-white/20 hover:bg-white/40 backdrop-blur-sm flex items-center justify-center text-white transition-colors">
+                      <button 
+                        className="h-8 w-8 rounded-full bg-white/20 hover:bg-white/40 backdrop-blur-sm flex items-center justify-center text-white transition-colors"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toast({
+                            title: "Template Downloaded",
+                            description: `Downloaded ${template.name}`,
+                          });
+                        }}
+                      >
                         <Download className="h-4 w-4" />
                       </button>
                     </div>
@@ -473,6 +548,10 @@ const QuotesMain = () => {
                     <Button 
                       className="mt-3 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white w-full"
                       size="sm"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handlePurchaseTemplate(template.id, template.name);
+                      }}
                     >
                       Purchase Template
                     </Button>

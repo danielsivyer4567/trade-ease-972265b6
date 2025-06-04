@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Search, Check, ShoppingCart, Image, List } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { toast } from "sonner";
 
 // Mock data for quote templates
 const QUOTE_TEMPLATES = [{
@@ -112,7 +113,23 @@ const QUOTE_TEMPLATES = [{
   }]
 }];
 
-const CATEGORIES = ["All", "Plumbing", "Renovation", "Electrical", "HVAC"];
+// Updated categories to match the ones in the screenshot
+const CATEGORIES = [
+  "All", 
+  "Plumbing", 
+  "Renovation", 
+  "Electrical", 
+  "HVAC", 
+  "Tech & IT",
+  "Business Services",
+  "Finance & Insurance",
+  "Construction",
+  "Real Estate",
+  "Hospitality & Events",
+  "Health & Fitness",
+  "Legal Services",
+  "Creative Services"
+];
 
 interface QuoteTemplateSelectorProps {
   onSelectTemplate: (templateId: string) => void;
@@ -139,7 +156,17 @@ export function QuoteTemplateSelector({
   const handleBuyTemplate = (templateId: string, e: React.MouseEvent) => {
     e.stopPropagation();
     // Implementation would connect to payment gateway
-    alert(`Redirecting to payment for template ${templateId}`);
+    toast.success(`Purchasing template ${templateId}`);
+  };
+
+  const handleCategoryChange = (newCategory: string) => {
+    setCategory(newCategory);
+    toast.success(`Showing ${newCategory === 'All' ? 'all templates' : `${newCategory} templates`}`);
+  };
+
+  const handleSelectTemplate = (templateId: string) => {
+    onSelectTemplate(templateId);
+    toast.success(`Template selected: ${templates.find(t => t.id === templateId)?.name}`);
   };
   
   return (
@@ -159,7 +186,7 @@ export function QuoteTemplateSelector({
             />
           </div>
           
-          <Select value={category} onValueChange={setCategory}>
+          <Select value={category} onValueChange={handleCategoryChange}>
             <SelectTrigger className="w-[140px]">
               <SelectValue placeholder="Category" />
             </SelectTrigger>
@@ -189,17 +216,32 @@ export function QuoteTemplateSelector({
             </Button>
           </div>
         </div>
+
+        {/* Category buttons - horizontal scrollable list */}
+        <div className="flex gap-2 overflow-x-auto pb-2 -mx-1 px-1">
+          {CATEGORIES.map(cat => (
+            <Button
+              key={cat}
+              variant={category === cat ? "default" : "outline"}
+              size="sm"
+              onClick={() => handleCategoryChange(cat)}
+              className="whitespace-nowrap"
+            >
+              {cat}
+            </Button>
+          ))}
+        </div>
         
         <div className={`space-y-3 max-h-[600px] overflow-y-auto pr-1 ${viewMode === "grid" ? "grid grid-cols-2 gap-3" : ""}`}>
           {filteredTemplates.length === 0 ? (
             <div className="text-center py-8 text-gray-500 col-span-2">
-              <p>No templates found</p>
+              <p>No templates found for the selected category</p>
             </div>
           ) : (
             filteredTemplates.map(template => (
               <div 
                 key={template.id} 
-                onClick={() => onSelectTemplate(template.id)} 
+                onClick={() => handleSelectTemplate(template.id)} 
                 className={`bg-slate-100 p-3 rounded-md cursor-pointer hover:bg-slate-200 transition-colors ${
                   selectedTemplate === template.id ? "ring-2 ring-blue-500" : ""
                 }`}
@@ -268,8 +310,9 @@ export function QuoteTemplateSelector({
             onClick={() => {
               setSearchQuery("");
               setCategory("All");
+              toast.success("Showing all templates");
             }} 
-            className="flex-1 bg-slate-500 hover:bg-slate-400"
+            className="flex-1 bg-slate-500 hover:bg-slate-400 text-white"
           >
             Show All Templates
           </Button>
@@ -277,7 +320,10 @@ export function QuoteTemplateSelector({
           <Button 
             variant="outline" 
             className="bg-blue-500 hover:bg-blue-400 text-white"
-            onClick={() => window.open('/template-marketplace', '_blank')}
+            onClick={() => {
+              window.open('/template-marketplace', '_blank');
+              toast.success("Opening template marketplace in new tab");
+            }}
           >
             <ShoppingCart className="h-4 w-4 mr-2" />
             Template Marketplace

@@ -165,7 +165,7 @@ const JobSiteMapView = ({ jobs }: JobSiteMapViewProps) => {
   const hasLocations = locationMarkers.length > 0;
 
   return (
-    <div className="w-full h-full relative">
+    <div className="w-full h-full relative rounded-lg overflow-hidden">
       {loading && (
         <div className="absolute inset-0 bg-white/80 flex items-center justify-center z-10">
           <div className="flex flex-col items-center">
@@ -183,11 +183,11 @@ const JobSiteMapView = ({ jobs }: JobSiteMapViewProps) => {
       />
       
       {!hasLocations && !loading && (
-        <div className="absolute inset-0 flex items-center justify-center bg-gray-100 rounded-lg">
+        <div className="absolute inset-0 flex items-center justify-center bg-gray-100">
           <div className="text-center p-6">
-            <MapPin className="h-12 w-12 mx-auto text-gray-400 mb-4" />
-            <h3 className="text-lg font-medium text-gray-700 mb-2">No job locations available</h3>
-            <p className="text-sm text-gray-500">
+            <MapPin className="h-10 w-10 mx-auto text-gray-400 mb-2" />
+            <h3 className="text-base font-medium text-gray-700 mb-1">No job locations available</h3>
+            <p className="text-xs text-gray-500">
               Add addresses to your jobs to see them on the map
             </p>
           </div>

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { CheckCircle, XCircle, AlertCircle, Loader2 } from 'lucide-react';
-import { GOOGLE_MAPS_CONFIG } from '@/config/google-maps';
+import { GOOGLE_MAPS_CONFIG, validateGoogleMapsApiKey } from '@/config/google-maps';
 
 interface DebugResult {
   test: string;
@@ -18,13 +18,14 @@ export function GoogleMapsDebug() {
     setIsRunning(true);
     setResults([]);
 
-    // Test 1: Check if API key exists
+    // Test 1: Check if API key exists and validate
+    const isApiKeyValid = validateGoogleMapsApiKey();
     addResult({
       test: 'API Key Configuration',
-      status: GOOGLE_MAPS_CONFIG.apiKey ? 'success' : 'error',
-      message: GOOGLE_MAPS_CONFIG.apiKey 
+      status: isApiKeyValid ? 'success' : 'error',
+      message: isApiKeyValid 
         ? `API key loaded: ${GOOGLE_MAPS_CONFIG.apiKey.substring(0, 10)}...` 
-        : 'No API key found in environment variables'
+        : 'No valid API key found in environment variables'
     });
 
     // Test 2: Check environment variables
@@ -33,7 +34,7 @@ export function GoogleMapsDebug() {
       status: process.env.VITE_GOOGLE_MAPS_API_KEY ? 'success' : 'warning',
       message: process.env.VITE_GOOGLE_MAPS_API_KEY 
         ? 'Environment variable VITE_GOOGLE_MAPS_API_KEY is set' 
-        : 'Using fallback API key from config'
+        : 'VITE_GOOGLE_MAPS_API_KEY not found in environment'
     });
 
     // Test 3: Try to load Google Maps script
@@ -47,6 +48,13 @@ export function GoogleMapsDebug() {
       // Remove any existing Google Maps scripts first
       const existingScripts = document.querySelectorAll('script[src*="maps.googleapis.com"]');
       existingScripts.forEach(script => script.remove());
+
+      // If no valid API key, don't attempt to load the script
+      if (!isApiKeyValid) {
+        updateResult('Google Maps Script', 'error', 'Cannot load script without valid API key');
+        setIsRunning(false);
+        return;
+      }
 
       const script = document.createElement('script');
       script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_CONFIG.apiKey}&callback=initMap&libraries=places,geometry`;

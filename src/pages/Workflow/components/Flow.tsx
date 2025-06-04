@@ -461,23 +461,23 @@ function FlowContent({ onInit, workflowId, onNodeSelect, workflowDarkMode = true
       {/* Animated Background */}
       <div className="workflow-background">
         {/* Smoke effect */}
-        {Array.from({ length: 10 }).map((_, i) => (
+        {Array.from({ length: 8 }).map((_, i) => (
           <div 
             key={`smoke-${i}`} 
             className="smoke"
             style={{
-              width: `${Math.random() * 150 + 100}px`,
-              height: `${Math.random() * 150 + 100}px`,
+              width: `${Math.random() * 200 + 150}px`,
+              height: `${Math.random() * 200 + 150}px`,
               top: `${Math.random() * 100}%`,
               left: `${Math.random() * 100}%`,
-              animation: `smoke ${Math.random() * 20 + 15}s ease-out infinite`,
+              animation: `smoke ${Math.random() * 15 + 20}s ease-out infinite`,
               animationDelay: `${Math.random() * 10}s`,
             }}
           />
         ))}
         
         {/* Animated particles */}
-        {Array.from({ length: 50 }).map((_, i) => (
+        {Array.from({ length: 25 }).map((_, i) => (
           <div 
             key={i} 
             className="particle"
@@ -486,7 +486,7 @@ function FlowContent({ onInit, workflowId, onNodeSelect, workflowDarkMode = true
               height: `${Math.random() * 10 + 5}px`, // Larger particles
               top: `${Math.random() * 100}%`,
               left: `${Math.random() * 100}%`,
-              animation: `floatParticle ${Math.random() * 15 + 10}s linear infinite`,
+              animation: `floatParticle ${Math.random() * 15 + 15}s linear infinite`,
               animationDelay: `${Math.random() * 5}s`,
             }}
           />
