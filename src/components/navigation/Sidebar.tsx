@@ -42,7 +42,7 @@ export const Sidebar = () => {
       </div>
       
       <nav className="flex-1">
-        <ul className="space-y-1 px-2">
+        <ul className="space-y-0.5 px-2">
           {navItems.map(item => {
             const isActive = activeRouteFn(item.path, { exact: item.path === '/' });
             

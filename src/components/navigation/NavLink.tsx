@@ -35,7 +35,7 @@ export const NavLink: React.FC<NavLinkProps> = ({
     <Link
       to={to}
       className={cn(
-        'flex items-center gap-2 px-3 py-2 rounded-md transition-colors',
+        'flex items-center gap-2 px-3 py-1.5 rounded-md transition-colors',
         'hover:bg-slate-100 dark:hover:bg-slate-800',
         active && activeClassName,
         className
