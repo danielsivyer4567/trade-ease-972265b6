@@ -9,7 +9,7 @@ import { Toaster as SonnerToaster } from 'sonner';
 import { NotificationProvider } from './components/notifications/NotificationContextProvider';
 import { WorkflowDarkModeProvider } from './contexts/WorkflowDarkModeContext';
 import { initializeTables } from './integrations/supabase/dbInit';
-import { ErrorBoundary } from 'react-error-boundary';
+import ErrorBoundary from './components/ErrorBoundary';
 import './App.css';
 import './pages/Workflow/components/workflow.css';
 
@@ -28,15 +28,15 @@ const LoadingFallback = () => (
   </div>
 );
 
-const ErrorFallback = ({ error, resetErrorBoundary }) => (
+const ErrorFallbackUI = () => (
   <div className="flex h-screen w-screen flex-col items-center justify-center p-6 text-center">
     <h2 className="text-2xl font-bold text-red-600">Something went wrong!</h2>
-    <p className="mt-2 mb-4">{error.message || 'An unexpected error occurred'}</p>
+    <p className="mt-2 mb-4">The application encountered an unexpected error</p>
     <button
-      onClick={resetErrorBoundary}
+      onClick={() => window.location.reload()}
       className="rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
     >
-      Try again
+      Reload App
     </button>
   </div>
 );
@@ -68,7 +68,7 @@ function App() {
   }
 
   return (
-    <ErrorBoundary FallbackComponent={ErrorFallback}>
+    <ErrorBoundary fallback={<ErrorFallbackUI />}>
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
           <NotificationProvider>

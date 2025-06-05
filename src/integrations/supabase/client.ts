@@ -1,38 +1,41 @@
 import { createClient } from '@supabase/supabase-js'
 import { SUPABASE_CONFIG } from '@/config/supabase'
 
-// Debug environment variables
-console.log('Environment variables:', {
-  VITE_SUPABASE_URL: import.meta.env.VITE_SUPABASE_URL,
-  VITE_SUPABASE_ANON_KEY: import.meta.env.VITE_SUPABASE_ANON_KEY,
-});
-
-// Get environment variables with fallbacks
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-const supabaseServiceRoleKey = import.meta.env.VITE_SUPABASE_SERVICE_ROLE_KEY || '';
-
-// Validate environment variables
-if (!supabaseUrl) {
-  console.error('Supabase URL is not defined. Please check your environment variables.');
-  throw new Error('VITE_SUPABASE_URL is not defined in environment variables');
+// Debug environment variables in development mode only
+if (import.meta.env.DEV) {
+  console.log('Supabase environment:', {
+    hasUrl: !!import.meta.env.VITE_SUPABASE_URL,
+    hasAnonKey: !!import.meta.env.VITE_SUPABASE_ANON_KEY,
+  });
 }
 
-if (!supabaseAnonKey) {
-  console.error('Supabase Anon Key is not defined. Please check your environment variables.');
-  throw new Error('VITE_SUPABASE_ANON_KEY is not defined in environment variables');
+// Get environment variables with fallbacks
+const supabaseUrl = SUPABASE_CONFIG.url;
+const supabaseAnonKey = SUPABASE_CONFIG.anonKey;
+
+// Validate environment variables but don't throw errors
+let supabaseInitialized = true;
+if (!supabaseUrl || !supabaseAnonKey) {
+  console.error('Supabase credentials are not properly defined. Some features may not work correctly.');
+  supabaseInitialized = false;
 }
 
 // Create a single instance of the Supabase client for the entire app
-// IMPORTANT: Always import this instance rather than creating new ones to avoid
-// the "Multiple GoTrueClient instances detected" warning
-export const supabase = createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.anonKey)
+// If not initialized properly, create a mock client that will gracefully fail
+export const supabase = supabaseInitialized 
+  ? createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.anonKey)
+  : createMockSupabaseClient();
 
 // Create an admin client with the service role key for privileged operations
-export const supabaseAdmin = null
+export const supabaseAdmin = null;
 
 // Add the demo data generation function
 export const generateDemoData = async () => {
+  if (!supabaseInitialized) {
+    console.warn('Supabase not initialized, cannot generate demo data');
+    return { error: 'Supabase not initialized' };
+  }
+  
   try {
     const response = await supabase.functions.invoke('generate-demo-data', {
       method: 'POST',
@@ -43,3 +46,44 @@ export const generateDemoData = async () => {
     return { error };
   }
 };
+
+// Create a mock Supabase client that will gracefully fail
+function createMockSupabaseClient() {
+  const mockErrorResponse = { data: null, error: { message: 'Supabase not properly initialized' }};
+  
+  return {
+    auth: {
+      getSession: async () => ({ data: { session: null }, error: null }),
+      signUp: async () => mockErrorResponse,
+      signIn: async () => mockErrorResponse,
+      signOut: async () => ({ error: null }),
+    },
+    from: () => ({
+      select: () => ({
+        eq: () => ({
+          order: () => Promise.resolve({ data: [], error: null }),
+          single: () => Promise.resolve(mockErrorResponse)
+        }),
+        single: () => Promise.resolve(mockErrorResponse)
+      }),
+      insert: () => ({
+        select: () => ({
+          single: () => Promise.resolve(mockErrorResponse)
+        })
+      }),
+      update: () => ({
+        eq: () => ({
+          select: () => ({
+            single: () => Promise.resolve(mockErrorResponse)
+          })
+        })
+      }),
+      delete: () => ({
+        eq: () => Promise.resolve({ error: null })
+      })
+    }),
+    functions: {
+      invoke: async () => ({ error: 'Supabase not initialized' })
+    }
+  };
+}

@@ -1,10 +1,13 @@
 import { AppLayout } from "@/components/ui/AppLayout";
 import { CustomersPageContent } from "./components/CustomersPageContent";
+import ErrorBoundary from "@/components/ErrorBoundary";
 
 const CustomersPage = () => {
   return (
     <AppLayout>
-      <CustomersPageContent />
+      <ErrorBoundary>
+        <CustomersPageContent />
+      </ErrorBoundary>
     </AppLayout>
   );
 };

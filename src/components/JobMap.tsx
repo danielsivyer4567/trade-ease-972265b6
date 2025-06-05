@@ -196,23 +196,44 @@ const MapComponent = ({
           </div>
         `;
 
-        // Create the advanced marker
-        const marker = new google.maps.marker.AdvancedMarkerElement({
-          position: { lat: job.location[1], lng: job.location[0] },
-          map: mapInstance,
-          content: markerElement,
-          title: job.customer,
-          zIndex: 1000 // Ensure markers appear above other elements
-        });
+        try {
+          // Create the advanced marker
+          const marker = new google.maps.marker.AdvancedMarkerElement({
+            position: { lat: job.location[1], lng: job.location[0] },
+            map: mapInstance,
+            content: markerElement,
+            title: job.customer,
+            zIndex: 1000 // Ensure markers appear above other elements
+          });
 
-        // Add click listener using the recommended 'gmp-click' event
-        marker.addListener('gmp-click', () => {
-          setSelectedJob(job);
-          setSelectedLocation(null);
+          // Add click listener using the recommended 'gmp-click' event
+          marker.addListener('gmp-click', () => {
+            setSelectedJob(job);
+            setSelectedLocation(null);
+            
+            // Activate Street View for the clicked job location
+            activateStreetView(mapInstance, { lat: job.location[1], lng: job.location[0] }, job.address);
+          });
+        } catch (error) {
+          console.error("Error creating advanced marker, falling back to standard marker:", error);
           
-          // Activate Street View for the clicked job location
-          activateStreetView(mapInstance, { lat: job.location[1], lng: job.location[0] }, job.address);
-        });
+          // Fallback to standard marker if Advanced Markers are not available
+          const standardMarker = new google.maps.Marker({
+            position: { lat: job.location[1], lng: job.location[0] },
+            map: mapInstance,
+            title: job.customer,
+            zIndex: 1000
+          });
+          
+          // Add click listener for standard marker
+          standardMarker.addListener('click', () => {
+            setSelectedJob(job);
+            setSelectedLocation(null);
+            
+            // Activate Street View for the clicked job location
+            activateStreetView(mapInstance, { lat: job.location[1], lng: job.location[0] }, job.address);
+          });
+        }
       });
     }
 
@@ -234,23 +255,44 @@ const MapComponent = ({
           </div>
         `;
 
-        // Create the advanced marker
-        const marker = new google.maps.marker.AdvancedMarkerElement({
-          position: { lat: coordinates[1], lng: coordinates[0] },
-          map: mapInstance,
-          content: markerElement,
-          title: job.customer,
-          zIndex: 1000 // Ensure markers appear above other elements
-        });
+        try {
+          // Create the advanced marker
+          const marker = new google.maps.marker.AdvancedMarkerElement({
+            position: { lat: coordinates[1], lng: coordinates[0] },
+            map: mapInstance,
+            content: markerElement,
+            title: job.customer,
+            zIndex: 1000 // Ensure markers appear above other elements
+          });
 
-        // Add click listener
-        marker.addListener('gmp-click', () => {
-          setSelectedJob(job);
-          setSelectedLocation({ coordinates, label });
+          // Add click listener
+          marker.addListener('gmp-click', () => {
+            setSelectedJob(job);
+            setSelectedLocation({ coordinates, label });
+            
+            // Activate Street View for the clicked location
+            activateStreetView(mapInstance, { lat: coordinates[1], lng: coordinates[0] }, job.address);
+          });
+        } catch (error) {
+          console.error("Error creating advanced marker, falling back to standard marker:", error);
           
-          // Activate Street View for the clicked location
-          activateStreetView(mapInstance, { lat: coordinates[1], lng: coordinates[0] }, job.address);
-        });
+          // Fallback to standard marker if Advanced Markers are not available
+          const standardMarker = new google.maps.Marker({
+            position: { lat: coordinates[1], lng: coordinates[0] },
+            map: mapInstance,
+            title: job.customer,
+            zIndex: 1000
+          });
+          
+          // Add click listener for standard marker
+          standardMarker.addListener('click', () => {
+            setSelectedJob(job);
+            setSelectedLocation({ coordinates, label });
+            
+            // Activate Street View for the clicked location
+            activateStreetView(mapInstance, { lat: coordinates[1], lng: coordinates[0] }, job.address);
+          });
+        }
       });
     }
 
@@ -266,13 +308,25 @@ const MapComponent = ({
           </div>
         `;
 
-        new google.maps.marker.AdvancedMarkerElement({
-          position: { lat: marker.position[0], lng: marker.position[1] },
-          map: mapInstance,
-          content: markerElement,
-          title: marker.title,
-          zIndex: 1000 // Ensure markers appear above other elements
-        });
+        try {
+          new google.maps.marker.AdvancedMarkerElement({
+            position: { lat: marker.position[0], lng: marker.position[1] },
+            map: mapInstance,
+            content: markerElement,
+            title: marker.title,
+            zIndex: 1000 // Ensure markers appear above other elements
+          });
+        } catch (error) {
+          console.error("Error creating advanced marker, falling back to standard marker:", error);
+          
+          // Fallback to standard marker if Advanced Markers are not available
+          new google.maps.Marker({
+            position: { lat: marker.position[0], lng: marker.position[1] },
+            map: mapInstance,
+            title: marker.title,
+            zIndex: 1000
+          });
+        }
       });
     }
 
@@ -287,13 +341,25 @@ const MapComponent = ({
         </div>
       `;
 
-      new google.maps.marker.AdvancedMarkerElement({
-        position: mapCenter,
-        map: mapInstance,
-        content: centerMarkerElement,
-        title: "Location",
-        zIndex: 1000
-      });
+      try {
+        new google.maps.marker.AdvancedMarkerElement({
+          position: mapCenter,
+          map: mapInstance,
+          content: centerMarkerElement,
+          title: "Location",
+          zIndex: 1000
+        });
+      } catch (error) {
+        console.error("Error creating advanced marker, falling back to standard marker:", error);
+        
+        // Fallback to standard marker if Advanced Markers are not available
+        new google.maps.Marker({
+          position: mapCenter,
+          map: mapInstance,
+          title: "Location",
+          zIndex: 1000
+        });
+      }
     }
     
     // Draw property boundaries if provided
@@ -382,7 +448,7 @@ const MapComponent = ({
 // Main JobMap component using useLoadScript hook
 const JobMap = (props: JobMapProps) => {
   const { isLoaded, loadError } = useLoadScript({
-    googleMapsApiKey: "AIzaSyCVHBYlen8sLxyI69WC67znnfi9SU4J0BY",
+    googleMapsApiKey: GOOGLE_MAPS_CONFIG.apiKey || "AIzaSyCVHBYlen8sLxyI69WC67znnfi9SU4J0BY",
     libraries: libraries as any,
     version: "beta",
     mapIds: [mapId] // Add mapId for Advanced Markers
