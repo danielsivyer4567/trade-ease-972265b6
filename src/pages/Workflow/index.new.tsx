@@ -445,7 +445,7 @@ export default function WorkflowPage() {
       
       const newNode = {
         id: uniqueId,
-        type: 'automation',
+        type: 'automationNode',
         position,
         data: {
           automationId: automationId,
