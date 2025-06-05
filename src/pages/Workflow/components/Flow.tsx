@@ -329,6 +329,38 @@ function FlowContent({ onInit, workflowId, onNodeSelect, workflowDarkMode = true
     [actualDarkMode, setEdges, nodes]
   );
 
+  // Create stable node objects to prevent unnecessary re-renders
+  const createStableNode = useCallback((type, position, data) => {
+    // Create a unique ID with timestamp to avoid conflicts
+    const uniqueId = `${type}-${Date.now()}`;
+    
+    // Create a stable node object
+    return {
+      id: uniqueId,
+      type,
+      position,
+      data: { 
+        ...data,
+        label: data.label || type.replace('Node', ''),
+        workflowDarkMode: actualDarkMode,
+        icon: data.icon || nodeTypeIcons[type],
+        iconComponent: data.iconComponent || nodeTypeIcons[type],
+        description: data.description || getNodeDescription(type)
+      },
+      // Apply fixed classes only
+      className: `resizable ${type}`,
+      // Disable all drag animations in React Flow
+      draggable: true,
+      selectable: true,
+      // Add custom styling to prevent style changes
+      style: {
+        transition: 'none',
+        animationDuration: '0ms',
+        transform: 'translate3d(0,0,0)'
+      }
+    };
+  }, [actualDarkMode]);
+
   const onDrop = useCallback(
     (event) => {
       event.preventDefault();
@@ -342,28 +374,15 @@ function FlowContent({ onInit, workflowId, onNodeSelect, workflowDarkMode = true
         x: event.clientX,
         y: event.clientY,
       });
-
-      // Create a unique ID with timestamp to avoid conflicts
-      const uniqueId = `${type}-${Date.now()}`;
       
-      const newNode = {
-        id: uniqueId,
-        type,
-        position,
-        data: { 
-          label: type.replace('Node', ''),
-          workflowDarkMode: actualDarkMode,
-          icon: nodeTypeIcons[type],
-          iconComponent: nodeTypeIcons[type],
-          // Add default description based on node type
-          description: getNodeDescription(type)
-        },
-        className: `resizable ${type}`,
-      };
+      const newNode = createStableNode(type, position, { 
+        label: type.replace('Node', ''),
+        description: getNodeDescription(type)
+      });
 
       setNodes((nds) => nds.concat(newNode));
     },
-    [instance, actualDarkMode, setNodes]
+    [instance, createStableNode, setNodes]
   );
 
   const onDragOver = useCallback((event) => {
@@ -391,38 +410,58 @@ function FlowContent({ onInit, workflowId, onNodeSelect, workflowDarkMode = true
     animationDuration: 3000 // 3 seconds by default
   });
 
-  // Handle node click with activation
+  // Handle node click with activation - completely rewritten
   const onNodeClick = (event, node) => {
     if (onNodeSelect) {
       onNodeSelect(node);
     }
+    
+    // Store selected node in state
     setSelectedNode(node);
     
-    // Reset all nodes to their original class
+    // Force stable class updates - never modify node data during selection
+    // This prevents any re-rendering of the actual node component
     setNodes(nds => 
-      nds.map(n => ({
-        ...n,
-        className: `resizable ${n.type}`
-      }))
+      nds.map(n => {
+        // If this is the node that was clicked
+        if (n.id === node.id) {
+          return {
+            ...n,
+            // ONLY update the className - nothing else
+            className: `resizable ${n.type} active-node`,
+            // Add a style override with !important-like priority
+            style: {
+              ...n.style,
+              zIndex: 10,
+              boxShadow: '0 0 0 2px #fff, 0 0 0 4px rgba(191, 161, 74, 0.8)'
+            }
+          };
+        } 
+        // For all other nodes, ensure they don't have the active class
+        else if (n.className && n.className.includes('active-node')) {
+          return {
+            ...n,
+            className: `resizable ${n.type}`,
+            // Reset any style overrides
+            style: {
+              ...n.style,
+              zIndex: undefined,
+              boxShadow: undefined
+            }
+          };
+        }
+        // Return unchanged for all other nodes
+        return n;
+      })
     );
     
-    // Add active class only to the clicked node
-    setNodes(nds => 
-      nds.map(n => ({
-        ...n,
-        className: n.id === node.id 
-          ? `resizable ${n.type} active-node` 
-          : `resizable ${n.type}`
-      }))
-    );
-    
-    // Deactivate all edges first
+    // Handle edge animations separately from node styling
     animationDeactivateAllEdges();
     
-    // Then activate outgoing edges from this node
+    // Use a delay to prevent animation conflicts
     setTimeout(() => {
       animationActivateNodeOutgoingEdges(node.id);
-    }, 50);
+    }, 100);
   };
 
   const handleClosePanel = () => setSelectedNode(null);
@@ -448,20 +487,14 @@ function FlowContent({ onInit, workflowId, onNodeSelect, workflowDarkMode = true
     zIndex: 5000
   };
 
-  // Update all nodes when dark mode changes
+  // Complete replacement for the dark mode effect - preserve all node data and state
   useEffect(() => {
     console.log('Flow dark mode state:', actualDarkMode);
-    setNodes((nds) => 
-      nds.map(node => ({
-        ...node,
-        data: { 
-          ...node.data,
-          workflowDarkMode: actualDarkMode
-        },
-        className: `resizable ${node.type}`
-      }))
-    );
-  }, [actualDarkMode, setNodes]);
+    
+    // Do nothing - we don't need to update dark mode on existing nodes
+    // This prevents unnecessary re-renders
+    
+  }, [actualDarkMode]);
 
   return (
     <div 
@@ -520,8 +553,8 @@ function FlowContent({ onInit, workflowId, onNodeSelect, workflowDarkMode = true
         nodeTypes={nodeTypes}
         edgeTypes={edgeTypes}
         fitView
-        fitViewOptions={{ padding: 0.2 }}
-        className={`${actualDarkMode ? 'workflow-dark-mode-flow' : ''}`}
+        fitViewOptions={{ padding: 0.2, duration: 0 }}
+        className={`${actualDarkMode ? 'workflow-dark-mode-flow' : ''} workflow-no-animations`}
         style={actualDarkMode ? { 
           background: `linear-gradient(135deg, ${DARK_SECONDARY} 0%, ${DARK_BG} 50%, #0a0a18 100%)`, 
           color: DARK_TEXT, 
@@ -529,7 +562,6 @@ function FlowContent({ onInit, workflowId, onNodeSelect, workflowDarkMode = true
           boxShadow: 'inset 0 0 40px rgba(86, 28, 198, 0.15)',
           fontFamily: "'Roboto', sans-serif",
           backgroundSize: '400% 400%',
-          animation: 'gradientFlow 15s ease infinite',
           position: 'relative',
           zIndex: 1 // Ensure it's above the video
         } : {
@@ -539,7 +571,6 @@ function FlowContent({ onInit, workflowId, onNodeSelect, workflowDarkMode = true
         }}
         defaultEdgeOptions={{
           type: 'animated',
-          animated: true,
           style: { 
             strokeWidth: actualDarkMode ? 2 : 1.5,
             stroke: actualDarkMode ? 'rgba(165, 149, 255, 0.6)' : '#3b82f6'
@@ -561,8 +592,21 @@ function FlowContent({ onInit, workflowId, onNodeSelect, workflowDarkMode = true
         elementsSelectable={true}
         nodesDraggable={true}
         nodesConnectable={true}
-        zoomOnDoubleClick={true}
+        zoomOnDoubleClick={false}
         panOnDrag={true}
+        snapToGrid={true}
+        snapGrid={[10, 10]}
+        nodeExtent={[[-1000, -1000], [2000, 2000]]}
+        minZoom={0.1}
+        maxZoom={2}
+        translateExtent={[[-2000, -2000], [2000, 2000]]}
+        preventScrolling={true}
+        defaultViewport={{ x: 0, y: 0, zoom: 1 }}
+        // Disable all animations and transitions
+        connectOnClick={false}
+        disableKeyboardA11y={true}
+        autoPanOnConnect={false}
+        autoPanOnNodeDrag={false}
       >
         <Background 
           color={actualDarkMode ? "#ffffff" : "#999"} 
