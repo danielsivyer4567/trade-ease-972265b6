@@ -65,6 +65,10 @@ export const CustomerCard = ({ customer, onCustomerClick, onEditClick }: Custome
     }
   };
 
+  const handleLinkClick = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent the card click from triggering
+  };
+
   return (
     <Card 
       className="cursor-pointer hover:shadow-md transition-shadow"
@@ -97,15 +101,35 @@ export const CustomerCard = ({ customer, onCustomerClick, onEditClick }: Custome
         <div className="space-y-2">
           <div className="flex items-center gap-2 text-sm">
             <Mail className="h-4 w-4 text-gray-500" />
-            <span>{customer.email}</span>
+            <a 
+              href={`mailto:${customer.email}`} 
+              className="text-blue-600 hover:underline" 
+              onClick={handleLinkClick}
+            >
+              {customer.email}
+            </a>
           </div>
           <div className="flex items-center gap-2 text-sm">
             <Phone className="h-4 w-4 text-gray-500" />
-            <span>{customer.phone}</span>
+            <a 
+              href={`tel:${customer.phone}`} 
+              className="text-blue-600 hover:underline" 
+              onClick={handleLinkClick}
+            >
+              {customer.phone}
+            </a>
           </div>
           <div className="flex items-center gap-2 text-sm">
             <MapPin className="h-4 w-4 text-gray-500" />
-            <span>{`${customer.address}, ${customer.city}, ${customer.state} ${customer.zipCode}`}</span>
+            <a 
+              href={`https://maps.google.com/?q=${encodeURIComponent(`${customer.address}, ${customer.city}, ${customer.state} ${customer.zipCode}`)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-600 hover:underline"
+              onClick={handleLinkClick}
+            >
+              {`${customer.address}, ${customer.city}, ${customer.state} ${customer.zipCode}`}
+            </a>
           </div>
         </div>
       </CardContent>
