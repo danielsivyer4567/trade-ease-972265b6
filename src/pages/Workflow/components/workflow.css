@@ -76,19 +76,126 @@
 
 /* Node stability improvements */
 .react-flow__node {
-  transition: box-shadow 0.3s ease, transform 0.05s linear;
-  transform: translate3d(0, 0, 0); /* Force hardware acceleration */
-  will-change: transform, opacity;
-  backface-visibility: hidden;
-  perspective: 1000px;
-  position: absolute; /* Ensure absolute positioning */
-  touch-action: none; /* Prevent default touch actions */
+  transform: translate3d(0, 0, 0) !important;
+  transition: none !important;
+  animation: none !important;
+  will-change: transform !important;
+  backface-visibility: hidden !important;
+  perspective: 1000px !important;
+  position: absolute !important;
+  touch-action: none !important;
+  animation-duration: 0ms !important;
+  contain: layout style size !important;
+  pointer-events: auto !important;
+  z-index: 3 !important;
 }
 
-/* Prevent node content flickering */
-.react-flow__node .node-content {
-  position: relative;
-  z-index: 1;
+/* Completely disable all transforms except for positioning */
+.react-flow__node-drag-handle {
+  cursor: grab !important;
+  pointer-events: all !important;
+}
+
+/* Override all node content styles to prevent flashing */
+.react-flow__node * {
+  transition: none !important;
+  animation: none !important;
+  -webkit-font-smoothing: antialiased !important;
+  -moz-osx-font-smoothing: grayscale !important;
+  text-rendering: geometricPrecision !important;
+}
+
+/* Force hardware acceleration on all node content */
+.node-content {
+  transform: translateZ(0) !important;
+  backface-visibility: hidden !important;
+  perspective: 1000px !important;
+  contain: layout style !important;
+}
+
+/* Fix handle positioning to prevent glitching */
+.react-flow__handle {
+  transition: none !important;
+  animation: none !important;
+  transform: translate3d(0, 0, 0) !important;
+  will-change: transform !important;
+  position: absolute !important;
+  z-index: 5 !important;
+  pointer-events: all !important;
+}
+
+/* Electricity animation - ONLY apply to path elements */
+.workflow-edge-active-path {
+  animation: electricFlow 1.5s infinite !important;
+}
+
+/* Completely override any style React Flow might add */
+.react-flow__node.active-node {
+  z-index: 10 !important;
+  box-shadow: 0 0 0 2px #fff, 0 0 0 4px rgba(191, 161, 74, 0.8) !important;
+}
+
+/* Define animations */
+@keyframes electricFlow {
+  0% {
+    filter: drop-shadow(0 0 2px rgba(191, 161, 74, 0.5));
+  }
+  50% {
+    filter: drop-shadow(0 0 5px rgba(191, 161, 74, 0.8));
+  }
+  100% {
+    filter: drop-shadow(0 0 2px rgba(191, 161, 74, 0.5));
+  }
+}
+
+/* Fix edge rendering */
+.react-flow__edge-path {
+  stroke-width: 2px !important;
+  transition: none !important;
+  animation: none !important;
+}
+
+/* Fix selection box rendering */
+.react-flow__selection {
+  background: rgba(0, 89, 220, 0.08) !important;
+  border: 1px dotted rgba(0, 89, 220, 0.8) !important;
+  transition: none !important;
+}
+
+/* Stabilize minimap */
+.react-flow__minimap {
+  transition: none !important;
+}
+
+/* Prevent all viewport animations */
+.react-flow__viewport {
+  transition: none !important;
+  transform-origin: 0 0 !important;
+}
+
+/* Fix active edges */
+.workflow-active-edges .react-flow__edge path {
+  transition: none !important;
+}
+
+/* Prevent node width/height transitions */
+.resizable {
+  transition: none !important;
+  min-width: auto !important;
+  min-height: auto !important;
+}
+
+/* Fix viewport size */
+.react-flow {
+  position: relative !important;
+}
+
+/* Extreme GPU acceleration for all viewport elements */
+.react-flow__pane {
+  transform: translate3d(0,0,0) !important;
+  backface-visibility: hidden !important;
+  will-change: transform !important;
+  transform-style: preserve-3d !important;
 }
 
 /* Active node styling */
@@ -99,17 +206,6 @@
 
 .workflow-dark-mode-flow .react-flow__node.active-node {
   box-shadow: 0 0 0 2px #fff, 0 0 0 4px rgba(191, 161, 74, 0.8);
-}
-
-/* Node handle positioning fix */
-.react-flow__handle {
-  background-color: #555;
-  border: 2px solid white;
-  width: 8px;
-  height: 8px;
-  position: absolute;
-  pointer-events: all;
-  transform: translate3d(0, 0, 0); /* Force hardware acceleration */
 }
 
 /* Improve handle hit area */
@@ -126,9 +222,63 @@
   transform: translate3d(0, 0, 0);
   will-change: transform;
   pointer-events: all;
+  /* Disable animations on the edge itself */
+  transition: none !important;
 }
 
 /* Ensure edge connections don't glitch */
 .react-flow__edge-path {
   transition: stroke 0.2s ease, stroke-width 0.2s ease;
+}
+
+/* Prevent unwanted transitions on node selection */
+.react-flow__nodesselection {
+  transition: none !important;
+}
+
+/* Stabilize node drag state */
+.react-flow__node.dragging {
+  animation: none !important;
+  transition: none !important;
+}
+
+/* Ensure consistent font rendering */
+.react-flow * {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Completely disable all animations everywhere in React Flow */
+.workflow-no-animations * {
+  transition: none !important;
+  animation: none !important;
+}
+
+.workflow-no-animations .react-flow__viewport {
+  transition: none !important;
+  transform-origin: 0 0 !important;
+}
+
+.workflow-no-animations .react-flow__node {
+  animation: none !important;
+}
+
+.workflow-no-animations .react-flow__edge {
+  animation: none !important;
+}
+
+.workflow-no-animations .react-flow__handle {
+  transition: none !important;
+}
+
+/* Override even React Flow's own internal transition classes */
+.workflow-no-animations .react-flow__edge-path,
+.workflow-no-animations .react-flow__connection-path {
+  transition: none !important;
+  animation: none !important;
+}
+
+/* Only allow our specific animation for active edges */
+.workflow-no-animations .workflow-edge-active-path {
+  animation: electricFlow 1.5s infinite !important;
 } 

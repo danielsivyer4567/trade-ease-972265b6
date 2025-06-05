@@ -1,4 +1,4 @@
-import React, { memo, ReactNode } from 'react';
+import React, { memo, ReactNode, useMemo } from 'react';
 import { Handle, Position, NodeProps } from '@xyflow/react';
 import { DARK_BG, DARK_TEXT } from '@/contexts/WorkflowDarkModeContext';
 import { Zap } from 'lucide-react';
@@ -6,11 +6,11 @@ import { Zap } from 'lucide-react';
 interface NodeData {
   workflowDarkMode?: boolean;
   label?: string;
-  title?: string;
   description?: string;
-  automationId?: string;
   icon?: ReactNode;
   iconComponent?: ReactNode;
+  automationId?: string | number;
+  title?: string;
   [key: string]: any;
 }
 
@@ -18,17 +18,13 @@ function AutomationNode({ data, isConnectable }: NodeProps) {
   const nodeData = data as NodeData;
   const workflowDarkMode = nodeData?.workflowDarkMode || false;
   
-  const displayTitle = nodeData.title || nodeData.label || `Automation ${nodeData.automationId || ''}`;
+  // Get node label from either title, label, or default
+  const displayLabel = nodeData.title || nodeData.label || 'Automation';
+  const displayDescription = nodeData.description || `Automation ID: ${nodeData.automationId || 'Unknown'}`;
   
-  return (
-    <>
-      <Handle
-        type="target"
-        position={Position.Left}
-        style={{ background: workflowDarkMode ? '#c04aff' : '#555' }}
-        isConnectable={isConnectable}
-      />
-      
+  // Memoize the node content to prevent unnecessary re-renders
+  const nodeContent = useMemo(() => {
+    return (
       <div className="node-content">
         <div className="flex items-center justify-center mb-2">
           {nodeData.icon || nodeData.iconComponent || <Zap className="h-5 w-5 text-white" />}
@@ -41,40 +37,60 @@ function AutomationNode({ data, isConnectable }: NodeProps) {
             fontSize: '0.9rem'
           }}
         >
-          {displayTitle}
+          {displayLabel}
         </div>
         
-        {nodeData.description && (
-          <div 
-            className="text-center text-xs mt-1"
-            style={{ 
-              color: 'rgba(255, 255, 255, 0.8)',
-            }}
-          >
-            {nodeData.description}
-          </div>
-        )}
-        
-        {nodeData.automationId && !nodeData.description && (
-          <div 
-            className="text-center text-xs mt-1"
-            style={{ 
-              color: 'rgba(255, 255, 255, 0.8)',
-            }}
-          >
-            ID: {nodeData.automationId}
-          </div>
-        )}
+        <div 
+          className="text-center text-xs mt-1"
+          style={{ 
+            color: 'rgba(255, 255, 255, 0.8)',
+          }}
+        >
+          {displayDescription}
+        </div>
       </div>
+    );
+  }, [nodeData.icon, nodeData.iconComponent, displayLabel, displayDescription]);
+  
+  // Pre-compute styles for handles to ensure they're stable
+  const handleStyle = useMemo(() => ({
+    background: workflowDarkMode ? '#FFC107' : '#555',
+    border: '2px solid white',
+  }), [workflowDarkMode]);
+  
+  return (
+    <>
+      <Handle
+        type="target"
+        position={Position.Left}
+        style={handleStyle}
+        isConnectable={isConnectable}
+      />
+      
+      {nodeContent}
       
       <Handle
         type="source"
         position={Position.Right}
-        style={{ background: workflowDarkMode ? '#c04aff' : '#555' }}
+        style={handleStyle}
         isConnectable={isConnectable}
       />
     </>
   );
 }
 
-export default memo(AutomationNode); 
+// Use a more effective comparison function for memo
+export default memo(AutomationNode, (prevProps, nextProps) => {
+  const prevData = prevProps.data as NodeData;
+  const nextData = nextProps.data as NodeData;
+  
+  // Only re-render if these specific properties change
+  return (
+    prevData.label === nextData.label &&
+    prevData.title === nextData.title &&
+    prevData.description === nextData.description &&
+    prevData.automationId === nextData.automationId &&
+    prevData.workflowDarkMode === nextData.workflowDarkMode &&
+    prevProps.isConnectable === nextProps.isConnectable
+  );
+}); 

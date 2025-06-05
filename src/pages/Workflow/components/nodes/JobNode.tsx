@@ -1,4 +1,4 @@
-import React, { memo, ReactNode } from 'react';
+import React, { memo, ReactNode, useMemo } from 'react';
 import { Handle, Position, NodeProps } from '@xyflow/react';
 import { DARK_BG, DARK_TEXT } from '@/contexts/WorkflowDarkModeContext';
 import { Briefcase } from 'lucide-react';
@@ -16,15 +16,9 @@ function JobNode({ data, isConnectable }: NodeProps) {
   const nodeData = data as NodeData;
   const workflowDarkMode = nodeData?.workflowDarkMode || false;
   
-  return (
-    <>
-      <Handle
-        type="target"
-        position={Position.Left}
-        style={{ background: workflowDarkMode ? '#ff56e1' : '#555' }}
-        isConnectable={isConnectable}
-      />
-      
+  // Memoize the node content to prevent unnecessary re-renders
+  const nodeContent = useMemo(() => {
+    return (
       <div className="node-content">
         <div className="flex items-center justify-center mb-2">
           {nodeData.icon || nodeData.iconComponent || <Briefcase className="h-5 w-5 text-white" />}
@@ -51,15 +45,46 @@ function JobNode({ data, isConnectable }: NodeProps) {
           </div>
         )}
       </div>
+    );
+  }, [nodeData.icon, nodeData.iconComponent, nodeData.label, nodeData.description]);
+  
+  // Pre-compute styles for handles to ensure they're stable
+  const handleStyle = useMemo(() => ({
+    background: workflowDarkMode ? '#4CAF50' : '#555',
+    border: '2px solid white',
+  }), [workflowDarkMode]);
+  
+  return (
+    <>
+      <Handle
+        type="target"
+        position={Position.Left}
+        style={handleStyle}
+        isConnectable={isConnectable}
+      />
+      
+      {nodeContent}
       
       <Handle
         type="source"
         position={Position.Right}
-        style={{ background: workflowDarkMode ? '#ff56e1' : '#555' }}
+        style={handleStyle}
         isConnectable={isConnectable}
       />
     </>
   );
 }
 
-export default memo(JobNode);
+// Use a more effective comparison function for memo
+export default memo(JobNode, (prevProps, nextProps) => {
+  const prevData = prevProps.data as NodeData;
+  const nextData = nextProps.data as NodeData;
+  
+  // Only re-render if these specific properties change
+  return (
+    prevData.label === nextData.label &&
+    prevData.description === nextData.description &&
+    prevData.workflowDarkMode === nextData.workflowDarkMode &&
+    prevProps.isConnectable === nextProps.isConnectable
+  );
+});
