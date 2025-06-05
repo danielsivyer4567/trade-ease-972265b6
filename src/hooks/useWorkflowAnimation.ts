@@ -29,24 +29,33 @@ export function useWorkflowAnimation({
     const updatedEdges = edges.map(edge => {
       const isActive = activeEdges.has(edge.id);
       
-      // Only update if the active state changed
-      if (isActive !== edge.data?.isActive) {
+      // Get source type if available
+      const sourceType = typeof edge.data?.sourceType === 'string' ? edge.data.sourceType : '';
+      
+      // Create a stable class name that doesn't change unless active state changes
+      const edgeClassName = isActive 
+        ? `workflow-edge-active ${sourceType}` 
+        : sourceType;
+      
+      // Only update if the active state or className changed
+      if (isActive !== edge.data?.isActive || edgeClassName !== edge.className) {
         return {
           ...edge,
           data: {
             ...edge.data,
             isActive
           },
-          className: isActive ? 'workflow-edge-active' : ''
+          className: edgeClassName
         };
       }
       return edge;
     });
     
-    // Only update if there were changes
+    // Use deep comparison to avoid unnecessary updates
     const edgesChanged = JSON.stringify(updatedEdges) !== JSON.stringify(edges);
     if (edgesChanged) {
-      setEdges(updatedEdges);
+      // Batch update to avoid multiple renders
+      setEdges(updatedEdges as Edge[]);
     }
   }, [edges, activeEdges, setEdges]);
   

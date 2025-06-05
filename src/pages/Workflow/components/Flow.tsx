@@ -46,7 +46,8 @@ const nodeTypes = {
   messagingNode: MessagingNode,
   emailNode: MessagingNode,
   whatsappNode: MessagingNode,
-  socialNode: CustomNode,
+  socialNode: MessagingNode,
+  automation: AutomationNode // Added to ensure proper mapping for 'automation' type
 };
 
 // Node type to icon mapping
@@ -397,7 +398,15 @@ function FlowContent({ onInit, workflowId, onNodeSelect, workflowDarkMode = true
     }
     setSelectedNode(node);
     
-    // Add active class to the node
+    // Reset all nodes to their original class
+    setNodes(nds => 
+      nds.map(n => ({
+        ...n,
+        className: `resizable ${n.type}`
+      }))
+    );
+    
+    // Add active class only to the clicked node
     setNodes(nds => 
       nds.map(n => ({
         ...n,
@@ -407,8 +416,13 @@ function FlowContent({ onInit, workflowId, onNodeSelect, workflowDarkMode = true
       }))
     );
     
-    // Activate all outgoing edges from this node
-    animationActivateNodeOutgoingEdges(node.id);
+    // Deactivate all edges first
+    animationDeactivateAllEdges();
+    
+    // Then activate outgoing edges from this node
+    setTimeout(() => {
+      animationActivateNodeOutgoingEdges(node.id);
+    }, 50);
   };
 
   const handleClosePanel = () => setSelectedNode(null);
