@@ -41,9 +41,9 @@ export const NavigationGroup: React.FC<NavigationGroupProps> = ({
   isExpanded,
   onLogout
 }) => {
-  return <div className="grid gap-0.5 w-full my-1 pt-1 border-t border-white/30 first:border-0 first:pt-0 first:mt-0">
+  return <div className="grid gap-0.25 w-full my-0.5 pt-0.5 border-t border-white/30 first:border-0 first:pt-0 first:mt-0">
       {/* Group Label - Only show if it exists and sidebar is expanded */}
-      {isExpanded && label && <h4 className="text-white font-bold text-xs px-2 mb-1">
+      {isExpanded && label && <h4 className="text-white font-bold text-xs px-2 mb-0.5">
           {label}
         </h4>}
 
