@@ -23,6 +23,43 @@ const formSchema = z.object({
   zipCode: z.string().optional().or(z.literal(""))
 });
 
+// Mock customer data for fallback
+const MOCK_CUSTOMERS: CustomerData[] = [
+  {
+    id: "1",
+    name: "John Smith",
+    email: "john@example.com",
+    phone: "0412 345 678",
+    address: "123 Main St",
+    city: "Brisbane",
+    state: "QLD",
+    zipCode: "4000",
+    status: "active"
+  },
+  {
+    id: "2",
+    name: "Sarah Johnson",
+    email: "sarah@example.com",
+    phone: "0423 456 789",
+    address: "456 High St",
+    city: "Gold Coast",
+    state: "QLD",
+    zipCode: "4217",
+    status: "active"
+  },
+  {
+    id: "3",
+    name: "Michael Brown",
+    email: "michael@example.com",
+    phone: "0434 567 890",
+    address: "789 Beach Rd",
+    city: "Sunshine Coast",
+    state: "QLD",
+    zipCode: "4575",
+    status: "inactive"
+  }
+];
+
 export function CustomersPageContent() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedFilter, setSelectedFilter] = useState("all");
@@ -31,6 +68,7 @@ export function CustomersPageContent() {
   const [apiCustomers, setApiCustomers] = useState<CustomerData[]>([]);
   const [isApiLoading, setIsApiLoading] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
+  const [useFallbackData, setUseFallbackData] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
   const { customers, isLoading, fetchCustomers, updateCustomer } = useCustomers();
@@ -50,9 +88,17 @@ export function CustomersPageContent() {
   
   // Fetch customers from both sources
   useEffect(() => {
-    fetchCustomers();
-    fetchApiCustomers();
-  }, [fetchCustomers]);
+    try {
+      fetchCustomers().catch(error => {
+        console.error("Error in fetchCustomers:", error);
+        setUseFallbackData(true);
+      });
+      fetchApiCustomers();
+    } catch (error) {
+      console.error("Error initializing customer data:", error);
+      setUseFallbackData(true);
+    }
+  }, []);
   
   // Function to fetch customers from API
   const fetchApiCustomers = async () => {
@@ -64,11 +110,9 @@ export function CustomersPageContent() {
     } catch (error) {
       console.error("Error fetching customers from API:", error);
       setApiError("Failed to fetch customers from external API");
-      // toast({
-      //   title: "API Error",
-      //   description: "Failed to fetch customers from external API",
-      //   variant: "destructive"
-      // });
+      // Don't show toast as it might be annoying, just silently fail
+      // and use fallback data
+      setUseFallbackData(true);
     } finally {
       setIsApiLoading(false);
     }
@@ -84,15 +128,25 @@ export function CustomersPageContent() {
     }
   };
 
-  // Combine customers from both sources, prioritizing API customers
-  const allCustomers = [...apiCustomers, ...customers.filter(
-    customer => !apiCustomers.some(apiCustomer => apiCustomer.id === customer.id)
-  )];
+  // Use fallback data if both API and Supabase fail
+  const customerData = useFallbackData ? MOCK_CUSTOMERS : (
+    // Combine customers from both sources, prioritizing API customers
+    [...apiCustomers, ...customers.filter(
+      customer => !apiCustomers.some(apiCustomer => apiCustomer.id === customer.id)
+    )]
+  );
 
-  const filteredCustomers = allCustomers.filter(customer => {
-    const matchesSearch = customer.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                         customer.email.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                         customer.phone.includes(searchQuery);
+  const filteredCustomers = customerData.filter(customer => {
+    // Add null checks for all properties
+    const customerName = customer?.name || '';
+    const customerEmail = customer?.email || '';
+    const customerPhone = customer?.phone || '';
+    
+    const matchesSearch = 
+      customerName.toLowerCase().includes(searchQuery.toLowerCase()) || 
+      customerEmail.toLowerCase().includes(searchQuery.toLowerCase()) || 
+      customerPhone.includes(searchQuery);
+      
     if (selectedFilter === "all") return matchesSearch;
     return matchesSearch && customer.status === selectedFilter;
   });

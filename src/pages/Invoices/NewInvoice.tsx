@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AppLayout } from "@/components/ui/AppLayout";
@@ -10,7 +9,7 @@ export default function NewInvoice() {
   const navigate = useNavigate();
 
   const handleBack = () => {
-    navigate("/quotes-invoices");
+    navigate("/invoices");
   };
 
   return (

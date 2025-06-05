@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -6,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Filter, Plus, Search } from "lucide-react";
 import { InvoicesList } from "./InvoicesList";
 import { useNavigate } from "react-router-dom";
+import { TabLink } from "@/components/ui/TabLink";
 
 export function InvoicesPage() {
   const navigate = useNavigate();
@@ -27,10 +27,6 @@ export function InvoicesPage() {
       )
     : invoices;
 
-  const handleNewInvoice = () => {
-    navigate("/invoices/new");
-  };
-
   return (
     <div className="w-full">
       <Card className="bg-white rounded-lg shadow-sm">
@@ -48,9 +44,11 @@ export function InvoicesPage() {
                 />
                 <Search className="absolute left-2 top-2.5 h-4 w-4 text-gray-500" />
               </div>
-              <Button onClick={handleNewInvoice} className="whitespace-nowrap">
-                <Plus className="mr-1 h-4 w-4" /> New Invoice
-              </Button>
+              <TabLink to="/invoices/new" title="New Invoice">
+                <Button className="whitespace-nowrap">
+                  <Plus className="mr-1 h-4 w-4" /> New Invoice
+                </Button>
+              </TabLink>
             </div>
           </div>
           
