@@ -16,8 +16,8 @@ class StartupService {
     console.log('Initializing application...');
     
     try {
-      // Check if the user_profiles table exists
-      await this.ensureUserProfilesTable();
+      // Check if user profiles exist
+      await this.ensureUserProfiles();
       
       // Set initialized flag
       this.initialized = true;
@@ -30,108 +30,65 @@ class StartupService {
   }
 
   /**
-   * Ensure the user_profiles table exists and has the right structure
-   */
-  private async ensureUserProfilesTable(): Promise<void> {
-    try {
-      // Check if user_profiles table exists
-      const { data: tableExists, error: tableCheckError } = await supabase
-        .rpc('check_table_exists', { table_name: 'user_profiles' });
-      
-      if (tableCheckError) {
-        console.error('Error checking for user_profiles table:', tableCheckError);
-        
-        // Try to create the function if it doesn't exist
-        await supabase.rpc('create_check_table_exists_function');
-        
-        // Try again
-        const { data: retryTableExists } = await supabase
-          .rpc('check_table_exists', { table_name: 'user_profiles' });
-          
-        if (!retryTableExists) {
-          // Table doesn't exist, try to create it using supabase functions
-          await this.createUserProfilesTable();
-        }
-      } else if (!tableExists) {
-        // Table doesn't exist, create it
-        await this.createUserProfilesTable();
-      }
-      
-      // Make sure all existing users have a profile
-      await this.ensureUserProfiles();
-    } catch (error) {
-      console.error('Error ensuring user_profiles table:', error);
-      throw error;
-    }
-  }
-
-  /**
-   * Create the user_profiles table
-   */
-  private async createUserProfilesTable(): Promise<void> {
-    // Try to create table via RPC function - this will only work if our
-    // database has the required permissions
-    try {
-      await supabase.rpc('create_user_profiles_table');
-      console.log('Created user_profiles table via RPC');
-    } catch (error) {
-      console.error('Error creating user_profiles table via RPC:', error);
-      
-      // If that fails, we'll try a different approach or notify the user
-      console.log('Please run the database migrations manually using: npm run db:setup');
-    }
-  }
-
-  /**
    * Ensure all users have a profile
    */
   private async ensureUserProfiles(): Promise<void> {
     try {
       // Get the current user
-      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      const { data: authData, error: userError } = await supabase.auth.getSession();
       
       if (userError) {
-        console.error('Error getting current user:', userError);
+        console.error('Error getting current user session:', userError);
         return;
       }
       
+      const user = authData.session?.user;
       if (!user) {
         // No user logged in, nothing to do
         return;
       }
-      
-      // Check if the user has a profile
-      const { data: profile, error: profileError } = await supabase
+
+      // Check if user profile exists
+      const { data: profiles, error: profileError } = await supabase
         .from('user_profiles')
         .select('*')
         .eq('user_id', user.id)
-        .maybeSingle();
-        
+        .single();
+
       if (profileError) {
         console.error('Error checking for user profile:', profileError);
         return;
       }
-      
-      // If no profile, create one
-      if (!profile) {
-        const { error: insertError } = await supabase
-          .from('user_profiles')
-          .insert({
-            user_id: user.id,
-            email: user.email,
-            name: user.user_metadata?.name || user.email,
-            two_factor_enabled: false,
-            created_at: new Date().toISOString()
-          });
-          
-        if (insertError) {
-          console.error('Error creating user profile:', insertError);
-        } else {
-          console.log('Created user profile for:', user.email);
+        
+        // If no profile, create one
+        if (!profiles || profiles.length === 0) {
+          const { error: insertError } = await supabase
+            .from('user_profiles')
+            .insert({
+              user_id: user.id,
+              email: user.email,
+              name: user.user_metadata?.name || user.email,
+              two_factor_enabled: false,
+              created_at: new Date().toISOString()
+            });
+            
+          if (insertError) {
+            if (insertError.code === '42P01') {
+              console.warn('User profiles table does not exist. This is expected in new environments.');
+            } else {
+              console.error('Error creating user profile:', insertError);
+            }
+          } else {
+            console.log('Created user profile for:', user.email);
+          }
         }
+      } catch (error) {
+        console.warn('Database operations failed, continuing without user profile:', error);
       }
     } catch (error) {
       console.error('Error ensuring user profiles:', error);
+      // Don't throw error, allow application to continue
+      console.warn('Continuing despite user profile initialization error');
     }
   }
 }

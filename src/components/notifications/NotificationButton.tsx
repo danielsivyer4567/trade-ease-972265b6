@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { Bell, Phone, Search, User, Clock, PhoneCall, PhoneOutgoing, PhoneIncoming, PhoneMissed, Play, Pause, Volume2 } from 'lucide-react';
+import { Bell, Phone, Search, User, Clock, PhoneCall, PhoneOutgoing, PhoneIncoming, PhoneMissed, Play, Pause, Volume2, Trash } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useNotifications } from './NotificationContextProvider';
 import { cn } from '@/lib/utils';
@@ -15,6 +15,7 @@ import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Slider } from '@/components/ui/slider';
 import { Badge } from '@/components/ui/badge';
+import { HeaderVariant as DestructiveButton } from '@/components/ui/destructive-button';
 
 interface NotificationButtonProps {
   className?: string;
@@ -306,6 +307,9 @@ export const NotificationButton = ({ className }: NotificationButtonProps) => {
           </Tabs>
         </DropdownMenuContent>
       </DropdownMenu>
+      
+      {/* New Destructive Button */}
+      <DestructiveButton />
       
       {/* Notifications Button */}
       <Button 

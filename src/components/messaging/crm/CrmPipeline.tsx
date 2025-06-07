@@ -139,8 +139,8 @@ export const CrmPipeline: React.FC = () => {
   return (
     <div className="flex h-[calc(100vh-7rem)] bg-gray-50">
       {/* Left sidebar - contacts */}
-      <div className="w-80 border-r border-gray-200 bg-white flex flex-col">
-        <div className="p-3 border-b border-gray-200">
+      <div className="w-80 border-r border-gray-300 border-r-2 bg-white flex flex-col">
+        <div className="p-3 border-b border-gray-300 border-b-2">
           <div className="flex justify-between items-center mb-3">
             <h2 className="text-base font-semibold text-gray-800">Contacts</h2>
             <DropdownMenu>
@@ -167,14 +167,34 @@ export const CrmPipeline: React.FC = () => {
           </div>
         </div>
         
-        <div className="overflow-y-auto flex-1 scrollbar-hide">
-          <div className="flex p-2 border-b border-gray-100 sticky top-0 bg-white z-10">
+        <div className="flex-1">
+          <div className="flex px-6 py-3 border-b border-gray-300 border-b-2 bg-white">
             <Tabs defaultValue="all" className="w-full">
-              <TabsList className="w-full grid grid-cols-4 h-7 bg-gray-100/80">
-                <TabsTrigger value="all" className="text-xs">All</TabsTrigger>
-                <TabsTrigger value="unread" className="text-xs">Unread</TabsTrigger>
-                <TabsTrigger value="starred" className="text-xs">Starred</TabsTrigger>
-                <TabsTrigger value="recent" className="text-xs">Recent</TabsTrigger>
+              <TabsList className="w-full grid grid-cols-4 h-10 bg-gradient-to-r from-blue-600/10 to-purple-600/10 p-1 rounded-lg shadow-sm overflow-visible">
+                <TabsTrigger 
+                  value="all" 
+                  className="text-sm data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-indigo-600 data-[state=active]:text-white transition-all duration-300 rounded-md h-8 px-3 font-medium"
+                >
+                  All
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="unread" 
+                  className="text-sm data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-indigo-600 data-[state=active]:text-white transition-all duration-300 rounded-md h-8 px-3 font-medium"
+                >
+                  Unread
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="starred" 
+                  className="text-sm data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-indigo-600 data-[state=active]:text-white transition-all duration-300 rounded-md h-8 px-3 font-medium"
+                >
+                  Starred
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="recent" 
+                  className="text-sm data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-indigo-600 data-[state=active]:text-white transition-all duration-300 rounded-md h-8 px-3 font-medium"
+                >
+                  Recent
+                </TabsTrigger>
               </TabsList>
             </Tabs>
           </div>
@@ -216,7 +236,7 @@ export const CrmPipeline: React.FC = () => {
         {selectedContact ? (
           <div className="flex flex-col h-full">
             {/* Conversation header */}
-            <div className="bg-white border-b border-gray-200 py-1 px-3 flex items-center justify-between flex-shrink-0">
+            <div className="bg-white border-b border-gray-300 border-b-2 py-1 px-3 flex items-center justify-between flex-shrink-0">
               <div className="flex items-center gap-2">
                 <Avatar className="h-8 w-8">
                   <AvatarImage src={selectedContact.avatar} alt={selectedContact.name} />
@@ -245,19 +265,13 @@ export const CrmPipeline: React.FC = () => {
               
               <div className="flex items-center gap-2">
                 <Button size="icon" variant="ghost">
-                  <Phone className="h-5 w-5 text-gray-500" />
-                </Button>
-                <Button size="icon" variant="ghost">
-                  <Calendar className="h-5 w-5 text-gray-500" />
-                </Button>
-                <Button size="icon" variant="ghost">
                   <MoreVertical className="h-5 w-5 text-gray-500" />
                 </Button>
               </div>
             </div>
             
             {/* Conversation area - matching middle sections height */}
-            <div className="flex-grow overflow-y-auto scrollbar-hide" style={{ height: 'calc(100% - 70px)' }}>
+            <div className="flex-grow overflow-y-auto scrollbar-hide" style={{ height: 'calc(100% - 110px)' }}>
               <div className="p-2 space-y-2 max-w-4xl mx-auto">
                 {conversations.map((msg) => (
                   <div key={msg.id} className={`flex ${msg.sender === 'agent' ? 'justify-end' : msg.sender === 'system' ? 'justify-center' : 'justify-start'}`}>
@@ -314,32 +328,32 @@ export const CrmPipeline: React.FC = () => {
             </div>
             
             {/* Message input - aligned with Tags section */}
-            <div className="bg-white border-t border-gray-200 p-1.5 z-10 flex-shrink-0" style={{ height: '40px' }}>
+            <div className="bg-white border-t border-gray-300 border-t-2 p-3 z-10 flex-shrink-0">
               <div className="flex items-center gap-2">
                 <div className="flex-1 relative">
                   <Input 
                     placeholder="Type a message..." 
-                    className="pr-10 h-7"
+                    className="pr-10"
                     value={messageText}
                     onChange={(e) => setMessageText(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
                   />
                   <div className="absolute right-2 top-1/2 transform -translate-y-1/2">
-                    <Button size="icon" variant="ghost" className="h-5 w-5 text-gray-400 hover:text-gray-600">
-                      <Smile className="h-3 w-3" />
+                    <Button size="icon" variant="ghost" className="h-6 w-6 text-gray-400 hover:text-gray-600">
+                      <Smile className="h-4 w-4" />
                     </Button>
                   </div>
                 </div>
-                <Button size="icon" variant="ghost" className="h-7 w-7 text-gray-400 hover:text-gray-600">
-                  <Paperclip className="h-3 w-3" />
+                <Button size="icon" variant="ghost" className="h-9 w-9 text-gray-400 hover:text-gray-600">
+                  <Paperclip className="h-4 w-4" />
                 </Button>
                 <Button 
                   size="icon"
-                  className="bg-blue-600 hover:bg-blue-700 text-white h-7 w-7"
+                  className="bg-blue-600 hover:bg-blue-700 text-white h-9 w-9"
                   onClick={handleSendMessage}
                   disabled={!messageText.trim()}
                 >
-                  <Send className="h-3 w-3" />
+                  <Send className="h-4 w-4" />
                 </Button>
               </div>
             </div>
@@ -358,10 +372,10 @@ export const CrmPipeline: React.FC = () => {
       </div>
 
       {/* Right sidebar - contact details */}
-      <div className="w-80 border-l border-gray-200 bg-white flex flex-col overflow-hidden">
+      <div className="w-80 border-l border-gray-300 border-l-2 bg-white flex flex-col overflow-hidden">
         {selectedContact ? (
           <>
-            <div className="p-1.5 border-b border-gray-200">
+            <div className="p-1.5 border-b border-gray-300 border-b-2">
               <h3 className="font-medium text-gray-800 mb-1.5">Contact</h3>
               
               <div className="flex items-center gap-2 mb-2">
@@ -375,6 +389,15 @@ export const CrmPipeline: React.FC = () => {
                 <div>
                   <h4 className="font-medium text-gray-900 text-sm">{selectedContact.name}</h4>
                   <p className="text-xs text-gray-500">Customer</p>
+                </div>
+                
+                <div className="flex items-center gap-1 ml-auto">
+                  <Button size="icon" variant="ghost" className="h-8 w-8">
+                    <Phone className="h-4 w-4 text-gray-500" />
+                  </Button>
+                  <Button size="icon" variant="ghost" className="h-8 w-8">
+                    <Calendar className="h-4 w-4 text-gray-500" />
+                  </Button>
                 </div>
               </div>
               
@@ -392,7 +415,7 @@ export const CrmPipeline: React.FC = () => {
               </div>
             </div>
             
-            <div className="p-1.5 border-b border-gray-200">
+            <div className="p-1.5 border-b border-gray-300 border-b-2">
               <div className="flex items-center justify-between mb-1.5">
                 <h3 className="font-medium text-gray-800">Appointments</h3>
                 <Button size="sm" variant="outline" className="h-8 text-xs">
@@ -437,7 +460,7 @@ export const CrmPipeline: React.FC = () => {
               </div>
             </div>
             
-            <div className="p-1.5 border-b border-gray-200">
+            <div className="p-1.5 border-b border-gray-300 border-b-2">
               <div className="flex items-center justify-between mb-1.5">
                 <h3 className="font-medium text-gray-800">Tags</h3>
                 <Button size="sm" variant="ghost">

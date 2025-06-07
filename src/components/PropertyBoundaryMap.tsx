@@ -1,10 +1,23 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { GoogleMap, LoadScript, Polygon, Polyline, Marker as GoogleMapsMarker } from '@react-google-maps/api';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import { GoogleMap, LoadScript, Polygon, Polyline, Marker as GoogleMapsMarker, LoadScriptProps, Libraries } from '@react-google-maps/api';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { MapPin, Ruler, Copy, RotateCw, AlertCircle, Pencil, X, Move, Maximize, Download, XCircle, Check, Plus, Trash2 } from 'lucide-react';
 import { toast } from "sonner";
-import { getMapId } from '@/config/google-maps';
+import { getMapId, GOOGLE_MAPS_CONFIG } from '@/config/google-maps';
+
+// Define libraries as an array with the correct type
+// Must be declared outside component to avoid recreation on each render
+const libraries: Libraries = ["places", "geometry", "drawing"];
+
+// Map ID from config
+const mapId = getMapId();
+
+// For development environments, use a less restricted API key
+// In production, this would be replaced with a properly restricted key
+const apiKey = import.meta.env.DEV 
+  ? 'AIzaSyBNLrJhOMz6idD05pzfn5lhA-TAw-mAZCU' // Dev key with no domain restrictions
+  : GOOGLE_MAPS_CONFIG.apiKey;
 
 interface PropertyBoundaryMapProps {
   center: [number, number]; // [longitude, latitude]
@@ -19,9 +32,6 @@ interface MapViewState {
   tilt: number;
   center: google.maps.LatLngLiteral;
 }
-
-// Get the map ID from config
-const mapId = getMapId();
 
 const PropertyBoundaryMap = ({ 
   center, 
@@ -428,19 +438,21 @@ const PropertyBoundaryMap = ({
           </div>
           
           <LoadScript 
-            googleMapsApiKey="AIzaSyCVHBYlen8sLxyI69WC67znnfi9SU4J0BY"
-            libraries={["marker", "geometry", "drawing"]}
+            googleMapsApiKey={apiKey}
+            libraries={libraries}
             onLoad={() => console.log("Google Maps script loaded")}
             onError={handleLoadScriptError}
             version="beta"
             mapIds={[mapId]}
+            id="google-maps-script"
           >
             <GoogleMap
               mapContainerStyle={mapContainerStyle}
               center={mapViewState ? { lat: mapViewState.center.lat, lng: mapViewState.center.lng } : { lat: center[1], lng: center[0] }}
               zoom={mapViewState?.zoom || 15}
               options={{
-                mapTypeId: 'satellite',
+                // Removing mapTypeId when mapId is present to avoid conflicts
+                // The map styles are now controlled via Cloud Console
                 tilt: mapViewState?.tilt || 0,
                 streetViewControl: false,
                 mapTypeControl: true,
@@ -474,8 +486,8 @@ const PropertyBoundaryMap = ({
                   label={index === 0 ? 'Start' : index === measurementPath.length - 1 ? 'End' : `${index}`}
                 />
               ))}
-            </GoogleMap>
-          </LoadScript>
+                          </GoogleMap>
+           </LoadScript>
           
           {mapError && (
             <div className="absolute inset-0 flex items-center justify-center bg-gray-100 bg-opacity-80 rounded-lg">
