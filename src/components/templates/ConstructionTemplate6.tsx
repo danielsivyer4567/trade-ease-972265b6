@@ -1,11 +1,15 @@
 "use client";
 import React, { useId } from "react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Building2, Calendar, MapPin, Phone, Mail, User, FileText, DollarSign } from "lucide-react";
+import { Building2, Calendar, MapPin, Phone, Mail, User, FileText, DollarSign, Edit3, Settings, X, Type, List, Hash } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useTemplateEditor } from '../../hooks/useTemplateEditor';
+import TemplateEditor from './TemplateEditor';
+import '../../styles/template-editor.css';
 
 interface DotPatternProps {
   width?: any;
@@ -142,9 +146,25 @@ function ConstructionTemplate6({
   total = 20223,
   notes = "This quote includes all materials and labor. Work will be completed within 3-4 weeks from start date. 50% deposit required to begin work."
 }: ConstructionQuoteProps) {
+  const editor = useTemplateEditor({
+    defaultComponents: [
+      { id: 'header', type: 'header', title: 'Header', order: 0 },
+      { id: 'company-client-info', type: 'company-client-info', title: 'Company & Client', order: 1 },
+      { id: 'project-details', type: 'project-details', title: 'Project Details', order: 2 },
+      { id: 'quote-items', type: 'quote-items', title: 'Quote Items', order: 3 },
+      { id: 'notes', type: 'notes', title: 'Notes', order: 4 },
+      { id: 'footer', type: 'footer', title: 'Footer', order: 5 },
+    ]
+  });
+
+  const { getBackgroundOverlayStyles } = editor;
+
   return (
-    <div className="w-full max-w-4xl mx-auto bg-white dark:bg-zinc-900 min-h-screen">
-      <div className="relative border-2 border-orange-500 p-8">
+    <div className={editor.getContainerClasses("w-full max-w-4xl mx-auto bg-white dark:bg-zinc-900 min-h-screen")}>
+      <div className="relative border-2 border-orange-500 p-8 template-container" style={{ position: 'relative' }}>
+        {editor.backgroundImage && (
+          <div style={getBackgroundOverlayStyles()} />
+        )}
         <DotPattern width={8} height={8} className="fill-orange-500/10" />
         
         {/* Corner decorations */}
@@ -154,23 +174,30 @@ function ConstructionTemplate6({
         <div className="absolute -bottom-1.5 -right-1.5 h-3 w-3 bg-orange-500" />
 
         <div className="relative z-10 space-y-8">
+          <TemplateEditor {...editor} />
           {/* Header */}
-          <div className="text-center space-y-4">
+          <div 
+            className={editor.getSectionClasses("text-center space-y-4", "header")}
+            {...editor.getSectionProps("header", "header")}
+          >
             <div className="flex items-center justify-center gap-3">
               <Building2 className="w-8 h-8 text-orange-500" />
               <h1 className="text-3xl font-bold text-zinc-900 dark:text-white">
                 CONSTRUCTION QUOTE
               </h1>
             </div>
-            <Badge variant="outline" className="text-orange-500 border-orange-500 px-4 py-1">
+            <Badge variant="outline" className="text-orange-500 border-orange-500 px-4 py-1 dark:text-orange-400 dark:border-orange-400">
               Professional Estimate
             </Badge>
           </div>
 
           {/* Company and Client Info */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div 
+            className={editor.getSectionClasses("grid grid-cols-1 md:grid-cols-2 gap-8", "company-client-info")}
+            {...editor.getSectionProps("company-client-info", "company-client-info")}
+          >
             {/* Company Info */}
-            <Card className="p-6 border-orange-200 dark:border-orange-800">
+            <Card className="p-6 border-orange-200 dark:border-orange-800 bg-white dark:bg-zinc-800">
               <div className="space-y-4">
                 <div className="flex items-center gap-2">
                   <Building2 className="w-5 h-5 text-orange-500" />
@@ -195,7 +222,7 @@ function ConstructionTemplate6({
             </Card>
 
             {/* Client Info */}
-            <Card className="p-6 border-orange-200 dark:border-orange-800">
+            <Card className="p-6 border-orange-200 dark:border-orange-800 bg-white dark:bg-zinc-800">
               <div className="space-y-4">
                 <div className="flex items-center gap-2">
                   <User className="w-5 h-5 text-orange-500" />
@@ -217,7 +244,10 @@ function ConstructionTemplate6({
           </div>
 
           {/* Project Details */}
-          <Card className="p-6 border-orange-200 dark:border-orange-800">
+          <Card 
+            className={editor.getSectionClasses("p-6 border-orange-200 dark:border-orange-800 bg-white dark:bg-zinc-800", "project-details")}
+            {...editor.getSectionProps("project-details", "project-details")}
+          >
             <div className="space-y-4">
               <div className="flex items-center gap-2">
                 <FileText className="w-5 h-5 text-orange-500" />
@@ -253,7 +283,10 @@ function ConstructionTemplate6({
           </Card>
 
           {/* Quote Items */}
-          <Card className="p-6 border-orange-200 dark:border-orange-800">
+          <Card 
+            className={editor.getSectionClasses("p-6 border-orange-200 dark:border-orange-800 bg-white dark:bg-zinc-800", "quote-items")}
+            {...editor.getSectionProps("quote-items", "quote-items")}
+          >
             <div className="space-y-4">
               <div className="flex items-center gap-2">
                 <DollarSign className="w-5 h-5 text-orange-500" />
@@ -304,7 +337,10 @@ function ConstructionTemplate6({
           </Card>
 
           {/* Notes */}
-          <Card className="p-6 border-orange-200 dark:border-orange-800">
+          <Card 
+            className={editor.getSectionClasses("p-6 border-orange-200 dark:border-orange-800 bg-white dark:bg-zinc-800", "notes")}
+            {...editor.getSectionProps("notes", "notes")}
+          >
             <div className="space-y-4">
               <h3 className="font-bold text-lg text-zinc-900 dark:text-white">Terms & Notes</h3>
               <p className="text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed">{notes}</p>
@@ -312,12 +348,15 @@ function ConstructionTemplate6({
           </Card>
 
           {/* Footer */}
-          <div className="text-center space-y-4 pt-8">
+          <div 
+            className={editor.getSectionClasses("text-center space-y-4 pt-8", "footer")}
+            {...editor.getSectionProps("footer", "footer")}
+          >
             <div className="flex justify-center gap-4">
-              <Button className="bg-orange-500 hover:bg-orange-600 text-white">
+              <Button className="bg-orange-500 hover:bg-orange-600 text-white dark:bg-orange-600 dark:hover:bg-orange-700">
                 Accept Quote
               </Button>
-              <Button variant="outline" className="border-orange-500 text-orange-500 hover:bg-orange-50 dark:hover:bg-orange-950">
+              <Button variant="outline" className="border-orange-500 text-orange-500 hover:bg-orange-50 dark:hover:bg-orange-950 dark:text-orange-400 dark:border-orange-400">
                 Request Changes
               </Button>
             </div>

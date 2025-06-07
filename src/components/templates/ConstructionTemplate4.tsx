@@ -27,8 +27,18 @@ import {
   Globe,
   Building2,
   User,
-  Sparkles
+  Sparkles,
+  Edit3,
+  Settings,
+  X,
+  Plus,
+  Copy,
+  Trash2,
+  Move
 } from "lucide-react";
+import { useTemplateEditor } from '../../hooks/useTemplateEditor';
+import TemplateEditor from './TemplateEditor';
+import '../../styles/template-editor.css';
 
 interface DotPatternProps {
   width?: any;
@@ -224,7 +234,7 @@ const defaultContactInfo: ContactInfo = {
   website: "www.builderpro.com"
 };
 
-function ConstructionQuoteTemplate({
+function ConstructionTemplate4({
   companyName = "BuilderPro Construction",
   clientName = "John & Sarah Smith",
   projectTitle = "Custom Home Construction - 2,500 sq ft",
@@ -251,6 +261,19 @@ function ConstructionQuoteTemplate({
     notes,
     terms
   });
+
+  const editor = useTemplateEditor({
+    defaultComponents: [
+      { id: 'header', type: 'header', title: 'Header', order: 0 },
+      { id: 'client-project-info', type: 'client-project-info', title: 'Client & Project', order: 1 },
+      { id: 'items-table', type: 'items-table', title: 'Items Table', order: 2 },
+      { id: 'totals', type: 'totals', title: 'Totals', order: 3 },
+      { id: 'notes-terms', type: 'notes-terms', title: 'Notes & Terms', order: 4 },
+      { id: 'footer', type: 'footer', title: 'Footer', order: 5 },
+    ]
+  });
+  
+  const { getBackgroundOverlayStyles } = editor;
 
   const subtotal = editableData.items.reduce((sum, item) => sum + item.total, 0);
   const tax = subtotal * 0.08; // 8% tax
@@ -295,20 +318,24 @@ function ConstructionQuoteTemplate({
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-amber-50 p-4 md:p-8">
-      <DotPattern width={20} height={20} className="opacity-30" />
+    <div className={editor.getContainerClasses("min-h-screen bg-gradient-to-br from-orange-50 to-amber-50 dark:from-slate-900 dark:to-slate-800 p-4 md:p-8")}>
+      <DotPattern width={20} height={20} className="opacity-30 dark:opacity-10" />
       
-      <div className="relative z-10 max-w-4xl mx-auto">
+      <div className="relative z-10 max-w-4xl mx-auto template-container" style={{ position: 'relative' }}>
+        {editor.backgroundImage && (
+          <div style={getBackgroundOverlayStyles()} />
+        )}
+        <TemplateEditor {...editor} />
         {/* Header Controls */}
         <motion.div 
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="flex flex-wrap gap-4 justify-between items-center mb-8 p-4 bg-white/80 backdrop-blur-sm rounded-xl border border-orange-200 shadow-lg"
+          className="flex flex-wrap gap-4 justify-between items-center mb-8 p-4 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm rounded-xl border border-orange-200 dark:border-slate-700 shadow-lg"
         >
           <div className="flex items-center gap-2">
             <Building2 className="h-6 w-6 text-orange-600" />
             <TextShimmer 
-              className="text-xl font-bold text-orange-800"
+              className="text-xl font-bold text-orange-800 dark:text-orange-200"
               duration={3}
             >
               Construction Quote Generator
@@ -320,16 +347,16 @@ function ConstructionQuoteTemplate({
               variant={isEditing ? "default" : "outline"}
               size="sm"
               onClick={() => setIsEditing(!isEditing)}
-              className="gap-2"
+              className="gap-2 bg-white/80 dark:bg-slate-800 dark:text-slate-200 dark:border-slate-600"
             >
               <Type className="h-4 w-4" />
               {isEditing ? "Preview" : "Edit"}
             </Button>
-            <Button variant="outline" size="sm" className="gap-2">
+            <Button variant="outline" size="sm" className="gap-2 bg-white/80 dark:bg-slate-800 dark:text-slate-200 dark:border-slate-600">
               <Download className="h-4 w-4" />
               Export PDF
             </Button>
-            <Button variant="outline" size="sm" className="gap-2">
+            <Button variant="outline" size="sm" className="gap-2 bg-white/80 dark:bg-slate-800 dark:text-slate-200 dark:border-slate-600">
               <Share2 className="h-4 w-4" />
               Share
             </Button>
@@ -341,7 +368,7 @@ function ConstructionQuoteTemplate({
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.2 }}
-          className="bg-white rounded-2xl shadow-2xl border-4 border-orange-500 overflow-hidden"
+          className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border-4 border-orange-500 dark:border-orange-500 overflow-hidden"
           style={{ 
             boxShadow: `0 0 0 4px ${colors.primary}, 0 25px 50px -12px rgba(0, 0, 0, 0.25)` 
           }}
@@ -354,7 +381,10 @@ function ConstructionQuoteTemplate({
 
           <div className="relative p-8 md:p-12">
             {/* Header */}
-            <div className="flex flex-col md:flex-row justify-between items-start mb-12 pb-8 border-b-2 border-orange-200">
+            <div 
+              className={editor.getSectionClasses("flex flex-col md:flex-row justify-between items-start mb-12 pb-8 border-b-2 border-orange-200 dark:border-orange-800", "header")}
+              {...editor.getSectionProps("header", "header")}
+            >
               <div className="mb-6 md:mb-0">
                 <div className="flex items-center gap-3 mb-4">
                   <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg flex items-center justify-center">
@@ -364,16 +394,16 @@ function ConstructionQuoteTemplate({
                     <Input
                       value={editableData.companyName}
                       onChange={(e) => setEditableData(prev => ({ ...prev, companyName: e.target.value }))}
-                      className="text-2xl font-bold border-orange-300 focus:border-orange-500"
+                      className="text-2xl font-bold border-orange-300 focus:border-orange-500 dark:bg-slate-800 dark:border-slate-600 dark:text-white"
                     />
                   ) : (
-                    <h1 className="text-3xl font-bold text-gray-900 bg-gradient-to-r from-orange-600 to-orange-800 bg-clip-text text-transparent">
+                    <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 bg-gradient-to-r from-orange-600 to-orange-800 bg-clip-text text-transparent">
                       {editableData.companyName}
                     </h1>
                   )}
                 </div>
                 
-                <div className="space-y-2 text-gray-600">
+                <div className="space-y-2 text-gray-600 dark:text-gray-400">
                   <div className="flex items-center gap-2">
                     <MapPin className="h-4 w-4 text-orange-500" />
                     <span>{contactInfo.address}</span>
@@ -394,11 +424,11 @@ function ConstructionQuoteTemplate({
               </div>
 
               <div className="text-right">
-                <h2 className="text-4xl font-bold text-orange-600 mb-4 flex items-center gap-2">
+                <h2 className="text-4xl font-bold text-orange-600 dark:text-orange-400 mb-4 flex items-center gap-2">
                   <Quote className="h-8 w-8" />
                   QUOTE
                 </h2>
-                <div className="space-y-2 text-gray-700">
+                <div className="space-y-2 text-gray-700 dark:text-gray-300">
                   <div className="flex items-center gap-2">
                     <Hash className="h-4 w-4 text-orange-500" />
                     <span className="font-semibold">Quote #:</span>
@@ -406,7 +436,7 @@ function ConstructionQuoteTemplate({
                       <Input
                         value={editableData.quoteNumber}
                         onChange={(e) => setEditableData(prev => ({ ...prev, quoteNumber: e.target.value }))}
-                        className="w-32 text-sm"
+                        className="w-32 text-sm dark:bg-slate-800 dark:border-slate-600 dark:text-white"
                       />
                     ) : (
                       <span>{editableData.quoteNumber}</span>
@@ -427,9 +457,12 @@ function ConstructionQuoteTemplate({
             </div>
 
             {/* Client & Project Info */}
-            <div className="grid md:grid-cols-2 gap-8 mb-8">
-              <div className="bg-orange-50 p-6 rounded-xl border border-orange-200">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+            <div 
+              className={editor.getSectionClasses("grid md:grid-cols-2 gap-8 mb-8", "client-project-info")}
+              {...editor.getSectionProps("client-project-info", "client-project-info")}
+            >
+              <div className="bg-orange-50 dark:bg-slate-800 p-6 rounded-xl border border-orange-200 dark:border-slate-700">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2">
                   <User className="h-5 w-5 text-orange-600" />
                   Quote For:
                 </h3>
@@ -437,15 +470,15 @@ function ConstructionQuoteTemplate({
                   <Input
                     value={editableData.clientName}
                     onChange={(e) => setEditableData(prev => ({ ...prev, clientName: e.target.value }))}
-                    className="text-lg font-medium"
+                    className="text-lg font-medium dark:bg-slate-700 dark:border-slate-600 dark:text-white"
                   />
                 ) : (
-                  <p className="text-lg font-medium text-gray-800">{editableData.clientName}</p>
+                  <p className="text-lg font-medium text-gray-800 dark:text-gray-200">{editableData.clientName}</p>
                 )}
               </div>
 
-              <div className="bg-orange-50 p-6 rounded-xl border border-orange-200">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+              <div className="bg-orange-50 dark:bg-slate-800 p-6 rounded-xl border border-orange-200 dark:border-slate-700">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2">
                   <Building2 className="h-5 w-5 text-orange-600" />
                   Project:
                 </h3>
@@ -453,31 +486,34 @@ function ConstructionQuoteTemplate({
                   <Input
                     value={editableData.projectTitle}
                     onChange={(e) => setEditableData(prev => ({ ...prev, projectTitle: e.target.value }))}
-                    className="text-lg font-medium"
+                    className="text-lg font-medium dark:bg-slate-700 dark:border-slate-600 dark:text-white"
                   />
                 ) : (
-                  <p className="text-lg font-medium text-gray-800">{editableData.projectTitle}</p>
+                  <p className="text-lg font-medium text-gray-800 dark:text-gray-200">{editableData.projectTitle}</p>
                 )}
               </div>
             </div>
 
             {/* Items Table */}
-            <div className="mb-8">
-              <h3 className="text-xl font-semibold text-gray-900 mb-6 flex items-center gap-2">
+            <div 
+              className={editor.getSectionClasses("mb-8", "items-table")}
+              {...editor.getSectionProps("items-table", "items-table")}
+            >
+              <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-6 flex items-center gap-2">
                 <List className="h-5 w-5 text-orange-600" />
                 Project Breakdown
               </h3>
               
               <div className="overflow-x-auto">
-                <table className="w-full border-collapse border border-orange-200 rounded-lg overflow-hidden">
+                <table className="w-full border-collapse border border-orange-200 dark:border-orange-800 rounded-lg overflow-hidden">
                   <thead>
                     <tr className="bg-gradient-to-r from-orange-500 to-orange-600 text-white">
-                      <th className="border border-orange-300 p-4 text-left font-semibold">Description</th>
-                      <th className="border border-orange-300 p-4 text-center font-semibold">Qty</th>
-                      <th className="border border-orange-300 p-4 text-center font-semibold">Unit</th>
-                      <th className="border border-orange-300 p-4 text-right font-semibold">Unit Price</th>
-                      <th className="border border-orange-300 p-4 text-right font-semibold">Total</th>
-                      {isEditing && <th className="border border-orange-300 p-4 text-center font-semibold">Actions</th>}
+                      <th className="border border-orange-300 dark:border-orange-700 p-4 text-left font-semibold">Description</th>
+                      <th className="border border-orange-300 dark:border-orange-700 p-4 text-center font-semibold">Qty</th>
+                      <th className="border border-orange-300 dark:border-orange-700 p-4 text-center font-semibold">Unit</th>
+                      <th className="border border-orange-300 dark:border-orange-700 p-4 text-right font-semibold">Unit Price</th>
+                      <th className="border border-orange-300 dark:border-orange-700 p-4 text-right font-semibold">Total</th>
+                      {isEditing && <th className="border border-orange-300 dark:border-orange-700 p-4 text-center font-semibold">Actions</th>}
                     </tr>
                   </thead>
                   <tbody>
@@ -488,59 +524,59 @@ function ConstructionQuoteTemplate({
                           initial={{ opacity: 0, y: 20 }}
                           animate={{ opacity: 1, y: 0 }}
                           exit={{ opacity: 0, y: -20 }}
-                          className={index % 2 === 0 ? "bg-orange-25" : "bg-white"}
+                          className={index % 2 === 0 ? "bg-orange-25 dark:bg-slate-800" : "bg-white dark:bg-slate-800/50"}
                         >
-                          <td className="border border-orange-200 p-4">
+                          <td className="border border-orange-200 dark:border-orange-800 p-4">
                             {isEditing ? (
                               <Input
                                 value={item.description}
                                 onChange={(e) => handleItemChange(item.id, 'description', e.target.value)}
-                                className="w-full"
+                                className="w-full dark:bg-slate-700 dark:border-slate-600 dark:text-white"
                               />
                             ) : (
-                              <span className="font-medium text-gray-800">{item.description}</span>
+                              <span className="font-medium text-gray-800 dark:text-gray-200">{item.description}</span>
                             )}
                           </td>
-                          <td className="border border-orange-200 p-4 text-center">
+                          <td className="border border-orange-200 dark:border-orange-800 p-4 text-center">
                             {isEditing ? (
                               <Input
                                 type="number"
                                 value={item.quantity}
                                 onChange={(e) => handleItemChange(item.id, 'quantity', Number(e.target.value))}
-                                className="w-20 text-center"
+                                className="w-20 text-center dark:bg-slate-700 dark:border-slate-600 dark:text-white"
                               />
                             ) : (
-                              <span>{item.quantity.toLocaleString()}</span>
+                              <span className="dark:text-gray-300">{item.quantity.toLocaleString()}</span>
                             )}
                           </td>
-                          <td className="border border-orange-200 p-4 text-center">
+                          <td className="border border-orange-200 dark:border-orange-800 p-4 text-center">
                             {isEditing ? (
                               <Input
                                 value={item.unit}
                                 onChange={(e) => handleItemChange(item.id, 'unit', e.target.value)}
-                                className="w-20 text-center"
+                                className="w-20 text-center dark:bg-slate-700 dark:border-slate-600 dark:text-white"
                               />
                             ) : (
-                              <span>{item.unit}</span>
+                              <span className="dark:text-gray-300">{item.unit}</span>
                             )}
                           </td>
-                          <td className="border border-orange-200 p-4 text-right">
+                          <td className="border border-orange-200 dark:border-orange-800 p-4 text-right">
                             {isEditing ? (
                               <Input
                                 type="number"
                                 value={item.unitPrice}
                                 onChange={(e) => handleItemChange(item.id, 'unitPrice', Number(e.target.value))}
-                                className="w-24 text-right"
+                                className="w-24 text-right dark:bg-slate-700 dark:border-slate-600 dark:text-white"
                               />
                             ) : (
-                              <span>${item.unitPrice.toLocaleString()}</span>
+                              <span className="dark:text-gray-300">${item.unitPrice.toLocaleString()}</span>
                             )}
                           </td>
-                          <td className="border border-orange-200 p-4 text-right font-semibold">
+                          <td className="border border-orange-200 dark:border-orange-800 p-4 text-right font-semibold dark:text-gray-200">
                             ${item.total.toLocaleString()}
                           </td>
                           {isEditing && (
-                            <td className="border border-orange-200 p-4 text-center">
+                            <td className="border border-orange-200 dark:border-orange-800 p-4 text-center">
                               <Button
                                 variant="destructive"
                                 size="sm"
@@ -560,7 +596,7 @@ function ConstructionQuoteTemplate({
               {isEditing && (
                 <Button
                   onClick={addItem}
-                  className="mt-4 gap-2"
+                  className="mt-4 gap-2 dark:bg-slate-800 dark:text-slate-200 dark:border-slate-600"
                   variant="outline"
                 >
                   <Building2 className="h-4 w-4" />
@@ -570,21 +606,24 @@ function ConstructionQuoteTemplate({
             </div>
 
             {/* Totals */}
-            <div className="flex justify-end mb-8">
-              <div className="w-full md:w-96 bg-gradient-to-br from-orange-50 to-amber-50 p-6 rounded-xl border-2 border-orange-200">
+            <div 
+              className={editor.getSectionClasses("flex justify-end mb-8", "totals")}
+              {...editor.getSectionProps("totals", "totals")}
+            >
+              <div className="w-full md:w-96 bg-gradient-to-br from-orange-50 to-amber-50 dark:from-slate-800 dark:to-slate-700 p-6 rounded-xl border-2 border-orange-200 dark:border-orange-700">
                 <div className="space-y-3">
                   <div className="flex justify-between items-center">
-                    <span className="font-medium text-gray-700">Subtotal:</span>
-                    <span className="text-lg font-semibold">${subtotal.toLocaleString()}</span>
+                    <span className="font-medium text-gray-700 dark:text-gray-300">Subtotal:</span>
+                    <span className="text-lg font-semibold dark:text-gray-100">${subtotal.toLocaleString()}</span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="font-medium text-gray-700">Tax (8%):</span>
-                    <span className="text-lg font-semibold">${tax.toLocaleString()}</span>
+                    <span className="font-medium text-gray-700 dark:text-gray-300">Tax (8%):</span>
+                    <span className="text-lg font-semibold dark:text-gray-100">${tax.toLocaleString()}</span>
                   </div>
-                  <div className="border-t-2 border-orange-300 pt-3">
+                  <div className="border-t-2 border-orange-300 dark:border-orange-600 pt-3">
                     <div className="flex justify-between items-center">
-                      <span className="text-xl font-bold text-gray-900">Total:</span>
-                      <span className="text-2xl font-bold text-orange-600">${total.toLocaleString()}</span>
+                      <span className="text-xl font-bold text-gray-900 dark:text-gray-100">Total:</span>
+                      <span className="text-2xl font-bold text-orange-600 dark:text-orange-400">${total.toLocaleString()}</span>
                     </div>
                   </div>
                 </div>
@@ -592,9 +631,12 @@ function ConstructionQuoteTemplate({
             </div>
 
             {/* Notes & Terms */}
-            <div className="grid md:grid-cols-2 gap-8">
-              <div className="bg-amber-50 p-6 rounded-xl border border-amber-200">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+            <div 
+              className={editor.getSectionClasses("grid md:grid-cols-2 gap-8", "notes-terms")}
+              {...editor.getSectionProps("notes-terms", "notes-terms")}
+            >
+              <div className="bg-amber-50 dark:bg-slate-800 p-6 rounded-xl border border-amber-200 dark:border-slate-700">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2">
                   <FileText className="h-5 w-5 text-orange-600" />
                   Project Notes
                 </h3>
@@ -602,15 +644,15 @@ function ConstructionQuoteTemplate({
                   <Textarea
                     value={editableData.notes}
                     onChange={(e) => setEditableData(prev => ({ ...prev, notes: e.target.value }))}
-                    className="min-h-[120px]"
+                    className="min-h-[120px] dark:bg-slate-700 dark:border-slate-600 dark:text-white"
                   />
                 ) : (
-                  <p className="text-gray-700 leading-relaxed">{editableData.notes}</p>
+                  <p className="text-gray-700 dark:text-gray-300 leading-relaxed">{editableData.notes}</p>
                 )}
               </div>
 
-              <div className="bg-amber-50 p-6 rounded-xl border border-amber-200">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+              <div className="bg-amber-50 dark:bg-slate-800 p-6 rounded-xl border border-amber-200 dark:border-slate-700">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2">
                   <FileText className="h-5 w-5 text-orange-600" />
                   Terms & Conditions
                 </h3>
@@ -618,20 +660,23 @@ function ConstructionQuoteTemplate({
                   <Textarea
                     value={editableData.terms}
                     onChange={(e) => setEditableData(prev => ({ ...prev, terms: e.target.value }))}
-                    className="min-h-[120px]"
+                    className="min-h-[120px] dark:bg-slate-700 dark:border-slate-600 dark:text-white"
                   />
                 ) : (
-                  <p className="text-gray-700 leading-relaxed">{editableData.terms}</p>
+                  <p className="text-gray-700 dark:text-gray-300 leading-relaxed">{editableData.terms}</p>
                 )}
               </div>
             </div>
 
             {/* Footer */}
-            <div className="mt-12 pt-8 border-t-2 border-orange-200 text-center">
-              <p className="text-gray-600 mb-4">
+            <div 
+              className={editor.getSectionClasses("mt-12 pt-8 border-t-2 border-orange-200 dark:border-orange-800 text-center", "footer")}
+              {...editor.getSectionProps("footer", "footer")}
+            >
+              <p className="text-gray-600 dark:text-gray-400 mb-4">
                 Thank you for considering {editableData.companyName} for your construction project.
               </p>
-              <div className="flex items-center justify-center gap-2 text-orange-600">
+              <div className="flex items-center justify-center gap-2 text-orange-600 dark:text-orange-400">
                 <Sparkles className="h-5 w-5" />
                 <span className="font-semibold">Building Excellence, One Project at a Time</span>
                 <Sparkles className="h-5 w-5" />
@@ -644,6 +689,4 @@ function ConstructionQuoteTemplate({
   );
 }
 
-export default function ConstructionQuoteDemo() {
-  return <ConstructionQuoteTemplate />;
-} 
+export default ConstructionTemplate4; 

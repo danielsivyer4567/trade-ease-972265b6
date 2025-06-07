@@ -10,10 +10,14 @@ import { TeamLinks } from './navigation/TeamLinks';
 
 interface SidebarNavLinksProps {
   isExpanded?: boolean;
+  isDarkMode: boolean;
+  onToggleDarkMode: () => void;
 }
 
 export function SidebarNavLinks({
-  isExpanded = true
+  isExpanded = true,
+  isDarkMode,
+  onToggleDarkMode
 }: SidebarNavLinksProps) {
   const location = useLocation();
   const navigate = useNavigate();
@@ -51,6 +55,8 @@ export function SidebarNavLinks({
           items={group.items}
           isExpanded={isExpanded}
           onLogout={handleLogout}
+          isDarkMode={isDarkMode}
+          onToggleDarkMode={onToggleDarkMode}
         />
       ))}
       

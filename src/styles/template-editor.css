@@ -1,0 +1,81 @@
+/* Template Editor Styles */
+/* These styles can be applied to any template for edit mode functionality */
+
+/* Edit Mode Styles */
+.edit-mode .form-section {
+  border: 2px dashed transparent !important;
+  cursor: pointer !important;
+  transition: all 0.3s ease !important;
+  position: relative !important;
+}
+
+.edit-mode .form-section:hover {
+  border-color: #3498db !important;
+  background: rgba(52, 152, 219, 0.1) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 4px 12px rgba(52, 152, 219, 0.15) !important;
+}
+
+.edit-mode .form-section.selected {
+  border-color: #e74c3c !important;
+  background: rgba(231, 76, 60, 0.1) !important;
+  box-shadow: 0 0 15px rgba(231, 76, 60, 0.4) !important;
+  transform: translateY(-1px) !important;
+}
+
+.edit-mode .form-section.selected::before {
+  content: "✓ SELECTED";
+  position: absolute !important;
+  top: -8px !important;
+  left: 15px !important;
+  background: #e74c3c !important;
+  color: white !important;
+  padding: 2px 8px !important;
+  border-radius: 12px !important;
+  font-size: 10px !important;
+  font-weight: bold !important;
+  z-index: 101 !important;
+}
+
+/* Sidebar Styles */
+.sidebar-open .template-container {
+  margin-right: 320px;
+  transition: margin-right 0.3s ease;
+}
+
+/* Edit mode indicator */
+.edit-mode::before {
+  content: "🎨 EDIT MODE";
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(231, 76, 60, 0.9);
+  color: white;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: bold;
+  z-index: 1000;
+  box-shadow: 0 4px 12px rgba(231, 76, 60, 0.3);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.7; }
+  100% { opacity: 1; }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .sidebar-open .template-container {
+    margin-right: 0;
+    margin-bottom: 400px;
+  }
+  
+  .edit-mode .form-section.selected::before {
+    font-size: 8px;
+    padding: 1px 4px;
+  }
+} 

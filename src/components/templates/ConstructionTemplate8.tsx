@@ -60,7 +60,7 @@ interface ConstructionQuoteTemplateProps {
   data?: QuoteData;
 }
 
-const ConstructionTemplate2: React.FC<ConstructionQuoteTemplateProps> = ({
+const ConstructionTemplate8: React.FC<ConstructionQuoteTemplateProps> = ({
   data = {
     quoteNumber: "CQ-2024-001",
     date: "2024-01-15",
@@ -191,6 +191,8 @@ const ConstructionTemplate2: React.FC<ConstructionQuoteTemplateProps> = ({
     ]
   });
 
+  const { getBackgroundOverlayStyles } = editor;
+
   const calculatePhaseTotal = (phase: ProjectPhase): number => {
     return phase.items.reduce((sum, item) => sum + item.total, 0);
   };
@@ -208,14 +210,14 @@ const ConstructionTemplate2: React.FC<ConstructionQuoteTemplateProps> = ({
 
   return (
     <div className={editor.getContainerClasses("min-h-screen bg-background p-8 print:p-0")}>
-       <div className="template-container max-w-4xl mx-auto" style={{ position: 'relative' }}>
+      <div className="template-container max-w-4xl mx-auto" style={{ position: 'relative' }}>
         {editor.backgroundImage && (
-          <div style={editor.getBackgroundOverlayStyles()} />
+          <div style={getBackgroundOverlayStyles()} />
         )}
         <TemplateEditor {...editor} />
-        <div className="max-w-4xl mx-auto bg-white dark:bg-slate-900 shadow-lg print:shadow-none">
+        <div className="max-w-4xl mx-auto bg-white shadow-lg print:shadow-none">
           {/* Geometric Header Pattern */}
-          <div 
+          <div
             className={editor.getSectionClasses("relative overflow-hidden", "header")}
             {...editor.getSectionProps("header", "header")}
           >
@@ -231,6 +233,8 @@ const ConstructionTemplate2: React.FC<ConstructionQuoteTemplateProps> = ({
                 </svg>
               </div>
             </div>
+            
+            {/* Header Content */}
             <div className="relative z-10 p-8 text-white">
               <div className="flex justify-between items-start">
                 <div className="flex items-center space-x-4">
@@ -239,28 +243,28 @@ const ConstructionTemplate2: React.FC<ConstructionQuoteTemplateProps> = ({
                   </div>
                   <div>
                     <h1 className="text-3xl font-bold">{data.company.name}</h1>
-                    <p className="text-slate-200 dark:text-slate-300">{data.company.license}</p>
+                    <p className="text-slate-200">{data.company.license}</p>
                   </div>
                 </div>
                 <div className="text-right">
                   <h2 className="text-2xl font-semibold">CONSTRUCTION QUOTE</h2>
-                  <p className="text-slate-200 dark:text-slate-300">#{data.quoteNumber}</p>
+                  <p className="text-slate-200">#{data.quoteNumber}</p>
                 </div>
               </div>
             </div>
           </div>
 
           {/* Company & Client Information */}
-          <div 
+          <div
             className={editor.getSectionClasses("p-8 grid grid-cols-1 md:grid-cols-2 gap-8", "company-client-info")}
             {...editor.getSectionProps("company-client-info", "company-client-info")}
           >
-            <Card className="p-6 bg-white dark:bg-slate-800">
-              <h3 className="text-lg font-semibold mb-4 flex items-center text-slate-800 dark:text-slate-200">
-                <Building2 className="w-5 h-5 mr-2 text-slate-600 dark:text-slate-400" />
+            <Card className="p-6">
+              <h3 className="text-lg font-semibold mb-4 flex items-center">
+                <Building2 className="w-5 h-5 mr-2 text-slate-600" />
                 Company Information
               </h3>
-              <div className="space-y-2 text-sm text-slate-700 dark:text-slate-300">
+              <div className="space-y-2 text-sm">
                 <div className="flex items-center">
                   <MapPin className="w-4 h-4 mr-2 text-slate-500" />
                   <span>{data.company.address}</span>
@@ -280,12 +284,12 @@ const ConstructionTemplate2: React.FC<ConstructionQuoteTemplateProps> = ({
               </div>
             </Card>
 
-            <Card className="p-6 bg-white dark:bg-slate-800">
-              <h3 className="text-lg font-semibold mb-4 flex items-center text-slate-800 dark:text-slate-200">
-                <Users className="w-5 h-5 mr-2 text-slate-600 dark:text-slate-400" />
+            <Card className="p-6">
+              <h3 className="text-lg font-semibold mb-4 flex items-center">
+                <Users className="w-5 h-5 mr-2 text-slate-600" />
                 Client Information
               </h3>
-              <div className="space-y-2 text-sm text-slate-700 dark:text-slate-300">
+              <div className="space-y-2 text-sm">
                 <div className="font-medium">{data.client.name}</div>
                 <div className="flex items-center">
                   <MapPin className="w-4 h-4 mr-2 text-slate-500" />
@@ -304,87 +308,87 @@ const ConstructionTemplate2: React.FC<ConstructionQuoteTemplateProps> = ({
           </div>
 
           {/* Project Details */}
-          <div 
+          <div
             className={editor.getSectionClasses("px-8 pb-6", "project-details")}
             {...editor.getSectionProps("project-details", "project-details")}
           >
-            <Card className="p-6 bg-white dark:bg-slate-800">
+            <Card className="p-6">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div>
-                  <h3 className="font-semibold text-slate-700 dark:text-slate-300 mb-2">Project Details</h3>
-                  <p className="text-lg font-medium text-slate-900 dark:text-slate-100">{data.projectTitle}</p>
-                  <Badge variant="secondary" className="mt-1 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300">
+                  <h3 className="font-semibold text-slate-700 mb-2">Project Details</h3>
+                  <p className="text-lg font-medium">{data.projectTitle}</p>
+                  <Badge variant="secondary" className="mt-1">
                     <Hammer className="w-3 h-3 mr-1" />
                     {data.projectType}
                   </Badge>
                 </div>
                 <div>
-                  <h3 className="font-semibold text-slate-700 dark:text-slate-300 mb-2 flex items-center">
+                  <h3 className="font-semibold text-slate-700 mb-2 flex items-center">
                     <Calendar className="w-4 h-4 mr-1" />
                     Quote Date
                   </h3>
-                  <p className="text-slate-800 dark:text-slate-200">{new Date(data.date).toLocaleDateString()}</p>
-                  <p className="text-sm text-slate-600 dark:text-slate-400">Valid until: {new Date(data.validUntil).toLocaleDateString()}</p>
+                  <p>{new Date(data.date).toLocaleDateString()}</p>
+                  <p className="text-sm text-slate-600">Valid until: {new Date(data.validUntil).toLocaleDateString()}</p>
                 </div>
                 <div>
-                  <h3 className="font-semibold text-slate-700 dark:text-slate-300 mb-2 flex items-center">
+                  <h3 className="font-semibold text-slate-700 mb-2 flex items-center">
                     <Clock className="w-4 h-4 mr-1" />
                     Timeline
                   </h3>
-                  <p className="text-sm text-slate-700 dark:text-slate-300">{data.timeline}</p>
+                  <p className="text-sm">{data.timeline}</p>
                 </div>
               </div>
             </Card>
           </div>
 
           {/* Project Phases and Line Items */}
-          <div 
+          <div
             className={editor.getSectionClasses("px-8 pb-6", "project-breakdown")}
             {...editor.getSectionProps("project-breakdown", "project-breakdown")}
           >
-            <h3 className="text-xl font-semibold mb-6 text-slate-900 dark:text-slate-100">Project Breakdown</h3>
+            <h3 className="text-xl font-semibold mb-6">Project Breakdown</h3>
             
             {data.phases.map((phase, phaseIndex) => (
-              <Card key={phase.id} className="mb-6 bg-white dark:bg-slate-800">
+              <Card key={phase.id} className="mb-6">
                 <div className="p-6">
                   <div className="flex justify-between items-center mb-4">
                     <div>
-                      <h4 className="text-lg font-semibold text-slate-800 dark:text-slate-200">
+                      <h4 className="text-lg font-semibold text-slate-800">
                         Phase {phaseIndex + 1}: {phase.name}
                       </h4>
-                      <p className="text-sm text-slate-600 dark:text-slate-400">Duration: {phase.duration}</p>
+                      <p className="text-sm text-slate-600">Duration: {phase.duration}</p>
                     </div>
                     <div className="text-right">
-                      <p className="text-lg font-semibold text-slate-800 dark:text-slate-200">{formatCurrency(calculatePhaseTotal(phase))}</p>
+                      <p className="text-lg font-semibold">{formatCurrency(calculatePhaseTotal(phase))}</p>
                     </div>
                   </div>
                   
                   <div className="overflow-x-auto">
                     <table className="w-full text-sm">
                       <thead>
-                        <tr className="border-b border-slate-200 dark:border-slate-700">
-                          <th className="text-left py-2 font-medium text-slate-700 dark:text-slate-300">Description</th>
-                          <th className="text-center py-2 font-medium text-slate-700 dark:text-slate-300">Qty</th>
-                          <th className="text-center py-2 font-medium text-slate-700 dark:text-slate-300">Unit</th>
-                          <th className="text-right py-2 font-medium text-slate-700 dark:text-slate-300">Unit Price</th>
-                          <th className="text-right py-2 font-medium text-slate-700 dark:text-slate-300">Total</th>
+                        <tr className="border-b border-slate-200">
+                          <th className="text-left py-2 font-medium text-slate-700">Description</th>
+                          <th className="text-center py-2 font-medium text-slate-700">Qty</th>
+                          <th className="text-center py-2 font-medium text-slate-700">Unit</th>
+                          <th className="text-right py-2 font-medium text-slate-700">Unit Price</th>
+                          <th className="text-right py-2 font-medium text-slate-700">Total</th>
                         </tr>
                       </thead>
                       <tbody>
                         {phase.items.map((item) => (
-                          <tr key={item.id} className="border-b border-slate-100 dark:border-slate-700">
+                          <tr key={item.id} className="border-b border-slate-100">
                             <td className="py-3">
                               <div>
-                                <span className="font-medium text-slate-800 dark:text-slate-200">{item.description}</span>
-                                <Badge variant="outline" className="ml-2 text-xs border-slate-300 dark:border-slate-600 text-slate-600 dark:text-slate-400">
+                                <span className="font-medium">{item.description}</span>
+                                <Badge variant="outline" className="ml-2 text-xs">
                                   {item.category}
                                 </Badge>
                               </div>
                             </td>
-                            <td className="text-center py-3 text-slate-700 dark:text-slate-300">{item.quantity}</td>
-                            <td className="text-center py-3 text-slate-700 dark:text-slate-300">{item.unit}</td>
-                            <td className="text-right py-3 text-slate-700 dark:text-slate-300">{formatCurrency(item.unitPrice)}</td>
-                            <td className="text-right py-3 font-medium text-slate-800 dark:text-slate-200">{formatCurrency(item.total)}</td>
+                            <td className="text-center py-3">{item.quantity}</td>
+                            <td className="text-center py-3">{item.unit}</td>
+                            <td className="text-right py-3">{formatCurrency(item.unitPrice)}</td>
+                            <td className="text-right py-3 font-medium">{formatCurrency(item.total)}</td>
                           </tr>
                         ))}
                       </tbody>
@@ -396,18 +400,18 @@ const ConstructionTemplate2: React.FC<ConstructionQuoteTemplateProps> = ({
           </div>
 
           {/* Total Summary */}
-          <div 
+          <div
             className={editor.getSectionClasses("px-8 pb-6", "summary")}
             {...editor.getSectionProps("summary", "summary")}
           >
-            <Card className="p-6 bg-slate-50 dark:bg-slate-800">
+            <Card className="p-6 bg-slate-50">
               <div className="flex justify-between items-center">
                 <div>
-                  <h3 className="text-xl font-semibold text-slate-800 dark:text-slate-200">Project Total</h3>
-                  <p className="text-sm text-slate-600 dark:text-slate-400">All phases included</p>
+                  <h3 className="text-xl font-semibold text-slate-800">Project Total</h3>
+                  <p className="text-sm text-slate-600">All phases included</p>
                 </div>
                 <div className="text-right">
-                  <p className="text-3xl font-bold text-slate-800 dark:text-slate-200 flex items-center">
+                  <p className="text-3xl font-bold text-slate-800 flex items-center">
                     <DollarSign className="w-6 h-6 mr-1" />
                     {formatCurrency(calculateGrandTotal()).replace('$', '')}
                   </p>
@@ -421,22 +425,22 @@ const ConstructionTemplate2: React.FC<ConstructionQuoteTemplateProps> = ({
             className={editor.getSectionClasses("px-8 pb-6", "terms")}
             {...editor.getSectionProps("terms", "terms")}
           >
-            <Card className="p-6 bg-white dark:bg-slate-800">
-              <h3 className="text-lg font-semibold mb-4 flex items-center text-slate-800 dark:text-slate-200">
-                <DollarSign className="w-5 h-5 mr-2 text-slate-600 dark:text-slate-400" />
+            <Card className="p-6">
+              <h3 className="text-lg font-semibold mb-4 flex items-center">
+                <DollarSign className="w-5 h-5 mr-2 text-slate-600" />
                 Payment Terms
               </h3>
-              <p className="text-sm text-slate-700 dark:text-slate-300">{data.paymentTerms}</p>
+              <p className="text-sm">{data.paymentTerms}</p>
             </Card>
 
             {/* Terms and Conditions */}
-            <Card className="p-6 mt-6 bg-white dark:bg-slate-800">
-              <h3 className="text-lg font-semibold mb-4 text-slate-800 dark:text-slate-200">Terms & Conditions</h3>
+            <Card className="p-6 mt-6">
+              <h3 className="text-lg font-semibold mb-4">Terms & Conditions</h3>
               <ul className="space-y-2 text-sm">
                 {data.terms.map((term, index) => (
                   <li key={index} className="flex items-start">
                     <span className="w-2 h-2 bg-slate-400 rounded-full mt-2 mr-3 flex-shrink-0"></span>
-                    <span className="text-slate-700 dark:text-slate-300">{term}</span>
+                    <span>{term}</span>
                   </li>
                 ))}
               </ul>
@@ -444,44 +448,44 @@ const ConstructionTemplate2: React.FC<ConstructionQuoteTemplateProps> = ({
 
             {/* Notes */}
             {data.notes && (
-              <Card className="p-6 mt-6 bg-white dark:bg-slate-800">
-                <h3 className="text-lg font-semibold mb-4 text-slate-800 dark:text-slate-200">Additional Notes</h3>
-                <p className="text-sm text-slate-700 dark:text-slate-300">{data.notes}</p>
+              <Card className="p-6 mt-6">
+                <h3 className="text-lg font-semibold mb-4">Additional Notes</h3>
+                <p className="text-sm text-slate-700">{data.notes}</p>
               </Card>
             )}
           </div>
 
           {/* Signature Section */}
-          <div 
+          <div
             className={editor.getSectionClasses("px-8 pb-8", "signature")}
             {...editor.getSectionProps("signature", "signature")}
           >
-            <Card className="p-6 bg-white dark:bg-slate-800">
-              <h3 className="text-lg font-semibold mb-6 text-slate-800 dark:text-slate-200">Acceptance & Signatures</h3>
+            <Card className="p-6">
+              <h3 className="text-lg font-semibold mb-6">Acceptance & Signatures</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div>
-                  <h4 className="font-medium mb-4 text-slate-800 dark:text-slate-200">Client Acceptance</h4>
+                  <h4 className="font-medium mb-4">Client Acceptance</h4>
                   <div className="space-y-4">
                     <div>
-                      <div className="border-b border-slate-300 dark:border-slate-600 h-8 mb-2"></div>
-                      <p className="text-xs text-slate-600 dark:text-slate-400">Client Signature</p>
+                      <div className="border-b border-slate-300 h-8 mb-2"></div>
+                      <p className="text-xs text-slate-600">Client Signature</p>
                     </div>
                     <div>
-                      <div className="border-b border-slate-300 dark:border-slate-600 h-8 mb-2"></div>
-                      <p className="text-xs text-slate-600 dark:text-slate-400">Date</p>
+                      <div className="border-b border-slate-300 h-8 mb-2"></div>
+                      <p className="text-xs text-slate-600">Date</p>
                     </div>
                   </div>
                 </div>
                 <div>
-                  <h4 className="font-medium mb-4 text-slate-800 dark:text-slate-200">Company Representative</h4>
+                  <h4 className="font-medium mb-4">Company Representative</h4>
                   <div className="space-y-4">
                     <div>
-                      <div className="border-b border-slate-300 dark:border-slate-600 h-8 mb-2"></div>
-                      <p className="text-xs text-slate-600 dark:text-slate-400">Authorized Signature</p>
+                      <div className="border-b border-slate-300 h-8 mb-2"></div>
+                      <p className="text-xs text-slate-600">Authorized Signature</p>
                     </div>
                     <div>
-                      <div className="border-b border-slate-300 dark:border-slate-600 h-8 mb-2"></div>
-                      <p className="text-xs text-slate-600 dark:text-slate-400">Date</p>
+                      <div className="border-b border-slate-300 h-8 mb-2"></div>
+                      <p className="text-xs text-slate-600">Date</p>
                     </div>
                   </div>
                 </div>
@@ -490,7 +494,7 @@ const ConstructionTemplate2: React.FC<ConstructionQuoteTemplateProps> = ({
           </div>
 
           {/* Footer */}
-          <div className="bg-slate-100 dark:bg-slate-800 p-6 text-center text-sm text-slate-600 dark:text-slate-400">
+          <div className="bg-slate-100 p-6 text-center text-sm text-slate-600">
             <p>Thank you for considering {data.company.name} for your construction project.</p>
             <p className="mt-1">Questions? Contact us at {data.company.phone} or {data.company.email}</p>
           </div>
@@ -500,4 +504,4 @@ const ConstructionTemplate2: React.FC<ConstructionQuoteTemplateProps> = ({
   );
 };
 
-export default ConstructionTemplate2; 
+export default ConstructionTemplate8; 

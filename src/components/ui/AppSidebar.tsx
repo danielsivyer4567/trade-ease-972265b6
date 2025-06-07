@@ -17,9 +17,11 @@ interface AppSidebarProps {
   className?: string;
   isExpanded: boolean;
   onToggle: () => void;
+  isDarkMode: boolean;
+  onToggleDarkMode: () => void;
 }
 
-export function AppSidebar({ className, isExpanded, onToggle }: AppSidebarProps) {
+export function AppSidebar({ className, isExpanded, onToggle, isDarkMode, onToggleDarkMode }: AppSidebarProps) {
   const [isMobileOpen, setIsMobileOpen] = React.useState(false);
   const { theme } = useSidebarTheme();
 
@@ -38,7 +40,7 @@ export function AppSidebar({ className, isExpanded, onToggle }: AppSidebarProps)
           onToggle={onToggle}
         />
         <ScrollArea className="flex-1 overflow-y-auto">
-          <SidebarNavLinks isExpanded={isExpanded} />
+          <SidebarNavLinks isExpanded={isExpanded} isDarkMode={isDarkMode} onToggleDarkMode={onToggleDarkMode} />
         </ScrollArea>
       </aside>
 
@@ -51,7 +53,7 @@ export function AppSidebar({ className, isExpanded, onToggle }: AppSidebarProps)
             </SheetTitle>
           </SheetHeader>
           <ScrollArea className="flex-1 py-2 h-[calc(100vh-4rem)]">
-            <SidebarNavLinks isExpanded={true} />
+            <SidebarNavLinks isExpanded={true} isDarkMode={isDarkMode} onToggleDarkMode={onToggleDarkMode} />
           </ScrollArea>
         </SheetContent>
       </Sheet>
