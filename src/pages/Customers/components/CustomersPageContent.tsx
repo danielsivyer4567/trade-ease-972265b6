@@ -98,7 +98,7 @@ export function CustomersPageContent() {
       console.error("Error initializing customer data:", error);
       setUseFallbackData(true);
     }
-  }, []);
+  }, [fetchCustomers]);
   
   // Function to fetch customers from API
   const fetchApiCustomers = async () => {
@@ -131,8 +131,8 @@ export function CustomersPageContent() {
   // Use fallback data if both API and Supabase fail
   const customerData = useFallbackData ? MOCK_CUSTOMERS : (
     // Combine customers from both sources, prioritizing API customers
-    [...apiCustomers, ...customers.filter(
-      customer => !apiCustomers.some(apiCustomer => apiCustomer.id === customer.id)
+    [...(Array.isArray(apiCustomers) ? apiCustomers : []), ...customers.filter(
+      customer => !(Array.isArray(apiCustomers) && apiCustomers.some(apiCustomer => apiCustomer.id === customer.id))
     )]
   );
 

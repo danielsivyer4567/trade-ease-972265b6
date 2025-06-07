@@ -1029,6 +1029,7 @@ const QuotesMain = () => {
   const [signingUrl, setSigningUrl] = useState('');
   const [showDocuSeal, setShowDocuSeal] = useState(false);
   const [documentSigned, setDocumentSigned] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const loadTemplatesAndCategories = async () => {
@@ -1074,8 +1075,12 @@ const QuotesMain = () => {
   }, [activeCategory, searchTerm, popularTag, allTemplates]);
 
   const handleBack = () => {
-    setActiveSection('templates');
-    setSelectedTemplate(null);
+    if (activeSection === 'templates') {
+      navigate(-1); // Go back to the previous page in browser history
+    } else {
+      setActiveSection('templates');
+      setSelectedTemplate(null);
+    }
   };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {

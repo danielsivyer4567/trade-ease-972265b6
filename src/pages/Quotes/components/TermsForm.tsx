@@ -13,13 +13,13 @@ export const TermsForm = ({ onUpdate, initialTerms }: TermsFormProps) => {
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 p-1">
       <div>
         <Label htmlFor="terms">Terms & Conditions</Label>
         <Textarea 
           id="terms" 
           placeholder="Enter each term on a new line..."
-          value={initialTerms.join('\n')}
+          value={initialTerms?.join('\n') || ''}
           onChange={handleChange}
           rows={8} 
           className="mt-1" 
