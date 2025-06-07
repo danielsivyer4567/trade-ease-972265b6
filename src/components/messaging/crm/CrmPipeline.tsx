@@ -359,14 +359,19 @@ export const CrmPipeline: React.FC = () => {
             </div>
           </div>
         ) : (
-          <div className="flex flex-col items-center justify-center h-full text-center p-8">
-            <div className="bg-gray-100 rounded-full p-4 mb-4">
-              <Mail className="h-10 w-10 text-gray-400" />
+          <div className="flex flex-col items-center justify-center h-full text-center p-8 relative">
+            <div 
+              className="absolute inset-0 bg-contain bg-center bg-no-repeat opacity-30" 
+              style={{ 
+                backgroundImage: "url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAwIiBoZWlnaHQ9IjYwMCIgdmlld0JveD0iMCAwIDgwMCA2MDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CiAgPGRlZnM+CiAgICA8bGluZWFyR3JhZGllbnQgaWQ9ImdyYWQxIiB4MT0iMCUiIHkxPSIwJSIgeDI9IjEwMCUiIHkyPSIxMDAlIj4KICAgICAgPHN0b3Agb2Zmc2V0PSIwJSIgc3RvcC1jb2xvcj0iIzM2ODJmNCIgLz4KICAgICAgPHN0b3Agb2Zmc2V0PSIxMDAlIiBzdG9wLWNvbG9yPSIjNzgzNGY5IiAvPgogICAgPC9saW5lYXJHcmFkaWVudD4KICAgIDxsaW5lYXJHcmFkaWVudCBpZD0iZ3JhZDIiIHgxPSIwJSIgeTE9IjEwMCUiIHgyPSIxMDAlIiB5Mj0iMCUiPgogICAgICA8c3RvcCBvZmZzZXQ9IjAlIiBzdG9wLWNvbG9yPSIjZjQ0MzM2IiAvPgogICAgICA8c3RvcCBvZmZzZXQ9IjEwMCUiIHN0b3AtY29sb3I9IiNmZjlmMDAiIC8+CiAgICA8L2xpbmVhckdyYWRpZW50PgogICAgPGxpbmVhckdyYWRpZW50IGlkPSJncmFkMyIgeDE9IjAlIiB5MT0iMCUiIHgyPSIxMDAlIiB5Mj0iMCUiPgogICAgICA8c3RvcCBvZmZzZXQ9IjAlIiBzdG9wLWNvbG9yPSIjMDBkMmZmIiAvPgogICAgICA8c3RvcCBvZmZzZXQ9IjEwMCUiIHN0b3AtY29sb3I9IiMwMDdkZmYiIC8+CiAgICA8L2xpbmVhckdyYWRpZW50PgogIDwvZGVmcz4KCiAgPGNpcmNsZSBjeD0iNDAwIiBjeT0iMzAwIiByPSIxMjAiIGZpbGw9IiMxMTEiIGZpbGwtb3BhY2l0eT0iMC4xIiAvPgogIDxjaXJjbGUgY3g9IjQwMCIgY3k9IjMwMCIgcj0iMTAwIiBmaWxsPSIjMTExIiBmaWxsLW9wYWNpdHk9IjAuMiIgLz4KICA8Y2lyY2xlIGN4PSI0MDAiIGN5PSIzMDAiIHI9IjgwIiBmaWxsPSIjMjIyIiBmaWxsLW9wYWNpdHk9IjAuMyIgLz4KICA8dGV4dCB4PSI0MDAiIHk9IjMwNSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iIzMzNSIgc3R5bGU9ImZvbnQtZmFtaWx5OiBBcmlhbDsgZm9udC1zaXplOiAyMHB4OyBmb250LXdlaWdodDogYm9sZDsiPk1FU1NBR0lORyBIVUI8L3RleHQ+CgogIDxnPgogICAgPGNpcmNsZSBjeD0iMjAwIiBjeT0iMTUwIiByPSI0MCIgZmlsbD0idXJsKCNncmFkMSkiIC8+CiAgICA8dGV4dCB4PSIyMDAiIHk9IjE1NSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0id2hpdGUiIHN0eWxlPSJmb250LWZhbWlseTogQXJpYWw7IGZvbnQtc2l6ZTogMTJweDsgZm9udC13ZWlnaHQ6IGJvbGQ7Ij5TT0NJQUw8L3RleHQ+CiAgICA8cGF0aCBkPSJNMjUwIDE3NSBMIDMzMCAyNTAiIHN0cm9rZT0idXJsKCNncmFkMSkiIHN0cm9rZS13aWR0aD0iMyIgLz4KICA8L2c+CgogIDxnPgogICAgPGNpcmNsZSBjeD0iNjAwIiBjeT0iMTUwIiByPSI0MCIgZmlsbD0idXJsKCNncmFkMikiIC8+CiAgICA8dGV4dCB4PSI2MDAiIHk9IjE1NSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0id2hpdGUiIHN0eWxlPSJmb250LWZhbWlseTogQXJpYWw7IGZvbnQtc2l6ZTogMTJweDsgZm9udC13ZWlnaHQ6IGJvbGQ7Ij5FTUFJTFM8L3RleHQ+CiAgICA8cGF0aCBkPSJNNTUwIDE3NSBMIDQ3MCAyNTAiIHN0cm9rZT0idXJsKCNncmFkMikiIHN0cm9rZS13aWR0aD0iMyIgLz4KICA8L2c+CgogIDxnPgogICAgPGNpcmNsZSBjeD0iNDAwIiBjeT0iMTAwIiByPSI0MCIgZmlsbD0idXJsKCNncmFkMykiIC8+CiAgICA8dGV4dCB4PSI0MDAiIHk9IjEwNSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0id2hpdGUiIHN0eWxlPSJmb250LWZhbWlseTogQXJpYWw7IGZvbnQtc2l6ZTogMTJweDsgZm9udC13ZWlnaHQ6IGJvbGQ7Ij5TTVMvTU1TPC90ZXh0PgogICAgPHBhdGggZD0iTTQwMCAxNTAgTCA0MDAgMjQwIiBzdHJva2U9InVybCgjZ3JhZDMpIiBzdHJva2Utd2lkdGg9IjMiIC8+CiAgPC9nPgogIAogIDxnPgogICAgPGNpcmNsZSBjeD0iMjAwIiBjeT0iNDUwIiByPSI0MCIgZmlsbD0iIzQ0YyIgLz4KICAgIDx0ZXh0IHg9IjIwMCIgeT0iNDU1IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSJ3aGl0ZSIgc3R5bGU9ImZvbnQtZmFtaWx5OiBBcmlhbDsgZm9udC1zaXplOiAxMnB4OyBmb250LXdlaWdodDogYm9sZDsiPldIQVRTQVBQPC90ZXh0PgogICAgPHBhdGggZD0iTTI1MCA0MjUgTCAzMzAgMzUwIiBzdHJva2U9IiM0NGMiIHN0cm9rZS13aWR0aD0iMyIgLz4KICA8L2c+CgogIDxnPgogICAgPGNpcmNsZSBjeD0iNjAwIiBjeT0iNDUwIiByPSI0MCIgZmlsbD0iIzYzYSIgLz4KICAgIDx0ZXh0IHg9IjYwMCIgeT0iNDU1IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSJ3aGl0ZSIgc3R5bGU9ImZvbnQtZmFtaWx5OiBBcmlhbDsgZm9udC1zaXplOiAxMnB4OyBmb250LXdlaWdodDogYm9sZDsiPlRFTEVHUkFNPC90ZXh0PgogICAgPHBhdGggZD0iTTU1MCA0MjUgTCA0NzAgMzUwIiBzdHJva2U9IiM2M2EiIHN0cm9rZS13aWR0aD0iMyIgLz4KICA8L2c+CgogIDxnPgogICAgPGNpcmNsZSBjeD0iNDAwIiBjeT0iNTAwIiByPSI0MCIgZmlsbD0iIzRiNCIgLz4KICAgIDx0ZXh0IHg9IjQwMCIgeT0iNTA1IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSJ3aGl0ZSIgc3R5bGU9ImZvbnQtZmFtaWx5OiBBcmlhbDsgZm9udC1zaXplOiAxMnB4OyBmb250LXdlaWdodDogYm9sZDsiPldFQ0hBVDwvdGV4dD4KICAgIDxwYXRoIGQ9Ik00MDAgNDUwIEwgNDAwIDM2MCIgc3Ryb2tlPSIjNGI0IiBzdHJva2Utd2lkdGg9IjMiIC8+CiAgPC9nPgo8L3N2Zz4=');"
+              }}
+            ></div>
+            <div className="relative z-10 bg-white/70 p-6 rounded-lg backdrop-blur-sm">
+              <h3 className="text-xl font-medium text-gray-800 mb-2">Messaging Hub</h3>
+              <p className="text-gray-700 max-w-md">
+                Select a contact from the list to start messaging across multiple channels.
+              </p>
             </div>
-            <h3 className="text-xl font-medium text-gray-800 mb-2">Select a conversation</h3>
-            <p className="text-gray-500 max-w-sm">
-              Choose a contact from the list to view your conversation history and continue chatting.
-            </p>
           </div>
         )}
       </div>
