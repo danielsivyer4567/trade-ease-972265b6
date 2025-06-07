@@ -99,7 +99,7 @@ const fetchCustomers = async (user): Promise<Customer[]> => {
       progress: Math.floor(Math.random() * 100), // TODO: Replace with actual progress from jobs table
       lastContact: customer.last_contact || new Date().toISOString().split('T')[0],
       jobId: `JOB-${customer.id.substring(0, 4)}`, // TODO: Replace with latest job ID
-      jobTitle: 'Current Job', // TODO: Replace with actual job title
+      jobTitle: '', // Will be populated from actual job data
       customer_code: customer.customer_code, // Include the customer_code
       jobsQty: customer.jobs_qty || 0,
       quotesQty: customer.quotes_qty || 0,
@@ -162,7 +162,7 @@ function CustomersPage() {
         progress: Math.floor(Math.random() * 100),
         lastContact: c.created_at?.split('T')[0] || new Date().toISOString().split('T')[0],
         jobId: `JOB-${c.id.substring(0, 4)}`,
-        jobTitle: 'Current Job',
+        jobTitle: '',
         customer_code: c.customer_code,
         jobsQty: 0,
         quotesQty: 0,
@@ -455,14 +455,14 @@ function CustomersPage() {
               </TabsList>
               <TabsContent value="communications" className="flex-1 overflow-y-auto p-4">
                 {selectedCustomer ? (
-                  <div className="bg-gray-50 rounded-lg p-4 min-h-[60vh]">Communications content for {selectedCustomer.name} goes here.</div>
+                  <div className="bg-gray-50 rounded-lg p-4 min-h-[60vh]">Communications content goes here.</div>
                 ) : (
                   <div className="bg-gray-50 rounded-lg p-4 min-h-[60vh] flex items-center justify-center text-gray-400">Select a customer to view communications.</div>
                 )}
               </TabsContent>
               <TabsContent value="quotes" className="flex-1 overflow-y-auto p-4">
                 {selectedCustomer ? (
-                  <div className="bg-gray-50 rounded-lg p-4 min-h-[60vh]">Quotes content for {selectedCustomer.name} goes here.</div>
+                  <div className="bg-gray-50 rounded-lg p-4 min-h-[60vh]">Quotes content goes here.</div>
                 ) : (
                   <div className="bg-gray-50 rounded-lg p-4 min-h-[60vh] flex items-center justify-center text-gray-400">Select a customer to view quotes.</div>
                 )}
