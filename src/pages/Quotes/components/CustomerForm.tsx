@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -9,10 +8,11 @@ import { ChevronRight } from "lucide-react";
 import { useCustomers, Customer } from "../../Customers/hooks/useCustomers";
 
 interface CustomerFormProps {
-  onNextTab: () => void;
+  onUpdate: (data: any) => void;
+  initialData: any;
 }
 
-export function CustomerForm({ onNextTab }: CustomerFormProps) {
+export function CustomerForm({ onUpdate, initialData }: CustomerFormProps) {
   const [selectedCustomerId, setSelectedCustomerId] = useState<string>("");
   const [email, setEmail] = useState<string>("");
   const [phone, setPhone] = useState<string>("");
@@ -27,29 +27,42 @@ export function CustomerForm({ onNextTab }: CustomerFormProps) {
   }, []);
   
   useEffect(() => {
-    // If a customer is selected, populate their details
-    if (selectedCustomerId) {
-      const selectedCustomer = customers.find(c => c.id === selectedCustomerId);
-      if (selectedCustomer) {
-        console.log("Selected customer in quotes:", selectedCustomer);
-        setEmail(selectedCustomer.email || '');
-        setPhone(selectedCustomer.phone || '');
-        // Make sure we're using the correctly mapped zipCode field (camelCase)
-        setAddress(`${selectedCustomer.address}, ${selectedCustomer.city}, ${selectedCustomer.state} ${selectedCustomer.zipCode}`);
-      }
+    const selectedCustomer = customers.find(c => c.id === selectedCustomerId);
+    if (selectedCustomer) {
+      console.log("Selected customer in quotes:", selectedCustomer);
+      setEmail(selectedCustomer.email || '');
+      setPhone(selectedCustomer.phone || '');
+      // Make sure we're using the correctly mapped zipCode field (camelCase)
+      setAddress(`${selectedCustomer.address}, ${selectedCustomer.city}, ${selectedCustomer.state} ${selectedCustomer.zipCode}`);
+      onUpdate({
+        name: selectedCustomer.name,
+        email: selectedCustomer.email || '',
+        phone: selectedCustomer.phone || '',
+        address: `${selectedCustomer.address}, ${selectedCustomer.city}, ${selectedCustomer.state} ${selectedCustomer.zipCode}`
+      });
     } else {
       // Clear fields if no customer selected
       setEmail('');
       setPhone('');
       setAddress('');
+      onUpdate({
+        name: '',
+        email: '',
+        phone: '',
+        address: ''
+      });
     }
-  }, [selectedCustomerId, customers]);
+  }, [selectedCustomerId, customers, onUpdate]);
+
+  const handleChange = (field: string, value: string) => {
+    onUpdate({ ...initialData, [field]: value });
+  };
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
       <div className="space-y-4">
         <div>
-          <Label htmlFor="customer">Customer</Label>
+          <Label htmlFor="customer">Select Existing Customer</Label>
           <Select value={selectedCustomerId} onValueChange={setSelectedCustomerId}>
             <SelectTrigger>
               <SelectValue placeholder="Select a customer" />
@@ -64,22 +77,16 @@ export function CustomerForm({ onNextTab }: CustomerFormProps) {
           </Select>
         </div>
         <div>
+          <Label htmlFor="name">Name</Label>
+          <Input id="name" placeholder="Customer Name" value={initialData?.name || ''} onChange={e => handleChange('name', e.target.value)} />
+        </div>
+        <div>
           <Label htmlFor="email">Email</Label>
-          <Input 
-            id="email" 
-            placeholder="customer@example.com" 
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
+          <Input id="email" placeholder="customer@example.com" value={initialData?.email || ''} onChange={e => handleChange('email', e.target.value)} />
         </div>
         <div>
           <Label htmlFor="phone">Phone</Label>
-          <Input 
-            id="phone" 
-            placeholder="(555) 123-4567"
-            value={phone}
-            onChange={(e) => setPhone(e.target.value)}
-          />
+          <Input id="phone" placeholder="(555) 123-4567" value={initialData?.phone || ''} onChange={e => handleChange('phone', e.target.value)} />
         </div>
       </div>
       <div className="space-y-4">
@@ -89,8 +96,8 @@ export function CustomerForm({ onNextTab }: CustomerFormProps) {
             id="address" 
             placeholder="Customer address" 
             rows={3}
-            value={address}
-            onChange={(e) => setAddress(e.target.value)}
+            value={initialData?.address || ''}
+            onChange={e => handleChange('address', e.target.value)}
           />
         </div>
         <div>
@@ -100,7 +107,7 @@ export function CustomerForm({ onNextTab }: CustomerFormProps) {
       </div>
       
       <div className="flex justify-end mt-6 space-x-2 md:col-span-2">
-        <Button onClick={onNextTab}>
+        <Button onClick={() => {}}>
           Next: Quote Items
           <ChevronRight className="ml-2 h-4 w-4" />
         </Button>
