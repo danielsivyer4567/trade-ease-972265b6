@@ -677,16 +677,6 @@ const ConstructionTemplate3: React.FC = () => {
           </div>
         </div>
       </div>
-
-      {/* Print Button */}
-      <Button
-        onClick={handlePrint}
-        className="fixed bottom-5 right-5 bg-green-600 hover:bg-green-700 text-white rounded-full p-4 shadow-lg no-print"
-        size="lg"
-      >
-        <Printer className="w-5 h-5 mr-2" />
-        🖨️ Print Template
-      </Button>
     </div>
   );
 };

@@ -32,6 +32,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { DocuSealWrapper } from './components/DocuSealWrapper';
 import { createSignatureRequest } from '@/services/docuSealService';
+import { QuoteBuilder } from "./components/QuoteBuilder";
 
 // Template Preview Component
 const TemplatePreview: React.FC<{ template: any }> = ({ template }) => {
@@ -904,7 +905,7 @@ const baseTemplates = [
     component: ConstructionTemplate3, 
     category: 'Construction', 
     tags: ['construction', 'customizable', 'drag-and-drop'],
-    price: '$19.99',
+    price: 'Free',
     description: 'A highly customizable construction template with drag-and-drop features and live preview.'
   },
   { 
@@ -913,7 +914,7 @@ const baseTemplates = [
     component: ConstructionTemplate4, 
     category: 'Construction',
     tags: ['construction', 'animated', 'interactive'],
-    price: '$9.99',
+    price: 'Free',
     description: 'An engaging construction quote with shimmer text effects and animations.'
   },
   { 
@@ -922,7 +923,7 @@ const baseTemplates = [
     component: ConstructionTemplate5, 
     category: 'Construction',
     tags: ['construction', 'grid', 'professional'],
-    price: '$9.99',
+    price: 'Free',
     description: 'A professional construction quote using a grid pattern and clean typography.'
   },
   { 
@@ -931,7 +932,7 @@ const baseTemplates = [
     component: ConstructionTemplate6, 
     category: 'Construction',
     tags: ['construction', 'modern', 'minimalist'],
-    price: '$9.99',
+    price: 'Free',
     description: 'A modern construction quote with dot patterns and a card-based layout.'
   },
   { 
@@ -940,7 +941,7 @@ const baseTemplates = [
     component: ConstructionTemplate7, 
     category: 'Construction',
     tags: ['construction', 'themed', 'professional'],
-    price: '$14.99',
+    price: 'Free',
     description: 'A construction-themed quote with a hard hat icon and color-coded sections.'
   },
   { 
@@ -949,7 +950,7 @@ const baseTemplates = [
     component: ConstructionTemplate8, 
     category: 'Construction',
     tags: ['construction', 'phased', 'detailed'],
-    price: '$19.99',
+    price: 'Free',
     description: 'A detailed construction quote broken down by project phases.'
   },
   { 
@@ -958,7 +959,7 @@ const baseTemplates = [
     component: ConstructionTemplate9, 
     category: 'Construction',
     tags: ['construction', 'themed', 'dark-mode'],
-    price: '$14.99',
+    price: 'Free',
     description: 'A professional, themed construction quote with a hard hat icon and dark mode support.'
   },
 ];
@@ -1109,9 +1110,16 @@ const QuotesMain = () => {
       setActiveSection('editor');
     } else {
       // Logic for creating a blank quote
-      setSelectedTemplate({ id: 'blank', name: 'Blank Quote' });
-      setActiveSection('customer');
+      setSelectedTemplate({ id: 'blank', name: 'Blank Quote', component: () => <div>Blank Quote</div> });
+      setActiveSection('quote-builder');
     }
+  };
+
+  const handleFinalizeQuote = (details: { customer: any; items: QuoteItem[]; terms: string[] }) => {
+    setCustomer(details.customer);
+    setQuoteItems(details.items);
+    setTerms(details.terms);
+    setActiveSection('preview');
   };
 
   const handleDeleteTemplate = async (template: any) => {
@@ -1197,19 +1205,15 @@ const QuotesMain = () => {
         return renderTemplateGallery();
       case 'editor':
         return renderQuoteEditor();
-      case 'customer':
-        return <CustomerForm onNextTab={() => setActiveSection('items')} />;
-      case 'items':
-        return <QuoteItemsForm onNextTab={() => setActiveSection('terms')} onPrevTab={() => setActiveSection('customer')} quoteItems={quoteItems} setQuoteItems={setQuoteItems} />;
-      case 'terms':
-        return <TermsForm onNextTab={() => setActiveSection('preview')} onPrevTab={() => setActiveSection('items')} />;
+      case 'quote-builder':
+        return <QuoteBuilder template={selectedTemplate} onBack={() => setActiveSection('templates')} onFinalize={handleFinalizeQuote} />;
       case 'preview':
-        return <FinalPreview
+        return <FinalPreview 
           template={selectedTemplate}
-          customer={customer}
-          items={quoteItems}
+          customer={customer} 
+          items={quoteItems} 
           terms={terms}
-          onBack={() => setActiveSection('terms')}
+          onBack={() => setActiveSection('quote-builder')} 
           onSave={handleSaveQuote}
           onSend={handleSendQuote}
           onRequestSignature={handleRequestSignature}
@@ -1225,9 +1229,14 @@ const QuotesMain = () => {
   const renderTemplateGallery = () => {
       return (
         <div className="h-full flex flex-col">
-          <header className="p-6 border-b">
-            <h1 className="text-2xl font-bold">Template Gallery</h1>
-            <p className="text-muted-foreground">Select a template to start your quote</p>
+          <header className="p-6 border-b flex items-center gap-4">
+            <Button variant="outline" size="icon" onClick={handleBack}>
+              <ArrowLeft className="h-4 w-4" />
+            </Button>
+            <div>
+              <h1 className="text-2xl font-bold">Template Gallery</h1>
+              <p className="text-muted-foreground">Select a template to start your quote</p>
+            </div>
           </header>
           <div className="flex flex-1 overflow-hidden">
             <aside className="w-64 border-r p-6 overflow-y-auto">
@@ -1327,7 +1336,6 @@ const QuotesMain = () => {
     }
 
     const TemplateComponent = selectedTemplate.component;
-    const templateProps = {}; // Props for the template are for default values, handled within the component now
 
     return (
       <div className="h-full flex flex-col">
@@ -1340,18 +1348,18 @@ const QuotesMain = () => {
           </div>
           <div className="text-center">
             <h2 className="text-lg font-semibold">{selectedTemplate.name}</h2>
-            <p className="text-sm text-muted-foreground">Editor Mode</p>
+            <p className="text-sm text-muted-foreground">Template Preview</p>
           </div>
           <div>
-            <Button onClick={() => setActiveSection('customer')} className="bg-green-600 hover:bg-green-700 text-white">
+            <Button onClick={() => setActiveSection('quote-builder')} className="bg-green-600 hover:bg-green-700 text-white">
               <FilePlus className="mr-2 h-4 w-4" />
-              Create Quote with this Template
+              Use This Template
             </Button>
           </div>
         </header>
         <div className="flex-1 overflow-y-auto">
           <ErrorBoundary FallbackComponent={ErrorFallback}>
-            <TemplateComponent {...templateProps} />
+            <TemplateComponent />
           </ErrorBoundary>
         </div>
       </div>
