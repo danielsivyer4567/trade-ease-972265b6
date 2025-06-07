@@ -14,96 +14,78 @@ interface CustomerFormProps {
 
 export function CustomerForm({ onUpdate, initialData }: CustomerFormProps) {
   const [selectedCustomerId, setSelectedCustomerId] = useState<string>("");
-  const [email, setEmail] = useState<string>("");
-  const [phone, setPhone] = useState<string>("");
-  const [address, setAddress] = useState<string>("");
-  const [quoteNumber] = useState<string>("Q-2024-009");
-  
   const { customers, fetchCustomers } = useCustomers();
-  
+  const [formData, setFormData] = useState(initialData || {});
+
   useEffect(() => {
-    console.log("CustomerForm - Fetching customers");
     fetchCustomers();
-  }, []);
-  
+  }, [fetchCustomers]);
+
   useEffect(() => {
     const selectedCustomer = customers.find(c => c.id === selectedCustomerId);
     if (selectedCustomer) {
-      console.log("Selected customer in quotes:", selectedCustomer);
-      setEmail(selectedCustomer.email || '');
-      setPhone(selectedCustomer.phone || '');
-      // Make sure we're using the correctly mapped zipCode field (camelCase)
-      setAddress(`${selectedCustomer.address}, ${selectedCustomer.city}, ${selectedCustomer.state} ${selectedCustomer.zipCode}`);
-      onUpdate({
+      const newData = {
         name: selectedCustomer.name,
         email: selectedCustomer.email || '',
         phone: selectedCustomer.phone || '',
-        address: `${selectedCustomer.address}, ${selectedCustomer.city}, ${selectedCustomer.state} ${selectedCustomer.zipCode}`
-      });
-    } else {
-      // Clear fields if no customer selected
-      setEmail('');
-      setPhone('');
-      setAddress('');
-      onUpdate({
-        name: '',
-        email: '',
-        phone: '',
-        address: ''
-      });
+        address: `${selectedCustomer.address || ''}, ${selectedCustomer.city || ''}, ${selectedCustomer.state || ''} ${selectedCustomer.zipCode || ''}`.trim()
+      };
+      setFormData(newData);
+      onUpdate(newData);
     }
   }, [selectedCustomerId, customers, onUpdate]);
 
+  useEffect(() => {
+    // Sync initialData changes from parent
+    if (initialData) {
+      setFormData(initialData);
+    }
+  }, [initialData])
+
   const handleChange = (field: string, value: string) => {
-    onUpdate({ ...initialData, [field]: value });
+    const newData = { ...formData, [field]: value };
+    setFormData(newData);
+    onUpdate(newData);
   };
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-      <div className="space-y-4">
-        <div>
-          <Label htmlFor="customer">Select Existing Customer</Label>
-          <Select value={selectedCustomerId} onValueChange={setSelectedCustomerId}>
-            <SelectTrigger>
-              <SelectValue placeholder="Select a customer" />
-            </SelectTrigger>
-            <SelectContent>
-              {customers.map(customer => (
-                <SelectItem key={customer.id} value={customer.id}>
-                  {customer.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-        <div>
-          <Label htmlFor="name">Name</Label>
-          <Input id="name" placeholder="Customer Name" value={initialData?.name || ''} onChange={e => handleChange('name', e.target.value)} />
-        </div>
-        <div>
-          <Label htmlFor="email">Email</Label>
-          <Input id="email" placeholder="customer@example.com" value={initialData?.email || ''} onChange={e => handleChange('email', e.target.value)} />
-        </div>
-        <div>
-          <Label htmlFor="phone">Phone</Label>
-          <Input id="phone" placeholder="(555) 123-4567" value={initialData?.phone || ''} onChange={e => handleChange('phone', e.target.value)} />
-        </div>
+    <div className="space-y-4 p-1">
+      <div className="space-y-2">
+        <Label htmlFor="customer">Select Existing Customer</Label>
+        <Select value={selectedCustomerId} onValueChange={setSelectedCustomerId}>
+          <SelectTrigger>
+            <SelectValue placeholder="Select or type to create new" />
+          </SelectTrigger>
+          <SelectContent>
+            {customers.map(customer => (
+              <SelectItem key={customer.id} value={customer.id}>
+                {customer.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
-      <div className="space-y-4">
-        <div>
-          <Label htmlFor="address">Address</Label>
-          <Textarea 
-            id="address" 
-            placeholder="Customer address" 
-            rows={3}
-            value={initialData?.address || ''}
-            onChange={e => handleChange('address', e.target.value)}
-          />
-        </div>
-        <div>
-          <Label htmlFor="quote-number">Quote #</Label>
-          <Input id="quote-number" value={quoteNumber} readOnly className="bg-gray-50" />
-        </div>
+      <div className="space-y-2">
+        <Label htmlFor="name">Name</Label>
+        <Input id="name" placeholder="Customer Name" value={formData?.name || ''} onChange={e => handleChange('name', e.target.value)} />
+      </div>
+      <div className="space-y-2">
+        <Label htmlFor="email">Email</Label>
+        <Input id="email" placeholder="customer@example.com" value={formData?.email || ''} onChange={e => handleChange('email', e.target.value)} />
+      </div>
+      <div className="space-y-2">
+        <Label htmlFor="phone">Phone</Label>
+        <Input id="phone" placeholder="(555) 123-4567" value={formData?.phone || ''} onChange={e => handleChange('phone', e.target.value)} />
+      </div>
+      <div className="space-y-2">
+        <Label htmlFor="address">Address</Label>
+        <Textarea 
+          id="address" 
+          placeholder="Customer Address" 
+          rows={3}
+          value={formData?.address || ''}
+          onChange={e => handleChange('address', e.target.value)}
+        />
       </div>
       
       <div className="flex justify-end mt-6 space-x-2 md:col-span-2">
