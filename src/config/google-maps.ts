@@ -25,6 +25,9 @@ export const GOOGLE_MAPS_CONFIG = {
   }
 };
 
+// Non-readonly libraries array for use with LoadScript
+export const GOOGLE_MAPS_LIBRARIES = ["marker", "geometry", "drawing"];
+
 // Helper to check if the API key is properly configured
 export const validateGoogleMapsApiKey = (): boolean => {
   if (!GOOGLE_MAPS_CONFIG.apiKey) {

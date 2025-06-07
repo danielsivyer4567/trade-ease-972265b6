@@ -3,7 +3,8 @@ import ReactDOM from 'react-dom/client'
 import App from './App.tsx'
 import './index.css'
 import { disableDevToolsOverlay } from './utils/disableDevToolsOverlay'
-import { startupService } from './services/startupService'
+// Remove the startupService import to prevent the 404 error
+// import { startupService } from './services/startupService'
 
 // Disable React DevTools overlay to prevent message channel errors
 disableDevToolsOverlay();
@@ -26,11 +27,11 @@ if (!rootElement) {
 } else {
   const root = ReactDOM.createRoot(rootElement);
   
-  // Initialize app with the startup service
+  // Initialize app
   const renderApp = async () => {
     try {
-      // Initialize the application
-      await startupService.initialize();
+      // No need to initialize the startup service - this was causing the 404 error
+      // await startupService.initialize();
       
       // Render the app
       root.render(
