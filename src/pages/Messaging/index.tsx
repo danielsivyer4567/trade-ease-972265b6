@@ -26,7 +26,7 @@ import { ChannelIcon, ChannelIconWithBg } from "@/components/messaging/ChannelIc
 export default function Messaging() {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
-  const [showIntro, setShowIntro] = useState(true);
+  const [showIntro, setShowIntro] = useState(false);
   const [introPhase, setIntroPhase] = useState(0);
   
   const {
