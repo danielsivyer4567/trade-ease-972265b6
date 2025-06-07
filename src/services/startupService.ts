@@ -62,7 +62,7 @@ class StartupService {
         
         // If no profile, create one
         if (!profiles) {
-          const { error: insertError } = await supabase
+          const { data, error: insertError } = await supabase
             .from('user_profiles')
             .insert({
               user_id: user.id,

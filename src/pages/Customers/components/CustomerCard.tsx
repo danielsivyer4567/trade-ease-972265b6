@@ -88,76 +88,41 @@ export const CustomerCard = ({ customer, onCustomerClick, onEditClick }: Custome
 
   return (
     <Card 
-      className="cursor-pointer hover:shadow-md transition-shadow"
+      key={customer.id} 
+      className="p-4 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors border border-slate-200 dark:border-slate-700"
       onClick={() => onCustomerClick(customer.id)}
     >
-      <CardHeader className="pb-2">
-        <div className="flex justify-between items-start">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <div className="bg-slate-100 dark:bg-slate-700 p-3 rounded-full">
+            <User className="h-5 w-5 text-slate-600 dark:text-slate-300" />
+          </div>
           <div>
-            <CardTitle 
-              className="text-lg font-semibold hover:text-blue-600 hover:underline"
-              onClick={handleNameClick}
-            >
-              {getName()}
-            </CardTitle>
+            <h3 className="font-semibold">{getName()}</h3>
             {getCustomerCode() && (
               <span className="text-sm text-gray-500">Code: {getCustomerCode()}</span>
             )}
           </div>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="text-right">
+            <p className="text-sm text-muted-foreground flex items-center gap-1.5">
+              <MapPin className="h-4 w-4" /> {`${getAddress()}${getCity() ? `, ${getCity()}` : ''}${getState() ? `, ${getState()}` : ''} ${getZipCode()}`}
+            </p>
+            <p className="text-xs text-slate-500 mt-1">
+              Status: <span className="font-medium text-green-600">{customer.status}</span>
+            </p>
+          </div>
           <Button
             variant="ghost"
-            size="sm"
+            size="icon"
             onClick={(e) => onEditClick(e, customer)}
-            className="p-1"
+            className="text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
           >
             <Edit className="h-4 w-4" />
           </Button>
         </div>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-2">
-          {hasEmail && (
-            <div className="flex items-center gap-2 text-sm">
-              <Mail className="h-4 w-4 text-gray-500" />
-              <a 
-                href={`mailto:${getEmail()}`} 
-                className="text-blue-600 hover:underline" 
-                onClick={handleLinkClick}
-              >
-                {getEmail()}
-              </a>
-            </div>
-          )}
-          
-          {hasPhone && (
-            <div className="flex items-center gap-2 text-sm">
-              <Phone className="h-4 w-4 text-gray-500" />
-              <a 
-                href={`tel:${getPhone()}`} 
-                className="text-blue-600 hover:underline" 
-                onClick={handleLinkClick}
-              >
-                {getPhone()}
-              </a>
-            </div>
-          )}
-          
-          {hasAddress && (
-            <div className="flex items-center gap-2 text-sm">
-              <MapPin className="h-4 w-4 text-gray-500" />
-              <a 
-                href={`https://maps.google.com/?q=${encodeURIComponent(`${getAddress()}, ${getCity()}, ${getState()} ${getZipCode()}`)}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-600 hover:underline"
-                onClick={handleLinkClick}
-              >
-                {`${getAddress()}${getCity() ? `, ${getCity()}` : ''}${getState() ? `, ${getState()}` : ''} ${getZipCode()}`}
-              </a>
-            </div>
-          )}
-        </div>
-      </CardContent>
+      </div>
     </Card>
   );
 };
