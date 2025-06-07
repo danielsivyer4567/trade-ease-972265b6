@@ -1,8 +1,11 @@
 import React, { useId } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Building2, Calendar, FileText, MapPin, Phone, Mail } from "lucide-react";
+import { Building2, FileText, MapPin, Phone, Mail } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useTemplateEditor } from '../../hooks/useTemplateEditor';
+import TemplateEditor from './TemplateEditor';
+import '../../styles/template-editor.css';
 
 interface GridPatternProps {
   width?: number;
@@ -166,8 +169,21 @@ const ConstructionTemplate5 = ({
   total = 16519.13,
   notes = "This quote is valid for 30 days. A 50% deposit is required to begin work. All materials are included in the quoted prices. Timeline: 3-4 weeks upon project commencement."
 }: ConstructionQuoteTemplateProps) => {
+  const editor = useTemplateEditor({
+    defaultComponents: [
+      { id: 'header', type: 'header', title: 'Header', order: 0 },
+      { id: 'client-info', type: 'client-info', title: 'Client Info', order: 1 },
+      { id: 'items-table', type: 'items-table', title: 'Items Table', order: 2 },
+      { id: 'totals', type: 'totals', title: 'Totals', order: 3 },
+      { id: 'notes', type: 'notes', title: 'Notes', order: 4 },
+      { id: 'footer', type: 'footer', title: 'Footer', order: 5 },
+    ]
+  });
+
+  const { getBackgroundOverlayStyles } = editor;
+
   return (
-    <div className="min-h-screen bg-background relative overflow-hidden">
+    <div className={editor.getContainerClasses("min-h-screen bg-background dark:bg-slate-900 relative overflow-hidden")}>
       <GridPattern
         width={30}
         height={30}
@@ -176,21 +192,29 @@ const ConstructionTemplate5 = ({
         strokeDasharray="2 4"
         className={cn(
           "[mask-image:radial-gradient(600px_circle_at_center,white,transparent)]",
-          "opacity-20"
+          "opacity-20 dark:opacity-10"
         )}
       />
       
-      <div className="relative z-10 max-w-4xl mx-auto p-8 space-y-6">
+      <div className="relative z-10 max-w-4xl mx-auto p-8 space-y-6 template-container" style={{ position: 'relative' }}>
+        {editor.backgroundImage && (
+          <div style={getBackgroundOverlayStyles()} />
+        )}
+        <TemplateEditor {...editor} />
+        
         {/* Header */}
-        <Card className="border-2 border-primary/20">
-          <CardHeader className="bg-primary/5">
+        <Card 
+          className={editor.getSectionClasses("border-2 border-primary/20 dark:border-primary/40 bg-white dark:bg-slate-800", "header")}
+          {...editor.getSectionProps("header", "header")}
+        >
+          <CardHeader className="bg-primary/5 dark:bg-primary/10">
             <div className="flex justify-between items-start">
               <div>
-                <CardTitle className="text-3xl font-bold text-primary flex items-center gap-2">
+                <CardTitle className="text-3xl font-bold text-primary dark:text-blue-400 flex items-center gap-2">
                   <Building2 className="h-8 w-8" />
                   {companyName}
                 </CardTitle>
-                <div className="mt-4 space-y-1 text-sm text-muted-foreground">
+                <div className="mt-4 space-y-1 text-sm text-muted-foreground dark:text-slate-400">
                   <div className="flex items-center gap-2">
                     <MapPin className="h-4 w-4" />
                     {companyAddress}
@@ -206,8 +230,8 @@ const ConstructionTemplate5 = ({
                 </div>
               </div>
               <div className="text-right">
-                <h1 className="text-4xl font-bold text-primary">QUOTE</h1>
-                <div className="mt-4 space-y-1 text-sm">
+                <h1 className="text-4xl font-bold text-primary dark:text-blue-400">QUOTE</h1>
+                <div className="mt-4 space-y-1 text-sm text-foreground dark:text-slate-200">
                   <div><strong>Quote #:</strong> {quoteNumber}</div>
                   <div><strong>Date:</strong> {quoteDate}</div>
                   <div><strong>Valid Until:</strong> {validUntil}</div>
@@ -218,56 +242,62 @@ const ConstructionTemplate5 = ({
         </Card>
 
         {/* Client Information */}
-        <div className="grid md:grid-cols-2 gap-6">
-          <Card>
+        <div 
+          className={editor.getSectionClasses("grid md:grid-cols-2 gap-6", "client-info")}
+          {...editor.getSectionProps("client-info", "client-info")}
+        >
+          <Card className="bg-white dark:bg-slate-800">
             <CardHeader>
-              <CardTitle className="text-lg">Bill To:</CardTitle>
+              <CardTitle className="text-lg text-foreground dark:text-slate-200">Bill To:</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-1">
-                <div className="font-semibold">{clientName}</div>
-                <div className="text-sm text-muted-foreground">{clientAddress}</div>
+                <div className="font-semibold text-foreground dark:text-slate-100">{clientName}</div>
+                <div className="text-sm text-muted-foreground dark:text-slate-400">{clientAddress}</div>
               </div>
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="bg-white dark:bg-slate-800">
             <CardHeader>
-              <CardTitle className="text-lg flex items-center gap-2">
+              <CardTitle className="text-lg flex items-center gap-2 text-foreground dark:text-slate-200">
                 <FileText className="h-5 w-5" />
                 Project Details
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="font-semibold">{projectTitle}</div>
+              <div className="font-semibold text-foreground dark:text-slate-100">{projectTitle}</div>
             </CardContent>
           </Card>
         </div>
 
         {/* Items Table */}
-        <Card>
+        <Card
+          className={editor.getSectionClasses("bg-white dark:bg-slate-800", "items-table")}
+          {...editor.getSectionProps("items-table", "items-table")}
+        >
           <CardHeader>
-            <CardTitle className="text-xl">Quote Details</CardTitle>
+            <CardTitle className="text-xl text-foreground dark:text-slate-100">Quote Details</CardTitle>
           </CardHeader>
           <CardContent className="p-0">
             <Table>
               <TableHeader>
-                <TableRow className="bg-muted/50">
-                  <TableHead className="font-semibold">Description</TableHead>
-                  <TableHead className="text-center font-semibold">Qty</TableHead>
-                  <TableHead className="text-center font-semibold">Unit</TableHead>
-                  <TableHead className="text-right font-semibold">Unit Price</TableHead>
-                  <TableHead className="text-right font-semibold">Total</TableHead>
+                <TableRow className="bg-muted/50 dark:bg-slate-700/50">
+                  <TableHead className="font-semibold text-foreground dark:text-slate-200">Description</TableHead>
+                  <TableHead className="text-center font-semibold text-foreground dark:text-slate-200">Qty</TableHead>
+                  <TableHead className="text-center font-semibold text-foreground dark:text-slate-200">Unit</TableHead>
+                  <TableHead className="text-right font-semibold text-foreground dark:text-slate-200">Unit Price</TableHead>
+                  <TableHead className="text-right font-semibold text-foreground dark:text-slate-200">Total</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {items.map((item, index) => (
-                  <TableRow key={index}>
-                    <TableCell className="font-medium">{item.description}</TableCell>
-                    <TableCell className="text-center">{item.quantity}</TableCell>
-                    <TableCell className="text-center">{item.unit}</TableCell>
-                    <TableCell className="text-right">${item.unitPrice.toLocaleString()}</TableCell>
-                    <TableCell className="text-right font-medium">${item.total.toLocaleString()}</TableCell>
+                  <TableRow key={index} className="dark:border-slate-700">
+                    <TableCell className="font-medium text-foreground dark:text-slate-200">{item.description}</TableCell>
+                    <TableCell className="text-center text-muted-foreground dark:text-slate-400">{item.quantity}</TableCell>
+                    <TableCell className="text-center text-muted-foreground dark:text-slate-400">{item.unit}</TableCell>
+                    <TableCell className="text-right text-muted-foreground dark:text-slate-400">${item.unitPrice.toLocaleString()}</TableCell>
+                    <TableCell className="text-right font-medium text-foreground dark:text-slate-200">${item.total.toLocaleString()}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -276,10 +306,13 @@ const ConstructionTemplate5 = ({
         </Card>
 
         {/* Totals */}
-        <div className="flex justify-end">
-          <Card className="w-full max-w-md">
+        <div 
+          className={editor.getSectionClasses("flex justify-end", "totals")}
+          {...editor.getSectionProps("totals", "totals")}
+        >
+          <Card className="w-full max-w-md bg-white dark:bg-slate-800">
             <CardContent className="p-6">
-              <div className="space-y-3">
+              <div className="space-y-3 text-foreground dark:text-slate-200">
                 <div className="flex justify-between">
                   <span>Subtotal:</span>
                   <span>${subtotal.toLocaleString()}</span>
@@ -288,8 +321,8 @@ const ConstructionTemplate5 = ({
                   <span>Tax ({taxRate}%):</span>
                   <span>${tax.toLocaleString()}</span>
                 </div>
-                <div className="border-t pt-3">
-                  <div className="flex justify-between text-xl font-bold text-primary">
+                <div className="border-t dark:border-slate-700 pt-3">
+                  <div className="flex justify-between text-xl font-bold text-primary dark:text-blue-400">
                     <span>Total:</span>
                     <span>${total.toLocaleString()}</span>
                   </div>
@@ -300,22 +333,28 @@ const ConstructionTemplate5 = ({
         </div>
 
         {/* Notes */}
-        <Card>
+        <Card
+          className={editor.getSectionClasses("bg-white dark:bg-slate-800", "notes")}
+          {...editor.getSectionProps("notes", "notes")}
+        >
           <CardHeader>
-            <CardTitle className="text-lg">Terms & Notes</CardTitle>
+            <CardTitle className="text-lg text-foreground dark:text-slate-100">Terms & Notes</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-muted-foreground leading-relaxed">{notes}</p>
+            <p className="text-sm text-muted-foreground dark:text-slate-400 leading-relaxed">{notes}</p>
           </CardContent>
         </Card>
 
         {/* Footer */}
-        <Card className="border-primary/20">
+        <Card 
+          className={editor.getSectionClasses("border-primary/20 dark:border-primary/40 bg-white dark:bg-slate-800", "footer")}
+          {...editor.getSectionProps("footer", "footer")}
+        >
           <CardContent className="p-6 text-center">
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-muted-foreground dark:text-slate-400">
               Thank you for considering {companyName} for your construction needs.
             </p>
-            <p className="text-sm text-muted-foreground mt-2">
+            <p className="text-sm text-muted-foreground dark:text-slate-400 mt-2">
               We look forward to working with you on this project.
             </p>
           </CardContent>

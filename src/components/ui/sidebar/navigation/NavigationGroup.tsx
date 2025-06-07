@@ -2,8 +2,25 @@ import React from 'react';
 import { NavItem } from './NavItem';
 import { DropdownMenu } from './DropdownMenu';
 import { LogoutButton } from './LogoutButton';
-import { LucideIcon } from 'lucide-react';
+import { LucideIcon, Moon, Sun } from 'lucide-react';
 import { ThemeSwitcher } from '../theme/ThemeSwitcher';
+import { Button } from '@/components/ui/button';
+
+// New component for the dark mode toggle
+const DarkModeToggle = ({ isDarkMode, onToggleDarkMode, isExpanded }) => {
+  return (
+    <Button 
+      variant="ghost" 
+      size="sm" 
+      onClick={onToggleDarkMode} 
+      className="w-full flex justify-center items-center text-white hover:bg-white/20"
+      title={isDarkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
+    >
+      {isDarkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+      {isExpanded && <span className="ml-2">{isDarkMode ? 'Light' : 'Dark'}</span>}
+    </Button>
+  );
+};
 
 // Define strict literal types for navigation items
 export interface NavItemType {
@@ -34,12 +51,16 @@ interface NavigationGroupProps {
   items: NavigationItem[];
   isExpanded: boolean;
   onLogout: () => void;
+  isDarkMode: boolean;
+  onToggleDarkMode: () => void;
 }
 export const NavigationGroup: React.FC<NavigationGroupProps> = ({
   label,
   items,
   isExpanded,
-  onLogout
+  onLogout,
+  isDarkMode,
+  onToggleDarkMode
 }) => {
   return <div className="grid gap-0.25 w-full my-0.5 pt-0.5 border-t border-white/30 first:border-0 first:pt-0 first:mt-0">
       {/* Group Label - Only show if it exists and sidebar is expanded */}
@@ -62,7 +83,9 @@ export const NavigationGroup: React.FC<NavigationGroupProps> = ({
             <div className="flex-grow">
               <LogoutButton isExpanded={isExpanded} onLogout={onLogout} />
             </div>
-            <ThemeSwitcher />
+            <div className="flex-shrink-0">
+              <DarkModeToggle isDarkMode={isDarkMode} onToggleDarkMode={onToggleDarkMode} isExpanded={isExpanded} />
+            </div>
           </div>
         );
       }

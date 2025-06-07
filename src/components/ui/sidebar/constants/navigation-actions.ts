@@ -1,4 +1,4 @@
-import { Settings, LogOut } from 'lucide-react';
+import { Settings, LogOut, Sun, Moon } from 'lucide-react';
 import type { NavigationItem } from '../navigation/NavigationGroup';
 import type { NavigationGroup } from './index';
 
