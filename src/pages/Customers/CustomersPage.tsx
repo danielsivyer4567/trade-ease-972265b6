@@ -469,21 +469,21 @@ function CustomersPage() {
               </TabsContent>
               <TabsContent value="jobs" className="flex-1 overflow-y-auto p-4">
                 {selectedCustomer ? (
-                  <div className="bg-gray-50 rounded-lg p-4 min-h-[60vh]">Jobs content for {selectedCustomer.name} goes here.</div>
+                  <div className="bg-gray-50 rounded-lg p-4 min-h-[60vh]">Jobs content goes here.</div>
                 ) : (
                   <div className="bg-gray-50 rounded-lg p-4 min-h-[60vh] flex items-center justify-center text-gray-400">Select a customer to view jobs.</div>
                 )}
               </TabsContent>
               <TabsContent value="documents" className="flex-1 overflow-y-auto p-4">
                 {selectedCustomer ? (
-                  <div className="bg-gray-50 rounded-lg p-4 min-h-[60vh]">Documents content for {selectedCustomer.name} goes here.</div>
+                  <div className="bg-gray-50 rounded-lg p-4 min-h-[60vh]">Documents content goes here.</div>
                 ) : (
                   <div className="bg-gray-50 rounded-lg p-4 min-h-[60vh] flex items-center justify-center text-gray-400">Select a customer to view documents.</div>
                 )}
               </TabsContent>
               <TabsContent value="notes" className="flex-1 overflow-y-auto p-4">
                 {selectedCustomer ? (
-                  <div className="bg-gray-50 rounded-lg p-4 min-h-[60vh]">Notes content for {selectedCustomer.name} goes here.</div>
+                  <div className="bg-gray-50 rounded-lg p-4 min-h-[60vh]">Notes content goes here.</div>
                 ) : (
                   <div className="bg-gray-50 rounded-lg p-4 min-h-[60vh] flex items-center justify-center text-gray-400">Select a customer to view notes.</div>
                 )}
@@ -496,7 +496,7 @@ function CustomersPage() {
             <h3 className="text-lg font-semibold mb-4">Job Journey</h3>
             <div className="flex-1 flex flex-col items-center justify-center bg-gray-50 rounded-lg">
               {selectedCustomer ? (
-                <span className="text-gray-700">Journey/Progress tracker for {selectedCustomer.name} goes here.</span>
+                <span className="text-gray-700">Journey/Progress tracker goes here.</span>
               ) : (
                 <span className="text-gray-400">Select a customer to view their journey/progress.</span>
               )}
