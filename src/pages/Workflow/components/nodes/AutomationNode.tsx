@@ -1,4 +1,4 @@
-import React, { memo, ReactNode, useMemo } from 'react';
+import React, { memo, ReactNode, useMemo, useEffect } from 'react';
 import { Handle, Position, NodeProps } from '@xyflow/react';
 import { DARK_BG, DARK_TEXT, DARK_GOLD } from '@/contexts/WorkflowDarkModeContext';
 import { Zap } from 'lucide-react';
@@ -14,7 +14,7 @@ interface NodeData {
   [key: string]: any;
 }
 
-function AutomationNode({ data, isConnectable }: NodeProps) {
+function AutomationNode({ data, isConnectable, id }: NodeProps) {
   const nodeData = data as NodeData;
   const workflowDarkMode = nodeData?.workflowDarkMode || false;
   
@@ -22,8 +22,21 @@ function AutomationNode({ data, isConnectable }: NodeProps) {
   const displayLabel = nodeData.title || nodeData.label || 'Automation';
   const displayDescription = nodeData.description || `Automation ID: ${nodeData.automationId || 'Unknown'}`;
   
+  // Debug logging on mount and updates
+  useEffect(() => {
+    console.log('DEBUG: AutomationNode rendered:', { 
+      id, 
+      displayLabel, 
+      displayDescription,
+      workflowDarkMode,
+      data: nodeData
+    });
+  }, [id, displayLabel, displayDescription, workflowDarkMode, nodeData]);
+  
   // Memoize the node content to prevent unnecessary re-renders
   const nodeContent = useMemo(() => {
+    console.log('DEBUG: AutomationNode content memo recalculated', { id });
+    
     return (
       <div 
         className="node-content border-2 rounded-xl shadow-md p-3 w-44 transition-transform duration-150 hover:scale-105 hover:shadow-xl"
@@ -96,8 +109,7 @@ export default memo(AutomationNode, (prevProps, nextProps) => {
   const prevData = prevProps.data as NodeData;
   const nextData = nextProps.data as NodeData;
   
-  // Only re-render if these specific properties change
-  return (
+  const areEqual = (
     prevData.label === nextData.label &&
     prevData.title === nextData.title &&
     prevData.description === nextData.description &&
@@ -105,4 +117,21 @@ export default memo(AutomationNode, (prevProps, nextProps) => {
     prevData.workflowDarkMode === nextData.workflowDarkMode &&
     prevProps.isConnectable === nextProps.isConnectable
   );
+  
+  if (!areEqual) {
+    console.log('DEBUG: AutomationNode will re-render due to props change', {
+      prevData,
+      nextData,
+      changes: {
+        label: prevData.label !== nextData.label,
+        title: prevData.title !== nextData.title,
+        description: prevData.description !== nextData.description,
+        automationId: prevData.automationId !== nextData.automationId,
+        workflowDarkMode: prevData.workflowDarkMode !== nextData.workflowDarkMode,
+        isConnectable: prevProps.isConnectable !== nextProps.isConnectable
+      }
+    });
+  }
+  
+  return areEqual;
 }); 

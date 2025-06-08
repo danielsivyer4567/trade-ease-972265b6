@@ -1,4 +1,4 @@
-import React, { useCallback, useState, useEffect, useRef, CSSProperties } from 'react';
+import React, { useCallback, useState, useEffect, useRef, CSSProperties, useMemo } from 'react';
 import {
   ReactFlow,
   ReactFlowProvider,
@@ -96,6 +96,25 @@ function FlowContent({ onInit, workflowId, onNodeSelect, workflowDarkMode = true
   const nodes = externalNodes || internalNodes;
   const edges = externalEdges || internalEdges;
 
+  // Add debug logging for dimensions
+  const containerRef = useRef(null);
+  useEffect(() => {
+    if (containerRef.current) {
+      const { width, height } = containerRef.current.getBoundingClientRect();
+      console.log('DEBUG: Flow canvas dimensions:', { width, height });
+    }
+  }, []);
+  
+  // Debug when nodes change
+  useEffect(() => {
+    console.log('DEBUG: Flow nodes changed:', nodes);
+  }, [nodes]);
+
+  // Debug when edges change
+  useEffect(() => {
+    console.log('DEBUG: Flow edges changed:', edges);
+  }, [edges]);
+
   // Handle state updates based on whether external state is provided
   const setNodes = useCallback((updater) => {
     if (externalSetNodes) {
@@ -177,13 +196,19 @@ function FlowContent({ onInit, workflowId, onNodeSelect, workflowDarkMode = true
   const [isInteractive, setIsInteractive] = useState(true);
 
   const handleInit = useCallback((flowInstance) => {
+    console.log('DEBUG: Flow instance initialized', flowInstance);
     setInstance(flowInstance);
     onInit(flowInstance);
     
     // Initial fit view after a small delay to ensure nodes are loaded
     setTimeout(() => {
       if (flowInstance) {
+        console.log('DEBUG: Performing initial fit view');
         flowInstance.fitView({ padding: 0.2 });
+        
+        // Debug - get current viewport state
+        const viewport = flowInstance.getViewport();
+        console.log('DEBUG: Initial viewport state:', viewport);
       }
     }, 100);
   }, [onInit]);
@@ -298,36 +323,20 @@ function FlowContent({ onInit, workflowId, onNodeSelect, workflowDarkMode = true
     }
   }, [edges, activeEdges, externalSetEdges, setEdges]);
 
-  const onConnect = useCallback(
-    (params) => {
-      // Find source node to get its type for coloring
-      const sourceNode = nodes.find(node => node.id === params.source);
-      const sourceType = sourceNode ? sourceNode.type : null;
-      
-      const newEdge = {
+  const onConnect = useCallback((params) => {
+    console.log('DEBUG: Creating new edge connection:', params);
+    
+    setEdges((eds) => 
+      addEdge({
         ...params,
         type: 'animated',
-        animated: true,
-        data: {
-          isActive: false, // Start inactive
-          sourceType: sourceType // Store source type for coloring
-        },
-        style: { 
-          stroke: actualDarkMode ? 'rgba(165, 149, 255, 0.6)' : '#3b82f6',
-          strokeWidth: actualDarkMode ? 2 : 1.5
-        },
-        markerEnd: {
-          type: MarkerType.ArrowClosed,
-          color: actualDarkMode ? 'rgba(165, 149, 255, 0.8)' : '#3b82f6',
-          width: 15,
-          height: 15
+        animated: true, 
+        data: { 
+          isActive: false 
         }
-      };
-      
-      setEdges((eds) => addEdge(newEdge, eds));
-    },
-    [actualDarkMode, setEdges, nodes]
-  );
+      }, eds)
+    );
+  }, [setEdges]);
 
   // Create stable node objects to prevent unnecessary re-renders
   const createStableNode = useCallback((type, position, data) => {
@@ -412,6 +421,7 @@ function FlowContent({ onInit, workflowId, onNodeSelect, workflowDarkMode = true
 
   // Handle node click with activation - completely rewritten
   const onNodeClick = (event, node) => {
+    console.log('DEBUG: Node clicked:', node);
     if (onNodeSelect) {
       onNodeSelect(node);
     }
@@ -498,6 +508,7 @@ function FlowContent({ onInit, workflowId, onNodeSelect, workflowDarkMode = true
 
   return (
     <div 
+      ref={containerRef}
       style={{ 
         width: '100%', 
         height: '100%',

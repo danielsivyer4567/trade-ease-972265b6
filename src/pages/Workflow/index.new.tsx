@@ -276,6 +276,8 @@ export default function WorkflowPage() {
       let xPosition = 100;
       let yPosition = 100;
       
+      console.log('DEBUG: Starting to add automation node', { existingNodes });
+      
       if (existingNodes.length > 0) {
         // Find the rightmost node
         const rightmostNode = existingNodes.reduce((rightmost, node) => {
@@ -285,12 +287,23 @@ export default function WorkflowPage() {
         // Position the new node to the right with some spacing
         xPosition = rightmostNode.position.x + 250;
         yPosition = rightmostNode.position.y; // Keep same Y coordinate as rightmost node
+        
+        console.log('DEBUG: Positioning node relative to rightmost node', { 
+          rightmostNode: rightmostNode.id,
+          rightmostX: rightmostNode.position.x,
+          newX: xPosition,
+          newY: yPosition
+        });
+      } else {
+        console.log('DEBUG: No existing nodes, using default position', { xPosition, yPosition });
       }
       
       const position = { x: xPosition, y: yPosition };
       
       // Create a unique ID with timestamp to avoid conflicts
       const uniqueId = `automation-${automationId}-${Date.now()}`;
+      
+      console.log('DEBUG: Creating automation node with ID', uniqueId);
       
       const newNode = {
         id: uniqueId,
@@ -301,16 +314,26 @@ export default function WorkflowPage() {
           title: automationTitle || `Automation ${automationId}`,
           description: automationDescription || '',
           label: automationTitle || `Automation ${automationId}`,
-          icon: nodeTypeIcons.automationNode
+          icon: nodeTypeIcons.automationNode,
+          workflowDarkMode: true // Explicitly set dark mode for the node
         }
       };
       
-      setNodes(nds => [...nds, ensureNodeIcon(newNode)]);
+      console.log('DEBUG: Node object created', newNode);
+      
+      setNodes(nds => {
+        const newNodes = [...nds, ensureNodeIcon(newNode)];
+        console.log('DEBUG: Nodes after adding:', newNodes);
+        return newNodes;
+      });
       
       // Auto-fit the view to show all nodes
       setTimeout(() => {
         if (flowInstance) {
+          console.log('DEBUG: Fitting view to show all nodes');
           flowInstance.fitView({ padding: 0.2 });
+        } else {
+          console.log('DEBUG: Cannot fit view - flowInstance is null');
         }
       }, 100);
       
@@ -333,7 +356,13 @@ export default function WorkflowPage() {
           }
         };
         
-        setEdges(eds => [...eds, newEdge]);
+        console.log('DEBUG: Adding edge connecting to rightmost node', newEdge);
+        
+        setEdges(eds => {
+          const newEdges = [...eds, newEdge];
+          console.log('DEBUG: Edges after adding:', newEdges);
+          return newEdges;
+        });
       }
     }
   };
