@@ -412,24 +412,30 @@ function FlowContent({ onInit, workflowId, onNodeSelect, workflowDarkMode = true
 
   // Create stable node objects to prevent unnecessary re-renders
   const createStableNode = useCallback((type, position, data) => {
+    // Validate node type
+    const validType = validNodeTypes.includes(type) ? type : 'customNode';
+    if (validType !== type) {
+      console.warn(`Invalid node type "${type}" requested, using "${validType}" instead`);
+    }
+    
     // Create a unique ID with timestamp to avoid conflicts
-    const uniqueId = `${type}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    const uniqueId = `${validType}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
     
     // Create a stable node object
     return {
       id: uniqueId,
-      type,
+      type: validType,
       position,
       data: { 
         ...data,
-        label: data.label || type.replace('Node', ''),
+        label: data.label || validType.replace('Node', ''),
         workflowDarkMode: actualDarkMode,
-        icon: data.icon || nodeTypeIcons[type],
-        iconComponent: data.iconComponent || nodeTypeIcons[type],
-        description: data.description || getNodeDescription(type)
+        icon: data.icon || nodeTypeIcons[validType],
+        iconComponent: data.iconComponent || nodeTypeIcons[validType],
+        description: data.description || getNodeDescription(validType)
       },
       // Apply fixed classes only
-      className: `resizable ${type}`,
+      className: `resizable ${validType}`,
       // Enable dragging but disable animations
       draggable: true,
       selectable: true,
