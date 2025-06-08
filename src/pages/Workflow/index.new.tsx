@@ -123,7 +123,67 @@ export default function WorkflowPage() {
       hasProcessedLocationState.current = true;
       console.log('Processing location state once:', location.state);
       
-      if (location.state.addWorkflow && location.state.workflowId) {
+      if (location.state.useTemplate && location.state.fromLocalStorage) {
+        // Load template from localStorage
+        try {
+          const templateDataStr = localStorage.getItem('workflow_template_data');
+          if (templateDataStr) {
+            const templateData = JSON.parse(templateDataStr);
+            
+            // Check if data is fresh (less than 5 minutes old)
+            if (templateData.timestamp && Date.now() - templateData.timestamp < 5 * 60 * 1000) {
+              console.log('Loading template from localStorage:', templateData.templateName);
+              
+              // Apply template data
+              if (templateData.templateData) {
+                if (templateData.templateData.nodes && Array.isArray(templateData.templateData.nodes)) {
+                  // Create a mapping of old IDs to new IDs
+                  const idMapping = {};
+                  
+                  const initializedNodes = templateData.templateData.nodes.map(node => {
+                    const newId = `${node.id}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+                    idMapping[node.id] = newId;
+                    
+                    return ensureNodeIcon({
+                      ...node,
+                      id: newId
+                    });
+                  });
+                  setNodes(initializedNodes);
+                  
+                  if (templateData.templateData.edges && Array.isArray(templateData.templateData.edges)) {
+                    const initializedEdges = templateData.templateData.edges.map(edge => ({
+                      ...edge,
+                      id: `${edge.id}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+                      // Map source and target to new node IDs
+                      source: idMapping[edge.source] || edge.source,
+                      target: idMapping[edge.target] || edge.target,
+                      type: edge.type || 'animated',
+                      animated: edge.animated !== false,
+                      data: {
+                        ...edge.data,
+                        isActive: false
+                      }
+                    }));
+                    setEdges(initializedEdges);
+                  }
+                  
+                  toast.success(`Template "${templateData.templateName}" loaded successfully`);
+                }
+                
+                // Clear the localStorage data after use
+                localStorage.removeItem('workflow_template_data');
+              }
+            } else {
+              console.warn('Template data in localStorage is stale');
+              localStorage.removeItem('workflow_template_data');
+            }
+          }
+        } catch (error) {
+          console.error('Error loading template from localStorage:', error);
+          toast.error('Failed to load template');
+        }
+      } else if (location.state.addWorkflow && location.state.workflowId) {
         // Store workflow ID for loading after flow instance is initialized
         pendingWorkflowId.current = {
           workflowId: location.state.workflowId,
