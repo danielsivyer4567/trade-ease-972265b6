@@ -57,22 +57,24 @@ export class WorkflowJobProcessor {
         .from('workflow_executions')
         .select('*')
         .eq('status', 'pending')
-        .order('created_at', { ascending: true })
-        .limit(10);
+        .order('created_at', { ascending: true });
 
       if (error) {
         throw error;
       }
 
-      if (!executions || executions.length === 0) {
+      // Limit to 10 executions per batch
+      const limitedExecutions = executions?.slice(0, 10) || [];
+
+      if (!limitedExecutions || limitedExecutions.length === 0) {
         logger.debug('No pending workflow executions found');
         return;
       }
 
-      logger.info(`Processing ${executions.length} pending workflow executions`);
+      logger.info(`Processing ${limitedExecutions.length} pending workflow executions`);
 
       // Process each execution
-      for (const execution of executions) {
+      for (const execution of limitedExecutions) {
         try {
           // Update status to running
           await supabase
