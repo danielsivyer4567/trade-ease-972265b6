@@ -367,4 +367,36 @@
 .react-flow__node:focus {
   transition: none !important;
   animation: none !important;
+}
+
+/* Global class to disable animations during node operations */
+.workflow-no-animations * {
+  transition: none !important;
+  animation: none !important;
+  animation-duration: 0ms !important;
+  transition-duration: 0ms !important;
+}
+
+/* Disable React Flow's internal transform transitions */
+.react-flow__node.dragging {
+  cursor: grabbing;
+}
+
+.react-flow__node {
+  cursor: grab;
+}
+
+/* Ensure transform updates are immediate */
+.react-flow__node[style*="transform"] {
+  transition: none !important;
+}
+
+/* Disable selection animations */
+.react-flow__node.selected {
+  box-shadow: 0 0 0 2px #fff, 0 0 0 4px rgba(191, 161, 74, 0.8);
+}
+
+/* Ensure handles don't animate */
+.react-flow__handle {
+  transition: none !important;
 } 
