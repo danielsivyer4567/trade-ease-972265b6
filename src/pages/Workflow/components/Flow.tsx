@@ -34,6 +34,22 @@ import { useWorkflowAnimation } from '@/hooks/useWorkflowAnimation';
 import { ZoomIn, ZoomOut, Maximize, Lock, Unlock, User, Briefcase, ClipboardList, FileText, MessageSquare, Eye, Zap, Share2, Layout } from 'lucide-react';
 import { DARK_GOLD, DARK_BG, DARK_TEXT, DARK_SECONDARY } from '@/contexts/WorkflowDarkModeContext';
 
+// Define valid node types at the top of the file
+const validNodeTypes = [
+  'customerNode',
+  'jobNode',
+  'taskNode',
+  'quoteNode',
+  'customNode',
+  'visionNode',
+  'automationNode',
+  'messagingNode',
+  'emailNode',
+  'whatsappNode',
+  'socialNode',
+  'automation'
+];
+
 // Define node types
 const nodeTypes = {
   customerNode: CustomerNode,
@@ -105,7 +121,15 @@ function FlowContent({ onInit, workflowId, onNodeSelect, workflowDarkMode = true
   // Update internal state when external state changes
   useEffect(() => {
     if (externalNodes) {
-      setInternalNodes(externalNodes);
+      // Validate node types before setting
+      const validatedNodes = externalNodes.map(node => {
+        if (!validNodeTypes.includes(node.type)) {
+          console.warn(`Invalid node type "${node.type}" detected, defaulting to customNode`);
+          return { ...node, type: 'customNode' };
+        }
+        return node;
+      });
+      setInternalNodes(validatedNodes);
     }
   }, [externalNodes, setInternalNodes]);
 
@@ -136,14 +160,28 @@ function FlowContent({ onInit, workflowId, onNodeSelect, workflowDarkMode = true
 
   // Handle state updates based on whether external state is provided
   const setNodes = useCallback((updater) => {
+    const validateNodes = (nodes) => {
+      return nodes.map(node => {
+        if (!validNodeTypes.includes(node.type)) {
+          console.warn(`Invalid node type "${node.type}" detected, defaulting to customNode`);
+          return { ...node, type: 'customNode' };
+        }
+        return node;
+      });
+    };
+
     if (externalSetNodes) {
       if (typeof updater === 'function') {
-        externalSetNodes(updater);
+        externalSetNodes((prevNodes) => validateNodes(updater(prevNodes)));
       } else {
-        externalSetNodes(updater);
+        externalSetNodes(validateNodes(updater));
       }
     } else {
-      setInternalNodes(updater);
+      if (typeof updater === 'function') {
+        setInternalNodes((prevNodes) => validateNodes(updater(prevNodes)));
+      } else {
+        setInternalNodes(validateNodes(updater));
+      }
     }
   }, [externalSetNodes, setInternalNodes]);
 
@@ -164,19 +202,34 @@ function FlowContent({ onInit, workflowId, onNodeSelect, workflowDarkMode = true
     if (externalSetNodes) {
       // Apply changes to external nodes
       externalSetNodes((nds) => {
-        const nextNodes = [...nds];
+        let nextNodes = [...nds];
         changes.forEach((change) => {
           if (change.type === 'remove') {
-            const index = nextNodes.findIndex((n) => n.id === change.id);
-            if (index !== -1) {
-              nextNodes.splice(index, 1);
+            nextNodes = nextNodes.filter((n) => n.id !== change.id);
+          } else if (change.type === 'position' && change.position) {
+            const nodeIndex = nextNodes.findIndex((n) => n.id === change.id);
+            if (nodeIndex !== -1) {
+              nextNodes[nodeIndex] = {
+                ...nextNodes[nodeIndex],
+                position: change.position
+              };
             }
-          } else if (change.type === 'add') {
-            nextNodes.push(change.item);
-          } else if (change.type === 'position' || change.type === 'dimensions') {
-            const index = nextNodes.findIndex((n) => n.id === change.id);
-            if (index !== -1) {
-              nextNodes[index] = { ...nextNodes[index], ...change };
+          } else if (change.type === 'dimensions' && change.dimensions) {
+            const nodeIndex = nextNodes.findIndex((n) => n.id === change.id);
+            if (nodeIndex !== -1) {
+              nextNodes[nodeIndex] = {
+                ...nextNodes[nodeIndex],
+                width: change.dimensions.width,
+                height: change.dimensions.height
+              };
+            }
+          } else if (change.type === 'select') {
+            const nodeIndex = nextNodes.findIndex((n) => n.id === change.id);
+            if (nodeIndex !== -1) {
+              nextNodes[nodeIndex] = {
+                ...nextNodes[nodeIndex],
+                selected: change.selected
+              };
             }
           }
         });
