@@ -58,7 +58,7 @@ export class WorkflowJobProcessor {
         .select('*')
         .eq('status', 'pending')
         .order('created_at', { ascending: true })
-        .range(0, 9);
+        .limit(10);
 
       if (error) {
         throw error;

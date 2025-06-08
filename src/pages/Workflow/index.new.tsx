@@ -196,11 +196,11 @@ export default function WorkflowPage() {
           setEdges(initializedEdges);
         }
       } else {
-        toast.error('Failed to load workflow data');
+        toast.error(result.error?.message || 'Failed to load workflow data');
       }
     } catch (error) {
       console.error('Error loading workflow data:', error);
-      toast.error('Failed to load workflow data');
+      toast.error(error instanceof Error ? error.message : 'Failed to load workflow data');
     }
   };
 

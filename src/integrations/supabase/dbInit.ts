@@ -14,7 +14,8 @@ export async function initializeTables() {
       'trade_accounts',
       'trade_watchlists',
       'trade_transactions',
-      'customers'
+      'customers',
+      'workflow_executions'
     ];
     
     // Using Edge Functions is better than RPC for sensitive operations
@@ -32,6 +33,7 @@ export async function initializeTables() {
       }
       
       console.log('Tables initialization result:', data);
+
       return { success: true, data };
     } catch (edgeFunctionError) {
       // This is expected in development or when functions aren't deployed
