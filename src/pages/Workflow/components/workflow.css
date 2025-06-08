@@ -220,6 +220,7 @@
   will-change: transform !important;
   transform-style: preserve-3d !important;
   background: none !important;
+  pointer-events: auto !important;
 }
 
 /* Active node styling */
@@ -316,7 +317,7 @@
 }
 
 /* Remove all background colors and images from workflow builder */
-.workflow-background, .react-flow__pane, .react-flow__viewport, .react-flow, .workflow-dark-mode-flow, .workflow-no-animations {
+.workflow-background, .react-flow, .workflow-dark-mode-flow, .workflow-no-animations {
   background: none !important;
   background-color: transparent !important;
   background-image: none !important;
@@ -361,6 +362,8 @@
 /* Disable viewport transitions that might cause glitching */
 .react-flow__viewport {
   transition: none !important;
+  pointer-events: auto !important;
+  isolation: isolate; /* Create new stacking context */
 }
 
 /* Ensure smooth dragging without animations */
@@ -457,7 +460,7 @@
   width: 100%;
   height: 100%;
   overflow: hidden;
-  z-index: 0;
+  z-index: -1; /* Put it behind everything */
   pointer-events: none; /* Ensure it doesn't interfere with interactions */
 }
 
@@ -478,4 +481,25 @@
 .react-flow {
   isolation: isolate;
   background: transparent !important;
+  position: relative;
+  z-index: 1;
+  pointer-events: auto !important;
+}
+
+/* Ensure nodes can be interacted with */
+.react-flow__nodes {
+  z-index: 2 !important;
+  pointer-events: auto !important;
+}
+
+/* Individual nodes should have proper interaction */
+.react-flow__node {
+  z-index: 10 !important;
+  position: relative;
+  pointer-events: auto !important;
+  cursor: grab;
+}
+
+.react-flow__node.dragging {
+  cursor: grabbing;
 } 
