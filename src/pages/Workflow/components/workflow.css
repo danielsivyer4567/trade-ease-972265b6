@@ -210,6 +210,7 @@
 /* Fix viewport size */
 .react-flow {
   position: relative !important;
+  z-index: 1;
 }
 
 /* Extreme GPU acceleration for all viewport elements */
@@ -399,4 +400,82 @@
 /* Ensure handles don't animate */
 .react-flow__handle {
   transition: none !important;
+}
+
+/* Ensure proper layering of React Flow elements */
+.react-flow {
+  position: relative;
+  z-index: 1;
+}
+
+/* Background should be behind everything */
+.react-flow__background {
+  z-index: 0 !important;
+}
+
+/* Edges layer */
+.react-flow__edges {
+  z-index: 1 !important;
+}
+
+/* Nodes should be above edges and background */
+.react-flow__nodes {
+  z-index: 2 !important;
+}
+
+/* Individual nodes should have proper z-index */
+.react-flow__node {
+  z-index: 10 !important;
+  position: relative;
+}
+
+/* Selected nodes should be even higher */
+.react-flow__node.selected {
+  z-index: 1000 !important;
+}
+
+/* Ensure handles are above nodes */
+.react-flow__handle {
+  z-index: 11 !important;
+}
+
+/* Controls should be above everything */
+.react-flow__controls {
+  z-index: 1001 !important;
+}
+
+/* Minimap should be above everything */
+.react-flow__minimap {
+  z-index: 1002 !important;
+}
+
+/* Workflow background container */
+.workflow-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  z-index: 0;
+  pointer-events: none; /* Ensure it doesn't interfere with interactions */
+}
+
+/* Ensure smoke and particles are contained */
+.workflow-background .smoke,
+.workflow-background .particle {
+  position: absolute;
+  pointer-events: none;
+  will-change: transform; /* Optimize animations */
+}
+
+/* Prevent background animations from affecting viewport */
+.react-flow__viewport {
+  isolation: isolate; /* Create new stacking context */
+}
+
+/* Ensure the main React Flow container is isolated from background */
+.react-flow {
+  isolation: isolate;
+  background: transparent !important;
 } 

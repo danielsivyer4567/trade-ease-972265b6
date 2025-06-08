@@ -272,17 +272,8 @@ function FlowContent({ onInit, workflowId, onNodeSelect, workflowDarkMode = true
     setInstance(flowInstance);
     onInit(flowInstance);
     
-    // Initial fit view after a small delay to ensure nodes are loaded
-    setTimeout(() => {
-      if (flowInstance) {
-        console.log('DEBUG: Performing initial fit view');
-        flowInstance.fitView({ padding: 0.2 });
-        
-        // Debug - get current viewport state
-        const viewport = flowInstance.getViewport();
-        console.log('DEBUG: Initial viewport state:', viewport);
-      }
-    }, 100);
+    // Remove automatic fitView to prevent unwanted zoom animations
+    // Users can manually fit view using the controls if needed
   }, [onInit]);
 
   // Direct control handlers
@@ -644,18 +635,16 @@ function FlowContent({ onInit, workflowId, onNodeSelect, workflowDarkMode = true
         onNodeClick={onNodeClick}
         nodeTypes={nodeTypes}
         edgeTypes={edgeTypes}
-        fitView
-        fitViewOptions={{ padding: 0.2, duration: 0 }}
         className={`${actualDarkMode ? 'workflow-dark-mode-flow' : ''} workflow-no-animations`}
         style={actualDarkMode ? { 
           color: DARK_TEXT, 
           fontFamily: "'Roboto', sans-serif",
           position: 'relative',
-          zIndex: 1 // Ensure it's above the video
+          zIndex: 1 // Ensure it's above the background
         } : {
           fontFamily: "'Roboto', sans-serif",
           position: 'relative',
-          zIndex: 1 // Ensure it's above the video
+          zIndex: 1 // Ensure it's above the background
         }}
         defaultEdgeOptions={{
           type: 'animated',

@@ -209,21 +209,16 @@ export default function WorkflowPage() {
     if (flowInstance) {
       // Handle pending template data after flow instance is available
       if (pendingTemplateData.current) {
-        // Fit view to show all nodes
-        setTimeout(() => {
-          flowInstance.fitView({ padding: 0.2 });
-          toast.success(`Template "${pendingTemplateData.current.templateName}" applied to workflow`);
-          pendingTemplateData.current = null;
-        }, 100);
+        // Simply show success message without fitView
+        toast.success(`Template "${pendingTemplateData.current.templateName}" applied to workflow`);
+        pendingTemplateData.current = null;
       }
       
       // Handle pending workflow data after flow instance is available
       if (pendingWorkflowId.current) {
-        setTimeout(() => {
-          flowInstance.fitView({ padding: 0.2 });
-          toast.success(`Workflow "${pendingWorkflowId.current.workflowName}" added to canvas`);
-          pendingWorkflowId.current = null;
-        }, 100);
+        // Simply show success message without fitView
+        toast.success(`Workflow "${pendingWorkflowId.current.workflowName}" added to canvas`);
+        pendingWorkflowId.current = null;
       }
       
       // Handle pending automation node addition
@@ -313,12 +308,8 @@ export default function WorkflowPage() {
       }
     }
     
-    // Fit view after a small delay to ensure DOM updates
-    requestAnimationFrame(() => {
-      if (flowInstance) {
-        flowInstance.fitView({ padding: 0.2, duration: 0 }); // No animation duration
-      }
-    });
+    // Remove automatic fitView to prevent zoom animations
+    // Users can manually fit view if needed
     
     toast.success(`Added automation: ${automationTitle || `Automation ${automationId}`}`);
   };
