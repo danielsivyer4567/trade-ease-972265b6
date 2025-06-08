@@ -1,6 +1,6 @@
 import React, { memo, ReactNode, useMemo } from 'react';
 import { Handle, Position, NodeProps } from '@xyflow/react';
-import { DARK_BG, DARK_TEXT } from '@/contexts/WorkflowDarkModeContext';
+import { DARK_BG, DARK_TEXT, DARK_GOLD } from '@/contexts/WorkflowDarkModeContext';
 import { Zap } from 'lucide-react';
 
 interface NodeData {
@@ -25,37 +25,49 @@ function AutomationNode({ data, isConnectable }: NodeProps) {
   // Memoize the node content to prevent unnecessary re-renders
   const nodeContent = useMemo(() => {
     return (
-      <div className="node-content">
-        <div className="flex items-center justify-center mb-2">
-          {nodeData.icon || nodeData.iconComponent || <Zap className="h-5 w-5 text-white" />}
-        </div>
-        
-        <div 
-          className="text-center font-medium"
-          style={{ 
-            color: '#ffffff',
-            fontSize: '0.9rem'
-          }}
-        >
-          {displayLabel}
-        </div>
-        
-        <div 
-          className="text-center text-xs mt-1"
-          style={{ 
-            color: 'rgba(255, 255, 255, 0.8)',
-          }}
-        >
-          {displayDescription}
+      <div 
+        className="node-content border-2 rounded-xl shadow-md p-3 w-44 transition-transform duration-150 hover:scale-105 hover:shadow-xl"
+        style={{
+          backgroundColor: workflowDarkMode ? DARK_BG : 'white',
+          borderColor: workflowDarkMode ? DARK_GOLD : '#c04aff',
+          color: workflowDarkMode ? DARK_TEXT : '#111827'
+        }}
+      >
+        <div className="flex items-center">
+          <div 
+            className="w-9 h-9 rounded-full flex items-center justify-center mr-3 shadow-sm"
+            style={{ 
+              backgroundColor: workflowDarkMode ? DARK_BG : '#f4f4f5',
+              border: `2px solid ${workflowDarkMode ? DARK_GOLD : '#c04aff'}`
+            }}
+          >
+            {nodeData.icon || nodeData.iconComponent || <Zap className="h-5 w-5" style={{ color: workflowDarkMode ? DARK_GOLD : '#c04aff' }} />}
+          </div>
+          <div>
+            <div 
+              className="font-bold text-sm"
+              style={{ color: workflowDarkMode ? DARK_TEXT : '#111827' }}
+            >
+              {displayLabel}
+            </div>
+            <div 
+              className="text-xs"
+              style={{ color: workflowDarkMode ? 'rgba(255, 224, 130, 0.9)' : '#6b7280' }}
+            >
+              {displayDescription}
+            </div>
+          </div>
         </div>
       </div>
     );
-  }, [nodeData.icon, nodeData.iconComponent, displayLabel, displayDescription]);
+  }, [nodeData.icon, nodeData.iconComponent, displayLabel, displayDescription, workflowDarkMode]);
   
   // Pre-compute styles for handles to ensure they're stable
   const handleStyle = useMemo(() => ({
-    background: workflowDarkMode ? '#FFC107' : '#555',
+    background: workflowDarkMode ? DARK_GOLD : '#c04aff',
     border: '2px solid white',
+    width: 12,
+    height: 12
   }), [workflowDarkMode]);
   
   return (

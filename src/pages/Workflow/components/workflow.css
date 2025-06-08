@@ -3,37 +3,41 @@
 /* Electricity animation */
 @keyframes electricFlow {
   0% {
-    filter: drop-shadow(0 0 2px rgba(59, 130, 246, 0.5));
+    filter: drop-shadow(0 0 2px rgba(192, 74, 255, 0.7));
   }
   50% {
-    filter: drop-shadow(0 0 5px rgba(59, 130, 246, 0.8));
+    filter: drop-shadow(0 0 5px rgba(192, 74, 255, 0.9));
   }
   100% {
-    filter: drop-shadow(0 0 2px rgba(59, 130, 246, 0.5));
+    filter: drop-shadow(0 0 2px rgba(192, 74, 255, 0.7));
   }
 }
 
 /* Dark mode electricity animation */
 @keyframes electricFlowDark {
   0% {
-    filter: drop-shadow(0 0 2px rgba(191, 161, 74, 0.5));
+    filter: drop-shadow(0 0 2px rgba(191, 161, 74, 0.7));
   }
   50% {
-    filter: drop-shadow(0 0 5px rgba(191, 161, 74, 0.8));
+    filter: drop-shadow(0 0 5px rgba(191, 161, 74, 0.9));
   }
   100% {
-    filter: drop-shadow(0 0 2px rgba(191, 161, 74, 0.5));
+    filter: drop-shadow(0 0 2px rgba(191, 161, 74, 0.7));
   }
 }
 
 /* Active connection class */
 .workflow-edge-active path {
   animation: electricFlow 1.5s infinite;
+  stroke-width: 2.5px !important;
+  stroke-opacity: 1 !important;
 }
 
 /* Dark mode active connection */
 .workflow-dark-mode .workflow-edge-active path {
   animation: electricFlowDark 1.5s infinite;
+  stroke-width: 2.5px !important;
+  stroke-opacity: 1 !important;
 }
 
 /* Edge pulse effect */
@@ -47,25 +51,25 @@
 
 @keyframes edgePulseLight {
   0% {
-    stroke-opacity: 0.3;
+    stroke-opacity: 0.5;
   }
   50% {
     stroke-opacity: 1;
   }
   100% {
-    stroke-opacity: 0.3;
+    stroke-opacity: 0.5;
   }
 }
 
 @keyframes edgePulseDark {
   0% {
-    stroke-opacity: 0.3;
+    stroke-opacity: 0.5;
   }
   50% {
     stroke-opacity: 1;
   }
   100% {
-    stroke-opacity: 0.3;
+    stroke-opacity: 0.5;
   }
 }
 
@@ -88,6 +92,15 @@
   contain: layout style size !important;
   pointer-events: auto !important;
   z-index: 3 !important;
+}
+
+/* Automation node specific styles */
+.react-flow__node-automationNode {
+  z-index: 5 !important;
+}
+
+.react-flow__node-automationNode .node-content {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
 }
 
 /* Completely disable all transforms except for positioning */
@@ -138,13 +151,13 @@
 /* Define animations */
 @keyframes electricFlow {
   0% {
-    filter: drop-shadow(0 0 2px rgba(191, 161, 74, 0.5));
+    filter: drop-shadow(0 0 2px rgba(191, 161, 74, 0.7));
   }
   50% {
-    filter: drop-shadow(0 0 5px rgba(191, 161, 74, 0.8));
+    filter: drop-shadow(0 0 5px rgba(191, 161, 74, 0.9));
   }
   100% {
-    filter: drop-shadow(0 0 2px rgba(191, 161, 74, 0.5));
+    filter: drop-shadow(0 0 2px rgba(191, 161, 74, 0.7));
   }
 }
 
