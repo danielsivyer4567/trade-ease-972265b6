@@ -39,18 +39,28 @@ CREATE TABLE IF NOT EXISTS workflow_edges (
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Workflow executions table
-CREATE TABLE IF NOT EXISTS workflow_executions (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  workflow_id UUID REFERENCES workflows(id) ON DELETE CASCADE,
-  status TEXT NOT NULL DEFAULT 'pending',
-  started_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  completed_at TIMESTAMP WITH TIME ZONE,
-  execution_data JSONB,
-  error_message TEXT,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
+-- Create stored procedure for workflow_executions table creation
+CREATE OR REPLACE FUNCTION create_workflow_executions_table_if_not_exists()
+RETURNS void AS $$
+BEGIN
+  CREATE TABLE IF NOT EXISTS workflow_executions (
+    id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
+    workflow_id text NOT NULL,
+    status text NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'running', 'completed', 'failed')),
+    created_at timestamptz NOT NULL DEFAULT now(),
+    started_at timestamptz,
+    completed_at timestamptz,
+    error_message text,
+    execution_data jsonb,
+    user_id uuid REFERENCES auth.users(id) ON DELETE CASCADE
+  );
+  
+  -- Create indexes if they don't exist
+  CREATE INDEX IF NOT EXISTS idx_workflow_executions_workflow_id ON workflow_executions(workflow_id);
+  CREATE INDEX IF NOT EXISTS idx_workflow_executions_status ON workflow_executions(status);
+  CREATE INDEX IF NOT EXISTS idx_workflow_executions_user_id ON workflow_executions(user_id);
+END;
+$$ LANGUAGE plpgsql;
 
 -- Create indexes for better query performance
 CREATE INDEX idx_workflow_nodes_workflow_id ON workflow_nodes(workflow_id);

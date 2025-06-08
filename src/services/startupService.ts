@@ -49,38 +49,38 @@ class StartupService {
       }
 
       // Check if user profile exists
-      const { data: profiles, error: profileError } = await supabase
+      const { data: profile, error: profileError } = await supabase
         .from('user_profiles')
         .select('*')
         .eq('user_id', user.id)
         .single();
 
-      if (profileError) {
+      if (profileError && (profileError as any).code !== 'PGRST116') { // PGRST116: No rows found
         console.error('Error checking for user profile:', profileError);
         return;
-      if (!profiles) {
+      }
+        
+      if (!profile) {
         // Create user profile if it doesn't exist
         const { error: insertError } = await supabase
           .from('user_profiles')
           .insert({
             user_id: user.id,
+            email: user.email,
             name: user.user_metadata?.name || user.email,
             two_factor_enabled: false,
             created_at: new Date().toISOString()
           });
             
-          if (insertError) {
-            if (insertError.code === '42P01') {
-              console.warn('User profiles table does not exist. This is expected in new environments.');
-            } else {
-              console.error('Error creating user profile:', insertError);
-            }
+        if (insertError) {
+          if ((insertError as any).code === '42P01') {
+            console.warn('User profiles table does not exist. This is expected in new environments.');
           } else {
-            console.log('Created user profile for:', user.email);
+            console.error('Error creating user profile:', insertError);
           }
+        } else {
+          console.log('Created user profile for:', user.email);
         }
-      } catch (error) {
-        console.warn('Database operations failed, continuing without user profile:', error);
       }
     } catch (error) {
       console.error('Error ensuring user profiles:', error);
