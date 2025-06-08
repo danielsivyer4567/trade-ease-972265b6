@@ -6,12 +6,13 @@ import { NodeSidebar } from './components/NodeSidebar';
 import { NodeDetailsPanel } from './components/NodeDetailsPanel';
 import { WorkflowDrawer } from './components/WorkflowDrawer';
 import { WorkflowSaveDialog } from './components/WorkflowSaveDialog';
-import { WorkflowLoadDialog } from './components/WorkflowLoadDialog';
+import { WorkflowTemplateDialog } from './components/WorkflowTemplateDialog';
 import { WorkflowAIAssistant } from './components/WorkflowAIAssistant';
 import { toast } from 'sonner';
 import { WorkflowService } from '@/services/WorkflowService';
 import { User, Briefcase, ClipboardList, FileText, MessageSquare, Eye, Zap, Share2, Layout } from 'lucide-react';
 import { DARK_BG, DARK_TEXT, DARK_GOLD, DARK_SECONDARY } from '@/contexts/WorkflowDarkModeContext';
+import { WorkflowTemplate } from '@/types/workflow';
 
 // Define interfaces for workflow data
 interface NodeData {
@@ -121,159 +122,7 @@ export default function WorkflowPage() {
       hasProcessedLocationState.current = true;
       console.log('Processing location state once:', location.state);
       
-      // Check if we should load template data from localStorage
-      if (location.state.useTemplate && location.state.fromLocalStorage) {
-        try {
-          const storedData = localStorage.getItem('workflow_template_data');
-          if (storedData) {
-            const templateInfo = JSON.parse(storedData);
-            console.log('Retrieved template data from localStorage:', templateInfo.templateName);
-            
-            // Apply template data
-            if (templateInfo.templateData) {
-              if (templateInfo.templateData.nodes && Array.isArray(templateInfo.templateData.nodes)) {
-                setNodes(templateInfo.templateData.nodes.map(node => ensureNodeIcon({
-                  id: node.id,
-                  type: node.type,
-                  position: node.position,
-                  data: node.data
-                })));
-              }
-              
-              if (templateInfo.templateData.edges && Array.isArray(templateInfo.templateData.edges)) {
-                setEdges(templateInfo.templateData.edges.map(edge => ({
-                  id: edge.id,
-                  source: edge.source,
-                  target: edge.target,
-                  type: 'animated',
-                  animated: true
-                })));
-              }
-            }
-            
-            // Store template data for use after flow instance is initialized
-            pendingTemplateData.current = {
-              templateName: templateInfo.templateName,
-              templateData: templateInfo.templateData
-            };
-            
-            // Clean up localStorage after use to prevent stale data
-            localStorage.removeItem('workflow_template_data');
-          }
-        } catch (error) {
-          console.error('Error loading template data from localStorage:', error);
-          toast.error('Failed to load template data');
-        }
-      } else if (location.state.addAutomation && location.state.fromLocalStorage) {
-        try {
-          const storedData = localStorage.getItem('automation_workflow_data');
-          if (storedData) {
-            const automationInfo = JSON.parse(storedData);
-            console.log('Retrieved automation data from localStorage:', automationInfo.automationTitle);
-            
-            // Store automation data for use after flow instance is initialized
-            pendingAutomationData.current = {
-              automationId: automationInfo.automationId,
-              automationTitle: automationInfo.automationTitle,
-              automationDescription: automationInfo.automationDescription,
-              preserveExisting: location.state.preserveExisting !== false // Default to true if not specified
-            };
-            
-            // If flowInstance is already available, add the automation node immediately
-            if (flowInstance) {
-              addAutomationNode(
-                automationInfo.automationId, 
-                automationInfo.automationTitle, 
-                automationInfo.automationDescription,
-                location.state.preserveExisting !== false // Pass the preserveExisting flag
-              );
-              pendingAutomationData.current = null; // Clear to prevent duplicate processing
-            }
-            
-            // Clean up localStorage after use to prevent stale data
-            localStorage.removeItem('automation_workflow_data');
-          }
-        } catch (error) {
-          console.error('Error loading automation data from localStorage:', error);
-          toast.error('Failed to load automation data');
-        }
-      } else if (location.state.useTemplate && location.state.templateData) {
-        // Original behavior for direct template data in state
-        // Check if we should preserve existing content
-        if (location.state.preserveExisting) {
-          console.log('Preserving existing content while applying template');
-          
-          // Store template data for use after flow instance is initialized
-          pendingTemplateData.current = {
-            templateName: location.state.templateName,
-            templateData: location.state.templateData,
-            preserveExisting: true
-          };
-          
-          // Apply template data by appending to existing nodes and edges
-          const templateData = location.state.templateData;
-          
-          if (templateData.nodes && Array.isArray(templateData.nodes)) {
-            // Create unique IDs for new nodes from template to avoid conflicts
-            const templateTimestamp = Date.now();
-            const newTemplateNodes = templateData.nodes.map(node => ensureNodeIcon({
-              id: `template-${node.id}-${templateTimestamp}`,
-              type: node.type,
-              position: node.position,
-              data: node.data
-            }));
-            
-            // Append new nodes to existing ones
-            setNodes(currentNodes => [...currentNodes, ...newTemplateNodes]);
-          }
-          
-          if (templateData.edges && Array.isArray(templateData.edges)) {
-            // Create unique IDs for new edges, and update source/target references
-            const templateTimestamp = Date.now();
-            const newTemplateEdges = templateData.edges.map(edge => ({
-              id: `template-${edge.id}-${templateTimestamp}`,
-              source: `template-${edge.source}-${templateTimestamp}`,
-              target: `template-${edge.target}-${templateTimestamp}`,
-              type: 'animated',
-              animated: true
-            }));
-            
-            // Append new edges to existing ones
-            setEdges(currentEdges => [...currentEdges, ...newTemplateEdges]);
-          }
-          
-        } else {
-          console.log('Replacing existing content with template');
-          
-          // Store template data for use after flow instance is initialized
-          pendingTemplateData.current = {
-            templateName: location.state.templateName,
-            templateData: location.state.templateData
-          };
-          
-          // Apply template data immediately to nodes and edges (replacing existing content)
-          const templateData = location.state.templateData;
-          
-          if (templateData.nodes && Array.isArray(templateData.nodes)) {
-            setNodes(templateData.nodes.map(node => ensureNodeIcon({
-              id: node.id,
-              type: node.type,
-              position: node.position,
-              data: node.data
-            })));
-          }
-          
-          if (templateData.edges && Array.isArray(templateData.edges)) {
-            setEdges(templateData.edges.map(edge => ({
-              id: edge.id,
-              source: edge.source,
-              target: edge.target,
-              type: 'animated',
-              animated: true
-            })));
-          }
-        }
-      } else if (location.state.addWorkflow && location.state.workflowId) {
+      if (location.state.addWorkflow && location.state.workflowId) {
         // Store workflow ID for loading after flow instance is initialized
         pendingWorkflowId.current = {
           workflowId: location.state.workflowId,
@@ -568,12 +417,21 @@ export default function WorkflowPage() {
       />
 
       {/* Load dialog */}
-      <WorkflowLoadDialog
+      <WorkflowTemplateDialog
         open={isLoadDialogOpen}
         onOpenChange={setIsLoadDialogOpen}
-        onLoad={(instance) => {
-          // TODO: Implement load functionality
-          console.log('Loading workflow:', instance);
+        onLoad={(template: WorkflowTemplate) => {
+          if (template.data) {
+            if (template.data.nodes) {
+              setNodes(template.data.nodes.map(ensureNodeIcon));
+            }
+            if (template.data.edges) {
+              setEdges(template.data.edges);
+            }
+            if (flowInstance) {
+              setTimeout(() => flowInstance.fitView(), 100);
+            }
+          }
         }}
       />
     </div>

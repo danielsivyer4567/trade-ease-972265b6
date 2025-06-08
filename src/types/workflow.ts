@@ -68,6 +68,7 @@ export interface WorkflowTemplate {
   name: string;
   description: string;
   category: string;
+  isUserTemplate?: boolean;
   data: {
     nodes: Array<{
       id: string;

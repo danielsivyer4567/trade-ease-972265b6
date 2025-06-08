@@ -17,64 +17,55 @@ import {
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from 'sonner';
+import { WorkflowService } from '@/services/WorkflowService';
+import { WorkflowTemplate } from '@/types/workflow';
+import { Badge } from '@/components/ui/badge';
 
-interface Workflow {
-  id: string;
-  name: string;
-  description: string;
-  flow: any;
-  createdAt: string;
-}
-
-interface WorkflowLoadDialogProps {
+interface WorkflowTemplateDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onLoad: (instance: any) => void;
+  onLoad: (template: WorkflowTemplate) => void;
 }
 
-export function WorkflowLoadDialog({
+export function WorkflowTemplateDialog({
   open,
   onOpenChange,
   onLoad,
-}: WorkflowLoadDialogProps) {
-  const [workflows, setWorkflows] = useState<Workflow[]>([]);
+}: WorkflowTemplateDialogProps) {
+  const [templates, setTemplates] = useState<WorkflowTemplate[]>([]);
 
   useEffect(() => {
     if (open) {
-      // Load workflows from localStorage
-      const savedWorkflows = JSON.parse(localStorage.getItem('workflows') || '[]');
-      setWorkflows(savedWorkflows);
+      const fetchTemplates = async () => {
+        const { success, templates } = await WorkflowService.listWorkflowTemplates();
+        if (success && templates) {
+          setTemplates(templates);
+        } else {
+          toast.error("Failed to load workflow templates.");
+        }
+      };
+      fetchTemplates();
     }
   }, [open]);
 
-  const handleLoad = (workflow: Workflow) => {
+  const handleLoad = (template: WorkflowTemplate) => {
     try {
-      onLoad(workflow.flow);
-      toast.success(`Loaded workflow: ${workflow.name}`);
+      onLoad(template);
+      toast.success(`Loaded template: ${template.name}`);
       onOpenChange(false);
     } catch (error) {
-      console.error('Error loading workflow:', error);
-      toast.error('Failed to load workflow');
+      console.error('Error loading template:', error);
+      toast.error('Failed to load template');
     }
-  };
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[800px]">
         <DialogHeader>
-          <DialogTitle>Load Workflow</DialogTitle>
+          <DialogTitle>Load Workflow from Template</DialogTitle>
           <DialogDescription>
-            Select a workflow to load from your saved workflows.
+            Select a template to start building your workflow.
           </DialogDescription>
         </DialogHeader>
 
@@ -84,34 +75,36 @@ export function WorkflowLoadDialog({
               <TableRow>
                 <TableHead>Name</TableHead>
                 <TableHead>Description</TableHead>
-                <TableHead>Created</TableHead>
+                <TableHead>Category</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {workflows.length === 0 ? (
+              {templates.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={4} className="text-center">
-                    No saved workflows found
+                    No templates found
                   </TableCell>
                 </TableRow>
               ) : (
-                workflows.map((workflow) => (
-                  <TableRow key={workflow.id}>
+                templates.map((template) => (
+                  <TableRow key={template.id}>
                     <TableCell className="font-medium">
-                      {workflow.name}
+                      {template.name}
                     </TableCell>
                     <TableCell>
-                      {workflow.description || 'No description'}
+                      {template.description || 'No description'}
                     </TableCell>
                     <TableCell>
-                      {formatDate(workflow.createdAt)}
+                      <Badge variant={template.isUserTemplate ? "secondary" : "outline"}>
+                        {template.category}
+                      </Badge>
                     </TableCell>
                     <TableCell className="text-right">
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => handleLoad(workflow)}
+                        onClick={() => handleLoad(template)}
                       >
                         Load
                       </Button>
