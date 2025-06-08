@@ -50,9 +50,16 @@ export function NavItem({
   const expanded = sidebarExpanded !== undefined ? sidebarExpanded : state === "expanded";
   
   const handleClick = (e: React.MouseEvent) => {
+    console.log('NavItem clicked:', path, displayText);
+    
     if (disabled) {
       e.preventDefault();
       return;
+    }
+    
+    // Special logging for workflow
+    if (path === '/workflow') {
+      console.log('Workflow navigation triggered!');
     }
     
     // Navigate directly and handle tab management separately

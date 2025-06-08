@@ -5,6 +5,7 @@ import { LogoutButton } from './LogoutButton';
 import { LucideIcon, Moon, Sun } from 'lucide-react';
 import { ThemeSwitcher } from '../theme/ThemeSwitcher';
 import { Button } from '@/components/ui/button';
+import { useNavigate } from 'react-router-dom';
 
 // New component for the dark mode toggle
 const DarkModeToggle = ({ isDarkMode, onToggleDarkMode, isExpanded }) => {
@@ -62,6 +63,16 @@ export const NavigationGroup: React.FC<NavigationGroupProps> = ({
   isDarkMode,
   onToggleDarkMode
 }) => {
+  const navigate = useNavigate();
+
+  const handleNavigation = (path: string) => {
+    console.log('NavigationGroup: Navigating to', path);
+    if (path === '/workflow') {
+      console.log('Workflow navigation clicked!');
+    }
+    navigate(path);
+  };
+
   return <div className="grid gap-0.25 w-full my-0.5 pt-0.5 border-t border-white/30 first:border-0 first:pt-0 first:mt-0">
       {/* Group Label - Only show if it exists and sidebar is expanded */}
       {isExpanded && label && <h4 className="text-white font-bold text-xs px-2 mb-0.5">
