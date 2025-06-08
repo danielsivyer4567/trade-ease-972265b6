@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom/client'
 import App from './App.tsx'
 import './index.css'
 import { disableDevToolsOverlay } from './utils/disableDevToolsOverlay'
+import { workflowJobProcessor } from './services/WorkflowJobProcessor'
 // Remove the startupService import to prevent the 404 error
 // import { startupService } from './services/startupService'
 
@@ -18,6 +19,13 @@ if (import.meta.hot) {
   import.meta.hot.on('error', (err) => {
     console.error('Vite HMR error detected:', err);
   });
+}
+
+// Start the workflow job processor
+if (import.meta.env.MODE === 'development') {
+  // In development, start the job processor
+  workflowJobProcessor.start(5000); // Check for jobs every 5 seconds
+  console.log('Workflow job processor started in development mode');
 }
 
 // Create root with error handling
