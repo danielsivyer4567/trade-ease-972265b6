@@ -88,17 +88,32 @@ const defaultEdges = [];
 function FlowContent({ onInit, workflowId, onNodeSelect, workflowDarkMode = true, nodes: externalNodes, edges: externalEdges, setNodes: externalSetNodes, setEdges: externalSetEdges }: FlowProps) {
   console.log('DEBUG: FlowContent component rendering', { 
     hasNodes: externalNodes && externalNodes.length > 0,
-    hasEdges: externalEdges && externalEdges.length > 0
+    hasEdges: externalEdges && externalEdges.length > 0,
+    nodes: externalNodes,
+    edges: externalEdges
   });
   // Always use dark mode
   const actualDarkMode = true;
   
   // Use external state if provided, otherwise use internal state
-  const [internalNodes, setInternalNodes, onNodesChange] = useNodesState(defaultNodes);
-  const [internalEdges, setInternalEdges, onEdgesChange] = useEdgesState(defaultEdges);
+  const [internalNodes, setInternalNodes, onNodesChange] = useNodesState(externalNodes || defaultNodes);
+  const [internalEdges, setInternalEdges, onEdgesChange] = useEdgesState(externalEdges || defaultEdges);
   
   const nodes = externalNodes || internalNodes;
   const edges = externalEdges || internalEdges;
+
+  // Update internal state when external state changes
+  useEffect(() => {
+    if (externalNodes) {
+      setInternalNodes(externalNodes);
+    }
+  }, [externalNodes, setInternalNodes]);
+
+  useEffect(() => {
+    if (externalEdges) {
+      setInternalEdges(externalEdges);
+    }
+  }, [externalEdges, setInternalEdges]);
 
   // Add debug logging for dimensions
   const containerRef = useRef(null);
@@ -515,9 +530,7 @@ function FlowContent({ onInit, workflowId, onNodeSelect, workflowDarkMode = true
       ref={containerRef}
       style={{ 
         width: '100%', 
-        height: '100%', 
-        background: actualDarkMode ? DARK_BG : '#f9fafb',
-        border: '5px solid red' // Add a visible border for debugging
+        height: '100%'
       }}
       className={animationActiveEdges.size > 0 ? 'workflow-active-edges' : ''}
     >
@@ -572,12 +585,8 @@ function FlowContent({ onInit, workflowId, onNodeSelect, workflowDarkMode = true
         fitViewOptions={{ padding: 0.2, duration: 0 }}
         className={`${actualDarkMode ? 'workflow-dark-mode-flow' : ''} workflow-no-animations`}
         style={actualDarkMode ? { 
-          background: `linear-gradient(135deg, ${DARK_SECONDARY} 0%, ${DARK_BG} 50%, #0a0a18 100%)`, 
           color: DARK_TEXT, 
-          border: `3px solid rgba(165, 149, 255, 0.3)`,
-          boxShadow: 'inset 0 0 40px rgba(86, 28, 198, 0.15)',
           fontFamily: "'Roboto', sans-serif",
-          backgroundSize: '400% 400%',
           position: 'relative',
           zIndex: 1 // Ensure it's above the video
         } : {
@@ -631,36 +640,29 @@ function FlowContent({ onInit, workflowId, onNodeSelect, workflowDarkMode = true
           variant={BackgroundVariant.Dots}
           style={{
             opacity: actualDarkMode ? 0.05 : 0.15,
-            backgroundImage: actualDarkMode ? 
-              'radial-gradient(circle, rgba(255, 255, 255, 0.06) 1px, transparent 1px)' : 
-              'radial-gradient(circle, rgba(0, 0, 0, 0.15) 1px, transparent 1px)',
-            backgroundSize: '20px 20px'
+            backgroundImage: 'none',
           }}
         />
-        
-        <MiniMap 
-          className="!bottom-20 !right-4" 
-          style={actualDarkMode ? { 
-            background: DARK_BG, 
-            borderColor: DARK_GOLD,
+      </ReactFlow>
+
+      {/* MiniMap visually below the sidebar, but inside ReactFlow context */}
+      <div style={{ position: 'absolute', left: 0, bottom: 16, zIndex: 1001, width: '16rem', pointerEvents: 'auto' }}>
+        <MiniMap
+          className="w-full h-32"
+          style={{
+            background: actualDarkMode ? DARK_BG : '#fff',
+            borderColor: actualDarkMode ? DARK_GOLD : '#ccc',
             borderWidth: '2px',
             borderStyle: 'solid',
-            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)'
-          } : {}} 
+            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
+            borderRadius: '8px',
+            margin: '0 auto',
+            display: 'block',
+          }}
           nodeColor={actualDarkMode ? DARK_GOLD : undefined}
           maskColor={actualDarkMode ? 'rgba(24, 20, 12, 0.6)' : undefined}
         />
-        
-        {/* Add a panel with animation controls for demo purposes */}
-        <Panel position="top-right">
-          <button 
-            onClick={animationDeactivateAllEdges}
-            className="px-2 py-1 rounded bg-gray-200 text-xs mr-2"
-          >
-            Reset Animations
-          </button>
-        </Panel>
-      </ReactFlow>
+      </div>
 
       {selectedNode && (
         <NodeDetailsPanel

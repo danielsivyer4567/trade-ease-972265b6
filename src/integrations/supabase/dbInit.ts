@@ -13,7 +13,8 @@ export async function initializeTables() {
       'demo_requests',
       'trade_accounts',
       'trade_watchlists',
-      'trade_transactions'
+      'trade_transactions',
+      'customers'
     ];
     
     // Using Edge Functions is better than RPC for sensitive operations

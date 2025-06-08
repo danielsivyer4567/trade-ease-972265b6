@@ -1,6 +1,7 @@
 import React from 'react';
 import { Paperclip, User, Briefcase, ClipboardList, FileText, Eye, Settings, MessageSquare, Share2, Zap, Calendar, Bell } from 'lucide-react';
 import { DARK_BG, DARK_TEXT, DARK_GOLD } from '@/contexts/WorkflowDarkModeContext';
+import { MiniMap } from '@xyflow/react';
 
 interface NodeSidebarProps {
   targetData?: {
@@ -9,6 +10,8 @@ interface NodeSidebarProps {
     createAutomationNode?: boolean;
   } | null;
   workflowDarkMode?: boolean;
+  nodes?: any[];
+  edges?: any[];
 }
 
 // Node type definitions with vibrant colors from the image
@@ -111,7 +114,7 @@ const nodeTypes = [
   }
 ];
 
-export function NodeSidebar({ targetData, workflowDarkMode = false }: NodeSidebarProps) {
+export function NodeSidebar({ targetData, workflowDarkMode = false, nodes, edges }: NodeSidebarProps) {
   const handleDragStart = (event, nodeType) => {
     event.dataTransfer.setData('application/reactflow', nodeType);
     event.dataTransfer.effectAllowed = 'move';
@@ -196,6 +199,24 @@ export function NodeSidebar({ targetData, workflowDarkMode = false }: NodeSideba
             </div>
           </div>
         ))}
+      </div>
+      {/* MiniMap below nodes */}
+      <div className="mt-6">
+        <MiniMap
+          className="w-full h-32"
+          style={{
+            background: workflowDarkMode ? DARK_BG : '#fff',
+            borderColor: workflowDarkMode ? DARK_GOLD : '#ccc',
+            borderWidth: '2px',
+            borderStyle: 'solid',
+            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
+            borderRadius: '8px',
+            margin: '0 auto',
+            display: 'block',
+          }}
+          nodeColor={workflowDarkMode ? DARK_GOLD : undefined}
+          maskColor={workflowDarkMode ? 'rgba(24, 20, 12, 0.6)' : undefined}
+        />
       </div>
     </div>
   );

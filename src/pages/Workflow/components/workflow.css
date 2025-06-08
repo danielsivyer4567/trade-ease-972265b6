@@ -92,21 +92,25 @@
   contain: layout style size !important;
   pointer-events: auto !important;
   z-index: 3 !important;
+  opacity: 1 !important;
 }
 
 /* Automation node specific styles */
 .react-flow__node-automationNode {
   z-index: 5 !important;
+  opacity: 1 !important;
 }
 
 .react-flow__node-automationNode .node-content {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
+  opacity: 1 !important;
 }
 
 /* Completely disable all transforms except for positioning */
 .react-flow__node-drag-handle {
   cursor: grab !important;
   pointer-events: all !important;
+  opacity: 1 !important;
 }
 
 /* Override all node content styles to prevent flashing */
@@ -116,6 +120,7 @@
   -webkit-font-smoothing: antialiased !important;
   -moz-osx-font-smoothing: grayscale !important;
   text-rendering: geometricPrecision !important;
+  opacity: 1 !important;
 }
 
 /* Force hardware acceleration on all node content */
@@ -124,6 +129,7 @@
   backface-visibility: hidden !important;
   perspective: 1000px !important;
   contain: layout style !important;
+  opacity: 1 !important;
 }
 
 /* Fix handle positioning to prevent glitching */
@@ -135,6 +141,7 @@
   position: absolute !important;
   z-index: 5 !important;
   pointer-events: all !important;
+  opacity: 1 !important;
 }
 
 /* Electricity animation - ONLY apply to path elements */
@@ -146,6 +153,7 @@
 .react-flow__node.active-node {
   z-index: 10 !important;
   box-shadow: 0 0 0 2px #fff, 0 0 0 4px rgba(191, 161, 74, 0.8) !important;
+  opacity: 1 !important;
 }
 
 /* Define animations */
@@ -184,6 +192,7 @@
 .react-flow__viewport {
   transition: none !important;
   transform-origin: 0 0 !important;
+  background: none !important;
 }
 
 /* Fix active edges */
@@ -209,16 +218,19 @@
   backface-visibility: hidden !important;
   will-change: transform !important;
   transform-style: preserve-3d !important;
+  background: none !important;
 }
 
 /* Active node styling */
 .react-flow__node.active-node {
   z-index: 10;
   box-shadow: 0 0 0 2px #fff, 0 0 0 4px rgba(59, 130, 246, 0.5);
+  opacity: 1 !important;
 }
 
 .workflow-dark-mode-flow .react-flow__node.active-node {
   box-shadow: 0 0 0 2px #fff, 0 0 0 4px rgba(191, 161, 74, 0.8);
+  opacity: 1 !important;
 }
 
 /* Improve handle hit area */
@@ -294,4 +306,21 @@
 /* Only allow our specific animation for active edges */
 .workflow-no-animations .workflow-edge-active-path {
   animation: electricFlow 1.5s infinite !important;
+}
+
+/* Remove or comment out background for workflow builder overlay */
+.workflow-background {
+  /* background: none !important; */
+  /* Remove any background color or image here to make nodes visible */
+}
+
+/* Remove all background colors and images from workflow builder */
+.workflow-background, .react-flow__pane, .react-flow__viewport, .react-flow, .workflow-dark-mode-flow, .workflow-no-animations {
+  background: none !important;
+  background-color: transparent !important;
+  background-image: none !important;
+}
+
+.react-flow__node, .react-flow__node * {
+  z-index: 1000 !important;
 } 

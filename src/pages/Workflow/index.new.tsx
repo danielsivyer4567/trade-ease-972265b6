@@ -170,44 +170,30 @@ export default function WorkflowPage() {
       if (result.success && result.workflow) {
         const workflowData = result.workflow.data as WorkflowData;
         
+        // Initialize nodes and edges
         if (workflowData && workflowData.nodes && Array.isArray(workflowData.nodes)) {
-          // Create a map of existing node IDs to check for duplicates
-          const existingNodeIds = new Set(nodes.map(node => node.id));
-          
-          // Get new nodes to add (avoid duplicates)
-          const newNodes = workflowData.nodes
-            .filter(node => !existingNodeIds.has(node.id))
-            .map(node => ensureNodeIcon({
-              id: node.id,
-              type: node.type,
-              position: node.position,
-              data: node.data
-            }));
-          
-          // Append new nodes to existing ones
-          setNodes(currentNodes => [...currentNodes, ...newNodes]);
+          const initializedNodes = workflowData.nodes.map(node => ensureNodeIcon({
+            id: node.id,
+            type: node.type,
+            position: node.position,
+            data: node.data
+          }));
+          setNodes(initializedNodes);
         }
         
         if (workflowData && workflowData.edges && Array.isArray(workflowData.edges)) {
-          // Create a map of existing edge IDs to check for duplicates
-          const existingEdgeIds = new Set(edges.map(edge => edge.id));
-          
-          // Get new edges to add (avoid duplicates)
-          const newEdges = workflowData.edges
-            .filter(edge => !existingEdgeIds.has(edge.id))
-            .map(edge => ({
-              id: edge.id,
-              source: edge.source,
-              target: edge.target,
-              type: 'animated',
-              animated: true,
-              data: {
-                isActive: false // Start with inactive state
-              }
-            }));
-          
-          // Append new edges to existing ones
-          setEdges(currentEdges => [...currentEdges, ...newEdges]);
+          const initializedEdges = workflowData.edges.map(edge => ({
+            id: edge.id,
+            source: edge.source,
+            target: edge.target,
+            type: edge.type || 'animated',
+            animated: edge.animated !== false,
+            data: {
+              ...edge.data,
+              isActive: false
+            }
+          }));
+          setEdges(initializedEdges);
         }
       } else {
         toast.error('Failed to load workflow data');
@@ -371,7 +357,7 @@ export default function WorkflowPage() {
   return (
     <div className="flex h-screen bg-[#0e0e20]">
       {/* Left sidebar for node types */}
-      <NodeSidebar workflowDarkMode={true} />
+      <NodeSidebar workflowDarkMode={true} nodes={nodes} edges={edges} />
 
       {/* Main workflow area */}
       <div className="flex-1 flex flex-col h-full bg-[#0e0e20] relative">
