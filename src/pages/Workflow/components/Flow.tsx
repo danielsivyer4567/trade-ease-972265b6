@@ -360,7 +360,7 @@ function FlowContent({ onInit, workflowId, onNodeSelect, workflowDarkMode = true
   // Create stable node objects to prevent unnecessary re-renders
   const createStableNode = useCallback((type, position, data) => {
     // Create a unique ID with timestamp to avoid conflicts
-    const uniqueId = `${type}-${Date.now()}`;
+    const uniqueId = `${type}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
     
     // Create a stable node object
     return {
@@ -377,14 +377,15 @@ function FlowContent({ onInit, workflowId, onNodeSelect, workflowDarkMode = true
       },
       // Apply fixed classes only
       className: `resizable ${type}`,
-      // Disable all drag animations in React Flow
+      // Enable dragging but disable animations
       draggable: true,
       selectable: true,
-      // Add custom styling to prevent style changes
+      // Disable all animations and transitions
       style: {
         transition: 'none',
-        animationDuration: '0ms',
-        transform: 'translate3d(0,0,0)'
+        animation: 'none',
+        transform: `translate(${position.x}px, ${position.y}px)`,
+        pointerEvents: 'all'
       }
     };
   }, [actualDarkMode]);
@@ -408,7 +409,10 @@ function FlowContent({ onInit, workflowId, onNodeSelect, workflowDarkMode = true
         description: getNodeDescription(type)
       });
 
-      setNodes((nds) => nds.concat(newNode));
+      // Use requestAnimationFrame to ensure smooth addition
+      requestAnimationFrame(() => {
+        setNodes((nds) => nds.concat(newNode));
+      });
     },
     [instance, createStableNode, setNodes]
   );
