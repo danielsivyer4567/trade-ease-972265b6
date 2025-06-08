@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Workflow Template Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .template-card {
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .template-card:hover {
+            background-color: #f0f0f0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .template-title {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        .template-description {
+            color: #666;
+            font-size: 14px;
+        }
+        .button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        .button:hover {
+            background-color: #45a049;
+        }
+        .status {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 4px;
+            display: none;
+        }
+        .status.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+            display: block;
+        }
+        .status.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Workflow Template Test</h1>
+        <p>Click on a template to simulate loading it into the workflow canvas:</p>
+        
+        <div id="templates">
+            <div class="template-card" onclick="loadTemplate('customer-onboarding')">
+                <div class="template-title">Customer Onboarding</div>
+                <div class="template-description">Standard workflow for onboarding new customers</div>
+                <div style="margin-top: 10px; font-size: 12px; color: #888;">
+                    Nodes: 2 | Connections: 1
+                </div>
+            </div>
+            
+            <div class="template-card" onclick="loadTemplate('project-management')">
+                <div class="template-title">Project Management</div>
+                <div class="template-description">Workflow for handling construction project tasks</div>
+                <div style="margin-top: 10px; font-size: 12px; color: #888;">
+                    Nodes: 3 | Connections: 2
+                </div>
+            </div>
+            
+            <div class="template-card" onclick="loadTemplate('sales-pipeline')">
+                <div class="template-title">Sales Pipeline</div>
+                <div class="template-description">Manage leads through your sales funnel</div>
+                <div style="margin-top: 10px; font-size: 12px; color: #888;">
+                    Nodes: 3 | Connections: 2
+                </div>
+            </div>
+        </div>
+        
+        <button class="button" onclick="navigateToWorkflow()">Go to Workflow Page</button>
+        
+        <div id="status" class="status"></div>
+        
+        <h2 style="margin-top: 30px;">Test Instructions:</h2>
+        <ol>
+            <li>Click on any template card above</li>
+            <li>The template data will be stored in localStorage</li>
+            <li>Click "Go to Workflow Page" to navigate to the workflow canvas</li>
+            <li>The template should load automatically on the canvas</li>
+        </ol>
+        
+        <h3>Current localStorage Data:</h3>
+        <pre id="localStorage-data" style="background: #f5f5f5; padding: 10px; border-radius: 4px; overflow-x: auto;"></pre>
+    </div>
+    
+    <script>
+        // Template data matching the example templates
+        const templates = {
+            'customer-onboarding': {
+                id: 'customer-onboarding',
+                name: 'Customer Onboarding',
+                description: 'Standard workflow for onboarding new customers',
+                data: {
+                    nodes: [
+                        {
+                            id: 'create-customer',
+                            type: 'customerNode',
+                            position: { x: 100, y: 100 },
+                            data: { label: 'Create Customer' }
+                        },
+                        {
+                            id: 'send-welcome',
+                            type: 'emailNode',
+                            position: { x: 300, y: 100 },
+                            data: { label: 'Send Welcome Email' }
+                        }
+                    ],
+                    edges: [
+                        {
+                            id: 'e1',
+                            source: 'create-customer',
+                            target: 'send-welcome'
+                        }
+                    ]
+                }
+            },
+            'project-management': {
+                id: 'project-management',
+                name: 'Project Management',
+                description: 'Workflow for handling construction project tasks',
+                data: {
+                    nodes: [
+                        {
+                            id: 'create-project',
+                            type: 'jobNode',
+                            position: { x: 100, y: 100 },
+                            data: { label: 'Create Project' }
+                        },
+                        {
+                            id: 'assign-team',
+                            type: 'customNode',
+                            position: { x: 300, y: 100 },
+                            data: { label: 'Assign Team' }
+                        },
+                        {
+                            id: 'schedule-tasks',
+                            type: 'taskNode',
+                            position: { x: 500, y: 100 },
+                            data: { label: 'Schedule Tasks' }
+                        }
+                    ],
+                    edges: [
+                        {
+                            id: 'e1',
+                            source: 'create-project',
+                            target: 'assign-team'
+                        },
+                        {
+                            id: 'e2',
+                            source: 'assign-team',
+                            target: 'schedule-tasks'
+                        }
+                    ]
+                }
+            },
+            'sales-pipeline': {
+                id: 'sales-pipeline',
+                name: 'Sales Pipeline',
+                description: 'Manage leads through your sales funnel',
+                data: {
+                    nodes: [
+                        {
+                            id: 'lead-capture',
+                            type: 'customerNode',
+                            position: { x: 100, y: 100 },
+                            data: { label: 'Lead Capture' }
+                        },
+                        {
+                            id: 'qualification',
+                            type: 'customNode',
+                            position: { x: 300, y: 100 },
+                            data: { label: 'Qualification' }
+                        },
+                        {
+                            id: 'proposal',
+                            type: 'quoteNode',
+                            position: { x: 500, y: 100 },
+                            data: { label: 'Send Proposal' }
+                        }
+                    ],
+                    edges: [
+                        {
+                            id: 'e1',
+                            source: 'lead-capture',
+                            target: 'qualification'
+                        },
+                        {
+                            id: 'e2',
+                            source: 'qualification',
+                            target: 'proposal'
+                        }
+                    ]
+                }
+            }
+        };
+        
+        function loadTemplate(templateId) {
+            const template = templates[templateId];
+            if (!template) {
+                showStatus('Template not found', 'error');
+                return;
+            }
+            
+            // Store template data in localStorage
+            const templateData = {
+                templateId: template.id,
+                templateName: template.name,
+                templateDescription: template.description,
+                templateData: template.data,
+                timestamp: Date.now()
+            };
+            
+            localStorage.setItem('workflow_template_data', JSON.stringify(templateData));
+            
+            showStatus(`Template "${template.name}" loaded into localStorage. Click "Go to Workflow Page" to see it in action.`, 'success');
+            updateLocalStorageDisplay();
+        }
+        
+        function navigateToWorkflow() {
+            // In a real app, this would navigate to the workflow page
+            // For testing, we'll just show what would happen
+            const templateData = localStorage.getItem('workflow_template_data');
+            if (templateData) {
+                showStatus('Navigate to http://localhost:8081/workflow with state: { useTemplate: true, fromLocalStorage: true }', 'success');
+                // In the real app: navigate('/workflow', { state: { useTemplate: true, fromLocalStorage: true } });
+                window.location.href = 'http://localhost:8081/workflow';
+            } else {
+                showStatus('No template selected. Please select a template first.', 'error');
+            }
+        }
+        
+        function showStatus(message, type) {
+            const statusEl = document.getElementById('status');
+            statusEl.textContent = message;
+            statusEl.className = `status ${type}`;
+        }
+        
+        function updateLocalStorageDisplay() {
+            const data = localStorage.getItem('workflow_template_data');
+            const displayEl = document.getElementById('localStorage-data');
+            if (data) {
+                displayEl.textContent = JSON.stringify(JSON.parse(data), null, 2);
+            } else {
+                displayEl.textContent = 'No template data in localStorage';
+            }
+        }
+        
+        // Initial display
+        updateLocalStorageDisplay();
+        
+        // Clear old data on page load
+        if (localStorage.getItem('workflow_template_data')) {
+            const data = JSON.parse(localStorage.getItem('workflow_template_data'));
+            if (data.timestamp && Date.now() - data.timestamp > 5 * 60 * 1000) {
+                localStorage.removeItem('workflow_template_data');
+                updateLocalStorageDisplay();
+            }
+        }
+    </script>
+</body>
+</html> 
