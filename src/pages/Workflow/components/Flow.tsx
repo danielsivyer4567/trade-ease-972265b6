@@ -427,41 +427,51 @@ function FlowContent({ onInit, workflowId, onNodeSelect, workflowDarkMode = true
       },
       // Apply fixed classes only
       className: `resizable ${validType}`,
-      // Enable dragging but disable animations
+      // Enable dragging
       draggable: true,
-      selectable: true,
-      // Disable all animations and transitions
-      style: {
-        transition: 'none',
-        animation: 'none',
-        transform: `translate(${position.x}px, ${position.y}px)`,
-        pointerEvents: 'all'
-      }
+      selectable: true
     };
   }, [actualDarkMode]);
 
   const onDrop = useCallback(
     (event) => {
       event.preventDefault();
+      console.log('DEBUG: onDrop called', event);
 
       const type = event.dataTransfer.getData('application/reactflow');
-      if (!type) return;
+      console.log('DEBUG: Dropped node type:', type);
+      
+      if (!type) {
+        console.warn('No node type found in drag data');
+        return;
+      }
 
-      if (!instance) return;
+      if (!instance) {
+        console.warn('Flow instance not ready');
+        return;
+      }
 
       const position = instance.screenToFlowPosition({
         x: event.clientX,
         y: event.clientY,
       });
       
+      console.log('DEBUG: Calculated position:', position);
+      
       const newNode = createStableNode(type, position, { 
         label: type.replace('Node', ''),
         description: getNodeDescription(type)
       });
 
+      console.log('DEBUG: Created new node:', newNode);
+
       // Use requestAnimationFrame to ensure smooth addition
       requestAnimationFrame(() => {
-        setNodes((nds) => nds.concat(newNode));
+        setNodes((nds) => {
+          const updated = nds.concat(newNode);
+          console.log('DEBUG: Updated nodes:', updated);
+          return updated;
+        });
       });
     },
     [instance, createStableNode, setNodes]
@@ -470,6 +480,7 @@ function FlowContent({ onInit, workflowId, onNodeSelect, workflowDarkMode = true
   const onDragOver = useCallback((event) => {
     event.preventDefault();
     event.dataTransfer.dropEffect = 'move';
+    console.log('DEBUG: onDragOver called');
   }, []);
 
   // Initialize the animation hook

@@ -115,8 +115,10 @@ const nodeTypes = [
 
 export function NodeSidebar({ targetData, workflowDarkMode = false, nodes, edges }: NodeSidebarProps) {
   const handleDragStart = (event, nodeType) => {
+    console.log('DEBUG: Drag started for node type:', nodeType);
     event.dataTransfer.setData('application/reactflow', nodeType);
     event.dataTransfer.effectAllowed = 'move';
+    console.log('DEBUG: Data set in dataTransfer');
   };
 
   return (
