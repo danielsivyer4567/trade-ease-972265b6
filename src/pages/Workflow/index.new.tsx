@@ -51,6 +51,7 @@ interface WorkflowData {
 }
 
 export default function WorkflowPage() {
+  console.log('DEBUG: WorkflowPage component rendering');
   const { id } = useParams();
   const location = useLocation();
   const navigate = useNavigate();

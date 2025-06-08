@@ -33,74 +33,46 @@ function AutomationNode({ data, isConnectable, id }: NodeProps) {
     });
   }, [id, displayLabel, displayDescription, workflowDarkMode, nodeData]);
   
-  // Memoize the node content to prevent unnecessary re-renders
-  const nodeContent = useMemo(() => {
-    console.log('DEBUG: AutomationNode content memo recalculated', { id });
-    
-    return (
-      <div 
-        className="node-content border-2 rounded-xl shadow-md p-3 w-44 transition-transform duration-150 hover:scale-105 hover:shadow-xl"
-        style={{
-          backgroundColor: workflowDarkMode ? DARK_BG : 'white',
-          borderColor: workflowDarkMode ? DARK_GOLD : '#c04aff',
-          color: workflowDarkMode ? DARK_TEXT : '#111827'
-        }}
-      >
-        <div className="flex items-center">
-          <div 
-            className="w-9 h-9 rounded-full flex items-center justify-center mr-3 shadow-sm"
-            style={{ 
-              backgroundColor: workflowDarkMode ? DARK_BG : '#f4f4f5',
-              border: `2px solid ${workflowDarkMode ? DARK_GOLD : '#c04aff'}`
-            }}
-          >
-            {nodeData.icon || nodeData.iconComponent || <Zap className="h-5 w-5" style={{ color: workflowDarkMode ? DARK_GOLD : '#c04aff' }} />}
-          </div>
-          <div>
-            <div 
-              className="font-bold text-sm"
-              style={{ color: workflowDarkMode ? DARK_TEXT : '#111827' }}
-            >
-              {displayLabel}
-            </div>
-            <div 
-              className="text-xs"
-              style={{ color: workflowDarkMode ? 'rgba(255, 224, 130, 0.9)' : '#6b7280' }}
-            >
-              {displayDescription}
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }, [nodeData.icon, nodeData.iconComponent, displayLabel, displayDescription, workflowDarkMode]);
-  
-  // Pre-compute styles for handles to ensure they're stable
-  const handleStyle = useMemo(() => ({
-    background: workflowDarkMode ? DARK_GOLD : '#c04aff',
-    border: '2px solid white',
-    width: 12,
-    height: 12
-  }), [workflowDarkMode]);
-  
+  // Fixed style for debugging
   return (
-    <>
+    <div style={{
+      position: 'absolute',
+      width: '200px',
+      height: '100px',
+      backgroundColor: 'purple',
+      color: 'white',
+      padding: '10px',
+      border: '3px solid yellow',
+      borderRadius: '8px',
+      zIndex: 1000,
+      boxShadow: '0 0 10px rgba(0,0,0,0.5)'
+    }}>
+      <div>ID: {id}</div>
+      <div>Label: {displayLabel}</div>
+      <div>Description: {displayDescription}</div>
+      
       <Handle
         type="target"
         position={Position.Left}
-        style={handleStyle}
+        style={{
+          background: 'yellow',
+          width: 15,
+          height: 15
+        }}
         isConnectable={isConnectable}
       />
-      
-      {nodeContent}
       
       <Handle
         type="source"
         position={Position.Right}
-        style={handleStyle}
+        style={{
+          background: 'yellow',
+          width: 15,
+          height: 15
+        }}
         isConnectable={isConnectable}
       />
-    </>
+    </div>
   );
 }
 
