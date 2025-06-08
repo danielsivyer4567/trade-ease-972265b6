@@ -58,19 +58,16 @@ class StartupService {
       if (profileError) {
         console.error('Error checking for user profile:', profileError);
         return;
-      }
-        
-        // If no profile, create one
-        if (!profiles) {
-          const { data: insertData, error: insertError } = await supabase
-            .from('user_profiles')
-            .insert({
-              user_id: user.id,
-              email: user.email,
-              name: user.user_metadata?.name || user.email,
-              two_factor_enabled: false,
-              created_at: new Date().toISOString()
-            });
+      if (!profiles) {
+        // Create user profile if it doesn't exist
+        const { error: insertError } = await supabase
+          .from('user_profiles')
+          .insert({
+            user_id: user.id,
+            name: user.user_metadata?.name || user.email,
+            two_factor_enabled: false,
+            created_at: new Date().toISOString()
+          });
             
           if (insertError) {
             if (insertError.code === '42P01') {

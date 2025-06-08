@@ -259,8 +259,7 @@ export function CustomerJourney({ customerId }: CustomerJourneyProps) {
         <div 
           className="absolute inset-0" 
           style={{
-            backgroundImage: 'radial-gradient(circle, rgba(0, 0, 0, 0.05) 1px, transparent 1px)',
-            backgroundSize: '20px 20px'
+            backgroundImage: 'none',
           }}
         ></div>
       </div>

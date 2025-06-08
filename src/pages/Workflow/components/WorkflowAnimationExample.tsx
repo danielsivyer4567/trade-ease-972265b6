@@ -79,7 +79,7 @@ export function WorkflowAnimationExample({
   };
   
   return (
-    <Card className="p-3 flex flex-col space-y-2 absolute bottom-4 right-4 z-10">
+    <Card className="p-3 flex flex-col space-y-2 absolute bottom-4 left-4 z-10">
       <div className="flex items-center space-x-2">
         <Zap className="h-4 w-4 text-amber-500" />
         <span className="text-sm font-medium">Connection Animation</span>

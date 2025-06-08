@@ -38,9 +38,15 @@ export function useCustomers() {
     setError(null);
     
     try {
+      console.log('Fetching customers from Supabase...');
       const { data: session } = await supabase.auth.getSession();
+      
+      // Debug auth session
+      console.log('Auth session:', session ? 'Found' : 'Not found');
+      
       if (!session?.session?.user) {
         const errMsg = "Authentication Error: You must be logged in to view customers";
+        console.error(errMsg);
         setError(errMsg);
         uiToast({
           title: "Authentication Error",
@@ -50,6 +56,7 @@ export function useCustomers() {
         return [];
       }
 
+      console.log('Querying customers table with user_id:', session.session.user.id);
       const { data, error } = await supabase
         .from('customers')
         .select('*')
@@ -57,11 +64,14 @@ export function useCustomers() {
         .order('name');
 
       if (error) {
+        console.error('Supabase query error:', error);
         throw error;
       }
 
+      console.log(`Retrieved ${data?.length || 0} customers from database`);
+      
       // Map database fields to our interface format
-      const formattedData = data.map(customer => ({
+      const formattedData = (data || []).map(customer => ({
         ...customer,
         zipCode: customer.zipcode, // Map zipcode from DB to zipCode in our interface
         business_name: customer.business_name || undefined,
@@ -77,13 +87,25 @@ export function useCustomers() {
       return formattedData;
     } catch (error: any) {
       const errMsg = error.message || "An unexpected error occurred";
-      setError(errMsg);
       console.error("Exception fetching customers:", error);
-      uiToast({
-        title: "Error",
-        description: errMsg,
-        variant: "destructive"
-      });
+      setError(errMsg);
+      
+      // Check for specific database errors
+      if (error.code === '42P01') {
+        console.error("Table 'customers' does not exist. Please ensure the database is properly set up.");
+        uiToast({
+          title: "Database Error",
+          description: "The customers table does not exist. Database setup may be required.",
+          variant: "destructive"
+        });
+      } else {
+        uiToast({
+          title: "Error",
+          description: errMsg,
+          variant: "destructive"
+        });
+      }
+      
       return [];
     } finally {
       setIsLoading(false);

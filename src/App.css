@@ -122,8 +122,7 @@
 
 .workflow-dark-mode-flow .react-flow__pane {
   background-color: transparent !important;
-  background-image: radial-gradient(circle, rgba(255, 255, 255, 0.03) 1px, transparent 1px) !important;
-  background-size: 20px 20px !important;
+  background-image: none !important;
 }
 
 .workflow-dark-mode-flow .react-flow__node {
@@ -482,9 +481,8 @@
   width: 10px;
   height: 10px;
   cursor: nwse-resize;
-  background-image: radial-gradient(circle, rgba(255, 255, 255, 0.8) 1px, transparent 2px);
-  background-size: 3px 3px;
-  background-position: bottom right;
+  background-color: rgba(255, 255, 255, 0.5);
+  border-radius: 2px;
   z-index: 10;
 }
 
