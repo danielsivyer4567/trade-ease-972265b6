@@ -86,6 +86,10 @@ const defaultEdges = [];
 
 // The actual Flow component content
 function FlowContent({ onInit, workflowId, onNodeSelect, workflowDarkMode = true, nodes: externalNodes, edges: externalEdges, setNodes: externalSetNodes, setEdges: externalSetEdges }: FlowProps) {
+  console.log('DEBUG: FlowContent component rendering', { 
+    hasNodes: externalNodes && externalNodes.length > 0,
+    hasEdges: externalEdges && externalEdges.length > 0
+  });
   // Always use dark mode
   const actualDarkMode = true;
   
@@ -511,8 +515,9 @@ function FlowContent({ onInit, workflowId, onNodeSelect, workflowDarkMode = true
       ref={containerRef}
       style={{ 
         width: '100%', 
-        height: '100%',
-        position: 'relative'
+        height: '100%', 
+        background: actualDarkMode ? DARK_BG : '#f9fafb',
+        border: '5px solid red' // Add a visible border for debugging
       }}
       className={animationActiveEdges.size > 0 ? 'workflow-active-edges' : ''}
     >
