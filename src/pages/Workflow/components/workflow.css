@@ -323,4 +323,48 @@
 
 .react-flow__node, .react-flow__node * {
   z-index: 1000 !important;
+}
+
+/* Disable all animations and transitions for React Flow nodes to prevent glitching */
+.react-flow__node {
+  transition: none !important;
+  animation: none !important;
+}
+
+.react-flow__node.dragging {
+  transition: none !important;
+  animation: none !important;
+}
+
+.react-flow__node-customerNode,
+.react-flow__node-jobNode,
+.react-flow__node-taskNode,
+.react-flow__node-quoteNode,
+.react-flow__node-messagingNode,
+.react-flow__node-emailNode,
+.react-flow__node-whatsappNode,
+.react-flow__node-visionNode,
+.react-flow__node-automationNode,
+.react-flow__node-socialNode,
+.react-flow__node-customNode {
+  transition: none !important;
+  animation: none !important;
+}
+
+/* Ensure nodes have stable positioning */
+.react-flow__node > div {
+  transition: none !important;
+  animation: none !important;
+}
+
+/* Disable viewport transitions that might cause glitching */
+.react-flow__viewport {
+  transition: none !important;
+}
+
+/* Ensure smooth dragging without animations */
+.react-flow__node.selected,
+.react-flow__node:focus {
+  transition: none !important;
+  animation: none !important;
 } 

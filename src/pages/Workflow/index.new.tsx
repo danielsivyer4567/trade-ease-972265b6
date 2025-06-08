@@ -242,91 +242,57 @@ export default function WorkflowPage() {
     
     console.log('Adding automation node with preserveExisting =', preserveExisting);
     
-    // Only clear the canvas if explicitly told not to preserve existing content
-    if (preserveExisting === false) {
-      console.log('Clearing canvas before adding automation node');
-      setNodes([]);
-      setEdges([]);
+    // Calculate position - place it to the right of existing nodes if there are any
+    const existingNodes = nodes;
+    let xPosition = 100;
+    let yPosition = 100;
+    
+    if (existingNodes.length > 0) {
+      // Find the rightmost node
+      const rightmostNode = existingNodes.reduce((rightmost, node) => {
+        return (node.position.x > rightmost.position.x) ? node : rightmost;
+      }, existingNodes[0]);
       
-      // Add the node after clearing
-      setTimeout(() => {
-        addNewAutomationNode();
-      }, 50);
-    } else {
-      // Simply add the node to existing canvas
-      addNewAutomationNode();
+      // Position the new node to the right with some spacing
+      xPosition = rightmostNode.position.x + 250;
+      yPosition = rightmostNode.position.y;
     }
     
-    function addNewAutomationNode() {
-      // Calculate position - place it to the right of existing nodes if there are any
-      const existingNodes = nodes;
-      let xPosition = 100;
-      let yPosition = 100;
-      
-      console.log('DEBUG: Starting to add automation node', { existingNodes });
-      
-      if (existingNodes.length > 0) {
-        // Find the rightmost node
-        const rightmostNode = existingNodes.reduce((rightmost, node) => {
-          return (node.position.x > rightmost.position.x) ? node : rightmost;
-        }, existingNodes[0]);
-        
-        // Position the new node to the right with some spacing
-        xPosition = rightmostNode.position.x + 250;
-        yPosition = rightmostNode.position.y; // Keep same Y coordinate as rightmost node
-        
-        console.log('DEBUG: Positioning node relative to rightmost node', { 
-          rightmostNode: rightmostNode.id,
-          rightmostX: rightmostNode.position.x,
-          newX: xPosition,
-          newY: yPosition
-        });
-      } else {
-        console.log('DEBUG: No existing nodes, using default position', { xPosition, yPosition });
+    const position = { x: xPosition, y: yPosition };
+    
+    // Create a unique ID with timestamp to avoid conflicts
+    const uniqueId = `automation-${automationId}-${Date.now()}`;
+    
+    const newNode = {
+      id: uniqueId,
+      type: 'automationNode',
+      position,
+      data: {
+        automationId: automationId,
+        title: automationTitle || `Automation ${automationId}`,
+        description: automationDescription || '',
+        label: automationTitle || `Automation ${automationId}`,
+        icon: nodeTypeIcons.automationNode,
+        workflowDarkMode: true
+      },
+      // Disable animations
+      style: {
+        transition: 'none',
+        animation: 'none'
       }
+    };
+    
+    // Batch update nodes and edges together
+    if (preserveExisting === false) {
+      // Clear and add in one update
+      setNodes([ensureNodeIcon(newNode)]);
+      setEdges([]);
+    } else {
+      // Add to existing nodes
+      const newNodes = [...nodes, ensureNodeIcon(newNode)];
+      setNodes(newNodes);
       
-      const position = { x: xPosition, y: yPosition };
-      
-      // Create a unique ID with timestamp to avoid conflicts
-      const uniqueId = `automation-${automationId}-${Date.now()}`;
-      
-      console.log('DEBUG: Creating automation node with ID', uniqueId);
-      
-      const newNode = {
-        id: uniqueId,
-        type: 'automationNode',
-        position,
-        data: {
-          automationId: automationId,
-          title: automationTitle || `Automation ${automationId}`,
-          description: automationDescription || '',
-          label: automationTitle || `Automation ${automationId}`,
-          icon: nodeTypeIcons.automationNode,
-          workflowDarkMode: true // Explicitly set dark mode for the node
-        }
-      };
-      
-      console.log('DEBUG: Node object created', newNode);
-      
-      setNodes(nds => {
-        const newNodes = [...nds, ensureNodeIcon(newNode)];
-        console.log('DEBUG: Nodes after adding:', newNodes);
-        return newNodes;
-      });
-      
-      // Auto-fit the view to show all nodes
-      setTimeout(() => {
-        if (flowInstance) {
-          console.log('DEBUG: Fitting view to show all nodes');
-          flowInstance.fitView({ padding: 0.2 });
-        } else {
-          console.log('DEBUG: Cannot fit view - flowInstance is null');
-        }
-      }, 100);
-      
-      toast.success(`Added automation: ${automationTitle || `Automation ${automationId}`}`);
-      
-      // If there are existing nodes, try to connect to the rightmost one
+      // If there are existing nodes, connect to the rightmost one
       if (existingNodes.length > 0) {
         const rightmostNode = existingNodes.reduce((rightmost, node) => {
           return (node.position.x > rightmost.position.x) ? node : rightmost;
@@ -339,19 +305,22 @@ export default function WorkflowPage() {
           type: 'animated',
           animated: true,
           data: {
-            isActive: false // Default to inactive
+            isActive: false
           }
         };
         
-        console.log('DEBUG: Adding edge connecting to rightmost node', newEdge);
-        
-        setEdges(eds => {
-          const newEdges = [...eds, newEdge];
-          console.log('DEBUG: Edges after adding:', newEdges);
-          return newEdges;
-        });
+        setEdges(eds => [...eds, newEdge]);
       }
     }
+    
+    // Fit view after a small delay to ensure DOM updates
+    requestAnimationFrame(() => {
+      if (flowInstance) {
+        flowInstance.fitView({ padding: 0.2, duration: 0 }); // No animation duration
+      }
+    });
+    
+    toast.success(`Added automation: ${automationTitle || `Automation ${automationId}`}`);
   };
 
   return (
