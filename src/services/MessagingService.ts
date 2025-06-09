@@ -76,7 +76,7 @@ export const MessagingService = {
 
       if (error) throw error;
 
-      // Queue message for sending (in production, this would trigger actual sending)
+      // Queue message for sending (browser-compatible simulation)
       await queueMessageForSending(message);
 
       logger.info('Message created and queued:', message);
@@ -216,47 +216,52 @@ export const MessagingService = {
     });
   },
 
-  async sendEmail(emailData: any) {
+  /**
+   * Send message via backend API (for production use)
+   */
+  sendViaBackend: async (params: SendMessageParams): Promise<{ success: boolean; error?: any }> => {
     try {
-      // Implement email sending logic here
-      logger.info('Email sent:', emailData);
-      return { success: true };
-    } catch (error) {
-      logger.error('Failed to send email:', error);
-      return { success: false, error };
-    }
-  },
+      // In production, this would call your backend API that handles Twilio/SendGrid
+      const response = await fetch('/api/send-message', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(params),
+      });
 
-  async sendWhatsApp(whatsappData: any) {
-    try {
-      // Implement WhatsApp sending logic here
-      logger.info('WhatsApp message sent:', whatsappData);
-      return { success: true };
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      return { success: true, ...result };
     } catch (error) {
-      logger.error('Failed to send WhatsApp message:', error);
-      return { success: false, error };
+      logger.error('Failed to send message via backend:', error);
+      return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
     }
   }
 };
 
 /**
- * Queue message for sending (placeholder for actual implementation)
+ * Queue message for sending (browser-compatible simulation)
+ * In production, this would trigger a backend API call or webhook
  */
 async function queueMessageForSending(message: Message): Promise<void> {
-  // In production, this would:
-  // 1. Add to a message queue (e.g., RabbitMQ, AWS SQS)
-  // 2. Trigger a webhook to a messaging service
-  // 3. Call appropriate API (SendGrid for email, Twilio for SMS/WhatsApp)
+  // Simulate sending process in development
+  logger.info(`Queuing ${message.type} message to ${message.recipient}`);
   
-  // For now, we'll simulate sending after a delay
+  // Simulate async sending with delays
   setTimeout(async () => {
     try {
-      // Simulate sending
+      // Simulate successful sending
       await MessagingService.updateMessageStatus(message.id, 'sent');
+      logger.info(`Message ${message.id} marked as sent`);
       
       // Simulate delivery after another delay
       setTimeout(async () => {
         await MessagingService.updateMessageStatus(message.id, 'delivered');
+        logger.info(`Message ${message.id} marked as delivered`);
       }, 2000);
     } catch (error) {
       await MessagingService.updateMessageStatus(
@@ -264,6 +269,7 @@ async function queueMessageForSending(message: Message): Promise<void> {
         'failed', 
         error instanceof Error ? error.message : 'Unknown error'
       );
+      logger.error(`Message ${message.id} failed:`, error);
     }
   }, 1000);
 } 
