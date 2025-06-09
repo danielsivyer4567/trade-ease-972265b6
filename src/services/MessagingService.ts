@@ -100,8 +100,7 @@ export const MessagingService = {
       const { data: message, error } = await supabase
         .from('messages')
         .select('*')
-        .eq('id', messageId)
-        .eq('user_id', session.user.id)
+        .match({ id: messageId, user_id: session.user.id })
         .single();
 
       if (error) throw error;

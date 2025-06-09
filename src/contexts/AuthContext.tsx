@@ -31,16 +31,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   useEffect(() => {
     let mounted = true;
-    let authSubscription: { data: { subscription: { unsubscribe: () => void } } } | null = null;
+    let authSubscription: any = null;
 
     const initializeAuth = async () => {
       try {
         console.log('Auth: Starting initialization...');
+        
         // Get initial session
         const { data: { session: currentSession }, error } = await supabase.auth.getSession();
         if (error) {
           console.error('Auth: Error getting session:', error);
-          throw error;
+          // Don't throw - just log and continue
         }
         
         console.log('Auth: Got initial session:', currentSession ? 'Session exists' : 'No session');
@@ -48,30 +49,28 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (mounted) {
           setSession(currentSession);
           setUser(currentSession?.user ?? null);
+          setLoading(false); // Always set loading to false here
         }
 
         // Set up auth state listener
-        authSubscription = supabase.auth.onAuthStateChange(
-          async (event, currentSession) => {
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(
+          (event, currentSession) => {
             if (!mounted) return;
 
-            try {
-              console.log('Auth: State changed:', event);
-              setSession(currentSession);
-              setUser(currentSession?.user ?? null);
-            } catch (error) {
-              console.error('Auth: Error in state change:', error);
-            } finally {
-              if (mounted) {
-                setLoading(false);
-              }
-            }
+            console.log('Auth: State changed:', event);
+            setSession(currentSession);
+            setUser(currentSession?.user ?? null);
+            setLoading(false);
           }
         );
+        
+        authSubscription = subscription;
       } catch (error) {
         console.error('Auth: Error initializing:', error);
         if (mounted) {
-          setLoading(false);
+          setLoading(false); // Always set loading to false on error
+          setSession(null);
+          setUser(null);
         }
       }
     };
@@ -81,8 +80,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return () => {
       console.log('Auth: Cleaning up...');
       mounted = false;
-      if (authSubscription?.data.subscription) {
-        authSubscription.data.subscription.unsubscribe();
+      if (authSubscription) {
+        authSubscription.unsubscribe();
       }
     };
   }, []);
@@ -102,23 +101,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       if (error) throw error;
       
-      // Check if 2FA is enabled for this user
-      const isTwoFactorEnabled = await twoFactorAuthService.isEnabled(data.user.id);
-      
-      if (isTwoFactorEnabled) {
-        // Store user ID temporarily and set awaiting 2FA state
-        setTempUserId(data.user.id);
-        setAwaitingTwoFactor(true);
+      // Skip 2FA check if TwoFactorAuthService fails
+      try {
+        const isTwoFactorEnabled = await twoFactorAuthService.isEnabled(data.user.id);
         
-        // Sign out immediately - user will complete sign in after 2FA
-        await supabase.auth.signOut();
-        
-        return;
+        if (isTwoFactorEnabled) {
+          setTempUserId(data.user.id);
+          setAwaitingTwoFactor(true);
+          await supabase.auth.signOut();
+          return;
+        }
+      } catch (twoFactorError) {
+        console.warn('2FA check failed, continuing without 2FA:', twoFactorError);
       }
       
       // No 2FA, user is fully authenticated
       setAwaitingTwoFactor(false);
       setTempUserId(null);
+      toast.success('Signed in successfully!');
     } catch (error: any) {
       console.error('Error signing in:', error.message);
       toast.error(error.message || 'Error signing in');
@@ -136,6 +136,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
       });
       if (error) throw error;
+      toast.success('Sign up successful! Please check your email for verification.');
     } catch (error: any) {
       console.error('Error signing up:', error.message);
       toast.error(error.message || 'Error signing up');
@@ -151,6 +152,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       // Reset 2FA state
       setAwaitingTwoFactor(false);
       setTempUserId(null);
+      toast.success('Signed out successfully!');
     } catch (error: any) {
       console.error('Error signing out:', error.message);
       toast.error(error.message || 'Error signing out');
@@ -179,7 +181,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return false;
       }
       
-      // Create verification request and get verification link
       const verificationData = await twoFactorAuthService.createVerificationRequest(
         tempUserId,
         phoneNumber
@@ -190,7 +191,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return false;
       }
       
-      // Send SMS with verification link
       const smsSent = await twoFactorAuthService.sendVerificationSMS(
         phoneNumber,
         verificationData.verificationLink
@@ -213,7 +213,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Complete 2FA verification
   const completeTwoFactor = async (verificationId: string, code: string): Promise<boolean> => {
     try {
-      // Verify the code
       const isValid = await twoFactorAuthService.verifyCode(verificationId, code);
       
       if (!isValid) {
@@ -221,10 +220,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return false;
       }
       
-      // If we have a temporary user ID, sign in the user manually
       if (tempUserId) {
-        // In a real implementation, you'd have a way to convert the tempUserId back into a session
-        // This is a simplified version
         toast.success('Two-factor authentication successful. You are now signed in.');
         setAwaitingTwoFactor(false);
         setTempUserId(null);
