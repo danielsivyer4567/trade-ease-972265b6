@@ -13,29 +13,26 @@ if (import.meta.env.DEV) {
 const supabaseUrl = SUPABASE_CONFIG.url;
 const supabaseAnonKey = SUPABASE_CONFIG.anonKey;
 
-// Validate environment variables but don't throw errors
-let supabaseInitialized = true;
+// Validate environment variables
 if (!supabaseUrl || !supabaseAnonKey) {
-  console.error('Supabase credentials are not properly defined. Some features may not work correctly.');
-  supabaseInitialized = false;
+  console.error('Supabase credentials are missing. Please check your environment variables.');
+  throw new Error('Supabase credentials are required');
 }
 
 // Create a single instance of the Supabase client for the entire app
-// If not initialized properly, create a mock client that will gracefully fail
-export const supabase = supabaseInitialized 
-  ? createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.anonKey)
-  : createMockSupabaseClient();
+export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+  auth: {
+    autoRefreshToken: true,
+    persistSession: true,
+    detectSessionInUrl: true
+  }
+});
 
 // Create an admin client with the service role key for privileged operations
 export const supabaseAdmin = null;
 
 // Add the demo data generation function
 export const generateDemoData = async () => {
-  if (!supabaseInitialized) {
-    console.warn('Supabase not initialized, cannot generate demo data');
-    return { error: 'Supabase not initialized' };
-  }
-  
   try {
     const response = await supabase.functions.invoke('generate-demo-data', {
       method: 'POST',

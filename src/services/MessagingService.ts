@@ -1,11 +1,20 @@
 import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/utils/logger';
-const twilio = require('twilio');
 
-const twilioSid = process.env.TWILIO_SID;
-const twilioAuthToken = process.env.TWILIO_AUTH_TOKEN;
-const twilioPhoneNumber = process.env.TWILIO_PHONE_NUMBER;
-const twilioClient = twilio(twilioSid, twilioAuthToken);
+// Environment variables
+const twilioSid = import.meta.env.VITE_TWILIO_SID;
+const twilioAuthToken = import.meta.env.VITE_TWILIO_AUTH_TOKEN;
+const twilioPhoneNumber = import.meta.env.VITE_TWILIO_PHONE_NUMBER;
+
+// Initialize Twilio client only if credentials are available
+let twilioClient: any = null;
+if (twilioSid && twilioAuthToken) {
+  import('twilio').then(({ default: twilio }) => {
+    twilioClient = twilio(twilioSid, twilioAuthToken);
+  }).catch(error => {
+    console.warn('Twilio initialization failed:', error);
+  });
+}
 
 export interface SendMessageParams {
   type: 'messagingNode' | 'emailNode' | 'whatsappNode' | 'sms';

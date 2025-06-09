@@ -6,14 +6,15 @@ import path from "path";
 export default defineConfig({
   server: {
     port: 8080,
-    host: true,
+    host: '0.0.0.0',
     open: true,
-    strictPort: false,
+    strictPort: true,
     hmr: {
       host: 'localhost',
       protocol: 'ws',
       overlay: false,
-      timeout: 5000
+      timeout: 5000,
+      clientPort: 8080
     },
     watch: {
       usePolling: true,

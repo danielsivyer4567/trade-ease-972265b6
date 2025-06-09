@@ -123,6 +123,11 @@ const settingsRouteObjects = SettingsRoutes();
 
 // Define main application routes using RouteObject configuration
 const routeObjects: RouteObject[] = [
+  // Test route for debugging
+  {
+    path: "/test",
+    element: <div style={{ padding: '20px' }}>Test Route Working!</div>
+  },
   // Development Entry (only in dev mode)
   {
     path: "/dev",
