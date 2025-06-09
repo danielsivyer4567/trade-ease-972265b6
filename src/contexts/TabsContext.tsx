@@ -69,6 +69,7 @@ function TabsProviderWithRouter({ children }: { children: React.ReactNode }) {
   const [activeTabId, setActiveTabId] = useState<string | null>(null);
   const initialized = useRef(false);
   const [navigationInProgress, setNavigationInProgress] = useState(false);
+  const mountedRef = useRef(false);
   
   // Try/catch blocks around each hook to safely handle missing router context
   let navigate, location;
@@ -85,10 +86,18 @@ function TabsProviderWithRouter({ children }: { children: React.ReactNode }) {
     location = { pathname: window.location.pathname }; // Fallback
   }
 
-  // Initialize with current path on first mount using useLayoutEffect
-  useLayoutEffect(() => {
-    if (!initialized.current && location?.pathname) {
-      initialized.current = true; // Set this flag first to prevent double initialization
+  // Track when component is mounted
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
+
+  // Initialize with current path on first mount - use regular useEffect to avoid render blocking
+  useEffect(() => {
+    if (!initialized.current && location?.pathname && mountedRef.current) {
+      initialized.current = true;
       
       // Create a default tab for the current location
       const defaultTabId = generateUniqueTabId();
@@ -106,47 +115,63 @@ function TabsProviderWithRouter({ children }: { children: React.ReactNode }) {
         path: location.pathname 
       };
       
-      setTabs([initialTab]);
-      setActiveTabId(defaultTabId);
+      // Use setTimeout to ensure state update happens after render
+      setTimeout(() => {
+        if (mountedRef.current) {
+          setTabs([initialTab]);
+          setActiveTabId(defaultTabId);
+        }
+      }, 0);
     }
   }, [location?.pathname]);
 
   // Update tabs when location changes (external navigation)
-  // Use useLayoutEffect to ensure state updates happen before render
-  useLayoutEffect(() => {
+  useEffect(() => {
     // Only handle navigation updates when initialized and not during active navigation
-    if (!navigationInProgress && initialized.current && location?.pathname) {
-      // Check if this path is already open in a tab
-      const existingTabIndex = tabs.findIndex(tab => tab.path === location.pathname);
-      
-      if (existingTabIndex >= 0) {
-        // Path exists in a tab, just activate it
-        setActiveTabId(tabs[existingTabIndex].id);
-      } else if (location.pathname !== '/') {
-        // New path, create a new tab
-        const pathSegments = location.pathname.split('/');
-        const lastSegment = pathSegments[pathSegments.length - 1];
-        let title = lastSegment || 'Home';
-        title = title.charAt(0).toUpperCase() + title.slice(1);
+    if (!navigationInProgress && initialized.current && location?.pathname && mountedRef.current) {
+      // Use setTimeout to prevent state updates during render
+      setTimeout(() => {
+        if (!mountedRef.current) return;
         
-        const newTab = {
-          id: generateUniqueTabId(),
-          title,
-          path: location.pathname
-        };
-        
-        setTabs(prev => [...prev, newTab]);
-        setActiveTabId(newTab.id);
-      }
+        setTabs(currentTabs => {
+          // Check if this path is already open in a tab
+          const existingTabIndex = currentTabs.findIndex(tab => tab.path === location.pathname);
+          
+          if (existingTabIndex >= 0) {
+            // Path exists in a tab, just activate it
+            setActiveTabId(currentTabs[existingTabIndex].id);
+            return currentTabs; // No change to tabs
+          } else if (location.pathname !== '/') {
+            // New path, create a new tab
+            const pathSegments = location.pathname.split('/');
+            const lastSegment = pathSegments[pathSegments.length - 1];
+            let title = lastSegment || 'Home';
+            title = title.charAt(0).toUpperCase() + title.slice(1);
+            
+            const newTab = {
+              id: generateUniqueTabId(),
+              title,
+              path: location.pathname
+            };
+            
+            setActiveTabId(newTab.id);
+            return [...currentTabs, newTab];
+          }
+          
+          return currentTabs; // No change
+        });
+      }, 0);
     }
-  }, [location?.pathname, navigationInProgress, tabs]);
+  }, [location?.pathname, navigationInProgress]);
 
-  // Navigation completion handler - separate useLayoutEffect to avoid dependencies issues
-  useLayoutEffect(() => {
+  // Navigation completion handler
+  useEffect(() => {
     if (navigationInProgress) {
       // Reset navigation flag after a short delay
       const timer = setTimeout(() => {
-        setNavigationInProgress(false);
+        if (mountedRef.current) {
+          setNavigationInProgress(false);
+        }
       }, 100);
       
       return () => clearTimeout(timer);
@@ -155,7 +180,7 @@ function TabsProviderWithRouter({ children }: { children: React.ReactNode }) {
 
   // Add a new tab - memoized to prevent rerenders
   const addTab = useCallback((tab: Omit<Tab, 'id'> & { id?: string }) => {
-    if (navigationInProgress) return;
+    if (navigationInProgress || !mountedRef.current) return;
     
     const id = tab.id || generateUniqueTabId();
     const newTab = { ...tab, id };
@@ -175,7 +200,7 @@ function TabsProviderWithRouter({ children }: { children: React.ReactNode }) {
 
   // Remove a tab - memoized to prevent rerenders
   const removeTab = useCallback((tabId: string) => {
-    if (navigationInProgress || !navigate) return;
+    if (navigationInProgress || !navigate || !mountedRef.current) return;
     
     const tabIndex = tabs.findIndex(tab => tab.id === tabId);
     if (tabIndex === -1) return;
@@ -207,7 +232,7 @@ function TabsProviderWithRouter({ children }: { children: React.ReactNode }) {
 
   // Activate a tab - memoized to prevent rerenders
   const activateTab = useCallback((tabId: string) => {
-    if (navigationInProgress || !navigate) return;
+    if (navigationInProgress || !navigate || !mountedRef.current) return;
     
     const tab = tabs.find(tab => tab.id === tabId);
     if (tab && activeTabId !== tabId) {
@@ -245,7 +270,7 @@ function TabsProviderWithRouter({ children }: { children: React.ReactNode }) {
 
   // Return null if not initialized to prevent rendering before state is set up
   if (!initialized.current) {
-    return null;
+    return <div></div>; // Return empty div instead of null to prevent hydration issues
   }
 
   return <TabsContext.Provider value={value}>{children}</TabsContext.Provider>;

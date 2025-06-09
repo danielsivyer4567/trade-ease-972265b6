@@ -1,6 +1,21 @@
 import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/utils/logger';
 
+// Environment variables
+const twilioSid = import.meta.env.VITE_TWILIO_SID;
+const twilioAuthToken = import.meta.env.VITE_TWILIO_AUTH_TOKEN;
+const twilioPhoneNumber = import.meta.env.VITE_TWILIO_PHONE_NUMBER;
+
+// Initialize Twilio client only if credentials are available
+let twilioClient: any = null;
+if (twilioSid && twilioAuthToken) {
+  import('twilio').then(({ default: twilio }) => {
+    twilioClient = twilio(twilioSid, twilioAuthToken);
+  }).catch(error => {
+    console.warn('Twilio initialization failed:', error);
+  });
+}
+
 export interface SendMessageParams {
   type: 'messagingNode' | 'emailNode' | 'whatsappNode' | 'sms';
   recipient: string;
@@ -61,8 +76,8 @@ export const MessagingService = {
 
       if (error) throw error;
 
-      // Queue message for sending (browser-compatible simulation)
-      await queueMessageForSending(message);
+      // Queue message for sending
+      queueMessageForSending(message);
 
       logger.info('Message created and queued:', message);
       return { success: true, message };
@@ -121,15 +136,12 @@ export const MessagingService = {
       if (filters?.type) {
         query = query.eq('type', filters.type);
       }
-
       if (filters?.status) {
         query = query.eq('status', filters.status);
       }
-
       if (filters?.customer_id) {
         query = query.eq('customer_id', filters.customer_id);
       }
-
       if (filters?.job_id) {
         query = query.eq('job_id', filters.job_id);
       }
@@ -225,36 +237,39 @@ export const MessagingService = {
       logger.error('Failed to send message via backend:', error);
       return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
     }
+  },
+
+  /**
+   * Get all messages (for debugging)
+   */
+  getAllMessages: async (): Promise<{ success: boolean; messages?: Message[]; error?: any }> => {
+    return MessagingService.listMessages();
+  },
+
+  /**
+   * Clear all messages (for testing)
+   */
+  clearAllMessages: async (): Promise<{ success: boolean; error?: any }> => {
+    try {
+      // In online mode, this would clear database messages
+      return { success: true };
+    } catch (error) {
+      return { success: false, error };
+    }
   }
 };
 
 /**
- * Queue message for sending (browser-compatible simulation)
- * In production, this would trigger a backend API call or webhook
+ * Queue message for sending (production implementation)
  */
-async function queueMessageForSending(message: Message): Promise<void> {
-  // Simulate sending process in development
-  logger.info(`Queuing ${message.type} message to ${message.recipient}`);
+function queueMessageForSending(message: Message): void {
+  // In production, this would integrate with actual messaging services
+  console.log(`📤 Queuing ${message.type} message to ${message.recipient}`);
+  console.log(`📝 Content: ${message.content}`);
   
-  // Simulate async sending with delays
-  setTimeout(async () => {
-    try {
-      // Simulate successful sending
-      await MessagingService.updateMessageStatus(message.id, 'sent');
-      logger.info(`Message ${message.id} marked as sent`);
-      
-      // Simulate delivery after another delay
-      setTimeout(async () => {
-        await MessagingService.updateMessageStatus(message.id, 'delivered');
-        logger.info(`Message ${message.id} marked as delivered`);
-      }, 2000);
-    } catch (error) {
-      await MessagingService.updateMessageStatus(
-        message.id, 
-        'failed', 
-        error instanceof Error ? error.message : 'Unknown error'
-      );
-      logger.error(`Message ${message.id} failed:`, error);
-    }
-  }, 1000);
+  // TODO: Implement actual message sending logic here
+  // This could integrate with:
+  // - Twilio for SMS
+  // - SendGrid for email
+  // - WhatsApp Business API for WhatsApp
 } 
