@@ -22,19 +22,23 @@ export const useIntegrations = () => {
         .select('integration_name, status, client_id, client_secret');
 
       if (error) {
-        throw error;
+        console.warn('Error fetching integration configs (using defaults):', error);
+        return [];
       }
 
+      // Ensure data is an array
+      const configData = Array.isArray(data) ? data : [];
+
       // Set Xero credentials if they exist
-      const xeroConfig = data.find(config => config.integration_name === 'Xero');
+      const xeroConfig = configData.find(config => config?.integration_name === 'Xero');
       if (xeroConfig) {
         setXeroClientId(xeroConfig.client_id || '');
         setXeroClientSecret(xeroConfig.client_secret || '');
       }
 
-      return data || [];
+      return configData;
     } catch (error) {
-      console.error('Error fetching integration configs:', error);
+      console.warn('Error fetching integration configs (using defaults):', error);
       setError('Failed to fetch integration configurations');
       return [];
     }

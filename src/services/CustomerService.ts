@@ -88,7 +88,11 @@ export class CustomerService {
         .eq('id', customerId)
         .single();
       
-      if (error) throw error;
+      if (error) {
+        console.warn('Customer lookup failed:', error);
+        return null;
+      }
+      
       return data;
     } catch (error) {
       console.error("Error fetching customer profile:", error);
@@ -106,7 +110,11 @@ export class CustomerService {
         .limit(1)
         .single();
       
-      if (error) throw error;
+      if (error) {
+        console.warn('Customer name lookup failed:', error);
+        return null;
+      }
+      
       return data;
     } catch (error) {
       console.error("Error fetching customer details by name:", error);

@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MessagingService Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        .status {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            background: #f0f0f0;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        .info {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+        pre {
+            background: #f5f5f5;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .test-box {
+            border: 2px solid #ddd;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+        input, textarea, select {
+            width: 100%;
+            padding: 8px;
+            margin: 5px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        .form-row {
+            display: flex;
+            gap: 10px;
+        }
+        .form-row > * {
+            flex: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📤 MessagingService Test</h1>
+        <p>Test the MessagingService functionality in offline mode!</p>
+        
+        <div class="test-box">
+            <h2>1. Send Test Message</h2>
+            <div class="form-row">
+                <select id="messageType">
+                    <option value="emailNode">Email</option>
+                    <option value="sms">SMS</option>
+                    <option value="whatsappNode">WhatsApp</option>
+                    <option value="messagingNode">General Message</option>
+                </select>
+                <input type="text" id="recipient" placeholder="Recipient (email/phone)" value="test@example.com">
+            </div>
+            <input type="text" id="subject" placeholder="Subject (optional)" value="Test Message">
+            <textarea id="content" placeholder="Message content" rows="3">Hello! This is a test message from the MessagingService.</textarea>
+            <button onclick="sendTestMessage()">Send Message</button>
+        </div>
+
+        <div class="test-box">
+            <h2>2. View Messages</h2>
+            <button onclick="listAllMessages()">List All Messages</button>
+            <button onclick="listByType()">List by Type</button>
+            <button onclick="clearAllMessages()">Clear All Messages</button>
+        </div>
+
+        <div class="test-box">
+            <h2>3. Quick Tests</h2>
+            <button onclick="sendMultipleMessages()">Send 3 Test Messages</button>
+            <button onclick="testDifferentTypes()">Test All Message Types</button>
+            <button onclick="checkMessageStatuses()">Check Message Statuses</button>
+        </div>
+
+        <div id="status" class="status"></div>
+    </div>
+
+    <script>
+        // Mock MessagingService for demonstration
+        const MessagingService = {
+            messages: [],
+            messageIdCounter: 1,
+
+            sendMessage: async function(params) {
+                const message = {
+                    id: `offline-msg-${this.messageIdCounter++}`,
+                    type: params.type,
+                    recipient: params.recipient,
+                    subject: params.subject,
+                    content: params.content,
+                    status: 'pending',
+                    customer_id: params.customer_id,
+                    job_id: params.job_id,
+                    metadata: params.metadata || {},
+                    created_at: new Date().toISOString(),
+                    user_id: 'offline-user'
+                };
+
+                this.messages.push(message);
+                console.log(`📤 Queuing ${message.type} message to ${message.recipient}`);
+                console.log(`📝 Content: ${message.content}`);
+
+                // Simulate sending process
+                setTimeout(() => {
+                    this.updateMessageStatus(message.id, 'sent');
+                    setTimeout(() => {
+                        this.updateMessageStatus(message.id, 'delivered');
+                    }, 1500);
+                }, 800);
+
+                return { success: true, message };
+            },
+
+            updateMessageStatus: function(messageId, status) {
+                const messageIndex = this.messages.findIndex(m => m.id === messageId);
+                if (messageIndex !== -1) {
+                    this.messages[messageIndex].status = status;
+                    if (status === 'sent') {
+                        this.messages[messageIndex].sent_at = new Date().toISOString();
+                    } else if (status === 'delivered') {
+                        this.messages[messageIndex].delivered_at = new Date().toISOString();
+                    }
+                    console.log(`📤 Message ${messageId} status updated to: ${status}`);
+                }
+                return { success: true };
+            },
+
+            listMessages: function(filters = {}) {
+                let filteredMessages = [...this.messages];
+                
+                if (filters.type) {
+                    filteredMessages = filteredMessages.filter(m => m.type === filters.type);
+                }
+                if (filters.status) {
+                    filteredMessages = filteredMessages.filter(m => m.status === filters.status);
+                }
+
+                filteredMessages.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+                return { success: true, messages: filteredMessages };
+            },
+
+            clearAllMessages: function() {
+                this.messages = [];
+                console.log('🧹 All messages cleared');
+                return { success: true };
+            }
+        };
+
+        function updateStatus(message, type = 'info') {
+            const statusDiv = document.getElementById('status');
+            statusDiv.className = `status ${type}`;
+            statusDiv.innerHTML = message;
+        }
+
+        async function sendTestMessage() {
+            const type = document.getElementById('messageType').value;
+            const recipient = document.getElementById('recipient').value;
+            const subject = document.getElementById('subject').value;
+            const content = document.getElementById('content').value;
+
+            if (!recipient || !content) {
+                updateStatus('Please fill in recipient and content!', 'error');
+                return;
+            }
+
+            try {
+                const result = await MessagingService.sendMessage({
+                    type,
+                    recipient,
+                    subject,
+                    content,
+                    metadata: { test: true, timestamp: new Date().toISOString() }
+                });
+
+                if (result.success) {
+                    updateStatus(`
+                        <strong>✅ Message Sent!</strong><br>
+                        <strong>Type:</strong> ${type}<br>
+                        <strong>To:</strong> ${recipient}<br>
+                        <strong>Content:</strong> ${content}<br>
+                        <strong>Message ID:</strong> ${result.message.id}<br>
+                        <em>Check browser console for real-time status updates!</em>
+                    `, 'success');
+                } else {
+                    updateStatus(`❌ Failed to send message: ${result.error}`, 'error');
+                }
+            } catch (error) {
+                updateStatus(`❌ Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function listAllMessages() {
+            const result = MessagingService.listMessages();
+            
+            if (result.success) {
+                updateStatus(`
+                    <strong>📋 All Messages (${result.messages.length}):</strong><br>
+                    <pre>${JSON.stringify(result.messages, null, 2)}</pre>
+                `, 'info');
+            } else {
+                updateStatus(`❌ Failed to list messages: ${result.error}`, 'error');
+            }
+        }
+
+        async function listByType() {
+            const type = document.getElementById('messageType').value;
+            const result = MessagingService.listMessages({ type });
+            
+            if (result.success) {
+                updateStatus(`
+                    <strong>📋 ${type} Messages (${result.messages.length}):</strong><br>
+                    <pre>${JSON.stringify(result.messages, null, 2)}</pre>
+                `, 'info');
+            } else {
+                updateStatus(`❌ Failed to list messages: ${result.error}`, 'error');
+            }
+        }
+
+        async function clearAllMessages() {
+            const result = MessagingService.clearAllMessages();
+            
+            if (result.success) {
+                updateStatus('🧹 All messages cleared successfully!', 'success');
+            } else {
+                updateStatus(`❌ Failed to clear messages: ${result.error}`, 'error');
+            }
+        }
+
+        async function sendMultipleMessages() {
+            updateStatus('📤 Sending 3 test messages...', 'info');
+            
+            const messages = [
+                { type: 'emailNode', recipient: 'user1@example.com', content: 'First test email' },
+                { type: 'sms', recipient: '+1234567890', content: 'Second test SMS' },
+                { type: 'whatsappNode', recipient: '+0987654321', content: 'Third test WhatsApp' }
+            ];
+
+            let successCount = 0;
+            for (const msg of messages) {
+                try {
+                    const result = await MessagingService.sendMessage({
+                        ...msg,
+                        subject: `Test Message ${successCount + 1}`,
+                        metadata: { batch: true }
+                    });
+                    if (result.success) successCount++;
+                } catch (error) {
+                    console.error('Error sending message:', error);
+                }
+            }
+
+            updateStatus(`✅ Sent ${successCount}/${messages.length} messages successfully!`, 'success');
+        }
+
+        async function testDifferentTypes() {
+            const types = ['emailNode', 'sms', 'whatsappNode', 'messagingNode'];
+            
+            updateStatus('📤 Testing all message types...', 'info');
+            
+            let results = [];
+            for (const type of types) {
+                try {
+                    const result = await MessagingService.sendMessage({
+                        type,
+                        recipient: `test-${type}@example.com`,
+                        subject: `Test ${type}`,
+                        content: `This is a test message for ${type}`,
+                        metadata: { typeTest: true }
+                    });
+                    results.push({ type, success: result.success });
+                } catch (error) {
+                    results.push({ type, success: false, error: error.message });
+                }
+            }
+
+            updateStatus(`
+                <strong>📊 Type Test Results:</strong><br>
+                <pre>${JSON.stringify(results, null, 2)}</pre>
+            `, 'info');
+        }
+
+        async function checkMessageStatuses() {
+            const result = MessagingService.listMessages();
+            
+            if (result.success) {
+                const statusCounts = result.messages.reduce((acc, msg) => {
+                    acc[msg.status] = (acc[msg.status] || 0) + 1;
+                    return acc;
+                }, {});
+
+                updateStatus(`
+                    <strong>📊 Message Status Summary:</strong><br>
+                    <pre>${JSON.stringify(statusCounts, null, 2)}</pre>
+                    <br>
+                    <strong>Recent Messages:</strong><br>
+                    <pre>${JSON.stringify(result.messages.slice(0, 5), null, 2)}</pre>
+                `, 'info');
+            } else {
+                updateStatus(`❌ Failed to check statuses: ${result.error}`, 'error');
+            }
+        }
+
+        // Show initial message
+        updateStatus(`
+            <h3>🚀 MessagingService Test Ready!</h3>
+            <p>This demonstrates the MessagingService functionality:</p>
+            <ul>
+                <li><strong>Send Messages:</strong> Email, SMS, WhatsApp, and general messages</li>
+                <li><strong>Track Status:</strong> Pending → Sent → Delivered</li>
+                <li><strong>List & Filter:</strong> View messages by type or status</li>
+                <li><strong>Offline Mode:</strong> Works without external dependencies</li>
+            </ul>
+            <p><em>🔧 Currently running in offline simulation mode</em></p>
+        `, 'info');
+    </script>
+</body>
+</html> 
