@@ -2,57 +2,95 @@ import { supabase } from '@/integrations/supabase/client';
 import { WorkflowExecutorService } from './WorkflowExecutorService';
 import { logger } from '@/utils/logger';
 
-export class WorkflowJobProcessor {
-  private static instance: WorkflowJobProcessor;
-  private isProcessing: boolean = false;
-  private interval: NodeJS.Timeout | null = null;
+interface WorkflowExecution {
+  id: string;
+  workflow_id: string;
+  status: 'pending' | 'running' | 'completed' | 'failed';
+  started_at?: string;
+  completed_at?: string;
+  error_message?: string;
+  input_data?: any;
+  result_data?: any;
+}
 
-  private constructor() {}
+class WorkflowJobProcessor {
+  private intervalId: NodeJS.Timeout | null = null;
+  private isProcessing = false;
+  private isOfflineMode = false;
 
-  public static getInstance(): WorkflowJobProcessor {
-    if (!WorkflowJobProcessor.instance) {
-      WorkflowJobProcessor.instance = new WorkflowJobProcessor();
+  constructor() {
+    // Check if we're in offline mode by looking at the Supabase URL
+    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+    this.isOfflineMode = !supabaseUrl || 
+      supabaseUrl.includes('your-project.supabase.co') || 
+      supabaseUrl === 'https://your-project.supabase.co';
+    
+    if (this.isOfflineMode) {
+      console.log('🔧 WorkflowJobProcessor: Running in offline mode');
     }
-    return WorkflowJobProcessor.instance;
   }
 
-  /**
-   * Start the job processor
-   */
-  public start(intervalMs: number = 5000): void {
-    if (this.interval) {
-      logger.warn('Job processor is already running');
+  start(intervalMs: number = 5000) {
+    if (this.intervalId) {
+      console.log('WorkflowJobProcessor: Already running');
       return;
     }
 
-    logger.info('Starting workflow job processor');
-    this.interval = setInterval(() => this.processJobs(), intervalMs);
+    if (this.isOfflineMode) {
+      console.log('🔧 WorkflowJobProcessor: Starting in offline simulation mode');
+      this.startOfflineSimulation(intervalMs);
+      return;
+    }
+
+    console.log(`WorkflowJobProcessor: Starting with ${intervalMs}ms interval`);
+    this.intervalId = setInterval(() => {
+      this.processJobs().catch(error => {
+        logger.error('WorkflowJobProcessor: Error in processJobs:', error);
+      });
+    }, intervalMs);
+
+    // Process jobs immediately on start
+    this.processJobs().catch(error => {
+      logger.error('WorkflowJobProcessor: Error in initial processJobs:', error);
+    });
   }
 
-  /**
-   * Stop the job processor
-   */
-  public stop(): void {
-    if (this.interval) {
-      logger.info('Stopping workflow job processor');
-      clearInterval(this.interval);
-      this.interval = null;
+  stop() {
+    if (this.intervalId) {
+      clearInterval(this.intervalId);
+      this.intervalId = null;
+      console.log('WorkflowJobProcessor: Stopped');
     }
   }
 
-  /**
-   * Process pending workflow jobs
-   */
-  private async processJobs(): Promise<void> {
+  private startOfflineSimulation(intervalMs: number) {
+    // In offline mode, just simulate processing without actual database calls
+    this.intervalId = setInterval(() => {
+      if (!this.isProcessing) {
+        console.log('🔧 WorkflowJobProcessor: Simulating job check (offline mode)');
+        // Simulate some processing time
+        this.isProcessing = true;
+        setTimeout(() => {
+          this.isProcessing = false;
+        }, 100);
+      }
+    }, intervalMs);
+  }
+
+  async processJobs(): Promise<void> {
     if (this.isProcessing) {
-      logger.debug('Job processor is already processing jobs');
+      return;
+    }
+
+    if (this.isOfflineMode) {
+      // Don't actually process jobs in offline mode
       return;
     }
 
     this.isProcessing = true;
 
     try {
-      // Get pending executions
+      // Get pending workflow executions
       const { data: executions, error } = await supabase
         .from('workflow_executions')
         .select('*')
@@ -67,45 +105,26 @@ export class WorkflowJobProcessor {
       const limitedExecutions = executions?.slice(0, 10) || [];
 
       if (!limitedExecutions || limitedExecutions.length === 0) {
-        logger.debug('No pending workflow executions found');
+        logger.info('WorkflowJobProcessor: No pending executions found');
         return;
       }
 
-      logger.info(`Processing ${limitedExecutions.length} pending workflow executions`);
+      logger.info(`WorkflowJobProcessor: Processing ${limitedExecutions.length} pending executions`);
 
       // Process each execution
       for (const execution of limitedExecutions) {
         try {
-          // Update status to running
-          await supabase
-            .from('workflow_executions')
-            .update({
-              status: 'running',
-              started_at: new Date().toISOString()
-            })
-            .eq('id', execution.id);
-
-          // Execute workflow
-          const { success, error } = await WorkflowExecutorService.executeWorkflow(
-            execution.workflow_id,
-            execution.execution_data?.input
-          );
-
-          if (!success) {
-            throw error || new Error('Failed to execute workflow');
-          }
-
-          logger.info(`Successfully processed workflow execution: ${execution.id}`);
+          await this.processExecution(execution);
         } catch (error) {
-          logger.error(`Failed to process workflow execution: ${execution.id}`, error);
-
-          // Update execution status to failed
+          logger.error(`WorkflowJobProcessor: Error processing execution ${execution.id}:`, error);
+          
+          // Mark execution as failed
           await supabase
             .from('workflow_executions')
             .update({
               status: 'failed',
-              completed_at: new Date().toISOString(),
-              error_message: error instanceof Error ? error.message : 'Unknown error'
+              error_message: error instanceof Error ? error.message : 'Unknown error',
+              completed_at: new Date().toISOString()
             })
             .eq('id', execution.id);
         }
@@ -116,7 +135,85 @@ export class WorkflowJobProcessor {
       this.isProcessing = false;
     }
   }
+
+  private async processExecution(execution: WorkflowExecution): Promise<void> {
+    try {
+      logger.info(`WorkflowJobProcessor: Starting execution ${execution.id}`);
+
+      // Mark as running
+      await supabase
+        .from('workflow_executions')
+        .update({
+          status: 'running',
+          started_at: new Date().toISOString()
+        })
+        .eq('id', execution.id);
+
+      // Get workflow data
+      const { data: workflow, error: workflowError } = await supabase
+        .from('workflows')
+        .select('*')
+        .eq('id', execution.workflow_id)
+        .single();
+
+      if (workflowError || !workflow) {
+        throw new Error(`Workflow ${execution.workflow_id} not found`);
+      }
+
+      // Execute the workflow
+      const result = await WorkflowExecutorService.executeWorkflow(
+        workflow.data,
+        execution.input_data || {}
+      );
+
+      // Mark as completed
+      await supabase
+        .from('workflow_executions')
+        .update({
+          status: 'completed',
+          result_data: result,
+          completed_at: new Date().toISOString()
+        })
+        .eq('id', execution.id);
+
+      logger.info(`WorkflowJobProcessor: Completed execution ${execution.id}`);
+    } catch (error) {
+      logger.error(`WorkflowJobProcessor: Error in execution ${execution.id}:`, error);
+      throw error;
+    }
+  }
+
+  // Add execution to queue (for manual triggering)
+  async queueExecution(workflowId: string, inputData: any = {}): Promise<string> {
+    if (this.isOfflineMode) {
+      const executionId = crypto.randomUUID();
+      console.log(`🔧 WorkflowJobProcessor: Simulated queueing execution ${executionId} for workflow ${workflowId}`);
+      return executionId;
+    }
+
+    try {
+      const { data: execution, error } = await supabase
+        .from('workflow_executions')
+        .insert({
+          workflow_id: workflowId,
+          status: 'pending',
+          input_data: inputData,
+          created_at: new Date().toISOString()
+        })
+        .select()
+        .single();
+
+      if (error) {
+        throw error;
+      }
+
+      logger.info(`WorkflowJobProcessor: Queued execution ${execution.id} for workflow ${workflowId}`);
+      return execution.id;
+    } catch (error) {
+      logger.error('WorkflowJobProcessor: Error queueing execution:', error);
+      throw error;
+    }
+  }
 }
 
-// Export singleton instance
-export const workflowJobProcessor = WorkflowJobProcessor.getInstance(); 
+export const workflowJobProcessor = new WorkflowJobProcessor();
