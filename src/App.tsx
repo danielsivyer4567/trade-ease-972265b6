@@ -56,15 +56,21 @@ function App() {
   const router = createRouter();
   
   useEffect(() => {
+    console.log('App: Starting initialization...');
     initializeTables()
+      .then(() => {
+        console.log('App: Tables initialized successfully');
+      })
       .catch(error => {
-        console.error('Failed to initialize tables:', error);
+        console.error('App: Failed to initialize tables:', error);
         setInitError(error);
       });
   }, []);
 
+  console.log('App: Rendering with router:', router);
+
   if (initError) {
-    console.warn('App continuing despite initialization error:', initError);
+    console.warn('App: Continuing despite initialization error:', initError);
   }
 
   return (

@@ -31,47 +31,55 @@ if (import.meta.env.MODE === 'development') {
 // Create root with error handling
 const rootElement = document.getElementById('root');
 if (!rootElement) {
-  console.error('Root element not found');
-} else {
-  const root = ReactDOM.createRoot(rootElement);
-  
-  // Initialize app
-  const renderApp = async () => {
-    try {
-      // No need to initialize the startup service - this was causing the 404 error
-      // await startupService.initialize();
-      
-      // Render the app
-      root.render(
-        <React.StrictMode>
-          <App />
-        </React.StrictMode>
-      );
-    } catch (error) {
-      console.error('Error initializing app:', error);
-      root.render(
-        <div style={{ padding: '20px', fontFamily: 'system-ui' }}>
-          <h1 style={{ color: 'red' }}>Application Error</h1>
-          <p>The application failed to initialize. Please check the console for details.</p>
-          <button 
-            style={{ 
-              padding: '8px 16px', 
-              backgroundColor: '#f44336', 
-              color: 'white', 
-              border: 'none', 
-              borderRadius: '4px',
-              cursor: 'pointer',
-              marginTop: '16px'
-            }}
-            onClick={() => window.location.reload()}
-          >
-            Reload Application
-          </button>
-        </div>
-      );
-    }
-  };
-  
-  // Start the application
-  renderApp();
+  throw new Error('Root element not found. Make sure you have a div with id="root" in your index.html');
 }
+
+const root = ReactDOM.createRoot(rootElement);
+
+// Initialize app with error boundary
+const renderApp = () => {
+  try {
+    // No need to initialize the startup service - this was causing the 404 error
+    // await startupService.initialize();
+    
+    // Render the app
+    root.render(
+      <React.StrictMode>
+        <App />
+      </React.StrictMode>
+    );
+  } catch (error) {
+    console.error('Error rendering app:', error);
+    root.render(
+      <div style={{ padding: '20px', fontFamily: 'system-ui' }}>
+        <h1 style={{ color: 'red' }}>Application Error</h1>
+        <p>The application failed to initialize. Please check the console for details.</p>
+        <pre style={{ 
+          backgroundColor: '#f5f5f5', 
+          padding: '10px', 
+          borderRadius: '4px',
+          overflow: 'auto'
+        }}>
+          {error instanceof Error ? error.message : String(error)}
+        </pre>
+        <button 
+          style={{ 
+            padding: '8px 16px', 
+            backgroundColor: '#f44336', 
+            color: 'white', 
+            border: 'none', 
+            borderRadius: '4px',
+            cursor: 'pointer',
+            marginTop: '16px'
+          }}
+          onClick={() => window.location.reload()}
+        >
+          Reload Application
+        </button>
+      </div>
+    );
+  }
+};
+
+// Start the application
+renderApp();

@@ -35,9 +35,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const initializeAuth = async () => {
       try {
+        console.log('Auth: Starting initialization...');
         // Get initial session
         const { data: { session: currentSession }, error } = await supabase.auth.getSession();
-        if (error) throw error;
+        if (error) {
+          console.error('Auth: Error getting session:', error);
+          throw error;
+        }
+        
+        console.log('Auth: Got initial session:', currentSession ? 'Session exists' : 'No session');
         
         if (mounted) {
           setSession(currentSession);
@@ -50,11 +56,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             if (!mounted) return;
 
             try {
-              console.log('Auth state changed:', event);
+              console.log('Auth: State changed:', event);
               setSession(currentSession);
               setUser(currentSession?.user ?? null);
             } catch (error) {
-              console.error('Error in auth state change:', error);
+              console.error('Auth: Error in state change:', error);
             } finally {
               if (mounted) {
                 setLoading(false);
@@ -63,7 +69,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           }
         );
       } catch (error) {
-        console.error('Error initializing auth:', error);
+        console.error('Auth: Error initializing:', error);
         if (mounted) {
           setLoading(false);
         }
@@ -73,12 +79,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     initializeAuth();
 
     return () => {
+      console.log('Auth: Cleaning up...');
       mounted = false;
       if (authSubscription?.data.subscription) {
         authSubscription.data.subscription.unsubscribe();
       }
     };
   }, []);
+
+  // Show loading state while initializing
+  if (loading) {
+    return (
+      <div className="flex h-screen w-screen items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
 
   const signIn = async (email: string, password: string) => {
     try {
@@ -282,23 +298,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const value = {
-    user,
-    session,
-    loading,
-    awaitingTwoFactor,
-    signIn,
-    signUp,
-    signOut,
-    resetPassword,
-    initiateTwoFactor,
-    completeTwoFactor,
-    enableTwoFactor,
-    disableTwoFactor,
-    checkTwoFactorEnabled,
-  };
-
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={{
+      user,
+      session,
+      loading,
+      awaitingTwoFactor,
+      signIn,
+      signUp,
+      signOut,
+      resetPassword,
+      initiateTwoFactor,
+      completeTwoFactor,
+      enableTwoFactor,
+      disableTwoFactor,
+      checkTwoFactorEnabled,
+    }}>
+      {children}
+    </AuthContext.Provider>
+  );
 };
 
 export const useAuth = () => {
