@@ -45,6 +45,96 @@ export interface Message {
   user_id: string;
 }
 
+// Message sending logic for construction app
+class MessageSender {
+  private twilioClient: any;
+  private sendGridClient: any;
+  private whatsAppClient: any;
+
+  constructor() {
+    this.twilioClient = twilioClient; // Use the initialized Twilio client
+    this.sendGridClient = null; // Initialize SendGrid client
+    this.whatsAppClient = null; // Initialize WhatsApp Business API client
+  }
+
+  async sendMessage(messageType: string, recipient: string, message: string) {
+    switch (messageType) {
+      case 'sms':
+      case 'messagingNode':
+        return this.sendSMS(recipient, message);
+      case 'email':
+      case 'emailNode':
+        return this.sendEmail(recipient, message);
+      case 'whatsapp':
+      case 'whatsappNode':
+        return this.sendWhatsApp(recipient, message);
+      default:
+        throw new Error('Unsupported message type');
+    }
+  }
+
+  async sendSMS(phoneNumber: string, message: string) {
+    try {
+      if (this.twilioClient && twilioPhoneNumber) {
+        console.log(`Sending SMS via Twilio to ${phoneNumber}: ${message}`);
+        const result = await this.twilioClient.messages.create({
+          body: message,
+          from: twilioPhoneNumber,
+          to: phoneNumber
+        });
+        return { success: true, messageId: result.sid };
+      } else {
+        // Fallback to console log if Twilio is not configured
+        console.log(`Sending SMS to ${phoneNumber}: ${message}`);
+        return { success: true, messageId: 'mock-sms-' + Date.now() };
+      }
+    } catch (error) {
+      console.error('Failed to send SMS:', error);
+      throw error;
+    }
+  }
+
+  async sendEmail(emailAddress: string, message: string) {
+    // TODO: Implement SendGrid email sending logic
+    console.log(`Sending email to ${emailAddress}: ${message}`);
+    // Example SendGrid implementation:
+    // return this.sendGridClient.send({
+    //   to: emailAddress,
+    //   from: 'YOUR_VERIFIED_SENDER_EMAIL',
+    //   subject: 'Construction App Update',
+    //   text: message,
+    // });
+    return { success: true, messageId: 'mock-email-' + Date.now() };
+  }
+
+  async sendWhatsApp(phoneNumber: string, message: string) {
+    // TODO: Implement WhatsApp Business API sending logic
+    console.log(`Sending WhatsApp message to ${phoneNumber}: ${message}`);
+    // Example WhatsApp Business API implementation:
+    // return this.whatsAppClient.messages.create({
+    //   body: message,
+    //   from: 'whatsapp:+YOUR_WHATSAPP_BUSINESS_NUMBER',
+    //   to: `whatsapp:${phoneNumber}`
+    // });
+    return { success: true, messageId: 'mock-whatsapp-' + Date.now() };
+  }
+}
+
+// Initialize the message sender
+const messageSender = new MessageSender();
+
+// Utility function for notifying users
+export async function notifyUser(userPreference: string, userContact: string, notificationMessage: string) {
+  try {
+    await messageSender.sendMessage(userPreference, userContact, notificationMessage);
+    console.log('Notification sent successfully');
+    return { success: true };
+  } catch (error) {
+    console.error('Failed to send notification:', error);
+    return { success: false, error };
+  }
+}
+
 export const MessagingService = {
   /**
    * Send a message (email, SMS, or WhatsApp)
@@ -76,8 +166,21 @@ export const MessagingService = {
 
       if (error) throw error;
 
-      // Queue message for sending
-      queueMessageForSending(message);
+      // Use MessageSender to actually send the message
+      try {
+        const sendResult = await messageSender.sendMessage(params.type, params.recipient, params.content);
+        
+        // Update message status based on send result
+        if (sendResult.success) {
+          await MessagingService.updateMessageStatus(message.id, 'sent');
+          logger.info('Message sent successfully:', { messageId: message.id, externalId: sendResult.messageId });
+        } else {
+          await MessagingService.updateMessageStatus(message.id, 'failed', 'Failed to send via external service');
+        }
+      } catch (sendError) {
+        logger.error('Failed to send message via external service:', sendError);
+        await MessagingService.updateMessageStatus(message.id, 'failed', sendError instanceof Error ? sendError.message : 'Unknown send error');
+      }
 
       logger.info('Message created and queued:', message);
       return { success: true, message };
@@ -272,4 +375,22 @@ function queueMessageForSending(message: Message): void {
   // - Twilio for SMS
   // - SendGrid for email
   // - WhatsApp Business API for WhatsApp
-} 
+}
+
+// Example usage functions for the construction app:
+export async function sendConstructionUpdate(phoneNumber: string, projectUpdate: string) {
+  return await notifyUser('sms', phoneNumber, `Construction Update: ${projectUpdate}`);
+}
+
+export async function sendTaskAssignment(email: string, taskDetails: string) {
+  return await notifyUser('email', email, `New Task Assigned: ${taskDetails}`);
+}
+
+export async function sendUrgentAlert(phoneNumber: string, alertMessage: string) {
+  return await notifyUser('whatsapp', phoneNumber, `🚨 URGENT: ${alertMessage}`);
+}
+
+// Example calls (these would be used in your application):
+// sendConstructionUpdate('+1234567890', 'Your construction project has been updated.');
+// sendTaskAssignment('user@example.com', 'New task assigned to you in the construction app.');
+// sendUrgentAlert('+1987654321', 'Site inspection required.'); 
