@@ -1,0 +1,198 @@
+/* Workflow Node Visibility Fix - Ensures nodes are never hidden behind background */
+
+/* 1. Fix the workflow background to ensure it stays behind everything */
+.workflow-background {
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  z-index: -1 !important; /* Force it to the back */
+  pointer-events: none !important;
+  opacity: 0.7 !important; /* Reduce opacity to ensure nodes are visible */
+  background: linear-gradient(135deg, rgba(23, 25, 57, 0.7), rgba(14, 14, 32, 0.7)) !important; /* Reduce opacity */
+}
+
+/* 2. Ensure smoke and particles stay in background */
+.workflow-background .smoke,
+.workflow-background .particle {
+  z-index: -1 !important;
+  opacity: 0.3 !important; /* Reduce opacity of effects */
+  pointer-events: none !important;
+}
+
+/* 3. Ensure React Flow container is above background */
+.react-flow {
+  position: relative !important;
+  z-index: 1 !important;
+  background: transparent !important;
+  isolation: isolate !important; /* Create stacking context */
+}
+
+/* 4. Ensure viewport is properly layered */
+.react-flow__viewport {
+  position: relative !important;
+  z-index: 1 !important;
+  background: transparent !important;
+  pointer-events: auto !important;
+}
+
+/* 5. Ensure pane is transparent and properly layered */
+.react-flow__pane {
+  background: transparent !important;
+  z-index: 1 !important;
+}
+
+/* 6. Ensure all nodes are visible with high z-index */
+.react-flow__nodes {
+  z-index: 100 !important;
+  position: relative !important;
+}
+
+.react-flow__node {
+  z-index: 100 !important;
+  position: relative !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+  /* Add subtle shadow to ensure visibility */
+  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.5)) !important;
+}
+
+/* 7. Ensure node content is fully opaque */
+.react-flow__node .node-content {
+  opacity: 1 !important;
+  background-color: rgba(42, 42, 70, 0.95) !important; /* Increase opacity */
+  backdrop-filter: blur(10px) !important; /* Add blur for better contrast */
+  z-index: 101 !important;
+}
+
+/* 8. Selected nodes should be even more prominent */
+.react-flow__node.selected {
+  z-index: 1000 !important;
+  filter: drop-shadow(0 4px 16px rgba(0, 0, 0, 0.7)) !important;
+}
+
+/* 9. Dragging nodes should be on top */
+.react-flow__node.dragging {
+  z-index: 2000 !important;
+  opacity: 1 !important;
+}
+
+/* 10. Ensure edges are visible but below nodes */
+.react-flow__edges {
+  z-index: 50 !important;
+  position: relative !important;
+}
+
+.react-flow__edge {
+  z-index: 50 !important;
+  opacity: 1 !important;
+}
+
+/* 11. Handles should be above nodes */
+.react-flow__handle {
+  z-index: 150 !important;
+  opacity: 1 !important;
+  background-color: rgba(230, 100, 255, 0.9) !important;
+  box-shadow: 0 0 8px rgba(230, 100, 255, 0.8) !important;
+}
+
+/* 12. Controls and minimap should be on top */
+.react-flow__controls {
+  z-index: 5000 !important;
+  background-color: rgba(30, 30, 47, 0.95) !important;
+  backdrop-filter: blur(10px) !important;
+}
+
+.react-flow__minimap {
+  z-index: 5000 !important;
+  background-color: rgba(42, 42, 58, 0.9) !important;
+  backdrop-filter: blur(10px) !important;
+}
+
+/* 13. Specific node type visibility enhancements */
+.react-flow__node-customerNode,
+.react-flow__node-jobNode,
+.react-flow__node-taskNode,
+.react-flow__node-quoteNode,
+.react-flow__node-messagingNode,
+.react-flow__node-emailNode,
+.react-flow__node-whatsappNode,
+.react-flow__node-visionNode,
+.react-flow__node-automationNode,
+.react-flow__node-socialNode,
+.react-flow__node-customNode {
+  z-index: 100 !important;
+  opacity: 1 !important;
+  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.5)) !important;
+}
+
+/* 14. Ensure node content backgrounds are solid enough */
+.workflow-dark-mode-flow .react-flow__node .node-content {
+  background-color: rgba(42, 42, 70, 0.95) !important;
+  border: 2px solid rgba(160, 160, 255, 0.5) !important;
+  box-shadow: 
+    0 0 20px rgba(130, 80, 230, 0.4),
+    inset 0 0 20px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* 15. Override any transparent backgrounds on nodes */
+.react-flow__node * {
+  opacity: 1 !important;
+}
+
+/* 16. Ensure text is always readable */
+.react-flow__node text,
+.react-flow__node span,
+.react-flow__node div {
+  color: #f8f8f8 !important;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8) !important;
+}
+
+/* 17. Fix for automation nodes specifically */
+.react-flow__node-automationNode {
+  z-index: 110 !important;
+  opacity: 1 !important;
+}
+
+.react-flow__node-automationNode .node-content {
+  background-image: linear-gradient(135deg, rgba(192, 74, 255, 0.95), rgba(126, 74, 255, 0.95)) !important;
+  opacity: 1 !important;
+  box-shadow: 
+    0 0 25px rgba(192, 74, 255, 0.5),
+    0 4px 12px rgba(0, 0, 0, 0.4) !important;
+}
+
+/* 18. Ensure workflow canvas container doesn't have conflicting backgrounds */
+.workflow-dark-mode-flow {
+  background-color: transparent !important;
+  background-image: none !important;
+}
+
+/* 19. Override any background on the main workflow area */
+.workflow-no-animations {
+  background: transparent !important;
+}
+
+/* 20. Final override to ensure visibility */
+.react-flow__renderer {
+  z-index: 1 !important;
+}
+
+.react-flow__zoompane {
+  z-index: 1 !important;
+}
+
+.react-flow__selectionpane {
+  z-index: 1 !important;
+}
+
+/* 21. Ensure node labels are always visible */
+.react-flow__node-label {
+  z-index: 102 !important;
+  color: #ffffff !important;
+  font-weight: 500 !important;
+  text-shadow: 
+    0 0 3px rgba(0, 0, 0, 0.8),
+    0 1px 2px rgba(0, 0, 0, 0.9) !important;
+} 

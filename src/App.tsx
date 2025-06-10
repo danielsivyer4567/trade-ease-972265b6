@@ -14,6 +14,8 @@ import './utils/errorHandler'; // Initialize async error handling
 import './App.css';
 import './pages/Workflow/components/workflow.css';
 import './styles/deprecation-fixes.css'; // Override deprecated CSS properties
+import './styles/workflow-visibility-fix.css'; // Ensure workflow nodes are always visible
+import './styles/workflow-interaction-fix.css'; // Ensure workflow canvas is interactive
 
 const queryClient = new QueryClient({
   defaultOptions: {

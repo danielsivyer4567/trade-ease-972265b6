@@ -54,13 +54,15 @@ html {
   }
 }
 
-/* User selection handling */
+/* User selection handling - removed to allow drag and drop */
+/* Commenting out as it may interfere with React Flow drag functionality
 * {
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
 }
+*/
 
 /* Allow text selection in inputs and text areas */
 input, textarea, [contenteditable="true"] {

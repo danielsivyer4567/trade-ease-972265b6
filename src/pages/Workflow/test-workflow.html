@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Workflow Drag Test</title>
+    <style>
+        .container {
+            display: flex;
+            height: 100vh;
+        }
+        .sidebar {
+            width: 200px;
+            background: #333;
+            padding: 20px;
+        }
+        .node {
+            background: #555;
+            color: white;
+            padding: 10px;
+            margin: 10px 0;
+            cursor: move;
+        }
+        .canvas {
+            flex: 1;
+            background: #f0f0f0;
+            position: relative;
+        }
+        .dropped-node {
+            position: absolute;
+            background: #007bff;
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <div class="node" draggable="true" data-type="customer">Customer Node</div>
+            <div class="node" draggable="true" data-type="job">Job Node</div>
+            <div class="node" draggable="true" data-type="task">Task Node</div>
+        </div>
+        <div class="canvas" id="canvas">
+            <p>Drag nodes here</p>
+        </div>
+    </div>
+    
+    <script>
+        const nodes = document.querySelectorAll('.node');
+        const canvas = document.getElementById('canvas');
+        
+        nodes.forEach(node => {
+            node.addEventListener('dragstart', (e) => {
+                console.log('Drag started:', e.target.dataset.type);
+                e.dataTransfer.setData('nodeType', e.target.dataset.type);
+                e.dataTransfer.effectAllowed = 'move';
+            });
+        });
+        
+        canvas.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+        });
+        
+        canvas.addEventListener('drop', (e) => {
+            e.preventDefault();
+            const nodeType = e.dataTransfer.getData('nodeType');
+            console.log('Dropped:', nodeType);
+            
+            const droppedNode = document.createElement('div');
+            droppedNode.className = 'dropped-node';
+            droppedNode.textContent = nodeType + ' Node';
+            droppedNode.style.left = e.offsetX + 'px';
+            droppedNode.style.top = e.offsetY + 'px';
+            
+            canvas.appendChild(droppedNode);
+        });
+    </script>
+</body>
+</html> 
