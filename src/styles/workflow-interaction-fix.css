@@ -1,0 +1,158 @@
+/* Workflow Interaction Fix - Ensures the canvas is fully interactive */
+
+/* 1. Ensure React Flow container is interactive */
+.react-flow {
+  position: relative !important;
+  width: 100% !important;
+  height: 100% !important;
+  pointer-events: auto !important;
+  user-select: auto !important;
+  -webkit-user-select: auto !important;
+  -moz-user-select: auto !important;
+  -ms-user-select: auto !important;
+}
+
+/* 2. Ensure viewport is interactive */
+.react-flow__viewport {
+  pointer-events: auto !important;
+  user-select: auto !important;
+}
+
+/* 3. Ensure pane can receive drops */
+.react-flow__pane {
+  pointer-events: auto !important;
+  user-select: auto !important;
+}
+
+/* 4. Ensure nodes container is interactive */
+.react-flow__nodes {
+  pointer-events: auto !important;
+  user-select: auto !important;
+}
+
+/* 5. Ensure individual nodes are draggable */
+.react-flow__node {
+  pointer-events: auto !important;
+  cursor: grab !important;
+  user-select: none !important; /* Prevent text selection on nodes */
+}
+
+.react-flow__node.dragging {
+  cursor: grabbing !important;
+}
+
+/* 6. Ensure handles are interactive */
+.react-flow__handle {
+  pointer-events: auto !important;
+  cursor: crosshair !important;
+}
+
+/* 7. Ensure edges are interactive */
+.react-flow__edges {
+  pointer-events: auto !important;
+}
+
+.react-flow__edge {
+  pointer-events: stroke !important;
+  cursor: pointer !important;
+}
+
+/* 8. Ensure controls are interactive */
+.react-flow__controls {
+  pointer-events: auto !important;
+}
+
+.react-flow__controls-button {
+  pointer-events: auto !important;
+  cursor: pointer !important;
+}
+
+/* 9. Fix node sidebar to be draggable */
+.node-sidebar {
+  pointer-events: auto !important;
+  user-select: none !important;
+}
+
+.node-item {
+  cursor: grab !important;
+  pointer-events: auto !important;
+  user-select: none !important;
+}
+
+.node-item[draggable="true"] {
+  -webkit-user-drag: element !important;
+  user-drag: element !important;
+}
+
+/* 10. Ensure workflow background doesn't block interactions */
+.workflow-background {
+  pointer-events: none !important;
+  user-select: none !important;
+}
+
+/* 11. Fix any overlays that might block interaction */
+.workflow-dark-mode-flow::before,
+.workflow-dark-mode-flow::after,
+.workflow-no-animations::before,
+.workflow-no-animations::after {
+  pointer-events: none !important;
+}
+
+/* 12. Ensure the main workflow container is interactive */
+.workflow-page,
+.workflow-container,
+.workflow-canvas {
+  pointer-events: auto !important;
+  position: relative !important;
+}
+
+/* 13. Override any global pointer-events: none */
+body * {
+  pointer-events: auto;
+}
+
+/* 14. Specific overrides for known blocking elements */
+.workflow-background,
+.smoke,
+.particle {
+  pointer-events: none !important;
+}
+
+/* 15. Ensure drag and drop works */
+[draggable="true"] {
+  -webkit-user-drag: element !important;
+  user-drag: element !important;
+  cursor: grab !important;
+}
+
+[draggable="true"]:active {
+  cursor: grabbing !important;
+}
+
+/* 16. Fix for React Flow renderer */
+.react-flow__renderer {
+  pointer-events: auto !important;
+}
+
+/* 17. Fix for selection and zoom pane */
+.react-flow__zoompane,
+.react-flow__selectionpane {
+  pointer-events: auto !important;
+}
+
+/* 18. Ensure minimap doesn't block */
+.react-flow__minimap {
+  pointer-events: auto !important;
+}
+
+/* 19. Fix any transform or position issues */
+.react-flow__transformationpane {
+  pointer-events: auto !important;
+}
+
+/* 20. Debug helper - add red border to non-interactive elements */
+/* Uncomment to debug interaction issues
+*[style*="pointer-events: none"] {
+  border: 2px solid red !important;
+}
+*/ 
