@@ -37,14 +37,24 @@ export function WorkflowTemplateDialog({
   useEffect(() => {
     if (open) {
       const fetchTemplates = async () => {
-        const { success, templates } = await WorkflowService.listWorkflowTemplates();
-        if (success && templates) {
-          setTemplates(templates);
-        } else {
+        try {
+          const { success, templates } = await WorkflowService.listWorkflowTemplates();
+          if (success && templates) {
+            setTemplates(templates);
+          } else {
+            console.warn('No templates returned from service');
+            setTemplates([]); // Set empty array instead of showing error
+          }
+        } catch (error) {
+          console.error('Error fetching templates:', error);
+          setTemplates([]); // Set empty array on error
           toast.error("Failed to load workflow templates.");
         }
       };
-      fetchTemplates();
+      
+      // Use a timeout to prevent immediate async issues
+      const timeoutId = setTimeout(fetchTemplates, 100);
+      return () => clearTimeout(timeoutId);
     }
   }, [open]);
 

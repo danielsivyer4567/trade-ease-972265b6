@@ -10,6 +10,7 @@ import { NotificationProvider } from './components/notifications/NotificationCon
 import { WorkflowDarkModeProvider } from './contexts/WorkflowDarkModeContext';
 import { initializeTables } from './integrations/supabase/dbInit';
 import ErrorBoundary from './components/ErrorBoundary';
+import './utils/errorHandler'; // Initialize async error handling
 import './App.css';
 import './pages/Workflow/components/workflow.css';
 

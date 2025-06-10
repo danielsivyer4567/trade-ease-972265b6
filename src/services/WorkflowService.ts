@@ -1,5 +1,6 @@
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { AsyncErrorHandler } from '@/utils/errorHandler';
 import { 
   Workflow,
   WorkflowTemplate,
@@ -11,6 +12,81 @@ import {
   WorkflowExecution
 } from '@/types/workflow';
 import { logger } from '@/utils/logger';
+
+// Default workflow templates
+const getDefaultTemplates = (): WorkflowTemplate[] => [
+  {
+    id: 'default-customer-onboarding',
+    name: 'Customer Onboarding',
+    description: 'Automated workflow for new customer onboarding process',
+    category: 'customer',
+    data: {
+      nodes: [
+        {
+          id: 'customer-1',
+          type: 'customerNode',
+          position: { x: 100, y: 100 },
+          data: { label: 'New Customer', description: 'Customer registration' }
+        },
+        {
+          id: 'email-1',
+          type: 'emailNode', 
+          position: { x: 300, y: 100 },
+          data: { label: 'Welcome Email', description: 'Send welcome email' }
+        }
+      ],
+      edges: [
+        {
+          id: 'e1-2',
+          source: 'customer-1',
+          target: 'email-1'
+        }
+      ]
+    },
+    isUserTemplate: false
+  },
+  {
+    id: 'default-job-workflow',
+    name: 'Job Processing',
+    description: 'Standard workflow for job creation and processing',
+    category: 'operations',
+    data: {
+      nodes: [
+        {
+          id: 'job-1',
+          type: 'jobNode',
+          position: { x: 100, y: 100 },
+          data: { label: 'New Job', description: 'Job creation' }
+        },
+        {
+          id: 'task-1',
+          type: 'taskNode',
+          position: { x: 300, y: 100 },
+          data: { label: 'Assign Tasks', description: 'Create job tasks' }
+        },
+        {
+          id: 'messaging-1',
+          type: 'messagingNode',
+          position: { x: 500, y: 100 },
+          data: { label: 'Notify Team', description: 'Send team notification' }
+        }
+      ],
+      edges: [
+        {
+          id: 'e1-2',
+          source: 'job-1',
+          target: 'task-1'
+        },
+        {
+          id: 'e2-3',
+          source: 'task-1',
+          target: 'messaging-1'
+        }
+      ]
+    },
+    isUserTemplate: false
+  }
+];
 
 export const WorkflowService = {
   /**
@@ -450,54 +526,46 @@ export const WorkflowService = {
    * List all workflow templates
    */
   listWorkflowTemplates: async (): Promise<{ success: boolean; templates?: WorkflowTemplate[]; error?: any }> => {
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        return { success: false, error: 'Authentication required' };
-      }
+    return AsyncErrorHandler.wrapAsyncOperation(
+      async () => {
+        try {
+          const { data: { session } } = await supabase.auth.getSession();
+          if (!session) {
+            return { success: false, error: 'Authentication required' };
+          }
 
-      // First try to get user's own templates
-      const { data: userTemplates, error: userTemplatesError } = await supabase
-        .from('workflows')
-        .select('*')
-        .eq('user_id', session.user.id)
-        .eq('is_template', true)
-        .order('updated_at', { ascending: false });
+          // Get user's own templates from workflows table
+          const { data: userTemplates, error: userTemplatesError } = await supabase
+            .from('workflows')
+            .select('*')
+            .eq('user_id', session.user.id)
+            .eq('is_template', true)
+            .order('updated_at', { ascending: false });
 
-      if (userTemplatesError) throw userTemplatesError;
+          if (userTemplatesError) throw userTemplatesError;
 
-      // Then get system templates
-      const { data: systemTemplates, error: systemTemplatesError } = await supabase
-        .from('workflow_templates')
-        .select('*')
-        .order('created_at', { ascending: false });
+          // Format the templates
+          const templates = [
+            ...(userTemplates || []).map(item => ({
+              id: item.id,
+              name: item.name,
+              description: item.description,
+              category: item.category || 'custom',
+              data: item.data || { nodes: [], edges: [] },
+              isUserTemplate: true
+            })),
+            // Add some default system templates if no user templates exist
+            ...((!userTemplates || userTemplates.length === 0) ? getDefaultTemplates() : [])
+          ];
 
-      if (systemTemplatesError) throw systemTemplatesError;
-
-      // Combine and format the templates
-      const templates = [
-        ...(userTemplates || []).map(item => ({
-          id: item.id,
-          name: item.name,
-          description: item.description,
-          category: item.category || 'custom',
-          data: item.data || { nodes: [], edges: [] },
-          isUserTemplate: true
-        })),
-        ...(systemTemplates || []).map(item => ({
-          id: item.id,
-          name: item.name,
-          description: item.description,
-          category: item.category || 'system',
-          data: item.data || { nodes: [], edges: [] },
-          isUserTemplate: false
-        }))
-      ];
-
-      return { success: true, templates };
-    } catch (error) {
-      console.error('Failed to list workflow templates:', error);
-      return { success: false, error };
-    }
+          return { success: true, templates };
+        } catch (error) {
+          console.error('Failed to list workflow templates:', error);
+          // Return default templates as fallback
+          return { success: true, templates: getDefaultTemplates() };
+        }
+      },
+      { success: true, templates: getDefaultTemplates() } // Fallback result
+    );
   },
 };

@@ -457,16 +457,24 @@ export default function WorkflowPage() {
         open={isLoadDialogOpen}
         onOpenChange={setIsLoadDialogOpen}
         onLoad={(template: WorkflowTemplate) => {
-          if (template.data) {
-            if (template.data.nodes) {
-              setNodes(template.data.nodes.map(ensureNodeIcon));
+          try {
+            if (template.data) {
+              if (template.data.nodes) {
+                setNodes(template.data.nodes.map(ensureNodeIcon));
+              }
+              if (template.data.edges) {
+                setEdges(template.data.edges);
+              }
+              if (flowInstance) {
+                setTimeout(() => flowInstance.fitView(), 100);
+              }
+              toast.success(`Template "${template.name}" loaded successfully`);
+            } else {
+              toast.error('Template data is missing');
             }
-            if (template.data.edges) {
-              setEdges(template.data.edges);
-            }
-            if (flowInstance) {
-              setTimeout(() => flowInstance.fitView(), 100);
-            }
+          } catch (error) {
+            console.error('Error loading template:', error);
+            toast.error('Failed to load template');
           }
         }}
       />
