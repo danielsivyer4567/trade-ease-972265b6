@@ -4,6 +4,7 @@ import App from './App.tsx'
 import './index.css'
 import { disableDevToolsOverlay } from './utils/disableDevToolsOverlay'
 import { workflowJobProcessor } from './services/WorkflowJobProcessor'
+import './utils/errorHandler' // Initialize error handler immediately
 // Remove the startupService import to prevent the 404 error
 // import { startupService } from './services/startupService'
 
@@ -24,7 +25,7 @@ if (import.meta.hot) {
 // Start the workflow job processor
 if (import.meta.env.MODE === 'development') {
   // In development, start the job processor
-  workflowJobProcessor.start(5000); // Check for jobs every 5 seconds
+  workflowJobProcessor.start(); // Check for jobs every 30 seconds (hardcoded in the service)
   console.log('Workflow job processor started in development mode');
 }
 
