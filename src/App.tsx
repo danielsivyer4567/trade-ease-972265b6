@@ -13,6 +13,7 @@ import ErrorBoundary from './components/ErrorBoundary';
 import './utils/errorHandler'; // Initialize async error handling
 import './App.css';
 import './pages/Workflow/components/workflow.css';
+import './styles/deprecation-fixes.css'; // Override deprecated CSS properties
 
 const queryClient = new QueryClient({
   defaultOptions: {

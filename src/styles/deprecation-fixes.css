@@ -1,0 +1,58 @@
+/* Override deprecated -ms-high-contrast-adjust from third-party libraries */
+/* This file suppresses deprecation warnings by providing modern alternatives */
+
+/* Global override for all elements */
+* {
+  /* Remove deprecated property if set by libraries */
+  -ms-high-contrast-adjust: none !important;
+  /* Use modern forced colors standard */
+  forced-color-adjust: auto !important;
+}
+
+/* Specific overrides for common UI components that might use deprecated properties */
+button,
+input,
+select,
+textarea,
+a,
+[role="button"],
+[role="link"],
+.react-flow__node,
+.react-flow__edge,
+.react-flow__controls,
+.react-flow__background,
+.react-flow__minimap {
+  -ms-high-contrast-adjust: none !important;
+  forced-color-adjust: auto !important;
+}
+
+/* Override for any SVG elements */
+svg,
+svg * {
+  -ms-high-contrast-adjust: none !important;
+  forced-color-adjust: auto !important;
+}
+
+/* Ensure proper contrast in forced colors mode */
+@media (forced-colors: active) {
+  * {
+    forced-color-adjust: auto !important;
+  }
+  
+  /* Ensure interactive elements remain visible */
+  button,
+  input,
+  select,
+  textarea,
+  a {
+    outline: 1px solid currentColor !important;
+  }
+}
+
+/* Additional overrides for any Tailwind utilities that might use deprecated properties */
+[class*="contrast-"],
+[class*="backdrop-"],
+[class*="filter"] {
+  -ms-high-contrast-adjust: none !important;
+  forced-color-adjust: auto !important;
+} 
