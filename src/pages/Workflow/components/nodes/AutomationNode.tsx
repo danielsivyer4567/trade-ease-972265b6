@@ -33,31 +33,66 @@ function AutomationNode({ data, isConnectable, id }: NodeProps) {
     });
   }, [id, displayLabel, displayDescription, workflowDarkMode, nodeData]);
   
-  // Fixed style for debugging
+  // Proper styling matching other workflow nodes
   return (
-    <div style={{
-      position: 'absolute',
+    <div className="node-content" style={{
       width: '200px',
-      height: '100px',
-      backgroundColor: 'purple',
-      color: 'white',
-      padding: '10px',
-      border: '3px solid yellow',
+      minHeight: '100px',
+      background: workflowDarkMode 
+        ? 'linear-gradient(135deg, rgba(192, 74, 255, 0.8), rgba(126, 74, 255, 0.8))'
+        : 'linear-gradient(135deg, #c04aff, #7e4aff)',
+      color: '#ffffff',
+      padding: '16px',
+      border: workflowDarkMode 
+        ? '1px solid rgba(192, 74, 255, 0.5)'
+        : '1px solid #c04aff',
       borderRadius: '8px',
-      zIndex: 1000,
-      boxShadow: '0 0 10px rgba(0,0,0,0.5)'
+      boxShadow: workflowDarkMode 
+        ? '0 0 20px rgba(192, 74, 255, 0.3)'
+        : '0 4px 12px rgba(192, 74, 255, 0.3)',
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'center',
+      textAlign: 'center',
+      position: 'relative',
+      backdropFilter: 'blur(2px)',
+      fontFamily: "'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
     }}>
-      <div>ID: {id}</div>
-      <div>Label: {displayLabel}</div>
-      <div>Description: {displayDescription}</div>
+      {/* Icon */}
+      <div style={{ marginBottom: '8px' }}>
+        {nodeData.iconComponent || nodeData.icon || <Zap className="h-6 w-6 text-white" />}
+      </div>
+      
+      {/* Label */}
+      <div style={{
+        fontSize: '14px',
+        fontWeight: '600',
+        marginBottom: '4px',
+        textShadow: '0 1px 2px rgba(0,0,0,0.3)'
+      }}>
+        {displayLabel}
+      </div>
+      
+      {/* Description */}
+      <div style={{
+        fontSize: '11px',
+        opacity: 0.9,
+        textShadow: '0 1px 2px rgba(0,0,0,0.3)',
+        lineHeight: '1.3'
+      }}>
+        {displayDescription}
+      </div>
       
       <Handle
         type="target"
         position={Position.Left}
         style={{
-          background: 'yellow',
-          width: 15,
-          height: 15
+          background: workflowDarkMode ? DARK_GOLD : 'rgba(230, 100, 255, 0.7)',
+          border: '2px solid rgba(255, 255, 255, 0.8)',
+          width: 12,
+          height: 12,
+          left: -6
         }}
         isConnectable={isConnectable}
       />
@@ -66,9 +101,11 @@ function AutomationNode({ data, isConnectable, id }: NodeProps) {
         type="source"
         position={Position.Right}
         style={{
-          background: 'yellow',
-          width: 15,
-          height: 15
+          background: workflowDarkMode ? DARK_GOLD : 'rgba(230, 100, 255, 0.7)',
+          border: '2px solid rgba(255, 255, 255, 0.8)',
+          width: 12,
+          height: 12,
+          right: -6
         }}
         isConnectable={isConnectable}
       />
