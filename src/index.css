@@ -42,6 +42,18 @@ html {
   text-size-adjust: 100%;
 }
 
+/* Modern forced colors support (replaces deprecated -ms-high-contrast-adjust) */
+* {
+  forced-color-adjust: auto;
+}
+
+/* Ensure proper contrast in forced colors mode */
+@media (forced-colors: active) {
+  * {
+    forced-color-adjust: auto;
+  }
+}
+
 /* User selection handling */
 * {
   -webkit-user-select: none;
