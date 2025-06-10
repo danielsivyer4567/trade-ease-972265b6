@@ -50,27 +50,33 @@ export const useWebSocket = (
       };
 
       socket.onerror = error => {
-        console.error('WebSocket error:', error);
+        console.debug('WebSocket error (may be expected):', error);
         setIsConnected(false);
-        toast({
-          title: "Connection Error",
-          description: "Lost connection to the team. Trying to reconnect...",
-          variant: "destructive"
-        });
+        // Only show toast for actual connectivity issues, not for expected disconnections
+        if (socketRef.current?.readyState !== WebSocket.CLOSING && socketRef.current?.readyState !== WebSocket.CLOSED) {
+          toast({
+            title: "Connection Error",
+            description: "Lost connection to the team. Trying to reconnect...",
+            variant: "destructive"
+          });
+        }
       };
 
       socket.onclose = (event) => {
-        console.log('WebSocket disconnected:', event.code, event.reason);
+        console.debug('WebSocket disconnected:', event.code, event.reason);
         setIsConnected(false);
         
-        // Only attempt to reconnect if the closure wasn't clean
-        if (event.code !== 1000) {
+        // Only attempt to reconnect if the closure wasn't clean and we're still supposed to be connected
+        if (event.code !== 1000 && event.code !== 1001 && isListening && socketRef.current === socket) {
           reconnectTimeoutRef.current = setTimeout(() => {
-            toast({
-              title: "Reconnecting",
-              description: "Attempting to reconnect to the team communication..."
-            });
-            connect();
+            // Double-check that we should still be connected before attempting reconnection
+            if (isListening && socketRef.current === socket) {
+              toast({
+                title: "Reconnecting",
+                description: "Attempting to reconnect to the team communication..."
+              });
+              connect();
+            }
           }, 5000);
         }
       };
