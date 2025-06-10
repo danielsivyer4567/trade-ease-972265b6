@@ -599,9 +599,8 @@ function FlowContent({ onInit, workflowId, onNodeSelect, workflowDarkMode = true
       }}
       className={animationActiveEdges.size > 0 ? 'workflow-active-edges' : ''}
     >
-      {/* Animated Background */}
-      <div className="workflow-background">
-        {/* Smoke effect */}
+      {/* Animated Background - TEMPORARILY DISABLED FOR DEBUGGING */}
+      {/* <div className="workflow-background">
         {Array.from({ length: 8 }).map((_, i) => (
           <div 
             key={`smoke-${i}`} 
@@ -617,14 +616,13 @@ function FlowContent({ onInit, workflowId, onNodeSelect, workflowDarkMode = true
           />
         ))}
         
-        {/* Animated particles */}
         {Array.from({ length: 25 }).map((_, i) => (
           <div 
             key={i} 
             className="particle"
             style={{
-              width: `${Math.random() * 10 + 5}px`, // Larger particles
-              height: `${Math.random() * 10 + 5}px`, // Larger particles
+              width: `${Math.random() * 10 + 5}px`,
+              height: `${Math.random() * 10 + 5}px`,
               top: `${Math.random() * 100}%`,
               left: `${Math.random() * 100}%`,
               animation: `floatParticle ${Math.random() * 15 + 15}s linear infinite`,
@@ -632,7 +630,7 @@ function FlowContent({ onInit, workflowId, onNodeSelect, workflowDarkMode = true
             }}
           />
         ))}
-      </div>
+      </div> */}
 
       <ReactFlow
         nodes={nodes}
@@ -651,11 +649,13 @@ function FlowContent({ onInit, workflowId, onNodeSelect, workflowDarkMode = true
           color: DARK_TEXT, 
           fontFamily: "'Roboto', sans-serif",
           position: 'relative',
-          zIndex: 1 // Ensure it's above the background
+          zIndex: 1,
+          backgroundColor: '#1a1a2e' // Dark background for visibility
         } : {
           fontFamily: "'Roboto', sans-serif",
           position: 'relative',
-          zIndex: 1 // Ensure it's above the background
+          zIndex: 1,
+          backgroundColor: '#f0f0f0' // Light background for visibility
         }}
         defaultEdgeOptions={{
           type: 'animated',

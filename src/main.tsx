@@ -2,7 +2,6 @@ import React from 'react'
 import ReactDOM from 'react-dom/client'
 import App from './App.tsx'
 import './index.css'
-import '@xyflow/react/dist/style.css' // Required for React Flow to work properly
 import { disableDevToolsOverlay } from './utils/disableDevToolsOverlay'
 import { workflowJobProcessor } from './services/WorkflowJobProcessor'
 import './utils/errorHandler' // Initialize error handler immediately
