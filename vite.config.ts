@@ -25,12 +25,17 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
+      "@supabase/postgrest-js": path.resolve(__dirname, "./node_modules/@supabase/postgrest-js/dist/cjs/index.js"),
     },
     extensions: ['.mjs', '.js', '.ts', '.jsx', '.tsx', '.json'],
+    conditions: ['import', 'module', 'browser', 'default'],
+    mainFields: ['browser', 'module', 'main'],
   },
   optimizeDeps: {
     esbuildOptions: {
       target: 'es2020',
+      ignoreAnnotations: true,
+      treeShaking: true,
     },
     include: [
       'react', 
@@ -41,12 +46,18 @@ export default defineConfig({
       '@radix-ui/react-dialog',
       '@radix-ui/react-popover',
       '@radix-ui/react-slot',
+      '@supabase/supabase-js',
+      '@supabase/postgrest-js',
+    ],
+    exclude: [
+      'framer-motion',
+      '@lottiefiles/react-lottie-player'
     ],
     force: true // Force optimization of dependencies
   },
   build: {
     target: 'es2020',
-    sourcemap: true,
+    sourcemap: 'hidden', // Hide source maps but still generate them
     chunkSizeWarningLimit: 1600,
     rollupOptions: {
       output: {
@@ -77,6 +88,13 @@ export default defineConfig({
         // Add module preload
         experimentalMinChunkSize: 10000
       },
+      onwarn(warning, warn) {
+        // Suppress source map warnings
+        if (warning.code === 'SOURCEMAP_ERROR' || warning.message.includes('source map')) {
+          return;
+        }
+        warn(warning);
+      }
     },
     // Add module preload
     modulePreload: {

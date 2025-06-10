@@ -46,6 +46,12 @@ export class WorkflowJobProcessor {
   }
 
   async processExecutions(): Promise<void> {
+    // Temporarily disable workflow execution processing
+    // The workflow_executions table doesn't exist in the current database schema
+    logger.debug('WorkflowJobProcessor: Workflow execution processing is disabled (table not found)');
+    return;
+
+    /*
     try {
       // Get pending workflow executions
       const { data: executions, error } = await supabase
@@ -93,9 +99,15 @@ export class WorkflowJobProcessor {
     } catch (error) {
       logger.error('Failed to process workflow jobs:', error);
     }
+    */
   }
 
   private async processExecution(execution: WorkflowExecution): Promise<void> {
+    // Disabled - workflow_executions table doesn't exist
+    logger.warn('WorkflowJobProcessor: processExecution is disabled - table not found');
+    return;
+    
+    /*
     try {
       logger.info(`WorkflowJobProcessor: Starting execution ${execution.id}`);
 
@@ -140,10 +152,16 @@ export class WorkflowJobProcessor {
       logger.error(`WorkflowJobProcessor: Error in execution ${execution.id}:`, error);
       throw error;
     }
+    */
   }
 
   // Add execution to queue (for manual triggering)
   async queueExecution(workflowId: string, inputData: any = {}): Promise<string> {
+    // Temporarily disabled - workflow_executions table doesn't exist
+    logger.warn('WorkflowJobProcessor: Cannot queue execution - workflow_executions table not found');
+    throw new Error('Workflow execution system is disabled - database table not found');
+    
+    /*
     try {
       const { data: execution, error } = await supabase
         .from('workflow_executions')
@@ -166,6 +184,7 @@ export class WorkflowJobProcessor {
       logger.error('WorkflowJobProcessor: Error queueing execution:', error);
       throw error;
     }
+    */
   }
 
   stop(): void {
