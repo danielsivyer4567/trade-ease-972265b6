@@ -13,6 +13,8 @@ import { WorkflowService } from '@/services/WorkflowService';
 import { User, Briefcase, ClipboardList, FileText, MessageSquare, Eye, Zap, Share2, Layout } from 'lucide-react';
 import { DARK_BG, DARK_TEXT, DARK_GOLD, DARK_SECONDARY } from '@/contexts/WorkflowDarkModeContext';
 import { WorkflowTemplate } from '@/types/workflow';
+import { DebugOverlay } from './components/DebugOverlay';
+import { MinimalFlowTest } from './components/MinimalFlowTest';
 
 // Define interfaces for workflow data
 interface NodeData {
@@ -389,7 +391,7 @@ export default function WorkflowPage() {
         />
 
         {/* Flow canvas */}
-        <div className="flex-1 h-full">
+        <div className="flex-1 h-full" style={{ position: 'relative', overflow: 'hidden' }}>
           <Flow 
             workflowId={id} 
             onNodeSelect={setSelectedNode}
