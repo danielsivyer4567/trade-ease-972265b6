@@ -27,6 +27,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { JobDocumentation } from "./form-sections/JobDocumentation";
+import { useFileUpload } from "./document-approval/hooks/useFileUpload";
 
 interface JobDetailProps {
   job: Job;
@@ -642,6 +644,53 @@ export const JobDetail = ({ job }: JobDetailProps) => {
     geocodeAddress();
   }, [jobData.address, job.address, job.id]);
 
+  const [documentationFiles, setDocumentationFiles] = useState<(File & { url?: string })[]>([]);
+  const [documentationNotes, setDocumentationNotes] = useState("");
+  const { uploadFileToStorage, isUploading } = useFileUpload(job.id);
+
+  // Load documentation files and notes from job on mount
+  useEffect(() => {
+    if (job.documents && Array.isArray(job.documents)) {
+      setDocumentationFiles(job.documents.map((doc: any) => ({ name: doc.name, url: doc.url, size: doc.size || 0, type: doc.type || '', lastModified: doc.lastModified || Date.now() })));
+    }
+    if (job.documentationNotes) {
+      setDocumentationNotes(job.documentationNotes);
+    }
+  }, [job.documents, job.documentationNotes]);
+
+  // Handle file upload for documentation
+  const handleDocumentationFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || e.target.files.length === 0) return;
+    const files = Array.from(e.target.files);
+    const uploadedDocs: any[] = [];
+    for (const file of files) {
+      try {
+        const filePath = await uploadFileToStorage(file);
+        const publicUrl = supabase.storage.from('job-documents').getPublicUrl(filePath).publicUrl;
+        uploadedDocs.push({
+          name: file.name,
+          url: publicUrl,
+          size: file.size,
+          type: file.type,
+          lastModified: file.lastModified
+        });
+      } catch (err) {
+        toast.error(`Failed to upload ${file.name}`);
+      }
+    }
+    const newDocs = [...documentationFiles, ...uploadedDocs];
+    setDocumentationFiles(newDocs);
+    await updateJobDetails(job.id, { documents: newDocs });
+    toast.success("Documentation files uploaded and saved");
+  };
+
+  // Handle documentation notes change and save to backend
+  const handleDocumentationNotesChange = async (notes: string) => {
+    setDocumentationNotes(notes);
+    await updateJobDetails(job.id, { documentationNotes: notes });
+    toast.success("Documentation notes saved");
+  };
+
   return (
     <>
       <div className="w-full h-full bg-gray-100">
@@ -707,7 +756,7 @@ export const JobDetail = ({ job }: JobDetailProps) => {
 
         {/* Navigation tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid grid-cols-5 md:grid-cols-10 bg-white border-t border-b border-gray-200">
+          <TabsList className="grid grid-cols-5 md:grid-cols-11 bg-white border-t border-b border-gray-200">
             <TabsTrigger value="details" className="text-xs md:text-sm py-2 data-[state=active]:border-b-2 data-[state=active]:border-blue-500">
               Details
             </TabsTrigger>
@@ -740,6 +789,9 @@ export const JobDetail = ({ job }: JobDetailProps) => {
             </TabsTrigger>
             <TabsTrigger value="conversations" className="text-xs md:text-sm py-2 data-[state=active]:border-b-2 data-[state=active]:border-blue-500">
               <MessageSquare className="h-4 w-4 md:mr-1 md:inline hidden" /> Conversations
+            </TabsTrigger>
+            <TabsTrigger value="documentation" className="text-xs md:text-sm py-2 data-[state=active]:border-b-2 data-[state=active]:border-blue-500">
+              Documentation
             </TabsTrigger>
           </TabsList>
 
@@ -1674,6 +1726,17 @@ export const JobDetail = ({ job }: JobDetailProps) => {
 
           <TabsContent value="conversations" className="p-4">
             <div className="text-center py-10 text-gray-500">Conversations content will be displayed here</div>
+          </TabsContent>
+
+          <TabsContent value="documentation" className="p-4">
+            <JobDocumentation
+              documents={documentationFiles}
+              setDocuments={setDocumentationFiles}
+              notes={documentationNotes}
+              setNotes={handleDocumentationNotesChange}
+              onFileUpload={handleDocumentationFileUpload}
+              isUploading={isUploading}
+            />
           </TabsContent>
         </Tabs>
       </div>

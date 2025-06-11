@@ -6,6 +6,7 @@ import { FormHeader } from "./form-sections/FormHeader";
 import { FormFooter } from "./form-sections/FormFooter";
 import { MainFormFields } from "./form-sections/MainFormFields";
 import { JobDescription } from "./form-sections/JobDescription";
+import { JobDocumentation } from "./form-sections/JobDocumentation";
 import JobStreetView from "@/components/JobStreetView";
 
 interface JobFormProps {
@@ -69,6 +70,8 @@ export function JobForm({
 }: JobFormProps) {
   const { toast } = useToast();
   const [showStreetView, setShowStreetView] = useState(false);
+  const [documents, setDocuments] = useState<File[]>([]);
+  const [documentationNotes, setDocumentationNotes] = useState("");
 
   // Check if we have enough address information to show the street view
   useEffect(() => {
@@ -136,7 +139,14 @@ export function JobForm({
       address: formattedAddress || "",
       status: "scheduled",
       createdAt: new Date().toISOString(),
-      lastUpdated: new Date().toISOString()
+      lastUpdated: new Date().toISOString(),
+      documents: documents.map(file => ({
+        name: file.name,
+        type: file.type,
+        size: file.size,
+        lastModified: file.lastModified
+      })),
+      documentationNotes
     };
   };
 
@@ -261,6 +271,16 @@ export function JobForm({
                   
                   <JobDescription description={description} setDescription={setDescription} />
                 </div>
+              </div>
+
+              {/* Documentation Section */}
+              <div className="border-t pt-8">
+                <JobDocumentation
+                  documents={documents}
+                  setDocuments={setDocuments}
+                  notes={documentationNotes}
+                  setNotes={setDocumentationNotes}
+                />
               </div>
             </div>
             

@@ -22,6 +22,14 @@ export interface Job {
   date_undecided?: boolean;
   job_steps?: JobStep[];
   boundaries?: Array<Array<[number, number]>>; // Array of polygon coordinates
+  documents?: Array<{
+    name: string;
+    url: string;
+    size?: number;
+    type?: string;
+    lastModified?: number;
+  }>;
+  documentationNotes?: string;
 }
 
 export interface JobStep {
