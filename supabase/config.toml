@@ -1,5 +1,10 @@
+# Project ID
+project_id = "wxwbxupdisbofesaygqj"
 
 [functions]
 [functions.search-property-boundaries]
 verify_jwt = true
+
+[functions.google-maps-key]
+verify_jwt = false
 
