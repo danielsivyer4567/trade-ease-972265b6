@@ -9,35 +9,56 @@ if (!import.meta.env.VITE_SUPABASE_ANON_KEY) {
   throw new Error('Missing VITE_SUPABASE_ANON_KEY environment variable')
 }
 
-// Use the original Supabase URL for data operations
+// Get the Supabase URL and key from environment variables
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL!
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY!
 
-// For development, use the local proxy for auth endpoints to avoid CORS issues
-const authUrl = import.meta.env.DEV ? window.location.origin : supabaseUrl
+// In development, use localhost to avoid CORS issues
+const isDev = import.meta.env.DEV
+const baseUrl = isDev ? window.location.origin : supabaseUrl
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-  auth: {
-    persistSession: true,
-    autoRefreshToken: true,
-    detectSessionInUrl: true,
-    flowType: 'pkce',
-    // Add CORS settings for localhost development
-    storageKey: 'supabase-auth',
-    // Enable debug mode to help diagnose issues
-    debug: import.meta.env.DEV,
-    // Use the local proxy for auth in development
-    ...(import.meta.env.DEV && { url: authUrl })
-  },
-  global: {
-    headers: {
-      'X-Client-Info': 'trade-ease@1.0.0'
+// Create the Supabase client with appropriate configuration
+export const supabase = createClient(
+  // In development, we'll use the original URL for compatibility with the SDK,
+  // but all requests will be intercepted and proxied through our local server
+  supabaseUrl,
+  supabaseAnonKey,
+  {
+    auth: {
+      persistSession: true,
+      autoRefreshToken: true,
+      detectSessionInUrl: true,
+      flowType: 'pkce',
+      storageKey: 'supabase-auth',
+      debug: isDev
+    },
+    global: {
+      headers: {
+        'X-Client-Info': 'trade-ease@1.0.0'
+      },
+      // For development, fetch will be intercepted by our proxy
+      ...(isDev && { fetch: customFetch })
     }
   }
-})
+)
+
+// Custom fetch function that routes requests through our local proxy in development
+function customFetch(url: RequestInfo | URL, init?: RequestInit): Promise<Response> {
+  if (typeof url === 'string' && url.startsWith(supabaseUrl)) {
+    // Replace the Supabase URL with our local proxy
+    const path = url.replace(supabaseUrl, '')
+    const newUrl = `${baseUrl}${path}`
+    console.log(`Proxying Supabase request: ${url} -> ${newUrl}`)
+    return fetch(newUrl, init)
+  }
+  
+  // For non-Supabase URLs or non-string URLs, use the default fetch
+  return fetch(url, init)
+}
 
 // Export admin client (placeholder for now)
 export const supabaseAdmin = supabase
 
 // Export demo data generator (placeholder for now)
 export const generateDemoData = () => Promise.resolve([])
+
