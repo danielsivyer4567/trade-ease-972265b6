@@ -454,7 +454,9 @@ const PropertyBoundaryMap = ({
                 streetViewControl: false,
                 mapTypeControl: true,
                 fullscreenControl: true,
-                mapId: mapId
+                mapId: mapId,
+                // Only set mapTypeId if mapId is not present to avoid warnings
+                ...(mapId ? {} : { mapTypeId: 'satellite' })
               }}
               onLoad={handleMapLoad}
             >

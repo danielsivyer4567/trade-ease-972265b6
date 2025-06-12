@@ -60,14 +60,10 @@ const DEFAULT_MAP_OPTIONS = {
   tilt: 45,
   zoom: 13,
   mapTypeControl: true,
-  mapTypeControlOptions: {
-    position: google.maps.ControlPosition.TOP_RIGHT,
-    mapTypeIds: ['roadmap', 'satellite', 'hybrid', 'terrain']
-  },
-  mapTypeId: 'satellite', // Set default to satellite view
   streetViewControl: true,
   fullscreenControl: true,
-  mapId: getMapId()
+  mapId: getMapId(),
+  mapTypeId: 'satellite'  // Set satellite as default
 };
 
 // Default map container style
@@ -611,7 +607,6 @@ const JobSiteMap = memo(() => {
               zoom={mapViewState?.zoom || DEFAULT_MAP_OPTIONS.zoom} 
               options={{
                 ...DEFAULT_MAP_OPTIONS,
-                // Use stored tilt if available to prevent resetting the view
                 tilt: mapViewState?.tilt || DEFAULT_MAP_OPTIONS.tilt
               }}
               onLoad={handleMapLoad}
