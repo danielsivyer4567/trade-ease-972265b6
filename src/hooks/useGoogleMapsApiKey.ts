@@ -15,14 +15,9 @@ export function useGoogleMapsApiKey() {
     setIsLoading(true);
     setError(null);
     try {
-      // Debug log
-      console.log('Fetching Google Maps API key...');
-      console.log('Environment variable:', import.meta.env.VITE_GOOGLE_MAPS_API_KEY);
-
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
         console.log('No session found, using environment variable');
-        // If no session, use environment variable
         const envApiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
         if (!envApiKey) {
           throw new Error('No API key found in environment variables');
@@ -32,24 +27,25 @@ export function useGoogleMapsApiKey() {
         return;
       }
 
-      console.log('Session found, fetching from Supabase');
-      const { data, error } = await supabase.functions.invoke('google-maps-key', {
-        method: 'GET',
-        headers: {
-          Authorization: `Bearer ${session.access_token}`
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/google-maps-key`,
+        {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${session.access_token}`,
+            'Content-Type': 'application/json',
+          },
         }
-      });
+      );
 
-      if (error) {
-        console.error('Supabase error:', error);
-        throw error;
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
 
+      const data = await response.json();
       if (data?.apiKey) {
-        console.log('API key found in Supabase');
         setApiKey(data.apiKey);
       } else {
-        console.log('No API key in Supabase, using environment variable');
         const envApiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
         if (!envApiKey) {
           throw new Error('No API key found in environment variables');
@@ -75,16 +71,20 @@ export function useGoogleMapsApiKey() {
         return;
       }
 
-      const { error } = await supabase.functions.invoke('google-maps-key', {
-        method: 'POST',
-        body: { apiKey: newApiKey },
-        headers: {
-          Authorization: `Bearer ${session.access_token}`
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/google-maps-key`,
+        {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${session.access_token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ apiKey: newApiKey }),
         }
-      });
+      );
 
-      if (error) {
-        throw error;
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
 
       setApiKey(newApiKey);
@@ -108,15 +108,19 @@ export function useGoogleMapsApiKey() {
         return;
       }
 
-      const { error } = await supabase.functions.invoke('google-maps-key', {
-        method: 'DELETE',
-        headers: {
-          Authorization: `Bearer ${session.access_token}`
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/google-maps-key`,
+        {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${session.access_token}`,
+            'Content-Type': 'application/json',
+          },
         }
-      });
+      );
 
-      if (error) {
-        throw error;
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
 
       setApiKey(null);
