@@ -33,6 +33,10 @@ if (missingVars.length > 0) {
   process.exit(1);
 }
 
+// Extract project ID from Supabase URL
+const supabaseUrl = process.env.VITE_SUPABASE_URL || '';
+const projectId = supabaseUrl.replace('https://', '').split('.')[0];
+
 // Create n8n environment configuration
 const n8nEnvContent = `# n8n Configuration
 N8N_PORT=5678
@@ -41,16 +45,21 @@ N8N_HOST=localhost
 N8N_BASIC_AUTH_ACTIVE=true
 N8N_BASIC_AUTH_USER=admin
 N8N_BASIC_AUTH_PASSWORD=changeme123
-N8N_WEBHOOK_URL=https://your-tunnel-id.hooks.n8n.cloud/webhook
+
+# Webhook URL Configuration
+# For local testing: http://localhost:5678/webhook
+# For external webhooks (with tunnel): https://your-id.hooks.n8n.cloud/webhook
+# For production: https://your-domain.com/webhook
+N8N_WEBHOOK_URL=http://localhost:5678/webhook
 
 # Supabase Configuration (from main .env)
-SUPABASE_URL=https://wxwbxupdisbofesaygqj.supabase.co
-SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind4d2J4dXBkaXNib2Zlc2F5Z3FqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDAwMDI0OTgsImV4cCI6MjA1NTU3ODQ5OH0.xhjkVsi9XZMwobUMsdYE0e1FXQeT_uNLaTHquGvRxjI
-SUPABASE_SERVICE_KEY=${process.env.SUPABASE_SERVICE_KEY || eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind4d2J4dXBkaXNib2Zlc2F5Z3FqIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0MDAwMjQ5OCwiZXhwIjoyMDU1NTc4NDk4fQ.8ypq7i-y-m9xRjauPx5Fscx-nLh27PLHTPIc6LUIuDs
+SUPABASE_URL=${process.env.VITE_SUPABASE_URL}
+SUPABASE_ANON_KEY=${process.env.VITE_SUPABASE_ANON_KEY}
+SUPABASE_SERVICE_KEY=${process.env.SUPABASE_SERVICE_KEY || 'YOUR_SERVICE_KEY_HERE'}
 
 # Database Configuration
 DATABASE_TYPE=postgresdb
-DATABASE_POSTGRESDB_HOST=db.${process.env.VITE_SUPABASE_URL?.replace('https://', '').split('.')[0]}.supabase.co
+DATABASE_POSTGRESDB_HOST=db.${projectId}.supabase.co
 DATABASE_POSTGRESDB_PORT=5432
 DATABASE_POSTGRESDB_DATABASE=postgres
 DATABASE_POSTGRESDB_USER=postgres
