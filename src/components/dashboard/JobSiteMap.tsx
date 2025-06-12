@@ -3,11 +3,12 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { GoogleMap, LoadScript, InfoWindow, LoadScriptProps, Polyline } from '@react-google-maps/api';
-import { MapPin, AlertCircle, Pencil, X, Ruler } from "lucide-react";
+import { MapPin, AlertCircle, Pencil, X, Ruler, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import type { Job } from "@/types/job";
 import { supabase } from "@/integrations/supabase/client";
 import { GOOGLE_MAPS_CONFIG, validateGoogleMapsApiKey, getSafeApiKey, getMapId } from "@/config/google-maps";
+import { useGoogleMapsApiKey } from '@/hooks/useGoogleMapsApiKey';
 
 // Define types for locations and map properties
 type Location = {
@@ -96,6 +97,12 @@ const JobSiteMap = memo(() => {
   
   // Keep a stable reference to prevent script reloading issues
   const loadScriptRef = useRef<any>(null);
+
+  // Add the hook
+  const { apiKey, isLoading: isApiKeyLoading, error: apiKeyError } = useGoogleMapsApiKey();
+
+  // Update the API key validation
+  const isApiKeyValid = apiKey && apiKey.startsWith('AIzaSy');
 
   // Fetch jobs data
   useEffect(() => {
@@ -345,10 +352,10 @@ const JobSiteMap = memo(() => {
     }
   }, [drawingMode]);
   
-  // Handle load error
+  // Update the error handling
   const handleLoadError = useCallback((error: Error) => {
     console.error("Error loading Google Maps:", error);
-    console.error("API Key present:", !!GOOGLE_MAPS_API_KEY);
+    console.error("API Key present:", !!apiKey);
     console.error("Error details:", {
       message: error.message,
       stack: error.stack,
@@ -366,14 +373,14 @@ const JobSiteMap = memo(() => {
       specificError += "Invalid API key. Please check your API key configuration.";
     } else if (error.message?.includes('OverQuotaMapError')) {
       specificError += "API quota exceeded. Please check your Google Cloud billing.";
-    } else if (!GOOGLE_MAPS_API_KEY) {
-      specificError += "API key not configured. Please add VITE_GOOGLE_MAPS_API_KEY to your .env file.";
+    } else if (!apiKey) {
+      specificError += "API key not configured. Please add your Google Maps API key in settings.";
     } else {
       specificError += "Please check browser console for details.";
     }
     
     setMapError(specificError);
-  }, []);
+  }, [apiKey]);
   
   // Format distance for display
   const formatDistance = useCallback((meters: number): string => {
@@ -416,6 +423,39 @@ const JobSiteMap = memo(() => {
     strokeWeight: 3,
     zIndex: 2
   };
+
+  // Update the loading state check
+  if (isApiKeyLoading) {
+    return (
+      <div className="w-full h-full flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
+  // Update the error state check
+  if (apiKeyError || !isApiKeyValid) {
+    return (
+      <div className="w-full h-full flex items-center justify-center">
+        <div className="text-center p-4 max-w-md">
+          <AlertCircle className="mx-auto h-12 w-12 text-red-500" />
+          <h3 className="mt-2 text-lg font-semibold text-gray-900">API Key Missing</h3>
+          <p className="mt-1 text-sm text-gray-500">
+            Google Maps API key is not configured or invalid. Please add a valid key in settings.
+          </p>
+          <div className="mt-3">
+            <Button 
+              onClick={() => window.open('/settings', '_blank')} 
+              className="w-full"
+              size="sm"
+            >
+              Go to Settings
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <Card className="w-full h-full p-0 overflow-hidden">
@@ -541,7 +581,7 @@ const JobSiteMap = memo(() => {
           </div>
         ) : (
           <LoadScript 
-            googleMapsApiKey={GOOGLE_MAPS_API_KEY} 
+            googleMapsApiKey={apiKey} 
             libraries={mapLibraries}
             version="weekly"
             onError={handleLoadError}

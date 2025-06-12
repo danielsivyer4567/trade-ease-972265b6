@@ -1,7 +1,7 @@
 // Google Maps API Configuration
 export const GOOGLE_MAPS_CONFIG = {
   // API key from environment variable with proper fallback handling
-  apiKey: process.env.VITE_GOOGLE_MAPS_API_KEY || "AIzaSyCVHBYlen8sLxyI69WC67znnfi9SU4J0BY",
+  apiKey: process.env.VITE_GOOGLE_MAPS_API_KEY || "",
   
   // Map ID for Advanced Markers and other Google Maps features
   // Using environment variable with fallback
