@@ -102,6 +102,19 @@ export default function TestGoogleMaps() {
                 height="400px"
               />
             </div>
+            
+            {/* Simple iframe test */}
+            <div className="mt-4">
+              <h3 className="text-sm font-semibold mb-2">Direct iframe test:</h3>
+              <iframe
+                width="100%"
+                height="300"
+                style={{ border: 0 }}
+                loading="lazy"
+                allowFullScreen
+                src={`https://www.google.com/maps/embed/v1/place?key=${apiKey || envApiKey}&q=${encodeURIComponent(testAddress)}`}
+              />
+            </div>
           </div>
         </CardContent>
       </Card>
