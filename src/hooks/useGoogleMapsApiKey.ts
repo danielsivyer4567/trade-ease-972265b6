@@ -15,13 +15,24 @@ export function useGoogleMapsApiKey() {
     setIsLoading(true);
     setError(null);
     try {
+      // Debug log
+      console.log('Fetching Google Maps API key...');
+      console.log('Environment variable:', import.meta.env.VITE_GOOGLE_MAPS_API_KEY);
+
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
-        setError('You must be logged in to use Google Maps');
+        console.log('No session found, using environment variable');
+        // If no session, use environment variable
+        const envApiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+        if (!envApiKey) {
+          throw new Error('No API key found in environment variables');
+        }
+        setApiKey(envApiKey);
         setIsLoading(false);
         return;
       }
 
+      console.log('Session found, fetching from Supabase');
       const { data, error } = await supabase.functions.invoke('google-maps-key', {
         method: 'GET',
         headers: {
@@ -30,10 +41,21 @@ export function useGoogleMapsApiKey() {
       });
 
       if (error) {
+        console.error('Supabase error:', error);
         throw error;
       }
 
-      setApiKey(data.apiKey);
+      if (data?.apiKey) {
+        console.log('API key found in Supabase');
+        setApiKey(data.apiKey);
+      } else {
+        console.log('No API key in Supabase, using environment variable');
+        const envApiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+        if (!envApiKey) {
+          throw new Error('No API key found in environment variables');
+        }
+        setApiKey(envApiKey);
+      }
     } catch (error) {
       console.error('Error fetching Google Maps API key:', error);
       setError('Failed to fetch Google Maps API key');

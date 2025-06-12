@@ -1,7 +1,11 @@
 // Google Maps API Configuration
 export const GOOGLE_MAPS_CONFIG = {
   // API key from environment variable with proper fallback handling
-  apiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY || "",
+  apiKey: (() => {
+    const key = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || "";
+    console.log('Google Maps API Key loaded:', key ? `${key.substring(0, 10)}...` : 'Not configured');
+    return key;
+  })(),
   
   // Map ID for Advanced Markers and other Google Maps features
   // Using environment variable with fallback
@@ -30,13 +34,16 @@ export const GOOGLE_MAPS_LIBRARIES = ["marker", "geometry", "drawing"];
 
 // Helper to check if the API key is properly configured
 export const validateGoogleMapsApiKey = (): boolean => {
+  console.log('Validating Google Maps API key...');
+  console.log('API Key present:', !!GOOGLE_MAPS_CONFIG.apiKey);
+  
   if (!GOOGLE_MAPS_CONFIG.apiKey) {
     console.error("CRITICAL: Google Maps API key is not configured in environment variables");
     return false;
   }
   
   if (GOOGLE_MAPS_CONFIG.apiKey.startsWith("AIzaSy")) {
-    // Basic format validation
+    console.log('API Key format is valid');
     return true;
   }
   
