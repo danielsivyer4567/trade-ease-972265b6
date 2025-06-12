@@ -23,6 +23,23 @@ if (import.meta.hot) {
   });
 }
 
+// Add CORS error monitoring
+const originalFetch = window.fetch;
+window.fetch = function(input, init) {
+  return originalFetch(input, init).catch(error => {
+    if (error.message && error.message.includes('CORS')) {
+      console.error('CORS Error Details:', {
+        url: typeof input === 'string' ? input : (input instanceof Request ? input.url : String(input)),
+        method: init?.method || (input instanceof Request ? input.method : 'GET'),
+        headers: init?.headers || (input instanceof Request ? input.headers : undefined),
+        mode: init?.mode || 'cors',
+        error: error.message
+      });
+    }
+    throw error;
+  });
+};
+
 // Start the workflow job processor
 if (import.meta.env.MODE === 'development') {
   // In development, start the job processor

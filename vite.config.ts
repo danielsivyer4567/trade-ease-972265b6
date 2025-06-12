@@ -25,6 +25,15 @@ export default defineConfig(({ mode }) => {
         usePolling: true,
       },
       middlewareMode: false,
+      proxy: {
+        // Add proxy for Supabase authentication endpoints to bypass CORS
+        '/auth/v1': {
+          target: 'https://wxwbxupdisbofesaygqj.supabase.co',
+          changeOrigin: true,
+          secure: true,
+          rewrite: (path) => path
+        }
+      }
     },
     plugins: [react()],
     resolve: {
