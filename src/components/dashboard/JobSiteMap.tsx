@@ -56,7 +56,6 @@ const DEFAULT_CENTER = {
 
 // Default map options
 const DEFAULT_MAP_OPTIONS = {
-  mapTypeId: 'satellite',
   tilt: 45,
   zoom: 13,
   mapTypeControl: false,
