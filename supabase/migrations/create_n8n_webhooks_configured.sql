@@ -11,7 +11,7 @@ DECLARE
 BEGIN
   -- Your n8n webhook URL with tunnel
   webhook_url := 'https://yeathgp1pgxkfrt2yfgrpxrv.hooks.n8n.cloud/webhook/trade-webhook';
-  webhook_secret := 'your-webhook-secret-key-123'; -- Change this to a secure secret
+  webhook_secret := 'trade-ease-webhook-secret-2024-secure'; -- Secure webhook secret
   
   -- Build the webhook payload
   webhook_payload = json_build_object(
