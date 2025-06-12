@@ -25,6 +25,7 @@ const NotFoundPage = lazy(() => import('@/pages/NotFound'));
 const DebugMapsPage = lazy(() => import('@/pages/debug-maps'));
 const TestMapsPage = lazy(() => import('@/pages/test-maps'));
 const GoogleCloudFixPage = lazy(() => import('@/pages/google-cloud-fix'));
+const TestGoogleMapsPage = lazy(() => import('@/pages/TestGoogleMaps'));
 
 // Auth pages
 const AuthPage = lazy(() => import('@/pages/Auth'));
@@ -268,6 +269,8 @@ const routeObjects: RouteObject[] = [
           { path: "/test-maps", element: <SuspenseWrapper><TestMapsPage /></SuspenseWrapper> },
           // Google Cloud Fix route
           { path: "/google-cloud-fix", element: <SuspenseWrapper><GoogleCloudFixPage /></SuspenseWrapper> },
+          // Test Google Maps API route
+          { path: "/test-google-maps", element: <SuspenseWrapper><TestGoogleMapsPage /></SuspenseWrapper> },
           // Add the route to the settings routes
           {
             path: "/settings/integrations/database",
