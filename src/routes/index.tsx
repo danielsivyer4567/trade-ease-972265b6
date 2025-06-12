@@ -129,6 +129,19 @@ const routeObjects: RouteObject[] = [
     path: "/test",
     element: <div style={{ padding: '20px' }}>Test Route Working!</div>
   },
+  // Health check route
+  {
+    path: "/health",
+    element: (
+      <Suspense fallback={<LoadingFallback />}>
+        <div style={{ padding: '20px' }}>
+          <SuspenseWrapper>
+            {React.createElement(React.lazy(() => import('@/components/health/AppHealthCheck').then(module => ({ default: module.AppHealthCheck }))))}
+          </SuspenseWrapper>
+        </div>
+      </Suspense>
+    )
+  },
   // Development Entry (only in dev mode)
   {
     path: "/dev",
