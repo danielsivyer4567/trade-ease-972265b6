@@ -71,8 +71,15 @@ function customFetch(url: RequestInfo | URL, init?: RequestInit): Promise<Respon
           }
         }
         
-        // Return the original response
-        return response;
+        // Create a new response that handles JSON parsing errors
+        return new Response(
+          response.body,
+          {
+            status: response.status,
+            statusText: response.statusText,
+            headers: response.headers
+          }
+        );
       })
       .catch(error => {
         console.error('Supabase proxy fetch error:', error);
@@ -83,6 +90,19 @@ function customFetch(url: RequestInfo | URL, init?: RequestInit): Promise<Respon
   // For non-Supabase URLs or non-string URLs, use the default fetch
   return fetch(url, init);
 }
+
+// Override the global Response.json method to handle invalid JSON
+const originalJsonMethod = Response.prototype.json;
+Response.prototype.json = function() {
+  return originalJsonMethod.call(this).catch(error => {
+    if (error instanceof SyntaxError) {
+      console.error('JSON parse error:', error);
+      // Return a valid JSON object with error information
+      return { error: true, message: 'Invalid JSON response', details: error.message };
+    }
+    throw error;
+  });
+};
 
 // Export admin client (placeholder for now)
 export const supabaseAdmin = supabase
