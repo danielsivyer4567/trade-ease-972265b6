@@ -26,8 +26,28 @@ export default defineConfig(({ mode }) => {
       },
       middlewareMode: false,
       proxy: {
-        // Add proxy for Supabase authentication endpoints to bypass CORS
+        // Proxy all Supabase endpoints
         '/auth/v1': {
+          target: 'https://wxwbxupdisbofesaygqj.supabase.co',
+          changeOrigin: true,
+          secure: true,
+          rewrite: (path) => path
+        },
+        // Add proxy for other Supabase API endpoints
+        '/rest/v1': {
+          target: 'https://wxwbxupdisbofesaygqj.supabase.co',
+          changeOrigin: true,
+          secure: true,
+          rewrite: (path) => path
+        },
+        '/storage/v1': {
+          target: 'https://wxwbxupdisbofesaygqj.supabase.co',
+          changeOrigin: true,
+          secure: true,
+          rewrite: (path) => path
+        },
+        // Catch-all for any other Supabase endpoints
+        '/v1': {
           target: 'https://wxwbxupdisbofesaygqj.supabase.co',
           changeOrigin: true,
           secure: true,
