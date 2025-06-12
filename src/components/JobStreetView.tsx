@@ -5,10 +5,14 @@ import { useGoogleMapsApiKey } from '@/hooks/useGoogleMapsApiKey';
 
 interface JobStreetViewProps {
   address: string;
+  city?: string;
+  state?: string;
+  zipCode?: string;
+  height?: string;
   className?: string;
 }
 
-export function JobStreetView({ address, className = "" }: JobStreetViewProps) {
+export function JobStreetView({ address, city, state, zipCode, height = "300px", className = "" }: JobStreetViewProps) {
   const [streetViewUrl, setStreetViewUrl] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
   const { apiKey, isLoading, error: apiKeyError } = useGoogleMapsApiKey();
@@ -30,17 +34,17 @@ export function JobStreetView({ address, className = "" }: JobStreetViewProps) {
     }
 
     try {
-      const formattedAddress = encodeURIComponent(address);
+      const formattedAddress = encodeURIComponent([address, city, state, zipCode].filter(Boolean).join(", "));
       setStreetViewUrl(`https://www.google.com/maps/embed/v1/streetview?key=${apiKey}&location=${formattedAddress}&heading=210&pitch=10&fov=90`);
       setError(null);
     } catch (err) {
       setError("Failed to generate Street View URL");
     }
-  }, [address, apiKey, apiKeyError]);
+  }, [address, city, state, zipCode, apiKey, apiKeyError]);
 
   if (isLoading) {
     return (
-      <Card className={`w-full h-[300px] ${className}`}>
+      <Card className={`w-full h-[${height}] ${className}`}>
         <CardContent className="flex items-center justify-center h-full">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
         </CardContent>
@@ -50,7 +54,7 @@ export function JobStreetView({ address, className = "" }: JobStreetViewProps) {
 
   if (error) {
     return (
-      <Card className={`w-full h-[300px] ${className}`}>
+      <Card className={`w-full h-[${height}] ${className}`}>
         <CardContent className="flex items-center justify-center h-full">
           <div className="text-center">
             <AlertCircle className="mx-auto h-8 w-8 text-red-500 mb-2" />
@@ -62,7 +66,7 @@ export function JobStreetView({ address, className = "" }: JobStreetViewProps) {
   }
 
   return (
-    <Card className={`w-full h-[300px] ${className}`}>
+    <Card className={`w-full h-[${height}] ${className}`}>
       <CardContent className="p-0 h-full">
         <iframe
           src={streetViewUrl}
