@@ -50,7 +50,7 @@ DECLARE
   payload json;
   webhook_url text;
 BEGIN
-  -- Set your n8n webhook URL
+  -- Set your n8n webhook URL (replace with your actual n8n tunnel URL)
   webhook_url := 'https://your-tunnel-id.hooks.n8n.cloud/webhook/trade-webhook';
   
   -- Build the payload
