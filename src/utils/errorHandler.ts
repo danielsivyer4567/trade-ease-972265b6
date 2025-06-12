@@ -1,95 +1,118 @@
-// Global error handler for async message channel errors and browser extension issues
-export class AsyncErrorHandler {
-  private static errorFilters = [
+// Enhanced error handler for better error reporting and recovery
+
+let isErrorHandlerInitialized = false;
+
+export function initializeErrorHandler() {
+  if (isErrorHandlerInitialized) {
+    return;
+  }
+
+  console.log('Initializing enhanced error handler...');
+
+  // Error filters to ignore common browser extension and development errors
+  const errorFilters = [
     'message channel closed',
     'A listener indicated an asynchronous response by returning true',
     'Extension context invalidated',
     'chrome-extension://',
     'moz-extension://',
-    'vendor.js', // Filter vendor.js errors
-    'ResizeObserver loop limit exceeded',
-    'ResizeObserver loop completed with undelivered notifications',
-    'Non-Error promise rejection captured'
+    'vendor.js',
+    'ResizeObserver loop',
+    'Non-Error promise rejection captured',
+    'Script error.',
+    'Loading CSS chunk',
+    'Loading chunk',
+    'Network request failed',
+    'ChunkLoadError',
+    'Failed to fetch dynamically imported module',
+    'AbortError: The operation was aborted'
   ];
 
-  private static shouldIgnoreError(error: any): boolean {
-    const errorMessage = error?.message || error?.toString() || '';
-    const errorStack = error?.stack || '';
+  function shouldIgnoreError(error: any): boolean {
+    if (!error) return false;
     
-    // Check both message and stack trace
-    const fullError = errorMessage + ' ' + errorStack;
+    const errorStr = String(error.message || error.toString() || '');
+    const stack = String(error.stack || '');
+    const fullError = errorStr + ' ' + stack;
     
-    return this.errorFilters.some(filter => 
+    return errorFilters.some(filter => 
       fullError.toLowerCase().includes(filter.toLowerCase())
     );
   }
 
-  public static init() {
-    // Immediately override console.error to catch early errors
-    const originalConsoleError = console.error;
-    console.error = (...args) => {
-      const message = args.map(arg => 
-        typeof arg === 'object' ? JSON.stringify(arg) : String(arg)
-      ).join(' ');
-      
-      if (this.shouldIgnoreError(message)) {
-        console.debug('[Filtered Error]', ...args);
-        return;
-      }
-      originalConsoleError.apply(console, args);
-    };
+  // Handle unhandled promise rejections
+  window.addEventListener('unhandledrejection', (event) => {
+    if (shouldIgnoreError(event.reason)) {
+      console.debug('[Filtered Promise Rejection]', event.reason);
+      event.preventDefault();
+      return;
+    }
+    
+    console.error('[Unhandled Promise Rejection]', event.reason);
+    
+    // Don't prevent default for real errors - let them bubble up
+    // but provide better logging
+    if (event.reason && event.reason.message) {
+      console.error('Promise rejection details:', {
+        message: event.reason.message,
+        stack: event.reason.stack,
+        url: window.location.href,
+        timestamp: new Date().toISOString()
+      });
+    }
+  });
 
-    // Handle unhandled promise rejections
-    window.addEventListener('unhandledrejection', (event) => {
-      if (this.shouldIgnoreError(event.reason)) {
-        console.debug('[Filtered Promise Rejection]', event.reason);
-        event.preventDefault();
-        return;
-      }
+  // Handle global errors
+  window.addEventListener('error', (event) => {
+    if (shouldIgnoreError(event.error) || shouldIgnoreError(event.message)) {
+      console.debug('[Filtered Error]', event.error || event.message);
+      event.preventDefault();
+      return;
+    }
+    
+    console.error('[Global Error]', {
+      message: event.message,
+      filename: event.filename,
+      lineno: event.lineno,
+      colno: event.colno,
+      error: event.error,
+      url: window.location.href,
+      timestamp: new Date().toISOString()
     });
+  });
 
-    // Handle global errors
-    window.addEventListener('error', (event) => {
-      if (this.shouldIgnoreError(event.error) || this.shouldIgnoreError(event.message)) {
-        console.debug('[Filtered Global Error]', event.error || event.message);
-        event.preventDefault();
-        return;
-      }
-    });
+  // Override console.error to filter out extension errors
+  const originalConsoleError = console.error;
+  console.error = function(...args: any[]) {
+    const message = args.map(arg => 
+      typeof arg === 'object' ? JSON.stringify(arg) : String(arg)
+    ).join(' ');
+    
+    if (shouldIgnoreError({ message })) {
+      console.debug('[Filtered Console Error]', ...args);
+      return;
+    }
+    
+    originalConsoleError.apply(console, args);
+  };
 
-    // Intercept Promise constructor to catch async errors at source
-    const OriginalPromise = window.Promise;
-    window.Promise = class FilteredPromise<T> extends OriginalPromise<T> {
-      constructor(executor: (resolve: (value: T | PromiseLike<T>) => void, reject: (reason?: any) => void) => void) {
-        super((resolve, reject) => {
-          executor(resolve, (reason) => {
-            if (AsyncErrorHandler.shouldIgnoreError(reason)) {
-              console.debug('[Filtered Promise Constructor Rejection]', reason);
-              resolve(undefined as any); // Resolve instead of reject for filtered errors
-            } else {
-              reject(reason);
-            }
-          });
-        });
-      }
-    } as any;
-  }
+  // Add some recovery mechanisms
+  window.addEventListener('load', () => {
+    console.log('App fully loaded');
+  });
 
-  public static wrapAsyncOperation<T>(
-    operation: () => Promise<T>,
-    fallback?: T
-  ): Promise<T> {
-    return operation().catch((error) => {
-      if (this.shouldIgnoreError(error)) {
-        console.debug('Filtered async operation error:', error);
-        if (fallback !== undefined) {
-          return fallback;
-        }
-      }
-      throw error;
-    });
-  }
+  // Handle network errors gracefully
+  window.addEventListener('online', () => {
+    console.log('Network connection restored');
+  });
+
+  window.addEventListener('offline', () => {
+    console.warn('Network connection lost - app may have limited functionality');
+  });
+
+  isErrorHandlerInitialized = true;
+  console.log('Enhanced error handler initialized successfully');
 }
 
-// Initialize error handling
-AsyncErrorHandler.init(); 
+// Auto-initialize
+initializeErrorHandler(); 

@@ -5,6 +5,7 @@ import './index.css'
 import { disableDevToolsOverlay } from './utils/disableDevToolsOverlay'
 import { workflowJobProcessor } from './services/WorkflowJobProcessor'
 import './utils/errorHandler' // Initialize error handler immediately
+import './utils/startupDiagnostics' // Run startup diagnostics
 // Remove the startupService import to prevent the 404 error
 // import { startupService } from './services/startupService'
 
