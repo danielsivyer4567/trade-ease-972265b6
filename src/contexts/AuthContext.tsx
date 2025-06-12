@@ -1,6 +1,7 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
+import { customAuth } from '@/integrations/supabase/auth-client';
 import { toast } from 'sonner';
 import { twoFactorAuthService } from '@/services/TwoFactorAuthService';
 
@@ -38,7 +39,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         console.log('Auth: Starting initialization...');
         
         // Get initial session
-        const { data: { session: currentSession }, error } = await supabase.auth.getSession();
+        const { data: { session: currentSession }, error } = await customAuth.getSession();
         if (error) {
           console.error('Auth: Error getting session:', error);
           // Don't throw - just log and continue
@@ -53,7 +54,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
 
         // Set up auth state listener
-        const { data: { subscription } } = supabase.auth.onAuthStateChange(
+        const { data: { subscription } } = customAuth.onAuthStateChange(
           (event, currentSession) => {
             if (!mounted) return;
 
@@ -98,10 +99,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signIn = async (email: string, password: string) => {
     try {
       console.log('Attempting to sign in with email:', email);
-      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      const { data, error } = await customAuth.signInWithPassword({ email, password });
       
       if (error) {
-        console.error('Supabase auth error:', error);
+        console.error('Auth error:', error);
         throw error;
       }
       
@@ -119,7 +120,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (isTwoFactorEnabled) {
           setTempUserId(data.user.id);
           setAwaitingTwoFactor(true);
-          await supabase.auth.signOut();
+          await customAuth.signOut();
           return;
         }
       } catch (twoFactorError) {
@@ -132,14 +133,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       toast.success('Signed in successfully!');
     } catch (error: any) {
       console.error('Error signing in:', error.message || error);
-      
-      // Handle the case where the error is from our custom JSON parser
-      if (error.error === true && error.message === 'Invalid JSON response') {
-        toast.error('Authentication service error. Please try again later.');
-      } else {
-        toast.error(error.message || 'Error signing in');
-      }
-      
+      toast.error(error.message || 'Error signing in');
       throw error;
     }
   };
@@ -164,7 +158,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const signOut = async () => {
     try {
-      const { error } = await supabase.auth.signOut();
+      const { error } = await customAuth.signOut();
       if (error) throw error;
       
       // Reset 2FA state
@@ -179,7 +173,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const resetPassword = async (email: string) => {
     try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      const { error } = await customAuth.resetPasswordForEmail(email, {
         redirectTo: window.location.origin + '/auth/reset-password',
       });
       if (error) throw error;
