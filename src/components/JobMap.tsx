@@ -59,7 +59,6 @@ const MapComponent = ({
     : defaultCenter;
 
   const options = {
-    mapTypeId: 'satellite',
     streetViewControl: true, // Enable Street View control
     mapTypeControl: false,
     mapId: mapId // Add mapId for Advanced Markers
