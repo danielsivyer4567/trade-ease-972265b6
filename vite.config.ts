@@ -31,27 +31,63 @@ export default defineConfig(({ mode }) => {
           target: 'https://wxwbxupdisbofesaygqj.supabase.co',
           changeOrigin: true,
           secure: true,
-          rewrite: (path) => path
+          rewrite: (path) => path,
+          configure: (proxy, _options) => {
+            proxy.on('proxyRes', (proxyRes, req, res) => {
+              // Add CORS headers to the proxied response
+              proxyRes.headers['Access-Control-Allow-Origin'] = '*';
+              proxyRes.headers['Access-Control-Allow-Methods'] = 'GET,HEAD,PUT,PATCH,POST,DELETE';
+              proxyRes.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization, X-Client-Info';
+              proxyRes.headers['Access-Control-Allow-Credentials'] = 'true';
+              
+              // Log the response headers for debugging
+              console.log(`Proxy response headers for ${req.url}:`, proxyRes.headers);
+            });
+          }
         },
-        // Add proxy for other Supabase API endpoints
+        // Add proxy for other Supabase API endpoints with the same CORS configuration
         '/rest/v1': {
           target: 'https://wxwbxupdisbofesaygqj.supabase.co',
           changeOrigin: true,
           secure: true,
-          rewrite: (path) => path
+          rewrite: (path) => path,
+          configure: (proxy, _options) => {
+            proxy.on('proxyRes', (proxyRes, _req, _res) => {
+              proxyRes.headers['Access-Control-Allow-Origin'] = '*';
+              proxyRes.headers['Access-Control-Allow-Methods'] = 'GET,HEAD,PUT,PATCH,POST,DELETE';
+              proxyRes.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization, X-Client-Info';
+              proxyRes.headers['Access-Control-Allow-Credentials'] = 'true';
+            });
+          }
         },
         '/storage/v1': {
           target: 'https://wxwbxupdisbofesaygqj.supabase.co',
           changeOrigin: true,
           secure: true,
-          rewrite: (path) => path
+          rewrite: (path) => path,
+          configure: (proxy, _options) => {
+            proxy.on('proxyRes', (proxyRes, _req, _res) => {
+              proxyRes.headers['Access-Control-Allow-Origin'] = '*';
+              proxyRes.headers['Access-Control-Allow-Methods'] = 'GET,HEAD,PUT,PATCH,POST,DELETE';
+              proxyRes.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization, X-Client-Info';
+              proxyRes.headers['Access-Control-Allow-Credentials'] = 'true';
+            });
+          }
         },
         // Catch-all for any other Supabase endpoints
         '/v1': {
           target: 'https://wxwbxupdisbofesaygqj.supabase.co',
           changeOrigin: true,
           secure: true,
-          rewrite: (path) => path
+          rewrite: (path) => path,
+          configure: (proxy, _options) => {
+            proxy.on('proxyRes', (proxyRes, _req, _res) => {
+              proxyRes.headers['Access-Control-Allow-Origin'] = '*';
+              proxyRes.headers['Access-Control-Allow-Methods'] = 'GET,HEAD,PUT,PATCH,POST,DELETE';
+              proxyRes.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization, X-Client-Info';
+              proxyRes.headers['Access-Control-Allow-Credentials'] = 'true';
+            });
+          }
         }
       }
     },
