@@ -62,8 +62,7 @@ const DEFAULT_MAP_OPTIONS = {
   mapTypeControl: true,
   streetViewControl: true,
   fullscreenControl: true,
-  mapId: getMapId(),
-  mapTypeId: 'satellite'  // Set satellite as default
+  mapTypeId: 'satellite' // Only satellite, no mapId
 };
 
 // Default map container style
