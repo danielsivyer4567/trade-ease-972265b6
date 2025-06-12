@@ -7,7 +7,7 @@ import { FormFooter } from "./form-sections/FormFooter";
 import { MainFormFields } from "./form-sections/MainFormFields";
 import { JobDescription } from "./form-sections/JobDescription";
 import { JobDocumentation } from "./form-sections/JobDocumentation";
-import JobStreetView from "@/components/JobStreetView";
+import { JobStreetView } from "@/components/JobStreetView";
 
 interface JobFormProps {
   onShowTemplateSearch: () => void;
