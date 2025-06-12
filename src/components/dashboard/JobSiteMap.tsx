@@ -59,7 +59,12 @@ const DEFAULT_CENTER = {
 const DEFAULT_MAP_OPTIONS = {
   tilt: 45,
   zoom: 13,
-  mapTypeControl: false,
+  mapTypeControl: true,
+  mapTypeControlOptions: {
+    position: google.maps.ControlPosition.TOP_RIGHT,
+    mapTypeIds: ['roadmap', 'satellite', 'hybrid', 'terrain']
+  },
+  mapTypeId: 'satellite', // Set default to satellite view
   streetViewControl: true,
   fullscreenControl: true,
   mapId: getMapId()
