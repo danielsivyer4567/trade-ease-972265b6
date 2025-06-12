@@ -16,9 +16,32 @@ export default function TestGoogleMaps() {
     }
   };
 
+  // Debug: Check environment variables
+  const envApiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+  const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+
   return (
     <div className="container mx-auto p-6 max-w-4xl">
       <h1 className="text-3xl font-bold mb-6">Google Maps API Test Page</h1>
+      
+      {/* Debug Card */}
+      <Card className="mb-6 bg-gray-50">
+        <CardHeader>
+          <CardTitle>Debug Information</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-2 font-mono text-sm">
+            <div>
+              <span className="text-gray-600">VITE_SUPABASE_URL:</span>
+              <span className="ml-2">{supabaseUrl || 'NOT SET'}</span>
+            </div>
+            <div>
+              <span className="text-gray-600">VITE_GOOGLE_MAPS_API_KEY:</span>
+              <span className="ml-2">{envApiKey ? `${envApiKey.substring(0, 10)}...` : 'NOT SET'}</span>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
       
       <Card className="mb-6">
         <CardHeader>

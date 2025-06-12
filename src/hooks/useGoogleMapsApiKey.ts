@@ -60,16 +60,34 @@ export function useGoogleMapsApiKey() {
       if (data?.apiKey) {
         setApiKey(data.apiKey);
       } else {
+        // No API key in database, try environment variable
+        console.log('No API key found in database, checking environment variable');
         const envApiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
-        if (!envApiKey) {
-          throw new Error('No API key found in environment variables');
+        if (envApiKey) {
+          console.log('Using API key from environment variable');
+          setApiKey(envApiKey);
+        } else {
+          console.warn('No Google Maps API key found in database or environment');
+          // Don't throw an error here, just set apiKey to null
+          setApiKey(null);
         }
-        setApiKey(envApiKey);
       }
     } catch (error) {
       console.error('Error fetching Google Maps API key:', error);
-      setError('Failed to fetch Google Maps API key');
-      toast.error('Failed to fetch Google Maps API key');
+      
+      // If we get an error, try to fall back to environment variable
+      const envApiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+      if (envApiKey) {
+        console.log('Error fetching from database, using environment variable');
+        setApiKey(envApiKey);
+        setError(null); // Clear the error since we have a fallback
+      } else {
+        setError('Failed to fetch Google Maps API key');
+        // Only show toast for actual errors, not missing keys
+        if (!error.message.includes('No API key found')) {
+          toast.error('Failed to fetch Google Maps API key');
+        }
+      }
     } finally {
       setIsLoading(false);
     }

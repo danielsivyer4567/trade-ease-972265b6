@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Save Google Maps API Key</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #result {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+    </style>
+</head>
+<body>
+    <h1>Save Google Maps API Key to Supabase</h1>
+    
+    <p><strong>Important:</strong> You need to be logged in to your Trade Ease application first!</p>
+    
+    <ol>
+        <li>Open your Trade Ease app at <a href="http://localhost:8080" target="_blank">http://localhost:8080</a></li>
+        <li>Log in with your credentials</li>
+        <li>Come back here and click the button below</li>
+    </ol>
+    
+    <button id="sendApiKey">Save Google Maps API Key</button>
+    
+    <div id="result"></div>
+
+    <script>
+        document.getElementById('sendApiKey').addEventListener('click', async () => {
+            const apiKey = 'AIzaSyCVHBYlen8sLxyI69WC67znnfi9SU4J0BY';
+            const resultDiv = document.getElementById('result');
+            
+            resultDiv.innerHTML = 'Saving API key...';
+            resultDiv.className = '';
+            
+            try {
+                // First, we need to get the auth token from the Trade Ease app
+                // The easiest way is to use the test page functionality
+                
+                // Open the test page in a new tab
+                const testPageUrl = 'http://localhost:8080/test-google-maps';
+                
+                resultDiv.innerHTML = `
+                    <div class="error">
+                        <h3>Manual Steps Required:</h3>
+                        <ol>
+                            <li>Go to <a href="${testPageUrl}" target="_blank">${testPageUrl}</a></li>
+                            <li>In the "API Key Status" section, you'll see an input field</li>
+                            <li>Paste this API key: <code>${apiKey}</code></li>
+                            <li>Click "Save API Key"</li>
+                        </ol>
+                        <p>The page will handle authentication and save the key to your Supabase database.</p>
+                    </div>
+                `;
+                
+                // Alternatively, if you want to save it directly via the Edge Function:
+                // You would need to get the auth token from the browser's localStorage
+                // after logging in to the Trade Ease app
+                
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error">Error: ${error.message}</div>`;
+            }
+        });
+    </script>
+</body>
+</html> 

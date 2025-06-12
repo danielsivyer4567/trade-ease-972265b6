@@ -34,20 +34,16 @@ export const GOOGLE_MAPS_LIBRARIES = ["marker", "geometry", "drawing"];
 
 // Helper to check if the API key is properly configured
 export const validateGoogleMapsApiKey = (): boolean => {
-  console.log('Validating Google Maps API key...');
-  console.log('API Key present:', !!GOOGLE_MAPS_CONFIG.apiKey);
-  
+  // Don't log errors here since we're using a hook-based approach
+  // that can fetch API keys from the database
   if (!GOOGLE_MAPS_CONFIG.apiKey) {
-    console.error("CRITICAL: Google Maps API key is not configured in environment variables");
     return false;
   }
   
   if (GOOGLE_MAPS_CONFIG.apiKey.startsWith("AIzaSy")) {
-    console.log('API Key format is valid');
     return true;
   }
   
-  console.error("CRITICAL: Google Maps API key format appears invalid");
   return false;
 };
 
