@@ -97,9 +97,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const signIn = async (email: string, password: string) => {
     try {
+      console.log('Attempting to sign in with email:', email);
       const { data, error } = await supabase.auth.signInWithPassword({ email, password });
       
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase auth error:', error);
+        throw error;
+      }
+      
+      if (!data || !data.user) {
+        console.error('Sign in response missing user data:', data);
+        throw new Error('Invalid response from authentication service');
+      }
+      
+      console.log('Sign in successful, user:', data.user.id);
       
       // Skip 2FA check if TwoFactorAuthService fails
       try {
@@ -120,8 +131,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setTempUserId(null);
       toast.success('Signed in successfully!');
     } catch (error: any) {
-      console.error('Error signing in:', error.message);
-      toast.error(error.message || 'Error signing in');
+      console.error('Error signing in:', error.message || error);
+      
+      // Handle the case where the error is from our custom JSON parser
+      if (error.error === true && error.message === 'Invalid JSON response') {
+        toast.error('Authentication service error. Please try again later.');
+      } else {
+        toast.error(error.message || 'Error signing in');
+      }
+      
       throw error;
     }
   };
