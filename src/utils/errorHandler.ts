@@ -115,4 +115,18 @@ export function initializeErrorHandler() {
 }
 
 // Auto-initialize
-initializeErrorHandler(); 
+initializeErrorHandler();
+
+// Export a simple async operation wrapper as a replacement for the old AsyncErrorHandler
+export function wrapAsyncOperation<T>(
+  operation: () => Promise<T>,
+  fallback?: T
+): Promise<T> {
+  return operation().catch((error) => {
+    console.debug('Async operation error (handled):', error);
+    if (fallback !== undefined) {
+      return fallback;
+    }
+    throw error;
+  });
+} 

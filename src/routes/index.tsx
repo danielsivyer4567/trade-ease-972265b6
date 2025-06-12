@@ -12,9 +12,9 @@ import { AppLayoutWithTabs } from '@/components/AppLayoutWithTabs';
 import { apiRoutes } from './api-routes';
 import { AuthDebugger } from '@/components/debug/AuthDebugger';
 
-// Lazy load workflow pages
-const WorkflowPage = lazy(() => import('@/pages/Workflow/index.new').then(module => ({ default: module.default })));
-const WorkflowTemplates = lazy(() => import('@/pages/Workflow/templates').then(module => ({ default: module.default })));
+// Lazy load n8n workflow pages (replacing custom workflow components)
+const N8nWorkflowPage = lazy(() => import('@/pages/Workflow/n8n-workflow'));
+const N8nWorkflowListPage = lazy(() => import('@/pages/Workflow/n8n-workflow-list'));
 
 // Development mode debugging component
 const DevelopmentEntry = lazy(() => import('@/pages/DevelopmentEntry'));
@@ -62,10 +62,7 @@ const TeamsPage = lazy(() => import('@/pages/Teams'));
 // Calendar and Scheduling
 const CalendarPage = lazy(() => import('@/pages/Calendar'));
 
-// Workflow pages
-const WorkflowList = lazy(() => import('@/pages/Workflow/WorkflowList'));
-const EnrollmentHistory = lazy(() => import('@/pages/Workflow/EnrollmentHistory'));
-const ExecutionLogs = lazy(() => import('@/pages/Workflow/ExecutionLogs'));
+// Keep automation page for now (can be replaced with n8n later if needed)
 const AutomationsPage = lazy(() => import('@/pages/Automations').then(module => ({ default: module.default })));
 
 // Communication
@@ -260,13 +257,10 @@ const routeObjects: RouteObject[] = [
           { path: "/calculators/loads-spans", element: <SuspenseWrapper><LoadsSpansCalculator /></SuspenseWrapper> },
           { path: "/calculators/fencing", element: <SuspenseWrapper><FencingCalculator /></SuspenseWrapper> },
           { path: "/calculators/ncc-codes", element: <SuspenseWrapper><NCCCodesCalculator /></SuspenseWrapper> },
-          { path: "/workflow", element: <SuspenseWrapper><WorkflowPage /></SuspenseWrapper> },
-          { path: "/workflow/new", element: <SuspenseWrapper><WorkflowPage /></SuspenseWrapper> },
-          { path: "/workflow/edit/:id", element: <SuspenseWrapper><WorkflowPage /></SuspenseWrapper> },
-          { path: "/workflow/list", element: <SuspenseWrapper><WorkflowList /></SuspenseWrapper> },
-          { path: "/workflow/templates", element: <SuspenseWrapper><WorkflowTemplates /></SuspenseWrapper> },
-          { path: "/workflow/enrollment-history", element: <SuspenseWrapper><EnrollmentHistory /></SuspenseWrapper> },
-          { path: "/workflow/execution-logs", element: <SuspenseWrapper><ExecutionLogs /></SuspenseWrapper> },
+          { path: "/workflow", element: <SuspenseWrapper><N8nWorkflowListPage /></SuspenseWrapper> },
+          { path: "/workflow/new", element: <SuspenseWrapper><N8nWorkflowPage /></SuspenseWrapper> },
+          { path: "/workflow/edit/:id", element: <SuspenseWrapper><N8nWorkflowPage /></SuspenseWrapper> },
+          { path: "/workflow/list", element: <SuspenseWrapper><N8nWorkflowListPage /></SuspenseWrapper> },
           { path: "/workflow/automations", element: <SuspenseWrapper><AutomationsPage /></SuspenseWrapper> },
           { path: "/automations", element: <SuspenseWrapper><AutomationsPage /></SuspenseWrapper> },
           { path: "/forms", element: <SuspenseWrapper><FormsPage /></SuspenseWrapper> },
