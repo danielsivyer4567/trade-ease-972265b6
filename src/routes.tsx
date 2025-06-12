@@ -2,10 +2,8 @@ import { TagNotificationView } from '@/components/tags/TagNotificationView';
 import { fetchTagData } from '@/services/tagService';
 import { Route } from 'react-router-dom';
 import Automations from '@/pages/Automations';
-import Templates from '@/pages/Workflow/templates';
-import WorkflowList from '@/pages/Workflow/WorkflowList';
-import EnrollmentHistory from '@/pages/Workflow/EnrollmentHistory';
-import ExecutionLogs from '@/pages/Workflow/ExecutionLogs';
+import N8nWorkflowListPage from '@/pages/Workflow/n8n-workflow-list';
+import N8nWorkflowPage from '@/pages/Workflow/n8n-workflow';
 
 export const routes = [
   {
@@ -20,27 +18,23 @@ export const routes = [
   },
   {
     path: '/workflow',
-    element: <WorkflowList />
+    element: <N8nWorkflowListPage />
   },
   {
     path: '/workflow/list',
-    element: <WorkflowList />
+    element: <N8nWorkflowListPage />
   },
   {
-    path: '/workflow/templates',
-    element: <Templates />
+    path: '/workflow/new',
+    element: <N8nWorkflowPage />
   },
   {
-    path: '/workflow/enrollment-history',
-    element: <EnrollmentHistory />
+    path: '/workflow/edit/:id',
+    element: <N8nWorkflowPage />
   },
   {
     path: '/workflow/automations',
     element: <Automations />
-  },
-  {
-    path: '/workflow/execution-logs',
-    element: <ExecutionLogs />
   },
   {
     path: '/automations',
