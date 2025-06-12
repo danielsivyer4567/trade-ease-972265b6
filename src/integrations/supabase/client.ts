@@ -9,15 +9,25 @@ if (!import.meta.env.VITE_SUPABASE_ANON_KEY) {
   throw new Error('Missing VITE_SUPABASE_ANON_KEY environment variable')
 }
 
+// Use the original Supabase URL for data operations
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL!
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY!
+
+// For development, use the local proxy for auth endpoints to avoid CORS issues
+const authUrl = import.meta.env.DEV ? window.location.origin : supabaseUrl
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
     persistSession: true,
     autoRefreshToken: true,
     detectSessionInUrl: true,
-    flowType: 'pkce'
+    flowType: 'pkce',
+    // Add CORS settings for localhost development
+    storageKey: 'supabase-auth',
+    // Enable debug mode to help diagnose issues
+    debug: import.meta.env.DEV,
+    // Use the local proxy for auth in development
+    ...(import.meta.env.DEV && { url: authUrl })
   },
   global: {
     headers: {
