@@ -55,7 +55,7 @@
 
     <script>
         // Get API key from environment variable
-        const apiKey = process.env.VITE_GOOGLE_MAPS_API_KEY;
+        const apiKey = window.ENV?.VITE_GOOGLE_MAPS_API_KEY;
         
         if (!apiKey) {
             document.body.innerHTML = '<div style="color: red;">Error: Google Maps API key not configured</div>';
