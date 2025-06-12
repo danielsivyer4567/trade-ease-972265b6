@@ -13,11 +13,8 @@ const libraries: Libraries = ["places", "geometry", "drawing"];
 // Map ID from config
 const mapId = getMapId();
 
-// For development environments, use a less restricted API key
-// In production, this would be replaced with a properly restricted key
-const apiKey = import.meta.env.DEV 
-  ? 'AIzaSyBNLrJhOMz6idD05pzfn5lhA-TAw-mAZCU' // Dev key with no domain restrictions
-  : GOOGLE_MAPS_CONFIG.apiKey;
+// Use the API key from environment variables
+const apiKey = GOOGLE_MAPS_CONFIG.apiKey;
 
 interface PropertyBoundaryMapProps {
   center: [number, number]; // [longitude, latitude]
