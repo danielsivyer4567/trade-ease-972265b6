@@ -20,7 +20,13 @@ export default function TestMapsPage() {
 
     // Create script element
     const script = document.createElement('script');
-    const apiKey = process.env.VITE_GOOGLE_MAPS_API_KEY || 'AIzaSyCVHBYlen8sLxyI69WC67znnfi9SU4J0BY';
+    const apiKey = process.env.VITE_GOOGLE_MAPS_API_KEY;
+    
+    if (!apiKey) {
+      setErrorMessage('Google Maps API key is not configured in environment variables');
+      setStatus('error');
+      return;
+    }
     
     console.log('Testing with API key:', apiKey.substring(0, 10) + '...');
     
@@ -165,7 +171,7 @@ export default function TestMapsPage() {
                 <div>
                   <span className="text-gray-600">API Key: </span>
                   <span className="text-gray-900">
-                    {(process.env.VITE_GOOGLE_MAPS_API_KEY || 'AIzaSyCVHBYlen8sLxyI69WC67znnfi9SU4J0BY').substring(0, 10)}...
+                    {(process.env.VITE_GOOGLE_MAPS_API_KEY || 'Not configured').substring(0, 10)}...
                   </span>
                 </div>
                 <div>
