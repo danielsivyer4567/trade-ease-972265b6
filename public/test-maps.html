@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Google Maps API Test</title>
+    <title>Google Maps Test</title>
     <style>
         #map {
             height: 400px;
@@ -54,6 +54,18 @@
     </div>
 
     <script>
+        // Get API key from environment variable
+        const apiKey = process.env.VITE_GOOGLE_MAPS_API_KEY;
+        
+        if (!apiKey) {
+            document.body.innerHTML = '<div style="color: red;">Error: Google Maps API key not configured</div>';
+        } else {
+            // Load Google Maps script
+            const script = document.createElement('script');
+            script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&callback=initMap`;
+            document.head.appendChild(script);
+        }
+
         function initMap() {
             console.log('initMap called - Google Maps loaded successfully');
             document.getElementById('status').innerHTML = '<span class="success">Google Maps Loaded!</span>';
@@ -85,11 +97,6 @@
             console.error('Google Maps authentication failed');
             document.getElementById('status').innerHTML = '<span class="error">Authentication Failed - Check API Key Settings</span>';
         };
-    </script>
-    
-    <script async defer
-        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCVHBYlen8sLxyI69WC67znnfi9SU4J0BY&callback=initMap"
-        onerror="document.getElementById('status').innerHTML = '<span class=\'error\'>Failed to load Google Maps script</span>'">
     </script>
 </body>
 </html> 

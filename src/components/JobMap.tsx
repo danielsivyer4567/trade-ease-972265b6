@@ -447,7 +447,7 @@ const MapComponent = ({
 // Main JobMap component using useLoadScript hook
 const JobMap = (props: JobMapProps) => {
   const { isLoaded, loadError } = useLoadScript({
-    googleMapsApiKey: GOOGLE_MAPS_CONFIG.apiKey || "AIzaSyCVHBYlen8sLxyI69WC67znnfi9SU4J0BY",
+    googleMapsApiKey: GOOGLE_MAPS_CONFIG.apiKey,
     libraries: libraries as any,
     version: "beta",
     mapIds: [mapId] // Add mapId for Advanced Markers
