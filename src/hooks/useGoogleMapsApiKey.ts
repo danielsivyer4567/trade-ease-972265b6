@@ -15,7 +15,13 @@ export function useGoogleMapsApiKey() {
     setIsLoading(true);
     setError(null);
     try {
-      const { data: { session } } = await supabase.auth.getSession();
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      
+      if (sessionError) {
+        console.error('Session error:', sessionError);
+        throw new Error('Failed to get session');
+      }
+
       if (!session) {
         console.log('No session found, using environment variable');
         const envApiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
@@ -26,6 +32,8 @@ export function useGoogleMapsApiKey() {
         setIsLoading(false);
         return;
       }
+
+      console.log('Session found, token:', session.access_token.substring(0, 10) + '...');
 
       const response = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/google-maps-key`,
@@ -39,7 +47,13 @@ export function useGoogleMapsApiKey() {
       );
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const errorText = await response.text();
+        console.error('Response error:', {
+          status: response.status,
+          statusText: response.statusText,
+          body: errorText
+        });
+        throw new Error(`HTTP error! status: ${response.status}, body: ${errorText}`);
       }
 
       const data = await response.json();
@@ -65,7 +79,13 @@ export function useGoogleMapsApiKey() {
     setIsLoading(true);
     setError(null);
     try {
-      const { data: { session } } = await supabase.auth.getSession();
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      
+      if (sessionError) {
+        console.error('Session error:', sessionError);
+        throw new Error('Failed to get session');
+      }
+
       if (!session) {
         setError('You must be logged in to save API keys');
         return;
@@ -84,7 +104,13 @@ export function useGoogleMapsApiKey() {
       );
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const errorText = await response.text();
+        console.error('Response error:', {
+          status: response.status,
+          statusText: response.statusText,
+          body: errorText
+        });
+        throw new Error(`HTTP error! status: ${response.status}, body: ${errorText}`);
       }
 
       setApiKey(newApiKey);
@@ -102,7 +128,13 @@ export function useGoogleMapsApiKey() {
     setIsLoading(true);
     setError(null);
     try {
-      const { data: { session } } = await supabase.auth.getSession();
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      
+      if (sessionError) {
+        console.error('Session error:', sessionError);
+        throw new Error('Failed to get session');
+      }
+
       if (!session) {
         setError('You must be logged in to delete API keys');
         return;
@@ -120,7 +152,13 @@ export function useGoogleMapsApiKey() {
       );
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const errorText = await response.text();
+        console.error('Response error:', {
+          status: response.status,
+          statusText: response.statusText,
+          body: errorText
+        });
+        throw new Error(`HTTP error! status: ${response.status}, body: ${errorText}`);
       }
 
       setApiKey(null);
