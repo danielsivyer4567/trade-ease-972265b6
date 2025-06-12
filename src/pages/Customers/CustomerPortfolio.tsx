@@ -1166,94 +1166,47 @@ const CustomerPortfolio = () => {
 };
 
 function ProfilePictureUpload({ customer, customerId }: { customer: any, customerId: string }) {
-  const [profileUrl, setProfileUrl] = useLocalState<string | null>(null);
-  const [streetViewUrl, setStreetViewUrl] = useLocalState<string | null>(null);
-  const [showStreetView, setShowStreetView] = useLocalState(false);
-  const [uploading, setUploading] = useLocalState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [streetViewUrl, setStreetViewUrl] = useState<string | null>(null);
+
+  // Helper to clean and format the address
+  const formatAddress = () => {
+    if (!customer) return '';
+    // Remove extra spaces and commas, and avoid duplicate suburb
+    let address = `${customer.address || ''}, ${customer.city || ''}, ${customer.state || ''} ${customer.zipCode || ''}`;
+    address = address.replace(/\\s+,/g, ',').replace(/,+/g, ',').replace(/\\s{2,}/g, ' ').trim();
+    return address;
+  };
 
   // Generate Google Street View image URL
   const getStreetViewUrl = () => {
-    const address = encodeURIComponent(
-      `${customer.address || ''}, ${customer.city || ''}, ${customer.state || ''} ${customer.zipCode || ''}`
-    );
-    // You may want to use your own Google Maps API key here
-    const apiKey = "AIzaSyCVHBYlen8sLxyI69WC67znnfi9SU4J0BY";
+    const address = encodeURIComponent(formatAddress());
+    const apiKey = "qbBoQkZzbSYl80ncHWOjHDtEMm0="; // Updated API key
     return `https://maps.googleapis.com/maps/api/streetview?size=200x200&location=${address}&key=${apiKey}`;
   };
 
   useEffect(() => {
     if (customer && customer.address) {
-      setStreetViewUrl(getStreetViewUrl());
-    }
-    // Optionally, load existing profileUrl from customer.profile_url if available
-    if (customer && customer.profile_url) {
-      setProfileUrl(customer.profile_url);
+      const url = getStreetViewUrl();
+      setStreetViewUrl(url);
+      console.log('Street View URL:', url); // For debugging
     }
   }, [customer]);
 
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setUploading(true);
-    // Upload to Supabase Storage (or your backend)
-    const fileExt = file.name.split('.').pop();
-    const fileName = `${customerId}/profile.${fileExt}`;
-    const { data, error } = await supabase.storage.from('customer_photos').upload(fileName, file, { upsert: true });
-    if (error) {
-      setUploading(false);
-      alert('Upload failed');
-      return;
-    }
-    // Get public URL
-    const { data: urlData } = supabase.storage.from('customer_photos').getPublicUrl(fileName);
-    setProfileUrl(urlData.publicUrl);
-    setShowStreetView(false);
-    setUploading(false);
-    // Optionally, update customer profile in DB
-    await supabase.from('customers').update({ profile_url: urlData.publicUrl }).eq('id', customerId);
-  };
-
   return (
-    <div className="relative w-20 h-20 mb-2 flex flex-col items-center group">
+    <div className="relative w-20 h-20 mb-2 flex flex-col items-center">
       <Avatar className="w-20 h-20">
-        {showStreetView && streetViewUrl ? (
-          <AvatarImage src={streetViewUrl} alt="Street View" />
-        ) : profileUrl ? (
-          <AvatarImage src={profileUrl} alt="Profile" />
+        {streetViewUrl ? (
+          <AvatarImage
+            src={streetViewUrl}
+            alt="Street View"
+            onError={e => (e.currentTarget.src = '/fallback-image.png')}
+          />
         ) : (
           <AvatarFallback>
             <User className="h-10 w-10 text-primary" />
           </AvatarFallback>
         )}
       </Avatar>
-      <div className="flex gap-1 mt-2">
-        <Button
-          size="sm"
-          variant="outline"
-          className="text-xs px-2 py-1"
-          onClick={() => fileInputRef.current?.click()}
-          disabled={uploading}
-        >
-          Upload
-        </Button>
-        <Button
-          size="sm"
-          variant={showStreetView ? "default" : "outline"}
-          className="text-xs px-2 py-1"
-          onClick={() => setShowStreetView((v) => !v)}
-          disabled={!streetViewUrl}
-        >
-          {showStreetView ? "Profile" : "Street View"}
-        </Button>
-      </div>
-      <input
-        type="file"
-        accept="image/*"
-        className="hidden"
-        ref={fileInputRef}
-        onChange={handleFileChange}
-      />
     </div>
   );
 }
