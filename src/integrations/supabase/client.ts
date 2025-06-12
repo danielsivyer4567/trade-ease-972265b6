@@ -49,11 +49,39 @@ function customFetch(url: RequestInfo | URL, init?: RequestInit): Promise<Respon
     const path = url.replace(supabaseUrl, '')
     const newUrl = `${baseUrl}${path}`
     console.log(`Proxying Supabase request: ${url} -> ${newUrl}`)
+    
+    // Make the request through our proxy
     return fetch(newUrl, init)
+      .then(async (response) => {
+        // Clone the response so we can inspect it without consuming it
+        const clonedResponse = response.clone();
+        
+        // Check if response is ok
+        if (!response.ok) {
+          try {
+            // Try to parse the error response
+            const errorText = await clonedResponse.text();
+            console.error('Supabase proxy error response:', {
+              status: response.status,
+              statusText: response.statusText,
+              body: errorText
+            });
+          } catch (e) {
+            console.error('Failed to read error response:', e);
+          }
+        }
+        
+        // Return the original response
+        return response;
+      })
+      .catch(error => {
+        console.error('Supabase proxy fetch error:', error);
+        throw error;
+      });
   }
   
   // For non-Supabase URLs or non-string URLs, use the default fetch
-  return fetch(url, init)
+  return fetch(url, init);
 }
 
 // Export admin client (placeholder for now)
