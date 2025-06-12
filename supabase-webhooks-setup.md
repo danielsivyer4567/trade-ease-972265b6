@@ -85,6 +85,20 @@ FOR EACH ROW EXECUTE FUNCTION notify_n8n_webhook();
 CREATE TRIGGER trades_delete_webhook
 AFTER DELETE ON trades
 FOR EACH ROW EXECUTE FUNCTION notify_n8n_webhook();
+
+-- Add triggers for shipments table
+CREATE TRIGGER shipments_n8n_insert_webhook
+AFTER INSERT ON shipments
+FOR EACH ROW EXECUTE FUNCTION send_n8n_webhook();
+
+CREATE TRIGGER shipments_n8n_update_webhook
+AFTER UPDATE ON shipments
+FOR EACH ROW EXECUTE FUNCTION send_n8n_webhook();
+
+-- Add triggers for documents table
+CREATE TRIGGER documents_n8n_insert_webhook
+AFTER INSERT ON documents
+FOR EACH ROW EXECUTE FUNCTION send_n8n_webhook();
 ```
 
 ## Step 3: Create n8n Webhook Workflow
