@@ -60,8 +60,10 @@ const MapComponent = ({
 
   const options = {
     streetViewControl: true, // Enable Street View control
-    mapTypeControl: false,
-    mapId: mapId // Add mapId for Advanced Markers
+    mapTypeControl: true, // Enable map type control
+    mapId: mapId, // Add mapId for Advanced Markers
+    // Only set mapTypeId if mapId is not present to avoid warnings
+    ...(mapId ? {} : { mapTypeId: 'satellite' })
   };
 
   // Function to auto-fit map to all markers
