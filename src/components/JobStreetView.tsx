@@ -35,7 +35,7 @@ export function JobStreetView({ address, city, state, zipCode, height = "300px",
 
     try {
       const formattedAddress = encodeURIComponent([address, city, state, zipCode].filter(Boolean).join(", "));
-      setStreetViewUrl(`https://www.google.com/maps/embed/v1/streetview?key=${apiKey}&location=${formattedAddress}&heading=210&pitch=10&fov=90`);
+      setStreetViewUrl(`https://www.google.com/maps/embed/v1/place?key=${apiKey}&q=${formattedAddress}&maptype=satellite`);
       setError(null);
     } catch (err) {
       setError("Failed to generate Street View URL");
