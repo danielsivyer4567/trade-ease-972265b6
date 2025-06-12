@@ -50,7 +50,7 @@ SUPABASE_SERVICE_KEY=${process.env.SUPABASE_SERVICE_KEY || eyJhbGciOiJIUzI1NiIsI
 
 # Database Configuration
 DATABASE_TYPE=postgresdb
-DATABASE_POSTGRESDB_HOST=${process.env.VITE_SUPABASE_URL?.replace('https://', '').replace('.supabase.co', '')}.supabase.co
+DATABASE_POSTGRESDB_HOST=db.${process.env.VITE_SUPABASE_URL?.replace('https://', '').split('.')[0]}.supabase.co
 DATABASE_POSTGRESDB_PORT=5432
 DATABASE_POSTGRESDB_DATABASE=postgres
 DATABASE_POSTGRESDB_USER=postgres
