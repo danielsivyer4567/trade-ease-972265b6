@@ -1,9 +1,9 @@
 import { supabase } from '@/integrations/supabase/client';
 
 // DocuSeal API configuration
-const DOCUSEAL_API_URL = process.env.DOCUSEAL_API_URL || 'https://api.docuseal.co';
-const DOCUSEAL_API_KEY = process.env.DOCUSEAL_API_KEY || 'your-docuseal-api-key';
-const WEBHOOK_SECRET = process.env.DOCUSEAL_WEBHOOK_SECRET || 'your-webhook-secret';
+const DOCUSEAL_API_URL = import.meta.env.VITE_DOCUSEAL_API_URL || 'https://api.docuseal.co';
+const DOCUSEAL_API_KEY = import.meta.env.VITE_DOCUSEAL_API_KEY || 'your-docuseal-api-key';
+const WEBHOOK_SECRET = import.meta.env.VITE_DOCUSEAL_WEBHOOK_SECRET || 'your-webhook-secret';
 
 /**
  * DocuSeal Integration Class
