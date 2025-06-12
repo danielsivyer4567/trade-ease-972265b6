@@ -1,6 +1,5 @@
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { AsyncErrorHandler } from '@/utils/errorHandler';
 import { 
   Workflow,
   WorkflowTemplate,
@@ -526,46 +525,41 @@ export const WorkflowService = {
    * List all workflow templates
    */
   listWorkflowTemplates: async (): Promise<{ success: boolean; templates?: WorkflowTemplate[]; error?: any }> => {
-    return AsyncErrorHandler.wrapAsyncOperation(
-      async () => {
-        try {
-          const { data: { session } } = await supabase.auth.getSession();
-          if (!session) {
-            return { success: false, error: 'Authentication required' };
-          }
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        return { success: false, error: 'Authentication required' };
+      }
 
-          // Get user's own templates from workflows table
-          const { data: userTemplates, error: userTemplatesError } = await supabase
-            .from('workflows')
-            .select('*')
-            .eq('user_id', session.user.id)
-            .eq('is_template', true)
-            .order('updated_at', { ascending: false });
+      // Get user's own templates from workflows table
+      const { data: userTemplates, error: userTemplatesError } = await supabase
+        .from('workflows')
+        .select('*')
+        .eq('user_id', session.user.id)
+        .eq('is_template', true)
+        .order('updated_at', { ascending: false });
 
-          if (userTemplatesError) throw userTemplatesError;
+      if (userTemplatesError) throw userTemplatesError;
 
-          // Format the templates
-          const templates = [
-            ...(userTemplates || []).map(item => ({
-              id: item.id,
-              name: item.name,
-              description: item.description,
-              category: item.category || 'custom',
-              data: item.data || { nodes: [], edges: [] },
-              isUserTemplate: true
-            })),
-            // Add some default system templates if no user templates exist
-            ...((!userTemplates || userTemplates.length === 0) ? getDefaultTemplates() : [])
-          ];
+      // Format the templates
+      const templates = [
+        ...(userTemplates || []).map(item => ({
+          id: item.id,
+          name: item.name,
+          description: item.description,
+          category: item.category || 'custom',
+          data: item.data || { nodes: [], edges: [] },
+          isUserTemplate: true
+        })),
+        // Add some default system templates if no user templates exist
+        ...((!userTemplates || userTemplates.length === 0) ? getDefaultTemplates() : [])
+      ];
 
-          return { success: true, templates };
-        } catch (error) {
-          console.error('Failed to list workflow templates:', error);
-          // Return default templates as fallback
-          return { success: true, templates: getDefaultTemplates() };
-        }
-      },
-      { success: true, templates: getDefaultTemplates() } // Fallback result
-    );
+      return { success: true, templates };
+    } catch (error) {
+      console.error('Failed to list workflow templates:', error);
+      // Return default templates as fallback
+      return { success: true, templates: getDefaultTemplates() };
+    }
   },
 };
