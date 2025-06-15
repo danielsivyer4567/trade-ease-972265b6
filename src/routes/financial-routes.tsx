@@ -9,6 +9,7 @@ const ExpensesPage = React.lazy(() => import('@/pages/Expenses'));
 const InvoicesPage = React.lazy(() => import('@/pages/Invoices'));
 const QuotesPage = React.lazy(() => import('@/pages/Quotes'));
 const NewQuotePage = React.lazy(() => import('@/pages/Quotes/NewQuote'));
+const JobFinancialsPage = React.lazy(() => import('@/pages/Financials/JobFinancials'));
 
 export const financialRoutes = (
   <Route element={<ProtectedRoute />}>
@@ -18,5 +19,6 @@ export const financialRoutes = (
     <Route path="/invoices" element={<Suspense fallback={<LoadingFallback />}><InvoicesPage /></Suspense>} />
     <Route path="/quotes" element={<Suspense fallback={<LoadingFallback />}><QuotesPage /></Suspense>} />
     <Route path="/quotes/new" element={<Suspense fallback={<LoadingFallback />}><NewQuotePage /></Suspense>} />
+    <Route path="/financials/job/:jobId" element={<Suspense fallback={<LoadingFallback />}><JobFinancialsPage /></Suspense>} />
   </Route>
 );
