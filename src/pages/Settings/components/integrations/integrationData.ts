@@ -1,4 +1,3 @@
-
 import { 
   MessageSquare, CreditCard, Mail, Calendar, FileText, Phone, Facebook, 
   Building, Calculator, PenTool, Users, Database, Briefcase, HardHat, 
@@ -64,14 +63,6 @@ export const availableIntegrations: Integration[] = [
     icon: Mail,
     description: "Send automated emails and notifications",
     path: "/settings/integrations/sendgrid",
-    category: "communication"
-  },
-  {
-    title: "Twilio",
-    icon: Phone,
-    description: "SMS, voice, and messaging integration",
-    path: "/settings/integrations/twilio",
-    apiKeyRequired: true,
     category: "communication"
   },
   

@@ -201,8 +201,8 @@ ADMIN_SECRET_KEY=your_admin_secret_key
 | Supabase | ✅ Configured | Critical | None |
 | Mailgun | ✅ Configured | High | None |
 | Brevo | ✅ Configured | Optional | None |
-| Twilio | ⚠️ Inconsistent | High | Fix naming |
-| OpenAI | ❌ Missing | High | Add to env |
+| Twilio | 💎 Premium Feature | N/A | None - Auto-enabled for paid plans |
+| OpenAI | 💎 Premium Feature | N/A | None - Auto-enabled for paid plans |
 | DocuSeal | ❌ Missing | Medium | Add to env |
 | ArcGIS | ❌ Missing | Low | Add to env |
 | N8N | ⚠️ Partial | Medium | Add API key |
@@ -212,9 +212,14 @@ ADMIN_SECRET_KEY=your_admin_secret_key
 ## 🚨 Immediate Action Items
 
 ### High Priority
-1. **Fix Twilio Integration** - Standardize environment variable names
-2. **Add OpenAI API Key** - Required for AI features
+1. **~~Fix Twilio Integration~~** - ✅ **NOW PREMIUM FEATURE**
+2. **~~Add OpenAI API Key~~** - ✅ **NOW PREMIUM FEATURE**
 3. **Configure N8N API Key** - Complete automation setup
+
+### Premium Features (Not User-Configurable)
+- **Twilio SMS** - Available with higher tier plans
+- **OpenAI/AI Features** - Available with higher tier plans
+- These integrations are managed at the platform level to ensure reliability and reduce support complexity
 
 ### Medium Priority  
 4. **Set up DocuSeal** - Enable document signing features
@@ -222,6 +227,16 @@ ADMIN_SECRET_KEY=your_admin_secret_key
 
 ### Low Priority
 6. **Add ArcGIS** - Alternative mapping capabilities
+
+## 💎 **Premium Features Update**
+
+**Twilio** and **OpenAI/AI** integrations have been moved to premium tiers:
+- **Removed from user integrations list** ✅
+- **Backend functions remain active** for premium users
+- **Reduces configuration complexity** and support overhead
+- **Creates clear value proposition** for paid plans
+
+Users on higher-tier plans will have these features automatically enabled without needing to configure API keys.
 
 ## 🔐 Security Notes
 
