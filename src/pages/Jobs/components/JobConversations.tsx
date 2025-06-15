@@ -261,114 +261,116 @@ export const JobConversations: React.FC<JobConversationsProps> = ({ job }) => {
       </div>
 
       {/* Bottom Communication Interface */}
-      <div className="bg-white border-t p-4 mt-4">
-        <div className="space-y-4">
-          
-          {/* Communication Channel Buttons */}
-          <div className="flex flex-wrap gap-2 justify-center">
-            {communicationChannels.map((channel, index) => {
-              const Icon = channel.icon;
-              return (
+      {activeTab === 'communications' && (
+        <div className="bg-white border-t p-4 mt-4">
+          <div className="space-y-4">
+            
+            {/* Communication Channel Buttons */}
+            <div className="flex flex-wrap gap-2 justify-center">
+              {communicationChannels.map((channel, index) => {
+                const Icon = channel.icon;
+                return (
+                  <Button
+                    key={index}
+                    variant={channel.active ? "default" : "outline"}
+                    size="sm"
+                    className={`gap-2 ${channel.active ? 'bg-blue-500 hover:bg-blue-600' : ''}`}
+                  >
+                    <Icon className="h-4 w-4" />
+                    {channel.label}
+                  </Button>
+                );
+              })}
+            </div>
+
+            {/* Phone Number Inputs */}
+            <div className="flex gap-4 items-center justify-center text-sm">
+              <div className="flex items-center gap-2">
+                <span className="text-gray-600">From:</span>
+                <Input 
+                  value={fromNumber} 
+                  onChange={(e) => setFromNumber(e.target.value)}
+                  className="w-32 h-8 text-sm"
+                />
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-gray-600">To:</span>
+                <Input 
+                  value={toNumber} 
+                  onChange={(e) => setToNumber(e.target.value)}
+                  className="w-32 h-8 text-sm"
+                />
+              </div>
+            </div>
+
+            {/* Message Input */}
+            <div className="flex gap-2">
+              <Input
+                placeholder="Type a message"
+                value={messageText}
+                onChange={(e) => setMessageText(e.target.value)}
+                className="flex-1"
+                onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+              />
+              <Button variant="outline" size="icon">
+                <MessageCircle className="h-4 w-4" />
+              </Button>
+              <Button variant="outline" size="icon">
+                <ArrowDown className="h-4 w-4" />
+              </Button>
+              <Button 
+                variant="outline" 
+                size="icon"
+                className="text-red-500 hover:text-red-600"
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            </div>
+
+            {/* Quick Action Buttons */}
+            <div className="flex flex-wrap gap-2 justify-center">
+              {quickActions.map((action, index) => (
                 <Button
                   key={index}
-                  variant={channel.active ? "default" : "outline"}
+                  variant="outline"
                   size="sm"
-                  className={`gap-2 ${channel.active ? 'bg-blue-500 hover:bg-blue-600' : ''}`}
+                  className="text-xs"
                 >
-                  <Icon className="h-4 w-4" />
-                  {channel.label}
+                  {action.label}
                 </Button>
-              );
-            })}
-          </div>
-
-          {/* Phone Number Inputs */}
-          <div className="flex gap-4 items-center justify-center text-sm">
-            <div className="flex items-center gap-2">
-              <span className="text-gray-600">From:</span>
-              <Input 
-                value={fromNumber} 
-                onChange={(e) => setFromNumber(e.target.value)}
-                className="w-32 h-8 text-sm"
-              />
+              ))}
             </div>
-            <div className="flex items-center gap-2">
-              <span className="text-gray-600">To:</span>
-              <Input 
-                value={toNumber} 
-                onChange={(e) => setToNumber(e.target.value)}
-                className="w-32 h-8 text-sm"
-              />
-            </div>
-          </div>
 
-          {/* Message Input */}
-          <div className="flex gap-2">
-            <Input
-              placeholder="Type a message"
-              value={messageText}
-              onChange={(e) => setMessageText(e.target.value)}
-              className="flex-1"
-              onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-            />
-            <Button variant="outline" size="icon">
-              <MessageCircle className="h-4 w-4" />
-            </Button>
-            <Button variant="outline" size="icon">
-              <ArrowDown className="h-4 w-4" />
-            </Button>
-            <Button 
-              variant="outline" 
-              size="icon"
-              className="text-red-500 hover:text-red-600"
-            >
-              <Trash2 className="h-4 w-4" />
-            </Button>
-          </div>
-
-          {/* Quick Action Buttons */}
-          <div className="flex flex-wrap gap-2 justify-center">
-            {quickActions.map((action, index) => (
-              <Button
-                key={index}
+            {/* Action Buttons */}
+            <div className="flex gap-2 justify-center">
+              <Button 
+                onClick={handleCallCustomer}
                 variant="outline"
-                size="sm"
-                className="text-xs"
+                className="gap-2"
               >
-                {action.label}
+                Call Customer
               </Button>
-            ))}
-          </div>
+              <Button 
+                variant="outline"
+              >
+                Clear
+              </Button>
+              <Button 
+                onClick={handleSendMessage}
+                className="bg-blue-500 hover:bg-blue-600 gap-2"
+              >
+                <Send className="h-4 w-4" />
+                Send
+              </Button>
+            </div>
 
-          {/* Action Buttons */}
-          <div className="flex gap-2 justify-center">
-            <Button 
-              onClick={handleCallCustomer}
-              variant="outline"
-              className="gap-2"
-            >
-              Call Customer
-            </Button>
-            <Button 
-              variant="outline"
-            >
-              Clear
-            </Button>
-            <Button 
-              onClick={handleSendMessage}
-              className="bg-blue-500 hover:bg-blue-600 gap-2"
-            >
-              <Send className="h-4 w-4" />
-              Send
-            </Button>
-          </div>
-
-          {/* Internal Comment */}
-          <div className="text-center">
-            <span className="text-xs text-gray-400">Internal Comment</span>
+            {/* Internal Comment */}
+            <div className="text-center">
+              <span className="text-xs text-gray-400">Internal Comment</span>
+            </div>
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }; 
