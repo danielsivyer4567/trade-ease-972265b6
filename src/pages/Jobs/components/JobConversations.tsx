@@ -199,7 +199,7 @@ export const JobConversations: React.FC<JobConversationsProps> = ({ job }) => {
             
             {/* Call Records */}
             {conversations.map((call) => (
-              <Card key={call.id} className="shadow-sm">
+              <Card key={call.id} className="shadow-sm border-gray-300">
                 <CardContent className="p-4">
                   <div className="flex justify-between items-center">
                     <div className="flex items-center gap-3">
@@ -254,10 +254,10 @@ export const JobConversations: React.FC<JobConversationsProps> = ({ job }) => {
                       </AvatarFallback>
                     </Avatar>
                     
-                    <div className={`rounded-lg px-4 py-3 ${
+                    <div className={`rounded-lg px-4 py-3 border ${
                       message.type === 'sent' 
-                        ? 'bg-gray-100 text-gray-900' 
-                        : 'bg-blue-500 text-white'
+                        ? 'bg-gray-100 text-gray-900 border-gray-200' 
+                        : 'bg-blue-500 text-white border-blue-600'
                     }`}>
                       <p className="text-sm">{message.message}</p>
                       {message.hasImage && (
@@ -278,8 +278,8 @@ export const JobConversations: React.FC<JobConversationsProps> = ({ job }) => {
           </TabsContent>
 
           <TabsContent value="quotes">
-            <div className="space-y-6">
-              <Card>
+            <div className="space-y-6 max-w-4xl mx-auto">
+              <Card className="border-gray-300">
                 <CardHeader>
                   <CardTitle>Attach Existing Quote</CardTitle>
                 </CardHeader>
@@ -315,7 +315,14 @@ export const JobConversations: React.FC<JobConversationsProps> = ({ job }) => {
                 </CardContent>
               </Card>
 
-              <Card>
+              <div>
+                <Button className="w-full" onClick={handleAddNewQuote}>
+                  <PlusCircle className="h-4 w-4 mr-2" />
+                  Add New Quote
+                </Button>
+              </div>
+
+              <Card className="border-gray-300">
                 <CardHeader>
                   <CardTitle>Attached Quotes</CardTitle>
                 </CardHeader>
@@ -339,13 +346,6 @@ export const JobConversations: React.FC<JobConversationsProps> = ({ job }) => {
                   )}
                 </CardContent>
               </Card>
-
-              <div>
-                <Button className="w-full" variant="outline" onClick={handleAddNewQuote}>
-                  <PlusCircle className="h-4 w-4 mr-2" />
-                  Add New Quote
-                </Button>
-              </div>
             </div>
           </TabsContent>
 
