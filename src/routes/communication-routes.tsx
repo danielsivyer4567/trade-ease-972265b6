@@ -9,6 +9,7 @@ const EmailPage = React.lazy(() => import('@/pages/Email'));
 const NotificationsPage = React.lazy(() => import('@/pages/Notifications'));
 const MessagingPage = React.lazy(() => import('@/pages/Messaging'));
 const ReferralsPage = React.lazy(() => import('@/pages/Referrals'));
+const ConversationsPage = React.lazy(() => import('@/pages/Conversations'));
 
 // Export routes as JSX elements
 export const communicationRoutes = (
@@ -32,6 +33,11 @@ export const communicationRoutes = (
       <Route path="/referrals" element={
         <Suspense fallback={<LoadingFallback />}>
           <ReferralsPage />
+        </Suspense>
+      } />
+      <Route path="/conversations" element={
+        <Suspense fallback={<LoadingFallback />}>
+          <ConversationsPage />
         </Suspense>
       } />
     </Route>
