@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
@@ -18,7 +19,10 @@ import {
   MessageCircle,
   ArrowDown,
   Send,
-  Trash2
+  Trash2,
+  Search,
+  PlusCircle,
+  Link2
 } from "lucide-react";
 import type { Job } from "@/types/job";
 
@@ -26,11 +30,24 @@ interface JobConversationsProps {
   job: Job;
 }
 
+// Mock quote type
+type Quote = {
+  id: string;
+  quoteNumber: string;
+  customerName: string;
+  amount: number;
+};
+
 export const JobConversations: React.FC<JobConversationsProps> = ({ job }) => {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("communications");
   const [messageText, setMessageText] = useState("");
   const [fromNumber, setFromNumber] = useState("0491388575");
   const [toNumber, setToNumber] = useState("0491388575");
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<Quote[]>([]);
+  const [attachedQuotes, setAttachedQuotes] = useState<Quote[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
 
   const conversations = [
     {
@@ -107,6 +124,32 @@ export const JobConversations: React.FC<JobConversationsProps> = ({ job }) => {
   const handleCallCustomer = () => {
     // Add logic to initiate call
     console.log("Calling customer...");
+  };
+
+  const handleSearch = () => {
+    if (!searchQuery.trim()) return;
+    setIsSearching(true);
+    // Mock search delay
+    setTimeout(() => {
+      setSearchResults([
+        { id: 'q1', quoteNumber: 'Q-2025-001', customerName: 'John Doe', amount: 1500 },
+        { id: 'q2', quoteNumber: 'Q-2025-002', customerName: job.customer, amount: 2500 },
+      ]);
+      setIsSearching(false);
+    }, 1000);
+  };
+
+  const attachQuote = (quote: Quote) => {
+    if (!attachedQuotes.find(q => q.id === quote.id)) {
+      setAttachedQuotes(prev => [...prev, quote]);
+      // Remove from search results to avoid duplication
+      setSearchResults(prev => prev.filter(r => r.id !== quote.id));
+    }
+  };
+
+  const handleAddNewQuote = () => {
+    // Navigate to a new quote page, passing the job ID to link it back
+    navigate(`/quotes/new?jobId=${job.id}`);
   };
 
   return (
@@ -235,8 +278,74 @@ export const JobConversations: React.FC<JobConversationsProps> = ({ job }) => {
           </TabsContent>
 
           <TabsContent value="quotes">
-            <div className="text-center text-gray-500 py-8">
-              Quotes content will go here
+            <div className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Attach Existing Quote</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex gap-2">
+                    <Input 
+                      placeholder="Search by customer name or job number..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                    />
+                    <Button onClick={handleSearch} disabled={isSearching}>
+                      <Search className="h-4 w-4 mr-2" />
+                      {isSearching ? 'Searching...' : 'Search'}
+                    </Button>
+                  </div>
+
+                  {searchResults.length > 0 && (
+                    <div className="border rounded-md p-2 space-y-2">
+                      {searchResults.map(quote => (
+                        <div key={quote.id} className="flex justify-between items-center p-2 rounded-md hover:bg-gray-50">
+                          <div>
+                            <p className="font-medium">{quote.quoteNumber}</p>
+                            <p className="text-sm text-gray-500">{quote.customerName} - ${quote.amount}</p>
+                          </div>
+                          <Button variant="outline" size="sm" onClick={() => attachQuote(quote)}>
+                            <Link2 className="h-4 w-4 mr-2" />
+                            Attach
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Attached Quotes</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {attachedQuotes.length > 0 ? (
+                    <div className="space-y-2">
+                      {attachedQuotes.map(quote => (
+                        <div key={quote.id} className="flex justify-between items-center p-3 border rounded-md bg-gray-50">
+                           <div>
+                            <p className="font-medium">{quote.quoteNumber}</p>
+                            <p className="text-sm text-gray-500">{quote.customerName} - ${quote.amount}</p>
+                          </div>
+                          <Button variant="ghost" size="sm" className="text-red-500 hover:text-red-600">
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-gray-500 text-center py-4">No quotes attached to this job yet.</p>
+                  )}
+                </CardContent>
+              </Card>
+
+              <div>
+                <Button className="w-full" variant="outline" onClick={handleAddNewQuote}>
+                  <PlusCircle className="h-4 w-4 mr-2" />
+                  Add New Quote
+                </Button>
+              </div>
             </div>
           </TabsContent>
 

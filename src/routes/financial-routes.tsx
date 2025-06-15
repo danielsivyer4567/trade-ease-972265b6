@@ -1,16 +1,22 @@
-import { RouteObject } from 'react-router-dom';
-import { lazy } from 'react';
-import { SuspenseWrapper } from './utils/index';
+import React, { Suspense } from 'react';
+import { Route } from 'react-router-dom';
+import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
+import { LoadingFallback } from './loading-fallback';
 
-const BankingPage = lazy(() => import('@/pages/Banking'));
-const PaymentsPage = lazy(() => import('@/pages/Payments'));
-const ExpensesPage = lazy(() => import('@/pages/Expenses'));
+const BankingPage = React.lazy(() => import('@/pages/Banking'));
+const PaymentsPage = React.lazy(() => import('@/pages/Payments'));
+const ExpensesPage = React.lazy(() => import('@/pages/Expenses'));
+const InvoicesPage = React.lazy(() => import('@/pages/Invoices'));
+const QuotesPage = React.lazy(() => import('@/pages/Quotes'));
+const NewQuotePage = React.lazy(() => import('@/pages/Quotes/NewQuote'));
 
-export const financialRoutes: RouteObject = {
-  path: 'financial',
-  children: [
-    { path: 'banking', element: <SuspenseWrapper><BankingPage /></SuspenseWrapper> },
-    { path: 'payments', element: <SuspenseWrapper><PaymentsPage /></SuspenseWrapper> },
-    { path: 'expenses', element: <SuspenseWrapper><ExpensesPage /></SuspenseWrapper> },
-  ]
-};
+export const financialRoutes = (
+  <Route element={<ProtectedRoute />}>
+    <Route path="/banking" element={<Suspense fallback={<LoadingFallback />}><BankingPage /></Suspense>} />
+    <Route path="/payments" element={<Suspense fallback={<LoadingFallback />}><PaymentsPage /></Suspense>} />
+    <Route path="/expenses" element={<Suspense fallback={<LoadingFallback />}><ExpensesPage /></Suspense>} />
+    <Route path="/invoices" element={<Suspense fallback={<LoadingFallback />}><InvoicesPage /></Suspense>} />
+    <Route path="/quotes" element={<Suspense fallback={<LoadingFallback />}><QuotesPage /></Suspense>} />
+    <Route path="/quotes/new" element={<Suspense fallback={<LoadingFallback />}><NewQuotePage /></Suspense>} />
+  </Route>
+);
