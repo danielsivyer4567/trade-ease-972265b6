@@ -29,6 +29,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { JobDocumentation } from "./form-sections/JobDocumentation";
 import { useFileUpload } from "./document-approval/hooks/useFileUpload";
+import { JobConversations } from "./JobConversations";
 
 interface JobDetailProps {
   job: Job;
@@ -644,14 +645,14 @@ export const JobDetail = ({ job }: JobDetailProps) => {
     geocodeAddress();
   }, [jobData.address, job.address, job.id]);
 
-  const [documentationFiles, setDocumentationFiles] = useState<(File & { url?: string })[]>([]);
+  const [documentationFiles, setDocumentationFiles] = useState<any[]>([]);
   const [documentationNotes, setDocumentationNotes] = useState("");
   const { uploadFileToStorage, isUploading } = useFileUpload(job.id);
 
   // Load documentation files and notes from job on mount
   useEffect(() => {
     if (job.documents && Array.isArray(job.documents)) {
-      setDocumentationFiles(job.documents.map((doc: any) => ({ name: doc.name, url: doc.url, size: doc.size || 0, type: doc.type || '', lastModified: doc.lastModified || Date.now() })));
+      setDocumentationFiles(job.documents);
     }
     if (job.documentationNotes) {
       setDocumentationNotes(job.documentationNotes);
@@ -666,7 +667,7 @@ export const JobDetail = ({ job }: JobDetailProps) => {
     for (const file of files) {
       try {
         const filePath = await uploadFileToStorage(file);
-        const publicUrl = supabase.storage.from('job-documents').getPublicUrl(filePath).publicUrl;
+        const publicUrl = supabase.storage.from('job-documents').getPublicUrl(filePath).data.publicUrl;
         uploadedDocs.push({
           name: file.name,
           url: publicUrl,
@@ -1725,7 +1726,7 @@ export const JobDetail = ({ job }: JobDetailProps) => {
           </TabsContent>
 
           <TabsContent value="conversations" className="p-4">
-            <div className="text-center py-10 text-gray-500">Conversations content will be displayed here</div>
+            <JobConversations job={job} />
           </TabsContent>
 
           <TabsContent value="documentation" className="p-4">
