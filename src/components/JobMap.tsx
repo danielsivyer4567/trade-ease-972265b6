@@ -63,7 +63,22 @@ const MapComponent = ({
     mapTypeControl: true, // Enable map type control
     mapId: mapId, // Add mapId for Advanced Markers
     // Only set mapTypeId if mapId is not present to avoid warnings
-    ...(mapId ? {} : { mapTypeId: 'satellite' })
+    ...(mapId ? {} : { mapTypeId: 'satellite' }),
+    mapTypeControlOptions: {
+      position: google.maps.ControlPosition.TOP_RIGHT,
+      style: google.maps.MapTypeControlStyle.DROPDOWN_MENU
+    },
+    streetViewControlOptions: {
+      position: google.maps.ControlPosition.RIGHT_CENTER
+    },
+    fullscreenControl: true,
+    fullscreenControlOptions: {
+      position: google.maps.ControlPosition.RIGHT_TOP
+    },
+    zoomControl: true,
+    zoomControlOptions: {
+      position: google.maps.ControlPosition.RIGHT_CENTER
+    }
   };
 
   // Function to auto-fit map to all markers
@@ -191,7 +206,7 @@ const MapComponent = ({
         const markerElement = document.createElement('div');
         markerElement.className = 'marker';
         markerElement.innerHTML = `
-          <div class="flex items-center gap-2 font-semibold text-white bg-black/70 backdrop-blur-sm px-3 py-2 rounded-lg shadow-lg border border-white/30">
+          <div class="flex items-center gap-2 font-semibold text-white bg-black/70 backdrop-blur-sm px-3 py-2 rounded-lg shadow-lg border border-white/30 pointer-events-none">
             <img src="/lovable-uploads/34bca7f1-d63b-45a0-b1ca-a562443686ad.png" alt="Trade Ease Logo" width="24" height="24" class="object-contain" />
             <span>${job.jobNumber || 'N/A'}</span>
           </div>
@@ -250,7 +265,7 @@ const MapComponent = ({
         const markerElement = document.createElement('div');
         markerElement.className = 'marker';
         markerElement.innerHTML = `
-          <div class="flex items-center gap-2 font-semibold text-white bg-black/70 backdrop-blur-sm px-3 py-2 rounded-lg shadow-lg border border-white/30">
+          <div class="flex items-center gap-2 font-semibold text-white bg-black/70 backdrop-blur-sm px-3 py-2 rounded-lg shadow-lg border border-white/30 pointer-events-none">
             <img src="/lovable-uploads/34bca7f1-d63b-45a0-b1ca-a562443686ad.png" alt="Trade Ease Logo" width="24" height="24" class="object-contain" />
             <span>${job.jobNumber || 'N/A'}${label ? ` - ${label}` : ''}</span>
           </div>
@@ -303,7 +318,7 @@ const MapComponent = ({
         const markerElement = document.createElement('div');
         markerElement.className = 'marker';
         markerElement.innerHTML = `
-          <div class="flex items-center gap-2 font-semibold text-white bg-black/70 backdrop-blur-sm px-3 py-2 rounded-lg shadow-lg border border-white/30">
+          <div class="flex items-center gap-2 font-semibold text-white bg-black/70 backdrop-blur-sm px-3 py-2 rounded-lg shadow-lg border border-white/30 pointer-events-none">
             <img src="/lovable-uploads/34bca7f1-d63b-45a0-b1ca-a562443686ad.png" alt="Trade Ease Logo" width="24" height="24" class="object-contain" />
             <span>${marker.title || 'N/A'}</span>
           </div>
@@ -336,7 +351,7 @@ const MapComponent = ({
       const centerMarkerElement = document.createElement('div');
       centerMarkerElement.className = 'marker';
       centerMarkerElement.innerHTML = `
-        <div class="flex items-center gap-2 font-semibold text-white bg-blue-500/70 backdrop-blur-sm px-3 py-2 rounded-lg shadow-lg border border-white/30">
+        <div class="flex items-center gap-2 font-semibold text-white bg-blue-500/70 backdrop-blur-sm px-3 py-2 rounded-lg shadow-lg border border-white/30 pointer-events-none">
           <img src="/lovable-uploads/34bca7f1-d63b-45a0-b1ca-a562443686ad.png" alt="Trade Ease Logo" width="24" height="24" class="object-contain" />
           <span>Location</span>
         </div>

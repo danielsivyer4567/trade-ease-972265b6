@@ -59,7 +59,7 @@ const DEFAULT_CENTER = {
 const DEFAULT_MAP_OPTIONS = {
   tilt: 45,
   zoom: 13,
-  mapTypeControl: true,
+  mapTypeControl: false,
   streetViewControl: true,
   fullscreenControl: true,
   mapTypeId: 'satellite' // Only satellite, no mapId
@@ -469,9 +469,7 @@ const JobSiteMap = memo(() => {
       
       <div className="relative h-full">
         {/* Title overlay */}
-        <div className="absolute top-3 left-3 z-10 bg-black/50 backdrop-blur-sm px-3 py-1.5 rounded-md text-white font-semibold shadow-lg">
-          <h2 className="text-lg">Job Site Map</h2>
-        </div>
+        {/* Title overlay */}
         
         {/* Map control buttons - positioned on the left side below the title */}
         <div className="absolute top-14 left-3 z-10 flex gap-2">
@@ -606,7 +604,8 @@ const JobSiteMap = memo(() => {
               zoom={mapViewState?.zoom || DEFAULT_MAP_OPTIONS.zoom} 
               options={{
                 ...DEFAULT_MAP_OPTIONS,
-                tilt: mapViewState?.tilt || DEFAULT_MAP_OPTIONS.tilt
+                tilt: mapViewState?.tilt || DEFAULT_MAP_OPTIONS.tilt,
+                mapTypeControl: false
               }}
               onLoad={handleMapLoad}
             >
