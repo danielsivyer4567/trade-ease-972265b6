@@ -51,10 +51,13 @@ export function JobDocumentation({
       )}
 
       <Tabs defaultValue="general" className="w-full">
-        <TabsList className="grid grid-cols-3 mb-4">
+        <TabsList className="grid grid-cols-6 mb-4">
           <TabsTrigger value="general">General</TabsTrigger>
           <TabsTrigger value="technical">Technical</TabsTrigger>
           <TabsTrigger value="permits">Permits</TabsTrigger>
+          <TabsTrigger value="contracts">Contracts</TabsTrigger>
+          <TabsTrigger value="variation">Variation</TabsTrigger>
+          <TabsTrigger value="defects">Defects</TabsTrigger>
         </TabsList>
 
         <TabsContent value="general" className="space-y-4">
@@ -124,6 +127,75 @@ export function JobDocumentation({
             />
           </div>
           <ImagesGrid images={documents} title="Permits and Approvals" />
+        </TabsContent>
+
+        <TabsContent value="contracts" className="space-y-4">
+          <div>
+            <Label>Upload Contracts</Label>
+            <FileUpload 
+              onFileUpload={handleFileUpload}
+              label="Upload contracts and agreements"
+              allowGcpVision={true}
+              onTextExtracted={handleTextExtracted}
+            />
+          </div>
+          <div>
+            <Label htmlFor="contractNotes">Contract Notes</Label>
+            <Textarea
+              id="contractNotes"
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              placeholder="Add notes about contracts..."
+              className="w-full min-h-[100px]"
+            />
+          </div>
+          <ImagesGrid images={documents} title="Contracts" />
+        </TabsContent>
+
+        <TabsContent value="variation" className="space-y-4">
+          <div>
+            <Label>Upload Variations</Label>
+            <FileUpload 
+              onFileUpload={handleFileUpload}
+              label="Upload variation documents"
+              allowGcpVision={true}
+              onTextExtracted={handleTextExtracted}
+            />
+          </div>
+          <div>
+            <Label htmlFor="variationNotes">Variation Notes</Label>
+            <Textarea
+              id="variationNotes"
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              placeholder="Add notes about variations..."
+              className="w-full min-h-[100px]"
+            />
+          </div>
+          <ImagesGrid images={documents} title="Variations" />
+        </TabsContent>
+
+        <TabsContent value="defects" className="space-y-4">
+          <div>
+            <Label>Upload Defects</Label>
+            <FileUpload 
+              onFileUpload={handleFileUpload}
+              label="Upload defect reports and photos"
+              allowGcpVision={true}
+              onTextExtracted={handleTextExtracted}
+            />
+          </div>
+          <div>
+            <Label htmlFor="defectNotes">Defect Notes</Label>
+            <Textarea
+              id="defectNotes"
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              placeholder="Add notes about defects..."
+              className="w-full min-h-[100px]"
+            />
+          </div>
+          <ImagesGrid images={documents} title="Defects" />
         </TabsContent>
       </Tabs>
     </div>
