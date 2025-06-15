@@ -11,6 +11,10 @@ export interface EmailOptions {
 
 /**
  * Sends an email using the Mailgun service via Supabase Edge Function
+ * 
+ * Note: There's also a 'brevo-email-sender' function available as an alternative.
+ * To switch to Brevo, change the function name to 'brevo-email-sender' and update
+ * the body format accordingly (htmlContent, textContent, sender: { email: ... }).
  */
 export const sendEmail = async (options: EmailOptions): Promise<{ success: boolean; error?: string }> => {
   try {
