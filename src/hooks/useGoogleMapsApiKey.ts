@@ -14,6 +14,17 @@ export function useGoogleMapsApiKey() {
   const fetchApiKey = async () => {
     setIsLoading(true);
     setError(null);
+    
+    // First, try to get the API key from environment variables
+    const envApiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+    if (envApiKey) {
+      console.log('Using Google Maps API key from environment variable');
+      setApiKey(envApiKey);
+      setIsLoading(false);
+      return;
+    }
+
+    // If no environment variable, try to get from database
     try {
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
       
@@ -23,17 +34,11 @@ export function useGoogleMapsApiKey() {
       }
 
       if (!session) {
-        console.log('No session found, using environment variable');
-        const envApiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
-        if (!envApiKey) {
-          throw new Error('No API key found in environment variables');
-        }
-        setApiKey(envApiKey);
+        console.warn('No session found and no environment variable available');
+        setError('No Google Maps API key available');
         setIsLoading(false);
         return;
       }
-
-      console.log('Session found, token:', session.access_token.substring(0, 10) + '...');
 
       const response = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/google-maps-key`,
@@ -53,41 +58,19 @@ export function useGoogleMapsApiKey() {
           statusText: response.statusText,
           body: errorText
         });
-        throw new Error(`HTTP error! status: ${response.status}, body: ${errorText}`);
+        throw new Error(`Failed to retrieve API key: ${response.statusText}`);
       }
 
       const data = await response.json();
       if (data?.apiKey) {
         setApiKey(data.apiKey);
       } else {
-        // No API key in database, try environment variable
-        console.log('No API key found in database, checking environment variable');
-        const envApiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
-        if (envApiKey) {
-          console.log('Using API key from environment variable');
-          setApiKey(envApiKey);
-        } else {
-          console.warn('No Google Maps API key found in database or environment');
-          // Don't throw an error here, just set apiKey to null
-          setApiKey(null);
-        }
+        setError('No Google Maps API key found');
       }
     } catch (error) {
       console.error('Error fetching Google Maps API key:', error);
-      
-      // If we get an error, try to fall back to environment variable
-      const envApiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
-      if (envApiKey) {
-        console.log('Error fetching from database, using environment variable');
-        setApiKey(envApiKey);
-        setError(null); // Clear the error since we have a fallback
-      } else {
-        setError('Failed to fetch Google Maps API key');
-        // Only show toast for actual errors, not missing keys
-        if (!error.message.includes('No API key found')) {
-          toast.error('Failed to fetch Google Maps API key');
-        }
-      }
+      setError('Failed to fetch Google Maps API key');
+      toast.error('Failed to fetch Google Maps API key. Please check your configuration.');
     } finally {
       setIsLoading(false);
     }
@@ -128,7 +111,7 @@ export function useGoogleMapsApiKey() {
           statusText: response.statusText,
           body: errorText
         });
-        throw new Error(`HTTP error! status: ${response.status}, body: ${errorText}`);
+        throw new Error(`Failed to save API key: ${response.statusText}`);
       }
 
       setApiKey(newApiKey);
@@ -176,7 +159,7 @@ export function useGoogleMapsApiKey() {
           statusText: response.statusText,
           body: errorText
         });
-        throw new Error(`HTTP error! status: ${response.status}, body: ${errorText}`);
+        throw new Error(`Failed to delete API key: ${response.statusText}`);
       }
 
       setApiKey(null);

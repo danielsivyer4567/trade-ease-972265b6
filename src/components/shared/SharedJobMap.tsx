@@ -31,34 +31,52 @@ const SharedJobMap = ({
   // Add the hook for API key management
   const { apiKey, isLoading: isApiKeyLoading, error: apiKeyError } = useGoogleMapsApiKey();
 
-  // Process jobs to extract locations
-  const locationMarkers = jobs.reduce<Array<{
-    coordinates: [number, number];
-    job: Job;
-    label?: string;
-  }>>((markers, job) => {
-    // Add markers from the new locations array if available
-    if (job.locations && job.locations.length > 0) {
-      job.locations.forEach(location => {
-        if (location.coordinates && location.coordinates[0] && location.coordinates[1]) {
-          markers.push({
-            coordinates: location.coordinates,
-            job,
-            label: location.label || location.address
-          });
+  // Process job data to extract location markers
+  const markers = React.useMemo(() => {
+    if (!mapInstance) return [];
+    
+    return jobs
+      .filter(job => {
+        // Check for legacy location format
+        if (job.location && Array.isArray(job.location) && job.location.length === 2) {
+          return true;
         }
-      });
-    } 
-    // Fallback to legacy location if no locations array
-    else if (job.location && job.location[0] && job.location[1]) {
-      markers.push({
-        coordinates: job.location,
-        job,
-        label: job.address || 'Primary'
-      });
-    }
-    return markers;
-  }, []);
+        // Check for new locations format
+        if (job.locations && Array.isArray(job.locations) && job.locations.length > 0) {
+          return true;
+        }
+        return false;
+      })
+      .map(job => {
+        // Handle legacy location format
+        if (job.location && Array.isArray(job.location) && job.location.length === 2) {
+          return {
+            position: {
+              lat: job.location[0],
+              lng: job.location[1]
+            },
+            job,
+            label: job.title || 'Job Site'
+          };
+        }
+        
+        // Handle new locations format
+        if (job.locations && Array.isArray(job.locations) && job.locations.length > 0) {
+          return job.locations.map(loc => ({
+            position: {
+              lat: loc.coordinates[0],
+              lng: loc.coordinates[1]
+            },
+            job,
+            label: loc.label || job.title || 'Job Site'
+          }));
+        }
+        
+        return null;
+      })
+      .filter(Boolean)
+      .flat();
+  }, [jobs, mapInstance]);
 
   // Default map center - Gold Coast coordinates
   const DEFAULT_CENTER = {
@@ -159,15 +177,15 @@ const SharedJobMap = ({
             setLoading(false);
 
             // Fit map to markers if we have any
-            if (locationMarkers.length > 0) {
+            if (markers.length > 0) {
               const bounds = new google.maps.LatLngBounds();
-              locationMarkers.forEach(marker => {
-                bounds.extend({ lat: marker.coordinates[1], lng: marker.coordinates[0] });
+              markers.forEach(marker => {
+                bounds.extend({ lat: marker.position.lat, lng: marker.position.lng });
               });
               map.fitBounds(bounds);
 
               // Don't zoom in too much for single markers
-              if (locationMarkers.length === 1) {
+              if (markers.length === 1) {
                 setTimeout(() => {
                   if (map.getZoom() > 15) map.setZoom(15);
                 }, 100);
@@ -175,8 +193,8 @@ const SharedJobMap = ({
             }
 
             // Create markers after map is loaded
-            locationMarkers.forEach((marker) => {
-              const { coordinates, job, label } = marker;
+            markers.forEach((marker) => {
+              const { position, job, label } = marker;
               
               // Create marker element
               const markerElement = document.createElement('div');
@@ -191,7 +209,7 @@ const SharedJobMap = ({
               try {
                 // Create the advanced marker
                 const marker = new google.maps.marker.AdvancedMarkerElement({
-                  position: { lat: coordinates[1], lng: coordinates[0] },
+                  position: position,
                   map: map,
                   content: markerElement,
                   title: job.customer,
@@ -210,7 +228,7 @@ const SharedJobMap = ({
                 
                 // Fallback to standard marker
                 const standardMarker = new google.maps.Marker({
-                  position: { lat: coordinates[1], lng: coordinates[0] },
+                  position: position,
                   map: map,
                   title: job.customer,
                   zIndex: 1000
@@ -229,8 +247,8 @@ const SharedJobMap = ({
           {selectedJob && (
             <InfoWindow
               position={{
-                lat: selectedJob.location?.[1] || selectedJob.locations?.[0]?.coordinates[1] || DEFAULT_CENTER.lat,
-                lng: selectedJob.location?.[0] || selectedJob.locations?.[0]?.coordinates[0] || DEFAULT_CENTER.lng
+                lat: selectedJob.location?.[0] || selectedJob.locations?.[0]?.coordinates[0] || DEFAULT_CENTER.lat,
+                lng: selectedJob.location?.[1] || selectedJob.locations?.[0]?.coordinates[1] || DEFAULT_CENTER.lng
               }}
               onCloseClick={() => setSelectedJob(null)}
             >
