@@ -6,6 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Play, Save, Settings, Share2, Eye, FileDown, FileUp, Plus, Workflow, Zap, Activity } from 'lucide-react';
 import { toast } from 'sonner';
+import { useNavigate } from 'react-router-dom';
 
 interface N8nWorkflowEditorProps {
   workflowId?: string;
@@ -26,7 +27,8 @@ export function N8nWorkflowEditor({
   const [isLoading, setIsLoading] = useState(true);
   const [workflowData, setWorkflowData] = useState<any>(null);
   const [executionStatus, setExecutionStatus] = useState<'idle' | 'running' | 'completed' | 'error'>('idle');
-  const [n8nUrl] = useState(process.env.VITE_N8N_URL || 'http://localhost:5678');
+  const [n8nUrl] = useState(import.meta.env.VITE_N8N_URL || 'http://localhost:5678');
+  const navigate = useNavigate();
 
   // Initialize n8n editor
   useEffect(() => {

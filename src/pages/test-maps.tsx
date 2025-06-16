@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { BaseLayout } from "@/components/ui/BaseLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -8,6 +8,13 @@ export default function TestMapsPage() {
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [errorMessage, setErrorMessage] = useState<string>('');
   const [authError, setAuthError] = useState<string>('');
+  const [mapLoaded, setMapLoaded] = useState(false);
+  const [mapError, setMapError] = useState<string | null>(null);
+  const [mapInstance, setMapInstance] = useState<google.maps.Map | null>(null);
+  const mapRef = useRef<HTMLDivElement>(null);
+  
+  // Check if API key is available
+  const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
 
   const testGoogleMaps = () => {
     setStatus('loading');
@@ -20,7 +27,6 @@ export default function TestMapsPage() {
 
     // Create script element
     const script = document.createElement('script');
-    const apiKey = process.env.VITE_GOOGLE_MAPS_API_KEY;
     
     if (!apiKey) {
       setErrorMessage('Google Maps API key is not configured in environment variables');
@@ -171,7 +177,7 @@ export default function TestMapsPage() {
                 <div>
                   <span className="text-gray-600">API Key: </span>
                   <span className="text-gray-900">
-                    {(process.env.VITE_GOOGLE_MAPS_API_KEY || 'Not configured').substring(0, 10)}...
+                    {(import.meta.env.VITE_GOOGLE_MAPS_API_KEY || 'Not configured').substring(0, 10)}...
                   </span>
                 </div>
                 <div>

@@ -27,6 +27,9 @@ const TestMapsPage = lazy(() => import('@/pages/test-maps'));
 const GoogleCloudFixPage = lazy(() => import('@/pages/google-cloud-fix'));
 const TestGoogleMapsPage = lazy(() => import('@/pages/TestGoogleMaps'));
 
+// Workflow Dashboard
+const WorkflowDashboard = lazy(() => import('@/components/workflow/WorkflowDashboard').then(module => ({ default: module.default })));
+
 // Auth pages
 const AuthPage = lazy(() => import('@/pages/Auth'));
 
@@ -262,6 +265,7 @@ const routeObjects: RouteObject[] = [
           { path: "/workflow/edit/:id", element: <SuspenseWrapper><N8nWorkflowPage /></SuspenseWrapper> },
           { path: "/workflow/list", element: <SuspenseWrapper><N8nWorkflowListPage /></SuspenseWrapper> },
           { path: "/workflow/automations", element: <SuspenseWrapper><AutomationsPage /></SuspenseWrapper> },
+          { path: "/workflow/dashboard", element: <SuspenseWrapper><WorkflowDashboard /></SuspenseWrapper> },
           { path: "/automations", element: <SuspenseWrapper><AutomationsPage /></SuspenseWrapper> },
           { path: "/forms", element: <SuspenseWrapper><FormsPage /></SuspenseWrapper> },
           { path: "/tasks", element: <SuspenseWrapper><TasksPage /></SuspenseWrapper> },

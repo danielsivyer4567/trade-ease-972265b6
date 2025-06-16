@@ -4,19 +4,23 @@
 import { createClient } from '@supabase/supabase-js';
 import axios from 'axios';
 
-// Initialize Supabase client
-const supabaseUrl = process.env.VITE_SUPABASE_URL || '';
-const supabaseAnonKey = process.env.VITE_SUPABASE_ANON_KEY || '';
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY || '';
+/**
+ * n8n and Supabase Integration Service
+ * This service provides utilities for integrating n8n workflows with Supabase
+ */
+
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
+const supabaseServiceKey = import.meta.env.VITE_SUPABASE_SERVICE_KEY || '';
 
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
 const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
 
 // n8n configuration
 const n8nConfig = {
-  baseUrl: process.env.N8N_BASE_URL || 'http://localhost:5678',
-  apiKey: process.env.N8N_API_KEY || '',
-  webhookUrl: process.env.N8N_WEBHOOK_URL || 'http://localhost:5678/webhook'
+  baseUrl: import.meta.env.VITE_N8N_URL || 'http://localhost:5678',
+  apiKey: import.meta.env.VITE_N8N_API_KEY || '',
+  webhookUrl: import.meta.env.VITE_N8N_WEBHOOK_URL || 'http://localhost:5678/webhook'
 };
 
 /**
