@@ -43,48 +43,67 @@ export const supabase = createClient(
 )
 
 // Custom fetch function that routes requests through our local proxy in development
-function customFetch(url: RequestInfo | URL, init?: RequestInit): Promise<Response> {
+async function customFetch(url: RequestInfo | URL, init?: RequestInit): Promise<Response> {
   if (typeof url === 'string' && url.startsWith(supabaseUrl)) {
     // Replace the Supabase URL with our local proxy
     const path = url.replace(supabaseUrl, '')
     const newUrl = `${baseUrl}${path}`
     console.log(`Proxying Supabase request: ${url} -> ${newUrl}`)
     
-    // Make the request through our proxy
-    return fetch(newUrl, init)
-      .then(async (response) => {
-        // Clone the response so we can inspect it without consuming it
-        const clonedResponse = response.clone();
+    // Add retry logic
+    const maxRetries = 3;
+    let retryCount = 0;
+    
+    while (retryCount < maxRetries) {
+      try {
+        // Make the request through our proxy
+        const response = await fetch(newUrl, init);
         
-        // Check if response is ok
-        if (!response.ok) {
-          try {
-            // Try to parse the error response
-            const errorText = await clonedResponse.text();
-            console.error('Supabase proxy error response:', {
-              status: response.status,
-              statusText: response.statusText,
-              body: errorText
-            });
-          } catch (e) {
-            console.error('Failed to read error response:', e);
+        // If the response is ok, return it
+        if (response.ok) {
+          return response;
+        }
+        
+        // If we get a 502 or 504 error, retry
+        if (response.status === 502 || response.status === 504) {
+          retryCount++;
+          if (retryCount < maxRetries) {
+            console.log(`Retrying request (${retryCount}/${maxRetries})...`);
+            await new Promise(resolve => setTimeout(resolve, 1000 * retryCount)); // Exponential backoff
+            continue;
           }
         }
         
-        // Create a new response that handles JSON parsing errors
-        return new Response(
-          response.body,
-          {
+        // For other errors, try to parse the error response
+        try {
+          const errorText = await response.text();
+          console.error('Supabase proxy error response:', {
             status: response.status,
             statusText: response.statusText,
-            headers: response.headers
-          }
-        );
-      })
-      .catch(error => {
+            body: errorText
+          });
+        } catch (e) {
+          console.error('Failed to read error response:', e);
+        }
+        
+        // Return the error response
+        return response;
+      } catch (error) {
         console.error('Supabase proxy fetch error:', error);
+        retryCount++;
+        
+        if (retryCount < maxRetries) {
+          console.log(`Retrying request (${retryCount}/${maxRetries})...`);
+          await new Promise(resolve => setTimeout(resolve, 1000 * retryCount)); // Exponential backoff
+          continue;
+        }
+        
         throw error;
-      });
+      }
+    }
+    
+    // If we've exhausted all retries, throw an error
+    throw new Error(`Failed to fetch after ${maxRetries} retries`);
   }
   
   // For non-Supabase URLs or non-string URLs, use the default fetch
