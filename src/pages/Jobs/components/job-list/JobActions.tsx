@@ -52,6 +52,7 @@ export const JobActions = ({ job, actionLoading, onStatusChange }: JobActionsPro
           }}
           disabled={actionLoading === job.id}
           className="h-8 w-8 p-0 text-gray-700 hover:text-green-600 hover:bg-green-50"
+          aria-label="Complete"
         >
           {actionLoading === job.id ? (
             <Loader2 className="h-4 w-4 animate-spin" />
