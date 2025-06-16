@@ -1,16 +1,17 @@
 import React, { useState, useEffect } from "react";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { MapPin } from "lucide-react";
 import type { Job } from "@/types/job";
-import JobMap from "@/components/JobMap";
+import SharedJobMap from "@/components/shared/SharedJobMap";
 import { geocodingService } from "@/services";
 import { supabase } from "@/integrations/supabase/client";
 
 interface JobSiteMapViewProps {
   jobs: Job[];
+  onJobClick?: (job: Job) => void;
 }
 
-const JobSiteMapView = ({ jobs }: JobSiteMapViewProps) => {
+const JobSiteMapView = ({ jobs, onJobClick }: JobSiteMapViewProps) => {
   const [processedJobs, setProcessedJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -122,47 +123,10 @@ const JobSiteMapView = ({ jobs }: JobSiteMapViewProps) => {
     geocodeJobAddresses();
   }, [jobs]);
 
-  // Extract all location markers from jobs
-  const getAllLocationMarkers = () => {
-    const markers: Array<{
-      coordinates: [number, number];
-      job: Job;
-      label?: string;
-    }> = [];
-
-    processedJobs.forEach(job => {
-      // Add markers from the new locations array if available
-      if (job.locations && job.locations.length > 0) {
-        job.locations.forEach(location => {
-          if (location.coordinates && location.coordinates[0] && location.coordinates[1]) {
-            markers.push({
-              coordinates: location.coordinates,
-              job,
-              label: location.label || location.address
-            });
-          }
-        });
-      } 
-      // Fallback to legacy location if no locations array
-      else if (job.location && job.location[0] && job.location[1]) {
-        markers.push({
-          coordinates: job.location,
-          job,
-          label: job.address || 'Primary'
-        });
-      }
-      // If the job has an address but no coordinates, try to use the address
-      else if (job.address && job.address !== 'N/A') {
-        console.log(`Job ${job.id} has address (${job.address}) but no coordinates`);
-      }
-    });
-
-    console.log(`Created ${markers.length} location markers for ${processedJobs.length} jobs`);
-    return markers;
-  };
-
-  const locationMarkers = getAllLocationMarkers();
-  const hasLocations = locationMarkers.length > 0;
+  const hasLocations = processedJobs.some(job => 
+    (job.location && job.location[0] && job.location[1]) || 
+    (job.locations && job.locations.length > 0)
+  );
 
   return (
     <div className="w-full h-full relative rounded-lg overflow-hidden">
@@ -175,11 +139,10 @@ const JobSiteMapView = ({ jobs }: JobSiteMapViewProps) => {
         </div>
       )}
       
-      {/* Use the JobMap component with all location markers */}
-      <JobMap 
-        locationMarkers={locationMarkers}
-        zoom={locationMarkers.length > 1 ? 10 : 13} // Zoom out more if we have multiple locations
-        autoFit={true}
+      <SharedJobMap 
+        jobs={processedJobs}
+        height="200px"
+        onJobClick={onJobClick}
       />
       
       {!hasLocations && !loading && (
