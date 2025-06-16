@@ -50,7 +50,7 @@ export function N8nWorkflowList({ onSelectWorkflow }: N8nWorkflowListProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedWorkflow, setSelectedWorkflow] = useState<N8nWorkflow | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [n8nUrl] = useState(process.env.VITE_N8N_URL || 'http://localhost:5678');
+  const [n8nUrl] = useState(import.meta.env.VITE_N8N_URL || 'http://localhost:5678');
   const navigate = useNavigate();
 
   useEffect(() => {

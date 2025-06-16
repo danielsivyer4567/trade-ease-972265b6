@@ -29,13 +29,15 @@ export function GoogleMapsDebug() {
     });
 
     // Test 2: Check environment variables
-    addResult({
-      test: 'Environment Variables',
-      status: process.env.VITE_GOOGLE_MAPS_API_KEY ? 'success' : 'warning',
-      message: process.env.VITE_GOOGLE_MAPS_API_KEY 
-        ? 'Environment variable VITE_GOOGLE_MAPS_API_KEY is set' 
-        : 'VITE_GOOGLE_MAPS_API_KEY not found in environment'
-    });
+    const checks = [
+      {
+        name: 'Environment Variable',
+        status: import.meta.env.VITE_GOOGLE_MAPS_API_KEY ? 'success' : 'warning',
+        message: import.meta.env.VITE_GOOGLE_MAPS_API_KEY 
+          ? `API Key found: ${import.meta.env.VITE_GOOGLE_MAPS_API_KEY?.substring(0, 10)}...`
+          : 'No API key found in environment variables'
+      },
+    ];
 
     // Test 3: Try to load Google Maps script
     try {
