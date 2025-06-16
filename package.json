@@ -96,8 +96,9 @@
   "devDependencies": {
     "@eslint/js": "^8.56.0",
     "@tailwindcss/typography": "^0.5.10",
-    "@testing-library/jest-dom": "^6.1.4",
-    "@testing-library/react": "^14.0.0",
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^14.3.1",
+    "@types/jest": "^29.5.14",
     "@types/node": "^20.11.19",
     "@types/react": "^18.2.57",
     "@types/react-dom": "^18.2.19",
