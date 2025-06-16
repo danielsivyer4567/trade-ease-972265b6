@@ -123,6 +123,11 @@ const MapComponent = ({
   const onLoad = (mapInstance: google.maps.Map) => {
     setMap(mapInstance);
     
+    // Set satellite view programmatically when mapId is present
+    if (mapId) {
+      mapInstance.setMapTypeId('satellite');
+    }
+    
     // Helper function to activate Street View for a location
     const activateStreetView = (
       map: google.maps.Map, 
@@ -161,40 +166,7 @@ const MapComponent = ({
       }
     };
     
-    // Activate Street View automatically on load
-    try {
-      // Determine which point to use for Street View
-      let streetViewPoint;
-      
-      if (locationMarkers.length > 0) {
-        // Use the first location marker
-        streetViewPoint = { 
-          lat: locationMarkers[0].coordinates[1], 
-          lng: locationMarkers[0].coordinates[0]
-        };
-      } else if (jobs.length > 0 && jobs[0].location) {
-        // Use the first job location
-        streetViewPoint = { 
-          lat: jobs[0].location[1], 
-          lng: jobs[0].location[0]
-        };
-      } else if (markers.length > 0) {
-        // Use the first marker
-        streetViewPoint = { 
-          lat: markers[0].position[0], 
-          lng: markers[0].position[1]
-        };
-      } else {
-        // Use the map center
-        streetViewPoint = mapCenter;
-      }
-      
-      // Activate Street View using our helper function
-      activateStreetView(mapInstance, streetViewPoint);
-      
-    } catch (error) {
-      console.error("Error initializing Street View:", error);
-    }
+    // Don't activate Street View automatically - let users choose when to use it
     
     // Add markers from jobs if provided (legacy support)
     if (jobs.length > 0) {
@@ -206,9 +178,9 @@ const MapComponent = ({
         const markerElement = document.createElement('div');
         markerElement.className = 'marker';
         markerElement.innerHTML = `
-          <div class="flex items-center gap-2 font-semibold text-white bg-black/70 backdrop-blur-sm px-3 py-2 rounded-lg shadow-lg border border-white/30 pointer-events-none">
-            <img src="/lovable-uploads/34bca7f1-d63b-45a0-b1ca-a562443686ad.png" alt="Trade Ease Logo" width="24" height="24" class="object-contain" />
-            <span>${job.jobNumber || 'N/A'}</span>
+          <div style="display: flex; flex-direction: column; align-items: center; background: transparent; padding: 0; margin: 0;">
+            <img src='/lovable-uploads/34bca7f1-d63b-45a0-b1ca-a562443686ad.png' alt='Trade Ease Logo' width='16' height='16' style='object-fit: contain; display: block; margin-bottom: 2px;' />
+            <span style="color: #fff; font-weight: bold; font-size: 10px; line-height: 1; text-align: center;">${job.jobNumber || 'N/A'}</span>
           </div>
         `;
 
@@ -265,9 +237,9 @@ const MapComponent = ({
         const markerElement = document.createElement('div');
         markerElement.className = 'marker';
         markerElement.innerHTML = `
-          <div class="flex items-center gap-2 font-semibold text-white bg-black/70 backdrop-blur-sm px-3 py-2 rounded-lg shadow-lg border border-white/30 pointer-events-none">
-            <img src="/lovable-uploads/34bca7f1-d63b-45a0-b1ca-a562443686ad.png" alt="Trade Ease Logo" width="24" height="24" class="object-contain" />
-            <span>${job.jobNumber || 'N/A'}${label ? ` - ${label}` : ''}</span>
+          <div style="display: flex; flex-direction: column; align-items: center; background: transparent; padding: 0; margin: 0;">
+            <img src='/lovable-uploads/34bca7f1-d63b-45a0-b1ca-a562443686ad.png' alt='Trade Ease Logo' width='16' height='16' style='object-fit: contain; display: block; margin-bottom: 2px;' />
+            <span style="color: #fff; font-weight: bold; font-size: 10px; line-height: 1; text-align: center;">${job.jobNumber || 'N/A'}</span>
           </div>
         `;
 
@@ -318,9 +290,9 @@ const MapComponent = ({
         const markerElement = document.createElement('div');
         markerElement.className = 'marker';
         markerElement.innerHTML = `
-          <div class="flex items-center gap-2 font-semibold text-white bg-black/70 backdrop-blur-sm px-3 py-2 rounded-lg shadow-lg border border-white/30 pointer-events-none">
-            <img src="/lovable-uploads/34bca7f1-d63b-45a0-b1ca-a562443686ad.png" alt="Trade Ease Logo" width="24" height="24" class="object-contain" />
-            <span>${marker.title || 'N/A'}</span>
+          <div style="display: flex; flex-direction: column; align-items: center; background: transparent; padding: 0; margin: 0;">
+            <img src='/lovable-uploads/34bca7f1-d63b-45a0-b1ca-a562443686ad.png' alt='Trade Ease Logo' width='16' height='16' style='object-fit: contain; display: block; margin-bottom: 2px;' />
+            <span style="color: #fff; font-weight: bold; font-size: 10px; line-height: 1; text-align: center;">${marker.title || 'N/A'}</span>
           </div>
         `;
 
@@ -350,10 +322,11 @@ const MapComponent = ({
     if (jobs.length === 0 && markers.length === 0 && locationMarkers.length === 0) {
       const centerMarkerElement = document.createElement('div');
       centerMarkerElement.className = 'marker';
+      const centerMarkerJobNumber = jobs.length > 0 ? jobs[0].jobNumber : markers.length > 0 ? markers[0].title : locationMarkers.length > 0 ? locationMarkers[0].job.jobNumber : 'N/A';
       centerMarkerElement.innerHTML = `
-        <div class="flex items-center gap-2 font-semibold text-white bg-blue-500/70 backdrop-blur-sm px-3 py-2 rounded-lg shadow-lg border border-white/30 pointer-events-none">
-          <img src="/lovable-uploads/34bca7f1-d63b-45a0-b1ca-a562443686ad.png" alt="Trade Ease Logo" width="24" height="24" class="object-contain" />
-          <span>Location</span>
+        <div style="display: flex; flex-direction: column; align-items: center; background: transparent; padding: 0; margin: 0;">
+          <img src='/lovable-uploads/34bca7f1-d63b-45a0-b1ca-a562443686ad.png' alt='Trade Ease Logo' width='16' height='16' style='object-fit: contain; display: block; margin-bottom: 2px;' />
+          <span style="color: #fff; font-weight: bold; font-size: 10px; line-height: 1; text-align: center;">${centerMarkerJobNumber || 'N/A'}</span>
         </div>
       `;
 
