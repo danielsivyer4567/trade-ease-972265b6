@@ -1,7 +1,19 @@
 import React, { useState } from 'react';
+import { ChevronLeft, ChevronDown, MenuIcon, Plus, Building2, Users } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { ChevronLeft, MenuIcon, ChevronDown, Search, Plus } from 'lucide-react';
 import { useSidebarTheme } from './theme/SidebarThemeContext';
+import { useOrganization } from '@/contexts/OrganizationContext';
+import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface SidebarHeaderProps {
   isExpanded: boolean;
@@ -11,23 +23,22 @@ interface SidebarHeaderProps {
 
 export function SidebarHeader({ isExpanded, onToggle, className }: SidebarHeaderProps) {
   const { theme } = useSidebarTheme();
-  const [currentBusiness, setCurrentBusiness] = useState("Affordable Fencing");
-  const [isBusinessDropdownOpen, setIsBusinessDropdownOpen] = useState(false);
+  const { 
+    currentOrganization, 
+    userOrganizations, 
+    subscriptionTier, 
+    canCreateMoreOrganizations,
+    switchOrganization,
+    isLoading 
+  } = useOrganization();
   
-  // Mock business list data - would come from API/context in real implementation
-  const businesses = [
-    "Affordable Fencing",
-    "Second Business",
-    "Third Business"
-  ];
-  
-  const toggleBusinessDropdown = () => {
-    setIsBusinessDropdownOpen(!isBusinessDropdownOpen);
+  const handleSwitchOrganization = async (organizationId: string) => {
+    await switchOrganization(organizationId);
   };
-  
-  const selectBusiness = (business: string) => {
-    setCurrentBusiness(business);
-    setIsBusinessDropdownOpen(false);
+
+  const handleCreateNewOrganization = () => {
+    // Navigate to organization creation page
+    window.location.href = '/settings/organization/new';
   };
   
   return (
@@ -37,7 +48,6 @@ export function SidebarHeader({ isExpanded, onToggle, className }: SidebarHeader
     )}>
       {/* Header with toggle */}
       <div className={cn(
-        // sidebarHeaderVariants({ theme }), // This was causing an error after ThemeSwitcher removal, so commenting out
         "flex items-center",
         "bg-gradient-to-r from-[#1e2a3b] to-[#23375d]", 
         "h-12 px-3",
@@ -66,51 +76,132 @@ export function SidebarHeader({ isExpanded, onToggle, className }: SidebarHeader
       {isExpanded && (
         <div className="px-2 py-2">
           <div className="relative">
-            <div 
-              className="flex items-center justify-between bg-white text-gray-800 px-2 py-1.5 rounded cursor-pointer"
-              onClick={toggleBusinessDropdown}
-            >
-              <div className="flex items-center gap-1">
-                <svg className="w-4 h-4 text-blue-500" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
-                  <path d="M12 6V18" stroke="currentColor" strokeWidth="2"/>
-                  <path d="M6 12H18" stroke="currentColor" strokeWidth="2"/>
-                </svg>
-                <span className="text-xs font-medium truncate">{currentBusiness}</span>
-              </div>
-              <ChevronDown className="h-3 w-3 text-gray-500 ml-1" />
-            </div>
-            
-            {/* Dropdown */}
-            {isBusinessDropdownOpen && (
-              <div className="absolute top-full left-0 right-0 mt-1 bg-white rounded shadow-lg z-10">
-                {businesses.map((business, index) => (
-                  <div 
-                    key={index} 
-                    className="px-2 py-1.5 hover:bg-gray-100 cursor-pointer text-xs"
-                    onClick={() => selectBusiness(business)}
+            {isLoading ? (
+              <Skeleton className="h-8 w-full" />
+            ) : (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button 
+                    variant="ghost" 
+                    className="w-full justify-between bg-white text-gray-800 px-2 py-1.5 h-auto hover:bg-gray-100"
                   >
-                    {business}
-                  </div>
-                ))}
-              </div>
+                    <div className="flex items-center gap-1 min-w-0">
+                      <Building2 className="w-4 h-4 text-blue-500 flex-shrink-0" />
+                      <span className="text-xs font-medium truncate">
+                        {currentOrganization?.name || 'Select Organization'}
+                      </span>
+                    </div>
+                    <ChevronDown className="h-3 w-3 text-gray-500 ml-1 flex-shrink-0" />
+                  </Button>
+                </DropdownMenuTrigger>
+                
+                <DropdownMenuContent className="w-56" align="start">
+                  <DropdownMenuLabel className="flex items-center justify-between">
+                    <span>Organizations</span>
+                    <Badge variant="outline" className="text-xs">
+                      {subscriptionTier === 'agency' ? 'Agency' : 
+                       subscriptionTier === 'premium' ? 'Premium' : 'Free'}
+                    </Badge>
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  
+                  {/* User's own organizations */}
+                  {userOrganizations
+                    .filter(org => org.access_type === 'member')
+                    .map((org) => (
+                      <DropdownMenuItem
+                        key={org.organization_id}
+                        onClick={() => handleSwitchOrganization(org.organization_id)}
+                        className="cursor-pointer"
+                      >
+                        <div className="flex items-center justify-between w-full">
+                          <div className="flex items-center gap-2">
+                            <Building2 className="w-4 h-4" />
+                            <span className="text-sm">{org.organization_name}</span>
+                          </div>
+                          {org.is_current && (
+                            <Badge variant="secondary" className="text-xs">Current</Badge>
+                          )}
+                        </div>
+                      </DropdownMenuItem>
+                    ))}
+                  
+                  {/* Agency client organizations */}
+                  {subscriptionTier === 'agency' && 
+                   userOrganizations.filter(org => org.access_type === 'agency').length > 0 && (
+                    <>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuLabel className="text-xs text-muted-foreground">
+                        Client Organizations
+                      </DropdownMenuLabel>
+                      {userOrganizations
+                        .filter(org => org.access_type === 'agency')
+                        .map((org) => (
+                          <DropdownMenuItem
+                            key={org.organization_id}
+                            onClick={() => handleSwitchOrganization(org.organization_id)}
+                            className="cursor-pointer"
+                          >
+                            <div className="flex items-center justify-between w-full">
+                              <div className="flex items-center gap-2">
+                                <Users className="w-4 h-4" />
+                                <span className="text-sm">{org.organization_name}</span>
+                              </div>
+                              {org.is_current && (
+                                <Badge variant="secondary" className="text-xs">Current</Badge>
+                              )}
+                            </div>
+                          </DropdownMenuItem>
+                        ))}
+                    </>
+                  )}
+                  
+                  {/* Add new organization option for premium/agency users */}
+                  {(subscriptionTier === 'premium' || subscriptionTier === 'agency') && 
+                   canCreateMoreOrganizations && (
+                    <>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem
+                        onClick={handleCreateNewOrganization}
+                        className="cursor-pointer"
+                      >
+                        <Plus className="w-4 h-4 mr-2" />
+                        <span className="text-sm">Add Organization</span>
+                      </DropdownMenuItem>
+                    </>
+                  )}
+                  
+                  {/* Upgrade prompt for free users */}
+                  {subscriptionTier === 'free' && !canCreateMoreOrganizations && (
+                    <>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem
+                        onClick={() => window.location.href = '/settings/subscription'}
+                        className="cursor-pointer text-blue-600"
+                      >
+                        <Plus className="w-4 h-4 mr-2" />
+                        <span className="text-sm">Upgrade for Multiple Organizations</span>
+                      </DropdownMenuItem>
+                    </>
+                  )}
+                </DropdownMenuContent>
+              </DropdownMenu>
             )}
           </div>
           
           {/* Search Bar */}
-          <div className="mt-2 flex items-center gap-1">
-            <div className="flex-1 relative flex items-center bg-gray-700 rounded px-2 py-1">
-              <Search className="h-3 w-3 text-gray-400 absolute left-2" />
-              <input 
-                type="text" 
-                placeholder="Search" 
-                className="w-full bg-transparent border-none outline-none text-white pl-5 text-xs placeholder-gray-400"
-              />
-              <span className="text-[10px] text-gray-400 ml-1">ctrl K</span>
+          <div className="mt-2 relative">
+            <input 
+              type="text" 
+              placeholder="Search" 
+              className="w-full bg-white text-gray-800 px-3 py-1.5 pr-8 rounded text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
+            />
+            <div className="absolute right-1 top-1/2 -translate-y-1/2 flex items-center gap-1">
+              <span className="text-[10px] text-gray-400">ctrl K</span>
+              <button className="bg-green-500 text-white p-1 rounded">
+                <Plus className="h-3 w-3" />
+              </button>
             </div>
-            <button className="p-1 bg-green-500 text-white rounded">
-              <Plus className="h-3 w-3" />
-            </button>
           </div>
         </div>
       )}

@@ -20,6 +20,7 @@ const XeroCallback = React.lazy(() => import('@/pages/Settings/components/integr
 const GenericSettingsPage = React.lazy(() => import('@/pages/Settings/GenericSettingsPage'));
 const StaffPage = React.lazy(() => import('@/pages/Settings/Staff'));
 const MessagingSettings = React.lazy(() => import('@/pages/Settings/MessagingSettings'));
+const OrganizationSettings = React.lazy(() => import('@/pages/Settings/OrganizationSettings'));
 
 // Export routes configuration
 export const SettingsRoutes = (): RouteObject[] => [
@@ -49,6 +50,14 @@ export const SettingsRoutes = (): RouteObject[] => [
     ),
   },
   // Other specific settings routes
+  {
+    path: "organization",
+    element: (
+      <Suspense fallback={<LoadingFallback />}>
+        <OrganizationSettings />
+      </Suspense>
+    ),
+  },
   {
     path: "notifications",
     element: (

@@ -1,6 +1,7 @@
 import React, { Suspense, useState, useEffect } from 'react';
 import { RouterProvider } from 'react-router-dom';
 import { AuthProvider } from '@/contexts/AuthContext';
+import { OrganizationProvider } from '@/contexts/OrganizationContext';
 import { Toaster } from '@/components/ui/toaster';
 import { createRouter } from './routes/index';
 import { Analytics } from '@vercel/analytics/react';
@@ -81,13 +82,15 @@ function App() {
     <ErrorBoundary fallback={<ErrorFallbackUI />}>
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
-          <NotificationProvider>
-            <AppUIComponents>
-              <Suspense fallback={<LoadingFallback />}>
-                <RouterProvider router={router} />
-              </Suspense>
-            </AppUIComponents>
-          </NotificationProvider>
+          <OrganizationProvider>
+            <NotificationProvider>
+              <AppUIComponents>
+                <Suspense fallback={<LoadingFallback />}>
+                  <RouterProvider router={router} />
+                </Suspense>
+              </AppUIComponents>
+            </NotificationProvider>
+          </OrganizationProvider>
         </AuthProvider>
       </QueryClientProvider>
     </ErrorBoundary>

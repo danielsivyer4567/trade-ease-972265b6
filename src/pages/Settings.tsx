@@ -1,10 +1,16 @@
 import { BaseLayout } from "@/components/ui/BaseLayout";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Settings, DollarSign, Receipt, Clock, Users, Shield, FileText, Calendar, List, CreditCard, User, Bot, Briefcase, Network, Mail, FileJson, Building, Share, Zap, Search, Link2, Bell, Globe, FileLock, Brain, Database, MessageSquare } from "lucide-react";
+import { Settings, DollarSign, Receipt, Clock, Users, Shield, FileText, Calendar, List, CreditCard, User, Bot, Briefcase, Network, Mail, FileJson, Building, Share, Zap, Search, Link2, Bell, Globe, FileLock, Brain, Database, MessageSquare, Building2 } from "lucide-react";
 import { Link, Outlet, useLocation } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 
 const settingsSections = [
+  {
+    title: "Organization & Subscription",
+    icon: Building2,
+    description: "Manage organizations and subscription plan",
+    path: "/settings/organization"
+  },
   {
     title: "Messaging",
     icon: MessageSquare,
