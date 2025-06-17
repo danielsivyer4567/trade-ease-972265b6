@@ -11,7 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
-import { Building2, Users, Crown, Briefcase, Plus, Mail, Settings, Shield, CreditCard } from 'lucide-react';
+import { Building2, Users, Crown, Briefcase, Plus, Mail, Settings, Shield, CreditCard, Zap, Key, MessageSquare, Bot, Phone } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -87,6 +87,12 @@ export default function OrganizationSettings() {
     });
   };
 
+  const { data: hasAccess } = await supabase
+    .rpc('has_feature_access', { feature_key: 'automations' });
+
+  const { data: maxUsers } = await supabase
+    .rpc('get_feature_limit', { feature_key: 'max_users' });
+
   return (
     <div className="container mx-auto p-6 max-w-6xl">
       <div className="mb-6">
@@ -98,8 +104,8 @@ export default function OrganizationSettings() {
         <TabsList>
           <TabsTrigger value="organizations">Organizations</TabsTrigger>
           <TabsTrigger value="subscription">Subscription</TabsTrigger>
-          {subscriptionTier === 'agency' && (
-            <TabsTrigger value="agency">Agency Management</TabsTrigger>
+          {subscriptionTier === 'skeleton_key' && (
+            <TabsTrigger value="agency">Client Management</TabsTrigger>
           )}
         </TabsList>
 
@@ -197,7 +203,7 @@ export default function OrganizationSettings() {
                               </SelectContent>
                             </Select>
                           </div>
-                          {subscriptionTier === 'agency' && (
+                          {subscriptionTier === 'skeleton_key' && (
                             <div className="flex items-center space-x-2">
                               <input
                                 type="checkbox"
@@ -329,78 +335,178 @@ export default function OrganizationSettings() {
         </TabsContent>
 
         <TabsContent value="subscription" className="space-y-4">
-          <div className="grid gap-4 md:grid-cols-3">
-            {/* Free Tier */}
-            <Card className={subscriptionTier === 'free' ? 'border-primary' : ''}>
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            {/* Free Starter Tier */}
+            <Card className={subscriptionTier === 'free_starter' ? 'border-primary' : ''}>
               <CardHeader>
                 <CardTitle className="flex items-center justify-between">
-                  Free
-                  {subscriptionTier === 'free' && (
+                  <span className="text-lg">Free Starter</span>
+                  {subscriptionTier === 'free_starter' && (
                     <Badge>Current Plan</Badge>
                   )}
                 </CardTitle>
                 <CardDescription>
-                  Perfect for individual contractors
+                  Try TradeEase risk-free
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
+                <p className="text-2xl font-bold">$0/month</p>
                 <ul className="space-y-2 text-sm">
                   <li className="flex items-center gap-2">
                     <Shield className="h-4 w-4 text-green-500" />
-                    1 Organization
+                    1 organization, 1 user
                   </li>
                   <li className="flex items-center gap-2">
                     <Shield className="h-4 w-4 text-green-500" />
-                    Basic features
+                    Invoices & Quoting
                   </li>
                   <li className="flex items-center gap-2">
                     <Shield className="h-4 w-4 text-green-500" />
-                    Up to 5 team members
+                    Calendar
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Shield className="h-4 w-4 text-gray-300" />
+                    View all features (locked)
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Shield className="h-4 w-4 text-gray-300" />
+                    0 automations
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Shield className="h-4 w-4 text-gray-300" />
+                    0 automated texts/emails
                   </li>
                 </ul>
-                {subscriptionTier === 'free' && (
-                  <p className="text-2xl font-bold">$0/month</p>
+                <div className="pt-2 border-t">
+                  <p className="text-xs text-green-600 font-medium">
+                    40% affiliate commission
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Standard ticket support
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Growing Pain Relief Tier */}
+            <Card className={subscriptionTier === 'growing_pain_relief' ? 'border-primary' : ''}>
+              <CardHeader>
+                <CardTitle className="flex items-center justify-between">
+                  <span className="flex items-center gap-2">
+                    <Zap className="h-5 w-5 text-blue-500" />
+                    <span className="text-lg">Growing Pain Relief</span>
+                  </span>
+                  {subscriptionTier === 'growing_pain_relief' && (
+                    <Badge>Current Plan</Badge>
+                  )}
+                </CardTitle>
+                <CardDescription>
+                  Start automating your business
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <p className="text-2xl font-bold">$75/month <span className="text-sm font-normal text-muted-foreground">inc GST</span></p>
+                <ul className="space-y-2 text-sm">
+                  <li className="flex items-center gap-2">
+                    <Shield className="h-4 w-4 text-green-500" />
+                    1 organization, 3 users
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Shield className="h-4 w-4 text-green-500" />
+                    Auto web enquiry forwarding
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Shield className="h-4 w-4 text-green-500" />
+                    ABN verification
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Shield className="h-4 w-4 text-green-500" />
+                    Internal comms/tagging
+                  </li>
+                </ul>
+                <div className="pt-2 border-t space-y-1">
+                  <p className="text-xs font-medium">Add-ons available:</p>
+                  <p className="text-xs text-muted-foreground">• Automated texts: +$20/mo + 10¢/msg</p>
+                  <p className="text-xs text-muted-foreground">• AI agents: Setup + monthly fees</p>
+                  <p className="text-xs text-muted-foreground">• Workflows: Per setup + monthly</p>
+                </div>
+                <div className="pt-2 border-t">
+                  <p className="text-xs text-green-600 font-medium">
+                    40% affiliate commission
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Standard ticket support
+                  </p>
+                </div>
+                {subscriptionTier === 'free_starter' && (
+                  <Button 
+                    className="w-full" 
+                    onClick={() => handleUpgrade('premium')}
+                  >
+                    <CreditCard className="h-4 w-4 mr-2" />
+                    Upgrade Now
+                  </Button>
                 )}
               </CardContent>
             </Card>
 
-            {/* Premium Tier */}
-            <Card className={subscriptionTier === 'premium' ? 'border-primary' : ''}>
+            {/* Premium Edge Tier */}
+            <Card className={subscriptionTier === 'premium_edge' ? 'border-primary border-2' : ''}>
               <CardHeader>
                 <CardTitle className="flex items-center justify-between">
                   <span className="flex items-center gap-2">
                     <Crown className="h-5 w-5 text-yellow-500" />
-                    Premium
+                    <span className="text-lg">Premium Edge</span>
                   </span>
-                  {subscriptionTier === 'premium' && (
+                  {subscriptionTier === 'premium_edge' && (
                     <Badge>Current Plan</Badge>
                   )}
                 </CardTitle>
                 <CardDescription>
-                  For growing businesses
+                  Everything unlimited
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
+                <p className="text-2xl font-bold">$449/month</p>
                 <ul className="space-y-2 text-sm">
                   <li className="flex items-center gap-2">
                     <Shield className="h-4 w-4 text-green-500" />
-                    Up to 5 Organizations
+                    15 users included
                   </li>
                   <li className="flex items-center gap-2">
                     <Shield className="h-4 w-4 text-green-500" />
-                    Advanced features
+                    ALL features unlocked
                   </li>
                   <li className="flex items-center gap-2">
-                    <Shield className="h-4 w-4 text-green-500" />
-                    Unlimited team members
+                    <MessageSquare className="h-4 w-4 text-green-500" />
+                    Unlimited free texts
                   </li>
                   <li className="flex items-center gap-2">
-                    <Shield className="h-4 w-4 text-green-500" />
-                    Priority support
+                    <Bot className="h-4 w-4 text-green-500" />
+                    Unlimited automations
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Phone className="h-4 w-4 text-green-500" />
+                    Dedicated phone number
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Zap className="h-4 w-4 text-green-500" />
+                    Free basic workflow setup
                   </li>
                 </ul>
-                <p className="text-2xl font-bold">$49/month</p>
-                {subscriptionTier !== 'premium' && subscriptionTier !== 'agency' && (
+                <div className="pt-2 border-t space-y-1">
+                  <p className="text-xs text-muted-foreground">• Advanced workflows: Extra setup cost</p>
+                  <p className="text-xs text-muted-foreground">• Twilio & AI token costs apply</p>
+                </div>
+                <div className="pt-2 border-t">
+                  <p className="text-xs text-green-600 font-medium">
+                    40% affiliate commission
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Priority ticket support
+                  </p>
+                </div>
+                {(subscriptionTier === 'free_starter' || subscriptionTier === 'growing_pain_relief') && (
                   <Button 
                     className="w-full" 
                     onClick={() => handleUpgrade('premium')}
@@ -412,49 +518,68 @@ export default function OrganizationSettings() {
               </CardContent>
             </Card>
 
-            {/* Agency Tier */}
-            <Card className={subscriptionTier === 'agency' ? 'border-primary' : ''}>
+            {/* Skeleton Key Tier */}
+            <Card className={subscriptionTier === 'skeleton_key' ? 'border-primary border-2' : ''}>
               <CardHeader>
                 <CardTitle className="flex items-center justify-between">
                   <span className="flex items-center gap-2">
-                    <Briefcase className="h-5 w-5 text-purple-500" />
-                    Agency
+                    <Key className="h-5 w-5 text-purple-500" />
+                    <span className="text-lg">Skeleton Key</span>
                   </span>
-                  {subscriptionTier === 'agency' && (
+                  {subscriptionTier === 'skeleton_key' && (
                     <Badge>Current Plan</Badge>
                   )}
                 </CardTitle>
                 <CardDescription>
-                  For agencies and consultants
+                  White-label agency solution
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
+                <p className="text-2xl font-bold">Contact Us</p>
                 <ul className="space-y-2 text-sm">
                   <li className="flex items-center gap-2">
                     <Shield className="h-4 w-4 text-green-500" />
-                    Unlimited Organizations
+                    White-label branding
                   </li>
                   <li className="flex items-center gap-2">
                     <Shield className="h-4 w-4 text-green-500" />
-                    Client management
+                    Step-by-step setup videos
                   </li>
                   <li className="flex items-center gap-2">
                     <Shield className="h-4 w-4 text-green-500" />
-                    White-label options
+                    Resell to your clients
                   </li>
                   <li className="flex items-center gap-2">
                     <Shield className="h-4 w-4 text-green-500" />
-                    Dedicated support
+                    Keep 100% of client fees
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Shield className="h-4 w-4 text-green-500" />
+                    Client management tools
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Shield className="h-4 w-4 text-green-500" />
+                    Sell custom workflows
                   </li>
                 </ul>
-                <p className="text-2xl font-bold">$149/month</p>
-                {subscriptionTier !== 'agency' && (
+                <div className="pt-2 border-t">
+                  <p className="text-xs text-muted-foreground">
+                    Highest priority support
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Optional dedicated developer
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Only pay AI token costs
+                  </p>
+                </div>
+                {subscriptionTier !== 'skeleton_key' && (
                   <Button 
                     className="w-full" 
-                    onClick={() => handleUpgrade('agency')}
+                    onClick={() => window.location.href = 'mailto:support@tradeease.com?subject=Skeleton Key Access'}
                   >
-                    <CreditCard className="h-4 w-4 mr-2" />
-                    Upgrade to Agency
+                    <Mail className="h-4 w-4 mr-2" />
+                    Contact Sales
                   </Button>
                 )}
               </CardContent>
@@ -462,7 +587,7 @@ export default function OrganizationSettings() {
           </div>
         </TabsContent>
 
-        {subscriptionTier === 'agency' && (
+        {subscriptionTier === 'skeleton_key' && (
           <TabsContent value="agency" className="space-y-4">
             <Card>
               <CardHeader>
