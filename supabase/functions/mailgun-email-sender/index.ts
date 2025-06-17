@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const corsHeaders = {
@@ -13,7 +12,31 @@ interface EmailRequest {
   text?: string;
   from?: string;
   templateVariables?: Record<string, any>;
+  campaignId?: string;
+  tags?: string[];
+  tracking?: {
+    opens?: boolean;
+    clicks?: boolean;
+    unsubscribe?: boolean;
+  };
+  schedule?: {
+    sendAt?: string;
+    timezone?: string;
+  };
+  metadata?: Record<string, any>;
 }
+
+interface EmailTemplate {
+  id: string;
+  name: string;
+  subject: string;
+  html: string;
+  text?: string;
+  variables: string[];
+}
+
+// In-memory template storage (replace with database in production)
+const emailTemplates: Record<string, EmailTemplate> = {};
 
 serve(async (req) => {
   // Handle CORS preflight requests
@@ -22,7 +45,7 @@ serve(async (req) => {
   }
 
   try {
-    const MAILGUN_API_KEY = Deno.env.get("MAILGUN_API_KEY");
+    const MAILGUN_API_KEY = Deno.env.get();
     const MAILGUN_DOMAIN = Deno.env.get("MAILGUN_DOMAIN");
     
     if (!MAILGUN_API_KEY || !MAILGUN_DOMAIN) {
@@ -37,7 +60,19 @@ serve(async (req) => {
     }
 
     const requestData: EmailRequest = await req.json();
-    const { to, subject, html, text, from, templateVariables } = requestData;
+    const { 
+      to, 
+      subject, 
+      html, 
+      text, 
+      from, 
+      templateVariables,
+      campaignId,
+      tags,
+      tracking,
+      schedule,
+      metadata
+    } = requestData;
 
     // Validate required fields
     if (!to || !subject || (!html && !text)) {
@@ -73,6 +108,44 @@ serve(async (req) => {
       });
     }
 
+    // Add campaign tracking
+    if (campaignId) {
+      formData.append('o:campaign', campaignId);
+    }
+
+    // Add tags
+    if (tags && tags.length > 0) {
+      tags.forEach(tag => formData.append('o:tag', tag));
+    }
+
+    // Add tracking options
+    if (tracking) {
+      if (tracking.opens !== undefined) {
+        formData.append('o:tracking-opens', tracking.opens ? 'yes' : 'no');
+      }
+      if (tracking.clicks !== undefined) {
+        formData.append('o:tracking-clicks', tracking.clicks ? 'yes' : 'no');
+      }
+      if (tracking.unsubscribe !== undefined) {
+        formData.append('o:tracking-unsubscribe', tracking.unsubscribe ? 'yes' : 'no');
+      }
+    }
+
+    // Add scheduling if provided
+    if (schedule?.sendAt) {
+      formData.append('o:deliverytime', schedule.sendAt);
+      if (schedule.timezone) {
+        formData.append('o:deliverytime-optin', schedule.timezone);
+      }
+    }
+
+    // Add metadata
+    if (metadata) {
+      Object.entries(metadata).forEach(([key, value]) => {
+        formData.append(`v:${key}`, JSON.stringify(value));
+      });
+    }
+
     console.log(`Sending email via Mailgun to: ${to}, subject: ${subject}`);
 
     // Send the email using Mailgun API
@@ -102,7 +175,16 @@ serve(async (req) => {
 
     console.log("Email sent successfully:", result);
     return new Response(
-      JSON.stringify({ success: true, messageId: result.id }),
+      JSON.stringify({ 
+        success: true, 
+        messageId: result.id,
+        campaignId: campaignId,
+        tracking: {
+          opens: tracking?.opens,
+          clicks: tracking?.clicks,
+          unsubscribe: tracking?.unsubscribe
+        }
+      }),
       { 
         status: 200, 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
