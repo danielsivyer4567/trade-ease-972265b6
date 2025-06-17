@@ -107,6 +107,9 @@ const FencingCalculator = lazy(() => import('@/pages/Calculators/FencingCalculat
 const MarkupCalculator = lazy(() => import('@/pages/Calculators/MarkupCalculator'));
 const NCCCodesCalculator = lazy(() => import('@/pages/Calculators/NCCCodesCalculator'));
 
+// Demo pages
+const AnimatedStageDemo = lazy(() => import('@/pages/AnimatedStageDemo'));
+
 // Settings
 const SettingsPage = lazy(() => import('@/pages/Settings'));
 const IntegrationsPage = lazy(() => import('@/pages/Integrations'));
@@ -170,11 +173,11 @@ const routeObjects: RouteObject[] = [
             path: "settings", // Base path for settings
             children: settingsRouteObjects // Nest the objects returned by SettingsRoutes()
           },
-          // Payment Routes
-          paymentRoutes,
-          // Financial Routes
-          financialRoutes,
-          // Activity Routes
+          // Payment Routes (spread the children since it's a RouteObject with children)
+          ...(paymentRoutes.children || []),
+          // Financial Routes - commented out as it's JSX, not RouteObject
+          // financialRoutes,
+          // Activity Routes (spread as a single object in array)
           activityRoutes,
           // Customer routes
           {
@@ -282,6 +285,8 @@ const routeObjects: RouteObject[] = [
           { path: "/google-cloud-fix", element: <SuspenseWrapper><GoogleCloudFixPage /></SuspenseWrapper> },
           // Test Google Maps API route
           { path: "/test-google-maps", element: <SuspenseWrapper><TestGoogleMapsPage /></SuspenseWrapper> },
+          // Animated Stage Demo route
+          { path: "/animated-stage-demo", element: <SuspenseWrapper><AnimatedStageDemo /></SuspenseWrapper> },
           // Add the route to the settings routes
           {
             path: "/settings/integrations/database",
