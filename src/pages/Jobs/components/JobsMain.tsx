@@ -12,6 +12,29 @@ import { supabase } from "@/integrations/supabase/client";
 import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
+// FeatureAccess component for checking feature access
+function FeatureAccess({ featureKey }) {
+  const [hasAccess, setHasAccess] = useState(null);
+
+  useEffect(() => {
+    async function checkAccess() {
+      const { data, error } = await supabase.rpc('has_feature_access', { feature_key: featureKey });
+      if (error) {
+        console.error('Error checking feature access:', error);
+        setHasAccess(false);
+      } else {
+        setHasAccess(data);
+      }
+    }
+    checkAccess();
+  }, [featureKey]);
+
+  if (hasAccess === null) return <div>Checking feature access...</div>;
+  return hasAccess
+    ? <div>✅ Feature is enabled for you!</div>
+    : <div>❌ Feature is NOT enabled for you.</div>;
+}
+
 export function JobsMain() {
   console.log("JobsMain component is rendering");
   
@@ -92,6 +115,8 @@ export function JobsMain() {
 
   return (
     <div className="w-full h-full p-2">
+      {/* Feature access check at the top */}
+      <FeatureAccess featureKey="some_feature_key" />
       <div className="bg-white/80 backdrop-blur-sm rounded-lg shadow-sm p-3 mb-3">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-3">
           <h1 className="text-xl font-bold mb-2 md:mb-0">Job Management</h1>
