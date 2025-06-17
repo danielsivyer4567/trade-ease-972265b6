@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useOrganization } from '@/contexts/OrganizationContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -33,10 +33,27 @@ export default function OrganizationSettings() {
   const [inviteEmail, setInviteEmail] = useState('');
   const [inviteRole, setInviteRole] = useState('member');
   const [isAgencyInvite, setIsAgencyInvite] = useState(false);
+  const [hasAccess, setHasAccess] = useState(false);
+  const [maxUsers, setMaxUsers] = useState(0);
 
   const [isCreateOrgDialogOpen, setIsCreateOrgDialogOpen] = useState(false);
   const [newOrgName, setNewOrgName] = useState('');
   const [newOrgType, setNewOrgType] = useState('');
+
+  useEffect(() => {
+    const fetchFeatureAccess = async () => {
+      const { data: accessData } = await supabase
+        .rpc('has_feature_access', { feature_key: 'automations' });
+      
+      const { data: usersData } = await supabase
+        .rpc('get_feature_limit', { feature_key: 'max_users' });
+
+      setHasAccess(accessData);
+      setMaxUsers(usersData);
+    };
+
+    fetchFeatureAccess();
+  }, []);
 
   const handleInvite = async () => {
     if (!inviteEmail) {
@@ -86,12 +103,6 @@ export default function OrganizationSettings() {
       description: 'Payment integration coming soon. Contact support for manual upgrade.',
     });
   };
-
-  const { data: hasAccess } = await supabase
-    .rpc('has_feature_access', { feature_key: 'automations' });
-
-  const { data: maxUsers } = await supabase
-    .rpc('get_feature_limit', { feature_key: 'max_users' });
 
   if (hasAccess) {
     // Enable the feature
