@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { customerService } from '@/services/CustomerService';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface CustomerStageIndicatorProps {
   customerId: string;
@@ -21,6 +22,7 @@ export function CustomerStageIndicator({ customerId, size = 'md' }: CustomerStag
     name: '',
     team: 'default' as keyof typeof TEAM_COLORS
   });
+  const [prevStage, setPrevStage] = useState(stage);
   
   useEffect(() => {
     async function loadCustomerStage() {
@@ -44,6 +46,7 @@ export function CustomerStageIndicator({ customerId, size = 'md' }: CustomerStag
           currentStage = { number: 1, name: 'Audit', team: 'audit' };
         }
         
+        setPrevStage(stage);
         setStage(currentStage);
       } catch (error) {
         console.error('Error loading customer stage:', error);
@@ -72,21 +75,91 @@ export function CustomerStageIndicator({ customerId, size = 'md' }: CustomerStag
     }
   }[size];
 
+  // Animation variants
+  const ringVariants = {
+    initial: { scale: 0, rotate: -180 },
+    animate: { 
+      scale: 1, 
+      rotate: 0,
+      transition: {
+        type: "spring",
+        stiffness: 260,
+        damping: 20
+      }
+    },
+    exit: { scale: 0, rotate: 180 }
+  };
+
+  const numberVariants = {
+    initial: { opacity: 0, y: 20 },
+    animate: { 
+      opacity: 1, 
+      y: 0,
+      transition: {
+        delay: 0.2,
+        duration: 0.3
+      }
+    },
+    exit: { opacity: 0, y: -20 }
+  };
+
+  const pulseVariants = {
+    animate: {
+      scale: [1, 1.2, 1],
+      transition: {
+        duration: 2,
+        repeat: Infinity,
+        repeatType: "reverse" as const
+      }
+    }
+  };
+
   return (
     <div className="relative group">
-      <div 
-        className={`${sizeClasses.ring} ${TEAM_COLORS[stage.team]} rounded-full flex items-center justify-center text-white font-semibold`}
-      >
-        <span className={`${sizeClasses.text}`}>{stage.number}</span>
-      </div>
+      <AnimatePresence mode="wait">
+        <motion.div 
+          key={`${stage.team}-${stage.number}`}
+          className={`${sizeClasses.ring} ${TEAM_COLORS[stage.team]} rounded-full flex items-center justify-center text-white font-semibold relative`}
+          variants={ringVariants}
+          initial="initial"
+          animate="animate"
+          exit="exit"
+        >
+          {/* Pulse effect for stage changes */}
+          {prevStage.number !== stage.number && prevStage.number !== 0 && (
+            <motion.div
+              className={`absolute inset-0 ${TEAM_COLORS[stage.team]} rounded-full`}
+              variants={pulseVariants}
+              animate="animate"
+              style={{ zIndex: -1 }}
+            />
+          )}
+          
+          <motion.span 
+            key={stage.number}
+            className={`${sizeClasses.text}`}
+            variants={numberVariants}
+            initial="initial"
+            animate="animate"
+            exit="exit"
+          >
+            {stage.number}
+          </motion.span>
+        </motion.div>
+      </AnimatePresence>
       
-      {/* Tooltip */}
-      <div className="invisible group-hover:visible absolute -bottom-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white rounded px-2 py-1 whitespace-nowrap z-10">
+      {/* Animated Tooltip */}
+      <motion.div 
+        className="invisible group-hover:visible absolute -bottom-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white rounded px-2 py-1 whitespace-nowrap z-10"
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.2 }}
+      >
         <span className={`${sizeClasses.tooltip}`}>
           Stage {stage.number}: {stage.name}
         </span>
         <div className="absolute -top-1 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-gray-800 rotate-45"></div>
-      </div>
+      </motion.div>
     </div>
   );
 } 
