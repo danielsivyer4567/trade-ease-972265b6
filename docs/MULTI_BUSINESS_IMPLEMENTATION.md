@@ -19,25 +19,50 @@ Created comprehensive database tables and functions:
 
 ### 2. Subscription Tiers
 
-Three subscription levels:
+Four subscription levels:
 
-1. **Free**: 
-   - 1 organization only
-   - Basic features
-   - Up to 5 team members
+1. **Free Starter** ($0/month): 
+   - 1 organization, 1 user
+   - Basic features: invoices, quoting, calendar
+   - View all features (locked)
+   - 0 automations, 0 automated texts/emails
+   - 40% affiliate commission on referrals
+   - Standard ticket support
 
-2. **Premium** ($49/month):
-   - Up to 5 organizations
-   - Advanced features
-   - Unlimited team members
-   - Priority support
+2. **Growing Pain Relief** ($75/month inc GST):
+   - 1 organization, 3 users
+   - Auto web enquiry forwarding
+   - ABN verification
+   - Internal communications/tagging
+   - Add-ons available:
+     - Automated texts: +$20/mo + 10¢/msg
+     - AI agents: Setup + monthly fees
+     - Workflows: Per setup + monthly
+   - 40% affiliate commission
+   - Standard ticket support
 
-3. **Agency** ($149/month):
-   - Unlimited organizations
-   - Client management capabilities
-   - White-label options
-   - Dedicated support
-   - Can manage client organizations with permissions
+3. **Premium Edge** ($449/month):
+   - 15 users included
+   - ALL features unlocked
+   - Unlimited free texts
+   - Unlimited automations
+   - Dedicated phone number
+   - Free basic workflow setup
+   - Advanced workflows: Extra setup cost
+   - Twilio & AI token costs apply
+   - 40% affiliate commission
+   - Priority ticket support
+
+4. **Skeleton Key** (Contact for pricing):
+   - White-label branding
+   - Step-by-step setup videos
+   - Resell to your clients
+   - Keep 100% of client fees
+   - Client management tools
+   - Sell custom workflows
+   - Highest priority support
+   - Optional dedicated developer
+   - Only pay AI token costs
 
 ### 3. Organization Context
 
@@ -73,10 +98,11 @@ Implemented Row Level Security (RLS) policies:
 - Agency users have controlled access to client organizations
 - Audit logging for all organization activities
 
-### 6. Agency Features
+### 6. Skeleton Key Features
 
-For agency users:
-- Manage multiple client organizations
+For Skeleton Key users:
+- White-label the entire platform
+- Manage unlimited client organizations
 - Granular permission controls:
   - View all data
   - Edit settings
@@ -87,6 +113,9 @@ For agency users:
   - Export data
 - Client invitation system
 - Activity monitoring
+- Resell at your own pricing
+- Keep 100% of client revenue
+- Sell custom workflows to clients
 
 ## Implementation Files
 
@@ -106,9 +135,10 @@ For agency users:
 
 ### For Users
 
-1. **Free Users**: Can create and manage one organization
-2. **Premium Users**: Can create up to 5 organizations and switch between them
-3. **Agency Users**: Can manage unlimited organizations and client businesses
+1. **Free Starter**: 1 organization, 1 user, basic features only
+2. **Growing Pain Relief**: 1 organization, 3 users, with add-on options
+3. **Premium Edge**: 15 users, all features unlocked, unlimited usage
+4. **Skeleton Key**: White-label solution for agencies and consultants
 
 ### Switching Organizations
 
@@ -120,19 +150,24 @@ For agency users:
 
 ### Creating Organizations
 
-Premium/Agency users can:
+Premium Edge/Skeleton Key users can:
 1. Click the dropdown arrow next to business name
 2. Select "Add Organization"
 3. Fill in business details
 4. The new organization becomes active immediately
 
-### Agency Management
+Note: Free Starter and Growing Pain Relief users are limited to 1 organization
 
-Agency users can:
-1. Go to Settings > Organization & Subscription > Agency Management
+### Skeleton Key Management
+
+Skeleton Key users can:
+1. Go to Settings > Organization & Subscription > Client Management
 2. Invite clients by email
 3. Set granular permissions for each client
 4. Monitor client activity through audit logs
+5. White-label the platform with their branding
+6. Set custom pricing for their clients
+7. Manage billing relationships directly with clients
 
 ## Technical Details
 

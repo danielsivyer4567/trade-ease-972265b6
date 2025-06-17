@@ -99,8 +99,9 @@ export function SidebarHeader({ isExpanded, onToggle, className }: SidebarHeader
                   <DropdownMenuLabel className="flex items-center justify-between">
                     <span>Organizations</span>
                     <Badge variant="outline" className="text-xs">
-                      {subscriptionTier === 'agency' ? 'Agency' : 
-                       subscriptionTier === 'premium' ? 'Premium' : 'Free'}
+                      {subscriptionTier === 'skeleton_key' ? 'Skeleton Key' : 
+                       subscriptionTier === 'premium_edge' ? 'Premium' : 
+                       subscriptionTier === 'growing_pain_relief' ? 'Growing' : 'Free'}
                     </Badge>
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
@@ -127,7 +128,7 @@ export function SidebarHeader({ isExpanded, onToggle, className }: SidebarHeader
                     ))}
                   
                   {/* Agency client organizations */}
-                  {subscriptionTier === 'agency' && 
+                  {subscriptionTier === 'skeleton_key' && 
                    userOrganizations.filter(org => org.access_type === 'agency').length > 0 && (
                     <>
                       <DropdownMenuSeparator />
@@ -156,8 +157,8 @@ export function SidebarHeader({ isExpanded, onToggle, className }: SidebarHeader
                     </>
                   )}
                   
-                  {/* Add new organization option for premium/agency users */}
-                  {(subscriptionTier === 'premium' || subscriptionTier === 'agency') && 
+                  {/* Add new organization option for premium/skeleton key users */}
+                  {(subscriptionTier === 'premium_edge' || subscriptionTier === 'skeleton_key') && 
                    canCreateMoreOrganizations && (
                     <>
                       <DropdownMenuSeparator />
@@ -172,7 +173,7 @@ export function SidebarHeader({ isExpanded, onToggle, className }: SidebarHeader
                   )}
                   
                   {/* Upgrade prompt for free users */}
-                  {subscriptionTier === 'free' && !canCreateMoreOrganizations && (
+                  {subscriptionTier === 'free_starter' && !canCreateMoreOrganizations && (
                     <>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem

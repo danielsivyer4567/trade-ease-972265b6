@@ -35,7 +35,8 @@ interface OrganizationContextType {
   currentOrganization: Organization | null;
   userOrganizations: UserOrganization[];
   isLoading: boolean;
-  subscriptionTier: 'free' | 'premium' | 'agency';
+  subscriptionTier: 'free_starter' | 'growing_pain_relief' | 'premium_edge' | 'skeleton_key';
+  subscriptionFeatures: any;
   canCreateMoreOrganizations: boolean;
   switchOrganization: (organizationId: string) => Promise<boolean>;
   refreshOrganizations: () => Promise<void>;
@@ -60,7 +61,8 @@ export const OrganizationProvider: React.FC<{ children: React.ReactNode }> = ({ 
   const [currentOrganization, setCurrentOrganization] = useState<Organization | null>(null);
   const [userOrganizations, setUserOrganizations] = useState<UserOrganization[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [subscriptionTier, setSubscriptionTier] = useState<'free' | 'premium' | 'agency'>('free');
+  const [subscriptionTier, setSubscriptionTier] = useState<'free_starter' | 'growing_pain_relief' | 'premium_edge' | 'skeleton_key'>('free_starter');
+  const [subscriptionFeatures, setSubscriptionFeatures] = useState<any>({});
   const [maxOrganizations, setMaxOrganizations] = useState(1);
 
   // Load user's organizations and current organization
@@ -74,14 +76,15 @@ export const OrganizationProvider: React.FC<{ children: React.ReactNode }> = ({ 
       // Get user's subscription tier and settings
       const { data: profileData, error: profileError } = await supabase
         .from('user_profiles')
-        .select('subscription_tier, max_organizations, current_organization_id')
+        .select('subscription_tier, max_organizations, current_organization_id, subscription_features')
         .eq('user_id', user.id)
         .single();
 
       if (profileError) {
         console.error('Error loading user profile:', profileError);
       } else if (profileData) {
-        setSubscriptionTier(profileData.subscription_tier || 'free');
+        setSubscriptionTier(profileData.subscription_tier || 'free_starter');
+        setSubscriptionFeatures(profileData.subscription_features || {});
         setMaxOrganizations(profileData.max_organizations || 1);
       }
 
@@ -172,7 +175,7 @@ export const OrganizationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     try {
       // Check if user can create more organizations
       const currentOrgCount = userOrganizations.filter(org => org.access_type === 'member').length;
-      if (subscriptionTier === 'free' && currentOrgCount >= 1) {
+      if ((subscriptionTier === 'free_starter' || subscriptionTier === 'growing_pain_relief') && currentOrgCount >= 1) {
         toast({
           title: 'Upgrade required',
           description: 'Free accounts can only have one organization. Please upgrade to Premium or Agency.',
@@ -317,8 +320,9 @@ export const OrganizationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     await loadOrganizations();
   };
 
-  const canCreateMoreOrganizations = subscriptionTier === 'free' 
+  const canCreateMoreOrganizations = (subscriptionTier === 'free_starter' || subscriptionTier === 'growing_pain_relief')
     ? userOrganizations.filter(org => org.access_type === 'member').length < 1
+    : subscriptionTier === 'skeleton_key' ? true
     : userOrganizations.filter(org => org.access_type === 'member').length < maxOrganizations;
 
   return (
@@ -328,6 +332,7 @@ export const OrganizationProvider: React.FC<{ children: React.ReactNode }> = ({ 
         userOrganizations,
         isLoading,
         subscriptionTier,
+        subscriptionFeatures,
         canCreateMoreOrganizations,
         switchOrganization,
         refreshOrganizations,

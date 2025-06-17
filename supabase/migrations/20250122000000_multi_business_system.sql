@@ -42,10 +42,14 @@ CREATE TABLE IF NOT EXISTS organization_members (
 
 -- Add subscription/plan information to user_profiles
 ALTER TABLE user_profiles 
-ADD COLUMN IF NOT EXISTS subscription_tier TEXT DEFAULT 'free' CHECK (subscription_tier IN ('free', 'premium', 'agency')),
+ADD COLUMN IF NOT EXISTS subscription_tier TEXT DEFAULT 'free_starter' CHECK (subscription_tier IN ('free_starter', 'growing_pain_relief', 'premium_edge', 'skeleton_key')),
 ADD COLUMN IF NOT EXISTS subscription_expires_at TIMESTAMP WITH TIME ZONE,
 ADD COLUMN IF NOT EXISTS max_organizations INTEGER DEFAULT 1,
-ADD COLUMN IF NOT EXISTS current_organization_id UUID REFERENCES organizations(id);
+ADD COLUMN IF NOT EXISTS max_users INTEGER DEFAULT 1,
+ADD COLUMN IF NOT EXISTS current_organization_id UUID REFERENCES organizations(id),
+ADD COLUMN IF NOT EXISTS subscription_features JSONB DEFAULT '{}'::jsonb,
+ADD COLUMN IF NOT EXISTS affiliate_code TEXT UNIQUE,
+ADD COLUMN IF NOT EXISTS affiliate_earnings DECIMAL(10,2) DEFAULT 0;
 
 -- Create agency_client_relationships table for agency users
 CREATE TABLE IF NOT EXISTS agency_client_relationships (
@@ -153,11 +157,13 @@ WITH CHECK (
     SELECT 1 FROM user_profiles
     WHERE user_profiles.user_id = auth.uid()
     AND (
-      (user_profiles.subscription_tier = 'free' AND 
+      (user_profiles.subscription_tier IN ('free_starter', 'growing_pain_relief') AND 
        (SELECT COUNT(*) FROM organization_members WHERE user_id = auth.uid()) < 1)
       OR
-      (user_profiles.subscription_tier IN ('premium', 'agency') AND
-       (SELECT COUNT(*) FROM organization_members WHERE user_id = auth.uid()) < COALESCE(user_profiles.max_organizations, 10))
+      (user_profiles.subscription_tier = 'premium_edge' AND
+       (SELECT COUNT(*) FROM organization_members WHERE user_id = auth.uid()) < COALESCE(user_profiles.max_organizations, 5))
+      OR
+      (user_profiles.subscription_tier = 'skeleton_key')
     )
   )
 );
@@ -203,7 +209,7 @@ USING (
   AND EXISTS (
     SELECT 1 FROM user_profiles
     WHERE user_id = auth.uid()
-    AND subscription_tier = 'agency'
+    AND subscription_tier = 'skeleton_key'
   )
 );
 
