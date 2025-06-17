@@ -93,6 +93,12 @@ export default function OrganizationSettings() {
   const { data: maxUsers } = await supabase
     .rpc('get_feature_limit', { feature_key: 'max_users' });
 
+  if (hasAccess) {
+    // Enable the feature
+  } else {
+    // Show upgrade prompt
+  }
+
   return (
     <div className="container mx-auto p-6 max-w-6xl">
       <div className="mb-6">
