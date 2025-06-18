@@ -13,22 +13,22 @@
 | **Web enquiry forwarding**                    |              | ✔                  | ✔                 | ✔                    |
 | **ABN verification**                          |              | ✔                  | ✔                 | ✔                    |
 | **Internal comms/tagging**                    |              | ✔                  | ✔                 | ✔                    |
-| **Dedicated phone number**                    |              |                    | ✔                 | ✔                    |
-| **Free basic workflow setup**                 |              |                    | ✔                 | ✔                    |
+| **Dedicated phone number**                    |              | Add-on             | ✔                 | ✔                    |
+| **Free basic workflow setup**                 |              | Add-on             | ✔                 | ✔                    |
 | **Advanced workflows**                        |              | Add-on             | ✔                 | ✔                    |
 | **AI agents**                                 |              | Add-on             | ✔                 | ✔                    |
-| **White-label branding**                      |              |                    |                   | ✔                    |
-| **Resell to clients**                         |              |                    |                   | ✔                    |
-| **Client management tools**                   |              |                    |                   | ✔                    |
-| **Sell custom workflows**                     |              |                    |                   | ✔                    |
-| **API access**                                |              |                    |                   | ✔                    |
-| **Custom integrations**                       |              |                    |                   | ✔                    |
-| **Advanced analytics/reporting**              |              |                    |                   | ✔                    |
-| **Agency dashboard**                          |              |                    |                   | ✔                    |
-| **White-label client portal**                 |              |                    |                   | ✔                    |
+| **White-label branding**                      |              | Add-on             |                   | ✔                    |
+| **Resell to clients**                         |              | Add-on             |                   | ✔                    |
+| **Client management tools**                   |              | Add-on             |                   | ✔                    |
+| **Sell custom workflows**                     |              | Add-on             |                   | ✔                    |
+| **API access**                                |              | Add-on             |                   | ✔                    |
+| **Custom integrations**                       |              | Add-on             |                   | ✔                    |
+| **Advanced analytics/reporting**              |              | Add-on             |                   | ✔                    |
+| **Agency dashboard**                          |              | Add-on             |                   | ✔                    |
+| **White-label client portal**                 |              | Add-on             |                   | ✔                    |
 | **Affiliate commission**                      | 40%          | 40%                | 40%               | 40%                  |
 | **Support tier**                              | Standard     | Standard           | Priority          | Highest              |
-| **Dedicated developer**                       |              |                    | Optional (extra)  | Optional (extra)     |
+| **Dedicated developer**                       |              | Add-on             | Optional (extra)  | Optional (extra)     |
 
 ---
 
@@ -36,35 +36,35 @@
 
 | AI & Automation Feature                       | Free Starter | Growing Pain Relief | Premium Edge      | Skeleton Key         |
 |-----------------------------------------------|:------------:|:------------------:|:-----------------:|:--------------------:|
-| AI automated - red flagging any               |              |                    | ✔                 | ✔                    |
-| Invoice/job price rise alerts                 |              |                    | ✔                 | ✔                    |
-| Material order quantity error filter          |              |                    | ✔                 | ✔                    |
-| Receipt upload AI read and sort               |              |                    | ✔                 | ✔                    |
-| Boundary automated measure                    |              |                    | ✔                 | ✔                    |
-| Accounting software replacement               |              |                    | ✔                 | ✔                    |
-| Tax budgeting on each job                     |              |                    | ✔                 | ✔                    |
-| Financial report automation                   |              |                    | ✔                 | ✔                    |
-| Weekly financial report                       |              |                    | ✔                 | ✔                    |
-| Customer progression link                     |              |                    | ✔                 | ✔                    |
-| Instant digital signings                      |              |                    | ✔                 | ✔                    |
-| Instant pop-up signed variations              |              |                    | ✔                 | ✔                    |
-| Weather notifications (voice)                 |              |                    | ✔                 | ✔                    |
-| Multiple calendars                            |              |                    | ✔                 | ✔                    |
-| New number forwarding                         |              |                    | ✔                 | ✔                    |
-| Compliance updates                            |              |                    | ✔                 | ✔                    |
-| 150+ personalised automations                 |              |                    | ✔                 | ✔                    |
-| Tag drop system for admin                     |              |                    | ✔                 | ✔                    |
-| Site to boss approval requests                |              |                    | ✔                 | ✔                    |
-| Admin to boss approval requests               |              |                    | ✔                 | ✔                    |
-| Customizable quote templates                  |              |                    | ✔                 | ✔                    |
-| Payment links                                 |              |                    | ✔                 | ✔                    |
-| Remittance upload                             |              |                    | ✔                 | ✔                    |
-| Step-by-step job process + notify             |              |                    | ✔                 | ✔                    |
-| Instant payment (no dongle)                   |              |                    | ✔                 | ✔                    |
-| Upload once to all social media               |              |                    | ✔                 | ✔                    |
-| Customer journey view                         |              |                    | ✔                 | ✔                    |
-| Customer view any update auto                 |              |                    | ✔                 | ✔                    |
-| Automated Google review requests              |              |                    | ✔                 | ✔                    |
+| AI automated - red flagging any               |              | Add-on             | ✔                 | ✔                    |
+| Invoice/job price rise alerts                 |              | Add-on             | ✔                 | ✔                    |
+| Material order quantity error filter          |              | Add-on             | ✔                 | ✔                    |
+| Receipt upload AI read and sort               |              | Add-on             | ✔                 | ✔                    |
+| Boundary automated measure                    |              | Add-on             | ✔                 | ✔                    |
+| Accounting software replacement               |              | Add-on             | ✔                 | ✔                    |
+| Tax budgeting on each job                     |              | Add-on             | ✔                 | ✔                    |
+| Financial report automation                   |              | Add-on             | ✔                 | ✔                    |
+| Weekly financial report                       |              | Add-on             | ✔                 | ✔                    |
+| Customer progression link                     |              | Add-on             | ✔                 | ✔                    |
+| Instant digital signings                      |              | Add-on             | ✔                 | ✔                    |
+| Instant pop-up signed variations              |              | Add-on             | ✔                 | ✔                    |
+| Weather notifications (voice)                 |              | Add-on             | ✔                 | ✔                    |
+| Multiple calendars                            |              | Add-on             | ✔                 | ✔                    |
+| New number forwarding                         |              | Add-on             | ✔                 | ✔                    |
+| Compliance updates                            |              | Add-on             | ✔                 | ✔                    |
+| 150+ personalised automations                 |              | Add-on             | ✔                 | ✔                    |
+| Tag drop system for admin                     |              | Add-on             | ✔                 | ✔                    |
+| Site to boss approval requests                |              | Add-on             | ✔                 | ✔                    |
+| Admin to boss approval requests               |              | Add-on             | ✔                 | ✔                    |
+| Customizable quote templates                  |              | Add-on             | ✔                 | ✔                    |
+| Payment links                                 |              | Add-on             | ✔                 | ✔                    |
+| Remittance upload                             |              | Add-on             | ✔                 | ✔                    |
+| Step-by-step job process + notify             |              | Add-on             | ✔                 | ✔                    |
+| Instant payment (no dongle)                   |              | Add-on             | ✔                 | ✔                    |
+| Upload once to all social media               |              | Add-on             | ✔                 | ✔                    |
+| Customer journey view                         |              | Add-on             | ✔                 | ✔                    |
+| Customer view any update auto                 |              | Add-on             | ✔                 | ✔                    |
+| Automated Google review requests              |              | Add-on             | ✔                 | ✔                    |
 
 ---
 
