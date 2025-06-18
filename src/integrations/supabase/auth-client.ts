@@ -12,80 +12,23 @@ class CustomAuthClient {
     try {
       console.log('CustomAuthClient: Attempting to sign in with email:', email);
       
-      // Use direct fetch to have more control over the response handling
-      const response = await fetch(`${window.location.origin}/auth/v1/token?grant_type=password`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY,
-          'X-Client-Info': 'trade-ease@1.0.0'
-        },
-        body: JSON.stringify({ email, password })
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password
       });
       
-      // Log the raw response for debugging
-      console.log('Auth response status:', response.status);
-      
-      // Check if response is ok
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('Auth error response:', errorText);
-        
+      if (error) {
+        console.error('Auth error:', error);
         return {
           data: null,
           error: {
-            message: `Authentication failed: ${response.status} ${response.statusText}`,
-            status: response.status
+            message: error.message,
+            status: error.status || 400
           }
         };
       }
       
-      try {
-        // Try to parse the response as JSON
-        const data = await response.json();
-        console.log('Auth success response:', data);
-        
-        // If we got here, we have valid JSON, use the standard Supabase client to set the session
-        if (data && data.access_token) {
-          await supabase.auth.setSession({
-            access_token: data.access_token,
-            refresh_token: data.refresh_token
-          });
-          
-          // Get the user
-          const { data: userData } = await supabase.auth.getUser();
-          
-          return {
-            data: {
-              user: userData?.user || null,
-              session: {
-                access_token: data.access_token,
-                refresh_token: data.refresh_token,
-                expires_in: data.expires_in,
-                expires_at: Math.floor(Date.now() / 1000) + (data.expires_in || 3600),
-                token_type: data.token_type || 'bearer',
-                user: userData?.user || null
-              }
-            },
-            error: null
-          };
-        }
-        
-        return {
-          data: { user: null, session: null },
-          error: { message: 'Invalid response format', status: 400 }
-        };
-      } catch (jsonError) {
-        console.error('Error parsing auth response:', jsonError);
-        
-        return {
-          data: null,
-          error: { 
-            message: 'Failed to parse authentication response',
-            status: 500
-          }
-        };
-      }
+      return { data, error: null };
     } catch (error: any) {
       console.error('Unexpected auth error:', error);
       
@@ -103,7 +46,14 @@ class CustomAuthClient {
    * Sign out the current user
    */
   async signOut() {
-    return supabase.auth.signOut();
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      return { error: null };
+    } catch (error: any) {
+      console.error('Error signing out:', error);
+      return { error };
+    }
   }
   
   /**
@@ -123,8 +73,15 @@ class CustomAuthClient {
   /**
    * Reset password for email
    */
-  async resetPasswordForEmail(email: string, options?: any) {
-    return supabase.auth.resetPasswordForEmail(email, options);
+  async resetPasswordForEmail(email: string, options?: { redirectTo?: string }) {
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, options);
+      if (error) throw error;
+      return { error: null };
+    } catch (error: any) {
+      console.error('Error resetting password:', error);
+      return { error };
+    }
   }
   
   /**
