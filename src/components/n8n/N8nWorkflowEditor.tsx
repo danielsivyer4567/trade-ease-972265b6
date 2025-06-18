@@ -6,6 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Play, Save, Settings, Share2, Eye, FileDown, FileUp, Plus, Workflow, Zap, Activity } from 'lucide-react';
 import { toast } from 'sonner';
+import { useNavigate } from 'react-router-dom';
 
 interface N8nWorkflowEditorProps {
   workflowId?: string;
@@ -27,6 +28,7 @@ export function N8nWorkflowEditor({
   const [workflowData, setWorkflowData] = useState<any>(null);
   const [executionStatus, setExecutionStatus] = useState<'idle' | 'running' | 'completed' | 'error'>('idle');
   const [n8nUrl] = useState(import.meta.env.VITE_N8N_URL || 'http://localhost:5678');
+  const navigate = useNavigate();
 
   // Initialize n8n editor
   useEffect(() => {
@@ -58,7 +60,7 @@ export function N8nWorkflowEditor({
 
   const loadWorkflow = async (id: string) => {
     try {
-      const response = await fetch(`${n8nUrl}/v1/workflows/${id}`);
+      const response = await fetch(`${n8nUrl}/rest/workflows/${id}`);
       if (response.ok) {
         const workflow = await response.json();
         setWorkflowData(workflow);
@@ -73,13 +75,13 @@ export function N8nWorkflowEditor({
     try {
       if (!workflowData) return;
 
-      const response = await fetch(`${n8nUrl}/v1/workflows${workflowId ? `/${workflowId}` : ''}`, {
+      const response = await fetch(`${n8nUrl}/rest/workflows${workflowId ? `/${workflowId}` : ''}`, {
         method: workflowId ? 'PATCH' : 'POST',
         headers: {
-          Authorization: "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIyY2ZjY2FlOC1lOTZjLTQ3OTAtOTI4Ni0yYmUxOWY1ZTY2ZjMiLCJpc3MiOiJuOG4iLCJhdWQiOiJwdWJsaWMtYXBpIiwiaWF0IjoxNzQ5ODQxMjMwLCJleHAiOjE3NTIzNzkyMDB9.O1dy3eWhtTDZLsaT_s_9tS3gp3uHTE00icahu4JPHgE"
-        }
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(workflowData),
       });
-
 
       if (response.ok) {
         const savedWorkflow = await response.json();
@@ -103,11 +105,10 @@ export function N8nWorkflowEditor({
 
     try {
       setExecutionStatus('running');
-      const response = await fetch(`${n8nUrl}/v1/workflows/${workflowId}/execute`, {
+      const response = await fetch(`${n8nUrl}/rest/workflows/${workflowId}/execute`, {
         method: 'POST',
         headers: {
-        
-          Authorization: "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIyY2ZjY2FlOC1lOTZjLTQ3OTAtOTI4Ni0yYmUxOWY1ZTY2ZjMiLCJpc3MiOiJuOG4iLCJhdWQiOiJwdWJsaWMtYXBpIiwiaWF0IjoxNzQ5ODQxMjMwLCJleHAiOjE3NTIzNzkyMDB9.O1dy3eWhtTDZLsaT_s_9tS3gp3uHTE00icahu4JPHgE"
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({}),
       });

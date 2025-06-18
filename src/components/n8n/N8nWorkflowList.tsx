@@ -51,7 +51,6 @@ export function N8nWorkflowList({ onSelectWorkflow }: N8nWorkflowListProps) {
   const [selectedWorkflow, setSelectedWorkflow] = useState<N8nWorkflow | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [n8nUrl] = useState(import.meta.env.VITE_N8N_URL || 'http://localhost:5678');
-
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -59,25 +58,17 @@ export function N8nWorkflowList({ onSelectWorkflow }: N8nWorkflowListProps) {
   }, []);
 
   useEffect(() => {
-    if (Array.isArray(workflows)) {
-      const filtered = workflows.filter(workflow =>
-        workflow.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (workflow.tags || []).some(tag =>
-          tag.toLowerCase().includes(searchTerm.toLowerCase())
-        )
-      );
-      setFilteredWorkflows(filtered);
-    } else {
-      console.warn("Expected workflows to be an array, got:", workflows);
-      setFilteredWorkflows([]); // fallback to empty list
-    }
+    const filtered = workflows.filter(workflow =>
+      workflow.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      workflow.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()))
+    );
+    setFilteredWorkflows(filtered);
   }, [workflows, searchTerm]);
-  
 
   const loadWorkflows = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`${n8nUrl}/v1/workflows`);
+      const response = await fetch(`${n8nUrl}/rest/workflows`);
       if (response.ok) {
         const workflowsData = await response.json();
         setWorkflows(workflowsData.data || workflowsData);
@@ -95,10 +86,10 @@ export function N8nWorkflowList({ onSelectWorkflow }: N8nWorkflowListProps) {
 
   const createNewWorkflow = async () => {
     try {
-      const response = await fetch(`${n8nUrl}/v1/workflows`, {
+      const response = await fetch(`${n8nUrl}/rest/workflows`, {
         method: 'POST',
         headers: {
-          Authorization: "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIyY2ZjY2FlOC1lOTZjLTQ3OTAtOTI4Ni0yYmUxOWY1ZTY2ZjMiLCJpc3MiOiJuOG4iLCJhdWQiOiJwdWJsaWMtYXBpIiwiaWF0IjoxNzQ5ODQxMjMwLCJleHAiOjE3NTIzNzkyMDB9.O1dy3eWhtTDZLsaT_s_9tS3gp3uHTE00icahu4JPHgE"
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           name: `New Workflow ${Date.now()}`,
@@ -125,23 +116,18 @@ export function N8nWorkflowList({ onSelectWorkflow }: N8nWorkflowListProps) {
 
   const duplicateWorkflow = async (workflow: N8nWorkflow) => {
     try {
-      const response = await fetch(`${n8nUrl}/v1/workflows`, {
+      const response = await fetch(`${n8nUrl}/rest/workflows`, {
         method: 'POST',
         headers: {
-          "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIyY2ZjY2FlOC1lOTZjLTQ3OTAtOTI4Ni0yYmUxOWY1ZTY2ZjMiLCJpc3MiOiJuOG4iLCJhdWQiOiJwdWJsaWMtYXBpIiwiaWF0IjoxNzQ5ODQxMjMwLCJleHAiOjE3NTIzNzkyMDB9.O1dy3eWhtTDZLsaT_s_9tS3gp3uHTE00icahu4JPHgE",
-          "Content-Type": "application/json"
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           ...workflow,
-          id: undefined, // Ensure no duplicate ID
+          id: undefined,
           name: `${workflow.name} (Copy)`,
-          active: false
-        })
+          active: false,
+        }),
       });
-      
-      const result = await response.json();
-      console.log(result);
-      
 
       if (response.ok) {
         await loadWorkflows();
@@ -157,25 +143,22 @@ export function N8nWorkflowList({ onSelectWorkflow }: N8nWorkflowListProps) {
 
   const toggleWorkflowActive = async (workflow: N8nWorkflow) => {
     try {
-      const response = await fetch(`${n8nUrl}/v1/workflows/${workflow.id}`, {
+      const response = await fetch(`${n8nUrl}/rest/workflows/${workflow.id}`, {
         method: 'PATCH',
         headers: {
-          "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIyY2ZjY2FlOC1lOTZjLTQ3OTAtOTI4Ni0yYmUxOWY1ZTY2ZjMiLCJpc3MiOiJuOG4iLCJhdWQiOiJwdWJsaWMtYXBpIiwiaWF0IjoxNzQ5ODQxMjMwLCJleHAiOjE3NTIzNzkyMDB9.O1dy3eWhtTDZLsaT_s_9tS3gp3uHTE00icahu4JPHgE",
-          "Content-Type": "application/json"
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           active: !workflow.active,
-        })
+        }),
       });
-      
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error(`Failed to update workflow: ${response.status} - ${errorText}`);
+
+      if (response.ok) {
+        await loadWorkflows();
+        toast.success(`Workflow ${workflow.active ? 'deactivated' : 'activated'}`);
       } else {
-        const updatedWorkflow = await response.json();
-        console.log("Updated workflow:", updatedWorkflow);
+        throw new Error('Failed to toggle workflow');
       }
-      
     } catch (error) {
       console.error('Error toggling workflow:', error);
       toast.error('Failed to toggle workflow status');
@@ -184,34 +167,30 @@ export function N8nWorkflowList({ onSelectWorkflow }: N8nWorkflowListProps) {
 
   const executeWorkflow = async (workflow: N8nWorkflow) => {
     try {
-      const response = await fetch(`${n8nUrl}/v1/workflows/${workflow.id}/execute`, {
+      const response = await fetch(`${n8nUrl}/rest/workflows/${workflow.id}/execute`, {
         method: 'POST',
         headers: {
-          Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIyY2ZjY2FlOC1lOTZjLTQ3OTAtOTI4Ni0yYmUxOWY1ZTY2ZjMiLCJpc3MiOiJuOG4iLCJhdWQiOiJwdWJsaWMtYXBpIiwiaWF0IjoxNzQ5ODQxMjMwLCJleHAiOjE3NTIzNzkyMDB9.O1dy3eWhtTDZLsaT_s_9tS3gp3uHTE00icahu4JPHgE`,
-          "Content-Type": "application/json"
+          'Content-Type': 'application/json',
         },
-        body: JSON.stringify({})
+        body: JSON.stringify({}),
       });
-    
+
       if (response.ok) {
-        toast.success('✅ Workflow execution started');
+        toast.success('Workflow execution started');
       } else {
-        const errorText = await response.text();
-        console.error(`❌ Workflow execution failed: ${response.status}`, errorText);
-        toast.error(`Failed to execute workflow: ${response.status}`);
+        throw new Error('Failed to execute workflow');
       }
     } catch (error) {
-      console.error('🚨 Error executing workflow:', error);
-      toast.error('Unexpected error executing workflow');
+      console.error('Error executing workflow:', error);
+      toast.error('Failed to execute workflow');
     }
-    
   };
 
   const deleteWorkflow = async () => {
     if (!selectedWorkflow) return;
 
     try {
-      const response = await fetch(`${n8nUrl}/v1/workflows/${selectedWorkflow.id}`, {
+      const response = await fetch(`${n8nUrl}/rest/workflows/${selectedWorkflow.id}`, {
         method: 'DELETE',
       });
 
@@ -231,7 +210,7 @@ export function N8nWorkflowList({ onSelectWorkflow }: N8nWorkflowListProps) {
 
   const exportWorkflow = async (workflow: N8nWorkflow) => {
     try {
-      const response = await fetch(`${n8nUrl}/v1/workflows/${workflow.id}`);
+      const response = await fetch(`${n8nUrl}/rest/workflows/${workflow.id}`);
       if (response.ok) {
         const workflowData = await response.json();
         const dataStr = JSON.stringify(workflowData, null, 2);
