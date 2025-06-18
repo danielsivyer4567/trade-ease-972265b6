@@ -14,7 +14,7 @@ import { Separator } from '@/components/ui/separator';
 import { Building2, Users, Crown, Briefcase, Plus, Mail, Settings, Shield, CreditCard, Zap, Key, MessageSquare, Bot, Phone } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { PricingPlans } from "@/path/to/your/PricingPlans"; // Update the import path as needed
+import { PricingPlans } from "@/components/pricing/PricingPlans";
 
 export default function OrganizationSettings() {
   const navigate = useNavigate();
