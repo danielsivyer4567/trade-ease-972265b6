@@ -1,6 +1,7 @@
-import React, { Suspense, useState, useEffect } from 'react';
+import React, { Suspense, useState } from 'react';
 import { RouterProvider } from 'react-router-dom';
 import { AuthProvider } from '@/contexts/AuthContext';
+import { OrganizationProvider } from '@/contexts/OrganizationContext';
 import { Toaster } from '@/components/ui/toaster';
 import { createRouter } from './routes/index';
 import { Analytics } from '@vercel/analytics/react';
@@ -8,7 +9,6 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster as SonnerToaster } from 'sonner';
 import { NotificationProvider } from './components/notifications/NotificationContextProvider';
 import { WorkflowDarkModeProvider } from './contexts/WorkflowDarkModeContext';
-import { initializeTables } from './integrations/supabase/dbInit';
 import ErrorBoundary from './components/ErrorBoundary';
 import './utils/errorHandler'; // Initialize async error handling
 import './App.css';
@@ -59,18 +59,6 @@ function App() {
   const [initError, setInitError] = useState(null);
   const router = createRouter();
   
-  useEffect(() => {
-    console.log('App: Starting initialization...');
-    initializeTables()
-      .then(() => {
-        console.log('App: Tables initialized successfully');
-      })
-      .catch(error => {
-        console.error('App: Failed to initialize tables:', error);
-        setInitError(error);
-      });
-  }, []);
-
   console.log('App: Rendering with router:', router);
 
   if (initError) {
@@ -81,13 +69,15 @@ function App() {
     <ErrorBoundary fallback={<ErrorFallbackUI />}>
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
-          <NotificationProvider>
-            <AppUIComponents>
-              <Suspense fallback={<LoadingFallback />}>
-                <RouterProvider router={router} />
-              </Suspense>
-            </AppUIComponents>
-          </NotificationProvider>
+          <OrganizationProvider>
+            <NotificationProvider>
+              <AppUIComponents>
+                <Suspense fallback={<LoadingFallback />}>
+                  <RouterProvider router={router} />
+                </Suspense>
+              </AppUIComponents>
+            </NotificationProvider>
+          </OrganizationProvider>
         </AuthProvider>
       </QueryClientProvider>
     </ErrorBoundary>

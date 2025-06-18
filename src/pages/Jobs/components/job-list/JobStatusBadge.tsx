@@ -9,39 +9,51 @@ interface JobStatusBadgeProps {
 export const JobStatusBadge = ({ status }: JobStatusBadgeProps) => {
   const getStatusConfig = (status: Job['status']) => {
     switch (status) {
+      case 'ready':
+        return {
+          label: 'Ready',
+          variant: 'default' as const,
+          icon: <Clock className="h-3 w-3 mr-1" />
+        };
       case 'in-progress':
         return {
-          color: 'bg-blue-50 text-blue-700 border border-blue-200',
-          icon: <Clock className="h-3 w-3 mr-1" />,
-          label: 'In Progress'
+          label: 'In Progress',
+          variant: 'secondary' as const,
+          icon: <AlertCircle className="h-3 w-3 mr-1" />
         };
       case 'to-invoice':
         return {
-          color: 'bg-green-50 text-green-700 border border-green-200',
-          icon: <Check className="h-3 w-3 mr-1" />,
-          label: 'Completed'
+          label: 'To Invoice',
+          variant: 'outline' as const,
+          icon: <CreditCard className="h-3 w-3 mr-1" />
         };
       case 'invoiced':
         return {
-          color: 'bg-purple-50 text-purple-700 border border-purple-200',
-          icon: <CreditCard className="h-3 w-3 mr-1" />,
-          label: 'Invoiced'
+          label: 'Invoiced',
+          variant: 'default' as const,
+          icon: <CreditCard className="h-3 w-3 mr-1" />
+        };
+      case 'completed':
+        return {
+          label: 'Completed',
+          variant: 'default' as const,
+          icon: <Check className="h-3 w-3 mr-1" />
         };
       default:
         return {
-          color: 'bg-amber-50 text-amber-700 border border-amber-200',
-          icon: <AlertCircle className="h-3 w-3 mr-1" />,
-          label: 'Ready'
+          label: status,
+          variant: 'default' as const,
+          icon: null
         };
     }
   };
 
-  const { color, icon, label } = getStatusConfig(status);
+  const { label, variant, icon } = getStatusConfig(status);
 
   return (
-    <div className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${color}`}>
+    <Badge variant={variant} className="flex items-center">
       {icon}
       {label}
-    </div>
+    </Badge>
   );
 };

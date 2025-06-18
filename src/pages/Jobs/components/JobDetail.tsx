@@ -2,8 +2,8 @@ import React, { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Mic, Coffee, PackageCheck, Share, Clock, Calendar, FileText, Box, BarChart4, MessageSquare, 
-  Upload, X, Camera, PlusCircle, Trash2, Info, Edit, Save, ArrowLeft, Image as ImageIcon, CheckCircle, RotateCcw, Settings, AlertTriangle, Check, FilePlus, Book, Plus, SaveAll } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+  Upload, X, Camera, PlusCircle, Trash2, Info, Edit, Save, ArrowLeft, Image as ImageIcon, CheckCircle, RotateCcw, Settings, AlertTriangle, Check, FilePlus, Book, Plus, SaveAll, Smartphone, Mail, Facebook, Instagram, Globe, Phone, Play, Share2, Search, MessageCircle, ArrowDown, Send, ExternalLink, Link2 } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
@@ -29,6 +29,9 @@ import {
 } from "@/components/ui/alert-dialog";
 import { JobDocumentation } from "./form-sections/JobDocumentation";
 import { useFileUpload } from "./document-approval/hooks/useFileUpload";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { useNavigate } from 'react-router-dom';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
 interface JobDetailProps {
   job: Job;
@@ -71,6 +74,14 @@ type JobTemplate = {
   name: string;
   fields: JobTemplateField[];
   isCustom?: boolean;
+};
+
+// Mock quote type
+type Quote = {
+  id: string;
+  quoteNumber: string;
+  customerName: string;
+  amount: number;
 };
 
 export const JobDetail = ({ job }: JobDetailProps) => {
@@ -152,6 +163,30 @@ export const JobDetail = ({ job }: JobDetailProps) => {
   const [newTemplateName, setNewTemplateName] = useState('');
   const [newTemplateFields, setNewTemplateFields] = useState<JobTemplateField[]>([]);
   
+  // States for Communications tab
+  const [messageText, setMessageText] = useState("");
+  const [fromNumber, setFromNumber] = useState("0491388575");
+  const [toNumber, setToNumber] = useState("0491388575");
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<Quote[]>([]);
+  const [attachedQuotes, setAttachedQuotes] = useState<Quote[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+  
+  // Financials State
+  const [contractors, setContractors] = useState([
+    { id: 'c1', name: 'Sparky & Co.', cost: 1200 },
+    { id: 'c2', name: 'Plumb Perfect', cost: 850 },
+  ]);
+  const [materials, setMaterials] = useState([
+    { id: 'm1', name: 'Copper Wiring (50m)', cost: 350 },
+    { id: 'm2', name: 'Circuit Breaker Panel', cost: 450 },
+    { id: 'm3', name: 'PVC Pipes (20m)', cost: 150 },
+  ]);
+  const [newContractor, setNewContractor] = useState({ name: '', cost: '' });
+  const [newMaterial, setNewMaterial] = useState({ name: '', cost: '' });
+
+  const navigate = useNavigate();
+
   // Pre-defined job templates
   const predefinedTemplates: JobTemplate[] = [
     {
@@ -644,14 +679,14 @@ export const JobDetail = ({ job }: JobDetailProps) => {
     geocodeAddress();
   }, [jobData.address, job.address, job.id]);
 
-  const [documentationFiles, setDocumentationFiles] = useState<(File & { url?: string })[]>([]);
+  const [documentationFiles, setDocumentationFiles] = useState<any[]>([]);
   const [documentationNotes, setDocumentationNotes] = useState("");
   const { uploadFileToStorage, isUploading } = useFileUpload(job.id);
 
   // Load documentation files and notes from job on mount
   useEffect(() => {
     if (job.documents && Array.isArray(job.documents)) {
-      setDocumentationFiles(job.documents.map((doc: any) => ({ name: doc.name, url: doc.url, size: doc.size || 0, type: doc.type || '', lastModified: doc.lastModified || Date.now() })));
+      setDocumentationFiles(job.documents);
     }
     if (job.documentationNotes) {
       setDocumentationNotes(job.documentationNotes);
@@ -666,7 +701,7 @@ export const JobDetail = ({ job }: JobDetailProps) => {
     for (const file of files) {
       try {
         const filePath = await uploadFileToStorage(file);
-        const publicUrl = supabase.storage.from('job-documents').getPublicUrl(filePath).publicUrl;
+        const publicUrl = supabase.storage.from('job-documents').getPublicUrl(filePath).data.publicUrl;
         uploadedDocs.push({
           name: file.name,
           url: publicUrl,
@@ -689,6 +724,137 @@ export const JobDetail = ({ job }: JobDetailProps) => {
     setDocumentationNotes(notes);
     await updateJobDetails(job.id, { documentationNotes: notes });
     toast.success("Documentation notes saved");
+  };
+
+  const handleSearch = () => {
+    if (!searchQuery.trim()) return;
+    setIsSearching(true);
+    // Mock search delay
+    setTimeout(() => {
+      setSearchResults([
+        { id: 'q1', quoteNumber: 'Q-2025-001', customerName: 'John Doe', amount: 1500 },
+        { id: 'q2', quoteNumber: 'Q-2025-002', customerName: job.customer, amount: 2500 },
+      ]);
+      setIsSearching(false);
+    }, 1000);
+  };
+
+  const attachQuote = (quote: Quote) => {
+    if (!attachedQuotes.find(q => q.id === quote.id)) {
+      setAttachedQuotes(prev => [...prev, quote]);
+      // Remove from search results to avoid duplication
+      setSearchResults(prev => prev.filter(r => r.id !== quote.id));
+    }
+  };
+  
+  const handleAddNewQuote = () => {
+    // Navigate to a new quote page, passing the job ID to link it back
+    navigate(`/quotes/new?jobId=${job.id}`);
+  };
+
+  const handleSendMessage = () => {
+    if (!messageText.trim()) return;
+    // Add logic to send message
+    setMessageText("");
+  };
+
+  const handleCallCustomer = () => {
+    // Add logic to initiate call
+    console.log("Calling customer...");
+  };
+
+  const communicationChannels = [
+    { icon: MessageSquare, label: "SMS", active: true },
+    { icon: Smartphone, label: "WhatsApp" },
+    { icon: Mail, label: "Email" },
+    { icon: Facebook, label: "Facebook" },
+    { icon: Instagram, label: "TikTok" },
+    { icon: Instagram, label: "Instagram" },
+    { icon: Globe, label: "GBP" },
+    { icon: Globe, label: "Website" }
+  ];
+
+   const quickActions = [
+    { label: "new client form", type: "form" },
+    { label: "basic contract", type: "form" },
+    { label: "defect form", type: "form" },
+    { label: "variation approval", type: "form" },
+    { label: "job preference form", type: "form" }
+  ];
+
+  const smsMessages = [
+    {
+      id: 1,
+      sender: "AR",
+      message: "Hi Sajad. This is Ana from Affordable Fencing Gold Coast. I need to confirm which colour sleeper you would like for your retaining wall?",
+      time: "15:52 EAST",
+      date: "9th May, 2025",
+      type: "received",
+      hasImage: true
+    },
+    {
+      id: 2,
+      sender: "N",
+      message: "Hi, could we please get monument? thanks",
+      time: "17:07 EAST", 
+      date: "9th May, 2025",
+      type: "sent"
+    },
+    {
+      id: 3,
+      sender: "AR",
+      message: "You sure can. Thank you",
+      time: "17:41 EAST",
+      date: "9th May, 2025", 
+      type: "received"
+    }
+  ];
+
+  const callRecords = [
+    {
+      id: 1,
+      type: "outgoing",
+      duration: "12:45",
+      date: "2 days ago",
+      time: "15:23 EAST",
+      status: "completed"
+    },
+    {
+      id: 2,
+      type: "incoming", 
+      duration: "05:12",
+      date: "1 week ago",
+      time: "08:45 EAST",
+      status: "completed"
+    }
+  ];
+
+  // Financial Calculations
+  const totalContractorCost = contractors.reduce((acc, c) => acc + c.cost, 0);
+  const totalMaterialCost = materials.reduce((acc, m) => acc + m.cost, 0);
+  const totalExpenses = totalContractorCost + totalMaterialCost;
+  const totalRevenue = 5000; // Example static total revenue for a job
+  const grossProfit = totalRevenue - totalExpenses;
+  const gst = totalRevenue * 0.1; // 10% GST
+  const taxToPutAway = grossProfit * 0.3; // Assuming a 30% tax rate on profit
+  const netProfit = grossProfit - taxToPutAway;
+
+  const handleAddItem = (type: 'contractor' | 'material') => {
+    if (type === 'contractor' && newContractor.name && newContractor.cost) {
+      setContractors(prev => [...prev, { id: `c${Date.now()}`, name: newContractor.name, cost: parseFloat(newContractor.cost) }]);
+      setNewContractor({ name: '', cost: '' });
+    } else if (type === 'material' && newMaterial.name && newMaterial.cost) {
+      setMaterials(prev => [...prev, { id: `m${Date.now()}`, name: newMaterial.name, cost: parseFloat(newMaterial.cost) }]);
+      setNewMaterial({ name: '', cost: '' });
+    }
+  };
+
+  const handleDeleteItem = (type: 'contractor' | 'material', id: string) => {
+    if (type === 'contractor') {
+      setContractors(prev => prev.filter(item => item.id !== id));
+    } else {
+      setMaterials(prev => prev.filter(item => item.id !== id));
+    }
   };
 
   return (
@@ -789,6 +955,12 @@ export const JobDetail = ({ job }: JobDetailProps) => {
             </TabsTrigger>
             <TabsTrigger value="conversations" className="text-xs md:text-sm py-2 data-[state=active]:border-b-2 data-[state=active]:border-blue-500">
               <MessageSquare className="h-4 w-4 md:mr-1 md:inline hidden" /> Conversations
+            </TabsTrigger>
+            <TabsTrigger value="quotes" className="text-xs md:text-sm py-2 data-[state=active]:border-b-2 data-[state=active]:border-blue-500">
+              Quotes
+            </TabsTrigger>
+            <TabsTrigger value="jobs" className="text-xs md:text-sm py-2 data-[state=active]:border-b-2 data-[state=active]:border-blue-500">
+              Jobs
             </TabsTrigger>
             <TabsTrigger value="documentation" className="text-xs md:text-sm py-2 data-[state=active]:border-b-2 data-[state=active]:border-blue-500">
               Documentation
@@ -1721,11 +1893,285 @@ export const JobDetail = ({ job }: JobDetailProps) => {
           </TabsContent>
 
           <TabsContent value="financials" className="p-4">
-            <div className="text-center py-10 text-gray-500">Financials content will be displayed here</div>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* Main Content: Costs Breakdown */}
+              <div className="lg:col-span-2 space-y-6">
+                {/* Contractors */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Contractors</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Name</TableHead>
+                          <TableHead className="text-right">Cost</TableHead>
+                          <TableHead></TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {contractors.map(c => (
+                          <TableRow key={c.id}>
+                            <TableCell>{c.name}</TableCell>
+                            <TableCell className="text-right">${c.cost.toFixed(2)}</TableCell>
+                            <TableCell>
+                              <Button variant="ghost" size="icon" onClick={() => handleDeleteItem('contractor', c.id)}>
+                                <Trash2 className="h-4 w-4 text-red-500" />
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </CardContent>
+                  <CardFooter className="flex items-center gap-2 p-4 border-t">
+                    <Input placeholder="Contractor Name" value={newContractor.name} onChange={(e) => setNewContractor({...newContractor, name: e.target.value})} />
+                    <Input placeholder="Cost" type="number" value={newContractor.cost} onChange={(e) => setNewContractor({...newContractor, cost: e.target.value})} />
+                    <Button onClick={() => handleAddItem('contractor')}><PlusCircle className="h-4 w-4" /></Button>
+                  </CardFooter>
+                </Card>
+
+                {/* Materials */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Materials</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Item</TableHead>
+                          <TableHead className="text-right">Cost</TableHead>
+                          <TableHead></TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {materials.map(m => (
+                          <TableRow key={m.id}>
+                            <TableCell>{m.name}</TableCell>
+                            <TableCell className="text-right">${m.cost.toFixed(2)}</TableCell>
+                            <TableCell>
+                              <Button variant="ghost" size="icon" onClick={() => handleDeleteItem('material', m.id)}>
+                                <Trash2 className="h-4 w-4 text-red-500" />
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </CardContent>
+                   <CardFooter className="flex items-center gap-2 p-4 border-t">
+                    <Input placeholder="Material Name" value={newMaterial.name} onChange={(e) => setNewMaterial({...newMaterial, name: e.target.value})} />
+                    <Input placeholder="Cost" type="number" value={newMaterial.cost} onChange={(e) => setNewMaterial({...newMaterial, cost: e.target.value})} />
+                    <Button onClick={() => handleAddItem('material')}><PlusCircle className="h-4 w-4" /></Button>
+                  </CardFooter>
+                </Card>
+              </div>
+
+              {/* Sidebar: Financial Summary */}
+              <div className="space-y-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Financial Summary</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-600">Total Revenue</span>
+                      <span className="font-medium text-lg">${totalRevenue.toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-600">Total Expenses</span>
+                      <span className="font-medium text-lg text-red-600">-${totalExpenses.toFixed(2)}</span>
+                    </div>
+                    <hr />
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-600 font-semibold">Gross Profit</span>
+                      <span className="font-semibold text-xl text-blue-600">${grossProfit.toFixed(2)}</span>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                 <Card>
+                  <CardHeader>
+                    <CardTitle>Tax & Net Profit</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-600">GST (10%)</span>
+                      <span className="font-medium">${gst.toFixed(2)}</span>
+                    </div>
+                     <div className="flex justify-between items-center">
+                      <span className="text-gray-600">Tax to Put Away (30%)</span>
+                      <span className="font-medium text-orange-600">-${taxToPutAway.toFixed(2)}</span>
+                    </div>
+                    <hr />
+                    <div className="flex justify-between items-center">
+                      <span className="font-semibold text-gray-700">Net Profit</span>
+                      <span className="font-bold text-2xl text-green-600">${netProfit.toFixed(2)}</span>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
           </TabsContent>
 
           <TabsContent value="conversations" className="p-4">
-            <div className="text-center py-10 text-gray-500">Conversations content will be displayed here</div>
+            <div className="space-y-6 max-h-[calc(100vh-400px)] overflow-y-auto">
+              {/* Call Records */}
+              {callRecords.map((call) => (
+                <Card key={call.id} className="shadow-sm border-gray-300">
+                  <CardContent className="p-4">
+                    <div className="flex justify-between items-center">
+                      <div className="flex items-center gap-3">
+                        <Phone className="h-5 w-5 text-blue-500" />
+                        <div>
+                          <p className="font-medium text-gray-900">
+                            {call.type === 'outgoing' ? 'Outgoing Call' : 'Incoming Call'}
+                          </p>
+                          <p className="text-sm text-gray-500">
+                            Duration: {call.duration} • {call.date}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="text-gray-500 font-medium">
+                        {call.time}
+                      </div>
+                    </div>
+                    
+                    <div className="flex gap-2 mt-3">
+                      <Button variant="outline" size="sm" className="gap-2">
+                        <Play className="h-4 w-4" />
+                        Play Recording
+                      </Button>
+                      <Button variant="outline" size="sm" className="gap-2">
+                        <Save className="h-4 w-4" />
+                        Save to Vault
+                      </Button>
+                      <Button variant="outline" size="sm" className="gap-2">
+                        <Share2 className="h-4 w-4" />
+                        Share
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+
+              {/* Date Separator */}
+              <div className="flex items-center justify-center py-4">
+                <div className="bg-gray-200 rounded-full px-4 py-2">
+                  <p className="text-sm font-medium text-gray-600">9th May, 2025</p>
+                </div>
+              </div>
+
+              {/* SMS Messages */}
+              <div className="space-y-4">
+                {smsMessages.map((message) => (
+                  <div key={message.id} className={`flex ${message.type === 'sent' ? 'justify-start' : 'justify-end'}`}>
+                    <div className={`flex items-start gap-2 max-w-md ${message.type === 'sent' ? 'flex-row' : 'flex-row-reverse'}`}>
+                      <Avatar className="h-6 w-6 text-xs">
+                        <AvatarFallback className="bg-gray-300 text-gray-700">
+                          {message.sender}
+                        </AvatarFallback>
+                      </Avatar>
+                      
+                      <div className={`rounded-lg px-4 py-3 border ${
+                        message.type === 'sent' 
+                          ? 'bg-gray-100 text-gray-900 border-gray-200' 
+                          : 'bg-blue-500 text-white border-blue-600'
+                      }`}>
+                        <p className="text-sm">{message.message}</p>
+                        {message.hasImage && (
+                          <Button variant="link" className="text-blue-200 p-0 h-auto text-xs underline mt-1">
+                            View Image
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                    
+                    <div className="text-xs text-gray-500 mt-2 ml-2">
+                      {message.time} {message.sender}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="quotes">
+            <div className="space-y-6 max-w-4xl mx-auto">
+              <Card className="border-gray-300">
+                <CardHeader>
+                  <CardTitle>Attach Existing Quote</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex gap-2">
+                    <Input 
+                      placeholder="Search by customer name or job number..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                    />
+                    <Button onClick={handleSearch} disabled={isSearching}>
+                      <Search className="h-4 w-4 mr-2" />
+                      {isSearching ? 'Searching...' : 'Search'}
+                    </Button>
+                  </div>
+
+                  {searchResults.length > 0 && (
+                    <div className="border rounded-md p-2 space-y-2">
+                      {searchResults.map(quote => (
+                        <div key={quote.id} className="flex justify-between items-center p-2 rounded-md hover:bg-gray-50">
+                          <div>
+                            <p className="font-medium">{quote.quoteNumber}</p>
+                            <p className="text-sm text-gray-500">{quote.customerName} - ${quote.amount}</p>
+                          </div>
+                          <Button variant="outline" size="sm" onClick={() => attachQuote(quote)}>
+                            <Link2 className="h-4 w-4 mr-2" />
+                            Attach
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              <div>
+                <Button className="w-full" onClick={handleAddNewQuote}>
+                  <PlusCircle className="h-4 w-4 mr-2" />
+                  Add New Quote
+                </Button>
+              </div>
+
+              <Card className="border-gray-300">
+                <CardHeader>
+                  <CardTitle>Attached Quotes</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {attachedQuotes.length > 0 ? (
+                    <div className="space-y-2">
+                      {attachedQuotes.map(quote => (
+                        <div key={quote.id} className="flex justify-between items-center p-3 border rounded-md bg-gray-50">
+                           <div>
+                            <p className="font-medium">{quote.quoteNumber}</p>
+                            <p className="text-sm text-gray-500">{quote.customerName} - ${quote.amount}</p>
+                          </div>
+                          <Button variant="ghost" size="sm" className="text-red-500 hover:text-red-600">
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-gray-500 text-center py-4">No quotes attached to this job yet.</p>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="jobs">
+            <div className="text-center text-gray-500 py-8">Jobs content will go here</div>
           </TabsContent>
 
           <TabsContent value="documentation" className="p-4">
@@ -2021,6 +2467,111 @@ export const JobDetail = ({ job }: JobDetailProps) => {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Bottom Communication Interface - only shown for conversations tab */}
+      {activeTab === 'conversations' && (
+        <div className="sticky bottom-0 bg-white border-t p-4 mt-auto">
+          <div className="max-w-4xl mx-auto space-y-4">
+            <div className="flex flex-wrap gap-2 justify-center">
+              {communicationChannels.map((channel, index) => {
+                const Icon = channel.icon;
+                return (
+                  <Button
+                    key={index}
+                    variant={channel.active ? "default" : "outline"}
+                    size="sm"
+                    className={`gap-2 ${channel.active ? 'bg-blue-500 hover:bg-blue-600' : ''}`}
+                  >
+                    <Icon className="h-4 w-4" />
+                    {channel.label}
+                  </Button>
+                );
+              })}
+            </div>
+
+            <div className="flex gap-4 items-center justify-center text-sm">
+              <div className="flex items-center gap-2">
+                <span className="text-gray-600">From:</span>
+                <Input 
+                  value={fromNumber} 
+                  onChange={(e) => setFromNumber(e.target.value)}
+                  className="w-32 h-8 text-sm"
+                />
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-gray-600">To:</span>
+                <Input 
+                  value={toNumber} 
+                  onChange={(e) => setToNumber(e.target.value)}
+                  className="w-32 h-8 text-sm"
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-2">
+              <Input
+                placeholder="Type a message"
+                value={messageText}
+                onChange={(e) => setMessageText(e.target.value)}
+                className="flex-1"
+                onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+              />
+              <Button variant="outline" size="icon">
+                <MessageCircle className="h-4 w-4" />
+              </Button>
+              <Button variant="outline" size="icon">
+                <ArrowDown className="h-4 w-4" />
+              </Button>
+              <Button 
+                variant="outline" 
+                size="icon"
+                className="text-red-500 hover:text-red-600"
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            </div>
+
+            <div className="flex flex-wrap gap-2 justify-center">
+              {quickActions.map((action, index) => (
+                <Button
+                  key={index}
+                  variant="outline"
+                  size="sm"
+                  className="text-xs"
+                >
+                  {action.label}
+                </Button>
+              ))}
+            </div>
+
+            <div className="flex gap-2 justify-center">
+              <Button 
+                onClick={handleCallCustomer}
+                variant="outline"
+                className="gap-2"
+              >
+                Call Customer
+              </Button>
+              <Button 
+                variant="outline"
+              >
+                Clear
+              </Button>
+              <Button 
+                onClick={handleSendMessage}
+                className="bg-blue-500 hover:bg-blue-600 gap-2"
+              >
+                <Send className="h-4 w-4" />
+                Send
+              </Button>
+            </div>
+
+            <div className="text-center">
+              <span className="text-xs text-gray-400">Internal Comment</span>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }; 

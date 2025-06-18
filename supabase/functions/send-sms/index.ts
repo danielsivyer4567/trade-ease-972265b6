@@ -15,7 +15,7 @@ serve(async (req) => {
     const { to, body } = await req.json();
 
     // Get Twilio credentials from environment variables
-    const accountSid = Deno.env.get("TWILIO_SID");
+    const accountSid = Deno.env.get("TWILIO_SID") || Deno.env.get("TWILIO_ACCOUNT_SID");
     const authToken = Deno.env.get("TWILIO_AUTH_TOKEN");
     const from = Deno.env.get("TWILIO_PHONE_NUMBER");
 

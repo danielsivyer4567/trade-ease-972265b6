@@ -12,6 +12,9 @@
     "moduleDetection": "force",
     "noEmit": true,
 
+    /* Required for references */
+    "composite": true,
+
     /* Linting */
     "strict": true,
     "noUnusedLocals": false,

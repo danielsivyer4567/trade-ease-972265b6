@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useNavigate } from "react-router-dom";
 import { JobTable } from "./job-list/JobTable";
-import { Filter, Plus, Calendar, Link, Copy, MapPin } from "lucide-react";
+import { Filter, Plus, Calendar, Link, Copy, MapPin, CheckCircle } from "lucide-react";
 import JobSiteMapView from "./job-list/JobSiteMapView";
 import { toast } from "sonner";
 import type { Job } from "@/types/job";
@@ -11,6 +11,29 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+
+// FeatureAccess component for checking feature access
+function FeatureAccess({ featureKey }) {
+  const [hasAccess, setHasAccess] = useState(null);
+
+  useEffect(() => {
+    async function checkAccess() {
+      const { data, error } = await supabase.rpc('has_feature_access', { feature_key: featureKey });
+      if (error) {
+        console.error('Error checking feature access:', error);
+        setHasAccess(false);
+      } else {
+        setHasAccess(data);
+      }
+    }
+    checkAccess();
+  }, [featureKey]);
+
+  if (hasAccess === null) return <div>Checking feature access...</div>;
+  return hasAccess
+    ? <div>✅ Feature is enabled for you!</div>
+    : <div>❌ Feature is NOT enabled for you.</div>;
+}
 
 export function JobsMain() {
   console.log("JobsMain component is rendering");
@@ -23,6 +46,7 @@ export function JobsMain() {
   const [loading, setLoading] = useState(true);
   const [selectedJob, setSelectedJob] = useState<string | null>(null);
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
+  const [completedJobs, setCompletedJobs] = useState<Job[]>([]);
 
   useEffect(() => {
     const fetchJobs = async () => {
@@ -53,12 +77,29 @@ export function JobsMain() {
   const handleStatusChange = async (jobId: string, newStatus: Job['status']) => {
     setActionLoading(jobId);
     try {
-      await supabase.from('jobs').update({ status: newStatus }).eq('id', jobId);
-      setJobs(jobs => jobs.map(job => job.id === jobId ? { ...job, status: newStatus } : job));
-      toast.success(`Job ${jobId} status updated to ${newStatus}`);
+      const { error } = await supabase
+        .from('jobs')
+        .update({ status: newStatus })
+        .eq('id', jobId);
+
+      if (error) throw error;
+
+      setJobs(prevJobs => {
+        const updatedJobs = prevJobs.map(job => 
+          job.id === jobId ? { ...job, status: newStatus } : job
+        );
+        
+        const completed = updatedJobs.filter(job => job.status === 'completed');
+        const active = updatedJobs.filter(job => job.status !== 'completed');
+        
+        setCompletedJobs(completed);
+        return active;
+      });
+
+      toast.success('Job status updated successfully');
     } catch (error) {
-      console.error("Error updating job status:", error);
-      toast.error("Failed to update job status");
+      console.error('Error updating job status:', error);
+      toast.error('Failed to update job status');
     } finally {
       setActionLoading(null);
     }
@@ -74,6 +115,8 @@ export function JobsMain() {
 
   return (
     <div className="w-full h-full p-2">
+      {/* Feature access check at the top */}
+      <FeatureAccess featureKey="some_feature_key" />
       <div className="bg-white/80 backdrop-blur-sm rounded-lg shadow-sm p-3 mb-3">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-3">
           <h1 className="text-xl font-bold mb-2 md:mb-0">Job Management</h1>
@@ -129,11 +172,11 @@ export function JobsMain() {
       
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="flex space-x-4 mb-3 border-b pb-2 w-full bg-transparent justify-start">
-          <TabsTrigger value="overview" className="px-3 py-1 data-[state=active]:border-b-2 data-[state=active]:border-black data-[state=active]:font-medium data-[state=inactive]:text-gray-500">
-            Overview
-          </TabsTrigger>
           <TabsTrigger value="jobs" className="px-3 py-1 data-[state=active]:border-b-2 data-[state=active]:border-black data-[state=active]:font-medium data-[state=inactive]:text-gray-500">
-            Jobs & Quotes
+            Active Jobs
+          </TabsTrigger>
+          <TabsTrigger value="completed" className="px-3 py-1 data-[state=active]:border-b-2 data-[state=active]:border-black data-[state=active]:font-medium data-[state=inactive]:text-gray-500">
+            Completed Jobs
           </TabsTrigger>
           <TabsTrigger value="conversations" className="px-3 py-1 data-[state=active]:border-b-2 data-[state=active]:border-black data-[state=active]:font-medium data-[state=inactive]:text-gray-500">
             Conversations
@@ -158,12 +201,6 @@ export function JobsMain() {
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="overview">
-          <div className="text-center py-4 text-gray-500">
-            Overview content will be displayed here.
-          </div>
-        </TabsContent>
-
         <TabsContent value="jobs">
           <div className="bg-white/80 backdrop-blur-sm rounded-lg shadow-sm p-3 mb-3">
             {!loading && (
@@ -172,16 +209,42 @@ export function JobsMain() {
                   <div className="flex justify-between items-center">
                     <h2 className="text-sm font-medium flex items-center">
                       <Calendar className="h-3 w-3 mr-1 text-blue-500" /> 
-                      All Jobs
+                      Active Jobs
                     </h2>
                     <div className="text-xs text-gray-500">
-                      {jobs.length} total jobs
+                      {jobs.length} active jobs
                     </div>
                   </div>
                 </div>
                 <JobTable 
                   searchQuery={searchQuery} 
                   jobs={jobs}
+                  actionLoading={actionLoading}
+                  onStatusChange={handleStatusChange}
+                />
+              </div>
+            )}
+          </div>
+        </TabsContent>
+
+        <TabsContent value="completed">
+          <div className="bg-white/80 backdrop-blur-sm rounded-lg shadow-sm p-3 mb-3">
+            {!loading && (
+              <div className="bg-white rounded-lg border border-gray-200">
+                <div className="p-2 border-b border-gray-200 bg-gray-50">
+                  <div className="flex justify-between items-center">
+                    <h2 className="text-sm font-medium flex items-center">
+                      <CheckCircle className="h-3 w-3 mr-1 text-green-500" /> 
+                      Completed Jobs
+                    </h2>
+                    <div className="text-xs text-gray-500">
+                      {completedJobs.length} completed jobs
+                    </div>
+                  </div>
+                </div>
+                <JobTable 
+                  searchQuery={searchQuery} 
+                  jobs={completedJobs}
                   actionLoading={actionLoading}
                   onStatusChange={handleStatusChange}
                 />

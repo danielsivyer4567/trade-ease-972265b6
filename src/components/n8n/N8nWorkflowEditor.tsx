@@ -26,7 +26,7 @@ export function N8nWorkflowEditor({
   const [isLoading, setIsLoading] = useState(true);
   const [workflowData, setWorkflowData] = useState<any>(null);
   const [executionStatus, setExecutionStatus] = useState<'idle' | 'running' | 'completed' | 'error'>('idle');
-  const [n8nUrl] = useState(process.env.VITE_N8N_URL || 'http://localhost:5678');
+  const [n8nUrl] = useState(import.meta.env.VITE_N8N_URL || 'http://localhost:5678');
 
   // Initialize n8n editor
   useEffect(() => {
@@ -58,7 +58,7 @@ export function N8nWorkflowEditor({
 
   const loadWorkflow = async (id: string) => {
     try {
-      const response = await fetch(`${n8nUrl}/rest/workflows/${id}`);
+      const response = await fetch(`${n8nUrl}/v1/workflows/${id}`);
       if (response.ok) {
         const workflow = await response.json();
         setWorkflowData(workflow);
@@ -73,13 +73,13 @@ export function N8nWorkflowEditor({
     try {
       if (!workflowData) return;
 
-      const response = await fetch(`${n8nUrl}/rest/workflows${workflowId ? `/${workflowId}` : ''}`, {
+      const response = await fetch(`${n8nUrl}/v1/workflows${workflowId ? `/${workflowId}` : ''}`, {
         method: workflowId ? 'PATCH' : 'POST',
         headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(workflowData),
+          Authorization: "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIyY2ZjY2FlOC1lOTZjLTQ3OTAtOTI4Ni0yYmUxOWY1ZTY2ZjMiLCJpc3MiOiJuOG4iLCJhdWQiOiJwdWJsaWMtYXBpIiwiaWF0IjoxNzQ5ODQxMjMwLCJleHAiOjE3NTIzNzkyMDB9.O1dy3eWhtTDZLsaT_s_9tS3gp3uHTE00icahu4JPHgE"
+        }
       });
+
 
       if (response.ok) {
         const savedWorkflow = await response.json();
@@ -103,10 +103,11 @@ export function N8nWorkflowEditor({
 
     try {
       setExecutionStatus('running');
-      const response = await fetch(`${n8nUrl}/rest/workflows/${workflowId}/execute`, {
+      const response = await fetch(`${n8nUrl}/v1/workflows/${workflowId}/execute`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
+        
+          Authorization: "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIyY2ZjY2FlOC1lOTZjLTQ3OTAtOTI4Ni0yYmUxOWY1ZTY2ZjMiLCJpc3MiOiJuOG4iLCJhdWQiOiJwdWJsaWMtYXBpIiwiaWF0IjoxNzQ5ODQxMjMwLCJleHAiOjE3NTIzNzkyMDB9.O1dy3eWhtTDZLsaT_s_9tS3gp3uHTE00icahu4JPHgE"
         },
         body: JSON.stringify({}),
       });
