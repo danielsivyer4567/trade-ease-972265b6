@@ -9,6 +9,8 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster as SonnerToaster } from 'sonner';
 import { NotificationProvider } from './components/notifications/NotificationContextProvider';
 import { WorkflowDarkModeProvider } from './contexts/WorkflowDarkModeContext';
+import 'mapbox-gl/dist/mapbox-gl.css'
+import '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css'
 import ErrorBoundary from './components/ErrorBoundary';
 import './utils/errorHandler'; // Initialize async error handling
 import './App.css';

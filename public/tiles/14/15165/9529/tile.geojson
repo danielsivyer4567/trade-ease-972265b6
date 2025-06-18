@@ -1,0 +1,8 @@
+{
+"type": "FeatureCollection",
+"name": "tile",
+"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+"features": [
+{ "type": "Feature", "properties": { "lot": "3", "plan": "AP19371", "lotplan": "3AP19371", "tenure": "National Park", "lot_area": 2592980.0, "excl_area": 0.0, "lot_volume": 0.0, "feat_name": "Springbrook National Park", "alias_name": null, "acc_code": "UPGRADE RECTIFICATION - 2M", "surv_ind": "Y", "cover_typ": "Base", "parcel_typ": "Lot Type Parcel", "locality": "Numinbah Valley", "shire_name": "Gold Coast City", "smis_map": "https://apps.information.qld.gov.au/data/v2/Cadastre/SmartMap?lot=3&plan=AP19371", "objectid": 314540, "st_area(shape)": 0.00019769406056391325, "st_perimeter(shape)": 0.072231152880277982, "perimeter_m": 7601.08 }, "geometry": { "type": "Polygon", "coordinates": [ [ [ 153.236743438000474, -28.186998261758049 ], [ 153.2373046875, -28.184246349564567 ], [ 153.2373046875, -28.187083714935245 ], [ 153.236743438000474, -28.186998261758049 ] ] ] } }
+]
+}

@@ -60,6 +60,15 @@
     opacity: 0;
   }
 }
+.mapboxgl-popup {
+  z-index: 999 !important;
+}
+
+.mapboxgl-popup-content {
+  font-size: 12px;
+  padding: 4px 6px;
+}
+
 
 .workflow-background {
   position: absolute;
