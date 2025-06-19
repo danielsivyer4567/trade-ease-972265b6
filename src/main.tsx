@@ -1,6 +1,7 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import App from './App.tsx'
+import '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css'
 import './index.css'
 import { disableDevToolsOverlay } from './utils/disableDevToolsOverlay'
 import { workflowJobProcessor } from './services/WorkflowJobProcessor'

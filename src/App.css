@@ -70,6 +70,13 @@
   z-index: 0;
   will-change: transform; /* Performance optimization */
   pointer-events: none; /* Ensure it doesn't interfere with interactions */
+
+}
+
+.mapboxgl-ctrl-geocoder {
+  min-width: 100%;
+  font: 12px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
+
 }
 
 .particle {
