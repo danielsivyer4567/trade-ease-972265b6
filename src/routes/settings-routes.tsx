@@ -21,6 +21,7 @@ const GenericSettingsPage = React.lazy(() => import('@/pages/Settings/GenericSet
 const StaffPage = React.lazy(() => import('@/pages/Settings/Staff'));
 const MessagingSettings = React.lazy(() => import('@/pages/Settings/MessagingSettings'));
 const OrganizationSettings = React.lazy(() => import('@/pages/Settings/OrganizationSettings'));
+const TradeEasePlanDetails = React.lazy(() => import('@/pages/Settings/TradeEasePlanDetails'));
 
 // Export routes configuration
 export const SettingsRoutes = (): RouteObject[] => [
@@ -151,6 +152,14 @@ export const SettingsRoutes = (): RouteObject[] => [
     element: (
       <Suspense fallback={<LoadingFallback />}>
         <TermsOfServicePage />
+      </Suspense>
+    ),
+  },
+  {
+    path: "trade-ease-plan-details",
+    element: (
+      <Suspense fallback={<LoadingFallback />}>
+        <TradeEasePlanDetails />
       </Suspense>
     ),
   },
