@@ -15,7 +15,12 @@
     "preview": "vite preview",
     "db:setup": "node scripts/db-setup.js",
     "db:reset": "npx supabase db reset",
-    "start:with-db": "npm run db:setup && npm run dev"
+    "start:with-db": "npm run db:setup && npm run dev",
+    "migrate:generate": "node scripts/deploy-migrations.js generate",
+    "migrate:deploy": "node scripts/deploy-migrations.js deploy",
+    "migrate:link": "node scripts/deploy-migrations.js link",
+    "migrate:manual": "npm run migrate:generate && echo 'Check migration-combined.sql and MIGRATION_INSTRUCTIONS.md'",
+    "migrate:verify": "node scripts/verify-migration.js"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.3.4",

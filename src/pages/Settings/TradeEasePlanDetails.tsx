@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardContent, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { Check, Star, Users, Zap, Crown, MessageSquare, ArrowLeft } from 'lucide-react';
+import { Check, Star, Users, Zap, Crown, MessageSquare, ArrowLeft, Key } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
 
@@ -65,11 +65,13 @@ const defaultTiers: PricingTier[] = [
       </motion.div>
     ),
     features: [
-      { name: "Organizations: 1", included: true },
-      { name: "Users: 1", included: true },
+      { name: "Unlimited users in 1 organization", included: true },
       { name: "Invoicing", included: true, highlight: true },
       { name: "Quoting", included: true, highlight: true },
-      { name: "Calendar management", included: true, highlight: true },
+      { name: "Single Calendar Management", included: true, highlight: true },
+      { name: "Integration with Xero, MYOB, QuickBooks + 50 more", included: true, highlight: true },
+      { name: "Integration with external calendars", included: true, highlight: true },
+      { name: "40% affiliate commission on any subscription for life - no limit payout", included: true, highlight: true }
     ],
     limitations: [
       "No automations",
@@ -107,8 +109,11 @@ const defaultTiers: PricingTier[] = [
       </motion.div>
     ),
     features: [
-      { name: "Organizations: 1", included: true },
-      { name: "Users: 3", included: true },
+      { name: "3 users in 1 organization", included: true },
+      { name: "Integration with Xero, MYOB, QuickBooks + 50 more", included: true, highlight: true },
+      { name: "Integration with external calendars", included: true, highlight: true },
+      { name: "Trade specific calculators and features", included: true, highlight: true },
+      { name: "Request for free trade specific feature or tool", included: true, highlight: true },
       { name: "Direct website inquiries auto-forwarded", included: true, highlight: true },
       { name: "Auto worker/ABN verification", included: true, highlight: true },
       { name: "Internal communications & tagging", included: true, highlight: true },
@@ -118,6 +123,7 @@ const defaultTiers: PricingTier[] = [
       { name: "Customer progression link", included: true, highlight: true },
       { name: "Customer journey view", included: true, highlight: true },
       { name: "Step by step job process + notify", included: true, highlight: true },
+      { name: "40% affiliate commission on any subscription for life - no limit payout", included: true, highlight: true },
       { name: "Optional Add-ons", included: false },
       { name: "+ per user", included: false },
       { name: "AI automated red flagging", included: false },
@@ -187,8 +193,17 @@ const defaultTiers: PricingTier[] = [
       </motion.div>
     ),
     features: [
-      { name: "Organizations: 1", included: true },
-      { name: "Users: 15 (all features included)", included: true },
+      { name: "Unlimited users in 1 organization", included: true, highlight: true },
+      { name: "Unlimited notification texts to customers and staff", included: true, highlight: true },
+      { name: "Unlimited Calendars", included: true, highlight: true },
+      { name: "Invoicing & Quoting", included: true, highlight: true },
+      { name: "Single Calendar Management", included: true, highlight: true },
+      { name: "Integration with Xero, MYOB, QuickBooks + 50 more", included: true, highlight: true },
+      { name: "Integration with external calendars", included: true, highlight: true },
+      { name: "Trade specific calculators and features", included: true, highlight: true },
+      { name: "Request for free trade specific feature or tool", included: true, highlight: true },
+      { name: "Business Structure Layout Map", included: true, highlight: true },
+      { name: "NCC Code Search via Voice", included: true, highlight: true },
       { name: "Direct website inquiries auto-forwarded", included: true, highlight: true },
       { name: "Auto worker/ABN verification", included: true, highlight: true },
       { name: "Internal communications & tagging", included: true, highlight: true },
@@ -205,7 +220,6 @@ const defaultTiers: PricingTier[] = [
       { name: "Instant digital signings", included: true, highlight: true },
       { name: "Instant pop-up signed variations", included: true, highlight: true },
       { name: "Weather notifications (voice)", included: true, highlight: true },
-      { name: "Multiple calendars", included: true, highlight: true },
       { name: "New number forwarding", included: true, highlight: true },
       { name: "Compliance updates", included: true, highlight: true },
       { name: "150+ personalised automations", included: true, highlight: true },
@@ -220,7 +234,8 @@ const defaultTiers: PricingTier[] = [
       { name: "Upload once to all social media", included: true, highlight: true },
       { name: "Customer journey view", included: true, highlight: true },
       { name: "Customer view any update auto", included: true, highlight: true },
-      { name: "Automated Google review requests", included: true, highlight: true }
+      { name: "Automated Google review requests", included: true, highlight: true },
+      { name: "40% affiliate commission on any subscription for life - no limit payout", included: true, highlight: true }
     ],
     addOns: [
       "Advanced workflows: Extra cost per setup",
@@ -274,6 +289,11 @@ const defaultTiers: PricingTier[] = [
     features: [
       { name: "White-label entire business", included: true, highlight: true },
       { name: "Comprehensive A-Z training videos", included: true, highlight: true },
+      { name: "Integration with Xero, MYOB, QuickBooks + 50 more", included: true, highlight: true },
+      { name: "Integration with external calendars", included: true, highlight: true },
+      { name: "Trade specific calculators and features", included: true, highlight: true },
+      { name: "Request for free trade specific feature or tool", included: true, highlight: true },
+      { name: "NCC Code Search via Voice", included: true, highlight: true },
       { name: "Monetization opportunity", included: true, highlight: true },
       { name: "AI automated red flagging", included: true, highlight: true },
       { name: "Invoice/job price rise alerts", included: true, highlight: true },
@@ -288,7 +308,7 @@ const defaultTiers: PricingTier[] = [
       { name: "Instant digital signings", included: true, highlight: true },
       { name: "Instant pop-up signed variations", included: true, highlight: true },
       { name: "Weather notifications (voice)", included: true, highlight: true },
-      { name: "Multiple calendars", included: true, highlight: true },
+      { name: "Unlimited Calendars", included: true, highlight: true },
       { name: "New number forwarding", included: true, highlight: true },
       { name: "Compliance updates", included: true, highlight: true },
       { name: "150+ personalised automations", included: true, highlight: true },
@@ -306,7 +326,8 @@ const defaultTiers: PricingTier[] = [
       { name: "Automated Google review requests", included: true, highlight: true },
       { name: "Client management & permissions", included: true, highlight: true },
       { name: "Sell workflows you create", included: true, highlight: true },
-      { name: "Dedicated developer option", included: true, highlight: true }
+      { name: "Dedicated developer option", included: true, highlight: true },
+      { name: "40% affiliate commission on any subscription for life - no limit payout", included: true, highlight: true }
     ],
     addOns: [
       "Pricing based on conditional setup",
