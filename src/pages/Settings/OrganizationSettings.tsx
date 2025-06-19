@@ -11,7 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
-import { Building2, Users, Crown, Briefcase, Plus, Mail, Settings, Shield, CreditCard, Zap, Key, MessageSquare, Bot, Phone, Check, Star, X, Calendar } from 'lucide-react';
+import { Building2, Users, Crown, Briefcase, Plus, Mail, Settings, Shield, CreditCard, Zap, Key, MessageSquare, Bot, Phone, Check, Star, X, Calendar, ArrowLeft } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { cn } from '@/lib/utils';
@@ -792,17 +792,32 @@ export default function OrganizationSettings() {
   }
 
   return (
-    <div className="min-h-screen w-full bg-black">
+    <div className="min-h-screen w-full bg-gray-50">
       <Tabs defaultValue="organizations" className="w-full">
-        <div className="fixed top-0 z-50 w-full bg-black/80 backdrop-blur-sm border-b border-gray-800">
+        <div className="fixed top-0 z-50 w-full bg-white/95 backdrop-blur-sm border-b border-gray-200 shadow-sm">
           <div className="container mx-auto px-4">
-            <TabsList className="h-16">
-              <TabsTrigger value="organizations">Organizations</TabsTrigger>
-              <TabsTrigger value="subscription">Subscription</TabsTrigger>
-              {subscriptionTier === 'skeleton_key' && (
-                <TabsTrigger value="agency">Client Management</TabsTrigger>
-              )}
-            </TabsList>
+            <div className="flex items-center justify-between h-16">
+              <div className="flex-shrink-0">
+                <Button 
+                  variant="ghost" 
+                  className="text-gray-600 hover:text-gray-900"
+                  onClick={() => navigate('/settings')}
+                >
+                  <ArrowLeft className="h-4 w-4 mr-2" />
+                  Back to Settings
+                </Button>
+              </div>
+              <div className="flex-grow flex justify-center">
+                <TabsList className="bg-gray-100">
+                  <TabsTrigger value="organizations">Organizations</TabsTrigger>
+                  <TabsTrigger value="subscription">Subscription</TabsTrigger>
+                  {subscriptionTier === 'skeleton_key' && (
+                    <TabsTrigger value="agency">Client Management</TabsTrigger>
+                  )}
+                </TabsList>
+              </div>
+              <div className="flex-shrink-0 w-[150px]"></div>
+            </div>
           </div>
         </div>
 
@@ -810,18 +825,18 @@ export default function OrganizationSettings() {
           <TabsContent value="organizations" className="mt-0">
             <div className="container mx-auto p-6 max-w-6xl">
               <div className="mb-6">
-                <h1 className="text-3xl font-bold">Organization Settings</h1>
-                <p className="text-muted-foreground">Manage your organizations and subscription</p>
+                <h1 className="text-3xl font-bold text-gray-900">Organization Settings</h1>
+                <p className="text-gray-600">Manage your organizations and subscription</p>
               </div>
 
               {/* Current Organization */}
-              <Card className="mb-6">
+              <Card className="mb-6 bg-white shadow-sm border border-gray-200">
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Building2 className="h-5 w-5" />
+                  <CardTitle className="flex items-center gap-2 text-gray-900">
+                    <Building2 className="h-5 w-5 text-gray-700" />
                     Current Organization
                   </CardTitle>
-                  <CardDescription>
+                  <CardDescription className="text-gray-600">
                     Manage your current organization settings
                   </CardDescription>
                 </CardHeader>
@@ -830,35 +845,35 @@ export default function OrganizationSettings() {
                     <>
                       <div className="grid gap-4 md:grid-cols-2">
                         <div>
-                          <Label>Organization Name</Label>
+                          <Label className="text-gray-700">Organization Name</Label>
                           <Input 
                             value={currentOrganization.name} 
                             disabled 
-                            className="mt-1"
+                            className="mt-1 bg-gray-50 border-gray-200"
                           />
                         </div>
                         <div>
-                          <Label>Business Type</Label>
+                          <Label className="text-gray-700">Business Type</Label>
                           <Input 
                             value={currentOrganization.business_type || 'Not specified'} 
                             disabled 
-                            className="mt-1"
+                            className="mt-1 bg-gray-50 border-gray-200"
                           />
                         </div>
                         <div>
-                          <Label>ABN</Label>
+                          <Label className="text-gray-700">ABN</Label>
                           <Input 
                             value={currentOrganization.abn || 'Not provided'} 
                             disabled 
-                            className="mt-1"
+                            className="mt-1 bg-gray-50 border-gray-200"
                           />
                         </div>
                         <div>
-                          <Label>Email</Label>
+                          <Label className="text-gray-700">Email</Label>
                           <Input 
                             value={currentOrganization.email || 'Not provided'} 
                             disabled 
-                            className="mt-1"
+                            className="mt-1 bg-gray-50 border-gray-200"
                           />
                         </div>
                       </div>
@@ -866,41 +881,43 @@ export default function OrganizationSettings() {
                       <div className="flex gap-2">
                         <Button 
                           onClick={() => navigate(`/settings/organization/${currentOrganization.id}/edit`)}
+                          className="bg-blue-600 hover:bg-blue-700 text-white"
                         >
                           <Settings className="h-4 w-4 mr-2" />
                           Edit Details
                         </Button>
                         <Dialog open={isInviteDialogOpen} onOpenChange={setIsInviteDialogOpen}>
                           <DialogTrigger asChild>
-                            <Button variant="outline">
+                            <Button variant="outline" className="border-gray-300 text-gray-700 hover:bg-gray-50">
                               <Mail className="h-4 w-4 mr-2" />
                               Invite Members
                             </Button>
                           </DialogTrigger>
-                          <DialogContent>
+                          <DialogContent className="bg-white">
                             <DialogHeader>
-                              <DialogTitle>Invite to Organization</DialogTitle>
-                              <DialogDescription>
+                              <DialogTitle className="text-gray-900">Invite to Organization</DialogTitle>
+                              <DialogDescription className="text-gray-600">
                                 Send an invitation to join {currentOrganization.name}
                               </DialogDescription>
                             </DialogHeader>
                             <div className="space-y-4">
                               <div>
-                                <Label>Email Address</Label>
+                                <Label className="text-gray-700">Email Address</Label>
                                 <Input
                                   type="email"
                                   placeholder="colleague@example.com"
                                   value={inviteEmail}
                                   onChange={(e) => setInviteEmail(e.target.value)}
+                                  className="border-gray-300"
                                 />
                               </div>
                               <div>
-                                <Label>Role</Label>
+                                <Label className="text-gray-700">Role</Label>
                                 <Select value={inviteRole} onValueChange={setInviteRole}>
-                                  <SelectTrigger>
+                                  <SelectTrigger className="border-gray-300">
                                     <SelectValue />
                                   </SelectTrigger>
-                                  <SelectContent>
+                                  <SelectContent className="bg-white">
                                     <SelectItem value="viewer">Viewer</SelectItem>
                                     <SelectItem value="member">Member</SelectItem>
                                     <SelectItem value="admin">Admin</SelectItem>
@@ -914,19 +931,19 @@ export default function OrganizationSettings() {
                                     id="agency-invite"
                                     checked={isAgencyInvite}
                                     onChange={(e) => setIsAgencyInvite(e.target.checked)}
-                                    className="rounded"
+                                    className="rounded border-gray-300"
                                   />
-                                  <Label htmlFor="agency-invite">
+                                  <Label htmlFor="agency-invite" className="text-gray-700">
                                     Invite as agency client
                                   </Label>
                                 </div>
                               )}
                             </div>
                             <DialogFooter>
-                              <Button variant="outline" onClick={() => setIsInviteDialogOpen(false)}>
+                              <Button variant="outline" onClick={() => setIsInviteDialogOpen(false)} className="border-gray-300 text-gray-700">
                                 Cancel
                               </Button>
-                              <Button onClick={handleInvite}>
+                              <Button onClick={handleInvite} className="bg-blue-600 hover:bg-blue-700 text-white">
                                 Send Invitation
                               </Button>
                             </DialogFooter>
@@ -935,57 +952,59 @@ export default function OrganizationSettings() {
                       </div>
                     </>
                   ) : (
-                    <p className="text-muted-foreground">No organization selected</p>
+                    <p className="text-gray-600">No organization selected</p>
                   )}
                 </CardContent>
               </Card>
 
               {/* All Organizations */}
-              <Card>
+              <Card className="bg-white shadow-sm border border-gray-200">
                 <CardHeader>
-                  <CardTitle className="flex items-center justify-between">
+                  <CardTitle className="flex items-center justify-between text-gray-900">
                     <span className="flex items-center gap-2">
-                      <Users className="h-5 w-5" />
+                      <Users className="h-5 w-5 text-gray-700" />
                       Your Organizations
                     </span>
                     {canCreateMoreOrganizations && (
                       <Dialog open={isCreateOrgDialogOpen} onOpenChange={setIsCreateOrgDialogOpen}>
                         <DialogTrigger asChild>
-                          <Button size="sm">
+                          <Button size="sm" className="bg-blue-600 hover:bg-blue-700 text-white">
                             <Plus className="h-4 w-4 mr-2" />
                             New Organization
                           </Button>
                         </DialogTrigger>
-                        <DialogContent>
+                        <DialogContent className="bg-white">
                           <DialogHeader>
-                            <DialogTitle>Create New Organization</DialogTitle>
-                            <DialogDescription>
+                            <DialogTitle className="text-gray-900">Create New Organization</DialogTitle>
+                            <DialogDescription className="text-gray-600">
                               Set up a new organization for your business
                             </DialogDescription>
                           </DialogHeader>
                           <div className="space-y-4">
                             <div>
-                              <Label>Organization Name</Label>
+                              <Label className="text-gray-700">Organization Name</Label>
                               <Input
                                 placeholder="My Business Name"
                                 value={newOrgName}
                                 onChange={(e) => setNewOrgName(e.target.value)}
+                                className="border-gray-300"
                               />
                             </div>
                             <div>
-                              <Label>Business Type</Label>
+                              <Label className="text-gray-700">Business Type</Label>
                               <Input
                                 placeholder="e.g., Construction, Plumbing, Electrical"
                                 value={newOrgType}
                                 onChange={(e) => setNewOrgType(e.target.value)}
+                                className="border-gray-300"
                               />
                             </div>
                           </div>
                           <DialogFooter>
-                            <Button variant="outline" onClick={() => setIsCreateOrgDialogOpen(false)}>
+                            <Button variant="outline" onClick={() => setIsCreateOrgDialogOpen(false)} className="border-gray-300 text-gray-700">
                               Cancel
                             </Button>
-                            <Button onClick={handleCreateOrganization}>
+                            <Button onClick={handleCreateOrganization} className="bg-blue-600 hover:bg-blue-700 text-white">
                               Create Organization
                             </Button>
                           </DialogFooter>
@@ -993,7 +1012,7 @@ export default function OrganizationSettings() {
                       </Dialog>
                     )}
                   </CardTitle>
-                  <CardDescription>
+                  <CardDescription className="text-gray-600">
                     Organizations you own or have access to
                   </CardDescription>
                 </CardHeader>
@@ -1002,7 +1021,7 @@ export default function OrganizationSettings() {
                     {userOrganizations.map((org) => (
                       <div
                         key={org.organization_id}
-                        className="flex items-center justify-between p-3 border rounded-lg"
+                        className="flex items-center justify-between p-3 border border-gray-200 rounded-lg bg-gray-50/50 hover:bg-gray-50"
                       >
                         <div className="flex items-center gap-3">
                           {org.access_type === 'agency' ? (
@@ -1011,21 +1030,22 @@ export default function OrganizationSettings() {
                             <Building2 className="h-5 w-5 text-blue-500" />
                           )}
                           <div>
-                            <p className="font-medium">{org.organization_name}</p>
-                            <p className="text-sm text-muted-foreground">
+                            <p className="font-medium text-gray-900">{org.organization_name}</p>
+                            <p className="text-sm text-gray-600">
                               {org.access_type === 'agency' ? 'Agency Access' : `Role: ${org.role}`}
                             </p>
                           </div>
                         </div>
                         <div className="flex items-center gap-2">
                           {org.is_current && (
-                            <Badge variant="secondary">Current</Badge>
+                            <Badge variant="secondary" className="bg-blue-100 text-blue-800">Current</Badge>
                           )}
                           {!org.is_current && (
                             <Button
                               size="sm"
                               variant="outline"
                               onClick={() => window.location.reload()}
+                              className="border-gray-300 text-gray-700 hover:bg-gray-50"
                             >
                               Switch
                             </Button>
@@ -1039,22 +1059,22 @@ export default function OrganizationSettings() {
             </div>
           </TabsContent>
 
-          <TabsContent value="subscription" className="m-0 w-full">
+          <TabsContent value="subscription" className="m-0 w-full bg-black">
             <PricingPlans />
           </TabsContent>
 
           {subscriptionTier === 'skeleton_key' && (
-            <TabsContent value="agency" className="mt-0">
+            <TabsContent value="agency" className="mt-0 bg-gray-50">
               <div className="container mx-auto p-6 max-w-6xl">
-                <Card>
+                <Card className="bg-white shadow-sm border border-gray-200">
                   <CardHeader>
-                    <CardTitle>Agency Client Management</CardTitle>
-                    <CardDescription>
+                    <CardTitle className="text-gray-900">Agency Client Management</CardTitle>
+                    <CardDescription className="text-gray-600">
                       Manage your client organizations and permissions
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-muted-foreground">
+                    <p className="text-gray-600">
                       Agency management features coming soon...
                     </p>
                   </CardContent>
