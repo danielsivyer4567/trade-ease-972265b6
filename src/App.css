@@ -60,7 +60,14 @@
     opacity: 0;
   }
 }
+.mapboxgl-popup {
+  z-index: 999 !important;
+}
 
+.mapboxgl-popup-content {
+  font-size: 12px;
+  padding: 4px 6px;
+}
 .workflow-background {
   position: absolute;
   width: 100%;
@@ -73,11 +80,7 @@
 
 }
 
-.mapboxgl-ctrl-geocoder {
-  min-width: 100%;
-  font: 12px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
 
-}
 
 .particle {
   position: absolute;

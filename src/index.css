@@ -90,6 +90,7 @@ html {
   block-size: 100%;
 }
 
+
 /* Glass card effect with proper vendor order */
 .glass-card {
   background: rgba(255, 255, 255, 0.85);
