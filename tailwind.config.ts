@@ -8,13 +8,6 @@ export default {
     "./app/**/*.{ts,tsx}",
     "./src/**/*.{ts,tsx}",
   ],
-  safelist: [
-    'mapboxgl-popup',
-    'mapboxgl-popup-content',
-    'mapboxgl-popup-close-button',
-    'mapboxgl-popup-tip',
-    'mapboxgl-popup-anchor-top',
-  ],
   prefix: "",
   theme: {
   	container: {
