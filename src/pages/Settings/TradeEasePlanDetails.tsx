@@ -570,15 +570,26 @@ export default function TradeEasePlanDetails() {
     <div className="min-h-screen w-full bg-black">
         <div className="fixed top-0 z-50 w-full bg-black/80 backdrop-blur-sm border-b border-gray-800">
             <div className="container mx-auto px-4">
-                <div className="flex items-center h-16">
-                    <Button 
-                    variant="ghost" 
-                    className="text-gray-400 hover:text-white"
-                    onClick={() => navigate('/settings')}
-                    >
-                        <ArrowLeft className="h-4 w-4 mr-2" />
-                        Back to Settings
-                    </Button>
+                <div className="flex items-center justify-between h-16">
+                    <div className="flex-1">
+                      <Button 
+                        variant="ghost" 
+                        className="text-gray-400 hover:text-white"
+                        onClick={() => navigate('/settings')}
+                      >
+                          <ArrowLeft className="h-4 w-4 mr-2" />
+                          Back to Settings
+                      </Button>
+                    </div>
+                    <div className="flex-1 flex justify-center">
+                      <Button 
+                        className="bg-blue-600 hover:bg-blue-700 text-white font-bold text-lg px-8 py-3"
+                        onClick={() => navigate('/settings/my-plan')}
+                      >
+                        My Plan Details
+                      </Button>
+                    </div>
+                    <div className="flex-1"></div> {/* Right spacer */}
                 </div>
             </div>
         </div>
