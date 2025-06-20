@@ -36,6 +36,7 @@ const allFeatures: AddOn[] = [
   { id: 'trade-calculators', name: "Trade specific calculators and features", price: 0, included: true },
   { id: 'feature-request', name: "Request for free trade specific feature or tool", price: 0, included: true },
   { id: 'affiliate-commission', name: "40% affiliate commission on any subscription for life - no limit payout", price: 0, included: true },
+  { id: 'ncc-codes', name: "NCC Codes Search", price: 0, included: true },
   { id: 'business-structure-map', name: "Business Structure Layout Map", price: 25, included: false },
   { id: 'ncc-voice-search', name: "NCC Code Search via Voice", price: 30, included: false },
   { id: 'web-inquiries', name: "Direct website inquiries auto-forwarded", price: 15, included: false },
@@ -67,7 +68,7 @@ const allFeatures: AddOn[] = [
   { id: 'remittance-upload', name: "Remittance upload", price: 10, included: false },
   { id: 'instant-payment', name: "Instant payment (no dongle)", price: 30, included: false },
   { id: 'social-media-upload', name: "Upload once to all social media", price: 20, included: false },
-  { id: 'white-label', name: "White-label entire business", price: 100, included: false },
+  { id: 'white-label', name: "White-label entire business", price: 799, included: false },
   { id: 'training-videos', name: "Comprehensive A-Z training videos", price: 50, included: false },
   { id: 'monetization', name: "Monetization opportunity", price: 75, included: false },
   { id: 'dedicated-developer', name: "Optional dedicated developer", price: 200, included: false }
@@ -120,7 +121,7 @@ const allTiers: PricingTier[] = [
     interval: "/month inc GST",
     description: "The Growing Pain Relief plan helps alleviate common business challenges, providing essential features and + optional add-ons as a pay as you go !",
     icon: <Users className="h-5 w-5 text-blue-500" />,
-    includedFeatureIds: ['orgs-1', 'users-3', 'invoicing', 'calendar', 'accounting-integration', 'calendar-integration', 'trade-calculators', 'feature-request', 'web-inquiries', 'abn-verify', 'internal-comms', 'tax-budgeting', 'financial-reports', 'weekly-reports', 'customer-link', 'customer-journey', 'step-by-step-job', 'affiliate-commission'],
+    includedFeatureIds: ['orgs-1', 'users-3', 'invoicing', 'calendar', 'accounting-integration', 'calendar-integration', 'trade-calculators', 'feature-request', 'web-inquiries', 'abn-verify', 'internal-comms', 'tax-budgeting', 'financial-reports', 'weekly-reports', 'customer-link', 'customer-journey', 'step-by-step-job', 'affiliate-commission', 'ncc-codes'],
     addOns: [
       { id: 'adv-workflows', name: "Advanced workflows", price: 25, included: false },
       { id: 'twilio', name: "Additional Twilio numbers + call/text fees", price: 10, included: false },
@@ -138,7 +139,7 @@ const allTiers: PricingTier[] = [
     description: "Unlock the full potential of our platform with Premium Edge, providing comprehensive tools and unlimited usage for a truly streamlined operation.",
     icon: <Zap className="h-5 w-5" />,
     includedFeatureIds: [
-      'unlimited-users-in-org', 'unlimited-notification-texts', 'unlimited-calendars', 'invoicing', 'calendar', 'accounting-integration', 'calendar-integration', 'trade-calculators', 'feature-request', 'affiliate-commission', 'business-structure-map', 'web-inquiries', 'abn-verify', 'internal-comms',
+      'unlimited-users-in-org', 'unlimited-notification-texts', 'unlimited-calendars', 'invoicing', 'calendar', 'accounting-integration', 'calendar-integration', 'trade-calculators', 'feature-request', 'affiliate-commission', 'ncc-codes', 'business-structure-map', 'web-inquiries', 'abn-verify', 'internal-comms',
       'tax-budgeting', 'financial-reports', 'weekly-reports', 'customer-link', 'customer-journey',
       'step-by-step-job', 'ai-red-flagging', 'price-rise-alerts', 'material-order-filter', 'receipt-upload-ai',
       'boundary-measure', 'accounting-replacement', 'instant-signings', 'popup-variations', 'weather-notifications',
@@ -150,6 +151,7 @@ const allTiers: PricingTier[] = [
       { id: 'adv-workflows-prem', name: "Advanced workflows", price: 20, included: true },
       { id: 'twilio-prem', name: "Additional Twilio numbers + call/text fees", price: 8, included: false },
       { id: 'ai-tokens-prem', name: "Ongoing AI token costs", price: 12, included: false },
+      { id: 'white-label-prem', name: "White-label entire business", price: 799, included: false },
     ],
     affiliateEarnings: "Earn 40% on any subscription referral",
     support: "Priority ticket support system",
@@ -163,9 +165,9 @@ const allTiers: PricingTier[] = [
     description: "The Skeleton Key Access all the control, allowing you to white label our entire business and sell it as your own!",
     icon: <Crown className="h-5 w-5" />,
     includedFeatureIds: [
-      'orgs-1', 'users-3', 'invoicing', 'calendar', 'web-inquiries', 'abn-verify', 'internal-comms',
+      'orgs-1', 'users-3', 'invoicing', 'calendar', 'ncc-codes', 'web-inquiries', 'abn-verify', 'internal-comms',
       'ai-red-flagging', 'price-rise-alerts', 'material-order-filter', 'receipt-upload-ai', 'boundary-measure', 'accounting-replacement',
-      'white-label', 'training-videos', 'monetization', 'dedicated-developer'
+      'training-videos', 'monetization', 'dedicated-developer'
     ],
     addOns: [
       { id: 'setup-sk', name: "Pricing based on conditional setup", price: 0, included: true },
