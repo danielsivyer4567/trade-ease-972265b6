@@ -33,11 +33,29 @@ const SharedJobMap: React.FC<SharedJobMapProps> = ({
   
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isMounted, setIsMounted] = useState(false);
   const { apiKey, isLoading: isApiKeyLoading, error: apiKeyError } = useGoogleMapsApiKey();
+
+  // Track component mount state
+  useEffect(() => {
+    setIsMounted(true);
+    return () => setIsMounted(false);
+  }, []);
 
   // Initialize map
   const initializeMap = useCallback(() => {
-    if (!mapRef.current || !window.google) return;
+    if (!mapRef.current || !window.google || !isMounted) {
+      console.warn('Map initialization skipped: missing ref, Google Maps API, or component unmounted');
+      setIsLoading(false);
+      return;
+    }
+
+    // Ensure the element is in the DOM
+    if (!document.contains(mapRef.current)) {
+      console.warn('Map element not in DOM, skipping initialization');
+      setIsLoading(false);
+      return;
+    }
 
     try {
       // Create map instance
@@ -57,7 +75,11 @@ const SharedJobMap: React.FC<SharedJobMapProps> = ({
       infoWindowRef.current = new window.google.maps.InfoWindow();
 
       // Clear existing markers
-      markersRef.current.forEach(marker => marker.setMap(null));
+      markersRef.current.forEach(marker => {
+        if (marker && marker.setMap) {
+          marker.setMap(null);
+        }
+      });
       markersRef.current = [];
 
       // Get valid job locations
@@ -127,15 +149,18 @@ const SharedJobMap: React.FC<SharedJobMapProps> = ({
       setError('Failed to initialize map');
       setIsLoading(false);
     }
-  }, [jobs, showStreetView, onJobClick]);
+  }, [jobs, showStreetView, onJobClick, isMounted]);
 
   // Load Google Maps script
   useEffect(() => {
-    if (!apiKey || isApiKeyLoading) return;
+    if (!apiKey || isApiKeyLoading || !isMounted) return;
 
     // Check if script is already loaded
     if (window.google && window.google.maps) {
-      initializeMap();
+      // Ensure the map element exists before initializing
+      if (mapRef.current) {
+        initializeMap();
+      }
       return;
     }
 
@@ -145,9 +170,22 @@ const SharedJobMap: React.FC<SharedJobMapProps> = ({
     script.async = true;
     script.defer = true;
     
-    // Set up callback
+    // Set up callback with proper element check
     window.initMap = () => {
-      initializeMap();
+      // Ensure the map element exists and is in the DOM before initializing
+      if (mapRef.current && document.contains(mapRef.current) && isMounted) {
+        initializeMap();
+      } else {
+        // If element doesn't exist, wait a bit and try again
+        setTimeout(() => {
+          if (mapRef.current && document.contains(mapRef.current) && isMounted) {
+            initializeMap();
+          } else {
+            console.warn('Map element not found or component unmounted, skipping map initialization');
+            setIsLoading(false);
+          }
+        }, 100);
+      }
     };
 
     // Handle script errors
@@ -165,7 +203,7 @@ const SharedJobMap: React.FC<SharedJobMapProps> = ({
       }
       delete window.initMap;
     };
-  }, [apiKey, isApiKeyLoading, initializeMap]);
+  }, [apiKey, isApiKeyLoading, isMounted, initializeMap]);
 
   // Update markers when jobs change
   useEffect(() => {
@@ -173,6 +211,30 @@ const SharedJobMap: React.FC<SharedJobMapProps> = ({
       initializeMap();
     }
   }, [jobs, initializeMap]);
+
+  // Cleanup effect to handle component unmounting
+  useEffect(() => {
+    return () => {
+      // Clean up markers
+      markersRef.current.forEach(marker => {
+        if (marker && marker.setMap) {
+          marker.setMap(null);
+        }
+      });
+      markersRef.current = [];
+
+      // Clean up info window
+      if (infoWindowRef.current) {
+        infoWindowRef.current.close();
+        infoWindowRef.current = null;
+      }
+
+      // Clean up map instance
+      if (mapInstanceRef.current) {
+        mapInstanceRef.current = null;
+      }
+    };
+  }, []);
 
   // Loading state
   if (isApiKeyLoading) {
