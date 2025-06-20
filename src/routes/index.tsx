@@ -27,6 +27,10 @@ const TestMapsPage = lazy(() => import('@/pages/test-maps'));
 const GoogleCloudFixPage = lazy(() => import('@/pages/google-cloud-fix'));
 const TestGoogleMapsPage = lazy(() => import('@/pages/TestGoogleMaps'));
 
+// Voice Search Pages
+const QBCCVoiceSearchPage = lazy(() => import('@/pages/QBCCVoiceSearch'));
+const TimberQueenslandVoiceSearchPage = lazy(() => import('@/pages/TimberQueenslandVoiceSearch'));
+
 // Workflow Dashboard
 const WorkflowDashboard = lazy(() => import('@/components/workflow/WorkflowDashboard').then(module => ({ default: module.default })));
 
@@ -287,6 +291,9 @@ const routeObjects: RouteObject[] = [
           { path: "/test-google-maps", element: <SuspenseWrapper><TestGoogleMapsPage /></SuspenseWrapper> },
           // Animated Stage Demo route
           { path: "/animated-stage-demo", element: <SuspenseWrapper><AnimatedStageDemo /></SuspenseWrapper> },
+          // Voice Search routes
+          { path: "/qbcc-voice-search", element: <SuspenseWrapper><QBCCVoiceSearchPage /></SuspenseWrapper> },
+          { path: "/timber-queensland-voice-search", element: <SuspenseWrapper><TimberQueenslandVoiceSearchPage /></SuspenseWrapper> },
           // Add the route to the settings routes
           {
             path: "/settings/integrations/database",
