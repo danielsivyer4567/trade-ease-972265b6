@@ -1,4 +1,3 @@
-
 # Database Migration Instructions
 
 ## Option 1: Supabase Dashboard (Recommended for Production)
@@ -72,3 +71,120 @@ To rollback, you can drop the tables:
 ```sql
 DROP TABLE IF EXISTS ncc_codes CASCADE;
 ```
+
+## Solution: Apply Database Migrations
+
+The error is occurring because the `get_user_organizations` function hasn't been created in your database yet. This function is defined in the migration file `20250122000000_multi_business_system.sql`.
+
+### Recommended Approach: Use Supabase Dashboard
+
+1. **Go to your Supabase Dashboard**: 
+   - Open this URL: https://supabase.com/dashboard/project/wxwbxupdisbofesaygqj
+   
+2. **Navigate to the SQL Editor**:
+   - In the left sidebar, click on "SQL Editor"
+
+3. **Apply the migrations**:
+   - Open the file `migration-combined.sql` that was just generated in your project root
+   - Copy its entire contents
+   - Paste it into the SQL Editor
+   - Click "Run" to execute the SQL
+
+This will create all the necessary tables and functions, including the `get_user_organizations` function that's currently missing.
+
+### Alternative: If you only want to fix this specific error quickly
+
+You can run just the function creation SQL in the Supabase SQL Editor:
+
+```sql
+CREATE OR REPLACE FUNCTION get_user_organizations()
+RETURNS TABLE (
+  organization_id UUID,
+  organization_name TEXT,
+  role TEXT,
+  access_type TEXT,
+  is_current BOOLEAN
+) AS $$
+BEGIN
+  RETURN QUERY
+  -- Get organizations where user is a member
+  SELECT 
+    o.id,
+    o.name,
+    om.role,
+    'member'::TEXT as access_type,
+    (up.current_organization_id = o.id) as is_current
+  FROM organizations o
+  JOIN organization_members om ON o.id = om.organization_id
+  LEFT JOIN user_profiles up ON up.user_id = auth.uid()
+  WHERE om.user_id = auth.uid()
+  AND o.is_active = true
+  
+  UNION
+  
+  -- Get organizations where user has agency access
+  SELECT 
+    o.id,
+    o.name,
+    'agency'::TEXT as role,
+    'agency'::TEXT as access_type,
+    (up.current_organization_id = o.id) as is_current
+  FROM organizations o
+  JOIN agency_client_relationships acr ON o.id = acr.client_organization_id
+  LEFT JOIN user_profiles up ON up.user_id = auth.uid()
+  WHERE acr.agency_user_id = auth.uid()
+  AND acr.status = 'active'
+  AND o.is_active = true
+  
+  ORDER BY is_current DESC, organization_name;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+GRANT EXECUTE ON FUNCTION get_user_organizations TO authenticated;
+```
+
+After running the migrations, refresh your application and the error should be resolved!
+
+## Fix for the Missing Column Error
+
+The error "column up.current_organization_id does not exist" indicates that the `user_profiles` table is missing the `current_organization_id` column. This should have been added by the migration, but it seems it wasn't applied properly.
+
+### Quick Fix:
+
+1. **Go to your Supabase Dashboard**: 
+   - Open: https://supabase.com/dashboard/project/wxwbxupdisbofesaygqj
+   
+2. **Navigate to SQL Editor**
+
+3. **Run this SQL to add the missing column**:
+
+```sql
+-- Fix for missing current_organization_id column
+-- This adds the missing column to user_profiles table
+
+-- First, check if the column exists and add it if it doesn't
+DO $$ 
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 
+        FROM information_schema.columns 
+        WHERE table_schema = 'public' 
+        AND table_name = 'user_profiles' 
+        AND column_name = 'current_organization_id'
+    ) THEN
+        ALTER TABLE user_profiles 
+        ADD COLUMN current_organization_id UUID REFERENCES organizations(id);
+    END IF;
+END $$;
+
+-- Also ensure the index exists
+CREATE INDEX IF NOT EXISTS idx_user_profiles_current_org ON user_profiles(current_organization_id);
+```
+
+### Alternative: Run the Full Migration
+
+If you continue to have issues, I recommend running the complete migration from the `migration-combined.sql` file that was generated. This will ensure all tables, columns, and functions are properly created.
+
+The file `fix-current-organization-id.sql` has been created in your project root with the SQL commands needed to fix this specific issue.
+
+After running this SQL, refresh your application and the error should be resolved!
