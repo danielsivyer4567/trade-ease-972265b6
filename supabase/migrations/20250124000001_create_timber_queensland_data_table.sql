@@ -35,10 +35,10 @@ CREATE POLICY "Allow read access to Timber Queensland data for authorized users"
     USING (
         EXISTS (
             SELECT 1 FROM user_subscriptions us
-            JOIN subscription_features sf ON us.subscription_tier = sf.subscription_tier
+            JOIN subscription_features sf ON us.subscription_tier = sf.tier
             WHERE us.user_id = auth.uid()
             AND sf.feature_key = 'timber_queensland_voice_search'
-            AND sf.enabled = true
+            AND sf.feature_value::text = 'true'
             AND us.is_active = true
         )
     );
