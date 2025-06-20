@@ -143,7 +143,7 @@ export const OrganizationProvider: React.FC<{ children: React.ReactNode }> = ({ 
         setUserOrganizations(orgsData);
 
         // Load current organization details
-        const currentOrgData = orgsData.find(org => org.is_current);
+        const currentOrgData = orgsData.find((org: any) => org.is_current);
         if (currentOrgData) {
           const { data: orgDetails, error: detailsError } = await supabase
             .from('organizations')
