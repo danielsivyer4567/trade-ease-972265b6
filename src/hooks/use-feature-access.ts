@@ -9,6 +9,8 @@ interface FeatureAccess {
   accountingIntegration: boolean;
   businessStructureMap: boolean;
   nccVoiceSearch: boolean;
+  qbccVoiceSearch: boolean;
+  timberQueenslandVoiceSearch: boolean;
   canRequestFeatures: boolean;
   featureRequestLimit: number;
   isLoading: boolean;
@@ -23,6 +25,8 @@ export const useFeatureAccess = (): FeatureAccess => {
     accountingIntegration: false,
     businessStructureMap: false,
     nccVoiceSearch: false,
+    qbccVoiceSearch: false,
+    timberQueenslandVoiceSearch: false,
     canRequestFeatures: false,
     featureRequestLimit: 0,
     isLoading: true
@@ -39,6 +43,8 @@ export const useFeatureAccess = (): FeatureAccess => {
           accountingIntegration,
           businessStructureMap,
           nccVoiceSearch,
+          qbccVoiceSearch,
+          timberQueenslandVoiceSearch,
           canRequestFeatures,
           featureRequestLimit
         ] = await Promise.all([
@@ -49,6 +55,8 @@ export const useFeatureAccess = (): FeatureAccess => {
           FeatureRequestService.hasAccountingIntegration(),
           FeatureRequestService.hasBusinessStructureMapAccess(),
           FeatureRequestService.hasNCCVoiceSearchAccess(),
+          FeatureRequestService.hasQBCCVoiceSearchAccess(),
+          FeatureRequestService.hasTimberQueenslandVoiceSearchAccess(),
           FeatureRequestService.canRequestFeatures(),
           FeatureRequestService.getFeatureRequestLimit()
         ]);
@@ -61,6 +69,8 @@ export const useFeatureAccess = (): FeatureAccess => {
           accountingIntegration,
           businessStructureMap,
           nccVoiceSearch,
+          qbccVoiceSearch,
+          timberQueenslandVoiceSearch,
           canRequestFeatures,
           featureRequestLimit,
           isLoading: false

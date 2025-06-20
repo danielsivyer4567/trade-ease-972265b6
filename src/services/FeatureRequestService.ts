@@ -313,4 +313,46 @@ export class FeatureRequestService {
       return false;
     }
   }
+
+  /**
+   * Check if user has access to QBCC Forms Voice Search
+   */
+  static async hasQBCCVoiceSearchAccess(): Promise<boolean> {
+    try {
+      const { data, error } = await supabase.rpc('has_feature_access', {
+        feature_key: 'qbcc_voice_search'
+      });
+
+      if (error) {
+        console.error('Error checking QBCC voice search access:', error);
+        return false;
+      }
+
+      return data || false;
+    } catch (error) {
+      console.error('Error checking QBCC voice search access:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Check if user has access to Timber Queensland Voice Search
+   */
+  static async hasTimberQueenslandVoiceSearchAccess(): Promise<boolean> {
+    try {
+      const { data, error } = await supabase.rpc('has_feature_access', {
+        feature_key: 'timber_queensland_voice_search'
+      });
+
+      if (error) {
+        console.error('Error checking Timber Queensland voice search access:', error);
+        return false;
+      }
+
+      return data || false;
+    } catch (error) {
+      console.error('Error checking Timber Queensland voice search access:', error);
+      return false;
+    }
+  }
 } 
