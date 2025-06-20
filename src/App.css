@@ -501,3 +501,11 @@
   pointer-events: all !important;
   z-index: 50 !important;
 }
+
+/* Map container styles to ensure proper rendering */
+.map-container {
+  position: relative;
+  min-height: 100px;
+  visibility: visible;
+  opacity: 1;
+}

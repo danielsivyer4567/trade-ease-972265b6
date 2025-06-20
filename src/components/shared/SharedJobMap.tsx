@@ -34,6 +34,7 @@ const SharedJobMap: React.FC<SharedJobMapProps> = ({
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isMounted, setIsMounted] = useState(false);
+  const [mapElementReady, setMapElementReady] = useState(false);
   const { apiKey, isLoading: isApiKeyLoading, error: apiKeyError } = useGoogleMapsApiKey();
 
   // Track component mount state
@@ -42,18 +43,41 @@ const SharedJobMap: React.FC<SharedJobMapProps> = ({
     return () => setIsMounted(false);
   }, []);
 
+  // Track when map element is ready
+  useEffect(() => {
+    if (mapRef.current) {
+      // Use requestAnimationFrame to ensure the element is rendered
+      requestAnimationFrame(() => {
+        setMapElementReady(true);
+      });
+    }
+  }, []);
+
   // Initialize map
   const initializeMap = useCallback(() => {
-    if (!mapRef.current || !window.google || !isMounted) {
-      console.warn('Map initialization skipped: missing ref, Google Maps API, or component unmounted');
+    if (!mapRef.current || !window.google || !isMounted || !mapElementReady) {
+      console.warn('Map initialization skipped: missing requirements', {
+        hasMapRef: !!mapRef.current,
+        hasGoogleMaps: !!window.google,
+        isMounted,
+        mapElementReady
+      });
       setIsLoading(false);
       return;
     }
 
-    // Ensure the element is in the DOM
-    if (!document.contains(mapRef.current)) {
-      console.warn('Map element not in DOM, skipping initialization');
-      setIsLoading(false);
+    // Ensure the element is in the DOM and has dimensions
+    if (!document.contains(mapRef.current) || mapRef.current.offsetHeight === 0) {
+      console.warn('Map element not ready in DOM or has no height, retrying...');
+      // Retry after a short delay
+      setTimeout(() => {
+        if (mapRef.current && document.contains(mapRef.current) && mapRef.current.offsetHeight > 0) {
+          initializeMap();
+        } else {
+          setIsLoading(false);
+          setError('Map container not properly rendered');
+        }
+      }, 100);
       return;
     }
 
@@ -149,18 +173,20 @@ const SharedJobMap: React.FC<SharedJobMapProps> = ({
       setError('Failed to initialize map');
       setIsLoading(false);
     }
-  }, [jobs, showStreetView, onJobClick, isMounted]);
+  }, [jobs, showStreetView, onJobClick, isMounted, mapElementReady]);
 
   // Load Google Maps script
   useEffect(() => {
-    if (!apiKey || isApiKeyLoading || !isMounted) return;
+    if (!apiKey || isApiKeyLoading || !isMounted || !mapElementReady) return;
 
     // Check if script is already loaded
     if (window.google && window.google.maps) {
-      // Ensure the map element exists before initializing
-      if (mapRef.current) {
-        initializeMap();
-      }
+      // Add a small delay to ensure DOM is ready
+      setTimeout(() => {
+        if (mapRef.current && document.contains(mapRef.current)) {
+          initializeMap();
+        }
+      }, 0);
       return;
     }
 
@@ -172,20 +198,15 @@ const SharedJobMap: React.FC<SharedJobMapProps> = ({
     
     // Set up callback with proper element check
     window.initMap = () => {
-      // Ensure the map element exists and is in the DOM before initializing
-      if (mapRef.current && document.contains(mapRef.current) && isMounted) {
-        initializeMap();
-      } else {
-        // If element doesn't exist, wait a bit and try again
-        setTimeout(() => {
-          if (mapRef.current && document.contains(mapRef.current) && isMounted) {
-            initializeMap();
-          } else {
-            console.warn('Map element not found or component unmounted, skipping map initialization');
-            setIsLoading(false);
-          }
-        }, 100);
-      }
+      // Use requestAnimationFrame to ensure DOM is ready
+      requestAnimationFrame(() => {
+        if (mapRef.current && document.contains(mapRef.current) && isMounted) {
+          initializeMap();
+        } else {
+          console.warn('Map element not found or component unmounted, skipping map initialization');
+          setIsLoading(false);
+        }
+      });
     };
 
     // Handle script errors
@@ -203,7 +224,7 @@ const SharedJobMap: React.FC<SharedJobMapProps> = ({
       }
       delete window.initMap;
     };
-  }, [apiKey, isApiKeyLoading, isMounted, initializeMap]);
+  }, [apiKey, isApiKeyLoading, isMounted, mapElementReady, initializeMap]);
 
   // Update markers when jobs change
   useEffect(() => {
@@ -286,7 +307,11 @@ const SharedJobMap: React.FC<SharedJobMapProps> = ({
           <Loader2 className="h-8 w-8 animate-spin" />
         </div>
       )}
-      <div ref={mapRef} style={{ width: '100%', height: '100%' }} />
+      <div 
+        ref={mapRef} 
+        style={{ width: '100%', height: '100%' }}
+        className="map-container"
+      />
     </div>
   );
 };
