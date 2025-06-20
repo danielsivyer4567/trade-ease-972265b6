@@ -73,19 +73,59 @@ export const OrganizationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     }
 
     try {
-      // Get user's subscription tier and settings
-      const { data: profileData, error: profileError } = await supabase
-        .from('user_profiles')
-        .select('subscription_tier, max_organizations, current_organization_id, subscription_features')
-        .eq('user_id', user.id)
-        .single();
+      // First, check if user_profiles exists and has the required columns
+      let profileData = null;
+      let hasSubscriptionColumns = false;
+      
+      try {
+        // Try to get subscription data
+        const { data: fullProfile, error: fullProfileError } = await supabase
+          .from('user_profiles')
+          .select('subscription_tier, max_organizations, current_organization_id, subscription_features')
+          .eq('user_id', user.id)
+          .single();
 
-      if (profileError) {
-        console.error('Error loading user profile:', profileError);
-      } else if (profileData) {
+        if (!fullProfileError && fullProfile) {
+          profileData = fullProfile;
+          hasSubscriptionColumns = true;
+        }
+      } catch (err) {
+        console.warn('Subscription columns not available in user_profiles:', err);
+      }
+
+      // If subscription columns don't exist, try basic profile
+      if (!hasSubscriptionColumns) {
+        try {
+          const { data: basicProfile, error: basicProfileError } = await supabase
+            .from('user_profiles')
+            .select('user_id, email, name')
+            .eq('user_id', user.id)
+            .single();
+
+          if (!basicProfileError && basicProfile) {
+            // Use default values for missing columns
+            profileData = {
+              subscription_tier: 'free_starter',
+              max_organizations: 1,
+              current_organization_id: null,
+              subscription_features: {}
+            };
+          }
+        } catch (err) {
+          console.warn('Could not load user profile:', err);
+        }
+      }
+
+      // Set subscription data with defaults if needed
+      if (profileData) {
         setSubscriptionTier(profileData.subscription_tier || 'free_starter');
         setSubscriptionFeatures(profileData.subscription_features || {});
         setMaxOrganizations(profileData.max_organizations || 1);
+      } else {
+        // Use defaults if no profile data available
+        setSubscriptionTier('free_starter');
+        setSubscriptionFeatures({});
+        setMaxOrganizations(1);
       }
 
       // Get user's organizations using the database function
