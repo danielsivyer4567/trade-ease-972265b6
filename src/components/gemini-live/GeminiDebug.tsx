@@ -20,7 +20,7 @@ export const GeminiDebug: React.FC<GeminiDebugProps> = ({ apiKey }) => {
 
     try {
       const res = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key=${apiKey}`,
         {
           method: 'POST',
           headers: {
@@ -57,7 +57,7 @@ export const GeminiDebug: React.FC<GeminiDebugProps> = ({ apiKey }) => {
       <CardContent className="space-y-4">
         <div className="text-sm space-y-1">
           <p><strong>API Key:</strong> {apiKey ? `${apiKey.substring(0, 10)}...${apiKey.substring(apiKey.length - 4)}` : 'Not set'}</p>
-          <p><strong>Endpoint:</strong> gemini-1.5-flash</p>
+          <p><strong>Endpoint:</strong> gemini-1.5-pro</p>
         </div>
 
         <Button 

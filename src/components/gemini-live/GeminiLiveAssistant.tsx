@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { MicrophoneTest } from './MicrophoneTest';
+import { AnnotationOverlay, Annotation } from './AnnotationOverlay';
 
 interface GeminiLiveAssistantProps {
   geminiApiKey: string;
@@ -65,6 +66,7 @@ export const GeminiLiveAssistant: React.FC<GeminiLiveAssistantProps> = ({
   const [conversation, setConversation] = useState<ConversationMessage[]>([]);
   const [currentTranscript, setCurrentTranscript] = useState('');
   const [showMicTest, setShowMicTest] = useState(false);
+  const [annotations, setAnnotations] = useState<Annotation[]>([]);
   
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -273,7 +275,7 @@ export const GeminiLiveAssistant: React.FC<GeminiLiveAssistantProps> = ({
     try {
       // Add context if screen is being shared
       const contextualText = includeScreenshot 
-        ? `User is sharing their screen with Trade Ease app. User says: "${text}". Please help them based on what you can see on their screen.`
+        ? `You are an expert user of the "Trade Ease" application. Your goal is to provide helpful, step-by-step guidance. A user is sharing their screen and has asked for help. Their request is: "${text}". Analyze the screen and their request to provide a clear, actionable response. In the future, you will provide this as a JSON object with annotations, but for now, just provide the text explanation.`
         : text;
       
       let parts: any[] = [{ text: contextualText }];
@@ -303,7 +305,7 @@ export const GeminiLiveAssistant: React.FC<GeminiLiveAssistantProps> = ({
       console.log('Sending request to Gemini with:', { contextualText, includeScreenshot });
       
       const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiApiKey}`,
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key=${geminiApiKey}`,
         {
           method: 'POST',
           headers: {
@@ -364,8 +366,6 @@ export const GeminiLiveAssistant: React.FC<GeminiLiveAssistantProps> = ({
     console.log('Screenshot captured for context');
   };
 
-
-
   // Convert text to speech
   const speakText = (text: string) => {
     const utterance = new SpeechSynthesisUtterance(text);
@@ -425,248 +425,256 @@ export const GeminiLiveAssistant: React.FC<GeminiLiveAssistantProps> = ({
   }, []);
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <Card className="w-full max-w-4xl h-[80vh] flex flex-col">
-        <CardHeader className="flex-shrink-0">
-          <div className="flex items-center justify-between">
-            <CardTitle className="flex items-center gap-2">
-              <Sparkles className="h-6 w-6 text-purple-500" />
-              Gemini Live Assistant
-            </CardTitle>
-            <div className="flex items-center gap-2">
-              {isConnected && (
-                <Badge variant="default" className="animate-pulse">
-                  <Phone className="h-3 w-3 mr-1" />
-                  Live
-                </Badge>
-              )}
-              {isScreenSharing && (
-                <Badge variant="secondary">
-                  <Monitor className="h-3 w-3 mr-1" />
-                  Sharing
-                </Badge>
-              )}
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setShowMicTest(!showMicTest)}
-                title="Audio Test"
-              >
-                <Headphones className="h-4 w-4" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={onClose}
-              >
-                <Settings className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
-        </CardHeader>
-        
-        <CardContent className="flex-1 flex gap-4 p-4 overflow-hidden">
-          {/* Show microphone test if enabled */}
-          {showMicTest ? (
-            <MicrophoneTest onClose={() => setShowMicTest(false)} />
-          ) : (
-            <>
-              {/* Main conversation area */}
-              <div className="flex-1 flex flex-col">
-            <ScrollArea className="flex-1 border rounded-lg p-4">
-              <div className="space-y-4">
-                {conversation.length === 0 && (
-                  <div className="text-center py-8 text-muted-foreground">
-                    <MessageSquare className="h-12 w-12 mx-auto mb-3 opacity-50" />
-                    <p>Start a conversation with Gemini Live</p>
-                  </div>
+    <>
+      <AnnotationOverlay 
+        annotations={annotations}
+        width={window.innerWidth}
+        height={window.innerHeight}
+        onClear={() => setAnnotations([])}
+      />
+      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+        <Card className="w-full max-w-4xl h-[80vh] flex flex-col">
+          <CardHeader className="flex-shrink-0">
+            <div className="flex items-center justify-between">
+              <CardTitle className="flex items-center gap-2">
+                <Sparkles className="h-6 w-6 text-purple-500" />
+                Gemini Live Assistant
+              </CardTitle>
+              <div className="flex items-center gap-2">
+                {isConnected && (
+                  <Badge variant="default" className="animate-pulse">
+                    <Phone className="h-3 w-3 mr-1" />
+                    Live
+                  </Badge>
                 )}
-                
-                {conversation.map((message) => (
-                  <div
-                    key={message.id}
-                    className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
-                  >
-                    <div
-                      className={`max-w-[80%] rounded-lg p-3 ${
-                        message.role === 'user'
-                          ? 'bg-primary text-primary-foreground'
-                          : 'bg-muted'
-                      }`}
-                    >
-                      <div className="flex items-start gap-2">
-                        {message.role === 'assistant' && <Sparkles className="h-4 w-4 mt-0.5" />}
-                        <div className="flex-1">
-                          <p className="text-sm whitespace-pre-wrap">{message.content}</p>
-                          {message.audioUrl && (
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="mt-2"
-                              onClick={() => {/* Play audio */}}
-                            >
-                              <Volume2 className="h-4 w-4 mr-1" />
-                              Play Audio
-                            </Button>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </ScrollArea>
-            
-            {/* Current transcript */}
-            {currentTranscript && (
-              <div className="mt-2 p-2 bg-muted rounded text-sm text-muted-foreground">
-                {currentTranscript}...
-              </div>
-            )}
-            
-            {/* Controls */}
-            <div className="mt-4 space-y-3">
-              {/* Text input as primary method */}
-              <div className="flex gap-2">
-                <Input
-                  placeholder="Type your message or use voice..."
-                  onKeyPress={(e) => {
-                    if (e.key === 'Enter' && e.currentTarget.value.trim()) {
-                      const text = e.currentTarget.value;
-                      addMessage({ role: 'user', content: text });
-                      processUserInput(text, isScreenSharing);
-                      e.currentTarget.value = '';
-                    }
-                  }}
-                  disabled={!isConnected}
-                />
+                {isScreenSharing && (
+                  <Badge variant="secondary">
+                    <Monitor className="h-3 w-3 mr-1" />
+                    Sharing
+                  </Badge>
+                )}
                 <Button
-                  onClick={() => {
-                    const input = document.querySelector('input[placeholder="Type your message or use voice..."]') as HTMLInputElement;
-                    if (input?.value.trim()) {
-                      const text = input.value;
-                      addMessage({ role: 'user', content: text });
-                      processUserInput(text, isScreenSharing);
-                      input.value = '';
-                    }
-                  }}
-                  disabled={!isConnected}
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setShowMicTest(!showMicTest)}
+                  title="Audio Test"
                 >
-                  Send
+                  <Headphones className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={onClose}
+                >
+                  <Settings className="h-4 w-4" />
                 </Button>
               </div>
-              
-              <div className="flex gap-2">
-                {!isConnected ? (
-                  <Button
-                    onClick={connectToGeminiLive}
-                    disabled={isConnecting}
-                    className="flex-1"
-                  >
-                    {isConnecting ? (
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    ) : (
-                      <Phone className="h-4 w-4 mr-2" />
-                    )}
-                    Connect to Assistant
-                  </Button>
-                ) : (
-                  <>
-                    <Button
-                      onClick={() => {
-                        setIsMuted(!isMuted);
-                        if ((window as any).speechRecognition) {
-                          if (isMuted) {
-                            (window as any).speechRecognition.start();
-                          } else {
-                            (window as any).speechRecognition.stop();
-                          }
-                        }
-                      }}
-                      variant={isMuted ? "destructive" : "secondary"}
-                      size="icon"
-                      title={isMuted ? "Enable voice input" : "Disable voice input"}
-                    >
-                      {isMuted ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
-                    </Button>
-                    
-                    {!isScreenSharing ? (
-                      <Button
-                        onClick={startScreenShare}
-                        variant="secondary"
-                      >
-                        <Monitor className="h-4 w-4 mr-2" />
-                      Share Screen
-                    </Button>
-                  ) : (
-                    <Button
-                      onClick={stopScreenShare}
-                      variant="destructive"
-                    >
-                      <MonitorOff className="h-4 w-4 mr-2" />
-                      Stop Sharing
-                    </Button>
+            </div>
+          </CardHeader>
+          
+          <CardContent className="flex-1 flex gap-4 p-4 overflow-hidden">
+            {/* Show microphone test if enabled */}
+            {showMicTest ? (
+              <MicrophoneTest onClose={() => setShowMicTest(false)} />
+            ) : (
+              <>
+                {/* Main conversation area */}
+                <div className="flex-1 flex flex-col">
+                  <ScrollArea className="flex-1 border rounded-lg p-4">
+                    <div className="space-y-4">
+                      {conversation.length === 0 && (
+                        <div className="text-center py-8 text-muted-foreground">
+                          <MessageSquare className="h-12 w-12 mx-auto mb-3 opacity-50" />
+                          <p>Start a conversation with Gemini Live</p>
+                        </div>
+                      )}
+                      
+                      {conversation.map((message) => (
+                        <div
+                          key={message.id}
+                          className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                        >
+                          <div
+                            className={`max-w-[80%] rounded-lg p-3 ${
+                              message.role === 'user'
+                                ? 'bg-primary text-primary-foreground'
+                                : 'bg-muted'
+                            }`}
+                          >
+                            <div className="flex items-start gap-2">
+                              {message.role === 'assistant' && <Sparkles className="h-4 w-4 mt-0.5" />}
+                              <div className="flex-1">
+                                <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                                {message.audioUrl && (
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="mt-2"
+                                    onClick={() => {/* Play audio */}}
+                                  >
+                                    <Volume2 className="h-4 w-4 mr-1" />
+                                    Play Audio
+                                  </Button>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </ScrollArea>
+                  
+                  {/* Current transcript */}
+                  {currentTranscript && (
+                    <div className="mt-2 p-2 bg-muted rounded text-sm text-muted-foreground">
+                      {currentTranscript}...
+                    </div>
                   )}
                   
-                  <Button
-                    onClick={disconnect}
-                    variant="outline"
-                  >
-                    <PhoneOff className="h-4 w-4 mr-2" />
-                    End Call
-                  </Button>
-                  
-                  <Button
-                    onClick={() => {
-                      // Test button to verify Gemini is working
-                      processUserInput("Hello, can you hear me? Please respond if you're working.", false);
-                    }}
-                    variant="secondary"
-                    size="sm"
-                  >
-                    Test
-                  </Button>
-                </>
-              )}
-              </div>
-            </div>
-          </div>
-          
-          {/* Screen preview */}
-          {isScreenSharing && (
-            <div className="w-96 flex-shrink-0">
-              <div className="border rounded-lg overflow-hidden">
-                <div className="bg-muted p-2 text-sm font-medium">Screen Preview</div>
-                <video
-                  ref={videoRef}
-                  autoPlay
-                  playsInline
-                  muted
-                  className="w-full"
-                  style={{ maxHeight: '300px' }}
-                />
-                <canvas ref={canvasRef} className="hidden" />
-              </div>
-              
-              <Alert className="mt-4">
-                <AlertCircle className="h-4 w-4" />
-                <AlertDescription className="text-xs">
-                  I can see your screen and help you with:
-                  <ul className="list-disc list-inside mt-1">
-                    <li>Navigating the Trade Ease app</li>
-                    <li>Creating jobs, quotes, or invoices</li>
-                    <li>Managing customers and teams</li>
-                    <li>Using calculators and tools</li>
-                    <li>Troubleshooting any issues</li>
-                  </ul>
-                </AlertDescription>
-              </Alert>
-            </div>
-          )}
-          </>
-        )}
-        </CardContent>
-      </Card>
-    </div>
+                  {/* Controls */}
+                  <div className="mt-4 space-y-3">
+                    {/* Text input as primary method */}
+                    <div className="flex gap-2">
+                      <Input
+                        placeholder="Type your message or use voice..."
+                        onKeyPress={(e) => {
+                          if (e.key === 'Enter' && e.currentTarget.value.trim()) {
+                            const text = e.currentTarget.value;
+                            addMessage({ role: 'user', content: text });
+                            processUserInput(text, isScreenSharing);
+                            e.currentTarget.value = '';
+                          }
+                        }}
+                        disabled={!isConnected}
+                      />
+                      <Button
+                        onClick={() => {
+                          const input = document.querySelector('input[placeholder="Type your message or use voice..."]') as HTMLInputElement;
+                          if (input?.value.trim()) {
+                            const text = input.value;
+                            addMessage({ role: 'user', content: text });
+                            processUserInput(text, isScreenSharing);
+                            input.value = '';
+                          }
+                        }}
+                        disabled={!isConnected}
+                      >
+                        Send
+                      </Button>
+                    </div>
+                    
+                    <div className="flex gap-2">
+                      {!isConnected ? (
+                        <Button
+                          onClick={connectToGeminiLive}
+                          disabled={isConnecting}
+                          className="flex-1"
+                        >
+                          {isConnecting ? (
+                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          ) : (
+                            <Phone className="h-4 w-4 mr-2" />
+                          )}
+                          Connect to Assistant
+                        </Button>
+                      ) : (
+                        <>
+                          <Button
+                            onClick={() => {
+                              setIsMuted(!isMuted);
+                              if ((window as any).speechRecognition) {
+                                if (isMuted) {
+                                  (window as any).speechRecognition.start();
+                                } else {
+                                  (window as any).speechRecognition.stop();
+                                }
+                              }
+                            }}
+                            variant={isMuted ? "destructive" : "secondary"}
+                            size="icon"
+                            title={isMuted ? "Enable voice input" : "Disable voice input"}
+                          >
+                            {isMuted ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
+                          </Button>
+                          
+                          {!isScreenSharing ? (
+                            <Button
+                              onClick={startScreenShare}
+                              variant="secondary"
+                            >
+                              <Monitor className="h-4 w-4 mr-2" />
+                              Share Screen
+                            </Button>
+                          ) : (
+                            <Button
+                              onClick={stopScreenShare}
+                              variant="destructive"
+                            >
+                              <MonitorOff className="h-4 w-4 mr-2" />
+                              Stop Sharing
+                            </Button>
+                          )}
+                          
+                          <Button
+                            onClick={disconnect}
+                            variant="outline"
+                          >
+                            <PhoneOff className="h-4 w-4 mr-2" />
+                            End Call
+                          </Button>
+                          
+                          <Button
+                            onClick={() => {
+                              // Test button to verify Gemini is working
+                              processUserInput("Hello, can you hear me? Please respond if you're working.", false);
+                            }}
+                            variant="secondary"
+                            size="sm"
+                          >
+                            Test
+                          </Button>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Screen preview */}
+                {isScreenSharing && (
+                  <div className="w-96 flex-shrink-0">
+                    <div className="border rounded-lg overflow-hidden">
+                      <div className="bg-muted p-2 text-sm font-medium">Screen Preview</div>
+                      <video
+                        ref={videoRef}
+                        autoPlay
+                        playsInline
+                        muted
+                        className="w-full"
+                        style={{ maxHeight: '300px' }}
+                      />
+                      <canvas ref={canvasRef} className="hidden" />
+                    </div>
+                    
+                    <Alert className="mt-4">
+                      <AlertCircle className="h-4 w-4" />
+                      <AlertDescription className="text-xs">
+                        I can see your screen and help you with:
+                        <ul className="list-disc list-inside mt-1">
+                          <li>Navigating the Trade Ease app</li>
+                          <li>Creating jobs, quotes, or invoices</li>
+                          <li>Managing customers and teams</li>
+                          <li>Using calculators and tools</li>
+                          <li>Troubleshooting any issues</li>
+                        </ul>
+                      </AlertDescription>
+                    </Alert>
+                  </div>
+                )}
+              </>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+    </>
   );
 };
