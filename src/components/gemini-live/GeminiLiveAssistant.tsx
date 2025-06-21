@@ -266,7 +266,12 @@ export const GeminiLiveAssistant: React.FC<GeminiLiveAssistantProps> = ({
   // Process user input with Gemini
   const processUserInput = async (text: string, includeScreenshot?: boolean) => {
     try {
-      let parts: any[] = [{ text }];
+      // Add context if screen is being shared
+      const contextualText = includeScreenshot 
+        ? `User is sharing their screen with Trade Ease app. User says: "${text}". Please help them based on what you can see on their screen.`
+        : text;
+      
+      let parts: any[] = [{ text: contextualText }];
       
       // Add screenshot if screen is being shared
       if (includeScreenshot && isScreenSharing && canvasRef.current && videoRef.current) {
