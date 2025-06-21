@@ -26,6 +26,7 @@ const DebugMapsPage = lazy(() => import('@/pages/debug-maps'));
 const GoogleCloudFixPage = lazy(() => import('@/pages/google-cloud-fix'));
 const TestGoogleMapsPage = lazy(() => import('@/pages/TestGoogleMaps'));
 const TestGoogleMapsOptimizedPage = lazy(() => import('@/pages/TestGoogleMapsOptimized'));
+const GoogleMapsDiagnosticPage = lazy(() => import('@/pages/GoogleMapsDiagnostic'));
 
 // Voice Search Pages
 const QBCCVoiceSearchPage = lazy(() => import('@/pages/QBCCVoiceSearch'));
@@ -291,6 +292,8 @@ const routeObjects: RouteObject[] = [
           { path: "/test-maps", element: <SuspenseWrapper><TestGoogleMapsPage /></SuspenseWrapper> },
           // Test Google Maps Optimized route
           { path: "/test-google-maps-optimized", element: <SuspenseWrapper><TestGoogleMapsOptimizedPage /></SuspenseWrapper> },
+          // Google Maps Diagnostic route
+          { path: "/google-maps-diagnostic", element: <SuspenseWrapper><GoogleMapsDiagnosticPage /></SuspenseWrapper> },
           // Google Cloud Fix route
           { path: "/google-cloud-fix", element: <SuspenseWrapper><GoogleCloudFixPage /></SuspenseWrapper> },
           // Test Google Maps API route
