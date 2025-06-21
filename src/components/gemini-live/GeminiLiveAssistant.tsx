@@ -198,6 +198,16 @@ export const GeminiLiveAssistant: React.FC<GeminiLiveAssistantProps> = ({
         description: "I can now see your screen and help you better",
       });
       
+      // Automatically ask how to help when screen sharing starts
+      setTimeout(() => {
+        const message = "I can now see your screen! How can I help you with Trade Ease today?";
+        addMessage({
+          role: 'assistant',
+          content: message
+        });
+        speakText(message);
+      }, 1000);
+      
     } catch (error) {
       console.error('Error starting screen share:', error);
       toast({
@@ -324,8 +334,9 @@ export const GeminiLiveAssistant: React.FC<GeminiLiveAssistantProps> = ({
 
   // Send screenshot to Gemini for analysis
   const sendScreenshotToGemini = (base64Image: string) => {
-    // This is now handled by processUserInput with includeScreenshot flag
-    processUserInput("I can see your screen. What would you like help with?", true);
+    // Don't send automatic messages, just store the screenshot for next user input
+    // This prevents spamming the user with repeated messages
+    console.log('Screenshot captured for context');
   };
 
 
