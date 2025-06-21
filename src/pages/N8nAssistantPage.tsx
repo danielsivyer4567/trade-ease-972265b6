@@ -27,8 +27,10 @@ import { GeminiLiveAssistant } from '@/components/gemini-live/GeminiLiveAssistan
 import { useToast } from '@/hooks/use-toast';
 
 const N8nAssistantPage = () => {
-  const [geminiApiKey, setGeminiApiKey] = useState('');
-  const [apiKeyConfigured, setApiKeyConfigured] = useState(false);
+  // Check for API key in environment first
+  const envApiKey = import.meta.env.VITE_GEMINI_API_KEY || '';
+  const [geminiApiKey, setGeminiApiKey] = useState(envApiKey);
+  const [apiKeyConfigured, setApiKeyConfigured] = useState(!!envApiKey);
   const [showLiveAssistant, setShowLiveAssistant] = useState(false);
   const { toast } = useToast();
 
