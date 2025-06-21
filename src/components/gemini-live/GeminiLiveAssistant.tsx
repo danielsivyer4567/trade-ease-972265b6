@@ -75,6 +75,8 @@ export const GeminiLiveAssistant: React.FC<GeminiLiveAssistantProps> = ({
   const connectToGeminiLive = async () => {
     setIsConnecting(true);
     
+    console.log('Connecting with API key:', geminiApiKey ? `${geminiApiKey.substring(0, 10)}...` : 'No API key');
+    
     try {
       // For now, we'll use the REST API approach since WebSocket requires special setup
       setIsConnected(true);
@@ -298,6 +300,8 @@ export const GeminiLiveAssistant: React.FC<GeminiLiveAssistantProps> = ({
         }
       }
       
+      console.log('Sending request to Gemini with:', { contextualText, includeScreenshot });
+      
       const response = await fetch(
         `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiApiKey}`,
         {
@@ -319,7 +323,14 @@ export const GeminiLiveAssistant: React.FC<GeminiLiveAssistantProps> = ({
         }
       );
 
+      console.log('Gemini response status:', response.status);
       const data = await response.json();
+      console.log('Gemini response data:', data);
+      
+      if (!response.ok) {
+        console.error('Gemini API error:', data);
+        throw new Error(data.error?.message || `API returned ${response.status}`);
+      }
       
       if (data.candidates?.[0]?.content?.parts?.[0]?.text) {
         const responseText = data.candidates[0].content.parts[0].text;
@@ -330,6 +341,12 @@ export const GeminiLiveAssistant: React.FC<GeminiLiveAssistantProps> = ({
         
         // Convert to speech
         speakText(responseText);
+      } else {
+        console.warn('No text response from Gemini:', data);
+        addMessage({
+          role: 'system',
+          content: 'Received empty response from Gemini. Please try again.'
+        });
       }
     } catch (error) {
       console.error('Error processing input:', error);
@@ -597,6 +614,17 @@ export const GeminiLiveAssistant: React.FC<GeminiLiveAssistantProps> = ({
                   >
                     <PhoneOff className="h-4 w-4 mr-2" />
                     End Call
+                  </Button>
+                  
+                  <Button
+                    onClick={() => {
+                      // Test button to verify Gemini is working
+                      processUserInput("Hello, can you hear me? Please respond if you're working.", false);
+                    }}
+                    variant="secondary"
+                    size="sm"
+                  >
+                    Test
                   </Button>
                 </>
               )}
