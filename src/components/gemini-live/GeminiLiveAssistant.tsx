@@ -18,7 +18,8 @@ import {
   Settings,
   Phone,
   PhoneOff,
-  Headphones
+  Headphones,
+  LifeBuoy
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { MicrophoneTest } from './MicrophoneTest';
@@ -646,13 +647,16 @@ export const GeminiLiveAssistant: React.FC<GeminiLiveAssistantProps> = ({
                           
                           <Button
                             onClick={() => {
-                              // Test button to verify Gemini is working
-                              processUserInput("Hello, can you hear me? Please respond if you're working.", false);
+                              toast({
+                                title: 'Feature Coming Soon',
+                                description: 'Human agent escalation and ticketing are not yet available. Please continue to use the AI assistant for guidance.',
+                              });
                             }}
-                            variant="secondary"
-                            size="sm"
+                            variant="outline"
+                            title="Escalate to a human agent"
                           >
-                            Test
+                            <LifeBuoy className="h-4 w-4 mr-2" />
+                            Request Help
                           </Button>
                         </>
                       )}
