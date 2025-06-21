@@ -24,6 +24,7 @@ const OrganizationSettings = React.lazy(() => import('@/pages/Settings/Organizat
 const TradeEasePlanDetails = React.lazy(() => import('@/pages/Settings/TradeEasePlanDetails'));
 const MyPlanPage = React.lazy(() => import('@/pages/Settings/MyPlan'));
 const GeminiKeyVerification = React.lazy(() => import('@/pages/GeminiKeyVerification'));
+const MicrophoneTestPage = React.lazy(() => import('@/pages/MicrophoneTestPage'));
 
 // Export routes configuration
 export const SettingsRoutes = (): RouteObject[] => [
@@ -178,6 +179,14 @@ export const SettingsRoutes = (): RouteObject[] => [
     element: (
       <Suspense fallback={<LoadingFallback />}>
         <GeminiKeyVerification />
+      </Suspense>
+    ),
+  },
+  {
+    path: "microphone-test",
+    element: (
+      <Suspense fallback={<LoadingFallback />}>
+        <MicrophoneTestPage />
       </Suspense>
     ),
   },

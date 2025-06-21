@@ -449,8 +449,13 @@ export const GeminiLiveAssistant: React.FC<GeminiLiveAssistantProps> = ({
         </CardHeader>
         
         <CardContent className="flex-1 flex gap-4 p-4 overflow-hidden">
-          {/* Main conversation area */}
-          <div className="flex-1 flex flex-col">
+          {/* Show microphone test if enabled */}
+          {showMicTest ? (
+            <MicrophoneTest onClose={() => setShowMicTest(false)} />
+          ) : (
+            <>
+              {/* Main conversation area */}
+              <div className="flex-1 flex flex-col">
             <ScrollArea className="flex-1 border rounded-lg p-4">
               <div className="space-y-4">
                 {conversation.length === 0 && (
@@ -630,6 +635,8 @@ export const GeminiLiveAssistant: React.FC<GeminiLiveAssistantProps> = ({
               </Alert>
             </div>
           )}
+          </>
+        )}
         </CardContent>
       </Card>
     </div>
