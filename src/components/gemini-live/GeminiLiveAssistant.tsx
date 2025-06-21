@@ -17,9 +17,11 @@ import {
   AlertCircle,
   Settings,
   Phone,
-  PhoneOff
+  PhoneOff,
+  Headphones
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { MicrophoneTest } from './MicrophoneTest';
 
 interface GeminiLiveAssistantProps {
   geminiApiKey: string;
@@ -62,6 +64,7 @@ export const GeminiLiveAssistant: React.FC<GeminiLiveAssistantProps> = ({
   const [isMuted, setIsMuted] = useState(false);
   const [conversation, setConversation] = useState<ConversationMessage[]>([]);
   const [currentTranscript, setCurrentTranscript] = useState('');
+  const [showMicTest, setShowMicTest] = useState(false);
   
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -426,6 +429,14 @@ export const GeminiLiveAssistant: React.FC<GeminiLiveAssistantProps> = ({
                   Sharing
                 </Badge>
               )}
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setShowMicTest(!showMicTest)}
+                title="Audio Test"
+              >
+                <Headphones className="h-4 w-4" />
+              </Button>
               <Button
                 variant="ghost"
                 size="icon"
