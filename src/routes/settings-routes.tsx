@@ -23,6 +23,7 @@ const MessagingSettings = React.lazy(() => import('@/pages/Settings/MessagingSet
 const OrganizationSettings = React.lazy(() => import('@/pages/Settings/OrganizationSettings'));
 const TradeEasePlanDetails = React.lazy(() => import('@/pages/Settings/TradeEasePlanDetails'));
 const MyPlanPage = React.lazy(() => import('@/pages/Settings/MyPlan'));
+const GeminiKeyVerification = React.lazy(() => import('@/pages/GeminiKeyVerification'));
 
 // Export routes configuration
 export const SettingsRoutes = (): RouteObject[] => [
@@ -169,6 +170,14 @@ export const SettingsRoutes = (): RouteObject[] => [
     element: (
       <Suspense fallback={<LoadingFallback />}>
         <MyPlanPage />
+      </Suspense>
+    ),
+  },
+  {
+    path: "gemini-key-verification",
+    element: (
+      <Suspense fallback={<LoadingFallback />}>
+        <GeminiKeyVerification />
       </Suspense>
     ),
   },
