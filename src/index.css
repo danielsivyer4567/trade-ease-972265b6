@@ -275,3 +275,33 @@ html, body {
 .textarea:hover {
   @apply border-border;
 }
+
+/* Google Maps optimization styles */
+.map-container {
+  width: 100%;
+  height: 100%;
+  visibility: visible;
+  min-height: 200px;
+  position: relative;
+}
+
+/* Ensure Google Maps loads properly */
+.map-container > div {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* Optimize map rendering performance */
+.map-container img {
+  max-width: none !important;
+  height: auto !important;
+}
+
+/* Prevent layout shifts during map loading */
+.map-loading-container {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16/9;
+  min-height: 300px;
+  background-color: #f0f0f0;
+}

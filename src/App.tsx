@@ -50,7 +50,7 @@ const ErrorFallbackUI = () => (
 );
 
 // Base UI components that don't depend on router
-const AppUIComponents = ({ children = null }) => (
+const AppUIComponents = ({ children }: { children?: React.ReactNode }) => (
   <WorkflowDarkModeProvider>
     {children}
     <Toaster />
