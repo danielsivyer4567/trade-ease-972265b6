@@ -129,8 +129,8 @@ export const GeminiLiveAssistant: React.FC<GeminiLiveAssistantProps> = ({
             content: transcript
           });
           
-          // Process with Gemini
-          processUserInput(transcript);
+          // Process with Gemini (include screenshot if screen is being shared)
+          processUserInput(transcript, isScreenSharing);
           setCurrentTranscript('');
         }
       };
