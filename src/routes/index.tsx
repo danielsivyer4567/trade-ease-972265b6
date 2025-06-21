@@ -27,6 +27,7 @@ const GoogleCloudFixPage = lazy(() => import('@/pages/google-cloud-fix'));
 const TestGoogleMapsPage = lazy(() => import('@/pages/TestGoogleMaps'));
 const TestGoogleMapsOptimizedPage = lazy(() => import('@/pages/TestGoogleMapsOptimized'));
 const GoogleMapsDiagnosticPage = lazy(() => import('@/pages/GoogleMapsDiagnostic'));
+const N8nAssistantPage = lazy(() => import('@/pages/N8nAssistantPage'));
 
 // Voice Search Pages
 const QBCCVoiceSearchPage = lazy(() => import('@/pages/QBCCVoiceSearch'));
@@ -294,6 +295,8 @@ const routeObjects: RouteObject[] = [
           { path: "/test-google-maps-optimized", element: <SuspenseWrapper><TestGoogleMapsOptimizedPage /></SuspenseWrapper> },
           // Google Maps Diagnostic route
           { path: "/google-maps-diagnostic", element: <SuspenseWrapper><GoogleMapsDiagnosticPage /></SuspenseWrapper> },
+          // n8n AI Assistant route
+          { path: "/n8n-assistant", element: <SuspenseWrapper><N8nAssistantPage /></SuspenseWrapper> },
           // Google Cloud Fix route
           { path: "/google-cloud-fix", element: <SuspenseWrapper><GoogleCloudFixPage /></SuspenseWrapper> },
           // Test Google Maps API route
