@@ -273,36 +273,40 @@ export const GeminiLiveAssistant: React.FC<GeminiLiveAssistantProps> = ({
   // Process user input with Gemini
   const processUserInput = async (text: string, includeScreenshot?: boolean) => {
     try {
-      // Add context if screen is being shared
-      const contextualText = includeScreenshot 
-        ? `You are an expert user of the "Trade Ease" application. Your goal is to provide helpful, step-by-step guidance. A user is sharing their screen and has asked for help. Their request is: "${text}". Analyze the screen and their request to provide a clear, actionable response. In the future, you will provide this as a JSON object with annotations, but for now, just provide the text explanation.`
-        : text;
-      
-      let parts: any[] = [{ text: contextualText }];
-      
-      // Add screenshot if screen is being shared
-      if (includeScreenshot && isScreenSharing && canvasRef.current && videoRef.current) {
-        const canvas = canvasRef.current;
-        const video = videoRef.current;
-        
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-        
-        const ctx = canvas.getContext('2d');
-        if (ctx) {
-          ctx.drawImage(video, 0, 0);
+      const systemInstruction = {
+        role: "system",
+        parts: [{
+          text: `You are an expert user of the "Trade Ease" application. Your goal is to provide helpful, step-by-step guidance. A user is sharing their screen and has asked for help. 
           
-          const base64Image = canvas.toDataURL('image/jpeg', 0.8).split(',')[1];
-          parts.push({
-            inline_data: {
-              mime_type: "image/jpeg",
-              data: base64Image
-            }
-          });
-        }
-      }
-      
-      console.log('Sending request to Gemini with:', { contextualText, includeScreenshot });
+          Analyze the user's request and the screenshot to provide a clear, actionable response.
+          
+          Your response MUST be a valid JSON object with the following structure:
+          {
+            "explanation": "A clear, concise explanation of the steps to take. This will be spoken to the user.",
+            "annotations": [
+              {
+                "type": "'highlight' or 'arrow' or 'label'",
+                "label": "A short text label for the annotation (optional).",
+                "x": "The x-coordinate of the element to annotate.",
+                "y": "The y-coordinate of the element to annotate.",
+                "width": "The width of the element (for 'highlight').",
+                "height": "The height of the element (for 'highlight').",
+                "toX": "The destination x-coordinate (for 'arrow').",
+                "toY": "The destination y-coordinate (for 'arrow')."
+              }
+            ]
+          }
+
+          If you cannot determine the coordinates or what to do, respond with an empty annotations array and ask for clarification in the explanation.`
+        }]
+      };
+
+      const userRequest = {
+        role: "user",
+        parts: includeScreenshot
+          ? [{ text: `User request: "${text}"` }, { inline_data: { mime_type: "image/jpeg", data: getBase64Screenshot() } }]
+          : [{ text }]
+      };
       
       const response = await fetch(
         `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key=${geminiApiKey}`,
@@ -312,11 +316,10 @@ export const GeminiLiveAssistant: React.FC<GeminiLiveAssistantProps> = ({
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            contents: [{
-              parts
-            }],
+            contents: [systemInstruction, userRequest],
             generationConfig: {
-              temperature: 0.9,
+              response_mime_type: "application/json",
+              temperature: 0.7,
               topK: 1,
               topP: 1,
               maxOutputTokens: 2048,
@@ -325,31 +328,34 @@ export const GeminiLiveAssistant: React.FC<GeminiLiveAssistantProps> = ({
         }
       );
 
-      console.log('Gemini response status:', response.status);
-      const data = await response.json();
-      console.log('Gemini response data:', data);
-      
       if (!response.ok) {
-        console.error('Gemini API error:', data);
-        throw new Error(data.error?.message || `API returned ${response.status}`);
+        const errorData = await response.json();
+        console.error('Gemini API error:', errorData);
+        throw new Error(errorData.error?.message || `API returned ${response.status}`);
       }
       
-      if (data.candidates?.[0]?.content?.parts?.[0]?.text) {
-        const responseText = data.candidates[0].content.parts[0].text;
-        addMessage({
-          role: 'assistant',
-          content: responseText
-        });
+      const responseData = await response.json();
+      const responseText = responseData.candidates[0].content.parts[0].text;
+      
+      try {
+        const parsedResponse = JSON.parse(responseText);
         
-        // Convert to speech
+        if (parsedResponse.explanation) {
+          addMessage({ role: 'assistant', content: parsedResponse.explanation });
+          speakText(parsedResponse.explanation);
+        }
+
+        if (parsedResponse.annotations && Array.isArray(parsedResponse.annotations)) {
+          setAnnotations(parsedResponse.annotations);
+        }
+
+      } catch (e) {
+        console.error("Failed to parse JSON response from Gemini:", responseText);
+        // Fallback for non-JSON response
+        addMessage({ role: 'assistant', content: responseText });
         speakText(responseText);
-      } else {
-        console.warn('No text response from Gemini:', data);
-        addMessage({
-          role: 'system',
-          content: 'Received empty response from Gemini. Please try again.'
-        });
       }
+
     } catch (error) {
       console.error('Error processing input:', error);
       addMessage({
@@ -359,10 +365,25 @@ export const GeminiLiveAssistant: React.FC<GeminiLiveAssistantProps> = ({
     }
   };
 
+  const getBase64Screenshot = (): string => {
+    if (isScreenSharing && canvasRef.current && videoRef.current) {
+      const canvas = canvasRef.current;
+      const video = videoRef.current;
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        return canvas.toDataURL('image/jpeg', 0.8).split(',')[1];
+      }
+    }
+    return '';
+  };
+
   // Send screenshot to Gemini for analysis
   const sendScreenshotToGemini = (base64Image: string) => {
-    // Don't send automatic messages, just store the screenshot for next user input
-    // This prevents spamming the user with repeated messages
+    // This is now handled by processUserInput with includeScreenshot flag
+    // The periodic capture is mainly to keep the video feed running for context
     console.log('Screenshot captured for context');
   };
 
