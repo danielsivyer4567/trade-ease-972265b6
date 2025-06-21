@@ -448,114 +448,77 @@ export const GeminiLiveAssistant: React.FC<GeminiLiveAssistantProps> = ({
 
   return (
     <>
+      <video ref={videoRef} autoPlay muted playsInline style={{ display: 'none' }} />
+      <canvas ref={canvasRef} style={{ display: 'none' }} />
       <AnnotationOverlay 
         annotations={annotations}
         width={window.innerWidth}
         height={window.innerHeight}
         onClear={() => setAnnotations([])}
       />
+
       <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
         <Card className="w-full max-w-4xl h-[80vh] flex flex-col">
-          <CardHeader className="flex-shrink-0">
-            <div className="flex items-center justify-between">
+          <CardHeader>
+            <div className="flex justify-between items-center">
               <CardTitle className="flex items-center gap-2">
-                <Sparkles className="h-6 w-6 text-purple-500" />
+                <Sparkles className="h-5 w-5 text-primary" />
                 Gemini Live Assistant
               </CardTitle>
               <div className="flex items-center gap-2">
                 {isConnected && (
-                  <Badge variant="default" className="animate-pulse">
-                    <Phone className="h-3 w-3 mr-1" />
-                    Live
-                  </Badge>
-                )}
-                {isScreenSharing && (
-                  <Badge variant="secondary">
-                    <Monitor className="h-3 w-3 mr-1" />
-                    Sharing
+                  <Badge variant={isScreenSharing ? 'default' : 'secondary'}>
+                    {isScreenSharing ? 'Screen Sharing Active' : 'Screen Sharing Inactive'}
                   </Badge>
                 )}
                 <Button
                   variant="ghost"
                   size="icon"
-                  onClick={() => setShowMicTest(!showMicTest)}
+                  onClick={() => setShowMicTest(true)}
                   title="Audio Test"
                 >
                   <Headphones className="h-4 w-4" />
                 </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={onClose}
-                >
-                  <Settings className="h-4 w-4" />
-                </Button>
+                {onClose && (
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={onClose}
+                    >
+                        <Settings className="h-4 w-4" />
+                    </Button>
+                )}
               </div>
             </div>
           </CardHeader>
           
           <CardContent className="flex-1 flex gap-4 p-4 overflow-hidden">
-            {/* Show microphone test if enabled */}
             {showMicTest ? (
               <MicrophoneTest onClose={() => setShowMicTest(false)} />
             ) : (
               <>
-                {/* Main conversation area */}
                 <div className="flex-1 flex flex-col">
-                  <ScrollArea className="flex-1 border rounded-lg p-4">
+                  <ScrollArea className="flex-1 p-4 border rounded-lg bg-muted/20">
                     <div className="space-y-4">
-                      {conversation.length === 0 && (
-                        <div className="text-center py-8 text-muted-foreground">
-                          <MessageSquare className="h-12 w-12 mx-auto mb-3 opacity-50" />
-                          <p>Start a conversation with Gemini Live</p>
-                        </div>
-                      )}
-                      
-                      {conversation.map((message) => (
-                        <div
-                          key={message.id}
-                          className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
-                        >
-                          <div
-                            className={`max-w-[80%] rounded-lg p-3 ${
-                              message.role === 'user'
-                                ? 'bg-primary text-primary-foreground'
-                                : 'bg-muted'
-                            }`}
-                          >
-                            <div className="flex items-start gap-2">
-                              {message.role === 'assistant' && <Sparkles className="h-4 w-4 mt-0.5" />}
-                              <div className="flex-1">
-                                <p className="text-sm whitespace-pre-wrap">{message.content}</p>
-                                {message.audioUrl && (
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    className="mt-2"
-                                    onClick={() => {/* Play audio */}}
-                                  >
-                                    <Volume2 className="h-4 w-4 mr-1" />
-                                    Play Audio
-                                  </Button>
-                                )}
-                              </div>
-                            </div>
+                      {conversation.map((msg) => (
+                        <div key={msg.id} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                          <div className={`max-w-md p-3 rounded-xl ${msg.role === 'user' ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}>
+                            <p className="text-sm">{msg.content}</p>
+                            <p className="text-xs text-muted-foreground mt-1">{msg.timestamp.toLocaleTimeString()}</p>
                           </div>
                         </div>
                       ))}
+                      {currentTranscript && (
+                        <div className="flex justify-end">
+                            <div className="max-w-md p-3 rounded-xl bg-primary/80 text-primary-foreground">
+                                <p className="text-sm italic">{currentTranscript}</p>
+                            </div>
+                        </div>
+                      )}
                     </div>
                   </ScrollArea>
-                  
-                  {/* Current transcript */}
-                  {currentTranscript && (
-                    <div className="mt-2 p-2 bg-muted rounded text-sm text-muted-foreground">
-                      {currentTranscript}...
-                    </div>
-                  )}
-                  
-                  {/* Controls */}
+                    
                   <div className="mt-4 space-y-3">
-                    {/* Text input as primary method */}
                     <div className="flex gap-2">
                       <Input
                         placeholder="Type your message or use voice..."
@@ -585,116 +548,99 @@ export const GeminiLiveAssistant: React.FC<GeminiLiveAssistantProps> = ({
                       </Button>
                     </div>
                     
-                    <div className="flex gap-2">
-                      {!isConnected ? (
-                        <Button
-                          onClick={connectToGeminiLive}
-                          disabled={isConnecting}
-                          className="flex-1"
-                        >
-                          {isConnecting ? (
-                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                          ) : (
-                            <Phone className="h-4 w-4 mr-2" />
-                          )}
-                          Connect to Assistant
-                        </Button>
-                      ) : (
-                        <>
-                          <Button
-                            onClick={() => {
-                              setIsMuted(!isMuted);
-                              if ((window as any).speechRecognition) {
-                                if (isMuted) {
-                                  (window as any).speechRecognition.start();
-                                } else {
-                                  (window as any).speechRecognition.stop();
+                    <div className="flex justify-between">
+                        <div className="flex gap-2">
+                        {!isConnected ? (
+                            <Button
+                            onClick={connectToGeminiLive}
+                            disabled={isConnecting}
+                            >
+                            {isConnecting ? (
+                                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                            ) : (
+                                <Phone className="h-4 w-4 mr-2" />
+                            )}
+                            Connect to Assistant
+                            </Button>
+                        ) : (
+                            <>
+                            <Button
+                                onClick={() => {
+                                setIsMuted(!isMuted);
+                                if ((window as any).speechRecognition) {
+                                    if (isMuted) {
+                                    (window as any).speechRecognition.start();
+                                    } else {
+                                    (window as any).speechRecognition.stop();
+                                    }
                                 }
-                              }
-                            }}
-                            variant={isMuted ? "destructive" : "secondary"}
-                            size="icon"
-                            title={isMuted ? "Enable voice input" : "Disable voice input"}
-                          >
-                            {isMuted ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
-                          </Button>
-                          
-                          {!isScreenSharing ? (
-                            <Button
-                              onClick={startScreenShare}
-                              variant="secondary"
+                                }}
+                                variant={isMuted ? "destructive" : "secondary"}
+                                size="icon"
+                                title={isMuted ? "Enable voice input" : "Disable voice input"}
                             >
-                              <Monitor className="h-4 w-4 mr-2" />
-                              Share Screen
+                                {isMuted ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
                             </Button>
-                          ) : (
-                            <Button
-                              onClick={stopScreenShare}
-                              variant="destructive"
-                            >
-                              <MonitorOff className="h-4 w-4 mr-2" />
-                              Stop Sharing
-                            </Button>
-                          )}
-                          
-                          <Button
-                            onClick={disconnect}
-                            variant="outline"
-                          >
-                            <PhoneOff className="h-4 w-4 mr-2" />
-                            End Call
-                          </Button>
-                          
-                          <Button
-                            onClick={() => {
-                              toast({
-                                title: 'Feature Coming Soon',
-                                description: 'Human agent escalation and ticketing are not yet available. Please continue to use the AI assistant for guidance.',
-                              });
-                            }}
-                            variant="outline"
-                            title="Escalate to a human agent"
-                          >
-                            <LifeBuoy className="h-4 w-4 mr-2" />
-                            Request Help
-                          </Button>
-                        </>
-                      )}
+                            
+                            {!isScreenSharing ? (
+                                <Button
+                                onClick={startScreenShare}
+                                variant="secondary"
+                                >
+                                <Monitor className="h-4 w-4 mr-2" />
+                                Share Screen
+                                </Button>
+                            ) : (
+                                <Button
+                                onClick={stopScreenShare}
+                                variant="destructive"
+                                >
+                                <MonitorOff className="h-4 w-4 mr-2" />
+                                Stop Sharing
+                                </Button>
+                            )}
+                            </>
+                        )}
+                        </div>
+
+                        {isConnected && (
+                            <div className="flex gap-2">
+                                <Button
+                                    onClick={() => {
+                                    toast({
+                                        title: 'Feature Coming Soon',
+                                        description: 'Human agent escalation and ticketing are not yet available. Please continue to use the AI assistant for guidance.',
+                                    });
+                                    }}
+                                    variant="outline"
+                                    title="Escalate to a human agent"
+                                >
+                                    <LifeBuoy className="h-4 w-4 mr-2" />
+                                    Request Help
+                                </Button>
+                                <Button
+                                    onClick={disconnect}
+                                    variant="outline"
+                                >
+                                    <PhoneOff className="h-4 w-4 mr-2" />
+                                    End Call
+                                </Button>
+                            </div>
+                        )}
                     </div>
                   </div>
                 </div>
                 
-                {/* Screen preview */}
-                {isScreenSharing && (
-                  <div className="w-96 flex-shrink-0">
-                    <div className="border rounded-lg overflow-hidden">
-                      <div className="bg-muted p-2 text-sm font-medium">Screen Preview</div>
-                      <video
-                        ref={videoRef}
-                        autoPlay
-                        playsInline
-                        muted
-                        className="w-full"
-                        style={{ maxHeight: '300px' }}
-                      />
-                      <canvas ref={canvasRef} className="hidden" />
-                    </div>
-                    
-                    <Alert className="mt-4">
-                      <AlertCircle className="h-4 w-4" />
-                      <AlertDescription className="text-xs">
-                        I can see your screen and help you with:
-                        <ul className="list-disc list-inside mt-1">
-                          <li>Navigating the Trade Ease app</li>
-                          <li>Creating jobs, quotes, or invoices</li>
-                          <li>Managing customers and teams</li>
-                          <li>Using calculators and tools</li>
-                          <li>Troubleshooting any issues</li>
-                        </ul>
-                      </AlertDescription>
-                    </Alert>
-                  </div>
-                )}
+                <div className="w-1/3 flex flex-col gap-4">
+                  <video ref={videoRef} autoPlay muted playsInline className="w-full rounded-lg bg-black" />
+                  
+                  <Alert>
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertDescription>
+                      The AI can see your screen and will provide guidance. Your screen is not recorded.
+                    </AlertDescription>
+                  </Alert>
+                </div>
               </>
             )}
           </CardContent>
