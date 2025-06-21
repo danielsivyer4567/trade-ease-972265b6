@@ -23,7 +23,6 @@ const DevelopmentEntry = lazy(() => import('@/pages/DevelopmentEntry'));
 const DashboardPage = lazy(() => import('@/pages/index'));
 const NotFoundPage = lazy(() => import('@/pages/NotFound'));
 const DebugMapsPage = lazy(() => import('@/pages/debug-maps'));
-const TestMapsPage = lazy(() => import('@/pages/test-maps'));
 const GoogleCloudFixPage = lazy(() => import('@/pages/google-cloud-fix'));
 const TestGoogleMapsPage = lazy(() => import('@/pages/TestGoogleMaps'));
 
@@ -122,7 +121,7 @@ const IntegrationsPage = lazy(() => import('@/pages/Integrations'));
 import SetupDatabasePage from "@/pages/Settings/integrations/database/SetupDatabasePage";
 
 // Helper component for Suspense boundary
-const SuspenseWrapper = ({ children }) => (
+const SuspenseWrapper = ({ children }: { children: React.ReactNode }) => (
   <Suspense fallback={<LoadingFallback />}>{children}</Suspense>
 );
 
@@ -284,7 +283,7 @@ const routeObjects: RouteObject[] = [
           // Debug Maps route
           { path: "/debug-maps", element: <SuspenseWrapper><DebugMapsPage /></SuspenseWrapper> },
           // Test Maps route
-          { path: "/test-maps", element: <SuspenseWrapper><TestMapsPage /></SuspenseWrapper> },
+          { path: "/test-maps", element: <SuspenseWrapper><TestGoogleMapsPage /></SuspenseWrapper> },
           // Google Cloud Fix route
           { path: "/google-cloud-fix", element: <SuspenseWrapper><GoogleCloudFixPage /></SuspenseWrapper> },
           // Test Google Maps API route
