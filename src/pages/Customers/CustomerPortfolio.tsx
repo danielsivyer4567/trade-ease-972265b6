@@ -1180,7 +1180,7 @@ function ProfilePictureUpload({ customer, customerId }: { customer: any, custome
   // Generate Google Street View image URL
   const getStreetViewUrl = () => {
     const address = encodeURIComponent(formatAddress());
-    const apiKey = "qbBoQkZzbSYl80ncHWOjHDtEMm0="; // Updated API key
+    const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || ""; // Use environment variable
     return `https://maps.googleapis.com/maps/api/streetview?size=200x200&location=${address}&key=${apiKey}`;
   };
 
