@@ -304,6 +304,10 @@ export type Database = {
           type: string
           updated_at: string | null
           user_id: string | null
+          address: string | null
+          city: string | null
+          state: string | null
+          zip_code: string | null
         }
         Insert: {
           assigned_team?: string | null
@@ -320,6 +324,10 @@ export type Database = {
           type: string
           updated_at?: string | null
           user_id?: string | null
+          address?: string | null
+          city?: string | null
+          state?: string | null
+          zip_code?: string | null
         }
         Update: {
           assigned_team?: string | null
@@ -336,6 +344,10 @@ export type Database = {
           type?: string
           updated_at?: string | null
           user_id?: string | null
+          address?: string | null
+          city?: string | null
+          state?: string | null
+          zip_code?: string | null
         }
         Relationships: []
       }
