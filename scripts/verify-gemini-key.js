@@ -7,9 +7,13 @@
  * If no API key is provided, it will look for VITE_GEMINI_API_KEY in .env
  */
 
-const https = require('https');
-const fs = require('fs');
-const path = require('path');
+import https from 'https';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Get API key from command line or environment
 let apiKey = process.argv[2];
