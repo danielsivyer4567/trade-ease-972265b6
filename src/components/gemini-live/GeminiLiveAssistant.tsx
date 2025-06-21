@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Input } from '@/components/ui/input';
 import { 
   Monitor, 
   MonitorOff, 
@@ -33,6 +34,24 @@ interface ConversationMessage {
   audioUrl?: string;
 }
 
+// Speech Recognition types
+interface SpeechRecognitionEvent extends Event {
+  results: SpeechRecognitionResultList;
+  resultIndex: number;
+}
+
+interface SpeechRecognitionErrorEvent extends Event {
+  error: string;
+}
+
+declare global {
+  interface Window {
+    SpeechRecognition: any;
+    webkitSpeechRecognition: any;
+    speechRecognition: any;
+  }
+}
+
 export const GeminiLiveAssistant: React.FC<GeminiLiveAssistantProps> = ({
   geminiApiKey,
   onClose
@@ -47,8 +66,6 @@ export const GeminiLiveAssistant: React.FC<GeminiLiveAssistantProps> = ({
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const mediaStreamRef = useRef<MediaStream | null>(null);
-  const audioContextRef = useRef<AudioContext | null>(null);
-  const websocketRef = useRef<WebSocket | null>(null);
   const { toast } = useToast();
 
   // Initialize Gemini Live connection
@@ -56,123 +73,98 @@ export const GeminiLiveAssistant: React.FC<GeminiLiveAssistantProps> = ({
     setIsConnecting(true);
     
     try {
-      // Initialize audio context
-      audioContextRef.current = new AudioContext();
+      // For now, we'll use the REST API approach since WebSocket requires special setup
+      setIsConnected(true);
+      setIsConnecting(false);
       
-      // Connect to Gemini Live API via WebSocket
-      // Note: This is a simplified version - actual implementation would need proper WebSocket URL
-      const ws = new WebSocket(`wss://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:streamGenerateContent?key=${geminiApiKey}`);
-      
-      ws.onopen = () => {
-        console.log('Connected to Gemini Live');
-        setIsConnected(true);
-        setIsConnecting(false);
-        
-        // Send initial greeting
-        sendInitialGreeting();
-      };
-      
-      ws.onmessage = (event) => {
-        handleGeminiResponse(event.data);
-      };
-      
-      ws.onerror = (error) => {
-        console.error('WebSocket error:', error);
-        toast({
-          title: "Connection Error",
-          description: "Failed to connect to Gemini Live",
-          variant: "destructive"
-        });
-        setIsConnecting(false);
-      };
-      
-      ws.onclose = () => {
-        setIsConnected(false);
-        console.log('Disconnected from Gemini Live');
-      };
-      
-      websocketRef.current = ws;
+      // Send initial greeting
+      addMessage({
+        role: 'assistant',
+        content: "Hey there! I'm your AI assistant powered by Gemini. I can see your screen and help you with anything in the Trade Ease app. What would you like help with today?"
+      });
       
       // Start audio capture
       startAudioCapture();
       
+      toast({
+        title: "Connected",
+        description: "Gemini assistant is ready to help",
+      });
+      
     } catch (error) {
-      console.error('Error connecting to Gemini Live:', error);
+      console.error('Error connecting to Gemini:', error);
       toast({
         title: "Connection Failed",
-        description: "Could not establish connection to Gemini Live",
+        description: "Could not establish connection to Gemini",
         variant: "destructive"
       });
       setIsConnecting(false);
     }
   };
 
-  // Send initial greeting
-  const sendInitialGreeting = () => {
-    const greeting = {
-      contents: [{
-        parts: [{
-          text: "Hey there! I'm your AI assistant powered by Gemini. I can see your screen and help you with anything in the Trade Ease app. What would you like help with today?"
-        }]
-      }],
-      generationConfig: {
-        temperature: 0.9,
-        topK: 1,
-        topP: 1,
-        maxOutputTokens: 2048,
-      }
-    };
-    
-    if (websocketRef.current?.readyState === WebSocket.OPEN) {
-      websocketRef.current.send(JSON.stringify(greeting));
-      
-      addMessage({
-        role: 'assistant',
-        content: "Hey there! I'm your AI assistant powered by Gemini. I can see your screen and help you with anything in the Trade Ease app. What would you like help with today?"
-      });
-    }
-  };
-
-  // Start audio capture for voice input
+  // Start audio capture for voice input using Web Speech API
   const startAudioCapture = async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ 
-        audio: {
-          echoCancellation: true,
-          noiseSuppression: true,
-          autoGainControl: true
-        } 
-      });
-      
-      const audioContext = audioContextRef.current;
-      if (!audioContext) return;
-      
-      const source = audioContext.createMediaStreamSource(stream);
-      const processor = audioContext.createScriptProcessor(4096, 1, 1);
-      
-      processor.onaudioprocess = (e) => {
-        if (!isMuted && websocketRef.current?.readyState === WebSocket.OPEN) {
-          const inputData = e.inputBuffer.getChannelData(0);
-          // Convert audio data to base64 and send to Gemini
-          const base64Audio = arrayBufferToBase64(inputData.buffer);
+      // Check if speech recognition is available
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SpeechRecognition) {
+        throw new Error('Speech recognition not supported');
+      }
+
+      const recognition = new SpeechRecognition();
+      recognition.continuous = true;
+      recognition.interimResults = true;
+      recognition.lang = 'en-US';
+
+      recognition.onresult = (event: SpeechRecognitionEvent) => {
+        const last = event.results.length - 1;
+        const transcript = event.results[last][0].transcript;
+        
+        setCurrentTranscript(transcript);
+        
+        if (event.results[last].isFinal) {
+          // Add user message
+          addMessage({
+            role: 'user',
+            content: transcript
+          });
           
-          websocketRef.current.send(JSON.stringify({
-            audio: {
-              data: base64Audio,
-              mimeType: 'audio/pcm;rate=16000'
-            }
-          }));
+          // Process with Gemini
+          processUserInput(transcript);
+          setCurrentTranscript('');
         }
       };
-      
-      source.connect(processor);
-      processor.connect(audioContext.destination);
+
+      recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
+        console.error('Speech recognition error:', event.error);
+        if (event.error === 'not-allowed') {
+          toast({
+            title: "Microphone Access Denied",
+            description: "Please allow microphone access to use voice input",
+            variant: "destructive"
+          });
+        }
+      };
+
+      recognition.onend = () => {
+        // Restart if still connected and not muted
+        if (isConnected && !isMuted) {
+          recognition.start();
+        }
+      };
+
+      if (!isMuted) {
+        recognition.start();
+      }
+
+      // Store recognition instance
+      (window as any).speechRecognition = recognition;
       
     } catch (error) {
       console.error('Error starting audio capture:', error);
       toast({
-        title: "Microphone Error",
-        description: "Could not access microphone",
+        title: "Voice Input Error",
+        description: "Could not start voice recognition. Try using text input instead.",
         variant: "destructive"
       });
     }
@@ -261,52 +253,82 @@ export const GeminiLiveAssistant: React.FC<GeminiLiveAssistantProps> = ({
     }, 2000); // Capture every 2 seconds
   };
 
-  // Send screenshot to Gemini for analysis
-  const sendScreenshotToGemini = (base64Image: string) => {
-    if (websocketRef.current?.readyState === WebSocket.OPEN) {
-      websocketRef.current.send(JSON.stringify({
-        contents: [{
-          parts: [
-            {
-              text: "Analyzing the current screen. Please let me know what you need help with."
-            },
-            {
-              inline_data: {
-                mime_type: "image/jpeg",
-                data: base64Image
-              }
+  // Process user input with Gemini
+  const processUserInput = async (text: string, includeScreenshot?: boolean) => {
+    try {
+      let parts: any[] = [{ text }];
+      
+      // Add screenshot if screen is being shared
+      if (includeScreenshot && isScreenSharing && canvasRef.current && videoRef.current) {
+        const canvas = canvasRef.current;
+        const video = videoRef.current;
+        
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+          ctx.drawImage(video, 0, 0);
+          
+          const base64Image = canvas.toDataURL('image/jpeg', 0.8).split(',')[1];
+          parts.push({
+            inline_data: {
+              mime_type: "image/jpeg",
+              data: base64Image
             }
-          ]
-        }]
-      }));
+          });
+        }
+      }
+      
+      const response = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiApiKey}`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            contents: [{
+              parts
+            }],
+            generationConfig: {
+              temperature: 0.9,
+              topK: 1,
+              topP: 1,
+              maxOutputTokens: 2048,
+            }
+          })
+        }
+      );
+
+      const data = await response.json();
+      
+      if (data.candidates?.[0]?.content?.parts?.[0]?.text) {
+        const responseText = data.candidates[0].content.parts[0].text;
+        addMessage({
+          role: 'assistant',
+          content: responseText
+        });
+        
+        // Convert to speech
+        speakText(responseText);
+      }
+    } catch (error) {
+      console.error('Error processing input:', error);
+      addMessage({
+        role: 'system',
+        content: 'Sorry, I encountered an error processing your request.'
+      });
     }
   };
 
-  // Handle Gemini responses
-  const handleGeminiResponse = (data: string) => {
-    try {
-      const response = JSON.parse(data);
-      
-      if (response.candidates?.[0]?.content?.parts?.[0]?.text) {
-        const text = response.candidates[0].content.parts[0].text;
-        addMessage({
-          role: 'assistant',
-          content: text
-        });
-        
-        // Convert text to speech
-        speakText(text);
-      }
-      
-      if (response.audio) {
-        // Play audio response
-        playAudioResponse(response.audio.data);
-      }
-      
-    } catch (error) {
-      console.error('Error parsing Gemini response:', error);
-    }
+  // Send screenshot to Gemini for analysis
+  const sendScreenshotToGemini = (base64Image: string) => {
+    // This is now handled by processUserInput with includeScreenshot flag
+    processUserInput("I can see your screen. What would you like help with?", true);
   };
+
+
 
   // Convert text to speech
   const speakText = (text: string) => {
@@ -317,22 +339,10 @@ export const GeminiLiveAssistant: React.FC<GeminiLiveAssistantProps> = ({
     speechSynthesis.speak(utterance);
   };
 
-  // Play audio response from Gemini
+  // Play audio response from Gemini (simplified for now)
   const playAudioResponse = async (base64Audio: string) => {
-    const audioContext = audioContextRef.current;
-    if (!audioContext) return;
-    
-    try {
-      const audioData = base64ToArrayBuffer(base64Audio);
-      const audioBuffer = await audioContext.decodeAudioData(audioData);
-      
-      const source = audioContext.createBufferSource();
-      source.buffer = audioBuffer;
-      source.connect(audioContext.destination);
-      source.start();
-    } catch (error) {
-      console.error('Error playing audio:', error);
-    }
+    // For now, we'll use text-to-speech instead of raw audio playback
+    console.log('Audio playback not implemented in this version');
   };
 
   // Add message to conversation
@@ -363,13 +373,11 @@ export const GeminiLiveAssistant: React.FC<GeminiLiveAssistantProps> = ({
 
   // Disconnect from Gemini Live
   const disconnect = () => {
-    if (websocketRef.current) {
-      websocketRef.current.close();
+    // Stop speech recognition
+    if ((window as any).speechRecognition) {
+      (window as any).speechRecognition.stop();
     }
     stopScreenShare();
-    if (audioContextRef.current) {
-      audioContextRef.current.close();
-    }
     setIsConnected(false);
   };
 
@@ -468,36 +476,77 @@ export const GeminiLiveAssistant: React.FC<GeminiLiveAssistantProps> = ({
             )}
             
             {/* Controls */}
-            <div className="mt-4 flex gap-2">
-              {!isConnected ? (
+            <div className="mt-4 space-y-3">
+              {/* Text input as primary method */}
+              <div className="flex gap-2">
+                <Input
+                  placeholder="Type your message or use voice..."
+                  onKeyPress={(e) => {
+                    if (e.key === 'Enter' && e.currentTarget.value.trim()) {
+                      const text = e.currentTarget.value;
+                      addMessage({ role: 'user', content: text });
+                      processUserInput(text, isScreenSharing);
+                      e.currentTarget.value = '';
+                    }
+                  }}
+                  disabled={!isConnected}
+                />
                 <Button
-                  onClick={connectToGeminiLive}
-                  disabled={isConnecting}
-                  className="flex-1"
+                  onClick={() => {
+                    const input = document.querySelector('input[placeholder="Type your message or use voice..."]') as HTMLInputElement;
+                    if (input?.value.trim()) {
+                      const text = input.value;
+                      addMessage({ role: 'user', content: text });
+                      processUserInput(text, isScreenSharing);
+                      input.value = '';
+                    }
+                  }}
+                  disabled={!isConnected}
                 >
-                  {isConnecting ? (
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  ) : (
-                    <Phone className="h-4 w-4 mr-2" />
-                  )}
-                  Connect to Gemini Live
+                  Send
                 </Button>
-              ) : (
-                <>
+              </div>
+              
+              <div className="flex gap-2">
+                {!isConnected ? (
                   <Button
-                    onClick={() => setIsMuted(!isMuted)}
-                    variant={isMuted ? "destructive" : "secondary"}
-                    size="icon"
+                    onClick={connectToGeminiLive}
+                    disabled={isConnecting}
+                    className="flex-1"
                   >
-                    {isMuted ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
+                    {isConnecting ? (
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    ) : (
+                      <Phone className="h-4 w-4 mr-2" />
+                    )}
+                    Connect to Assistant
                   </Button>
-                  
-                  {!isScreenSharing ? (
+                ) : (
+                  <>
                     <Button
-                      onClick={startScreenShare}
-                      variant="secondary"
+                      onClick={() => {
+                        setIsMuted(!isMuted);
+                        if ((window as any).speechRecognition) {
+                          if (isMuted) {
+                            (window as any).speechRecognition.start();
+                          } else {
+                            (window as any).speechRecognition.stop();
+                          }
+                        }
+                      }}
+                      variant={isMuted ? "destructive" : "secondary"}
+                      size="icon"
+                      title={isMuted ? "Enable voice input" : "Disable voice input"}
                     >
-                      <Monitor className="h-4 w-4 mr-2" />
+                      {isMuted ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
+                    </Button>
+                    
+                    {!isScreenSharing ? (
+                      <Button
+                        onClick={startScreenShare}
+                        variant="secondary"
+                      >
+                        <Monitor className="h-4 w-4 mr-2" />
                       Share Screen
                     </Button>
                   ) : (
@@ -519,6 +568,7 @@ export const GeminiLiveAssistant: React.FC<GeminiLiveAssistantProps> = ({
                   </Button>
                 </>
               )}
+              </div>
             </div>
           </div>
           
