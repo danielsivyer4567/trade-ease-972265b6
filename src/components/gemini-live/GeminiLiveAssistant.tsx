@@ -272,7 +272,6 @@ export const GeminiLiveAssistant: React.FC<GeminiLiveAssistantProps> = ({
           body: JSON.stringify({
             contents: [systemInstruction, userRequest],
             generationConfig: {
-              response_mime_type: "application/json",
               temperature: 0.7,
               topK: 1,
               topP: 1,
@@ -305,7 +304,7 @@ export const GeminiLiveAssistant: React.FC<GeminiLiveAssistantProps> = ({
     } catch (error) {
       console.error('Error processing input:', error);
       addMessage({
-        role: 'assistant',
+        role: 'system',
         content: 'Sorry, I encountered an error processing your request.'
       });
     }
