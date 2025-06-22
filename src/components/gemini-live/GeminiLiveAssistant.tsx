@@ -136,9 +136,11 @@ export const GeminiLiveAssistant: React.FC<GeminiLiveAssistantProps> = ({
         const last = event.results.length - 1;
         const transcript = event.results[last][0].transcript;
         
+        console.log('Speech recognition result:', { transcript, isFinal: event.results[last].isFinal });
         setCurrentTranscript(transcript);
         
         if (event.results[last].isFinal) {
+          console.log('Final transcript received. Processing with Gemini...');
           // Add user message
           addMessage({
             role: 'user',
@@ -175,6 +177,8 @@ export const GeminiLiveAssistant: React.FC<GeminiLiveAssistantProps> = ({
 
       // Store recognition instance
       (window as any).speechRecognition = recognition;
+      
+      console.log('Audio capture started.');
       
     } catch (error) {
       console.error('Error starting audio capture:', error);
@@ -240,6 +244,7 @@ export const GeminiLiveAssistant: React.FC<GeminiLiveAssistantProps> = ({
 
   // Process user input with Gemini
   const processUserInput = async (text: string, includeScreenshot?: boolean) => {
+    console.log('processUserInput called with:', { text, includeScreenshot });
     try {
       const systemInstruction = {
         role: "system",
