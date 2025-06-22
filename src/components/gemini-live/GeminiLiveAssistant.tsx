@@ -90,7 +90,24 @@ export const GeminiLiveAssistant: React.FC<GeminiLiveAssistantProps> = ({
     console.log('Connecting with API key:', geminiApiKey ? `${geminiApiKey.substring(0, 10)}...` : 'No API key');
     
     try {
-      // For now, we'll use the REST API approach since WebSocket requires special setup
+      // First, validate the API key by sending a simple request
+      const validationResponse = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key=${geminiApiKey}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: "hello" }] }],
+          }),
+        }
+      );
+
+      if (!validationResponse.ok) {
+        const errorData = await validationResponse.json();
+        throw new Error(errorData.error?.message || `API Key validation failed: ${validationResponse.status}`);
+      }
+
+      // If validation is successful, proceed to connect
       setIsConnected(true);
       setIsConnecting(false);
       
@@ -112,7 +129,7 @@ export const GeminiLiveAssistant: React.FC<GeminiLiveAssistantProps> = ({
       console.error('Error connecting to Gemini:', error);
       toast({
         title: "Connection Failed",
-        description: "Could not establish connection to Gemini",
+        description: String(error) || "Could not establish connection to Gemini",
         variant: "destructive"
       });
       setIsConnecting(false);
