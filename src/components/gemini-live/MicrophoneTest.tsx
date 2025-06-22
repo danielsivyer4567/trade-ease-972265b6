@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { 
   Mic, 
   MicOff, 
@@ -160,120 +161,122 @@ export const MicrophoneTest: React.FC<MicrophoneTestProps> = ({ onClose }) => {
           Microphone & Audio Test
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-6">
-        {/* Device Info */}
-        <div className="space-y-2">
-          <div className="flex items-center gap-2 text-sm">
-            <Headphones className="h-4 w-4 text-muted-foreground" />
-            <span className="font-medium">Output:</span>
-            <span className="text-muted-foreground">Headphones (3- Arctis Nova Pro Wireless)</span>
+      <ScrollArea className="h-[60vh]">
+        <CardContent className="space-y-6 p-6">
+          {/* Device Info */}
+          <div className="space-y-2">
+            <div className="flex items-center gap-2 text-sm">
+              <Headphones className="h-4 w-4 text-muted-foreground" />
+              <span className="font-medium">Output:</span>
+              <span className="text-muted-foreground">Headphones (3- Arctis Nova Pro Wireless)</span>
+            </div>
+            <div className="flex items-center gap-2 text-sm">
+              <Mic className="h-4 w-4 text-muted-foreground" />
+              <span className="font-medium">Input:</span>
+              <span className="text-muted-foreground">
+                {microphoneInfo?.label || 'Microphone (3- Arctis Nova Pro Wireless)'}
+              </span>
+            </div>
           </div>
-          <div className="flex items-center gap-2 text-sm">
-            <Mic className="h-4 w-4 text-muted-foreground" />
-            <span className="font-medium">Input:</span>
-            <span className="text-muted-foreground">
-              {microphoneInfo?.label || 'Microphone (3- Arctis Nova Pro Wireless)'}
-            </span>
-          </div>
-        </div>
 
-        {/* Audio Level Monitor */}
-        <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <h3 className="text-sm font-medium">Audio Level Monitor</h3>
-            <Activity className={`h-4 w-4 ${isRecording ? 'text-green-500 animate-pulse' : 'text-muted-foreground'}`} />
+          {/* Audio Level Monitor */}
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-medium">Audio Level Monitor</h3>
+              <Activity className={`h-4 w-4 ${isRecording ? 'text-green-500 animate-pulse' : 'text-muted-foreground'}`} />
+            </div>
+            <Progress value={audioLevel} className="h-3" />
+            <div className="flex justify-between text-xs text-muted-foreground">
+              <span>Silent</span>
+              <span className={audioLevel > 30 ? 'text-green-500 font-medium' : ''}>
+                {audioLevel > 30 ? 'Good signal!' : 'Speak to see levels'}
+              </span>
+              <span>Loud</span>
+            </div>
+            <Button
+              onClick={isRecording ? stopAudioLevelMonitoring : startAudioLevelMonitoring}
+              variant={isRecording ? "destructive" : "default"}
+              className="w-full"
+            >
+              {isRecording ? (
+                <>
+                  <MicOff className="h-4 w-4 mr-2" />
+                  Stop Monitoring
+                </>
+              ) : (
+                <>
+                  <Mic className="h-4 w-4 mr-2" />
+                  Start Audio Level Test
+                </>
+              )}
+            </Button>
           </div>
-          <Progress value={audioLevel} className="h-3" />
-          <div className="flex justify-between text-xs text-muted-foreground">
-            <span>Silent</span>
-            <span className={audioLevel > 30 ? 'text-green-500 font-medium' : ''}>
-              {audioLevel > 30 ? 'Good signal!' : 'Speak to see levels'}
-            </span>
-            <span>Loud</span>
+
+          {/* Speech Recognition Test */}
+          <div className="space-y-3">
+            <h3 className="text-sm font-medium">Speech Recognition Test</h3>
+            <div className="min-h-[60px] p-3 bg-muted rounded-lg">
+              <p className="text-sm">{transcript || 'Click "Start Speech Test" and say something...'}</p>
+            </div>
+            <Button
+              onClick={isListening ? stopSpeechRecognition : startSpeechRecognition}
+              variant={isListening ? "destructive" : "secondary"}
+              className="w-full"
+            >
+              {isListening ? 'Stop Speech Test' : 'Start Speech Test'}
+            </Button>
           </div>
-          <Button
-            onClick={isRecording ? stopAudioLevelMonitoring : startAudioLevelMonitoring}
-            variant={isRecording ? "destructive" : "default"}
-            className="w-full"
-          >
-            {isRecording ? (
-              <>
-                <MicOff className="h-4 w-4 mr-2" />
-                Stop Monitoring
-              </>
-            ) : (
-              <>
-                <Mic className="h-4 w-4 mr-2" />
-                Start Audio Level Test
-              </>
-            )}
-          </Button>
-        </div>
 
-        {/* Speech Recognition Test */}
-        <div className="space-y-3">
-          <h3 className="text-sm font-medium">Speech Recognition Test</h3>
-          <div className="min-h-[60px] p-3 bg-muted rounded-lg">
-            <p className="text-sm">{transcript || 'Click "Start Speech Test" and say something...'}</p>
+          {/* Audio Output Test */}
+          <div className="space-y-3">
+            <h3 className="text-sm font-medium">Audio Output Test</h3>
+            <Button
+              onClick={playTestSound}
+              variant="outline"
+              className="w-full"
+            >
+              <Volume2 className="h-4 w-4 mr-2" />
+              Play Test Sound
+            </Button>
           </div>
-          <Button
-            onClick={isListening ? stopSpeechRecognition : startSpeechRecognition}
-            variant={isListening ? "destructive" : "secondary"}
-            className="w-full"
-          >
-            {isListening ? 'Stop Speech Test' : 'Start Speech Test'}
-          </Button>
-        </div>
 
-        {/* Audio Output Test */}
-        <div className="space-y-3">
-          <h3 className="text-sm font-medium">Audio Output Test</h3>
-          <Button
-            onClick={playTestSound}
-            variant="outline"
-            className="w-full"
-          >
-            <Volume2 className="h-4 w-4 mr-2" />
-            Play Test Sound
-          </Button>
-        </div>
-
-        {/* Test Results */}
-        <Alert>
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription>
-            <p className="font-medium mb-2">Quick Tests:</p>
-            <ul className="space-y-1 text-sm">
-              <li className="flex items-center gap-2">
-                {audioLevel > 20 ? (
-                  <CheckCircle className="h-3 w-3 text-green-500" />
-                ) : (
+          {/* Test Results */}
+          <Alert>
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>
+              <p className="font-medium mb-2">Quick Tests:</p>
+              <ul className="space-y-1 text-sm">
+                <li className="flex items-center gap-2">
+                  {audioLevel > 20 ? (
+                    <CheckCircle className="h-3 w-3 text-green-500" />
+                  ) : (
+                    <AlertCircle className="h-3 w-3 text-yellow-500" />
+                  )}
+                  Audio levels {audioLevel > 20 ? 'detected' : 'not detected yet'}
+                </li>
+                <li className="flex items-center gap-2">
+                  {transcript && transcript !== 'Listening... Say something!' ? (
+                    <CheckCircle className="h-3 w-3 text-green-500" />
+                  ) : (
+                    <AlertCircle className="h-3 w-3 text-yellow-500" />
+                  )}
+                  Speech recognition {transcript && transcript !== 'Listening... Say something!' ? 'working' : 'not tested'}
+                </li>
+                <li className="flex items-center gap-2">
                   <AlertCircle className="h-3 w-3 text-yellow-500" />
-                )}
-                Audio levels {audioLevel > 20 ? 'detected' : 'not detected yet'}
-              </li>
-              <li className="flex items-center gap-2">
-                {transcript && transcript !== 'Listening... Say something!' ? (
-                  <CheckCircle className="h-3 w-3 text-green-500" />
-                ) : (
-                  <AlertCircle className="h-3 w-3 text-yellow-500" />
-                )}
-                Speech recognition {transcript && transcript !== 'Listening... Say something!' ? 'working' : 'not tested'}
-              </li>
-              <li className="flex items-center gap-2">
-                <AlertCircle className="h-3 w-3 text-yellow-500" />
-                Audio output (test manually)
-              </li>
-            </ul>
-          </AlertDescription>
-        </Alert>
+                  Audio output (test manually)
+                </li>
+              </ul>
+            </AlertDescription>
+          </Alert>
 
-        {onClose && (
-          <Button onClick={onClose} variant="outline" className="w-full">
-            Close Test
-          </Button>
-        )}
-      </CardContent>
+          {onClose && (
+            <Button onClick={onClose} variant="outline" className="w-full">
+              Close Test
+            </Button>
+          )}
+        </CardContent>
+      </ScrollArea>
     </Card>
   );
 }; 

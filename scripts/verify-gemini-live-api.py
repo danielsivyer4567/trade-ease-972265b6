@@ -95,7 +95,7 @@ async def verify_api_key():
 async def test_audio_capabilities():
     """Test if the system has audio capabilities for the full demo"""
     try:
-        import pyaudio
+        import pyaudio # type: ignore
         p = pyaudio.PyAudio()
         
         # Check for audio devices
@@ -115,7 +115,7 @@ async def test_audio_capabilities():
 async def test_video_capabilities():
     """Test if the system has video capabilities for the full demo"""
     try:
-        import cv2
+        import cv2 # type: ignore
         
         # Test camera
         cap = cv2.VideoCapture(0)
@@ -127,7 +127,6 @@ async def test_video_capabilities():
             
         # Test screen capture
         try:
-            import mss
             print("🖥️ Screen capture: Available")
         except ImportError:
             print("🖥️ Screen capture: Not available (install mss)")
