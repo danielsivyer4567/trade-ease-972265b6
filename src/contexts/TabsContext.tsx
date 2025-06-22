@@ -115,13 +115,13 @@ function TabsProviderWithRouter({ children }: { children: React.ReactNode }) {
         path: location.pathname 
       };
       
-      // Use setTimeout to ensure state update happens after render
-      setTimeout(() => {
+      // Use requestAnimationFrame to ensure state update happens after render
+      requestAnimationFrame(() => {
         if (mountedRef.current) {
           setTabs([initialTab]);
           setActiveTabId(defaultTabId);
         }
-      }, 0);
+      });
     }
   }, [location?.pathname]);
 
@@ -129,8 +129,8 @@ function TabsProviderWithRouter({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     // Only handle navigation updates when initialized and not during active navigation
     if (!navigationInProgress && initialized.current && location?.pathname && mountedRef.current) {
-      // Use setTimeout to prevent state updates during render
-      setTimeout(() => {
+      // Use requestAnimationFrame to prevent state updates during render
+      requestAnimationFrame(() => {
         if (!mountedRef.current) return;
         
         setTabs(currentTabs => {
@@ -139,7 +139,13 @@ function TabsProviderWithRouter({ children }: { children: React.ReactNode }) {
           
           if (existingTabIndex >= 0) {
             // Path exists in a tab, just activate it
-            setActiveTabId(currentTabs[existingTabIndex].id);
+            const existingTab = currentTabs[existingTabIndex];
+            // Schedule the active tab update for the next frame
+            requestAnimationFrame(() => {
+              if (mountedRef.current) {
+                setActiveTabId(existingTab.id);
+              }
+            });
             return currentTabs; // No change to tabs
           } else if (location.pathname !== '/') {
             // New path, create a new tab
@@ -154,13 +160,18 @@ function TabsProviderWithRouter({ children }: { children: React.ReactNode }) {
               path: location.pathname
             };
             
-            setActiveTabId(newTab.id);
+            // Schedule the active tab update for the next frame
+            requestAnimationFrame(() => {
+              if (mountedRef.current) {
+                setActiveTabId(newTab.id);
+              }
+            });
             return [...currentTabs, newTab];
           }
           
           return currentTabs; // No change
         });
-      }, 0);
+      });
     }
   }, [location?.pathname, navigationInProgress]);
 

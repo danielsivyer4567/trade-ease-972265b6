@@ -24,7 +24,7 @@ export function useGoogleMapsApiKey() {
       return;
     }
 
-    // If no environment variable, try to get from database
+    // If no environment variable, try to get from database using Supabase client
     try {
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
       
@@ -40,28 +40,15 @@ export function useGoogleMapsApiKey() {
         return;
       }
 
-      const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/google-maps-key`,
-        {
-          method: 'GET',
-          headers: {
-            'Authorization': `Bearer ${session.access_token}`,
-            'Content-Type': 'application/json',
-          },
-        }
-      );
+      const { data, error: functionError } = await supabase.functions.invoke('google-maps-key', {
+        method: 'GET'
+      });
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('Response error:', {
-          status: response.status,
-          statusText: response.statusText,
-          body: errorText
-        });
-        throw new Error(`Failed to retrieve API key: ${response.statusText}`);
+      if (functionError) {
+        console.error('Function error:', functionError);
+        throw new Error(`Failed to retrieve API key: ${functionError.message}`);
       }
 
-      const data = await response.json();
       if (data?.apiKey) {
         setApiKey(data.apiKey);
       } else {
@@ -92,26 +79,14 @@ export function useGoogleMapsApiKey() {
         return;
       }
 
-      const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/google-maps-key`,
-        {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${session.access_token}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ apiKey: newApiKey }),
-        }
-      );
+      const { data, error: functionError } = await supabase.functions.invoke('google-maps-key', {
+        method: 'POST',
+        body: { apiKey: newApiKey }
+      });
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('Response error:', {
-          status: response.status,
-          statusText: response.statusText,
-          body: errorText
-        });
-        throw new Error(`Failed to save API key: ${response.statusText}`);
+      if (functionError) {
+        console.error('Function error:', functionError);
+        throw new Error(`Failed to save API key: ${functionError.message}`);
       }
 
       setApiKey(newApiKey);
@@ -141,25 +116,13 @@ export function useGoogleMapsApiKey() {
         return;
       }
 
-      const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/google-maps-key`,
-        {
-          method: 'DELETE',
-          headers: {
-            'Authorization': `Bearer ${session.access_token}`,
-            'Content-Type': 'application/json',
-          },
-        }
-      );
+      const { data, error: functionError } = await supabase.functions.invoke('google-maps-key', {
+        method: 'DELETE'
+      });
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('Response error:', {
-          status: response.status,
-          statusText: response.statusText,
-          body: errorText
-        });
-        throw new Error(`Failed to delete API key: ${response.statusText}`);
+      if (functionError) {
+        console.error('Function error:', functionError);
+        throw new Error(`Failed to delete API key: ${functionError.message}`);
       }
 
       setApiKey(null);

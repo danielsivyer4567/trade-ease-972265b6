@@ -68,9 +68,20 @@ export const OrganizationProvider: React.FC<{ children: React.ReactNode }> = ({ 
   // Load user's organizations and current organization
   const loadOrganizations = useCallback(async () => {
     if (!user) {
-      setIsLoading(false);
+      console.log('OrganizationContext: No user available, skipping load');
       return;
     }
+
+    // Check if user has a valid session
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      console.log('OrganizationContext: No valid session, skipping load');
+      return;
+    }
+
+    console.log('OrganizationContext: Loading organizations for user:', user.id);
+    console.log('OrganizationContext: Session access token exists:', !!session.access_token);
+    setIsLoading(true);
 
     try {
       // First, check if user_profiles exists and has the required columns
@@ -78,6 +89,7 @@ export const OrganizationProvider: React.FC<{ children: React.ReactNode }> = ({ 
       let hasSubscriptionColumns = false;
       
       try {
+        console.log('OrganizationContext: Attempting to fetch user profile with subscription data...');
         // Try to get subscription data
         const { data: fullProfile, error: fullProfileError } = await supabase
           .from('user_profiles')
@@ -85,22 +97,29 @@ export const OrganizationProvider: React.FC<{ children: React.ReactNode }> = ({ 
           .eq('user_id', user.id)
           .single();
 
+        console.log('OrganizationContext: Profile fetch result:', { fullProfile, fullProfileError });
+
         if (!fullProfileError && fullProfile) {
           profileData = fullProfile;
           hasSubscriptionColumns = true;
+        } else if (fullProfileError) {
+          console.error('OrganizationContext: Error fetching full profile:', fullProfileError);
         }
       } catch (err) {
-        console.warn('Subscription columns not available in user_profiles:', err);
+        console.warn('OrganizationContext: Subscription columns not available in user_profiles:', err);
       }
 
       // If subscription columns don't exist, try basic profile
       if (!hasSubscriptionColumns) {
         try {
+          console.log('OrganizationContext: Attempting to fetch basic user profile...');
           const { data: basicProfile, error: basicProfileError } = await supabase
             .from('user_profiles')
             .select('user_id, email, name')
             .eq('user_id', user.id)
             .single();
+
+          console.log('OrganizationContext: Basic profile fetch result:', { basicProfile, basicProfileError });
 
           if (!basicProfileError && basicProfile) {
             // Use default values for missing columns
@@ -110,18 +129,22 @@ export const OrganizationProvider: React.FC<{ children: React.ReactNode }> = ({ 
               current_organization_id: null,
               subscription_features: {}
             };
+          } else if (basicProfileError) {
+            console.error('OrganizationContext: Error fetching basic profile:', basicProfileError);
           }
         } catch (err) {
-          console.warn('Could not load user profile:', err);
+          console.warn('OrganizationContext: Could not load user profile:', err);
         }
       }
 
       // Set subscription data with defaults if needed
       if (profileData) {
+        console.log('OrganizationContext: Setting profile data:', profileData);
         setSubscriptionTier(profileData.subscription_tier || 'free_starter');
         setSubscriptionFeatures(profileData.subscription_features || {});
         setMaxOrganizations(profileData.max_organizations || 1);
       } else {
+        console.log('OrganizationContext: Using default profile data');
         // Use defaults if no profile data available
         setSubscriptionTier('free_starter');
         setSubscriptionFeatures({});
@@ -129,11 +152,14 @@ export const OrganizationProvider: React.FC<{ children: React.ReactNode }> = ({ 
       }
 
       // Get user's organizations using the database function
+      console.log('OrganizationContext: Fetching user organizations...');
       const { data: orgsData, error: orgsError } = await supabase
         .rpc('get_user_organizations');
 
+      console.log('OrganizationContext: Organizations fetch result:', { orgsData, orgsError });
+
       if (orgsError) {
-        console.error('Error loading organizations:', orgsError);
+        console.error('OrganizationContext: Error loading organizations:', orgsError);
         toast({
           title: 'Error loading organizations',
           description: orgsError.message,
@@ -145,6 +171,7 @@ export const OrganizationProvider: React.FC<{ children: React.ReactNode }> = ({ 
         // Load current organization details
         const currentOrgData = orgsData.find((org: any) => org.is_current);
         if (currentOrgData) {
+          console.log('OrganizationContext: Loading current organization details...');
           const { data: orgDetails, error: detailsError } = await supabase
             .from('organizations')
             .select('*')
@@ -153,11 +180,13 @@ export const OrganizationProvider: React.FC<{ children: React.ReactNode }> = ({ 
 
           if (!detailsError && orgDetails) {
             setCurrentOrganization(orgDetails);
+          } else if (detailsError) {
+            console.error('OrganizationContext: Error loading current organization details:', detailsError);
           }
         }
       }
     } catch (error) {
-      console.error('Error in loadOrganizations:', error);
+      console.error('OrganizationContext: Error in loadOrganizations:', error);
     } finally {
       setIsLoading(false);
     }
