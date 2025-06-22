@@ -76,6 +76,7 @@ export const GeminiLiveAssistant: React.FC<GeminiLiveAssistantProps> = ({
   const [currentTranscript, setCurrentTranscript] = useState('');
   const [showMicTest, setShowMicTest] = useState(false);
   const [annotations, setAnnotations] = useState<Annotation[]>([]);
+  const [recognitionStatus, setRecognitionStatus] = useState('Idle');
   
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -142,11 +143,15 @@ export const GeminiLiveAssistant: React.FC<GeminiLiveAssistantProps> = ({
       recognition.interimResults = true;
       recognition.lang = 'en-US';
 
+      recognition.onstart = () => {
+        setRecognitionStatus('Listening...');
+      };
+
       recognition.onresult = (event: SpeechRecognitionEvent) => {
         const last = event.results.length - 1;
         const transcript = event.results[last][0].transcript;
         
-        console.log('Speech recognition result:', { transcript, isFinal: event.results[last].isFinal });
+        setRecognitionStatus(`Hearing: "${transcript}"`);
         setCurrentTranscript(transcript);
         
         if (event.results[last].isFinal) {
@@ -165,6 +170,7 @@ export const GeminiLiveAssistant: React.FC<GeminiLiveAssistantProps> = ({
 
       recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
         console.error('Speech recognition error:', event.error);
+        setRecognitionStatus(`Error: ${event.error}`);
         if (event.error === 'not-allowed') {
           toast({
             title: "Microphone Access Denied",
@@ -175,6 +181,7 @@ export const GeminiLiveAssistant: React.FC<GeminiLiveAssistantProps> = ({
       };
 
       recognition.onend = () => {
+        setRecognitionStatus('Ended. Will restart if connected.');
         // Restart if still connected and not muted
         if (isConnected && !isMuted) {
           recognition.start();
@@ -471,6 +478,9 @@ export const GeminiLiveAssistant: React.FC<GeminiLiveAssistantProps> = ({
                   </ScrollArea>
                     
                   <div className="mt-4 space-y-3">
+                    <div className="text-center text-xs text-muted-foreground">
+                      Status: <span className="font-medium text-black">{recognitionStatus}</span>
+                    </div>
                     <div className="flex gap-2">
                       <Input
                         placeholder="Type your message or use voice..."
