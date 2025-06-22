@@ -5,8 +5,8 @@ import { Button } from '@/components/ui/button';
 import { NotificationItem } from './NotificationItem';
 import { cn } from '@/lib/utils';
 import { useNotifications, type Notification } from './NotificationContextProvider';
-import { createTag } from '@/services/tagService';
-import { toast } from 'react-toastify';
+import { createTag, type TagData } from '@/services/tagService';
+import { toast } from 'sonner';
 
 type PanelSize = 'quarter' | 'half' | 'custom' | 'minimized';
 type ActiveTab = 'all' | 'team' | 'trades' | 'account' | 'security' | 'calendar' | 'comments';
@@ -520,13 +520,13 @@ export const DraggableNotificationsPanel = ({
       const uploadedFilesWithUrls = await Promise.all(uploadPromises);
 
       // 2. Create tag data
-      const tagData = {
+      const tagData: Omit<TagData, 'id' | 'timestamp'> = {
         creatorId: currentUserId,
         comment: tagComment,
         taggedStaffIds: selectedStaff.map(s => s.id),
         attachments: uploadedFilesWithUrls
           .filter(f => f.supabaseUrl)
-          .map(f => ({ type: f.type, url: f.supabaseUrl })),
+          .map(f => ({ type: f.type, url: f.supabaseUrl! })),
         coords: tagPopupCoords!,
         drawingData: drawingPreviewUrl || tagCanvasRef.current?.toDataURL('image/png') // Use preview if available
       };
@@ -563,11 +563,11 @@ export const DraggableNotificationsPanel = ({
     console.log('[TagDropEffect] Running effect. Mode active:', tagDropModeActive); // Log effect run
 
     // Create a ref to track if the component is mounted
-    const isMounted = { current: true };
+    const isMountedRef = useRef(true);
     
     const listener = (event: MouseEvent) => {
       // Only process the event if the component is still mounted
-      if (isMounted.current) {
+      if (isMountedRef.current) {
         handlePlaceNewTag(event);
       }
     };
@@ -584,7 +584,7 @@ export const DraggableNotificationsPanel = ({
     return () => {
       console.log('[TagDropEffect] Cleanup: Removing click listener.'); // Log cleanup
       // Mark component as unmounted to prevent state updates
-      isMounted.current = false;
+      isMountedRef.current = false;
       document.removeEventListener('click', listener);
       // Ensure cursor is reset if component unmounts while mode is active
       if (tagDropModeActive) {
@@ -611,23 +611,10 @@ export const DraggableNotificationsPanel = ({
   const pageCanvasRef = useRef<HTMLCanvasElement>(null);
   const canvasContainerRef = useRef<HTMLDivElement>(null);
   
-  // Add Refs for listener state
-  const isDrawingRef = useRef(isDrawing);
-  const lastPointRef = useRef(lastPoint);
-  const drawingStateRef = useRef(drawingState);
-  
-  // Keep Refs synchronized with State
-  useEffect(() => {
-    isDrawingRef.current = isDrawing;
-  }, [isDrawing]);
-  
-  useEffect(() => {
-    lastPointRef.current = lastPoint;
-  }, [lastPoint]);
-  
-  useEffect(() => {
-    drawingStateRef.current = drawingState;
-  }, [drawingState]);
+  // Create refs for current values (we'll update these manually)
+  const currentIsDrawing = useRef(false);
+  const currentLastPoint = useRef<Point | null>(null);
+  const currentDrawingState = useRef(drawingState);
   
   // Drawing functions
   const startDrawing = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
@@ -923,7 +910,7 @@ export const DraggableNotificationsPanel = ({
       toolsbar.style.zIndex = '10000';
       toolsbar.innerHTML = `
         <div class="tool-group" style="display: flex; gap: 4px; border-right: 1px solid #ddd; padding-right: 8px;">
-          <button class="tool-btn pencil ${drawingStateRef.current.tool === 'pencil' ? 'active' : ''}" title="Pencil" style="width: 32px; height: 32px; border-radius: 4px; display: flex; align-items: center; justify-content: center; ${drawingStateRef.current.tool === 'pencil' ? 'background-color: #e6f0ff; border: 1px solid #3b82f6;' : 'background-color: #f1f5f9; border: 1px solid #ddd;'}">
+          <button class="tool-btn pencil ${currentDrawingState.current.tool === 'pencil' ? 'active' : ''}" title="Pencil" style="width: 32px; height: 32px; border-radius: 4px; display: flex; align-items: center; justify-content: center; ${currentDrawingState.current.tool === 'pencil' ? 'background-color: #e6f0ff; border: 1px solid #3b82f6;' : 'background-color: #f1f5f9; border: 1px solid #ddd;'}">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"></path></svg>
           </button>
           <button class="tool-btn eraser ${drawingStateRef.current.tool === 'eraser' ? 'active' : ''}" title="Eraser" style="width: 32px; height: 32px; border-radius: 4px; display: flex; align-items: center; justify-content: center; ${drawingStateRef.current.tool === 'eraser' ? 'background-color: #e6f0ff; border: 1px solid #3b82f6;' : 'background-color: #f1f5f9; border: 1px solid #ddd;'}">
@@ -1224,14 +1211,14 @@ export const DraggableNotificationsPanel = ({
     }
   }, [isDrawing, drawingState.lineWidth, drawingState.color]);
 
-  const drawPencil = (ctx, startPoint, endPoint) => {
+  const drawPencil = (ctx: CanvasRenderingContext2D, startPoint: Point, endPoint: Point) => {
     ctx.beginPath();
     ctx.moveTo(startPoint.x, startPoint.y);
     ctx.lineTo(endPoint.x, endPoint.y);
     ctx.stroke();
   };
 
-  const eraseArea = (ctx, point, size) => {
+  const eraseArea = (ctx: CanvasRenderingContext2D, point: Point, size: number) => {
     ctx.clearRect(point.x - size, point.y - size, size * 2, size * 2);
   };
 
