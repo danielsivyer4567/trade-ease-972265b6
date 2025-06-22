@@ -3,75 +3,51 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="icon" type="image/png" href="/favicon.png" />
-    <title>Trade Ease</title>
-    <meta name="description" content="Trade Ease - Trade Management Platform" />
-    <meta name="author" content="Lovable" />
-    <meta property="og:image" content="/og-image.png" />
-    
-    <!-- Early error handler to filter browser extension errors -->
-    <script>
-    (function() {
-      const errorFilters = [
-        'message channel closed',
-        'A listener indicated an asynchronous response by returning true',
-        'Extension context invalidated',
-        'chrome-extension://',
-        'moz-extension://',
-        'vendor.js',
-        'ResizeObserver loop'
-      ];
-
-      function shouldIgnoreError(error) {
-        const errorStr = (error && (error.message || error.toString())) || '';
-        const stack = (error && error.stack) || '';
-        const fullError = errorStr + ' ' + stack;
-        
-        return errorFilters.some(filter => 
-          fullError.toLowerCase().includes(filter.toLowerCase())
-        );
+    <title>Collaborative Tagging Tool</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      /* For custom scrollbar in TaggingDock and TagPopup */
+      .scrollbar-thin {
+        scrollbar-width: thin;
+        scrollbar-color: #a0aec0 #edf2f7; /* thumb color track color */
       }
-
-      // Override console.error immediately
-      const originalConsoleError = console.error;
-      console.error = function() {
-        const args = Array.prototype.slice.call(arguments);
-        const message = args.map(arg => 
-          typeof arg === 'object' ? JSON.stringify(arg) : String(arg)
-        ).join(' ');
-        
-        if (shouldIgnoreError(message)) {
-          console.debug('[Early Filter]', ...args);
-          return;
-        }
-        originalConsoleError.apply(console, args);
-      };
-
-      // Handle errors with capture phase
-      window.addEventListener('error', function(event) {
-        if (shouldIgnoreError(event.error) || shouldIgnoreError(event.message)) {
-          console.debug('[Early Filter - Error]', event.error || event.message);
-          event.preventDefault();
-          event.stopPropagation();
-          return false;
-        }
-      }, true);
-
-      // Handle unhandled rejections with capture phase
-      window.addEventListener('unhandledrejection', function(event) {
-        if (shouldIgnoreError(event.reason)) {
-          console.debug('[Early Filter - Rejection]', event.reason);
-          event.preventDefault();
-          event.stopPropagation();
-          return false;
-        }
-      }, true);
-    })();
-    </script>
-  </head>
-
+      .scrollbar-thin::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+      }
+      .scrollbar-thin::-webkit-scrollbar-track {
+        background: #edf2f7;
+        border-radius: 3px;
+      }
+      .scrollbar-thin::-webkit-scrollbar-thumb {
+        background-color: #a0aec0;
+        border-radius: 3px;
+        border: 1px solid #edf2f7;
+      }
+      /* Class for body when tag drop mode is active */
+      .tag-drop-mode-active {
+        cursor: crosshair !important; /* Force crosshair on the entire page */
+      }
+      .tag-drop-mode-active * {
+        cursor: crosshair !important; /* Ensure children also show crosshair */
+      }
+    </style>
+  <script type="importmap">
+{
+  "imports": {
+    "react": "https://esm.sh/react@^19.1.0",
+    "react-dom/": "https://esm.sh/react-dom@^19.1.0/",
+    "react-router-dom": "https://esm.sh/react-router-dom@^7.6.2",
+    "react/": "https://esm.sh/react@^19.1.0/",
+    "lucide-react": "https://esm.sh/lucide-react@^0.522.0"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
+</head>
   <body>
+    <noscript>You need to enable JavaScript to run this app.</noscript>
     <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
+    <script type="module" src="/index.tsx"></script>
   </body>
 </html>

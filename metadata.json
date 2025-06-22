@@ -1,0 +1,7 @@
+{
+  "name": "Collaborative Tagging & Annotation Tool",
+  "description": "A web application that allows users to place tags, add comments, draw annotations, and attach files to specific points on a webpage for collaborative feedback and review. Features a dockable panel for managing tags and notifications, and supports real-time interactions.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}
