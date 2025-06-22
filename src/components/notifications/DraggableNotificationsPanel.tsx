@@ -263,7 +263,7 @@ const EffectLogger = ({ active }: { active: boolean }) => {
 export const DraggableNotificationsPanel = ({
   isOpen,
   onClose,
-  businessLogoUrl = 'https://via.placeholder.com/32/007bff/ffffff?text=Logo', // Default placeholder logo
+  businessLogoUrl = '/business-logo.png', // Trade tools business logo
   currentUserId = 'user_abc', // Example user ID
   availableStaff = [ { id: 'staff1', name: 'Alice' }, { id: 'staff2', name: 'Bob' }] // Example staff
 }: DraggableNotificationsPanelProps) => {
