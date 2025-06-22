@@ -28,6 +28,7 @@ const TestGoogleMapsPage = lazy(() => import('@/pages/TestGoogleMaps'));
 const TestGoogleMapsOptimizedPage = lazy(() => import('@/pages/TestGoogleMapsOptimized'));
 const GoogleMapsDiagnosticPage = lazy(() => import('@/pages/GoogleMapsDiagnostic'));
 const N8nAssistantPage = lazy(() => import('@/pages/N8nAssistantPage'));
+const AISupportPage = lazy(() => import('@/pages/AISupport'));
 
 // Voice Search Pages
 const QBCCVoiceSearchPage = lazy(() => import('@/pages/QBCCVoiceSearch'));
@@ -306,6 +307,8 @@ const routeObjects: RouteObject[] = [
           // Voice Search routes
           { path: "/qbcc-voice-search", element: <SuspenseWrapper><QBCCVoiceSearchPage /></SuspenseWrapper> },
           { path: "/timber-queensland-voice-search", element: <SuspenseWrapper><TimberQueenslandVoiceSearchPage /></SuspenseWrapper> },
+          // AI Support route
+          { path: "/ai-support", element: <SuspenseWrapper><AISupportPage /></SuspenseWrapper> },
           // Add the route to the settings routes
           {
             path: "/settings/integrations/database",
