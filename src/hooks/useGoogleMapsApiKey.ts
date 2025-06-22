@@ -19,17 +19,25 @@ export function useGoogleMapsApiKey() {
     const envApiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
     if (envApiKey) {
       console.log('✅ Google Maps: Using API key from environment variable');
-      console.log('🔑 API Key:', `${envApiKey.substring(0, 10)}...`);
       
-      // Validate API key format
-      if (envApiKey.startsWith('AIzaSy') && envApiKey.length > 30) {
-        setApiKey(envApiKey);
+      // Trim any whitespace and log details for debugging
+      const trimmedApiKey = envApiKey.trim();
+      console.log('🔑 Raw API Key length:', envApiKey.length);
+      console.log('🔑 Trimmed API Key length:', trimmedApiKey.length);
+      console.log('🔑 API Key preview:', `${trimmedApiKey.substring(0, 10)}...${trimmedApiKey.substring(trimmedApiKey.length - 4)}`);
+      console.log('🔑 Starts with AIzaSy:', trimmedApiKey.startsWith('AIzaSy'));
+      
+      // More flexible validation - Google API keys are typically 39 characters and start with AIzaSy
+      if (trimmedApiKey.startsWith('AIzaSy') && trimmedApiKey.length >= 35 && trimmedApiKey.length <= 45) {
+        setApiKey(trimmedApiKey);
         setIsLoading(false);
         console.log('✅ Google Maps: API key format is valid');
         return;
       } else {
         console.error('❌ Google Maps: Invalid API key format in environment variables');
-        setError('Invalid Google Maps API key format');
+        console.error('   Expected: Starts with "AIzaSy" and length between 35-45 characters');
+        console.error('   Actual: Starts with', `"${trimmedApiKey.substring(0, 6)}"`, 'and length', trimmedApiKey.length);
+        setError(`Invalid Google Maps API key format. Expected format: AIzaSy... (length: 35-45), got length: ${trimmedApiKey.length}`);
         setIsLoading(false);
         return;
       }
@@ -89,10 +97,11 @@ export function useGoogleMapsApiKey() {
     setError(null);
     
     // Validate API key format before saving
-    if (!newApiKey.startsWith('AIzaSy') || newApiKey.length < 30) {
-      setError('Invalid Google Maps API key format');
+    const trimmedNewApiKey = newApiKey.trim();
+    if (!trimmedNewApiKey.startsWith('AIzaSy') || trimmedNewApiKey.length < 35 || trimmedNewApiKey.length > 45) {
+      setError(`Invalid Google Maps API key format. Expected: AIzaSy... (length: 35-45), got length: ${trimmedNewApiKey.length}`);
       setIsLoading(false);
-      toast.error('Invalid Google Maps API key format. Keys should start with "AIzaSy"');
+      toast.error('Invalid Google Maps API key format. Keys should start with "AIzaSy" and be 35-45 characters long');
       return;
     }
     
@@ -113,7 +122,7 @@ export function useGoogleMapsApiKey() {
       console.log('🔄 Google Maps: Saving API key to database...');
       const { data, error: functionError } = await supabase.functions.invoke('google-maps-key', {
         method: 'POST',
-        body: { apiKey: newApiKey }
+        body: { apiKey: trimmedNewApiKey }
       });
 
       if (functionError) {
@@ -121,7 +130,7 @@ export function useGoogleMapsApiKey() {
         throw new Error(`Failed to save API key: ${functionError.message}`);
       }
 
-      setApiKey(newApiKey);
+      setApiKey(trimmedNewApiKey);
       console.log('✅ Google Maps: API key saved successfully');
       toast.success('Google Maps API key saved successfully');
     } catch (error) {
