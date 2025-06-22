@@ -112,10 +112,12 @@ export const GeminiLiveAssistant: React.FC<GeminiLiveAssistantProps> = ({
       setIsConnecting(false);
       
       // Send initial greeting
+      const greeting = "Hey there! I'm your AI assistant powered by Gemini. I can see your screen and help you with anything in the Trade Ease app. What would you like help with today?";
       addMessage({
         role: 'assistant',
-        content: "Hey there! I'm your AI assistant powered by Gemini. I can see your screen and help you with anything in the Trade Ease app. What would you like help with today?"
+        content: greeting
       });
+      speakText(greeting);
       
       // Start audio capture
       startAudioCapture();
@@ -331,7 +333,6 @@ export const GeminiLiveAssistant: React.FC<GeminiLiveAssistantProps> = ({
       if (responseData.candidates && responseData.candidates.length > 0) {
         const responseText = responseData.candidates[0].content.parts[0].text;
         
-        // Since we removed the JSON requirement, we just process the text directly.
         addMessage({ role: 'assistant', content: responseText });
         speakText(responseText);
 
@@ -342,10 +343,12 @@ export const GeminiLiveAssistant: React.FC<GeminiLiveAssistantProps> = ({
 
     } catch (error) {
       console.error('Error processing input:', error);
+      const errorMessage = 'Sorry, I encountered an error processing your request.';
       addMessage({
         role: 'system',
-        content: 'Sorry, I encountered an error processing your request.'
+        content: errorMessage
       });
+      speakText(errorMessage);
     }
   };
 
@@ -406,12 +409,6 @@ export const GeminiLiveAssistant: React.FC<GeminiLiveAssistantProps> = ({
     speechSynthesis.speak(utterance);
   };
 
-  // Play audio response from Gemini (simplified for now)
-  const playAudioResponse = async (base64Audio: string) => {
-    // For now, we'll use text-to-speech instead of raw audio playback
-    console.log('Audio playback not implemented in this version');
-  };
-
   // Add message to conversation
   const addMessage = (message: Omit<ConversationMessage, 'id' | 'timestamp'>) => {
     setConversation(prev => [...prev, {
@@ -419,23 +416,6 @@ export const GeminiLiveAssistant: React.FC<GeminiLiveAssistantProps> = ({
       id: Date.now().toString(),
       timestamp: new Date()
     }]);
-  };
-
-  // Utility functions
-  const arrayBufferToBase64 = (buffer: ArrayBuffer): string => {
-    const bytes = new Uint8Array(buffer);
-    let binary = '';
-    bytes.forEach(byte => binary += String.fromCharCode(byte));
-    return btoa(binary);
-  };
-
-  const base64ToArrayBuffer = (base64: string): ArrayBuffer => {
-    const binary = atob(base64);
-    const bytes = new Uint8Array(binary.length);
-    for (let i = 0; i < binary.length; i++) {
-      bytes[i] = binary.charCodeAt(i);
-    }
-    return bytes.buffer;
   };
 
   // Disconnect from Gemini Live
@@ -450,6 +430,8 @@ export const GeminiLiveAssistant: React.FC<GeminiLiveAssistantProps> = ({
 
   // Cleanup on unmount
   useEffect(() => {
+    // Make sure voices are loaded
+    speechSynthesis.getVoices();
     return () => {
       disconnect();
     };
