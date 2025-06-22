@@ -65,6 +65,7 @@ const TDSCalculator = lazy(() => import('@/pages/Calculators/TDSCalculator'));
 const QBCCFormsCalculator = lazy(() => import('@/pages/Calculators/QBCCFormsCalculator'));
 const N8nWorkflowPage = lazy(() => import('@/pages/Workflow/n8n-workflow'));
 const N8nWorkflowListPage = lazy(() => import('@/pages/Workflow/n8n-workflow-list'));
+const GoogleMapsTest = lazy(() => import('@/pages/GoogleMapsTest'));
 
 const routeObjects: RouteObject[] = [
   apiRoutes,
@@ -156,6 +157,7 @@ const routeObjects: RouteObject[] = [
           { path: "workflow/new", element: <SuspenseWrapper><N8nWorkflowPage /></SuspenseWrapper> },
           { path: "workflow/edit/:id", element: <SuspenseWrapper><N8nWorkflowPage /></SuspenseWrapper> },
           { path: "debug/auth", element: <AuthDebugger /> },
+          { path: "debug/google-maps", element: <SuspenseWrapper><GoogleMapsTest /></SuspenseWrapper> },
         ]
       }
     ]
