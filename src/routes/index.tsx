@@ -1,5 +1,5 @@
 import React, { Suspense, lazy } from 'react';
-import { createBrowserRouter, RouteObject, Outlet } from 'react-router-dom';
+import { createBrowserRouter, RouteObject } from 'react-router-dom';
 import { LoadingFallback } from './loading-fallback';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { authRoutes } from './auth-routes';
@@ -25,8 +25,6 @@ const NewCustomerPage = lazy(() => import('@/pages/Customers/NewCustomer'));
 const EditCustomerPage = lazy(() => import('@/pages/Customers/EditCustomer'));
 const CustomerPortfolioPage = lazy(() => import('@/pages/Customers/CustomerPortfolio'));
 const SiteAuditsPage = lazy(() => import('@/pages/SiteAudits'));
-const NewSiteAuditPage = lazy(() => import('@/pages/SiteAudits/New'));
-const SiteAuditDetailsPage = lazy(() => import('@/pages/SiteAudits/Details'));
 const JobsPage = lazy(() => import('@/pages/Jobs'));
 const NewJobPage = lazy(() => import('@/pages/Jobs/NewJob'));
 const JobDetailsPage = lazy(() => import('@/pages/Jobs/JobDetails'));
@@ -79,7 +77,7 @@ const routeObjects: RouteObject[] = [
         children: [
           { path: "/", element: <SuspenseWrapper><DashboardPage /></SuspenseWrapper> },
           {
-            path: "settings/*", // Use '/*' for nested routes
+            path: "settings/*",
             element: <SettingsRoutes />
           },
           ...(paymentRoutes.children || []),
@@ -96,11 +94,7 @@ const routeObjects: RouteObject[] = [
           },
           {
             path: "site-audits",
-            children: [
-              { index: true, element: <SuspenseWrapper><SiteAuditsPage /></SuspenseWrapper> },
-              { path: "new", element: <SuspenseWrapper><NewSiteAuditPage /></SuspenseWrapper> },
-              { path: ":id", element: <SuspenseWrapper><SiteAuditDetailsPage /></SuspenseWrapper> },
-            ],
+            element: <SuspenseWrapper><SiteAuditsPage /></SuspenseWrapper>
           },
           {
             path: "jobs",
