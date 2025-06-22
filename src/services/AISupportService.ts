@@ -56,7 +56,7 @@ class AISupportService {
 
   constructor() {
     this.baseURL = import.meta.env.VITE_API_URL || 'http://localhost:8081';
-    this.apiKey = import.meta.env.VITE_VERTEX_AI_KEY || 'AIzaSyDDJy7brTYuEoNWfE0evnC2Eo0O8Ast6Bc';
+    this.apiKey = import.meta.env.VITE_VERTEX_AI_KEY || '';
   }
 
   // Initialize a new AI support session
