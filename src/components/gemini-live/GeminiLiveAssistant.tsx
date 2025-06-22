@@ -48,6 +48,14 @@ interface SpeechRecognitionErrorEvent extends Event {
   error: string;
 }
 
+type GeminiContentPart = {
+  text?: string;
+  inline_data?: {
+    mime_type: string;
+    data: string;
+  };
+};
+
 declare global {
   interface Window {
     SpeechRecognition: any;
@@ -198,14 +206,6 @@ export const GeminiLiveAssistant: React.FC<GeminiLiveAssistantProps> = ({
         stopScreenShare();
       });
       
-      // Start sending screenshots periodically
-      startScreenCapture();
-      
-      toast({
-        title: "Screen Sharing Started",
-        description: "I can now see your screen and help you better",
-      });
-      
       // Automatically ask how to help when screen sharing starts
       setTimeout(() => {
         const message = "I can now see your screen! How can I help you with Trade Ease today?";
@@ -238,75 +238,28 @@ export const GeminiLiveAssistant: React.FC<GeminiLiveAssistantProps> = ({
     }
   };
 
-  // Capture and send screenshots periodically
-  const startScreenCapture = () => {
-    const captureInterval = setInterval(() => {
-      if (!isScreenSharing || !videoRef.current || !canvasRef.current) {
-        clearInterval(captureInterval);
-        return;
-      }
-      
-      const canvas = canvasRef.current;
-      const video = videoRef.current;
-      
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
-      
-      const ctx = canvas.getContext('2d');
-      if (ctx) {
-        ctx.drawImage(video, 0, 0);
-        
-        // Convert to base64 and send to Gemini
-        canvas.toBlob((blob) => {
-          if (blob) {
-            const reader = new FileReader();
-            reader.onloadend = () => {
-              const base64data = reader.result as string;
-              sendScreenshotToGemini(base64data.split(',')[1]);
-            };
-            reader.readAsDataURL(blob);
-          }
-        }, 'image/jpeg', 0.8);
-      }
-    }, 2000); // Capture every 2 seconds
-  };
-
   // Process user input with Gemini
   const processUserInput = async (text: string, includeScreenshot?: boolean) => {
     try {
       const systemInstruction = {
         role: "system",
         parts: [{
-          text: `You are an expert user of the "Trade Ease" application. Your goal is to provide helpful, step-by-step guidance. A user is sharing their screen and has asked for help. 
-          
-          Analyze the user's request and the screenshot to provide a clear, actionable response.
-          
-          Your response MUST be a valid JSON object with the following structure:
-          {
-            "explanation": "A clear, concise explanation of the steps to take. This will be spoken to the user.",
-            "annotations": [
-              {
-                "type": "'highlight' or 'arrow' or 'label'",
-                "label": "A short text label for the annotation (optional).",
-                "x": "The x-coordinate of the element to annotate.",
-                "y": "The y-coordinate of the element to annotate.",
-                "width": "The width of the element (for 'highlight').",
-                "height": "The height of the element (for 'highlight').",
-                "toX": "The destination x-coordinate (for 'arrow').",
-                "toY": "The destination y-coordinate (for 'arrow')."
-              }
-            ]
-          }
-
-          If you cannot determine the coordinates or what to do, respond with an empty annotations array and ask for clarification in the explanation.`
+          text: `You are an expert user of the "Trade Ease" application. Your goal is to provide helpful, step-by-step guidance. A user is sharing their screen and has asked for help. Analyze the user's request and the screenshot to provide a clear, actionable response.`
         }]
       };
 
+      const userParts: GeminiContentPart[] = [{ text: `User request: "${text}"` }];
+
+      if (includeScreenshot) {
+        const screenshotData = getBase64Screenshot();
+        if (screenshotData) {
+          userParts.push({ inline_data: { mime_type: "image/jpeg", data: screenshotData } });
+        }
+      }
+
       const userRequest = {
         role: "user",
-        parts: includeScreenshot
-          ? [{ text: `User request: "${text}"` }, { inline_data: { mime_type: "image/jpeg", data: getBase64Screenshot() } }]
-          : [{ text }]
+        parts: userParts,
       };
       
       const response = await fetch(
@@ -336,31 +289,23 @@ export const GeminiLiveAssistant: React.FC<GeminiLiveAssistantProps> = ({
       }
       
       const responseData = await response.json();
-      const responseText = responseData.candidates[0].content.parts[0].text;
       
-      try {
-        const parsedResponse = JSON.parse(responseText);
+      if (responseData.candidates && responseData.candidates.length > 0) {
+        const responseText = responseData.candidates[0].content.parts[0].text;
         
-        if (parsedResponse.explanation) {
-          addMessage({ role: 'assistant', content: parsedResponse.explanation });
-          speakText(parsedResponse.explanation);
-        }
-
-        if (parsedResponse.annotations && Array.isArray(parsedResponse.annotations)) {
-          setAnnotations(parsedResponse.annotations);
-        }
-
-      } catch (e) {
-        console.error("Failed to parse JSON response from Gemini:", responseText);
-        // Fallback for non-JSON response
+        // Since we removed the JSON requirement, we just process the text directly.
         addMessage({ role: 'assistant', content: responseText });
         speakText(responseText);
+
+      } else {
+        console.error("No candidates in response from Gemini:", responseData);
+        throw new Error("Invalid response structure from API.");
       }
 
     } catch (error) {
       console.error('Error processing input:', error);
       addMessage({
-        role: 'system',
+        role: 'assistant',
         content: 'Sorry, I encountered an error processing your request.'
       });
     }
@@ -379,13 +324,6 @@ export const GeminiLiveAssistant: React.FC<GeminiLiveAssistantProps> = ({
       }
     }
     return '';
-  };
-
-  // Send screenshot to Gemini for analysis
-  const sendScreenshotToGemini = (base64Image: string) => {
-    // This is now handled by processUserInput with includeScreenshot flag
-    // The periodic capture is mainly to keep the video feed running for context
-    console.log('Screenshot captured for context');
   };
 
   // Convert text to speech
