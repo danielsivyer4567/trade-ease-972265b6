@@ -611,10 +611,23 @@ export const DraggableNotificationsPanel = ({
   const pageCanvasRef = useRef<HTMLCanvasElement>(null);
   const canvasContainerRef = useRef<HTMLDivElement>(null);
   
-  // Create refs for current values (we'll update these manually)
-  const currentIsDrawing = useRef(false);
-  const currentLastPoint = useRef<Point | null>(null);
-  const currentDrawingState = useRef(drawingState);
+  // Simple drawing state tracking
+  const drawingStateRef = useRef(drawingState);
+  const isDrawingRef = useRef(isDrawing);
+  const lastPointRef = useRef(lastPoint);
+  
+  // Keep refs in sync with state
+  useEffect(() => {
+    drawingStateRef.current = drawingState;
+  }, [drawingState]);
+  
+  useEffect(() => {
+    isDrawingRef.current = isDrawing;
+  }, [isDrawing]);
+  
+  useEffect(() => {
+    lastPointRef.current = lastPoint;
+  }, [lastPoint]);
   
   // Drawing functions
   const startDrawing = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
@@ -910,7 +923,7 @@ export const DraggableNotificationsPanel = ({
       toolsbar.style.zIndex = '10000';
       toolsbar.innerHTML = `
         <div class="tool-group" style="display: flex; gap: 4px; border-right: 1px solid #ddd; padding-right: 8px;">
-          <button class="tool-btn pencil ${currentDrawingState.current.tool === 'pencil' ? 'active' : ''}" title="Pencil" style="width: 32px; height: 32px; border-radius: 4px; display: flex; align-items: center; justify-content: center; ${currentDrawingState.current.tool === 'pencil' ? 'background-color: #e6f0ff; border: 1px solid #3b82f6;' : 'background-color: #f1f5f9; border: 1px solid #ddd;'}">
+          <button class="tool-btn pencil ${drawingStateRef.current.tool === 'pencil' ? 'active' : ''}" title="Pencil" style="width: 32px; height: 32px; border-radius: 4px; display: flex; align-items: center; justify-content: center; ${drawingStateRef.current.tool === 'pencil' ? 'background-color: #e6f0ff; border: 1px solid #3b82f6;' : 'background-color: #f1f5f9; border: 1px solid #ddd;'}">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"></path></svg>
           </button>
           <button class="tool-btn eraser ${drawingStateRef.current.tool === 'eraser' ? 'active' : ''}" title="Eraser" style="width: 32px; height: 32px; border-radius: 4px; display: flex; align-items: center; justify-content: center; ${drawingStateRef.current.tool === 'eraser' ? 'background-color: #e6f0ff; border: 1px solid #3b82f6;' : 'background-color: #f1f5f9; border: 1px solid #ddd;'}">
@@ -1205,9 +1218,11 @@ export const DraggableNotificationsPanel = ({
   useEffect(() => {
     if (isDrawing && tagCanvasRef.current) {
       const ctx = tagCanvasRef.current.getContext('2d');
-      ctx.lineWidth = drawingState.lineWidth;
-      ctx.strokeStyle = drawingState.color;
-      ctx.lineCap = 'round';
+      if (ctx) {
+        ctx.lineWidth = drawingState.lineWidth;
+        ctx.strokeStyle = drawingState.color;
+        ctx.lineCap = 'round';
+      }
     }
   }, [isDrawing, drawingState.lineWidth, drawingState.color]);
 
