@@ -24,7 +24,6 @@ import {
 } from 'lucide-react';
 import { N8nAssistant } from '@/components/n8n-assistant/N8nAssistant';
 import { GeminiLiveAssistant } from '@/components/gemini-live/GeminiLiveAssistant';
-import { GeminiDebug } from '@/components/gemini-live/GeminiDebug';
 import { useToast } from '@/hooks/use-toast';
 
 const N8nAssistantPage = () => {
@@ -158,11 +157,6 @@ const N8nAssistantPage = () => {
           </Card>
         ) : (
           <>
-            {/* Debug Panel */}
-            <div className="mb-6">
-              <GeminiDebug apiKey={geminiApiKey} />
-            </div>
-            
             {/* Live Assistant Mode Toggle */}
             <div className="mb-6 flex justify-center">
               <Card className="p-6 max-w-2xl w-full">
