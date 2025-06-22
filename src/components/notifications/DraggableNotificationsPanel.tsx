@@ -561,9 +561,6 @@ export const DraggableNotificationsPanel = ({
   // --- Event Listener for Placing Tag (useEffect) ---
   useEffect(() => {
     console.log('[TagDropEffect] Running effect. Mode active:', tagDropModeActive); // Log effect run
-
-    // Create a ref to track if the component is mounted
-    const isMountedRef = useRef(true);
     
     const listener = (event: MouseEvent) => {
       // Only process the event if the component is still mounted
@@ -583,8 +580,6 @@ export const DraggableNotificationsPanel = ({
     // Cleanup function
     return () => {
       console.log('[TagDropEffect] Cleanup: Removing click listener.'); // Log cleanup
-      // Mark component as unmounted to prevent state updates
-      isMountedRef.current = false;
       document.removeEventListener('click', listener);
       // Ensure cursor is reset if component unmounts while mode is active
       if (tagDropModeActive) {
@@ -592,7 +587,15 @@ export const DraggableNotificationsPanel = ({
           document.body.style.cursor = '';
       }
     };
-  }, [tagDropModeActive, handlePlaceNewTag]); 
+  }, [tagDropModeActive, handlePlaceNewTag]);
+  
+  // Effect to set mounted state on unmount
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []); 
 
   // Add states for drawing
   const [drawingState, setDrawingState] = useState<DrawingState>({
@@ -611,6 +614,9 @@ export const DraggableNotificationsPanel = ({
   // Full-page drawing refs temporarily disabled
   // const pageCanvasRef = useRef<HTMLCanvasElement>(null);
   // const canvasContainerRef = useRef<HTMLDivElement>(null);
+  
+  // Ref to track if component is mounted (for cleanup)
+  const isMountedRef = useRef(true);
   
   // Simple drawing state tracking
   const drawingStateRef = useRef(drawingState);
