@@ -41,7 +41,7 @@ export const MicrophoneTest: React.FC<MicrophoneTestProps> = ({ onClose }) => {
       if (animationRef.current) {
         cancelAnimationFrame(animationRef.current);
       }
-      if (audioContextRef.current) {
+      if (audioContextRef.current && audioContextRef.current.state !== 'closed') {
         audioContextRef.current.close();
       }
     };

@@ -80,6 +80,7 @@ export const GeminiLiveAssistant: React.FC<GeminiLiveAssistantProps> = ({
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const mediaStreamRef = useRef<MediaStream | null>(null);
+  const audioStreamRef = useRef<MediaStream | null>(null);
   const { toast } = useToast();
 
   // Initialize Gemini Live connection
@@ -121,6 +122,15 @@ export const GeminiLiveAssistant: React.FC<GeminiLiveAssistantProps> = ({
   // Start audio capture for voice input using Web Speech API
   const startAudioCapture = async () => {
     try {
+      // Proactively get the audio stream to ensure microphone is active
+      audioStreamRef.current = await navigator.mediaDevices.getUserMedia({ 
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true
+        } 
+      });
+
       // Check if speech recognition is available
       const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
       if (!SpeechRecognition) {
@@ -376,6 +386,11 @@ export const GeminiLiveAssistant: React.FC<GeminiLiveAssistantProps> = ({
     // Stop speech recognition
     if ((window as any).speechRecognition) {
       (window as any).speechRecognition.stop();
+    }
+    // Stop any active media streams
+    if (audioStreamRef.current) {
+      audioStreamRef.current.getTracks().forEach(track => track.stop());
+      audioStreamRef.current = null;
     }
     stopScreenShare();
     setIsConnected(false);
