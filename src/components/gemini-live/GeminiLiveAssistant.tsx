@@ -349,10 +349,31 @@ export const GeminiLiveAssistant: React.FC<GeminiLiveAssistantProps> = ({
 
   // Convert text to speech
   const speakText = (text: string) => {
+    const recognition = (window as any).speechRecognition;
+    let originalOnEnd: (() => void) | null = null;
+
+    if (recognition) {
+      originalOnEnd = recognition.onend;
+      recognition.onend = null; // Temporarily disable auto-restart
+      recognition.stop();
+      setRecognitionStatus('Speaking...');
+    }
+
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.rate = 1.0;
     utterance.pitch = 1.0;
     utterance.volume = 1.0;
+
+    utterance.onend = () => {
+      console.log("Speech synthesis finished, restoring recognition.");
+      if (recognition) {
+        recognition.onend = originalOnEnd; // Restore the handler
+        if (isConnected && !isMuted) {
+          recognition.start();
+        }
+      }
+    };
+    
     speechSynthesis.speak(utterance);
   };
 
