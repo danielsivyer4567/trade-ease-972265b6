@@ -3,7 +3,7 @@ import { RouterProvider } from 'react-router-dom';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { OrganizationProvider } from '@/contexts/OrganizationContext';
 import { Toaster } from '@/components/ui/toaster';
-import { createRouter } from './routes/index';
+import { router } from './routes/index';
 import { Analytics } from '@vercel/analytics/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster as SonnerToaster } from 'sonner';
@@ -61,7 +61,6 @@ const AppUIComponents = ({ children }: { children?: React.ReactNode }) => (
 
 function App() {
   const [initError, setInitError] = useState(null);
-  const router = createRouter();
   
   console.log('App: Rendering with router:', router);
 
