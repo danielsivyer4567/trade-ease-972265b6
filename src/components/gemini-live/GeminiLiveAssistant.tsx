@@ -129,10 +129,12 @@ export const GeminiLiveAssistant: React.FC<GeminiLiveAssistantProps> = ({
       
     } catch (error) {
       console.error('Error connecting to Gemini:', error);
+      const detailedError = error instanceof Error ? error.message : String(error);
       toast({
         title: "Connection Failed",
-        description: String(error) || "Could not establish connection to Gemini",
-        variant: "destructive"
+        description: `Details: ${detailedError}. Please check your API key and network connection.`,
+        variant: "destructive",
+        duration: 9000
       });
       setIsConnecting(false);
     }
@@ -337,8 +339,9 @@ export const GeminiLiveAssistant: React.FC<GeminiLiveAssistantProps> = ({
         speakText(responseText);
 
       } else {
-        console.error("No candidates in response from Gemini:", responseData);
-        throw new Error("Invalid response structure from API.");
+        const responseError = responseData.error?.message || "No candidates in response from Gemini.";
+        console.error("API Error:", responseError, responseData);
+        throw new Error(responseError);
       }
 
     } catch (error) {
