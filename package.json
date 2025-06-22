@@ -23,6 +23,7 @@
     "migrate:verify": "node scripts/verify-migration.js"
   },
   "dependencies": {
+    "@google/generative-ai": "^0.24.1",
     "@hookform/resolvers": "^3.3.4",
     "@lottiefiles/react-lottie-player": "^3.5.3",
     "@mapbox/mapbox-gl-geocoder": "^5.0.3",

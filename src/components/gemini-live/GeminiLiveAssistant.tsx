@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold, ChatSession } from "@google/generative-ai";
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -81,37 +82,60 @@ export const GeminiLiveAssistant: React.FC<GeminiLiveAssistantProps> = ({
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const mediaStreamRef = useRef<MediaStream | null>(null);
+  const chatRef = useRef<ChatSession | null>(null);
   const { toast } = useToast();
 
   // Initialize Gemini Live connection
   const connectToGeminiLive = async () => {
     setIsConnecting(true);
-    
     console.log('Connecting with API key:', geminiApiKey ? `${geminiApiKey.substring(0, 10)}...` : 'No API key');
-    
-    try {
-      // First, validate the API key by sending a simple request
-      const validationResponse = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key=${geminiApiKey}`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            contents: [{ parts: [{ text: "hello" }] }],
-          }),
-        }
-      );
 
-      if (!validationResponse.ok) {
-        const errorData = await validationResponse.json();
-        throw new Error(errorData.error?.message || `API Key validation failed: ${validationResponse.status}`);
-      }
-
-      // If validation is successful, proceed to connect
-      setIsConnected(true);
+    if (!geminiApiKey) {
+      toast({
+        title: "API Key Missing",
+        description: "The Gemini API key is not configured.",
+        variant: "destructive",
+      });
       setIsConnecting(false);
+      return;
+    }
+
+    try {
+      const genAI = new GoogleGenerativeAI(geminiApiKey);
+      const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
+
+      // Validate the API key by sending a simple, non-streaming request
+      await model.generateContent("hello");
+
+      // If validation is successful, set up the chat session
+      const chat = model.startChat({
+        history: [
+          {
+            role: "user",
+            parts: [{ text: `You are an expert user of the "Trade Ease" application. Your goal is to provide helpful, step-by-step guidance. A user is sharing their screen and has asked for help. Analyze the user's request and the screenshot to provide a clear, actionable response.` }],
+          },
+          {
+            role: "model",
+            parts: [{ text: "Understood. I am ready to assist the user with the Trade Ease application by analyzing their screen and requests." }],
+          },
+        ],
+        generationConfig: {
+          maxOutputTokens: 2048,
+          temperature: 0.7,
+          topP: 1,
+          topK: 1,
+        },
+        safetySettings: [
+            { category: HarmCategory.HARM_CATEGORY_HARASSMENT, threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE },
+            { category: HarmCategory.HARM_CATEGORY_HATE_SPEECH, threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE },
+            { category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT, threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE },
+            { category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT, threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE },
+        ]
+      });
+
+      chatRef.current = chat;
+      setIsConnected(true);
       
-      // Send initial greeting
       const greeting = "Hey there! I'm your AI assistant powered by Gemini. I can see your screen and help you with anything in the Trade Ease app. What would you like help with today?";
       addMessage({
         role: 'assistant',
@@ -119,23 +143,23 @@ export const GeminiLiveAssistant: React.FC<GeminiLiveAssistantProps> = ({
       });
       speakText(greeting);
       
-      // Start audio capture
       startAudioCapture();
       
       toast({
         title: "Connected",
         description: "Gemini assistant is ready to help",
       });
-      
+
     } catch (error) {
       console.error('Error connecting to Gemini:', error);
       const detailedError = error instanceof Error ? error.message : String(error);
       toast({
         title: "Connection Failed",
-        description: `Details: ${detailedError}. Please check your API key and network connection.`,
+        description: `Details: ${detailedError}. Please check your API key and Google Cloud project settings.`,
         variant: "destructive",
         duration: 9000
       });
+    } finally {
       setIsConnecting(false);
     }
   };
@@ -184,7 +208,7 @@ export const GeminiLiveAssistant: React.FC<GeminiLiveAssistantProps> = ({
           });
           
           // Process with Gemini (include screenshot if screen is being shared)
-          processUserInput(transcript, isScreenSharing);
+          processUserInput(transcript);
           setCurrentTranscript('');
         }
       };
@@ -281,71 +305,56 @@ export const GeminiLiveAssistant: React.FC<GeminiLiveAssistantProps> = ({
   };
 
   // Process user input with Gemini
-  const processUserInput = async (text: string, includeScreenshot?: boolean) => {
-    console.log('processUserInput called with:', { text, includeScreenshot });
+  const processUserInput = async (text: string) => {
+    if (!chatRef.current) {
+      toast({
+        title: "Not Connected",
+        description: "The assistant is not connected. Please connect first.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    console.log('Processing user input with SDK:', { text });
+
     try {
-      const systemInstruction = {
-        role: "system",
-        parts: [{
-          text: `You are an expert user of the "Trade Ease" application. Your goal is to provide helpful, step-by-step guidance. A user is sharing their screen and has asked for help. Analyze the user's request and the screenshot to provide a clear, actionable response.`
-        }]
-      };
+      const screenshotData = getBase64Screenshot();
+      const promptParts: ({text: string} | {inlineData: {mimeType: string, data: string}})[] = [
+        { text: `User request: "${text}"` }
+      ];
 
-      const userParts: GeminiContentPart[] = [{ text: `User request: "${text}"` }];
-
-      if (includeScreenshot) {
-        const screenshotData = getBase64Screenshot();
-        if (screenshotData) {
-          userParts.push({ inline_data: { mime_type: "image/jpeg", data: screenshotData } });
-        }
-      }
-
-      const userRequest = {
-        role: "user",
-        parts: userParts,
-      };
-      
-      const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key=${geminiApiKey}`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            contents: [systemInstruction, userRequest],
-            generationConfig: {
-              temperature: 0.7,
-              topK: 1,
-              topP: 1,
-              maxOutputTokens: 2048,
-            }
-          })
-        }
-      );
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.error('Gemini API error:', errorData);
-        throw new Error(errorData.error?.message || `API returned ${response.status}`);
+      if (isScreenSharing && screenshotData) {
+        promptParts.push({
+          inlineData: {
+            mimeType: "image/jpeg",
+            data: screenshotData,
+          }
+        });
       }
       
-      const responseData = await response.json();
-      
-      if (responseData.candidates && responseData.candidates.length > 0) {
-        const responseText = responseData.candidates[0].content.parts[0].text;
+      // Start a streaming request
+      const result = await chatRef.current.sendMessageStream(promptParts);
+
+      let responseText = '';
+      addMessage({ role: 'assistant', content: '...' }); // Placeholder for streaming response
+
+      for await (const chunk of result.stream) {
+        const chunkText = chunk.text();
+        responseText += chunkText;
         
-        addMessage({ role: 'assistant', content: responseText });
-        speakText(responseText);
-
-      } else {
-        const responseError = responseData.error?.message || "No candidates in response from Gemini.";
-        console.error("API Error:", responseError, responseData);
-        throw new Error(responseError);
+        // Update the last message in the conversation with the streamed content
+        setConversation(prev => {
+            const newConversation = [...prev];
+            newConversation[newConversation.length - 1].content = responseText;
+            return newConversation;
+        });
       }
+
+      console.log("Full streamed response received:", responseText);
+      speakText(responseText);
 
     } catch (error) {
-      console.error('Error processing input:', error);
+      console.error('Error processing input with SDK:', error);
       const detailedError = error instanceof Error ? error.message : String(error);
       const errorMessage = `Sorry, I encountered an error. Details: ${detailedError}`;
       addMessage({
@@ -356,7 +365,7 @@ export const GeminiLiveAssistant: React.FC<GeminiLiveAssistantProps> = ({
     }
   };
 
-  const getBase64Screenshot = (): string => {
+  const getBase64Screenshot = (): string | null => {
     if (isScreenSharing && canvasRef.current && videoRef.current) {
       const canvas = canvasRef.current;
       const video = videoRef.current;
@@ -368,7 +377,7 @@ export const GeminiLiveAssistant: React.FC<GeminiLiveAssistantProps> = ({
         return canvas.toDataURL('image/jpeg', 0.8).split(',')[1];
       }
     }
-    return '';
+    return null;
   };
 
   // Convert text to speech
@@ -524,7 +533,7 @@ export const GeminiLiveAssistant: React.FC<GeminiLiveAssistantProps> = ({
                           if (e.key === 'Enter' && e.currentTarget.value.trim()) {
                             const text = e.currentTarget.value;
                             addMessage({ role: 'user', content: text });
-                            processUserInput(text, isScreenSharing);
+                            processUserInput(text);
                             e.currentTarget.value = '';
                           }
                         }}
@@ -536,7 +545,7 @@ export const GeminiLiveAssistant: React.FC<GeminiLiveAssistantProps> = ({
                           if (input?.value.trim()) {
                             const text = input.value;
                             addMessage({ role: 'user', content: text });
-                            processUserInput(text, isScreenSharing);
+                            processUserInput(text);
                             input.value = '';
                           }
                         }}
