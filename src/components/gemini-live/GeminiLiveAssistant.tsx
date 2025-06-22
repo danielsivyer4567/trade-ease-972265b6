@@ -391,6 +391,18 @@ export const GeminiLiveAssistant: React.FC<GeminiLiveAssistantProps> = ({
       }
     };
     
+    // Find a better voice
+    const voices = speechSynthesis.getVoices();
+    const googleVoice = voices.find(v => v.name.includes('Google') && v.lang.startsWith('en'));
+    const naturalVoice = voices.find(v => v.lang.startsWith('en-US') && v.name.includes('Natural'));
+
+    if (googleVoice) {
+      utterance.voice = googleVoice;
+    } else if (naturalVoice) {
+      utterance.voice = naturalVoice;
+    }
+    // Otherwise, it will use the system default
+
     speechSynthesis.speak(utterance);
   };
 
