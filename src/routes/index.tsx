@@ -76,10 +76,7 @@ const routeObjects: RouteObject[] = [
         element: <ProtectedRoute />,
         children: [
           { path: "/", element: <SuspenseWrapper><DashboardPage /></SuspenseWrapper> },
-          {
-            path: "settings/*",
-            element: <SettingsRoutes />
-          },
+          ...SettingsRoutes(),
           ...(paymentRoutes.children || []),
           activityRoutes,
           {
