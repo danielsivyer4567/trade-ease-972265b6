@@ -7,7 +7,7 @@ import { useGoogleMapsApiKey } from '@/hooks/useGoogleMapsApiKey';
 const GoogleMapsTest = () => {
   const [testResults, setTestResults] = useState<string[]>([]);
   const [isRunning, setIsRunning] = useState(false);
-  const { apiKey, isLoading, error } = useGoogleMapsApiKey();
+  const { apiKey, isLoading, error, testApiKey } = useGoogleMapsApiKey();
 
   const addResult = (result: string) => {
     setTestResults(prev => [...prev, result]);
@@ -24,23 +24,27 @@ const GoogleMapsTest = () => {
     // Test 2: Check API key from hook
     addResult(`✅ Hook API Key: ${apiKey ? `${apiKey.substring(0, 10)}...` : 'Not found'}`);
 
-    // Test 3: Test Geocoding API
+    // Test 3: Test Geocoding API using the hook's test method
     if (apiKey || envApiKey) {
       const testKey = apiKey || envApiKey;
-      try {
-        const response = await fetch(
-          `https://maps.googleapis.com/maps/api/geocode/json?address=Sydney,Australia&key=${testKey}`
-        );
-        const data = await response.json();
+      const testResult = await testApiKey(testKey);
+      
+      if (testResult.success) {
+        addResult('✅ Geocoding API: Working perfectly!');
+      } else {
+        addResult(`❌ Geocoding API Error: ${testResult.error}`);
         
-        if (data.status === 'OK') {
-          addResult('✅ Geocoding API: Working');
-        } else {
-          addResult(`❌ Geocoding API Error: ${data.status} - ${data.error_message || 'Unknown error'}`);
+        // Provide specific guidance based on the error
+        if (testResult.error?.includes('REQUEST_DENIED')) {
+          addResult('💡 Fix: Go to Google Cloud Console → Credentials → Your API Key → Add localhost:5173/* to HTTP referrers');
+        } else if (testResult.error?.includes('OVER_QUERY_LIMIT')) {
+          addResult('💡 Fix: Enable billing in Google Cloud Console');
+        } else if (testResult.error?.includes('API_NOT_ACTIVATED')) {
+          addResult('💡 Fix: Enable Maps JavaScript API in Google Cloud Console');
         }
-      } catch (error) {
-        addResult(`❌ Geocoding API Error: ${error}`);
       }
+    } else {
+      addResult('❌ No API key available for testing');
     }
 
     // Test 4: Test loading Google Maps script

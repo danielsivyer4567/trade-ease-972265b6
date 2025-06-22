@@ -172,7 +172,7 @@ const MapComponent = ({
     if (jobs.length > 0) {
       jobs.forEach((job) => {
         // Skip if job has no location
-        if (!job.location || !job.location[0] || !job.location[1]) return;
+        if (!job.location || !Array.isArray(job.location) || job.location.length < 2 || !job.location[0] || !job.location[1]) return;
         
         // Create marker element
         const markerElement = document.createElement('div');
@@ -200,14 +200,16 @@ const MapComponent = ({
             setSelectedLocation(null);
             
             // Activate Street View for the clicked job location
-            activateStreetView(mapInstance, { lat: job.location[1], lng: job.location[0] }, job.address);
+            if (job.location && job.location.length >= 2) {
+              activateStreetView(mapInstance, { lat: job.location[1], lng: job.location[0] }, job.address);
+            }
           });
         } catch (error) {
           console.error("Error creating advanced marker, falling back to standard marker:", error);
           
           // Fallback to standard marker if Advanced Markers are not available
           const standardMarker = new google.maps.Marker({
-            position: { lat: job.location[1], lng: job.location[0] },
+            position: { lat: job.location![1], lng: job.location![0] },
             map: mapInstance,
             title: job.customer,
             zIndex: 1000
@@ -219,7 +221,9 @@ const MapComponent = ({
             setSelectedLocation(null);
             
             // Activate Street View for the clicked job location
-            activateStreetView(mapInstance, { lat: job.location[1], lng: job.location[0] }, job.address);
+            if (job.location && job.location.length >= 2) {
+              activateStreetView(mapInstance, { lat: job.location[1], lng: job.location[0] }, job.address);
+            }
           });
         }
       });
@@ -439,8 +443,9 @@ const JobMap = (props: JobMapProps) => {
   const { isLoaded, loadError } = useLoadScript({
     googleMapsApiKey: GOOGLE_MAPS_CONFIG.apiKey,
     libraries: libraries as any,
-    version: "beta",
-    mapIds: [mapId] // Add mapId for Advanced Markers
+    version: "weekly", // Changed from "beta" to "weekly" for stability
+    mapIds: [mapId], // Add mapId for Advanced Markers
+    preventGoogleFontsLoading: true // Prevent loading Google Fonts for better performance
   });
 
   if (loadError) {

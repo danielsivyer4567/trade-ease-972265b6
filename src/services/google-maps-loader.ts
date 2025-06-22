@@ -51,10 +51,11 @@ class GoogleMapsLoader {
         return;
       }
 
-      // Create script URL with parameters
+      // Create script URL with parameters (using loading=async for optimal performance)
       const params = new URLSearchParams({
         key: options.apiKey,
         callback: '__googleMapsCallback',
+        loading: 'async',
         ...(options.libraries && { libraries: options.libraries.join(',') }),
         ...(options.language && { language: options.language }),
         ...(options.region && { region: options.region }),
