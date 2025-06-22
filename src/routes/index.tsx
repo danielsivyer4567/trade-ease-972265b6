@@ -11,6 +11,13 @@ import { activityRoutes } from './activity-routes';
 import { AppLayoutWithTabs } from '@/components/AppLayoutWithTabs';
 import { apiRoutes } from './api-routes';
 import { AuthDebugger } from '@/components/debug/AuthDebugger';
+import SiteAuditReportPage from '@/pages/SiteAudits/Report';
+import FenceCalculatorPage from '@/pages/Calculators/FenceCalculatorPage';
+import { SuspenseWrapper } from "./utils/SuspenseWrapper";
+import { mainRoutes } from './main-routes';
+import SiteAuditsPage from '@/pages/SiteAudits';
+import SiteAuditDetailsPage from '@/pages/SiteAudits/Details';
+import NewSiteAuditPage from '@/pages/SiteAudits/New';
 
 // Lazy load n8n workflow pages (replacing custom workflow components)
 const N8nWorkflowPage = lazy(() => import('@/pages/Workflow/n8n-workflow'));
@@ -204,7 +211,8 @@ const routeObjects: RouteObject[] = [
             path: "/site-audits",
             children: [
               { index: true, element: <SuspenseWrapper><SiteAuditsPage /></SuspenseWrapper> },
-              { path: "new", element: <SuspenseWrapper><SiteAuditsPage /></SuspenseWrapper> },
+              { path: "new", element: <SuspenseWrapper><NewSiteAuditPage /></SuspenseWrapper> },
+              { path: ":id", element: <SuspenseWrapper><SiteAuditDetailsPage /></SuspenseWrapper> },
             ],
           },
           // Job routes
@@ -274,6 +282,7 @@ const routeObjects: RouteObject[] = [
           { path: "/calculators/ncc-codes", element: <SuspenseWrapper><NCCCodesCalculator /></SuspenseWrapper> },
           { path: "/calculators/tds", element: <SuspenseWrapper><TDSCalculator /></SuspenseWrapper> },
           { path: "/calculators/qbcc-forms", element: <SuspenseWrapper><QBCCFormsCalculator /></SuspenseWrapper> },
+          { path: "/calculators/fence", element: <SuspenseWrapper><FenceCalculatorPage /></SuspenseWrapper> },
           { path: "/workflow", element: <SuspenseWrapper><N8nWorkflowListPage /></SuspenseWrapper> },
           { path: "/workflow/new", element: <SuspenseWrapper><N8nWorkflowPage /></SuspenseWrapper> },
           { path: "/workflow/edit/:id", element: <SuspenseWrapper><N8nWorkflowPage /></SuspenseWrapper> },
@@ -314,6 +323,7 @@ const routeObjects: RouteObject[] = [
             path: "/settings/integrations/database",
             element: <SetupDatabasePage />,
           },
+          { path: "/site-audits/report/:id", element: <SuspenseWrapper><SiteAuditReportPage /></SuspenseWrapper> },
         ]
       }
     ]
