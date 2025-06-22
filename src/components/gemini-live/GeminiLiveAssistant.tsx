@@ -346,10 +346,11 @@ export const GeminiLiveAssistant: React.FC<GeminiLiveAssistantProps> = ({
 
     } catch (error) {
       console.error('Error processing input:', error);
-      const errorMessage = 'Sorry, I encountered an error processing your request.';
+      const detailedError = error instanceof Error ? error.message : String(error);
+      const errorMessage = `Sorry, I encountered an error. Details: ${detailedError}`;
       addMessage({
         role: 'system',
-        content: errorMessage
+        content: errorMessage,
       });
       speakText(errorMessage);
     }
