@@ -26,6 +26,7 @@ const DebugMapsPage = lazy(() => import('@/pages/debug-maps'));
 const TestMapsPage = lazy(() => import('@/pages/test-maps'));
 const GoogleCloudFixPage = lazy(() => import('@/pages/google-cloud-fix'));
 const TestGoogleMapsPage = lazy(() => import('@/pages/TestGoogleMaps'));
+const JobMapTestPage = lazy(() => import('@/pages/JobMapTest'));
 
 // Workflow Dashboard
 const WorkflowDashboard = lazy(() => import('@/components/workflow/WorkflowDashboard').then(module => ({ default: module.default })));
@@ -285,6 +286,8 @@ const routeObjects: RouteObject[] = [
           { path: "/google-cloud-fix", element: <SuspenseWrapper><GoogleCloudFixPage /></SuspenseWrapper> },
           // Test Google Maps API route
           { path: "/test-google-maps", element: <SuspenseWrapper><TestGoogleMapsPage /></SuspenseWrapper> },
+          // Job Map Test route
+          { path: "/job-map-test", element: <SuspenseWrapper><JobMapTestPage /></SuspenseWrapper> },
           // Animated Stage Demo route
           { path: "/animated-stage-demo", element: <SuspenseWrapper><AnimatedStageDemo /></SuspenseWrapper> },
           // Add the route to the settings routes

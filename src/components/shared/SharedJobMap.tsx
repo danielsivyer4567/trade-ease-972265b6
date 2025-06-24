@@ -44,6 +44,7 @@ const SharedJobMap: React.FC<SharedJobMapProps> = ({
       const map = new window.google.maps.Map(mapRef.current, {
         center: { lat: -28.0167, lng: 153.4000 },
         zoom: 10,
+        mapTypeId: 'satellite',
         mapTypeControl: true,
         streetViewControl: showStreetView,
         fullscreenControl: true,

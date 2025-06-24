@@ -129,24 +129,18 @@ export function JobForm({
       .join(", ");
 
     return {
-      jobNumber,
+      job_number: jobNumber,
       title,
       customer,
       description,
       type,
       date: dateUndecided ? "TBD" : date,
-      assignedTeam: team,
-      address: formattedAddress || "",
+      assigned_team: team,
+      
       status: "scheduled",
-      createdAt: new Date().toISOString(),
-      lastUpdated: new Date().toISOString(),
-      documents: documents.map(file => ({
-        name: file.name,
-        type: file.type,
-        size: file.size,
-        lastModified: file.lastModified
-      })),
-      documentationNotes
+
+      
+      
     };
   };
 
