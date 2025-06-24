@@ -14,7 +14,7 @@ const MinimalMap = ({ jobs }) => {
   const { isLoaded, loadError } = useLoadScript({
     googleMapsApiKey: "AIzaSyBFVIiAURNyUiIR_2dRQmud98q9sCn5ONI",
   });
-  const [selectedJob, setSelectedJob] = React.useState(null);
+  const [selectedJob, setSelectedJob] = useState(null);
 
   if (loadError) return <div>Error loading maps</div>;
   if (!isLoaded) return <div>Loading maps...</div>;
@@ -24,7 +24,7 @@ const MinimalMap = ({ jobs }) => {
     job => Array.isArray(job.location) && job.location.length === 2
   );
   const center = firstJobWithLocation
-    ? { lat: firstJobWithLocation.location[1], lng: firstJobWithLocation.location[0] }
+    ? { lat: Number(firstJobWithLocation.location[1]), lng: Number(firstJobWithLocation.location[0]) }
     : { lat: -28.0171, lng: 153.4014 };
 
   return (
@@ -37,9 +37,11 @@ const MinimalMap = ({ jobs }) => {
         Array.isArray(job.location) && job.location.length === 2 ? (
           <Marker
             key={job.id || idx}
-            position={{ lat: job.location[1], lng: job.location[0] }}
+            position={{
+              lat: Number(job.location[1]),
+              lng: Number(job.location[0])
+            }}
             title={job.title || `Job ${idx + 1}`}
-            onClick={() => setSelectedJob(job)}
           />
         ) : null
       )}
@@ -51,7 +53,7 @@ const MinimalMap = ({ jobs }) => {
           <div>
             <h3 className="font-semibold">{selectedJob.title || 'Job'}</h3>
             <p>{selectedJob.customer}</p>
-            <p className="text-sm text-gray-500">{selectedJob.date}</p>
+            <p className="text-xs text-gray-500">{selectedJob.date}</p>
           </div>
         </InfoWindow>
       )}
@@ -254,6 +256,8 @@ const JobSiteMap = () => {
       <div style={{ height: "400px", width: "100%" }}>
         <MinimalMap jobs={jobs} />
       </div>
+
+      <pre>{JSON.stringify(jobs, null, 2)}</pre>
     </Card>
   );
 };
