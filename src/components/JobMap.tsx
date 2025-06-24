@@ -437,7 +437,7 @@ const MapComponent = ({
 // Main JobMap component using useLoadScript hook
 const JobMap = (props: JobMapProps) => {
   const { isLoaded, loadError } = useLoadScript({
-    googleMapsApiKey: "AIzaSyBFVIiAURNyUiIR_2dRQmud98q9sCn5ONI",
+    googleMapsApiKey: "AIzaSyBJ7VtBCQWRDRYI1uOkw7dHLa-yMCX4Ghk",
     libraries: libraries as any,
     version: "beta",
     mapIds: [mapId] // Add mapId for Advanced Markers
@@ -451,7 +451,28 @@ const JobMap = (props: JobMapProps) => {
     return <div className="p-4">Loading maps...</div>;
   }
 
-  return <MapComponent {...props} />;
+  return (
+    <div className="map-wrapper">
+      <JobMap {...props} />
+    </div>
+  );
+};
+
+const MinimalMap = () => {
+  const { isLoaded, loadError } = useLoadScript({
+    googleMapsApiKey: "AIzaSyBJ7VtBCQWRDRYI1uOkw7dHLa-yMCX4Ghk", // your key
+  });
+
+  if (loadError) return <div>Error loading maps</div>;
+  if (!isLoaded) return <div>Loading maps...</div>;
+
+  return (
+    <GoogleMap
+      mapContainerStyle={{ width: "100%", height: "400px" }}
+      center={{ lat: -28.0171, lng: 153.4014 }}
+      zoom={14}
+    />
+  );
 };
 
 export default JobMap;

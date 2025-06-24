@@ -8,6 +8,56 @@ import type { Job } from "@/types/job";
 import { supabase } from "@/integrations/supabase/client";
 import SharedJobMap from "@/components/shared/SharedJobMap";
 import { useGoogleMapsApiKey } from "@/hooks/useGoogleMapsApiKey";
+import { GoogleMap, Marker, InfoWindow, useLoadScript } from '@react-google-maps/api';
+
+const MinimalMap = ({ jobs }) => {
+  const { isLoaded, loadError } = useLoadScript({
+    googleMapsApiKey: "AIzaSyBFVIiAURNyUiIR_2dRQmud98q9sCn5ONI",
+  });
+  const [selectedJob, setSelectedJob] = React.useState(null);
+
+  if (loadError) return <div>Error loading maps</div>;
+  if (!isLoaded) return <div>Loading maps...</div>;
+
+  // Center the map on the first job with a location, or use a default
+  const firstJobWithLocation = jobs.find(
+    job => Array.isArray(job.location) && job.location.length === 2
+  );
+  const center = firstJobWithLocation
+    ? { lat: firstJobWithLocation.location[1], lng: firstJobWithLocation.location[0] }
+    : { lat: -28.0171, lng: 153.4014 };
+
+  return (
+    <GoogleMap
+      mapContainerStyle={{ width: "100%", height: "100%" }}
+      center={center}
+      zoom={14}
+    >
+      {jobs.map((job, idx) =>
+        Array.isArray(job.location) && job.location.length === 2 ? (
+          <Marker
+            key={job.id || idx}
+            position={{ lat: job.location[1], lng: job.location[0] }}
+            title={job.title || `Job ${idx + 1}`}
+            onClick={() => setSelectedJob(job)}
+          />
+        ) : null
+      )}
+      {selectedJob && Array.isArray(selectedJob.location) && selectedJob.location.length === 2 && (
+        <InfoWindow
+          position={{ lat: selectedJob.location[1], lng: selectedJob.location[0] }}
+          onCloseClick={() => setSelectedJob(null)}
+        >
+          <div>
+            <h3 className="font-semibold">{selectedJob.title || 'Job'}</h3>
+            <p>{selectedJob.customer}</p>
+            <p className="text-sm text-gray-500">{selectedJob.date}</p>
+          </div>
+        </InfoWindow>
+      )}
+    </GoogleMap>
+  );
+};
 
 const JobSiteMap = () => {
   const navigate = useNavigate();
@@ -15,6 +65,7 @@ const JobSiteMap = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [debugInfo, setDebugInfo] = useState<any>({});
+  const [showFullMap, setShowFullMap] = useState(false);
   
   // Get Google Maps API key status
   const { apiKey, isLoading: isApiKeyLoading, error: apiKeyError } = useGoogleMapsApiKey();
@@ -200,11 +251,9 @@ const JobSiteMap = () => {
         </div>
       )}
       
-      <SharedJobMap 
-        jobs={jobs}
-        height="400px"
-        onJobClick={handleJobClick}
-      />
+      <div style={{ height: "400px", width: "100%" }}>
+        <MinimalMap jobs={jobs} />
+      </div>
     </Card>
   );
 };
