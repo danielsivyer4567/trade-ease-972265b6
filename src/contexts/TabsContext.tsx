@@ -72,7 +72,7 @@ function TabsProviderWithRouter({ children }: { children: React.ReactNode }) {
   const mountedRef = useRef(false);
   
   // Try/catch blocks around each hook to safely handle missing router context
-  let navigate, location;
+  let navigate: any, location: any;
   try {
     navigate = useNavigate();
   } catch (e) {
@@ -115,22 +115,13 @@ function TabsProviderWithRouter({ children }: { children: React.ReactNode }) {
         path: location.pathname 
       };
       
-<<<<<<< HEAD
       // Use requestAnimationFrame to ensure state update happens after render
       requestAnimationFrame(() => {
-=======
-      // Use setTimeout to ensure state update happens after render
-      setTimeout(() => {
->>>>>>> 36fe2b8b6a4c5197b88aa6f671b0288a98028ae7
         if (mountedRef.current) {
           setTabs([initialTab]);
           setActiveTabId(defaultTabId);
         }
-<<<<<<< HEAD
       });
-=======
-      }, 0);
->>>>>>> 36fe2b8b6a4c5197b88aa6f671b0288a98028ae7
     }
   }, [location?.pathname]);
 
@@ -138,13 +129,8 @@ function TabsProviderWithRouter({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     // Only handle navigation updates when initialized and not during active navigation
     if (!navigationInProgress && initialized.current && location?.pathname && mountedRef.current) {
-<<<<<<< HEAD
       // Use requestAnimationFrame to prevent state updates during render
       requestAnimationFrame(() => {
-=======
-      // Use setTimeout to prevent state updates during render
-      setTimeout(() => {
->>>>>>> 36fe2b8b6a4c5197b88aa6f671b0288a98028ae7
         if (!mountedRef.current) return;
         
         setTabs(currentTabs => {
@@ -153,7 +139,6 @@ function TabsProviderWithRouter({ children }: { children: React.ReactNode }) {
           
           if (existingTabIndex >= 0) {
             // Path exists in a tab, just activate it
-<<<<<<< HEAD
             const existingTab = currentTabs[existingTabIndex];
             // Schedule the active tab update for the next frame
             requestAnimationFrame(() => {
@@ -161,9 +146,6 @@ function TabsProviderWithRouter({ children }: { children: React.ReactNode }) {
                 setActiveTabId(existingTab.id);
               }
             });
-=======
-            setActiveTabId(currentTabs[existingTabIndex].id);
->>>>>>> 36fe2b8b6a4c5197b88aa6f671b0288a98028ae7
             return currentTabs; // No change to tabs
           } else if (location.pathname !== '/') {
             // New path, create a new tab
@@ -178,26 +160,18 @@ function TabsProviderWithRouter({ children }: { children: React.ReactNode }) {
               path: location.pathname
             };
             
-<<<<<<< HEAD
             // Schedule the active tab update for the next frame
             requestAnimationFrame(() => {
               if (mountedRef.current) {
                 setActiveTabId(newTab.id);
               }
             });
-=======
-            setActiveTabId(newTab.id);
->>>>>>> 36fe2b8b6a4c5197b88aa6f671b0288a98028ae7
             return [...currentTabs, newTab];
           }
           
           return currentTabs; // No change
         });
-<<<<<<< HEAD
       });
-=======
-      }, 0);
->>>>>>> 36fe2b8b6a4c5197b88aa6f671b0288a98028ae7
     }
   }, [location?.pathname, navigationInProgress]);
 
