@@ -4,7 +4,7 @@ import UpcomingJobs from "@/components/dashboard/UpcomingJobs";
 import { Card } from "@/components/ui/card";
 import { ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Calendar, MapPin } from "lucide-react";
 import { TeamCalendar } from "@/components/team/TeamCalendar";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { TradeDashboardContent } from "@/components/trade-dashboard/TradeDashboardContent";
@@ -16,64 +16,17 @@ import { Calendar as ReactCalendar } from "@/components/ui/calendar";
 import { DashboardCalendar } from "@/components/dashboard/DashboardCalendar";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { GoogleMap, Marker, useLoadScript } from "@react-google-maps/api";
-import { supabase } from "@/integrations/supabase/client";
 
 export default function DashboardPage() {
   const [calendarDate, setCalendarDate] = useState<Date | undefined>(new Date());
   const navigate = useNavigate();
   const [showFullMap, setShowFullMap] = useState(false);
-  const [jobs, setJobs] = useState([]);
-  const [selectedJob, setSelectedJob] = useState(null);
-  
-  useEffect(() => {
-    async function fetchJobs() {
-      const { data, error } = await supabase
-        .from("jobs")
-        .select("*")
-        .limit(100);
-  
-      if (error) {
-        console.error("Error fetching jobs:", error);
-      } else {
-        console.log("RAW jobs from Supabase:", data);
-        const cleaned = (data || []).map((job) => {
-          const [lng, lat] = job.location;
-          return {
-            ...job,
-            location: [parseFloat(lng), parseFloat(lat)],
-          };
-        });
-  
-        console.log("Parsed jobs:", cleaned);
-        setJobs(cleaned);
-      }
-    }
-  
-    fetchJobs();
-  }, []);
-  
-  console.log("Sanitized jobs:", jobs);
-
   
   const handleJobClick = (jobName: string) => {
     // Since these are mock jobs, we'll navigate to the jobs page with a toast
     toast.info(`Navigating to ${jobName}`);
     navigate('/jobs');
   };
-  
-  const { isLoaded, loadError } = useLoadScript({
-    googleMapsApiKey: "AIzaSyBFVIiAURNyUiIR_2dRQmud98q9sCn5ONI",
-  });
-
-  if (loadError) return <div>Error loading maps</div>;
-  if (!isLoaded) return <div>Loading maps...</div>;
-
-  // Only define customIcon after isLoaded is true and window.google is available
-  const customIcon = window.google && window.google.maps ? {
-    url: '/lovable-uploads/34bca7f1-d63b-45a0-b1ca-a562443686ad.png',
-    scaledSize: new window.google.maps.Size(40, 40),
-  } : undefined;
   
   return (
     <BaseLayout showQuickTabs>
@@ -96,26 +49,7 @@ export default function DashboardPage() {
             </div>
             
             <div className={`transition-all duration-300 ease-in-out ${showFullMap ? 'h-[600px]' : 'h-[400px]'}`}>
-              <GoogleMap
-                mapContainerStyle={{ width: "100%", height: "100%" }}
-                center={{ lat: -33.8688, lng: 151.2093 }}
-                zoom={14}
-              >
-                {jobs.map((job, idx) =>
-                  Array.isArray(job.location) && job.location.length === 2 ? (
-                    <Marker
-                      key={job.id || idx}
-                      position={{
-                        lat: Number(job.location[1]),
-                        lng: Number(job.location[0])
-                      }}
-                      title={job.title || `Job ${idx + 1}`}
-                      onClick={() => setSelectedJob(job)}
-                      icon={customIcon}
-                    />
-                  ) : null
-                )}
-              </GoogleMap>
+              <JobSiteMap />
             </div>
             
             {/* Welcome message as absolute overlay inside the map */}
@@ -236,7 +170,7 @@ export default function DashboardPage() {
             {/* Staff Calendar */}
             <div className="relative bg-white rounded-lg border shadow-sm overflow-hidden mb-6">
               {/* Replace the existing calendar with our new synchronized DashboardCalendar */}
-              {/* <DashboardCalendar /> */}
+              <DashboardCalendar />
             </div>
 
             {/* Performance Section */}
