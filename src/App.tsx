@@ -3,7 +3,11 @@ import { RouterProvider } from 'react-router-dom';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { OrganizationProvider } from '@/contexts/OrganizationContext';
 import { Toaster } from '@/components/ui/toaster';
+<<<<<<< HEAD
 import { router } from './routes/index';
+=======
+import { createRouter } from './routes/index';
+>>>>>>> 36fe2b8b6a4c5197b88aa6f671b0288a98028ae7
 import { Analytics } from '@vercel/analytics/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster as SonnerToaster } from 'sonner';
@@ -11,16 +15,22 @@ import { NotificationProvider } from './components/notifications/NotificationCon
 import { WorkflowDarkModeProvider } from './contexts/WorkflowDarkModeContext';
 import ErrorBoundary from './components/ErrorBoundary';
 import './utils/errorHandler'; // Initialize async error handling
+<<<<<<< HEAD
 import 'mapbox-gl/dist/mapbox-gl.css'
 import '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css'
+=======
+>>>>>>> 36fe2b8b6a4c5197b88aa6f671b0288a98028ae7
 import './App.css';
 import './pages/Workflow/components/workflow.css';
 import './styles/deprecation-fixes.css'; // Override deprecated CSS properties
 import './styles/workflow-visibility-fix.css'; // Ensure workflow nodes are always visible
 import './styles/workflow-interaction-fix.css'; // Ensure workflow canvas is interactive
 
+<<<<<<< HEAD
 
 
+=======
+>>>>>>> 36fe2b8b6a4c5197b88aa6f671b0288a98028ae7
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -50,7 +60,11 @@ const ErrorFallbackUI = () => (
 );
 
 // Base UI components that don't depend on router
+<<<<<<< HEAD
 const AppUIComponents = ({ children }: { children?: React.ReactNode }) => (
+=======
+const AppUIComponents = ({ children = null }) => (
+>>>>>>> 36fe2b8b6a4c5197b88aa6f671b0288a98028ae7
   <WorkflowDarkModeProvider>
     {children}
     <Toaster />
@@ -61,6 +75,10 @@ const AppUIComponents = ({ children }: { children?: React.ReactNode }) => (
 
 function App() {
   const [initError, setInitError] = useState(null);
+<<<<<<< HEAD
+=======
+  const router = createRouter();
+>>>>>>> 36fe2b8b6a4c5197b88aa6f671b0288a98028ae7
   
   console.log('App: Rendering with router:', router);
 

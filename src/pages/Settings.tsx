@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 
 const settingsSections = [
   {
+<<<<<<< HEAD
     title: "Organization Settings",
     icon: Building2,
     description: "Manage organizations, members, and roles",
@@ -18,6 +19,14 @@ const settingsSections = [
     path: "/settings/trade-ease-plan-details"
   },
   {
+=======
+    title: "Organization & Subscription",
+    icon: Building2,
+    description: "Manage organizations and subscription plan",
+    path: "/settings/organization"
+  },
+  {
+>>>>>>> 36fe2b8b6a4c5197b88aa6f671b0288a98028ae7
     title: "Messaging",
     icon: MessageSquare,
     description: "Configure messaging and communication settings",

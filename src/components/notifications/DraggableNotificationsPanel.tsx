@@ -5,8 +5,13 @@ import { Button } from '@/components/ui/button';
 import { NotificationItem } from './NotificationItem';
 import { cn } from '@/lib/utils';
 import { useNotifications, type Notification } from './NotificationContextProvider';
+<<<<<<< HEAD
 import { createTag, type TagData } from '@/services/tagService';
 import { toast } from 'sonner';
+=======
+import { createTag } from '@/services/tagService';
+import { toast } from 'react-toastify';
+>>>>>>> 36fe2b8b6a4c5197b88aa6f671b0288a98028ae7
 
 type PanelSize = 'quarter' | 'half' | 'custom' | 'minimized';
 type ActiveTab = 'all' | 'team' | 'trades' | 'account' | 'security' | 'calendar' | 'comments';
@@ -263,7 +268,11 @@ const EffectLogger = ({ active }: { active: boolean }) => {
 export const DraggableNotificationsPanel = ({
   isOpen,
   onClose,
+<<<<<<< HEAD
   businessLogoUrl = '/business-logo.png', // Trade tools business logo
+=======
+  businessLogoUrl = 'https://via.placeholder.com/32/007bff/ffffff?text=Logo', // Default placeholder logo
+>>>>>>> 36fe2b8b6a4c5197b88aa6f671b0288a98028ae7
   currentUserId = 'user_abc', // Example user ID
   availableStaff = [ { id: 'staff1', name: 'Alice' }, { id: 'staff2', name: 'Bob' }] // Example staff
 }: DraggableNotificationsPanelProps) => {
@@ -520,13 +529,21 @@ export const DraggableNotificationsPanel = ({
       const uploadedFilesWithUrls = await Promise.all(uploadPromises);
 
       // 2. Create tag data
+<<<<<<< HEAD
       const tagData: Omit<TagData, 'id' | 'timestamp'> = {
+=======
+      const tagData = {
+>>>>>>> 36fe2b8b6a4c5197b88aa6f671b0288a98028ae7
         creatorId: currentUserId,
         comment: tagComment,
         taggedStaffIds: selectedStaff.map(s => s.id),
         attachments: uploadedFilesWithUrls
           .filter(f => f.supabaseUrl)
+<<<<<<< HEAD
           .map(f => ({ type: f.type, url: f.supabaseUrl! })),
+=======
+          .map(f => ({ type: f.type, url: f.supabaseUrl })),
+>>>>>>> 36fe2b8b6a4c5197b88aa6f671b0288a98028ae7
         coords: tagPopupCoords!,
         drawingData: drawingPreviewUrl || tagCanvasRef.current?.toDataURL('image/png') // Use preview if available
       };
@@ -561,10 +578,20 @@ export const DraggableNotificationsPanel = ({
   // --- Event Listener for Placing Tag (useEffect) ---
   useEffect(() => {
     console.log('[TagDropEffect] Running effect. Mode active:', tagDropModeActive); // Log effect run
+<<<<<<< HEAD
     
     const listener = (event: MouseEvent) => {
       // Only process the event if the component is still mounted
       if (isMountedRef.current) {
+=======
+
+    // Create a ref to track if the component is mounted
+    const isMounted = { current: true };
+    
+    const listener = (event: MouseEvent) => {
+      // Only process the event if the component is still mounted
+      if (isMounted.current) {
+>>>>>>> 36fe2b8b6a4c5197b88aa6f671b0288a98028ae7
         handlePlaceNewTag(event);
       }
     };
@@ -580,6 +607,11 @@ export const DraggableNotificationsPanel = ({
     // Cleanup function
     return () => {
       console.log('[TagDropEffect] Cleanup: Removing click listener.'); // Log cleanup
+<<<<<<< HEAD
+=======
+      // Mark component as unmounted to prevent state updates
+      isMounted.current = false;
+>>>>>>> 36fe2b8b6a4c5197b88aa6f671b0288a98028ae7
       document.removeEventListener('click', listener);
       // Ensure cursor is reset if component unmounts while mode is active
       if (tagDropModeActive) {
@@ -587,6 +619,7 @@ export const DraggableNotificationsPanel = ({
           document.body.style.cursor = '';
       }
     };
+<<<<<<< HEAD
   }, [tagDropModeActive, handlePlaceNewTag]);
   
   // Effect to set mounted state on unmount
@@ -596,6 +629,9 @@ export const DraggableNotificationsPanel = ({
       isMountedRef.current = false;
     };
   }, []); 
+=======
+  }, [tagDropModeActive, handlePlaceNewTag]); 
+>>>>>>> 36fe2b8b6a4c5197b88aa6f671b0288a98028ae7
 
   // Add states for drawing
   const [drawingState, setDrawingState] = useState<DrawingState>({
@@ -611,6 +647,7 @@ export const DraggableNotificationsPanel = ({
   
   // Refs for canvases
   const tagCanvasRef = useRef<HTMLCanvasElement>(null);
+<<<<<<< HEAD
   // Full-page drawing refs temporarily disabled
   // const pageCanvasRef = useRef<HTMLCanvasElement>(null);
   // const canvasContainerRef = useRef<HTMLDivElement>(null);
@@ -628,6 +665,17 @@ export const DraggableNotificationsPanel = ({
     drawingStateRef.current = drawingState;
   }, [drawingState]);
   
+=======
+  const pageCanvasRef = useRef<HTMLCanvasElement>(null);
+  const canvasContainerRef = useRef<HTMLDivElement>(null);
+  
+  // Add Refs for listener state
+  const isDrawingRef = useRef(isDrawing);
+  const lastPointRef = useRef(lastPoint);
+  const drawingStateRef = useRef(drawingState);
+  
+  // Keep Refs synchronized with State
+>>>>>>> 36fe2b8b6a4c5197b88aa6f671b0288a98028ae7
   useEffect(() => {
     isDrawingRef.current = isDrawing;
   }, [isDrawing]);
@@ -636,12 +684,23 @@ export const DraggableNotificationsPanel = ({
     lastPointRef.current = lastPoint;
   }, [lastPoint]);
   
+<<<<<<< HEAD
+=======
+  useEffect(() => {
+    drawingStateRef.current = drawingState;
+  }, [drawingState]);
+  
+>>>>>>> 36fe2b8b6a4c5197b88aa6f671b0288a98028ae7
   // Drawing functions
   const startDrawing = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
     // If we're dragging the popup, don't start drawing
     if (isDraggingPopup) return;
     
+<<<<<<< HEAD
     const canvas = tagCanvasRef.current; // Only tag canvas for now
+=======
+    const canvas = drawingState.isDrawingOnPage ? pageCanvasRef.current : tagCanvasRef.current;
+>>>>>>> 36fe2b8b6a4c5197b88aa6f671b0288a98028ae7
     if (!canvas) return;
     
     // These are critical to prevent the popup from being dragged when drawing on the canvas
@@ -679,7 +738,11 @@ export const DraggableNotificationsPanel = ({
     e.nativeEvent.stopImmediatePropagation();
     e.preventDefault();
     
+<<<<<<< HEAD
     const canvas = tagCanvasRef.current; // Only tag canvas for now
+=======
+    const canvas = drawingState.isDrawingOnPage ? pageCanvasRef.current : tagCanvasRef.current;
+>>>>>>> 36fe2b8b6a4c5197b88aa6f671b0288a98028ae7
     if (!canvas) return;
     
     const rect = canvas.getBoundingClientRect();
@@ -727,7 +790,11 @@ export const DraggableNotificationsPanel = ({
       return;
     }
     
+<<<<<<< HEAD
     const canvas = tagCanvasRef.current; // Only tag canvas for now
+=======
+    const canvas = drawingState.isDrawingOnPage ? pageCanvasRef.current : tagCanvasRef.current;
+>>>>>>> 36fe2b8b6a4c5197b88aa6f671b0288a98028ae7
     if (!canvas) return;
     
     const rect = canvas.getBoundingClientRect();
@@ -854,8 +921,285 @@ export const DraggableNotificationsPanel = ({
     ctx.stroke();
   };
   
+<<<<<<< HEAD
   // Full-page drawing temporarily disabled for core tag testing
   // TODO: Re-implement with proper ref management later
+=======
+  // Set up page-wide canvas when drawing on page
+  useEffect(() => {
+    // Only log when the effect is actually creating or cleaning up
+    if (drawingState.isDrawingOnPage) {
+      console.log('[FullPage Draw Effect] Creating overlay canvas and controls...');
+    }
+
+    // Cleanup function for previous canvas if it exists
+    const cleanup = () => {
+      if (canvasContainerRef.current && canvasContainerRef.current.parentNode) {
+        console.log('[FullPage Draw Effect] Cleanup: Removing previous canvas...');
+        canvasContainerRef.current.parentNode.removeChild(canvasContainerRef.current);
+        pageCanvasRef.current = null;
+        canvasContainerRef.current = null;
+      }
+    };
+
+    // Clean up any existing canvas before creating a new one
+    cleanup();
+
+    if (drawingState.isDrawingOnPage) {
+      // Create a full-page canvas overlay for drawing
+      const container = document.createElement('div');
+      container.style.position = 'fixed';
+      container.style.top = '0';
+      container.style.left = '0';
+      container.style.width = '100vw';
+      container.style.height = '100vh';
+      container.style.zIndex = '9999'; 
+      container.style.pointerEvents = 'all';
+      container.classList.add('drawing-overlay');
+      
+      const canvas = document.createElement('canvas');
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      canvas.style.position = 'absolute';
+      canvas.style.top = '0';
+      canvas.style.left = '0';
+      canvas.style.width = '100%';
+      canvas.style.height = '100%';
+      canvas.style.cursor = 'crosshair';
+      canvas.style.pointerEvents = 'all'; 
+      
+      const controls = document.createElement('div');
+      controls.style.position = 'fixed';
+      controls.style.bottom = '20px';
+      controls.style.left = '50%';
+      controls.style.transform = 'translateX(-50%)';
+      controls.style.backgroundColor = '#fff';
+      controls.style.padding = '10px';
+      controls.style.borderRadius = '8px';
+      controls.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
+      controls.style.display = 'flex';
+      controls.style.gap = '10px';
+      controls.style.zIndex = '10000'; 
+      controls.innerHTML = `
+        <button class="drawing-done-btn px-4 py-2 bg-blue-600 text-white rounded">Done</button>
+        <button class="drawing-cancel-btn px-4 py-2 bg-gray-300 text-gray-700 rounded">Cancel</button>
+      `;
+      
+      // CORRECTED toolsbar.innerHTML
+      const toolsbar = document.createElement('div');
+      toolsbar.style.position = 'fixed';
+      toolsbar.style.top = '20px';
+      toolsbar.style.left = '50%';
+      toolsbar.style.transform = 'translateX(-50%)';
+      toolsbar.style.backgroundColor = '#fff';
+      toolsbar.style.padding = '8px';
+      toolsbar.style.borderRadius = '8px';
+      toolsbar.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
+      toolsbar.style.display = 'flex';
+      toolsbar.style.alignItems = 'center';
+      toolsbar.style.gap = '8px';
+      toolsbar.style.zIndex = '10000';
+      toolsbar.innerHTML = `
+        <div class="tool-group" style="display: flex; gap: 4px; border-right: 1px solid #ddd; padding-right: 8px;">
+          <button class="tool-btn pencil ${drawingStateRef.current.tool === 'pencil' ? 'active' : ''}" title="Pencil" style="width: 32px; height: 32px; border-radius: 4px; display: flex; align-items: center; justify-content: center; ${drawingStateRef.current.tool === 'pencil' ? 'background-color: #e6f0ff; border: 1px solid #3b82f6;' : 'background-color: #f1f5f9; border: 1px solid #ddd;'}">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"></path></svg>
+          </button>
+          <button class="tool-btn eraser ${drawingStateRef.current.tool === 'eraser' ? 'active' : ''}" title="Eraser" style="width: 32px; height: 32px; border-radius: 4px; display: flex; align-items: center; justify-content: center; ${drawingStateRef.current.tool === 'eraser' ? 'background-color: #e6f0ff; border: 1px solid #3b82f6;' : 'background-color: #f1f5f9; border: 1px solid #ddd;'}">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 20H7L3 16c-1.5-1.45-1.5-3.55 0-5l6.5-6.5c1.45-1.5 3.55-1.5 5 0l7 7c1.5 1.45 1.5 3.55 0 5L20 18"></path></svg>
+          </button>
+        </div>
+        <div class="tool-group" style="display: flex; gap: 4px; border-right: 1px solid #ddd; padding-right: 8px;">
+          <button class="tool-btn line ${drawingStateRef.current.tool === 'line' ? 'active' : ''}" title="Line" style="width: 32px; height: 32px; border-radius: 4px; display: flex; align-items: center; justify-content: center; ${drawingStateRef.current.tool === 'line' ? 'background-color: #e6f0ff; border: 1px solid #3b82f6;' : 'background-color: #f1f5f9; border: 1px solid #ddd;'}">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path></svg>
+          </button>
+          <button class="tool-btn arrow ${drawingStateRef.current.tool === 'arrow' ? 'active' : ''}" title="Arrow" style="width: 32px; height: 32px; border-radius: 4px; display: flex; align-items: center; justify-content: center; ${drawingStateRef.current.tool === 'arrow' ? 'background-color: #e6f0ff; border: 1px solid #3b82f6;' : 'background-color: #f1f5f9; border: 1px solid #ddd;'}">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+          </button>
+          <button class="tool-btn rectangle ${drawingStateRef.current.tool === 'rectangle' ? 'active' : ''}" title="Rectangle" style="width: 32px; height: 32px; border-radius: 4px; display: flex; align-items: center; justify-content: center; ${drawingStateRef.current.tool === 'rectangle' ? 'background-color: #e6f0ff; border: 1px solid #3b82f6;' : 'background-color: #f1f5f9; border: 1px solid #ddd;'}">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"></rect></svg>
+          </button>
+          <button class="tool-btn circle ${drawingStateRef.current.tool === 'circle' ? 'active' : ''}" title="Circle" style="width: 32px; height: 32px; border-radius: 4px; display: flex; align-items: center; justify-content: center; ${drawingStateRef.current.tool === 'circle' ? 'background-color: #e6f0ff; border: 1px solid #3b82f6;' : 'background-color: #f1f5f9; border: 1px solid #ddd;'}">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle></svg>
+          </button>
+        </div>
+        <div class="tool-group" style="display: flex; gap: 4px; border-right: 1px solid #ddd; padding-right: 8px;">
+          <select class="brush-width" style="padding: 4px; border-radius: 4px; border: 1px solid #ddd;">
+            <option value="1" ${drawingStateRef.current.lineWidth === 1 ? 'selected' : ''}>Thin</option>
+            <option value="3" ${drawingStateRef.current.lineWidth === 3 ? 'selected' : ''}>Normal</option>
+            <option value="5" ${drawingStateRef.current.lineWidth === 5 ? 'selected' : ''}>Thick</option>
+            <option value="10" ${drawingStateRef.current.lineWidth === 10 ? 'selected' : ''}>Extra Thick</option>
+          </select>
+        </div>
+        <div class="color-pickers" style="display: flex; gap: 4px;">
+          ${['#FF0000', '#000000', '#FFFFFF', '#CCCCCC', '#888888', '#FFFF00', '#00FF00', '#0000FF'].map(color => 
+            `<button class="color-btn" data-color="${color}" style="width: 24px; height: 24px; border-radius: 50%; background-color: ${color}; border: ${drawingStateRef.current.color === color ? '2px solid #3b82f6' : '1px solid #ddd'}; ${color === '#FFFFFF' ? 'border: 1px solid #ddd;' : ''}"></button>`
+          ).join('')}
+        </div>
+      `;
+      
+      container.appendChild(canvas);
+      container.appendChild(controls);
+      container.appendChild(toolsbar);
+      document.body.appendChild(container);
+      
+      canvasContainerRef.current = container;
+      pageCanvasRef.current = canvas;
+
+      // Add event listeners for drawing - USE REFS HERE
+      const mouseDownListener = (e: MouseEvent) => {
+        if (!canvas || !canvas.parentNode) return; // Check if canvas still exists
+        console.log('[FullPage Canvas] Mouse Down Event', e.clientX, e.clientY);
+        e.preventDefault();
+        e.stopPropagation();
+        
+        const point = {
+          x: e.clientX,
+          y: e.clientY
+        };
+        setIsDrawing(true); 
+        setLastPoint(point); 
+        
+        if (drawingStateRef.current.tool === 'pencil') {
+          const ctx = canvas.getContext('2d');
+          if (!ctx) return;
+          ctx.beginPath();
+          ctx.moveTo(point.x, point.y);
+          ctx.lineCap = 'round';
+          ctx.lineJoin = 'round';
+          ctx.strokeStyle = drawingStateRef.current.color;
+          ctx.lineWidth = drawingStateRef.current.lineWidth;
+        }
+      };
+      
+      const mouseMoveListener = (e: MouseEvent) => {
+        if (!canvas || !canvas.parentNode || !isDrawingRef.current || !lastPointRef.current) return;
+        console.log('[FullPage Canvas] Mouse Move Event', e.clientX, e.clientY);
+        
+        e.preventDefault();
+        e.stopPropagation();
+        
+        const point = {
+          x: e.clientX,
+          y: e.clientY
+        };
+        
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return;
+        
+        switch (drawingStateRef.current.tool) {
+          case 'pencil':
+            ctx.beginPath();
+            ctx.moveTo(lastPointRef.current.x, lastPointRef.current.y);
+            ctx.lineTo(point.x, point.y);
+            ctx.strokeStyle = drawingStateRef.current.color;
+            ctx.lineWidth = drawingStateRef.current.lineWidth;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            ctx.stroke();
+            break;
+          case 'eraser':
+             ctx.clearRect(
+              point.x - drawingStateRef.current.lineWidth * 5,
+              point.y - drawingStateRef.current.lineWidth * 5,
+              drawingStateRef.current.lineWidth * 10,
+              drawingStateRef.current.lineWidth * 10
+            );
+            break;
+        }
+        
+        setLastPoint(point); 
+      };
+      
+      const mouseUpListener = (e: MouseEvent) => {
+        if (!canvas || !canvas.parentNode) return;
+        console.log('[FullPage Canvas] Mouse Up/Leave Event', e.clientX, e.clientY);
+        
+        if (!isDrawingRef.current || !lastPointRef.current) {
+          setIsDrawing(false); 
+          setLastPoint(null); 
+          return;
+        }
+        
+        e.preventDefault();
+        e.stopPropagation();
+        
+        const endPoint = {
+          x: e.clientX,
+          y: e.clientY
+        };
+        
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return;
+        
+        const currentTool = drawingStateRef.current.tool;
+        const currentLastPoint = lastPointRef.current;
+        const currentColor = drawingStateRef.current.color;
+        const currentLineWidth = drawingStateRef.current.lineWidth;
+        
+        // Redraw the switch statement for drawing shapes using refs
+        switch (currentTool) {
+          case 'line':
+            ctx.beginPath();
+            ctx.moveTo(currentLastPoint.x, currentLastPoint.y);
+            ctx.lineTo(endPoint.x, endPoint.y);
+            ctx.strokeStyle = currentColor;
+            ctx.lineWidth = currentLineWidth;
+            ctx.stroke();
+            break;
+          case 'arrow':
+            drawArrow(ctx, currentLastPoint, endPoint, currentColor, currentLineWidth);
+            break;
+          case 'rectangle':
+            ctx.beginPath();
+            ctx.rect(
+              currentLastPoint.x,
+              currentLastPoint.y,
+              endPoint.x - currentLastPoint.x,
+              endPoint.y - currentLastPoint.y
+            );
+            ctx.strokeStyle = currentColor;
+            ctx.lineWidth = currentLineWidth;
+            ctx.stroke();
+            break;
+          case 'circle': {
+            const radius = Math.sqrt(
+              Math.pow(endPoint.x - currentLastPoint.x, 2) + Math.pow(endPoint.y - currentLastPoint.y, 2)
+            );
+            ctx.beginPath();
+            ctx.arc(currentLastPoint.x, currentLastPoint.y, radius, 0, 2 * Math.PI);
+            ctx.strokeStyle = currentColor;
+            ctx.lineWidth = currentLineWidth;
+            ctx.stroke();
+            break;
+          }
+          case 'star':
+            drawStar(ctx, currentLastPoint.x, currentLastPoint.y, 5, 
+                Math.sqrt(Math.pow(endPoint.x - currentLastPoint.x, 2) + Math.pow(endPoint.y - currentLastPoint.y, 2)), 
+                currentColor, currentLineWidth);
+            break;
+        }
+        
+        setIsDrawing(false); 
+        setLastPoint(null); 
+      };
+      
+      canvas.addEventListener('mousedown', mouseDownListener);
+      canvas.addEventListener('mousemove', mouseMoveListener);
+      canvas.addEventListener('mouseup', mouseUpListener);
+      canvas.addEventListener('mouseleave', mouseUpListener);
+
+      // Return cleanup function
+      return () => {
+        console.log('[FullPage Draw Effect] Cleanup: Removing event listeners and canvas...');
+        canvas.removeEventListener('mousedown', mouseDownListener);
+        canvas.removeEventListener('mousemove', mouseMoveListener);
+        canvas.removeEventListener('mouseup', mouseUpListener);
+        canvas.removeEventListener('mouseleave', mouseUpListener);
+        cleanup();
+      };
+    }
+  }, [drawingState.isDrawingOnPage]); // Only depend on isDrawingOnPage
+>>>>>>> 36fe2b8b6a4c5197b88aa6f671b0288a98028ae7
   
   // Helper to convert data URL to File
   const dataURLtoFile = (dataurl: string, filename: string): File | null => {
@@ -953,6 +1297,7 @@ export const DraggableNotificationsPanel = ({
   useEffect(() => {
     if (isDrawing && tagCanvasRef.current) {
       const ctx = tagCanvasRef.current.getContext('2d');
+<<<<<<< HEAD
       if (ctx) {
         ctx.lineWidth = drawingState.lineWidth;
         ctx.strokeStyle = drawingState.color;
@@ -962,13 +1307,26 @@ export const DraggableNotificationsPanel = ({
   }, [isDrawing, drawingState.lineWidth, drawingState.color]);
 
   const drawPencil = (ctx: CanvasRenderingContext2D, startPoint: Point, endPoint: Point) => {
+=======
+      ctx.lineWidth = drawingState.lineWidth;
+      ctx.strokeStyle = drawingState.color;
+      ctx.lineCap = 'round';
+    }
+  }, [isDrawing, drawingState.lineWidth, drawingState.color]);
+
+  const drawPencil = (ctx, startPoint, endPoint) => {
+>>>>>>> 36fe2b8b6a4c5197b88aa6f671b0288a98028ae7
     ctx.beginPath();
     ctx.moveTo(startPoint.x, startPoint.y);
     ctx.lineTo(endPoint.x, endPoint.y);
     ctx.stroke();
   };
 
+<<<<<<< HEAD
   const eraseArea = (ctx: CanvasRenderingContext2D, point: Point, size: number) => {
+=======
+  const eraseArea = (ctx, point, size) => {
+>>>>>>> 36fe2b8b6a4c5197b88aa6f671b0288a98028ae7
     ctx.clearRect(point.x - size, point.y - size, size * 2, size * 2);
   };
 
@@ -1011,7 +1369,48 @@ export const DraggableNotificationsPanel = ({
     return () => document.removeEventListener('mouseup', stopDrag);
   }, []);
 
+<<<<<<< HEAD
   // Full-page drawing handlers temporarily disabled
+=======
+  // --- Full-page Drawing Overlay ---
+  // Add a callback to handle Done/Cancel
+  const handleFullPageDrawingDone = () => {
+    if (pageCanvasRef.current) {
+      const url = pageCanvasRef.current.toDataURL('image/png');
+      setDrawingPreviewUrl(url);
+      setUploadedFiles(prev => {
+        const others = prev.filter(f => f.type !== 'drawing');
+        return [
+          ...others,
+          {
+            file: dataURLtoFile(url, 'drawing.png')!,
+            previewUrl: url,
+            type: 'drawing',
+          },
+        ];
+      });
+    }
+    setDrawingState(prev => ({ ...prev, isDrawingOnPage: false, isActive: false }));
+    setIsDrawingActive(false);
+  };
+  const handleFullPageDrawingCancel = () => {
+    setDrawingState(prev => ({ ...prev, isDrawingOnPage: false, isActive: false }));
+    setIsDrawingActive(false);
+  };
+  // ... existing code ...
+  // In the full-page drawing overlay effect, wire up the buttons
+  useEffect(() => {
+    if (!drawingState.isDrawingOnPage || !canvasContainerRef.current) return;
+    const doneBtn = canvasContainerRef.current.querySelector('.drawing-done-btn');
+    const cancelBtn = canvasContainerRef.current.querySelector('.drawing-cancel-btn');
+    if (doneBtn) doneBtn.addEventListener('click', handleFullPageDrawingDone);
+    if (cancelBtn) cancelBtn.addEventListener('click', handleFullPageDrawingCancel);
+    return () => {
+      if (doneBtn) doneBtn.removeEventListener('click', handleFullPageDrawingDone);
+      if (cancelBtn) cancelBtn.removeEventListener('click', handleFullPageDrawingCancel);
+    };
+  }, [drawingState.isDrawingOnPage]);
+>>>>>>> 36fe2b8b6a4c5197b88aa6f671b0288a98028ae7
   // ... existing code ...
   // When drawing is finished in the popup, update preview
   const handleDrawingFinish = () => {
@@ -1336,16 +1735,27 @@ export const DraggableNotificationsPanel = ({
                                       <Save className="h-3.5 w-3.5 mr-1" />
                                       Save Drawing to Attachments
                                   </Button>
+<<<<<<< HEAD
                                   {/* Draw Outside Tag Button - Temporarily Disabled */}
+=======
+                                  {/* Draw Outside Tag Button */}
+>>>>>>> 36fe2b8b6a4c5197b88aa6f671b0288a98028ae7
                                   <Button
                                       variant="outline"
                                       size="sm"
                                       className="mt-2 w-full text-xs"
+<<<<<<< HEAD
                                       disabled
                                       title="Full-page drawing temporarily disabled - coming soon!"
                                   >
                                       <Brush className="h-3.5 w-3.5 mr-1" />
                                       Draw Outside Tag (Coming Soon)
+=======
+                                      onClick={() => setDrawingState(prev => ({ ...prev, isDrawingOnPage: true }))}
+                                  >
+                                      <Brush className="h-3.5 w-3.5 mr-1" />
+                                      Draw Outside Tag (Full Page)
+>>>>>>> 36fe2b8b6a4c5197b88aa6f671b0288a98028ae7
                                   </Button>
                               </div>
                           </div>

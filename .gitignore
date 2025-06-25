@@ -43,3 +43,7 @@ tiles
 *.key
 
 
+<<<<<<< HEAD
+=======
+/public/tiles
+>>>>>>> 36fe2b8b6a4c5197b88aa6f671b0288a98028ae7
