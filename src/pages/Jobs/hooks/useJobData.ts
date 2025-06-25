@@ -81,15 +81,11 @@ export const useJobData = (id: string | undefined) => {
               assignedTeam: data.assigned_team,
               date_undecided: data.date_undecided,
               job_steps: data.job_steps || defaultJobSteps,
-<<<<<<< HEAD
               boundaries: data.boundaries,
               address: data.address,
               city: data.city,
               state: data.state,
               zipCode: data.zip_code
-=======
-              boundaries: data.boundaries
->>>>>>> 36fe2b8b6a4c5197b88aa6f671b0288a98028ae7
             };
             setJob(transformedJob);
             setError(null);
