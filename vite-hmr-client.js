@@ -52,7 +52,7 @@ class HMRContext {
     this.hmrClient.pruneMap.set(this.ownerPath, cb);
   }
   // Kept for backward compatibility (#11036)
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  // eslint-disable-next-line no-empty-function
   decline() {
   }
   invalidate(message) {
