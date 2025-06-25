@@ -6,12 +6,27 @@ import { useNavigate } from "react-router-dom";
 
 const settingsSections = [
   {
+<<<<<<< HEAD
+    title: "Organization Settings",
+    icon: Building2,
+    description: "Manage organizations, members, and roles",
+    path: "/settings/organization"
+  },
+  {
+    title: "Trade Ease Plan Details",
+    icon: CreditCard,
+    description: "View and manage your subscription plan",
+    path: "/settings/trade-ease-plan-details"
+  },
+  {
+=======
     title: "Organization & Subscription",
     icon: Building2,
     description: "Manage organizations and subscription plan",
     path: "/settings/organization"
   },
   {
+>>>>>>> 36fe2b8b6a4c5197b88aa6f671b0288a98028ae7
     title: "Messaging",
     icon: MessageSquare,
     description: "Configure messaging and communication settings",
@@ -106,12 +121,6 @@ const settingsSections = [
     icon: List,
     description: "Manage product and service prices",
     path: "/settings/price-lists"
-  },
-  {
-    title: "Trade Ease Plan Details",
-    icon: FileText,
-    description: "View and manage your plan",
-    path: "/settings/trade-ease-plan-details"
   },
   {
     title: "Payments",

@@ -1,8 +1,7 @@
-
 import React from "react";
 import { AppLayout } from "@/components/ui/AppLayout";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Calculator, Percent, Gauge, Ruler, Construction, Compass, ArrowUpDown, Square, FileCode } from "lucide-react";
+import { Calculator, Percent, Gauge, Ruler, Construction, Compass, ArrowUpDown, Square, FileCode, Hammer, Brush, Home, FileText, FileCheck } from "lucide-react";
 import { Link } from "react-router-dom";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 
@@ -29,9 +28,9 @@ const Calculators = () => {
     path: "/calculators/loads-spans"
   }, {
     title: "Concrete Calculator",
-    description: "Calculate concrete volume needed based on area and thickness measurements",
-    icon: <Construction className="h-6 w-6 text-gray-500" />,
-    path: "/calculators/loads-spans?tab=concrete"
+    description: "Calculate concrete volume needed for slabs, footings, and columns",
+    icon: <Hammer className="h-6 w-6 text-blue-500" />,
+    path: "/calculators/concrete"
   }, {
     title: "Angle Calculator",
     description: "Calculate angles and slopes using various measurement methods",
@@ -52,6 +51,16 @@ const Calculators = () => {
     description: "Search and reference National Construction Code clauses for building compliance",
     icon: <FileCode className="h-6 w-6 text-red-500" />,
     path: "/calculators/ncc-codes"
+  }, {
+    title: "TDS Reference",
+    description: "Timber Queensland Data Sheets - specifications, grades, and technical data",
+    icon: <FileText className="h-6 w-6 text-green-500" />,
+    path: "/calculators/tds"
+  }, {
+    title: "QBCC Forms Reference",
+    description: "Queensland Building and Construction Commission forms and compliance documents",
+    icon: <FileCheck className="h-6 w-6 text-blue-500" />,
+    path: "/calculators/qbcc-forms"
   }];
   
   return (

@@ -89,6 +89,10 @@ html {
   scroll-behavior: smooth;
   block-size: 100%;
 }
+<<<<<<< HEAD
+
+=======
+>>>>>>> 36fe2b8b6a4c5197b88aa6f671b0288a98028ae7
 
 /* Glass card effect with proper vendor order */
 .glass-card {
@@ -274,3 +278,36 @@ html, body {
 .textarea:hover {
   @apply border-border;
 }
+<<<<<<< HEAD
+
+/* Google Maps optimization styles */
+.map-container {
+  width: 100%;
+  height: 100%;
+  visibility: visible;
+  min-height: 200px;
+  position: relative;
+}
+
+/* Ensure Google Maps loads properly */
+.map-container > div {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* Optimize map rendering performance */
+.map-container img {
+  max-width: none !important;
+  height: auto !important;
+}
+
+/* Prevent layout shifts during map loading */
+.map-loading-container {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16/9;
+  min-height: 300px;
+  background-color: #f0f0f0;
+}
+=======
+>>>>>>> 36fe2b8b6a4c5197b88aa6f671b0288a98028ae7

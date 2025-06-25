@@ -57,6 +57,10 @@ export function JobTable({
           <TableRow className="bg-transparent border-b border-gray-200">
             <TableHead className="font-medium text-gray-700">Project</TableHead>
             <TableHead className="font-medium text-gray-700">Customer</TableHead>
+<<<<<<< HEAD
+            <TableHead className="font-medium text-gray-700">Address</TableHead>
+=======
+>>>>>>> 36fe2b8b6a4c5197b88aa6f671b0288a98028ae7
             <TableHead className="font-medium text-gray-700">Status</TableHead>
             <TableHead className="font-medium text-gray-700">Progress</TableHead>
             <TableHead className="font-medium text-gray-700">Actions</TableHead>
@@ -98,6 +102,25 @@ export function JobTable({
                     </div>
                   </TableCell>
                   <TableCell>
+<<<<<<< HEAD
+                    <div>
+                      {job.address ? (
+                        <>
+                          <div className="text-sm">{job.address}</div>
+                          {job.city && (
+                            <div className="text-xs text-gray-500">
+                              {job.city}{job.state ? `, ${job.state}` : ''}{job.zipCode ? ` ${job.zipCode}` : ''}
+                            </div>
+                          )}
+                        </>
+                      ) : (
+                        <span className="text-sm text-gray-400">No address</span>
+                      )}
+                    </div>
+                  </TableCell>
+                  <TableCell>
+=======
+>>>>>>> 36fe2b8b6a4c5197b88aa6f671b0288a98028ae7
                     <JobStatusBadge status={job.status} />
                   </TableCell>
                   <TableCell>
@@ -109,7 +132,11 @@ export function JobTable({
                       <Progress value={progress} className="h-1.5" />
                     </div>
                   </TableCell>
+<<<<<<< HEAD
+                  <TableCell onClick={(e) => e.stopPropagation()}>
+=======
                   <TableCell>
+>>>>>>> 36fe2b8b6a4c5197b88aa6f671b0288a98028ae7
                     <JobActions 
                       job={job}
                       actionLoading={actionLoading}
@@ -121,7 +148,11 @@ export function JobTable({
             })
           ) : (
             <TableRow>
+<<<<<<< HEAD
+              <TableCell colSpan={6} className="text-center py-8 text-gray-500">
+=======
               <TableCell colSpan={5} className="text-center py-8 text-gray-500">
+>>>>>>> 36fe2b8b6a4c5197b88aa6f671b0288a98028ae7
                 No jobs match your search criteria
               </TableCell>
             </TableRow>

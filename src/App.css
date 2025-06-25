@@ -60,7 +60,18 @@
     opacity: 0;
   }
 }
+<<<<<<< HEAD
+.mapboxgl-popup {
+  z-index: 999 !important;
+}
 
+.mapboxgl-popup-content {
+  font-size: 12px;
+  padding: 4px 6px;
+}
+=======
+
+>>>>>>> 36fe2b8b6a4c5197b88aa6f671b0288a98028ae7
 .workflow-background {
   position: absolute;
   width: 100%;
@@ -70,8 +81,16 @@
   z-index: 0;
   will-change: transform; /* Performance optimization */
   pointer-events: none; /* Ensure it doesn't interfere with interactions */
+<<<<<<< HEAD
+
 }
 
+
+
+=======
+}
+
+>>>>>>> 36fe2b8b6a4c5197b88aa6f671b0288a98028ae7
 .particle {
   position: absolute;
   background: rgba(255, 86, 225, 0.9); /* Brighter pink color */
@@ -491,3 +510,14 @@
   pointer-events: all !important;
   z-index: 50 !important;
 }
+<<<<<<< HEAD
+
+/* Map container styles to ensure proper rendering */
+.map-container {
+  position: relative;
+  min-height: 100px;
+  visibility: visible;
+  opacity: 1;
+}
+=======
+>>>>>>> 36fe2b8b6a4c5197b88aa6f671b0288a98028ae7

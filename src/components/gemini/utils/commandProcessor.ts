@@ -1,9 +1,26 @@
+<<<<<<< HEAD
+=======
 
+>>>>>>> 36fe2b8b6a4c5197b88aa6f671b0288a98028ae7
 import { toast } from "sonner";
 
 export const processCommand = (text: string) => {
   const lowerText = text.toLowerCase();
 
+<<<<<<< HEAD
+  // Check for screen share / AI help commands
+  if (lowerText.includes("screen share") || 
+      lowerText.includes("share screen") || 
+      lowerText.includes("ai help") || 
+      lowerText.includes("help with n8n") ||
+      lowerText.includes("n8n assistant")) {
+    window.location.href = "/n8n-assistant";
+    toast.success("Opening AI Screen Share Assistant");
+    return;
+  }
+
+=======
+>>>>>>> 36fe2b8b6a4c5197b88aa6f671b0288a98028ae7
   if (lowerText.includes("go to") || lowerText.includes("navigate to")) {
     const destination = extractDestination(lowerText);
     if (destination) {
@@ -55,7 +72,14 @@ export const navigateTo = (destination: string) => {
     banking: "/banking",
     inventory: "/inventory",
     calculators: "/calculators",
+<<<<<<< HEAD
+    calculator: "/calculators",
+    "n8n-assistant": "/n8n-assistant",
+    "ai-help": "/n8n-assistant",
+    "screen-share": "/n8n-assistant"
+=======
     calculator: "/calculators"
+>>>>>>> 36fe2b8b6a4c5197b88aa6f671b0288a98028ae7
   };
   const url = destinations[destination.toLowerCase()];
   if (url) {

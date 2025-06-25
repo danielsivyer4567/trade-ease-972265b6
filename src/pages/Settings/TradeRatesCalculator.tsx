@@ -1,12 +1,20 @@
 import React, { useState, useCallback } from "react";
 import { AppLayout } from "@/components/ui/AppLayout";
 import { Link } from "react-router-dom";
+<<<<<<< HEAD
+import { ArrowLeft, Calculator, Lock, AlertCircle } from "lucide-react";
+=======
 import { ArrowLeft, Calculator } from "lucide-react";
+>>>>>>> 36fe2b8b6a4c5197b88aa6f671b0288a98028ae7
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
+<<<<<<< HEAD
+import { useFeatureAccess } from "@/hooks/use-feature-access";
+=======
+>>>>>>> 36fe2b8b6a4c5197b88aa6f671b0288a98028ae7
 import { RateCalculator } from "./components/RateCalculator";
 import { CalculationResult } from "./components/CalculationResult";
 
@@ -15,6 +23,7 @@ const TradeRatesCalculator = () => {
   const [rate, setRate] = useState<number | ''>('');
   const [total, setTotal] = useState<number | null>(null);
   const { toast } = useToast();
+  const { tradeCalculators, isLoading } = useFeatureAccess();
 
   const calculateTotal = useCallback(() => {
     if (quantity === '' || rate === '') {
@@ -53,6 +62,64 @@ const TradeRatesCalculator = () => {
     if (value === null) return "-";
     return `$${value.toFixed(2)}`;
   }, []);
+<<<<<<< HEAD
+
+  if (isLoading) {
+    return (
+      <AppLayout>
+        <div className="container mx-auto p-4 md:p-6">
+          <div className="flex items-center justify-center h-64">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+          </div>
+        </div>
+      </AppLayout>
+    );
+  }
+
+  if (!tradeCalculators) {
+    return (
+      <AppLayout>
+        <div className="container mx-auto p-4 md:p-6">
+          <div className="flex items-center gap-2 mb-6">
+            <Link to="/settings" className="hover:text-blue-500">
+              <ArrowLeft className="h-6 w-6" />
+            </Link>
+            <Calculator className="h-8 w-8 text-gray-400" />
+            <h1 className="text-3xl font-bold text-gray-400">Trade Rates Calculator</h1>
+          </div>
+          
+          <Card className="max-w-2xl mx-auto">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-orange-600">
+                <Lock className="h-6 w-6" />
+                Feature Not Available
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-start gap-3">
+                <AlertCircle className="h-5 w-5 text-orange-500 mt-0.5" />
+                <div>
+                  <p className="text-muted-foreground mb-4">
+                    Trade-specific calculators and features are only available for Growing Pain Relief, Premium Edge, and Skeleton Key subscription tiers.
+                  </p>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Upgrade your subscription to access advanced calculation tools, trade-specific formulas, and specialized features for your industry.
+                  </p>
+                  <Button asChild>
+                    <Link to="/settings/my-plan">
+                      View Subscription Plans
+                    </Link>
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </AppLayout>
+    );
+  }
+=======
+>>>>>>> 36fe2b8b6a4c5197b88aa6f671b0288a98028ae7
 
   return (
     <AppLayout>

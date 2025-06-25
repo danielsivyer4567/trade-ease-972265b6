@@ -11,6 +11,7 @@ node_modules
 dist
 dist-ssr
 *.local
+tiles
 
 # Editor directories and files
 .vscode/*
@@ -42,3 +43,7 @@ dist-ssr
 *.key
 
 
+<<<<<<< HEAD
+=======
+/public/tiles
+>>>>>>> 36fe2b8b6a4c5197b88aa6f671b0288a98028ae7

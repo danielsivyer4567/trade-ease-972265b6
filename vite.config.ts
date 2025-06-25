@@ -26,6 +26,14 @@ export default defineConfig(({ mode }) => {
       },
       middlewareMode: false,
       proxy: {
+<<<<<<< HEAD
+        '/api': {
+      target: 'http://localhost:5678',
+      changeOrigin: true,
+      rewrite: path => path.replace(/^\/api/, '')
+    },
+=======
+>>>>>>> 36fe2b8b6a4c5197b88aa6f671b0288a98028ae7
         // Proxy all Supabase endpoints
         '/auth/v1': {
           target: 'https://wxwbxupdisbofesaygqj.supabase.co',

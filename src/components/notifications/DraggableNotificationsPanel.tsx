@@ -5,8 +5,13 @@ import { Button } from '@/components/ui/button';
 import { NotificationItem } from './NotificationItem';
 import { cn } from '@/lib/utils';
 import { useNotifications, type Notification } from './NotificationContextProvider';
+<<<<<<< HEAD
+import { createTag, type TagData } from '@/services/tagService';
+import { toast } from 'sonner';
+=======
 import { createTag } from '@/services/tagService';
 import { toast } from 'react-toastify';
+>>>>>>> 36fe2b8b6a4c5197b88aa6f671b0288a98028ae7
 
 type PanelSize = 'quarter' | 'half' | 'custom' | 'minimized';
 type ActiveTab = 'all' | 'team' | 'trades' | 'account' | 'security' | 'calendar' | 'comments';
@@ -263,7 +268,11 @@ const EffectLogger = ({ active }: { active: boolean }) => {
 export const DraggableNotificationsPanel = ({
   isOpen,
   onClose,
+<<<<<<< HEAD
+  businessLogoUrl = '/business-logo.png', // Trade tools business logo
+=======
   businessLogoUrl = 'https://via.placeholder.com/32/007bff/ffffff?text=Logo', // Default placeholder logo
+>>>>>>> 36fe2b8b6a4c5197b88aa6f671b0288a98028ae7
   currentUserId = 'user_abc', // Example user ID
   availableStaff = [ { id: 'staff1', name: 'Alice' }, { id: 'staff2', name: 'Bob' }] // Example staff
 }: DraggableNotificationsPanelProps) => {
@@ -520,13 +529,21 @@ export const DraggableNotificationsPanel = ({
       const uploadedFilesWithUrls = await Promise.all(uploadPromises);
 
       // 2. Create tag data
+<<<<<<< HEAD
+      const tagData: Omit<TagData, 'id' | 'timestamp'> = {
+=======
       const tagData = {
+>>>>>>> 36fe2b8b6a4c5197b88aa6f671b0288a98028ae7
         creatorId: currentUserId,
         comment: tagComment,
         taggedStaffIds: selectedStaff.map(s => s.id),
         attachments: uploadedFilesWithUrls
           .filter(f => f.supabaseUrl)
+<<<<<<< HEAD
+          .map(f => ({ type: f.type, url: f.supabaseUrl! })),
+=======
           .map(f => ({ type: f.type, url: f.supabaseUrl })),
+>>>>>>> 36fe2b8b6a4c5197b88aa6f671b0288a98028ae7
         coords: tagPopupCoords!,
         drawingData: drawingPreviewUrl || tagCanvasRef.current?.toDataURL('image/png') // Use preview if available
       };
@@ -561,6 +578,12 @@ export const DraggableNotificationsPanel = ({
   // --- Event Listener for Placing Tag (useEffect) ---
   useEffect(() => {
     console.log('[TagDropEffect] Running effect. Mode active:', tagDropModeActive); // Log effect run
+<<<<<<< HEAD
+    
+    const listener = (event: MouseEvent) => {
+      // Only process the event if the component is still mounted
+      if (isMountedRef.current) {
+=======
 
     // Create a ref to track if the component is mounted
     const isMounted = { current: true };
@@ -568,6 +591,7 @@ export const DraggableNotificationsPanel = ({
     const listener = (event: MouseEvent) => {
       // Only process the event if the component is still mounted
       if (isMounted.current) {
+>>>>>>> 36fe2b8b6a4c5197b88aa6f671b0288a98028ae7
         handlePlaceNewTag(event);
       }
     };
@@ -583,8 +607,11 @@ export const DraggableNotificationsPanel = ({
     // Cleanup function
     return () => {
       console.log('[TagDropEffect] Cleanup: Removing click listener.'); // Log cleanup
+<<<<<<< HEAD
+=======
       // Mark component as unmounted to prevent state updates
       isMounted.current = false;
+>>>>>>> 36fe2b8b6a4c5197b88aa6f671b0288a98028ae7
       document.removeEventListener('click', listener);
       // Ensure cursor is reset if component unmounts while mode is active
       if (tagDropModeActive) {
@@ -592,7 +619,19 @@ export const DraggableNotificationsPanel = ({
           document.body.style.cursor = '';
       }
     };
+<<<<<<< HEAD
+  }, [tagDropModeActive, handlePlaceNewTag]);
+  
+  // Effect to set mounted state on unmount
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []); 
+=======
   }, [tagDropModeActive, handlePlaceNewTag]); 
+>>>>>>> 36fe2b8b6a4c5197b88aa6f671b0288a98028ae7
 
   // Add states for drawing
   const [drawingState, setDrawingState] = useState<DrawingState>({
@@ -608,6 +647,25 @@ export const DraggableNotificationsPanel = ({
   
   // Refs for canvases
   const tagCanvasRef = useRef<HTMLCanvasElement>(null);
+<<<<<<< HEAD
+  // Full-page drawing refs temporarily disabled
+  // const pageCanvasRef = useRef<HTMLCanvasElement>(null);
+  // const canvasContainerRef = useRef<HTMLDivElement>(null);
+  
+  // Ref to track if component is mounted (for cleanup)
+  const isMountedRef = useRef(true);
+  
+  // Simple drawing state tracking
+  const drawingStateRef = useRef(drawingState);
+  const isDrawingRef = useRef(isDrawing);
+  const lastPointRef = useRef(lastPoint);
+  
+  // Keep refs in sync with state
+  useEffect(() => {
+    drawingStateRef.current = drawingState;
+  }, [drawingState]);
+  
+=======
   const pageCanvasRef = useRef<HTMLCanvasElement>(null);
   const canvasContainerRef = useRef<HTMLDivElement>(null);
   
@@ -617,6 +675,7 @@ export const DraggableNotificationsPanel = ({
   const drawingStateRef = useRef(drawingState);
   
   // Keep Refs synchronized with State
+>>>>>>> 36fe2b8b6a4c5197b88aa6f671b0288a98028ae7
   useEffect(() => {
     isDrawingRef.current = isDrawing;
   }, [isDrawing]);
@@ -625,16 +684,23 @@ export const DraggableNotificationsPanel = ({
     lastPointRef.current = lastPoint;
   }, [lastPoint]);
   
+<<<<<<< HEAD
+=======
   useEffect(() => {
     drawingStateRef.current = drawingState;
   }, [drawingState]);
   
+>>>>>>> 36fe2b8b6a4c5197b88aa6f671b0288a98028ae7
   // Drawing functions
   const startDrawing = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
     // If we're dragging the popup, don't start drawing
     if (isDraggingPopup) return;
     
+<<<<<<< HEAD
+    const canvas = tagCanvasRef.current; // Only tag canvas for now
+=======
     const canvas = drawingState.isDrawingOnPage ? pageCanvasRef.current : tagCanvasRef.current;
+>>>>>>> 36fe2b8b6a4c5197b88aa6f671b0288a98028ae7
     if (!canvas) return;
     
     // These are critical to prevent the popup from being dragged when drawing on the canvas
@@ -672,7 +738,11 @@ export const DraggableNotificationsPanel = ({
     e.nativeEvent.stopImmediatePropagation();
     e.preventDefault();
     
+<<<<<<< HEAD
+    const canvas = tagCanvasRef.current; // Only tag canvas for now
+=======
     const canvas = drawingState.isDrawingOnPage ? pageCanvasRef.current : tagCanvasRef.current;
+>>>>>>> 36fe2b8b6a4c5197b88aa6f671b0288a98028ae7
     if (!canvas) return;
     
     const rect = canvas.getBoundingClientRect();
@@ -720,7 +790,11 @@ export const DraggableNotificationsPanel = ({
       return;
     }
     
+<<<<<<< HEAD
+    const canvas = tagCanvasRef.current; // Only tag canvas for now
+=======
     const canvas = drawingState.isDrawingOnPage ? pageCanvasRef.current : tagCanvasRef.current;
+>>>>>>> 36fe2b8b6a4c5197b88aa6f671b0288a98028ae7
     if (!canvas) return;
     
     const rect = canvas.getBoundingClientRect();
@@ -847,6 +921,10 @@ export const DraggableNotificationsPanel = ({
     ctx.stroke();
   };
   
+<<<<<<< HEAD
+  // Full-page drawing temporarily disabled for core tag testing
+  // TODO: Re-implement with proper ref management later
+=======
   // Set up page-wide canvas when drawing on page
   useEffect(() => {
     // Only log when the effect is actually creating or cleaning up
@@ -1121,6 +1199,7 @@ export const DraggableNotificationsPanel = ({
       };
     }
   }, [drawingState.isDrawingOnPage]); // Only depend on isDrawingOnPage
+>>>>>>> 36fe2b8b6a4c5197b88aa6f671b0288a98028ae7
   
   // Helper to convert data URL to File
   const dataURLtoFile = (dataurl: string, filename: string): File | null => {
@@ -1218,6 +1297,17 @@ export const DraggableNotificationsPanel = ({
   useEffect(() => {
     if (isDrawing && tagCanvasRef.current) {
       const ctx = tagCanvasRef.current.getContext('2d');
+<<<<<<< HEAD
+      if (ctx) {
+        ctx.lineWidth = drawingState.lineWidth;
+        ctx.strokeStyle = drawingState.color;
+        ctx.lineCap = 'round';
+      }
+    }
+  }, [isDrawing, drawingState.lineWidth, drawingState.color]);
+
+  const drawPencil = (ctx: CanvasRenderingContext2D, startPoint: Point, endPoint: Point) => {
+=======
       ctx.lineWidth = drawingState.lineWidth;
       ctx.strokeStyle = drawingState.color;
       ctx.lineCap = 'round';
@@ -1225,13 +1315,18 @@ export const DraggableNotificationsPanel = ({
   }, [isDrawing, drawingState.lineWidth, drawingState.color]);
 
   const drawPencil = (ctx, startPoint, endPoint) => {
+>>>>>>> 36fe2b8b6a4c5197b88aa6f671b0288a98028ae7
     ctx.beginPath();
     ctx.moveTo(startPoint.x, startPoint.y);
     ctx.lineTo(endPoint.x, endPoint.y);
     ctx.stroke();
   };
 
+<<<<<<< HEAD
+  const eraseArea = (ctx: CanvasRenderingContext2D, point: Point, size: number) => {
+=======
   const eraseArea = (ctx, point, size) => {
+>>>>>>> 36fe2b8b6a4c5197b88aa6f671b0288a98028ae7
     ctx.clearRect(point.x - size, point.y - size, size * 2, size * 2);
   };
 
@@ -1274,6 +1369,9 @@ export const DraggableNotificationsPanel = ({
     return () => document.removeEventListener('mouseup', stopDrag);
   }, []);
 
+<<<<<<< HEAD
+  // Full-page drawing handlers temporarily disabled
+=======
   // --- Full-page Drawing Overlay ---
   // Add a callback to handle Done/Cancel
   const handleFullPageDrawingDone = () => {
@@ -1312,6 +1410,7 @@ export const DraggableNotificationsPanel = ({
       if (cancelBtn) cancelBtn.removeEventListener('click', handleFullPageDrawingCancel);
     };
   }, [drawingState.isDrawingOnPage]);
+>>>>>>> 36fe2b8b6a4c5197b88aa6f671b0288a98028ae7
   // ... existing code ...
   // When drawing is finished in the popup, update preview
   const handleDrawingFinish = () => {
@@ -1636,15 +1735,27 @@ export const DraggableNotificationsPanel = ({
                                       <Save className="h-3.5 w-3.5 mr-1" />
                                       Save Drawing to Attachments
                                   </Button>
+<<<<<<< HEAD
+                                  {/* Draw Outside Tag Button - Temporarily Disabled */}
+=======
                                   {/* Draw Outside Tag Button */}
+>>>>>>> 36fe2b8b6a4c5197b88aa6f671b0288a98028ae7
                                   <Button
                                       variant="outline"
                                       size="sm"
                                       className="mt-2 w-full text-xs"
+<<<<<<< HEAD
+                                      disabled
+                                      title="Full-page drawing temporarily disabled - coming soon!"
+                                  >
+                                      <Brush className="h-3.5 w-3.5 mr-1" />
+                                      Draw Outside Tag (Coming Soon)
+=======
                                       onClick={() => setDrawingState(prev => ({ ...prev, isDrawingOnPage: true }))}
                                   >
                                       <Brush className="h-3.5 w-3.5 mr-1" />
                                       Draw Outside Tag (Full Page)
+>>>>>>> 36fe2b8b6a4c5197b88aa6f671b0288a98028ae7
                                   </Button>
                               </div>
                           </div>

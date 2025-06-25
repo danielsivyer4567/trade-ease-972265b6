@@ -8,7 +8,13 @@ import './utils/errorHandler' // Initialize error handler immediately
 import './utils/startupDiagnostics' // Run startup diagnostics
 // Remove the startupService import to prevent the 404 error
 // import { startupService } from './services/startupService'
+<<<<<<< HEAD
+import '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css'
 
+
+=======
+
+>>>>>>> 36fe2b8b6a4c5197b88aa6f671b0288a98028ae7
 // Disable React DevTools overlay to prevent message channel errors
 disableDevToolsOverlay();
 

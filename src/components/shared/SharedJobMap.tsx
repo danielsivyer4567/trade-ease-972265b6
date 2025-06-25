@@ -1,5 +1,9 @@
 import React, { useEffect, useRef, useState, useCallback } from "react";
 import { useGoogleMapsApiKey } from "@/hooks/useGoogleMapsApiKey";
+<<<<<<< HEAD
+import { loadGoogleMaps } from "@/services/google-maps-loader";
+=======
+>>>>>>> 36fe2b8b6a4c5197b88aa6f671b0288a98028ae7
 import type { Job } from "@/types/job";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -16,7 +20,10 @@ interface SharedJobMapProps {
 declare global {
   interface Window {
     google: any;
+<<<<<<< HEAD
+=======
     initMap?: () => void;
+>>>>>>> 36fe2b8b6a4c5197b88aa6f671b0288a98028ae7
   }
 }
 
@@ -35,12 +42,30 @@ const SharedJobMap: React.FC<SharedJobMapProps> = ({
   const [error, setError] = useState<string | null>(null);
   const { apiKey, isLoading: isApiKeyLoading, error: apiKeyError } = useGoogleMapsApiKey();
 
+<<<<<<< HEAD
+  // Initialize map with performance optimizations
+  const initializeMap = useCallback(async () => {
+    if (!mapRef.current || !apiKey) {
+      setIsLoading(false);
+      return;
+    }
+
+    try {
+      // Load Google Maps using the optimized loader
+      await loadGoogleMaps(apiKey);
+
+      // Check if component is still mounted
+      if (!mapRef.current) return;
+
+      // Create map instance with optimized settings
+=======
   // Initialize map
   const initializeMap = useCallback(() => {
     if (!mapRef.current || !window.google) return;
 
     try {
       // Create map instance
+>>>>>>> 36fe2b8b6a4c5197b88aa6f671b0288a98028ae7
       const map = new window.google.maps.Map(mapRef.current, {
         center: { lat: -28.0167, lng: 153.4000 },
         zoom: 10,
@@ -49,6 +74,13 @@ const SharedJobMap: React.FC<SharedJobMapProps> = ({
         fullscreenControl: true,
         zoomControl: true,
         gestureHandling: 'greedy',
+<<<<<<< HEAD
+        // Performance optimizations
+        clickableIcons: false,
+        disableDefaultUI: false,
+        mapTypeId: 'roadmap',
+=======
+>>>>>>> 36fe2b8b6a4c5197b88aa6f671b0288a98028ae7
       });
 
       mapInstanceRef.current = map;
@@ -57,7 +89,15 @@ const SharedJobMap: React.FC<SharedJobMapProps> = ({
       infoWindowRef.current = new window.google.maps.InfoWindow();
 
       // Clear existing markers
+<<<<<<< HEAD
+      markersRef.current.forEach(marker => {
+        if (marker && marker.setMap) {
+          marker.setMap(null);
+        }
+      });
+=======
       markersRef.current.forEach(marker => marker.setMap(null));
+>>>>>>> 36fe2b8b6a4c5197b88aa6f671b0288a98028ae7
       markersRef.current = [];
 
       // Get valid job locations
@@ -73,7 +113,11 @@ const SharedJobMap: React.FC<SharedJobMapProps> = ({
 
       const bounds = new window.google.maps.LatLngBounds();
 
+<<<<<<< HEAD
+      // Add markers for each job with clustering for performance
+=======
       // Add markers for each job
+>>>>>>> 36fe2b8b6a4c5197b88aa6f671b0288a98028ae7
       validJobs.forEach(job => {
         if (job.location && Array.isArray(job.location) && job.location.length === 2) {
           const position = { lat: job.location[0], lng: job.location[1] };
@@ -82,14 +126,25 @@ const SharedJobMap: React.FC<SharedJobMapProps> = ({
             map,
             title: job.customer,
             optimized: true,
+<<<<<<< HEAD
+            animation: null, // Disable animation for better performance
+=======
+>>>>>>> 36fe2b8b6a4c5197b88aa6f671b0288a98028ae7
           });
 
           bounds.extend(position);
           markersRef.current.push(marker);
 
+<<<<<<< HEAD
+          // Use event delegation for better performance
+          marker.addListener('click', () => {
+            const content = `
+              <div style="padding: 8px; max-width: 250px;">
+=======
           marker.addListener('click', () => {
             const content = `
               <div style="padding: 8px;">
+>>>>>>> 36fe2b8b6a4c5197b88aa6f671b0288a98028ae7
                 <h3 style="font-weight: 600; margin: 0 0 4px 0;">${job.customer}</h3>
                 <p style="margin: 0; font-size: 14px; color: #666;">${job.title || ''}</p>
                 ${job.address ? `<p style="margin: 4px 0 0 0; font-size: 12px; color: #999;">${job.address}</p>` : ''}
@@ -106,14 +161,23 @@ const SharedJobMap: React.FC<SharedJobMapProps> = ({
         }
       });
 
+<<<<<<< HEAD
+      // Fit map to bounds with animation
+=======
       // Fit map to bounds
+>>>>>>> 36fe2b8b6a4c5197b88aa6f671b0288a98028ae7
       if (markersRef.current.length > 0) {
         map.fitBounds(bounds);
         
         // Don't zoom in too much for single markers
         if (markersRef.current.length === 1) {
           window.google.maps.event.addListenerOnce(map, 'bounds_changed', () => {
+<<<<<<< HEAD
+            const currentZoom = map.getZoom();
+            if (currentZoom && currentZoom > 15) {
+=======
             if (map.getZoom() > 15) {
+>>>>>>> 36fe2b8b6a4c5197b88aa6f671b0288a98028ae7
               map.setZoom(15);
             }
           });
@@ -124,6 +188,43 @@ const SharedJobMap: React.FC<SharedJobMapProps> = ({
       setError(null);
     } catch (err) {
       console.error('Error initializing map:', err);
+<<<<<<< HEAD
+      setError(err instanceof Error ? err.message : 'Failed to initialize map');
+      setIsLoading(false);
+    }
+  }, [jobs, showStreetView, onJobClick, apiKey]);
+
+  // Load map when API key is available
+  useEffect(() => {
+    if (apiKey && !isApiKeyLoading && mapRef.current) {
+      initializeMap();
+    }
+  }, [apiKey, isApiKeyLoading, initializeMap]);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      // Clean up markers
+      markersRef.current.forEach(marker => {
+        if (marker && marker.setMap) {
+          marker.setMap(null);
+        }
+      });
+      markersRef.current = [];
+
+      // Clean up info window
+      if (infoWindowRef.current) {
+        infoWindowRef.current.close();
+        infoWindowRef.current = null;
+      }
+
+      // Clean up map instance
+      if (mapInstanceRef.current) {
+        mapInstanceRef.current = null;
+      }
+    };
+  }, []);
+=======
       setError('Failed to initialize map');
       setIsLoading(false);
     }
@@ -173,11 +274,16 @@ const SharedJobMap: React.FC<SharedJobMapProps> = ({
       initializeMap();
     }
   }, [jobs, initializeMap]);
+>>>>>>> 36fe2b8b6a4c5197b88aa6f671b0288a98028ae7
 
   // Loading state
   if (isApiKeyLoading) {
     return (
+<<<<<<< HEAD
+      <div className="flex items-center justify-center map-loading-container" style={{ height }}>
+=======
       <div className="flex items-center justify-center" style={{ height }}>
+>>>>>>> 36fe2b8b6a4c5197b88aa6f671b0288a98028ae7
         <div className="text-center">
           <Loader2 className="h-8 w-8 animate-spin mx-auto mb-2" />
           <p className="text-sm text-gray-500">Loading map configuration...</p>
@@ -220,11 +326,23 @@ const SharedJobMap: React.FC<SharedJobMapProps> = ({
   return (
     <div style={{ position: 'relative', width: '100%', height }}>
       {isLoading && (
+<<<<<<< HEAD
+        <div className="absolute inset-0 flex items-center justify-center bg-white/80 z-10">
+          <Loader2 className="h-8 w-8 animate-spin" />
+        </div>
+      )}
+      <div 
+        ref={mapRef} 
+        style={{ width: '100%', height: '100%' }}
+        className="map-container"
+      />
+=======
         <div className="absolute inset-0 flex items-center justify-center bg-white z-10">
           <Loader2 className="h-8 w-8 animate-spin" />
         </div>
       )}
       <div ref={mapRef} style={{ width: '100%', height: '100%' }} />
+>>>>>>> 36fe2b8b6a4c5197b88aa6f671b0288a98028ae7
     </div>
   );
 };
