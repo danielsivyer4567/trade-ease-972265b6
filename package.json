@@ -15,7 +15,6 @@
     "preview": "vite preview",
     "db:setup": "node scripts/db-setup.js",
     "db:reset": "npx supabase db reset",
-<<<<<<< HEAD
     "start:with-db": "npm run db:setup && npm run dev",
     "migrate:generate": "node scripts/deploy-migrations.cjs generate",
     "migrate:deploy": "node scripts/deploy-migrations.cjs deploy",
@@ -28,14 +27,6 @@
     "@hookform/resolvers": "^3.3.4",
     "@lottiefiles/react-lottie-player": "^3.5.3",
     "@mapbox/mapbox-gl-geocoder": "^5.0.3",
-=======
-    "start:with-db": "npm run db:setup && npm run dev"
-  },
-  "dependencies": {
-    "@hookform/resolvers": "^3.3.4",
-    "@lottiefiles/react-lottie-player": "^3.5.3",
->>>>>>> 36fe2b8b6a4c5197b88aa6f671b0288a98028ae7
-    "@radix-ui/react-accordion": "^1.1.2",
     "@radix-ui/react-alert-dialog": "^1.0.5",
     "@radix-ui/react-aspect-ratio": "^1.0.3",
     "@radix-ui/react-avatar": "^1.0.4",
@@ -65,14 +56,10 @@
     "@react-google-maps/api": "^2.20.6",
     "@supabase/supabase-js": "^2.49.8",
     "@tanstack/react-query": "^5.17.19",
-<<<<<<< HEAD
     "@turf/bbox": "^7.2.0",
     "@turf/turf": "^7.2.0",
     "@vercel/analytics": "^1.1.2",
     "@xyflow/react": "^12.7.0",
-=======
-    "@vercel/analytics": "^1.1.2",
->>>>>>> 36fe2b8b6a4c5197b88aa6f671b0288a98028ae7
     "axios": "^1.8.4",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.0.0",
@@ -89,11 +76,7 @@
     "leaflet": "^1.9.4",
     "lucide-react": "^0.330.0",
     "mapbox-gl": "^3.1.2",
-<<<<<<< HEAD
     "n8n": "^1.98.2",
-=======
-    "n8n": "^0.182.1",
->>>>>>> 36fe2b8b6a4c5197b88aa6f671b0288a98028ae7
     "n8n-core": "^1.74.3",
     "n8n-editor-ui": "^1.74.3",
     "n8n-workflow": "^1.74.3",
@@ -125,10 +108,7 @@
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^14.3.1",
     "@types/jest": "^29.5.14",
-<<<<<<< HEAD
     "@types/mapbox__mapbox-gl-geocoder": "^5.0.0",
-=======
->>>>>>> 36fe2b8b6a4c5197b88aa6f671b0288a98028ae7
     "@types/node": "^20.11.19",
     "@types/react": "^18.2.57",
     "@types/react-dom": "^18.2.19",

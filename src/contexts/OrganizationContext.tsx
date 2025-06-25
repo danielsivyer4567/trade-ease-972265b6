@@ -68,8 +68,8 @@ export const OrganizationProvider: React.FC<{ children: React.ReactNode }> = ({ 
   // Load user's organizations and current organization
   const loadOrganizations = useCallback(async () => {
     if (!user) {
-<<<<<<< HEAD
       console.log('OrganizationContext: No user available, skipping load');
+      setIsLoading(false);
       return;
     }
 
@@ -77,6 +77,7 @@ export const OrganizationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) {
       console.log('OrganizationContext: No valid session, skipping load');
+      setIsLoading(false);
       return;
     }
 
@@ -161,34 +162,6 @@ export const OrganizationProvider: React.FC<{ children: React.ReactNode }> = ({ 
 
       if (orgsError) {
         console.error('OrganizationContext: Error loading organizations:', orgsError);
-=======
-      setIsLoading(false);
-      return;
-    }
-
-    try {
-      // Get user's subscription tier and settings
-      const { data: profileData, error: profileError } = await supabase
-        .from('user_profiles')
-        .select('subscription_tier, max_organizations, current_organization_id, subscription_features')
-        .eq('user_id', user.id)
-        .single();
-
-      if (profileError) {
-        console.error('Error loading user profile:', profileError);
-      } else if (profileData) {
-        setSubscriptionTier(profileData.subscription_tier || 'free_starter');
-        setSubscriptionFeatures(profileData.subscription_features || {});
-        setMaxOrganizations(profileData.max_organizations || 1);
-      }
-
-      // Get user's organizations using the database function
-      const { data: orgsData, error: orgsError } = await supabase
-        .rpc('get_user_organizations');
-
-      if (orgsError) {
-        console.error('Error loading organizations:', orgsError);
->>>>>>> 36fe2b8b6a4c5197b88aa6f671b0288a98028ae7
         toast({
           title: 'Error loading organizations',
           description: orgsError.message,
@@ -198,14 +171,9 @@ export const OrganizationProvider: React.FC<{ children: React.ReactNode }> = ({ 
         setUserOrganizations(orgsData);
 
         // Load current organization details
-<<<<<<< HEAD
         const currentOrgData = orgsData.find((org: any) => org.is_current);
         if (currentOrgData) {
           console.log('OrganizationContext: Loading current organization details...');
-=======
-        const currentOrgData = orgsData.find(org => org.is_current);
-        if (currentOrgData) {
->>>>>>> 36fe2b8b6a4c5197b88aa6f671b0288a98028ae7
           const { data: orgDetails, error: detailsError } = await supabase
             .from('organizations')
             .select('*')
@@ -214,20 +182,13 @@ export const OrganizationProvider: React.FC<{ children: React.ReactNode }> = ({ 
 
           if (!detailsError && orgDetails) {
             setCurrentOrganization(orgDetails);
-<<<<<<< HEAD
           } else if (detailsError) {
             console.error('OrganizationContext: Error loading current organization details:', detailsError);
-=======
->>>>>>> 36fe2b8b6a4c5197b88aa6f671b0288a98028ae7
           }
         }
       }
     } catch (error) {
-<<<<<<< HEAD
       console.error('OrganizationContext: Error in loadOrganizations:', error);
-=======
-      console.error('Error in loadOrganizations:', error);
->>>>>>> 36fe2b8b6a4c5197b88aa6f671b0288a98028ae7
     } finally {
       setIsLoading(false);
     }
