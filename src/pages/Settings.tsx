@@ -6,11 +6,11 @@ import { useNavigate } from "react-router-dom";
 
 const settingsSections = [
   {
-<<<<<<< HEAD
     title: "Organization Settings",
     icon: Building2,
     description: "Manage organizations, members, and roles",
     path: "/settings/organization"
+  },
   },
   {
     title: "Trade Ease Plan Details",
