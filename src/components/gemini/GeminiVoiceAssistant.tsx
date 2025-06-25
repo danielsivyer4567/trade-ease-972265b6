@@ -1,19 +1,10 @@
-<<<<<<< HEAD
 import React, { useState, useEffect } from 'react';
 import { Loader2, Mic, HelpCircle, Monitor, Sparkles } from 'lucide-react';
-=======
-
-import React, { useState, useEffect } from 'react';
-import { Loader2, Mic, HelpCircle } from 'lucide-react';
->>>>>>> 36fe2b8b6a4c5197b88aa6f671b0288a98028ae7
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useAudioProcessing } from './hooks/useAudioProcessing';
 import { processCommand } from './utils/commandProcessor';
-<<<<<<< HEAD
 import { useNavigate } from 'react-router-dom';
-=======
->>>>>>> 36fe2b8b6a4c5197b88aa6f671b0288a98028ae7
 import GeminiIcon from './GeminiIcon';
 import ListeningBubble from './ListeningBubble';
 import RecognizedTextBubble from './RecognizedTextBubble';
@@ -22,16 +13,13 @@ interface GeminiVoiceAssistantProps {
   className?: string;
 }
 
-const GeminiVoiceAssistant: React.FC<GeminiVoiceAssistantProps> = ({
+export const GeminiVoiceAssistant: React.FC<GeminiVoiceAssistantProps> = ({
   className
 }) => {
   const [showTooltip, setShowTooltip] = useState(false);
-<<<<<<< HEAD
   const [hasInteracted, setHasInteracted] = useState(false);
   const [showScreenShareButton, setShowScreenShareButton] = useState(false);
   const navigate = useNavigate();
-=======
->>>>>>> 36fe2b8b6a4c5197b88aa6f671b0288a98028ae7
   
   const {
     isListening,
@@ -62,7 +50,6 @@ const GeminiVoiceAssistant: React.FC<GeminiVoiceAssistantProps> = ({
     }
   }, [recognizedText]);
 
-<<<<<<< HEAD
   // Show screen share button after first interaction
   useEffect(() => {
     if (hasInteracted) {
@@ -87,8 +74,6 @@ const GeminiVoiceAssistant: React.FC<GeminiVoiceAssistantProps> = ({
     navigate('/n8n-assistant');
   };
 
-=======
->>>>>>> 36fe2b8b6a4c5197b88aa6f671b0288a98028ae7
   const buttonClasses = `
     ${isListening ? 'bg-red-500 hover:bg-red-600' : 'bg-cyan-400 hover:bg-cyan-300'} 
     font-extralight
@@ -99,7 +84,6 @@ const GeminiVoiceAssistant: React.FC<GeminiVoiceAssistantProps> = ({
     h-14 w-14 sm:h-16 sm:w-16
   `;
 
-<<<<<<< HEAD
   const screenShareButtonClasses = `
     bg-purple-500 hover:bg-purple-600
     font-extralight
@@ -161,33 +145,6 @@ const GeminiVoiceAssistant: React.FC<GeminiVoiceAssistantProps> = ({
           </Tooltip>
         </TooltipProvider>
       </div>
-=======
-  return (
-    <div className={`fixed bottom-6 right-6 z-50 ${className}`}>
-      <TooltipProvider>
-        <Tooltip open={showTooltip}>
-          <TooltipTrigger asChild>
-            <Button 
-              className={buttonClasses}
-              onClick={isListening ? stopListening : startListening} 
-              disabled={isProcessing}
-              aria-label={isListening ? "Stop listening" : "Start voice assistant"}
-            >
-              {isProcessing ? (
-                <Loader2 className="h-6 w-6 animate-spin text-white" />
-              ) : isListening ? (
-                <Mic className="h-6 w-6 text-white animate-pulse" />
-              ) : (
-                <GeminiIcon className="h-6 w-6 text-white" isListening={isListening} />
-              )}
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent side="left" className="bg-slate-800 text-white p-3 max-w-[200px]">
-            <p>Click to use voice commands. Try saying "Go to jobs" or "Create new quote"</p>
-          </TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
->>>>>>> 36fe2b8b6a4c5197b88aa6f671b0288a98028ae7
       
       {isListening && <ListeningBubble />}
 
@@ -199,17 +156,17 @@ const GeminiVoiceAssistant: React.FC<GeminiVoiceAssistantProps> = ({
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button 
-                variant="outline" 
-                size="icon" 
-                className="h-8 w-8 rounded-full bg-gray-100"
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-gray-500 hover:text-gray-700"
                 onClick={() => setShowTooltip(true)}
               >
                 <HelpCircle className="h-4 w-4" />
               </Button>
             </TooltipTrigger>
-            <TooltipContent side="left">
-              <p>Voice commands help</p>
+            <TooltipContent side="left" className="bg-slate-800 text-white p-3 max-w-[200px]">
+              <p>Need help with voice commands?</p>
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
@@ -217,5 +174,3 @@ const GeminiVoiceAssistant: React.FC<GeminiVoiceAssistantProps> = ({
     </div>
   );
 };
-
-export default GeminiVoiceAssistant;

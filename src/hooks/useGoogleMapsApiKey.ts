@@ -18,7 +18,6 @@ export function useGoogleMapsApiKey() {
     // First, try to get the API key from environment variables
     const envApiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
     if (envApiKey) {
-<<<<<<< HEAD
       console.log('✅ Google Maps: Using API key from environment variable');
       
       // Trim any whitespace and log details for debugging
@@ -47,40 +46,21 @@ export function useGoogleMapsApiKey() {
     console.log('⚠️ Google Maps: No environment variable found, trying database...');
 
     // If no environment variable, try to get from database using Supabase client
-=======
-      console.log('Using Google Maps API key from environment variable');
-      setApiKey(envApiKey);
-      setIsLoading(false);
-      return;
-    }
-
-    // If no environment variable, try to get from database
->>>>>>> 36fe2b8b6a4c5197b88aa6f671b0288a98028ae7
     try {
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
       
       if (sessionError) {
-<<<<<<< HEAD
         console.error('❌ Google Maps: Session error:', sessionError);
-=======
-        console.error('Session error:', sessionError);
->>>>>>> 36fe2b8b6a4c5197b88aa6f671b0288a98028ae7
         throw new Error('Failed to get session');
       }
 
       if (!session) {
-<<<<<<< HEAD
         console.warn('⚠️ Google Maps: No session found and no environment variable available');
         setError('No Google Maps API key available - Please add VITE_GOOGLE_MAPS_API_KEY to your .env file or log in to save one');
-=======
-        console.warn('No session found and no environment variable available');
-        setError('No Google Maps API key available');
->>>>>>> 36fe2b8b6a4c5197b88aa6f671b0288a98028ae7
         setIsLoading(false);
         return;
       }
 
-<<<<<<< HEAD
       console.log('🔄 Google Maps: Fetching API key from database...');
       const { data, error: functionError } = await supabase.functions.invoke('google-maps-key', {
         method: 'GET'
@@ -107,39 +87,6 @@ export function useGoogleMapsApiKey() {
       if (!errorMessage.includes('session')) {
         toast.error('Failed to fetch Google Maps API key. Please check your configuration.');
       }
-=======
-      const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/google-maps-key`,
-        {
-          method: 'GET',
-          headers: {
-            'Authorization': `Bearer ${session.access_token}`,
-            'Content-Type': 'application/json',
-          },
-        }
-      );
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('Response error:', {
-          status: response.status,
-          statusText: response.statusText,
-          body: errorText
-        });
-        throw new Error(`Failed to retrieve API key: ${response.statusText}`);
-      }
-
-      const data = await response.json();
-      if (data?.apiKey) {
-        setApiKey(data.apiKey);
-      } else {
-        setError('No Google Maps API key found');
-      }
-    } catch (error) {
-      console.error('Error fetching Google Maps API key:', error);
-      setError('Failed to fetch Google Maps API key');
-      toast.error('Failed to fetch Google Maps API key. Please check your configuration.');
->>>>>>> 36fe2b8b6a4c5197b88aa6f671b0288a98028ae7
     } finally {
       setIsLoading(false);
     }
@@ -148,7 +95,6 @@ export function useGoogleMapsApiKey() {
   const saveApiKey = async (newApiKey: string) => {
     setIsLoading(true);
     setError(null);
-<<<<<<< HEAD
     
     // Validate API key format before saving
     const trimmedNewApiKey = newApiKey.trim();
@@ -159,23 +105,16 @@ export function useGoogleMapsApiKey() {
       return;
     }
     
-=======
->>>>>>> 36fe2b8b6a4c5197b88aa6f671b0288a98028ae7
     try {
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
       
       if (sessionError) {
-<<<<<<< HEAD
         console.error('❌ Google Maps: Session error:', sessionError);
-=======
-        console.error('Session error:', sessionError);
->>>>>>> 36fe2b8b6a4c5197b88aa6f671b0288a98028ae7
         throw new Error('Failed to get session');
       }
 
       if (!session) {
         setError('You must be logged in to save API keys');
-<<<<<<< HEAD
         toast.error('Please log in to save API keys');
         return;
       }
@@ -198,38 +137,6 @@ export function useGoogleMapsApiKey() {
       console.error('❌ Google Maps: Error saving API key:', error);
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       setError(`Failed to save Google Maps API key: ${errorMessage}`);
-=======
-        return;
-      }
-
-      const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/google-maps-key`,
-        {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${session.access_token}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ apiKey: newApiKey }),
-        }
-      );
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('Response error:', {
-          status: response.status,
-          statusText: response.statusText,
-          body: errorText
-        });
-        throw new Error(`Failed to save API key: ${response.statusText}`);
-      }
-
-      setApiKey(newApiKey);
-      toast.success('Google Maps API key saved successfully');
-    } catch (error) {
-      console.error('Error saving Google Maps API key:', error);
-      setError('Failed to save Google Maps API key');
->>>>>>> 36fe2b8b6a4c5197b88aa6f671b0288a98028ae7
       toast.error('Failed to save Google Maps API key');
     } finally {
       setIsLoading(false);
@@ -243,17 +150,12 @@ export function useGoogleMapsApiKey() {
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
       
       if (sessionError) {
-<<<<<<< HEAD
         console.error('❌ Google Maps: Session error:', sessionError);
-=======
-        console.error('Session error:', sessionError);
->>>>>>> 36fe2b8b6a4c5197b88aa6f671b0288a98028ae7
         throw new Error('Failed to get session');
       }
 
       if (!session) {
         setError('You must be logged in to delete API keys');
-<<<<<<< HEAD
         toast.error('Please log in to delete API keys');
         return;
       }
@@ -275,44 +177,12 @@ export function useGoogleMapsApiKey() {
       console.error('❌ Google Maps: Error deleting API key:', error);
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       setError(`Failed to delete Google Maps API key: ${errorMessage}`);
-=======
-        return;
-      }
-
-      const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/google-maps-key`,
-        {
-          method: 'DELETE',
-          headers: {
-            'Authorization': `Bearer ${session.access_token}`,
-            'Content-Type': 'application/json',
-          },
-        }
-      );
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('Response error:', {
-          status: response.status,
-          statusText: response.statusText,
-          body: errorText
-        });
-        throw new Error(`Failed to delete API key: ${response.statusText}`);
-      }
-
-      setApiKey(null);
-      toast.success('Google Maps API key deleted successfully');
-    } catch (error) {
-      console.error('Error deleting Google Maps API key:', error);
-      setError('Failed to delete Google Maps API key');
->>>>>>> 36fe2b8b6a4c5197b88aa6f671b0288a98028ae7
       toast.error('Failed to delete Google Maps API key');
     } finally {
       setIsLoading(false);
     }
   };
 
-<<<<<<< HEAD
   // Test the current API key
   const testApiKey = async (keyToTest?: string): Promise<{ success: boolean; error?: string }> => {
     const testKey = keyToTest || apiKey;
@@ -346,19 +216,13 @@ export function useGoogleMapsApiKey() {
     }
   };
 
-=======
->>>>>>> 36fe2b8b6a4c5197b88aa6f671b0288a98028ae7
   return {
     apiKey,
     isLoading,
     error,
     saveApiKey,
     deleteApiKey,
-<<<<<<< HEAD
-    refreshApiKey: fetchApiKey,
+    refetch: fetchApiKey,
     testApiKey
-=======
-    refreshApiKey: fetchApiKey
->>>>>>> 36fe2b8b6a4c5197b88aa6f671b0288a98028ae7
   };
 } 

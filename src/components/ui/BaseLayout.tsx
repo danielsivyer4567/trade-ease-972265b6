@@ -4,11 +4,7 @@ import { AppSidebar } from './AppSidebar';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { MainContent } from './MainContent';
 import { SidebarProvider } from './sidebar/SidebarProvider';
-<<<<<<< HEAD
-import GeminiVoiceAssistant from "@/components/gemini/GeminiVoiceAssistant";
-=======
-import GeminiListen from "@/components/gemini/GeminiListen";
->>>>>>> 36fe2b8b6a4c5197b88aa6f671b0288a98028ae7
+import { GeminiVoiceAssistant } from "@/components/gemini/GeminiVoiceAssistant";
 import { SidebarThemeProvider } from './sidebar/theme/SidebarThemeContext';
 import { TabNavigator } from './TabNavigator';
 // Optionally import the new sidebar
@@ -103,11 +99,7 @@ export function BaseLayout({
           </main>
           
           {/* Gemini Listen Feature */}
-<<<<<<< HEAD
           <GeminiVoiceAssistant />
-=======
-          <GeminiListen />
->>>>>>> 36fe2b8b6a4c5197b88aa6f671b0288a98028ae7
           
           {/* Tab Navigator for direct/indirect tab navigation */}
           <TabNavigator />
