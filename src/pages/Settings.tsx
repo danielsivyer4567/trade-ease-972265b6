@@ -1,3 +1,4 @@
+import React from 'react';
 import { BaseLayout } from "@/components/ui/BaseLayout";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Settings, DollarSign, Receipt, Clock, Users, Shield, FileText, Calendar, List, CreditCard, User, Bot, Briefcase, Network, Mail, FileJson, Building, Share, Zap, Search, Link2, Bell, Globe, FileLock, Brain, Database, MessageSquare, Building2 } from "lucide-react";
@@ -11,7 +12,6 @@ const settingsSections = [
     description: "Manage organizations, members, and roles",
     path: "/settings/organization"
   },
-  },
   {
     title: "Trade Ease Plan Details",
     icon: CreditCard,
@@ -19,14 +19,6 @@ const settingsSections = [
     path: "/settings/trade-ease-plan-details"
   },
   {
-=======
-    title: "Organization & Subscription",
-    icon: Building2,
-    description: "Manage organizations and subscription plan",
-    path: "/settings/organization"
-  },
-  {
->>>>>>> 36fe2b8b6a4c5197b88aa6f671b0288a98028ae7
     title: "Messaging",
     icon: MessageSquare,
     description: "Configure messaging and communication settings",
