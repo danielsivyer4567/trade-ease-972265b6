@@ -21,13 +21,10 @@ const GenericSettingsPage = React.lazy(() => import('@/pages/Settings/GenericSet
 const StaffPage = React.lazy(() => import('@/pages/Settings/Staff'));
 const MessagingSettings = React.lazy(() => import('@/pages/Settings/MessagingSettings'));
 const OrganizationSettings = React.lazy(() => import('@/pages/Settings/OrganizationSettings'));
-<<<<<<< HEAD
 const TradeEasePlanDetails = React.lazy(() => import('@/pages/Settings/TradeEasePlanDetails'));
 const MyPlanPage = React.lazy(() => import('@/pages/Settings/MyPlan'));
 const GeminiKeyVerification = React.lazy(() => import('@/pages/GeminiKeyVerification'));
 const MicrophoneTestPage = React.lazy(() => import('@/pages/MicrophoneTestPage'));
-=======
->>>>>>> 36fe2b8b6a4c5197b88aa6f671b0288a98028ae7
 
 // Export routes configuration
 export const SettingsRoutes = (): RouteObject[] => [
@@ -161,7 +158,6 @@ export const SettingsRoutes = (): RouteObject[] => [
       </Suspense>
     ),
   },
-<<<<<<< HEAD
   {
     path: "trade-ease-plan-details",
     element: (
@@ -194,8 +190,6 @@ export const SettingsRoutes = (): RouteObject[] => [
       </Suspense>
     ),
   },
-=======
->>>>>>> 36fe2b8b6a4c5197b88aa6f671b0288a98028ae7
   // Generic catch-all route should be last
   {
     path: ":settingType",
