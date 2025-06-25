@@ -1,20 +1,13 @@
 import React, { useState, useCallback } from "react";
 import { AppLayout } from "@/components/ui/AppLayout";
 import { Link } from "react-router-dom";
-<<<<<<< HEAD
 import { ArrowLeft, Calculator, Lock, AlertCircle } from "lucide-react";
-=======
-import { ArrowLeft, Calculator } from "lucide-react";
->>>>>>> 36fe2b8b6a4c5197b88aa6f671b0288a98028ae7
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-<<<<<<< HEAD
 import { useFeatureAccess } from "@/hooks/use-feature-access";
-=======
->>>>>>> 36fe2b8b6a4c5197b88aa6f671b0288a98028ae7
 import { RateCalculator } from "./components/RateCalculator";
 import { CalculationResult } from "./components/CalculationResult";
 
@@ -62,7 +55,6 @@ const TradeRatesCalculator = () => {
     if (value === null) return "-";
     return `$${value.toFixed(2)}`;
   }, []);
-<<<<<<< HEAD
 
   if (isLoading) {
     return (
@@ -118,8 +110,6 @@ const TradeRatesCalculator = () => {
       </AppLayout>
     );
   }
-=======
->>>>>>> 36fe2b8b6a4c5197b88aa6f671b0288a98028ae7
 
   return (
     <AppLayout>
@@ -200,13 +190,14 @@ const TradeRatesCalculator = () => {
                   <div className="font-bold text-green-600">{formatCurrency(total)}</div>
                 </div>
                 
-                <Button 
-                  onClick={handleShareResults} 
-                  disabled={!total}
-                  className="w-full mt-4"
-                >
-                  Copy Results
-                </Button>
+                {total !== null && (
+                  <Button 
+                    onClick={handleShareResults}
+                    className="w-full"
+                  >
+                    Share Results
+                  </Button>
+                )}
               </div>
             </CardContent>
           </Card>

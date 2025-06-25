@@ -1,23 +1,3 @@
-<<<<<<< HEAD
-import React, { useEffect, useState } from 'react';
-import { AppLayout } from '@/components/ui/AppLayout';
-
-const PropertyBoundaries: React.FC = () => {
-  const [ParcelMap, setParcelMap] = useState<React.FC | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const loadParcelMap = async () => {
-      try {
-        setIsLoading(true);
-        setError(null);
-        const mod = await import('@/components/parcel/parcel');
-        setParcelMap(() => mod.default);
-      } catch (err) {
-        console.error('Failed to load parcel map component:', err);
-        setError('Failed to load the map component. Please refresh the page.');
-=======
 import React, { useState } from 'react';
 import { AppLayout } from '@/components/ui/AppLayout';
 import PropertyBoundaryMap from '@/components/PropertyBoundaryMap';
@@ -78,44 +58,10 @@ const PropertyBoundaries: React.FC = () => {
       } catch (error) {
         console.error("Error parsing boundary file:", error);
         toast.error("Error parsing boundary file");
->>>>>>> 36fe2b8b6a4c5197b88aa6f671b0288a98028ae7
       } finally {
         setIsLoading(false);
       }
     };
-<<<<<<< HEAD
-
-    loadParcelMap();
-  }, []);
-
-  return (
-    <AppLayout>
-      <div className="w-full h-screen relative">
-        {isLoading && (
-          <div className="flex items-center justify-center h-full">
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-              <p className="text-gray-600">Loading map...</p>
-            </div>
-          </div>
-        )}
-        
-        {error && (
-          <div className="flex items-center justify-center h-full">
-            <div className="text-center">
-              <p className="text-red-600 mb-4">{error}</p>
-              <button 
-                onClick={() => window.location.reload()} 
-                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-              >
-                Refresh Page
-              </button>
-            </div>
-          </div>
-        )}
-        
-        {ParcelMap && !isLoading && !error && <ParcelMap />}
-=======
     
     reader.onerror = () => {
       toast.error("Error reading file");
@@ -199,65 +145,55 @@ const PropertyBoundaries: React.FC = () => {
             </div>
           </Card>
         ) : (
-          <Tabs defaultValue="map" className="w-full">
-            <TabsList className="mb-4">
-              <TabsTrigger value="map">Map View</TabsTrigger>
-              <TabsTrigger value="measurements">Measurements</TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="map">
-              <PropertyBoundaryMap 
-                center={center}
-                boundaries={boundaries}
-                title="Property Boundary Map"
-                description="View and measure property boundaries"
-              />
-            </TabsContent>
-            
-            <TabsContent value="measurements">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2">
               <Card>
                 <CardHeader>
-                  <CardTitle>Property Measurements</CardTitle>
-                  <CardDescription>Detailed measurements of property boundaries</CardDescription>
+                  <CardTitle>Property Map</CardTitle>
+                  <CardDescription>Interactive map showing property boundaries</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  {boundaries.length > 0 ? (
-                    <>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                        <div className="bg-secondary/10 p-4 rounded-lg border border-secondary/20">
-                          <h3 className="text-sm font-medium text-muted-foreground mb-1">Total Perimeter</h3>
-                          <p className="text-2xl font-bold">{(measurements.boundaryLength / 1000).toFixed(2)} km</p>
-                        </div>
-                        <div className="bg-secondary/10 p-4 rounded-lg border border-secondary/20">
-                          <h3 className="text-sm font-medium text-muted-foreground mb-1">Total Area</h3>
-                          <p className="text-2xl font-bold">{(measurements.boundaryArea / 10000).toFixed(2)} hectares</p>
-                        </div>
-                      </div>
-                      
-                      <BoundaryMeasurements 
-                        edges={measurements.edges || []}
-                        showMeasurements={true}
-                      />
-                    </>
-                  ) : (
-                    <div className="text-center py-12">
-                      <p className="text-muted-foreground">No boundary data available</p>
-                      <p className="text-sm">Import boundary data to see measurements</p>
-                    </div>
-                  )}
+                  <div className="h-[500px] relative">
+                    <PropertyBoundaryMap 
+                      boundaries={boundaries}
+                      center={center}
+                    />
+                  </div>
                 </CardContent>
               </Card>
-            </TabsContent>
-          </Tabs>
+            </div>
+            
+            <div className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Boundary Information</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div>
+                      <h4 className="font-medium mb-2">Measurements</h4>
+                      {measurements && (
+                        <BoundaryMeasurements 
+                          showMeasurements={true}
+                          edges={measurements.edges || []}
+                        />
+                      )}
+                    </div>
+                    
+                    <div>
+                      <h4 className="font-medium mb-2">Boundary Count</h4>
+                      <p className="text-2xl font-bold text-primary">{boundaries.length}</p>
+                      <p className="text-sm text-muted-foreground">Total boundaries loaded</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
         )}
->>>>>>> 36fe2b8b6a4c5197b88aa6f671b0288a98028ae7
       </div>
     </AppLayout>
   );
 };
 
-<<<<<<< HEAD
 export default PropertyBoundaries;
-=======
-export default PropertyBoundaries; 
->>>>>>> 36fe2b8b6a4c5197b88aa6f671b0288a98028ae7
