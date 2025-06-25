@@ -1,11 +1,9 @@
-<<<<<<< HEAD
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { BaseLayout } from "@/components/ui/BaseLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Network, Share2, Users, Server, Workflow, Fence } from "lucide-react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 const NetworksPage = () => {
   const navigate = useNavigate();
@@ -14,15 +12,6 @@ const NetworksPage = () => {
     navigate(path);
   };
 
-=======
-
-import React from 'react';
-import { BaseLayout } from "@/components/ui/BaseLayout";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Network, Share2, Users, Server, Workflow } from "lucide-react";
-
-const NetworksPage = () => {
->>>>>>> 36fe2b8b6a4c5197b88aa6f671b0288a98028ae7
   return (
     <BaseLayout>
       <div className="p-4 md:p-6">
@@ -30,16 +19,11 @@ const NetworksPage = () => {
           <Network className="h-6 w-6 text-primary" />
           <h1 className="text-2xl font-bold">Networks</h1>
         </div>
-        
-<<<<<<< HEAD
         <div className="flex justify-between items-center mb-6">
           <Button onClick={() => handleNavigate('/calculators/fence')}>
             <Fence className="mr-2 h-4 w-4" /> Calculate Fence
           </Button>
         </div>
-        
-=======
->>>>>>> 36fe2b8b6a4c5197b88aa6f671b0288a98028ae7
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Partner Network Card */}
           <Card>
@@ -59,7 +43,6 @@ const NetworksPage = () => {
               </div>
             </CardContent>
           </Card>
-          
           {/* Supply Chain Network */}
           <Card>
             <CardHeader>
@@ -78,7 +61,6 @@ const NetworksPage = () => {
               </div>
             </CardContent>
           </Card>
-          
           {/* Lead Exchange */}
           <Card>
             <CardHeader>
@@ -97,7 +79,6 @@ const NetworksPage = () => {
               </div>
             </CardContent>
           </Card>
-          
           {/* Work Integration */}
           <Card>
             <CardHeader>
