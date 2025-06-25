@@ -18,8 +18,7 @@ const JobSiteMap = () => {
       try {
         const { data, error } = await supabase
           .from('jobs')
-          .select('*')
-          .limit(100); // Limit the number of jobs for better performance
+          .select('*');
           
         if (error) {
           console.error("Failed to fetch jobs:", error);
