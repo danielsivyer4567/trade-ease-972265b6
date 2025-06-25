@@ -10,7 +10,6 @@ import './utils/startupDiagnostics' // Run startup diagnostics
 // import { startupService } from './services/startupService'
 import '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css'
 
-
 // Disable React DevTools overlay to prevent message channel errors
 disableDevToolsOverlay();
 

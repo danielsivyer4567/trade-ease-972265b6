@@ -20,6 +20,7 @@
   "dependencies": {
     "@hookform/resolvers": "^3.3.4",
     "@lottiefiles/react-lottie-player": "^3.5.3",
+    "@mapbox/mapbox-gl-geocoder": "^5.0.3",
     "@radix-ui/react-accordion": "^1.1.2",
     "@radix-ui/react-alert-dialog": "^1.0.5",
     "@radix-ui/react-aspect-ratio": "^1.0.3",

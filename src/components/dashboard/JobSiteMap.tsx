@@ -9,10 +9,11 @@ import { supabase } from "@/integrations/supabase/client";
 import SharedJobMap from "@/components/shared/SharedJobMap";
 import { useGoogleMapsApiKey } from "@/hooks/useGoogleMapsApiKey";
 import { GoogleMap, Marker, InfoWindow, useLoadScript } from '@react-google-maps/api';
+import { getSafeApiKey } from "@/config/google-maps";
 
 const MinimalMap = ({ jobs }) => {
   const { isLoaded, loadError } = useLoadScript({
-    googleMapsApiKey: "AIzaSyBFVIiAURNyUiIR_2dRQmud98q9sCn5ONI",
+    googleMapsApiKey: getSafeApiKey(),
   });
   const [selectedJob, setSelectedJob] = useState(null);
 
