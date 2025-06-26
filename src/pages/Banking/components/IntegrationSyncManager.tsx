@@ -449,4 +449,7 @@ export default function IntegrationSyncManager({
             </div>
           )}
         </div>
- 
+      </CardContent>
+    </Card>
+  );
+}
