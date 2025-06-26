@@ -63,7 +63,7 @@ export default function DashboardPage() {
   };
   
   const { isLoaded, loadError } = useLoadScript({
-    googleMapsApiKey: "AIzaSyBFVIiAURNyUiIR_2dRQmud98q9sCn5ONI",
+    googleMapsApiKey: "AIzaSyCEZfDx6VHz83XX2tnhGRZl3VGSb9WlY1s",
   });
 
   if (loadError) return <div>Error loading maps</div>;

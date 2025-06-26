@@ -10,49 +10,50 @@ export function useJobFormSubmit() {
   const { toast } = useToast();
   const [calendarConnections, setCalendarConnections] = useState<CalendarConnection[]>([]);
 
-  // Fetch calendar connections when hook is initialized
   useEffect(() => {
     const fetchCalendarConnections = async () => {
       try {
         const { data: session } = await supabase.auth.getSession();
         if (session?.session?.user) {
           const { data } = await supabase
-            .from('user_calendar_connections')
-            .select('*')
-            .eq('user_id', session.session.user.id);
-          
+            .from("user_calendar_connections")
+            .select("*")
+            .eq("user_id", session.session.user.id);
+
           if (data) {
-            setCalendarConnections(data.map(conn => ({
-              id: conn.id,
-              provider: conn.provider,
-              providerId: conn.provider_id,
-              calendarId: conn.calendar_id,
-              syncEnabled: conn.sync_enabled,
-              createdAt: new Date(conn.created_at)
-            })));
+            setCalendarConnections(
+              data.map((conn) => ({
+                id: conn.id,
+                provider: conn.provider,
+                providerId: conn.provider_id,
+                calendarId: conn.calendar_id,
+                syncEnabled: conn.sync_enabled,
+                createdAt: new Date(conn.created_at),
+              }))
+            );
           }
         }
       } catch (error) {
-        console.error('Error fetching calendar connections:', error);
+        console.error("Error fetching calendar connections:", error);
       }
     };
-    
+
     fetchCalendarConnections();
   }, []);
 
   const validateJobForm = (
-    jobNumber: string, 
-    title: string, 
-    customer: string, 
-    type: string, 
-    date: string, 
+    jobNumber: string,
+    title: string,
+    customer: string,
+    type: string,
+    date: string,
     dateUndecided: boolean
   ) => {
     if (!jobNumber || !title || !customer || !type || (!date && !dateUndecided)) {
       toast({
         title: "Missing fields",
         description: "Please fill in all required fields",
-        variant: "destructive"
+        variant: "destructive",
       });
       return false;
     }
@@ -68,6 +69,7 @@ export function useJobFormSubmit() {
     date: string,
     dateUndecided: boolean,
     team: string,
+    location: [number, number],
     address: string = "",
     city: string = "",
     state: string = "",
@@ -75,28 +77,28 @@ export function useJobFormSubmit() {
   ) => {
     return {
       job_number: jobNumber,
-      title: title,
-      customer: customer,
-      description: description,
-      type: type,
+      title,
+      customer,
+      description,
+      type,
       date: dateUndecided ? null : date,
       date_undecided: dateUndecided,
       status: "ready",
-      location: [151.2093, -33.8688],
+      location,
       assigned_team: team !== "tba" ? team : null,
       address,
       city,
       state,
-      zipCode
+      zipCode,
     };
   };
 
   const handleSuccessfulSubmit = async (jobData: any) => {
     toast({
       title: "Job Created",
-      description: `Job has been created successfully`
+      description: `Job has been created successfully`,
     });
-    
+
     if (jobData.assigned_team && jobData.date && !jobData.date_undecided) {
       try {
         const { data: session } = await supabase.auth.getSession();
@@ -111,31 +113,31 @@ export function useJobFormSubmit() {
             description: jobData.description,
             location: jobData.location,
             status: jobData.status,
-            assignedTeam: jobData.assigned_team
+            assignedTeam: jobData.assigned_team,
           };
-          
+
           await syncSingleJobToCalendars(
-            jobForCalendar, 
+            jobForCalendar,
             calendarConnections,
             session.session.user.id
           );
-          
+
           toast({
             title: "Calendar Updated",
-            description: "Job has been added to team calendar"
+            description: "Job has been added to team calendar",
           });
         }
       } catch (error) {
-        console.error('Error syncing to calendar:', error);
+        console.error("Error syncing to calendar:", error);
       }
     }
-    
+
     navigate("/jobs");
   };
 
   return {
     validateJobForm,
     prepareJobData,
-    handleSuccessfulSubmit
+    handleSuccessfulSubmit,
   };
 }

@@ -12,7 +12,7 @@ import { GoogleMap, Marker, InfoWindow, useLoadScript } from '@react-google-maps
 
 const MinimalMap = ({ jobs }) => {
   const { isLoaded, loadError } = useLoadScript({
-    googleMapsApiKey: "AIzaSyBFVIiAURNyUiIR_2dRQmud98q9sCn5ONI",
+    googleMapsApiKey: "AIzaSyCEZfDx6VHz83XX2tnhGRZl3VGSb9WlY1s",
   });
   const [selectedJob, setSelectedJob] = useState(null);
 

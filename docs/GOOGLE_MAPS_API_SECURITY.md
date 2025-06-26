@@ -2,7 +2,7 @@
 
 ## URGENT: Your API Key is Exposed
 
-Your Google Maps API key `AIzaSyBFVIiAURNyUiIR_2dRQmud98q9sCn5ONI` is currently exposed and needs immediate action.
+Your Google Maps API key `AIzaSyCEZfDx6VHz83XX2tnhGRZl3VGSb9WlY1s` is currently exposed and needs immediate action.
 
 ## Immediate Actions Required
 
