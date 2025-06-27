@@ -111,6 +111,7 @@ const ConcreteCalculator = lazy(() => import('@/pages/Calculators/ConcreteCalcul
 const AngleCalculator = lazy(() => import('@/pages/Calculators/AngleCalculator'));
 const StairsCalculator = lazy(() => import('@/pages/Calculators/StairsCalculator'));
 const ElectricianCalculator = lazy(() => import('@/pages/Calculators/ElectricianCalculator'));
+const PlumbingCalculator = lazy(() => import('@/pages/Calculators/PlumbingCalculator'));
 const PropertyMeasurement = lazy(() => import('@/pages/PropertyMeasurement'));
 
 // Demo pages
@@ -273,6 +274,7 @@ const routeObjects: RouteObject[] = [
           { path: "/calculators/angle", element: <SuspenseWrapper><AngleCalculator /></SuspenseWrapper> },
           { path: "/calculators/stairs", element: <SuspenseWrapper><StairsCalculator /></SuspenseWrapper> },
           { path: "/calculators/electrician", element: <SuspenseWrapper><ElectricianCalculator /></SuspenseWrapper> },
+          { path: "/calculators/plumbing", element: <SuspenseWrapper><PlumbingCalculator /></SuspenseWrapper> },
           { path: "/property-measurement", element: <SuspenseWrapper><PropertyMeasurement /></SuspenseWrapper> },
           { path: "/workflow", element: <SuspenseWrapper><N8nWorkflowListPage /></SuspenseWrapper> },
           { path: "/workflow/new", element: <SuspenseWrapper><N8nWorkflowPage /></SuspenseWrapper> },
