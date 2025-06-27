@@ -1,7 +1,7 @@
 import React from "react";
 import { AppLayout } from "@/components/ui/AppLayout";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Calculator, Percent, Gauge, Ruler, Construction, Compass, ArrowUpDown, Square, FileCode, FileText } from "lucide-react";
+import { Calculator, Percent, Gauge, Ruler, Construction, Compass, ArrowUpDown, Square, FileCode, FileText, Zap } from "lucide-react";
 import { Link } from "react-router-dom";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 
@@ -134,15 +134,22 @@ const Calculators = () => {
           ))}
         </div>
 
-        {/* New separate section with divider */}
+        {/* Property Measurement and Electrician Tools section */}
         <div className="mt-8">
           <div className="border-t-2 border-gray-300 my-4 w-full"></div>
-          <div className="py-6 flex justify-center">
+          <div className="py-6 grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-2xl mx-auto">
             <Link 
               to="/property-measurement" 
-              className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors font-semibold"
+              className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors font-semibold text-center"
             >
               Property Measurement Tool
+            </Link>
+            <Link 
+              to="/calculators/electrician" 
+              className="bg-yellow-500 text-white px-6 py-3 rounded-lg hover:bg-yellow-600 transition-colors font-semibold text-center flex items-center justify-center gap-2"
+            >
+              <Zap className="h-5 w-5" />
+              Electrician Calculator
             </Link>
           </div>
         </div>
