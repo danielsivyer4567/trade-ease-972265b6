@@ -2,106 +2,1056 @@ import React, { useState } from "react";
 import { AppLayout } from "@/components/ui/AppLayout";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 
-const unitOptions = [
-  { label: "Metric (m², mm, m³)", value: "metric" },
-  { label: "Imperial (ft², in, yd³)", value: "imperial" },
-];
-
 const ConcreteCalculator = () => {
-  const [unit, setUnit] = useState("metric");
-  const [area, setArea] = useState("");
-  const [thickness, setThickness] = useState("");
-  const [volume, setVolume] = useState<string | null>(null);
+  const [currentUnit, setCurrentUnit] = useState('metric');
+  const [results, setResults] = useState({});
 
-  const handleCalculate = () => {
-    const areaNum = parseFloat(area);
-    const thicknessNum = parseFloat(thickness);
-    if (isNaN(areaNum) || isNaN(thicknessNum) || areaNum <= 0 || thicknessNum <= 0) {
-      setVolume(null);
-      return;
-    }
-    if (unit === "metric") {
-      // Area in m², thickness in mm
-      const thicknessMeters = thicknessNum / 1000;
-      const vol = areaNum * thicknessMeters; // m³
-      setVolume(vol.toFixed(3) + " m³");
+  const switchUnits = (unit) => {
+    setCurrentUnit(unit);
+    setResults({});
+  };
+
+  const calculateRectangular = (unit: string) => {
+    if (unit === 'metric') {
+      const length = parseFloat((document.getElementById('rect-length-m') as HTMLInputElement)?.value || '0');
+      const width = parseFloat((document.getElementById('rect-width-m') as HTMLInputElement)?.value || '0');
+      const thickness = parseFloat((document.getElementById('rect-thickness-m') as HTMLInputElement)?.value || '0');
+      
+      if (length > 0 && width > 0 && thickness > 0) {
+        const volume = length * width * (thickness / 100); // convert cm to m
+        setResults(prev => ({ ...prev, 'rect-metric': volume.toFixed(3) }));
+      }
     } else {
-      // Area in ft², thickness in inches
-      const thicknessFeet = thicknessNum / 12;
-      const volFeet = areaNum * thicknessFeet; // ft³
-      const volYards = volFeet / 27; // yd³
-      setVolume(volYards.toFixed(3) + " yd³");
+      const length = parseFloat((document.getElementById('rect-length-i') as HTMLInputElement)?.value || '0');
+      const width = parseFloat((document.getElementById('rect-width-i') as HTMLInputElement)?.value || '0');
+      const thickness = parseFloat((document.getElementById('rect-thickness-i') as HTMLInputElement)?.value || '0');
+      
+      if (length > 0 && width > 0 && thickness > 0) {
+        const volumeCubicFeet = length * width * (thickness / 12); // convert inches to feet
+        const volumeCubicYards = volumeCubicFeet / 27; // convert cubic feet to cubic yards
+        setResults(prev => ({ ...prev, 'rect-imperial': volumeCubicYards.toFixed(3) }));
+      }
     }
   };
 
-  const handleReset = () => {
-    setArea("");
-    setThickness("");
-    setVolume(null);
+  const calculateRoundCorners = (unit: string) => {
+    if (unit === 'metric') {
+      const length = parseFloat((document.getElementById('round-length-m') as HTMLInputElement)?.value || '0');
+      const width = parseFloat((document.getElementById('round-width-m') as HTMLInputElement)?.value || '0');
+      const radius = parseFloat((document.getElementById('round-radius-m') as HTMLInputElement)?.value || '0');
+      const thickness = parseFloat((document.getElementById('round-thickness-m') as HTMLInputElement)?.value || '0');
+      
+      if (length > 0 && width > 0 && radius > 0 && thickness > 0) {
+        const radiusM = radius / 100; // convert cm to m
+        const thicknessM = thickness / 100; // convert cm to m
+        // Formula: (A×B - 4×R² + π×R²) × C
+        const area = length * width - 4 * radiusM * radiusM + Math.PI * radiusM * radiusM;
+        const volume = area * thicknessM;
+        setResults(prev => ({ ...prev, 'round-metric': volume.toFixed(3) }));
+      }
+    } else {
+      const length = parseFloat((document.getElementById('round-length-i') as HTMLInputElement)?.value || '0');
+      const width = parseFloat((document.getElementById('round-width-i') as HTMLInputElement)?.value || '0');
+      const radius = parseFloat((document.getElementById('round-radius-i') as HTMLInputElement)?.value || '0');
+      const thickness = parseFloat((document.getElementById('round-thickness-i') as HTMLInputElement)?.value || '0');
+      
+      if (length > 0 && width > 0 && radius > 0 && thickness > 0) {
+        const radiusFt = radius / 12; // convert inches to feet
+        const thicknessFt = thickness / 12; // convert inches to feet
+        // Formula: (A×B - 4×R² + π×R²) × C
+        const area = length * width - 4 * radiusFt * radiusFt + Math.PI * radiusFt * radiusFt;
+        const volumeCubicFeet = area * thicknessFt;
+        const volumeCubicYards = volumeCubicFeet / 27;
+        setResults(prev => ({ ...prev, 'round-imperial': volumeCubicYards.toFixed(3) }));
+      }
+    }
+  };
+
+  const calculatePiers = (unit: string) => {
+    if (unit === 'metric') {
+      const diameter = parseFloat((document.getElementById('pier-diameter-m') as HTMLInputElement)?.value || '0');
+      const height = parseFloat((document.getElementById('pier-height-m') as HTMLInputElement)?.value || '0');
+      const count = parseFloat((document.getElementById('pier-count-m') as HTMLInputElement)?.value || '0');
+      
+      if (diameter > 0 && height > 0 && count > 0) {
+        const radius = (diameter / 100) / 2; // convert cm to m and get radius
+        // Formula: π × R² × H × Count
+        const volume = Math.PI * radius * radius * height * count;
+        setResults(prev => ({ ...prev, 'pier-metric': volume.toFixed(3) }));
+      }
+    } else {
+      const diameter = parseFloat((document.getElementById('pier-diameter-i') as HTMLInputElement)?.value || '0');
+      const height = parseFloat((document.getElementById('pier-height-i') as HTMLInputElement)?.value || '0');
+      const count = parseFloat((document.getElementById('pier-count-i') as HTMLInputElement)?.value || '0');
+      
+      if (diameter > 0 && height > 0 && count > 0) {
+        const radius = (diameter / 12) / 2; // convert inches to feet and get radius
+        // Formula: π × R² × H × Count
+        const volumeCubicFeet = Math.PI * radius * radius * height * count;
+        const volumeCubicYards = volumeCubicFeet / 27;
+        setResults(prev => ({ ...prev, 'pier-imperial': volumeCubicYards.toFixed(3) }));
+      }
+    }
+  };
+
+  const calculateBlockWork = (unit: string) => {
+    if (unit === 'metric') {
+      const length = parseFloat((document.getElementById('block-length-m') as HTMLInputElement)?.value || '0');
+      const height = parseFloat((document.getElementById('block-height-m') as HTMLInputElement)?.value || '0');
+      const width = parseFloat((document.getElementById('block-width-m') as HTMLInputElement)?.value || '0');
+      const hollow = parseFloat((document.getElementById('block-hollow-m') as HTMLInputElement)?.value || '0');
+      
+      if (length > 0 && height > 0 && width > 0 && hollow > 0) {
+        const widthM = width / 100; // convert cm to m
+        // Formula: A × B × C × (Hollow% ÷ 100)
+        const volume = length * height * widthM * (hollow / 100);
+        setResults(prev => ({ ...prev, 'block-metric': volume.toFixed(3) }));
+      }
+    } else {
+      const length = parseFloat((document.getElementById('block-length-i') as HTMLInputElement)?.value || '0');
+      const height = parseFloat((document.getElementById('block-height-i') as HTMLInputElement)?.value || '0');
+      const width = parseFloat((document.getElementById('block-width-i') as HTMLInputElement)?.value || '0');
+      const hollow = parseFloat((document.getElementById('block-hollow-i') as HTMLInputElement)?.value || '0');
+      
+      if (length > 0 && height > 0 && width > 0 && hollow > 0) {
+        const widthFt = width / 12; // convert inches to feet
+        // Formula: A × B × C × (Hollow% ÷ 100)
+        const volumeCubicFeet = length * height * widthFt * (hollow / 100);
+        const volumeCubicYards = volumeCubicFeet / 27;
+        setResults(prev => ({ ...prev, 'block-imperial': volumeCubicYards.toFixed(3) }));
+      }
+    }
+  };
+
+  const calculatePostHoles = (unit: string) => {
+    if (unit === 'metric') {
+      const diameter = parseFloat((document.getElementById('posthole-diameter-m') as HTMLInputElement)?.value || '0');
+      const depth = parseFloat((document.getElementById('posthole-depth-m') as HTMLInputElement)?.value || '0');
+      const postWidth = parseFloat((document.getElementById('posthole-width-m') as HTMLInputElement)?.value || '0');
+      const postThickness = parseFloat((document.getElementById('posthole-thickness-m') as HTMLInputElement)?.value || '0');
+      const count = parseFloat((document.getElementById('posthole-count-m') as HTMLInputElement)?.value || '0');
+      
+      if (diameter > 0 && depth > 0 && postWidth > 0 && postThickness > 0 && count > 0) {
+        const holeRadius = (diameter / 1000) / 2; // convert mm to m and get radius
+        const depthM = depth / 100; // convert cm to m
+        const postWidthM = postWidth / 1000; // convert mm to m
+        const postThicknessM = postThickness / 1000; // convert mm to m
+        
+        // Formula: [π×(D/2)² - W×T] × Depth × Count
+        const holeVolume = Math.PI * holeRadius * holeRadius;
+        const postVolume = postWidthM * postThicknessM;
+        const concreteVolumePerHole = (holeVolume - postVolume) * depthM;
+        const totalVolume = concreteVolumePerHole * count;
+        setResults(prev => ({ ...prev, 'posthole-metric': totalVolume.toFixed(3) }));
+      }
+    } else {
+      const diameter = parseFloat((document.getElementById('posthole-diameter-i') as HTMLInputElement)?.value || '0');
+      const depth = parseFloat((document.getElementById('posthole-depth-i') as HTMLInputElement)?.value || '0');
+      const postWidth = parseFloat((document.getElementById('posthole-width-i') as HTMLInputElement)?.value || '0');
+      const postThickness = parseFloat((document.getElementById('posthole-thickness-i') as HTMLInputElement)?.value || '0');
+      const count = parseFloat((document.getElementById('posthole-count-i') as HTMLInputElement)?.value || '0');
+      
+      if (diameter > 0 && depth > 0 && postWidth > 0 && postThickness > 0 && count > 0) {
+        const holeRadius = (diameter / 12) / 2; // convert inches to feet and get radius
+        const depthFt = depth / 12; // convert inches to feet
+        const postWidthFt = postWidth / 12; // convert inches to feet
+        const postThicknessFt = postThickness / 12; // convert inches to feet
+        
+        // Formula: [π×(D/2)² - W×T] × Depth × Count
+        const holeVolume = Math.PI * holeRadius * holeRadius;
+        const postVolume = postWidthFt * postThicknessFt;
+        const concreteVolumePerHole = (holeVolume - postVolume) * depthFt;
+        const totalVolumeCubicFeet = concreteVolumePerHole * count;
+        const totalVolumeCubicYards = totalVolumeCubicFeet / 27;
+        setResults(prev => ({ ...prev, 'posthole-imperial': totalVolumeCubicYards.toFixed(3) }));
+      }
+    }
+  };
+
+  const calculateFootings = (unit: string) => {
+    if (unit === 'metric') {
+      const length = parseFloat((document.getElementById('footing-length-m') as HTMLInputElement)?.value || '0');
+      const width = parseFloat((document.getElementById('footing-width-m') as HTMLInputElement)?.value || '0');
+      const depth = parseFloat((document.getElementById('footing-depth-m') as HTMLInputElement)?.value || '0');
+      
+      if (length > 0 && width > 0 && depth > 0) {
+        const widthM = width / 100; // convert cm to m
+        const depthM = depth / 100; // convert cm to m
+        // Formula: A × B × C
+        const volume = length * widthM * depthM;
+        setResults(prev => ({ ...prev, 'footing-metric': volume.toFixed(3) }));
+      }
+    } else {
+      const length = parseFloat((document.getElementById('footing-length-i') as HTMLInputElement)?.value || '0');
+      const width = parseFloat((document.getElementById('footing-width-i') as HTMLInputElement)?.value || '0');
+      const depth = parseFloat((document.getElementById('footing-depth-i') as HTMLInputElement)?.value || '0');
+      
+      if (length > 0 && width > 0 && depth > 0) {
+        const widthFt = width / 12; // convert inches to feet
+        const depthFt = depth / 12; // convert inches to feet
+        // Formula: A × B × C
+        const volumeCubicFeet = length * widthFt * depthFt;
+        const volumeCubicYards = volumeCubicFeet / 27;
+        setResults(prev => ({ ...prev, 'footing-imperial': volumeCubicYards.toFixed(3) }));
+      }
+    }
   };
 
   return (
     <AppLayout>
-      <div className="container mx-auto py-6 px-4 max-w-xl">
-        <SectionHeader title="Concrete Calculator" />
-        <div className="bg-white rounded shadow p-6 mt-6">
-          <div className="mb-4">
-            <label className="block font-medium mb-1">Unit System</label>
-            <select
-              className="w-full border rounded px-3 py-2"
-              value={unit}
-              onChange={e => setUnit(e.target.value)}
-            >
-              {unitOptions.map(opt => (
-                <option key={opt.value} value={opt.value}>{opt.label}</option>
-              ))}
-            </select>
+      <div style={{
+        fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
+        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        minHeight: '100vh',
+        padding: '20px'
+      }}>
+        <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
+          <div style={{ textAlign: 'center', marginBottom: '30px', color: 'white' }}>
+            <h1 style={{ fontSize: '2.5rem', marginBottom: '10px', textShadow: '2px 2px 4px rgba(0,0,0,0.3)' }}>
+              🏗️ Concrete Volume Calculators
+            </h1>
+            <p>Professional concrete calculation tools for construction projects</p>
           </div>
-          <div className="mb-4">
-            <label className="block font-medium mb-1">
-              Area ({unit === "metric" ? "m²" : "ft²"})
-            </label>
-            <input
-              type="number"
-              min="0"
-              className="w-full border rounded px-3 py-2"
-              value={area}
-              onChange={e => setArea(e.target.value)}
-              placeholder={unit === "metric" ? "e.g. 25" : "e.g. 250"}
-            />
-          </div>
-          <div className="mb-4">
-            <label className="block font-medium mb-1">
-              Thickness ({unit === "metric" ? "mm" : "in"})
-            </label>
-            <input
-              type="number"
-              min="0"
-              className="w-full border rounded px-3 py-2"
-              value={thickness}
-              onChange={e => setThickness(e.target.value)}
-              placeholder={unit === "metric" ? "e.g. 100" : "e.g. 4"}
-            />
-          </div>
-          <div className="flex gap-2 mb-4">
+          
+          <div style={{ display: 'flex', justifyContent: 'center', gap: '20px', marginBottom: '30px' }}>
             <button
-              className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
-              onClick={handleCalculate}
-              type="button"
+              style={{
+                background: currentUnit === 'metric' ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.2)',
+                color: currentUnit === 'metric' ? '#764ba2' : 'white',
+                border: '2px solid rgba(255,255,255,0.3)',
+                padding: '12px 24px',
+                borderRadius: '25px',
+                cursor: 'pointer',
+                fontSize: '1.1rem',
+                backdropFilter: 'blur(10px)',
+                transition: 'all 0.3s ease'
+              }}
+              onClick={() => switchUnits('metric')}
             >
-              Calculate
+              📏 Metric (mm/cm/m)
             </button>
             <button
-              className="bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300 transition"
-              onClick={handleReset}
-              type="button"
+              style={{
+                background: currentUnit === 'imperial' ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.2)',
+                color: currentUnit === 'imperial' ? '#764ba2' : 'white',
+                border: '2px solid rgba(255,255,255,0.3)',
+                padding: '12px 24px',
+                borderRadius: '25px',
+                cursor: 'pointer',
+                fontSize: '1.1rem',
+                backdropFilter: 'blur(10px)',
+                transition: 'all 0.3s ease'
+              }}
+              onClick={() => switchUnits('imperial')}
             >
-              Reset
+              📐 Imperial (ft/in)
             </button>
           </div>
-          {volume && (
-            <div className="mt-4 p-4 bg-blue-50 rounded text-blue-800 font-semibold text-center">
-              Concrete Volume: {volume}
+
+          {currentUnit === 'metric' && (
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '25px' }}>
+              {/* Rectangular Slab */}
+              <div style={{
+                background: 'rgba(255,255,255,0.95)',
+                borderRadius: '20px',
+                padding: '25px',
+                boxShadow: '0 10px 30px rgba(0,0,0,0.2)',
+                backdropFilter: 'blur(10px)',
+                border: '1px solid rgba(255,255,255,0.3)'
+              }}>
+                <div style={{ textAlign: 'center', marginBottom: '20px', paddingBottom: '15px', borderBottom: '2px solid #f0f0f0' }}>
+                  <h3 style={{ fontSize: '1.4rem', color: '#333', marginBottom: '8px' }}>🔲 Rectangular Slab</h3>
+                  <small>Standard concrete slabs & foundations</small>
+                </div>
+                
+                <div style={{ background: '#f8f9fa', borderRadius: '10px', padding: '15px', margin: '15px 0', textAlign: 'center', border: '2px dashed #dee2e6' }}>
+                  <div style={{ fontFamily: 'monospace', fontSize: '0.9rem', color: '#666', lineHeight: '1.6' }}>
+                    📐 Length × Width × Thickness<br/>
+                    <br/>
+                    +---------------+ ← A (Length)<br/>
+                    |               |<br/>
+                    |               | B (Width)<br/>
+                    |               |<br/>
+                    +---------------+<br/>
+                    Thickness: C
+                  </div>
+                </div>
+
+                <div style={{ marginBottom: '15px' }}>
+                  <label style={{ display: 'block', marginBottom: '5px', fontWeight: '600', color: '#555', fontSize: '0.95rem' }}>
+                    📏 A - Length (meters)
+                  </label>
+                  <input
+                    type="number"
+                    id="rect-length-m"
+                    placeholder="e.g., 5.5"
+                    step="0.01"
+                    style={{
+                      width: '100%',
+                      padding: '12px 15px',
+                      border: '2px solid #e9ecef',
+                      borderRadius: '10px',
+                      fontSize: '1rem'
+                    }}
+                  />
+                </div>
+
+                <div style={{ marginBottom: '15px' }}>
+                  <label style={{ display: 'block', marginBottom: '5px', fontWeight: '600', color: '#555', fontSize: '0.95rem' }}>
+                    📏 B - Width (meters)
+                  </label>
+                  <input
+                    type="number"
+                    id="rect-width-m"
+                    placeholder="e.g., 3.2"
+                    step="0.01"
+                    style={{
+                      width: '100%',
+                      padding: '12px 15px',
+                      border: '2px solid #e9ecef',
+                      borderRadius: '10px',
+                      fontSize: '1rem'
+                    }}
+                  />
+                </div>
+
+                <div style={{ marginBottom: '15px' }}>
+                  <label style={{ display: 'block', marginBottom: '5px', fontWeight: '600', color: '#555', fontSize: '0.95rem' }}>
+                    📏 C - Thickness (cm)
+                  </label>
+                  <input
+                    type="number"
+                    id="rect-thickness-m"
+                    placeholder="e.g., 15"
+                    step="0.1"
+                    style={{
+                      width: '100%',
+                      padding: '12px 15px',
+                      border: '2px solid #e9ecef',
+                      borderRadius: '10px',
+                      fontSize: '1rem'
+                    }}
+                  />
+                </div>
+
+                <button
+                  onClick={() => calculateRectangular('metric')}
+                  style={{
+                    width: '100%',
+                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                    color: 'white',
+                    border: 'none',
+                    padding: '15px',
+                    borderRadius: '10px',
+                    fontSize: '1.1rem',
+                    fontWeight: '600',
+                    cursor: 'pointer',
+                    margin: '20px 0'
+                  }}
+                >
+                  Calculate Volume 🧮
+                </button>
+
+                {results['rect-metric'] && (
+                  <div style={{
+                    background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+                    color: 'white',
+                    padding: '20px',
+                    borderRadius: '15px',
+                    textAlign: 'center',
+                    marginTop: '15px'
+                  }}>
+                    <div style={{ fontSize: '1.5rem', fontWeight: 'bold', marginBottom: '5px' }}>
+                      {results['rect-metric']}
+                    </div>
+                    <div style={{ fontSize: '1rem', opacity: '0.9' }}>
+                      cubic meters (m³)
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Round Corners Slab */}
+              <div style={{
+                background: 'rgba(255,255,255,0.95)',
+                borderRadius: '20px',
+                padding: '25px',
+                boxShadow: '0 10px 30px rgba(0,0,0,0.2)',
+                backdropFilter: 'blur(10px)',
+                border: '1px solid rgba(255,255,255,0.3)'
+              }}>
+                <div style={{ textAlign: 'center', marginBottom: '20px', paddingBottom: '15px', borderBottom: '2px solid #f0f0f0' }}>
+                  <h3 style={{ fontSize: '1.4rem', color: '#333', marginBottom: '8px' }}>🔘 Round Corners Slab</h3>
+                  <small>Slab with rounded corner radius</small>
+                </div>
+                
+                <div style={{ background: '#f8f9fa', borderRadius: '10px', padding: '15px', margin: '15px 0', textAlign: 'center', border: '2px dashed #dee2e6' }}>
+                  <div style={{ fontFamily: 'monospace', fontSize: '0.9rem', color: '#666', lineHeight: '1.6' }}>
+                    📐 Rectangle with Rounded Corners<br/>
+                    <br/>
+                    /---------------\ ← A (Length)<br/>
+                    |               |<br/>
+                    |               | B (Width)<br/>
+                    |               |<br/>
+                    \---------------/<br/>
+                    Corner Radius: R, Thickness: C
+                  </div>
+                </div>
+
+                <div style={{ marginBottom: '15px' }}>
+                  <input type="number" id="round-length-m" placeholder="e.g., 4.0" step="0.01" style={{ width: '100%', padding: '12px 15px', border: '2px solid #e9ecef', borderRadius: '10px', fontSize: '1rem' }} />
+                  <label style={{ fontSize: '0.9rem', color: '#666' }}>📏 A - Length (meters)</label>
+                </div>
+
+                <div style={{ marginBottom: '15px' }}>
+                  <input type="number" id="round-width-m" placeholder="e.g., 2.5" step="0.01" style={{ width: '100%', padding: '12px 15px', border: '2px solid #e9ecef', borderRadius: '10px', fontSize: '1rem' }} />
+                  <label style={{ fontSize: '0.9rem', color: '#666' }}>📏 B - Width (meters)</label>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '15px' }}>
+                  <div>
+                    <input type="number" id="round-radius-m" placeholder="e.g., 20" step="0.1" style={{ width: '100%', padding: '12px 15px', border: '2px solid #e9ecef', borderRadius: '10px', fontSize: '1rem' }} />
+                    <label style={{ fontSize: '0.8rem', color: '#666' }}>🔄 R - Corner Radius (cm)</label>
+                  </div>
+                  <div>
+                    <input type="number" id="round-thickness-m" placeholder="e.g., 12" step="0.1" style={{ width: '100%', padding: '12px 15px', border: '2px solid #e9ecef', borderRadius: '10px', fontSize: '1rem' }} />
+                    <label style={{ fontSize: '0.8rem', color: '#666' }}>📏 C - Thickness (cm)</label>
+                  </div>
+                </div>
+
+                <div style={{ background: '#fff3cd', border: '1px solid #ffeaa7', borderRadius: '8px', padding: '10px', margin: '10px 0', fontSize: '0.85rem', color: '#856404' }}>
+                  💡 Formula: (A×B - 4×R² + π×R²) × C
+                </div>
+
+                <button onClick={() => calculateRoundCorners('metric')} style={{ width: '100%', background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', color: 'white', border: 'none', padding: '15px', borderRadius: '10px', fontSize: '1.1rem', fontWeight: '600', cursor: 'pointer', margin: '20px 0' }}>
+                  Calculate Volume 🧮
+                </button>
+
+                {results['round-metric'] && (
+                  <div style={{ background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)', color: 'white', padding: '20px', borderRadius: '15px', textAlign: 'center', marginTop: '15px' }}>
+                    <div style={{ fontSize: '1.5rem', fontWeight: 'bold', marginBottom: '5px' }}>{results['round-metric']}</div>
+                    <div style={{ fontSize: '1rem', opacity: '0.9' }}>cubic meters (m³)</div>
+                  </div>
+                )}
+              </div>
+
+              {/* Concrete Piers */}
+              <div style={{ background: 'rgba(255,255,255,0.95)', borderRadius: '20px', padding: '25px', boxShadow: '0 10px 30px rgba(0,0,0,0.2)', backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.3)' }}>
+                <div style={{ textAlign: 'center', marginBottom: '20px', paddingBottom: '15px', borderBottom: '2px solid #f0f0f0' }}>
+                  <h3 style={{ fontSize: '1.4rem', color: '#333', marginBottom: '8px' }}>🔩 Concrete Piers</h3>
+                  <small>Cylindrical piers for house foundations</small>
+                </div>
+                
+                <div style={{ background: '#f8f9fa', borderRadius: '10px', padding: '15px', margin: '15px 0', textAlign: 'center', border: '2px dashed #dee2e6' }}>
+                  <div style={{ fontFamily: 'monospace', fontSize: '0.9rem', color: '#666', lineHeight: '1.6' }}>
+                    📐 Cylindrical Piers<br/>
+                    <br/>
+                        |     |<br/>
+                        |     | H (Height)<br/>
+                        |     |<br/>
+                    ----+-----+----<br/>
+                      D (Diameter)<br/>
+                    Volume: π × (D/2)² × H × Count
+                  </div>
+                </div>
+
+                <div style={{ marginBottom: '15px' }}>
+                  <input type="number" id="pier-diameter-m" placeholder="e.g., 30" step="0.1" style={{ width: '100%', padding: '12px 15px', border: '2px solid #e9ecef', borderRadius: '10px', fontSize: '1rem' }} />
+                  <label style={{ fontSize: '0.9rem', color: '#666' }}>⚪ Diameter (cm)</label>
+                </div>
+
+                <div style={{ marginBottom: '15px' }}>
+                  <input type="number" id="pier-height-m" placeholder="e.g., 1.5" step="0.01" style={{ width: '100%', padding: '12px 15px', border: '2px solid #e9ecef', borderRadius: '10px', fontSize: '1rem' }} />
+                  <label style={{ fontSize: '0.9rem', color: '#666' }}>📏 H - Height (meters)</label>
+                </div>
+
+                <div style={{ marginBottom: '15px' }}>
+                  <input type="number" id="pier-count-m" placeholder="e.g., 12" step="1" min="1" style={{ width: '100%', padding: '12px 15px', border: '2px solid #e9ecef', borderRadius: '10px', fontSize: '1rem' }} />
+                  <label style={{ fontSize: '0.9rem', color: '#666' }}>🔢 Number of Piers</label>
+                </div>
+
+                <div style={{ background: '#fff3cd', border: '1px solid #ffeaa7', borderRadius: '8px', padding: '10px', margin: '10px 0', fontSize: '0.85rem', color: '#856404' }}>
+                  💡 Formula: π × (D/2)² × H × Count
+                </div>
+
+                <button onClick={() => calculatePiers('metric')} style={{ width: '100%', background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', color: 'white', border: 'none', padding: '15px', borderRadius: '10px', fontSize: '1.1rem', fontWeight: '600', cursor: 'pointer', margin: '20px 0' }}>
+                  Calculate Volume 🧮
+                </button>
+
+                {results['pier-metric'] && (
+                  <div style={{ background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)', color: 'white', padding: '20px', borderRadius: '15px', textAlign: 'center', marginTop: '15px' }}>
+                    <div style={{ fontSize: '1.5rem', fontWeight: 'bold', marginBottom: '5px' }}>{results['pier-metric']}</div>
+                    <div style={{ fontSize: '1rem', opacity: '0.9' }}>cubic meters (m³)</div>
+                  </div>
+                )}
+              </div>
+
+              {/* Block Work Fill */}
+              <div style={{ background: 'rgba(255,255,255,0.95)', borderRadius: '20px', padding: '25px', boxShadow: '0 10px 30px rgba(0,0,0,0.2)', backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.3)' }}>
+                <div style={{ textAlign: 'center', marginBottom: '20px', paddingBottom: '15px', borderBottom: '2px solid #f0f0f0' }}>
+                  <h3 style={{ fontSize: '1.4rem', color: '#333', marginBottom: '8px' }}>🧱 Block Work Fill</h3>
+                  <small>Concrete inside hollow blocks</small>
+                </div>
+                
+                <div style={{ background: '#f8f9fa', borderRadius: '10px', padding: '15px', margin: '15px 0', textAlign: 'center', border: '2px dashed #dee2e6' }}>
+                  <div style={{ fontFamily: 'monospace', fontSize: '0.9rem', color: '#666', lineHeight: '1.6' }}>
+                    📐 Hollow Block Wall Fill<br/>
+                    <br/>
+                    [###] [###] [###] ← A (Length)<br/>
+                    [   ] [   ] [   ]<br/>
+                    [###] [###] [###] B (Height)<br/>
+                    [   ] [   ] [   ]<br/>
+                    [###] [###] [###]<br/>
+                    Thickness: C, Hollow %
+                  </div>
+                </div>
+
+                <div style={{ marginBottom: '15px' }}>
+                  <input type="number" id="block-length-m" placeholder="e.g., 8.0" step="0.01" style={{ width: '100%', padding: '12px 15px', border: '2px solid #e9ecef', borderRadius: '10px', fontSize: '1rem' }} />
+                  <label style={{ fontSize: '0.9rem', color: '#666' }}>📏 A - Wall Length (meters)</label>
+                </div>
+
+                <div style={{ marginBottom: '15px' }}>
+                  <input type="number" id="block-height-m" placeholder="e.g., 2.4" step="0.01" style={{ width: '100%', padding: '12px 15px', border: '2px solid #e9ecef', borderRadius: '10px', fontSize: '1rem' }} />
+                  <label style={{ fontSize: '0.9rem', color: '#666' }}>📏 B - Wall Height (meters)</label>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '15px' }}>
+                  <div>
+                    <input type="number" id="block-width-m" placeholder="e.g., 20" step="0.1" style={{ width: '100%', padding: '12px 15px', border: '2px solid #e9ecef', borderRadius: '10px', fontSize: '1rem' }} />
+                    <label style={{ fontSize: '0.8rem', color: '#666' }}>📏 C - Block Width (cm)</label>
+                  </div>
+                  <div>
+                    <input type="number" id="block-hollow-m" placeholder="e.g., 50" step="1" min="0" max="100" style={{ width: '100%', padding: '12px 15px', border: '2px solid #e9ecef', borderRadius: '10px', fontSize: '1rem' }} />
+                    <label style={{ fontSize: '0.8rem', color: '#666' }}>🕳️ Hollow % (40-60%)</label>
+                  </div>
+                </div>
+
+                <div style={{ background: '#fff3cd', border: '1px solid #ffeaa7', borderRadius: '8px', padding: '10px', margin: '10px 0', fontSize: '0.85rem', color: '#856404' }}>
+                  💡 Formula: A × B × C × (Hollow% ÷ 100)
+                </div>
+
+                <button onClick={() => calculateBlockWork('metric')} style={{ width: '100%', background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', color: 'white', border: 'none', padding: '15px', borderRadius: '10px', fontSize: '1.1rem', fontWeight: '600', cursor: 'pointer', margin: '20px 0' }}>
+                  Calculate Volume 🧮
+                </button>
+
+                {results['block-metric'] && (
+                  <div style={{ background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)', color: 'white', padding: '20px', borderRadius: '15px', textAlign: 'center', marginTop: '15px' }}>
+                    <div style={{ fontSize: '1.5rem', fontWeight: 'bold', marginBottom: '5px' }}>{results['block-metric']}</div>
+                    <div style={{ fontSize: '1rem', opacity: '0.9' }}>cubic meters (m³)</div>
+                  </div>
+                )}
+              </div>
+
+              {/* Post Holes */}
+              <div style={{ background: 'rgba(255,255,255,0.95)', borderRadius: '20px', padding: '25px', boxShadow: '0 10px 30px rgba(0,0,0,0.2)', backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.3)' }}>
+                <div style={{ textAlign: 'center', marginBottom: '20px', paddingBottom: '15px', borderBottom: '2px solid #f0f0f0' }}>
+                  <h3 style={{ fontSize: '1.4rem', color: '#333', marginBottom: '8px' }}>🕳️ Post Holes</h3>
+                  <small>Concrete around posts in holes</small>
+                </div>
+                
+                <div style={{ background: '#f8f9fa', borderRadius: '10px', padding: '15px', margin: '15px 0', textAlign: 'center', border: '2px dashed #dee2e6' }}>
+                  <div style={{ fontFamily: 'monospace', fontSize: '0.9rem', color: '#666', lineHeight: '1.6' }}>
+                    📐 Post Holes with Concrete<br/>
+                    <br/>
+                    +----------+ Ground Level<br/>
+                    | +------+ | ← Hole Diameter<br/>
+                    | | POST | |<br/>
+                    | |      | | Depth<br/>
+                    | +------+ |<br/>
+                    +----------+<br/>
+                    Concrete fills space around post
+                  </div>
+                </div>
+
+                <div style={{ marginBottom: '15px' }}>
+                  <input type="number" id="posthole-diameter-m" placeholder="e.g., 400" step="1" style={{ width: '100%', padding: '12px 15px', border: '2px solid #e9ecef', borderRadius: '10px', fontSize: '1rem' }} />
+                  <label style={{ fontSize: '0.9rem', color: '#666' }}>⚪ Hole Diameter (mm)</label>
+                </div>
+
+                <div style={{ marginBottom: '15px' }}>
+                  <input type="number" id="posthole-depth-m" placeholder="e.g., 60" step="0.1" style={{ width: '100%', padding: '12px 15px', border: '2px solid #e9ecef', borderRadius: '10px', fontSize: '1rem' }} />
+                  <label style={{ fontSize: '0.9rem', color: '#666' }}>📏 Hole Depth (cm)</label>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '15px' }}>
+                  <div>
+                    <input type="number" id="posthole-width-m" placeholder="e.g., 200" step="1" style={{ width: '100%', padding: '12px 15px', border: '2px solid #e9ecef', borderRadius: '10px', fontSize: '1rem' }} />
+                    <label style={{ fontSize: '0.8rem', color: '#666' }}>📐 Post Width (mm)</label>
+                  </div>
+                  <div>
+                    <input type="number" id="posthole-thickness-m" placeholder="e.g., 100" step="1" style={{ width: '100%', padding: '12px 15px', border: '2px solid #e9ecef', borderRadius: '10px', fontSize: '1rem' }} />
+                    <label style={{ fontSize: '0.8rem', color: '#666' }}>📐 Post Thickness (mm)</label>
+                  </div>
+                </div>
+
+                <div style={{ marginBottom: '15px' }}>
+                  <input type="number" id="posthole-count-m" placeholder="e.g., 8" step="1" min="1" style={{ width: '100%', padding: '12px 15px', border: '2px solid #e9ecef', borderRadius: '10px', fontSize: '1rem' }} />
+                  <label style={{ fontSize: '0.9rem', color: '#666' }}>🔢 Number of Posts</label>
+                </div>
+
+                <div style={{ background: '#fff3cd', border: '1px solid #ffeaa7', borderRadius: '8px', padding: '10px', margin: '10px 0', fontSize: '0.85rem', color: '#856404' }}>
+                  💡 Formula: [π×(D/2)² - W×T] × Depth × Count
+                </div>
+
+                <button onClick={() => calculatePostHoles('metric')} style={{ width: '100%', background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', color: 'white', border: 'none', padding: '15px', borderRadius: '10px', fontSize: '1.1rem', fontWeight: '600', cursor: 'pointer', margin: '20px 0' }}>
+                  Calculate Volume 🧮
+                </button>
+
+                {results['posthole-metric'] && (
+                  <div style={{ background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)', color: 'white', padding: '20px', borderRadius: '15px', textAlign: 'center', marginTop: '15px' }}>
+                    <div style={{ fontSize: '1.5rem', fontWeight: 'bold', marginBottom: '5px' }}>{results['posthole-metric']}</div>
+                    <div style={{ fontSize: '1rem', opacity: '0.9' }}>cubic meters (m³)</div>
+                  </div>
+                )}
+              </div>
+
+              {/* Strip Footings */}
+              <div style={{ background: 'rgba(255,255,255,0.95)', borderRadius: '20px', padding: '25px', boxShadow: '0 10px 30px rgba(0,0,0,0.2)', backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.3)' }}>
+                <div style={{ textAlign: 'center', marginBottom: '20px', paddingBottom: '15px', borderBottom: '2px solid #f0f0f0' }}>
+                  <h3 style={{ fontSize: '1.4rem', color: '#333', marginBottom: '8px' }}>🏗️ Strip Footings</h3>
+                  <small>Foundation footings calculation</small>
+                </div>
+                
+                <div style={{ background: '#f8f9fa', borderRadius: '10px', padding: '15px', margin: '15px 0', textAlign: 'center', border: '2px dashed #dee2e6' }}>
+                  <div style={{ fontFamily: 'monospace', fontSize: '0.9rem', color: '#666', lineHeight: '1.6' }}>
+                    📐 Strip Footings Foundation<br/>
+                    <br/>
+                    +================+ Ground Level<br/>
+                    |################| ← B (Width)<br/>
+                    |################|<br/>
+                    |################| C (Depth)<br/>
+                    +================+<br/>
+                           A (Length)
+                  </div>
+                </div>
+
+                <div style={{ marginBottom: '15px' }}>
+                  <input type="number" id="footing-length-m" placeholder="e.g., 20.0" step="0.01" style={{ width: '100%', padding: '12px 15px', border: '2px solid #e9ecef', borderRadius: '10px', fontSize: '1rem' }} />
+                  <label style={{ fontSize: '0.9rem', color: '#666' }}>📏 A - Footing Length (meters)</label>
+                </div>
+
+                <div style={{ marginBottom: '15px' }}>
+                  <input type="number" id="footing-width-m" placeholder="e.g., 60" step="0.1" style={{ width: '100%', padding: '12px 15px', border: '2px solid #e9ecef', borderRadius: '10px', fontSize: '1rem' }} />
+                  <label style={{ fontSize: '0.9rem', color: '#666' }}>📏 B - Footing Width (cm)</label>
+                </div>
+
+                <div style={{ marginBottom: '15px' }}>
+                  <input type="number" id="footing-depth-m" placeholder="e.g., 40" step="0.1" style={{ width: '100%', padding: '12px 15px', border: '2px solid #e9ecef', borderRadius: '10px', fontSize: '1rem' }} />
+                  <label style={{ fontSize: '0.9rem', color: '#666' }}>📏 C - Footing Depth (cm)</label>
+                </div>
+
+                <button onClick={() => calculateFootings('metric')} style={{ width: '100%', background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', color: 'white', border: 'none', padding: '15px', borderRadius: '10px', fontSize: '1.1rem', fontWeight: '600', cursor: 'pointer', margin: '20px 0' }}>
+                  Calculate Volume 🧮
+                </button>
+
+                {results['footing-metric'] && (
+                  <div style={{ background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)', color: 'white', padding: '20px', borderRadius: '15px', textAlign: 'center', marginTop: '15px' }}>
+                    <div style={{ fontSize: '1.5rem', fontWeight: 'bold', marginBottom: '5px' }}>{results['footing-metric']}</div>
+                    <div style={{ fontSize: '1rem', opacity: '0.9' }}>cubic meters (m³)</div>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {currentUnit === 'imperial' && (
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '25px' }}>
+              {/* Imperial calculators */}
+              <div style={{
+                background: 'rgba(255,255,255,0.95)',
+                borderRadius: '20px',
+                padding: '25px',
+                boxShadow: '0 10px 30px rgba(0,0,0,0.2)',
+                backdropFilter: 'blur(10px)',
+                border: '1px solid rgba(255,255,255,0.3)'
+              }}>
+                <div style={{ textAlign: 'center', marginBottom: '20px', paddingBottom: '15px', borderBottom: '2px solid #f0f0f0' }}>
+                  <h3 style={{ fontSize: '1.4rem', color: '#333', marginBottom: '8px' }}>🔲 Rectangular Slab</h3>
+                  <small>Standard concrete slabs & foundations</small>
+                </div>
+                
+                <div style={{ background: '#f8f9fa', borderRadius: '10px', padding: '15px', margin: '15px 0', textAlign: 'center', border: '2px dashed #dee2e6' }}>
+                  <div style={{ fontFamily: 'monospace', fontSize: '0.9rem', color: '#666', lineHeight: '1.6' }}>
+                    📐 Length × Width × Thickness<br/>
+                    <br/>
+                    +---------------+ ← A (Length)<br/>
+                    |               |<br/>
+                    |               | B (Width)<br/>
+                    |               |<br/>
+                    +---------------+<br/>
+                    Thickness: C
+                  </div>
+                </div>
+
+                <div style={{ marginBottom: '15px' }}>
+                  <label style={{ display: 'block', marginBottom: '5px', fontWeight: '600', color: '#555', fontSize: '0.95rem' }}>
+                    📏 A - Length (feet)
+                  </label>
+                  <input
+                    type="number"
+                    id="rect-length-i"
+                    placeholder="e.g., 18.5"
+                    step="0.1"
+                    style={{
+                      width: '100%',
+                      padding: '12px 15px',
+                      border: '2px solid #e9ecef',
+                      borderRadius: '10px',
+                      fontSize: '1rem'
+                    }}
+                  />
+                </div>
+
+                <div style={{ marginBottom: '15px' }}>
+                  <label style={{ display: 'block', marginBottom: '5px', fontWeight: '600', color: '#555', fontSize: '0.95rem' }}>
+                    📏 B - Width (feet)
+                  </label>
+                  <input
+                    type="number"
+                    id="rect-width-i"
+                    placeholder="e.g., 12.0"
+                    step="0.1"
+                    style={{
+                      width: '100%',
+                      padding: '12px 15px',
+                      border: '2px solid #e9ecef',
+                      borderRadius: '10px',
+                      fontSize: '1rem'
+                    }}
+                  />
+                </div>
+
+                <div style={{ marginBottom: '15px' }}>
+                  <label style={{ display: 'block', marginBottom: '5px', fontWeight: '600', color: '#555', fontSize: '0.95rem' }}>
+                    📏 C - Thickness (inches)
+                  </label>
+                  <input
+                    type="number"
+                    id="rect-thickness-i"
+                    placeholder="e.g., 6"
+                    step="0.25"
+                    style={{
+                      width: '100%',
+                      padding: '12px 15px',
+                      border: '2px solid #e9ecef',
+                      borderRadius: '10px',
+                      fontSize: '1rem'
+                    }}
+                  />
+                </div>
+
+                <button
+                  onClick={() => calculateRectangular('imperial')}
+                  style={{
+                    width: '100%',
+                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                    color: 'white',
+                    border: 'none',
+                    padding: '15px',
+                    borderRadius: '10px',
+                    fontSize: '1.1rem',
+                    fontWeight: '600',
+                    cursor: 'pointer',
+                    margin: '20px 0'
+                  }}
+                >
+                  Calculate Volume 🧮
+                </button>
+
+                {results['rect-imperial'] && (
+                  <div style={{
+                    background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+                    color: 'white',
+                    padding: '20px',
+                    borderRadius: '15px',
+                    textAlign: 'center',
+                    marginTop: '15px'
+                  }}>
+                    <div style={{ fontSize: '1.5rem', fontWeight: 'bold', marginBottom: '5px' }}>
+                      {results['rect-imperial']}
+                    </div>
+                    <div style={{ fontSize: '1rem', opacity: '0.9' }}>
+                      cubic yards (yd³)
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Round Corners Slab - Imperial */}
+              <div style={{ background: 'rgba(255,255,255,0.95)', borderRadius: '20px', padding: '25px', boxShadow: '0 10px 30px rgba(0,0,0,0.2)', backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.3)' }}>
+                <div style={{ textAlign: 'center', marginBottom: '20px', paddingBottom: '15px', borderBottom: '2px solid #f0f0f0' }}>
+                  <h3 style={{ fontSize: '1.4rem', color: '#333', marginBottom: '8px' }}>🔘 Round Corners Slab</h3>
+                  <small>Slab with rounded corner radius</small>
+                </div>
+                
+                <div style={{ background: '#f8f9fa', borderRadius: '10px', padding: '15px', margin: '15px 0', textAlign: 'center', border: '2px dashed #dee2e6' }}>
+                  <div style={{ fontFamily: 'monospace', fontSize: '0.9rem', color: '#666', lineHeight: '1.6' }}>
+                    📐 Rectangle with Rounded Corners<br/>
+                    <br/>
+                    /---------------\ ← A (Length)<br/>
+                    |               |<br/>
+                    |               | B (Width)<br/>
+                    |               |<br/>
+                    \---------------/<br/>
+                    Corner Radius: R, Thickness: C
+                  </div>
+                </div>
+
+                <div style={{ marginBottom: '15px' }}>
+                  <input type="number" id="round-length-i" placeholder="e.g., 16.0" step="0.1" style={{ width: '100%', padding: '12px 15px', border: '2px solid #e9ecef', borderRadius: '10px', fontSize: '1rem' }} />
+                  <label style={{ fontSize: '0.9rem', color: '#666' }}>📏 A - Length (feet)</label>
+                </div>
+
+                <div style={{ marginBottom: '15px' }}>
+                  <input type="number" id="round-width-i" placeholder="e.g., 10.0" step="0.1" style={{ width: '100%', padding: '12px 15px', border: '2px solid #e9ecef', borderRadius: '10px', fontSize: '1rem' }} />
+                  <label style={{ fontSize: '0.9rem', color: '#666' }}>📏 B - Width (feet)</label>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '15px' }}>
+                  <div>
+                    <input type="number" id="round-radius-i" placeholder="e.g., 8" step="0.25" style={{ width: '100%', padding: '12px 15px', border: '2px solid #e9ecef', borderRadius: '10px', fontSize: '1rem' }} />
+                    <label style={{ fontSize: '0.8rem', color: '#666' }}>🔄 R - Corner Radius (inches)</label>
+                  </div>
+                  <div>
+                    <input type="number" id="round-thickness-i" placeholder="e.g., 5" step="0.25" style={{ width: '100%', padding: '12px 15px', border: '2px solid #e9ecef', borderRadius: '10px', fontSize: '1rem' }} />
+                    <label style={{ fontSize: '0.8rem', color: '#666' }}>📏 C - Thickness (inches)</label>
+                  </div>
+                </div>
+
+                <div style={{ background: '#fff3cd', border: '1px solid #ffeaa7', borderRadius: '8px', padding: '10px', margin: '10px 0', fontSize: '0.85rem', color: '#856404' }}>
+                  💡 Formula: (A×B - 4×R² + π×R²) × C
+                </div>
+
+                <button onClick={() => calculateRoundCorners('imperial')} style={{ width: '100%', background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', color: 'white', border: 'none', padding: '15px', borderRadius: '10px', fontSize: '1.1rem', fontWeight: '600', cursor: 'pointer', margin: '20px 0' }}>
+                  Calculate Volume 🧮
+                </button>
+
+                {results['round-imperial'] && (
+                  <div style={{ background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)', color: 'white', padding: '20px', borderRadius: '15px', textAlign: 'center', marginTop: '15px' }}>
+                    <div style={{ fontSize: '1.5rem', fontWeight: 'bold', marginBottom: '5px' }}>{results['round-imperial']}</div>
+                    <div style={{ fontSize: '1rem', opacity: '0.9' }}>cubic yards (yd³)</div>
+                  </div>
+                )}
+              </div>
+
+              {/* Concrete Piers - Imperial */}
+              <div style={{ background: 'rgba(255,255,255,0.95)', borderRadius: '20px', padding: '25px', boxShadow: '0 10px 30px rgba(0,0,0,0.2)', backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.3)' }}>
+                <div style={{ textAlign: 'center', marginBottom: '20px', paddingBottom: '15px', borderBottom: '2px solid #f0f0f0' }}>
+                  <h3 style={{ fontSize: '1.4rem', color: '#333', marginBottom: '8px' }}>🔩 Concrete Piers</h3>
+                  <small>Cylindrical piers for house foundations</small>
+                </div>
+                
+                <div style={{ background: '#f8f9fa', borderRadius: '10px', padding: '15px', margin: '15px 0', textAlign: 'center', border: '2px dashed #dee2e6' }}>
+                  <div style={{ fontFamily: 'monospace', fontSize: '0.9rem', color: '#666', lineHeight: '1.6' }}>
+                    📐 Cylindrical Piers<br/>
+                    <br/>
+                        |     |<br/>
+                        |     | H (Height)<br/>
+                        |     |<br/>
+                    ----+-----+----<br/>
+                      D (Diameter)<br/>
+                    Volume: π × (D/2)² × H × Count
+                  </div>
+                </div>
+
+                <div style={{ marginBottom: '15px' }}>
+                  <input type="number" id="pier-diameter-i" placeholder="e.g., 12" step="0.25" style={{ width: '100%', padding: '12px 15px', border: '2px solid #e9ecef', borderRadius: '10px', fontSize: '1rem' }} />
+                  <label style={{ fontSize: '0.9rem', color: '#666' }}>⚪ Diameter (inches)</label>
+                </div>
+
+                <div style={{ marginBottom: '15px' }}>
+                  <input type="number" id="pier-height-i" placeholder="e.g., 5.0" step="0.1" style={{ width: '100%', padding: '12px 15px', border: '2px solid #e9ecef', borderRadius: '10px', fontSize: '1rem' }} />
+                  <label style={{ fontSize: '0.9rem', color: '#666' }}>📏 H - Height (feet)</label>
+                </div>
+
+                <div style={{ marginBottom: '15px' }}>
+                  <input type="number" id="pier-count-i" placeholder="e.g., 12" step="1" min="1" style={{ width: '100%', padding: '12px 15px', border: '2px solid #e9ecef', borderRadius: '10px', fontSize: '1rem' }} />
+                  <label style={{ fontSize: '0.9rem', color: '#666' }}>🔢 Number of Piers</label>
+                </div>
+
+                <div style={{ background: '#fff3cd', border: '1px solid #ffeaa7', borderRadius: '8px', padding: '10px', margin: '10px 0', fontSize: '0.85rem', color: '#856404' }}>
+                  💡 Formula: π × (D/2)² × H × Count
+                </div>
+
+                <button onClick={() => calculatePiers('imperial')} style={{ width: '100%', background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', color: 'white', border: 'none', padding: '15px', borderRadius: '10px', fontSize: '1.1rem', fontWeight: '600', cursor: 'pointer', margin: '20px 0' }}>
+                  Calculate Volume 🧮
+                </button>
+
+                {results['pier-imperial'] && (
+                  <div style={{ background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)', color: 'white', padding: '20px', borderRadius: '15px', textAlign: 'center', marginTop: '15px' }}>
+                    <div style={{ fontSize: '1.5rem', fontWeight: 'bold', marginBottom: '5px' }}>{results['pier-imperial']}</div>
+                    <div style={{ fontSize: '1rem', opacity: '0.9' }}>cubic yards (yd³)</div>
+                  </div>
+                )}
+              </div>
+
+              {/* Block Work Fill - Imperial */}
+              <div style={{ background: 'rgba(255,255,255,0.95)', borderRadius: '20px', padding: '25px', boxShadow: '0 10px 30px rgba(0,0,0,0.2)', backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.3)' }}>
+                <div style={{ textAlign: 'center', marginBottom: '20px', paddingBottom: '15px', borderBottom: '2px solid #f0f0f0' }}>
+                  <h3 style={{ fontSize: '1.4rem', color: '#333', marginBottom: '8px' }}>🧱 Block Work Fill</h3>
+                  <small>Concrete inside hollow blocks</small>
+                </div>
+                
+                <div style={{ background: '#f8f9fa', borderRadius: '10px', padding: '15px', margin: '15px 0', textAlign: 'center', border: '2px dashed #dee2e6' }}>
+                  <div style={{ fontFamily: 'monospace', fontSize: '0.9rem', color: '#666', lineHeight: '1.6' }}>
+                    📐 Hollow Block Wall Fill<br/>
+                    <br/>
+                    [###] [###] [###] ← A (Length)<br/>
+                    [   ] [   ] [   ]<br/>
+                    [###] [###] [###] B (Height)<br/>
+                    [   ] [   ] [   ]<br/>
+                    [###] [###] [###]<br/>
+                    Thickness: C, Hollow %
+                  </div>
+                </div>
+
+                <div style={{ marginBottom: '15px' }}>
+                  <input type="number" id="block-length-i" placeholder="e.g., 26.0" step="0.1" style={{ width: '100%', padding: '12px 15px', border: '2px solid #e9ecef', borderRadius: '10px', fontSize: '1rem' }} />
+                  <label style={{ fontSize: '0.9rem', color: '#666' }}>📏 A - Wall Length (feet)</label>
+                </div>
+
+                <div style={{ marginBottom: '15px' }}>
+                  <input type="number" id="block-height-i" placeholder="e.g., 8.0" step="0.1" style={{ width: '100%', padding: '12px 15px', border: '2px solid #e9ecef', borderRadius: '10px', fontSize: '1rem' }} />
+                  <label style={{ fontSize: '0.9rem', color: '#666' }}>📏 B - Wall Height (feet)</label>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '15px' }}>
+                  <div>
+                    <input type="number" id="block-width-i" placeholder="e.g., 8" step="0.25" style={{ width: '100%', padding: '12px 15px', border: '2px solid #e9ecef', borderRadius: '10px', fontSize: '1rem' }} />
+                    <label style={{ fontSize: '0.8rem', color: '#666' }}>📏 C - Block Width (inches)</label>
+                  </div>
+                  <div>
+                    <input type="number" id="block-hollow-i" placeholder="e.g., 50" step="1" min="0" max="100" style={{ width: '100%', padding: '12px 15px', border: '2px solid #e9ecef', borderRadius: '10px', fontSize: '1rem' }} />
+                    <label style={{ fontSize: '0.8rem', color: '#666' }}>🕳️ Hollow % (40-60%)</label>
+                  </div>
+                </div>
+
+                <div style={{ background: '#fff3cd', border: '1px solid #ffeaa7', borderRadius: '8px', padding: '10px', margin: '10px 0', fontSize: '0.85rem', color: '#856404' }}>
+                  💡 Formula: A × B × C × (Hollow% ÷ 100)
+                </div>
+
+                <button onClick={() => calculateBlockWork('imperial')} style={{ width: '100%', background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', color: 'white', border: 'none', padding: '15px', borderRadius: '10px', fontSize: '1.1rem', fontWeight: '600', cursor: 'pointer', margin: '20px 0' }}>
+                  Calculate Volume ��
+                </button>
+
+                {results['block-imperial'] && (
+                  <div style={{ background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)', color: 'white', padding: '20px', borderRadius: '15px', textAlign: 'center', marginTop: '15px' }}>
+                    <div style={{ fontSize: '1.5rem', fontWeight: 'bold', marginBottom: '5px' }}>{results['block-imperial']}</div>
+                    <div style={{ fontSize: '1rem', opacity: '0.9' }}>cubic yards (yd³)</div>
+                  </div>
+                )}
+              </div>
+
+              {/* Post Holes - Imperial */}
+              <div style={{ background: 'rgba(255,255,255,0.95)', borderRadius: '20px', padding: '25px', boxShadow: '0 10px 30px rgba(0,0,0,0.2)', backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.3)' }}>
+                <div style={{ textAlign: 'center', marginBottom: '20px', paddingBottom: '15px', borderBottom: '2px solid #f0f0f0' }}>
+                  <h3 style={{ fontSize: '1.4rem', color: '#333', marginBottom: '8px' }}>🕳️ Post Holes</h3>
+                  <small>Concrete around posts in holes</small>
+                </div>
+                
+                <div style={{ background: '#f8f9fa', borderRadius: '10px', padding: '15px', margin: '15px 0', textAlign: 'center', border: '2px dashed #dee2e6' }}>
+                  <div style={{ fontFamily: 'monospace', fontSize: '0.9rem', color: '#666', lineHeight: '1.6' }}>
+                    📐 Post Holes with Concrete<br/>
+                    <br/>
+                    +----------+ Ground Level<br/>
+                    | +------+ | ← Hole Diameter<br/>
+                    | | POST | |<br/>
+                    | |      | | Depth<br/>
+                    | +------+ |<br/>
+                    +----------+<br/>
+                    Concrete fills space around post
+                  </div>
+                </div>
+
+                <div style={{ marginBottom: '15px' }}>
+                  <input type="number" id="posthole-diameter-i" placeholder="e.g., 16" step="0.25" style={{ width: '100%', padding: '12px 15px', border: '2px solid #e9ecef', borderRadius: '10px', fontSize: '1rem' }} />
+                  <label style={{ fontSize: '0.9rem', color: '#666' }}>⚪ Hole Diameter (inches)</label>
+                </div>
+
+                <div style={{ marginBottom: '15px' }}>
+                  <input type="number" id="posthole-depth-i" placeholder="e.g., 24" step="0.25" style={{ width: '100%', padding: '12px 15px', border: '2px solid #e9ecef', borderRadius: '10px', fontSize: '1rem' }} />
+                  <label style={{ fontSize: '0.9rem', color: '#666' }}>📏 Hole Depth (inches)</label>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '15px' }}>
+                  <div>
+                    <input type="number" id="posthole-width-i" placeholder="e.g., 8" step="0.25" style={{ width: '100%', padding: '12px 15px', border: '2px solid #e9ecef', borderRadius: '10px', fontSize: '1rem' }} />
+                    <label style={{ fontSize: '0.8rem', color: '#666' }}>📐 Post Width (inches)</label>
+                  </div>
+                  <div>
+                    <input type="number" id="posthole-thickness-i" placeholder="e.g., 4" step="0.25" style={{ width: '100%', padding: '12px 15px', border: '2px solid #e9ecef', borderRadius: '10px', fontSize: '1rem' }} />
+                    <label style={{ fontSize: '0.8rem', color: '#666' }}>📐 Post Thickness (inches)</label>
+                  </div>
+                </div>
+
+                <div style={{ marginBottom: '15px' }}>
+                  <input type="number" id="posthole-count-i" placeholder="e.g., 8" step="1" min="1" style={{ width: '100%', padding: '12px 15px', border: '2px solid #e9ecef', borderRadius: '10px', fontSize: '1rem' }} />
+                  <label style={{ fontSize: '0.9rem', color: '#666' }}>🔢 Number of Posts</label>
+                </div>
+
+                <div style={{ background: '#fff3cd', border: '1px solid #ffeaa7', borderRadius: '8px', padding: '10px', margin: '10px 0', fontSize: '0.85rem', color: '#856404' }}>
+                  💡 Formula: [π×(D/2)² - W×T] × Depth × Count
+                </div>
+
+                <button onClick={() => calculatePostHoles('imperial')} style={{ width: '100%', background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', color: 'white', border: 'none', padding: '15px', borderRadius: '10px', fontSize: '1.1rem', fontWeight: '600', cursor: 'pointer', margin: '20px 0' }}>
+                  Calculate Volume 🧮
+                </button>
+
+                {results['posthole-imperial'] && (
+                  <div style={{ background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)', color: 'white', padding: '20px', borderRadius: '15px', textAlign: 'center', marginTop: '15px' }}>
+                    <div style={{ fontSize: '1.5rem', fontWeight: 'bold', marginBottom: '5px' }}>{results['posthole-imperial']}</div>
+                    <div style={{ fontSize: '1rem', opacity: '0.9' }}>cubic yards (yd³)</div>
+                  </div>
+                )}
+              </div>
+
+              {/* Strip Footings - Imperial */}
+              <div style={{ background: 'rgba(255,255,255,0.95)', borderRadius: '20px', padding: '25px', boxShadow: '0 10px 30px rgba(0,0,0,0.2)', backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.3)' }}>
+                <div style={{ textAlign: 'center', marginBottom: '20px', paddingBottom: '15px', borderBottom: '2px solid #f0f0f0' }}>
+                  <h3 style={{ fontSize: '1.4rem', color: '#333', marginBottom: '8px' }}>🏗️ Strip Footings</h3>
+                  <small>Foundation footings calculation</small>
+                </div>
+                
+                <div style={{ background: '#f8f9fa', borderRadius: '10px', padding: '15px', margin: '15px 0', textAlign: 'center', border: '2px dashed #dee2e6' }}>
+                  <div style={{ fontFamily: 'monospace', fontSize: '0.9rem', color: '#666', lineHeight: '1.6' }}>
+                    📐 Strip Footings Foundation<br/>
+                    <br/>
+                    +================+ Ground Level<br/>
+                    |################| ← B (Width)<br/>
+                    |################|<br/>
+                    |################| C (Depth)<br/>
+                    +================+<br/>
+                           A (Length)
+                  </div>
+                </div>
+
+                <div style={{ marginBottom: '15px' }}>
+                  <input type="number" id="footing-length-i" placeholder="e.g., 65.0" step="0.1" style={{ width: '100%', padding: '12px 15px', border: '2px solid #e9ecef', borderRadius: '10px', fontSize: '1rem' }} />
+                  <label style={{ fontSize: '0.9rem', color: '#666' }}>📏 A - Footing Length (feet)</label>
+                </div>
+
+                <div style={{ marginBottom: '15px' }}>
+                  <input type="number" id="footing-width-i" placeholder="e.g., 24" step="0.25" style={{ width: '100%', padding: '12px 15px', border: '2px solid #e9ecef', borderRadius: '10px', fontSize: '1rem' }} />
+                  <label style={{ fontSize: '0.9rem', color: '#666' }}>📏 B - Footing Width (inches)</label>
+                </div>
+
+                <div style={{ marginBottom: '15px' }}>
+                  <input type="number" id="footing-depth-i" placeholder="e.g., 16" step="0.25" style={{ width: '100%', padding: '12px 15px', border: '2px solid #e9ecef', borderRadius: '10px', fontSize: '1rem' }} />
+                  <label style={{ fontSize: '0.9rem', color: '#666' }}>📏 C - Footing Depth (inches)</label>
+                </div>
+
+                <button onClick={() => calculateFootings('imperial')} style={{ width: '100%', background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', color: 'white', border: 'none', padding: '15px', borderRadius: '10px', fontSize: '1.1rem', fontWeight: '600', cursor: 'pointer', margin: '20px 0' }}>
+                  Calculate Volume ��
+                </button>
+
+                {results['footing-imperial'] && (
+                  <div style={{ background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)', color: 'white', padding: '20px', borderRadius: '15px', textAlign: 'center', marginTop: '15px' }}>
+                    <div style={{ fontSize: '1.5rem', fontWeight: 'bold', marginBottom: '5px' }}>{results['footing-imperial']}</div>
+                    <div style={{ fontSize: '1rem', opacity: '0.9' }}>cubic yards (yd³)</div>
+                  </div>
+                )}
+              </div>
             </div>
           )}
         </div>
