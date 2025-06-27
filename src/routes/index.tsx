@@ -107,6 +107,9 @@ const LoadsSpansCalculator = lazy(() => import('@/pages/Calculators/LoadsSpansCa
 const FencingCalculator = lazy(() => import('@/pages/Calculators/FencingCalculator'));
 const MarkupCalculator = lazy(() => import('@/pages/Calculators/MarkupCalculator'));
 const NCCCodesCalculator = lazy(() => import('@/pages/Calculators/NCCCodesCalculator'));
+const ConcreteCalculator = lazy(() => import('@/pages/Calculators/ConcreteCalculator'));
+const AngleCalculator = lazy(() => import('@/pages/Calculators/AngleCalculator'));
+const StairsCalculator = lazy(() => import('@/pages/Calculators/StairsCalculator'));
 
 // Demo pages
 const AnimatedStageDemo = lazy(() => import('@/pages/AnimatedStageDemo'));
@@ -264,6 +267,9 @@ const routeObjects: RouteObject[] = [
           { path: "/calculators/loads-spans", element: <SuspenseWrapper><LoadsSpansCalculator /></SuspenseWrapper> },
           { path: "/calculators/fencing", element: <SuspenseWrapper><FencingCalculator /></SuspenseWrapper> },
           { path: "/calculators/ncc-codes", element: <SuspenseWrapper><NCCCodesCalculator /></SuspenseWrapper> },
+          { path: "/calculators/concrete", element: <SuspenseWrapper><ConcreteCalculator /></SuspenseWrapper> },
+          { path: "/calculators/angle", element: <SuspenseWrapper><AngleCalculator /></SuspenseWrapper> },
+          { path: "/calculators/stairs", element: <SuspenseWrapper><StairsCalculator /></SuspenseWrapper> },
           { path: "/workflow", element: <SuspenseWrapper><N8nWorkflowListPage /></SuspenseWrapper> },
           { path: "/workflow/new", element: <SuspenseWrapper><N8nWorkflowPage /></SuspenseWrapper> },
           { path: "/workflow/edit/:id", element: <SuspenseWrapper><N8nWorkflowPage /></SuspenseWrapper> },
