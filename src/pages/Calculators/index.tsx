@@ -1,4 +1,3 @@
-
 import React from "react";
 import { AppLayout } from "@/components/ui/AppLayout";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -57,7 +56,7 @@ const Calculators = () => {
   return (
     <AppLayout>
       <div className="container mx-auto py-6 px-4 space-y-6">
-        <SectionHeader title="Trade Calculators" />
+        <SectionHeader title="Tricks of the Trade" />
         
         <p className="text-center text-gray-600 mb-6">
           Use these calculators to help with your trade business operations
