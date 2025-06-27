@@ -11,191 +11,191 @@ const ConcreteCalculator = () => {
     setResults({});
   };
 
-  const calculateRectangular = (unit: string) => {
-    if (unit === 'metric') {
-      const length = parseFloat((document.getElementById('rect-length-m') as HTMLInputElement)?.value || '0');
-      const width = parseFloat((document.getElementById('rect-width-m') as HTMLInputElement)?.value || '0');
-      const thickness = parseFloat((document.getElementById('rect-thickness-m') as HTMLInputElement)?.value || '0');
-      
-      if (length > 0 && width > 0 && thickness > 0) {
-        const volume = length * width * (thickness / 100); // convert cm to m
-        setResults(prev => ({ ...prev, 'rect-metric': volume.toFixed(3) }));
-      }
-    } else {
-      const length = parseFloat((document.getElementById('rect-length-i') as HTMLInputElement)?.value || '0');
-      const width = parseFloat((document.getElementById('rect-width-i') as HTMLInputElement)?.value || '0');
-      const thickness = parseFloat((document.getElementById('rect-thickness-i') as HTMLInputElement)?.value || '0');
-      
-      if (length > 0 && width > 0 && thickness > 0) {
-        const volumeCubicFeet = length * width * (thickness / 12); // convert inches to feet
-        const volumeCubicYards = volumeCubicFeet / 27; // convert cubic feet to cubic yards
-        setResults(prev => ({ ...prev, 'rect-imperial': volumeCubicYards.toFixed(3) }));
-      }
-    }
-  };
+     const calculateRectangular = (unit: string) => {
+     if (unit === 'metric') {
+       const length = parseFloat((document.getElementById('rect-length-m') as HTMLInputElement)?.value || '0');
+       const width = parseFloat((document.getElementById('rect-width-m') as HTMLInputElement)?.value || '0');
+       const thickness = parseFloat((document.getElementById('rect-thickness-m') as HTMLInputElement)?.value || '0');
+       
+       if (length > 0 && width > 0 && thickness > 0) {
+         const volume = length * width * (thickness / 1000); // convert mm to m
+         setResults(prev => ({ ...prev, 'rect-metric': volume.toFixed(3) }));
+       }
+     } else {
+       const length = parseFloat((document.getElementById('rect-length-i') as HTMLInputElement)?.value || '0');
+       const width = parseFloat((document.getElementById('rect-width-i') as HTMLInputElement)?.value || '0');
+       const thickness = parseFloat((document.getElementById('rect-thickness-i') as HTMLInputElement)?.value || '0');
+       
+       if (length > 0 && width > 0 && thickness > 0) {
+         const volumeCubicFeet = length * width * (thickness / 12); // convert inches to feet
+         const volumeCubicYards = volumeCubicFeet / 27; // convert cubic feet to cubic yards
+         setResults(prev => ({ ...prev, 'rect-imperial': volumeCubicYards.toFixed(3) }));
+       }
+     }
+   };
 
-  const calculateRoundCorners = (unit: string) => {
-    if (unit === 'metric') {
-      const length = parseFloat((document.getElementById('round-length-m') as HTMLInputElement)?.value || '0');
-      const width = parseFloat((document.getElementById('round-width-m') as HTMLInputElement)?.value || '0');
-      const radius = parseFloat((document.getElementById('round-radius-m') as HTMLInputElement)?.value || '0');
-      const thickness = parseFloat((document.getElementById('round-thickness-m') as HTMLInputElement)?.value || '0');
-      
-      if (length > 0 && width > 0 && radius > 0 && thickness > 0) {
-        const radiusM = radius / 100; // convert cm to m
-        const thicknessM = thickness / 100; // convert cm to m
-        // Formula: (A×B - 4×R² + π×R²) × C
-        const area = length * width - 4 * radiusM * radiusM + Math.PI * radiusM * radiusM;
-        const volume = area * thicknessM;
-        setResults(prev => ({ ...prev, 'round-metric': volume.toFixed(3) }));
-      }
-    } else {
-      const length = parseFloat((document.getElementById('round-length-i') as HTMLInputElement)?.value || '0');
-      const width = parseFloat((document.getElementById('round-width-i') as HTMLInputElement)?.value || '0');
-      const radius = parseFloat((document.getElementById('round-radius-i') as HTMLInputElement)?.value || '0');
-      const thickness = parseFloat((document.getElementById('round-thickness-i') as HTMLInputElement)?.value || '0');
-      
-      if (length > 0 && width > 0 && radius > 0 && thickness > 0) {
-        const radiusFt = radius / 12; // convert inches to feet
-        const thicknessFt = thickness / 12; // convert inches to feet
-        // Formula: (A×B - 4×R² + π×R²) × C
-        const area = length * width - 4 * radiusFt * radiusFt + Math.PI * radiusFt * radiusFt;
-        const volumeCubicFeet = area * thicknessFt;
-        const volumeCubicYards = volumeCubicFeet / 27;
-        setResults(prev => ({ ...prev, 'round-imperial': volumeCubicYards.toFixed(3) }));
-      }
-    }
-  };
+     const calculateRoundCorners = (unit: string) => {
+     if (unit === 'metric') {
+       const length = parseFloat((document.getElementById('round-length-m') as HTMLInputElement)?.value || '0');
+       const width = parseFloat((document.getElementById('round-width-m') as HTMLInputElement)?.value || '0');
+       const radius = parseFloat((document.getElementById('round-radius-m') as HTMLInputElement)?.value || '0');
+       const thickness = parseFloat((document.getElementById('round-thickness-m') as HTMLInputElement)?.value || '0');
+       
+       if (length > 0 && width > 0 && radius > 0 && thickness > 0) {
+         const radiusM = radius / 1000; // convert mm to m
+         const thicknessM = thickness / 1000; // convert mm to m
+         // Formula: (A×B - 4×R² + π×R²) × C
+         const area = length * width - 4 * radiusM * radiusM + Math.PI * radiusM * radiusM;
+         const volume = area * thicknessM;
+         setResults(prev => ({ ...prev, 'round-metric': volume.toFixed(3) }));
+       }
+     } else {
+       const length = parseFloat((document.getElementById('round-length-i') as HTMLInputElement)?.value || '0');
+       const width = parseFloat((document.getElementById('round-width-i') as HTMLInputElement)?.value || '0');
+       const radius = parseFloat((document.getElementById('round-radius-i') as HTMLInputElement)?.value || '0');
+       const thickness = parseFloat((document.getElementById('round-thickness-i') as HTMLInputElement)?.value || '0');
+       
+       if (length > 0 && width > 0 && radius > 0 && thickness > 0) {
+         const radiusFt = radius / 12; // convert inches to feet
+         const thicknessFt = thickness / 12; // convert inches to feet
+         // Formula: (A×B - 4×R² + π×R²) × C
+         const area = length * width - 4 * radiusFt * radiusFt + Math.PI * radiusFt * radiusFt;
+         const volumeCubicFeet = area * thicknessFt;
+         const volumeCubicYards = volumeCubicFeet / 27;
+         setResults(prev => ({ ...prev, 'round-imperial': volumeCubicYards.toFixed(3) }));
+       }
+     }
+   };
 
-  const calculatePiers = (unit: string) => {
-    if (unit === 'metric') {
-      const diameter = parseFloat((document.getElementById('pier-diameter-m') as HTMLInputElement)?.value || '0');
-      const height = parseFloat((document.getElementById('pier-height-m') as HTMLInputElement)?.value || '0');
-      const count = parseFloat((document.getElementById('pier-count-m') as HTMLInputElement)?.value || '0');
-      
-      if (diameter > 0 && height > 0 && count > 0) {
-        const radius = (diameter / 100) / 2; // convert cm to m and get radius
-        // Formula: π × R² × H × Count
-        const volume = Math.PI * radius * radius * height * count;
-        setResults(prev => ({ ...prev, 'pier-metric': volume.toFixed(3) }));
-      }
-    } else {
-      const diameter = parseFloat((document.getElementById('pier-diameter-i') as HTMLInputElement)?.value || '0');
-      const height = parseFloat((document.getElementById('pier-height-i') as HTMLInputElement)?.value || '0');
-      const count = parseFloat((document.getElementById('pier-count-i') as HTMLInputElement)?.value || '0');
-      
-      if (diameter > 0 && height > 0 && count > 0) {
-        const radius = (diameter / 12) / 2; // convert inches to feet and get radius
-        // Formula: π × R² × H × Count
-        const volumeCubicFeet = Math.PI * radius * radius * height * count;
-        const volumeCubicYards = volumeCubicFeet / 27;
-        setResults(prev => ({ ...prev, 'pier-imperial': volumeCubicYards.toFixed(3) }));
-      }
-    }
-  };
+     const calculatePiers = (unit: string) => {
+     if (unit === 'metric') {
+       const diameter = parseFloat((document.getElementById('pier-diameter-m') as HTMLInputElement)?.value || '0');
+       const height = parseFloat((document.getElementById('pier-height-m') as HTMLInputElement)?.value || '0');
+       const count = parseFloat((document.getElementById('pier-count-m') as HTMLInputElement)?.value || '0');
+       
+       if (diameter > 0 && height > 0 && count > 0) {
+         const radius = (diameter / 1000) / 2; // convert mm to m and get radius
+         // Formula: π × R² × H × Count
+         const volume = Math.PI * radius * radius * height * count;
+         setResults(prev => ({ ...prev, 'pier-metric': volume.toFixed(3) }));
+       }
+     } else {
+       const diameter = parseFloat((document.getElementById('pier-diameter-i') as HTMLInputElement)?.value || '0');
+       const height = parseFloat((document.getElementById('pier-height-i') as HTMLInputElement)?.value || '0');
+       const count = parseFloat((document.getElementById('pier-count-i') as HTMLInputElement)?.value || '0');
+       
+       if (diameter > 0 && height > 0 && count > 0) {
+         const radius = (diameter / 12) / 2; // convert inches to feet and get radius
+         // Formula: π × R² × H × Count
+         const volumeCubicFeet = Math.PI * radius * radius * height * count;
+         const volumeCubicYards = volumeCubicFeet / 27;
+         setResults(prev => ({ ...prev, 'pier-imperial': volumeCubicYards.toFixed(3) }));
+       }
+     }
+   };
 
-  const calculateBlockWork = (unit: string) => {
-    if (unit === 'metric') {
-      const length = parseFloat((document.getElementById('block-length-m') as HTMLInputElement)?.value || '0');
-      const height = parseFloat((document.getElementById('block-height-m') as HTMLInputElement)?.value || '0');
-      const width = parseFloat((document.getElementById('block-width-m') as HTMLInputElement)?.value || '0');
-      const hollow = parseFloat((document.getElementById('block-hollow-m') as HTMLInputElement)?.value || '0');
-      
-      if (length > 0 && height > 0 && width > 0 && hollow > 0) {
-        const widthM = width / 100; // convert cm to m
-        // Formula: A × B × C × (Hollow% ÷ 100)
-        const volume = length * height * widthM * (hollow / 100);
-        setResults(prev => ({ ...prev, 'block-metric': volume.toFixed(3) }));
-      }
-    } else {
-      const length = parseFloat((document.getElementById('block-length-i') as HTMLInputElement)?.value || '0');
-      const height = parseFloat((document.getElementById('block-height-i') as HTMLInputElement)?.value || '0');
-      const width = parseFloat((document.getElementById('block-width-i') as HTMLInputElement)?.value || '0');
-      const hollow = parseFloat((document.getElementById('block-hollow-i') as HTMLInputElement)?.value || '0');
-      
-      if (length > 0 && height > 0 && width > 0 && hollow > 0) {
-        const widthFt = width / 12; // convert inches to feet
-        // Formula: A × B × C × (Hollow% ÷ 100)
-        const volumeCubicFeet = length * height * widthFt * (hollow / 100);
-        const volumeCubicYards = volumeCubicFeet / 27;
-        setResults(prev => ({ ...prev, 'block-imperial': volumeCubicYards.toFixed(3) }));
-      }
-    }
-  };
+     const calculateBlockWork = (unit: string) => {
+     if (unit === 'metric') {
+       const length = parseFloat((document.getElementById('block-length-m') as HTMLInputElement)?.value || '0');
+       const height = parseFloat((document.getElementById('block-height-m') as HTMLInputElement)?.value || '0');
+       const width = parseFloat((document.getElementById('block-width-m') as HTMLInputElement)?.value || '0');
+       const hollow = parseFloat((document.getElementById('block-hollow-m') as HTMLInputElement)?.value || '0');
+       
+       if (length > 0 && height > 0 && width > 0 && hollow > 0) {
+         const widthM = width / 1000; // convert mm to m
+         // Formula: A × B × C × (Hollow% ÷ 100)
+         const volume = length * height * widthM * (hollow / 100);
+         setResults(prev => ({ ...prev, 'block-metric': volume.toFixed(3) }));
+       }
+     } else {
+       const length = parseFloat((document.getElementById('block-length-i') as HTMLInputElement)?.value || '0');
+       const height = parseFloat((document.getElementById('block-height-i') as HTMLInputElement)?.value || '0');
+       const width = parseFloat((document.getElementById('block-width-i') as HTMLInputElement)?.value || '0');
+       const hollow = parseFloat((document.getElementById('block-hollow-i') as HTMLInputElement)?.value || '0');
+       
+       if (length > 0 && height > 0 && width > 0 && hollow > 0) {
+         const widthFt = width / 12; // convert inches to feet
+         // Formula: A × B × C × (Hollow% ÷ 100)
+         const volumeCubicFeet = length * height * widthFt * (hollow / 100);
+         const volumeCubicYards = volumeCubicFeet / 27;
+         setResults(prev => ({ ...prev, 'block-imperial': volumeCubicYards.toFixed(3) }));
+       }
+     }
+   };
 
-  const calculatePostHoles = (unit: string) => {
-    if (unit === 'metric') {
-      const diameter = parseFloat((document.getElementById('posthole-diameter-m') as HTMLInputElement)?.value || '0');
-      const depth = parseFloat((document.getElementById('posthole-depth-m') as HTMLInputElement)?.value || '0');
-      const postWidth = parseFloat((document.getElementById('posthole-width-m') as HTMLInputElement)?.value || '0');
-      const postThickness = parseFloat((document.getElementById('posthole-thickness-m') as HTMLInputElement)?.value || '0');
-      const count = parseFloat((document.getElementById('posthole-count-m') as HTMLInputElement)?.value || '0');
-      
-      if (diameter > 0 && depth > 0 && postWidth > 0 && postThickness > 0 && count > 0) {
-        const holeRadius = (diameter / 1000) / 2; // convert mm to m and get radius
-        const depthM = depth / 100; // convert cm to m
-        const postWidthM = postWidth / 1000; // convert mm to m
-        const postThicknessM = postThickness / 1000; // convert mm to m
-        
-        // Formula: [π×(D/2)² - W×T] × Depth × Count
-        const holeVolume = Math.PI * holeRadius * holeRadius;
-        const postVolume = postWidthM * postThicknessM;
-        const concreteVolumePerHole = (holeVolume - postVolume) * depthM;
-        const totalVolume = concreteVolumePerHole * count;
-        setResults(prev => ({ ...prev, 'posthole-metric': totalVolume.toFixed(3) }));
-      }
-    } else {
-      const diameter = parseFloat((document.getElementById('posthole-diameter-i') as HTMLInputElement)?.value || '0');
-      const depth = parseFloat((document.getElementById('posthole-depth-i') as HTMLInputElement)?.value || '0');
-      const postWidth = parseFloat((document.getElementById('posthole-width-i') as HTMLInputElement)?.value || '0');
-      const postThickness = parseFloat((document.getElementById('posthole-thickness-i') as HTMLInputElement)?.value || '0');
-      const count = parseFloat((document.getElementById('posthole-count-i') as HTMLInputElement)?.value || '0');
-      
-      if (diameter > 0 && depth > 0 && postWidth > 0 && postThickness > 0 && count > 0) {
-        const holeRadius = (diameter / 12) / 2; // convert inches to feet and get radius
-        const depthFt = depth / 12; // convert inches to feet
-        const postWidthFt = postWidth / 12; // convert inches to feet
-        const postThicknessFt = postThickness / 12; // convert inches to feet
-        
-        // Formula: [π×(D/2)² - W×T] × Depth × Count
-        const holeVolume = Math.PI * holeRadius * holeRadius;
-        const postVolume = postWidthFt * postThicknessFt;
-        const concreteVolumePerHole = (holeVolume - postVolume) * depthFt;
-        const totalVolumeCubicFeet = concreteVolumePerHole * count;
-        const totalVolumeCubicYards = totalVolumeCubicFeet / 27;
-        setResults(prev => ({ ...prev, 'posthole-imperial': totalVolumeCubicYards.toFixed(3) }));
-      }
-    }
-  };
+     const calculatePostHoles = (unit: string) => {
+     if (unit === 'metric') {
+       const diameter = parseFloat((document.getElementById('posthole-diameter-m') as HTMLInputElement)?.value || '0');
+       const depth = parseFloat((document.getElementById('posthole-depth-m') as HTMLInputElement)?.value || '0');
+       const postWidth = parseFloat((document.getElementById('posthole-width-m') as HTMLInputElement)?.value || '0');
+       const postThickness = parseFloat((document.getElementById('posthole-thickness-m') as HTMLInputElement)?.value || '0');
+       const count = parseFloat((document.getElementById('posthole-count-m') as HTMLInputElement)?.value || '0');
+       
+       if (diameter > 0 && depth > 0 && postWidth > 0 && postThickness > 0 && count > 0) {
+         const holeRadius = (diameter / 1000) / 2; // convert mm to m and get radius
+         const depthM = depth / 1000; // convert mm to m
+         const postWidthM = postWidth / 1000; // convert mm to m
+         const postThicknessM = postThickness / 1000; // convert mm to m
+         
+         // Formula: [π×(D/2)² - W×T] × Depth × Count
+         const holeVolume = Math.PI * holeRadius * holeRadius;
+         const postVolume = postWidthM * postThicknessM;
+         const concreteVolumePerHole = (holeVolume - postVolume) * depthM;
+         const totalVolume = concreteVolumePerHole * count;
+         setResults(prev => ({ ...prev, 'posthole-metric': totalVolume.toFixed(3) }));
+       }
+     } else {
+       const diameter = parseFloat((document.getElementById('posthole-diameter-i') as HTMLInputElement)?.value || '0');
+       const depth = parseFloat((document.getElementById('posthole-depth-i') as HTMLInputElement)?.value || '0');
+       const postWidth = parseFloat((document.getElementById('posthole-width-i') as HTMLInputElement)?.value || '0');
+       const postThickness = parseFloat((document.getElementById('posthole-thickness-i') as HTMLInputElement)?.value || '0');
+       const count = parseFloat((document.getElementById('posthole-count-i') as HTMLInputElement)?.value || '0');
+       
+       if (diameter > 0 && depth > 0 && postWidth > 0 && postThickness > 0 && count > 0) {
+         const holeRadius = (diameter / 12) / 2; // convert inches to feet and get radius
+         const depthFt = depth / 12; // convert inches to feet
+         const postWidthFt = postWidth / 12; // convert inches to feet
+         const postThicknessFt = postThickness / 12; // convert inches to feet
+         
+         // Formula: [π×(D/2)² - W×T] × Depth × Count
+         const holeVolume = Math.PI * holeRadius * holeRadius;
+         const postVolume = postWidthFt * postThicknessFt;
+         const concreteVolumePerHole = (holeVolume - postVolume) * depthFt;
+         const totalVolumeCubicFeet = concreteVolumePerHole * count;
+         const totalVolumeCubicYards = totalVolumeCubicFeet / 27;
+         setResults(prev => ({ ...prev, 'posthole-imperial': totalVolumeCubicYards.toFixed(3) }));
+       }
+     }
+   };
 
-  const calculateFootings = (unit: string) => {
-    if (unit === 'metric') {
-      const length = parseFloat((document.getElementById('footing-length-m') as HTMLInputElement)?.value || '0');
-      const width = parseFloat((document.getElementById('footing-width-m') as HTMLInputElement)?.value || '0');
-      const depth = parseFloat((document.getElementById('footing-depth-m') as HTMLInputElement)?.value || '0');
-      
-      if (length > 0 && width > 0 && depth > 0) {
-        const widthM = width / 100; // convert cm to m
-        const depthM = depth / 100; // convert cm to m
-        // Formula: A × B × C
-        const volume = length * widthM * depthM;
-        setResults(prev => ({ ...prev, 'footing-metric': volume.toFixed(3) }));
-      }
-    } else {
-      const length = parseFloat((document.getElementById('footing-length-i') as HTMLInputElement)?.value || '0');
-      const width = parseFloat((document.getElementById('footing-width-i') as HTMLInputElement)?.value || '0');
-      const depth = parseFloat((document.getElementById('footing-depth-i') as HTMLInputElement)?.value || '0');
-      
-      if (length > 0 && width > 0 && depth > 0) {
-        const widthFt = width / 12; // convert inches to feet
-        const depthFt = depth / 12; // convert inches to feet
-        // Formula: A × B × C
-        const volumeCubicFeet = length * widthFt * depthFt;
-        const volumeCubicYards = volumeCubicFeet / 27;
-        setResults(prev => ({ ...prev, 'footing-imperial': volumeCubicYards.toFixed(3) }));
-      }
-    }
-  };
+     const calculateFootings = (unit: string) => {
+     if (unit === 'metric') {
+       const length = parseFloat((document.getElementById('footing-length-m') as HTMLInputElement)?.value || '0');
+       const width = parseFloat((document.getElementById('footing-width-m') as HTMLInputElement)?.value || '0');
+       const depth = parseFloat((document.getElementById('footing-depth-m') as HTMLInputElement)?.value || '0');
+       
+       if (length > 0 && width > 0 && depth > 0) {
+         const widthM = width / 1000; // convert mm to m
+         const depthM = depth / 1000; // convert mm to m
+         // Formula: A × B × C
+         const volume = length * widthM * depthM;
+         setResults(prev => ({ ...prev, 'footing-metric': volume.toFixed(3) }));
+       }
+     } else {
+       const length = parseFloat((document.getElementById('footing-length-i') as HTMLInputElement)?.value || '0');
+       const width = parseFloat((document.getElementById('footing-width-i') as HTMLInputElement)?.value || '0');
+       const depth = parseFloat((document.getElementById('footing-depth-i') as HTMLInputElement)?.value || '0');
+       
+       if (length > 0 && width > 0 && depth > 0) {
+         const widthFt = width / 12; // convert inches to feet
+         const depthFt = depth / 12; // convert inches to feet
+         // Formula: A × B × C
+         const volumeCubicFeet = length * widthFt * depthFt;
+         const volumeCubicYards = volumeCubicFeet / 27;
+         setResults(prev => ({ ...prev, 'footing-imperial': volumeCubicYards.toFixed(3) }));
+       }
+     }
+   };
 
   return (
     <AppLayout>
@@ -265,13 +265,13 @@ const ConcreteCalculator = () => {
                 </div>
                 
                 <div style={{ background: '#f8f9fa', borderRadius: '10px', padding: '15px', margin: '15px 0', textAlign: 'center', border: '2px dashed #dee2e6' }}>
-                  <div style={{ fontFamily: 'monospace', fontSize: '0.9rem', color: '#666', lineHeight: '1.6' }}>
+                  <div style={{ fontFamily: 'monospace', fontSize: '0.9rem', color: '#666', lineHeight: '1.6', whiteSpace: 'pre-line' }}>
                     📐 Length × Width × Thickness<br/>
                     <br/>
                     +---------------+ ← A (Length)<br/>
-                    |               |<br/>
-                    |               | B (Width)<br/>
-                    |               |<br/>
+                    |&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|<br/>
+                    |&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| B (Width)<br/>
+                    |&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|<br/>
                     +---------------+<br/>
                     Thickness: C
                   </div>
@@ -315,24 +315,24 @@ const ConcreteCalculator = () => {
                   />
                 </div>
 
-                <div style={{ marginBottom: '15px' }}>
-                  <label style={{ display: 'block', marginBottom: '5px', fontWeight: '600', color: '#555', fontSize: '0.95rem' }}>
-                    📏 C - Thickness (cm)
-                  </label>
-                  <input
-                    type="number"
-                    id="rect-thickness-m"
-                    placeholder="e.g., 15"
-                    step="0.1"
-                    style={{
-                      width: '100%',
-                      padding: '12px 15px',
-                      border: '2px solid #e9ecef',
-                      borderRadius: '10px',
-                      fontSize: '1rem'
-                    }}
-                  />
-                </div>
+                                 <div style={{ marginBottom: '15px' }}>
+                   <label style={{ display: 'block', marginBottom: '5px', fontWeight: '600', color: '#555', fontSize: '0.95rem' }}>
+                     📏 C - Thickness (mm)
+                   </label>
+                   <input
+                     type="number"
+                     id="rect-thickness-m"
+                     placeholder="e.g., 150"
+                     step="1"
+                     style={{
+                       width: '100%',
+                       padding: '12px 15px',
+                       border: '2px solid #e9ecef',
+                       borderRadius: '10px',
+                       fontSize: '1rem'
+                     }}
+                   />
+                 </div>
 
                 <button
                   onClick={() => calculateRectangular('metric')}
@@ -408,16 +408,16 @@ const ConcreteCalculator = () => {
                   <label style={{ fontSize: '0.9rem', color: '#666' }}>📏 B - Width (meters)</label>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '15px' }}>
-                  <div>
-                    <input type="number" id="round-radius-m" placeholder="e.g., 20" step="0.1" style={{ width: '100%', padding: '12px 15px', border: '2px solid #e9ecef', borderRadius: '10px', fontSize: '1rem' }} />
-                    <label style={{ fontSize: '0.8rem', color: '#666' }}>🔄 R - Corner Radius (cm)</label>
-                  </div>
-                  <div>
-                    <input type="number" id="round-thickness-m" placeholder="e.g., 12" step="0.1" style={{ width: '100%', padding: '12px 15px', border: '2px solid #e9ecef', borderRadius: '10px', fontSize: '1rem' }} />
-                    <label style={{ fontSize: '0.8rem', color: '#666' }}>📏 C - Thickness (cm)</label>
-                  </div>
-                </div>
+                                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '15px' }}>
+                   <div>
+                     <input type="number" id="round-radius-m" placeholder="e.g., 200" step="1" style={{ width: '100%', padding: '12px 15px', border: '2px solid #e9ecef', borderRadius: '10px', fontSize: '1rem' }} />
+                     <label style={{ fontSize: '0.8rem', color: '#666' }}>🔄 R - Corner Radius (mm)</label>
+                   </div>
+                   <div>
+                     <input type="number" id="round-thickness-m" placeholder="e.g., 120" step="1" style={{ width: '100%', padding: '12px 15px', border: '2px solid #e9ecef', borderRadius: '10px', fontSize: '1rem' }} />
+                     <label style={{ fontSize: '0.8rem', color: '#666' }}>📏 C - Thickness (mm)</label>
+                   </div>
+                 </div>
 
                 <div style={{ background: '#fff3cd', border: '1px solid #ffeaa7', borderRadius: '8px', padding: '10px', margin: '10px 0', fontSize: '0.85rem', color: '#856404' }}>
                   💡 Formula: (A×B - 4×R² + π×R²) × C
@@ -455,10 +455,10 @@ const ConcreteCalculator = () => {
                   </div>
                 </div>
 
-                <div style={{ marginBottom: '15px' }}>
-                  <input type="number" id="pier-diameter-m" placeholder="e.g., 30" step="0.1" style={{ width: '100%', padding: '12px 15px', border: '2px solid #e9ecef', borderRadius: '10px', fontSize: '1rem' }} />
-                  <label style={{ fontSize: '0.9rem', color: '#666' }}>⚪ Diameter (cm)</label>
-                </div>
+                                 <div style={{ marginBottom: '15px' }}>
+                   <input type="number" id="pier-diameter-m" placeholder="e.g., 300" step="1" style={{ width: '100%', padding: '12px 15px', border: '2px solid #e9ecef', borderRadius: '10px', fontSize: '1rem' }} />
+                   <label style={{ fontSize: '0.9rem', color: '#666' }}>⚪ Diameter (mm)</label>
+                 </div>
 
                 <div style={{ marginBottom: '15px' }}>
                   <input type="number" id="pier-height-m" placeholder="e.g., 1.5" step="0.01" style={{ width: '100%', padding: '12px 15px', border: '2px solid #e9ecef', borderRadius: '10px', fontSize: '1rem' }} />
@@ -516,16 +516,16 @@ const ConcreteCalculator = () => {
                   <label style={{ fontSize: '0.9rem', color: '#666' }}>📏 B - Wall Height (meters)</label>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '15px' }}>
-                  <div>
-                    <input type="number" id="block-width-m" placeholder="e.g., 20" step="0.1" style={{ width: '100%', padding: '12px 15px', border: '2px solid #e9ecef', borderRadius: '10px', fontSize: '1rem' }} />
-                    <label style={{ fontSize: '0.8rem', color: '#666' }}>📏 C - Block Width (cm)</label>
-                  </div>
-                  <div>
-                    <input type="number" id="block-hollow-m" placeholder="e.g., 50" step="1" min="0" max="100" style={{ width: '100%', padding: '12px 15px', border: '2px solid #e9ecef', borderRadius: '10px', fontSize: '1rem' }} />
-                    <label style={{ fontSize: '0.8rem', color: '#666' }}>🕳️ Hollow % (40-60%)</label>
-                  </div>
-                </div>
+                                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '15px' }}>
+                   <div>
+                     <input type="number" id="block-width-m" placeholder="e.g., 200" step="1" style={{ width: '100%', padding: '12px 15px', border: '2px solid #e9ecef', borderRadius: '10px', fontSize: '1rem' }} />
+                     <label style={{ fontSize: '0.8rem', color: '#666' }}>📏 C - Block Width (mm)</label>
+                   </div>
+                   <div>
+                     <input type="number" id="block-hollow-m" placeholder="e.g., 50" step="1" min="0" max="100" style={{ width: '100%', padding: '12px 15px', border: '2px solid #e9ecef', borderRadius: '10px', fontSize: '1rem' }} />
+                     <label style={{ fontSize: '0.8rem', color: '#666' }}>🕳️ Hollow % (40-60%)</label>
+                   </div>
+                 </div>
 
                 <div style={{ background: '#fff3cd', border: '1px solid #ffeaa7', borderRadius: '8px', padding: '10px', margin: '10px 0', fontSize: '0.85rem', color: '#856404' }}>
                   💡 Formula: A × B × C × (Hollow% ÷ 100)
@@ -569,10 +569,10 @@ const ConcreteCalculator = () => {
                   <label style={{ fontSize: '0.9rem', color: '#666' }}>⚪ Hole Diameter (mm)</label>
                 </div>
 
-                <div style={{ marginBottom: '15px' }}>
-                  <input type="number" id="posthole-depth-m" placeholder="e.g., 60" step="0.1" style={{ width: '100%', padding: '12px 15px', border: '2px solid #e9ecef', borderRadius: '10px', fontSize: '1rem' }} />
-                  <label style={{ fontSize: '0.9rem', color: '#666' }}>📏 Hole Depth (cm)</label>
-                </div>
+                                 <div style={{ marginBottom: '15px' }}>
+                   <input type="number" id="posthole-depth-m" placeholder="e.g., 600" step="1" style={{ width: '100%', padding: '12px 15px', border: '2px solid #e9ecef', borderRadius: '10px', fontSize: '1rem' }} />
+                   <label style={{ fontSize: '0.9rem', color: '#666' }}>📏 Hole Depth (mm)</label>
+                 </div>
 
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '15px' }}>
                   <div>
@@ -632,13 +632,13 @@ const ConcreteCalculator = () => {
                 </div>
 
                 <div style={{ marginBottom: '15px' }}>
-                  <input type="number" id="footing-width-m" placeholder="e.g., 60" step="0.1" style={{ width: '100%', padding: '12px 15px', border: '2px solid #e9ecef', borderRadius: '10px', fontSize: '1rem' }} />
-                  <label style={{ fontSize: '0.9rem', color: '#666' }}>📏 B - Footing Width (cm)</label>
+                  <input type="number" id="footing-width-m" placeholder="e.g., 600" step="1" style={{ width: '100%', padding: '12px 15px', border: '2px solid #e9ecef', borderRadius: '10px', fontSize: '1rem' }} />
+                  <label style={{ fontSize: '0.9rem', color: '#666' }}>📏 B - Footing Width (mm)</label>
                 </div>
 
                 <div style={{ marginBottom: '15px' }}>
-                  <input type="number" id="footing-depth-m" placeholder="e.g., 40" step="0.1" style={{ width: '100%', padding: '12px 15px', border: '2px solid #e9ecef', borderRadius: '10px', fontSize: '1rem' }} />
-                  <label style={{ fontSize: '0.9rem', color: '#666' }}>📏 C - Footing Depth (cm)</label>
+                  <input type="number" id="footing-depth-m" placeholder="e.g., 400" step="1" style={{ width: '100%', padding: '12px 15px', border: '2px solid #e9ecef', borderRadius: '10px', fontSize: '1rem' }} />
+                  <label style={{ fontSize: '0.9rem', color: '#666' }}>📏 C - Footing Depth (mm)</label>
                 </div>
 
                 <button onClick={() => calculateFootings('metric')} style={{ width: '100%', background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', color: 'white', border: 'none', padding: '15px', borderRadius: '10px', fontSize: '1.1rem', fontWeight: '600', cursor: 'pointer', margin: '20px 0' }}>
