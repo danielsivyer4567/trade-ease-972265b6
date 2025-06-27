@@ -110,6 +110,7 @@ const NCCCodesCalculator = lazy(() => import('@/pages/Calculators/NCCCodesCalcul
 const ConcreteCalculator = lazy(() => import('@/pages/Calculators/ConcreteCalculator'));
 const AngleCalculator = lazy(() => import('@/pages/Calculators/AngleCalculator'));
 const StairsCalculator = lazy(() => import('@/pages/Calculators/StairsCalculator'));
+const PropertyMeasurement = lazy(() => import('@/pages/PropertyMeasurement'));
 
 // Demo pages
 const AnimatedStageDemo = lazy(() => import('@/pages/AnimatedStageDemo'));
@@ -270,6 +271,7 @@ const routeObjects: RouteObject[] = [
           { path: "/calculators/concrete", element: <SuspenseWrapper><ConcreteCalculator /></SuspenseWrapper> },
           { path: "/calculators/angle", element: <SuspenseWrapper><AngleCalculator /></SuspenseWrapper> },
           { path: "/calculators/stairs", element: <SuspenseWrapper><StairsCalculator /></SuspenseWrapper> },
+          { path: "/property-measurement", element: <SuspenseWrapper><PropertyMeasurement /></SuspenseWrapper> },
           { path: "/workflow", element: <SuspenseWrapper><N8nWorkflowListPage /></SuspenseWrapper> },
           { path: "/workflow/new", element: <SuspenseWrapper><N8nWorkflowPage /></SuspenseWrapper> },
           { path: "/workflow/edit/:id", element: <SuspenseWrapper><N8nWorkflowPage /></SuspenseWrapper> },

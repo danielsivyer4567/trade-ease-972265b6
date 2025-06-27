@@ -132,41 +132,56 @@ const Calculators = () => {
               </CardFooter>
             </Card>
           ))}
-          {/* Full-width border as a grid item */}
-          <div className="col-span-1 sm:col-span-2 lg:col-span-3">
-            <div className="border-t-2 border-gray-300 my-4 w-full"></div>
-            <h2 className="text-xl font-bold text-center text-gray-700 mt-6 mb-4">Building industry regulators</h2>
+        </div>
+
+        {/* New separate section with divider */}
+        <div className="mt-8">
+          <div className="border-t-2 border-gray-300 my-4 w-full"></div>
+          <div className="py-6 flex justify-center">
+            <Link 
+              to="/property-measurement" 
+              className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors font-semibold"
+            >
+              Property Measurement Tool
+            </Link>
           </div>
-          {/* NCC Codes Reference card as a grid item, plus new resources */}
-          {calculators.filter(c => [
-            "NCC Codes Reference",
-            "Qbcc Forms",
-            "Timber Qld Technical Data Sheet",
-            "SafeWork NSW",
-            "Consumer and Business Services",
-            "Building and Energy",
-            "Building Practitioners Board",
-            "Access Canberra (Building and Planning)",
-            "Consumer, Building and Occupational Services"
-          ].includes(c.title)).map((calculator, index) => (
-            <Card key={index} className="hover:shadow-md transition-shadow">
-              <CardHeader className="bg-slate-200 p-4">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-base md:text-lg">{calculator.title}</CardTitle>
-                  {calculator.icon}
-                </div>
-                <CardDescription className="line-clamp-2 min-h-[40px]">{calculator.description}</CardDescription>
-              </CardHeader>
-              <CardFooter className="bg-slate-200 p-4">
-                <Link 
-                  to={calculator.path} 
-                  className="w-full bg-blue-50 text-blue-600 py-2 rounded-md text-center hover:bg-blue-100 transition-colors"
-                >
-                  Open Reference
-                </Link>
-              </CardFooter>
-            </Card>
-          ))}
+        </div>
+
+        {/* Building industry regulators section */}
+        <div className="mt-8">
+          <div className="border-t-2 border-gray-300 my-4 w-full"></div>
+          <h2 className="text-xl font-bold text-center text-gray-700 mt-6 mb-6">Building industry regulators</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {calculators.filter(c => [
+              "NCC Codes Reference",
+              "Qbcc Forms",
+              "Timber Qld Technical Data Sheet",
+              "SafeWork NSW",
+              "Consumer and Business Services",
+              "Building and Energy",
+              "Building Practitioners Board",
+              "Access Canberra (Building and Planning)",
+              "Consumer, Building and Occupational Services"
+            ].includes(c.title)).map((calculator, index) => (
+              <Card key={index} className="hover:shadow-md transition-shadow">
+                <CardHeader className="bg-slate-200 p-4">
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-base md:text-lg">{calculator.title}</CardTitle>
+                    {calculator.icon}
+                  </div>
+                  <CardDescription className="line-clamp-2 min-h-[40px]">{calculator.description}</CardDescription>
+                </CardHeader>
+                <CardFooter className="bg-slate-200 p-4">
+                  <Link 
+                    to={calculator.path} 
+                    className="w-full bg-blue-50 text-blue-600 py-2 rounded-md text-center hover:bg-blue-100 transition-colors"
+                  >
+                    Open Reference
+                  </Link>
+                </CardFooter>
+              </Card>
+            ))}
+          </div>
         </div>
       </div>
     </AppLayout>
