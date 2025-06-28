@@ -122,32 +122,72 @@ const Calculators = () => {
               </CardFooter>
             </Card>
           ))}
+          {/* Electrician Calculator Card */}
+          <Card className="hover:shadow-md transition-shadow">
+            <CardHeader className="bg-slate-200 p-4">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-base md:text-lg">Electrician Calculator</CardTitle>
+                <Zap className="h-6 w-6 text-yellow-500" />
+              </div>
+              <CardDescription className="line-clamp-2 min-h-[40px]">
+                Calculate electrical loads, wire sizes, voltage drops, and more for electrical projects.
+              </CardDescription>
+            </CardHeader>
+            <CardFooter className="bg-slate-200 p-4">
+              <Link 
+                to="/calculators/electrician" 
+                className="w-full bg-blue-50 text-blue-600 py-2 rounded-md text-center hover:bg-blue-100 transition-colors"
+              >
+                Open Calculator
+              </Link>
+            </CardFooter>
+          </Card>
+          {/* Plumbing Calculator Card */}
+          <Card className="hover:shadow-md transition-shadow">
+            <CardHeader className="bg-slate-200 p-4">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-base md:text-lg">Plumbing Calculator</CardTitle>
+                <Droplets className="h-6 w-6 text-blue-500" />
+              </div>
+              <CardDescription className="line-clamp-2 min-h-[40px]">
+                Calculate pipe sizes, pressure loss, tank volumes, and more for plumbing projects.
+              </CardDescription>
+            </CardHeader>
+            <CardFooter className="bg-slate-200 p-4">
+              <Link 
+                to="/calculators/plumbing" 
+                className="w-full bg-blue-50 text-blue-600 py-2 rounded-md text-center hover:bg-blue-100 transition-colors"
+              >
+                Open Calculator
+              </Link>
+            </CardFooter>
+          </Card>
         </div>
 
         {/* Property Measurement and Specialized Tools section */}
         <div className="mt-8">
           <div className="border-t-2 border-gray-300 my-4 w-full"></div>
           <div className="py-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 max-w-4xl mx-auto">
-            <Link 
-              to="/property-measurement" 
-              className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors font-semibold text-center"
-            >
-              Property Measurement Tool
-            </Link>
-            <Link 
-              to="/calculators/electrician" 
-              className="bg-yellow-500 text-white px-6 py-3 rounded-lg hover:bg-yellow-600 transition-colors font-semibold text-center flex items-center justify-center gap-2"
-            >
-              <Zap className="h-5 w-5" />
-              Electrician Calculator
-            </Link>
-            <Link 
-              to="/calculators/plumbing" 
-              className="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 transition-colors font-semibold text-center flex items-center justify-center gap-2"
-            >
-              <Droplets className="h-5 w-5" />
-              Plumbing Calculator
-            </Link>
+            {/* Property Measurement Tool Card */}
+            <Card className="hover:shadow-md transition-shadow">
+              <CardHeader className="bg-slate-200 p-4">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-base md:text-lg">Property Measurement Tool</CardTitle>
+                  <Compass className="h-6 w-6 text-blue-600" />
+                </div>
+                <CardDescription className="line-clamp-2 min-h-[40px]">
+                  Measure property dimensions and calculate area for site planning and compliance.
+                </CardDescription>
+              </CardHeader>
+              <CardFooter className="bg-slate-200 p-4">
+                <Link 
+                  to="/property-measurement" 
+                  className="w-full bg-blue-50 text-blue-600 py-2 rounded-md text-center hover:bg-blue-100 transition-colors"
+                >
+                  Automatic Boundary Measurements Qld
+                </Link>
+              </CardFooter>
+            </Card>
           </div>
         </div>
 

@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -23,13 +22,13 @@ export const LoadSpanConfigCard: React.FC<LoadSpanConfigCardProps> = ({
   calculateSpanFromTable
 }) => {
   return (
-    <Card>
+    <Card className="bg-slate-300">
       <CardHeader>
         <CardTitle>Load & Span Configuration</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="space-y-2">
+          <div className="space-y-2 text-black">
             <Label htmlFor="load-value">Load (kPa)</Label>
             <Input
               id="load-value"
@@ -41,11 +40,11 @@ export const LoadSpanConfigCard: React.FC<LoadSpanConfigCardProps> = ({
               step="0.1"
             />
           </div>
-          <div className="space-y-2">
+          <div className="space-y-2 text-black">
             <Label htmlFor="span-type">Span Type</Label>
             <Select value={spanType} onValueChange={setSpanType}>
-              <SelectTrigger id="span-type">
-                <SelectValue placeholder="Select span type" />
+              <SelectTrigger id="span-type" className="text-black">
+                <SelectValue placeholder="Select span type" className="text-black" />
               </SelectTrigger>
               <SelectContent>
                 {SPAN_TYPES.map((type) => (

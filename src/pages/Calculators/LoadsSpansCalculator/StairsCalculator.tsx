@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Card, CardHeader, CardContent, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -40,7 +39,7 @@ export const StairsCalculator: React.FC<StairsCalculatorProps> = ({
 }) => {
   return (
     <>
-      <Card>
+      <Card className="bg-slate-300">
         <CardHeader>
           <CardTitle>Stairs Calculator</CardTitle>
           <CardDescription>
@@ -123,7 +122,7 @@ export const StairsCalculator: React.FC<StairsCalculatorProps> = ({
       </Card>
 
       {stairsResult && (
-        <Card className="mt-6 bg-amber-50 border-amber-200">
+        <Card className="bg-slate-300 mt-6 border-amber-200">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <span>Stairs Calculation Results</span>

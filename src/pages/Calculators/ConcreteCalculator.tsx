@@ -730,22 +730,13 @@ const ConcreteCalculator = () => {
           {selectedCalculator === 'post' && (
             <>
               {currentUnit === 'metric' ? (
-                <div style={{ background: '#e2e8f0', borderRadius: '20px', padding: '25px', boxShadow: '0 10px 30px rgba(0,0,0,0.2)', backdropFilter: 'blur(10px)', border: '2px solid #64748b' }}>
+                <div style={{ background: '#e2e8f0', borderRadius: '20px', padding: '25px', boxShadow: '0 10px 30px rgba(0,0,0,0.2)', backdropFilter: 'blur(10px)', border: '2px solid #94a3b8' }}>
                   <div style={{ textAlign: 'center', marginBottom: '20px', paddingBottom: '15px', borderBottom: '2px solid #f0f0f0' }}>
                     <h3 style={{ fontSize: '1.4rem', color: '#333', marginBottom: '8px' }}>🔲 Post Holes</h3>
                     <small>Cylindrical holes for posts</small>
                   </div>
                   <div style={{ background: '#f8f9fa', borderRadius: '10px', padding: '15px', margin: '15px 0', textAlign: 'center', border: '2px dashed #dee2e6' }}>
-                    <div style={{ fontFamily: 'monospace', fontSize: '0.9rem', color: '#666', lineHeight: '1.6' }}>
-                      📐 Cylindrical Post Holes<br/>
-                      <br/>
-                      |     |<br/>
-                      |     | H (Depth)<br/>
-                      |     |<br/>
-                      ----+-----+----<br/>
-                        D (Diameter)<br/>
-                      Volume: π × (D/2)² × H × Count
-                    </div>
+                    <img src="/lovable-uploads/197b4517e855d.png" alt="Post holes: labeled diameter, depth, and count" style={{ maxWidth: '320px', width: '100%', display: 'block', margin: '0 auto' }} />
                   </div>
                   <div style={{ marginBottom: '15px' }}>
                     <input type="number" id="posthole-diameter-m" placeholder="e.g., 100" step="1" style={{ width: '100%', padding: '12px 15px', border: '2px solid #e9ecef', borderRadius: '10px', fontSize: '1rem' }} />
@@ -779,16 +770,7 @@ const ConcreteCalculator = () => {
                     <small>Cylindrical holes for posts</small>
                   </div>
                   <div style={{ background: '#f8f9fa', borderRadius: '10px', padding: '15px', margin: '15px 0', textAlign: 'center', border: '2px dashed #dee2e6' }}>
-                    <div style={{ fontFamily: 'monospace', fontSize: '0.9rem', color: '#666', lineHeight: '1.6' }}>
-                      📐 Cylindrical Post Holes<br/>
-                      <br/>
-                      |     |<br/>
-                      |     | H (Depth)<br/>
-                      |     |<br/>
-                      ----+-----+----<br/>
-                        D (Diameter)<br/>
-                      Volume: π × (D/2)² × H × Count
-                    </div>
+                    <img src="/lovable-uploads/197b4517e855d.png" alt="Post holes: labeled diameter, depth, and count" style={{ maxWidth: '320px', width: '100%', display: 'block', margin: '0 auto' }} />
                   </div>
                   <div style={{ marginBottom: '15px' }}>
                     <input type="number" id="posthole-diameter-i" placeholder="e.g., 4" step="0.25" style={{ width: '100%', padding: '12px 15px', border: '2px solid #e9ecef', borderRadius: '10px', fontSize: '1rem' }} />
@@ -827,16 +809,7 @@ const ConcreteCalculator = () => {
                     <small>Concrete footings for strip foundations</small>
                   </div>
                   <div style={{ background: '#f8f9fa', borderRadius: '10px', padding: '15px', margin: '15px 0', textAlign: 'center', border: '2px dashed #dee2e6' }}>
-                    <div style={{ fontFamily: 'monospace', fontSize: '0.9rem', color: '#666', lineHeight: '1.6' }}>
-                      📐 Strip Footings<br/>
-                      <br/>
-                      ┌─────────────┐<br/>
-                      │ █ █ █ █ █ │ H (Height)<br/>
-                      │ █ █ █ █ █ │<br/>
-                      └─────────────┘<br/>
-                        L (Length)<br/>
-                      Volume: L × H × T
-                    </div>
+                    <img src="/lovable-uploads/197b451d8348e.png" alt="Strip footings: labeled length, width, and depth" style={{ maxWidth: '320px', width: '100%', display: 'block', margin: '0 auto' }} />
                   </div>
                   <div style={{ marginBottom: '15px' }}>
                     <input type="number" id="footing-length-m" placeholder="e.g., 10.0" step="0.1" style={{ width: '100%', padding: '12px 15px', border: '2px solid #e9ecef', borderRadius: '10px', fontSize: '1rem' }} />
@@ -870,16 +843,7 @@ const ConcreteCalculator = () => {
                     <small>Concrete footings for strip foundations</small>
                   </div>
                   <div style={{ background: '#f8f9fa', borderRadius: '10px', padding: '15px', margin: '15px 0', textAlign: 'center', border: '2px dashed #dee2e6' }}>
-                    <div style={{ fontFamily: 'monospace', fontSize: '0.9rem', color: '#666', lineHeight: '1.6' }}>
-                      📐 Strip Footings<br/>
-                      <br/>
-                      ┌─────────────┐<br/>
-                      │ █ █ █ █ █ │ H (Height)<br/>
-                      │ █ █ █ █ █ │<br/>
-                      └─────────────┘<br/>
-                        L (Length)<br/>
-                      Volume: L × H × T
-                    </div>
+                    <img src="/lovable-uploads/197b451d8348e.png" alt="Strip footings: labeled length, width, and depth" style={{ maxWidth: '320px', width: '100%', display: 'block', margin: '0 auto' }} />
                   </div>
                   <div style={{ marginBottom: '15px' }}>
                     <input type="number" id="footing-length-i" placeholder="e.g., 32.8" step="0.1" style={{ width: '100%', padding: '12px 15px', border: '2px solid #e9ecef', borderRadius: '10px', fontSize: '1rem' }} />

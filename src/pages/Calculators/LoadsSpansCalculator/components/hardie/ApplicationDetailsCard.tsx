@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -20,7 +19,7 @@ export const ApplicationDetailsCard: React.FC<ApplicationDetailsCardProps> = ({
   setSupportSpacing
 }) => {
   return (
-    <Card>
+    <Card className="bg-slate-300">
       <CardHeader>
         <CardTitle>Application Details</CardTitle>
       </CardHeader>
@@ -29,8 +28,8 @@ export const ApplicationDetailsCard: React.FC<ApplicationDetailsCardProps> = ({
           <div className="space-y-2">
             <Label htmlFor="application-area">Application Area</Label>
             <Select value={applicationArea} onValueChange={setApplicationArea}>
-              <SelectTrigger id="application-area">
-                <SelectValue placeholder="Select application area" />
+              <SelectTrigger id="application-area" className="text-black">
+                <SelectValue placeholder="Select application area" className="text-black" />
               </SelectTrigger>
               <SelectContent>
                 {HARDIE_APPLICATION_AREAS.map((area) => (

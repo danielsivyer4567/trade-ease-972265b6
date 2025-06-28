@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -41,7 +40,7 @@ export const ConcreteCalculator = ({
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
       {/* Input Card */}
-      <Card>
+      <Card className="bg-slate-300">
         <CardHeader>
           <CardTitle className="text-xl">Concrete Measurements</CardTitle>
         </CardHeader>
@@ -141,7 +140,7 @@ export const ConcreteCalculator = ({
       </Card>
 
       {/* Results Card */}
-      <Card>
+      <Card className="bg-slate-300">
         <CardHeader>
           <CardTitle className="text-xl">Required Concrete</CardTitle>
         </CardHeader>

@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -41,7 +40,7 @@ export const SquaringCalculator: React.FC<SquaringCalculatorProps> = ({
 }) => {
   return (
     <>
-      <Card>
+      <Card className="bg-slate-300">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Square className="h-5 w-5" />
@@ -60,7 +59,7 @@ export const SquaringCalculator: React.FC<SquaringCalculatorProps> = ({
                 placeholder="Enter width"
                 min="0.1"
                 step="0.1"
-                className="bg-slate-400"
+                className="bg-white text-black"
               />
             </div>
             <div className="space-y-2">
@@ -73,7 +72,7 @@ export const SquaringCalculator: React.FC<SquaringCalculatorProps> = ({
                 placeholder="Enter length"
                 min="0.1"
                 step="0.1"
-                className="bg-slate-400"
+                className="bg-white text-black"
               />
             </div>
           </div>
@@ -93,7 +92,7 @@ export const SquaringCalculator: React.FC<SquaringCalculatorProps> = ({
         </CardContent>
       </Card>
 
-      <Card className="mt-4">
+      <Card className="bg-slate-300 mt-4">
         <CardHeader>
           <CardTitle>Diagonal Measurements</CardTitle>
         </CardHeader>
@@ -109,7 +108,7 @@ export const SquaringCalculator: React.FC<SquaringCalculatorProps> = ({
                 placeholder="Enter diagonal A"
                 min="0.1"
                 step="0.1"
-                className="bg-slate-400"
+                className="bg-white text-black"
               />
             </div>
             <div className="space-y-2">
@@ -122,7 +121,7 @@ export const SquaringCalculator: React.FC<SquaringCalculatorProps> = ({
                 placeholder="Enter diagonal B"
                 min="0.1"
                 step="0.1"
-                className="bg-slate-400"
+                className="bg-white text-black"
               />
             </div>
           </div>
@@ -140,7 +139,7 @@ export const SquaringCalculator: React.FC<SquaringCalculatorProps> = ({
       </Card>
 
       {squaringResult && (
-        <Card className="mt-4 bg-amber-50 border-amber-200">
+        <Card className="bg-slate-300 mt-4 bg-amber-50 border-amber-200">
           <CardHeader>
             <CardTitle className="text-amber-800">Squaring Results</CardTitle>
           </CardHeader>
