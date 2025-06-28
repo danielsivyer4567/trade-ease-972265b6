@@ -32,16 +32,6 @@ const Calculators = () => {
     icon: <Construction className="h-6 w-6 text-gray-500" />,
     path: "/calculators/concrete"
   }, {
-    title: "Angle Calculator",
-    description: "Calculate angles and slopes using various measurement methods",
-    icon: <Compass className="h-6 w-6 text-indigo-500" />,
-    path: "/calculators/angle"
-  }, {
-    title: "Stairs Calculator",
-    description: "Calculate stair dimensions, risers, and treads for building projects",
-    icon: <ArrowUpDown className="h-6 w-6 text-orange-500" />,
-    path: "/calculators/stairs"
-  }, {
     title: "Fencing Calculator",
     description: "Calculate materials needed for fencing projects including posts, panels, and gates",
     icon: <Square className="h-6 w-6 text-emerald-500" />,

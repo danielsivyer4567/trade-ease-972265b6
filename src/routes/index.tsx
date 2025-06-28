@@ -108,8 +108,6 @@ const FencingCalculator = lazy(() => import('@/pages/Calculators/FencingCalculat
 const MarkupCalculator = lazy(() => import('@/pages/Calculators/MarkupCalculator'));
 const NCCCodesCalculator = lazy(() => import('@/pages/Calculators/NCCCodesCalculator'));
 const ConcreteCalculator = lazy(() => import('@/pages/Calculators/ConcreteCalculator'));
-const AngleCalculator = lazy(() => import('@/pages/Calculators/AngleCalculator'));
-const StairsCalculator = lazy(() => import('@/pages/Calculators/StairsCalculator'));
 const ElectricianCalculator = lazy(() => import('@/pages/Calculators/ElectricianCalculator'));
 const PlumbingCalculator = lazy(() => import('@/pages/Calculators/PlumbingCalculator'));
 const PropertyMeasurement = lazy(() => import('@/pages/PropertyMeasurement'));
@@ -270,9 +268,12 @@ const routeObjects: RouteObject[] = [
           { path: "/calculators/loads-spans", element: <SuspenseWrapper><LoadsSpansCalculator /></SuspenseWrapper> },
           { path: "/calculators/fencing", element: <SuspenseWrapper><FencingCalculator /></SuspenseWrapper> },
           { path: "/calculators/ncc-codes", element: <SuspenseWrapper><NCCCodesCalculator /></SuspenseWrapper> },
-          { path: "/calculators/concrete", element: <SuspenseWrapper><ConcreteCalculator /></SuspenseWrapper> },
-          { path: "/calculators/angle", element: <SuspenseWrapper><AngleCalculator /></SuspenseWrapper> },
-          { path: "/calculators/stairs", element: <SuspenseWrapper><StairsCalculator /></SuspenseWrapper> },
+          { path: "/calculators/concrete",
+            children: [
+              { index: true, element: <Navigate to="rect" replace /> },
+              { path: ":tab", element: <SuspenseWrapper><ConcreteCalculator /></SuspenseWrapper> },
+            ]
+          },
           { path: "/calculators/electrician", element: <SuspenseWrapper><ElectricianCalculator /></SuspenseWrapper> },
           { path: "/calculators/plumbing", element: <SuspenseWrapper><PlumbingCalculator /></SuspenseWrapper> },
           { path: "/property-measurement", element: <SuspenseWrapper><PropertyMeasurement /></SuspenseWrapper> },
