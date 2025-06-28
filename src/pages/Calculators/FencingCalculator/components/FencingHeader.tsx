@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Link } from "react-router-dom";
 import { ArrowLeft, Square } from "lucide-react";
@@ -9,7 +8,7 @@ export const FencingHeader = () => {
       <Link to="/calculators" className="hover:text-blue-500">
         <ArrowLeft className="h-6 w-6" />
       </Link>
-      <Square className="h-8 w-8 text-emerald-500" />
+      <Square className="h-8 w-8 text-blue-500" />
       <h1 className="text-3xl font-bold">Fencing Calculator</h1>
     </div>
   );

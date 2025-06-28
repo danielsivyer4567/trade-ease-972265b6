@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Calculation } from "../types";
 
@@ -8,7 +7,7 @@ interface CalculationResultProps {
 
 export function CalculationResult({ calculation }: CalculationResultProps) {
   return (
-    <Card>
+    <Card className="bg-slate-300">
       <CardHeader>
         <CardTitle>Calculation Result</CardTitle>
       </CardHeader>

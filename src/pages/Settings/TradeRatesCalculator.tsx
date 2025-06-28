@@ -61,13 +61,13 @@ const TradeRatesCalculator = () => {
           <Link to="/settings" className="hover:text-blue-500">
             <ArrowLeft className="h-6 w-6" />
           </Link>
-          <Calculator className="h-8 w-8 text-green-500" />
+          <Calculator className="h-8 w-8 text-blue-500" />
           <h1 className="text-3xl font-bold">Trade Rates Calculator</h1>
         </div>
         
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Calculator Input Section */}
-          <Card className="lg:col-span-2">
+          <Card className="lg:col-span-2 bg-slate-300">
             <CardHeader>
               <CardTitle>Calculate Total</CardTitle>
               <CardDescription>
@@ -112,7 +112,7 @@ const TradeRatesCalculator = () => {
           </Card>
 
           {/* Results Section */}
-          <Card>
+          <Card className="bg-slate-300">
             <CardHeader>
               <CardTitle>Results</CardTitle>
             </CardHeader>
@@ -130,13 +130,13 @@ const TradeRatesCalculator = () => {
                 
                 <div className="grid grid-cols-2 gap-2">
                   <div className="font-medium">Total:</div>
-                  <div className="font-bold text-green-600">{formatCurrency(total)}</div>
+                  <div className="font-bold text-blue-600">{formatCurrency(total)}</div>
                 </div>
                 
                 <Button 
                   onClick={handleShareResults} 
                   disabled={!total}
-                  className="w-full mt-4"
+                  className="w-full mt-4 bg-blue-500 hover:bg-blue-600"
                 >
                   Copy Results
                 </Button>
@@ -145,7 +145,7 @@ const TradeRatesCalculator = () => {
           </Card>
           
           {/* Rate Calculator Section */}
-          <Card className="lg:col-span-3">
+          <Card className="lg:col-span-3 bg-slate-300">
             <CardHeader>
               <CardTitle>Rate Calculator</CardTitle>
               <CardDescription>

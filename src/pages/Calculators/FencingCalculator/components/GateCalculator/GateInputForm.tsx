@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -23,7 +22,7 @@ export const GateInputForm: React.FC<GateInputFormProps> = ({
   onCalculate
 }) => {
   return (
-    <div className="bg-emerald-50 p-4 rounded-lg mb-4 border border-emerald-200">
+    <div className="bg-slate-300 p-4 rounded-lg mb-4 border border-slate-400">
       <h3 className="text-lg font-semibold mb-4">Calculate Gate Materials</h3>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
         <div>
@@ -58,7 +57,7 @@ export const GateInputForm: React.FC<GateInputFormProps> = ({
       </div>
       <Button 
         onClick={onCalculate}
-        className="w-full bg-emerald-500 hover:bg-emerald-600 mb-4"
+        className="w-full bg-blue-500 hover:bg-blue-600 mb-4"
       >
         Calculate Gate Materials
       </Button>
