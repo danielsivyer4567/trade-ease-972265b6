@@ -1,4 +1,3 @@
-
 import React from "react";
 import { SpanTableCalculator } from "../SpanTableCalculator";
 import { BeamCalculator } from "../BeamCalculator";
@@ -35,8 +34,9 @@ export const TabContents: React.FC<TabContentsProps> = ({ tabId }) => {
     case "beam":
       return <BeamCalculator {...beamCalculatorProps} />;
     case "joist":
-    case "rafter":
       return <SpanTableCalculator {...spanTableCalculatorProps} />;
+    case "rafter":
+      return <RafterRoofCalculator />;
     case "concrete":
       return <ConcreteCalculator {...concreteCalculatorProps} />;
     case "squaring":

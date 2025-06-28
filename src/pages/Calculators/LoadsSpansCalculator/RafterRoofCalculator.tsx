@@ -13,6 +13,9 @@ export const RafterRoofCalculator: React.FC = () => {
   const [rafterSpacing, setRafterSpacing] = useState(600);
   const [rafterWidth, setRafterWidth] = useState(45);
   const [birdsmouthDepth, setBirdsmouthDepth] = useState(50);
+  const [roofCovering, setRoofCovering] = useState("colorbond");
+  const [ridgeBeam, setRidgeBeam] = useState("no");
+  const [ridgeBeamThickness, setRidgeBeamThickness] = useState(90);
   const [result, setResult] = useState<any>(null);
 
   function calculate() {
@@ -45,6 +48,14 @@ export const RafterRoofCalculator: React.FC = () => {
 
   return (
     <>
+      <div className="w-full flex justify-center mb-6">
+        <img 
+          src="/lovable-uploads/197b4c992159b.png" 
+          alt="Rafter and roof diagram" 
+          className="max-w-full h-auto rounded shadow-md border border-gray-200"
+          style={{ maxHeight: 240 }}
+        />
+      </div>
       <Card className="bg-slate-300">
         <CardHeader>
           <CardTitle className="text-black">Rafter & Roof Calculator</CardTitle>
@@ -102,12 +113,57 @@ export const RafterRoofCalculator: React.FC = () => {
             </div>
           </div>
           <div className="mb-6">
+            <h2 className="font-semibold text-lg text-black mb-2">Roof Covering Material</h2>
+            <div className="flex flex-wrap gap-2">
+              {[
+                { value: "colorbond", label: "Colorbond" },
+                { value: "roof_tiles", label: "Roof Tiles" },
+                { value: "shingles", label: "Shingles" },
+                { value: "slate_rock", label: "Slate Rock" },
+                { value: "composite_shingles", label: "Composite Shingles" },
+                { value: "solar_tiles", label: "Solar Tiles" },
+              ].map(opt => (
+                <Button
+                  key={opt.value}
+                  type="button"
+                  className={`px-4 py-2 rounded ${roofCovering === opt.value ? 'bg-amber-500 text-white' : 'bg-white text-black border border-gray-300'}`}
+                  onClick={() => setRoofCovering(opt.value)}
+                >
+                  {opt.label}
+                </Button>
+              ))}
+            </div>
+          </div>
+          <div className="mb-6">
             <h2 className="font-semibold text-lg text-black mb-2">Birdsmouth Cut</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="space-y-2 text-black">
                 <Label htmlFor="birdsmouth">Birdsmouth Depth (mm) (seat cut)</Label>
                 <Input id="birdsmouth" type="number" value={birdsmouthDepth} onChange={e => setBirdsmouthDepth(Number(e.target.value))} min={1} step={1} className="bg-white text-black" />
               </div>
+            </div>
+          </div>
+          <div className="mb-6">
+            <h2 className="font-semibold text-lg text-black mb-2">Ridge Beam</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="space-y-2 text-black">
+                <Label htmlFor="ridge-beam">Ridge Beam Added?</Label>
+                <Select value={ridgeBeam} onValueChange={setRidgeBeam}>
+                  <SelectTrigger id="ridge-beam" className="text-black">
+                    <SelectValue placeholder="Select option" className="text-black" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="no" className="text-black">No</SelectItem>
+                    <SelectItem value="yes" className="text-black">Yes</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              {ridgeBeam === "yes" && (
+                <div className="space-y-2 text-black">
+                  <Label htmlFor="ridge-beam-thickness">Ridge Beam Thickness (mm)</Label>
+                  <Input id="ridge-beam-thickness" type="number" value={ridgeBeamThickness} onChange={e => setRidgeBeamThickness(Number(e.target.value))} min={1} step={1} className="bg-white text-black" />
+                </div>
+              )}
             </div>
           </div>
           <Button className="w-full mt-4 bg-amber-500 hover:bg-amber-600" onClick={calculate}>Calculate</Button>
@@ -128,6 +184,9 @@ export const RafterRoofCalculator: React.FC = () => {
               <li><b>Total Rafter Length (standard spacing):</b> {result.total_rafter_length_m} m</li>
               <li><b>Total Rafter Length (adjusted for wind):</b> {result.adjusted_total_rafter_length_m} m</li>
               <li><b>Estimated Material Weight:</b> {result.material_weight_kg} kg</li>
+              {ridgeBeam === "yes" && (
+                <li><b>Ridge Beam Thickness:</b> {ridgeBeamThickness} mm</li>
+              )}
             </ul>
           </CardContent>
         </Card>
