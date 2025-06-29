@@ -115,7 +115,7 @@ const Calculators = () => {
               <CardFooter className="bg-slate-200 p-4">
                 <Link 
                   to={calculator.path} 
-                  className="w-full bg-blue-50 text-blue-600 py-2 rounded-md text-center hover:bg-blue-100 transition-colors"
+                  className="w-full bg-blue-600 text-white py-2 rounded-md text-center hover:bg-blue-700 transition-colors"
                 >
                   Open Calculator
                 </Link>
@@ -136,7 +136,7 @@ const Calculators = () => {
             <CardFooter className="bg-slate-200 p-4">
               <Link 
                 to="/calculators/electrician" 
-                className="w-full bg-blue-50 text-blue-600 py-2 rounded-md text-center hover:bg-blue-100 transition-colors"
+                className="w-full bg-blue-600 text-white py-2 rounded-md text-center hover:bg-blue-700 transition-colors"
               >
                 Open Calculator
               </Link>
@@ -156,7 +156,7 @@ const Calculators = () => {
             <CardFooter className="bg-slate-200 p-4">
               <Link 
                 to="/calculators/plumbing" 
-                className="w-full bg-blue-50 text-blue-600 py-2 rounded-md text-center hover:bg-blue-100 transition-colors"
+                className="w-full bg-blue-600 text-white py-2 rounded-md text-center hover:bg-blue-700 transition-colors"
               >
                 Open Calculator
               </Link>
@@ -182,7 +182,7 @@ const Calculators = () => {
               <CardFooter className="bg-slate-200 p-4">
                 <Link 
                   to="/property-measurement" 
-                  className="w-full bg-blue-50 text-blue-600 py-2 rounded-md text-center hover:bg-blue-100 transition-colors"
+                  className="w-full bg-blue-600 text-white py-2 rounded-md text-center hover:bg-blue-700 transition-colors"
                 >
                   Automatic Boundary Measurements Qld
                 </Link>
@@ -218,7 +218,7 @@ const Calculators = () => {
                 <CardFooter className="bg-slate-200 p-4">
                   <Link 
                     to={calculator.path} 
-                    className="w-full bg-blue-50 text-blue-600 py-2 rounded-md text-center hover:bg-blue-100 transition-colors"
+                    className="w-full bg-blue-600 text-white py-2 rounded-md text-center hover:bg-blue-700 transition-colors"
                   >
                     Open Reference
                   </Link>

@@ -267,11 +267,11 @@ const PropertyMeasurement = () => {
 
         <div className="grid gap-6 lg:grid-cols-2">
           {/* Form Section */}
-          <Card>
-            <CardHeader>
+          <Card className="bg-slate-300">
+            <CardHeader className="bg-slate-300">
               <CardTitle>Property Details</CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="bg-slate-300">
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
                   <Label htmlFor="street_number">Street Number</Label>
@@ -443,11 +443,11 @@ const PropertyMeasurement = () => {
           </Card>
 
           {/* Response Section */}
-          <Card>
-            <CardHeader>
+          <Card className="bg-slate-300">
+            <CardHeader className="bg-slate-300">
               <CardTitle>Response</CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="bg-slate-300">
               {error && (
                 <div className="p-4 bg-red-50 border border-red-200 rounded-md mb-4">
                   <p className="text-red-700 text-sm">
@@ -562,11 +562,11 @@ const PropertyMeasurement = () => {
         </div>
 
         {/* Performance Optimization Section */}
-        <Card className="mt-6">
-          <CardHeader>
+        <Card className="mt-6 bg-slate-300">
+          <CardHeader className="bg-slate-300">
             <CardTitle>Performance Optimization</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="bg-slate-300">
             <div className="space-y-4 text-sm">
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                 <h4 className="font-semibold text-blue-800 mb-2">🚀 For Best Performance - Deploy Supabase Function</h4>
