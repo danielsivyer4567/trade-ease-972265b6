@@ -661,6 +661,8 @@ const PropertyMeasurement = () => {
                           {data.side_lengths_m && Array.isArray(data.side_lengths_m) && (
                             <BoundaryMeasurements 
                               measurements={data.side_lengths_m}
+                              coordinates={data.coordinates || data.boundary_points || data.vertices}
+                              propertyData={data}
                               streetFacing="north" // Default - can be enhanced later with actual orientation data
                             />
                           )}
@@ -716,12 +718,27 @@ const PropertyMeasurement = () => {
           <CardContent className="bg-slate-300">
             <div className="space-y-4 text-sm">
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <h4 className="font-semibold text-blue-800 mb-2">🏠 How Directions Are Assigned</h4>
+                <h4 className="font-semibold text-blue-800 mb-2">🏠 Automatic Direction Detection</h4>
                 <div className="space-y-2 text-blue-700">
-                  <p><strong>Front:</strong> The street-facing boundary (usually shortest side for residential lots)</p>
-                  <p><strong>Left/Right:</strong> Standing at the front boundary facing the property</p>
-                  <p><strong>Back:</strong> The rear boundary opposite to the street</p>
-                  <p><strong>Cardinal Directions:</strong> North, South, East, West based on compass orientation</p>
+                  <p><strong>Smart Front Detection:</strong></p>
+                  <div className="ml-4 space-y-1 text-sm">
+                    <p>• For properties with coordinates: Uses geometric analysis to identify street-facing boundary</p>
+                    <p>• For properties without coordinates: Uses shortest boundary (typical for residential lots)</p>
+                    <p>• Considers southern positioning (many streets run east-west)</p>
+                  </div>
+                  
+                  <p><strong>Left/Right Assignment:</strong></p>
+                  <div className="ml-4 space-y-1 text-sm">
+                    <p>• Calculated relative to standing at the front boundary facing inward</p>
+                    <p>• Uses clockwise/counterclockwise analysis from property centroid</p>
+                    <p>• Angular positioning: Right (45°-135°), Back (135°-225°), Left (225°-315°)</p>
+                  </div>
+                  
+                  <p><strong>Rear Identification:</strong></p>
+                  <div className="ml-4 space-y-1 text-sm">
+                    <p>• Boundary positioned opposite or furthest from the identified front</p>
+                    <p>• Uses geometric analysis for irregular properties</p>
+                  </div>
                 </div>
               </div>
               
