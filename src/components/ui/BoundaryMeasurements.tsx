@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Navigation, RotateCw, Home, TreePine, Compass } from 'lucide-react';
+import { Navigation, RotateCw, Home, TreePine, Compass, Map } from 'lucide-react';
+import { QueenslandSpatialService } from '../../services/QueenslandSpatialService';
 
 interface BoundaryMeasurement {
   length: number;
@@ -20,6 +21,13 @@ interface BoundaryMeasurementsProps {
   coordinates?: PropertyCoordinate[];
   streetFacing?: 'north' | 'south' | 'east' | 'west';
   propertyData?: any; // Full API response for additional analysis
+  address?: {
+    street_number: string;
+    street_name: string;
+    street_type: string;
+    suburb: string;
+    postcode: string;
+  };
 }
 
 const DIRECTION_OPTIONS = [
@@ -37,10 +45,66 @@ export const BoundaryMeasurements: React.FC<BoundaryMeasurementsProps> = ({
   measurements, 
   coordinates,
   streetFacing,
-  propertyData 
+  propertyData,
+  address
 }) => {
   const [boundaryData, setBoundaryData] = useState<BoundaryMeasurement[]>([]);
   const [editMode, setEditMode] = useState(false);
+  const [queenslandData, setQueenslandData] = useState<any>(null);
+  const [isLoadingQLD, setIsLoadingQLD] = useState(false);
+
+  // Load Queensland Spatial data
+  const loadQueenslandData = async () => {
+    console.log('BoundaryMeasurements: loadQueenslandData called with address:', address);
+    
+    // For testing: create a mock address if none provided
+    const testAddress = address || {
+      street_number: '2',
+      street_name: 'Adelong',
+      street_type: 'Close',
+      suburb: 'Upper Coomera',
+      postcode: '4209'
+    };
+
+    if (!testAddress.postcode.startsWith('4')) {
+      console.log('BoundaryMeasurements: Not a Queensland postcode:', testAddress.postcode);
+      alert('Queensland Spatial Data is only available for Queensland properties (postcodes starting with 4)');
+      return;
+    }
+
+    setIsLoadingQLD(true);
+    console.log('BoundaryMeasurements: Testing with address:', testAddress);
+    
+    try {
+      console.log('BoundaryMeasurements: Loading Queensland Spatial data for:', testAddress);
+      alert('Fetching Queensland Government spatial data... This may take a few seconds.');
+      
+      const qldData = await QueenslandSpatialService.getQueenslandPropertyData(testAddress);
+      
+      if (qldData) {
+        console.log('BoundaryMeasurements: Queensland data loaded successfully:', qldData);
+        setQueenslandData(qldData);
+        
+        // Convert Queensland boundary data to our format
+        const qldBoundaries: BoundaryMeasurement[] = qldData.boundaries.map((boundary, index) => ({
+          length: boundary.length,
+          direction: boundary.direction,
+          isStreetFacing: qldData.streetFrontage?.boundaryIndex === index
+        }));
+        
+        setBoundaryData(qldBoundaries);
+        alert(`Queensland data loaded! Found Lot ${qldData.lotNumber}, Plan ${qldData.planNumber}`);
+      } else {
+        console.log('BoundaryMeasurements: No Queensland data available');
+        alert('No Queensland spatial data found for this property. This could be due to:\n- Property not in Queensland cadastral database\n- Address not found in government records\n- Temporary API unavailability');
+      }
+    } catch (error) {
+      console.error('BoundaryMeasurements: Queensland data loading failed:', error);
+      alert(`Queensland spatial data failed to load:\n${error instanceof Error ? error.message : 'Unknown error'}\n\nCheck browser console for details.`);
+    } finally {
+      setIsLoadingQLD(false);
+    }
+  };
 
   // Calculate the angle between two points
   const calculateAngle = (p1: PropertyCoordinate, p2: PropertyCoordinate): number => {
@@ -474,7 +538,19 @@ export const BoundaryMeasurements: React.FC<BoundaryMeasurementsProps> = ({
             Property Boundary Measurements
           </CardTitle>
           <div className="flex gap-2">
-            {!coordinates && measurements.length >= 5 && (
+            {address && address.postcode.startsWith('4') && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={loadQueenslandData}
+                disabled={isLoadingQLD}
+                className="text-xs bg-green-50 hover:bg-green-100 text-green-700"
+              >
+                <Map className="h-3 w-3 mr-1" />
+                {isLoadingQLD ? 'Loading QLD Data...' : 'Get QLD Spatial Data'}
+              </Button>
+            )}
+            {!coordinates && measurements.length >= 5 && !queenslandData && (
               <Button
                 variant="outline"
                 size="sm"
@@ -589,32 +665,62 @@ export const BoundaryMeasurements: React.FC<BoundaryMeasurementsProps> = ({
               'Irregular'
             } ({boundaryData.length} sides)</div>
                          <div><strong>Detection Method:</strong> {
-               coordinates 
-                 ? (measurements.length >= 5 ? 'Advanced Irregular Property Analysis' : 'Enhanced (coordinate geometry)')
-                 : (measurements.length >= 5 ? 'Enhanced Pattern Analysis (irregular)' : 'Standard (pattern-based analysis)')
+               queenslandData 
+                 ? 'Queensland Government Spatial Data (Cadastral Boundaries)'
+                 : coordinates 
+                   ? (measurements.length >= 5 ? 'Advanced Irregular Property Analysis' : 'Enhanced (coordinate geometry)')
+                   : (measurements.length >= 5 ? 'Enhanced Pattern Analysis (irregular)' : 'Standard (pattern-based analysis)')
              }</div>
              <div><strong>Front Identification:</strong> {
-               measurements.length >= 5 
-                 ? (coordinates 
-                     ? 'Multi-factor scoring: position, length, orientation, accessibility' 
-                     : 'Medium-length boundary analysis (avoiding utility boundaries)')
-                 : (coordinates 
-                     ? 'Geometric analysis with street positioning' 
-                     : 'Shortest boundary (typical for residential lots)')
+               queenslandData 
+                 ? `Official cadastral analysis with confidence scoring (Lot ${queenslandData.lotNumber})`
+                 : measurements.length >= 5 
+                   ? (coordinates 
+                       ? 'Multi-factor scoring: position, length, orientation, accessibility' 
+                       : 'Medium-length boundary analysis (avoiding utility boundaries)')
+                   : (coordinates 
+                       ? 'Geometric analysis with street positioning' 
+                       : 'Shortest boundary (typical for residential lots)')
              }</div>
             <div><strong>Direction Assignment:</strong> Left/Right relative to standing at front boundary</div>
-                     {!coordinates && (
+                     {!queenslandData && !coordinates && (
                <div className="text-amber-600 mt-1">
-                 <strong>💡 Current Limitation:</strong> This API doesn't provide coordinate data for geometric analysis
+                 <strong>💡 Enhancement Available:</strong> {address && address.postcode.startsWith('4') ? 'Queensland Spatial Data available!' : 'Current API limitations'}
                  <br />
                  <span className="text-xs">
-                   • Current response includes: measurements, area, perimeter, and aerial image
-                   <br />
-                   • Missing: boundary coordinates, vertices, or polygon data  
-                   <br />
+                   {address && address.postcode.startsWith('4') ? (
+                     <>
+                       • Click "Get QLD Spatial Data" for official government cadastral boundaries
+                       <br />
+                       • Provides exact coordinates, lot details, and precise direction detection
+                       <br />
+                     </>
+                   ) : (
+                     <>
+                       • Current response includes: measurements, area, perimeter, and aerial image
+                       <br />
+                       • Missing: boundary coordinates, vertices, or polygon data  
+                       <br />
+                     </>
+                   )}
                    • Use "Try Longer Front" button for irregular properties with incorrect front detection
                    <br />
                    • Use "Edit Directions" to manually assign specific boundary directions
+                 </span>
+               </div>
+             )}
+             {queenslandData && (
+               <div className="text-green-600 mt-1">
+                 <strong>✅ Queensland Spatial Data Active:</strong> Using official government cadastral boundaries
+                 <br />
+                 <span className="text-xs">
+                   • Lot {queenslandData.lotNumber}, Plan {queenslandData.planNumber}
+                   <br />
+                   • Street frontage: {queenslandData.streetFrontage?.length.toFixed(2)}m on {queenslandData.streetFrontage?.streetName}
+                   <br />
+                   • Coordinate-based direction detection with compass bearings
+                   <br />
+                   • Data source: Queensland Government Spatial Services
                  </span>
                </div>
              )}

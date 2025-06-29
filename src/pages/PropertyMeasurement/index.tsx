@@ -663,6 +663,13 @@ const PropertyMeasurement = () => {
                               measurements={data.side_lengths_m}
                               coordinates={data.coordinates || data.boundary_points || data.vertices}
                               propertyData={data}
+                              address={{
+                                street_number: formData.street_number,
+                                street_name: formData.street_name,
+                                street_type: formData.street_type,
+                                suburb: formData.suburb,
+                                postcode: formData.postcode
+                              }}
                               streetFacing="north" // Default - can be enhanced later with actual orientation data
                             />
                           )}
