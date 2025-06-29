@@ -38,9 +38,23 @@ export const ConcreteCalculator = ({
   calculateConcreteVolume: () => void;
 }) => {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-      {/* Input Card */}
-      <Card className="bg-slate-300">
+    <div className="space-y-6">
+      {/* Reference Image */}
+      <div className="bg-gray-50 p-4 rounded-lg border-2 border-dashed border-gray-300 text-center">
+        <h3 className="text-lg font-medium mb-3">📋 Calculator Reference Guide</h3>
+        <img 
+          src="/lovable-uploads/197b43d06f3c3.png" 
+          alt="Concrete calculator reference guide" 
+          className="max-w-sm mx-auto rounded-lg shadow-md"
+        />
+        <p className="text-sm text-gray-600 mt-2">
+          Reference guide for selecting the correct calculator type
+        </p>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Input Card */}
+        <Card className="bg-slate-300">
         <CardHeader>
           <CardTitle className="text-xl">Concrete Measurements</CardTitle>
         </CardHeader>
@@ -206,6 +220,7 @@ export const ConcreteCalculator = ({
           </div>
         </CardContent>
       </Card>
+      </div>
     </div>
   );
 };

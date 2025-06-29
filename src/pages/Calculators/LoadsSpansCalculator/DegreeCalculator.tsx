@@ -60,7 +60,7 @@ export const DegreeCalculator: React.FC<DegreeCalculatorProps> = ({
         <CardContent className="space-y-4">
           <div className="w-full flex justify-center mb-6">
             <img 
-              src="/lovable-uploads/square.png" 
+              src="/lovable-uploads/197babb3f562d.png" 
               alt="Angle calculation diagram" 
               className="max-w-full h-auto rounded shadow-md border border-gray-200"
               style={{ maxHeight: 300 }}

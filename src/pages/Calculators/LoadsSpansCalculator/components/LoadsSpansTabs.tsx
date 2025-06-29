@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TabContents } from "./TabContents";
@@ -11,7 +10,6 @@ interface LoadsSpansTabsProps {
 export const LoadsSpansTabs = ({ activeTab, setActiveTab }: LoadsSpansTabsProps) => {
   const tabs = [
     { id: "beam", label: "Beam" },
-    { id: "joist", label: "Bearer" },
     { id: "rafter", label: "Rafter & Roof" },
     { id: "concrete", label: "Concrete" },
     { id: "squaring", label: "Squaring" },
@@ -24,7 +22,7 @@ export const LoadsSpansTabs = ({ activeTab, setActiveTab }: LoadsSpansTabsProps)
   return (
     <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
       <div className="overflow-x-auto pb-2">
-        <TabsList className="grid min-w-max grid-cols-9 mb-6">
+        <TabsList className="grid min-w-max grid-cols-8 mb-6">
           {tabs.map((tab) => (
             <TabsTrigger key={tab.id} value={tab.id} className="text-sm">
               {tab.label}

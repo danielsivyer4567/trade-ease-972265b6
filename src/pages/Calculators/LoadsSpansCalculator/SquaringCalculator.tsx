@@ -40,6 +40,15 @@ export const SquaringCalculator: React.FC<SquaringCalculatorProps> = ({
 }) => {
   return (
     <>
+      {/* Header image */}
+      <div className="mb-6 flex justify-center">
+        <img 
+          src="/lovable-uploads/square.png" 
+          alt="Squaring Calculator" 
+          className="max-w-full h-auto max-h-64 object-contain rounded-lg shadow-md"
+        />
+      </div>
+      
       <Card className="bg-slate-300">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">

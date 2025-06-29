@@ -1,4 +1,3 @@
-
 import React from "react";
 import { ProductSelectionCard } from "./components/hardie/ProductSelectionCard";
 import { ApplicationDetailsCard } from "./components/hardie/ApplicationDetailsCard";
@@ -38,6 +37,14 @@ export const JamesHardieCalculator: React.FC<JamesHardieCalculatorProps> = ({
 }) => {
   return (
     <>
+      <div className="mb-6 text-center">
+        <img 
+          src="/lovable-uploads/james hardie image.jpg" 
+          alt="James Hardie Products" 
+          className="mx-auto max-w-full h-auto rounded-lg shadow-md"
+        />
+      </div>
+
       <ProductSelectionCard
         productType={productType}
         setProductType={setProductType}

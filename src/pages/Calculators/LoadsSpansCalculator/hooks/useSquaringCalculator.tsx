@@ -1,5 +1,5 @@
-
 import { useState } from "react";
+import { useCalculationHistory } from "@/hooks/use-calculation-history";
 
 export interface SquaringResult {
   isSquare: boolean;
@@ -16,6 +16,8 @@ export const useSquaringCalculator = () => {
   const [diagonalB, setDiagonalB] = useState<string>("");
   const [unit, setUnit] = useState<string>("meters");
   const [squaringResult, setSquaringResult] = useState<SquaringResult | null>(null);
+  
+  const { addCalculation } = useCalculationHistory();
 
   const calculateSquaring = () => {
     const widthNum = parseFloat(width);
@@ -61,6 +63,25 @@ export const useSquaringCalculator = () => {
     }
 
     setSquaringResult(result);
+
+    // Save calculation to history
+    addCalculation(
+      "Squaring Calculator",
+      {
+        width: widthNum,
+        length: lengthNum,
+        diagonalA: diagonalANum || null,
+        diagonalB: diagonalBNum || null,
+        unit: unit
+      },
+      {
+        isSquare: result.isSquare,
+        diagonalA: result.diagonalA,
+        diagonalB: result.diagonalB,
+        difference: result.difference,
+        perpendicularDistance: result.perpendicularDistance
+      }
+    );
   };
 
   const reset = () => {

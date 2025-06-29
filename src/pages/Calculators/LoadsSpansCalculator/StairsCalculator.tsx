@@ -47,6 +47,14 @@ export const StairsCalculator: React.FC<StairsCalculatorProps> = ({
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
+          <div className="w-full flex justify-center mb-6">
+            <img 
+              src="/lovable-uploads/stairsss.jpg" 
+              alt="Stairs calculation diagram" 
+              className="max-w-full h-auto rounded shadow-md border border-gray-200"
+              style={{ maxHeight: 300 }}
+            />
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="floor-height">Floor to Floor Height (mm)</Label>

@@ -1,7 +1,7 @@
-
 import { useState } from "react";
 import { WOOD_TYPES, LOAD_TYPES } from "../constants";
 import { useToast } from "@/hooks/use-toast";
+import { useCalculationHistory } from "@/hooks/use-calculation-history";
 
 export interface CalculationResult {
   maxLoad: number;
@@ -18,6 +18,7 @@ export const useBeamCalculator = () => {
   const [calculatedResult, setCalculatedResult] = useState<CalculationResult | null>(null);
   
   const { toast } = useToast();
+  const { addCalculation } = useCalculationHistory();
 
   const calculateStress = () => {
     if (!beamWidth || !beamDepth || !span) {
@@ -51,14 +52,29 @@ export const useBeamCalculator = () => {
     const deflection = (5 * selectedLoad.factor * Math.pow(spanLength, 3)) / 
                       (384 * selectedWood.strengthFactor * inertia / 1000);
     
-    setCalculatedResult({
+    const calculationResult = {
       maxLoad: Number(maxLoad.toFixed(2)),
       safeLoad: Number(safeLoad.toFixed(2)),
       deflection: Number(deflection.toFixed(2)),
-    });
+    };
+
+    setCalculatedResult(calculationResult);
+
+    // Save calculation to history
+    addCalculation(
+      "Beam Calculator",
+      {
+        beamWidth: width,
+        beamDepth: depth,
+        woodType,
+        loadType,
+        span: spanLength
+      },
+      calculationResult
+    );
 
     toast({
-      title: "Calculation Complete",
+      title: "Calculation Complete", 
       description: "Load and span results have been calculated",
     });
   };

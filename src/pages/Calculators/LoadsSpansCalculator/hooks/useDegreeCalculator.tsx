@@ -1,5 +1,5 @@
-
 import { useState } from "react";
+import { useCalculationHistory } from "@/hooks/use-calculation-history";
 
 export interface DegreeCalculatorResult {
   degrees: number;
@@ -20,6 +20,8 @@ export const useDegreeCalculator = () => {
   const [gradient, setGradient] = useState<string>("");
   const [unit, setUnit] = useState<string>("meters");
   const [result, setResult] = useState<DegreeCalculatorResult | null>(null);
+
+  const { addCalculation } = useCalculationHistory();
 
   const calculateAngle = () => {
     let degrees = 0;
@@ -79,12 +81,30 @@ export const useDegreeCalculator = () => {
     const gradientValue = Math.tan(radians) !== 0 ? 1 / Math.tan(radians) : 0;
     const percentageValue = Math.tan(radians) * 100;
 
-    setResult({
+    const calculationResult = {
       degrees,
       radians,
       gradient: gradientValue,
       percentage: percentageValue
-    });
+    };
+
+    setResult(calculationResult);
+
+    // Save calculation to history
+    addCalculation(
+      "Degrees Calculator",
+      {
+        calculationType,
+        adjacent: adjacent || null,
+        opposite: opposite || null,
+        rise: rise || null,
+        run: run || null,
+        percentage: percentage || null,
+        gradient: gradient || null,
+        unit: unit
+      },
+      calculationResult
+    );
   };
 
   const reset = () => {
