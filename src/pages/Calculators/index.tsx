@@ -22,9 +22,9 @@ const Calculators = () => {
     icon: <Gauge className="h-6 w-6 text-purple-500" />,
     path: "/calculators/job-cost"
   }, {
-    title: "Loads and Spans Calculator",
-    description: "Calculate timber beam loads and spans for construction projects",
-    icon: <Ruler className="h-6 w-6 text-amber-500" />,
+    title: "Carpentry Calculators",
+    description: "Calculate timber beam loads, spans, and other carpentry measurements for construction projects",
+          icon: <Ruler className="h-6 w-6 text-blue-500" />,
     path: "/calculators/loads-spans"
   }, {
     title: "Concrete Calculator",

@@ -15,7 +15,7 @@ export const LoadsSpansHeader: React.FC<LoadsSpansHeaderProps> = ({
       <Link to="/calculators" className="hover:text-blue-500">
         <ArrowLeft className="h-6 w-6" />
       </Link>
-      <Ruler className="h-8 w-8 text-amber-500" />
+      <Ruler className="h-8 w-8 text-blue-500" />
       <h1 className="text-3xl font-bold">{title}</h1>
     </div>
   );

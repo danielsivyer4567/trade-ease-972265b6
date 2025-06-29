@@ -59,7 +59,7 @@ export const LoadSpanConfigCard: React.FC<LoadSpanConfigCardProps> = ({
 
         <Button 
           onClick={calculateSpanFromTable} 
-          className="w-full mt-4 bg-amber-500 hover:bg-amber-600"
+          className="w-full mt-4 bg-blue-500 hover:bg-blue-600"
         >
           Calculate Span
         </Button>

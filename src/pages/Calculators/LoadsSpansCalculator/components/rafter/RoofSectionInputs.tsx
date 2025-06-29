@@ -71,7 +71,7 @@ export const RoofSectionInputs: React.FC<RoofSectionInputsProps> = ({
         </Button>
         
         <Button 
-          className="bg-amber-500 hover:bg-amber-600 flex-1"
+                      className="bg-blue-500 hover:bg-blue-600 flex-1"
           onClick={calculateTotalArea}
         >
           Calculate Area

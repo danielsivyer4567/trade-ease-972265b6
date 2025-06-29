@@ -12,19 +12,19 @@ export const ResultsCard: React.FC<ResultsCardProps> = ({ hardieResult }) => {
   if (!hardieResult) return null;
   
   return (
-    <Card className="bg-amber-50 border-amber-200">
+    <Card className="bg-blue-50 border-blue-200">
       <CardHeader>
-        <CardTitle className="text-amber-800">James Hardie Calculation Results</CardTitle>
+        <CardTitle className="text-blue-800">James Hardie Calculation Results</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="p-4 bg-white rounded-lg shadow-sm">
             <p className="text-sm font-medium text-gray-500">Recommended Fastener Type</p>
-            <p className="text-xl font-bold text-amber-600">{hardieResult.fastenerType}</p>
+            <p className="text-xl font-bold text-blue-600">{hardieResult.fastenerType}</p>
           </div>
           <div className="p-4 bg-white rounded-lg shadow-sm">
             <p className="text-sm font-medium text-gray-500">Fastener Spacing</p>
-            <p className="text-xl font-bold text-green-600">{hardieResult.fastenerSpacing} mm</p>
+            <p className="text-xl font-bold text-blue-600">{hardieResult.fastenerSpacing} mm</p>
           </div>
           <div className="p-4 bg-white rounded-lg shadow-sm">
             <p className="text-sm font-medium text-gray-500">Max. Support Spacing</p>
@@ -41,7 +41,7 @@ export const ResultsCard: React.FC<ResultsCardProps> = ({ hardieResult }) => {
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-3">
-            <h3 className="font-semibold text-amber-800">Technical Properties</h3>
+            <h3 className="font-semibold text-blue-800">Technical Properties</h3>
             <div className="grid grid-cols-2 gap-2">
               <div className="p-3 bg-white rounded-lg shadow-sm">
                 <p className="text-xs font-medium text-gray-500">Fire Rating</p>
@@ -63,7 +63,7 @@ export const ResultsCard: React.FC<ResultsCardProps> = ({ hardieResult }) => {
           </div>
           
           <div className="space-y-3">
-            <h3 className="font-semibold text-amber-800">Standards Compliance</h3>
+            <h3 className="font-semibold text-blue-800">Standards Compliance</h3>
             <div className="p-3 bg-white rounded-lg shadow-sm">
               <ul className="text-sm space-y-1">
                 <li>✓ AS 1530.1: Non-combustibility</li>

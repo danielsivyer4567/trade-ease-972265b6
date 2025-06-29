@@ -6,7 +6,7 @@ export const AboutCalculator: React.FC = () => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>About the Loads and Spans Calculator</CardTitle>
+        <CardTitle>About the Carpentry Calculators</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <p>

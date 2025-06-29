@@ -11,11 +11,11 @@ export const ResultCard: React.FC<ResultCardProps> = ({ spanResult }) => {
   return (
     <Card className="bg-slate-300">
       <CardHeader>
-        <CardTitle className="text-amber-800">Span Calculation Result</CardTitle>
+        <CardTitle className="text-blue-800">Span Calculation Result</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="p-4 bg-white rounded-lg shadow-sm text-white">
-          <p className="text-2xl font-bold text-amber-600">{spanResult}</p>
+                      <p className="text-2xl font-bold text-blue-600">{spanResult}</p>
         </div>
       </CardContent>
     </Card>

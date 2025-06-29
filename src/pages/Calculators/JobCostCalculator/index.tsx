@@ -16,7 +16,7 @@ const JobCostCalculator = () => {
           <h1 className="text-3xl font-bold">Job Cost Estimator</h1>
         </div>
         
-        <div className="bg-white rounded-lg shadow p-6">
+        <div className="bg-slate-300 rounded-lg shadow p-6">
           <p className="text-center text-gray-500 mb-4">Coming soon! The Job Cost Estimator is under development.</p>
         </div>
       </div>

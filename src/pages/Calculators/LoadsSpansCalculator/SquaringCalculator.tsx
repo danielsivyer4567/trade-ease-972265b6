@@ -127,7 +127,7 @@ export const SquaringCalculator: React.FC<SquaringCalculatorProps> = ({
           </div>
 
           <div className="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-2">
-            <Button onClick={calculateSquaring} className="flex-1 bg-amber-500 hover:bg-amber-600">
+            <Button onClick={calculateSquaring} className="flex-1 bg-blue-500 hover:bg-blue-600">
               Calculate
             </Button>
             <Button onClick={reset} variant="outline" className="flex-1">
@@ -139,15 +139,15 @@ export const SquaringCalculator: React.FC<SquaringCalculatorProps> = ({
       </Card>
 
       {squaringResult && (
-        <Card className="bg-slate-300 mt-4 bg-amber-50 border-amber-200">
+        <Card className="bg-slate-300 mt-4 border-blue-200">
           <CardHeader>
-            <CardTitle className="text-amber-800">Squaring Results</CardTitle>
+            <CardTitle className="text-blue-800">Squaring Results</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               <div className="p-4 bg-white rounded-lg shadow-sm">
                 <p className="text-sm font-medium text-gray-500">Theoretical Diagonal</p>
-                <p className="text-2xl font-bold text-amber-600">
+                <p className="text-2xl font-bold text-blue-600">
                   {Math.sqrt(Math.pow(parseFloat(width), 2) + Math.pow(parseFloat(length), 2)).toFixed(2)} {unit}
                 </p>
               </div>
@@ -156,7 +156,7 @@ export const SquaringCalculator: React.FC<SquaringCalculatorProps> = ({
                 <>
                   <div className="p-4 bg-white rounded-lg shadow-sm">
                     <p className="text-sm font-medium text-gray-500">Diagonal Difference</p>
-                    <p className="text-2xl font-bold text-amber-600">
+                    <p className="text-2xl font-bold text-blue-600">
                       {squaringResult.difference.toFixed(2)} {unit}
                     </p>
                   </div>

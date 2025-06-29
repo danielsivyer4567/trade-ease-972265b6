@@ -433,7 +433,7 @@ const PlumbingCalculator = () => {
         
         <div className="grid md:grid-cols-2 gap-6">
           {/* Pipe Size Calculator */}
-          <Card className="bg-blue-50">
+          <Card className="bg-slate-300">
             <CardHeader>
               <CardTitle className="text-xl font-semibold text-blue-800">Pipe Size Calculator</CardTitle>
             </CardHeader>
@@ -494,9 +494,9 @@ const PlumbingCalculator = () => {
           </Card>
 
           {/* Pressure Loss Calculator */}
-          <Card className="bg-green-50">
+          <Card className="bg-slate-300">
             <CardHeader>
-              <CardTitle className="text-xl font-semibold text-green-800">Pressure Loss Calculator</CardTitle>
+              <CardTitle className="text-xl font-semibold text-blue-800">Pressure Loss Calculator</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
@@ -573,7 +573,7 @@ const PlumbingCalculator = () => {
                 />
               </div>
               <div className="flex space-x-2">
-                <Button onClick={calculatePressureLoss} className="bg-green-600 hover:bg-green-700 flex-1">
+                <Button onClick={calculatePressureLoss} className="bg-blue-500 hover:bg-blue-600 flex-1">
                   Calculate
                 </Button>
                 <Button onClick={resetPressureLoss} variant="secondary">
@@ -584,9 +584,9 @@ const PlumbingCalculator = () => {
           </Card>
 
           {/* Tank Volume Calculator */}
-          <Card className="bg-purple-50">
+          <Card className="bg-slate-300">
             <CardHeader>
-              <CardTitle className="text-xl font-semibold text-purple-800">Tank Volume Calculator</CardTitle>
+              <CardTitle className="text-xl font-semibold text-blue-800">Tank Volume Calculator</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
@@ -712,7 +712,7 @@ const PlumbingCalculator = () => {
                 />
               </div>
               <div className="flex space-x-2">
-                <Button onClick={calculateTankVolume} className="bg-purple-600 hover:bg-purple-700 flex-1">
+                <Button onClick={calculateTankVolume} className="bg-blue-500 hover:bg-blue-600 flex-1">
                   Calculate
                 </Button>
                 <Button onClick={resetTankVolume} variant="secondary">
@@ -723,9 +723,9 @@ const PlumbingCalculator = () => {
           </Card>
 
           {/* Drain Size Calculator */}
-          <Card className="bg-amber-50">
+          <Card className="bg-slate-300">
             <CardHeader>
-              <CardTitle className="text-xl font-semibold text-amber-800">Drain Size Calculator</CardTitle>
+              <CardTitle className="text-xl font-semibold text-blue-800">Drain Size Calculator</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
@@ -827,7 +827,7 @@ const PlumbingCalculator = () => {
                 />
               </div>
               <div className="flex space-x-2">
-                <Button onClick={calculateDrainSize} className="bg-amber-600 hover:bg-amber-700 flex-1">
+                <Button onClick={calculateDrainSize} className="bg-blue-500 hover:bg-blue-600 flex-1">
                   Calculate
                 </Button>
                 <Button onClick={resetDrainSize} variant="secondary">
@@ -838,9 +838,9 @@ const PlumbingCalculator = () => {
           </Card>
 
           {/* Pipe Grade Calculator */}
-          <Card className="bg-red-50">
+          <Card className="bg-slate-300">
             <CardHeader>
-              <CardTitle className="text-xl font-semibold text-red-800">Pipe Grade Calculator</CardTitle>
+              <CardTitle className="text-xl font-semibold text-blue-800">Pipe Grade Calculator</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
@@ -877,7 +877,7 @@ const PlumbingCalculator = () => {
                 />
               </div>
               <div className="flex space-x-2">
-                <Button onClick={calculatePipeGrade} className="bg-red-600 hover:bg-red-700 flex-1">
+                <Button onClick={calculatePipeGrade} className="bg-blue-500 hover:bg-blue-600 flex-1">
                   Calculate
                 </Button>
                 <Button onClick={resetPipeGrade} variant="secondary">
@@ -888,9 +888,9 @@ const PlumbingCalculator = () => {
           </Card>
 
           {/* Water Heater Sizing Calculator */}
-          <Card className="bg-teal-50">
+          <Card className="bg-slate-300">
             <CardHeader>
-              <CardTitle className="text-xl font-semibold text-teal-800">Water Heater Sizing</CardTitle>
+              <CardTitle className="text-xl font-semibold text-blue-800">Water Heater Sizing</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
@@ -950,7 +950,7 @@ const PlumbingCalculator = () => {
                 />
               </div>
               <div className="flex space-x-2">
-                <Button onClick={calculateWaterHeater} className="bg-teal-600 hover:bg-teal-700 flex-1">
+                <Button onClick={calculateWaterHeater} className="bg-blue-500 hover:bg-blue-600 flex-1">
                   Calculate
                 </Button>
                 <Button onClick={resetWaterHeater} variant="secondary">

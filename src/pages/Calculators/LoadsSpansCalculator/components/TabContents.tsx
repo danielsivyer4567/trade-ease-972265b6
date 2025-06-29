@@ -6,6 +6,7 @@ import { ConcreteCalculator } from "../ConcreteCalculator";
 import { SquaringCalculator } from "../SquaringCalculator";
 import { DegreeCalculator } from "../DegreeCalculator";
 import { StairsCalculator } from "../StairsCalculator";
+import { DeckingCalculator } from "../DeckingCalculator";
 import { JamesHardieCalculator } from "../JamesHardieCalculator";
 import { useSpanTableCalculator } from "../hooks/useSpanTableCalculator";
 import { useBeamCalculator } from "../hooks/useBeamCalculator";
@@ -45,6 +46,8 @@ export const TabContents: React.FC<TabContentsProps> = ({ tabId }) => {
       return <DegreeCalculator {...degreeCalculatorProps} />;
     case "stairs":
       return <StairsCalculator {...stairsCalculatorProps} />;
+    case "decking":
+      return <DeckingCalculator />;
     case "hardie":
       return <JamesHardieCalculator {...hardieCalculatorProps} />;
     default:

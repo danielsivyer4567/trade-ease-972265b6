@@ -130,7 +130,7 @@ export const ConcreteCalculator = ({
           </div>
 
           <Button 
-            className="w-full mt-4" 
+            className="w-full mt-4 bg-blue-500 hover:bg-blue-600" 
             onClick={calculateConcreteVolume}
             disabled={!length || !width || !thickness}
           >
@@ -148,12 +148,12 @@ export const ConcreteCalculator = ({
           <div className="space-y-6">
             {calculatedVolume !== null ? (
               <>
-                <div className="bg-amber-50 p-6 rounded-lg border border-amber-200">
-                  <h3 className="text-lg font-medium text-amber-800 mb-2">Total Volume Needed</h3>
-                  <p className="text-3xl font-bold text-amber-900">
+                <div className="bg-blue-50 p-6 rounded-lg border border-blue-200">
+                  <h3 className="text-lg font-medium text-blue-800 mb-2">Total Volume Needed</h3>
+                  <p className="text-3xl font-bold text-blue-900">
                     {calculatedVolume.toFixed(2)} m³
                   </p>
-                  <p className="text-sm text-amber-700 mt-2">
+                  <p className="text-sm text-blue-700 mt-2">
                     This includes a {waste}% waste factor
                   </p>
                 </div>
@@ -187,7 +187,7 @@ export const ConcreteCalculator = ({
               </>
             ) : (
               <div className="h-full flex flex-col items-center justify-center text-center p-6">
-                <div className="text-amber-500 bg-amber-50 p-3 rounded-full mb-3">
+                <div className="text-blue-500 bg-blue-50 p-3 rounded-full mb-3">
                   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <rect width="18" height="10" x="3" y="8" rx="1" />
                     <path d="M7 8v4" />

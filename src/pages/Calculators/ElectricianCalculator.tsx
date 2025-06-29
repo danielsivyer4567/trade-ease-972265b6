@@ -357,7 +357,7 @@ const ElectricianCalculator = () => {
         
         <div className="grid md:grid-cols-2 gap-6">
           {/* Ohm's Law Calculator */}
-          <Card className="bg-blue-50">
+          <Card className="bg-slate-300">
             <CardHeader>
               <CardTitle className="text-xl font-semibold text-blue-800">Ohm's Law Calculator</CardTitle>
             </CardHeader>
@@ -414,9 +414,9 @@ const ElectricianCalculator = () => {
           </Card>
           
           {/* Wire Size Calculator */}
-          <Card className="bg-green-50">
+          <Card className="bg-slate-300">
             <CardHeader>
-              <CardTitle className="text-xl font-semibold text-green-800">Wire Size Calculator</CardTitle>
+              <CardTitle className="text-xl font-semibold text-blue-800">Wire Size Calculator</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
@@ -472,7 +472,7 @@ const ElectricianCalculator = () => {
                 />
               </div>
               <div className="flex space-x-2">
-                <Button onClick={calculateWireSize} className="bg-green-600 hover:bg-green-700 flex-1">
+                <Button onClick={calculateWireSize} className="bg-blue-500 hover:bg-blue-600 flex-1">
                   Calculate
                 </Button>
                 <Button onClick={resetWireSize} variant="secondary">
@@ -483,9 +483,9 @@ const ElectricianCalculator = () => {
           </Card>
           
           {/* Voltage Drop Calculator */}
-          <Card className="bg-purple-50">
+          <Card className="bg-slate-300">
             <CardHeader>
-              <CardTitle className="text-xl font-semibold text-purple-800">Voltage Drop Calculator</CardTitle>
+              <CardTitle className="text-xl font-semibold text-blue-800">Voltage Drop Calculator</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
@@ -573,7 +573,7 @@ const ElectricianCalculator = () => {
                 />
               </div>
               <div className="flex space-x-2">
-                <Button onClick={calculateVoltageDrop} className="bg-purple-600 hover:bg-purple-700 flex-1">
+                <Button onClick={calculateVoltageDrop} className="bg-blue-500 hover:bg-blue-600 flex-1">
                   Calculate
                 </Button>
                 <Button onClick={resetVoltageDrop} variant="secondary">
@@ -584,9 +584,9 @@ const ElectricianCalculator = () => {
           </Card>
           
           {/* Conduit Fill Calculator */}
-          <Card className="bg-amber-50">
+          <Card className="bg-slate-300">
             <CardHeader>
-              <CardTitle className="text-xl font-semibold text-amber-800">Conduit Fill Calculator</CardTitle>
+              <CardTitle className="text-xl font-semibold text-blue-800">Conduit Fill Calculator</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
@@ -698,7 +698,7 @@ const ElectricianCalculator = () => {
                 />
               </div>
               <div className="flex space-x-2">
-                <Button onClick={calculateConduitFill} className="bg-amber-600 hover:bg-amber-700 flex-1">
+                <Button onClick={calculateConduitFill} className="bg-blue-500 hover:bg-blue-600 flex-1">
                   Calculate
                 </Button>
                 <Button onClick={resetConduitFill} variant="secondary">

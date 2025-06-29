@@ -133,7 +133,7 @@ export const DegreeCalculator: React.FC<DegreeCalculatorProps> = ({
           </div>
 
           <div className="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-2">
-            <Button onClick={calculateAngle} className="flex-1 bg-amber-500 hover:bg-amber-600">
+            <Button onClick={calculateAngle} className="flex-1 bg-blue-500 hover:bg-blue-600">
               Calculate Angle
             </Button>
             <Button onClick={reset} variant="outline" className="flex-1">
@@ -144,36 +144,36 @@ export const DegreeCalculator: React.FC<DegreeCalculatorProps> = ({
         </CardContent>
       </Card>
 
-      {result && <Card className="mt-4 bg-amber-50 border-amber-200">
+      {result && <Card className="mt-4 bg-blue-50 border-blue-200">
           <CardHeader>
-            <CardTitle className="text-amber-800">Angle Results</CardTitle>
+            <CardTitle className="text-blue-800">Angle Results</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="p-4 bg-white rounded-lg shadow-sm text-white">
                 <p className="text-sm font-medium text-gray-500">Angle in Degrees</p>
-                <p className="text-2xl font-bold text-amber-600">
+                <p className="text-2xl font-bold text-blue-600">
                   {result.degrees.toFixed(2)}°
                 </p>
               </div>
               
               <div className="p-4 bg-white rounded-lg shadow-sm text-white">
                 <p className="text-sm font-medium text-gray-500">Angle in Radians</p>
-                <p className="text-2xl font-bold text-amber-600">
+                <p className="text-2xl font-bold text-blue-600">
                   {result.radians.toFixed(4)} rad
                 </p>
               </div>
               
               <div className="p-4 bg-white rounded-lg shadow-sm text-white">
                 <p className="text-sm font-medium text-gray-500">Slope as Percentage</p>
-                <p className="text-2xl font-bold text-amber-600">
+                <p className="text-2xl font-bold text-blue-600">
                   {result.percentage.toFixed(2)}%
                 </p>
               </div>
               
               <div className="p-4 bg-white rounded-lg shadow-sm text-white">
                 <p className="text-sm font-medium text-gray-500">Gradient (1:x)</p>
-                <p className="text-2xl font-bold text-amber-600">
+                <p className="text-2xl font-bold text-blue-600">
                   1:{result.gradient.toFixed(2)}
                 </p>
               </div>

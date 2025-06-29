@@ -62,7 +62,7 @@ const NCCCodesCalculator = () => {
           <h1 className="text-3xl font-bold">NCC Codes Reference</h1>
         </div>
         
-        <div className="bg-white rounded-lg shadow p-6">
+        <div className="bg-slate-300 rounded-lg shadow p-6">
           <div className="relative mb-6">
             <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
             <Input

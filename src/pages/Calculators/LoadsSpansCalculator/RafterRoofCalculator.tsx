@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 export const RafterRoofCalculator: React.FC = () => {
   const [pitchDeg, setPitchDeg] = useState(30);
   const [spanM, setSpanM] = useState(6);
-  const [material, setMaterial] = useState("wood");
+  const [material, setMaterial] = useState("timber");
   const [windRating, setWindRating] = useState("medium");
   const [rafterSpacing, setRafterSpacing] = useState(600);
   const [rafterWidth, setRafterWidth] = useState(45);
@@ -28,7 +28,7 @@ export const RafterRoofCalculator: React.FC = () => {
     const num_rafters = math.ceil(span_mm / rafterSpacing) + 1;
     const birdsmouth_seat_cut = birdsmouthDepth;
     const total_rafter_length_m = rafter_length * num_rafters;
-    const material_weights: any = { wood: 0.6, metal: 2.0 };
+    const material_weights: any = { timber: 0.6, steel: 2.0 };
     const material_weight_total = total_rafter_length_m * (material_weights[material] || 0.6);
     const wind_adjustment: any = { low: 1, medium: 0.9, high: 0.75 };
     const adjusted_spacing = rafterSpacing * (wind_adjustment[windRating] || 1);
@@ -48,13 +48,23 @@ export const RafterRoofCalculator: React.FC = () => {
 
   return (
     <>
-      <div className="w-full flex justify-center mb-6">
-        <img 
-          src="/lovable-uploads/197b4c992159b.png" 
-          alt="Rafter and roof diagram" 
-          className="max-w-full h-auto rounded shadow-md border border-gray-200"
-          style={{ maxHeight: 240 }}
-        />
+      <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+        <div className="flex justify-center">
+          <img 
+            src="/lovable-uploads/newest rafter.jpg" 
+            alt="Rafter and roof diagram" 
+            className="max-w-full h-auto rounded shadow-md border border-gray-200"
+            style={{ maxHeight: 240 }}
+          />
+        </div>
+        <div className="flex justify-center">
+          <img 
+            src="/lovable-uploads/ae3d67e8-3620-4069-b805-8133fef2a567.png" 
+            alt="Additional rafter diagram" 
+            className="max-w-full h-auto rounded shadow-md border border-gray-200"
+            style={{ maxHeight: 240 }}
+          />
+        </div>
       </div>
       <Card className="bg-slate-300">
         <CardHeader>
@@ -88,8 +98,8 @@ export const RafterRoofCalculator: React.FC = () => {
                     <SelectValue placeholder="Select material" className="text-black" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="wood" className="text-black">Wood</SelectItem>
-                    <SelectItem value="metal" className="text-black">Metal</SelectItem>
+                    <SelectItem value="timber" className="text-black">Timber</SelectItem>
+                    <SelectItem value="steel" className="text-black">Steel</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -126,7 +136,7 @@ export const RafterRoofCalculator: React.FC = () => {
                 <Button
                   key={opt.value}
                   type="button"
-                  className={`px-4 py-2 rounded ${roofCovering === opt.value ? 'bg-amber-500 text-white' : 'bg-white text-black border border-gray-300'}`}
+                  className={`px-4 py-2 rounded ${roofCovering === opt.value ? 'bg-blue-500 text-white' : 'bg-white text-black border border-gray-300'}`}
                   onClick={() => setRoofCovering(opt.value)}
                 >
                   {opt.label}
@@ -166,7 +176,7 @@ export const RafterRoofCalculator: React.FC = () => {
               )}
             </div>
           </div>
-          <Button className="w-full mt-4 bg-amber-500 hover:bg-amber-600" onClick={calculate}>Calculate</Button>
+          <Button className="w-full mt-4 bg-blue-500 hover:bg-blue-600" onClick={calculate}>Calculate</Button>
         </CardContent>
       </Card>
       {result && (
