@@ -287,51 +287,23 @@ export const DeckingCalculator: React.FC = () => {
                 />
               </div>
               
-              <div className="space-y-4">
-                <div
-                  className={`w-full bg-white border-2 rounded-lg p-4 cursor-pointer transition-all hover:border-gray-400 ${deckingDirection === "A" ? "border-blue-500" : "border-gray-300"}`}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Button
+                  variant={deckingDirection === "A" ? "default" : "outline"}
+                  className={`h-20 flex flex-col items-center gap-2 ${deckingDirection === "A" ? "bg-blue-500 hover:bg-blue-600" : ""}`}
                   onClick={() => setDeckingDirection("A")}
                 >
-                  <div className="flex items-center justify-between">
-                    <span className="font-medium text-gray-700">Direction A (Across dimension A)</span>
-                    <div className="flex items-center gap-2">
-                      <Input
-                        type="number"
-                        value={dimensionA}
-                        onChange={(e) => {
-                          setDimensionA(e.target.value);
-                          e.stopPropagation();
-                        }}
-                        onClick={(e) => e.stopPropagation()}
-                        placeholder="Length (mm)"
-                        className="w-32 bg-white text-black"
-                      />
-                      <span className="text-sm text-gray-500">mm</span>
-                    </div>
-                  </div>
-                </div>
-                <div
-                  className={`w-full bg-white border-2 rounded-lg p-4 cursor-pointer transition-all hover:border-gray-400 ${deckingDirection === "B" ? "border-blue-500" : "border-gray-300"}`}
+                  <span className="font-semibold">Direction A</span>
+                  <span className="text-sm text-center">Decking runs across dimension A</span>
+                </Button>
+                <Button
+                  variant={deckingDirection === "B" ? "default" : "outline"}
+                  className={`h-20 flex flex-col items-center gap-2 ${deckingDirection === "B" ? "bg-blue-500 hover:bg-blue-600" : ""}`}
                   onClick={() => setDeckingDirection("B")}
                 >
-                  <div className="flex items-center justify-between">
-                    <span className="font-medium text-gray-700">Direction B (Across dimension B)</span>
-                    <div className="flex items-center gap-2">
-                      <Input
-                        type="number"
-                        value={dimensionB}
-                        onChange={(e) => {
-                          setDimensionB(e.target.value);
-                          e.stopPropagation();
-                        }}
-                        onClick={(e) => e.stopPropagation()}
-                        placeholder="Length (mm)"
-                        className="w-32 bg-white text-black"
-                      />
-                      <span className="text-sm text-gray-500">mm</span>
-                    </div>
-                  </div>
-                </div>
+                  <span className="font-semibold">Direction B</span>
+                  <span className="text-sm text-center">Decking runs across dimension B</span>
+                </Button>
               </div>
             </div>
           </CardContent>
