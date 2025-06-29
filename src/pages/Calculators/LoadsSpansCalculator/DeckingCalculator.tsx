@@ -17,8 +17,8 @@ export const DeckingCalculator: React.FC = () => {
   // State for deck configuration
   const [deckingDirection, setDeckingDirection] = useState<"A" | "B" | "">("");
   const [subFrameType, setSubFrameType] = useState<"timber" | "steel" | "">("");
-  const [bearerSize, setBearerSize] = useState<"small" | "large" | "">("");
-  const [joistSize, setJoistSize] = useState<"90x45" | "140x45" | "190x45" | "">("");
+  const [bearerSize, setBearerSize] = useState<"90x45" | "140x45" | "190x45" | "240x45" | "">("");
+  const [joistSize, setJoistSize] = useState<"90x45" | "140x90" | "240x45" | "">("");
   const [edgeDesign, setEdgeDesign] = useState<"picture-frame" | "fascia-board" | "flush" | "overhang" | "">("");
   
   // State for decking material
@@ -122,18 +122,23 @@ export const DeckingCalculator: React.FC = () => {
     let joistBoots = 0;
     let cloutNails = 0;
     
-    if (bearerSize === "small") {
+        if (bearerSize === "90x45") {
       // Small bearers (90x45mm) - no joists needed, more bearers
       const bearerSpacing = 300; // Closer spacing for smaller bearers
       bearersNeeded = Math.ceil((deckingDirection === "A" ? dimB : dimA) / bearerSpacing) + 1;
       // No joists needed for small bearers
-    } else if (bearerSize === "large") {
-      // Large bearers - need joists
-      const bearerSpacing = 1800; // Standard spacing for large bearers
+    } else if (bearerSize === "140x45" || bearerSize === "190x45" || bearerSize === "240x45") {
+      // Larger bearers - need joists
+      let bearerSpacing = 1800; // Standard spacing for large bearers
+      
+      // Adjust spacing based on bearer size
+      if (bearerSize === "190x45") bearerSpacing = 2100;
+      if (bearerSize === "240x45") bearerSpacing = 2400;
+      
       bearersNeeded = Math.ceil((deckingDirection === "A" ? dimA : dimB) / bearerSpacing) + 1;
       
       // Calculate joists based on selected size
-      const joistSpacing = joistSize === "190x45" ? 600 : joistSize === "140x45" ? 500 : 450; // Different spacing based on joist size
+      const joistSpacing = joistSize === "240x45" ? 600 : joistSize === "140x90" ? 500 : 450; // Different spacing based on joist size
       joistsNeeded = Math.ceil((deckingDirection === "A" ? dimB : dimA) / joistSpacing) + 1;
       
       // Calculate joist boots/brackets for large bearer system
@@ -154,7 +159,7 @@ export const DeckingCalculator: React.FC = () => {
       boardWidth: boardWidthMm,
       wastageIncluded: "10%",
       bearerSize,
-      joistSize: bearerSize === "large" ? joistSize : null
+      joistSize: (bearerSize === "140x45" || bearerSize === "190x45" || bearerSize === "240x45") ? joistSize : null
     });
   };
 
@@ -179,7 +184,7 @@ export const DeckingCalculator: React.FC = () => {
     <>
       <div className="w-full flex justify-center mb-6">
         <img 
-          src="/lovable-uploads/197b9939fa709.png" 
+          src="/lovable-uploads/197ba1646d3c2.png" 
           alt="Decking construction diagram" 
           className="max-w-full h-auto rounded shadow-md border border-gray-200"
           style={{ maxHeight: 300 }}
@@ -358,7 +363,7 @@ export const DeckingCalculator: React.FC = () => {
                     onClick={() => setSubFrameType("timber")}
                   >
                     <span className="font-semibold">Timber</span>
-                    <span className="text-xs">*Recommended</span>
+                    <span className="text-xs">Treated Pine/Hardwood</span>
                   </Button>
                   <Button
                     variant={subFrameType === "steel" ? "default" : "outline"}
@@ -366,68 +371,107 @@ export const DeckingCalculator: React.FC = () => {
                     onClick={() => setSubFrameType("steel")}
                   >
                     <span className="font-semibold">Steel</span>
+                    <span className="text-xs">C-Sections & RHS</span>
                   </Button>
                 </div>
               </div>
 
               {subFrameType && (
                 <div className="space-y-4">
-                  <h3 className="text-lg font-semibold">Bearer Size</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <h3 className="text-lg font-semibold">Bearer Size ({subFrameType === "timber" ? "Timber" : "Steel"})</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                     <div 
-                      className={`p-4 border-2 rounded-lg cursor-pointer transition-all ${bearerSize === "small" ? "border-blue-500 bg-blue-500 text-white" : "border-gray-300 bg-white hover:border-gray-400"}`}
-                      onClick={() => setBearerSize("small")}
+                      className={`p-4 border-2 rounded-lg cursor-pointer transition-all ${bearerSize === "90x45" ? "border-blue-500 bg-blue-500 text-white" : "border-gray-300 bg-white hover:border-gray-400"}`}
+                      onClick={() => setBearerSize("90x45")}
                     >
-                      <h4 className={`font-semibold mb-2 ${bearerSize === "small" ? "text-white" : ""}`}>Small Bearers (90x45mm)</h4>
-                      <ul className={`text-sm space-y-1 ${bearerSize === "small" ? "text-blue-100" : "text-gray-600"}`}>
-                        <li>• More bearers required</li>
-                        <li>• Closer spacing needed</li>
+                      <h4 className={`font-semibold mb-2 ${bearerSize === "90x45" ? "text-white" : ""}`}>
+                        {subFrameType === "timber" ? "90x45mm Timber" : "90x45mm C-Section"}
+                      </h4>
+                      <ul className={`text-sm space-y-1 ${bearerSize === "90x45" ? "text-blue-100" : "text-gray-600"}`}>
+                        <li>• More bearers needed</li>
+                        <li>• Closer spacing (300mm)</li>
                         <li>• No joists required</li>
-                        <li>• More economical option</li>
+                        <li>• {subFrameType === "timber" ? "Economical timber option" : "Lightweight steel option"}</li>
                       </ul>
                     </div>
                     <div 
-                      className={`p-4 border-2 rounded-lg cursor-pointer transition-all ${bearerSize === "large" ? "border-blue-500 bg-blue-500 text-white" : "border-gray-300 bg-white hover:border-gray-400"}`}
-                      onClick={() => setBearerSize("large")}
+                      className={`p-4 border-2 rounded-lg cursor-pointer transition-all ${bearerSize === "140x45" ? "border-blue-500 bg-blue-500 text-white" : "border-gray-300 bg-white hover:border-gray-400"}`}
+                      onClick={() => setBearerSize("140x45")}
                     >
-                      <h4 className={`font-semibold mb-2 ${bearerSize === "large" ? "text-white" : ""}`}>Large Bearers (140x45mm+)</h4>
-                      <ul className={`text-sm space-y-1 ${bearerSize === "large" ? "text-blue-100" : "text-gray-600"}`}>
-                        <li>• Fewer bearers needed</li>
+                      <h4 className={`font-semibold mb-2 ${bearerSize === "140x45" ? "text-white" : ""}`}>
+                        {subFrameType === "timber" ? "140x45mm Timber" : "140x45mm C-Section"}
+                      </h4>
+                      <ul className={`text-sm space-y-1 ${bearerSize === "140x45" ? "text-blue-100" : "text-gray-600"}`}>
+                        <li>• Standard size</li>
                         <li>• Requires joists</li>
-                        <li>• Stronger structure</li>
-                        <li>• Standard construction</li>
+                        <li>• 1.8m spacing</li>
+                        <li>• {subFrameType === "timber" ? "Good timber strength" : "Corrosion resistant steel"}</li>
+                      </ul>
+                    </div>
+                    <div 
+                      className={`p-4 border-2 rounded-lg cursor-pointer transition-all ${bearerSize === "190x45" ? "border-blue-500 bg-blue-500 text-white" : "border-gray-300 bg-white hover:border-gray-400"}`}
+                      onClick={() => setBearerSize("190x45")}
+                    >
+                      <h4 className={`font-semibold mb-2 ${bearerSize === "190x45" ? "text-white" : ""}`}>
+                        {subFrameType === "timber" ? "190x45mm Timber" : "190x45mm C-Section"}
+                      </h4>
+                      <ul className={`text-sm space-y-1 ${bearerSize === "190x45" ? "text-blue-100" : "text-gray-600"}`}>
+                        <li>• Heavy duty</li>
+                        <li>• Requires joists</li>
+                        <li>• 2.1m spacing</li>
+                        <li>• {subFrameType === "timber" ? "High timber strength" : "High strength steel"}</li>
+                      </ul>
+                    </div>
+                    <div 
+                      className={`p-4 border-2 rounded-lg cursor-pointer transition-all ${bearerSize === "240x45" ? "border-blue-500 bg-blue-500 text-white" : "border-gray-300 bg-white hover:border-gray-400"}`}
+                      onClick={() => setBearerSize("240x45")}
+                    >
+                      <h4 className={`font-semibold mb-2 ${bearerSize === "240x45" ? "text-white" : ""}`}>
+                        {subFrameType === "timber" ? "240x45mm Timber" : "240x45mm C-Section"}
+                      </h4>
+                      <ul className={`text-sm space-y-1 ${bearerSize === "240x45" ? "text-blue-100" : "text-gray-600"}`}>
+                        <li>• Extra heavy duty</li>
+                        <li>• Requires joists</li>
+                        <li>• 2.4m spacing</li>
+                        <li>• {subFrameType === "timber" ? "Maximum timber strength" : "Maximum steel strength"}</li>
                       </ul>
                     </div>
                   </div>
                 </div>
               )}
 
-              {bearerSize === "large" && (
+              {(bearerSize === "140x45" || bearerSize === "190x45" || bearerSize === "240x45") && (
                 <div className="space-y-4">
-                  <h3 className="text-lg font-semibold">Joist Size</h3>
+                  <h3 className="text-lg font-semibold">Joist Size ({subFrameType === "timber" ? "Timber" : "Steel"})</h3>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <Button
                       variant={joistSize === "90x45" ? "default" : "outline"}
                       className={`h-16 flex flex-col items-center gap-1 ${joistSize === "90x45" ? "bg-blue-500 hover:bg-blue-600" : ""}`}
                       onClick={() => setJoistSize("90x45")}
                     >
-                      <span className="font-semibold">90x45mm</span>
+                      <span className="font-semibold">
+                        {subFrameType === "timber" ? "90x45mm Timber" : "90x45mm C-Section"}
+                      </span>
                       <span className="text-xs">Standard</span>
                     </Button>
                     <Button
-                      variant={joistSize === "140x45" ? "default" : "outline"}
-                      className={`h-16 flex flex-col items-center gap-1 ${joistSize === "140x45" ? "bg-blue-500 hover:bg-blue-600" : ""}`}
-                      onClick={() => setJoistSize("140x45")}
+                      variant={joistSize === "140x90" ? "default" : "outline"}
+                      className={`h-16 flex flex-col items-center gap-1 ${joistSize === "140x90" ? "bg-blue-500 hover:bg-blue-600" : ""}`}
+                      onClick={() => setJoistSize("140x90")}
                     >
-                      <span className="font-semibold">140x45mm</span>
+                      <span className="font-semibold">
+                        {subFrameType === "timber" ? "140x90mm Timber" : "140x90mm RHS"}
+                      </span>
                       <span className="text-xs">Heavy duty</span>
                     </Button>
                     <Button
-                      variant={joistSize === "190x45" ? "default" : "outline"}
-                      className={`h-16 flex flex-col items-center gap-1 ${joistSize === "190x45" ? "bg-blue-500 hover:bg-blue-600" : ""}`}
-                      onClick={() => setJoistSize("190x45")}
+                      variant={joistSize === "240x45" ? "default" : "outline"}
+                      className={`h-16 flex flex-col items-center gap-1 ${joistSize === "240x45" ? "bg-blue-500 hover:bg-blue-600" : ""}`}
+                      onClick={() => setJoistSize("240x45")}
                     >
-                      <span className="font-semibold">190x45mm</span>
+                      <span className="font-semibold">
+                        {subFrameType === "timber" ? "240x45mm Timber" : "240x45mm C-Section"}
+                      </span>
                       <span className="text-xs">Extra heavy duty</span>
                     </Button>
                   </div>
@@ -808,12 +852,17 @@ export const DeckingCalculator: React.FC = () => {
                 } - {boardWidth}mm x {deckingMaterial === "composite" ? "23mm" : "19mm"}</li>
                 <li><strong>Sub-frame:</strong> {subFrameType?.charAt(0).toUpperCase() + subFrameType?.slice(1)}</li>
                 <li><strong>Bearer Size:</strong> {
-                  bearerSize === "small" ? "90x45mm (More bearers, no joists needed)" :
-                  bearerSize === "large" ? "140x45mm+ (Fewer bearers, joists required)" :
+                  bearerSize === "90x45" ? `90x45mm ${subFrameType === "timber" ? "Timber" : "C-Section"} (More bearers, no joists needed)` :
+                  bearerSize === "140x45" ? `140x45mm ${subFrameType === "timber" ? "Timber" : "C-Section"} (Standard, requires joists)` :
+                  bearerSize === "190x45" ? `190x45mm ${subFrameType === "timber" ? "Timber" : "C-Section"} (Heavy duty, requires joists)` :
+                  bearerSize === "240x45" ? `240x45mm ${subFrameType === "timber" ? "Timber" : "C-Section"} (Extra heavy duty, requires joists)` :
                   "Not selected"
                 }</li>
                 {results.joistSize && (
-                  <li><strong>Joist Size:</strong> {results.joistSize}</li>
+                  <li><strong>Joist Size:</strong> {results.joistSize} {
+                    subFrameType === "timber" ? "Timber" : 
+                    results.joistSize === "140x90" ? "RHS" : "C-Section"
+                  }</li>
                 )}
                 <li><strong>Edge Design:</strong> {edgeDesign?.replace("-", " ").replace(/\b\w/g, l => l.toUpperCase())}</li>
                 <li><strong>Fixing Method:</strong> {fixingMethod?.charAt(0).toUpperCase() + fixingMethod?.slice(1)}</li>
