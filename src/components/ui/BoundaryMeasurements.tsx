@@ -72,20 +72,45 @@ export const BoundaryMeasurements: React.FC<BoundaryMeasurementsProps> = ({
       
       if (coords && coords.length === measurements.length) {
         return identifyFrontForIrregularProperty(measurements, coords);
-      } else {
-        // Without coordinates, for irregular properties, make an educated guess
-        // Often the front is one of the medium-length boundaries, not shortest or longest
-        const sortedIndices = measurements
-          .map((length, index) => ({ length, index }))
-          .sort((a, b) => a.length - b.length);
-        
-        // Take boundary around 25th-40th percentile (avoiding very short utility boundaries)
-        const frontCandidateIndex = Math.floor(sortedIndices.length * 0.3);
-        const frontCandidate = sortedIndices[frontCandidateIndex];
-        
-        console.log('BoundaryMeasurements: Irregular property front candidate:', frontCandidate);
-        return frontCandidate.index;
-      }
+             } else {
+         // Without coordinates, for irregular properties, use smarter analysis
+         console.log('BoundaryMeasurements: Irregular property without coordinates, using enhanced fallback');
+         
+         const sortedIndices = measurements
+           .map((length, index) => ({ length, index }))
+           .sort((a, b) => a.length - b.length);
+         
+         console.log('BoundaryMeasurements: Sorted measurements:', sortedIndices);
+         
+         // For irregular properties, avoid very short boundaries (likely utility easements)
+         // and very long boundaries (likely rear boundaries)
+         const minLength = sortedIndices[0].length;
+         const maxLength = sortedIndices[sortedIndices.length - 1].length;
+         const lengthRange = maxLength - minLength;
+         
+         // If there's a big variation in lengths, be more selective
+         if (lengthRange > minLength * 2) {
+           // Look for boundaries in the 15-50% range of lengths
+           const candidates = sortedIndices.filter(item => {
+             const ratio = (item.length - minLength) / lengthRange;
+             return ratio >= 0.15 && ratio <= 0.5;
+           });
+           
+           if (candidates.length > 0) {
+             // From the candidates, prefer the first one (closest to shorter end)
+             const frontCandidate = candidates[0];
+             console.log('BoundaryMeasurements: Selected front from candidates:', frontCandidate);
+             return frontCandidate.index;
+           }
+         }
+         
+         // Fallback: take boundary around 25th percentile
+         const frontCandidateIndex = Math.floor(sortedIndices.length * 0.25);
+         const frontCandidate = sortedIndices[frontCandidateIndex];
+         
+         console.log('BoundaryMeasurements: Fallback front candidate:', frontCandidate);
+         return frontCandidate.index;
+       }
     }
     
     // Method 1: Use the shortest boundary (common for regular residential lots)
@@ -365,7 +390,15 @@ export const BoundaryMeasurements: React.FC<BoundaryMeasurementsProps> = ({
       console.log('BoundaryMeasurements: Initializing with data:', {
         measurements,
         coordinates,
-        propertyData: propertyData ? Object.keys(propertyData) : null
+        propertyData: propertyData ? {
+          keys: Object.keys(propertyData),
+          hasCoordinates: !!propertyData.coordinates,
+          hasBoundaryPoints: !!propertyData.boundary_points,
+          hasVertices: !!propertyData.vertices,
+          hasPolygon: !!propertyData.polygon,
+          hasGeometry: !!propertyData.geometry,
+          sampleData: propertyData
+        } : null
       });
 
       // Try to extract coordinates from various possible formats
@@ -440,15 +473,48 @@ export const BoundaryMeasurements: React.FC<BoundaryMeasurementsProps> = ({
             <Compass className="h-4 w-4" />
             Property Boundary Measurements
           </CardTitle>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setEditMode(!editMode)}
-            className="text-xs"
-          >
-            <RotateCw className="h-3 w-3 mr-1" />
-            {editMode ? 'Done' : 'Edit Directions'}
-          </Button>
+          <div className="flex gap-2">
+            {!coordinates && measurements.length >= 5 && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  // Quick fix: For irregular properties without coordinates, 
+                  // try one of the longer boundaries as front
+                  const sortedByLength = measurements
+                    .map((length, index) => ({ length, index }))
+                    .sort((a, b) => b.length - a.length);
+                  
+                  // Try the 3rd or 4th longest (avoiding the very longest which might be rear)
+                  const candidateIndex = sortedByLength.length > 4 ? 3 : 1;
+                  const newFrontIndex = sortedByLength[candidateIndex].index;
+                  
+                  // Manually set this boundary as front and reassign all others
+                  const newBoundaries = measurements.map((length, index) => {
+                    if (index === newFrontIndex) {
+                      return { length, direction: 'front', isStreetFacing: true };
+                    } else {
+                      // Clear previous front assignments and use generic labels
+                      return { length, direction: `side-${index + 1}`, isStreetFacing: false };
+                    }
+                  });
+                  setBoundaryData(newBoundaries);
+                }}
+                className="text-xs bg-amber-50 hover:bg-amber-100 text-amber-700"
+              >
+                Try Longer Front
+              </Button>
+            )}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setEditMode(!editMode)}
+              className="text-xs"
+            >
+              <RotateCw className="h-3 w-3 mr-1" />
+              {editMode ? 'Done' : 'Edit Directions'}
+            </Button>
+          </div>
         </div>
         <p className="text-xs text-gray-600">
           {editMode ? 'Click to assign directions to each boundary' : 'Boundaries labeled with smart defaults'}
@@ -537,11 +603,19 @@ export const BoundaryMeasurements: React.FC<BoundaryMeasurementsProps> = ({
                      : 'Shortest boundary (typical for residential lots)')
              }</div>
             <div><strong>Direction Assignment:</strong> Left/Right relative to standing at front boundary</div>
-            {!coordinates && (
-              <div className="text-amber-600 mt-1">
-                <strong>💡 Enhancement:</strong> Coordinate data would enable more precise direction detection
-              </div>
-            )}
+                     {!coordinates && (
+               <div className="text-amber-600 mt-1">
+                 <strong>💡 Enhancement:</strong> Coordinate data would enable more precise direction detection
+                 <br />
+                 <span className="text-xs">
+                   • Check "View Raw JSON Response" below for coordinate data in the API response
+                   <br />
+                   • Use "Try Longer Front" button for irregular properties with incorrect front detection
+                   <br />
+                   • Use "Edit Directions" to manually assign any boundary directions
+                 </span>
+               </div>
+             )}
           </div>
         </div>
 
