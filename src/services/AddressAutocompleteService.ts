@@ -172,6 +172,8 @@ export class AddressAutocompleteService {
    * Parse address description string into components (fallback method)
    */
   static parseAddressDescription(description: string): AddressComponents {
+    console.log('🔍 Parsing address description:', description);
+    
     const result: AddressComponents = {
       unit_number: '',
       street_number: '',
@@ -200,6 +202,7 @@ export class AddressAutocompleteService {
 
     // Split by comma to separate main address from suburb/state/postcode
     const parts = description.split(',').map(part => part.trim());
+    console.log('📝 Address parts:', parts);
     
     if (parts.length >= 1) {
       // Parse the first part (street address)
@@ -209,7 +212,7 @@ export class AddressAutocompleteService {
       // Patterns: "Unit 1/123 Smith St", "1/123 Smith St", "Apt 5, 67 Park Ave"
       const unitPatterns = [
         /^(Unit|Apt|Apartment|Shop|Suite|Level|Floor)\s+(\w+)[\/,]\s*(.+)$/i,  // "Unit 1/123 Smith St" or "Apt 5, 67 Park Ave"
-        /^(\w+)\/(.+)$/,  // "1/123 Smith St"
+        /^(\w+)\/(.+)$/,  // "1/123 Smith St" (but make sure it's not just a street name)
         /^(Unit|Apt|Apartment|Shop|Suite|Level|Floor)\s+(\w+)\s+(.+)$/i  // "Unit 1 123 Smith St" (space instead of slash)
       ];
       
@@ -221,13 +224,19 @@ export class AddressAutocompleteService {
             result.unit_number = unitMatch[2];
             streetPart = unitMatch[3];
           } else {
-            // Simple number/address pattern
-            result.unit_number = unitMatch[1];
-            streetPart = unitMatch[2];
+            // Simple number/address pattern (e.g., "1/123 Smith St")
+            // Make sure the first part is actually a unit number (not a complex street name)
+            const potentialUnit = unitMatch[1];
+            if (/^\w{1,4}$/.test(potentialUnit)) { // Unit numbers are typically short
+              result.unit_number = potentialUnit;
+              streetPart = unitMatch[2];
+            }
           }
           break;
         }
       }
+      
+      console.log('🏢 After unit parsing - Unit:', result.unit_number, 'Street part:', streetPart);
       
       // Extract street number (digits at the beginning)
       const streetNumberMatch = streetPart.match(/^(\d+[a-zA-Z]?)\s+(.+)$/);
@@ -281,17 +290,37 @@ export class AddressAutocompleteService {
     }
     
     if (parts.length >= 2) {
-      // Parse suburb from second part
-      const suburbPart = parts[1].trim();
+      // Parse suburb from second part, but make sure it's not a unit remnant
+      let suburbPart = parts[1].trim();
       
-      // Extract postcode (4 digits at the end)
-      const postcodeMatch = suburbPart.match(/^(.+?)\s+(\d{4})$/);
+      // Check if this looks like a unit number that wasn't caught earlier
+      // Patterns like "Unit 2", "Apt 5", etc. should not be treated as suburbs
+      const unitRemnantPattern = /^(Unit|Apt|Apartment|Shop|Suite|Level|Floor)\s+\w+$/i;
+      if (unitRemnantPattern.test(suburbPart)) {
+        // This is actually a unit number, not a suburb
+        const unitMatch = suburbPart.match(/^(Unit|Apt|Apartment|Shop|Suite|Level|Floor)\s+(\w+)$/i);
+        if (unitMatch && !result.unit_number) {
+          result.unit_number = unitMatch[2];
+        }
+        
+        // Look for suburb in the next part
+        if (parts.length >= 3) {
+          suburbPart = parts[2].trim();
+        } else {
+          suburbPart = ''; // No suburb available
+        }
+      }
       
-      if (postcodeMatch) {
-        result.suburb = postcodeMatch[1].trim();
-        result.postcode = postcodeMatch[2];
-      } else {
-        result.suburb = suburbPart;
+      if (suburbPart) {
+        // Extract postcode (4 digits at the end)
+        const postcodeMatch = suburbPart.match(/^(.+?)\s+(\d{4})$/);
+        
+        if (postcodeMatch) {
+          result.suburb = postcodeMatch[1].trim();
+          result.postcode = postcodeMatch[2];
+        } else {
+          result.suburb = suburbPart;
+        }
       }
     }
     
@@ -339,6 +368,7 @@ export class AddressAutocompleteService {
       result[key as keyof AddressComponents] = result[key as keyof AddressComponents].trim();
     });
 
+    console.log('✅ Final parsed result:', result);
     return result;
   }
 

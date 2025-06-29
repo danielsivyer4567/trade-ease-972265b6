@@ -5,10 +5,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Loader2, MapPin } from 'lucide-react';
+import { Loader2, MapPin, Compass } from 'lucide-react';
 import { PropertyMeasurementService } from '@/services/PropertyMeasurementService';
 import { AutocompleteInput } from '@/components/ui/AutocompleteInput';
 import { AddressAutocompleteService, AddressSuggestion } from '@/services/AddressAutocompleteService';
+import { BoundaryMeasurements } from '@/components/ui/BoundaryMeasurements';
 
 const PropertyMeasurement = () => {
   const [formData, setFormData] = useState({
@@ -656,21 +657,12 @@ const PropertyMeasurement = () => {
                             </div>
                           )}
                           
-                          {/* Property Measurements */}
+                          {/* Property Measurements with Directional Labels */}
                           {data.side_lengths_m && Array.isArray(data.side_lengths_m) && (
-                            <div>
-                              <Label className="text-sm font-semibold">Property Measurements:</Label>
-                              <div className="mt-2 grid grid-cols-2 gap-2">
-                                {data.side_lengths_m.map((length: number, index: number) => (
-                                  <div key={index} className="bg-blue-50 p-2 rounded text-sm">
-                                    <span className="font-medium">Side {index + 1}:</span> {length}m
-                                  </div>
-                                ))}
-                              </div>
-                              <div className="mt-2 p-2 bg-green-50 rounded text-sm">
-                                <span className="font-medium">Total Perimeter:</span> {data.side_lengths_m.reduce((sum: number, length: number) => sum + length, 0).toFixed(2)}m
-                              </div>
-                            </div>
+                            <BoundaryMeasurements 
+                              measurements={data.side_lengths_m}
+                              streetFacing="north" // Default - can be enhanced later with actual orientation data
+                            />
                           )}
                           
                           {/* Raw JSON Response */}
@@ -712,6 +704,48 @@ const PropertyMeasurement = () => {
             </CardContent>
           </Card>
         </div>
+
+        {/* Boundary Direction Information */}
+        <Card className="mt-6 bg-slate-300">
+          <CardHeader className="bg-slate-300">
+            <CardTitle className="flex items-center gap-2">
+              <Compass className="h-5 w-5" />
+              Understanding Boundary Directions
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="bg-slate-300">
+            <div className="space-y-4 text-sm">
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <h4 className="font-semibold text-blue-800 mb-2">🏠 How Directions Are Assigned</h4>
+                <div className="space-y-2 text-blue-700">
+                  <p><strong>Front:</strong> The street-facing boundary (usually shortest side for residential lots)</p>
+                  <p><strong>Left/Right:</strong> Standing at the front boundary facing the property</p>
+                  <p><strong>Back:</strong> The rear boundary opposite to the street</p>
+                  <p><strong>Cardinal Directions:</strong> North, South, East, West based on compass orientation</p>
+                </div>
+              </div>
+              
+              <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                <h4 className="font-semibold text-green-800 mb-2">✏️ Customizing Boundary Labels</h4>
+                <div className="space-y-2 text-green-700">
+                  <p>• Click <strong>"Edit Directions"</strong> to customize boundary labels</p>
+                  <p>• Smart defaults are applied based on typical property layouts</p>
+                  <p>• Rectangular properties automatically get Front, Back, Left, Right assignments</p>
+                  <p>• Irregular properties can be manually labeled as needed</p>
+                </div>
+              </div>
+              
+              <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+                <h4 className="font-semibold text-amber-800 mb-2">🗺️ Important Property Information</h4>
+                <div className="space-y-2 text-amber-700">
+                  <p><strong>Street Frontage:</strong> The measurement of your property that faces the street</p>
+                  <p><strong>Perimeter:</strong> Total boundary length around your property</p>
+                  <p><strong>Boundary Order:</strong> Measurements typically start from the street and go clockwise</p>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Performance Optimization Section */}
         <Card className="mt-6 bg-slate-300">
