@@ -236,6 +236,14 @@ export const DeckingCalculator: React.FC = () => {
           <CardContent>
             <div className="w-full flex justify-center mb-6">
               <img 
+                src="/lovable-uploads/square.png" 
+                alt="Deck shape diagram" 
+                className="max-w-full h-auto rounded shadow-md border border-gray-200"
+                style={{ maxHeight: 300 }}
+              />
+            </div>
+            <div className="w-full flex justify-center mb-6">
+              <img 
                 src="/lovable-uploads/197b9a21089f9.png" 
                 alt="Deck dimensions diagram" 
                 className="max-w-full h-auto rounded shadow-md border border-gray-200"
