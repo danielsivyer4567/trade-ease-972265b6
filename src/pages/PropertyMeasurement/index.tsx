@@ -12,6 +12,7 @@ import { AddressAutocompleteService, AddressSuggestion } from '@/services/Addres
 
 const PropertyMeasurement = () => {
   const [formData, setFormData] = useState({
+    unit_number: '',
     street_number: '',
     street_name: '',
     street_type: '',
@@ -21,10 +22,12 @@ const PropertyMeasurement = () => {
   
   const [fullAddress, setFullAddress] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isParsingAddress, setIsParsingAddress] = useState(false);
   const [response, setResponse] = useState<string>('');
   const [error, setError] = useState<string>('');
   const [debugMode, setDebugMode] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState<string>('');
+  const [validationMessage, setValidationMessage] = useState<string>('');
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -35,46 +38,70 @@ const PropertyMeasurement = () => {
   };
 
   const handleAddressSelect = async (suggestion: AddressSuggestion) => {
+    setIsParsingAddress(true);
+    setError('');
+    setValidationMessage('');
+    
     try {
-      // Get detailed address components from the selected suggestion
+      console.log('Selected address suggestion:', suggestion);
+      
+      // First, try to get detailed address components from Google Places API
       const addressDetails = await AddressAutocompleteService.getAddressDetails(suggestion.placeId);
       
-      if (addressDetails) {
-        setFormData({
+      let finalFormData: typeof formData;
+      
+      if (addressDetails && addressDetails.street_number && addressDetails.street_name) {
+        console.log('Using Google Places API details:', addressDetails);
+        finalFormData = {
+          unit_number: addressDetails.unit_number,
           street_number: addressDetails.street_number,
           street_name: addressDetails.street_name,
           street_type: addressDetails.street_type,
           suburb: addressDetails.suburb,
           postcode: addressDetails.postcode
-        });
+        };
       } else {
-        // Fallback: try to parse the address description
-        const addressParts = suggestion.description.split(', ');
-        if (addressParts.length >= 2) {
-          const streetPart = addressParts[0];
-          const suburbPart = addressParts[1];
-          
-          // Try to extract street number and name from the first part
-          const streetMatch = streetPart.match(/^(\d+)\s+(.+)$/);
-          if (streetMatch) {
-            const [, streetNumber, streetNameAndType] = streetMatch;
-            const streetWords = streetNameAndType.split(' ');
-            const streetType = streetWords[streetWords.length - 1];
-            const streetName = streetWords.slice(0, -1).join(' ');
-            
-            setFormData(prev => ({
-              ...prev,
-              street_number: streetNumber,
-              street_name: streetName,
-              street_type: streetType,
-              suburb: suburbPart.split(' ')[0], // Take first word as suburb
-            }));
-          }
-        }
+        // Fallback: use robust address description parsing
+        console.log('Google Places API details failed, using fallback parsing');
+        const parsedAddress = AddressAutocompleteService.parseAddressDescription(suggestion.description);
+        
+        console.log('Parsed address from description:', parsedAddress);
+        
+        finalFormData = {
+          unit_number: parsedAddress.unit_number,
+          street_number: parsedAddress.street_number,
+          street_name: parsedAddress.street_name,
+          street_type: parsedAddress.street_type,
+          suburb: parsedAddress.suburb,
+          postcode: parsedAddress.postcode
+        };
       }
+      
+      // Update form data
+      setFormData(finalFormData);
+      
+      // Validate the parsed data
+      const missingFields = [];
+      if (!finalFormData.street_number) missingFields.push('street number');
+      if (!finalFormData.street_name) missingFields.push('street name');
+      if (!finalFormData.suburb) missingFields.push('suburb');
+      // Note: unit_number is optional, so we don't validate it
+      
+      if (missingFields.length > 0) {
+        setValidationMessage(`⚠️ Please manually complete: ${missingFields.join(', ')}`);
+      } else {
+        setValidationMessage('✅ Address parsed successfully');
+        // Clear success message after 3 seconds
+        setTimeout(() => setValidationMessage(''), 3000);
+      }
+      
+      console.log('Final form data after address selection:', finalFormData);
+      
     } catch (error) {
       console.error('Error parsing address:', error);
-      // If parsing fails, user can still fill fields manually
+      setError('Failed to parse address. Please fill in the fields manually.');
+    } finally {
+      setIsParsingAddress(false);
     }
   };
 
@@ -228,11 +255,36 @@ const PropertyMeasurement = () => {
     }
   };
 
+  const validateFormData = (): string[] => {
+    const errors: string[] = [];
+    
+    if (!formData.street_number.trim()) errors.push('Street Number is required');
+    if (!formData.street_name.trim()) errors.push('Street Name is required');
+    if (!formData.suburb.trim()) errors.push('Suburb is required');
+    if (!formData.postcode.trim()) errors.push('Postcode is required');
+    
+    // Validate postcode format (Australian postcodes are 4 digits)
+    if (formData.postcode && !/^\d{4}$/.test(formData.postcode.trim())) {
+      errors.push('Postcode must be 4 digits');
+    }
+    
+    return errors;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate form data before submission
+    const validationErrors = validateFormData();
+    if (validationErrors.length > 0) {
+      setError(`Please fix the following issues:\n${validationErrors.join('\n')}`);
+      return;
+    }
+    
     setIsLoading(true);
     setError('');
     setResponse('');
+    setValidationMessage('');
     setLoadingMessage('Initializing...');
 
     try {
@@ -272,6 +324,7 @@ const PropertyMeasurement = () => {
 
   const clearForm = () => {
     setFormData({
+      unit_number: '',
       street_number: '',
       street_name: '',
       street_type: '',
@@ -281,6 +334,7 @@ const PropertyMeasurement = () => {
     setFullAddress('');
     setResponse('');
     setError('');
+    setValidationMessage('');
     setDebugMode(false);
   };
 
@@ -330,12 +384,27 @@ const PropertyMeasurement = () => {
                     value={fullAddress}
                     onChange={setFullAddress}
                     onSuggestionSelect={handleAddressSelect}
-                    placeholder="Start typing an address... (e.g., '2 Adelong Close, Upper Coomera')"
+                    placeholder="Start typing an address... (e.g., 'Unit 1/2 Adelong Close, Upper Coomera' or '2 Adelong Close, Upper Coomera')"
                     className="mb-2"
                   />
                   <p className="text-xs text-blue-600">
                     Start typing to see address suggestions. Selecting an address will auto-fill the fields below.
                   </p>
+                  
+                  {/* Address Parsing Status */}
+                  {isParsingAddress && (
+                    <div className="mt-2 flex items-center gap-2 text-sm text-blue-600">
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Parsing address...
+                    </div>
+                  )}
+                  
+                  {/* Validation Message */}
+                  {validationMessage && (
+                    <div className={`mt-2 text-sm ${validationMessage.includes('✅') ? 'text-green-600' : 'text-amber-600'}`}>
+                      {validationMessage}
+                    </div>
+                  )}
                 </div>
 
                 {/* Manual Entry Fields */}
@@ -343,6 +412,17 @@ const PropertyMeasurement = () => {
                   <h4 className="text-sm font-medium text-gray-700 mb-3">Or enter address details manually:</h4>
                   
                   <div className="space-y-4">
+                    <div>
+                      <Label htmlFor="unit_number">Unit/Apartment Number (Optional)</Label>
+                      <Input
+                        id="unit_number"
+                        name="unit_number"
+                        value={formData.unit_number}
+                        onChange={handleInputChange}
+                        placeholder="e.g., 1, Unit 5, Apt 12"
+                      />
+                    </div>
+                    
                     <div>
                       <Label htmlFor="street_number">Street Number</Label>
                       <Input

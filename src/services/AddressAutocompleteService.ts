@@ -15,6 +15,7 @@ export interface AddressSuggestion {
 }
 
 export interface AddressComponents {
+  unit_number: string;
   street_number: string;
   street_name: string;
   street_type: string;
@@ -102,6 +103,7 @@ export class AddressAutocompleteService {
    */
   private static parseAddressComponents(components: any[]): AddressComponents {
     const result: Partial<AddressComponents> = {
+      unit_number: '',
       street_number: '',
       street_name: '',
       street_type: '',
@@ -109,25 +111,23 @@ export class AddressAutocompleteService {
       postcode: ''
     };
 
-    // Australian street type abbreviations and their full forms
+         // Australian street type abbreviations and their full forms
     const streetTypeMap: Record<string, string> = {
-      'St': 'Street', 'Rd': 'Road', 'Ave': 'Avenue', 'Dr': 'Drive',
+      'St': 'Street', 'Rd': 'Road', 'Ave': 'Avenue', 'Av': 'Avenue', 'Dr': 'Drive',
       'Cl': 'Close', 'Ct': 'Court', 'Pl': 'Place', 'Cres': 'Crescent',
       'Tce': 'Terrace', 'Pde': 'Parade', 'Hwy': 'Highway', 'Blvd': 'Boulevard',
       'Espl': 'Esplanade', 'Pkwy': 'Parkway', 'Ln': 'Lane', 'Way': 'Way',
       'Cct': 'Circuit', 'Rise': 'Rise', 'Grove': 'Grove', 'Walk': 'Walk'
     };
 
-    console.log('Parsing address components:', components);
-
     components.forEach((component: any) => {
       const types = component.types;
       const longName = component.long_name;
-      const shortName = component.short_name;
       
-      console.log(`Component: ${longName} (${shortName}) - Types: ${types.join(', ')}`);
-      
-      if (types.includes('street_number')) {
+      if (types.includes('subpremise')) {
+        // Unit/apartment number
+        result.unit_number = longName;
+      } else if (types.includes('street_number')) {
         result.street_number = longName;
       } else if (types.includes('route')) {
         // More robust parsing for Australian street addresses
@@ -157,6 +157,7 @@ export class AddressAutocompleteService {
 
     // Clean and validate the results
     const cleanResult = {
+      unit_number: (result.unit_number || '').trim(),
       street_number: (result.street_number || '').trim(),
       street_name: (result.street_name || '').trim(),
       street_type: (result.street_type || '').trim(),
@@ -164,7 +165,6 @@ export class AddressAutocompleteService {
       postcode: (result.postcode || '').trim()
     };
 
-    console.log('Parsed address components:', cleanResult);
     return cleanResult;
   }
 
@@ -172,9 +172,8 @@ export class AddressAutocompleteService {
    * Parse address description string into components (fallback method)
    */
   static parseAddressDescription(description: string): AddressComponents {
-    console.log('Parsing address description:', description);
-    
     const result: AddressComponents = {
+      unit_number: '',
       street_number: '',
       street_name: '',
       street_type: '',
@@ -184,19 +183,51 @@ export class AddressAutocompleteService {
 
     // Australian street type patterns (both abbreviated and full forms)
     const streetTypes = [
-      'Street', 'St', 'Road', 'Rd', 'Avenue', 'Ave', 'Drive', 'Dr',
+      'Street', 'St', 'Road', 'Rd', 'Avenue', 'Ave', 'Av', 'Drive', 'Dr',
       'Close', 'Cl', 'Court', 'Ct', 'Place', 'Pl', 'Crescent', 'Cres',
       'Terrace', 'Tce', 'Parade', 'Pde', 'Highway', 'Hwy', 'Boulevard', 'Blvd',
       'Esplanade', 'Espl', 'Parkway', 'Pkwy', 'Lane', 'Ln', 'Way',
       'Circuit', 'Cct', 'Rise', 'Grove', 'Walk', 'Loop', 'Bend'
     ];
 
+    // Street type standardization map
+    const streetTypeStandardMap: Record<string, string> = {
+      'St': 'Street', 'Rd': 'Road', 'Ave': 'Avenue', 'Av': 'Avenue', 'Dr': 'Drive',
+      'Cl': 'Close', 'Ct': 'Court', 'Pl': 'Place', 'Cres': 'Crescent',
+      'Tce': 'Terrace', 'Pde': 'Parade', 'Hwy': 'Highway', 'Blvd': 'Boulevard',
+      'Espl': 'Esplanade', 'Pkwy': 'Parkway', 'Ln': 'Lane'
+    };
+
     // Split by comma to separate main address from suburb/state/postcode
     const parts = description.split(',').map(part => part.trim());
     
     if (parts.length >= 1) {
       // Parse the first part (street address)
-      const streetPart = parts[0].trim();
+      let streetPart = parts[0].trim();
+      
+      // Check for unit/apartment number patterns
+      // Patterns: "Unit 1/123 Smith St", "1/123 Smith St", "Apt 5, 67 Park Ave"
+      const unitPatterns = [
+        /^(Unit|Apt|Apartment|Shop|Suite|Level|Floor)\s+(\w+)[\/,]\s*(.+)$/i,  // "Unit 1/123 Smith St" or "Apt 5, 67 Park Ave"
+        /^(\w+)\/(.+)$/,  // "1/123 Smith St"
+        /^(Unit|Apt|Apartment|Shop|Suite|Level|Floor)\s+(\w+)\s+(.+)$/i  // "Unit 1 123 Smith St" (space instead of slash)
+      ];
+      
+      for (const pattern of unitPatterns) {
+        const unitMatch = streetPart.match(pattern);
+        if (unitMatch) {
+          if (pattern.source.includes('Unit|Apt')) {
+            // Patterns with unit type specified
+            result.unit_number = unitMatch[2];
+            streetPart = unitMatch[3];
+          } else {
+            // Simple number/address pattern
+            result.unit_number = unitMatch[1];
+            streetPart = unitMatch[2];
+          }
+          break;
+        }
+      }
       
       // Extract street number (digits at the beginning)
       const streetNumberMatch = streetPart.match(/^(\d+[a-zA-Z]?)\s+(.+)$/);
@@ -225,7 +256,8 @@ export class AddressAutocompleteService {
         
         if (streetTypeIndex > 0) {
           result.street_name = streetWords.slice(0, streetTypeIndex).join(' ');
-          result.street_type = foundStreetType;
+          // Standardize the street type
+          result.street_type = streetTypeStandardMap[foundStreetType] || foundStreetType;
         } else {
           // No street type found, assume the whole remaining part is street name
           result.street_name = remainingStreet;
@@ -240,7 +272,8 @@ export class AddressAutocompleteService {
         
         if (matchedType && streetWords.length > 1) {
           result.street_name = streetWords.slice(0, -1).join(' ');
-          result.street_type = matchedType;
+          // Standardize the street type
+          result.street_type = streetTypeStandardMap[matchedType] || matchedType;
         } else {
           result.street_name = streetPart;
         }
@@ -262,12 +295,42 @@ export class AddressAutocompleteService {
       }
     }
     
-    // If we have more parts, try to extract postcode from the last part
-    if (parts.length >= 3 && !result.postcode) {
-      const lastPart = parts[parts.length - 1].trim();
-      const postcodeMatch = lastPart.match(/\b(\d{4})\b/);
-      if (postcodeMatch) {
-        result.postcode = postcodeMatch[1];
+    // Extract postcode from any part of the address (look for 4-digit numbers)
+    if (!result.postcode) {
+      for (let i = 1; i < parts.length; i++) {
+        const part = parts[i].trim();
+        const postcodeMatch = part.match(/\b(\d{4})\b/);
+        if (postcodeMatch) {
+          result.postcode = postcodeMatch[1];
+          
+          // If this part contained a postcode, remove it and use the remaining text for suburb
+          if (i === 1 && !result.suburb) {
+            const suburbText = part.replace(/\b\d{4}\b/, '').trim();
+            if (suburbText) {
+              result.suburb = suburbText;
+            }
+          }
+          break;
+        }
+      }
+    }
+
+    // If still no suburb and we have multiple parts, try to extract suburb better
+    if (!result.suburb && parts.length >= 2) {
+      // Take the second part and clean it up
+      let suburbPart = parts[1].trim();
+      
+      // Remove state abbreviations (QLD, NSW, VIC, etc.)
+      suburbPart = suburbPart.replace(/\b(QLD|NSW|VIC|SA|WA|TAS|NT|ACT)\b/gi, '').trim();
+      
+      // Remove postcodes
+      suburbPart = suburbPart.replace(/\b\d{4}\b/, '').trim();
+      
+      // Remove extra commas and spaces
+      suburbPart = suburbPart.replace(/^,+|,+$/g, '').trim();
+      
+      if (suburbPart) {
+        result.suburb = suburbPart;
       }
     }
 
@@ -276,7 +339,6 @@ export class AddressAutocompleteService {
       result[key as keyof AddressComponents] = result[key as keyof AddressComponents].trim();
     });
 
-    console.log('Parsed description result:', result);
     return result;
   }
 

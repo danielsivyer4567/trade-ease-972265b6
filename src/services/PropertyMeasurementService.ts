@@ -1,4 +1,5 @@
 interface PropertyMeasurementRequest {
+  unit_number?: string;
   street_number: string;
   street_name: string;
   street_type: string;
@@ -161,13 +162,18 @@ export class PropertyMeasurementService {
         };
       }
 
-      const requestBody = {
+      const requestBody: any = {
         street_number: data.street_number.toString(),
         street_name: data.street_name.toString(),
         street_type: data.street_type.toString(),
         suburb: data.suburb.toString(),
         postcode: data.postcode.toString()
       };
+
+      // Add unit number if provided
+      if (data.unit_number && data.unit_number.trim()) {
+        requestBody.unit_number = data.unit_number.toString();
+      }
 
       console.log('PropertyMeasurementService: Sending request...');
 
