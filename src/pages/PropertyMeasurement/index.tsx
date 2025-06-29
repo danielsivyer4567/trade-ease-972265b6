@@ -7,6 +7,8 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Loader2, MapPin } from 'lucide-react';
 import { PropertyMeasurementService } from '@/services/PropertyMeasurementService';
+import { AutocompleteInput } from '@/components/ui/AutocompleteInput';
+import { AddressAutocompleteService, AddressSuggestion } from '@/services/AddressAutocompleteService';
 
 const PropertyMeasurement = () => {
   const [formData, setFormData] = useState({
@@ -17,6 +19,7 @@ const PropertyMeasurement = () => {
     postcode: ''
   });
   
+  const [fullAddress, setFullAddress] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [response, setResponse] = useState<string>('');
   const [error, setError] = useState<string>('');
@@ -29,6 +32,50 @@ const PropertyMeasurement = () => {
       ...prev,
       [name]: value
     }));
+  };
+
+  const handleAddressSelect = async (suggestion: AddressSuggestion) => {
+    try {
+      // Get detailed address components from the selected suggestion
+      const addressDetails = await AddressAutocompleteService.getAddressDetails(suggestion.placeId);
+      
+      if (addressDetails) {
+        setFormData({
+          street_number: addressDetails.street_number,
+          street_name: addressDetails.street_name,
+          street_type: addressDetails.street_type,
+          suburb: addressDetails.suburb,
+          postcode: addressDetails.postcode
+        });
+      } else {
+        // Fallback: try to parse the address description
+        const addressParts = suggestion.description.split(', ');
+        if (addressParts.length >= 2) {
+          const streetPart = addressParts[0];
+          const suburbPart = addressParts[1];
+          
+          // Try to extract street number and name from the first part
+          const streetMatch = streetPart.match(/^(\d+)\s+(.+)$/);
+          if (streetMatch) {
+            const [, streetNumber, streetNameAndType] = streetMatch;
+            const streetWords = streetNameAndType.split(' ');
+            const streetType = streetWords[streetWords.length - 1];
+            const streetName = streetWords.slice(0, -1).join(' ');
+            
+            setFormData(prev => ({
+              ...prev,
+              street_number: streetNumber,
+              street_name: streetName,
+              street_type: streetType,
+              suburb: suburbPart.split(' ')[0], // Take first word as suburb
+            }));
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error parsing address:', error);
+      // If parsing fails, user can still fill fields manually
+    }
   };
 
   const testConnectivity = async () => {
@@ -191,15 +238,16 @@ const PropertyMeasurement = () => {
     try {
       debugMode && console.log('Using PropertyMeasurementService with data:', formData);
       
-      setLoadingMessage('Connecting to property measurement service...');
+      setLoadingMessage('Connecting to Supabase function...');
       
-      const result = await PropertyMeasurementService.getPropertyMeasurement(formData);
+      // Use Supabase method as the standard method
+      const result = await PropertyMeasurementService.getPropertyMeasurementViaSupabase(formData);
       
       setLoadingMessage('Processing response...');
       debugMode && console.log('Service result:', result);
 
       if (!result.success) {
-        throw new Error(result.error || 'Service call failed');
+        throw new Error(result.error || 'Supabase service call failed');
       }
 
       setLoadingMessage('Formatting data...');
@@ -213,7 +261,7 @@ const PropertyMeasurement = () => {
       
       setLoadingMessage('Complete!');
     } catch (err) {
-      console.error('Service error:', err);
+      console.error('Supabase service error:', err);
       const errorMessage = err instanceof Error ? err.message : 'An error occurred';
       setError(errorMessage);
     } finally {
@@ -230,6 +278,7 @@ const PropertyMeasurement = () => {
       suburb: '',
       postcode: ''
     });
+    setFullAddress('');
     setResponse('');
     setError('');
     setDebugMode(false);
@@ -247,18 +296,18 @@ const PropertyMeasurement = () => {
             Enter property details to get measurement and visualization data
           </p>
           
-          {/* Speed Warning */}
-          <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mt-4">
+          {/* Speed Notice */}
+          <div className="bg-green-50 border border-green-200 rounded-lg p-4 mt-4">
             <div className="flex items-start gap-2">
-              <div className="bg-amber-100 rounded-full p-1">
-                <svg className="w-4 h-4 text-amber-600" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+              <div className="bg-green-100 rounded-full p-1">
+                <svg className="w-4 h-4 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                 </svg>
               </div>
               <div className="flex-1">
-                <h4 className="text-sm font-medium text-amber-800">Performance Note</h4>
-                <p className="text-sm text-amber-700 mt-1">
-                  The service may take 10-30 seconds due to CORS proxy overhead. For faster results, deploy the Supabase function.
+                <h4 className="text-sm font-medium text-green-800">Optimized Performance</h4>
+                <p className="text-sm text-green-700 mt-1">
+                  Now using Supabase Edge Function for optimal speed (1-5 seconds). Alternative methods available in debug mode if needed.
                 </p>
               </div>
             </div>
@@ -273,64 +322,87 @@ const PropertyMeasurement = () => {
             </CardHeader>
             <CardContent className="bg-slate-300">
               <form onSubmit={handleSubmit} className="space-y-4">
-                <div>
-                  <Label htmlFor="street_number">Street Number</Label>
-                  <Input
-                    id="street_number"
-                    name="street_number"
-                    value={formData.street_number}
-                    onChange={handleInputChange}
-                    placeholder="e.g., 2"
-                    required
+                {/* Address Autocomplete */}
+                <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                  <h4 className="text-sm font-medium text-blue-800 mb-2">🔍 Quick Address Search</h4>
+                  <AutocompleteInput
+                    label="Search for address"
+                    value={fullAddress}
+                    onChange={setFullAddress}
+                    onSuggestionSelect={handleAddressSelect}
+                    placeholder="Start typing an address... (e.g., '2 Adelong Close, Upper Coomera')"
+                    className="mb-2"
                   />
+                  <p className="text-xs text-blue-600">
+                    Start typing to see address suggestions. Selecting an address will auto-fill the fields below.
+                  </p>
                 </div>
-                
-                <div>
-                  <Label htmlFor="street_name">Street Name</Label>
-                  <Input
-                    id="street_name"
-                    name="street_name"
-                    value={formData.street_name}
-                    onChange={handleInputChange}
-                    placeholder="e.g., Adelong"
-                    required
-                  />
-                </div>
-                
-                <div>
-                  <Label htmlFor="street_type">Street Type</Label>
-                  <Input
-                    id="street_type"
-                    name="street_type"
-                    value={formData.street_type}
-                    onChange={handleInputChange}
-                    placeholder="e.g., Cl, St, Ave, Rd"
-                    required
-                  />
-                </div>
-                
-                <div>
-                  <Label htmlFor="suburb">Suburb</Label>
-                  <Input
-                    id="suburb"
-                    name="suburb"
-                    value={formData.suburb}
-                    onChange={handleInputChange}
-                    placeholder="e.g., Upper Coomera"
-                    required
-                  />
-                </div>
-                
-                <div>
-                  <Label htmlFor="postcode">Postcode</Label>
-                  <Input
-                    id="postcode"
-                    name="postcode"
-                    value={formData.postcode}
-                    onChange={handleInputChange}
-                    placeholder="e.g., 4209"
-                    required
-                  />
+
+                {/* Manual Entry Fields */}
+                <div className="border-t pt-4">
+                  <h4 className="text-sm font-medium text-gray-700 mb-3">Or enter address details manually:</h4>
+                  
+                  <div className="space-y-4">
+                    <div>
+                      <Label htmlFor="street_number">Street Number</Label>
+                      <Input
+                        id="street_number"
+                        name="street_number"
+                        value={formData.street_number}
+                        onChange={handleInputChange}
+                        placeholder="e.g., 2"
+                        required
+                      />
+                    </div>
+                    
+                    <div>
+                      <Label htmlFor="street_name">Street Name</Label>
+                      <Input
+                        id="street_name"
+                        name="street_name"
+                        value={formData.street_name}
+                        onChange={handleInputChange}
+                        placeholder="e.g., Adelong"
+                        required
+                      />
+                    </div>
+                    
+                    <div>
+                      <Label htmlFor="street_type">Street Type</Label>
+                      <Input
+                        id="street_type"
+                        name="street_type"
+                        value={formData.street_type}
+                        onChange={handleInputChange}
+                        placeholder="e.g., Cl, St, Ave, Rd"
+                        required
+                      />
+                    </div>
+                    
+                    <div>
+                      <Label htmlFor="suburb">Suburb</Label>
+                      <Input
+                        id="suburb"
+                        name="suburb"
+                        value={formData.suburb}
+                        onChange={handleInputChange}
+                        placeholder="e.g., Upper Coomera"
+                        required
+                      />
+                    </div>
+                    
+                    <div>
+                      <Label htmlFor="postcode">Postcode</Label>
+                      <Input
+                        id="postcode"
+                        name="postcode"
+                        value={formData.postcode}
+                        onChange={handleInputChange}
+                        placeholder="e.g., 4209"
+                        required
+                      />
+                    </div>
+                  </div>
                 </div>
 
                 <div className="space-y-2 pt-4">
@@ -568,9 +640,19 @@ const PropertyMeasurement = () => {
           </CardHeader>
           <CardContent className="bg-slate-300">
             <div className="space-y-4 text-sm">
+              <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                <h4 className="font-semibold text-green-800 mb-2">✅ Using Supabase Function (Optimized)</h4>
+                <p className="text-green-700 mb-2">The main "Get Property Measurement" button now uses the Supabase function for optimal performance.</p>
+                <div className="text-xs text-green-600">
+                  <div><strong>Method:</strong> Direct Supabase Edge Function</div>
+                  <div><strong>Expected Speed:</strong> 1-5 seconds (no proxy overhead)</div>
+                  <div><strong>Reliability:</strong> High (server-side execution)</div>
+                </div>
+              </div>
+              
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <h4 className="font-semibold text-blue-800 mb-2">🚀 For Best Performance - Deploy Supabase Function</h4>
-                <p className="text-blue-700 mb-2">To get instant results (1-2 seconds instead of 10-30 seconds), deploy the server-side function:</p>
+                <h4 className="font-semibold text-blue-800 mb-2">🔧 If Function Not Deployed</h4>
+                <p className="text-blue-700 mb-2">If you haven't deployed the Supabase function yet, deploy it for full functionality:</p>
                 <div className="bg-white rounded border p-3 font-mono text-xs">
                   <div>1. Open terminal</div>
                   <div>2. Run: <code className="bg-gray-100 px-1 rounded">supabase login</code></div>
@@ -579,12 +661,12 @@ const PropertyMeasurement = () => {
               </div>
               
               <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
-                <h4 className="font-semibold text-gray-800 mb-2">Current Method - CORS Proxy</h4>
-                <p className="text-gray-600 mb-2">Currently using CORS proxy which adds delay:</p>
+                <h4 className="font-semibold text-gray-800 mb-2">Alternative Methods</h4>
+                <p className="text-gray-600 mb-2">Backup methods available in debug mode:</p>
                 <div className="text-xs text-gray-500">
-                  <div><strong>URL:</strong> https://property-measurement-47233712259.australia-southeast1.run.app/visualize</div>
-                  <div><strong>Proxy:</strong> cors-anywhere.herokuapp.com or api.allorigins.win</div>
-                  <div><strong>Speed:</strong> 10-30 seconds (due to proxy overhead)</div>
+                  <div><strong>Fast Mode:</strong> Alternative proxy methods</div>
+                  <div><strong>CORS Proxy:</strong> cors-anywhere.herokuapp.com or api.allorigins.win</div>
+                  <div><strong>Direct API:</strong> Direct call (may have CORS issues)</div>
                 </div>
               </div>
             </div>
