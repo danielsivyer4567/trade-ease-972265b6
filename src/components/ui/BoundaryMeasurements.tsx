@@ -591,7 +591,7 @@ export const BoundaryMeasurements: React.FC<BoundaryMeasurementsProps> = ({
                          <div><strong>Detection Method:</strong> {
                coordinates 
                  ? (measurements.length >= 5 ? 'Advanced Irregular Property Analysis' : 'Enhanced (coordinate geometry)')
-                 : 'Standard (pattern-based analysis)'
+                 : (measurements.length >= 5 ? 'Enhanced Pattern Analysis (irregular)' : 'Standard (pattern-based analysis)')
              }</div>
              <div><strong>Front Identification:</strong> {
                measurements.length >= 5 
@@ -605,14 +605,16 @@ export const BoundaryMeasurements: React.FC<BoundaryMeasurementsProps> = ({
             <div><strong>Direction Assignment:</strong> Left/Right relative to standing at front boundary</div>
                      {!coordinates && (
                <div className="text-amber-600 mt-1">
-                 <strong>💡 Enhancement:</strong> Coordinate data would enable more precise direction detection
+                 <strong>💡 Current Limitation:</strong> This API doesn't provide coordinate data for geometric analysis
                  <br />
                  <span className="text-xs">
-                   • Check "View Raw JSON Response" below for coordinate data in the API response
+                   • Current response includes: measurements, area, perimeter, and aerial image
+                   <br />
+                   • Missing: boundary coordinates, vertices, or polygon data  
                    <br />
                    • Use "Try Longer Front" button for irregular properties with incorrect front detection
                    <br />
-                   • Use "Edit Directions" to manually assign any boundary directions
+                   • Use "Edit Directions" to manually assign specific boundary directions
                  </span>
                </div>
              )}
