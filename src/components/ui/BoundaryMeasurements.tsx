@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Navigation, RotateCw, Home, TreePine, Compass, Map } from 'lucide-react';
+import { Navigation, RotateCw, Home, TreePine, Compass, Map, AlertTriangle } from 'lucide-react';
 import { QueenslandSpatialService } from '../../services/QueenslandSpatialService';
 
 interface BoundaryMeasurement {
@@ -177,17 +177,35 @@ export const BoundaryMeasurements: React.FC<BoundaryMeasurementsProps> = ({
        }
     }
     
-    // Method 1: Use the shortest boundary (common for regular residential lots)
-    const shortestIndex = measurements.indexOf(Math.min(...measurements));
+    // Method 1: Smart boundary selection for rectangular properties
+    if (measurements.length === 4) {
+      // For rectangular properties, use intelligent analysis
+      const maxLength = Math.max(...measurements);
+      const maxIndex = measurements.indexOf(maxLength);
+      
+      // For rectangular properties, front is usually top (0) or bottom (2)
+      // If the longest boundary is a side (1 or 3), check if top/bottom are reasonable
+      if (maxIndex === 1 || maxIndex === 3) {
+        // Check if top or bottom boundaries are substantial (not tiny side access)
+        const topLength = measurements[0];
+        const bottomLength = measurements[2];
+        const longestSide = Math.max(topLength, bottomLength);
+        
+        // If top or bottom is at least 60% of the longest side, prefer it as front
+        if (longestSide >= maxLength * 0.6) {
+          const frontIndex = bottomLength >= topLength ? 2 : 0; // Prefer bottom, then top
+          console.log('BoundaryMeasurements: Using smart rectangular analysis, front boundary:', frontIndex);
+          return frontIndex;
+        }
+      }
+      
+      console.log('BoundaryMeasurements: Using longest boundary as front:', maxIndex);
+      return maxIndex;
+    }
     
     // Method 2: If coordinates available, use geometric analysis for regular properties
     if (coords && coords.length === measurements.length) {
-      // For rectangular properties, prefer southern boundary if it's reasonably short
-      const shortestScore = 0.7;
-      let bestIndex = shortestIndex;
-      let bestScore = shortestScore;
-      
-      // Find the most southern boundary (lowest latitude)
+      // Find the most southern boundary (lowest latitude) - often the street-facing side
       let mostSouthernIndex = 0;
       let lowestLat = Infinity;
       
@@ -202,47 +220,14 @@ export const BoundaryMeasurements: React.FC<BoundaryMeasurementsProps> = ({
         }
       }
       
-      // If the most southern boundary is within reasonable range, prefer it
-      const southernScore = 0.8;
-      if (mostSouthernIndex !== shortestIndex) {
-        const southernLength = measurements[mostSouthernIndex];
-        const shortestLength = measurements[shortestIndex];
-        
-        // If southern boundary is within 100% of shortest, prefer it
-        if (southernLength <= shortestLength * 2.0) {
-          bestIndex = mostSouthernIndex;
-          bestScore = southernScore;
-        }
-      }
-      
-      console.log('BoundaryMeasurements: Regular property front boundary analysis:', {
-        shortestIndex,
-        mostSouthernIndex,
-        bestIndex,
-        bestScore
-      });
-      
-      return bestIndex;
+      console.log('BoundaryMeasurements: Using most southern boundary as front:', mostSouthernIndex);
+      return mostSouthernIndex;
     }
     
-    // Method 3: For properties without coordinates, use intelligent defaults
-    if (measurements.length === 4) {
-      const sortedIndices = measurements
-        .map((length, index) => ({ length, index }))
-        .sort((a, b) => a.length - b.length);
-      
-      const shortestTwo = sortedIndices.slice(0, 2);
-      const longestTwo = sortedIndices.slice(2, 4);
-      const avgShort = (shortestTwo[0].length + shortestTwo[1].length) / 2;
-      const avgLong = (longestTwo[0].length + longestTwo[1].length) / 2;
-      
-      if (avgLong > avgShort * 1.5) {
-        return shortestTwo[0].index;
-      }
-    }
-    
-    console.log('BoundaryMeasurements: Using shortest boundary as front:', shortestIndex);
-    return shortestIndex;
+    // Method 3: Fallback - use longest boundary (street frontage is typically longest)
+    const longestIndex = measurements.indexOf(Math.max(...measurements));
+    console.log('BoundaryMeasurements: Using longest boundary as front fallback:', longestIndex);
+    return longestIndex;
   };
 
   // Enhanced front detection for irregular properties using coordinates
@@ -534,8 +519,8 @@ export const BoundaryMeasurements: React.FC<BoundaryMeasurementsProps> = ({
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <CardTitle className="text-sm font-semibold flex items-center gap-2">
-            <Compass className="h-4 w-4" />
-            Property Boundary Measurements
+            <Home className="h-4 w-4" />
+            Front Boundary Detection
           </CardTitle>
           <div className="flex gap-2">
             {address && address.postcode.startsWith('4') && (
@@ -550,208 +535,72 @@ export const BoundaryMeasurements: React.FC<BoundaryMeasurementsProps> = ({
                 {isLoadingQLD ? 'Loading QLD Data...' : 'Get QLD Spatial Data'}
               </Button>
             )}
-            {!coordinates && measurements.length >= 5 && !queenslandData && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  // Quick fix: For irregular properties without coordinates, 
-                  // try one of the longer boundaries as front
-                  const sortedByLength = measurements
-                    .map((length, index) => ({ length, index }))
-                    .sort((a, b) => b.length - a.length);
-                  
-                  // Try the 3rd or 4th longest (avoiding the very longest which might be rear)
-                  const candidateIndex = sortedByLength.length > 4 ? 3 : 1;
-                  const newFrontIndex = sortedByLength[candidateIndex].index;
-                  
-                  // Manually set this boundary as front and reassign all others
-                  const newBoundaries = measurements.map((length, index) => {
-                    if (index === newFrontIndex) {
-                      return { length, direction: 'front', isStreetFacing: true };
-                    } else {
-                      // Clear previous front assignments and use generic labels
-                      return { length, direction: `side-${index + 1}`, isStreetFacing: false };
-                    }
-                  });
-                  setBoundaryData(newBoundaries);
-                }}
-                className="text-xs bg-amber-50 hover:bg-amber-100 text-amber-700"
-              >
-                Try Longer Front
-              </Button>
-            )}
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setEditMode(!editMode)}
-              className="text-xs"
-            >
-              <RotateCw className="h-3 w-3 mr-1" />
-              {editMode ? 'Done' : 'Edit Directions'}
-            </Button>
           </div>
         </div>
         <p className="text-xs text-gray-600">
-          {editMode ? 'Click to assign directions to each boundary' : 'Boundaries labeled with smart defaults'}
+          Automatic identification of the street-facing property boundary
         </p>
       </CardHeader>
       
       <CardContent className="space-y-3">
-        {/* Boundary Grid */}
-        <div className="grid grid-cols-1 gap-2">
-          {boundaryData.map((boundary, index) => {
-            const directionInfo = getDirectionInfo(boundary.direction);
-            const Icon = directionInfo.icon;
-            
-            return (
-              <div key={index} className="flex items-center gap-3">
-                {/* Direction Label */}
-                <div className={`px-3 py-1.5 rounded-md border text-xs font-medium flex items-center gap-1.5 min-w-[120px] ${directionInfo.color}`}>
-                  <Icon className="h-3 w-3" />
-                  <span>{getDirectionEmoji(boundary.direction)}</span>
-                  <span className="capitalize">{directionInfo.label}</span>
+        {/* Front Boundary Identification Only */}
+        <div className="text-center space-y-3">
+          {boundaryData.find(b => b.isStreetFacing) ? (
+            <div className="bg-blue-50 border-2 border-blue-200 rounded-lg p-4">
+              <div className="flex items-center justify-center gap-3 mb-2">
+                <div className="bg-blue-100 p-2 rounded-full">
+                  <Home className="h-5 w-5 text-blue-600" />
                 </div>
-                
-                {/* Measurement */}
-                <div className="bg-slate-100 px-3 py-1.5 rounded text-sm font-medium flex-1">
-                  {boundary.length}m
-                </div>
-                
-                {/* Edit Dropdown */}
-                {editMode && (
-                  <select
-                    value={boundary.direction}
-                    onChange={(e) => updateBoundaryDirection(index, e.target.value)}
-                    className="text-xs border rounded px-2 py-1 bg-white"
-                  >
-                    {DIRECTION_OPTIONS.map(option => (
-                      <option key={option.value} value={option.value}>
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
-                )}
+                <h3 className="text-lg font-semibold text-blue-800">Front Boundary Identified</h3>
               </div>
-            );
-          })}
-        </div>
-
-        {/* Summary */}
-        <div className="border-t pt-3 space-y-2">
-          <div className="flex justify-between items-center p-2 bg-green-50 rounded text-sm">
-            <span className="font-medium text-green-800">Total Perimeter:</span>
-            <span className="font-bold text-green-900">{totalPerimeter.toFixed(2)}m</span>
-          </div>
-          
-          {/* Street-facing highlight */}
-          {boundaryData.some(b => b.isStreetFacing) && (
-            <div className="flex justify-between items-center p-2 bg-blue-50 rounded text-sm">
-              <span className="font-medium text-blue-800">Street Frontage:</span>
-              <span className="font-bold text-blue-900">
-                {boundaryData.find(b => b.isStreetFacing)?.length.toFixed(2)}m
-              </span>
+              <p className="text-blue-700 text-sm">
+                The street-facing boundary has been automatically detected and highlighted on the property map.
+              </p>
+              <div className="mt-3 inline-flex items-center gap-2 bg-blue-100 px-3 py-1 rounded-full text-xs font-medium text-blue-800">
+                <span>🏠</span>
+                <span>Front (Street)</span>
+              </div>
+            </div>
+          ) : (
+            <div className="bg-amber-50 border-2 border-amber-200 rounded-lg p-4">
+              <div className="flex items-center justify-center gap-3 mb-2">
+                <div className="bg-amber-100 p-2 rounded-full">
+                  <AlertTriangle className="h-5 w-5 text-amber-600" />
+                </div>
+                <h3 className="text-lg font-semibold text-amber-800">Front Detection in Progress</h3>
+              </div>
+              <p className="text-amber-700 text-sm">
+                Analyzing property boundaries to identify the street-facing side...
+              </p>
             </div>
           )}
-        </div>
 
-        {/* Automatic Direction Detection Info */}
-        <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg">
-          <Label className="text-xs font-medium text-green-800 mb-2 block">🎯 Automatic Direction Detection:</Label>
-          <div className="text-xs text-green-700 space-y-1">
-            <div><strong>Property Type:</strong> {
-              boundaryData.length === 3 ? 'Triangular' :
-              boundaryData.length === 4 ? 'Rectangular' :
-              'Irregular'
-            } ({boundaryData.length} sides)</div>
-                         <div><strong>Detection Method:</strong> {
-               queenslandData 
-                 ? 'Queensland Government Spatial Data (Cadastral Boundaries)'
-                 : coordinates 
-                   ? (measurements.length >= 5 ? 'Advanced Irregular Property Analysis' : 'Enhanced (coordinate geometry)')
-                   : (measurements.length >= 5 ? 'Enhanced Pattern Analysis (irregular)' : 'Standard (pattern-based analysis)')
-             }</div>
-             <div><strong>Front Identification:</strong> {
-               queenslandData 
-                 ? `Official cadastral analysis with confidence scoring (Lot ${queenslandData.lotNumber})`
-                 : measurements.length >= 5 
-                   ? (coordinates 
-                       ? 'Multi-factor scoring: position, length, orientation, accessibility' 
-                       : 'Medium-length boundary analysis (avoiding utility boundaries)')
-                   : (coordinates 
-                       ? 'Geometric analysis with street positioning' 
-                       : 'Shortest boundary (typical for residential lots)')
-             }</div>
-            <div><strong>Direction Assignment:</strong> Left/Right relative to standing at front boundary</div>
-                     {!queenslandData && !coordinates && (
-               <div className="text-amber-600 mt-1">
-                 <strong>💡 Enhancement Available:</strong> {address && address.postcode.startsWith('4') ? 'Queensland Spatial Data available!' : 'Current API limitations'}
-                 <br />
-                 <span className="text-xs">
-                   {address && address.postcode.startsWith('4') ? (
-                     <>
-                       • Click "Get QLD Spatial Data" for official government cadastral boundaries
-                       <br />
-                       • Provides exact coordinates, lot details, and precise direction detection
-                       <br />
-                     </>
-                   ) : (
-                     <>
-                       • Current response includes: measurements, area, perimeter, and aerial image
-                       <br />
-                       • Missing: boundary coordinates, vertices, or polygon data  
-                       <br />
-                     </>
-                   )}
-                   • Use "Try Longer Front" button for irregular properties with incorrect front detection
-                   <br />
-                   • Use "Edit Directions" to manually assign specific boundary directions
-                 </span>
-               </div>
-             )}
-             {queenslandData && (
-               <div className="text-green-600 mt-1">
-                 <strong>✅ Queensland Spatial Data Active:</strong> Using official government cadastral boundaries
-                 <br />
-                 <span className="text-xs">
-                   • Lot {queenslandData.lotNumber}, Plan {queenslandData.planNumber}
-                   <br />
-                   • Street frontage: {queenslandData.streetFrontage?.length.toFixed(2)}m on {queenslandData.streetFrontage?.streetName}
-                   <br />
-                   • Coordinate-based direction detection with compass bearings
-                   <br />
-                   • Data source: Queensland Government Spatial Services
-                 </span>
-               </div>
-             )}
-          </div>
-        </div>
-
-        {/* Property Layout Visualization */}
-        <div className="mt-4 p-3 bg-gray-50 rounded-lg">
-          <Label className="text-xs font-medium text-gray-700 mb-2 block">Property Layout Guide:</Label>
-          <div className="grid grid-cols-2 gap-2 text-xs">
-            <div className="space-y-1">
-              <div className="flex items-center gap-1">
-                <div className="w-3 h-3 bg-blue-100 border border-blue-200 rounded"></div>
-                <span>Front: Street-facing boundary</span>
-              </div>
-              <div className="flex items-center gap-1">
-                <div className="w-3 h-3 bg-green-100 border border-green-200 rounded"></div>
-                <span>Back: Rear boundary</span>
-              </div>
-            </div>
-            <div className="space-y-1">
-              <div className="flex items-center gap-1">
-                <div className="w-3 h-3 bg-purple-100 border border-purple-200 rounded"></div>
-                <span>Left: Standing at front</span>
-              </div>
-              <div className="flex items-center gap-1">
-                <div className="w-3 h-3 bg-orange-100 border border-orange-200 rounded"></div>
-                <span>Right: Standing at front</span>
-              </div>
+          {/* Simple Detection Method Info */}
+          <div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
+            <div className="text-xs text-gray-600 space-y-1">
+              <div><strong>Detection Method:</strong> {
+                queenslandData 
+                  ? 'Queensland Government Spatial Data'
+                  : coordinates 
+                    ? 'Geometric Analysis'
+                    : 'Pattern-Based Analysis'
+              }</div>
+              <div><strong>Goal:</strong> Identify street-facing boundary for property orientation</div>
             </div>
           </div>
+
+          {/* QLD Data Button */}
+          {address && address.postcode.startsWith('4') && !queenslandData && (
+            <Button
+              variant="outline"
+              onClick={loadQueenslandData}
+              disabled={isLoadingQLD}
+              className="w-full bg-green-50 hover:bg-green-100 text-green-700"
+            >
+              <Map className="h-4 w-4 mr-2" />
+              {isLoadingQLD ? 'Loading QLD Data...' : 'Get Official QLD Boundary Data'}
+            </Button>
+          )}
         </div>
       </CardContent>
     </Card>

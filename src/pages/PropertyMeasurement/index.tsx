@@ -11,6 +11,338 @@ import { AutocompleteInput } from '@/components/ui/AutocompleteInput';
 import { AddressAutocompleteService, AddressSuggestion } from '@/services/AddressAutocompleteService';
 import { BoundaryMeasurements } from '@/components/ui/BoundaryMeasurements';
 
+const PropertyBoundaryIconSmall = () => (
+  <svg
+    width="64"
+    height="64"
+    viewBox="0 0 32 32"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    className="text-blue-600"
+  >
+    {/* Property boundary outline - animated drawing */}
+    <path
+      d="M6 8 L24 8 L24 22 L6 22 Z"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeDasharray="60"
+      strokeDashoffset="60"
+    >
+      <animate
+        attributeName="stroke-dashoffset"
+        values="60;0;60"
+        dur="3s"
+        repeatCount="indefinite"
+      />
+    </path>
+    
+    {/* Corner markers */}
+    <circle cx="6" cy="8" r="1.5" fill="currentColor" opacity="0">
+      <animate attributeName="opacity" values="0;1;0" dur="3s" begin="0.6s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="24" cy="8" r="1.5" fill="currentColor" opacity="0">
+      <animate attributeName="opacity" values="0;1;0" dur="3s" begin="1.2s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="24" cy="22" r="1.5" fill="currentColor" opacity="0">
+      <animate attributeName="opacity" values="0;1;0" dur="3s" begin="1.8s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="6" cy="22" r="1.5" fill="currentColor" opacity="0">
+      <animate attributeName="opacity" values="0;1;0" dur="3s" begin="2.4s" repeatCount="indefinite"/>
+    </circle>
+    
+    {/* Measurement lines */}
+    <g opacity="0">
+      <animate attributeName="opacity" values="0;1;1;0" dur="3s" begin="2.2s" repeatCount="indefinite"/>
+      
+      {/* Top measurement */}
+      <line x1="6" y1="5" x2="24" y2="5" stroke="currentColor" strokeWidth="1"/>
+      <line x1="6" y1="4" x2="6" y2="6" stroke="currentColor" strokeWidth="1"/>
+      <line x1="24" y1="4" x2="24" y2="6" stroke="currentColor" strokeWidth="1"/>
+      <text x="15" y="3.5" fontSize="2.5" fill="currentColor" textAnchor="middle">25m</text>
+      
+      {/* Right measurement */}
+      <line x1="26" y1="8" x2="26" y2="22" stroke="currentColor" strokeWidth="1"/>
+      <line x1="25" y1="8" x2="27" y2="8" stroke="currentColor" strokeWidth="1"/>
+      <line x1="25" y1="22" x2="27" y2="22" stroke="currentColor" strokeWidth="1"/>
+      <text x="28.5" y="16" fontSize="2.5" fill="currentColor" textAnchor="middle">15m</text>
+    </g>
+    
+    {/* Survey compass indicator */}
+    <g transform="translate(26,6)" opacity="0">
+      <animate attributeName="opacity" values="0;1;1;0" dur="3s" begin="1s" repeatCount="indefinite"/>
+      <circle cx="0" cy="0" r="2" fill="none" stroke="currentColor" strokeWidth="0.5"/>
+      <path d="M0,-1.5 L0.5,1 L0,0.5 L-0.5,1 Z" fill="currentColor"/>
+      <text x="0" y="3.5" fontSize="2" fill="currentColor" textAnchor="middle">N</text>
+    </g>
+  </svg>
+);
+
+const PropertyBoundaryIcon = () => (
+  <svg
+    width="48"
+    height="48"
+    viewBox="0 0 32 32"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    className="mx-auto mb-4 text-blue-500"
+  >
+    {/* Property boundary outline - animated drawing */}
+    <path
+      d="M6 8 L24 8 L24 22 L6 22 Z"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeDasharray="60"
+      strokeDashoffset="60"
+    >
+      <animate
+        attributeName="stroke-dashoffset"
+        values="60;0;60"
+        dur="4s"
+        repeatCount="indefinite"
+      />
+    </path>
+    
+    {/* Corner markers */}
+    <circle cx="6" cy="8" r="1.5" fill="currentColor" opacity="0">
+      <animate attributeName="opacity" values="0;1;0" dur="4s" begin="0.8s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="24" cy="8" r="1.5" fill="currentColor" opacity="0">
+      <animate attributeName="opacity" values="0;1;0" dur="4s" begin="1.6s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="24" cy="22" r="1.5" fill="currentColor" opacity="0">
+      <animate attributeName="opacity" values="0;1;0" dur="4s" begin="2.4s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="6" cy="22" r="1.5" fill="currentColor" opacity="0">
+      <animate attributeName="opacity" values="0;1;0" dur="4s" begin="3.2s" repeatCount="indefinite"/>
+    </circle>
+    
+    {/* Measurement lines */}
+    <g opacity="0">
+      <animate attributeName="opacity" values="0;1;1;0" dur="4s" begin="3.5s" repeatCount="indefinite"/>
+      
+      {/* Top measurement */}
+      <line x1="6" y1="5" x2="24" y2="5" stroke="currentColor" strokeWidth="1"/>
+      <line x1="6" y1="4" x2="6" y2="6" stroke="currentColor" strokeWidth="1"/>
+      <line x1="24" y1="4" x2="24" y2="6" stroke="currentColor" strokeWidth="1"/>
+      <text x="15" y="3.5" fontSize="2.5" fill="currentColor" textAnchor="middle">25m</text>
+      
+      {/* Right measurement */}
+      <line x1="26" y1="8" x2="26" y2="22" stroke="currentColor" strokeWidth="1"/>
+      <line x1="25" y1="8" x2="27" y2="8" stroke="currentColor" strokeWidth="1"/>
+      <line x1="25" y1="22" x2="27" y2="22" stroke="currentColor" strokeWidth="1"/>
+      <text x="28.5" y="16" fontSize="2.5" fill="currentColor" textAnchor="middle">15m</text>
+    </g>
+    
+    {/* Survey compass indicator */}
+    <g transform="translate(26,6)" opacity="0">
+      <animate attributeName="opacity" values="0;1;1;0" dur="4s" begin="1.5s" repeatCount="indefinite"/>
+      <circle cx="0" cy="0" r="2" fill="none" stroke="currentColor" strokeWidth="0.5"/>
+      <path d="M0,-1.5 L0.5,1 L0,0.5 L-0.5,1 Z" fill="currentColor"/>
+      <text x="0" y="3.5" fontSize="2" fill="currentColor" textAnchor="middle">N</text>
+    </g>
+  </svg>
+);
+
+const PropertyImageWithFrontHighlight = ({ 
+  imageUrl, 
+  measurements, 
+  coordinates 
+}: { 
+  imageUrl: string; 
+  measurements: number[]; 
+  coordinates?: any[] 
+}) => {
+  // Intelligent front boundary detection based on real property access features
+  const identifyFrontBoundary = (measurements: number[], imageUrl?: string): number => {
+    // TODO: Implement computer vision analysis to detect:
+    // 1. Driveway entrance/vehicle access points
+    // 2. Power box/utility connections
+    // 3. Front door/main entrance visibility
+    // 4. Street-facing features
+    
+    // For now, use heuristic analysis with visual cues in mind
+    if (measurements.length === 4) {
+      // Rectangular property analysis
+      // Most driveways are positioned on street-facing boundaries
+      // Power boxes are typically on the shortest street-accessible side
+      
+      const sortedIndices = measurements
+        .map((length, index) => ({ length, index }))
+        .sort((a, b) => a.length - b.length);
+      
+      // Strategy: Look for medium-length boundaries that could accommodate driveways
+      // Avoid very short boundaries (likely side setbacks) and very long boundaries (likely rear)
+      const minLength = sortedIndices[0].length;
+      const maxLength = sortedIndices[3].length;
+      
+      // Find boundaries suitable for driveway access (15-35m range is common)
+      const drivewayCandidate = sortedIndices.find(item => 
+        item.length >= 15 && item.length <= 35 && 
+        (item.index === 0 || item.index === 2) // Prefer top/bottom boundaries
+      );
+      
+      if (drivewayCandidate) {
+        return drivewayCandidate.index;
+      }
+      
+      // Fallback: Use shortest of top/bottom boundaries (power box logic)
+      const topLength = measurements[0];
+      const bottomLength = measurements[2];
+      return topLength <= bottomLength ? 0 : 2;
+    } else {
+      // Irregular property - use medium-length boundary logic
+      const sortedIndices = measurements
+        .map((length, index) => ({ length, index }))
+        .sort((a, b) => a.length - b.length);
+      
+      // Look for boundary in 25-75th percentile range (likely driveway access)
+      const middleIndex = Math.floor(sortedIndices.length * 0.4); // Lean toward shorter side
+      return sortedIndices[middleIndex].index;
+    }
+  };
+
+  const frontIndex = identifyFrontBoundary(measurements, imageUrl);
+
+  return (
+    <div className="relative">
+      <img 
+        src={imageUrl} 
+        alt="Property boundary visualization"
+        className="w-full h-auto"
+        onError={(e) => {
+          const target = e.target as HTMLImageElement;
+          target.style.display = 'none';
+        }}
+      />
+      
+      {/* Front Boundary Indicator - Animated Pulse */}
+      <div className="absolute inset-0 pointer-events-none">
+        {/* Top boundary highlight (if front is boundary 0) */}
+        {frontIndex === 0 && (
+          <div className="absolute top-8 left-1/2 transform -translate-x-1/2">
+            <div className="bg-blue-500 text-white px-3 py-1 rounded-full text-xs font-bold animate-pulse shadow-lg border-2 border-blue-300">
+              🏠 FRONT (Street)
+            </div>
+            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-1">
+              <div className="w-0 h-0 border-l-6 border-r-6 border-b-8 border-transparent border-b-blue-500 animate-bounce drop-shadow-lg"></div>
+            </div>
+          </div>
+        )}
+        
+        {/* Right boundary highlight (if front is boundary 1) */}
+        {frontIndex === 1 && (
+          <div className="absolute right-8 top-1/2 transform -translate-y-1/2">
+            <div className="bg-blue-500 text-white px-3 py-1 rounded-full text-xs font-bold animate-pulse shadow-lg border-2 border-blue-300">
+              🏠 FRONT
+            </div>
+            <div className="absolute left-full top-1/2 transform -translate-y-1/2 ml-1">
+              <div className="w-0 h-0 border-t-6 border-b-6 border-l-8 border-transparent border-l-blue-500 animate-bounce drop-shadow-lg"></div>
+            </div>
+          </div>
+        )}
+        
+        {/* Bottom boundary highlight (if front is boundary 2) */}
+        {frontIndex === 2 && (
+          <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2">
+            <div className="bg-blue-500 text-white px-3 py-1 rounded-full text-xs font-bold animate-pulse shadow-lg border-2 border-blue-300">
+              🏠 FRONT (Street)
+            </div>
+            <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-1">
+              <div className="w-0 h-0 border-l-6 border-r-6 border-t-8 border-transparent border-t-blue-500 animate-bounce drop-shadow-lg"></div>
+            </div>
+          </div>
+        )}
+        
+        {/* Left boundary highlight (if front is boundary 3) */}
+        {frontIndex === 3 && (
+          <div className="absolute left-8 top-1/2 transform -translate-y-1/2">
+            <div className="bg-blue-500 text-white px-3 py-1 rounded-full text-xs font-bold animate-pulse shadow-lg border-2 border-blue-300">
+              🏠 FRONT
+            </div>
+            <div className="absolute right-full top-1/2 transform -translate-y-1/2 mr-1">
+              <div className="w-0 h-0 border-t-6 border-b-6 border-r-8 border-transparent border-r-blue-500 animate-bounce drop-shadow-lg"></div>
+            </div>
+          </div>
+        )}
+        
+        {/* Irregular properties - position badge based on front boundary location */}
+        {measurements.length > 4 && (
+          <>
+            {/* Front boundary is bottom-ish (likely boundary 4 for 5-sided property) */}
+            {frontIndex === 4 && (
+              <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2">
+                <div className="bg-blue-500 text-white px-3 py-1 rounded-full text-xs font-bold animate-pulse shadow-lg border-2 border-blue-300">
+                  🏠 FRONT (Street)
+                </div>
+                <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-1">
+                  <div className="w-0 h-0 border-l-6 border-r-6 border-t-8 border-transparent border-t-blue-500 animate-bounce drop-shadow-lg"></div>
+                </div>
+              </div>
+            )}
+            
+            {/* Front boundary is top-ish (boundary 0) */}
+            {frontIndex === 0 && (
+              <div className="absolute top-8 left-1/2 transform -translate-x-1/2">
+                <div className="bg-blue-500 text-white px-3 py-1 rounded-full text-xs font-bold animate-pulse shadow-lg border-2 border-blue-300">
+                  🏠 FRONT (Street)
+                </div>
+                <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-1">
+                  <div className="w-0 h-0 border-l-6 border-r-6 border-b-8 border-transparent border-b-blue-500 animate-bounce drop-shadow-lg"></div>
+                </div>
+              </div>
+            )}
+            
+            {/* Front boundary is right-ish */}
+            {(frontIndex === 1 || frontIndex === 2) && (
+              <div className="absolute right-8 top-1/2 transform -translate-y-1/2">
+                <div className="bg-blue-500 text-white px-3 py-1 rounded-full text-xs font-bold animate-pulse shadow-lg border-2 border-blue-300">
+                  🏠 FRONT
+                </div>
+                <div className="absolute left-full top-1/2 transform -translate-y-1/2 ml-1">
+                  <div className="w-0 h-0 border-t-6 border-b-6 border-l-8 border-transparent border-l-blue-500 animate-bounce drop-shadow-lg"></div>
+                </div>
+              </div>
+            )}
+            
+            {/* Front boundary is left-ish */}
+            {frontIndex === 3 && (
+              <div className="absolute left-8 top-1/2 transform -translate-y-1/2">
+                <div className="bg-blue-500 text-white px-3 py-1 rounded-full text-xs font-bold animate-pulse shadow-lg border-2 border-blue-300">
+                  🏠 FRONT
+                </div>
+                <div className="absolute right-full top-1/2 transform -translate-y-1/2 mr-1">
+                  <div className="w-0 h-0 border-t-6 border-b-6 border-r-8 border-transparent border-r-blue-500 animate-bounce drop-shadow-lg"></div>
+                </div>
+              </div>
+            )}
+            
+            {/* Fallback for other irregular boundaries */}
+            {frontIndex > 4 && (
+              <div className="absolute top-8 right-8">
+                <div className="bg-blue-500 text-white px-3 py-1 rounded-full text-xs font-bold animate-pulse shadow-lg border-2 border-blue-300">
+                  🏠 FRONT (#{frontIndex + 1})
+                </div>
+              </div>
+            )}
+          </>
+        )}
+        
+        {/* Compass indicator */}
+        <div className="absolute top-2 right-2">
+          <div className="bg-white/90 rounded-full p-2 shadow-lg">
+            <div className="w-6 h-6 relative">
+              <div className="absolute inset-0 text-red-500 text-center font-bold text-xs leading-6">N</div>
+              <div className="absolute inset-0 border border-gray-400 rounded-full"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const PropertyMeasurement = () => {
   const [formData, setFormData] = useState({
     unit_number: '',
@@ -373,7 +705,10 @@ const PropertyMeasurement = () => {
           {/* Form Section */}
           <Card className="bg-slate-300">
             <CardHeader className="bg-slate-300">
-              <CardTitle>Property Details</CardTitle>
+              <div className="flex items-center justify-between">
+                <CardTitle>Property Details</CardTitle>
+                <PropertyBoundaryIconSmall />
+              </div>
             </CardHeader>
             <CardContent className="bg-slate-300">
               <form onSubmit={handleSubmit} className="space-y-4">
@@ -639,14 +974,10 @@ const PropertyMeasurement = () => {
                             <div>
                               <Label className="text-sm font-semibold">Property Visualization:</Label>
                               <div className="mt-2 border rounded-lg overflow-hidden">
-                                <img 
-                                  src={data.image_url} 
-                                  alt="Property boundary visualization"
-                                  className="w-full h-auto"
-                                  onError={(e) => {
-                                    const target = e.target as HTMLImageElement;
-                                    target.style.display = 'none';
-                                  }}
+                                <PropertyImageWithFrontHighlight 
+                                  imageUrl={data.image_url} 
+                                  measurements={data.side_lengths_m}
+                                  coordinates={data.coordinates || data.boundary_points || data.vertices}
                                 />
                               </div>
                               <p className="text-xs text-gray-500 mt-1">
@@ -706,8 +1037,10 @@ const PropertyMeasurement = () => {
               
               {!response && !error && (
                 <div className="text-center py-8 text-gray-500">
-                  <MapPin className="h-12 w-12 mx-auto mb-2 opacity-30" />
-                  <p>Enter property details and click "Get Property Measurement" to see the response</p>
+                  <div className="space-y-2">
+                    <p className="font-medium text-gray-700">Automatic Boundary Detection</p>
+                    <p className="text-sm">Enter property details and click "Get Property Measurement" to see boundary measurements, area calculations, and property visualization</p>
+                  </div>
                 </div>
               )}
             </CardContent>
