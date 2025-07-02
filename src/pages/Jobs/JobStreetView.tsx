@@ -18,7 +18,7 @@ const JobStreetView: React.FC<JobStreetViewProps> = ({ location }) => {
         allowFullScreen
         loading="lazy"
         referrerPolicy="no-referrer-when-downgrade"
-        src={`https://www.google.com/maps/embed/v1/streetview?key=AIzaSyBcIDk3_FcrH6wEaYpGaLMRuW5GjV2ogkM&location=${lat},${lng}&heading=210&pitch=10&fov=80`}
+        src={`https://www.google.com/maps/embed/v1/streetview?key=AIzaSyBS_SpQWpq8RwFQSlK6sPifGosgnxPrpxE&location=${lat},${lng}&heading=210&pitch=10&fov=80`}
       />
     </div>
   );
