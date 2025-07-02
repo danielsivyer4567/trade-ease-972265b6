@@ -1,24 +1,493 @@
-
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { AppLayout } from "@/components/ui/AppLayout";
 import { Link } from "react-router-dom";
-import { ArrowLeft, Gauge } from "lucide-react";
+import { ArrowLeft, Gauge, Save, History, Settings } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
+
+// Import types and utilities
+import {
+  ProjectDetails,
+  MaterialItem,
+  LaborItem,
+  EquipmentItem,
+  SubcontractorItem,
+  OverheadItem,
+  RiskItem,
+  EstimateSettings,
+  CostBreakdown
+} from './types';
+import {
+  calculateCostBreakdown,
+  generateAIRecommendations,
+  exportToCSV,
+  validateEstimate,
+  calculateMaterialCost,
+  calculateLaborCost,
+  calculateEquipmentCost,
+  calculateSubcontractorCost
+} from './utils';
+
+// Import components
+import { ProjectDetailsForm } from './components/ProjectDetails';
+import { MaterialsInput } from './components/MaterialsInput';
+import { LaborInput } from './components/LaborInput';
+import { EquipmentInput } from './components/EquipmentInput';
+import { OtherCostsTab } from './components/OtherCostsTab';
+import { CostSummary } from './components/CostSummary';
+import { EstimateHistory } from './components/EstimateHistory';
+import { EstimateSettings as EstimateSettingsComponent } from './components/EstimateSettings';
+
+// Import sample data
+import { sampleMaterials, sampleLabor, sampleEquipment, sampleSubcontractors, sampleRisks } from './sampleData';
 
 const JobCostCalculator = () => {
+  const { toast } = useToast();
+  
+  // State management
+  const [projectDetails, setProjectDetails] = useState<ProjectDetails>({
+    name: '',
+    client: '',
+    location: '',
+    type: 'Commercial - Office',
+    size: 0,
+    sizeUnit: 'SF',
+    startDate: new Date(),
+    duration: 90,
+    complexity: 'medium',
+    weatherRisk: false,
+    siteConditions: '',
+    accessRestrictions: '',
+    workingHours: '7AM-5PM Mon-Fri',
+    unionRequirements: false
+  });
+
+  const [materials, setMaterials] = useState<MaterialItem[]>([]);
+  const [labor, setLabor] = useState<LaborItem[]>([]);
+  const [equipment, setEquipment] = useState<EquipmentItem[]>([]);
+  const [subcontractors, setSubcontractors] = useState<SubcontractorItem[]>([]);
+  const [overhead, setOverhead] = useState<OverheadItem[]>([
+    {
+      id: '1',
+      category: 'Project Management',
+      description: 'PM and supervision',
+      amount: 0,
+      allocation: 'percentage',
+      percentage: 5
+    },
+    {
+      id: '2',
+      category: 'Insurance & Bonds',
+      description: 'General liability and performance bond',
+      amount: 0,
+      allocation: 'percentage',
+      percentage: 2.5
+    }
+  ]);
+  const [risks, setRisks] = useState<RiskItem[]>([]);
+  
+  const [showHistory, setShowHistory] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
+  
+  // Load settings from localStorage
+  const loadSettings = (): EstimateSettings => {
+    const saved = localStorage.getItem('estimateSettings');
+    if (saved) {
+      return JSON.parse(saved);
+    }
+    return {
+      defaultMarkup: 15,
+      defaultWasteFactor: 5,
+      defaultOverhead: 10,
+      defaultProfit: 10,
+      defaultContingency: 5,
+      taxRate: 0,
+      roundTotals: false,
+      includeMarketConditions: false,
+      showDetailedBreakdown: true
+    };
+  };
+
+  const [settings, setSettings] = useState<EstimateSettings>(loadSettings());
+
+  const [activeTab, setActiveTab] = useState('details');
+  const [isSaving, setIsSaving] = useState(false);
+
+  // Calculate cost breakdown
+  const breakdown = calculateCostBreakdown(
+    materials,
+    labor,
+    equipment,
+    subcontractors,
+    overhead,
+    risks,
+    settings,
+    projectDetails.size
+  );
+
+  // Generate AI recommendations
+  const recommendations = generateAIRecommendations(
+    breakdown,
+    materials,
+    labor
+  );
+
+  // Calculate subtotal for overhead calculations
+  const subtotal = materials.reduce((sum, m) => sum + calculateMaterialCost(m), 0) +
+                   labor.reduce((sum, l) => sum + calculateLaborCost(l), 0) +
+                   equipment.reduce((sum, e) => sum + calculateEquipmentCost(e), 0) +
+                   subcontractors.reduce((sum, s) => sum + calculateSubcontractorCost(s), 0);
+
+  // Save estimate to local storage
+  const saveEstimate = () => {
+    const estimateData = {
+      projectDetails,
+      materials,
+      labor,
+      equipment,
+      subcontractors,
+      overhead,
+      risks,
+      settings,
+      breakdown: calculateCostBreakdown(
+        materials,
+        labor,
+        equipment,
+        subcontractors,
+        overhead,
+        risks,
+        settings
+      ),
+      createdAt: new Date().toISOString(),
+      status: 'draft'
+    };
+    
+    const estimateId = `estimate_${Date.now()}`;
+    localStorage.setItem(estimateId, JSON.stringify(estimateData));
+    
+    toast({
+      title: "Estimate saved",
+      description: "Your estimate has been saved to history.",
+    });
+  };
+
+  // Load estimate from history
+  const loadEstimate = (estimateData: any) => {
+    if (estimateData.projectDetails) setProjectDetails(estimateData.projectDetails);
+    if (estimateData.materials) setMaterials(estimateData.materials);
+    if (estimateData.labor) setLabor(estimateData.labor);
+    if (estimateData.equipment) setEquipment(estimateData.equipment);
+    if (estimateData.subcontractors) setSubcontractors(estimateData.subcontractors);
+    if (estimateData.overhead) setOverhead(estimateData.overhead);
+    if (estimateData.risks) setRisks(estimateData.risks);
+    if (estimateData.settings) setSettings(estimateData.settings);
+    
+    setShowHistory(false);
+    toast({
+      title: "Estimate loaded",
+      description: "The estimate has been loaded successfully.",
+    });
+  };
+
+  // Export to CSV
+  const handleExport = () => {
+    const csv = exportToCSV(breakdown, projectDetails);
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${projectDetails.name || 'estimate'}_${new Date().toISOString().split('T')[0]}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+    
+    toast({
+      title: "Export Successful",
+      description: "Your estimate has been exported to CSV.",
+    });
+  };
+
+  // Generate proposal (placeholder)
+  const handleGenerateProposal = () => {
+    toast({
+      title: "Coming Soon",
+      description: "Proposal generation feature will be available soon.",
+    });
+  };
+
+  // Validate estimate
+  const errors = validateEstimate(materials, labor, projectDetails);
+  const isValid = errors.length === 0;
+
+  // Load sample data for demonstration
+  const loadSampleData = () => {
+    setProjectDetails({
+      name: 'Modern Office Building Renovation',
+      client: 'ABC Corporation',
+      location: '123 Business Park Dr, Suite 100',
+      startDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days from now
+      duration: 90, // 90 days duration
+      type: 'commercial',
+      size: 15000,
+      sizeUnit: 'sqft',
+      complexity: 'medium',
+      weatherRisk: false,
+      siteConditions: 'normal',
+      workingHours: 'standard',
+      unionRequirements: false
+    });
+    
+    setMaterials(sampleMaterials);
+    setLabor(sampleLabor);
+    setEquipment(sampleEquipment);
+    setSubcontractors(sampleSubcontractors);
+    setRisks(sampleRisks);
+    
+    // Add some sample overhead
+    setOverhead([
+      {
+        id: '1',
+        category: 'Project Management',
+        description: 'Project manager and coordination',
+        amount: 0,
+        allocation: 'percentage',
+        percentage: 8
+      },
+      {
+        id: '2',
+        category: 'Permits & Fees',
+        description: 'Building permits and inspection fees',
+        amount: 5000,
+        allocation: 'fixed',
+        percentage: 0
+      }
+    ]);
+    
+    toast({
+      title: "Sample data loaded",
+      description: "The estimator has been populated with sample data.",
+    });
+  };
+
   return (
     <AppLayout>
-      <div className="container mx-auto p-4 md:p-6">
-        <div className="flex items-center gap-2 mb-6">
-          <Link to="/calculators" className="hover:text-blue-500">
-            <ArrowLeft className="h-6 w-6" />
-          </Link>
-          <Gauge className="h-8 w-8 text-purple-500" />
-          <h1 className="text-3xl font-bold">Job Cost Estimator</h1>
+      <div style={{
+        fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
+        background: 'linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)',
+        minHeight: '100vh',
+        padding: '20px'
+      }}>
+        <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
+          {/* Header */}
+          <div style={{ textAlign: 'center', marginBottom: '30px', color: '#6c757d' }}>
+            <h1 style={{ fontSize: '2.5rem', marginBottom: '10px', textShadow: '1px 1px 2px rgba(0,0,0,0.1)' }}>
+              🏗️ Advanced Job Cost Estimator
+            </h1>
+            <p>Professional construction cost estimation tool</p>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex justify-between items-center mb-6">
+            <Button
+              onClick={loadSampleData}
+              style={{
+                background: '#3b82f6',
+                color: 'white',
+                border: 'none',
+                padding: '12px 24px',
+                borderRadius: '25px',
+                cursor: 'pointer',
+                fontSize: '1rem',
+                transition: 'all 0.3s ease'
+              }}
+            >
+              <Gauge className="h-4 w-4 mr-2" />
+              Load Sample Data
+            </Button>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowHistory(true)}
+                style={{
+                  background: '#dee2e6',
+                  color: '#6c757d',
+                  border: '2px solid #dee2e6',
+                  padding: '10px 20px',
+                  borderRadius: '20px',
+                  cursor: 'pointer',
+                  fontSize: '0.95rem',
+                  transition: 'all 0.3s ease'
+                }}
+              >
+                <History className="h-4 w-4 mr-2" />
+                History
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowSettings(true)}
+                style={{
+                  background: '#dee2e6',
+                  color: '#6c757d',
+                  border: '2px solid #dee2e6',
+                  padding: '10px 20px',
+                  borderRadius: '20px',
+                  cursor: 'pointer',
+                  fontSize: '0.95rem',
+                  transition: 'all 0.3s ease'
+                }}
+              >
+                <Settings className="h-4 w-4 mr-2" />
+                Settings
+              </Button>
+              <Button
+                onClick={saveEstimate}
+                disabled={!isValid}
+                style={{
+                  background: isValid ? '#3b82f6' : '#dee2e6',
+                  color: isValid ? 'white' : '#6c757d',
+                  border: 'none',
+                  padding: '10px 20px',
+                  borderRadius: '20px',
+                  cursor: isValid ? 'pointer' : 'not-allowed',
+                  fontSize: '0.95rem',
+                  transition: 'all 0.3s ease'
+                }}
+              >
+                <Save className="h-4 w-4 mr-2" />
+                Save Estimate
+              </Button>
+            </div>
+          </div>
+
+          {/* Main Content */}
+          <div style={{ 
+            background: '#e2e8f0', 
+            borderRadius: '20px', 
+            padding: '25px', 
+            boxShadow: '0 10px 30px rgba(0,0,0,0.2)', 
+            backdropFilter: 'blur(10px)', 
+            border: '2px solid #94a3b8' 
+          }}>
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+              <TabsList className="grid w-full grid-cols-6" style={{
+                background: '#dee2e6',
+                borderRadius: '15px',
+                padding: '4px',
+                marginBottom: '20px'
+              }}>
+                <TabsTrigger value="details" style={{
+                  borderRadius: '10px',
+                  transition: 'all 0.3s ease'
+                }}>Details</TabsTrigger>
+                <TabsTrigger value="materials" style={{
+                  borderRadius: '10px',
+                  transition: 'all 0.3s ease'
+                }}>Materials</TabsTrigger>
+                <TabsTrigger value="labor" style={{
+                  borderRadius: '10px',
+                  transition: 'all 0.3s ease'
+                }}>Labor</TabsTrigger>
+                <TabsTrigger value="equipment" style={{
+                  borderRadius: '10px',
+                  transition: 'all 0.3s ease'
+                }}>Equipment</TabsTrigger>
+                <TabsTrigger value="other" style={{
+                  borderRadius: '10px',
+                  transition: 'all 0.3s ease'
+                }}>Other</TabsTrigger>
+                <TabsTrigger value="summary" style={{
+                  borderRadius: '10px',
+                  transition: 'all 0.3s ease'
+                }}>Summary</TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="details" className="mt-4">
+                <ProjectDetailsForm
+                  details={projectDetails}
+                  onChange={setProjectDetails}
+                />
+              </TabsContent>
+
+              <TabsContent value="materials" className="mt-4">
+                <MaterialsInput
+                  materials={materials}
+                  onChange={setMaterials}
+                />
+              </TabsContent>
+
+              <TabsContent value="labor" className="mt-4">
+                <LaborInput
+                  labor={labor}
+                  onChange={setLabor}
+                />
+              </TabsContent>
+
+              <TabsContent value="equipment" className="mt-4">
+                <EquipmentInput
+                  equipment={equipment}
+                  onChange={setEquipment}
+                />
+              </TabsContent>
+
+              <TabsContent value="other" className="mt-4">
+                <OtherCostsTab
+                  subcontractors={subcontractors}
+                  overhead={overhead}
+                  risks={risks}
+                  onSubcontractorsChange={setSubcontractors}
+                  onOverheadChange={setOverhead}
+                  onRisksChange={setRisks}
+                  subtotal={subtotal}
+                />
+              </TabsContent>
+
+              <TabsContent value="summary" className="mt-4">
+                <CostSummary
+                  breakdown={breakdown}
+                  recommendations={recommendations}
+                  onExport={handleExport}
+                  onGenerateProposal={handleGenerateProposal}
+                />
+              </TabsContent>
+            </Tabs>
+
+            {errors.length > 0 && (
+              <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+                <h4 className="font-semibold text-red-800 mb-2">Please fix the following issues:</h4>
+                <ul className="list-disc list-inside text-sm text-red-700">
+                  {errors.map((error, index) => (
+                    <li key={index}>{error}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
         </div>
-        
-        <div className="bg-slate-300 rounded-lg shadow p-6">
-          <p className="text-center text-gray-500 mb-4">Coming soon! The Job Cost Estimator is under development.</p>
-        </div>
+
+        {/* History Modal */}
+        {showHistory && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <EstimateHistory
+              onLoad={loadEstimate}
+              onClose={() => setShowHistory(false)}
+            />
+          </div>
+        )}
+
+        {/* Settings Modal */}
+        {showSettings && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <EstimateSettingsComponent
+              settings={settings}
+              onChange={setSettings}
+              onClose={() => setShowSettings(false)}
+            />
+          </div>
+        )}
       </div>
     </AppLayout>
   );
