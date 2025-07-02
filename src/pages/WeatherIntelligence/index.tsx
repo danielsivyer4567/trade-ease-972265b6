@@ -34,6 +34,7 @@ import {
   Activity
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import WeatherNotificationService from '@/services/WeatherNotificationService';
 
 interface WeatherData {
   location: string;
@@ -795,6 +796,30 @@ const WeatherIntelligence: React.FC = () => {
                   >
                     <Calendar className="h-4 w-4" />
                   </Button>
+                </div>
+
+                <div className="pt-4 border-t border-gray-200">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <Label className="text-[#555]">Test Notifications</Label>
+                      <p className="text-sm text-[#6c757d]">Test your notification settings</p>
+                    </div>
+                    <Button
+                      onClick={async () => {
+                        const notificationService = WeatherNotificationService.getInstance();
+                        await notificationService.testNotification();
+                        toast({
+                          title: "Test Notification Sent",
+                          description: "Check your browser notifications and listen for audio alerts.",
+                        });
+                      }}
+                      style={{ borderRadius: '25px' }}
+                      className="bg-blue-600 hover:bg-blue-700"
+                    >
+                      <Zap className="h-4 w-4 mr-2" />
+                      Test Alert
+                    </Button>
+                  </div>
                 </div>
               </CardContent>
             </Card>
