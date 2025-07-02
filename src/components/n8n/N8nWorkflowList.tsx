@@ -70,7 +70,7 @@ export function N8nWorkflowList({ onSelectWorkflow }: N8nWorkflowListProps) {
       setLoading(true);
       const response = await fetch(`/api/n8n/workflows`, {
         headers: {
-          'X-N8N-API-KEY': import.meta.env.VITE_N8N_API_KEY,
+          'X-N8N-API-KEY': 'n8n_api_6fe7f406f20166677dc347f597cbebda22a582e9533c4b5540d585720bcd074c8111599077d42b66',
         }
       });
       if (response.ok) {
@@ -93,7 +93,7 @@ export function N8nWorkflowList({ onSelectWorkflow }: N8nWorkflowListProps) {
       const response = await fetch(`/api/n8n/workflows`, {
         method: 'POST',
         headers: {
-          'X-N8N-API-KEY': import.meta.env.VITE_N8N_API_KEY,
+          'X-N8N-API-KEY': 'n8n_api_6fe7f406f20166677dc347f597cbebda22a582e9533c4b5540d585720bcd074c8111599077d42b66',
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
@@ -124,7 +124,7 @@ export function N8nWorkflowList({ onSelectWorkflow }: N8nWorkflowListProps) {
       const response = await fetch(`/api/n8n/workflows`, {
         method: 'POST',
         headers: {
-          'X-N8N-API-KEY': import.meta.env.VITE_N8N_API_KEY,
+          'X-N8N-API-KEY': 'n8n_api_6fe7f406f20166677dc347f597cbebda22a582e9533c4b5540d585720bcd074c8111599077d42b66',
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
@@ -152,7 +152,7 @@ export function N8nWorkflowList({ onSelectWorkflow }: N8nWorkflowListProps) {
       const response = await fetch(`/api/n8n/workflows/${workflow.id}`, {
         method: 'PATCH',
         headers: {
-          'X-N8N-API-KEY': import.meta.env.VITE_N8N_API_KEY,
+          'X-N8N-API-KEY': 'n8n_api_6fe7f406f20166677dc347f597cbebda22a582e9533c4b5540d585720bcd074c8111599077d42b66',
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
@@ -177,7 +177,7 @@ export function N8nWorkflowList({ onSelectWorkflow }: N8nWorkflowListProps) {
       const response = await fetch(`/api/n8n/workflows/${workflow.id}/execute`, {
         method: 'POST',
         headers: {
-          'X-N8N-API-KEY': import.meta.env.VITE_N8N_API_KEY,
+          'X-N8N-API-KEY': 'n8n_api_6fe7f406f20166677dc347f597cbebda22a582e9533c4b5540d585720bcd074c8111599077d42b66',
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({}),
@@ -201,7 +201,7 @@ export function N8nWorkflowList({ onSelectWorkflow }: N8nWorkflowListProps) {
       const response = await fetch(`/api/n8n/workflows/${selectedWorkflow.id}`, {
         method: 'DELETE',
         headers: {
-          'X-N8N-API-KEY': import.meta.env.VITE_N8N_API_KEY,
+          'X-N8N-API-KEY': 'n8n_api_6fe7f406f20166677dc347f597cbebda22a582e9533c4b5540d585720bcd074c8111599077d42b66',
         }
       });
 
@@ -223,7 +223,7 @@ export function N8nWorkflowList({ onSelectWorkflow }: N8nWorkflowListProps) {
     try {
       const response = await fetch(`/api/n8n/workflows/${workflow.id}`, {
         headers: {
-          'X-N8N-API-KEY': import.meta.env.VITE_N8N_API_KEY,
+          'X-N8N-API-KEY': 'n8n_api_6fe7f406f20166677dc347f597cbebda22a582e9533c4b5540d585720bcd074c8111599077d42b66',
         }
       });
       if (response.ok) {

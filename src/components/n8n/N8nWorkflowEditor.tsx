@@ -79,7 +79,7 @@ export function N8nWorkflowEditor({
         method: workflowId ? 'PATCH' : 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'X-N8N-API-KEY': import.meta.env.VITE_N8N_API_KEY,
+          'X-N8N-API-KEY': 'n8n_api_6fe7f406f20166677dc347f597cbebda22a582e9533c4b5540d585720bcd074c8111599077d42b66',
         },
         body: JSON.stringify(workflowData),
       });
@@ -110,7 +110,7 @@ export function N8nWorkflowEditor({
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'X-N8N-API-KEY': import.meta.env.VITE_N8N_API_KEY,
+          'X-N8N-API-KEY': 'n8n_api_6fe7f406f20166677dc347f597cbebda22a582e9533c4b5540d585720bcd074c8111599077d42b66',
         },
         body: JSON.stringify({}),
       });
