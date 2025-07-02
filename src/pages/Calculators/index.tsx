@@ -476,6 +476,89 @@ const ConcreteIcon = () => (
   </svg>
 );
 
+const WeatherIntelligenceIcon = () => (
+  <svg
+    width="24"
+    height="24"
+    viewBox="0 0 32 32"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    className="h-6 w-6 text-blue-600 animate-pulse"
+  >
+    {/* Main cloud with animation */}
+    <g transform-origin="16 12">
+      <animateTransform
+        attributeName="transform"
+        attributeType="XML"
+        type="scale"
+        values="1;1.1;1"
+        dur="3s"
+        repeatCount="indefinite"
+      />
+      <path d="M8 16c-2.2 0-4-1.8-4-4s1.8-4 4-4c0.4-2.6 2.6-4.5 5.2-4.4 2.4 0.1 4.4 2.1 4.4 4.4 1.8 0 3.4 1.6 3.4 3.5s-1.5 3.5-3.4 3.5" fill="currentColor" opacity="0.8"/>
+    </g>
+    
+    {/* Sun rays with rotation */}
+    <g transform-origin="24 8" opacity="0.7">
+      <animateTransform
+        attributeName="transform"
+        attributeType="XML"
+        type="rotate"
+        values="0 24 8;360 24 8"
+        dur="8s"
+        repeatCount="indefinite"
+      />
+      <line x1="24" y1="4" x2="24" y2="6" stroke="currentColor" strokeWidth="1"/>
+      <line x1="27" y1="5" x2="26" y2="6" stroke="currentColor" strokeWidth="1"/>
+      <line x1="28" y1="8" x2="26" y2="8" stroke="currentColor" strokeWidth="1"/>
+      <line x1="27" y1="11" x2="26" y2="10" stroke="currentColor" strokeWidth="1"/>
+      <line x1="24" y1="12" x2="24" y2="10" stroke="currentColor" strokeWidth="1"/>
+      <line x1="21" y1="11" x2="22" y2="10" stroke="currentColor" strokeWidth="1"/>
+      <line x1="20" y1="8" x2="22" y2="8" stroke="currentColor" strokeWidth="1"/>
+      <line x1="21" y1="5" x2="22" y2="6" stroke="currentColor" strokeWidth="1"/>
+    </g>
+    
+    {/* Sun center */}
+    <circle cx="24" cy="8" r="2" fill="currentColor" opacity="0.9"/>
+    
+    {/* Rain drops with falling animation */}
+    <g opacity="0">
+      <animate attributeName="opacity" values="0;1;0" dur="2s" begin="0.5s" repeatCount="indefinite"/>
+      <ellipse cx="10" cy="20" rx="0.5" ry="2" fill="currentColor"/>
+      <ellipse cx="14" cy="22" rx="0.5" ry="2" fill="currentColor"/>
+      <ellipse cx="18" cy="20" rx="0.5" ry="2" fill="currentColor"/>
+    </g>
+    
+    <g opacity="0">
+      <animate attributeName="opacity" values="0;1;0" dur="2s" begin="1s" repeatCount="indefinite"/>
+      <ellipse cx="12" cy="24" rx="0.5" ry="2" fill="currentColor"/>
+      <ellipse cx="16" cy="26" rx="0.5" ry="2" fill="currentColor"/>
+      <ellipse cx="20" cy="24" rx="0.5" ry="2" fill="currentColor"/>
+    </g>
+    
+    {/* Wind lines with movement */}
+    <g opacity="0">
+      <animate attributeName="opacity" values="0;0.7;0" dur="3s" begin="2s" repeatCount="indefinite"/>
+      <path d="M2 18 Q6 16 10 18" stroke="currentColor" strokeWidth="1" fill="none"/>
+      <path d="M2 22 Q8 20 12 22" stroke="currentColor" strokeWidth="1" fill="none"/>
+      <path d="M2 26 Q5 24 8 26" stroke="currentColor" strokeWidth="1" fill="none"/>
+    </g>
+    
+    {/* Weather station antenna */}
+    <line x1="28" y1="28" x2="28" y2="20" stroke="currentColor" strokeWidth="1.5"/>
+    <circle cx="28" cy="20" r="1" fill="currentColor"/>
+    <line x1="26" y1="22" x2="30" y2="22" stroke="currentColor" strokeWidth="0.8"/>
+    <line x1="27" y1="24" x2="29" y2="24" stroke="currentColor" strokeWidth="0.8"/>
+    
+    {/* Signal waves */}
+    <g opacity="0">
+      <animate attributeName="opacity" values="0;1;0" dur="2s" repeatCount="indefinite"/>
+      <path d="M25 20 Q26 18 27 20" stroke="currentColor" strokeWidth="0.5" fill="none"/>
+      <path d="M29 20 Q30 18 31 20" stroke="currentColor" strokeWidth="0.5" fill="none"/>
+    </g>
+  </svg>
+);
+
 const Calculators = () => {
   const calculators = [{
     title: "Markup Calculator",
@@ -726,6 +809,26 @@ const Calculators = () => {
                   className="w-full bg-blue-600 text-white py-2 rounded-md text-center hover:bg-blue-700 transition-colors"
                 >
                   Open Calculator
+                </Link>
+              </CardFooter>
+            </Card>
+            {/* Weather Intelligence Card */}
+            <Card className="hover:shadow-md transition-shadow">
+              <CardHeader className="bg-slate-200 p-4">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-base md:text-lg">Weather Intelligence</CardTitle>
+                  <WeatherIntelligenceIcon />
+                </div>
+                <CardDescription className="line-clamp-2 min-h-[40px]">
+                  Professional weather monitoring with location-based alerts and construction-specific forecasts
+                </CardDescription>
+              </CardHeader>
+              <CardFooter className="bg-slate-200 p-4">
+                <Link 
+                  to="/weather-intelligence" 
+                  className="w-full bg-blue-600 text-white py-2 rounded-md text-center hover:bg-blue-700 transition-colors"
+                >
+                  Open Tool
                 </Link>
               </CardFooter>
             </Card>

@@ -9,7 +9,8 @@ import {
   ProjectPhase,
   EstimateSettings,
   MarketCondition,
-  AIRecommendation
+  AIRecommendation,
+  UnionRequirement
 } from './types';
 
 // Material cost calculations
@@ -94,6 +95,12 @@ export const calculateTotalContingency = (risks: RiskItem[]): number => {
   return risks.reduce((total, risk) => total + calculateRiskScore(risk), 0);
 };
 
+// Union cost calculations
+export const calculateUnionCosts = (unionRequirement: UnionRequirement): number => {
+  if (!unionRequirement.isRequired) return 0;
+  return unionRequirement.costItems.reduce((total, item) => total + item.total, 0);
+};
+
 // Total cost breakdown
 export const calculateCostBreakdown = (
   materials: MaterialItem[],
@@ -103,25 +110,28 @@ export const calculateCostBreakdown = (
   overhead: OverheadItem[],
   risks: RiskItem[],
   settings: EstimateSettings,
-  projectSize?: number
+  projectSize?: number,
+  unionRequirement?: UnionRequirement
 ): CostBreakdown => {
   const materialsCost = calculateMaterialsTotal(materials);
   const laborCost = calculateLaborTotal(labor);
   const equipmentCost = calculateEquipmentTotal(equipment);
   const subcontractorsCost = calculateSubcontractorsTotal(subcontractors);
+  const unionCosts = unionRequirement ? calculateUnionCosts(unionRequirement) : 0;
   
-  const subtotal = materialsCost + laborCost + equipmentCost + subcontractorsCost;
+  // Union costs are added to the labor cost for subtotal calculation
+  const subtotal = materialsCost + laborCost + unionCosts + equipmentCost + subcontractorsCost;
   const overheadCost = calculateOverheadTotal(overhead, subtotal);
-  const contingencyCost = calculateTotalContingency(risks) + (subtotal * settings.contingency / 100);
+  const contingencyCost = calculateTotalContingency(risks) + (subtotal * settings.defaultContingency / 100);
   
   const beforeProfit = subtotal + overheadCost + contingencyCost;
-  const profitAmount = beforeProfit * (settings.profitMargin / 100);
+  const profitAmount = beforeProfit * (settings.defaultProfit / 100);
   
   const total = beforeProfit + profitAmount;
   
   return {
     materials: materialsCost,
-    labor: laborCost,
+    labor: laborCost + unionCosts, // Include union costs in labor total
     equipment: equipmentCost,
     subcontractors: subcontractorsCost,
     overhead: overheadCost,

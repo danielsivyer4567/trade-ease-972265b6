@@ -111,6 +111,7 @@ const ConcreteCalculator = lazy(() => import('@/pages/Calculators/ConcreteCalcul
 const ElectricianCalculator = lazy(() => import('@/pages/Calculators/ElectricianCalculator'));
 const PlumbingCalculator = lazy(() => import('@/pages/Calculators/PlumbingCalculator'));
 const PropertyMeasurement = lazy(() => import('@/pages/PropertyMeasurement'));
+const WeatherIntelligencePage = lazy(() => import('@/pages/WeatherIntelligence'));
 
 // Demo pages
 const AnimatedStageDemo = lazy(() => import('@/pages/AnimatedStageDemo'));
@@ -277,6 +278,7 @@ const routeObjects: RouteObject[] = [
           { path: "/calculators/electrician", element: <SuspenseWrapper><ElectricianCalculator /></SuspenseWrapper> },
           { path: "/calculators/plumbing", element: <SuspenseWrapper><PlumbingCalculator /></SuspenseWrapper> },
           { path: "/property-measurement", element: <SuspenseWrapper><PropertyMeasurement /></SuspenseWrapper> },
+          { path: "/weather-intelligence", element: <SuspenseWrapper><WeatherIntelligencePage /></SuspenseWrapper> },
           { path: "/workflow", element: <SuspenseWrapper><N8nWorkflowListPage /></SuspenseWrapper> },
           { path: "/workflow/new", element: <SuspenseWrapper><N8nWorkflowPage /></SuspenseWrapper> },
           { path: "/workflow/edit/:id", element: <SuspenseWrapper><N8nWorkflowPage /></SuspenseWrapper> },

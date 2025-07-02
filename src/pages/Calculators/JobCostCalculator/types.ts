@@ -130,6 +130,27 @@ export interface ProjectDetails {
   unionRequirements?: boolean;
 }
 
+export interface UnionCostItem {
+  id: string;
+  category: 'wages' | 'benefits' | 'training' | 'compliance' | 'overtime' | 'administrative';
+  type: string;
+  description: string;
+  rate: number;
+  unit: string;
+  quantity: number;
+  total: number;
+  isPercentage: boolean;
+}
+
+export interface UnionRequirement {
+  isRequired: boolean;
+  localNumber?: string;
+  trade?: string;
+  cbaReference?: string;
+  specialRequirements?: string;
+  costItems: UnionCostItem[];
+}
+
 export interface EstimateSettings {
   defaultMarkup: number;
   defaultWasteFactor: number;

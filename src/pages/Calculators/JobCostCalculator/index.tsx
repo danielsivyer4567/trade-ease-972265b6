@@ -16,7 +16,8 @@ import {
   OverheadItem,
   RiskItem,
   EstimateSettings,
-  CostBreakdown
+  CostBreakdown,
+  UnionRequirement
 } from './types';
 import {
   calculateCostBreakdown,
@@ -61,6 +62,11 @@ const JobCostCalculator = () => {
     accessRestrictions: '',
     workingHours: '7AM-5PM Mon-Fri',
     unionRequirements: false
+  });
+
+  const [unionRequirement, setUnionRequirement] = useState<UnionRequirement>({
+    isRequired: false,
+    costItems: []
   });
 
   const [materials, setMaterials] = useState<MaterialItem[]>([]);
@@ -123,7 +129,8 @@ const JobCostCalculator = () => {
     overhead,
     risks,
     settings,
-    projectDetails.size
+    projectDetails.size,
+    unionRequirement
   );
 
   // Generate AI recommendations
@@ -149,6 +156,7 @@ const JobCostCalculator = () => {
       subcontractors,
       overhead,
       risks,
+      unionRequirement,
       settings,
       breakdown: calculateCostBreakdown(
         materials,
@@ -157,7 +165,9 @@ const JobCostCalculator = () => {
         subcontractors,
         overhead,
         risks,
-        settings
+        settings,
+        projectDetails.size,
+        unionRequirement
       ),
       createdAt: new Date().toISOString(),
       status: 'draft'
@@ -181,6 +191,7 @@ const JobCostCalculator = () => {
     if (estimateData.subcontractors) setSubcontractors(estimateData.subcontractors);
     if (estimateData.overhead) setOverhead(estimateData.overhead);
     if (estimateData.risks) setRisks(estimateData.risks);
+    if (estimateData.unionRequirement) setUnionRequirement(estimateData.unionRequirement);
     if (estimateData.settings) setSettings(estimateData.settings);
     
     setShowHistory(false);
@@ -290,76 +301,71 @@ const JobCostCalculator = () => {
 
           {/* Action Buttons */}
           <div className="flex justify-between items-center mb-6">
-            <Button
+            <button
               onClick={loadSampleData}
               style={{
                 background: '#3b82f6',
                 color: 'white',
-                border: 'none',
+                border: '2px solid #3b82f6',
                 padding: '12px 24px',
                 borderRadius: '25px',
                 cursor: 'pointer',
-                fontSize: '1rem',
-                transition: 'all 0.3s ease'
+                fontSize: '1.1rem',
+                transition: 'all 0.3s ease',
+                fontWeight: '600'
               }}
             >
-              <Gauge className="h-4 w-4 mr-2" />
+              <Gauge className="h-4 w-4 mr-2" style={{ display: 'inline' }} />
               Load Sample Data
-            </Button>
+            </button>
             <div className="flex gap-2">
-              <Button
-                variant="outline"
-                size="sm"
+              <button
                 onClick={() => setShowHistory(true)}
                 style={{
                   background: '#dee2e6',
                   color: '#6c757d',
                   border: '2px solid #dee2e6',
-                  padding: '10px 20px',
-                  borderRadius: '20px',
+                  padding: '12px 24px',
+                  borderRadius: '25px',
                   cursor: 'pointer',
-                  fontSize: '0.95rem',
+                  fontSize: '1.1rem',
                   transition: 'all 0.3s ease'
                 }}
               >
-                <History className="h-4 w-4 mr-2" />
-                History
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
+                📜 History
+              </button>
+              <button
                 onClick={() => setShowSettings(true)}
                 style={{
                   background: '#dee2e6',
                   color: '#6c757d',
                   border: '2px solid #dee2e6',
-                  padding: '10px 20px',
-                  borderRadius: '20px',
+                  padding: '12px 24px',
+                  borderRadius: '25px',
                   cursor: 'pointer',
-                  fontSize: '0.95rem',
+                  fontSize: '1.1rem',
                   transition: 'all 0.3s ease'
                 }}
               >
-                <Settings className="h-4 w-4 mr-2" />
-                Settings
-              </Button>
-              <Button
+                ⚙️ Settings
+              </button>
+              <button
                 onClick={saveEstimate}
                 disabled={!isValid}
                 style={{
                   background: isValid ? '#3b82f6' : '#dee2e6',
                   color: isValid ? 'white' : '#6c757d',
-                  border: 'none',
-                  padding: '10px 20px',
-                  borderRadius: '20px',
+                  border: `2px solid ${isValid ? '#3b82f6' : '#dee2e6'}`,
+                  padding: '12px 24px',
+                  borderRadius: '25px',
                   cursor: isValid ? 'pointer' : 'not-allowed',
-                  fontSize: '0.95rem',
-                  transition: 'all 0.3s ease'
+                  fontSize: '1.1rem',
+                  transition: 'all 0.3s ease',
+                  opacity: isValid ? 1 : 0.6
                 }}
               >
-                <Save className="h-4 w-4 mr-2" />
-                Save Estimate
-              </Button>
+                💾 Save Estimate
+              </button>
             </div>
           </div>
 
@@ -408,7 +414,18 @@ const JobCostCalculator = () => {
               <TabsContent value="details" className="mt-4">
                 <ProjectDetailsForm
                   details={projectDetails}
-                  onChange={setProjectDetails}
+                  unionRequirement={unionRequirement}
+                  onChange={(details) => {
+                    setProjectDetails(details);
+                    // Sync union requirement state with project details
+                    if (details.unionRequirements !== projectDetails.unionRequirements) {
+                      setUnionRequirement({
+                        ...unionRequirement,
+                        isRequired: details.unionRequirements || false
+                      });
+                    }
+                  }}
+                  onUnionChange={setUnionRequirement}
                 />
               </TabsContent>
 
