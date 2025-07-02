@@ -34,27 +34,22 @@ export const CalendarDayContent: React.FC<CalendarDayContentProps> = ({
     const isToday = format(today, 'yyyy-MM-dd') === format(date, 'yyyy-MM-dd');
     
     if (isSelected) {
-      return 'bg-blue-600 dark:bg-blue-800 text-white';
+      // Selected date uses same style as regular dates, no blue overlay
+      return 'bg-blue-50 border-blue-200 shadow-sm';
     }
     
     if (isToday) {
-      return 'bg-blue-100 dark:bg-blue-950 dark:text-blue-200';
+      // Current date uses slate grey
+      return 'bg-slate-100 text-slate-900 border-slate-300 shadow-md font-semibold';
     }
     
     if (jobsForDate.length > 0) {
-      switch (teamColor) {
-        case 'red':
-          return 'bg-red-50 dark:bg-red-950/30';
-        case 'blue':
-          return 'bg-blue-50 dark:bg-blue-950/30';
-        case 'green':
-          return 'bg-green-50 dark:bg-green-950/30';
-        default:
-          return 'bg-gray-50 dark:bg-gray-900/50';
-      }
+      // Jobs get a slightly different blue shade for emphasis
+      return 'bg-blue-100 border-blue-300 shadow-md';
     }
     
-    return '';
+    // All dates get blue team color
+    return 'bg-blue-50 border-blue-200 shadow-sm';
   };
   
   const getTeamColorDot = () => {
@@ -71,21 +66,28 @@ export const CalendarDayContent: React.FC<CalendarDayContentProps> = ({
       onDragOver={e => e.preventDefault()} 
       onDrop={e => onDrop(e, date)} 
       onClick={() => onDayClick(date, jobsForDate)} 
-      className={`relative w-full h-full flex items-start justify-center cursor-pointer ${getDayBackground()} rounded-md transition-colors`}
+      className={`absolute inset-0 flex flex-col cursor-pointer ${getDayBackground()} transition-colors`}
     >
-      <span className={`absolute top-1 ${isSelected ? 'text-white' : ''} font-medium`}>{date.getDate()}</span>
+      <div className="w-full flex items-center justify-between px-1 py-0 border-b border-slate-300 min-h-[18px]">
+        <div className="w-5 flex items-center justify-center">
+          {!miniView && weatherData && <WeatherDisplay date={date} weatherData={weatherData} />}
+        </div>
+        <span className={`${isSelected ? 'text-white' : ''} font-medium text-xs`}>{date.getDate()}</span>
+        <div className="w-5"></div> {/* Spacer to center the date */}
+      </div>
       
-      {!miniView && weatherData && <WeatherDisplay date={date} weatherData={weatherData} />}
-      
-      {miniView ? (
-        showJobDot && (
-          <div className={`absolute bottom-1 right-1 w-3 h-3 rounded-full ${getTeamColorDot()}`} 
-               title={`${jobsForDate.length} jobs scheduled`} />
-        )
-      ) : (
-        jobsForDate && jobsForDate.length > 0 && 
-        <JobsDisplay jobsForDate={jobsForDate} teamColor={teamColor} onJobClick={onJobClick} />
-      )}
+      <div className="flex-1 relative bg-white">
+        
+        {miniView ? (
+          showJobDot && (
+            <div className={`absolute bottom-1 right-1 w-3 h-3 rounded-full ${getTeamColorDot()}`} 
+                 title={`${jobsForDate.length} jobs scheduled`} />
+          )
+        ) : (
+          jobsForDate && jobsForDate.length > 0 && 
+          <JobsDisplay jobsForDate={jobsForDate} teamColor={teamColor} onJobClick={onJobClick} />
+        )}
+      </div>
     </div>
   );
 };

@@ -56,8 +56,8 @@ interface JobWeatherImpact {
 }
 
 export class WeatherService {
-  private static readonly BASE_URL = process.env.REACT_APP_WEATHER_API_URL || 'https://api.openweathermap.org/data/2.5';
-  private static readonly API_KEY = process.env.REACT_APP_WEATHER_API_KEY || '';
+  private static readonly BASE_URL = import.meta.env.VITE_WEATHER_API_URL || 'https://api.openweathermap.org/data/2.5';
+  private static readonly API_KEY = import.meta.env.VITE_WEATHER_API_KEY || '';
 
   /**
    * Get current weather conditions for a location
