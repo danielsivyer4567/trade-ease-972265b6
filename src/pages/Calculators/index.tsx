@@ -368,23 +368,23 @@ const AnimatedHammerIcon = () => (
       />
       
       {/* Hammer striking face */}
-      <rect x="9" y="8" width="6" height="3" rx="0.5" fill="#C0C0C0" />
-      <rect x="9.5" y="8.5" width="5" height="2" rx="0.3" fill="#E5E5E5" />
+      <rect x="9" y="8" width="6" height="3" rx="0.5" fill="#374151" />
+      <rect x="9.5" y="8.5" width="5" height="2" rx="0.3" fill="#4B5563" />
       
       {/* Curved claw */}
       <path 
         d="M16 9.5 Q19 8 20 10 Q21 12 19 11 Q17 10 16 9.5" 
-        fill="#C0C0C0" 
-        stroke="#A0A0A0" 
+        fill="#374151" 
+        stroke="#1F2937" 
         strokeWidth="0.3"
       />
       <path 
         d="M15.8 9.7 Q18.5 8.5 19.5 10.2 Q20.2 11.5 18.8 10.8 Q17 10 15.8 9.7" 
-        fill="#E5E5E5" 
+        fill="#4B5563" 
       />
       
       {/* Hammer head connection */}
-      <rect x="11" y="9" width="2" height="2" rx="0.2" fill="#A0A0A0" />
+      <rect x="11" y="9" width="2" height="2" rx="0.2" fill="#1F2937" />
     </g>
     
     {/* Blue handle with texture */}

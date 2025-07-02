@@ -10,6 +10,7 @@ import { PropertyMeasurementService } from '@/services/PropertyMeasurementServic
 import { AutocompleteInput } from '@/components/ui/AutocompleteInput';
 import { AddressAutocompleteService, AddressSuggestion } from '@/services/AddressAutocompleteService';
 import { BoundaryMeasurements } from '@/components/ui/BoundaryMeasurements';
+import { identifyFrontBoundary } from '@/utils/propertyBoundaryUtils';
 
 const PropertyBoundaryIconSmall = () => (
   <svg
@@ -154,56 +155,10 @@ const PropertyImageWithFrontHighlight = ({
   measurements: number[]; 
   coordinates?: any[] 
 }) => {
-  // Intelligent front boundary detection based on real property access features
-  const identifyFrontBoundary = (measurements: number[], imageUrl?: string): number => {
-    // TODO: Implement computer vision analysis to detect:
-    // 1. Driveway entrance/vehicle access points
-    // 2. Power box/utility connections
-    // 3. Front door/main entrance visibility
-    // 4. Street-facing features
-    
-    // For now, use heuristic analysis with visual cues in mind
-    if (measurements.length === 4) {
-      // Rectangular property analysis
-      // Most driveways are positioned on street-facing boundaries
-      // Power boxes are typically on the shortest street-accessible side
-      
-      const sortedIndices = measurements
-        .map((length, index) => ({ length, index }))
-        .sort((a, b) => a.length - b.length);
-      
-      // Strategy: Look for medium-length boundaries that could accommodate driveways
-      // Avoid very short boundaries (likely side setbacks) and very long boundaries (likely rear)
-      const minLength = sortedIndices[0].length;
-      const maxLength = sortedIndices[3].length;
-      
-      // Find boundaries suitable for driveway access (15-35m range is common)
-      const drivewayCandidate = sortedIndices.find(item => 
-        item.length >= 15 && item.length <= 35 && 
-        (item.index === 0 || item.index === 2) // Prefer top/bottom boundaries
-      );
-      
-      if (drivewayCandidate) {
-        return drivewayCandidate.index;
-      }
-      
-      // Fallback: Use shortest of top/bottom boundaries (power box logic)
-      const topLength = measurements[0];
-      const bottomLength = measurements[2];
-      return topLength <= bottomLength ? 0 : 2;
-    } else {
-      // Irregular property - use medium-length boundary logic
-      const sortedIndices = measurements
-        .map((length, index) => ({ length, index }))
-        .sort((a, b) => a.length - b.length);
-      
-      // Look for boundary in 25-75th percentile range (likely driveway access)
-      const middleIndex = Math.floor(sortedIndices.length * 0.4); // Lean toward shorter side
-      return sortedIndices[middleIndex].index;
-    }
-  };
-
-  const frontIndex = identifyFrontBoundary(measurements, imageUrl);
+  // Use unified front boundary identification algorithm
+  const frontBoundaryResult = identifyFrontBoundary(measurements, coordinates);
+  const frontIndex = frontBoundaryResult.frontIndex;
+  const confidence = Math.round(frontBoundaryResult.confidence * 100);
 
   return (
     <div className="relative">
@@ -223,7 +178,7 @@ const PropertyImageWithFrontHighlight = ({
         {frontIndex === 0 && (
           <div className="absolute top-8 left-1/2 transform -translate-x-1/2">
             <div className="bg-blue-500 text-white px-3 py-1 rounded-full text-xs font-bold animate-pulse shadow-lg border-2 border-blue-300">
-              🏠 FRONT (Street)
+              🏠 FRONT (Street) {confidence}%
             </div>
             <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-1">
               <div className="w-0 h-0 border-l-6 border-r-6 border-b-8 border-transparent border-b-blue-500 animate-bounce drop-shadow-lg"></div>
@@ -235,7 +190,7 @@ const PropertyImageWithFrontHighlight = ({
         {frontIndex === 1 && (
           <div className="absolute right-8 top-1/2 transform -translate-y-1/2">
             <div className="bg-blue-500 text-white px-3 py-1 rounded-full text-xs font-bold animate-pulse shadow-lg border-2 border-blue-300">
-              🏠 FRONT
+              🏠 FRONT {confidence}%
             </div>
             <div className="absolute left-full top-1/2 transform -translate-y-1/2 ml-1">
               <div className="w-0 h-0 border-t-6 border-b-6 border-l-8 border-transparent border-l-blue-500 animate-bounce drop-shadow-lg"></div>
@@ -247,7 +202,7 @@ const PropertyImageWithFrontHighlight = ({
         {frontIndex === 2 && (
           <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2">
             <div className="bg-blue-500 text-white px-3 py-1 rounded-full text-xs font-bold animate-pulse shadow-lg border-2 border-blue-300">
-              🏠 FRONT (Street)
+              🏠 FRONT (Street) {confidence}%
             </div>
             <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-1">
               <div className="w-0 h-0 border-l-6 border-r-6 border-t-8 border-transparent border-t-blue-500 animate-bounce drop-shadow-lg"></div>
@@ -259,7 +214,7 @@ const PropertyImageWithFrontHighlight = ({
         {frontIndex === 3 && (
           <div className="absolute left-8 top-1/2 transform -translate-y-1/2">
             <div className="bg-blue-500 text-white px-3 py-1 rounded-full text-xs font-bold animate-pulse shadow-lg border-2 border-blue-300">
-              🏠 FRONT
+              🏠 FRONT {confidence}%
             </div>
             <div className="absolute right-full top-1/2 transform -translate-y-1/2 mr-1">
               <div className="w-0 h-0 border-t-6 border-b-6 border-r-8 border-transparent border-r-blue-500 animate-bounce drop-shadow-lg"></div>
@@ -274,7 +229,7 @@ const PropertyImageWithFrontHighlight = ({
             {frontIndex === 4 && (
               <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2">
                 <div className="bg-blue-500 text-white px-3 py-1 rounded-full text-xs font-bold animate-pulse shadow-lg border-2 border-blue-300">
-                  🏠 FRONT (Street)
+                  🏠 FRONT (Street) {confidence}%
                 </div>
                 <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-1">
                   <div className="w-0 h-0 border-l-6 border-r-6 border-t-8 border-transparent border-t-blue-500 animate-bounce drop-shadow-lg"></div>
@@ -286,7 +241,7 @@ const PropertyImageWithFrontHighlight = ({
             {frontIndex === 0 && (
               <div className="absolute top-8 left-1/2 transform -translate-x-1/2">
                 <div className="bg-blue-500 text-white px-3 py-1 rounded-full text-xs font-bold animate-pulse shadow-lg border-2 border-blue-300">
-                  🏠 FRONT (Street)
+                  🏠 FRONT (Street) {confidence}%
                 </div>
                 <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-1">
                   <div className="w-0 h-0 border-l-6 border-r-6 border-b-8 border-transparent border-b-blue-500 animate-bounce drop-shadow-lg"></div>
@@ -298,7 +253,7 @@ const PropertyImageWithFrontHighlight = ({
             {(frontIndex === 1 || frontIndex === 2) && (
               <div className="absolute right-8 top-1/2 transform -translate-y-1/2">
                 <div className="bg-blue-500 text-white px-3 py-1 rounded-full text-xs font-bold animate-pulse shadow-lg border-2 border-blue-300">
-                  🏠 FRONT
+                  🏠 FRONT {confidence}%
                 </div>
                 <div className="absolute left-full top-1/2 transform -translate-y-1/2 ml-1">
                   <div className="w-0 h-0 border-t-6 border-b-6 border-l-8 border-transparent border-l-blue-500 animate-bounce drop-shadow-lg"></div>
@@ -310,7 +265,7 @@ const PropertyImageWithFrontHighlight = ({
             {frontIndex === 3 && (
               <div className="absolute left-8 top-1/2 transform -translate-y-1/2">
                 <div className="bg-blue-500 text-white px-3 py-1 rounded-full text-xs font-bold animate-pulse shadow-lg border-2 border-blue-300">
-                  🏠 FRONT
+                  🏠 FRONT {confidence}%
                 </div>
                 <div className="absolute right-full top-1/2 transform -translate-y-1/2 mr-1">
                   <div className="w-0 h-0 border-t-6 border-b-6 border-r-8 border-transparent border-r-blue-500 animate-bounce drop-shadow-lg"></div>
@@ -322,7 +277,7 @@ const PropertyImageWithFrontHighlight = ({
             {frontIndex > 4 && (
               <div className="absolute top-8 right-8">
                 <div className="bg-blue-500 text-white px-3 py-1 rounded-full text-xs font-bold animate-pulse shadow-lg border-2 border-blue-300">
-                  🏠 FRONT (#{frontIndex + 1})
+                  🏠 FRONT (#{frontIndex + 1}) {confidence}%
                 </div>
               </div>
             )}

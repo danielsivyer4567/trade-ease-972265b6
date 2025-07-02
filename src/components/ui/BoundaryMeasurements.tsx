@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Navigation, RotateCw, Home, TreePine, Compass, Map, AlertTriangle } from 'lucide-react';
 import { QueenslandSpatialService } from '../../services/QueenslandSpatialService';
+import { identifyFrontBoundary } from '@/utils/propertyBoundaryUtils';
 
 interface BoundaryMeasurement {
   length: number;
@@ -41,8 +42,8 @@ const DIRECTION_OPTIONS = [
   { value: 'west', label: 'West', icon: Compass, color: 'bg-indigo-100 text-indigo-800 border-indigo-200' },
 ];
 
-export const BoundaryMeasurements: React.FC<BoundaryMeasurementsProps> = ({ 
-  measurements, 
+export const BoundaryMeasurements: React.FC<BoundaryMeasurementsProps> = ({
+  measurements,
   coordinates,
   streetFacing,
   propertyData,
@@ -52,11 +53,16 @@ export const BoundaryMeasurements: React.FC<BoundaryMeasurementsProps> = ({
   const [editMode, setEditMode] = useState(false);
   const [queenslandData, setQueenslandData] = useState<any>(null);
   const [isLoadingQLD, setIsLoadingQLD] = useState(false);
+  const [frontBoundaryInfo, setFrontBoundaryInfo] = useState<{
+    frontIndex: number;
+    confidence: number;
+    reason: string;
+  } | null>(null);
 
   // Load Queensland Spatial data
   const loadQueenslandData = async () => {
     console.log('BoundaryMeasurements: loadQueenslandData called with address:', address);
-    
+
     // For testing: create a mock address if none provided
     const testAddress = address || {
       street_number: '2',
@@ -74,24 +80,24 @@ export const BoundaryMeasurements: React.FC<BoundaryMeasurementsProps> = ({
 
     setIsLoadingQLD(true);
     console.log('BoundaryMeasurements: Testing with address:', testAddress);
-    
+
     try {
       console.log('BoundaryMeasurements: Loading Queensland Spatial data for:', testAddress);
       alert('Fetching Queensland Government spatial data... This may take a few seconds.');
-      
+
       const qldData = await QueenslandSpatialService.getQueenslandPropertyData(testAddress);
-      
+
       if (qldData) {
         console.log('BoundaryMeasurements: Queensland data loaded successfully:', qldData);
         setQueenslandData(qldData);
-        
+
         // Convert Queensland boundary data to our format
         const qldBoundaries: BoundaryMeasurement[] = qldData.boundaries.map((boundary, index) => ({
           length: boundary.length,
           direction: boundary.direction,
           isStreetFacing: qldData.streetFrontage?.boundaryIndex === index
         }));
-        
+
         setBoundaryData(qldBoundaries);
         alert(`Queensland data loaded! Found Lot ${qldData.lotNumber}, Plan ${qldData.planNumber}`);
       } else {
@@ -126,200 +132,21 @@ export const BoundaryMeasurements: React.FC<BoundaryMeasurementsProps> = ({
     };
   };
 
-  // Determine which boundary is most likely the front (street-facing)
-  const identifyFrontBoundary = (measurements: number[], coords?: PropertyCoordinate[]): number => {
-    console.log('BoundaryMeasurements: Identifying front boundary', { measurements, coords });
-    
-    // For irregular properties (5+ sides), don't assume shortest is front
-    if (measurements.length >= 5) {
-      console.log('BoundaryMeasurements: Irregular property detected, using enhanced analysis');
-      
-      if (coords && coords.length === measurements.length) {
-        return identifyFrontForIrregularProperty(measurements, coords);
-             } else {
-         // Without coordinates, for irregular properties, use smarter analysis
-         console.log('BoundaryMeasurements: Irregular property without coordinates, using enhanced fallback');
-         
-         const sortedIndices = measurements
-           .map((length, index) => ({ length, index }))
-           .sort((a, b) => a.length - b.length);
-         
-         console.log('BoundaryMeasurements: Sorted measurements:', sortedIndices);
-         
-         // For irregular properties, avoid very short boundaries (likely utility easements)
-         // and very long boundaries (likely rear boundaries)
-         const minLength = sortedIndices[0].length;
-         const maxLength = sortedIndices[sortedIndices.length - 1].length;
-         const lengthRange = maxLength - minLength;
-         
-         // If there's a big variation in lengths, be more selective
-         if (lengthRange > minLength * 2) {
-           // Look for boundaries in the 15-50% range of lengths
-           const candidates = sortedIndices.filter(item => {
-             const ratio = (item.length - minLength) / lengthRange;
-             return ratio >= 0.15 && ratio <= 0.5;
-           });
-           
-           if (candidates.length > 0) {
-             // From the candidates, prefer the first one (closest to shorter end)
-             const frontCandidate = candidates[0];
-             console.log('BoundaryMeasurements: Selected front from candidates:', frontCandidate);
-             return frontCandidate.index;
-           }
-         }
-         
-         // Fallback: take boundary around 25th percentile
-         const frontCandidateIndex = Math.floor(sortedIndices.length * 0.25);
-         const frontCandidate = sortedIndices[frontCandidateIndex];
-         
-         console.log('BoundaryMeasurements: Fallback front candidate:', frontCandidate);
-         return frontCandidate.index;
-       }
-    }
-    
-    // Method 1: Smart boundary selection for rectangular properties
-    if (measurements.length === 4) {
-      // For rectangular properties, use intelligent analysis
-      const maxLength = Math.max(...measurements);
-      const maxIndex = measurements.indexOf(maxLength);
-      
-      // For rectangular properties, front is usually top (0) or bottom (2)
-      // If the longest boundary is a side (1 or 3), check if top/bottom are reasonable
-      if (maxIndex === 1 || maxIndex === 3) {
-        // Check if top or bottom boundaries are substantial (not tiny side access)
-        const topLength = measurements[0];
-        const bottomLength = measurements[2];
-        const longestSide = Math.max(topLength, bottomLength);
-        
-        // If top or bottom is at least 60% of the longest side, prefer it as front
-        if (longestSide >= maxLength * 0.6) {
-          const frontIndex = bottomLength >= topLength ? 2 : 0; // Prefer bottom, then top
-          console.log('BoundaryMeasurements: Using smart rectangular analysis, front boundary:', frontIndex);
-          return frontIndex;
-        }
-      }
-      
-      console.log('BoundaryMeasurements: Using longest boundary as front:', maxIndex);
-      return maxIndex;
-    }
-    
-    // Method 2: If coordinates available, use geometric analysis for regular properties
-    if (coords && coords.length === measurements.length) {
-      // Find the most southern boundary (lowest latitude) - often the street-facing side
-      let mostSouthernIndex = 0;
-      let lowestLat = Infinity;
-      
-      for (let i = 0; i < coords.length; i++) {
-        const currentPoint = coords[i];
-        const nextPoint = coords[(i + 1) % coords.length];
-        const midLat = (currentPoint.lat + nextPoint.lat) / 2;
-        
-        if (midLat < lowestLat) {
-          lowestLat = midLat;
-          mostSouthernIndex = i;
-        }
-      }
-      
-      console.log('BoundaryMeasurements: Using most southern boundary as front:', mostSouthernIndex);
-      return mostSouthernIndex;
-    }
-    
-    // Method 3: Fallback - use longest boundary (street frontage is typically longest)
-    const longestIndex = measurements.indexOf(Math.max(...measurements));
-    console.log('BoundaryMeasurements: Using longest boundary as front fallback:', longestIndex);
-    return longestIndex;
-  };
-
-  // Enhanced front detection for irregular properties using coordinates
-  const identifyFrontForIrregularProperty = (measurements: number[], coords: PropertyCoordinate[]): number => {
-    console.log('BoundaryMeasurements: Analyzing irregular property for front boundary');
-    
-    const centroid = calculateCentroid(coords);
-    let bestFrontIndex = 0;
-    let bestScore = 0;
-    
-    // Analyze each boundary for "frontness"
-    for (let i = 0; i < coords.length; i++) {
-      const currentPoint = coords[i];
-      const nextPoint = coords[(i + 1) % coords.length];
-      const length = measurements[i];
-      
-      // Calculate boundary midpoint
-      const midpoint = {
-        lat: (currentPoint.lat + nextPoint.lat) / 2,
-        lng: (currentPoint.lng + nextPoint.lng) / 2
-      };
-      
-      // Calculate boundary orientation (angle)
-      const boundaryAngle = calculateAngle(currentPoint, nextPoint);
-      
-      // Score factors for front boundary:
-      let score = 0;
-      
-      // 1. Southern positioning (higher score for lower latitude)
-      const maxLat = Math.max(...coords.map(c => c.lat));
-      const minLat = Math.min(...coords.map(c => c.lat));
-      const latRange = maxLat - minLat;
-      if (latRange > 0) {
-        const southernScore = (maxLat - midpoint.lat) / latRange;
-        score += southernScore * 30; // 30% weight
-      }
-      
-      // 2. Length factor - prefer medium lengths (not too short, not too long)
-      const maxLength = Math.max(...measurements);
-      const minLength = Math.min(...measurements);
-      const lengthRange = maxLength - minLength;
-      
-      if (lengthRange > 0) {
-        // Prefer boundaries that are 20-60% of the way from min to max length
-        const lengthRatio = (length - minLength) / lengthRange;
-        let lengthScore = 0;
-        
-        if (lengthRatio >= 0.2 && lengthRatio <= 0.6) {
-          lengthScore = 1.0 - Math.abs(lengthRatio - 0.4) / 0.2; // Peak at 40%
-        } else if (lengthRatio < 0.2) {
-          lengthScore = lengthRatio / 0.2; // Linear increase to 20%
-        } else {
-          lengthScore = Math.max(0, (1.0 - lengthRatio) / 0.4); // Linear decrease from 60%
-        }
-        
-        score += lengthScore * 25; // 25% weight
-      }
-      
-      // 3. Orientation factor - prefer east-west oriented boundaries (more horizontal)
-      const orientationScore = Math.abs(Math.sin(boundaryAngle * Math.PI / 180));
-      score += orientationScore * 20; // 20% weight
-      
-      // 4. Distance from centroid - prefer boundaries closer to centroid (more accessible)
-      const distanceFromCentroid = Math.sqrt(
-        Math.pow(midpoint.lat - centroid.lat, 2) + 
-        Math.pow(midpoint.lng - centroid.lng, 2)
-      );
-      
-      const maxDistance = Math.max(...coords.map(coord => 
-        Math.sqrt(Math.pow(coord.lat - centroid.lat, 2) + Math.pow(coord.lng - centroid.lng, 2))
-      ));
-      
-      if (maxDistance > 0) {
-        const proximityScore = 1 - (distanceFromCentroid / maxDistance);
-        score += proximityScore * 25; // 25% weight
-      }
-      
-      console.log(`BoundaryMeasurements: Boundary ${i} (${length}m) score: ${score.toFixed(2)}`);
-      
-      if (score > bestScore) {
-        bestScore = score;
-        bestFrontIndex = i;
-      }
-    }
-    
-    console.log(`BoundaryMeasurements: Selected boundary ${bestFrontIndex} as front with score ${bestScore.toFixed(2)}`);
-    return bestFrontIndex;
-  };
+  // Use unified front boundary identification algorithm
 
   // Automatically assign directions based on property geometry
   const autoAssignDirections = (measurements: number[], coords?: PropertyCoordinate[]): BoundaryMeasurement[] => {
-    const frontIndex = identifyFrontBoundary(measurements, coords);
+    const frontBoundaryResult = identifyFrontBoundary(measurements, coords);
+    const frontIndex = frontBoundaryResult.frontIndex;
+    
+    console.log('BoundaryMeasurements: Front boundary identified:', frontBoundaryResult);
+    
+    // Store the front boundary info for display
+    setFrontBoundaryInfo({
+      frontIndex: frontBoundaryResult.frontIndex,
+      confidence: frontBoundaryResult.confidence,
+      reason: frontBoundaryResult.reason
+    });
     
     if (coords && coords.length === measurements.length) {
       return autoAssignWithCoordinates(measurements, coords, frontIndex);
@@ -575,7 +402,7 @@ export const BoundaryMeasurements: React.FC<BoundaryMeasurementsProps> = ({
             </div>
           )}
 
-          {/* Simple Detection Method Info */}
+          {/* Detection Method and Confidence Info */}
           <div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
             <div className="text-xs text-gray-600 space-y-1">
               <div><strong>Detection Method:</strong> {
@@ -585,6 +412,13 @@ export const BoundaryMeasurements: React.FC<BoundaryMeasurementsProps> = ({
                     ? 'Geometric Analysis'
                     : 'Pattern-Based Analysis'
               }</div>
+              {frontBoundaryInfo && (
+                <>
+                  <div><strong>Confidence:</strong> {Math.round(frontBoundaryInfo.confidence * 100)}%</div>
+                  <div><strong>Reasoning:</strong> {frontBoundaryInfo.reason}</div>
+                  <div><strong>Selected Boundary:</strong> #{frontBoundaryInfo.frontIndex + 1} ({measurements[frontBoundaryInfo.frontIndex]?.toFixed(1)}m)</div>
+                </>
+              )}
               <div><strong>Goal:</strong> Identify street-facing boundary for property orientation</div>
             </div>
           </div>
