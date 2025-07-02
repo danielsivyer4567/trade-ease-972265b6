@@ -1,12 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { GoogleMap, LoadScript, InfoWindow, Polygon, useLoadScript } from '@react-google-maps/api';
+import {
+  GoogleMap,
+  InfoWindow,
+  Polygon,
+  useLoadScript,
+} from '@react-google-maps/api';
 import type { Job } from '@/types/job';
-import { Briefcase } from 'lucide-react';
 import { GOOGLE_MAPS_CONFIG, getMapId } from '@/config/google-maps';
 import { toast } from 'sonner';
 
-// Get the map ID from config
 const mapId = getMapId();
+const libraries = ['marker'];
 
 interface JobMapProps {
   jobs?: Job[];
@@ -22,369 +26,135 @@ interface JobMapProps {
     label?: string;
   }>;
   boundaries?: Array<Array<[number, number]>>;
-  autoFit?: boolean; // New prop to control whether map should auto-fit to markers
+  autoFit?: boolean;
 }
 
-// Define libraries to load
-const libraries = ["marker"];
-
-// Create a separate map component without the LoadScript wrapper
-const MapComponent = ({ 
-  jobs = [], 
-  center, 
-  zoom = 14, 
-  markers = [], 
+const JobMapInternal = ({
+  jobs = [],
+  center,
+  zoom = 14,
+  markers = [],
   locationMarkers = [],
   boundaries = [],
-  autoFit = true 
+  autoFit = true,
 }: JobMapProps) => {
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
-  const [selectedLocation, setSelectedLocation] = useState<{coordinates: [number, number], label?: string} | null>(null);
+  const [selectedLocation, setSelectedLocation] = useState<{
+    coordinates: [number, number];
+    label?: string;
+  } | null>(null);
   const [map, setMap] = useState<google.maps.Map | null>(null);
 
   const mapContainerStyle = {
     width: '100%',
     height: '100%',
-    borderRadius: '0'
+    borderRadius: '0',
   };
 
-  // Default coordinates for Gold Coast, Queensland if no center provided
   const defaultCenter = {
     lat: -28.017112731933594,
-    lng: 153.4014129638672
+    lng: 153.4014129638672,
   };
 
-  const mapCenter = center 
-    ? { lat: center[1], lng: center[0] } 
+  const mapCenter = center
+    ? { lat: center[1], lng: center[0] }
     : defaultCenter;
 
   const options = {
-    streetViewControl: true, // Enable Street View control
-    mapTypeControl: true, // Enable map type control
-    mapId: mapId, // Add mapId for Advanced Markers
-    // Only set mapTypeId if mapId is not present to avoid warnings
+    streetViewControl: true,
+    mapTypeControl: true,
+    mapId: mapId,
     ...(mapId ? {} : { mapTypeId: 'satellite' }),
-    mapTypeControlOptions: {
-      position: google.maps.ControlPosition.TOP_RIGHT,
-      style: google.maps.MapTypeControlStyle.DROPDOWN_MENU
-    },
-    streetViewControlOptions: {
-      position: google.maps.ControlPosition.RIGHT_CENTER
-    },
-    fullscreenControl: true,
-    fullscreenControlOptions: {
-      position: google.maps.ControlPosition.RIGHT_TOP
-    },
     zoomControl: true,
-    zoomControlOptions: {
-      position: google.maps.ControlPosition.RIGHT_CENTER
-    }
   };
 
-  // Function to auto-fit map to all markers
   const fitMapToMarkers = (map: google.maps.Map) => {
-    if (!map || (!jobs.length && !markers.length && !locationMarkers.length)) return;
-    
     const bounds = new google.maps.LatLngBounds();
-    
-    // Add job locations to bounds (legacy)
-    jobs.forEach(job => {
-      if (job.location && job.location[0] && job.location[1]) {
+
+    jobs.forEach((job) => {
+      if (job.location?.length === 2) {
         bounds.extend({ lat: job.location[1], lng: job.location[0] });
       }
     });
-    
-    // Add location markers to bounds
-    locationMarkers.forEach(marker => {
-      bounds.extend({ lat: marker.coordinates[1], lng: marker.coordinates[0] });
-    });
-    
-    // Add individual markers to bounds
-    markers.forEach(marker => {
-      bounds.extend({ lat: marker.position[0], lng: marker.position[1] });
-    });
-    
-    // Skip if no valid bounds
-    if (bounds.isEmpty()) return;
-    
-    // Fit the map to the bounds
-    map.fitBounds(bounds);
-    
-    // Add some padding if there's only one marker
-    if ((jobs.length + markers.length + locationMarkers.length) <= 1) {
-      // Don't zoom in too much for single markers
-      const currentZoom = map.getZoom();
-      if (currentZoom && currentZoom > 15) {
-        map.setZoom(15);
+
+    locationMarkers.forEach((m) =>
+      bounds.extend({ lat: m.coordinates[1], lng: m.coordinates[0] })
+    );
+
+    markers.forEach((m) =>
+      bounds.extend({ lat: m.position[0], lng: m.position[1] })
+    );
+
+    if (!bounds.isEmpty()) {
+      map.fitBounds(bounds);
+      if ((jobs.length + markers.length + locationMarkers.length) <= 1) {
+        const currentZoom = map.getZoom();
+        if (currentZoom && currentZoom > 15) {
+          map.setZoom(15);
+        }
       }
     }
   };
 
   const onLoad = (mapInstance: google.maps.Map) => {
     setMap(mapInstance);
-    
-    // Set satellite view programmatically when mapId is present
-    if (mapId) {
-      mapInstance.setMapTypeId('satellite');
-    }
-    
-    // Helper function to activate Street View for a location
-    const activateStreetView = (
-      map: google.maps.Map, 
-      location: google.maps.LatLngLiteral, 
-      address?: string
-    ) => {
-      try {
-        // Get the Street View service
-        const streetViewService = new google.maps.StreetViewService();
-        
-        // If address is provided and geocoding is needed, we could add that here
-        // For now we'll use the coordinates directly
-        
-        // Check for Street View availability and activate if available
-        streetViewService.getPanorama(
-          { location, radius: 50 },
-          (data, status) => {
-            if (status === google.maps.StreetViewStatus.OK) {
-              // Street View is available, activate it
-              const panorama = map.getStreetView();
-              panorama.setPosition(location);
-              panorama.setPov({
-                heading: 0,
-                pitch: 0
-              });
-              panorama.setVisible(true);
-              console.log("Street View activated for location:", location);
-            } else {
-              console.log("Street View not available at this location");
-              toast.info("Street View not available at this location");
-            }
-          }
-        );
-      } catch (error) {
-        console.error("Error initializing Street View:", error);
-      }
-    };
-    
-    // Don't activate Street View automatically - let users choose when to use it
-    
-    // Add markers from jobs if provided (legacy support)
-    if (jobs.length > 0) {
-      jobs.forEach((job) => {
-        // Skip if job has no location
-        if (!job.location || !job.location[0] || !job.location[1]) return;
-        
-        // Create marker element
-        const markerElement = document.createElement('div');
-        markerElement.className = 'marker';
-        markerElement.innerHTML = `
-          <div style="display: flex; flex-direction: column; align-items: center; background: transparent; padding: 0; margin: 0;">
-            <img src='/lovable-uploads/34bca7f1-d63b-45a0-b1ca-a562443686ad.png' alt='Trade Ease Logo' width='16' height='16' style='object-fit: contain; display: block; margin-bottom: 2px;' />
-            <span style="color: #fff; font-weight: bold; font-size: 10px; line-height: 1; text-align: center;">${job.jobNumber || 'N/A'}</span>
+
+    jobs.forEach((job) => {
+      if (!job.location || job.location.length < 2) return;
+
+      const markerElement = document.createElement('div');
+      markerElement.innerHTML = `
+        <div style="display:flex; flex-direction:column; align-items:center;">
+          <div style="background: rgba(30,30,30,0.6); color:white; padding:4px 8px; border-radius:12px; backdrop-filter:blur(6px); font-weight:600;">
+            ${job.job_number || 'N/A'}
           </div>
-        `;
-
-        try {
-          // Create the advanced marker
-          const marker = new google.maps.marker.AdvancedMarkerElement({
-            position: { lat: job.location[1], lng: job.location[0] },
-            map: mapInstance,
-            content: markerElement,
-            title: job.customer,
-            zIndex: 1000 // Ensure markers appear above other elements
-          });
-
-          // Add click listener using the recommended 'gmp-click' event
-          marker.addListener('gmp-click', () => {
-            setSelectedJob(job);
-            setSelectedLocation(null);
-            
-            // Activate Street View for the clicked job location
-            activateStreetView(mapInstance, { lat: job.location[1], lng: job.location[0] }, job.address);
-          });
-        } catch (error) {
-          console.error("Error creating advanced marker, falling back to standard marker:", error);
-          
-          // Fallback to standard marker if Advanced Markers are not available
-          const standardMarker = new google.maps.Marker({
-            position: { lat: job.location[1], lng: job.location[0] },
-            map: mapInstance,
-            title: job.customer,
-            zIndex: 1000
-          });
-          
-          // Add click listener for standard marker
-          standardMarker.addListener('click', () => {
-            setSelectedJob(job);
-            setSelectedLocation(null);
-            
-            // Activate Street View for the clicked job location
-            activateStreetView(mapInstance, { lat: job.location[1], lng: job.location[0] }, job.address);
-          });
-        }
-      });
-    }
-
-    // Add markers from locationMarkers prop (new primary way)
-    if (locationMarkers.length > 0) {
-      locationMarkers.forEach(locMarker => {
-        const { coordinates, job, label } = locMarker;
-        
-        // Skip if invalid coordinates
-        if (!coordinates || !coordinates[0] || !coordinates[1]) return;
-        
-        // Create marker element
-        const markerElement = document.createElement('div');
-        markerElement.className = 'marker';
-        markerElement.innerHTML = `
-          <div style="display: flex; flex-direction: column; align-items: center; background: transparent; padding: 0; margin: 0;">
-            <img src='/lovable-uploads/34bca7f1-d63b-45a0-b1ca-a562443686ad.png' alt='Trade Ease Logo' width='16' height='16' style='object-fit: contain; display: block; margin-bottom: 2px;' />
-            <span style="color: #fff; font-weight: bold; font-size: 10px; line-height: 1; text-align: center;">${job.jobNumber || 'N/A'}</span>
-          </div>
-        `;
-
-        try {
-          // Create the advanced marker
-          const marker = new google.maps.marker.AdvancedMarkerElement({
-            position: { lat: coordinates[1], lng: coordinates[0] },
-            map: mapInstance,
-            content: markerElement,
-            title: job.customer,
-            zIndex: 1000 // Ensure markers appear above other elements
-          });
-
-          // Add click listener
-          marker.addListener('gmp-click', () => {
-            setSelectedJob(job);
-            setSelectedLocation({ coordinates, label });
-            
-            // Activate Street View for the clicked location
-            activateStreetView(mapInstance, { lat: coordinates[1], lng: coordinates[0] }, job.address);
-          });
-        } catch (error) {
-          console.error("Error creating advanced marker, falling back to standard marker:", error);
-          
-          // Fallback to standard marker if Advanced Markers are not available
-          const standardMarker = new google.maps.Marker({
-            position: { lat: coordinates[1], lng: coordinates[0] },
-            map: mapInstance,
-            title: job.customer,
-            zIndex: 1000
-          });
-          
-          // Add click listener for standard marker
-          standardMarker.addListener('click', () => {
-            setSelectedJob(job);
-            setSelectedLocation({ coordinates, label });
-            
-            // Activate Street View for the clicked location
-            activateStreetView(mapInstance, { lat: coordinates[1], lng: coordinates[0] }, job.address);
-          });
-        }
-      });
-    }
-
-    // Add markers from the markers prop if provided
-    if (markers.length > 0) {
-      markers.forEach(marker => {
-        const markerElement = document.createElement('div');
-        markerElement.className = 'marker';
-        markerElement.innerHTML = `
-          <div style="display: flex; flex-direction: column; align-items: center; background: transparent; padding: 0; margin: 0;">
-            <img src='/lovable-uploads/34bca7f1-d63b-45a0-b1ca-a562443686ad.png' alt='Trade Ease Logo' width='16' height='16' style='object-fit: contain; display: block; margin-bottom: 2px;' />
-            <span style="color: #fff; font-weight: bold; font-size: 10px; line-height: 1; text-align: center;">${marker.title || 'N/A'}</span>
-          </div>
-        `;
-
-        try {
-          new google.maps.marker.AdvancedMarkerElement({
-            position: { lat: marker.position[0], lng: marker.position[1] },
-            map: mapInstance,
-            content: markerElement,
-            title: marker.title,
-            zIndex: 1000 // Ensure markers appear above other elements
-          });
-        } catch (error) {
-          console.error("Error creating advanced marker, falling back to standard marker:", error);
-          
-          // Fallback to standard marker if Advanced Markers are not available
-          new google.maps.Marker({
-            position: { lat: marker.position[0], lng: marker.position[1] },
-            map: mapInstance,
-            title: marker.title,
-            zIndex: 1000
-          });
-        }
-      });
-    }
-
-    // Add a marker for the center location if no other markers are provided
-    if (jobs.length === 0 && markers.length === 0 && locationMarkers.length === 0) {
-      const centerMarkerElement = document.createElement('div');
-      centerMarkerElement.className = 'marker';
-      const centerMarkerJobNumber = jobs.length > 0 ? jobs[0].jobNumber : markers.length > 0 ? markers[0].title : locationMarkers.length > 0 ? locationMarkers[0].job.jobNumber : 'N/A';
-      centerMarkerElement.innerHTML = `
-        <div style="display: flex; flex-direction: column; align-items: center; background: transparent; padding: 0; margin: 0;">
-          <img src='/lovable-uploads/34bca7f1-d63b-45a0-b1ca-a562443686ad.png' alt='Trade Ease Logo' width='16' height='16' style='object-fit: contain; display: block; margin-bottom: 2px;' />
-          <span style="color: #fff; font-weight: bold; font-size: 10px; line-height: 1; text-align: center;">${centerMarkerJobNumber || 'N/A'}</span>
+          <img src="/lovable-uploads/34bca7f1-d63b-45a0-b1ca-a562443686ad.png" width="24" height="24" style="margin-top:4px;" />
         </div>
       `;
 
       try {
-        new google.maps.marker.AdvancedMarkerElement({
-          position: mapCenter,
+        const marker = new google.maps.marker.AdvancedMarkerElement({
+          position: {
+            lat: job.location[1],
+            lng: job.location[0],
+          },
           map: mapInstance,
-          content: centerMarkerElement,
-          title: "Location",
-          zIndex: 1000
+          content: markerElement,
+          title: job.customer,
+        });
+
+        marker.addListener('gmp-click', () => {
+          setSelectedJob(job);
+          setSelectedLocation(null);
         });
       } catch (error) {
-        console.error("Error creating advanced marker, falling back to standard marker:", error);
-        
-        // Fallback to standard marker if Advanced Markers are not available
-        new google.maps.Marker({
-          position: mapCenter,
+        console.warn('Advanced marker failed, fallback marker created');
+        const marker = new google.maps.Marker({
+          position: {
+            lat: job.location[1],
+            lng: job.location[0],
+          },
           map: mapInstance,
-          title: "Location",
-          zIndex: 1000
+          title: job.customer,
+        });
+
+        marker.addListener('click', () => {
+          setSelectedJob(job);
+          setSelectedLocation(null);
         });
       }
-    }
-    
-    // Draw property boundaries if provided
-    if (boundaries.length > 0) {
-      boundaries.forEach((boundary, index) => {
-        // Convert the boundary points to Google Maps LatLng objects
-        const polygonPath = boundary.map(point => ({
-          lat: point[1],
-          lng: point[0]
-        }));
-        
-        // Create and add the polygon to the map
-        new google.maps.Polygon({
-          paths: polygonPath,
-          strokeColor: '#5D4A9C',
-          strokeOpacity: 0.8,
-          strokeWeight: 3,
-          fillColor: '#9b87f5',
-          fillOpacity: 0.35,
-          map: mapInstance
-        });
-      });
-    }
-    
-    // Auto fit the map to markers if enabled
+    });
+
     if (autoFit) {
       fitMapToMarkers(mapInstance);
     }
   };
-  
-  // Effect to handle changes in jobs or markers
+
   useEffect(() => {
     if (map && autoFit) {
       fitMapToMarkers(map);
     }
-  }, [jobs, markers, locationMarkers, map, autoFit]);
+  }, [jobs, locationMarkers, markers, map, autoFit]);
 
   return (
     <GoogleMap
@@ -394,39 +164,18 @@ const MapComponent = ({
       options={options}
       onLoad={onLoad}
     >
-      {selectedJob && selectedLocation && (
+      {selectedJob && selectedJob.location && (
         <InfoWindow
-          position={{ lat: selectedLocation.coordinates[1], lng: selectedLocation.coordinates[0] }}
-          onCloseClick={() => {
-            setSelectedJob(null);
-            setSelectedLocation(null);
+          position={{
+            lat: selectedJob.location[1],
+            lng: selectedJob.location[0],
           }}
-        >
-          <div>
-            <div className="flex items-center gap-2 mb-1">
-              <img src="/lovable-uploads/34bca7f1-d63b-45a0-b1ca-a562443686ad.png" alt="Trade Ease Logo" width="20" height="20" className="object-contain" />
-              <h3 className="font-semibold">{selectedJob.customer}</h3>
-            </div>
-            <p>{selectedJob.title} - {selectedJob.type}</p>
-            {selectedLocation.label && (
-              <p className="text-sm text-blue-600">{selectedLocation.label}</p>
-            )}
-            <p className="text-sm text-gray-500">{selectedJob.date}</p>
-          </div>
-        </InfoWindow>
-      )}
-      {selectedJob && !selectedLocation && selectedJob.location && (
-        <InfoWindow
-          position={{ lat: selectedJob.location[1], lng: selectedJob.location[0] }}
           onCloseClick={() => setSelectedJob(null)}
         >
           <div>
-            <div className="flex items-center gap-2 mb-1">
-              <img src="/lovable-uploads/34bca7f1-d63b-45a0-b1ca-a562443686ad.png" alt="Trade Ease Logo" width="20" height="20" className="object-contain" />
-              <h3 className="font-semibold">{selectedJob.customer}</h3>
-            </div>
-            <p>{selectedJob.type}</p>
-            <p className="text-sm text-gray-500">{selectedJob.date}</p>
+            <strong>{selectedJob.customer}</strong>
+            <div>{selectedJob.title}</div>
+            <div>{selectedJob.job_number}</div>
           </div>
         </InfoWindow>
       )}
@@ -434,44 +183,21 @@ const MapComponent = ({
   );
 };
 
-// Main JobMap component using useLoadScript hook
 const JobMap = (props: JobMapProps) => {
   const { isLoaded, loadError } = useLoadScript({
-    googleMapsApiKey: "AIzaSyCEZfDx6VHz83XX2tnhGRZl3VGSb9WlY1s",
+    googleMapsApiKey: 'AIzaSyCEZfDx6VHz83XX2tnhGRZl3VGSb9WlY1s',
     libraries: libraries as any,
-    version: "beta",
-    mapIds: [mapId] // Add mapId for Advanced Markers
+    version: 'beta',
+    mapIds: [mapId],
   });
 
-  if (loadError) {
-    return <div className="p-4 text-red-500">Error loading maps</div>;
-  }
-
-  if (!isLoaded) {
-    return <div className="p-4">Loading maps...</div>;
-  }
+  if (loadError) return <div className="p-4 text-red-500">Error loading maps</div>;
+  if (!isLoaded) return <div className="p-4">Loading maps...</div>;
 
   return (
-    <div className="map-wrapper">
-      <JobMap {...props} />
+    <div className="map-wrapper w-full h-[400px] rounded-md overflow-hidden">
+      <JobMapInternal {...props} />
     </div>
-  );
-};
-
-const MinimalMap = () => {
-  const { isLoaded, loadError } = useLoadScript({
-    googleMapsApiKey: "AIzaSyCEZfDx6VHz83XX2tnhGRZl3VGSb9WlY1s", // your key
-  });
-
-  if (loadError) return <div>Error loading maps</div>;
-  if (!isLoaded) return <div>Loading maps...</div>;
-
-  return (
-    <GoogleMap
-      mapContainerStyle={{ width: "100%", height: "400px" }}
-      center={{ lat: -28.0171, lng: 153.4014 }}
-      zoom={14}
-    />
   );
 };
 

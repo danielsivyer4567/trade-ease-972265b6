@@ -14,7 +14,7 @@ export interface Job {
   city?: string;
   state?: string;
   zipCode?: string;
-  jobNumber: string;
+  job_number: string;
   title: string;
   description?: string;
   assignedTeam?: string;

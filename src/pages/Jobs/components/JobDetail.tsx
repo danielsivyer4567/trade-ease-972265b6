@@ -32,9 +32,19 @@ import { useFileUpload } from "./document-approval/hooks/useFileUpload";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useNavigate } from 'react-router-dom';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import JobStreetView from "../JobStreetView";
 
 interface JobDetailProps {
   job: Job;
+}
+
+interface JobStreetViewProps {
+  address: string;
+  city?: string;
+  state?: string;
+  zipCode?: string;
+  height?: string;
+  className?: string;
 }
 
 type JobSection = {
@@ -863,18 +873,10 @@ export const JobDetail = ({ job }: JobDetailProps) => {
         {/* Map/Location header section with updated map data handling */}
         <div className="relative h-64 bg-gray-300">
           <div className="absolute inset-0">
-            <JobMap 
-              center={jobData.location || job.location}
-              zoom={15}
-              markers={jobData.location ? [
-                {
-                  position: [jobData.location[1], jobData.location[0]] as [number, number],
-                  title: jobData.address || job.address || jobData.jobNumber || job.jobNumber
-                }
-              ] : []}
-              boundaries={jobData.boundaries || job.boundaries}
-              autoFit={true}
-            />
+          {job.location && Array.isArray(job.location) && job.location.length === 2 && (
+  <JobStreetView location={job.location} height="350px" className="mt-4 rounded-xl" />
+)}
+
           </div>
         </div>
 
@@ -978,7 +980,7 @@ export const JobDetail = ({ job }: JobDetailProps) => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
                         <p className="text-sm text-gray-500">Job Number</p>
-                        <p>{jobData.jobNumber || job.jobNumber}</p>
+                        <p>{jobData.job_number || job.job_number}</p>
                       </div>
                       <div>
                         <p className="text-sm text-gray-500">Customer</p>

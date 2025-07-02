@@ -14,21 +14,10 @@ const supabaseUrl = import.meta.env.VITE_SUPABASE_URL!
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY!
 
 // Create the Supabase client with appropriate configuration
-export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-  auth: {
-    persistSession: true,
-    autoRefreshToken: true,
-    detectSessionInUrl: true,
-    flowType: 'pkce',
-    storageKey: 'supabase-auth',
-    debug: import.meta.env.DEV
-  },
-  global: {
-    headers: {
-      'X-Client-Info': 'trade-ease@1.0.0'
-    }
-  }
-})
+export const supabase = createClient(
+  'https://wxwbxupdisbofesaygqj.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind4d2J4dXBkaXNib2Zlc2F5Z3FqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTAxMTExMTQsImV4cCI6MjA2NTY4NzExNH0.JFDOBBTmzr8xj3NTICBLnztHliD-HbnC7HAswQbLw4E'
+)
 
 // Export admin client (placeholder for now)
 export const supabaseAdmin = supabase

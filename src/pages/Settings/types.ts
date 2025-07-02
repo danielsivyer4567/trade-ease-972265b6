@@ -26,7 +26,7 @@ export interface Calculation {
 
 export interface Job {
   id: string;
-  jobNumber: string;
+  job_number: string;
   title: string;
   measurements: {
     squareMeters?: number;

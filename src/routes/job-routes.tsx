@@ -11,6 +11,7 @@ const JobDetailsPage = React.lazy(() => import('@/pages/Jobs/JobDetails'));
 const NewTemplatePage = React.lazy(() => import('@/pages/Jobs/NewTemplate'));
 const PropertyBoundariesPage = React.lazy(() => import('@/pages/PropertyBoundaries'));
 const CustomerProgressPage = React.lazy(() => import('@/pages/Jobs/CustomerProgress'));
+const NewJobNewTablePage = React.lazy(() => import('@/pages/Jobs/NewJobNewTable'));
 
 // Export routes as JSX elements
 export const jobRoutes = (

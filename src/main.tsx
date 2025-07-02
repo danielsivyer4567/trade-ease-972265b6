@@ -2,105 +2,98 @@ import React from 'react'
 import ReactDOM from 'react-dom/client'
 import App from './App.tsx'
 import './index.css'
+import { LoadScript } from '@react-google-maps/api'
 import { disableDevToolsOverlay } from './utils/disableDevToolsOverlay'
 import { workflowJobProcessor } from './services/WorkflowJobProcessor'
-import './utils/errorHandler' // Initialize error handler immediately
-import './utils/startupDiagnostics' // Run startup diagnostics
-// Remove the startupService import to prevent the 404 error
-// import { startupService } from './services/startupService'
+import './utils/errorHandler'
+import './utils/startupDiagnostics'
 import '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css'
 
+disableDevToolsOverlay()
 
-// Disable React DevTools overlay to prevent message channel errors
-disableDevToolsOverlay();
-
-// Setup error handling for Vite HMR
 if (import.meta.hot) {
   import.meta.hot.on('vite:beforeUpdate', () => {
-    console.log('Vite HMR update detected');
-  });
+    console.log('Vite HMR update detected')
+  })
 
   import.meta.hot.on('error', (err) => {
-    console.error('Vite HMR error detected:', err);
-  });
+    console.error('Vite HMR error detected:', err)
+  })
 }
 
-// Add CORS error monitoring
-const originalFetch = window.fetch;
-window.fetch = function(input, init) {
-  return originalFetch(input, init).catch(error => {
+const originalFetch = window.fetch
+window.fetch = function (input, init) {
+  return originalFetch(input, init).catch((error) => {
     if (error.message && error.message.includes('CORS')) {
       console.error('CORS Error Details:', {
-        url: typeof input === 'string' ? input : (input instanceof Request ? input.url : String(input)),
+        url: typeof input === 'string' ? input : input instanceof Request ? input.url : String(input),
         method: init?.method || (input instanceof Request ? input.method : 'GET'),
         headers: init?.headers || (input instanceof Request ? input.headers : undefined),
         mode: init?.mode || 'cors',
-        error: error.message
-      });
+        error: error.message,
+      })
     }
-    throw error;
-  });
-};
+    throw error
+  })
+}
 
-// Start the workflow job processor
 if (import.meta.env.MODE === 'development') {
-  // In development, start the job processor
-  workflowJobProcessor.start(); // Check for jobs every 30 seconds (hardcoded in the service)
-  console.log('Workflow job processor started in development mode');
+  workflowJobProcessor.start()
+  console.log('Workflow job processor started in development mode')
 }
 
-// Create root with error handling
-const rootElement = document.getElementById('root');
+const rootElement = document.getElementById('root')
 if (!rootElement) {
-  throw new Error('Root element not found. Make sure you have a div with id="root" in your index.html');
+  throw new Error('Root element not found. Make sure you have a div with id="root" in your index.html')
 }
 
-const root = ReactDOM.createRoot(rootElement);
+const root = ReactDOM.createRoot(rootElement)
 
-// Initialize app with error boundary
 const renderApp = () => {
   try {
-    // No need to initialize the startup service - this was causing the 404 error
-    // await startupService.initialize();
-    
-    // Render the app
     root.render(
       <React.StrictMode>
-        <App />
+        <LoadScript
+          googleMapsApiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY}
+          libraries={['places']}
+        >
+          <App />
+        </LoadScript>
       </React.StrictMode>
-    );
+    )
   } catch (error) {
-    console.error('Error rendering app:', error);
+    console.error('Error rendering app:', error)
     root.render(
       <div style={{ padding: '20px', fontFamily: 'system-ui' }}>
         <h1 style={{ color: 'red' }}>Application Error</h1>
         <p>The application failed to initialize. Please check the console for details.</p>
-        <pre style={{ 
-          backgroundColor: '#f5f5f5', 
-          padding: '10px', 
-          borderRadius: '4px',
-          overflow: 'auto'
-        }}>
+        <pre
+          style={{
+            backgroundColor: '#f5f5f5',
+            padding: '10px',
+            borderRadius: '4px',
+            overflow: 'auto',
+          }}
+        >
           {error instanceof Error ? error.message : String(error)}
         </pre>
-        <button 
-          style={{ 
-            padding: '8px 16px', 
-            backgroundColor: '#f44336', 
-            color: 'white', 
-            border: 'none', 
+        <button
+          style={{
+            padding: '8px 16px',
+            backgroundColor: '#f44336',
+            color: 'white',
+            border: 'none',
             borderRadius: '4px',
             cursor: 'pointer',
-            marginTop: '16px'
+            marginTop: '16px',
           }}
           onClick={() => window.location.reload()}
         >
           Reload Application
         </button>
       </div>
-    );
+    )
   }
-};
+}
 
-// Start the application
-renderApp();
+renderApp()

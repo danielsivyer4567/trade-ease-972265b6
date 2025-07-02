@@ -8,6 +8,7 @@ import { MainFormFields } from "./form-sections/MainFormFields";
 import { JobDescription } from "./form-sections/JobDescription";
 import { JobDocumentation } from "./form-sections/JobDocumentation";
 import { JobStreetView } from "@/components/JobStreetView";
+import { geocodingService } from "@/services/GeocodingService";
 
 interface JobFormProps {
   onShowTemplateSearch: () => void;
@@ -110,7 +111,7 @@ export function JobForm({
     return true;
   };
 
-  const prepareJobData = (
+  const prepareJobData = async (
     jobNumber: string,
     title: string,
     customer: string,
@@ -124,10 +125,29 @@ export function JobForm({
     state?: string,
     zipCode?: string
   ) => {
-    const formattedAddress = [address, city, state, zipCode]
-      .filter(Boolean)
-      .join(", ");
-
+    const formattedAddress = [address, city, state, zipCode].filter(Boolean).join(", ");
+    let location: [number, number] | null = null;
+  
+    if (formattedAddress && window.google?.maps?.Geocoder) {
+      try {
+        const geocoder = new window.google.maps.Geocoder();
+        const results = await new Promise<google.maps.GeocoderResult[]>((resolve, reject) => {
+          geocoder.geocode({ address: formattedAddress }, (results, status) => {
+            if (status === "OK" && results[0]) {
+              resolve(results);
+            } else {
+              reject(`Geocoding failed: ${status}`);
+            }
+          });
+        });
+  
+        const loc = results[0].geometry.location;
+        location = [loc.lng(), loc.lat()];
+      } catch (err) {
+        console.error("Geocoding error:", err);
+      }
+    }
+  
     return {
       job_number: jobNumber,
       title,
@@ -136,18 +156,21 @@ export function JobForm({
       type,
       date: dateUndecided ? "TBD" : date,
       assigned_team: team,
-      
       status: "scheduled",
-
-      
-      
+      address,
+      city,
+      state,
+      zipCode,
+      location: location || [151.2093, -33.8688] // fallback: Sydney
     };
   };
+  
+  
 
   const handleSuccessfulSubmit = (data: any) => {
     toast({
       title: "Job Created",
-      description: `Job ${data.jobNumber} has been created successfully`
+      description: `Job ${data.job_number} has been created successfully`
     });
     
     // Redirect to the job detail page or jobs list
@@ -161,7 +184,7 @@ export function JobForm({
       return;
     }
 
-    const jobData = prepareJobData(
+    const jobData = await prepareJobData(
       jobNumber, 
       title, 
       customer, 

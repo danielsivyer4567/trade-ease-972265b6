@@ -1,25 +1,26 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { AlertCircle } from "lucide-react";
 import { useGoogleMapsApiKey } from '@/hooks/useGoogleMapsApiKey';
 
 interface JobStreetViewProps {
-  address: string;
-  city?: string;
-  state?: string;
-  zipCode?: string;
+  location: [number, number]; // [lng, lat]
   height?: string;
   className?: string;
 }
 
-export function JobStreetView({ address, city, state, zipCode, height = "300px", className = "" }: JobStreetViewProps) {
+export function JobStreetView({
+  location,
+  height = "300px",
+  className = "",
+}: JobStreetViewProps) {
   const [streetViewUrl, setStreetViewUrl] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
   const { apiKey, isLoading, error: apiKeyError } = useGoogleMapsApiKey();
 
   useEffect(() => {
-    if (!address) {
-      setError("No address provided");
+    if (!location || location.length !== 2) {
+      setError("Invalid location coordinates");
       return;
     }
 
@@ -33,20 +34,19 @@ export function JobStreetView({ address, city, state, zipCode, height = "300px",
       return;
     }
 
-    try {
-      const formattedAddress = encodeURIComponent([address, city, state, zipCode].filter(Boolean).join(", "));
-      setStreetViewUrl(`https://www.google.com/maps/embed/v1/place?key=${apiKey}&q=${formattedAddress}&maptype=satellite`);
-      setError(null);
-    } catch (err) {
-      setError("Failed to generate Street View URL");
-    }
-  }, [address, city, state, zipCode, apiKey, apiKeyError]);
+    const [lng, lat] = location;
+    const coords = `${lat},${lng}`; // Note the order: lat,lng
+    setStreetViewUrl(
+      `https://www.google.com/maps/embed/v1/streetview?key=${apiKey}&location=${coords}&heading=210&pitch=10&fov=90`
+    );
+    setError(null);
+  }, [location, apiKey, apiKeyError]);
 
   if (isLoading) {
     return (
       <Card className={`w-full h-[${height}] ${className}`}>
         <CardContent className="flex items-center justify-center h-full">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900" />
         </CardContent>
       </Card>
     );
@@ -80,4 +80,4 @@ export function JobStreetView({ address, city, state, zipCode, height = "300px",
       </CardContent>
     </Card>
   );
-} 
+}
