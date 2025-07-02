@@ -9,8 +9,8 @@ import { Loader2, MapPin, Compass } from 'lucide-react';
 import { PropertyMeasurementService } from '@/services/PropertyMeasurementService';
 import { AutocompleteInput } from '@/components/ui/AutocompleteInput';
 import { AddressAutocompleteService, AddressSuggestion } from '@/services/AddressAutocompleteService';
-import { BoundaryMeasurements } from '@/components/ui/BoundaryMeasurements';
-import { identifyFrontBoundary } from '@/utils/propertyBoundaryUtils';
+import { supabase } from '@/lib/supabase';
+
 
 const PropertyBoundaryIconSmall = () => (
   <svg
@@ -146,143 +146,84 @@ const PropertyBoundaryIcon = () => (
   </svg>
 );
 
-const PropertyImageWithFrontHighlight = ({ 
+const PropertyImageWithTotalPerimeter = ({ 
   imageUrl, 
-  measurements, 
-  coordinates 
+  measurements,
+  address 
 }: { 
   imageUrl: string; 
-  measurements: number[]; 
-  coordinates?: any[] 
+  measurements: number[];
+  address?: {
+    street_number: string;
+    street_name: string;
+    street_type: string;
+    suburb: string;
+    postcode: string;
+  };
 }) => {
-  // Use unified front boundary identification algorithm
-  const frontBoundaryResult = identifyFrontBoundary(measurements, coordinates);
-  const frontIndex = frontBoundaryResult.frontIndex;
-  const confidence = Math.round(frontBoundaryResult.confidence * 100);
+  const totalPerimeter = measurements.reduce((sum, measurement) => sum + measurement, 0);
+  const [showReportModal, setShowReportModal] = useState(false);
+  const [reportText, setReportText] = useState('');
+  const [isSubmittingReport, setIsSubmittingReport] = useState(false);
+  const [reportSubmitted, setReportSubmitted] = useState(false);
+
+  const handleReportIssue = async () => {
+    if (!reportText.trim()) {
+      alert('Please enter a description of the issue');
+      return;
+    }
+
+    setIsSubmittingReport(true);
+    
+    try {
+      const addressString = address ? 
+        `${address.street_number} ${address.street_name} ${address.street_type}, ${address.suburb} ${address.postcode}` : 
+        'Address not provided';
+
+      const reportData = {
+        address: addressString,
+        issue_description: reportText,
+        image_url: imageUrl,
+        measurements: JSON.stringify(measurements),
+        reported_at: new Date().toISOString(),
+        status: 'new'
+      };
+
+      const { data, error } = await supabase
+        .from('property_issue_reports')
+        .insert([reportData])
+        .select();
+
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      setReportSubmitted(true);
+      setReportText('');
+      setTimeout(() => {
+        setShowReportModal(false);
+        setReportSubmitted(false);
+      }, 2000);
+    } catch (error) {
+      console.error('Error submitting report:', error);
+      alert('Failed to submit report. Please try again.');
+    } finally {
+      setIsSubmittingReport(false);
+    }
+  };
 
   return (
-    <div className="relative">
-      <img 
-        src={imageUrl} 
-        alt="Property boundary visualization"
-        className="w-full h-auto"
-        onError={(e) => {
-          const target = e.target as HTMLImageElement;
-          target.style.display = 'none';
-        }}
-      />
-      
-      {/* Front Boundary Indicator - Animated Pulse */}
-      <div className="absolute inset-0 pointer-events-none">
-        {/* Top boundary highlight (if front is boundary 0) */}
-        {frontIndex === 0 && (
-          <div className="absolute top-8 left-1/2 transform -translate-x-1/2">
-            <div className="bg-blue-500 text-white px-3 py-1 rounded-full text-xs font-bold animate-pulse shadow-lg border-2 border-blue-300">
-              🏠 FRONT (Street) {confidence}%
-            </div>
-            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-1">
-              <div className="w-0 h-0 border-l-6 border-r-6 border-b-8 border-transparent border-b-blue-500 animate-bounce drop-shadow-lg"></div>
-            </div>
-          </div>
-        )}
-        
-        {/* Right boundary highlight (if front is boundary 1) */}
-        {frontIndex === 1 && (
-          <div className="absolute right-8 top-1/2 transform -translate-y-1/2">
-            <div className="bg-blue-500 text-white px-3 py-1 rounded-full text-xs font-bold animate-pulse shadow-lg border-2 border-blue-300">
-              🏠 FRONT {confidence}%
-            </div>
-            <div className="absolute left-full top-1/2 transform -translate-y-1/2 ml-1">
-              <div className="w-0 h-0 border-t-6 border-b-6 border-l-8 border-transparent border-l-blue-500 animate-bounce drop-shadow-lg"></div>
-            </div>
-          </div>
-        )}
-        
-        {/* Bottom boundary highlight (if front is boundary 2) */}
-        {frontIndex === 2 && (
-          <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2">
-            <div className="bg-blue-500 text-white px-3 py-1 rounded-full text-xs font-bold animate-pulse shadow-lg border-2 border-blue-300">
-              🏠 FRONT (Street) {confidence}%
-            </div>
-            <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-1">
-              <div className="w-0 h-0 border-l-6 border-r-6 border-t-8 border-transparent border-t-blue-500 animate-bounce drop-shadow-lg"></div>
-            </div>
-          </div>
-        )}
-        
-        {/* Left boundary highlight (if front is boundary 3) */}
-        {frontIndex === 3 && (
-          <div className="absolute left-8 top-1/2 transform -translate-y-1/2">
-            <div className="bg-blue-500 text-white px-3 py-1 rounded-full text-xs font-bold animate-pulse shadow-lg border-2 border-blue-300">
-              🏠 FRONT {confidence}%
-            </div>
-            <div className="absolute right-full top-1/2 transform -translate-y-1/2 mr-1">
-              <div className="w-0 h-0 border-t-6 border-b-6 border-r-8 border-transparent border-r-blue-500 animate-bounce drop-shadow-lg"></div>
-            </div>
-          </div>
-        )}
-        
-        {/* Irregular properties - position badge based on front boundary location */}
-        {measurements.length > 4 && (
-          <>
-            {/* Front boundary is bottom-ish (likely boundary 4 for 5-sided property) */}
-            {frontIndex === 4 && (
-              <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2">
-                <div className="bg-blue-500 text-white px-3 py-1 rounded-full text-xs font-bold animate-pulse shadow-lg border-2 border-blue-300">
-                  🏠 FRONT (Street) {confidence}%
-                </div>
-                <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-1">
-                  <div className="w-0 h-0 border-l-6 border-r-6 border-t-8 border-transparent border-t-blue-500 animate-bounce drop-shadow-lg"></div>
-                </div>
-              </div>
-            )}
-            
-            {/* Front boundary is top-ish (boundary 0) */}
-            {frontIndex === 0 && (
-              <div className="absolute top-8 left-1/2 transform -translate-x-1/2">
-                <div className="bg-blue-500 text-white px-3 py-1 rounded-full text-xs font-bold animate-pulse shadow-lg border-2 border-blue-300">
-                  🏠 FRONT (Street) {confidence}%
-                </div>
-                <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-1">
-                  <div className="w-0 h-0 border-l-6 border-r-6 border-b-8 border-transparent border-b-blue-500 animate-bounce drop-shadow-lg"></div>
-                </div>
-              </div>
-            )}
-            
-            {/* Front boundary is right-ish */}
-            {(frontIndex === 1 || frontIndex === 2) && (
-              <div className="absolute right-8 top-1/2 transform -translate-y-1/2">
-                <div className="bg-blue-500 text-white px-3 py-1 rounded-full text-xs font-bold animate-pulse shadow-lg border-2 border-blue-300">
-                  🏠 FRONT {confidence}%
-                </div>
-                <div className="absolute left-full top-1/2 transform -translate-y-1/2 ml-1">
-                  <div className="w-0 h-0 border-t-6 border-b-6 border-l-8 border-transparent border-l-blue-500 animate-bounce drop-shadow-lg"></div>
-                </div>
-              </div>
-            )}
-            
-            {/* Front boundary is left-ish */}
-            {frontIndex === 3 && (
-              <div className="absolute left-8 top-1/2 transform -translate-y-1/2">
-                <div className="bg-blue-500 text-white px-3 py-1 rounded-full text-xs font-bold animate-pulse shadow-lg border-2 border-blue-300">
-                  🏠 FRONT {confidence}%
-                </div>
-                <div className="absolute right-full top-1/2 transform -translate-y-1/2 mr-1">
-                  <div className="w-0 h-0 border-t-6 border-b-6 border-r-8 border-transparent border-r-blue-500 animate-bounce drop-shadow-lg"></div>
-                </div>
-              </div>
-            )}
-            
-            {/* Fallback for other irregular boundaries */}
-            {frontIndex > 4 && (
-              <div className="absolute top-8 right-8">
-                <div className="bg-blue-500 text-white px-3 py-1 rounded-full text-xs font-bold animate-pulse shadow-lg border-2 border-blue-300">
-                  🏠 FRONT (#{frontIndex + 1}) {confidence}%
-                </div>
-              </div>
-            )}
-          </>
-        )}
+    <div className="space-y-3">
+      <div className="relative">
+        <img 
+          src={imageUrl} 
+          alt="Property boundary visualization"
+          className="w-full h-auto"
+          onError={(e) => {
+            const target = e.target as HTMLImageElement;
+            target.style.display = 'none';
+          }}
+        />
         
         {/* Compass indicator */}
         <div className="absolute top-2 right-2">
@@ -294,6 +235,90 @@ const PropertyImageWithFrontHighlight = ({
           </div>
         </div>
       </div>
+      
+      {/* Total Perimeter Display */}
+      <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 text-center">
+        <div className="text-lg font-semibold text-blue-800">
+          Total Perimeter: {totalPerimeter.toFixed(1)}m
+        </div>
+        <div className="text-xs text-blue-600 mt-1">
+          {measurements.length} boundaries measured
+        </div>
+      </div>
+
+      {/* Disclaimer and Report Issue */}
+      <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
+        <div className="text-sm text-amber-800 mb-2">
+          <strong>Please note:</strong> Some properties with technical data layouts may be hard for AI to interpret.
+        </div>
+        <div className="text-xs text-amber-700 mb-3">
+          If there was an issue, please add the address and report an issue below.
+        </div>
+        <button
+          onClick={() => setShowReportModal(true)}
+          className="bg-amber-600 hover:bg-amber-700 text-white text-xs px-3 py-1 rounded transition-colors"
+        >
+          Report Issue
+        </button>
+      </div>
+
+      {/* Report Issue Modal */}
+      {showReportModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full">
+            <h3 className="text-lg font-semibold mb-4">Report an Issue</h3>
+            
+            {reportSubmitted ? (
+              <div className="text-center">
+                <div className="text-green-600 text-sm mb-2">✅ Report submitted successfully!</div>
+                <div className="text-xs text-gray-600">Thank you for helping us improve our service.</div>
+              </div>
+            ) : (
+              <>
+                <div className="mb-4">
+                  <div className="text-sm text-gray-700 mb-2">
+                    <strong>Address:</strong> {address ? 
+                      `${address.street_number} ${address.street_name} ${address.street_type}, ${address.suburb} ${address.postcode}` : 
+                      'Not provided'}
+                  </div>
+                </div>
+                
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Describe the issue:
+                  </label>
+                  <textarea
+                    value={reportText}
+                    onChange={(e) => setReportText(e.target.value)}
+                    placeholder="Please describe what seems incorrect about the property measurement or visualization..."
+                    className="w-full p-2 border border-gray-300 rounded text-sm"
+                    rows={4}
+                  />
+                </div>
+                
+                <div className="flex gap-2">
+                  <button
+                    onClick={handleReportIssue}
+                    disabled={isSubmittingReport}
+                    className="bg-blue-600 hover:bg-blue-700 text-white text-sm px-4 py-2 rounded disabled:opacity-50"
+                  >
+                    {isSubmittingReport ? 'Submitting...' : 'Submit Report'}
+                  </button>
+                  <button
+                    onClick={() => {
+                      setShowReportModal(false);
+                      setReportText('');
+                    }}
+                    className="bg-gray-300 hover:bg-gray-400 text-gray-700 text-sm px-4 py-2 rounded"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 };
@@ -313,7 +338,7 @@ const PropertyMeasurement = () => {
   const [isParsingAddress, setIsParsingAddress] = useState(false);
   const [response, setResponse] = useState<string>('');
   const [error, setError] = useState<string>('');
-  const [debugMode, setDebugMode] = useState(false);
+
   const [loadingMessage, setLoadingMessage] = useState<string>('');
   const [validationMessage, setValidationMessage] = useState<string>('');
 
@@ -393,155 +418,7 @@ const PropertyMeasurement = () => {
     }
   };
 
-  const testConnectivity = async () => {
-    setIsLoading(true);
-    setError('');
-    setResponse('');
 
-    try {
-      debugMode && console.log('Testing API connectivity...');
-      
-      // Simple connectivity test - just check if we can reach the API
-      const response = await fetch('https://property-measurement-47233712259.australia-southeast1.run.app/visualize', {
-        method: 'OPTIONS', // Use OPTIONS instead of POST for connectivity test
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });
-
-      debugMode && console.log('Connectivity test response status:', response.status);
-      debugMode && console.log('Connectivity test response headers:', Object.fromEntries(response.headers.entries()));
-
-      setResponse(`Connectivity Test Result:\nStatus: ${response.status}\nAPI is reachable: ${response.status < 500 ? 'Yes' : 'No'}`);
-    } catch (err) {
-      console.error('Connectivity test error:', err);
-      setError(`Connectivity test failed: ${err instanceof Error ? err.message : 'Unknown error'}\nThis indicates a network issue or CORS problem.`);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const testFastMode = async () => {
-    setIsLoading(true);
-    setError('');
-    setResponse('');
-    setLoadingMessage('Using fast mode...');
-
-    try {
-      debugMode && console.log('Testing fast mode...');
-      
-      const result = await PropertyMeasurementService.getPropertyMeasurementFast(formData);
-      debugMode && console.log('Fast mode test result:', result);
-
-      if (!result.success) {
-        throw new Error(result.error || 'Fast mode test failed');
-      }
-
-      if (typeof result.data === 'string') {
-        setResponse(`Fast Mode Response:\n${result.data}`);
-      } else {
-        setResponse(`Fast Mode Response:\n${JSON.stringify(result.data, null, 2)}`);
-      }
-    } catch (err) {
-      console.error('Fast mode test error:', err);
-      setError(`Fast mode test failed: ${err instanceof Error ? err.message : 'Unknown error'}`);
-    } finally {
-      setIsLoading(false);
-      setLoadingMessage('');
-    }
-  };
-
-  const testSupabaseFunction = async () => {
-    setIsLoading(true);
-    setError('');
-    setResponse('');
-
-    try {
-      debugMode && console.log('Testing Supabase function...');
-      
-      const result = await PropertyMeasurementService.getPropertyMeasurementViaSupabase(formData);
-      debugMode && console.log('Supabase function test result:', result);
-
-      if (!result.success) {
-        throw new Error(result.error || 'Supabase function test failed');
-      }
-
-      if (typeof result.data === 'string') {
-        setResponse(`Supabase Function Response:\n${result.data}`);
-      } else {
-        setResponse(`Supabase Function Response:\n${JSON.stringify(result.data, null, 2)}`);
-      }
-    } catch (err) {
-      console.error('Supabase function test error:', err);
-      setError(`Supabase function test failed: ${err instanceof Error ? err.message : 'Unknown error'}`);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const testWithProxy = async () => {
-    setIsLoading(true);
-    setError('');
-    setResponse('');
-
-    try {
-      debugMode && console.log('Testing with CORS proxy...');
-      
-      const result = await PropertyMeasurementService.getPropertyMeasurementWithProxy(formData, true);
-      debugMode && console.log('Proxy test result:', result);
-
-      if (!result.success) {
-        throw new Error(result.error || 'Proxy test failed');
-      }
-
-      if (typeof result.data === 'string') {
-        setResponse(`CORS Proxy Response:\n${result.data}`);
-      } else {
-        setResponse(`CORS Proxy Response:\n${JSON.stringify(result.data, null, 2)}`);
-      }
-    } catch (err) {
-      console.error('Proxy test error:', err);
-      setError(`CORS proxy test failed: ${err instanceof Error ? err.message : 'Unknown error'}`);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const testDirectAPI = async () => {
-    setIsLoading(true);
-    setError('');
-    setResponse('');
-
-    try {
-      debugMode && console.log('Testing direct API call with data:', formData);
-      
-      const response = await fetch('https://property-measurement-47233712259.australia-southeast1.run.app/visualize', {
-        method: 'POST',
-        headers: {
-          'Authorization': 'Bearer 5a218f5e-58cf-4dd9-ad40-ed1d90ce4fc7',
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(formData)
-      });
-
-      debugMode && console.log('Direct API Response status:', response.status);
-      debugMode && console.log('Direct API Response headers:', Object.fromEntries(response.headers.entries()));
-
-      const responseText = await response.text();
-      debugMode && console.log('Direct API Raw response:', responseText);
-
-      if (!response.ok) {
-        throw new Error(`Direct API error: ${response.status} - ${responseText}`);
-      }
-
-      setResponse(`Direct API Response:\n${responseText}`);
-    } catch (err) {
-      console.error('Direct API error:', err);
-      setError(`Direct API test failed: ${err instanceof Error ? err.message : 'Unknown error'}`);
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   const validateFormData = (): string[] => {
     const errors: string[] = [];
@@ -576,7 +453,7 @@ const PropertyMeasurement = () => {
     setLoadingMessage('Initializing...');
 
     try {
-      debugMode && console.log('Using PropertyMeasurementService with data:', formData);
+
       
       setLoadingMessage('Connecting to Supabase function...');
       
@@ -584,7 +461,7 @@ const PropertyMeasurement = () => {
       const result = await PropertyMeasurementService.getPropertyMeasurementViaSupabase(formData);
       
       setLoadingMessage('Processing response...');
-      debugMode && console.log('Service result:', result);
+
 
       if (!result.success) {
         throw new Error(result.error || 'Supabase service call failed');
@@ -623,7 +500,7 @@ const PropertyMeasurement = () => {
     setResponse('');
     setError('');
     setValidationMessage('');
-    setDebugMode(false);
+
   };
 
   return (
@@ -638,22 +515,7 @@ const PropertyMeasurement = () => {
             Enter property details to get measurement and visualization data
           </p>
           
-          {/* Speed Notice */}
-          <div className="bg-green-50 border border-green-200 rounded-lg p-4 mt-4">
-            <div className="flex items-start gap-2">
-              <div className="bg-green-100 rounded-full p-1">
-                <svg className="w-4 h-4 text-green-600" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                </svg>
-              </div>
-              <div className="flex-1">
-                <h4 className="text-sm font-medium text-green-800">Optimized Performance</h4>
-                <p className="text-sm text-green-700 mt-1">
-                  Now using Supabase Edge Function for optimal speed (1-5 seconds). Alternative methods available in debug mode if needed.
-                </p>
-              </div>
-            </div>
-          </div>
+
         </div>
 
         <div className="grid gap-6 lg:grid-cols-2">
@@ -803,84 +665,10 @@ const PropertyMeasurement = () => {
                     </Button>
                   </div>
                   
-                  <Button 
-                    type="button" 
-                    variant="secondary" 
-                    onClick={testFastMode}
-                    disabled={isLoading}
-                    className="w-full bg-green-50 hover:bg-green-100 text-green-700 border-green-200"
-                  >
-                    {isLoading ? (
-                      <>
-                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                        {loadingMessage || 'Processing...'}
-                      </>
-                    ) : (
-                      '⚡ Try Fast Mode (Alternative Proxy)'
-                    )}
-                  </Button>
+
                 </div>
 
-                <div className="mt-4 space-y-2">
-                  <label className="flex items-center gap-2 text-sm">
-                    <input
-                      type="checkbox"
-                      checked={debugMode}
-                      onChange={(e) => setDebugMode(e.target.checked)}
-                    />
-                    Enable debug mode (show detailed logs)
-                  </label>
-                  
-                  {debugMode && (
-                    <div className="space-y-2">
-                      <Button 
-                        type="button" 
-                        variant="secondary" 
-                        onClick={testSupabaseFunction}
-                        disabled={isLoading}
-                        className="w-full text-xs bg-green-100 hover:bg-green-200 text-green-800"
-                      >
-                        Test Supabase Function (Recommended)
-                      </Button>
-                      <Button 
-                        type="button" 
-                        variant="secondary" 
-                        onClick={testFastMode}
-                        disabled={isLoading}
-                        className="w-full text-xs bg-blue-100 hover:bg-blue-200 text-blue-800"
-                      >
-                        ⚡ Test Fast Mode (Usually Faster)
-                      </Button>
-                      <Button 
-                        type="button" 
-                        variant="secondary" 
-                        onClick={testConnectivity}
-                        disabled={isLoading}
-                        className="w-full text-xs"
-                      >
-                        Test API Connectivity (check if API is reachable)
-                      </Button>
-                      <Button 
-                        type="button" 
-                        variant="secondary" 
-                        onClick={testDirectAPI}
-                        disabled={isLoading}
-                        className="w-full text-xs"
-                      >
-                        Test Direct API Call (no proxy)
-                      </Button>
-                      <Button 
-                        type="button" 
-                        variant="secondary" 
-                        onClick={testWithProxy}
-                        disabled={isLoading}
-                        className="w-full text-xs"
-                      >
-                        Test with CORS Proxy
-                      </Button>
-                    </div>
-                  )}
-                </div>
+
               </form>
             </CardContent>
           </Card>
@@ -898,18 +686,8 @@ const PropertyMeasurement = () => {
                   </p>
                   {(error.includes('Failed to fetch') || error.includes('Not authenticated')) && (
                     <div className="mt-2 text-xs text-red-600">
-                      {error.includes('Not authenticated') ? (
-                        <>
-                          <p><strong>Authentication Issue:</strong> The proxy couldn't authenticate with the API.</p>
-                          <p>Try the regular "Get Property Measurement" button instead.</p>
-                        </>
-                      ) : (
-                        <>
-                          <p><strong>CORS Issue:</strong> The browser is blocking the request due to security policy.</p>
-                          <p>Try enabling debug mode and using "Test with CORS Proxy" button.</p>
-                        </>
-                      )}
-                      <p>For cors-anywhere proxy, you may need to visit: <a href="https://cors-anywhere.herokuapp.com/corsdemo" target="_blank" rel="noopener noreferrer" className="underline">https://cors-anywhere.herokuapp.com/corsdemo</a> and click "Request temporary access"</p>
+                      <p><strong>Connection Issue:</strong> Unable to connect to the property measurement service.</p>
+                      <p>Please try again in a few moments.</p>
                     </div>
                   )}
                 </div>
@@ -929,49 +707,23 @@ const PropertyMeasurement = () => {
                             <div>
                               <Label className="text-sm font-semibold">Property Visualization:</Label>
                               <div className="mt-2 border rounded-lg overflow-hidden">
-                                <PropertyImageWithFrontHighlight 
-                                  imageUrl={data.image_url} 
-                                  measurements={data.side_lengths_m}
-                                  coordinates={data.coordinates || data.boundary_points || data.vertices}
-                                />
+                                                              <PropertyImageWithTotalPerimeter 
+                                imageUrl={data.image_url} 
+                                measurements={data.side_lengths_m}
+                                address={{
+                                  street_number: formData.street_number,
+                                  street_name: formData.street_name,
+                                  street_type: formData.street_type,
+                                  suburb: formData.suburb,
+                                  postcode: formData.postcode
+                                }}
+                              />
                               </div>
-                              <p className="text-xs text-gray-500 mt-1">
-                                Image URL: <a href={data.image_url} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">
-                                  {data.image_url}
-                                </a>
-                              </p>
                             </div>
                           )}
+
                           
-                          {/* Property Measurements with Directional Labels */}
-                          {data.side_lengths_m && Array.isArray(data.side_lengths_m) && (
-                            <BoundaryMeasurements 
-                              measurements={data.side_lengths_m}
-                              coordinates={data.coordinates || data.boundary_points || data.vertices}
-                              propertyData={data}
-                              address={{
-                                street_number: formData.street_number,
-                                street_name: formData.street_name,
-                                street_type: formData.street_type,
-                                suburb: formData.suburb,
-                                postcode: formData.postcode
-                              }}
-                              streetFacing="north" // Default - can be enhanced later with actual orientation data
-                            />
-                          )}
-                          
-                          {/* Raw JSON Response */}
-                          <details className="mt-4">
-                            <summary className="cursor-pointer text-sm font-semibold text-gray-700 hover:text-gray-900">
-                              View Raw JSON Response
-                            </summary>
-                            <Textarea
-                              value={JSON.stringify(data, null, 2)}
-                              readOnly
-                              rows={8}
-                              className="font-mono text-xs mt-2"
-                            />
-                          </details>
+
                         </div>
                       );
                     } catch {
@@ -1002,102 +754,7 @@ const PropertyMeasurement = () => {
           </Card>
         </div>
 
-        {/* Boundary Direction Information */}
-        <Card className="mt-6 bg-slate-300">
-          <CardHeader className="bg-slate-300">
-            <CardTitle className="flex items-center gap-2">
-              <Compass className="h-5 w-5" />
-              Understanding Boundary Directions
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="bg-slate-300">
-            <div className="space-y-4 text-sm">
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <h4 className="font-semibold text-blue-800 mb-2">🏠 Automatic Direction Detection</h4>
-                <div className="space-y-2 text-blue-700">
-                  <p><strong>Smart Front Detection:</strong></p>
-                  <div className="ml-4 space-y-1 text-sm">
-                    <p>• For properties with coordinates: Uses geometric analysis to identify street-facing boundary</p>
-                    <p>• For properties without coordinates: Uses shortest boundary (typical for residential lots)</p>
-                    <p>• Considers southern positioning (many streets run east-west)</p>
-                  </div>
-                  
-                  <p><strong>Left/Right Assignment:</strong></p>
-                  <div className="ml-4 space-y-1 text-sm">
-                    <p>• Calculated relative to standing at the front boundary facing inward</p>
-                    <p>• Uses clockwise/counterclockwise analysis from property centroid</p>
-                    <p>• Angular positioning: Right (45°-135°), Back (135°-225°), Left (225°-315°)</p>
-                  </div>
-                  
-                  <p><strong>Rear Identification:</strong></p>
-                  <div className="ml-4 space-y-1 text-sm">
-                    <p>• Boundary positioned opposite or furthest from the identified front</p>
-                    <p>• Uses geometric analysis for irregular properties</p>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                <h4 className="font-semibold text-green-800 mb-2">✏️ Customizing Boundary Labels</h4>
-                <div className="space-y-2 text-green-700">
-                  <p>• Click <strong>"Edit Directions"</strong> to customize boundary labels</p>
-                  <p>• Smart defaults are applied based on typical property layouts</p>
-                  <p>• Rectangular properties automatically get Front, Back, Left, Right assignments</p>
-                  <p>• Irregular properties can be manually labeled as needed</p>
-                </div>
-              </div>
-              
-              <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
-                <h4 className="font-semibold text-amber-800 mb-2">🗺️ Important Property Information</h4>
-                <div className="space-y-2 text-amber-700">
-                  <p><strong>Street Frontage:</strong> The measurement of your property that faces the street</p>
-                  <p><strong>Perimeter:</strong> Total boundary length around your property</p>
-                  <p><strong>Boundary Order:</strong> Measurements typically start from the street and go clockwise</p>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
 
-        {/* Performance Optimization Section */}
-        <Card className="mt-6 bg-slate-300">
-          <CardHeader className="bg-slate-300">
-            <CardTitle>Performance Optimization</CardTitle>
-          </CardHeader>
-          <CardContent className="bg-slate-300">
-            <div className="space-y-4 text-sm">
-              <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                <h4 className="font-semibold text-green-800 mb-2">✅ Using Supabase Function (Optimized)</h4>
-                <p className="text-green-700 mb-2">The main "Get Property Measurement" button now uses the Supabase function for optimal performance.</p>
-                <div className="text-xs text-green-600">
-                  <div><strong>Method:</strong> Direct Supabase Edge Function</div>
-                  <div><strong>Expected Speed:</strong> 1-5 seconds (no proxy overhead)</div>
-                  <div><strong>Reliability:</strong> High (server-side execution)</div>
-                </div>
-              </div>
-              
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <h4 className="font-semibold text-blue-800 mb-2">🔧 If Function Not Deployed</h4>
-                <p className="text-blue-700 mb-2">If you haven't deployed the Supabase function yet, deploy it for full functionality:</p>
-                <div className="bg-white rounded border p-3 font-mono text-xs">
-                  <div>1. Open terminal</div>
-                  <div>2. Run: <code className="bg-gray-100 px-1 rounded">supabase login</code></div>
-                  <div>3. Run: <code className="bg-gray-100 px-1 rounded">supabase functions deploy property-measurement</code></div>
-                </div>
-              </div>
-              
-              <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
-                <h4 className="font-semibold text-gray-800 mb-2">Alternative Methods</h4>
-                <p className="text-gray-600 mb-2">Backup methods available in debug mode:</p>
-                <div className="text-xs text-gray-500">
-                  <div><strong>Fast Mode:</strong> Alternative proxy methods</div>
-                  <div><strong>CORS Proxy:</strong> cors-anywhere.herokuapp.com or api.allorigins.win</div>
-                  <div><strong>Direct API:</strong> Direct call (may have CORS issues)</div>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
       </div>
     </AppLayout>
   );
