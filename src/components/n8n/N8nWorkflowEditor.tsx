@@ -37,7 +37,7 @@ export function N8nWorkflowEditor({
         setIsLoading(true);
         
         // Check if n8n is available
-        const response = await fetch(`${n8nUrl}/rest/active`);
+        const response = await fetch(`/api/n8n/active`);
         if (!response.ok) {
           throw new Error('n8n server is not available');
         }
@@ -56,11 +56,11 @@ export function N8nWorkflowEditor({
     };
 
     initializeN8n();
-  }, [workflowId, n8nUrl]);
+  }, [workflowId]);
 
   const loadWorkflow = async (id: string) => {
     try {
-      const response = await fetch(`${n8nUrl}/rest/workflows/${id}`);
+      const response = await fetch(`/api/n8n/workflows/${id}`);
       if (response.ok) {
         const workflow = await response.json();
         setWorkflowData(workflow);
@@ -75,10 +75,11 @@ export function N8nWorkflowEditor({
     try {
       if (!workflowData) return;
 
-      const response = await fetch(`${n8nUrl}/rest/workflows${workflowId ? `/${workflowId}` : ''}`, {
+      const response = await fetch(`/api/n8n/workflows${workflowId ? `/${workflowId}` : ''}`, {
         method: workflowId ? 'PATCH' : 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'X-N8N-API-KEY': import.meta.env.VITE_N8N_API_KEY,
         },
         body: JSON.stringify(workflowData),
       });
@@ -105,10 +106,11 @@ export function N8nWorkflowEditor({
 
     try {
       setExecutionStatus('running');
-      const response = await fetch(`${n8nUrl}/rest/workflows/${workflowId}/execute`, {
+      const response = await fetch(`/api/n8n/workflows/${workflowId}/execute`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'X-N8N-API-KEY': import.meta.env.VITE_N8N_API_KEY,
         },
         body: JSON.stringify({}),
       });

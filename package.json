@@ -15,7 +15,11 @@
     "preview": "vite preview",
     "db:setup": "node scripts/db-setup.js",
     "db:reset": "npx supabase db reset",
-    "start:with-db": "npm run db:setup && npm run dev"
+    "start:with-db": "npm run db:setup && npm run dev",
+    "n8n:start": "npx n8n start",
+    "n8n:stop": "taskkill /F /IM node.exe",
+    "n8n:logs": "echo 'n8n logs are shown in the terminal where n8n is running'",
+    "n8n:restart": "taskkill /F /IM node.exe && npx n8n start"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.3.4",

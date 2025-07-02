@@ -1,0 +1,78 @@
+{
+  "name": "Trade Ease - New Customer Welcome",
+  "nodes": [
+    {
+      "id": "webhook-trigger",
+      "name": "New Customer Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        100,
+        100
+      ],
+      "parameters": {
+        "path": "new-customer",
+        "options": {}
+      }
+    },
+    {
+      "id": "send-welcome-email",
+      "name": "Send Welcome Email",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 1,
+      "position": [
+        300,
+        100
+      ],
+      "parameters": {
+        "toEmail": "={{ $json.customer.email }}",
+        "subject": "Welcome to Trade Ease!",
+        "text": "Hi {{ $json.customer.name }}, welcome to our platform! We're excited to help you with your trade needs."
+      }
+    },
+    {
+      "id": "create-task",
+      "name": "Create Initial Task",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [
+        500,
+        100
+      ],
+      "parameters": {
+        "url": "{{ $env.VITE_SUPABASE_URL }}/rest/v1/tasks",
+        "method": "POST",
+        "headers": {
+          "apikey": "{{ $env.VITE_SUPABASE_ANON_KEY }}",
+          "Authorization": "Bearer {{ $env.VITE_SUPABASE_ANON_KEY }}",
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "customer_id": "={{ $json.customer.id }}",
+          "title": "Initial Consultation",
+          "description": "Schedule initial consultation with new customer",
+          "status": "pending"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "webhook-trigger": {
+      "main": [
+        [
+          "send-welcome-email"
+        ]
+      ]
+    },
+    "send-welcome-email": {
+      "main": [
+        [
+          "create-task"
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {},
+  "staticData": null
+}
