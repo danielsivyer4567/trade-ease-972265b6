@@ -14,7 +14,7 @@ import { getSafeApiKey } from "@/config/google-maps";
 const MinimalMap = ({ jobs }) => {
   const { isLoaded, loadError } = useLoadScript({
 
-    googleMapsApiKey: "AIzaSyCEZfDx6VHz83XX2tnhGRZl3VGSb9WlY1s",
+    googleMapsApiKey: "AIzaSyBS_SpQWpq8RwFQSlK6sPifGosgnxPrpxE",
 
   });
   const [selectedJob, setSelectedJob] = useState(null);
