@@ -21,6 +21,10 @@ const GenericSettingsPage = React.lazy(() => import('@/pages/Settings/GenericSet
 const StaffPage = React.lazy(() => import('@/pages/Settings/Staff'));
 const MessagingSettings = React.lazy(() => import('@/pages/Settings/MessagingSettings'));
 const OrganizationSettings = React.lazy(() => import('@/pages/Settings/OrganizationSettings'));
+const TradeEasePlanDetails = React.lazy(() => import('@/pages/Settings/TradeEasePlanDetails'));
+const MyPlanPage = React.lazy(() => import('@/pages/Settings/MyPlan'));
+const GeminiKeyVerification = React.lazy(() => import('@/pages/GeminiKeyVerification'));
+const MicrophoneTestPage = React.lazy(() => import('@/pages/MicrophoneTestPage'));
 
 // Export routes configuration
 export const SettingsRoutes = (): RouteObject[] => [
@@ -151,6 +155,38 @@ export const SettingsRoutes = (): RouteObject[] => [
     element: (
       <Suspense fallback={<LoadingFallback />}>
         <TermsOfServicePage />
+      </Suspense>
+    ),
+  },
+  {
+    path: "trade-ease-plan-details",
+    element: (
+      <Suspense fallback={<LoadingFallback />}>
+        <TradeEasePlanDetails />
+      </Suspense>
+    ),
+  },
+  {
+    path: "my-plan",
+    element: (
+      <Suspense fallback={<LoadingFallback />}>
+        <MyPlanPage />
+      </Suspense>
+    ),
+  },
+  {
+    path: "gemini-key-verification",
+    element: (
+      <Suspense fallback={<LoadingFallback />}>
+        <GeminiKeyVerification />
+      </Suspense>
+    ),
+  },
+  {
+    path: "microphone-test",
+    element: (
+      <Suspense fallback={<LoadingFallback />}>
+        <MicrophoneTestPage />
       </Suspense>
     ),
   },

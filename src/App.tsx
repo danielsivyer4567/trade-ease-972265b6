@@ -3,7 +3,7 @@ import { RouterProvider } from 'react-router-dom';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { OrganizationProvider } from '@/contexts/OrganizationContext';
 import { Toaster } from '@/components/ui/toaster';
-import { createRouter } from './routes/index';
+import { router } from './routes/index';
 import { Analytics } from '@vercel/analytics/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster as SonnerToaster } from 'sonner';
@@ -18,8 +18,6 @@ import './pages/Workflow/components/workflow.css';
 import './styles/deprecation-fixes.css'; // Override deprecated CSS properties
 import './styles/workflow-visibility-fix.css'; // Ensure workflow nodes are always visible
 import './styles/workflow-interaction-fix.css'; // Ensure workflow canvas is interactive
-
-
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -50,7 +48,7 @@ const ErrorFallbackUI = () => (
 );
 
 // Base UI components that don't depend on router
-const AppUIComponents = ({ children = null }) => (
+const AppUIComponents = ({ children }: { children?: React.ReactNode }) => (
   <WorkflowDarkModeProvider>
     {children}
     <Toaster />
@@ -61,7 +59,6 @@ const AppUIComponents = ({ children = null }) => (
 
 function App() {
   const [initError, setInitError] = useState(null);
-  const router = createRouter();
   
   console.log('App: Rendering with router:', router);
 
