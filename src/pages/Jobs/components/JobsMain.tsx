@@ -11,6 +11,8 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { GoogleMap, OverlayView } from "@react-google-maps/api";
+import JobMap from "@/components/JobMap";
 
 // FeatureAccess component for checking feature access
 function FeatureAccess({ featureKey }) {
@@ -54,6 +56,8 @@ export function JobsMain() {
       setLoading(true);
       try {
         const { data, error } = await supabase.from('jobs').select('*');
+        console.log("Fetched jobs:", data);
+
         console.log("Supabase response:", { data, error });
         if (error) {
           console.error("Supabase error:", error);
@@ -164,7 +168,9 @@ export function JobsMain() {
               </div>
             </div>
             <div className="h-[200px] bg-gray-50 rounded-b-lg border border-gray-200">
-              <JobSiteMapView jobs={jobs} />
+            <JobMap jobs={jobs} />
+
+
             </div>
           </div>
         )}

@@ -15,7 +15,7 @@ const UpcomingJobs = () => {
     const fetchJobs = async () => {
       setLoading(true);
       try {
-        const { data, error } = await supabase.from('jobs').select('*');
+        const { data, error } = await supabase.from('new_jobs').select('*');
         if (error) {
           console.error("Failed to fetch jobs:", error);
         } else {

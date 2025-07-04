@@ -13,7 +13,9 @@ import { getSafeApiKey } from "@/config/google-maps";
 
 const MinimalMap = ({ jobs }) => {
   const { isLoaded, loadError } = useLoadScript({
-    googleMapsApiKey: getSafeApiKey(),
+
+    googleMapsApiKey: "AIzaSyCEZfDx6VHz83XX2tnhGRZl3VGSb9WlY1s",
+
   });
   const [selectedJob, setSelectedJob] = useState(null);
 
@@ -84,8 +86,7 @@ const JobSiteMap = () => {
         
         const { data, error } = await supabase
           .from('jobs')
-          .select('*')
-          .limit(100); // Limit the number of jobs for better performance
+          .select('*');
           
         if (error) {
           console.error("Failed to fetch jobs:", error);

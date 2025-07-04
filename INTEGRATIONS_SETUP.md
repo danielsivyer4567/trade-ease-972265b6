@@ -164,7 +164,7 @@ ARCGIS_API_KEY=your_arcgis_api_key
 **Environment Variables**:
 ```bash
 VITE_N8N_URL=http://localhost:5678  # ✅ Already set
-N8N_API_KEY=your_n8n_api_key        # ❌ Missing
+N8N_API_KEY=n8n_api_6209b969611232dbcf1350a6cf8b4258a82a2c43903cbe44c694c06a35032ecb16603d8c6e75f1e1        # ❌ Missing
 ```
 
 ## 🏢 Business Services

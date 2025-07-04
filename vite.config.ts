@@ -25,11 +25,12 @@ export default defineConfig(({ mode }) => {
       },
       middlewareMode: false,
       proxy: {
-        '/api': {
-      target: 'http://localhost:5678',
-      changeOrigin: true,
-      rewrite: path => path.replace(/^\/api/, '')
-    },
+        // n8n proxy
+        '/api/n8n': {
+          target: 'http://127.0.0.1:5678',
+          changeOrigin: true,
+          rewrite: (path) => path.replace(/^\/api\/n8n/, '/rest'),
+        },
         // Proxy all Supabase endpoints
         '/auth/v1': {
           target: 'https://wxwbxupdisbofesaygqj.supabase.co',
@@ -92,7 +93,12 @@ export default defineConfig(({ mode }) => {
               proxyRes.headers['Access-Control-Allow-Credentials'] = 'true';
             });
           }
-        }
+        },
+        '/api': {
+          target: 'http://127.0.0.1:5678',
+          changeOrigin: true,
+          rewrite: path => path.replace(/^\/api/, ''),
+        },
       }
     },
     plugins: [react()],

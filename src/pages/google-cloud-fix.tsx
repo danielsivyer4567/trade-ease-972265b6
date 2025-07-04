@@ -43,7 +43,7 @@ export default function GoogleCloudFixPage() {
             </CardHeader>
             <CardContent>
               <div className="p-3 bg-gray-100 rounded-md font-mono text-sm mb-3">
-                AIzaSyCVHBYlen8sLxyI69WC67znnfi9SU4J0BY
+                AIzaSy... (AIzaSyBFVIiAURNyUiIR_2dRQmud98q9sCn5ONI)
               </div>
               <p className="text-sm text-gray-600">
                 Click on this API key in the credentials list

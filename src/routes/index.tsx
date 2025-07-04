@@ -1,18 +1,16 @@
 import React, { Suspense, lazy } from 'react';
-import { createBrowserRouter, createRoutesFromElements, RouteObject, Outlet, Navigate, Route } from 'react-router-dom';
-import { useAuth } from '@/contexts/AuthContext';
+import { createBrowserRouter, RouteObject } from 'react-router-dom';
 import { LoadingFallback } from './loading-fallback';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { authRoutes } from './auth-routes';
 import { SettingsRoutes } from './settings-routes';
 import { paymentRoutes } from './payment-routes';
-import { financialRoutes } from './financial-routes';
 import { activityRoutes } from './activity-routes';
 import { AppLayoutWithTabs } from '@/components/AppLayoutWithTabs';
 import { apiRoutes } from './api-routes';
 import { AuthDebugger } from '@/components/debug/AuthDebugger';
 
-// Lazy load n8n workflow pages (replacing custom workflow components)
+// Lazy load n8n workflow pages
 const N8nWorkflowPage = lazy(() => import('@/pages/Workflow/n8n-workflow'));
 const N8nWorkflowListPage = lazy(() => import('@/pages/Workflow/n8n-workflow-list'));
 
@@ -99,7 +97,7 @@ const CalculatorsPage = lazy(() => import('@/pages/Calculators'));
 const FormsPage = lazy(() => import('@/pages/Forms'));
 const TasksPage = lazy(() => import('@/pages/Tasks'));
 const AIFeaturesPage = lazy(() => import('@/pages/AIFeatures'));
-const PropertyBoundariesPage = lazy(() => import('@/pages/PropertyBoundaries'));
+// const PropertyBoundariesPage = lazy(() => import('@/pages/PropertyBoundaries'));
 const NetworksPage = lazy(() => import('@/pages/Networks'));
 const CredentialsPage = lazy(() => import('@/pages/Credentials'));
 const JobCostCalculator = lazy(() => import('@/pages/Calculators/JobCostCalculator'));
@@ -107,11 +105,11 @@ const LoadsSpansCalculator = lazy(() => import('@/pages/Calculators/LoadsSpansCa
 const FencingCalculator = lazy(() => import('@/pages/Calculators/FencingCalculator'));
 const MarkupCalculator = lazy(() => import('@/pages/Calculators/MarkupCalculator'));
 const NCCCodesCalculator = lazy(() => import('@/pages/Calculators/NCCCodesCalculator'));
-const ConcreteCalculator = lazy(() => import('@/pages/Calculators/ConcreteCalculator'));
-const ElectricianCalculator = lazy(() => import('@/pages/Calculators/ElectricianCalculator'));
-const PlumbingCalculator = lazy(() => import('@/pages/Calculators/PlumbingCalculator'));
-const PropertyMeasurement = lazy(() => import('@/pages/PropertyMeasurement'));
-const WeatherIntelligencePage = lazy(() => import('@/pages/WeatherIntelligence'));
+
+const TDSCalculator = lazy(() => import('@/pages/Calculators/TDSCalculator'));
+const QBCCFormsCalculator = lazy(() => import('@/pages/Calculators/QBCCFormsCalculator'));
+const FenceCalculatorPage = lazy(() => import('@/pages/Calculators/FenceCalculatorPage'));
+
 
 // Demo pages
 const AnimatedStageDemo = lazy(() => import('@/pages/AnimatedStageDemo'));
@@ -124,7 +122,7 @@ const IntegrationsPage = lazy(() => import('@/pages/Integrations'));
 import SetupDatabasePage from "@/pages/Settings/integrations/database/SetupDatabasePage";
 
 // Helper component for Suspense boundary
-const SuspenseWrapper = ({ children }) => (
+const SuspenseWrapper = ({ children }: { children: React.ReactNode }) => (
   <Suspense fallback={<LoadingFallback />}>{children}</Suspense>
 );
 
@@ -181,8 +179,6 @@ const routeObjects: RouteObject[] = [
           },
           // Payment Routes (spread the children since it's a RouteObject with children)
           ...(paymentRoutes.children || []),
-          // Financial Routes - commented out as it's JSX, not RouteObject
-          // financialRoutes,
           // Activity Routes (spread as a single object in array)
           activityRoutes,
           // Customer routes
@@ -269,16 +265,11 @@ const routeObjects: RouteObject[] = [
           { path: "/calculators/loads-spans", element: <SuspenseWrapper><LoadsSpansCalculator /></SuspenseWrapper> },
           { path: "/calculators/fencing", element: <SuspenseWrapper><FencingCalculator /></SuspenseWrapper> },
           { path: "/calculators/ncc-codes", element: <SuspenseWrapper><NCCCodesCalculator /></SuspenseWrapper> },
-          { path: "/calculators/concrete",
-            children: [
-              { index: true, element: <Navigate to="rect" replace /> },
-              { path: ":tab", element: <SuspenseWrapper><ConcreteCalculator /></SuspenseWrapper> },
-            ]
-          },
-          { path: "/calculators/electrician", element: <SuspenseWrapper><ElectricianCalculator /></SuspenseWrapper> },
-          { path: "/calculators/plumbing", element: <SuspenseWrapper><PlumbingCalculator /></SuspenseWrapper> },
-          { path: "/property-measurement", element: <SuspenseWrapper><PropertyMeasurement /></SuspenseWrapper> },
-          { path: "/weather-intelligence", element: <SuspenseWrapper><WeatherIntelligencePage /></SuspenseWrapper> },
+
+          { path: "/calculators/tds", element: <SuspenseWrapper><TDSCalculator /></SuspenseWrapper> },
+          { path: "/calculators/qbcc-forms", element: <SuspenseWrapper><QBCCFormsCalculator /></SuspenseWrapper> },
+          { path: "/calculators/fence", element: <SuspenseWrapper><FenceCalculatorPage /></SuspenseWrapper> },
+
           { path: "/workflow", element: <SuspenseWrapper><N8nWorkflowListPage /></SuspenseWrapper> },
           { path: "/workflow/new", element: <SuspenseWrapper><N8nWorkflowPage /></SuspenseWrapper> },
           { path: "/workflow/edit/:id", element: <SuspenseWrapper><N8nWorkflowPage /></SuspenseWrapper> },
@@ -289,7 +280,6 @@ const routeObjects: RouteObject[] = [
           { path: "/forms", element: <SuspenseWrapper><FormsPage /></SuspenseWrapper> },
           { path: "/tasks", element: <SuspenseWrapper><TasksPage /></SuspenseWrapper> },
           { path: "/ai-features", element: <SuspenseWrapper><AIFeaturesPage /></SuspenseWrapper> },
-          { path: "/property-boundaries", element: <SuspenseWrapper><PropertyBoundariesPage /></SuspenseWrapper> },
           { path: "/networks", element: <SuspenseWrapper><NetworksPage /></SuspenseWrapper> },
           // Credentials route
           { path: "/credentials", element: <SuspenseWrapper><CredentialsPage /></SuspenseWrapper> },
@@ -321,11 +311,4 @@ const routeObjects: RouteObject[] = [
   },
 ];
 
-// Create the browser router instance
-export function createRouter() {
-  // Using React Router v7.5.3+ which already includes the startTransition optimizations by default
-  return createBrowserRouter(routeObjects);
-}
-
-// Create a singleton instance of the router
-export const router = createRouter();
+export const router = createBrowserRouter(routeObjects);

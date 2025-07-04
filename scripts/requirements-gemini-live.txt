@@ -1,0 +1,23 @@
+# Requirements for Gemini Live API
+# Install with: pip install -r requirements-gemini-live.txt
+
+# Core Gemini API client
+google-genai>=0.1.0
+
+# Audio processing
+pyaudio>=0.2.11
+
+# Video and image processing
+opencv-python>=4.8.0
+pillow>=10.0.0
+
+# Screen capture
+mss>=9.0.0
+
+# For Python < 3.11 compatibility
+taskgroup>=0.2.2 ; python_version < '3.11'
+exceptiongroup>=1.1.0 ; python_version < '3.11'
+
+# Optional but recommended
+numpy>=1.24.0  # For better array handling
+python-dotenv>=1.0.0  # For .env file support 

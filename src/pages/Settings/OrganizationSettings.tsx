@@ -36,7 +36,6 @@ export default function OrganizationSettings() {
   const [isAgencyInvite, setIsAgencyInvite] = useState(false);
   const [hasAccess, setHasAccess] = useState(false);
   const [maxUsers, setMaxUsers] = useState(0);
-
   const [isCreateOrgDialogOpen, setIsCreateOrgDialogOpen] = useState(false);
   const [newOrgName, setNewOrgName] = useState('');
   const [newOrgType, setNewOrgType] = useState('');
@@ -97,283 +96,205 @@ export default function OrganizationSettings() {
     }
   };
 
-  const handleUpgrade = (tier: 'premium' | 'agency') => {
-    // In a real implementation, this would integrate with a payment provider
-    toast({
-      title: 'Upgrade to ' + tier,
-      description: 'Payment integration coming soon. Contact support for manual upgrade.',
-    });
-  };
-
-  if (hasAccess) {
-    // Enable the feature
-  } else {
-    // Show upgrade prompt
-  }
-
   return (
-    <div className="container mx-auto p-6 max-w-6xl">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold">Organization Settings</h1>
-        <p className="text-muted-foreground">Manage your organizations and subscription</p>
-      </div>
-
-      <Tabs defaultValue="organizations" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="organizations">Organizations</TabsTrigger>
-          <TabsTrigger value="subscription">Subscription</TabsTrigger>
-          {subscriptionTier === 'skeleton_key' && (
-            <TabsTrigger value="agency">Client Management</TabsTrigger>
-          )}
-        </TabsList>
-
-        <TabsContent value="organizations" className="space-y-4">
-          {/* Current Organization */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Building2 className="h-5 w-5" />
-                Current Organization
-              </CardTitle>
-              <CardDescription>
-                Manage your current organization settings
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {currentOrganization ? (
-                <>
-                  <div className="grid gap-4 md:grid-cols-2">
-                    <div>
-                      <Label>Organization Name</Label>
-                      <Input 
-                        value={currentOrganization.name} 
-                        disabled 
-                        className="mt-1"
-                      />
-                    </div>
-                    <div>
-                      <Label>Business Type</Label>
-                      <Input 
-                        value={currentOrganization.business_type || 'Not specified'} 
-                        disabled 
-                        className="mt-1"
-                      />
-                    </div>
-                    <div>
-                      <Label>ABN</Label>
-                      <Input 
-                        value={currentOrganization.abn || 'Not provided'} 
-                        disabled 
-                        className="mt-1"
-                      />
-                    </div>
-                    <div>
-                      <Label>Email</Label>
-                      <Input 
-                        value={currentOrganization.email || 'Not provided'} 
-                        disabled 
-                        className="mt-1"
-                      />
-                    </div>
-                  </div>
-                  
-                  <div className="flex gap-2">
-                    <Button 
-                      onClick={() => navigate(`/settings/organization/${currentOrganization.id}/edit`)}
-                    >
-                      <Settings className="h-4 w-4 mr-2" />
-                      Edit Details
-                    </Button>
-                    <Dialog open={isInviteDialogOpen} onOpenChange={setIsInviteDialogOpen}>
-                      <DialogTrigger asChild>
-                        <Button variant="outline">
-                          <Mail className="h-4 w-4 mr-2" />
-                          Invite Members
-                        </Button>
-                      </DialogTrigger>
-                      <DialogContent>
-                        <DialogHeader>
-                          <DialogTitle>Invite to Organization</DialogTitle>
-                          <DialogDescription>
-                            Send an invitation to join {currentOrganization.name}
-                          </DialogDescription>
-                        </DialogHeader>
-                        <div className="space-y-4">
-                          <div>
-                            <Label>Email Address</Label>
-                            <Input
-                              type="email"
-                              placeholder="colleague@example.com"
-                              value={inviteEmail}
-                              onChange={(e) => setInviteEmail(e.target.value)}
-                            />
-                          </div>
-                          <div>
-                            <Label>Role</Label>
-                            <Select value={inviteRole} onValueChange={setInviteRole}>
-                              <SelectTrigger>
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="viewer">Viewer</SelectItem>
-                                <SelectItem value="member">Member</SelectItem>
-                                <SelectItem value="admin">Admin</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </div>
-                          {subscriptionTier === 'skeleton_key' && (
-                            <div className="flex items-center space-x-2">
-                              <input
-                                type="checkbox"
-                                id="agency-invite"
-                                checked={isAgencyInvite}
-                                onChange={(e) => setIsAgencyInvite(e.target.checked)}
-                                className="rounded"
-                              />
-                              <Label htmlFor="agency-invite">
-                                Invite as agency client
-                              </Label>
-                            </div>
-                          )}
-                        </div>
-                        <DialogFooter>
-                          <Button variant="outline" onClick={() => setIsInviteDialogOpen(false)}>
-                            Cancel
-                          </Button>
-                          <Button onClick={handleInvite}>
-                            Send Invitation
-                          </Button>
-                        </DialogFooter>
-                      </DialogContent>
-                    </Dialog>
-                  </div>
-                </>
-              ) : (
-                <p className="text-muted-foreground">No organization selected</p>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* All Organizations */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center justify-between">
-                <span className="flex items-center gap-2">
-                  <Users className="h-5 w-5" />
-                  Your Organizations
-                </span>
-                {canCreateMoreOrganizations && (
-                  <Dialog open={isCreateOrgDialogOpen} onOpenChange={setIsCreateOrgDialogOpen}>
-                    <DialogTrigger asChild>
-                      <Button size="sm">
-                        <Plus className="h-4 w-4 mr-2" />
-                        New Organization
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent>
-                      <DialogHeader>
-                        <DialogTitle>Create New Organization</DialogTitle>
-                        <DialogDescription>
-                          Set up a new organization for your business
-                        </DialogDescription>
-                      </DialogHeader>
-                      <div className="space-y-4">
-                        <div>
-                          <Label>Organization Name</Label>
-                          <Input
-                            placeholder="My Business Name"
-                            value={newOrgName}
-                            onChange={(e) => setNewOrgName(e.target.value)}
-                          />
-                        </div>
-                        <div>
-                          <Label>Business Type</Label>
-                          <Input
-                            placeholder="e.g., Construction, Plumbing, Electrical"
-                            value={newOrgType}
-                            onChange={(e) => setNewOrgType(e.target.value)}
-                          />
-                        </div>
-                      </div>
-                      <DialogFooter>
-                        <Button variant="outline" onClick={() => setIsCreateOrgDialogOpen(false)}>
-                          Cancel
-                        </Button>
-                        <Button onClick={handleCreateOrganization}>
-                          Create Organization
-                        </Button>
-                      </DialogFooter>
-                    </DialogContent>
-                  </Dialog>
-                )}
-              </CardTitle>
-              <CardDescription>
-                Organizations you own or have access to
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                {userOrganizations.map((org) => (
-                  <div
-                    key={org.organization_id}
-                    className="flex items-center justify-between p-3 border rounded-lg"
-                  >
-                    <div className="flex items-center gap-3">
-                      {org.access_type === 'agency' ? (
-                        <Briefcase className="h-5 w-5 text-purple-500" />
-                      ) : (
-                        <Building2 className="h-5 w-5 text-blue-500" />
-                      )}
-                      <div>
-                        <p className="font-medium">{org.organization_name}</p>
-                        <p className="text-sm text-muted-foreground">
-                          {org.access_type === 'agency' ? 'Agency Access' : `Role: ${org.role}`}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      {org.is_current && (
-                        <Badge variant="secondary">Current</Badge>
-                      )}
-                      {!org.is_current && (
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => window.location.reload()}
-                        >
-                          Switch
-                        </Button>
-                      )}
-                    </div>
-                  </div>
-                ))}
+    <div className="min-h-screen w-full bg-gray-50">
+      <Tabs defaultValue="organizations" className="w-full">
+        <div className="fixed top-0 z-50 w-full bg-white/95 backdrop-blur-sm border-b border-gray-200 shadow-sm">
+          <div className="container mx-auto px-4">
+            <div className="flex items-center justify-between h-16">
+              <div className="flex-shrink-0">
+                <Button 
+                  variant="ghost" 
+                  className="text-gray-600 hover:text-gray-900"
+                  onClick={() => navigate('/settings')}
+                >
+                  <Settings className="h-4 w-4 mr-2" />
+                  Back to Settings
+                </Button>
               </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
+              <div className="flex items-center space-x-4">
+                <TabsList className="grid w-full grid-cols-3">
+                  <TabsTrigger value="organizations">Organizations</TabsTrigger>
+                  <TabsTrigger value="subscription">Subscription</TabsTrigger>
+                  <TabsTrigger value="features">Features</TabsTrigger>
+                </TabsList>
+              </div>
+            </div>
+          </div>
+        </div>
 
-        <TabsContent value="subscription" className="space-y-4">
-          <PricingPlans />
-        </TabsContent>
-
-        {subscriptionTier === 'skeleton_key' && (
-          <TabsContent value="agency" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Agency Client Management</CardTitle>
-                <CardDescription>
-                  Manage your client organizations and permissions
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground">
-                  Agency management features coming soon...
-                </p>
-              </CardContent>
-            </Card>
+        <div className="pt-16">
+          <TabsContent value="organizations" className="space-y-6 p-6">
+            {/* Organizations content */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {userOrganizations?.map((org) => (
+                <Card key={org.organization_id} className="relative">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Building2 className="h-5 w-5" />
+                      {org.organization_name}
+                    </CardTitle>
+                    <CardDescription>Organization</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-gray-600">Role:</span>
+                        <Badge variant="outline">{org.role}</Badge>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-gray-600">Type:</span>
+                        <span className="text-sm font-medium">{org.access_type}</span>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+              
+              {canCreateMoreOrganizations && (
+                <Card className="border-dashed border-2 border-gray-300 hover:border-gray-400 transition-colors">
+                  <CardContent className="flex flex-col items-center justify-center h-32">
+                    <Button
+                      variant="ghost"
+                      onClick={() => setIsCreateOrgDialogOpen(true)}
+                      className="flex flex-col items-center gap-2"
+                    >
+                      <Plus className="h-8 w-8 text-gray-400" />
+                      <span className="text-sm text-gray-600">Create Organization</span>
+                    </Button>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
           </TabsContent>
-        )}
+
+          <TabsContent value="subscription" className="space-y-6 p-6">
+            <PricingPlans />
+          </TabsContent>
+
+          <TabsContent value="features" className="space-y-6 p-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Zap className="h-5 w-5 text-yellow-500" />
+                    Automations
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-gray-600 mb-4">
+                    Set up automated workflows and processes
+                  </p>
+                  <Badge variant={hasAccess ? "default" : "secondary"}>
+                    {hasAccess ? "Available" : "Not Available"}
+                  </Badge>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Users className="h-5 w-5 text-blue-500" />
+                    Team Members
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-gray-600 mb-4">
+                    Maximum number of team members
+                  </p>
+                  <Badge variant="outline">{maxUsers} Users</Badge>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+        </div>
       </Tabs>
+
+      {/* Invite Dialog */}
+      <Dialog open={isInviteDialogOpen} onOpenChange={setIsInviteDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Invite to Organization</DialogTitle>
+            <DialogDescription>
+              Send an invitation to join your organization
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="Enter email address"
+                value={inviteEmail}
+                onChange={(e) => setInviteEmail(e.target.value)}
+              />
+            </div>
+            <div>
+              <Label htmlFor="role">Role</Label>
+              <Select value={inviteRole} onValueChange={setInviteRole}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="member">Member</SelectItem>
+                  <SelectItem value="admin">Admin</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsInviteDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleInvite}>Send Invitation</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Create Organization Dialog */}
+      <Dialog open={isCreateOrgDialogOpen} onOpenChange={setIsCreateOrgDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Create Organization</DialogTitle>
+            <DialogDescription>
+              Create a new organization for your business
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="orgName">Organization Name</Label>
+              <Input
+                id="orgName"
+                placeholder="Enter organization name"
+                value={newOrgName}
+                onChange={(e) => setNewOrgName(e.target.value)}
+              />
+            </div>
+            <div>
+              <Label htmlFor="orgType">Business Type</Label>
+              <Select value={newOrgType} onValueChange={setNewOrgType}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select business type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="construction">Construction</SelectItem>
+                  <SelectItem value="landscaping">Landscaping</SelectItem>
+                  <SelectItem value="plumbing">Plumbing</SelectItem>
+                  <SelectItem value="electrical">Electrical</SelectItem>
+                  <SelectItem value="other">Other</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsCreateOrgDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleCreateOrganization}>Create Organization</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 } 

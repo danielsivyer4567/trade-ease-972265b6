@@ -1,3 +1,4 @@
+import React from 'react';
 import { BaseLayout } from "@/components/ui/BaseLayout";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Settings, DollarSign, Receipt, Clock, Users, Shield, FileText, Calendar, List, CreditCard, User, Bot, Briefcase, Network, Mail, FileJson, Building, Share, Zap, Search, Link2, Bell, Globe, FileLock, Brain, Database, MessageSquare, Building2 } from "lucide-react";
@@ -6,10 +7,16 @@ import { useNavigate } from "react-router-dom";
 
 const settingsSections = [
   {
-    title: "Organization & Subscription",
+    title: "Organization Settings",
     icon: Building2,
-    description: "Manage organizations and subscription plan",
+    description: "Manage organizations, members, and roles",
     path: "/settings/organization"
+  },
+  {
+    title: "Trade Ease Plan Details",
+    icon: CreditCard,
+    description: "View and manage your subscription plan",
+    path: "/settings/trade-ease-plan-details"
   },
   {
     title: "Messaging",
@@ -106,12 +113,6 @@ const settingsSections = [
     icon: List,
     description: "Manage product and service prices",
     path: "/settings/price-lists"
-  },
-  {
-    title: "Trade Ease Plan Details",
-    icon: FileText,
-    description: "View and manage your plan",
-    path: "/settings/trade-ease-plan-details"
   },
   {
     title: "Payments",

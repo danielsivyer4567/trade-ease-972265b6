@@ -88,7 +88,11 @@ docker-compose up -d
 
 ## Configuration
 
+<<<<<<< HEAD
 ### Environment VariablesVITE_N8N_URL=http://localhost:5678
+=======
+### Environment Variables
+>>>>>>> 36fe2b8b6a4c5197b88aa6f671b0288a98028ae7
 
 Add the following to your `.env` file:
 ```env

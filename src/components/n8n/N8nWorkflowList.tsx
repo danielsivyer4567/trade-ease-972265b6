@@ -68,7 +68,11 @@ export function N8nWorkflowList({ onSelectWorkflow }: N8nWorkflowListProps) {
   const loadWorkflows = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`${n8nUrl}/rest/workflows`);
+      const response = await fetch(`/api/n8n/workflows`, {
+        headers: {
+          'X-N8N-API-KEY': 'n8n_api_6fe7f406f20166677dc347f597cbebda22a582e9533c4b5540d585720bcd074c8111599077d42b66',
+        }
+      });
       if (response.ok) {
         const workflowsData = await response.json();
         setWorkflows(workflowsData.data || workflowsData);
@@ -86,9 +90,10 @@ export function N8nWorkflowList({ onSelectWorkflow }: N8nWorkflowListProps) {
 
   const createNewWorkflow = async () => {
     try {
-      const response = await fetch(`${n8nUrl}/rest/workflows`, {
+      const response = await fetch(`/api/n8n/workflows`, {
         method: 'POST',
         headers: {
+          'X-N8N-API-KEY': 'n8n_api_6fe7f406f20166677dc347f597cbebda22a582e9533c4b5540d585720bcd074c8111599077d42b66',
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
@@ -116,9 +121,10 @@ export function N8nWorkflowList({ onSelectWorkflow }: N8nWorkflowListProps) {
 
   const duplicateWorkflow = async (workflow: N8nWorkflow) => {
     try {
-      const response = await fetch(`${n8nUrl}/rest/workflows`, {
+      const response = await fetch(`/api/n8n/workflows`, {
         method: 'POST',
         headers: {
+          'X-N8N-API-KEY': 'n8n_api_6fe7f406f20166677dc347f597cbebda22a582e9533c4b5540d585720bcd074c8111599077d42b66',
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
@@ -143,9 +149,10 @@ export function N8nWorkflowList({ onSelectWorkflow }: N8nWorkflowListProps) {
 
   const toggleWorkflowActive = async (workflow: N8nWorkflow) => {
     try {
-      const response = await fetch(`${n8nUrl}/rest/workflows/${workflow.id}`, {
+      const response = await fetch(`/api/n8n/workflows/${workflow.id}`, {
         method: 'PATCH',
         headers: {
+          'X-N8N-API-KEY': 'n8n_api_6fe7f406f20166677dc347f597cbebda22a582e9533c4b5540d585720bcd074c8111599077d42b66',
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
@@ -167,9 +174,10 @@ export function N8nWorkflowList({ onSelectWorkflow }: N8nWorkflowListProps) {
 
   const executeWorkflow = async (workflow: N8nWorkflow) => {
     try {
-      const response = await fetch(`${n8nUrl}/rest/workflows/${workflow.id}/execute`, {
+      const response = await fetch(`/api/n8n/workflows/${workflow.id}/execute`, {
         method: 'POST',
         headers: {
+          'X-N8N-API-KEY': 'n8n_api_6fe7f406f20166677dc347f597cbebda22a582e9533c4b5540d585720bcd074c8111599077d42b66',
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({}),
@@ -190,8 +198,11 @@ export function N8nWorkflowList({ onSelectWorkflow }: N8nWorkflowListProps) {
     if (!selectedWorkflow) return;
 
     try {
-      const response = await fetch(`${n8nUrl}/rest/workflows/${selectedWorkflow.id}`, {
+      const response = await fetch(`/api/n8n/workflows/${selectedWorkflow.id}`, {
         method: 'DELETE',
+        headers: {
+          'X-N8N-API-KEY': 'n8n_api_6fe7f406f20166677dc347f597cbebda22a582e9533c4b5540d585720bcd074c8111599077d42b66',
+        }
       });
 
       if (response.ok) {
@@ -210,7 +221,11 @@ export function N8nWorkflowList({ onSelectWorkflow }: N8nWorkflowListProps) {
 
   const exportWorkflow = async (workflow: N8nWorkflow) => {
     try {
-      const response = await fetch(`${n8nUrl}/rest/workflows/${workflow.id}`);
+      const response = await fetch(`/api/n8n/workflows/${workflow.id}`, {
+        headers: {
+          'X-N8N-API-KEY': 'n8n_api_6fe7f406f20166677dc347f597cbebda22a582e9533c4b5540d585720bcd074c8111599077d42b66',
+        }
+      });
       if (response.ok) {
         const workflowData = await response.json();
         const dataStr = JSON.stringify(workflowData, null, 2);

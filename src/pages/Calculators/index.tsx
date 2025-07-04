@@ -1,7 +1,9 @@
 import React from "react";
 import { AppLayout } from "@/components/ui/AppLayout";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Calculator, Percent, Gauge, Ruler, Construction, Compass, ArrowUpDown, Square, FileCode, FileText, Zap, Droplets } from "lucide-react";
+
+import { Calculator, Percent, Gauge, Ruler, Construction, Compass, ArrowUpDown, Square, FileCode, Hammer, Brush, Home, FileText, FileCheck } from "lucide-react";
+
 import { Link } from "react-router-dom";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 
@@ -577,9 +579,21 @@ const Calculators = () => {
     path: "/calculators/loads-spans"
   }, {
     title: "Concrete Calculator",
-    description: "Calculate concrete volume needed based on area and thickness measurements",
-    icon: <ConcreteIcon />,
+
+    description: "Calculate concrete volume needed for slabs, footings, and columns",
+    icon: <Hammer className="h-6 w-6 text-blue-500" />,
     path: "/calculators/concrete"
+  }, {
+    title: "Angle Calculator",
+    description: "Calculate angles and slopes using various measurement methods",
+    icon: <Compass className="h-6 w-6 text-indigo-500" />,
+    path: "/calculators/loads-spans?tab=degree"
+  }, {
+    title: "Stairs Calculator",
+    description: "Calculate stair dimensions, risers, and treads for building projects",
+    icon: <ArrowUpDown className="h-6 w-6 text-orange-500" />,
+    path: "/calculators/loads-spans?tab=stairs"
+
   }, {
     title: "Fencing Calculator",
     description: "Calculate materials needed for fencing projects including posts, panels, and gates",
@@ -596,85 +610,17 @@ const Calculators = () => {
     ),
     path: "/calculators/ncc-codes"
   }, {
-    title: "Qbcc Forms",
-    description: "Access Queensland Building and Construction Commission forms.",
-    icon: (
-      <div className="relative">
-        <FileText className="h-6 w-6 text-blue-500 animate-pulse" />
-        <div className="absolute -top-1 -right-1 w-2 h-2 bg-blue-400 rounded-full animate-ping"></div>
-      </div>
-    ),
-    path: "/qbcc-forms"
+
+    title: "TDS Reference",
+    description: "Timber Queensland Data Sheets - specifications, grades, and technical data",
+    icon: <FileText className="h-6 w-6 text-green-500" />,
+    path: "/calculators/tds"
   }, {
-    title: "Timber Qld Technical Data Sheet",
-    description: "View technical data sheets from Timber Queensland.",
-    icon: (
-      <div className="relative">
-        <FileText className="h-6 w-6 text-green-700 animate-pulse" />
-        <div className="absolute top-0 right-0 w-1 h-1 bg-green-500 rounded-full animate-bounce"></div>
-      </div>
-    ),
-    path: "/timber-qld-technical-data-sheet"
-  }, {
-    title: "SafeWork NSW",
-    description: "Access SafeWork NSW resources and guidelines.",
-    icon: (
-      <div className="relative">
-        <FileText className="h-6 w-6 text-orange-500 animate-pulse" />
-        <div className="absolute -top-1 -right-1 w-2 h-2 bg-orange-400 rounded-full animate-ping"></div>
-      </div>
-    ),
-    path: "/safework-nsw"
-  }, {
-    title: "Consumer and Business Services",
-    description: "Consumer and Business Services resources.",
-    icon: (
-      <div className="relative">
-        <FileText className="h-6 w-6 text-yellow-600 animate-pulse" />
-        <div className="absolute top-0 right-0 w-1 h-1 bg-yellow-500 rounded-full animate-bounce"></div>
-      </div>
-    ),
-    path: "/consumer-business-services"
-  }, {
-    title: "Building and Energy",
-    description: "Building and Energy compliance and information.",
-    icon: (
-      <div className="relative">
-        <FileText className="h-6 w-6 text-blue-700 animate-pulse" />
-        <div className="absolute -top-1 -right-1 w-2 h-2 bg-blue-600 rounded-full animate-ping"></div>
-      </div>
-    ),
-    path: "/building-and-energy"
-  }, {
-    title: "Building Practitioners Board",
-    description: "Building Practitioners Board resources.",
-    icon: (
-      <div className="relative">
-        <FileText className="h-6 w-6 text-purple-700 animate-pulse" />
-        <div className="absolute top-0 right-0 w-1 h-1 bg-purple-600 rounded-full animate-bounce"></div>
-      </div>
-    ),
-    path: "/building-practitioners-board"
-  }, {
-    title: "Access Canberra (Building and Planning)",
-    description: "Access Canberra Building and Planning resources.",
-    icon: (
-      <div className="relative">
-        <FileText className="h-6 w-6 text-pink-700 animate-pulse" />
-        <div className="absolute -top-1 -right-1 w-2 h-2 bg-pink-600 rounded-full animate-ping"></div>
-      </div>
-    ),
-    path: "/access-canberra-building-planning"
-  }, {
-    title: "Consumer, Building and Occupational Services",
-    description: "Consumer, Building and Occupational Services resources.",
-    icon: (
-      <div className="relative">
-        <FileText className="h-6 w-6 text-gray-700 animate-pulse" />
-        <div className="absolute top-0 right-0 w-1 h-1 bg-gray-600 rounded-full animate-bounce"></div>
-      </div>
-    ),
-    path: "/consumer-building-occupational-services"
+    title: "QBCC Forms Reference",
+    description: "Queensland Building and Construction Commission forms and compliance documents",
+    icon: <FileCheck className="h-6 w-6 text-blue-500" />,
+    path: "/calculators/qbcc-forms"
+
   }];
   
   return (

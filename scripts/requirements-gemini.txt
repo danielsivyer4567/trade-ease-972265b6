@@ -1,0 +1,3 @@
+# Requirements for Gemini API testing
+google-genai>=0.1.0
+asyncio 

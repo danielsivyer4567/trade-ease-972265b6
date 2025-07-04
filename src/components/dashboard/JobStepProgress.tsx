@@ -232,7 +232,7 @@ export const JobStepProgress = () => {
     if (id) {
       const {
         error
-      } = await supabase.from('jobs').update({
+      } = await supabase.from('new_jobs').update({
         job_steps: updatedSteps
       }).eq('id', id);
       if (error) {
