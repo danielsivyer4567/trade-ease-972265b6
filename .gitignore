@@ -70,3 +70,4 @@ apikeys.txt
 # Additional sensitive files
 supabase/.env
 supabase/config.local.toml
+.env
