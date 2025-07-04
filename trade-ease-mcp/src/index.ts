@@ -19,9 +19,16 @@ import {
 } from "@modelcontextprotocol/sdk/types.js";
 import { createClient } from '@supabase/supabase-js';
 
-// Supabase configuration
-const supabaseUrl = process.env.SUPABASE_URL || 'https://wxwbxupdisbofesaygqj.supabase.co';
-const supabaseKey = process.env.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind4d2J4dXBkaXNib2Zlc2F5Z3FqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTAxMTExMTQsImV4cCI6MjA2NTY4NzExNH0.JFDOBBTmzr8xj3NTICBLnztHliD-HbnC7HAswQbLw4E';
+// Supabase configuration - SECURE: No hardcoded credentials
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseKey = process.env.SUPABASE_ANON_KEY;
+
+// Validate required environment variables
+if (!supabaseUrl || !supabaseKey) {
+  console.error('❌ SECURITY: Missing required environment variables');
+  console.error('Please set SUPABASE_URL and SUPABASE_ANON_KEY in your environment');
+  process.exit(1);
+}
 
 const supabase = createClient(supabaseUrl, supabaseKey);
 
