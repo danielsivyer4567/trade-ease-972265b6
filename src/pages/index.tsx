@@ -4,7 +4,7 @@ import UpcomingJobs from "@/components/dashboard/UpcomingJobs";
 import { Card } from "@/components/ui/card";
 import { ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Calendar, MapPin } from "lucide-react";
 import { TeamCalendar } from "@/components/team/TeamCalendar";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { TradeDashboardContent } from "@/components/trade-dashboard/TradeDashboardContent";
@@ -17,16 +17,50 @@ import { DashboardCalendar } from "@/components/dashboard/DashboardCalendar";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import JobMap from "@/components/JobMap";
+import { Job } from "@/types/job";
+import { supabase } from "@/lib/supabase";
 
 export default function DashboardPage() {
   const [calendarDate, setCalendarDate] = useState<Date | undefined>(new Date());
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
+  const [selectedJob, setSelectedJob] = useState<string | null>(null);
+  const [jobs, setJobs] = useState<Job[]>([]);
+
   const [showFullMap, setShowFullMap] = useState(false);
 
   const handleJobClick = (jobName: string) => {
     toast.info(`Navigating to ${jobName}`);
     navigate('/jobs');
   };
+
+  useEffect(() => {
+    const fetchJobs = async () => {
+      console.log("Fetching jobs from supabase...");
+      setLoading(true);
+      try {
+        const { data, error } = await supabase.from('jobs').select('*');
+        console.log("Fetched jobs:", data);
+
+        console.log("Supabase response:", { data, error });
+        if (error) {
+          console.error("Supabase error:", error);
+          toast.error("Failed to fetch jobs");
+        } else {
+          setJobs(data || []);
+          if (data && data.length > 0) {
+            setSelectedJob(data[0].id);
+          }
+        }
+      } catch (err) {
+        console.error("Error in fetchJobs:", err);
+        toast.error("Failed to fetch jobs");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchJobs();
+  }, []);
 
   return (
     <BaseLayout showQuickTabs>
@@ -45,7 +79,36 @@ export default function DashboardPage() {
             </div>
 
             <div className={`transition-all duration-300 ease-in-out ${showFullMap ? 'h-[600px]' : 'h-[400px]'}`}>
-              <JobSiteMap />
+            {loading ? (
+          <div className="h-[200px] flex items-center justify-center">
+            <div className="flex flex-col items-center">
+              <div className="h-8 w-8 border-4 border-t-blue-500 border-r-transparent border-b-transparent border-l-transparent rounded-full animate-spin mb-2"></div>
+              <p className="text-gray-500">Loading jobs data...</p>
+            </div>
+          </div>
+        ) : (
+          <div className="w-full mb-3">
+            <div className="bg-gray-50 p-2 rounded-t-lg border border-gray-200 border-b-0">
+              <div className="flex justify-between items-center">
+                <h2 className="text-sm font-medium flex items-center">
+                  <MapPin className="h-3 w-3 mr-1 text-blue-500" /> 
+                  Job Locations
+                </h2>
+                <div className="text-xs text-gray-500">
+                  {jobs.filter(job => 
+                    (job.location && job.location[0] && job.location[1]) || 
+                    (job.locations && job.locations.length > 0)
+                  ).length} jobs with locations
+                </div>
+              </div>
+            </div>
+            <div className="h-[200px] bg-gray-50 rounded-b-lg border border-gray-200">
+            <JobMap jobs={jobs} />
+
+
+            </div>
+          </div>
+        )}
 
             </div>
 

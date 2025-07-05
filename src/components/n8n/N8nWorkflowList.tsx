@@ -25,6 +25,8 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
+import { AppLayout } from '../ui/AppLayout';
+import { BaseLayout } from '../ui/BaseLayout';
 
 interface N8nWorkflow {
   id: string;
@@ -248,199 +250,203 @@ export function N8nWorkflowList({ onSelectWorkflow }: N8nWorkflowListProps) {
 
   if (loading) {
     return (
+      
       <div className="flex items-center justify-center h-64">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
         <span className="ml-2">Loading workflows...</span>
       </div>
+      
     );
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">n8n Workflows</h1>
-          <p className="text-muted-foreground">
-            Manage your automation workflows powered by n8n
-          </p>
-        </div>
-        <Button onClick={createNewWorkflow} className="flex items-center space-x-2">
-          <Plus className="h-4 w-4" />
-          <span>New Workflow</span>
-        </Button>
-      </div>
-
-      {/* Search and Filters */}
-      <div className="flex items-center space-x-4">
-        <div className="relative flex-1 max-w-sm">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-          <Input
-            placeholder="Search workflows..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-9"
-          />
-        </div>
-        <Button variant="outline" onClick={loadWorkflows}>
-          Refresh
-        </Button>
-      </div>
-
-      {/* Workflows Table */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center space-x-2">
-            <Workflow className="h-5 w-5" />
-            <span>Workflows ({filteredWorkflows.length})</span>
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Nodes</TableHead>
-                <TableHead>Tags</TableHead>
-                <TableHead>Last Updated</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredWorkflows.map((workflow) => (
-                <TableRow key={workflow.id}>
-                  <TableCell>
-                    <div className="flex items-center space-x-3">
-                      <div>
-                        <div className="font-medium">{workflow.name}</div>
-                        <div className="text-sm text-muted-foreground">ID: {workflow.id}</div>
-                      </div>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <Badge 
-                      variant={workflow.active ? "default" : "secondary"}
-                      className="flex items-center space-x-1"
-                    >
-                      {workflow.active ? (
-                        <CheckCircle className="h-3 w-3" />
-                      ) : (
-                        <Pause className="h-3 w-3" />
-                      )}
-                      <span>{workflow.active ? 'Active' : 'Inactive'}</span>
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <span className="text-sm">{workflow.nodes?.length || 0} nodes</span>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex flex-wrap gap-1">
-                      {workflow.tags?.map((tag, index) => (
-                        <Badge key={index} variant="outline" className="text-xs">
-                          {tag}
-                        </Badge>
-                      ))}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center space-x-1 text-sm text-muted-foreground">
-                      <Clock className="h-3 w-3" />
-                      <span>{new Date(workflow.updatedAt).toLocaleDateString()}</span>
-                    </div>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="h-8 w-8 p-0">
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem
-                          onClick={() => navigate(`/workflow/edit/${workflow.id}`)}
-                        >
-                          <Edit className="mr-2 h-4 w-4" />
-                          Edit
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => executeWorkflow(workflow)}>
-                          <Play className="mr-2 h-4 w-4" />
-                          Execute
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => toggleWorkflowActive(workflow)}>
-                          {workflow.active ? (
-                            <Pause className="mr-2 h-4 w-4" />
-                          ) : (
-                            <CheckCircle className="mr-2 h-4 w-4" />
-                          )}
-                          {workflow.active ? 'Deactivate' : 'Activate'}
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => duplicateWorkflow(workflow)}>
-                          <Copy className="mr-2 h-4 w-4" />
-                          Duplicate
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => exportWorkflow(workflow)}>
-                          <Download className="mr-2 h-4 w-4" />
-                          Export
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onClick={() => {
-                            setSelectedWorkflow(workflow);
-                            setIsDeleteDialogOpen(true);
-                          }}
-                          className="text-red-600"
-                        >
-                          <Trash2 className="mr-2 h-4 w-4" />
-                          Delete
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-
-          {filteredWorkflows.length === 0 && (
-            <div className="text-center py-8">
-              <Workflow className="mx-auto h-12 w-12 text-gray-400" />
-              <h3 className="mt-2 text-sm font-medium text-gray-900">No workflows</h3>
-              <p className="mt-1 text-sm text-gray-500">
-                Get started by creating a new workflow.
-              </p>
-              <div className="mt-6">
-                <Button onClick={createNewWorkflow}>
-                  <Plus className="mr-2 h-4 w-4" />
-                  New Workflow
-                </Button>
-              </div>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Delete Confirmation Dialog */}
-      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Delete Workflow</DialogTitle>
-            <DialogDescription>
-              Are you sure you want to delete "{selectedWorkflow?.name}"? This action cannot be undone.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="flex justify-end space-x-2">
-            <Button
-              variant="outline"
-              onClick={() => setIsDeleteDialogOpen(false)}
-            >
-              Cancel
-            </Button>
-            <Button variant="destructive" onClick={deleteWorkflow}>
-              Delete
-            </Button>
+    
+      <div className="w-full min-h-[70vh] p-0 m-0 space-y-8">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4 w-full">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">n8n Workflows</h1>
+            <p className="text-muted-foreground">
+              Manage your automation workflows powered by n8n
+            </p>
           </div>
-        </DialogContent>
-      </Dialog>
-    </div>
+          <Button onClick={createNewWorkflow} className="flex items-center space-x-2 px-6 py-2 text-base font-semibold shadow-md">
+            <Plus className="h-4 w-4" />
+            <span>New Workflow</span>
+          </Button>
+        </div>
+
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 mb-2 w-full">
+          <div className="relative flex-1 max-w-sm">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+            <Input
+              placeholder="Search workflows..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-9"
+            />
+          </div>
+          <Button variant="outline" onClick={loadWorkflows} className="w-full sm:w-auto">
+            Refresh
+          </Button>
+        </div>
+
+        <div className="overflow-x-auto w-full">
+          <div className="rounded-lg shadow-sm bg-white w-full">
+            <Card className="w-full border-none shadow-none bg-transparent">
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2">
+                  <Workflow className="h-5 w-5" />
+                  <span>Workflows ({filteredWorkflows.length})</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Table className="w-full">
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Name</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Nodes</TableHead>
+                      <TableHead>Tags</TableHead>
+                      <TableHead>Last Updated</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredWorkflows.map((workflow) => (
+                      <TableRow key={workflow.id}>
+                        <TableCell>
+                          <div className="flex items-center space-x-3">
+                            <div>
+                              <div className="font-medium">{workflow.name}</div>
+                              <div className="text-sm text-muted-foreground">ID: {workflow.id}</div>
+                            </div>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <Badge 
+                            variant={workflow.active ? "default" : "secondary"}
+                            className="flex items-center space-x-1"
+                          >
+                            {workflow.active ? (
+                              <CheckCircle className="h-3 w-3" />
+                            ) : (
+                              <Pause className="h-3 w-3" />
+                            )}
+                            <span>{workflow.active ? 'Active' : 'Inactive'}</span>
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <span className="text-sm">{workflow.nodes?.length || 0} nodes</span>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex flex-wrap gap-1">
+                            {workflow.tags?.map((tag, index) => (
+                              <Badge key={index} variant="outline" className="text-xs">
+                                {tag}
+                              </Badge>
+                            ))}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center space-x-1 text-sm text-muted-foreground">
+                            <Clock className="h-3 w-3" />
+                            <span>{new Date(workflow.updatedAt).toLocaleDateString()}</span>
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" className="h-8 w-8 p-0">
+                                <MoreHorizontal className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem
+                                onClick={() => navigate(`/workflow/edit/${workflow.id}`)}
+                              >
+                                <Edit className="mr-2 h-4 w-4" />
+                                Edit
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => executeWorkflow(workflow)}>
+                                <Play className="mr-2 h-4 w-4" />
+                                Execute
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => toggleWorkflowActive(workflow)}>
+                                {workflow.active ? (
+                                  <Pause className="mr-2 h-4 w-4" />
+                                ) : (
+                                  <CheckCircle className="mr-2 h-4 w-4" />
+                                )}
+                                {workflow.active ? 'Deactivate' : 'Activate'}
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => duplicateWorkflow(workflow)}>
+                                <Copy className="mr-2 h-4 w-4" />
+                                Duplicate
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => exportWorkflow(workflow)}>
+                                <Download className="mr-2 h-4 w-4" />
+                                Export
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={() => {
+                                  setSelectedWorkflow(workflow);
+                                  setIsDeleteDialogOpen(true);
+                                }}
+                                className="text-red-600"
+                              >
+                                <Trash2 className="mr-2 h-4 w-4" />
+                                Delete
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+
+                {filteredWorkflows.length === 0 && (
+                  <div className="flex flex-col items-center justify-center min-h-[40vh] py-8 w-full">
+                    <Workflow className="mx-auto h-12 w-12 text-gray-400" />
+                    <h3 className="mt-2 text-sm font-medium text-gray-900">No workflows</h3>
+                    <p className="mt-1 text-sm text-gray-500">
+                      Get started by creating a new workflow.
+                    </p>
+                    <div className="mt-6">
+                      <Button onClick={createNewWorkflow} className="px-5 py-2 text-base font-semibold">
+                        <Plus className="mr-2 h-4 w-4" />
+                        New Workflow
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+
+        <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Delete Workflow</DialogTitle>
+              <DialogDescription>
+                Are you sure you want to delete "{selectedWorkflow?.name}"? This action cannot be undone.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="flex justify-end space-x-2">
+              <Button
+                variant="outline"
+                onClick={() => setIsDeleteDialogOpen(false)}
+              >
+                Cancel
+              </Button>
+              <Button variant="destructive" onClick={deleteWorkflow}>
+                Delete
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+      </div>
+    
   );
 } 
