@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -44,13 +43,13 @@ export const FencingReferenceTable: React.FC<FencingReferenceTableProps> = ({
   };
 
   return (
-    <Card>
+    <Card className="bg-slate-300">
       <CardHeader>
-        <CardTitle className="text-xl">Fence Types Reference Calculator</CardTitle>
+        <CardTitle className="text-xl">Fence Types & Materials Calculator</CardTitle>
       </CardHeader>
       <CardContent>
         {/* Simple Calculator Section */}
-        <div className="bg-emerald-50 p-4 rounded-lg mb-4 border border-emerald-200">
+        <div className="bg-slate-300 p-4 rounded-lg mb-4 border border-slate-400">
           <h3 className="text-lg font-semibold mb-4">Quick Calculator</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
             <div>
@@ -87,59 +86,59 @@ export const FencingReferenceTable: React.FC<FencingReferenceTableProps> = ({
           </div>
           <Button 
             onClick={calculateMaterials}
-            className="w-full bg-emerald-500 hover:bg-emerald-600 mb-4"
+            className="w-full bg-blue-500 hover:bg-blue-600 mb-4"
           >
             Calculate Materials
           </Button>
 
           {calculationResult && (
-            <div className="bg-white p-4 rounded-lg border border-gray-200">
+            <div className="bg-slate-300 p-4 rounded-lg border border-slate-400">
               <h4 className="font-medium mb-2">Materials Required for {length}m of {fenceType}</h4>
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
-                <div className="bg-emerald-50 p-2 rounded">
+                <div className="bg-blue-50 p-2 rounded">
                   <div className="text-sm text-gray-600">Posts</div>
                   <div className="font-bold">{calculationResult.posts}</div>
                 </div>
-                <div className="bg-emerald-50 p-2 rounded">
+                <div className="bg-blue-50 p-2 rounded">
                   <div className="text-sm text-gray-600">Panels</div>
                   <div className="font-bold">{calculationResult.panels}</div>
                 </div>
                 {calculationResult.palings !== "-" && (
-                  <div className="bg-emerald-50 p-2 rounded">
+                  <div className="bg-blue-50 p-2 rounded">
                     <div className="text-sm text-gray-600">Palings</div>
                     <div className="font-bold">{calculationResult.palings}</div>
                   </div>
                 )}
-                <div className="bg-emerald-50 p-2 rounded">
+                <div className="bg-blue-50 p-2 rounded">
                   <div className="text-sm text-gray-600">Rails</div>
                   <div className="font-bold">{calculationResult.rails}</div>
                 </div>
-                <div className="bg-emerald-50 p-2 rounded">
+                <div className="bg-blue-50 p-2 rounded">
                   <div className="text-sm text-gray-600">Post Height</div>
                   <div className="font-bold">{calculationResult.postHeight}</div>
                 </div>
                 {calculationResult.nails !== "-" && Number(calculationResult.nails) > 0 && (
-                  <div className="bg-emerald-50 p-2 rounded">
+                  <div className="bg-blue-50 p-2 rounded">
                     <div className="text-sm text-gray-600">Nails</div>
                     <div className="font-bold">{calculationResult.nails}</div>
                   </div>
                 )}
-                <div className="bg-emerald-50 p-2 rounded">
+                <div className="bg-blue-50 p-2 rounded">
                   <div className="text-sm text-gray-600">Screws</div>
                   <div className="font-bold">{calculationResult.screws}</div>
                 </div>
-                <div className="bg-emerald-50 p-2 rounded">
+                <div className="bg-blue-50 p-2 rounded">
                   <div className="text-sm text-gray-600">Rapid Sets</div>
                   <div className="font-bold">{calculationResult.rapidSets}</div>
                 </div>
                 {calculationResult.caps !== "-" && (
-                  <div className="bg-emerald-50 p-2 rounded">
+                  <div className="bg-blue-50 p-2 rounded">
                     <div className="text-sm text-gray-600">Caps</div>
                     <div className="font-bold">{calculationResult.caps}</div>
                   </div>
                 )}
                 {calculationResult.sleepers !== "-" && (
-                  <div className="bg-emerald-50 p-2 rounded">
+                  <div className="bg-blue-50 p-2 rounded">
                     <div className="text-sm text-gray-600">Sleepers</div>
                     <div className="font-bold">{calculationResult.sleepers}</div>
                   </div>

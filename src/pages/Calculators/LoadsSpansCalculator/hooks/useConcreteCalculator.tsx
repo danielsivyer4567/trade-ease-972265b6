@@ -1,5 +1,5 @@
-
 import { useState } from "react";
+import { useCalculationHistory } from "@/hooks/use-calculation-history";
 
 export const useConcreteCalculator = () => {
   const [length, setLength] = useState<number>(0);
@@ -9,6 +9,8 @@ export const useConcreteCalculator = () => {
   const [thicknessUnit, setThicknessUnit] = useState<string>("mm"); // Add thickness unit state
   const [waste, setWaste] = useState<number>(10); // Default 10% waste
   const [calculatedVolume, setCalculatedVolume] = useState<number | null>(null);
+
+  const { addCalculation } = useCalculationHistory();
 
   const calculateConcreteVolume = () => {
     if (!length || !width || !thickness) {
@@ -44,6 +46,25 @@ export const useConcreteCalculator = () => {
     }
 
     setCalculatedVolume(volume);
+
+    // Save calculation to history
+    addCalculation(
+      "Concrete Calculator",
+      {
+        length,
+        width,
+        thickness,
+        unit,
+        thicknessUnit,
+        waste
+      },
+      {
+        volume: Number(volume.toFixed(3)),
+        lengthInMeters: Number(lengthInMeters.toFixed(2)),
+        widthInMeters: Number(widthInMeters.toFixed(2)),
+        thicknessInMeters: Number(thicknessInMeters.toFixed(3))
+      }
+    );
   };
 
   return {

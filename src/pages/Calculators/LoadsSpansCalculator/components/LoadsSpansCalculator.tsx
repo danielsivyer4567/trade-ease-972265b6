@@ -1,10 +1,8 @@
-
 import React, { useState } from "react";
 import { AppLayout } from "@/components/ui/AppLayout";
 import { Link } from "react-router-dom";
 import { ArrowLeft, Ruler } from "lucide-react";
 import { Card } from "@/components/ui/card";
-import { LoadsSpansHeader } from "./LoadsSpansHeader";
 import { LoadsSpansTabs } from "./LoadsSpansTabs";
 import { useIsMobile } from "@/hooks/use-mobile";
 
@@ -20,11 +18,10 @@ const LoadsSpansCalculator = () => {
             <ArrowLeft className="h-6 w-6" />
           </Link>
           <Ruler className="h-8 w-8 text-blue-500" />
-          <h1 className="text-3xl font-bold">Loads & Spans Calculator</h1>
+          <h1 className="text-3xl font-bold">Carpentry Calculators</h1>
         </div>
         
-        <Card className="bg-white p-4 md:p-6 rounded-lg shadow">
-          <LoadsSpansHeader />
+        <Card className="bg-slate-300 p-4 md:p-6 rounded-lg shadow">
           <LoadsSpansTabs activeTab={activeTab} setActiveTab={setActiveTab} />
         </Card>
       </div>

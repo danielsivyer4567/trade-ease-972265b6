@@ -35,8 +35,8 @@ jobs:
     - name: Build
       run: npm run build
       env:
-        VITE_SUPABASE_URL: https://wxwbxupdisbofesaygqj.supabase.co
-        VITE_SUPABASE_ANON_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind4d2J4dXBkaXNib2Zlc2F5Z3FqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDAwMDI0OTgsImV4cCI6MjA1NTU3ODQ5OH0.xhjkVsi9XZMwobUMsdYE0e1FXQeT_uNLaTHquGvRxjI
+        VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+        VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
 
     
 
@@ -63,8 +63,9 @@ jobs:
     - name: Deploy to Vercel
       uses: amondnet/vercel-action@v20
       with:
-        vercel-token: bElR8xmtKfks8JDluBkSjW1E
-        vercel-org-id: trade-ease-972265b6
-        vercel-project-id: prj_g0cKa8iGI0XdJSw2elwuyoll3EoQ
+        vercel-token: ${{ secrets.VERCEL_TOKEN }}
+        zeit-token: ${{ secrets.VERCEL_TOKEN }}
+        vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+        vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
         working-directory: ./
         vercel-args: '--prod' 

@@ -1,95 +1,66 @@
-import { BaseLayout } from '@/components/ui/BaseLayout';
-import JobSiteMap from '@/components/dashboard/JobSiteMap';
-import UpcomingJobs from '@/components/dashboard/UpcomingJobs';
-import { Card } from '@/components/ui/card';
-import { ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Calendar, MapPin } from 'lucide-react';
-import { TeamCalendar } from '@/components/team/TeamCalendar';
-import { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { TradeDashboardContent } from '@/components/trade-dashboard/TradeDashboardContent';
-import { PerformanceSection } from '@/components/dashboard/PerformanceSection';
-import { StatisticsSection } from '@/components/dashboard/StatisticsSection';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Separator } from '@/components/ui/separator';
-import { Calendar as ReactCalendar } from '@/components/ui/calendar';
-import { DashboardCalendar } from '@/components/dashboard/DashboardCalendar';
-import { useNavigate } from 'react-router-dom';
-import { toast } from 'sonner';
-import { GoogleMap, Marker, OverlayView, useLoadScript } from '@react-google-maps/api';
-import { supabase } from '@/integrations/supabase/client';
-import React from 'react';
-import { useRef } from "react";
-
-
-
+import { BaseLayout } from "@/components/ui/BaseLayout";
+import JobSiteMap from "@/components/dashboard/JobSiteMap";
+import UpcomingJobs from "@/components/dashboard/UpcomingJobs";
+import { Card } from "@/components/ui/card";
+import { ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Calendar, MapPin } from "lucide-react";
+import { TeamCalendar } from "@/components/team/TeamCalendar";
+import { useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { TradeDashboardContent } from "@/components/trade-dashboard/TradeDashboardContent";
+import { PerformanceSection } from "@/components/dashboard/PerformanceSection";
+import { StatisticsSection } from "@/components/dashboard/StatisticsSection";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
+import { Calendar as ReactCalendar } from "@/components/ui/calendar";
+import { DashboardCalendar } from "@/components/dashboard/DashboardCalendar";
+import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
+import { Job } from "@/types/job";
+import { supabase } from "@/lib/supabase";
+import JobMap from "@/components/JobMap";
 
 export default function DashboardPage() {
   const [calendarDate, setCalendarDate] = useState<Date | undefined>(new Date());
   const navigate = useNavigate();
+  const [jobs, setJobs] = useState<Job[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedJob, setSelectedJob] = useState<string | null>(null);
   const [showFullMap, setShowFullMap] = useState(false);
-  const [jobs, setJobs] = useState([]);
-  const [selectedJob, setSelectedJob] = useState(null);
-  const mapRef = useRef<google.maps.Map | null>(null);
 
-  const onMapLoad = (map: google.maps.Map) => {
-    mapRef.current = map;
-  };
-  const zoomToLocation = (lat: number, lng: number) => {
-    if (mapRef.current) {
-      mapRef.current.panTo({ lat, lng });
-      mapRef.current.setZoom(18);
-    }
-  };
-  
 
   useEffect(() => {
-    async function fetchJobs() {
-      const { data, error } = await supabase.from('jobs').select('*').limit(100);
+    const fetchJobs = async () => {
+      console.log("Fetching jobs from supabase...");
+      setLoading(true);
+      try {
+        const { data, error } = await supabase.from('jobs').select('*');
+        console.log("Fetched jobs:", data);
 
-      if (error) {
-        console.error('Error fetching jobs:', error);
-      } else {
-        console.log('RAW jobs from Supabase:', data);
-        const cleaned = (data || []).map(job => {
-          const [lng, lat] = job.location;
-          return {
-            ...job,
-            location: [parseFloat(lng), parseFloat(lat)],
-          };
-        });
-
-        console.log('Parsed jobs:', cleaned);
-        setJobs(cleaned);
+        console.log("Supabase response:", { data, error });
+        if (error) {
+          console.error("Supabase error:", error);
+          toast.error("Failed to fetch jobs");
+        } else {
+          setJobs(data || []);
+          if (data && data.length > 0) {
+            setSelectedJob(data[0].id);
+          }
+        }
+      } catch (err) {
+        console.error("Error in fetchJobs:", err);
+        toast.error("Failed to fetch jobs");
+      } finally {
+        setLoading(false);
       }
-    }
-
+    };
     fetchJobs();
   }, []);
 
-  console.log('Sanitized jobs:', jobs);
-
   const handleJobClick = (jobName: string) => {
-    // Since these are mock jobs, we'll navigate to the jobs page with a toast
     toast.info(`Navigating to ${jobName}`);
     navigate('/jobs');
   };
-
-  const { isLoaded, loadError } = useLoadScript({
-    googleMapsApiKey: 'AIzaSyCEZfDx6VHz83XX2tnhGRZl3VGSb9WlY1s',
-  });
-
-  if (loadError) return <div>Error loading maps</div>;
-  if (!isLoaded) return <div>Loading maps...</div>;
-
-  // Only define customIcon after isLoaded is true and window.google is available
-  const customIcon =
-    window.google && window.google.maps
-      ? {
-          url: '/lovable-uploads/34bca7f1-d63b-45a0-b1ca-a562443686ad.png',
-          scaledSize: new window.google.maps.Size(40, 40),
-        }
-      : undefined;
 
   return (
     <BaseLayout showQuickTabs>
@@ -108,52 +79,38 @@ export default function DashboardPage() {
             </div>
 
             <div className={`transition-all duration-300 ease-in-out ${showFullMap ? 'h-[600px]' : 'h-[400px]'}`}>
-              <GoogleMap
-                mapContainerStyle={{ width: '100%', height: '100%' }}
-                center={{ lat: -27.987904, lng: 153.413997 }}
-                zoom={14}
-                onLoad={onMapLoad}
-              >
-                {jobs.map((job, idx) => (
-                  <OverlayView
-                    key={job.id || idx}
-                    position={{ lat: job.location[1], lng: job.location[0] }}
-                    mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}
-                  >
-                    <div
-                      onClick={() => zoomToLocation(job.location[1], job.location[0])}
-                      style={{
-                        cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        backgroundColor: 'rgba(30, 30, 30, 0.5)', // semi-transparent dark
-                        backdropFilter: 'blur(6px)', // blur effect
-                        WebkitBackdropFilter: 'blur(6px)',
-                        color: '#fff',
-                        padding: '6px 14px',
-                        borderRadius: '16px',
-                        fontSize: '13px',
-                        fontWeight: 600,
-                        boxShadow: '0 2px 8px rgba(0,0,0,0.4)',
-                        transform: 'translate(-50%, -130%)',
-                        whiteSpace: 'nowrap',
-                        gap: '8px',
-                        border: '1px solid rgba(255,255,255,0.15)',
-                        minWidth: '125px',
-                      }}
-                    >
-                      <img
-                        src={customIcon.url}
-                        alt="Job Icon"
-                        width={18}
-                        height={18}
-                        style={{ objectFit: 'contain', flexShrink: 0 }}
-                      />
-                      <span>{job.job_number || 'N/A'}</span>
-                    </div>
-                  </OverlayView>
-                ))}
-              </GoogleMap>
+
+            {loading ? (
+          <div className="h-[200px] flex items-center justify-center">
+            <div className="flex flex-col items-center">
+              <div className="h-8 w-8 border-4 border-t-blue-500 border-r-transparent border-b-transparent border-l-transparent rounded-full animate-spin mb-2"></div>
+              <p className="text-gray-500">Loading jobs data...</p>
+            </div>
+          </div>
+        ) : (
+          <div className="w-full mb-3">
+            <div className="bg-gray-50 p-2 rounded-t-lg border border-gray-200 border-b-0">
+              <div className="flex justify-between items-center">
+                <h2 className="text-sm font-medium flex items-center">
+                  <MapPin className="h-3 w-3 mr-1 text-blue-500" /> 
+                  Job Locations
+                </h2>
+                <div className="text-xs text-gray-500">
+                  {jobs.filter(job => 
+                    (job.location && job.location[0] && job.location[1]) || 
+                    (job.locations && job.locations.length > 0)
+                  ).length} jobs with locations
+                </div>
+              </div>
+            </div>
+            <div className="h-[200px] bg-gray-50 rounded-b-lg border border-gray-200">
+            <JobMap jobs={jobs} />
+
+
+            </div>
+          </div>
+        )}
+
             </div>
 
             {/* Welcome message as absolute overlay inside the map */}
@@ -276,7 +233,7 @@ export default function DashboardPage() {
             {/* Staff Calendar */}
             <div className="relative bg-white rounded-lg border shadow-sm overflow-hidden mb-6">
               {/* Replace the existing calendar with our new synchronized DashboardCalendar */}
-              {/* <DashboardCalendar /> */}
+              <DashboardCalendar />
             </div>
 
             {/* Performance Section */}

@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 import { Unit } from "../../hooks/useFencingCalculator";
@@ -21,7 +20,7 @@ export const GateCalculator: React.FC<GateCalculatorProps> = ({ unit }) => {
   } = useGateCalculator();
 
   return (
-    <Card>
+    <Card className="bg-slate-300">
       <CardHeader>
         <CardTitle className="text-xl">Gate Materials Calculator</CardTitle>
       </CardHeader>

@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -39,7 +38,7 @@ export const FencingInputForm: React.FC<FencingInputFormProps> = ({
   calculateFencingMaterials
 }) => {
   return (
-    <Card>
+    <Card className="bg-slate-300">
       <CardHeader>
         <CardTitle className="text-xl">Fence Specifications</CardTitle>
       </CardHeader>
@@ -147,7 +146,7 @@ export const FencingInputForm: React.FC<FencingInputFormProps> = ({
         )}
 
         <Button 
-          className="w-full mt-4 bg-emerald-500 hover:bg-emerald-600" 
+          className="w-full mt-4 bg-blue-500 hover:bg-blue-600" 
           onClick={calculateFencingMaterials}
           disabled={!length || !postSpacing}
         >

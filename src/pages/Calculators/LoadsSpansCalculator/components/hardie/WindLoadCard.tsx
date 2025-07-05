@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -18,7 +17,7 @@ export const WindLoadCard: React.FC<WindLoadCardProps> = ({
   calculateHardieRequirements
 }) => {
   return (
-    <Card>
+    <Card className="bg-slate-300">
       <CardHeader>
         <CardTitle>Wind Load & Calculation</CardTitle>
       </CardHeader>
@@ -26,8 +25,8 @@ export const WindLoadCard: React.FC<WindLoadCardProps> = ({
         <div className="space-y-2">
           <Label htmlFor="wind-load">Wind Load (kPa)</Label>
           <Select value={windLoad} onValueChange={setWindLoad}>
-            <SelectTrigger id="wind-load">
-              <SelectValue placeholder="Select wind load category" />
+            <SelectTrigger id="wind-load" className="text-black">
+              <SelectValue placeholder="Select wind load category" className="text-black" />
             </SelectTrigger>
             <SelectContent>
               {WIND_LOAD_CATEGORIES.map((category) => (
@@ -44,7 +43,7 @@ export const WindLoadCard: React.FC<WindLoadCardProps> = ({
 
         <Button 
           onClick={calculateHardieRequirements} 
-          className="w-full mt-4 bg-amber-500 hover:bg-amber-600"
+          className="w-full mt-4 bg-blue-500 hover:bg-blue-600"
         >
           Calculate Requirements
         </Button>

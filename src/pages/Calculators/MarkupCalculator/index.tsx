@@ -135,7 +135,7 @@ const MarkupCalculator = () => {
           <Link to="/calculators" className="hover:text-blue-500">
             <ArrowLeft className="h-6 w-6" />
           </Link>
-          <Percent className="h-8 w-8 text-green-500" />
+          <Percent className="h-8 w-8 text-blue-500" />
           <h1 className="text-3xl font-bold">Markup Calculator</h1>
         </div>
         
@@ -151,7 +151,7 @@ const MarkupCalculator = () => {
           <TabsContent value="calculator">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               {/* Calculator Input Section */}
-              <Card className="lg:col-span-2">
+              <Card className="lg:col-span-2 bg-slate-300">
                 <CardHeader>
                   <CardTitle>Calculate Price</CardTitle>
                   <CardDescription>
@@ -207,7 +207,7 @@ const MarkupCalculator = () => {
               </Card>
 
               {/* Results Section */}
-              <Card>
+              <Card className="bg-slate-300">
                 <CardHeader>
                   <CardTitle>Results</CardTitle>
                 </CardHeader>
@@ -227,7 +227,7 @@ const MarkupCalculator = () => {
                     
                     <div className="grid grid-cols-2 gap-2">
                       <div className="font-medium">Selling Price:</div>
-                      <div className="font-bold text-green-600">{formatCurrency(sellingPrice)}</div>
+                      <div className="font-bold text-blue-600">{formatCurrency(sellingPrice)}</div>
                     </div>
                     
                     <div className="grid grid-cols-2 gap-2">
@@ -248,7 +248,7 @@ const MarkupCalculator = () => {
                       </div>
                     )}
                     
-                    <Button onClick={handleShareResults} className="w-full">
+                    <Button onClick={handleShareResults} className="w-full bg-blue-500 hover:bg-blue-600">
                       Copy Results
                     </Button>
                   </div>

@@ -24,13 +24,30 @@ tiles
 *.sln
 *.sw?
 
-# Environment variables
+# Environment variables - COMPREHENSIVE PROTECTION
 .env
 .env.local
 .env.*.local
 .env.development
 .env.test
 .env.production
+.env.staging
+.env.n8n
+.env.secrets
+.env.private
+UTF-8
+*.env
+*.env.*
+
+# Database and API credentials
+database.json
+secrets.json
+credentials.json
+config.json
+apikeys.txt
+*.pem
+*.p12
+*.pfx
 
 # Vercel
 .vercel
@@ -41,7 +58,16 @@ tiles
 *.token
 *.secret
 *.key
+*.cert
+*.crt
 
+# Backup files that might contain sensitive data
+*.backup
+*.bak
+*.tmp
+*.temp
 
-.env
+# Additional sensitive files
+supabase/.env
+supabase/config.local.toml
 .env

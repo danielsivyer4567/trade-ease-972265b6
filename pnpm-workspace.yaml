@@ -1,0 +1,14 @@
+ignoredBuiltDependencies:
+  - '@fortawesome/fontawesome-common-types'
+  - '@fortawesome/fontawesome-svg-core'
+  - '@fortawesome/free-solid-svg-icons'
+  - '@scarf/scarf'
+  - cpu-features
+  - ssh2
+
+onlyBuiltDependencies:
+  - '@swc/core'
+  - core-js
+  - esbuild
+  - sharp
+  - sqlite3

@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Card, CardHeader, CardContent, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -40,7 +39,7 @@ export const StairsCalculator: React.FC<StairsCalculatorProps> = ({
 }) => {
   return (
     <>
-      <Card>
+      <Card className="bg-slate-300">
         <CardHeader>
           <CardTitle>Stairs Calculator</CardTitle>
           <CardDescription>
@@ -48,6 +47,14 @@ export const StairsCalculator: React.FC<StairsCalculatorProps> = ({
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
+          <div className="w-full flex justify-center mb-6">
+            <img 
+              src="/lovable-uploads/stairsss.jpg" 
+              alt="Stairs calculation diagram" 
+              className="max-w-full h-auto rounded shadow-md border border-gray-200"
+              style={{ maxHeight: 300 }}
+            />
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="floor-height">Floor to Floor Height (mm)</Label>
@@ -115,7 +122,7 @@ export const StairsCalculator: React.FC<StairsCalculatorProps> = ({
 
           <Button 
             onClick={calculateStairs} 
-            className="w-full mt-4 bg-amber-500 hover:bg-amber-600"
+            className="w-full mt-4 bg-blue-500 hover:bg-blue-600"
           >
             Calculate Stairs
           </Button>
@@ -123,14 +130,14 @@ export const StairsCalculator: React.FC<StairsCalculatorProps> = ({
       </Card>
 
       {stairsResult && (
-        <Card className="mt-6 bg-amber-50 border-amber-200">
+        <Card className="bg-slate-300 mt-6 border-blue-200">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <span>Stairs Calculation Results</span>
               {stairsResult.isCompliant ? (
                 <CheckCircle className="text-green-500 h-5 w-5" />
               ) : (
-                <AlertTriangle className="text-amber-500 h-5 w-5" />
+                <AlertTriangle className="text-blue-500 h-5 w-5" />
               )}
             </CardTitle>
           </CardHeader>
@@ -138,24 +145,24 @@ export const StairsCalculator: React.FC<StairsCalculatorProps> = ({
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div className="p-3 bg-white rounded-lg shadow-sm">
                 <p className="text-xs font-medium text-gray-500">Number of Risers</p>
-                <p className="text-lg font-bold text-amber-600">{stairsResult.numberOfRisers}</p>
+                <p className="text-lg font-bold text-blue-600">{stairsResult.numberOfRisers}</p>
               </div>
               <div className="p-3 bg-white rounded-lg shadow-sm">
                 <p className="text-xs font-medium text-gray-500">Riser Height</p>
-                <p className="text-lg font-bold text-amber-600">{stairsResult.riserHeight.toFixed(1)} mm</p>
+                <p className="text-lg font-bold text-blue-600">{stairsResult.riserHeight.toFixed(1)} mm</p>
               </div>
               <div className="p-3 bg-white rounded-lg shadow-sm">
                 <p className="text-xs font-medium text-gray-500">Tread Depth</p>
-                <p className="text-lg font-bold text-amber-600">{stairsResult.treadDepth.toFixed(1)} mm</p>
+                <p className="text-lg font-bold text-blue-600">{stairsResult.treadDepth.toFixed(1)} mm</p>
               </div>
               <div className="p-3 bg-white rounded-lg shadow-sm">
                 <p className="text-xs font-medium text-gray-500">Stair Angle</p>
-                <p className="text-lg font-bold text-amber-600">{stairsResult.stairAngle.toFixed(1)}°</p>
+                <p className="text-lg font-bold text-blue-600">{stairsResult.stairAngle.toFixed(1)}°</p>
               </div>
             </div>
 
             {stairsResult.complianceNotes.length > 0 && (
-              <Alert className="bg-amber-100 border-amber-300">
+              <Alert className="bg-blue-100 border-blue-300">
                 <AlertTitle>Building Code Compliance Issues</AlertTitle>
                 <AlertDescription>
                   <ul className="list-disc list-inside mt-2 space-y-1">

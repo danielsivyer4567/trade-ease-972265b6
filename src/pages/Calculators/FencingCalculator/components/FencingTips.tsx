@@ -1,10 +1,9 @@
-
 import React from "react";
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 
 export const FencingTips = () => {
   return (
-    <Card>
+    <Card className="bg-slate-300">
       <CardHeader>
         <CardTitle className="text-xl">Fencing Tips</CardTitle>
       </CardHeader>

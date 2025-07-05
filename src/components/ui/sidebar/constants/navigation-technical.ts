@@ -23,7 +23,7 @@ export const technicalNavigation = {
     {
       type: 'link' as const,
       icon: Calculator,
-      label: 'Calculators',
+      label: 'Tricks of the Trade',
       path: '/calculators'
     }
   ] as NavigationItem[],

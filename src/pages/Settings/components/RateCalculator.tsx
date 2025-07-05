@@ -85,7 +85,7 @@ export const RateCalculator = () => {
         </div>
       </div>
 
-      <Card>
+      <Card className="bg-slate-300">
         <CardContent className="pt-6">
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-2">
@@ -100,13 +100,13 @@ export const RateCalculator = () => {
             
             <div className="grid grid-cols-2 gap-2">
               <div className="font-medium">Total:</div>
-              <div className="font-bold text-green-600">{formatCurrency(total)}</div>
+              <div className="font-bold text-blue-600">{formatCurrency(total)}</div>
             </div>
             
             <Button 
               onClick={handleShareResults} 
               disabled={!total}
-              className="w-full mt-4"
+              className="w-full mt-4 bg-blue-500 hover:bg-blue-600"
             >
               Copy Results
             </Button>

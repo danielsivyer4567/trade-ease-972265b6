@@ -9,7 +9,11 @@ import './utils/errorHandler'
 import './utils/startupDiagnostics'
 import '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css'
 
-disableDevToolsOverlay()
+
+// Disable React DevTools overlay to prevent message channel errors
+disableDevToolsOverlay();
+
+// Setup error handling for Vite HMR
 
 if (import.meta.hot) {
   import.meta.hot.on('vite:beforeUpdate', () => {

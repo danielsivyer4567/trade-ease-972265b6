@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 import { Square } from "lucide-react";
@@ -18,87 +17,87 @@ export const FencingResultsCard: React.FC<FencingResultsCardProps> = ({
   gateCount
 }) => {
   return (
-    <Card>
+    <Card className="bg-slate-300">
       <CardHeader>
         <CardTitle className="text-xl">Materials Required</CardTitle>
       </CardHeader>
       <CardContent>
         {result ? (
           <div className="space-y-6">
-            <div className="bg-emerald-50 p-6 rounded-lg border border-emerald-200">
-              <h3 className="text-lg font-medium text-emerald-800 mb-4">Material Summary</h3>
+            <div className="bg-blue-50 p-6 rounded-lg border border-blue-200">
+              <h3 className="text-lg font-medium text-blue-800 mb-4">Material Summary</h3>
               
               <div className="space-y-4">
-                <div className="flex justify-between items-center pb-2 border-b border-emerald-100">
+                <div className="flex justify-between items-center pb-2 border-b border-blue-100">
                   <span className="font-medium">Fence Posts:</span>
-                  <span className="text-lg font-bold text-emerald-700">{result.posts} posts</span>
+                  <span className="text-lg font-bold text-blue-700">{result.posts} posts</span>
                 </div>
                 
-                <div className="flex justify-between items-center pb-2 border-b border-emerald-100">
+                <div className="flex justify-between items-center pb-2 border-b border-blue-100">
                   <span className="font-medium">Fence Panels/Sections:</span>
-                  <span className="text-lg font-bold text-emerald-700">{result.panels} panels</span>
+                  <span className="text-lg font-bold text-blue-700">{result.panels} panels</span>
                 </div>
                 
                 {result.palings !== undefined && result.palings > 0 && (
-                  <div className="flex justify-between items-center pb-2 border-b border-emerald-100">
+                  <div className="flex justify-between items-center pb-2 border-b border-blue-100">
                     <span className="font-medium">Palings (100x16mm):</span>
-                    <span className="text-lg font-bold text-emerald-700">{result.palings} palings</span>
+                    <span className="text-lg font-bold text-blue-700">{result.palings} palings</span>
                   </div>
                 )}
                 
                 {result.totalRails !== undefined && (
-                  <div className="flex justify-between items-center pb-2 border-b border-emerald-100">
+                  <div className="flex justify-between items-center pb-2 border-b border-blue-100">
                     <span className="font-medium">Rails (75x38mm):</span>
-                    <span className="text-lg font-bold text-emerald-700">{result.totalRails} rails</span>
+                    <span className="text-lg font-bold text-blue-700">{result.totalRails} rails</span>
                   </div>
                 )}
                 
                 {result.nails !== undefined && result.nails > 0 && (
-                  <div className="flex justify-between items-center pb-2 border-b border-emerald-100">
+                  <div className="flex justify-between items-center pb-2 border-b border-blue-100">
                     <span className="font-medium">Nails:</span>
-                    <span className="text-lg font-bold text-emerald-700">{result.nails} nails</span>
+                    <span className="text-lg font-bold text-blue-700">{result.nails} nails</span>
                   </div>
                 )}
                 
                 {result.screws !== undefined && (
-                  <div className="flex justify-between items-center pb-2 border-b border-emerald-100">
+                  <div className="flex justify-between items-center pb-2 border-b border-blue-100">
                     <span className="font-medium">Screws:</span>
-                    <span className="text-lg font-bold text-emerald-700">{result.screws} screws</span>
+                    <span className="text-lg font-bold text-blue-700">{result.screws} screws</span>
                   </div>
                 )}
                 
                 {result.rapidSets !== undefined && (
-                  <div className="flex justify-between items-center pb-2 border-b border-emerald-100">
+                  <div className="flex justify-between items-center pb-2 border-b border-blue-100">
                     <span className="font-medium">Rapid Set (30kg):</span>
-                    <span className="text-lg font-bold text-emerald-700">{result.rapidSets} bags</span>
+                    <span className="text-lg font-bold text-blue-700">{result.rapidSets} bags</span>
                   </div>
                 )}
                 
                 {result.caps !== undefined && result.caps > 0 && (
-                  <div className="flex justify-between items-center pb-2 border-b border-emerald-100">
+                  <div className="flex justify-between items-center pb-2 border-b border-blue-100">
                     <span className="font-medium">Caps:</span>
-                    <span className="text-lg font-bold text-emerald-700">{result.caps} caps</span>
+                    <span className="text-lg font-bold text-blue-700">{result.caps} caps</span>
                   </div>
                 )}
                 
                 {result.sleepers !== undefined && result.sleepers > 0 && (
-                  <div className="flex justify-between items-center pb-2 border-b border-emerald-100">
+                  <div className="flex justify-between items-center pb-2 border-b border-blue-100">
                     <span className="font-medium">2.4m Sleepers:</span>
-                    <span className="text-lg font-bold text-emerald-700">{result.sleepers} sleepers</span>
+                    <span className="text-lg font-bold text-blue-700">{result.sleepers} sleepers</span>
                   </div>
                 )}
                 
                 {gateCount > 0 && (
-                  <div className="flex justify-between items-center pb-2 border-b border-emerald-100">
+                  <div className="flex justify-between items-center pb-2 border-b border-blue-100">
                     <span className="font-medium">Gates:</span>
-                    <span className="text-lg font-bold text-emerald-700">{gateCount} gates</span>
+                    <span className="text-lg font-bold text-blue-700">{gateCount} gates</span>
                   </div>
                 )}
                 
                 {result.concreteAmount && (
-                  <div className="flex justify-between items-center pb-2 border-b border-emerald-100">
+                  <div className="flex justify-between items-center pb-2 border-b border-blue-100">
                     <span className="font-medium">Concrete (for post holes):</span>
-                    <span className="text-lg font-bold text-emerald-700">{result.concreteAmount} bags</span>
+                    <span className="text-lg font-bold text-blue-700">{result.concreteAmount} bags</span>
                   </div>
                 )}
               </div>
@@ -124,7 +123,7 @@ export const FencingResultsCard: React.FC<FencingResultsCardProps> = ({
           </div>
         ) : (
           <div className="h-full flex flex-col items-center justify-center text-center p-6">
-            <div className="text-emerald-500 bg-emerald-50 p-3 rounded-full mb-3">
+            <div className="text-blue-500 bg-blue-50 p-3 rounded-full mb-3">
               <Square className="h-6 w-6" />
             </div>
             <h3 className="text-lg font-medium">Enter Fence Specifications</h3>

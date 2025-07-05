@@ -1,6 +1,6 @@
-
 import { useState } from "react";
 import { HARDIE_PRODUCT_TYPES, WIND_LOAD_CATEGORIES } from "../constants";
+import { useCalculationHistory } from "@/hooks/use-calculation-history";
 
 export interface HardieResult {
   fastenerType: string;
@@ -22,6 +22,8 @@ export const useJamesHardieCalculator = () => {
   const [supportSpacing, setSupportSpacing] = useState("450");
   const [windLoad, setWindLoad] = useState(WIND_LOAD_CATEGORIES[0]?.kPa.toString() || "0.5");
   const [hardieResult, setHardieResult] = useState<HardieResult | null>(null);
+
+  const { addCalculation } = useCalculationHistory();
 
   const calculateHardieRequirements = () => {
     // Basic validation
@@ -89,7 +91,7 @@ export const useJamesHardieCalculator = () => {
     }
     
     // Set the result
-    setHardieResult({
+    const calculationResult = {
       fastenerType,
       fastenerSpacing,
       maxSupportSpacing,
@@ -100,7 +102,22 @@ export const useJamesHardieCalculator = () => {
       thermalRValue,
       applicationArea,
       windLoad: windLoadNum.toString()
-    });
+    };
+
+    setHardieResult(calculationResult);
+
+    // Save calculation to history
+    addCalculation(
+      "James Hardie Calculator",
+      {
+        productType,
+        thickness,
+        applicationArea,
+        supportSpacing: spacingNum,
+        windLoad: windLoadNum
+      },
+      calculationResult
+    );
   };
 
   return {

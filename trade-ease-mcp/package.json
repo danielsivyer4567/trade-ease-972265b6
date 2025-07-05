@@ -1,0 +1,30 @@
+{
+  "name": "Trade-ease-mcp",
+  "version": "0.1.0",
+  "description": "A model context proticol server",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "Trade-ease-mcp": "./build/index.js"
+  },
+  "files": [
+    "build"
+  ],
+  "scripts": {
+    "build": "tsc && node -e \"require('fs').chmodSync('build/index.js', '755')\"",
+    "prepare": "npm run build",
+    "watch": "tsc --watch",
+    "inspector": "npx @modelcontextprotocol/inspector build/index.js",
+    "n8n:stop": "node -e \"require('fs').chmodSync('build/index.js', '755')\"",
+    "n8n:restart": "node -e \"require('fs').chmodSync('build/index.js', '755')\"",
+    "n8n:logs": "node -e \"require('fs').chmodSync('build/index.js', '755')\""
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "0.6.0",
+    "@supabase/supabase-js": "^2.50.3"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.24",
+    "typescript": "^5.3.3"
+  }
+}

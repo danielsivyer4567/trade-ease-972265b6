@@ -16,16 +16,16 @@ export const JobsDisplay: React.FC<JobsDisplayProps> = ({
   
   const getColorClass = (color: string) => {
     switch (color) {
-      case 'red': return 'bg-red-500';
-      case 'blue': return 'bg-blue-500';
-      case 'green': return 'bg-green-500';
-      default: return 'bg-gray-500';
+      case 'red': return 'bg-red-500 shadow-sm';
+      case 'blue': return 'bg-blue-500 shadow-sm';
+      case 'green': return 'bg-green-500 shadow-sm';
+      default: return 'bg-slate-500 shadow-sm';
     }
   };
   
   return (
     <>
-      <div className="absolute bottom-6 left-0 right-0 px-1 z-10">
+      <div className="absolute bottom-5 left-0 right-0 px-1 z-10">
         {jobsForDate.slice(0, 2).map((job, idx) => (
           <div 
             key={`${job.id}-${idx}`}
@@ -33,20 +33,20 @@ export const JobsDisplay: React.FC<JobsDisplayProps> = ({
               e.stopPropagation();
               onJobClick(job.id, e);
             }}
-            className={`text-[10px] truncate rounded mb-1 px-1 py-[2px] cursor-pointer hover:opacity-80 ${getColorClass(teamColor)} text-white shadow-sm`}
+            className={`text-[10px] truncate mb-1 px-1 py-[2px] cursor-pointer hover:opacity-80 ${getColorClass(teamColor)} text-white shadow-sm`}
             title={job.title || job.jobNumber}
           >
             {job.title || `Job #${job.jobNumber}`}
           </div>
         ))}
         {jobsForDate.length > 2 && (
-          <div className="text-[10px] text-center text-gray-600 font-semibold">
+          <div className="text-[10px] text-center text-slate-600 font-semibold">
             +{jobsForDate.length - 2} more
           </div>
         )}
       </div>
       
-      <div className="absolute bottom-1 right-1 bg-blue-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-medium shadow-sm">
+      <div className="absolute bottom-1 right-1 bg-blue-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-semibold shadow-lg border-2 border-white">
         {jobsForDate.length}
       </div>
     </>

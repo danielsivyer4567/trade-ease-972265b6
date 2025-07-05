@@ -1,4 +1,3 @@
-
 import { DollarSign, Search, Plus, X } from "lucide-react";
 import SettingsPageTemplate from "./SettingsPageTemplate";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
@@ -157,11 +156,11 @@ export default function TradeRates() {
       <div className="space-y-6">
         <div className="flex justify-between items-center">
           <p className="text-gray-600">Calculate and manage your trade rates for accurate quotes and billing</p>
-          <Button>Save Default Rates</Button>
+          <Button className="bg-blue-500 hover:bg-blue-600">Save Default Rates</Button>
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <Card>
+          <Card className="bg-slate-300">
             <CardHeader>
               <CardTitle>Rate Calculator</CardTitle>
             </CardHeader>
@@ -203,7 +202,7 @@ export default function TradeRates() {
               </div>
               
               {selectedJob && (
-                <div className="mb-4 p-3 bg-gray-50 rounded-md">
+                <div className="mb-4 p-3 bg-slate-200 rounded-md">
                   <div className="flex justify-between items-start">
                     <div>
                       <h3 className="font-medium">{selectedJob.jobNumber} - {selectedJob.title}</h3>
@@ -412,7 +411,7 @@ export default function TradeRates() {
                 {extras.length > 0 && (
                   <div className="mb-4 space-y-2">
                     {extras.map(extra => (
-                      <div key={extra.id} className="flex items-center justify-between bg-gray-50 p-2 rounded">
+                      <div key={extra.id} className="flex items-center justify-between bg-slate-200 p-2 rounded">
                         <span className="flex-1">{extra.name}</span>
                         <span className="font-medium mr-2">${extra.price.toFixed(2)}</span>
                         <Button 
@@ -457,14 +456,14 @@ export default function TradeRates() {
             </CardContent>
             <CardFooter>
               {selectedJob && (
-                <Button className="w-full">
+                <Button className="w-full bg-blue-500 hover:bg-blue-600">
                   Apply Pricing to Job #{selectedJob.jobNumber}
                 </Button>
               )}
             </CardFooter>
           </Card>
           
-          <Card>
+          <Card className="bg-slate-300">
             <CardHeader>
               <CardTitle>Default Rates</CardTitle>
             </CardHeader>
@@ -500,7 +499,7 @@ export default function TradeRates() {
                   <span className="font-medium">10%</span>
                 </div>
               </div>
-              <Button variant="outline" className="mt-4 w-full">Edit Default Rates</Button>
+              <Button variant="outline" className="mt-4 w-full border-blue-500 text-blue-500 hover:bg-blue-50">Edit Default Rates</Button>
             </CardContent>
           </Card>
         </div>

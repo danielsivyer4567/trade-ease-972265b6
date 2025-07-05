@@ -13,13 +13,12 @@ export default defineConfig(({ mode }) => {
       port: 8080,
       host: '0.0.0.0',
       open: true,
-      strictPort: true,
+      strictPort: false,
       hmr: {
         host: 'localhost',
         protocol: 'ws',
         overlay: false,
-        timeout: 5000,
-        clientPort: 8080
+        timeout: 5000
       },
       watch: {
         usePolling: true,

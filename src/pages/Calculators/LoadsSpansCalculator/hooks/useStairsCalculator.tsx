@@ -1,6 +1,6 @@
-
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { useCalculationHistory } from "@/hooks/use-calculation-history";
 
 export interface StairsResult {
   numberOfRisers: number;
@@ -22,6 +22,7 @@ export const useStairsCalculator = () => {
   const [stairsResult, setStairsResult] = useState<StairsResult | null>(null);
   
   const { toast } = useToast();
+  const { addCalculation } = useCalculationHistory();
 
   const calculateStairs = () => {
     if (!floorToFloorHeight || !availableRun || !treadThickness) {
@@ -84,7 +85,7 @@ export const useStairsCalculator = () => {
     }
     
     // Set the result
-    setStairsResult({
+    const calculationResult = {
       numberOfRisers: idealRisers,
       riserHeight: actualRiserHeight,
       treadDepth: treadDepth,
@@ -93,7 +94,22 @@ export const useStairsCalculator = () => {
       headroom: headroom,
       isCompliant: isCompliant,
       complianceNotes: complianceNotes
-    });
+    };
+
+    setStairsResult(calculationResult);
+
+    // Save calculation to history
+    addCalculation(
+      "Stairs Calculator",
+      {
+        floorToFloorHeight: floorHeight,
+        availableRun: run,
+        treadThickness: treadThick,
+        desiredRiserHeight: targetRiserHeight,
+        buildingType: buildingType
+      },
+      calculationResult
+    );
     
     toast({
       title: "Calculation Complete",

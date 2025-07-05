@@ -162,6 +162,7 @@ const NCCCodesCalculator = () => {
           <h1 className="text-3xl font-bold">NCC Codes Reference</h1>
         </div>
 
+
         {error && (
           <Card className="mb-6 border-red-200 bg-red-50">
             <CardContent className="p-4">

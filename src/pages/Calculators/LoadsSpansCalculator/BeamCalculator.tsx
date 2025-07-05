@@ -36,25 +36,38 @@ export const BeamCalculator: React.FC<BeamCalculatorProps> = ({
   calculateStress
 }) => {
   return <>
-      <Card>
+      {/* Beam illustration image above measurements */}
+      <div className="w-full flex justify-center mb-6">
+        <img 
+          src="/lovable-uploads/197b48b6454ca%20(1).png" 
+          alt="Beam illustration" 
+          className="max-w-full h-auto rounded shadow-md border border-gray-200"
+          style={{ maxHeight: 240 }}
+        />
+      </div>
+      <Card className="bg-slate-300">
         <CardHeader>
           <CardTitle>Beam Dimensions</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="beam-width">Beam Width (mm)</Label>
-              <Input id="beam-width" type="number" value={beamWidth} onChange={e => setBeamWidth(e.target.value)} min="50" max="1000" className="bg-slate-400" />
+              <Label htmlFor="beam-height">Beam Height - A (mm)</Label>
+              <Input id="beam-height" type="number" value={beamWidth} onChange={e => setBeamWidth(e.target.value)} min="50" max="1000" />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="beam-depth">Beam Depth (mm)</Label>
-              <Input id="beam-depth" type="number" value={beamDepth} onChange={e => setBeamDepth(e.target.value)} min="50" max="1000" className="bg-slate-400" />
+              <Label htmlFor="span-length">Span Length - B (meters)</Label>
+              <Input id="span-length" type="number" value={span} onChange={e => setSpan(e.target.value)} min="1" max="20" step="0.1" />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="beam-depth">Beam Depth - C (mm)</Label>
+              <Input id="beam-depth" type="number" value={beamDepth} onChange={e => setBeamDepth(e.target.value)} min="50" max="1000" />
             </div>
           </div>
         </CardContent>
       </Card>
 
-      <Card>
+      <Card className="bg-slate-300">
         <CardHeader>
           <CardTitle>Material & Load Properties</CardTitle>
         </CardHeader>
@@ -90,35 +103,35 @@ export const BeamCalculator: React.FC<BeamCalculatorProps> = ({
         </CardContent>
       </Card>
 
-      <Card>
+      <Card className="bg-slate-300">
         <CardHeader>
           <CardTitle>Span Length</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="span-length">Span Length (meters)</Label>
-            <Input id="span-length" type="number" value={span} onChange={e => setSpan(e.target.value)} min="1" max="20" step="0.1" className="bg-slate-400" />
+            <Input id="span-length" type="number" value={span} onChange={e => setSpan(e.target.value)} min="1" max="20" step="0.1" />
           </div>
 
-          <Button onClick={calculateStress} className="w-full mt-4 bg-amber-500 hover:bg-amber-600">
+          <Button onClick={calculateStress} className="w-full mt-4 bg-blue-500 hover:bg-blue-600">
             Calculate
           </Button>
         </CardContent>
       </Card>
 
-      {calculatedResult && <Card className="bg-amber-50 border-amber-200">
+      {calculatedResult && <Card className="bg-slate-300 border-blue-200">
           <CardHeader>
-            <CardTitle className="text-amber-800">Calculation Results</CardTitle>
+            <CardTitle className="text-blue-800">Calculation Results</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="p-4 bg-white rounded-lg shadow-sm">
                 <p className="text-sm font-medium text-gray-500">Maximum Load</p>
-                <p className="text-2xl font-bold text-amber-600">{calculatedResult.maxLoad} kN</p>
+                <p className="text-2xl font-bold text-blue-600">{calculatedResult.maxLoad} kN</p>
               </div>
               <div className="p-4 bg-white rounded-lg shadow-sm">
                 <p className="text-sm font-medium text-gray-500">Safe Working Load</p>
-                <p className="text-2xl font-bold text-green-600">{calculatedResult.safeLoad} kN</p>
+                <p className="text-2xl font-bold text-blue-600">{calculatedResult.safeLoad} kN</p>
               </div>
               <div className="p-4 bg-white rounded-lg shadow-sm">
                 <p className="text-sm font-medium text-gray-500">Deflection</p>

@@ -1,4 +1,3 @@
-
 import React from "react";
 import { AppLayout } from "@/components/ui/AppLayout";
 import { useFencingCalculator } from "./hooks/useFencingCalculator";

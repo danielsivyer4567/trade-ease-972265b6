@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TabContents } from "./TabContents";
@@ -11,12 +10,12 @@ interface LoadsSpansTabsProps {
 export const LoadsSpansTabs = ({ activeTab, setActiveTab }: LoadsSpansTabsProps) => {
   const tabs = [
     { id: "beam", label: "Beam" },
-    { id: "joist", label: "Joist" },
     { id: "rafter", label: "Rafter & Roof" },
     { id: "concrete", label: "Concrete" },
     { id: "squaring", label: "Squaring" },
     { id: "degrees", label: "Degrees" },
     { id: "stairs", label: "Stairs" },
+    { id: "decking", label: "Decking" },
     { id: "hardie", label: "James Hardie" }
   ];
 

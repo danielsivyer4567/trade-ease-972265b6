@@ -1,4 +1,3 @@
-
 import React from "react";
 
 interface GateResultsDisplayProps {
@@ -32,14 +31,14 @@ export const GateResultsDisplay: React.FC<GateResultsDisplayProps> = ({
   };
 
   return (
-    <div className="bg-white p-4 rounded-lg border border-gray-200">
+    <div className="bg-slate-300 p-4 rounded-lg border border-slate-400">
       <h4 className="font-medium mb-2">Materials Required for {gateCount} {gateType}{gateCount > 1 ? 's' : ''}</h4>
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
         {Object.entries(calculationResult).map(([key, value]) => {
           // Only display items with values greater than 0 (except for post height which is a string)
           if (key === 'hardwoodPostHeight' || Number(value) > 0) {
             return (
-              <div key={key} className="bg-emerald-50 p-2 rounded">
+              <div key={key} className="bg-blue-50 p-2 rounded">
                 <div className="text-sm text-gray-600">{materialLabels[key] || key}</div>
                 <div className="font-bold">{value}</div>
               </div>

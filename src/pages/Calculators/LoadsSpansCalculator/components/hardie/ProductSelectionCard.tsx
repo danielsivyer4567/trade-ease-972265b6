@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Card, CardHeader, CardContent, CardTitle, CardDescription } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -22,7 +21,7 @@ export const ProductSelectionCard: React.FC<ProductSelectionCardProps> = ({
   const selectedProduct = HARDIE_PRODUCT_TYPES.find(p => p.name === productType) || HARDIE_PRODUCT_TYPES[0];
   
   return (
-    <Card>
+    <Card className="bg-slate-300">
       <CardHeader>
         <CardTitle>James Hardie Product Selection</CardTitle>
         <CardDescription>
@@ -34,8 +33,8 @@ export const ProductSelectionCard: React.FC<ProductSelectionCardProps> = ({
           <div className="space-y-2">
             <Label htmlFor="product-type">Product Type</Label>
             <Select value={productType} onValueChange={setProductType}>
-              <SelectTrigger id="product-type">
-                <SelectValue placeholder="Select product type" />
+              <SelectTrigger id="product-type" className="text-black">
+                <SelectValue placeholder="Select product type" className="text-black" />
               </SelectTrigger>
               <SelectContent>
                 {HARDIE_PRODUCT_TYPES.map((product) => (
@@ -52,8 +51,8 @@ export const ProductSelectionCard: React.FC<ProductSelectionCardProps> = ({
           <div className="space-y-2">
             <Label htmlFor="thickness">Thickness</Label>
             <Select value={thickness} onValueChange={setThickness}>
-              <SelectTrigger id="thickness">
-                <SelectValue placeholder="Select thickness" />
+              <SelectTrigger id="thickness" className="text-black">
+                <SelectValue placeholder="Select thickness" className="text-black" />
               </SelectTrigger>
               <SelectContent>
                 {HARDIE_THICKNESSES.map((thick) => (
