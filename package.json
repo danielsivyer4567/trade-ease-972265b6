@@ -16,10 +16,11 @@
     "db:setup": "node scripts/db-setup.js",
     "db:reset": "npx supabase db reset",
     "start:with-db": "npm run db:setup && npm run dev",
-    "n8n:start": "npx n8n start",
+    "n8n:start": "cross-env N8N_SKIP_INSTANCE_OWNER_SETUP=true N8N_USER_MANAGEMENT_DISABLED=true N8N_BASIC_AUTH_ACTIVE=false N8N_ENCRYPTION_KEY=n8n-trade-ease-encryption-key-2024 N8N_CORS_ORIGIN=http://localhost:3000,http://localhost:8080,http://localhost:5173 N8N_DATABASE_TYPE=sqlite npx n8n start",
     "n8n:stop": "taskkill /F /IM node.exe",
     "n8n:logs": "echo 'n8n logs are shown in the terminal where n8n is running'",
-    "n8n:restart": "taskkill /F /IM node.exe && npx n8n start"
+    "n8n:restart": "taskkill /F /IM node.exe && npm run n8n:start",
+    "n8n:reset": "powershell -command \"if (Test-Path '$env:USERPROFILE\\.n8n') { Remove-Item -Recurse -Force '$env:USERPROFILE\\.n8n'; Write-Host 'n8n database reset - fresh start ready!' } else { Write-Host 'No n8n data to reset' }\""
   },
   "dependencies": {
     "@hookform/resolvers": "^3.3.4",
@@ -75,7 +76,7 @@
     "leaflet": "^1.9.4",
     "lucide-react": "^0.330.0",
     "mapbox-gl": "^3.1.2",
-    "n8n": "^1.30.0",
+    "n8n": "^0.182.1",
     "n8n-core": "^1.74.3",
     "n8n-editor-ui": "^1.74.3",
     "n8n-workflow": "^1.74.3",
@@ -113,6 +114,7 @@
     "@types/react-dom": "^18.2.19",
     "@vitejs/plugin-react-swc": "^3.5.0",
     "autoprefixer": "^10.4.17",
+    "cross-env": "^7.0.3",
     "eslint": "^8.56.0",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.5",

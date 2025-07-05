@@ -17,10 +17,20 @@ if errorlevel 1 (
 REM Stop any existing n8n container
 echo 🛑 Stopping any existing n8n container...
 docker stop n8n >nul 2>&1
+docker rm n8n >nul 2>&1
 
-REM Start n8n with persistent data
+REM Start n8n with persistent data and proper configuration
 echo ▶️  Starting n8n...
-docker run -d --name n8n -p 5678:5678 -e GENERIC_TIMEZONE="America/New_York" -e TZ="America/New_York" -e N8N_CORS_ORIGIN="http://localhost:3000,http://localhost:8080" -v n8n_data:/home/node/.n8n n8nio/n8n
+docker run -d --name n8n -p 5678:5678 ^
+  -e GENERIC_TIMEZONE="America/New_York" ^
+  -e TZ="America/New_York" ^
+  -e N8N_CORS_ORIGIN="http://localhost:3000,http://localhost:8080,http://localhost:5173" ^
+  -e N8N_SKIP_INSTANCE_OWNER_SETUP=true ^
+  -e N8N_USER_MANAGEMENT_DISABLED=true ^
+  -e N8N_BASIC_AUTH_ACTIVE=false ^
+  -e N8N_ENCRYPTION_KEY="n8n-trade-ease-encryption-key-2024" ^
+  -v n8n_data:/home/node/.n8n ^
+  n8nio/n8n
 
 if errorlevel 1 (
     echo ❌ Failed to start n8n. Check Docker installation and try again.
