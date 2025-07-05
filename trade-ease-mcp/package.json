@@ -14,7 +14,10 @@
     "build": "tsc && node -e \"require('fs').chmodSync('build/index.js', '755')\"",
     "prepare": "npm run build",
     "watch": "tsc --watch",
-    "inspector": "npx @modelcontextprotocol/inspector build/index.js"
+    "inspector": "npx @modelcontextprotocol/inspector build/index.js",
+    "n8n:stop": "node -e \"require('fs').chmodSync('build/index.js', '755')\"",
+    "n8n:restart": "node -e \"require('fs').chmodSync('build/index.js', '755')\"",
+    "n8n:logs": "node -e \"require('fs').chmodSync('build/index.js', '755')\""
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "0.6.0",
