@@ -108,24 +108,7 @@ export const FeatureRequestForm: React.FC<FeatureRequestFormProps> = ({ onReques
     );
   }
 
-  if (!canRequest) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <AlertCircle className="h-5 w-5 text-orange-500" />
-            Feature Requests Not Available
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-muted-foreground">
-            Feature requests are only available for Growing Pain Relief, Premium Edge, and Skeleton Key subscription tiers.
-            Please upgrade your subscription to request new features.
-          </p>
-        </CardContent>
-      </Card>
-    );
-  }
+  // Removed feature request access check - all users now have access
 
   return (
     <Card>

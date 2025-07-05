@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { FeatureRequestService } from '@/services/FeatureRequestService';
+import { supabase } from '@/integrations/supabase/client';
 
 interface FeatureAccess {
   tradeCalculators: boolean;
@@ -15,6 +16,9 @@ interface FeatureAccess {
   featureRequestLimit: number;
   isLoading: boolean;
 }
+
+// Skeleton key user ID
+const SKELETON_KEY_USER_ID = '7463a3ad-5193-4dee-b59f-307a8c1da359';
 
 export const useFeatureAccess = (): FeatureAccess => {
   const [access, setAccess] = useState<FeatureAccess>({
@@ -35,6 +39,30 @@ export const useFeatureAccess = (): FeatureAccess => {
   useEffect(() => {
     const checkFeatureAccess = async () => {
       try {
+        // Check if current user is the skeleton key user
+        const { data: { user } } = await supabase.auth.getUser();
+        const isSkeletonKeyUser = user?.id === SKELETON_KEY_USER_ID;
+
+        if (isSkeletonKeyUser) {
+          // Grant all features to skeleton key user
+          setAccess({
+            tradeCalculators: true,
+            externalCalendarIntegration: true,
+            unlimitedNotificationTexts: true,
+            unlimitedCalendars: true,
+            accountingIntegration: true,
+            businessStructureMap: true,
+            nccVoiceSearch: true,
+            qbccVoiceSearch: true,
+            timberQueenslandVoiceSearch: true,
+            canRequestFeatures: true,
+            featureRequestLimit: -1, // Unlimited
+            isLoading: false
+          });
+          return;
+        }
+
+        // Regular feature access check for non-skeleton key users
         const [
           tradeCalculators,
           externalCalendarIntegration,

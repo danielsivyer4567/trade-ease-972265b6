@@ -222,24 +222,7 @@ export const NCCVoiceSearch: React.FC = () => {
     );
   }
 
-  if (!nccVoiceSearch) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-orange-600">
-            <Mic className="h-5 w-5" />
-            Feature Not Available
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-muted-foreground">
-            NCC Code Search via Voice is only available for Premium Edge and Skeleton Key subscription tiers.
-            Please upgrade your subscription to access this feature.
-          </p>
-        </CardContent>
-      </Card>
-    );
-  }
+  // Removed NCC voice search access check - all users now have access
 
   return (
     <div className="space-y-6">

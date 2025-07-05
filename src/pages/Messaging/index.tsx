@@ -110,33 +110,7 @@ export default function Messaging() {
     );
   }
 
-  if (!userConfig?.messaging_enabled) {
-    return (
-      <AppLayout>
-        <div className="space-y-4">
-          <Card className="overflow-hidden shadow-lg border-0">
-            <CardHeader className="bg-gradient-to-r from-blue-600 to-purple-600 pb-2">
-              <CardTitle className="flex items-center gap-2 text-2xl md:text-3xl text-white">
-                <MessageSquare className="h-5 w-5 text-white" />
-                Messaging CRM
-              </CardTitle>
-              <CardDescription className="py-[8px] text-white/90">
-                Messaging features are not enabled for your account
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="p-6 bg-white">
-              <Button 
-                onClick={() => navigate("/settings")}
-                className="w-full md:w-auto bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium transition-all duration-300 shadow-md hover:shadow-lg"
-              >
-                Enable Messaging Features
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
-      </AppLayout>
-    );
-  }
+  // Removed messaging enabled check - all users now have access to messaging features
   
   return (
     <AppLayout>

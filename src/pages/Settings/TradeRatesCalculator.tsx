@@ -68,48 +68,7 @@ const TradeRatesCalculator = () => {
     );
   }
 
-  if (!tradeCalculators) {
-    return (
-      <AppLayout>
-        <div className="container mx-auto p-4 md:p-6">
-          <div className="flex items-center gap-2 mb-6">
-            <Link to="/settings" className="hover:text-blue-500">
-              <ArrowLeft className="h-6 w-6" />
-            </Link>
-            <Calculator className="h-8 w-8 text-gray-400" />
-            <h1 className="text-3xl font-bold text-gray-400">Trade Rates Calculator</h1>
-          </div>
-          
-          <Card className="max-w-2xl mx-auto">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-orange-600">
-                <Lock className="h-6 w-6" />
-                Feature Not Available
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-start gap-3">
-                <AlertCircle className="h-5 w-5 text-orange-500 mt-0.5" />
-                <div>
-                  <p className="text-muted-foreground mb-4">
-                    Trade-specific calculators and features are only available for Growing Pain Relief, Premium Edge, and Skeleton Key subscription tiers.
-                  </p>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    Upgrade your subscription to access advanced calculation tools, trade-specific formulas, and specialized features for your industry.
-                  </p>
-                  <Button asChild>
-                    <Link to="/settings/my-plan">
-                      View Subscription Plans
-                    </Link>
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </AppLayout>
-    );
-  }
+  // Removed trade calculators access check - all users now have access
 
   return (
     <AppLayout>

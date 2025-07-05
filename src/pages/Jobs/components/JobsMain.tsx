@@ -16,25 +16,8 @@ import JobMap from "@/components/JobMap";
 
 // FeatureAccess component for checking feature access
 function FeatureAccess({ featureKey }) {
-  const [hasAccess, setHasAccess] = useState(null);
-
-  useEffect(() => {
-    async function checkAccess() {
-      const { data, error } = await supabase.rpc('has_feature_access', { feature_key: featureKey });
-      if (error) {
-        console.error('Error checking feature access:', error);
-        setHasAccess(false);
-      } else {
-        setHasAccess(data);
-      }
-    }
-    checkAccess();
-  }, [featureKey]);
-
-  if (hasAccess === null) return <div>Checking feature access...</div>;
-  return hasAccess
-    ? <div>✅ Feature is enabled for you!</div>
-    : <div>❌ Feature is NOT enabled for you.</div>;
+  // Removed feature access check - all users now have access to features
+  return null;
 }
 
 export function JobsMain() {
@@ -279,7 +262,7 @@ export function JobsMain() {
                   <SelectContent>
                     {jobs.map(job => (
                       <SelectItem key={job.id} value={job.id}>
-                        {job.title} ({job.jobNumber})
+                        {job.title} ({job.job_number})
                       </SelectItem>
                     ))}
                   </SelectContent>
