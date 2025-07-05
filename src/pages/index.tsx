@@ -16,6 +16,7 @@ import { Calendar as ReactCalendar } from "@/components/ui/calendar";
 import { DashboardCalendar } from "@/components/dashboard/DashboardCalendar";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import JobMap from "@/components/JobMap";
 
 export default function DashboardPage() {
   const [calendarDate, setCalendarDate] = useState<Date | undefined>(new Date());
@@ -44,7 +45,6 @@ export default function DashboardPage() {
             </div>
 
             <div className={`transition-all duration-300 ease-in-out ${showFullMap ? 'h-[600px]' : 'h-[400px]'}`}>
-
               <JobSiteMap />
 
             </div>

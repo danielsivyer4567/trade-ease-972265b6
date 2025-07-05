@@ -1,6 +1,7 @@
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import { N8nWorkflowEditor } from '@/components/n8n/N8nWorkflowEditor';
+import { AppLayout } from '@/components/ui/AppLayout';
 
 export default function N8nWorkflowPage() {
   const { id } = useParams();
@@ -14,6 +15,7 @@ export default function N8nWorkflowPage() {
   };
 
   return (
+    <AppLayout>
     <div className="h-screen w-full">
       <N8nWorkflowEditor
         workflowId={id}
@@ -23,5 +25,6 @@ export default function N8nWorkflowPage() {
         height="100vh"
       />
     </div>
+    </AppLayout>
   );
 } 

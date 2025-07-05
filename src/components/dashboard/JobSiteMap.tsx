@@ -7,13 +7,9 @@ import { AlertCircle, MapPin, Loader2 } from "lucide-react";
 import type { Job } from "@/types/job";
 import { supabase } from "@/integrations/supabase/client";
 import SharedJobMap from "@/components/shared/SharedJobMap";
-import { useGoogleMapsApiKey } from "@/hooks/useGoogleMapsApiKey";
 import { GoogleMap, Marker, InfoWindow, useLoadScript } from '@react-google-maps/api';
 
-const MinimalMap = ({ jobs }) => {
-  const { isLoaded, loadError } = useLoadScript({
-    googleMapsApiKey: "AIzaSyCEZfDx6VHz83XX2tnhGRZl3VGSb9WlY1s",
-  });
+const MinimalMap = ({ jobs, isLoaded, loadError }) => {
   const [selectedJob, setSelectedJob] = useState(null);
 
   if (loadError) return <div>Error loading maps</div>;
@@ -29,7 +25,7 @@ const MinimalMap = ({ jobs }) => {
 
   return (
     <GoogleMap
-      mapContainerStyle={{ width: "100%", height: "100%" }}
+      mapContainerStyle={{ width: "100%", height: "400px" }}
       center={center}
       zoom={14}
     >
@@ -41,19 +37,86 @@ const MinimalMap = ({ jobs }) => {
               lat: Number(job.location[1]),
               lng: Number(job.location[0])
             }}
-            title={job.title || `Job ${idx + 1}`}
+            title={job.title || job.job_number || `Job ${idx + 1}`}
+            onClick={() => setSelectedJob(job)}
           />
         ) : null
       )}
+      <Marker position={{ lat: -27.8822506, lng: 153.2835595 }} title="Test Marker" />
       {selectedJob && Array.isArray(selectedJob.location) && selectedJob.location.length === 2 && (
         <InfoWindow
           position={{ lat: selectedJob.location[1], lng: selectedJob.location[0] }}
           onCloseClick={() => setSelectedJob(null)}
         >
-          <div>
-            <h3 className="font-semibold">{selectedJob.title || 'Job'}</h3>
-            <p>{selectedJob.customer}</p>
-            <p className="text-xs text-gray-500">{selectedJob.date}</p>
+          <div className="p-2 max-w-xs">
+            <div className="space-y-2">
+              <div className="border-b pb-2">
+                <h3 className="font-bold text-lg text-blue-600">{selectedJob.title || 'Job'}</h3>
+                <p className="text-sm text-gray-600">Job #{selectedJob.job_number}</p>
+              </div>
+              
+              <div>
+                <p className="font-semibold text-gray-800">{selectedJob.customer}</p>
+                {selectedJob.address && (
+                  <p className="text-sm text-gray-600">{selectedJob.address}</p>
+                )}
+                {selectedJob.city && selectedJob.state && (
+                  <p className="text-sm text-gray-600">{selectedJob.city}, {selectedJob.state} {selectedJob.zipCode}</p>
+                )}
+              </div>
+              
+              <div className="flex items-center gap-2">
+                <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                  selectedJob.status === 'ready' ? 'bg-yellow-100 text-yellow-800' :
+                  selectedJob.status === 'in-progress' ? 'bg-blue-100 text-blue-800' :
+                  selectedJob.status === 'completed' ? 'bg-green-100 text-green-800' :
+                  selectedJob.status === 'invoiced' ? 'bg-purple-100 text-purple-800' :
+                  'bg-gray-100 text-gray-800'
+                }`}>
+                  {selectedJob.status?.replace('-', ' ').toUpperCase()}
+                </span>
+                <span className="text-xs text-gray-500">{selectedJob.type}</span>
+              </div>
+              
+              {selectedJob.date && (
+                <div className="text-sm text-gray-600">
+                  <span className="font-medium">Date:</span> {selectedJob.date}
+                </div>
+              )}
+              
+              {selectedJob.description && (
+                <div className="text-sm text-gray-700">
+                  <span className="font-medium">Description:</span> {selectedJob.description}
+                </div>
+              )}
+              
+              {selectedJob.assignedTeam && (
+                <div className="text-sm text-gray-600">
+                  <span className="font-medium">Team:</span> {selectedJob.assignedTeam}
+                </div>
+              )}
+              
+              {selectedJob.job_steps && selectedJob.job_steps.length > 0 && (
+                <div className="text-sm">
+                  <span className="font-medium">Steps:</span>
+                  <div className="mt-1 space-y-1">
+                    {selectedJob.job_steps.slice(0, 3).map((step, index) => (
+                      <div key={index} className="flex items-center gap-2">
+                        <div className={`w-2 h-2 rounded-full ${
+                          step.isCompleted ? 'bg-green-500' : 'bg-gray-300'
+                        }`}></div>
+                        <span className={step.isCompleted ? 'line-through text-gray-500' : 'text-gray-700'}>
+                          {step.title}
+                        </span>
+                      </div>
+                    ))}
+                    {selectedJob.job_steps.length > 3 && (
+                      <p className="text-xs text-gray-500">+{selectedJob.job_steps.length - 3} more steps</p>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </InfoWindow>
       )}
@@ -69,8 +132,14 @@ const JobSiteMap = () => {
   const [debugInfo, setDebugInfo] = useState<any>({});
   const [showFullMap, setShowFullMap] = useState(false);
   
-  // Get Google Maps API key status
-  const { apiKey, isLoading: isApiKeyLoading, error: apiKeyError } = useGoogleMapsApiKey();
+  // Hardcoded Google Maps API key
+  const apiKey = "AIzaSyCEZfDx6VHz83XX2tnhGRZl3VGSb9WlY1s";
+  const isApiKeyLoading = false;
+  const apiKeyError = null;
+
+  const { isLoaded, loadError } = useLoadScript({
+    googleMapsApiKey: "AIzaSyCEZfDx6VHz83XX2tnhGRZl3VGSb9WlY1s",
+  });
 
   // Fetch jobs data
   useEffect(() => {
@@ -253,7 +322,7 @@ const JobSiteMap = () => {
       )}
       
       <div style={{ height: "400px", width: "100%" }}>
-        <MinimalMap jobs={jobs} />
+        <MinimalMap jobs={jobs} isLoaded={isLoaded} loadError={loadError} />
       </div>
 
       <pre>{JSON.stringify(jobs, null, 2)}</pre>
