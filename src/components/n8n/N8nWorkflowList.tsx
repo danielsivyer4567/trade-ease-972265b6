@@ -256,6 +256,7 @@ export function N8nWorkflowList({ onSelectWorkflow }: N8nWorkflowListProps) {
   }
 
   return (
+    
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">

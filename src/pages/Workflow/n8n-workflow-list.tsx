@@ -1,5 +1,7 @@
 import React from 'react';
 import { N8nWorkflowList } from '@/components/n8n/N8nWorkflowList';
+import { BaseLayout } from '@/components/ui/BaseLayout';
+import { AppLayout } from '@/components/ui/AppLayout';
 
 export default function N8nWorkflowListPage() {
   const handleSelectWorkflow = (workflow: any) => {
@@ -7,8 +9,8 @@ export default function N8nWorkflowListPage() {
   };
 
   return (
-    <div className="container mx-auto py-6">
+    <AppLayout showQuickTabs>
       <N8nWorkflowList onSelectWorkflow={handleSelectWorkflow} />
-    </div>
+    </AppLayout>
   );
 } 
