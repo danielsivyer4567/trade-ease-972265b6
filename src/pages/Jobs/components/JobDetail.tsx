@@ -27,7 +27,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { JobDocumentation } from "./form-sections/JobDocumentation";
+import JobDocumentation from "../JobDocumentation";
 import { useFileUpload } from "./document-approval/hooks/useFileUpload";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useNavigate } from 'react-router-dom';
@@ -873,8 +873,8 @@ export const JobDetail = ({ job }: JobDetailProps) => {
         {/* Map/Location header section with updated map data handling */}
         <div className="relative h-64 bg-gray-300">
           <div className="absolute inset-0">
-          {job.location && Array.isArray(job.location) && job.location.length === 2 && (
-  <JobStreetView location={job.location} height="350px" className="mt-4 rounded-xl" />
+          {job.address && (
+  <JobStreetView address={job.address} className="mt-4 rounded-xl" />
 )}
 
           </div>
@@ -2178,12 +2178,8 @@ export const JobDetail = ({ job }: JobDetailProps) => {
 
           <TabsContent value="documentation" className="p-4">
             <JobDocumentation
-              documents={documentationFiles}
-              setDocuments={setDocumentationFiles}
-              notes={documentationNotes}
-              setNotes={handleDocumentationNotesChange}
-              onFileUpload={handleDocumentationFileUpload}
-              isUploading={isUploading}
+              jobId={job.id}
+              jobDetails={job}
             />
           </TabsContent>
         </Tabs>
