@@ -839,7 +839,7 @@ const Calculators = () => {
               </CardHeader>
               <CardFooter className="bg-slate-200 p-4">
                 <Link 
-                  to="/calculators/ai-swms" 
+                  to="/calculators/ai-swms-creator" 
                   className="w-full bg-blue-600 text-white py-2 rounded-md text-center hover:bg-blue-700 transition-colors"
                 >
                   Open Tool

@@ -110,6 +110,7 @@ const TDSCalculator = lazy(() => import('@/pages/Calculators/TDSCalculator'));
 const QBCCFormsCalculator = lazy(() => import('@/pages/Calculators/QBCCFormsCalculator'));
 const FenceCalculatorPage = lazy(() => import('@/pages/Calculators/FenceCalculatorPage'));
 const AISWMSCreator = lazy(() => import('@/pages/Calculators/AISWMSCreator'));
+const AISWMSCreatorPage = lazy(() => import('@/pages/Calculators/AISWMSCreator/index'));
 
 
 // Demo pages
@@ -270,6 +271,7 @@ const routeObjects: RouteObject[] = [
           { path: "/calculators/tds", element: <SuspenseWrapper><TDSCalculator /></SuspenseWrapper> },
           { path: "/calculators/qbcc-forms", element: <SuspenseWrapper><QBCCFormsCalculator /></SuspenseWrapper> },
           { path: "/calculators/fence", element: <SuspenseWrapper><FenceCalculatorPage /></SuspenseWrapper> },
+          { path: "/calculators/ai-swms-creator", element: <SuspenseWrapper><AISWMSCreatorPage /></SuspenseWrapper> },
           { path: "/calculators/ai-swms", element: <SuspenseWrapper><AISWMSCreator /></SuspenseWrapper> },
 
           { path: "/workflow", element: <SuspenseWrapper><N8nWorkflowListPage /></SuspenseWrapper> },
