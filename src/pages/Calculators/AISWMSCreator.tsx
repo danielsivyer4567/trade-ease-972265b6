@@ -27,6 +27,19 @@ const AISWMSCreator = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedSWMS, setGeneratedSWMS] = useState('');
   const [dataAutoPopulated, setDataAutoPopulated] = useState(false);
+  const [businessDetails, setBusinessDetails] = useState({
+    businessName: 'Trade Ease Construction',
+    abn: '12 345 678 901',
+    contactPerson: 'John Smith',
+    email: 'john@tradease.com.au',
+    phone: '(02) 1234 5678',
+    licenseNumber: 'LIC123456789',
+    logo: null,
+    workCoverPolicy: null,
+    publicLiabilityPolicy: null,
+    useLogoEverytime: true,
+    useCredentialsEverytime: true
+  });
 
   // Read URL parameters and populate form fields
   useEffect(() => {
@@ -56,6 +69,18 @@ const AISWMSCreator = () => {
       }
       
       setDataAutoPopulated(true);
+    }
+
+    // Read business details from localStorage
+    try {
+      const storedBusinessDetails = localStorage.getItem('swms_business_details');
+      if (storedBusinessDetails) {
+        const parsedDetails = JSON.parse(storedBusinessDetails);
+        setBusinessDetails(parsedDetails);
+        console.log('Loaded business details from localStorage:', parsedDetails);
+      }
+    } catch (error) {
+      console.error('Error reading business details from localStorage:', error);
     }
   }, []);
 
@@ -111,6 +136,15 @@ const AISWMSCreator = () => {
     }, 2000);
   };
 
+  // Function to generate logo HTML
+  const generateLogoHtml = () => {
+    if (businessDetails.logo && businessDetails.logo.data) {
+      return `<img src="${businessDetails.logo.data}" alt="Company Logo" style="width: 100%; height: 100%; object-fit: contain;" />`;
+    } else {
+      return `TRADE EASE<br>LOGO<br>HERE`;
+    }
+  };
+
   const generateProfessionalSWMS = () => {
     const currentDate = new Date().toLocaleDateString('en-AU');
     const nextReviewDate = new Date(Date.now() + 6 * 30 * 24 * 60 * 60 * 1000).toLocaleDateString('en-AU'); // 6 months from now
@@ -125,8 +159,12 @@ const AISWMSCreator = () => {
     body { font-family: Arial, sans-serif; margin: 20px; font-size: 12px; }
     .header { display: flex; justify-content: space-between; align-items: center; border: 2px solid #000; padding: 10px; margin-bottom: 20px; }
     .logo { width: 120px; height: 80px; background: #FFB800; border: 1px solid #000; display: flex; align-items: center; justify-content: center; font-weight: bold; color: #000; }
+    .logo img { max-width: 100%; max-height: 100%; object-fit: contain; }
     .title { flex: 1; text-align: center; }
     .title h1 { margin: 0; font-size: 24px; font-weight: bold; }
+    .date-created { background: #FFD700; border: 2px solid #000; padding: 8px; text-align: center; font-weight: bold; font-size: 14px; margin-bottom: 15px; }
+    .date-created .date-label { color: #000; }
+    .date-created .date-value { color: #000; font-size: 16px; }
     .title p { margin: 5px 0; font-style: italic; }
     .contact { text-align: right; font-size: 10px; }
     .contact a { color: blue; }
@@ -176,20 +214,23 @@ const AISWMSCreator = () => {
 <!-- PAGE 1: Project Details -->
 <div class="header">
   <div class="logo">
-    TRADE EASE<br>
-    LOGO<br>
-    HERE
+    ${generateLogoHtml()}
   </div>
   <div class="title">
     <h1>Safe Work Method Statement Template</h1>
     <p>A template to use when creating Safe Work Method Statements in your workplace</p>
   </div>
   <div class="contact">
-    <strong>Trade Ease Construction</strong><br>
-    <a href="mailto:info@tradeeaseapp.com">info@tradeeaseapp.com</a><br>
-    <strong>Phone:</strong> 1300 TRADE EASE<br>
-    <strong>ABN:</strong> 12 345 678 901
+    <strong>${businessDetails.businessName}</strong><br>
+    <a href="mailto:${businessDetails.email}">${businessDetails.email}</a><br>
+    <strong>Phone:</strong> ${businessDetails.phone}<br>
+    <strong>ABN:</strong> ${businessDetails.abn}
   </div>
+</div>
+
+<div class="date-created">
+  <span class="date-label">DATE CREATED:</span> 
+  <span class="date-value">${currentDate}</span>
 </div>
 
 <div class="section-header">Project Details</div>
@@ -302,20 +343,23 @@ const AISWMSCreator = () => {
 <!-- PAGE 2: Risk Assessment Matrix -->
 <div class="header">
   <div class="logo">
-    TRADE EASE<br>
-    LOGO<br>
-    HERE
+    ${generateLogoHtml()}
   </div>
   <div class="title">
     <h1>Safe Work Method Statement Template</h1>
     <p>A template to use when creating Safe Work Method Statements in your workplace</p>
   </div>
   <div class="contact">
-    <strong>Trade Ease Construction</strong><br>
-    <a href="mailto:info@tradeeaseapp.com">info@tradeeaseapp.com</a><br>
-    <strong>Phone:</strong> 1300 TRADE EASE<br>
-    <strong>ABN:</strong> 12 345 678 901
+    <strong>${businessDetails.businessName}</strong><br>
+    <a href="mailto:${businessDetails.email}">${businessDetails.email}</a><br>
+    <strong>Phone:</strong> ${businessDetails.phone}<br>
+    <strong>ABN:</strong> ${businessDetails.abn}
   </div>
+</div>
+
+<div class="date-created">
+  <span class="date-label">DATE CREATED:</span> 
+  <span class="date-value">${currentDate}</span>
 </div>
 
 <div class="section-header">Risk Assessment</div>
@@ -389,20 +433,23 @@ const AISWMSCreator = () => {
 <!-- PAGE 3: Risk Actions & Hierarchy -->
 <div class="header">
   <div class="logo">
-    TRADE EASE<br>
-    LOGO<br>
-    HERE
+    ${generateLogoHtml()}
   </div>
   <div class="title">
     <h1>Safe Work Method Statement Template</h1>
     <p>A template to use when creating Safe Work Method Statements in your workplace</p>
   </div>
   <div class="contact">
-    <strong>Trade Ease Construction</strong><br>
-    <a href="mailto:info@tradeeaseapp.com">info@tradeeaseapp.com</a><br>
-    <strong>Phone:</strong> 1300 TRADE EASE<br>
-    <strong>ABN:</strong> 12 345 678 901
+    <strong>${businessDetails.businessName}</strong><br>
+    <a href="mailto:${businessDetails.email}">${businessDetails.email}</a><br>
+    <strong>Phone:</strong> ${businessDetails.phone}<br>
+    <strong>ABN:</strong> ${businessDetails.abn}
   </div>
+</div>
+
+<div class="date-created">
+  <span class="date-label">DATE CREATED:</span> 
+  <span class="date-value">${currentDate}</span>
 </div>
 
 <div class="risk-actions">
@@ -474,20 +521,23 @@ const AISWMSCreator = () => {
 <!-- PAGE 4: SWMS Table -->
 <div class="header">
   <div class="logo">
-    TRADE EASE<br>
-    LOGO<br>
-    HERE
+    ${generateLogoHtml()}
   </div>
   <div class="title">
     <h1>Safe Work Method Statement Template</h1>
     <p>A template to use when creating Safe Work Method Statements in your workplace</p>
   </div>
   <div class="contact">
-    <strong>Trade Ease Construction</strong><br>
-    <a href="mailto:info@tradeeaseapp.com">info@tradeeaseapp.com</a><br>
-    <strong>Phone:</strong> 1300 TRADE EASE<br>
-    <strong>ABN:</strong> 12 345 678 901
+    <strong>${businessDetails.businessName}</strong><br>
+    <a href="mailto:${businessDetails.email}">${businessDetails.email}</a><br>
+    <strong>Phone:</strong> ${businessDetails.phone}<br>
+    <strong>ABN:</strong> ${businessDetails.abn}
   </div>
+</div>
+
+<div class="date-created">
+  <span class="date-label">DATE CREATED:</span> 
+  <span class="date-value">${currentDate}</span>
 </div>
 
 <div class="section-header">Safe Work Method Statement</div>
@@ -515,20 +565,23 @@ const AISWMSCreator = () => {
 
 <div class="header">
   <div class="logo">
-    TRADE EASE<br>
-    LOGO<br>
-    HERE
+    ${generateLogoHtml()}
   </div>
   <div class="title">
     <h1>Safe Work Method Statement Template</h1>
     <p>A template to use when creating Safe Work Method Statements in your workplace</p>
   </div>
   <div class="contact">
-    <strong>Trade Ease Construction</strong><br>
-    <a href="mailto:info@tradeeaseapp.com">info@tradeeaseapp.com</a><br>
-    <strong>Phone:</strong> 1300 TRADE EASE<br>
-    <strong>ABN:</strong> 12 345 678 901
+    <strong>${businessDetails.businessName}</strong><br>
+    <a href="mailto:${businessDetails.email}">${businessDetails.email}</a><br>
+    <strong>Phone:</strong> ${businessDetails.phone}<br>
+    <strong>ABN:</strong> ${businessDetails.abn}
   </div>
+</div>
+
+<div class="date-created">
+  <span class="date-label">DATE CREATED:</span> 
+  <span class="date-value">${currentDate}</span>
 </div>
 
 <div class="section-header">Document Information & Approval</div>
@@ -803,35 +856,104 @@ const AISWMSCreator = () => {
 
   return (
     <AppLayout>
-      <div className="container mx-auto py-6 px-4 max-w-6xl">
-        <div className="mb-8">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="p-2 bg-orange-100 rounded-lg">
-              <Shield className="h-6 w-6 text-orange-600" />
-            </div>
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">AI SWMS Creator</h1>
-              <p className="text-gray-600">Generate Safe Work Method Statements using AI</p>
+      {/* Blue Gradient Header with Animated Text and Helmet */}
+      <div className="bg-gradient-to-r from-blue-600 via-blue-700 to-purple-700 text-white relative overflow-hidden">
+        {/* Animated Background Dots */}
+        <div className="absolute inset-0 opacity-30">
+          <div className="absolute top-4 left-8 w-2 h-2 bg-white rounded-full animate-pulse"></div>
+          <div className="absolute top-12 right-12 w-3 h-3 bg-white rounded-full animate-pulse" style={{animationDelay: '0.5s'}}></div>
+          <div className="absolute bottom-8 left-16 w-2 h-2 bg-white rounded-full animate-pulse" style={{animationDelay: '1s'}}></div>
+          <div className="absolute bottom-16 right-8 w-2 h-2 bg-white rounded-full animate-pulse" style={{animationDelay: '1.5s'}}></div>
+          <div className="absolute top-1/2 left-1/4 w-1 h-1 bg-white rounded-full animate-pulse" style={{animationDelay: '2s'}}></div>
+          <div className="absolute top-1/3 right-1/3 w-1 h-1 bg-white rounded-full animate-pulse" style={{animationDelay: '2.5s'}}></div>
+        </div>
+        
+        <div className="container mx-auto px-4 py-12">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-6">
+              {/* Black CFMEU Construction Helmet */}
+              <div className="relative">
+                <svg
+                  width="120"
+                  height="120"
+                  viewBox="0 0 48 48"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="relative drop-shadow-lg"
+                >
+                  {/* Helmet brim/visor */}
+                  <ellipse cx="24" cy="36" rx="20" ry="4" fill="#000" stroke="#333" strokeWidth="1"/>
+                  
+                  {/* Main helmet shell */}
+                  <path
+                    d="M6 36c0-10 8-18 18-18s18 8 18 18"
+                    fill="#000"
+                    stroke="#333"
+                    strokeWidth="2"
+                  />
+                  
+                  {/* Front sun visor */}
+                  <ellipse cx="24" cy="37" rx="14" ry="2" fill="#000" stroke="#333" strokeWidth="1"/>
+                  <ellipse cx="24" cy="38" rx="12" ry="1.5" fill="#111" stroke="#333" strokeWidth="1"/>
+                  
+                  {/* Helmet ridges */}
+                  <path d="M8 32c0-8.8 7.2-16 16-16s16 7.2 16 16" fill="none" stroke="#333" strokeWidth="1.5"/>
+                  <path d="M10 30c0-7.7 6.3-14 14-14s14 6.3 14 14" fill="none" stroke="#444" strokeWidth="1"/>
+                  
+                  {/* Side adjustment knobs */}
+                  <circle cx="10" cy="31" r="2" fill="#444"/>
+                  <circle cx="38" cy="31" r="2" fill="#444"/>
+                  
+                  {/* CFMEU Text */}
+                  <text x="24" y="24" fontSize="6" fill="#FFF" textAnchor="middle" fontWeight="bold" fontFamily="Arial, sans-serif">CFMEU</text>
+                  <text x="24" y="30" fontSize="3" fill="#FFF" textAnchor="middle" fontFamily="Arial, sans-serif">CONSTRUCTION</text>
+                  
+                  {/* Union logo areas */}
+                  <circle cx="14" cy="28" r="3" fill="#C41E3A" stroke="#FFF" strokeWidth="0.5"/>
+                  <text x="14" y="29" fontSize="2" fill="#FFF" textAnchor="middle" fontWeight="bold">CFMEU</text>
+                  
+                  <circle cx="34" cy="28" r="3" fill="#C41E3A" stroke="#FFF" strokeWidth="0.5"/>
+                  <text x="34" y="29" fontSize="2" fill="#FFF" textAnchor="middle" fontWeight="bold">CFMEU</text>
+                </svg>
+              </div>
+              
+              {/* Animated Title */}
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-4xl font-bold">AI SWMS Generator</span>
+                  <div className="text-green-400 animate-pulse">
+                    <CheckCircle className="h-8 w-8" />
+                  </div>
+                </div>
+                <p className="text-xl text-blue-100">Professional Safe Work Method Statement Creation</p>
+              </div>
             </div>
           </div>
-          
-          <Alert className="mb-6">
-            <Brain className="h-4 w-4" />
-            <AlertDescription>
-              This AI-powered tool generates SWMS documents based on your project details and identified hazards. 
-              Always have generated documents reviewed by a qualified safety professional before use.
+        </div>
+      </div>
+      
+      {/* Legal Requirement Notice */}
+      <div className="bg-blue-50 border-l-4 border-blue-400 p-4 mb-6">
+        <div className="flex items-center">
+          <AlertTriangle className="h-5 w-5 text-blue-400 mr-3" />
+          <div>
+            <p className="text-sm font-medium text-blue-800">
+              <strong>Legal Requirement:</strong> Safe Work Method Statements (SWMS) are mandatory for high-risk construction work under Australian WHS legislation. 
+              Our AI-powered system ensures compliance while saving hours of manual documentation.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div className="container mx-auto py-6 px-4 max-w-6xl">
+        {dataAutoPopulated && (
+          <Alert className="mb-6 bg-green-50 border-green-200">
+            <CheckCircle className="h-4 w-4 text-green-600" />
+            <AlertDescription className="text-green-800">
+              Project details have been automatically populated from your job selection. You can modify any fields as needed.
             </AlertDescription>
           </Alert>
-          
-          {dataAutoPopulated && (
-            <Alert className="mb-6 bg-green-50 border-green-200">
-              <CheckCircle className="h-4 w-4 text-green-600" />
-              <AlertDescription className="text-green-800">
-                Project details have been automatically populated from your job selection. You can modify any fields as needed.
-              </AlertDescription>
-            </Alert>
-          )}
-        </div>
+        )}
 
         <Tabs defaultValue="input" className="w-full">
           <TabsList className="grid w-full grid-cols-3">

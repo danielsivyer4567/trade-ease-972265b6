@@ -17,19 +17,19 @@ export const SafetyDocumentsManager = () => {
       </CardHeader>
       <CardContent>
         <div className="space-y-2 mb-4">
-            <h3 className="text-lg font-semibold mb-2 text-slate-600">Available Documents</h3>
-            {mockDocuments.map((doc) => (
+          <h3 className="text-lg font-semibold mb-2 text-slate-600">Available Documents</h3>
+          {mockDocuments.map((doc) => (
             <div 
               key={doc.id} 
               className="p-3 border border-slate-300 rounded bg-white shadow-xs cursor-grab active:cursor-grabbing hover:shadow-md hover:bg-blue-50 transition-all"
             >
-                <p className="font-medium text-slate-800">{doc.name}</p>
-                <div className="flex justify-between text-sm text-slate-500 mt-1">
+              <p className="font-medium text-slate-800">{doc.name}</p>
+              <div className="flex justify-between text-sm text-slate-500 mt-1">
                 <span>Type: {doc.type} | Ver: {doc.version}</span>
                 <span>Date: {doc.date}</span>
-                </div>
+              </div>
             </div>
-            ))}
+          ))}
         </div>
 
         {/* Placeholder for document upload section - styled */}

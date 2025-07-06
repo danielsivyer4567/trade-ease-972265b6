@@ -52,8 +52,10 @@ export function NavItem({
   const handleClick = (e: React.MouseEvent) => {
     console.log('NavItem clicked:', path, displayText);
     
+    // Always prevent default link behavior to avoid page reload
+    e.preventDefault();
+    
     if (disabled) {
-      e.preventDefault();
       return;
     }
     

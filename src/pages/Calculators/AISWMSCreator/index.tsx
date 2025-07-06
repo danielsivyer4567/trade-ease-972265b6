@@ -1,12 +1,14 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { AppLayout } from '@/components/ui/AppLayout';
+import { toast } from '@/hooks/use-toast';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
-import { Shield, AlertTriangle, FileText, Brain, Zap, CheckCircle, Plus, X, Download, Search, Building, Users, Clock, Eye, QrCode, FileCheck, Lightbulb, ArrowRight, Check, HardHat, Clipboard, FileSignature, Cpu, Award, BookOpen, Smartphone, Upload, Image, ShieldCheck, CreditCard, Settings } from 'lucide-react';
+import { Shield, AlertTriangle, FileText, Brain, Zap, CheckCircle, Plus, X, Download, Search, Building, Users, Clock, Eye, QrCode, FileCheck, Lightbulb, ArrowRight, Check, HardHat, Clipboard, FileSignature, Cpu, Award, BookOpen, Smartphone, Upload, Image, ShieldCheck, CreditCard, Settings, ArrowLeft } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -236,7 +238,12 @@ const RealisticAIBrainIcon = () => (
 );
 
 const AISWMSCreatorPage = () => {
+  const navigate = useNavigate();
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const logoInputRef = useRef<HTMLInputElement>(null);
+  const workCoverInputRef = useRef<HTMLInputElement>(null);
+  const liabilityInputRef = useRef<HTMLInputElement>(null);
+  
   const [businessDetails, setBusinessDetails] = useState({
     businessName: 'Trade Ease Construction',
     abn: '12 345 678 901',
@@ -253,20 +260,81 @@ const AISWMSCreatorPage = () => {
 
   // File upload handlers
   const handleFileUpload = (fileType, file) => {
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setBusinessDetails(prev => ({
-          ...prev,
-          [fileType]: {
-            name: file.name,
-            size: file.size,
-            type: file.type,
-            data: e.target.result
-          }
-        }));
-      };
-      reader.readAsDataURL(file);
+    if (!file) return;
+
+    console.log('File upload triggered:', fileType, file.name);
+
+    // Validate file type for logo
+    if (fileType === 'logo') {
+      if (!file.type.startsWith('image/')) {
+        toast({
+          title: "Invalid file type",
+          description: "Please select an image file (PNG, JPG, SVG, etc.)",
+          variant: "destructive",
+        });
+        return;
+      }
+    }
+
+    // Validate file size (2MB limit)
+    if (file.size > 2 * 1024 * 1024) {
+      toast({
+        title: "File too large", 
+        description: "File size must be less than 2MB",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      setBusinessDetails(prev => ({
+        ...prev,
+        [fileType]: {
+          name: file.name,
+          size: file.size,
+          type: file.type,
+          data: e.target.result
+        }
+      }));
+      
+      toast({
+        title: "File uploaded successfully",
+        description: `${file.name} has been uploaded`,
+      });
+    };
+    
+    reader.onerror = () => {
+      toast({
+        title: "Upload failed",
+        description: "There was an error reading the file",
+        variant: "destructive",
+      });
+    };
+    
+    reader.readAsDataURL(file);
+  };
+
+  // Handle file input button clicks
+  const handleLogoButtonClick = () => {
+    console.log('Logo button clicked');
+    if (logoInputRef.current) {
+      logoInputRef.current.value = ''; // Reset input to allow re-uploading same file
+      logoInputRef.current.click();
+    }
+  };
+
+  const handleWorkCoverButtonClick = () => {
+    if (workCoverInputRef.current) {
+      workCoverInputRef.current.value = '';
+      workCoverInputRef.current.click();
+    }
+  };
+
+  const handleLiabilityButtonClick = () => {
+    if (liabilityInputRef.current) {
+      liabilityInputRef.current.value = '';
+      liabilityInputRef.current.click();
     }
   };
 
@@ -365,6 +433,9 @@ const AISWMSCreatorPage = () => {
   );
 
   const proceedToSWMSGeneration = () => {
+    // Store business details (including logo) in localStorage
+    localStorage.setItem('swms_business_details', JSON.stringify(businessDetails));
+    
     // Navigate to the actual SWMS generation page with project details
     const params = new URLSearchParams({
       projectName: projectDetails.projectName,
@@ -374,364 +445,384 @@ const AISWMSCreatorPage = () => {
       tradeType: projectDetails.tradeType,
       supervisor: projectDetails.supervisor,
       projectDate: projectDetails.projectDate,
-      businessName: businessDetails.businessName,
-      abn: businessDetails.abn,
-      contactPerson: businessDetails.contactPerson,
-      email: businessDetails.email,
-      phone: businessDetails.phone
+      estimatedDuration: projectDetails.estimatedDuration,
+      crewSize: projectDetails.crewSize,
+      description: projectDetails.description
     });
-    window.location.href = `/calculators/ai-swms?${params.toString()}`;
+    
+    window.location.href = `/calculators/ai-swms-generator?${params.toString()}`;
   };
 
   // Glowing Card wrapper component
   const GlowingCard = ({ children, className = "", ...props }) => {
     return (
-      <div className="relative">
-        {isDarkMode && (
-          <GlowingEffect
-            disabled={false}
-            proximity={100}
-            spread={30}
-            blur={1}
-            borderWidth={2}
-            movementDuration={1.5}
-          />
-        )}
-        <Card 
-          className={`${className} ${isDarkMode ? 'dark:bg-gray-900/50 dark:border-gray-800' : ''} hover:shadow-md transition-shadow`} 
-          {...props}
-        >
-          {children}
-        </Card>
-      </div>
+      <Card className={`transition-all duration-300 hover:shadow-lg hover:shadow-blue-200/50 dark:hover:shadow-blue-900/20 ${className}`} {...props}>
+        {children}
+      </Card>
     );
   };
 
   return (
     <AppLayout>
-      <div className="container mx-auto py-6 px-4 space-y-6">
-        {/* Header Section */}
-        <div className="mb-8">
-          <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-6 rounded-lg mb-6 relative overflow-hidden">
-            <div className="absolute inset-0 opacity-10">
-              <div className="absolute inset-0" style={{
-                backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)',
-                backgroundSize: '20px 20px'
-              }}></div>
-            </div>
-            <div className="flex items-center gap-4 relative z-10">
+      <div className="space-y-6">
+        {/* Back Button */}
+        <div className="pt-4">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => navigate('/credentials')}
+            className="flex items-center gap-2 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back to Credentials
+          </Button>
+        </div>
+        
+        {/* Beautiful Header Section with Blue Gradient and Animated Dots */}
+        <div className="relative overflow-hidden bg-gradient-to-r from-blue-600 via-blue-700 to-purple-700 text-white p-4 rounded-lg shadow-2xl">
+        {/* Animated Background Dots */}
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute w-4 h-4 bg-white/20 rounded-full animate-pulse top-2 left-6"></div>
+          <div className="absolute w-3 h-3 bg-white/30 rounded-full animate-pulse top-6 right-12" style={{animationDelay: '0.5s'}}></div>
+          <div className="absolute w-2 h-2 bg-white/25 rounded-full animate-pulse bottom-4 left-8" style={{animationDelay: '1s'}}></div>
+          <div className="absolute w-5 h-5 bg-white/15 rounded-full animate-pulse top-8 right-24" style={{animationDelay: '1.5s'}}></div>
+          <div className="absolute w-3 h-3 bg-white/20 rounded-full animate-pulse bottom-6 right-6" style={{animationDelay: '2s'}}></div>
+          <div className="absolute w-4 h-4 bg-white/35 rounded-full animate-pulse top-4 left-1/2" style={{animationDelay: '2.5s'}}></div>
+        </div>
+        
+        {/* Content */}
+        <div className="relative z-10">
+          <div className="flex items-center mb-3">
+            <div className="mr-4" style={{filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.3))'}}>
               <RealisticSafetyHelmetIcon />
-              <div>
-                <h1 className="text-3xl font-bold text-white flex items-center gap-2">
-                  <AnimatedHeaderWithCheck />
-                </h1>
-                <BlurText 
-                  text="Professional Safe Work Method Statement Creation" 
-                  className="text-blue-100 text-lg" 
-                  delay={100}
-                  animateBy="words"
-                  direction="top"
-                />
-              </div>
+            </div>
+            <div className="text-left">
+              <AnimatedHeaderWithCheck />
+              <p className="text-lg text-white/90 mt-1 font-medium">
+                Professional Safe Work Method Statement Creation
+              </p>
             </div>
           </div>
           
-          <Alert className="mb-6 border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-900/20">
-            <AlertTriangle className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-            <AlertDescription className="text-blue-800 dark:text-blue-300">
-              <strong>Legal Requirement:</strong> Safe Work Method Statements (SWMS) are mandatory for high-risk construction work under Australian WHS legislation. 
-              Our AI-powered system ensures compliance while saving hours of manual documentation.
-            </AlertDescription>
-          </Alert>
+          {/* Legal Requirement Notice */}
+          <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 border border-white/20">
+            <div className="flex items-center mb-1">
+              <AlertTriangle className="h-4 w-4 text-yellow-300 mr-2" />
+              <span className="font-semibold text-yellow-100 text-sm">Legal Requirement Notice</span>
+            </div>
+            <p className="text-xs text-white/90 leading-relaxed">
+              Under Australian Work Health and Safety (WHS) legislation, a Safe Work Method Statement (SWMS) is mandatory for high-risk construction work. 
+              This document must be prepared before work begins and requires consultation with workers and their representatives.
+            </p>
+          </div>
         </div>
+      </div>
 
-        <div className="grid lg:grid-cols-3 gap-6">
-          {/* Left Column - Business Details & Job Selection */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Business Details */}
-            <GlowingCard>
-              <CardHeader className="bg-slate-200 dark:bg-slate-800">
-                <CardTitle className="flex items-center gap-2">
-                  <RealisticConstructionSiteIcon />
-                  Business Details
-                </CardTitle>
-                <CardDescription>
-                  Your business information will be automatically included in all SWMS documents
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                {/* Basic Business Information */}
-                <div className="space-y-4">
-                  <h4 className="font-medium text-sm text-gray-700 dark:text-gray-300 uppercase tracking-wide">Basic Information</h4>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="businessName">Business Name</Label>
-                      <Input
-                        id="businessName"
-                        value={businessDetails.businessName}
-                        onChange={(e) => updateBusinessDetails({...businessDetails, businessName: e.target.value})}
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="abn">ABN</Label>
-                      <Input
-                        id="abn"
-                        value={businessDetails.abn}
-                        onChange={(e) => updateBusinessDetails({...businessDetails, abn: e.target.value})}
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="licenseNumber">License Number</Label>
-                      <Input
-                        id="licenseNumber"
-                        value={businessDetails.licenseNumber}
-                        onChange={(e) => updateBusinessDetails({...businessDetails, licenseNumber: e.target.value})}
-                        placeholder="e.g., LIC123456789"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="contactPerson">Contact Person</Label>
-                      <Input
-                        id="contactPerson"
-                        value={businessDetails.contactPerson}
-                        onChange={(e) => updateBusinessDetails({...businessDetails, contactPerson: e.target.value})}
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="email">Email</Label>
-                      <Input
-                        id="email"
-                        type="email"
-                        value={businessDetails.email}
-                        onChange={(e) => updateBusinessDetails({...businessDetails, email: e.target.value})}
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="phone">Phone</Label>
-                      <Input
-                        id="phone"
-                        value={businessDetails.phone}
-                        onChange={(e) => updateBusinessDetails({...businessDetails, phone: e.target.value})}
-                      />
-                    </div>
+      <div className="grid lg:grid-cols-3 gap-6">
+        {/* Left Column - Business Details & Job Selection */}
+        <div className="lg:col-span-2 space-y-6">
+          {/* Business Details */}
+          <GlowingCard>
+            <CardHeader className="bg-slate-200 dark:bg-slate-800">
+              <CardTitle className="flex items-center gap-2">
+                <RealisticConstructionSiteIcon />
+                Business Details
+              </CardTitle>
+              <CardDescription>
+                Your business information will be automatically included in all SWMS documents
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {/* Basic Business Information */}
+              <div className="space-y-4">
+                <h4 className="font-medium text-sm text-gray-700 dark:text-gray-300 uppercase tracking-wide">Basic Information</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="businessName">Business Name</Label>
+                    <Input
+                      id="businessName"
+                      value={businessDetails.businessName}
+                      onChange={(e) => updateBusinessDetails({...businessDetails, businessName: e.target.value})}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="abn">ABN</Label>
+                    <Input
+                      id="abn"
+                      value={businessDetails.abn}
+                      onChange={(e) => updateBusinessDetails({...businessDetails, abn: e.target.value})}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="licenseNumber">License Number</Label>
+                    <Input
+                      id="licenseNumber"
+                      value={businessDetails.licenseNumber}
+                      onChange={(e) => updateBusinessDetails({...businessDetails, licenseNumber: e.target.value})}
+                      placeholder="e.g., LIC123456789"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="contactPerson">Contact Person</Label>
+                    <Input
+                      id="contactPerson"
+                      value={businessDetails.contactPerson}
+                      onChange={(e) => updateBusinessDetails({...businessDetails, contactPerson: e.target.value})}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="email">Email</Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      value={businessDetails.email}
+                      onChange={(e) => updateBusinessDetails({...businessDetails, email: e.target.value})}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="phone">Phone</Label>
+                    <Input
+                      id="phone"
+                      value={businessDetails.phone}
+                      onChange={(e) => updateBusinessDetails({...businessDetails, phone: e.target.value})}
+                    />
                   </div>
                 </div>
+              </div>
 
-                <Separator />
+              <Separator />
 
-                {/* Company Logo Upload */}
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <h4 className="font-medium text-sm text-gray-700 dark:text-gray-300 uppercase tracking-wide">Company Logo</h4>
-                    <div className="flex items-center space-x-2">
-                      <input
-                        type="checkbox"
-                        id="useLogoEverytime"
-                        checked={businessDetails.useLogoEverytime}
-                        onChange={(e) => updateBusinessDetails({...businessDetails, useLogoEverytime: e.target.checked})}
-                        className="rounded"
-                      />
-                      <Label htmlFor="useLogoEverytime" className="text-sm">Use in all SWMS documents</Label>
-                    </div>
+              {/* Company Logo Upload */}
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <h4 className="font-medium text-sm text-gray-700 dark:text-gray-300 uppercase tracking-wide">Company Logo</h4>
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      id="useLogoEverytime"
+                      checked={businessDetails.useLogoEverytime}
+                      onChange={(e) => updateBusinessDetails({...businessDetails, useLogoEverytime: e.target.checked})}
+                      className="rounded"
+                    />
+                    <Label htmlFor="useLogoEverytime" className="text-sm">Use in all SWMS documents</Label>
                   </div>
-                  
-                  <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-6">
-                    {businessDetails.logo ? (
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-3">
-                          <Image className="h-8 w-8 text-blue-500" />
-                          <div>
-                            <p className="text-sm font-medium">{businessDetails.logo.name}</p>
-                            <p className="text-xs text-gray-500">{(businessDetails.logo.size / 1024).toFixed(1)} KB</p>
-                          </div>
+                </div>
+                
+                <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-6">
+                  {businessDetails.logo ? (
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-3">
+                        <Image className="h-8 w-8 text-blue-500" />
+                        <div>
+                          <p className="text-sm font-medium">{businessDetails.logo.name}</p>
+                          <p className="text-xs text-gray-500">{(businessDetails.logo.size / 1024).toFixed(1)} KB</p>
                         </div>
-                        <Button variant="outline" size="sm" onClick={() => removeFile('logo')}>
-                          <X className="h-4 w-4" />
-                        </Button>
+                      </div>
+                      <Button variant="outline" size="sm" onClick={() => removeFile('logo')}>
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="text-center">
+                      <Upload className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                      <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">Upload your company logo</p>
+                      <p className="text-xs text-gray-500 mb-4">PNG, JPG, SVG up to 2MB</p>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => handleFileUpload('logo', e.target.files?.[0])}
+                        className="hidden"
+                        ref={logoInputRef}
+                      />
+                      <Button 
+                        type="button" 
+                        className="bg-blue-600 hover:bg-blue-700"
+                        onClick={handleLogoButtonClick}
+                      >
+                        Choose File
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <Separator />
+
+              {/* Insurance & Compliance Documents */}
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <h4 className="font-medium text-sm text-gray-700 dark:text-gray-300 uppercase tracking-wide">Insurance & Compliance</h4>
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      id="useCredentialsEverytime"
+                      checked={businessDetails.useCredentialsEverytime}
+                      onChange={(e) => updateBusinessDetails({...businessDetails, useCredentialsEverytime: e.target.checked})}
+                      className="rounded"
+                    />
+                    <Label htmlFor="useCredentialsEverytime" className="text-sm">Attach to all SWMS documents</Label>
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* WorkCover Policy */}
+                  <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+                    <div className="flex items-center space-x-2 mb-3">
+                      <ShieldCheck className="h-5 w-5 text-green-500" />
+                      <h5 className="font-medium">WorkCover Policy</h5>
+                    </div>
+                    
+                    {businessDetails.workCoverPolicy ? (
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-sm font-medium">{businessDetails.workCoverPolicy.name}</p>
+                            <p className="text-xs text-gray-500">{(businessDetails.workCoverPolicy.size / 1024).toFixed(1)} KB</p>
+                          </div>
+                          <Button variant="outline" size="sm" onClick={() => removeFile('workCoverPolicy')}>
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </div>
                       </div>
                     ) : (
                       <div className="text-center">
-                        <Upload className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                        <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">Upload your company logo</p>
-                        <p className="text-xs text-gray-500 mb-4">PNG, JPG, SVG up to 2MB</p>
+                        <FileText className="h-8 w-8 text-gray-400 mx-auto mb-2" />
                         <input
                           type="file"
-                          accept="image/*"
-                          onChange={(e) => handleFileUpload('logo', e.target.files[0])}
+                          accept=".pdf,.doc,.docx"
+                          onChange={(e) => handleFileUpload('workCoverPolicy', e.target.files?.[0])}
                           className="hidden"
-                          id="logo-upload"
+                          ref={workCoverInputRef}
                         />
-                        <Label htmlFor="logo-upload" className="cursor-pointer">
-                          <Button type="button" className="bg-blue-600 hover:bg-blue-700">
-                            Choose File
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="w-full"
+                          onClick={handleWorkCoverButtonClick}
+                        >
+                          <Upload className="h-4 w-4 mr-2" />
+                          Upload Policy
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Public Liability Policy */}
+                  <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+                    <div className="flex items-center space-x-2 mb-3">
+                      <Shield className="h-5 w-5 text-blue-500" />
+                      <h5 className="font-medium">Public Liability</h5>
+                    </div>
+                    
+                    {businessDetails.publicLiabilityPolicy ? (
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-sm font-medium">{businessDetails.publicLiabilityPolicy.name}</p>
+                            <p className="text-xs text-gray-500">{(businessDetails.publicLiabilityPolicy.size / 1024).toFixed(1)} KB</p>
+                          </div>
+                          <Button variant="outline" size="sm" onClick={() => removeFile('publicLiabilityPolicy')}>
+                            <X className="h-4 w-4" />
                           </Button>
-                        </Label>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="text-center">
+                        <FileText className="h-8 w-8 text-gray-400 mx-auto mb-2" />
+                        <input
+                          type="file"
+                          accept=".pdf,.doc,.docx"
+                          onChange={(e) => handleFileUpload('publicLiabilityPolicy', e.target.files?.[0])}
+                          className="hidden"
+                          ref={liabilityInputRef}
+                        />
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="w-full"
+                          onClick={handleLiabilityButtonClick}
+                        >
+                          <Upload className="h-4 w-4 mr-2" />
+                          Upload Policy
+                        </Button>
                       </div>
                     )}
                   </div>
                 </div>
+              </div>
+            </CardContent>
+          </GlowingCard>
 
-                <Separator />
+          {/* Job Selection */}
+          <GlowingCard>
+            <CardHeader className="bg-slate-200 dark:bg-slate-800">
+              <CardTitle className="flex items-center gap-2">
+                <RealisticClipboardIcon />
+                Select Job for SWMS
+              </CardTitle>
+              <CardDescription>
+                Choose an existing job or create a new one to generate the SWMS document
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {/* Search Jobs */}
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                <Input
+                  placeholder="Search jobs by name, number, or location..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
 
-                {/* Insurance & Compliance Documents */}
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <h4 className="font-medium text-sm text-gray-700 dark:text-gray-300 uppercase tracking-wide">Insurance & Compliance</h4>
-                    <div className="flex items-center space-x-2">
-                      <input
-                        type="checkbox"
-                        id="useCredentialsEverytime"
-                        checked={businessDetails.useCredentialsEverytime}
-                        onChange={(e) => updateBusinessDetails({...businessDetails, useCredentialsEverytime: e.target.checked})}
-                        className="rounded"
-                      />
-                      <Label htmlFor="useCredentialsEverytime" className="text-sm">Attach to all SWMS documents</Label>
-                    </div>
-                  </div>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {/* WorkCover Policy */}
-                    <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
-                      <div className="flex items-center space-x-2 mb-3">
-                        <ShieldCheck className="h-5 w-5 text-green-500" />
-                        <h5 className="font-medium">WorkCover Policy</h5>
-                      </div>
-                      
-                      {businessDetails.workCoverPolicy ? (
-                        <div className="space-y-3">
-                          <div className="flex items-center justify-between">
-                            <div>
-                              <p className="text-sm font-medium">{businessDetails.workCoverPolicy.name}</p>
-                              <p className="text-xs text-gray-500">{(businessDetails.workCoverPolicy.size / 1024).toFixed(1)} KB</p>
-                            </div>
-                            <Button variant="outline" size="sm" onClick={() => removeFile('workCoverPolicy')}>
-                              <X className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="text-center">
-                          <input
-                            type="file"
-                            accept=".pdf,.doc,.docx"
-                            onChange={(e) => handleFileUpload('workCoverPolicy', e.target.files[0])}
-                            className="hidden"
-                            id="workcover-upload"
-                          />
-                          <Label htmlFor="workcover-upload" className="cursor-pointer">
-                            <Button type="button" variant="outline" size="sm" className="w-full">
-                              <Upload className="h-4 w-4 mr-2" />
-                              Upload Policy
-                            </Button>
-                          </Label>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Public Liability Policy */}
-                    <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
-                      <div className="flex items-center space-x-2 mb-3">
-                        <CreditCard className="h-5 w-5 text-blue-500" />
-                        <h5 className="font-medium">Public Liability</h5>
-                      </div>
-                      
-                      {businessDetails.publicLiabilityPolicy ? (
-                        <div className="space-y-3">
-                          <div className="flex items-center justify-between">
-                            <div>
-                              <p className="text-sm font-medium">{businessDetails.publicLiabilityPolicy.name}</p>
-                              <p className="text-xs text-gray-500">{(businessDetails.publicLiabilityPolicy.size / 1024).toFixed(1)} KB</p>
-                            </div>
-                            <Button variant="outline" size="sm" onClick={() => removeFile('publicLiabilityPolicy')}>
-                              <X className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="text-center">
-                          <input
-                            type="file"
-                            accept=".pdf,.doc,.docx"
-                            onChange={(e) => handleFileUpload('publicLiabilityPolicy', e.target.files[0])}
-                            className="hidden"
-                            id="liability-upload"
-                          />
-                          <Label htmlFor="liability-upload" className="cursor-pointer">
-                            <Button type="button" variant="outline" size="sm" className="w-full">
-                              <Upload className="h-4 w-4 mr-2" />
-                              Upload Policy
-                            </Button>
-                          </Label>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </GlowingCard>
-
-            {/* Job Selection */}
-            <GlowingCard>
-               <CardHeader className="bg-slate-200 dark:bg-slate-800">
-                 <CardTitle className="flex items-center gap-2">
-                   <RealisticClipboardIcon />
-                   Job Selection
-                 </CardTitle>
-                 <CardDescription>
-                   Select an existing job or create a new one for your SWMS
-                 </CardDescription>
-               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex gap-2">
-                  <div className="relative flex-1">
-                    <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                    <Input
-                      placeholder="Search existing jobs..."
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      className="pl-9"
-                    />
-                  </div>
-                  <Button 
-                    variant="outline" 
-                    onClick={() => setShowNewJobForm(!showNewJobForm)}
-                    className="flex items-center gap-2"
+              {/* Job List */}
+              <div className="space-y-2 max-h-64 overflow-y-auto">
+                {filteredJobs.map((job) => (
+                  <div
+                    key={job.id}
+                    className={`p-3 border rounded-lg cursor-pointer transition-all ${
+                      selectedJob?.id === job.id
+                        ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
+                        : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
+                    }`}
+                    onClick={() => handleJobSelection(job)}
                   >
-                    <Plus className="h-4 w-4" />
-                    New Job
-                  </Button>
-                </div>
-
-                {/* Existing Jobs List */}
-                {!showNewJobForm && (
-                  <div className="space-y-2 max-h-64 overflow-y-auto">
-                    {filteredJobs.map(job => (
-                      <div
-                        key={job.id}
-                        className={`p-3 border rounded-lg cursor-pointer transition-all ${
-                          selectedJob?.id === job.id ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-gray-300'
-                        }`}
-                        onClick={() => handleJobSelection(job)}
-                      >
-                        <div className="flex justify-between items-start">
-                          <div>
-                            <div className="font-medium">{job.jobName}</div>
-                            <div className="text-sm text-gray-600">{job.jobNumber} • {job.location}</div>
-                            <div className="text-sm text-gray-500">Client: {job.client}</div>
-                          </div>
-                          <Badge variant={job.status === 'Active' ? 'default' : 'secondary'}>
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <h4 className="font-medium text-sm">{job.jobName}</h4>
+                        <p className="text-xs text-gray-600 dark:text-gray-400">Job #{job.jobNumber}</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-500">{job.location}</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-xs text-gray-600 dark:text-gray-400">{job.client}</p>
+                        <div className="flex items-center space-x-2 mt-1">
+                          <span className={`px-2 py-1 text-xs rounded-full ${
+                            job.status === 'Active' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
+                          }`}>
                             {job.status}
-                          </Badge>
+                          </span>
                         </div>
                       </div>
-                    ))}
+                    </div>
                   </div>
-                )}
+                ))}
+              </div>
 
-                {/* New Job Form */}
+              {/* Create New Job */}
+              <div className="border-t pt-4">
+                <Button
+                  variant="outline"
+                  className="w-full"
+                  onClick={() => setShowNewJobForm(!showNewJobForm)}
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Create New Job
+                </Button>
+
                 {showNewJobForm && (
-                  <GlowingCard className="border-dashed">
-                    <CardHeader className="bg-slate-200 dark:bg-slate-800">
+                  <GlowingCard className="mt-4">
+                    <CardHeader>
                       <CardTitle className="text-lg">Create New Job</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
@@ -760,7 +851,7 @@ const AISWMSCreatorPage = () => {
                             id="location"
                             value={newJobDetails.location}
                             onChange={(e) => setNewJobDetails({...newJobDetails, location: e.target.value})}
-                            placeholder="e.g., 123 Main St, Brisbane"
+                            placeholder="e.g., 123 Smith St, Melbourne"
                           />
                         </div>
                         <div>
@@ -769,11 +860,38 @@ const AISWMSCreatorPage = () => {
                             id="clientName"
                             value={newJobDetails.clientName}
                             onChange={(e) => setNewJobDetails({...newJobDetails, clientName: e.target.value})}
-                            placeholder="e.g., Smith Family"
+                            placeholder="e.g., Jane Doe"
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="tradeType">Trade Type</Label>
+                          <Select value={newJobDetails.tradeType} onValueChange={(value) => setNewJobDetails({...newJobDetails, tradeType: value})}>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select trade type" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="Carpentry">Carpentry</SelectItem>
+                              <SelectItem value="Plumbing">Plumbing</SelectItem>
+                              <SelectItem value="Electrical">Electrical</SelectItem>
+                              <SelectItem value="General Construction">General Construction</SelectItem>
+                              <SelectItem value="Roofing">Roofing</SelectItem>
+                              <SelectItem value="Painting">Painting</SelectItem>
+                              <SelectItem value="Tiling">Tiling</SelectItem>
+                              <SelectItem value="Landscaping">Landscaping</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div>
+                          <Label htmlFor="estimatedDuration">Estimated Duration</Label>
+                          <Input
+                            id="estimatedDuration"
+                            value={newJobDetails.estimatedDuration}
+                            onChange={(e) => setNewJobDetails({...newJobDetails, estimatedDuration: e.target.value})}
+                            placeholder="e.g., 2 weeks"
                           />
                         </div>
                       </div>
-                      <Button 
+                      <Button
                         onClick={() => {
                           const newJob = {
                             id: Date.now(),
@@ -782,8 +900,8 @@ const AISWMSCreatorPage = () => {
                             location: newJobDetails.location,
                             client: newJobDetails.clientName,
                             tradeType: newJobDetails.tradeType,
-                            estimatedDuration: newJobDetails.estimatedDuration,
-                            status: 'New'
+                            status: 'Planned',
+                            estimatedDuration: newJobDetails.estimatedDuration
                           };
                           handleJobSelection(newJob);
                           setShowNewJobForm(false);
@@ -840,145 +958,146 @@ const AISWMSCreatorPage = () => {
                       <ArrowRight className="h-4 w-4 ml-2 animate-bounce" />
                     </Button>
                   </div>
-                                 )}
-               </CardContent>
-             </GlowingCard>
-          </div>
+                )}
+              </div>
+            </CardContent>
+          </GlowingCard>
+        </div>
 
-          {/* Right Column - Features & Information */}
-          <div className="space-y-6">
-                       {/* What is SWMS */}
-           <GlowingCard>
-             <CardHeader className="bg-slate-200 dark:bg-slate-800">
-               <CardTitle className="flex items-center gap-2">
-                 <RealisticSafetyWarningIcon />
-                 What is SWMS?
-               </CardTitle>
-             </CardHeader>
-             <CardContent className="space-y-3">
-               <p className="text-sm text-gray-700 dark:text-gray-300">
-                 A Safe Work Method Statement (SWMS) is a document that identifies high-risk construction work and specifies measures to control safety risks.
-               </p>
-               <div className="space-y-2">
-                 <div className="flex items-start gap-2">
-                   <CheckCircle className="h-4 w-4 text-green-500 mt-0.5" />
-                   <span className="text-sm">Required by Australian WHS legislation</span>
-                 </div>
-                 <div className="flex items-start gap-2">
-                   <CheckCircle className="h-4 w-4 text-green-500 mt-0.5" />
-                   <span className="text-sm">Mandatory for high-risk construction work</span>
-                 </div>
-                 <div className="flex items-start gap-2">
-                   <CheckCircle className="h-4 w-4 text-green-500 mt-0.5" />
-                   <span className="text-sm">Must be prepared before work begins</span>
-                 </div>
-                 <div className="flex items-start gap-2">
-                   <CheckCircle className="h-4 w-4 text-green-500 mt-0.5" />
-                   <span className="text-sm">Requires worker consultation and sign-off</span>
-                 </div>
-               </div>
-             </CardContent>
-           </GlowingCard>
+        {/* Right Column - Features & Information */}
+        <div className="space-y-6">
+          {/* What is SWMS */}
+          <GlowingCard>
+            <CardHeader className="bg-slate-200 dark:bg-slate-800">
+              <CardTitle className="flex items-center gap-2">
+                <RealisticSafetyWarningIcon />
+                What is SWMS?
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <p className="text-sm text-gray-700 dark:text-gray-300">
+                A Safe Work Method Statement (SWMS) is a document that identifies high-risk construction work and specifies measures to control safety risks.
+              </p>
+              <div className="space-y-2">
+                <div className="flex items-start gap-2">
+                  <CheckCircle className="h-4 w-4 text-green-500 mt-0.5" />
+                  <span className="text-sm">Required by Australian WHS legislation</span>
+                </div>
+                <div className="flex items-start gap-2">
+                  <CheckCircle className="h-4 w-4 text-green-500 mt-0.5" />
+                  <span className="text-sm">Mandatory for high-risk construction work</span>
+                </div>
+                <div className="flex items-start gap-2">
+                  <CheckCircle className="h-4 w-4 text-green-500 mt-0.5" />
+                  <span className="text-sm">Must be prepared before work begins</span>
+                </div>
+                <div className="flex items-start gap-2">
+                  <CheckCircle className="h-4 w-4 text-green-500 mt-0.5" />
+                  <span className="text-sm">Requires worker consultation and sign-off</span>
+                </div>
+              </div>
+            </CardContent>
+          </GlowingCard>
 
-                       {/* Key Features */}
-           <GlowingCard>
-             <CardHeader className="bg-slate-200 dark:bg-slate-800">
-               <CardTitle className="flex items-center gap-2">
-                 <RealisticAIBrainIcon />
-                 AI-Powered Features
-               </CardTitle>
-             </CardHeader>
-             <CardContent className="space-y-4">
-               <div className="space-y-3">
-                 <div className="flex items-start gap-3">
-                   <div className="p-1 bg-blue-100 dark:bg-blue-900 rounded">
-                     <Cpu className="h-4 w-4 text-blue-600 dark:text-blue-400 animate-pulse" />
-                   </div>
-                   <div>
-                     <div className="font-medium text-sm">Intelligent Document Generation</div>
-                     <div className="text-xs text-gray-600 dark:text-gray-400">AI creates comprehensive, task-specific SWMS documents in minutes</div>
-                   </div>
-                 </div>
-                 
-                 <div className="flex items-start gap-3">
-                   <div className="p-1 bg-green-100 dark:bg-green-900 rounded">
-                     <Clock className="h-4 w-4 text-green-600 dark:text-green-400 animate-pulse" />
-                   </div>
-                   <div>
-                     <div className="font-medium text-sm">Time Efficiency</div>
-                     <div className="text-xs text-gray-600 dark:text-gray-400">Reduce hours of manual work to minutes with automated generation</div>
-                   </div>
-                 </div>
-                 
-                 <div className="flex items-start gap-3">
-                   <div className="p-1 bg-orange-100 dark:bg-orange-900 rounded">
-                     <FileSignature className="h-4 w-4 text-orange-600 dark:text-orange-400 animate-pulse" />
-                   </div>
-                   <div>
-                     <div className="font-medium text-sm">Compliance Assurance</div>
-                     <div className="text-xs text-gray-600 dark:text-gray-400">Ensures full WHS compliance with current Australian regulations</div>
-                   </div>
-                 </div>
-                 
-                 <div className="flex items-start gap-3">
-                   <div className="p-1 bg-purple-100 dark:bg-purple-900 rounded">
-                     <Smartphone className="h-4 w-4 text-purple-600 dark:text-purple-400 animate-pulse" />
-                   </div>
-                   <div>
-                     <div className="font-medium text-sm">Digital Sign-Off System</div>
-                     <div className="text-xs text-gray-600 dark:text-gray-400">QR code integration for quick on-site worker sign-offs</div>
-                   </div>
-                 </div>
-                 
-                 <div className="flex items-start gap-3">
-                   <div className="p-1 bg-red-100 dark:bg-red-900 rounded">
-                     <BookOpen className="h-4 w-4 text-red-600 dark:text-red-400 animate-pulse" />
-                   </div>
-                   <div>
-                     <div className="font-medium text-sm">Centralized Management</div>
-                     <div className="text-xs text-gray-600 dark:text-gray-400">Secure cloud storage with version control and team access</div>
-                   </div>
-                 </div>
-               </div>
-             </CardContent>
-           </GlowingCard>
-
-            {/* Benefits */}
-            <GlowingCard>
-              <CardHeader className="bg-slate-200 dark:bg-slate-800">
-                <CardTitle className="flex items-center gap-2">
-                  <Award className="h-5 w-5 text-yellow-500" />
-                  Benefits
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                    <span className="text-sm">Save 3-5 hours per SWMS document</span>
+          {/* Key Features */}
+          <GlowingCard>
+            <CardHeader className="bg-slate-200 dark:bg-slate-800">
+              <CardTitle className="flex items-center gap-2">
+                <RealisticAIBrainIcon />
+                AI-Powered Features
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-3">
+                <div className="flex items-start gap-3">
+                  <div className="p-1 bg-blue-100 dark:bg-blue-900 rounded">
+                    <Cpu className="h-4 w-4 text-blue-600 dark:text-blue-400 animate-pulse" />
                   </div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                    <span className="text-sm">Reduce compliance risks</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-                    <span className="text-sm">Improve workplace safety</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
-                    <span className="text-sm">Professional documentation</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 bg-red-500 rounded-full"></div>
-                    <span className="text-sm">Mobile-friendly access</span>
+                  <div>
+                    <div className="font-medium text-sm">Intelligent Document Generation</div>
+                    <div className="text-xs text-gray-600 dark:text-gray-400">AI creates comprehensive, task-specific SWMS documents in minutes</div>
                   </div>
                 </div>
-              </CardContent>
-            </GlowingCard>
-          </div>
+                
+                <div className="flex items-start gap-3">
+                  <div className="p-1 bg-green-100 dark:bg-green-900 rounded">
+                    <Clock className="h-4 w-4 text-green-600 dark:text-green-400 animate-pulse" />
+                  </div>
+                  <div>
+                    <div className="font-medium text-sm">Time Efficiency</div>
+                    <div className="text-xs text-gray-600 dark:text-gray-400">Reduce hours of manual work to minutes with automated generation</div>
+                  </div>
+                </div>
+                
+                <div className="flex items-start gap-3">
+                  <div className="p-1 bg-orange-100 dark:bg-orange-900 rounded">
+                    <FileSignature className="h-4 w-4 text-orange-600 dark:text-orange-400 animate-pulse" />
+                  </div>
+                  <div>
+                    <div className="font-medium text-sm">Compliance Assurance</div>
+                    <div className="text-xs text-gray-600 dark:text-gray-400">Ensures full WHS compliance with current Australian regulations</div>
+                  </div>
+                </div>
+                
+                <div className="flex items-start gap-3">
+                  <div className="p-1 bg-purple-100 dark:bg-purple-900 rounded">
+                    <Smartphone className="h-4 w-4 text-purple-600 dark:text-purple-400 animate-pulse" />
+                  </div>
+                  <div>
+                    <div className="font-medium text-sm">Digital Sign-Off System</div>
+                    <div className="text-xs text-gray-600 dark:text-gray-400">QR code integration for quick on-site worker sign-offs</div>
+                  </div>
+                </div>
+                
+                <div className="flex items-start gap-3">
+                  <div className="p-1 bg-red-100 dark:bg-red-900 rounded">
+                    <BookOpen className="h-4 w-4 text-red-600 dark:text-red-400 animate-pulse" />
+                  </div>
+                  <div>
+                    <div className="font-medium text-sm">Centralized Management</div>
+                    <div className="text-xs text-gray-600 dark:text-gray-400">Secure cloud storage with version control and team access</div>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </GlowingCard>
+
+          {/* Benefits */}
+          <GlowingCard>
+            <CardHeader className="bg-slate-200 dark:bg-slate-800">
+              <CardTitle className="flex items-center gap-2">
+                <Award className="h-5 w-5 text-yellow-500" />
+                Benefits
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                  <span className="text-sm">Save 3-5 hours per SWMS document</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                  <span className="text-sm">Reduce compliance risks</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                  <span className="text-sm">Improve workplace safety</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
+                  <span className="text-sm">Professional documentation</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                  <span className="text-sm">Mobile-friendly access</span>
+                </div>
+              </div>
+            </CardContent>
+          </GlowingCard>
         </div>
       </div>
+    </div>
     </AppLayout>
   );
 };
