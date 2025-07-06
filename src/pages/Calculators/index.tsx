@@ -2,7 +2,7 @@ import React from "react";
 import { AppLayout } from "@/components/ui/AppLayout";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 
-import { Calculator, Percent, Gauge, Ruler, Construction, Compass, ArrowUpDown, Square, FileCode, Hammer, Brush, Home, FileText, FileCheck } from "lucide-react";
+import { Calculator, Percent, Gauge, Ruler, Construction, Compass, ArrowUpDown, Square, FileCode, Hammer, Brush, Home, FileText, FileCheck, Zap, Droplets, Shield, AlertTriangle } from "lucide-react";
 
 import { Link } from "react-router-dom";
 import { SectionHeader } from "@/components/ui/SectionHeader";
@@ -561,6 +561,75 @@ const WeatherIntelligenceIcon = () => (
   </svg>
 );
 
+const AISWMSIcon = () => (
+  <svg
+    width="24"
+    height="24"
+    viewBox="0 0 32 32"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    className="h-6 w-6 text-orange-500 animate-pulse"
+  >
+    {/* Safety shield background */}
+    <path
+      d="M16 2 L26 6 L26 16 C26 22 16 28 16 28 C16 28 6 22 6 16 L6 6 Z"
+      fill="currentColor"
+      opacity="0.2"
+    />
+    
+    {/* Main shield outline */}
+    <path
+      d="M16 3 L24 6.5 L24 16 C24 21 16 26 16 26 C16 26 8 21 8 16 L8 6.5 Z"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+    />
+    
+    {/* AI brain/circuit pattern */}
+    <g opacity="0">
+      <animate attributeName="opacity" values="0;1;0" dur="2s" repeatCount="indefinite"/>
+      <circle cx="16" cy="12" r="3" fill="none" stroke="currentColor" strokeWidth="1"/>
+      <circle cx="16" cy="12" r="1" fill="currentColor"/>
+      
+      {/* Circuit connections */}
+      <line x1="13" y1="12" x2="11" y2="12" stroke="currentColor" strokeWidth="1"/>
+      <line x1="19" y1="12" x2="21" y2="12" stroke="currentColor" strokeWidth="1"/>
+      <line x1="16" y1="9" x2="16" y2="7" stroke="currentColor" strokeWidth="1"/>
+      <line x1="16" y1="15" x2="16" y2="17" stroke="currentColor" strokeWidth="1"/>
+      
+      {/* Small circuit nodes */}
+      <circle cx="11" cy="12" r="0.5" fill="currentColor"/>
+      <circle cx="21" cy="12" r="0.5" fill="currentColor"/>
+      <circle cx="16" cy="7" r="0.5" fill="currentColor"/>
+      <circle cx="16" cy="17" r="0.5" fill="currentColor"/>
+    </g>
+    
+    {/* Warning triangle with exclamation */}
+    <g transform="translate(16,20)" opacity="0">
+      <animate attributeName="opacity" values="0;1;0" dur="2.5s" begin="0.5s" repeatCount="indefinite"/>
+      <path d="M-2,-2 L2,-2 L0,2 Z" fill="currentColor"/>
+      <line x1="0" y1="-1" x2="0" y2="0" stroke="white" strokeWidth="0.5"/>
+      <circle cx="0" cy="1" r="0.2" fill="white"/>
+    </g>
+    
+    {/* Safety sparkles */}
+    <g opacity="0">
+      <animate attributeName="opacity" values="0;1;0" dur="3s" begin="1s" repeatCount="indefinite"/>
+      <circle cx="10" cy="8" r="0.3" fill="currentColor"/>
+      <circle cx="22" cy="10" r="0.3" fill="currentColor"/>
+      <circle cx="12" cy="22" r="0.3" fill="currentColor"/>
+      <circle cx="20" cy="20" r="0.3" fill="currentColor"/>
+    </g>
+    
+    {/* Document lines inside shield */}
+    <g opacity="0.6">
+      <line x1="12" y1="16" x2="20" y2="16" stroke="currentColor" strokeWidth="0.5"/>
+      <line x1="12" y1="18" x2="18" y2="18" stroke="currentColor" strokeWidth="0.5"/>
+      <line x1="12" y1="20" x2="20" y2="20" stroke="currentColor" strokeWidth="0.5"/>
+    </g>
+  </svg>
+);
+
 const Calculators = () => {
   const calculators = [{
     title: "Markup Calculator",
@@ -620,7 +689,6 @@ const Calculators = () => {
     description: "Queensland Building and Construction Commission forms and compliance documents",
     icon: <FileCheck className="h-6 w-6 text-blue-500" />,
     path: "/calculators/qbcc-forms"
-
   }];
   
   return (
@@ -755,6 +823,26 @@ const Calculators = () => {
                   className="w-full bg-blue-600 text-white py-2 rounded-md text-center hover:bg-blue-700 transition-colors"
                 >
                   Open Calculator
+                </Link>
+              </CardFooter>
+            </Card>
+            {/* AI SWMS Creator Card */}
+            <Card className="hover:shadow-md transition-shadow">
+              <CardHeader className="bg-slate-200 p-4">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-base md:text-lg">AI SWMS Creator</CardTitle>
+                  <AISWMSIcon />
+                </div>
+                <CardDescription className="line-clamp-2 min-h-[40px]">
+                  AI-powered Safe Work Method Statement generator for construction projects and risk assessments
+                </CardDescription>
+              </CardHeader>
+              <CardFooter className="bg-slate-200 p-4">
+                <Link 
+                  to="/calculators/ai-swms" 
+                  className="w-full bg-blue-600 text-white py-2 rounded-md text-center hover:bg-blue-700 transition-colors"
+                >
+                  Open Tool
                 </Link>
               </CardFooter>
             </Card>
