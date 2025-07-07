@@ -34,8 +34,21 @@ export default function CredentialsPage() {
 
   return (
     <AppLayout>
+      {/* Back Button - Overlaying the gradient header */}
+      <div className="absolute top-4 left-4 z-50">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => navigate('/')}
+          className="flex items-center gap-2 text-white/80 hover:text-white hover:bg-white/10 backdrop-blur-sm"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Back to Dashboard
+        </Button>
+      </div>
+
       {/* Header Section with Gradient Background - Full Width */}
-      <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white relative overflow-hidden">
+      <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white relative overflow-hidden -mt-6 pt-16">
         {/* Animated Background Dots */}
         <div className="absolute inset-0 pointer-events-none z-20">
           <div className="absolute w-3 h-3 bg-white/80 rounded-full animate-pulse top-4 left-6 shadow-sm"></div>
@@ -44,19 +57,6 @@ export default function CredentialsPage() {
           <div className="absolute w-2 h-2 bg-pink-200/90 rounded-full animate-pulse top-12 right-12 shadow-sm" style={{animationDelay: '1.5s'}}></div>
           <div className="absolute w-3 h-3 bg-cyan-200/80 rounded-full animate-pulse bottom-6 right-4 shadow-sm" style={{animationDelay: '2s'}}></div>
           <div className="absolute w-2 h-2 bg-green-200/90 rounded-full animate-pulse top-6 right-24 shadow-sm" style={{animationDelay: '2.5s'}}></div>
-        </div>
-
-        {/* Back Button - Overlaying the gradient */}
-        <div className="absolute top-4 left-4 z-50">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => navigate('/')}
-            className="flex items-center gap-2 text-white/80 hover:text-white hover:bg-white/10 backdrop-blur-sm"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Back to Dashboard
-          </Button>
         </div>
 
         <div className="container mx-auto px-4 py-8 relative z-30">

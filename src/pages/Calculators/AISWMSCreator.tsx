@@ -858,21 +858,21 @@ const AISWMSCreator = () => {
 
   return (
     <AppLayout>
-      {/* Blue Gradient Header with Animated Text and Helmet */}
-      <div className="bg-gradient-to-r from-blue-600 via-blue-700 to-purple-700 text-white relative overflow-hidden -mt-6 pt-10">
-        {/* Back Button - Overlaying the gradient */}
-        <div className="absolute top-4 left-4 z-50">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => navigate('/credentials')}
-            className="flex items-center gap-2 text-white/80 hover:text-white hover:bg-white/10 backdrop-blur-sm"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Back to Credentials
-          </Button>
-        </div>
+      {/* Back Button - Overlaying the gradient header */}
+      <div className="absolute top-4 left-4 z-50">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => navigate('/credentials')}
+          className="flex items-center gap-2 text-white/80 hover:text-white hover:bg-white/10 backdrop-blur-sm"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Back to Credentials
+        </Button>
+      </div>
 
+      {/* Blue Gradient Header with Animated Text and Helmet */}
+      <div className="bg-gradient-to-r from-blue-600 via-blue-700 to-purple-700 text-white relative overflow-hidden pt-16">
         {/* Animated Background Dots */}
         <div className="absolute inset-0 opacity-30">
           <div className="absolute top-4 left-8 w-2 h-2 bg-white rounded-full animate-pulse"></div>
