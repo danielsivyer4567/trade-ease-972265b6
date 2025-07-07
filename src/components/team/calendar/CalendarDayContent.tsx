@@ -32,6 +32,7 @@ export const CalendarDayContent: React.FC<CalendarDayContentProps> = ({
   const [showWeatherTooltip, setShowWeatherTooltip] = useState(false);
   const [fadeWeatherTooltip, setFadeWeatherTooltip] = useState(false);
   const [tooltipPosition, setTooltipPosition] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
+  const [isDragOver, setIsDragOver] = useState(false);
   const dayRef = useRef<HTMLDivElement>(null);
   const fadeTimeoutRef = useRef<NodeJS.Timeout>();
 
@@ -42,6 +43,11 @@ export const CalendarDayContent: React.FC<CalendarDayContentProps> = ({
   const getDayBackground = () => {
     const today = new Date();
     const isToday = format(today, 'yyyy-MM-dd') === format(date, 'yyyy-MM-dd');
+    
+    // Show drag over state
+    if (isDragOver) {
+      return 'bg-green-200 border-green-400 border-2 shadow-lg';
+    }
     
     if (isSelected) {
       return 'bg-blue-600 text-white border-blue-600';
@@ -123,10 +129,18 @@ export const CalendarDayContent: React.FC<CalendarDayContentProps> = ({
     <>
       <div 
         ref={dayRef}
-        onDragOver={e => e.preventDefault()} 
-        onDrop={e => onDrop(e, date)} 
+        onDragOver={(e) => {
+          e.preventDefault();
+          setIsDragOver(true);
+        }}
+        onDragLeave={() => setIsDragOver(false)}
+        onDrop={(e) => {
+          e.preventDefault();
+          setIsDragOver(false);
+          onDrop(e, date);
+        }}
         onClick={() => onDayClick(date, jobsForDate)} 
-        className={`absolute inset-0 flex flex-col cursor-pointer ${getDayBackground()} transition-colors`}
+        className={`absolute inset-0 flex flex-col ${isDragOver ? 'cursor-copy' : 'cursor-pointer'} ${getDayBackground()} transition-all duration-200 hover:shadow-sm`}
       >
         <div className="w-full flex items-center justify-between px-1 py-0 min-h-[18px]">
           <div className="w-5 flex items-center justify-center">

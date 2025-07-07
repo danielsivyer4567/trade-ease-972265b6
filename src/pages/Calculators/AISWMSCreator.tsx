@@ -859,7 +859,7 @@ const AISWMSCreator = () => {
   return (
     <AppLayout>
       {/* Back Button - Overlaying the gradient header */}
-      <div className="absolute top-4 left-4 z-50">
+      <div className="absolute top-0 left-0 z-50">
         <Button
           variant="ghost"
           size="sm"
@@ -872,7 +872,7 @@ const AISWMSCreator = () => {
       </div>
 
       {/* Blue Gradient Header with Animated Text and Helmet */}
-      <div className="bg-gradient-to-r from-blue-600 via-blue-700 to-purple-700 text-white relative overflow-hidden pt-16">
+      <div className="bg-gradient-to-r from-blue-600 via-blue-700 to-purple-700 text-white absolute top-0 left-0 right-0 z-40 overflow-hidden pt-16">
         {/* Animated Background Dots */}
         <div className="absolute inset-0 opacity-30">
           <div className="absolute top-4 left-8 w-2 h-2 bg-white rounded-full animate-pulse"></div>
@@ -948,7 +948,7 @@ const AISWMSCreator = () => {
       </div>
       
       {/* Legal Requirement Notice */}
-      <div className="bg-blue-50 border-l-4 border-blue-400 p-4 mb-6">
+      <div className="bg-blue-50 border-l-4 border-blue-400 p-4 mb-6 mt-48">
         <div className="flex items-center">
           <AlertTriangle className="h-5 w-5 text-blue-400 mr-3" />
           <div>

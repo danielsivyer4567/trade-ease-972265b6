@@ -1,7 +1,6 @@
 import React from 'react';
 import { Job } from '@/types/job';
 import { format, isSameDay } from 'date-fns';
-import { TeamCalendarHeader } from './calendar/TeamCalendarHeader';
 import { useWeatherData } from './calendar/useWeatherData';
 import { useCalendarHandlers } from './calendar/useCalendarHandlers';
 import { getJobsForDate } from './calendar/calendarUtils';
@@ -36,23 +35,6 @@ export function TeamCalendar({
 
   return (
     <section className={`${miniView ? 'mini-calendar' : ''} relative z-10`}>
-      {!miniView && (
-        <div 
-          className="p-6 my-8 mx-1"
-          style={{ 
-            background: '#e2e8f0', 
-            boxShadow: '0 10px 30px rgba(0,0,0,0.2)', 
-            backdropFilter: 'blur(10px)', 
-            border: '2px solid #94a3b8' 
-          }}
-        >
-          <TeamCalendarHeader 
-            assignedJobs={assignedJobs} 
-            date={date} 
-          />
-        </div>
-      )}
-      
       <div 
         className="p-6"
         style={{ 

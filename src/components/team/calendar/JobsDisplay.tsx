@@ -29,14 +29,24 @@ export const JobsDisplay: React.FC<JobsDisplayProps> = ({
         {jobsForDate.slice(0, 2).map((job, idx) => (
           <div 
             key={`${job.id}-${idx}`}
+            draggable
+            onDragStart={(e) => {
+              e.stopPropagation();
+              e.dataTransfer.setData('application/json', JSON.stringify(job));
+              e.dataTransfer.effectAllowed = 'move';
+              e.currentTarget.style.opacity = '0.5';
+            }}
+            onDragEnd={(e) => {
+              e.currentTarget.style.opacity = '1';
+            }}
             onClick={(e) => {
               e.stopPropagation();
               onJobClick(job.id, e);
             }}
-            className={`text-[10px] truncate mb-1 px-1 py-[2px] cursor-pointer hover:opacity-80 ${getColorClass(teamColor)} text-white shadow-sm`}
-            title={job.title || job.jobNumber}
+            className={`text-[10px] truncate mb-1 px-1 py-[2px] cursor-grab active:cursor-grabbing hover:opacity-80 ${getColorClass(teamColor)} text-white shadow-sm`}
+            title={job.title || job.job_number}
           >
-            {job.title || `Job #${job.jobNumber}`}
+            {job.title || `Job #${job.job_number}`}
           </div>
         ))}
         {jobsForDate.length > 2 && (

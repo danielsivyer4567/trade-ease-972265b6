@@ -92,8 +92,8 @@ export function CustomCalendar({
     const weatherData = weatherDates.find(wd => wd.date === dateStr);
     const jobsForDate = assignedJobs.filter(job => {
       try {
-        const jobDate = new Date(job.date);
-        return format(jobDate, 'yyyy-MM-dd') === dateStr;
+        // Direct string comparison to avoid timezone issues
+        return job.date === dateStr;
       } catch (e) {
         return false;
       }

@@ -14,28 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { GoogleMap, OverlayView } from "@react-google-maps/api";
 import JobMap from "@/components/JobMap";
 
-// FeatureAccess component for checking feature access
-function FeatureAccess({ featureKey }) {
-  const [hasAccess, setHasAccess] = useState(null);
 
-  useEffect(() => {
-    async function checkAccess() {
-      const { data, error } = await supabase.rpc('has_feature_access', { feature_key: featureKey });
-      if (error) {
-        console.error('Error checking feature access:', error);
-        setHasAccess(false);
-      } else {
-        setHasAccess(data);
-      }
-    }
-    checkAccess();
-  }, [featureKey]);
-
-  if (hasAccess === null) return <div>Checking feature access...</div>;
-  return hasAccess
-    ? <div>✅ Feature is enabled for you!</div>
-    : <div>❌ Feature is NOT enabled for you.</div>;
-}
 
 export function JobsMain() {
   console.log("JobsMain component is rendering");
@@ -118,30 +97,9 @@ export function JobsMain() {
     `https://1b024d1a-36c6-4c1f-bf9e-27b08a6c3df4.lovableproject.com/progress/${selectedJob}` : '';
 
   return (
-    <div className="w-full h-full p-2">
-      {/* Feature access check at the top */}
-      <FeatureAccess featureKey="some_feature_key" />
-      <div className="bg-white/80 backdrop-blur-sm rounded-lg shadow-sm p-3 mb-3">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-3">
-          <h1 className="text-xl font-bold mb-2 md:mb-0">Job Management</h1>
-          <div className="flex items-center space-x-1 w-full md:w-auto">
-            <div className="relative w-full md:w-auto flex-1 md:flex-initial">
-              <Input
-                type="text"
-                placeholder="Search jobs..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-8 h-9"
-              />
-              <Filter className="absolute left-2 top-2 h-4 w-4 text-gray-500" />
-            </div>
-            <Button 
-              onClick={() => navigate("/jobs/new")} 
-              className="whitespace-nowrap h-9"
-            >
-              <Plus className="mr-1 h-4 w-4" /> New Job
-            </Button>
-          </div>
+    <div className="w-full h-full p-0">
+      <div className="bg-white/80 backdrop-blur-sm rounded-lg shadow-sm p-0 mb-0">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-0">
         </div>
         
         {loading ? (
@@ -152,32 +110,23 @@ export function JobsMain() {
             </div>
           </div>
         ) : (
-          <div className="w-full mb-3">
-            <div className="bg-gray-50 p-2 rounded-t-lg border border-gray-200 border-b-0">
-              <div className="flex justify-between items-center">
-                <h2 className="text-sm font-medium flex items-center">
-                  <MapPin className="h-3 w-3 mr-1 text-blue-500" /> 
-                  Job Locations
-                </h2>
-                <div className="text-xs text-gray-500">
-                  {jobs.filter(job => 
-                    (job.location && job.location[0] && job.location[1]) || 
-                    (job.locations && job.locations.length > 0)
-                  ).length} jobs with locations
-                </div>
-              </div>
+          <div className="w-full mb-0">
+            {/* Job Management Header - matching main dashboard dark overlay styling */}
+            <div className="flex justify-center items-center px-4 py-2 bg-white/80 backdrop-blur-sm rounded-t-lg border border-gray-200 border-b-0 mt-0">
+              <h2 className="text-xl font-semibold text-white drop-shadow-md border border-black bg-black/60 px-3 py-1 rounded inline-block backdrop-blur-sm flex items-center gap-2">
+                <Calendar className="h-5 w-5 text-white" />
+                Job Management
+              </h2>
             </div>
-            <div className="h-[200px] bg-gray-50 rounded-b-lg border border-gray-200">
-            <JobMap jobs={jobs} />
-
-
+            <div className="h-[400px] bg-gray-50 rounded-b-lg border border-gray-200">
+              <JobMap jobs={jobs} />
             </div>
           </div>
         )}
       </div>
       
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="flex space-x-4 mb-3 border-b pb-2 w-full bg-transparent justify-start">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full mt-0">
+        <TabsList className="flex space-x-4 mb-0 border-b pb-2 w-full bg-transparent justify-start">
           <TabsTrigger value="jobs" className="px-3 py-1 data-[state=active]:border-b-2 data-[state=active]:border-black data-[state=active]:font-medium data-[state=inactive]:text-gray-500">
             Active Jobs
           </TabsTrigger>
@@ -209,6 +158,28 @@ export function JobsMain() {
 
         <TabsContent value="jobs">
           <div className="bg-white/80 backdrop-blur-sm rounded-lg shadow-sm p-3 mb-3">
+            {/* Search bar and New Job button moved here */}
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-3">
+              <div className="flex items-center space-x-1 w-full md:w-auto">
+                <div className="relative w-full md:w-auto flex-1 md:flex-initial">
+                  <Input
+                    type="text"
+                    placeholder="Search jobs..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-8 h-9"
+                  />
+                  <Filter className="absolute left-2 top-2 h-4 w-4 text-gray-500" />
+                </div>
+                <Button 
+                  onClick={() => navigate("/jobs/new")} 
+                  className="whitespace-nowrap h-9"
+                >
+                  <Plus className="mr-1 h-4 w-4" /> New Job
+                </Button>
+              </div>
+            </div>
+            
             {!loading && (
               <div className="bg-white rounded-lg border border-gray-200">
                 <div className="p-2 border-b border-gray-200 bg-gray-50">
@@ -235,6 +206,22 @@ export function JobsMain() {
 
         <TabsContent value="completed">
           <div className="bg-white/80 backdrop-blur-sm rounded-lg shadow-sm p-3 mb-3">
+            {/* Search bar for completed jobs */}
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-3">
+              <div className="flex items-center space-x-1 w-full md:w-auto">
+                <div className="relative w-full md:w-auto flex-1 md:flex-initial">
+                  <Input
+                    type="text"
+                    placeholder="Search completed jobs..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-8 h-9"
+                  />
+                  <Filter className="absolute left-2 top-2 h-4 w-4 text-gray-500" />
+                </div>
+              </div>
+            </div>
+            
             {!loading && (
               <div className="bg-white rounded-lg border border-gray-200">
                 <div className="p-2 border-b border-gray-200 bg-gray-50">
@@ -279,7 +266,7 @@ export function JobsMain() {
                   <SelectContent>
                     {jobs.map(job => (
                       <SelectItem key={job.id} value={job.id}>
-                        {job.title} ({job.jobNumber})
+                        {job.title} ({job.job_number})
                       </SelectItem>
                     ))}
                   </SelectContent>

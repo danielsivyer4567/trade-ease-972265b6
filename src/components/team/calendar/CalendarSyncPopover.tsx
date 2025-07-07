@@ -61,13 +61,14 @@ export const CalendarSyncPopover: React.FC<CalendarSyncPopoverProps> = ({
 
   const generateCalendarLink = (platform: 'google' | 'apple' | 'outlook') => {
     const events = assignedJobs.map(job => {
-      const jobDate = new Date(job.date);
-      const endDate = new Date(jobDate);
-      endDate.setHours(endDate.getHours() + 2);
+      // Parse date more safely to avoid timezone issues
+      const [year, month, day] = job.date.split('-').map(Number);
+      const jobDate = new Date(year, month - 1, day, 9, 0, 0); // Default to 9 AM
+      const endDate = new Date(year, month - 1, day, 11, 0, 0); // Default to 11 AM
       
       return {
         title: job.title,
-        description: job.description || `Job #${job.jobNumber}`,
+        description: job.description || `Job #${job.job_number}`,
         location: job.location ? `${job.location[1]},${job.location[0]}` : '',
         startDate: jobDate,
         endDate: endDate
@@ -178,14 +179,15 @@ export const CalendarSyncPopover: React.FC<CalendarSyncPopoverProps> = ({
     try {
       // Record sync events for each job
       for (const job of assignedJobs) {
-        const jobDate = new Date(job.date);
-        const endDate = new Date(jobDate);
-        endDate.setHours(endDate.getHours() + 2);
+        // Parse date more safely to avoid timezone issues
+        const [year, month, day] = job.date.split('-').map(Number);
+        const jobDate = new Date(year, month - 1, day, 9, 0, 0); // Default to 9 AM
+        const endDate = new Date(year, month - 1, day, 11, 0, 0); // Default to 11 AM
         
         await calendarService.recordSyncEvent(userId, connection.id, {
           tradeEventId: job.id,
           providerEventId: `provider_event_${Date.now()}`,
-          title: job.title || `Job #${job.jobNumber}`,
+          title: job.title || `Job #${job.job_number}`,
           start: jobDate,
           end: endDate
         });
@@ -241,9 +243,10 @@ export const CalendarSyncPopover: React.FC<CalendarSyncPopoverProps> = ({
     ];
 
     assignedJobs.forEach(job => {
-      const jobDate = new Date(job.date);
-      const endDate = new Date(jobDate);
-      endDate.setHours(endDate.getHours() + 2);
+      // Parse date more safely to avoid timezone issues
+      const [year, month, day] = job.date.split('-').map(Number);
+      const jobDate = new Date(year, month - 1, day, 9, 0, 0); // Default to 9 AM
+      const endDate = new Date(year, month - 1, day, 11, 0, 0); // Default to 11 AM
       
       icsContent = [
         ...icsContent,
@@ -252,7 +255,7 @@ export const CalendarSyncPopover: React.FC<CalendarSyncPopoverProps> = ({
         `DTSTAMP:${format(new Date(), 'yyyyMMdd')}T${format(new Date(), 'HHmmss')}Z`,
         `DTSTART:${format(jobDate, 'yyyyMMdd')}T${format(jobDate, 'HHmmss')}Z`,
         `DTEND:${format(endDate, 'yyyyMMdd')}T${format(endDate, 'HHmmss')}Z`,
-        `SUMMARY:${job.title || `Job #${job.jobNumber}`}`,
+        `SUMMARY:${job.title || `Job #${job.job_number}`}`,
         `DESCRIPTION:${job.description || ''}`,
         'END:VEVENT'
       ];

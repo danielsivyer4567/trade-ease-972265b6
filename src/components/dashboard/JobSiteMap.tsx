@@ -11,13 +11,17 @@ import { useGoogleMapsApiKey } from "@/hooks/useGoogleMapsApiKey";
 import { GoogleMap, Marker, InfoWindow, useLoadScript } from '@react-google-maps/api';
 
 const MinimalMap = ({ jobs }) => {
+  const { apiKey, isLoading: isApiKeyLoading, error: apiKeyError } = useGoogleMapsApiKey();
   const { isLoaded, loadError } = useLoadScript({
-    googleMapsApiKey: "AIzaSyCEZfDx6VHz83XX2tnhGRZl3VGSb9WlY1s",
+    googleMapsApiKey: apiKey || "",
   });
   const [selectedJob, setSelectedJob] = useState(null);
+  const [activeInfoWindow, setActiveInfoWindow] = useState(null);
 
-  if (loadError) return <div>Error loading maps</div>;
-  if (!isLoaded) return <div>Loading maps...</div>;
+  if (apiKeyError) return <div className="p-4 text-red-500">API Key Error: {apiKeyError}</div>;
+  if (isApiKeyLoading) return <div className="p-4">Loading API key...</div>;
+  if (loadError) return <div className="p-4 text-red-500">Error loading maps: {loadError.message}</div>;
+  if (!isLoaded) return <div className="p-4">Loading maps...</div>;
 
   // Center the map on the first job with a location, or use a default
   const firstJobWithLocation = jobs.find(
@@ -27,33 +31,115 @@ const MinimalMap = ({ jobs }) => {
     ? { lat: Number(firstJobWithLocation.location[1]), lng: Number(firstJobWithLocation.location[0]) }
     : { lat: -28.0171, lng: 153.4014 };
 
-  return (
-    <GoogleMap
-      mapContainerStyle={{ width: "100%", height: "100%" }}
-      center={center}
-      zoom={14}
-    >
-      {jobs.map((job, idx) =>
-        Array.isArray(job.location) && job.location.length === 2 ? (
-          <Marker
-            key={job.id || idx}
-            position={{
-              lat: Number(job.location[1]),
-              lng: Number(job.location[0])
-            }}
-            title={job.title || `Job ${idx + 1}`}
-          />
-        ) : null
-      )}
-      {selectedJob && Array.isArray(selectedJob.location) && selectedJob.location.length === 2 && (
+  // Group jobs by location to handle overlapping markers
+  const groupJobsByLocation = (jobs) => {
+    const grouped = {};
+    jobs.forEach(job => {
+      if (Array.isArray(job.location) && job.location.length === 2) {
+        const key = `${job.location[0]},${job.location[1]}`;
+        if (!grouped[key]) {
+          grouped[key] = [];
+        }
+        grouped[key].push(job);
+      }
+    });
+    return grouped;
+  };
+
+  const groupedJobs = groupJobsByLocation(jobs);
+
+  // Create offset positions for overlapping markers
+  const createOffsetPositions = (jobs, basePos) => {
+    if (jobs.length === 1) {
+      return [{ ...jobs[0], position: basePos }];
+    }
+    
+    const radius = 0.0002; // Small radius for offset
+    return jobs.map((job, index) => {
+      const angle = (index * 2 * Math.PI) / jobs.length;
+      const offsetPos = {
+        lat: basePos.lat + (radius * Math.cos(angle)),
+        lng: basePos.lng + (radius * Math.sin(angle))
+      };
+      return { ...job, position: offsetPos };
+    });
+  };
+
+  // Flatten grouped jobs with offset positions
+  const markersToRender = Object.entries(groupedJobs).flatMap(([locationKey, jobsAtLocation]) => {
+    const [lng, lat] = locationKey.split(',').map(Number);
+    const basePos = { lat, lng };
+    return createOffsetPositions(jobsAtLocation, basePos);
+  });
+
+  const handleMarkerClick = (job) => {
+    // Close any existing InfoWindow
+    setActiveInfoWindow(null);
+    setSelectedJob(null);
+    
+    // Open new InfoWindow after a small delay to ensure the previous one closes
+    setTimeout(() => {
+      setSelectedJob(job);
+      setActiveInfoWindow(job.id);
+    }, 100);
+  };
+
+  const handleInfoWindowClose = () => {
+    setSelectedJob(null);
+    setActiveInfoWindow(null);
+  };
+
+      return (
+      <GoogleMap
+        mapContainerStyle={{ width: "100%", height: "100%" }}
+        center={center}
+        zoom={14}
+        options={{
+          mapTypeControl: true,
+          streetViewControl: true,
+          fullscreenControl: true,
+        }}
+      >
+      {markersToRender.map((job, idx) => (
+        <Marker
+          key={`${job.id}-${idx}`}
+          position={job.position}
+          title={job.customer || `Job ${job.job_number || idx + 1}`}
+          onClick={() => handleMarkerClick(job)}
+          options={{
+            zIndex: selectedJob?.id === job.id ? 9999 : 1000,
+          }}
+        />
+      ))}
+      
+      {selectedJob && activeInfoWindow === selectedJob.id && (
         <InfoWindow
-          position={{ lat: selectedJob.location[1], lng: selectedJob.location[0] }}
-          onCloseClick={() => setSelectedJob(null)}
+          position={selectedJob.position}
+          onCloseClick={handleInfoWindowClose}
+          options={{
+            zIndex: 10000,
+          }}
         >
-          <div>
-            <h3 className="font-semibold">{selectedJob.title || 'Job'}</h3>
-            <p>{selectedJob.customer}</p>
-            <p className="text-xs text-gray-500">{selectedJob.date}</p>
+          <div style={{ padding: '8px', maxWidth: '250px' }}>
+            <h3 style={{ fontWeight: '600', margin: '0 0 4px 0' }}>
+              {selectedJob.customer || 'Unknown Customer'}
+            </h3>
+            <p style={{ margin: '0', fontSize: '14px', color: '#666' }}>
+              {selectedJob.title || 'No title'}
+            </p>
+            {selectedJob.address && (
+              <p style={{ margin: '4px 0 0 0', fontSize: '12px', color: '#999' }}>
+                {selectedJob.address}
+              </p>
+            )}
+            <p style={{ margin: '4px 0 0 0', fontSize: '11px', color: '#999' }}>
+              Job #{selectedJob.job_number || 'N/A'}
+            </p>
+            {selectedJob.status && (
+              <p style={{ margin: '4px 0 0 0', fontSize: '11px', color: '#666' }}>
+                Status: {selectedJob.status}
+              </p>
+            )}
           </div>
         </InfoWindow>
       )}
@@ -137,23 +223,25 @@ const JobSiteMap = () => {
   // Show API key error
   if (apiKeyError || !apiKey) {
     return (
-      <Card className="p-4">
-        <Alert className="border-red-200 bg-red-50">
-          <AlertCircle className="h-4 w-4 text-red-600" />
-          <AlertDescription className="text-red-800">
-            <div className="mb-2">
-              <strong>Google Maps API Key Issue:</strong> {apiKeyError || "API key not configured"}
-            </div>
-            <div className="text-sm">
-              <p>To fix this:</p>
-              <ol className="list-decimal list-inside ml-4 space-y-1">
-                <li>Create a <code className="bg-red-100 px-1 rounded">.env</code> file in your project root</li>
-                <li>Add: <code className="bg-red-100 px-1 rounded">VITE_GOOGLE_MAPS_API_KEY=your_api_key_here</code></li>
-                <li>Restart your development server</li>
-              </ol>
-            </div>
-          </AlertDescription>
-        </Alert>
+      <Card className="p-4 h-full">
+        <div className="h-full flex items-center justify-center">
+          <Alert className="border-red-200 bg-red-50 max-w-md">
+            <AlertCircle className="h-4 w-4 text-red-600" />
+            <AlertDescription className="text-red-800">
+              <div className="mb-2">
+                <strong>Google Maps API Key Issue:</strong> {apiKeyError || "API key not configured"}
+              </div>
+              <div className="text-sm">
+                <p>To fix this:</p>
+                <ol className="list-decimal list-inside ml-4 space-y-1">
+                  <li>Create a <code className="bg-red-100 px-1 rounded">.env</code> file in your project root</li>
+                  <li>Add: <code className="bg-red-100 px-1 rounded">VITE_GOOGLE_MAPS_API_KEY=your_api_key_here</code></li>
+                  <li>Restart your development server</li>
+                </ol>
+              </div>
+            </AlertDescription>
+          </Alert>
+        </div>
       </Card>
     );
   }
@@ -161,14 +249,11 @@ const JobSiteMap = () => {
   // Show loading state
   if (loading || isApiKeyLoading) {
     return (
-      <Card className="p-4">
-        <div className="animate-pulse">
-          <div className="h-6 bg-gray-200 rounded w-1/4 mb-4"></div>
-          <div className="h-96 bg-gray-200 rounded flex items-center justify-center">
-            <div className="text-center">
-              <Loader2 className="h-8 w-8 animate-spin mx-auto mb-2 text-gray-400" />
-              <p className="text-sm text-gray-500">Loading job locations...</p>
-            </div>
+      <Card className="p-0 h-full">
+        <div className="h-full flex items-center justify-center">
+          <div className="text-center">
+            <Loader2 className="h-8 w-8 animate-spin mx-auto mb-2 text-gray-400" />
+            <p className="text-sm text-gray-500">Loading job locations...</p>
           </div>
         </div>
       </Card>
@@ -178,23 +263,25 @@ const JobSiteMap = () => {
   // Show error state
   if (error) {
     return (
-      <Card className="p-4">
-        <Alert className="border-red-200 bg-red-50">
-          <AlertCircle className="h-4 w-4 text-red-600" />
-          <AlertDescription className="text-red-800">
-            <div className="mb-2">
-              <strong>Error loading jobs:</strong> {error}
-            </div>
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={() => window.location.reload()}
-              className="mt-2"
-            >
-              Retry
-            </Button>
-          </AlertDescription>
-        </Alert>
+      <Card className="p-4 h-full">
+        <div className="h-full flex items-center justify-center">
+          <Alert className="border-red-200 bg-red-50 max-w-md">
+            <AlertCircle className="h-4 w-4 text-red-600" />
+            <AlertDescription className="text-red-800">
+              <div className="mb-2">
+                <strong>Error loading jobs:</strong> {error}
+              </div>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => window.location.reload()}
+                className="mt-2"
+              >
+                Retry
+              </Button>
+            </AlertDescription>
+          </Alert>
+        </div>
       </Card>
     );
   }
@@ -236,27 +323,10 @@ const JobSiteMap = () => {
   }
 
   return (
-    <Card className="p-4">
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-xl font-semibold">Job Locations</h2>
-        <div className="text-sm text-gray-500">
-          {jobsWithLocations} of {jobs.length} jobs with locations
-        </div>
-      </div>
-      
-      {/* Debug info in development */}
-      {import.meta.env.DEV && (
-        <div className="mb-4 p-3 bg-blue-50 rounded text-xs">
-          <p><strong>Debug:</strong> API Key: {apiKey ? `${apiKey.substring(0, 10)}...` : 'Not set'}</p>
-          <p>Jobs with locations: {jobsWithLocations}</p>
-        </div>
-      )}
-      
-      <div style={{ height: "400px", width: "100%" }}>
+    <Card className="p-0 h-full">
+      <div style={{ height: "100%", width: "100%" }}>
         <MinimalMap jobs={jobs} />
       </div>
-
-      <pre>{JSON.stringify(jobs, null, 2)}</pre>
     </Card>
   );
 };
