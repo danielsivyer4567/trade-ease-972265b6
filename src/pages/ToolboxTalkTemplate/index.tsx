@@ -72,7 +72,7 @@ export default function ToolboxTalkTemplatePage() {
               {/* Toolbox Icon */}
               <div className="relative">
                 <img
-                  src="/lovable-uploads/tool box.jpg"
+                  src="/lovable-uploads/197e55c93e89b.png"
                   alt="Toolbox Icon"
                   width="140"
                   height="120"

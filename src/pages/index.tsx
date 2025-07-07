@@ -2,25 +2,21 @@ import { BaseLayout } from "@/components/ui/BaseLayout";
 import JobSiteMap from "@/components/dashboard/JobSiteMap";
 import UpcomingJobs from "@/components/dashboard/UpcomingJobs";
 import { Card } from "@/components/ui/card";
-import { ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Calendar, MapPin, Filter, Plus, Link, Copy, CheckCircle } from "lucide-react";
+import { ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Calendar, MapPin, Filter, Plus, Link, Copy, CheckCircle, Zap, Wrench, AlertTriangle, Settings, Droplets, Building, Clock, BarChart3, Users, MessageCircle, Camera, FileText, DollarSign, ClipboardList, Star } from "lucide-react";
 import { TeamCalendar } from "@/components/team/TeamCalendar";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { TradeDashboardContent } from "@/components/trade-dashboard/TradeDashboardContent";
-import { PerformanceSection } from "@/components/dashboard/PerformanceSection";
-import { StatisticsSection } from "@/components/dashboard/StatisticsSection";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Separator } from "@/components/ui/separator";
-import { Calendar as ReactCalendar } from "@/components/ui/calendar";
 import { DashboardCalendar } from "@/components/dashboard/DashboardCalendar";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { Job } from "@/types/job";
+import { Job, Technician } from "@/types/job";
 import { supabase } from "@/lib/supabase";
 import JobMap from "@/components/JobMap";
+import { ActiveJobCards } from "@/components/ActiveJobCards";
+import { StatisticsSection } from "@/components/dashboard/StatisticsSection";
+import { KeyStatistics } from "@/components/statistics/KeyStatistics";
 
 export default function DashboardPage() {
   const [calendarDate, setCalendarDate] = useState<Date | undefined>(new Date());
@@ -28,11 +24,48 @@ export default function DashboardPage() {
   const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedJob, setSelectedJob] = useState<string | null>(null);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [activeTab, setActiveTab] = useState<string>("jobs");
+  const [activeTab, setActiveTab] = useState<string>("analytics");
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [completedJobs, setCompletedJobs] = useState<Job[]>([]);
   const [isQueuedSectionDragOver, setIsQueuedSectionDragOver] = useState(false);
+  const [selectedJobs, setSelectedJobs] = useState<string[]>([]);
+
+  // Mock technician data
+  const mockTechnicians: Technician[] = [
+    {
+      id: "1",
+      name: "John Smith",
+      email: "john.smith@tradeease.com",
+      phone: "+1 (555) 123-4567",
+      skills: ["Plumbing", "Electrical", "HVAC"],
+      shift: { start: "8:00 AM", end: "5:00 PM" },
+      isAvailable: true,
+      maxConcurrentJobs: 3,
+      hourlyRate: 45
+    },
+    {
+      id: "2",
+      name: "Sarah Johnson",
+      email: "sarah.johnson@tradeease.com",
+      phone: "+1 (555) 234-5678",
+      skills: ["Carpentry", "Painting", "Flooring"],
+      shift: { start: "7:00 AM", end: "4:00 PM" },
+      isAvailable: true,
+      maxConcurrentJobs: 2,
+      hourlyRate: 50
+    },
+    {
+      id: "3",
+      name: "Mike Davis",
+      email: "mike.davis@tradeease.com",
+      phone: "+1 (555) 345-6789",
+      skills: ["Roofing", "Siding", "Gutters"],
+      shift: { start: "8:00 AM", end: "6:00 PM" },
+      isAvailable: false,
+      maxConcurrentJobs: 4,
+      hourlyRate: 55
+    }
+  ];
 
 
   useEffect(() => {
@@ -220,6 +253,93 @@ export default function DashboardPage() {
     }
   };
 
+  const handleJobSelect = (jobId: string) => {
+    setSelectedJobs(prev => 
+      prev.includes(jobId) 
+        ? prev.filter(id => id !== jobId)
+        : [...prev, jobId]
+    );
+  };
+
+  const handleJobAssignToTechnician = async (jobId: string, technicianId: string) => {
+    try {
+      const { error } = await supabase
+        .from('jobs')
+        .update({ assignedTo: technicianId })
+        .eq('id', jobId);
+
+      if (error) throw error;
+
+      setJobs(prevJobs => 
+        prevJobs.map(j => 
+          j.id === jobId ? { ...j, assignedTo: technicianId } : j
+        )
+      );
+
+      const technician = mockTechnicians.find(t => t.id === technicianId);
+      toast.success(`Job assigned to ${technician?.name || 'technician'}`);
+    } catch (error) {
+      console.error('Error assigning job to technician:', error);
+      toast.error('Failed to assign job to technician');
+    }
+  };
+
+  const handleActiveJobStatusUpdate = (jobId: string, status: "pending" | "ready" | "in-progress" | "completed" | "cancelled") => {
+    // Map the ActiveJobCards status to our Job status
+    const mappedStatus = status === 'pending' ? 'ready' : status as Job['status'];
+    handleStatusChange(jobId, mappedStatus);
+  };
+
+  // Transform jobs to match ActiveJobCards interface
+  const transformJobsForActiveCards = (jobs: Job[]) => {
+    return jobs.map(job => ({
+      id: job.id,
+      type: job.type || job.title || 'General Service',
+      customer: job.customer || 'Unknown Customer',
+      status: (job.status === 'to-invoice' || job.status === 'invoiced' ? 'ready' : job.status) as "pending" | "ready" | "in-progress" | "completed" | "cancelled",
+      priority: ((job as any).priority || (job.type?.toLowerCase().includes('emergency') ? 'urgent' : 'medium')) as "low" | "medium" | "high" | "urgent",
+      category: job.type?.toLowerCase().includes('emergency') ? 'emergency' :
+                job.type?.toLowerCase().includes('electrical') ? 'electrical' :
+                job.type?.toLowerCase().includes('hvac') ? 'hvac' :
+                job.type?.toLowerCase().includes('plumbing') ? 'plumbing' :
+                'maintenance' as "emergency" | "maintenance" | "electrical" | "hvac" | "plumbing",
+      size: ((job as any).size || 'M') as "S" | "M" | "L" | "XL",
+      assignedTo: job.assignedTo,
+      estimatedDuration: (job as any).estimatedDuration || 120,
+      value: (job as any).value || 450,
+      cost: (job as any).cost || 280,
+      location: {
+        address: typeof job.location === 'string' ? job.location : job.address || 'Unknown Address',
+        lat: (job as any).lat || 0,
+        lng: (job as any).lng || 0
+      },
+      createdAt: new Date((job as any).created_at || Date.now()),
+      dueDate: new Date((job as any).due_date || job.date || Date.now()),
+      completedAt: (job as any).completed_at ? new Date((job as any).completed_at) : undefined,
+      customerRating: (job as any).customerRating,
+      notes: (job as any).notes || [],
+      tags: (job as any).tags || [],
+      weatherSensitive: (job as any).weatherSensitive || false,
+      requiresSpecialEquipment: (job as any).requiresSpecialEquipment || false
+    }));
+  };
+
+  // Transform technicians to match ActiveJobCards interface
+  const transformTechniciansForActiveCards = (technicians: Technician[]) => {
+    return technicians.map(tech => ({
+      id: tech.id,
+      name: tech.name,
+      email: tech.email,
+      phone: tech.phone,
+      skills: tech.skills,
+      certifications: (tech as any).certifications || [],
+      currentJobs: (tech as any).currentJobs || [],
+      maxConcurrentJobs: tech.maxConcurrentJobs,
+      hourlyRate: tech.hourlyRate,
+      isAvailable: tech.isAvailable
+    }));
+  };
+
   const getTeamColor = (assignedTeam?: string) => {
     if (!assignedTeam) return 'white'; // No team assigned
     
@@ -280,12 +400,43 @@ export default function DashboardPage() {
     }
   };
 
+  const getJobIcon = (jobType: string) => {
+    const type = jobType.toLowerCase();
+    if (type.includes('plumbing')) return <Droplets className="w-5 h-5" />;
+    if (type.includes('electrical')) return <Zap className="w-5 h-5" />;
+    if (type.includes('hvac') || type.includes('maintenance')) return <Settings className="w-5 h-5" />;
+    if (type.includes('emergency')) return <AlertTriangle className="w-5 h-5" />;
+    if (type.includes('building') || type.includes('construction')) return <Building className="w-5 h-5" />;
+    return <Wrench className="w-5 h-5" />;
+  };
+
+  const getJobPriority = (job: Job) => {
+    if (job.type.toLowerCase().includes('emergency')) return 'H';
+    if (job.status === 'ready') return 'M';
+    return 'L';
+  };
+
+  const getJobPrice = (job: Job) => {
+    // Mock pricing based on job type
+    if (job.type.toLowerCase().includes('emergency')) return '$450';
+    if (job.type.toLowerCase().includes('hvac')) return '$280';
+    if (job.type.toLowerCase().includes('maintenance')) return '$180';
+    return '$250';
+  };
+
+  const isJobOverdue = (job: Job) => {
+    if (!job.date || job.date_undecided) return false;
+    const jobDate = new Date(job.date);
+    const today = new Date();
+    return jobDate < today && job.status !== 'completed';
+  };
+
   return (
     <BaseLayout showQuickTabs>
       <div className="pb-10 pt-0">
         <div className="p-0 space-y-0">
           {/* Job Site Map - Google Maps Satellite View */}
-          <div className="mt-0 relative">
+          <div className="mt-0 relative px-4">
             <div className="h-[400px]">
 
             {loading ? (
@@ -326,223 +477,83 @@ export default function DashboardPage() {
           </div>
 
           {/* Job Management Controls - Integrated from Jobs Page */}
-          <div className="px-4 mt-4">
+          <div className="px-4 mt-32">
             <div className="bg-white/80 backdrop-blur-sm rounded-lg shadow-sm p-4 mb-4">
-              {/* Search and New Job Controls */}
-              <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4">
-                <div className="flex items-center space-x-2 w-full md:w-auto">
-                  <div className="relative w-full md:w-64 flex-1 md:flex-initial">
-                    <Input
-                      type="text"
-                      placeholder="Search jobs..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      className="pl-8 h-9"
-                    />
-                    <Filter className="absolute left-2 top-2 h-4 w-4 text-gray-500" />
-                  </div>
-                  <Button 
-                    onClick={() => navigate("/jobs/new")} 
-                    className="whitespace-nowrap h-9 bg-green-600 hover:bg-green-700"
-                  >
-                    <Plus className="mr-1 h-4 w-4" /> New Job
-                  </Button>
-                  <Button 
-                    onClick={() => navigate("/jobs")} 
-                    variant="outline"
-                    className="whitespace-nowrap h-9"
-                  >
-                    <Link className="mr-1 h-4 w-4" /> View All Jobs
-                  </Button>
-                </div>
-              </div>
-
               {/* Job Management Tabs */}
               <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                <TabsList className="flex space-x-2 mb-4 border-b pb-2 w-full bg-transparent justify-start overflow-x-auto">
-                  <TabsTrigger value="jobs" className="px-3 py-1 data-[state=active]:border-b-2 data-[state=active]:border-blue-500 data-[state=active]:font-medium data-[state=inactive]:text-gray-500">
+                <TabsList className="flex space-x-0 mb-4 border-b-0 pb-0 w-full bg-transparent justify-start overflow-x-auto">
+                  <TabsTrigger value="analytics" className="flex items-center gap-2 px-4 py-3 rounded-t-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-600 data-[state=active]:text-white data-[state=active]:font-medium data-[state=inactive]:text-gray-600 data-[state=inactive]:bg-gray-100 data-[state=inactive]:hover:bg-gray-200 transition-all duration-200">
+                    <BarChart3 className="w-4 h-4" />
+                    Analytics
+                  </TabsTrigger>
+                  <TabsTrigger value="jobs" className="flex items-center gap-2 px-4 py-3 rounded-t-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-600 data-[state=active]:text-white data-[state=active]:font-medium data-[state=inactive]:text-gray-600 data-[state=inactive]:bg-gray-100 data-[state=inactive]:hover:bg-gray-200 transition-all duration-200">
+                    <Clock className="w-4 h-4" />
                     Queued Jobs
                   </TabsTrigger>
-                  <TabsTrigger value="completed" className="px-3 py-1 data-[state=active]:border-b-2 data-[state=active]:border-blue-500 data-[state=active]:font-medium data-[state=inactive]:text-gray-500">
-                    Completed Jobs
+                  <TabsTrigger value="team" className="flex items-center gap-2 px-4 py-3 rounded-t-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-600 data-[state=active]:text-white data-[state=active]:font-medium data-[state=inactive]:text-gray-600 data-[state=inactive]:bg-gray-100 data-[state=inactive]:hover:bg-gray-200 transition-all duration-200">
+                    <Users className="w-4 h-4" />
+                    Team
                   </TabsTrigger>
-                  <TabsTrigger value="conversations" className="px-3 py-1 data-[state=active]:border-b-2 data-[state=active]:border-blue-500 data-[state=active]:font-medium data-[state=inactive]:text-gray-500">
-                    Conversations
+                  <TabsTrigger value="chat" className="flex items-center gap-2 px-4 py-3 rounded-t-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-600 data-[state=active]:text-white data-[state=active]:font-medium data-[state=inactive]:text-gray-600 data-[state=inactive]:bg-gray-100 data-[state=inactive]:hover:bg-gray-200 transition-all duration-200">
+                    <MessageCircle className="w-4 h-4" />
+                    Chat
                   </TabsTrigger>
-                  <TabsTrigger value="photos" className="px-3 py-1 data-[state=active]:border-b-2 data-[state=active]:border-blue-500 data-[state=active]:font-medium data-[state=inactive]:text-gray-500">
+                  <TabsTrigger value="photos" className="flex items-center gap-2 px-4 py-3 rounded-t-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-600 data-[state=active]:text-white data-[state=active]:font-medium data-[state=inactive]:text-gray-600 data-[state=inactive]:bg-gray-100 data-[state=inactive]:hover:bg-gray-200 transition-all duration-200">
+                    <Camera className="w-4 h-4" />
                     Photos
                   </TabsTrigger>
-                  <TabsTrigger value="notes" className="px-3 py-1 data-[state=active]:border-b-2 data-[state=active]:border-blue-500 data-[state=active]:font-medium data-[state=inactive]:text-gray-500">
+                  <TabsTrigger value="notes" className="flex items-center gap-2 px-4 py-3 rounded-t-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-600 data-[state=active]:text-white data-[state=active]:font-medium data-[state=inactive]:text-gray-600 data-[state=inactive]:bg-gray-100 data-[state=inactive]:hover:bg-gray-200 transition-all duration-200">
+                    <FileText className="w-4 h-4" />
                     Notes
                   </TabsTrigger>
-                  <TabsTrigger value="financials" className="px-3 py-1 data-[state=active]:border-b-2 data-[state=active]:border-blue-500 data-[state=active]:font-medium data-[state=inactive]:text-gray-500">
-                    Financials
+                  <TabsTrigger value="finance" className="flex items-center gap-2 px-4 py-3 rounded-t-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-600 data-[state=active]:text-white data-[state=active]:font-medium data-[state=inactive]:text-gray-600 data-[state=inactive]:bg-gray-100 data-[state=inactive]:hover:bg-gray-200 transition-all duration-200">
+                    <DollarSign className="w-4 h-4" />
+                    Finance
                   </TabsTrigger>
-                  <TabsTrigger value="forms" className="px-3 py-1 data-[state=active]:border-b-2 data-[state=active]:border-blue-500 data-[state=active]:font-medium data-[state=inactive]:text-gray-500">
+                  <TabsTrigger value="forms" className="flex items-center gap-2 px-4 py-3 rounded-t-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-600 data-[state=active]:text-white data-[state=active]:font-medium data-[state=inactive]:text-gray-600 data-[state=inactive]:bg-gray-100 data-[state=inactive]:hover:bg-gray-200 transition-all duration-200">
+                    <ClipboardList className="w-4 h-4" />
                     Forms
                   </TabsTrigger>
-                  <TabsTrigger value="reviews" className="px-3 py-1 data-[state=active]:border-b-2 data-[state=active]:border-blue-500 data-[state=active]:font-medium data-[state=inactive]:text-gray-500">
+                  <TabsTrigger value="reviews" className="flex items-center gap-2 px-4 py-3 rounded-t-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-600 data-[state=active]:text-white data-[state=active]:font-medium data-[state=inactive]:text-gray-600 data-[state=inactive]:bg-gray-100 data-[state=inactive]:hover:bg-gray-200 transition-all duration-200">
+                    <Star className="w-4 h-4" />
                     Reviews
                   </TabsTrigger>
                 </TabsList>
 
                 {/* Tab Contents */}
+                <TabsContent value="analytics" className="mt-0">
+                  <div className="space-y-6">
+                    <StatisticsSection />
+                  </div>
+                </TabsContent>
+
                 <TabsContent value="jobs" className="mt-0">
-                  <div 
-                    className={`p-6 bg-gradient-to-br from-slate-50 to-blue-50 rounded-lg border transition-all duration-200 ${
-                      isQueuedSectionDragOver 
-                        ? 'border-green-400 bg-green-50 shadow-lg' 
-                        : 'border-slate-200'
-                    }`}
-                    onDragOver={(e) => {
-                      e.preventDefault();
-                      setIsQueuedSectionDragOver(true);
-                    }}
-                    onDragLeave={(e) => {
-                      // Only set false if we're leaving the entire container
-                      if (!e.currentTarget.contains(e.relatedTarget as Node)) {
-                        setIsQueuedSectionDragOver(false);
-                      }
-                    }}
-                    onDrop={(e) => {
-                      e.preventDefault();
-                      setIsQueuedSectionDragOver(false);
-                      
-                      const jobDataStr = e.dataTransfer.getData('application/json');
-                      if (jobDataStr) {
-                        try {
-                          const job = JSON.parse(jobDataStr);
-                          if (job.id && job.date) {
-                            // Only unschedule if job has a date (is scheduled)
-                            handleJobUnschedule(job.id);
-                          }
-                        } catch (error) {
-                          console.error('Error parsing job data:', error);
-                        }
-                      }
-                    }}
-                  >
-                    <div className="flex items-center justify-between mb-6">
-                      <div className="flex items-center gap-3">
-                        <h3 className="text-xl font-bold text-slate-800">Queued Jobs</h3>
-                        <span className="bg-blue-100 text-blue-800 text-xs font-medium px-3 py-1 rounded-full">
-                          {jobs.filter(job => job.status === 'ready' || job.date_undecided).length} jobs
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-2 text-sm text-slate-600">
-                        <div className={`w-2 h-2 rounded-full ${
-                          isQueuedSectionDragOver 
-                            ? 'bg-green-500 animate-bounce' 
-                            : 'bg-blue-500 animate-pulse'
-                        }`}></div>
-                        <span className={`font-medium ${
-                          isQueuedSectionDragOver ? 'text-green-700' : 'text-slate-600'
-                        }`}>
-                          {isQueuedSectionDragOver ? 'Drop to unschedule' : 'Drag jobs to schedule'}
-                        </span>
-                      </div>
-                    </div>
-                    
-                    {isQueuedSectionDragOver && (
-                      <div className="mb-4 p-4 bg-green-100 border-2 border-green-300 border-dashed rounded-lg">
-                        <div className="flex items-center justify-center gap-2 text-green-700">
-                          <div className="w-3 h-3 bg-green-500 rounded-full animate-bounce"></div>
-                          <span className="font-semibold">Drop job here to remove from schedule</span>
-                          <div className="w-3 h-3 bg-green-500 rounded-full animate-bounce delay-100"></div>
-                        </div>
-                      </div>
-                    )}
-                    
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7 gap-4 max-h-80 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-slate-300 scrollbar-track-transparent">
-                      {jobs.filter(job => job.status === 'ready' || job.date_undecided).map((job) => {
-                        const teamColors = getTeamColorClasses(job.assignedTeam);
-                        return (
-                          <div
-                            key={job.id}
-                            draggable
-                            onDragStart={(e) => {
-                              e.dataTransfer.setData('application/json', JSON.stringify(job));
-                              e.dataTransfer.effectAllowed = 'move';
-                              e.currentTarget.style.opacity = '0.5';
-                            }}
-                            onDragEnd={(e) => {
-                              e.currentTarget.style.opacity = '1';
-                            }}
-                            className={`group ${teamColors.background} border-2 ${teamColors.border} rounded-xl p-4 cursor-grab active:cursor-grabbing hover:shadow-lg ${teamColors.hover} hover:scale-105 transition-all duration-300 ease-in-out`}
-                            style={{ 
-                              minHeight: '120px', 
-                              maxWidth: '160px',
-                              aspectRatio: '1.3'
-                            }}
-                          >
-                            <div className="flex flex-col h-full">
-                              <div className="flex-1 space-y-2">
-                                <div className="flex items-start justify-between">
-                                  <h4 className={`font-bold text-slate-800 text-sm leading-tight line-clamp-2 ${teamColors.text} transition-colors`}>
-                                    {job.title || job.type}
-                                  </h4>
-                                  <div className={`w-2 h-2 ${teamColors.indicator} rounded-full transition-colors`}></div>
-                                </div>
-                              
-                                <div className="space-y-1">
-                                  <p className="text-slate-600 text-xs font-medium truncate">
-                                    {job.customer}
-                                  </p>
-                                  <p className="text-slate-500 text-xs font-mono">
-                                    #{job.job_number}
-                                  </p>
-                                </div>
-                              </div>
-                            
-                              <div className="mt-auto pt-2">
-                                <div className="flex items-center justify-center">
-                                  <span className={`px-3 py-1 rounded-lg text-xs font-bold uppercase tracking-wide ${
-                                    job.status === 'ready' 
-                                      ? 'bg-emerald-100 text-emerald-700 border border-emerald-200' 
-                                      : 'bg-amber-100 text-amber-700 border border-amber-200'
-                                  }`}>
-                                    {job.status === 'ready' ? 'Ready' : 'Pending'}
-                                  </span>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                    
-                    {jobs.filter(job => job.status === 'ready' || job.date_undecided).length === 0 && (
-                      <div className="text-center py-12 text-slate-500">
-                        <div className="w-16 h-16 mx-auto mb-4 bg-slate-100 rounded-full flex items-center justify-center">
-                          <Plus className="w-8 h-8 text-slate-400" />
-                        </div>
-                        <p className="text-lg font-medium mb-2">No queued jobs</p>
-                        <p className="text-sm mb-4">Get started by adding your first job</p>
-                        <Button 
-                          onClick={() => navigate("/jobs/new")} 
-                          className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium"
-                        >
-                          <Plus className="w-4 h-4 mr-2" />
-                          Add New Job
-                        </Button>
-                      </div>
-                    )}
+                  <ActiveJobCards
+                    jobs={transformJobsForActiveCards(jobs.filter(job => job.status === 'ready' || job.status === 'in-progress' || job.date_undecided))}
+                    technicians={transformTechniciansForActiveCards(mockTechnicians)}
+                    selectedJobs={selectedJobs}
+                    onJobSelect={handleJobSelect}
+                    onStatusUpdate={handleActiveJobStatusUpdate}
+                    onAssign={handleJobAssignToTechnician}
+                  />
+                </TabsContent>
+
+                <TabsContent value="team" className="mt-0">
+                  <div className="text-center p-4 bg-gray-50 rounded-lg">
+                    <p className="text-gray-600 mb-2">Team Management</p>
+                    <p className="text-2xl font-bold text-purple-600">{mockTechnicians.length}</p>
+                    <p className="text-sm text-gray-500">Active team members</p>
+                    <Button onClick={() => navigate("/teams")} variant="outline" className="mt-2">
+                      Manage Team
+                    </Button>
                   </div>
                 </TabsContent>
 
-                <TabsContent value="completed" className="mt-0">
+                <TabsContent value="chat" className="mt-0">
                   <div className="text-center p-4 bg-gray-50 rounded-lg">
-                    <p className="text-gray-600 mb-2">Completed Jobs</p>
-                    <p className="text-2xl font-bold text-green-600">{completedJobs.length}</p>
-                    <p className="text-sm text-gray-500">Jobs completed</p>
-                  </div>
-                </TabsContent>
-
-                <TabsContent value="conversations" className="mt-0">
-                  <div className="text-center p-4 bg-gray-50 rounded-lg">
-                    <p className="text-gray-600 mb-2">Recent Conversations</p>
-                    <Button onClick={() => navigate("/conversations")} variant="outline" className="mt-2">
-                      View All Conversations
+                    <p className="text-gray-600 mb-2">Team Chat</p>
+                    <Button onClick={() => navigate("/messaging")} variant="outline" className="mt-2">
+                      Open Chat
                     </Button>
                   </div>
                 </TabsContent>
@@ -565,7 +576,7 @@ export default function DashboardPage() {
                   </div>
                 </TabsContent>
 
-                <TabsContent value="financials" className="mt-0">
+                <TabsContent value="finance" className="mt-0">
                   <div className="text-center p-4 bg-gray-50 rounded-lg">
                     <p className="text-gray-600 mb-2">Financial Overview</p>
                     <Button onClick={() => navigate("/financials")} variant="outline" className="mt-2">
@@ -596,7 +607,7 @@ export default function DashboardPage() {
           </div>
 
           {/* Staff Calendar - Only show when in Queued Jobs tab */}
-          {activeTab === "queued" && (
+          {activeTab === "jobs" && (
             <div className="px-4 mt-4">
               <div className="relative bg-white rounded-lg border shadow-sm overflow-hidden mb-6">
                 {/* Replace the existing calendar with our new synchronized DashboardCalendar */}
@@ -604,62 +615,6 @@ export default function DashboardPage() {
               </div>
             </div>
           )}
-
-          {/* Performance Section */}
-          <div className="px-4 mt-4">
-            <Collapsible className="mb-6">
-              <div className="flex items-center justify-between">
-                <h2 className="text-2xl font-semibold">Performance Metrics</h2>
-                <CollapsibleTrigger asChild>
-                  <Button variant="ghost" size="sm" className="w-9 p-0">
-                    <ChevronDown className="h-4 w-4" />
-                    <span className="sr-only">Toggle</span>
-                  </Button>
-                </CollapsibleTrigger>
-              </div>
-              <CollapsibleContent>
-                <div className="pt-4">
-                  <PerformanceSection />
-                </div>
-              </CollapsibleContent>
-            </Collapsible>
-
-            {/* Statistics Section */}
-            <Collapsible className="mb-6">
-              <div className="flex items-center justify-between">
-                <h2 className="text-2xl font-semibold">Statistics & Analytics</h2>
-                <CollapsibleTrigger asChild>
-                  <Button variant="ghost" size="sm" className="w-9 p-0">
-                    <ChevronDown className="h-4 w-4" />
-                    <span className="sr-only">Toggle</span>
-                  </Button>
-                </CollapsibleTrigger>
-              </div>
-              <CollapsibleContent>
-                <div className="pt-4">
-                  <StatisticsSection />
-                </div>
-              </CollapsibleContent>
-            </Collapsible>
-
-            {/* Google Business Dashboard */}
-            <Collapsible className="mb-6">
-              <div className="flex items-center justify-between">
-                <h2 className="text-2xl font-semibold">Google Business Dashboard</h2>
-                <CollapsibleTrigger asChild>
-                  <Button variant="ghost" size="sm" className="w-9 p-0">
-                    <ChevronDown className="h-4 w-4" />
-                    <span className="sr-only">Toggle</span>
-                  </Button>
-                </CollapsibleTrigger>
-              </div>
-              <CollapsibleContent>
-                <div className="pt-4">
-                  <TradeDashboardContent />
-                </div>
-              </CollapsibleContent>
-            </Collapsible>
-          </div>
         </div>
       </div>
     </BaseLayout>

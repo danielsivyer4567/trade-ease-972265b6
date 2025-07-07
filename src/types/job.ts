@@ -19,6 +19,7 @@ export interface Job {
   description?: string;
   assignedTeam?: string;
   assignedMemberId?: string;
+  assignedTo?: string; // For technician assignment
   date_undecided?: boolean;
   job_steps?: JobStep[];
   boundaries?: Array<Array<[number, number]>>; // Array of polygon coordinates
@@ -56,4 +57,19 @@ export interface JobTemplate {
     linearMeter: number;
     materialsMarkup: number;
   };
+}
+
+export interface Technician {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  skills: string[];
+  shift: {
+    start: string;
+    end: string;
+  };
+  isAvailable: boolean;
+  maxConcurrentJobs: number;
+  hourlyRate: number;
 }
