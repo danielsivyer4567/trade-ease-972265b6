@@ -6,7 +6,7 @@ import { StaffList } from './components/StaffList';
 import { SafetyDocumentsManager } from './components/SafetyDocumentsManager';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Brain, ExternalLink, ArrowLeft } from 'lucide-react';
+import { Brain, ExternalLink, ArrowLeft, MessageSquare, Shield, ClipboardList } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 export default function CredentialsPage() {
@@ -14,6 +14,21 @@ export default function CredentialsPage() {
 
   const handleOpenSWMSCreator = () => {
     navigate('/calculators/ai-swms-creator');
+  };
+
+  const handleOpenToolboxTalk = () => {
+    // Navigate to toolbox talk template (placeholder)
+    navigate('/toolbox-talk-template');
+  };
+
+  const handleOpenWHSSLAM = () => {
+    // Navigate to WHS SLAM (placeholder)
+    navigate('/whs-slam');
+  };
+
+  const handleOpenWHSJSEA = () => {
+    // Navigate to WHS JSEA (placeholder)
+    navigate('/whs-jsea');
   };
 
   return (
@@ -86,10 +101,21 @@ export default function CredentialsPage() {
 
           </div>
 
-          {/* Right Column - SWMS Creator */}
-          <div className="xl:col-span-1">
-            <Card className="bg-gradient-to-br from-gray-50 to-blue-50 border-gray-200 shadow-lg sticky top-4">
-              <CardContent className="p-6">
+          {/* Right Column - WHS Tools */}
+          <div className="xl:col-span-1 space-y-6">
+            
+            {/* SWMS Creator */}
+            <Card className="relative overflow-hidden bg-gradient-to-br from-blue-50 to-purple-100 border-blue-200 shadow-lg">
+              {/* Animated Background Dots */}
+              <div className="absolute inset-0 pointer-events-none z-20">
+                <div className="absolute w-3 h-3 bg-white/80 rounded-full animate-pulse top-4 left-6 shadow-sm"></div>
+                <div className="absolute w-2 h-2 bg-yellow-200/90 rounded-full animate-pulse top-8 right-8 shadow-sm" style={{animationDelay: '0.5s'}}></div>
+                <div className="absolute w-4 h-4 bg-white/70 rounded-full animate-pulse bottom-12 left-4 shadow-sm" style={{animationDelay: '1s'}}></div>
+                <div className="absolute w-2 h-2 bg-pink-200/90 rounded-full animate-pulse top-12 right-12 shadow-sm" style={{animationDelay: '1.5s'}}></div>
+                <div className="absolute w-3 h-3 bg-cyan-200/80 rounded-full animate-pulse bottom-6 right-4 shadow-sm" style={{animationDelay: '2s'}}></div>
+              </div>
+              
+              <CardContent className="relative z-30 p-6">
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex items-center gap-3">
                     <div className="p-2 bg-blue-100 rounded-lg">
@@ -105,7 +131,7 @@ export default function CredentialsPage() {
                 </div>
                 
                 <p className="text-gray-600 mb-6 leading-relaxed">
-                  AI-powered Safe Work Method Statement generator for construction projects and risk assessments
+                  (standard mandatory risk control measures each worker must abide by)
                 </p>
                 
                 <Button 
@@ -116,6 +142,124 @@ export default function CredentialsPage() {
                 </Button>
               </CardContent>
             </Card>
+
+            {/* Toolbox Talk Template */}
+            <Card className="relative overflow-hidden bg-gradient-to-br from-green-50 to-teal-100 border-green-200 shadow-lg">
+              {/* Animated Background Dots */}
+              <div className="absolute inset-0 pointer-events-none z-20">
+                <div className="absolute w-3 h-3 bg-white/80 rounded-full animate-pulse top-4 left-6 shadow-sm"></div>
+                <div className="absolute w-2 h-2 bg-green-200/90 rounded-full animate-pulse top-8 right-8 shadow-sm" style={{animationDelay: '0.5s'}}></div>
+                <div className="absolute w-4 h-4 bg-white/70 rounded-full animate-pulse bottom-12 left-4 shadow-sm" style={{animationDelay: '1s'}}></div>
+                <div className="absolute w-2 h-2 bg-teal-200/90 rounded-full animate-pulse top-12 right-12 shadow-sm" style={{animationDelay: '1.5s'}}></div>
+                <div className="absolute w-3 h-3 bg-green-300/80 rounded-full animate-pulse bottom-6 right-4 shadow-sm" style={{animationDelay: '2s'}}></div>
+              </div>
+              
+              <CardContent className="relative z-30 p-6">
+                <div className="flex items-start justify-between mb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-green-100 rounded-lg">
+                      <MessageSquare className="h-6 w-6 text-green-600" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-semibold text-gray-900">Toolbox Talk Template</h3>
+                    </div>
+                  </div>
+                  <div className="p-2 bg-orange-100 rounded-lg">
+                    <ExternalLink className="h-4 w-4 text-orange-600" />
+                  </div>
+                </div>
+                
+                <p className="text-gray-600 mb-6 leading-relaxed">
+                  Generate professional toolbox talk templates for team safety meetings and hazard discussions
+                </p>
+                
+                <Button 
+                  onClick={handleOpenToolboxTalk}
+                  className="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-4 rounded-lg transition-colors"
+                >
+                  Open Tool
+                </Button>
+              </CardContent>
+            </Card>
+
+            {/* WHS SLAM */}
+            <Card className="relative overflow-hidden bg-gradient-to-br from-red-50 to-pink-100 border-red-200 shadow-lg">
+              {/* Animated Background Dots */}
+              <div className="absolute inset-0 pointer-events-none z-20">
+                <div className="absolute w-3 h-3 bg-white/80 rounded-full animate-pulse top-4 left-6 shadow-sm"></div>
+                <div className="absolute w-2 h-2 bg-red-200/90 rounded-full animate-pulse top-8 right-8 shadow-sm" style={{animationDelay: '0.5s'}}></div>
+                <div className="absolute w-4 h-4 bg-white/70 rounded-full animate-pulse bottom-12 left-4 shadow-sm" style={{animationDelay: '1s'}}></div>
+                <div className="absolute w-2 h-2 bg-pink-200/90 rounded-full animate-pulse top-12 right-12 shadow-sm" style={{animationDelay: '1.5s'}}></div>
+                <div className="absolute w-3 h-3 bg-red-300/80 rounded-full animate-pulse bottom-6 right-4 shadow-sm" style={{animationDelay: '2s'}}></div>
+              </div>
+              
+              <CardContent className="relative z-30 p-6">
+                <div className="flex items-start justify-between mb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-red-100 rounded-lg">
+                      <Shield className="h-6 w-6 text-red-600" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-semibold text-gray-900">WHS SLAM</h3>
+                    </div>
+                  </div>
+                  <div className="p-2 bg-orange-100 rounded-lg">
+                    <ExternalLink className="h-4 w-4 text-orange-600" />
+                  </div>
+                </div>
+                
+                <p className="text-gray-600 mb-6 leading-relaxed">
+                  Stop, Look, Assess & Manage (required before every activity / task)
+                </p>
+                
+                <Button 
+                  onClick={handleOpenWHSSLAM}
+                  className="w-full bg-red-600 hover:bg-red-700 text-white font-medium py-3 px-4 rounded-lg transition-colors"
+                >
+                  Open Tool
+                </Button>
+              </CardContent>
+            </Card>
+
+            {/* WHS JSEA */}
+            <Card className="relative overflow-hidden bg-gradient-to-br from-orange-50 to-yellow-100 border-orange-200 shadow-lg">
+              {/* Animated Background Dots */}
+              <div className="absolute inset-0 pointer-events-none z-20">
+                <div className="absolute w-3 h-3 bg-white/80 rounded-full animate-pulse top-4 left-6 shadow-sm"></div>
+                <div className="absolute w-2 h-2 bg-orange-200/90 rounded-full animate-pulse top-8 right-8 shadow-sm" style={{animationDelay: '0.5s'}}></div>
+                <div className="absolute w-4 h-4 bg-white/70 rounded-full animate-pulse bottom-12 left-4 shadow-sm" style={{animationDelay: '1s'}}></div>
+                <div className="absolute w-2 h-2 bg-yellow-200/90 rounded-full animate-pulse top-12 right-12 shadow-sm" style={{animationDelay: '1.5s'}}></div>
+                <div className="absolute w-3 h-3 bg-orange-300/80 rounded-full animate-pulse bottom-6 right-4 shadow-sm" style={{animationDelay: '2s'}}></div>
+              </div>
+              
+              <CardContent className="relative z-30 p-6">
+                <div className="flex items-start justify-between mb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-orange-100 rounded-lg">
+                      <ClipboardList className="h-6 w-6 text-orange-600" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-semibold text-gray-900">WHS JSEA</h3>
+                    </div>
+                  </div>
+                  <div className="p-2 bg-orange-100 rounded-lg">
+                    <ExternalLink className="h-4 w-4 text-orange-600" />
+                  </div>
+                </div>
+                
+                <p className="text-gray-600 mb-6 leading-relaxed">
+                  Job Safety and Environmental Analysis tool for comprehensive workplace risk assessment and control
+                </p>
+                
+                <Button 
+                  onClick={handleOpenWHSJSEA}
+                  className="w-full bg-orange-600 hover:bg-orange-700 text-white font-medium py-3 px-4 rounded-lg transition-colors"
+                >
+                  Open Tool
+                </Button>
+              </CardContent>
+            </Card>
+
           </div>
 
         </div>
