@@ -1,0 +1,65 @@
+/* Header Text and Tick Animations */
+
+/* Text sliding and fading in animation */
+@keyframes slideInFadeText {
+  0% {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  70% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Green tick animation - slides in with text and changes from white to green */
+@keyframes tickSlideInAndTurnGreen {
+  0% {
+    opacity: 0;
+    transform: translateX(-30px) scale(0);
+    color: white;
+  }
+  70% {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+    color: white;
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+    color: #22c55e;
+  }
+}
+
+/* Green tick pulse - subtle pulse while staying green */
+@keyframes tickPulse {
+  0%, 100% {
+    color: #22c55e;
+    transform: scale(1);
+  }
+  50% {
+    color: #16a34a;
+    transform: scale(1.05);
+  }
+}
+
+/* Animation classes */
+.animate-slide-in-text {
+  animation: slideInFadeText 0.8s ease-out;
+}
+
+.animate-tick-appear {
+  animation: tickSlideInAndTurnGreen 0.8s ease-out;
+  animation-delay: 0s; /* Slides in with the text */
+  animation-fill-mode: both;
+  color: white; /* Initial state is white */
+}
+
+.animate-tick-pulse {
+  animation: tickPulse 2s ease-in-out infinite;
+  animation-delay: 0.8s; /* Starts after both text and tick finish sliding in */
+} 

@@ -25,6 +25,7 @@ const TestMapsPage = lazy(() => import('@/pages/test-maps'));
 const GoogleCloudFixPage = lazy(() => import('@/pages/google-cloud-fix'));
 const TestGoogleMapsPage = lazy(() => import('@/pages/TestGoogleMaps'));
 const JobMapTestPage = lazy(() => import('@/pages/JobMapTest'));
+const ToolboxTalkTemplatePage = lazy(() => import('@/pages/ToolboxTalkTemplate'));
 
 // Workflow Dashboard
 const WorkflowDashboard = lazy(() => import('@/components/workflow/WorkflowDashboard').then(module => ({ default: module.default })));
@@ -287,6 +288,8 @@ const routeObjects: RouteObject[] = [
           { path: "/networks", element: <SuspenseWrapper><NetworksPage /></SuspenseWrapper> },
           // Credentials route
           { path: "/credentials", element: <SuspenseWrapper><CredentialsPage /></SuspenseWrapper> },
+          // Toolbox Talk Template route
+          { path: "/toolbox-talk-template", element: <SuspenseWrapper><ToolboxTalkTemplatePage /></SuspenseWrapper> },
           // Debug Maps route
           { path: "/debug-maps", element: <SuspenseWrapper><DebugMapsPage /></SuspenseWrapper> },
           // Test Maps route

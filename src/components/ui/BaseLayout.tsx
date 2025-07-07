@@ -84,10 +84,11 @@ export function BaseLayout({
 
           {/* Main Content */}
           <main className={cn(
-            "min-h-screen h-screen w-full bg-[#f0f4fa] dark:bg-slate-900 flex flex-col",
+            "min-h-screen h-screen w-full flex flex-col",
             "transition-all duration-300 ease-in-out",
             sidebarOpen ? "md:pl-[240px]" : "md:pl-[64px]",
-            isMobile ? "pl-0" : ""
+            isMobile ? "pl-0" : "",
+            className || "bg-[#f0f4fa] dark:bg-slate-900"
           )}>
             <MainContent 
               sidebarOpen={sidebarOpen}

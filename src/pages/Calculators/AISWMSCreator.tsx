@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { AppLayout } from '@/components/ui/AppLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -6,12 +7,13 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
-import { Shield, AlertTriangle, FileText, Brain, Zap, CheckCircle, Plus, X, Download, Eye } from 'lucide-react';
+import { Shield, AlertTriangle, FileText, Brain, Zap, CheckCircle, Plus, X, Download, Eye, ArrowLeft } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 
 const AISWMSCreator = () => {
+  const navigate = useNavigate();
   const [projectInfo, setProjectInfo] = useState({
     projectName: '',
     location: '',
@@ -857,7 +859,20 @@ const AISWMSCreator = () => {
   return (
     <AppLayout>
       {/* Blue Gradient Header with Animated Text and Helmet */}
-      <div className="bg-gradient-to-r from-blue-600 via-blue-700 to-purple-700 text-white relative overflow-hidden">
+      <div className="bg-gradient-to-r from-blue-600 via-blue-700 to-purple-700 text-white relative overflow-hidden -mt-6 pt-10">
+        {/* Back Button - Overlaying the gradient */}
+        <div className="absolute top-4 left-4 z-50">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => navigate('/credentials')}
+            className="flex items-center gap-2 text-white/80 hover:text-white hover:bg-white/10 backdrop-blur-sm"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back to Credentials
+          </Button>
+        </div>
+
         {/* Animated Background Dots */}
         <div className="absolute inset-0 opacity-30">
           <div className="absolute top-4 left-8 w-2 h-2 bg-white rounded-full animate-pulse"></div>

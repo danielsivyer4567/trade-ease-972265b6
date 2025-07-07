@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AppLayout } from '@/components/ui/AppLayout';
-import { toast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -267,22 +267,14 @@ const AISWMSCreatorPage = () => {
     // Validate file type for logo
     if (fileType === 'logo') {
       if (!file.type.startsWith('image/')) {
-        toast({
-          title: "Invalid file type",
-          description: "Please select an image file (PNG, JPG, SVG, etc.)",
-          variant: "destructive",
-        });
+        toast.error("Invalid file type - Please select an image file (PNG, JPG, SVG, etc.)");
         return;
       }
     }
 
     // Validate file size (2MB limit)
     if (file.size > 2 * 1024 * 1024) {
-      toast({
-        title: "File too large", 
-        description: "File size must be less than 2MB",
-        variant: "destructive",
-      });
+      toast.error("File too large - File size must be less than 2MB");
       return;
     }
 
@@ -298,18 +290,11 @@ const AISWMSCreatorPage = () => {
         }
       }));
       
-      toast({
-        title: "File uploaded successfully",
-        description: `${file.name} has been uploaded`,
-      });
+      toast.success(`File uploaded successfully - ${file.name} has been uploaded`);
     };
     
     reader.onerror = () => {
-      toast({
-        title: "Upload failed",
-        description: "There was an error reading the file",
-        variant: "destructive",
-      });
+      toast.error("Upload failed - There was an error reading the file");
     };
     
     reader.readAsDataURL(file);
@@ -450,7 +435,7 @@ const AISWMSCreatorPage = () => {
       description: projectDetails.description
     });
     
-    window.location.href = `/calculators/ai-swms-generator?${params.toString()}`;
+    window.location.href = `/calculators/ai-swms?${params.toString()}`;
   };
 
   // Glowing Card wrapper component
@@ -893,31 +878,62 @@ const AISWMSCreatorPage = () => {
                       </div>
                       <Button
                         onClick={() => {
-                          const newJob = {
-                            id: Date.now(),
-                            jobNumber: newJobDetails.jobNumber,
-                            jobName: newJobDetails.jobName,
-                            location: newJobDetails.location,
-                            client: newJobDetails.clientName,
-                            tradeType: newJobDetails.tradeType,
-                            status: 'Planned',
-                            estimatedDuration: newJobDetails.estimatedDuration
-                          };
-                          handleJobSelection(newJob);
-                          setShowNewJobForm(false);
-                          // Clear the form for next use
-                          setNewJobDetails({
-                            jobNumber: '',
-                            jobName: '',
-                            location: '',
-                            clientName: '',
-                            tradeType: '',
-                            startDate: '',
-                            estimatedDuration: ''
-                          });
+                          // Validate required fields
+                          if (!newJobDetails.jobNumber?.trim()) {
+                            toast.error("Job Number is required");
+                            return;
+                          }
+                          if (!newJobDetails.jobName?.trim()) {
+                            toast.error("Job Name is required");
+                            return;
+                          }
+                          if (!newJobDetails.location?.trim()) {
+                            toast.error("Location is required");
+                            return;
+                          }
+                          if (!newJobDetails.clientName?.trim()) {
+                            toast.error("Client Name is required");
+                            return;
+                          }
+                          if (!newJobDetails.tradeType?.trim()) {
+                            toast.error("Trade Type is required");
+                            return;
+                          }
+
+                          try {
+                            const newJob = {
+                              id: Date.now(),
+                              jobNumber: newJobDetails.jobNumber.trim(),
+                              jobName: newJobDetails.jobName.trim(),
+                              location: newJobDetails.location.trim(),
+                              client: newJobDetails.clientName.trim(),
+                              tradeType: newJobDetails.tradeType.trim(),
+                              status: 'Planned',
+                              estimatedDuration: newJobDetails.estimatedDuration?.trim() || ''
+                            };
+                            
+                            handleJobSelection(newJob);
+                            setShowNewJobForm(false);
+                            
+                            // Clear the form for next use
+                            setNewJobDetails({
+                              jobNumber: '',
+                              jobName: '',
+                              location: '',
+                              clientName: '',
+                              tradeType: '',
+                              startDate: '',
+                              estimatedDuration: ''
+                            });
+                            
+                            toast.success(`Job "${newJob.jobName}" created successfully!`);
+                          } catch (error) {
+                            console.error('Error creating job:', error);
+                            toast.error("Failed to create job. Please try again.");
+                          }
                         }}
                         className="w-full bg-blue-600 hover:bg-blue-700 text-white"
-                        disabled={!newJobDetails.jobNumber || !newJobDetails.jobName}
+                        disabled={!newJobDetails.jobNumber?.trim() || !newJobDetails.jobName?.trim() || !newJobDetails.location?.trim() || !newJobDetails.clientName?.trim() || !newJobDetails.tradeType?.trim()}
                       >
                         Create Job
                       </Button>
