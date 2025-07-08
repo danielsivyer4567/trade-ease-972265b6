@@ -481,7 +481,7 @@ export default function DashboardPage() {
             <div className="bg-white/80 backdrop-blur-sm rounded-lg shadow-sm p-4 mb-4">
               {/* Job Management Tabs */}
               <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                <TabsList className="flex space-x-0 mb-4 border-b-0 pb-0 w-full bg-transparent justify-start overflow-x-auto">
+                <TabsList className="flex space-x-0 mb-4 border-b-0 pb-0 w-full bg-transparent justify-between overflow-x-auto">
                   <TabsTrigger value="analytics" className="flex items-center gap-2 px-4 py-3 rounded-t-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-600 data-[state=active]:text-white data-[state=active]:font-medium data-[state=inactive]:text-gray-600 data-[state=inactive]:bg-gray-100 data-[state=inactive]:hover:bg-gray-200 transition-all duration-200">
                     <BarChart3 className="w-4 h-4" />
                     Analytics
