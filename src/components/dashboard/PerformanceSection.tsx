@@ -1,9 +1,21 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { Gauge, TrendingUp, Award, Clock, Target, ArrowUp, ArrowDown } from 'lucide-react';
+import { Gauge, TrendingUp, Award, Clock, Target, ArrowUp, ArrowDown, Activity } from 'lucide-react';
 import { cn } from "@/lib/utils";
 import { GlassCard } from "@/components/ui/GlassCard";
+
+// Unified color palette matching StatisticsSection
+const colors = {
+  primary: '#1e40af',    // Modern blue
+  secondary: '#3b82f6',  // Lighter blue
+  tertiary: '#60a5fa',   // Even lighter blue
+  accent: '#10b981',     // Green for positive metrics
+  warning: '#f59e0b',    // Amber for attention items
+  neutral: '#6b7280',    // Gray for secondary info
+  background: '#f8fafc', // Light gray background
+  border: '#e2e8f0'      // Subtle border color
+};
 
 // Sample data for charts
 const performanceData = [
@@ -25,26 +37,29 @@ const teamPerformance = [
 
 const KpiCard = ({ title, value, icon, description, trend, percentage }) => {
   const TrendIcon = trend === 'up' ? ArrowUp : ArrowDown;
-  const trendColor = trend === 'up' ? 'text-green-500' : 'text-red-500';
+  const trendColor = trend === 'up' ? 'text-green-600' : 'text-red-600';
   
   return (
-    <Card className="h-full">
-      <CardHeader className="flex flex-row items-center justify-between pb-2">
-        <CardTitle className="text-sm font-medium">{title}</CardTitle>
-        {React.createElement(icon, { className: "h-5 w-5 text-gray-500" })}
+    <GlassCard className="h-full border-0 shadow-sm hover:shadow-md transition-shadow duration-200">
+      <CardHeader className="flex flex-row items-center justify-between pb-3">
+        <CardTitle className="text-sm font-medium text-gray-700">{title}</CardTitle>
+        <div className="p-2 bg-blue-50 rounded-lg">
+          {React.createElement(icon, { className: "h-4 w-4 text-blue-600" })}
+        </div>
       </CardHeader>
-      <CardContent>
-        <div className="text-2xl font-bold">{value}</div>
+      <CardContent className="pt-0">
+        <div className="text-2xl font-bold text-gray-900 mb-2">{value}</div>
         {description && (
-          <div className="flex items-center pt-1">
+          <div className="flex items-center">
             {trend && <TrendIcon className={cn("h-4 w-4 mr-1", trendColor)} />}
-            <p className={cn("text-xs", trend && trendColor)}>
-              {percentage} <span className="text-gray-500">{description}</span>
+            <p className="text-xs text-gray-600">
+              <span className={cn("font-medium", trend && trendColor)}>{percentage}</span>
+              <span className="ml-1">{description}</span>
             </p>
           </div>
         )}
       </CardContent>
-    </Card>
+    </GlassCard>
   );
 };
 
@@ -53,19 +68,19 @@ const PerformanceMetric = ({ title, value, target, color }) => {
   const isOnTarget = percentage >= 100;
   
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-3 p-4 bg-white rounded-lg border border-gray-100">
       <div className="flex justify-between items-center">
-        <span className="text-sm font-medium">{title}</span>
+        <span className="text-sm font-medium text-gray-700">{title}</span>
         <span className={cn(
-          "text-xs font-medium",
-          isOnTarget ? "text-green-500" : "text-amber-500"
+          "text-xs font-semibold px-2 py-1 rounded-full",
+          isOnTarget ? "text-green-700 bg-green-100" : "text-amber-700 bg-amber-100"
         )}>
           {value}/{target} ({percentage}%)
         </span>
       </div>
-      <div className="w-full bg-gray-200 rounded-full h-2.5">
+      <div className="w-full bg-gray-200 rounded-full h-2">
         <div 
-          className={cn("h-2.5 rounded-full", color)} 
+          className={cn("h-2 rounded-full transition-all duration-500", color)} 
           style={{ width: `${Math.min(percentage, 100)}%` }}
         ></div>
       </div>
@@ -75,11 +90,20 @@ const PerformanceMetric = ({ title, value, target, color }) => {
 
 export function PerformanceSection() {
   return (
-    <div className="space-y-6">
-      <h2 className="text-2xl font-bold">Performance Dashboard</h2>
+    <div className="space-y-8">
+      {/* Header Section */}
+      <div className="flex items-center gap-3 pb-2 border-b border-gray-200">
+        <div className="p-2 bg-green-50 rounded-lg">
+          <Activity className="h-6 w-6 text-green-600" />
+        </div>
+        <div>
+          <h2 className="text-3xl font-bold text-gray-900">Performance Dashboard</h2>
+          <p className="text-gray-600 mt-1">Monitor key metrics and team performance indicators</p>
+        </div>
+      </div>
       
       {/* KPI Cards */}
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
         <KpiCard 
           title="Efficiency Rating" 
           value="92%" 
@@ -115,76 +139,116 @@ export function PerformanceSection() {
       </div>
 
       {/* Main Performance Chart */}
-      <GlassCard>
-        <div className="p-4">
-          <h2 className="text-xl font-semibold mb-4">Efficiency Trends</h2>
-          <div className="h-[300px]">
+      <GlassCard className="border-0 shadow-lg">
+        <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-gray-100">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-white rounded-lg shadow-sm">
+              <TrendingUp className="h-5 w-5 text-blue-600" />
+            </div>
+            <div>
+              <CardTitle className="text-xl font-semibold text-gray-900">Efficiency Trends</CardTitle>
+              <p className="text-gray-600 mt-1">Track performance over time compared to targets and industry standards</p>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent className="p-6">
+          <div className="h-[350px]">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart
                 data={performanceData}
-                margin={{
-                  top: 5,
-                  right: 10,
-                  left: 10,
-                  bottom: 5,
-                }}
+                margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
               >
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="month" fontSize={12} />
-                <YAxis fontSize={12} domain={[50, 100]} />
-                <Tooltip />
+                <CartesianGrid strokeDasharray="3 3" stroke={colors.border} />
+                <XAxis 
+                  dataKey="month" 
+                  fontSize={12} 
+                  tick={{ fill: colors.neutral }}
+                  stroke={colors.neutral}
+                />
+                <YAxis 
+                  fontSize={12} 
+                  domain={[50, 100]} 
+                  tick={{ fill: colors.neutral }}
+                  stroke={colors.neutral}
+                />
+                <Tooltip 
+                  contentStyle={{ 
+                    backgroundColor: 'white', 
+                    border: `1px solid ${colors.border}`,
+                    borderRadius: '8px',
+                    boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)'
+                  }}
+                />
                 <Legend />
                 <Line 
                   type="monotone" 
                   dataKey="efficiency" 
-                  stroke="#8884d8" 
-                  strokeWidth={2} 
-                  activeDot={{ r: 8 }} 
+                  stroke={colors.primary}
+                  strokeWidth={3} 
+                  dot={{ fill: colors.primary, strokeWidth: 2, r: 6 }} 
                   name="Your Efficiency"
                 />
                 <Line 
                   type="monotone" 
                   dataKey="target" 
-                  stroke="#82ca9d" 
+                  stroke={colors.accent}
                   strokeWidth={2}
                   strokeDasharray="5 5" 
+                  dot={{ fill: colors.accent, strokeWidth: 2, r: 4 }}
                   name="Target"
                 />
                 <Line 
                   type="monotone" 
                   dataKey="industry" 
-                  stroke="#ffc658" 
+                  stroke={colors.warning}
                   strokeWidth={2} 
+                  dot={{ fill: colors.warning, strokeWidth: 2, r: 4 }}
                   name="Industry Average"
                 />
               </LineChart>
             </ResponsiveContainer>
           </div>
-        </div>
+        </CardContent>
       </GlassCard>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Team Performance */}
-        <GlassCard>
-          <div className="p-4">
-            <h2 className="text-xl font-semibold mb-4">Team Performance</h2>
+        <GlassCard className="border-0 shadow-lg">
+          <CardHeader className="bg-gradient-to-r from-green-50 to-emerald-50 border-b border-gray-100">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-white rounded-lg shadow-sm">
+                <TrendingUp className="h-5 w-5 text-green-600" />
+              </div>
+              <div>
+                <CardTitle className="text-xl font-semibold text-gray-900">Team Performance</CardTitle>
+                <p className="text-gray-600 mt-1">Individual team performance scores and trends</p>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent className="p-6">
             <div className="space-y-4">
-              {teamPerformance.map((team) => (
-                <div key={team.name} className="flex items-center justify-between border-b pb-3">
+              {teamPerformance.map((team, index) => (
+                <div key={team.name} className="flex items-center justify-between p-4 bg-white rounded-lg border border-gray-100 hover:border-gray-200 transition-colors">
                   <div className="flex items-center">
-                    <div className="bg-blue-100 p-2 rounded-full mr-3">
-                      <TrendingUp className="h-5 w-5 text-blue-500" />
+                    <div className={cn(
+                      "p-2 rounded-full mr-3",
+                      index === 0 ? "bg-blue-100" : index === 1 ? "bg-green-100" : index === 2 ? "bg-amber-100" : "bg-purple-100"
+                    )}>
+                      <TrendingUp className={cn(
+                        "h-5 w-5",
+                        index === 0 ? "text-blue-600" : index === 1 ? "text-green-600" : index === 2 ? "text-amber-600" : "text-purple-600"
+                      )} />
                     </div>
                     <div>
-                      <p className="font-medium">{team.name}</p>
-                      <p className="text-sm text-gray-500">Performance Score</p>
+                      <p className="font-medium text-gray-900">{team.name}</p>
+                      <p className="text-sm text-gray-600">Performance Score</p>
                     </div>
                   </div>
-                  <div className="flex items-center">
-                    <span className="text-xl font-bold mr-2">{team.score}</span>
+                  <div className="flex items-center gap-3">
+                    <span className="text-2xl font-bold text-gray-900">{team.score}</span>
                     <span className={cn(
-                      "flex items-center text-xs",
-                      team.trend === "up" ? "text-green-500" : "text-red-500"
+                      "flex items-center text-sm font-medium px-2 py-1 rounded-full",
+                      team.trend === "up" ? "text-green-700 bg-green-100" : "text-red-700 bg-red-100"
                     )}>
                       {team.trend === "up" ? 
                         <ArrowUp className="h-4 w-4 mr-1" /> : 
@@ -196,40 +260,50 @@ export function PerformanceSection() {
                 </div>
               ))}
             </div>
-          </div>
+          </CardContent>
         </GlassCard>
 
         {/* Performance Metrics */}
-        <GlassCard>
-          <div className="p-4">
-            <h2 className="text-xl font-semibold mb-4">Performance Metrics</h2>
-            <div className="space-y-6">
+        <GlassCard className="border-0 shadow-lg">
+          <CardHeader className="bg-gradient-to-r from-purple-50 to-violet-50 border-b border-gray-100">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-white rounded-lg shadow-sm">
+                <Target className="h-5 w-5 text-purple-600" />
+              </div>
+              <div>
+                <CardTitle className="text-xl font-semibold text-gray-900">Performance Metrics</CardTitle>
+                <p className="text-gray-600 mt-1">Key performance indicators and progress tracking</p>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent className="p-6">
+            <div className="space-y-4">
               <PerformanceMetric 
                 title="On-Time Completion" 
                 value={92} 
                 target={90} 
-                color="bg-blue-600"
+                color="bg-gradient-to-r from-blue-500 to-blue-600"
               />
               <PerformanceMetric 
                 title="Budget Adherence" 
                 value={88} 
                 target={95} 
-                color="bg-amber-500"
+                color="bg-gradient-to-r from-amber-500 to-amber-600"
               />
               <PerformanceMetric 
                 title="Safety Compliance" 
                 value={100} 
                 target={100} 
-                color="bg-green-500"
+                color="bg-gradient-to-r from-green-500 to-green-600"
               />
               <PerformanceMetric 
                 title="Quality Standards" 
                 value={96} 
                 target={90} 
-                color="bg-indigo-500"
+                color="bg-gradient-to-r from-purple-500 to-purple-600"
               />
             </div>
-          </div>
+          </CardContent>
         </GlassCard>
       </div>
     </div>

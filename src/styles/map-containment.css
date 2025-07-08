@@ -1,0 +1,51 @@
+/* Map containment styles to prevent z-index issues */
+.map-container {
+  isolation: isolate;
+  contain: layout style paint;
+  position: relative;
+  z-index: 1;
+}
+
+/* Ensure map canvas stays within its bounds */
+.map-container .gm-style {
+  position: relative !important;
+}
+
+/* Fix for Google Maps canvas z-index */
+.map-container .gm-style > div:first-child {
+  position: relative !important;
+  z-index: 0 !important;
+}
+
+/* Ensure info windows don't exceed container bounds */
+.map-container .gm-style .gm-style-iw-c {
+  z-index: 999 !important;
+  max-width: none !important;
+}
+
+/* Tab content should be above maps */
+[role="tabpanel"] {
+  position: relative;
+  z-index: 10;
+}
+
+/* Navigation and header elements should be above maps */
+nav, header, [data-testid="navigation"] {
+  position: relative;
+  z-index: 20;
+}
+
+/* Modal and overlay elements should be above everything */
+.modal, .overlay, [role="dialog"] {
+  z-index: 50;
+}
+
+/* Dropdown menus should be above maps */
+.dropdown-menu, [role="menu"], [role="listbox"] {
+  z-index: 30;
+}
+
+/* Toast notifications should be above everything */
+.toast, [data-sonner-toast] {
+  z-index: 100;
+} 

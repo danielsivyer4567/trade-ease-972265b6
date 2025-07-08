@@ -18,6 +18,7 @@ import './pages/Workflow/components/workflow.css';
 import './styles/deprecation-fixes.css'; // Override deprecated CSS properties
 import './styles/workflow-visibility-fix.css'; // Ensure workflow nodes are always visible
 import './styles/workflow-interaction-fix.css'; // Ensure workflow canvas is interactive
+import './styles/map-containment.css'; // Fix z-index issues with maps
 
 const queryClient = new QueryClient({
   defaultOptions: {
