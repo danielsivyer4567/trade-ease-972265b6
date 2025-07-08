@@ -116,6 +116,8 @@ const AISWMSCreatorPage = lazy(() => import('@/pages/Calculators/AISWMSCreator/i
 
 // Demo pages
 const AnimatedStageDemo = lazy(() => import('@/pages/AnimatedStageDemo'));
+const ButtonRippleDemo = lazy(() => import('@/pages/ButtonRippleDemo'));
+const SimpleButtonTest = lazy(() => import('@/pages/SimpleButtonTest'));
 
 // Settings
 const SettingsPage = lazy(() => import('@/pages/Settings'));
@@ -302,6 +304,10 @@ const routeObjects: RouteObject[] = [
           { path: "/job-map-test", element: <SuspenseWrapper><JobMapTestPage /></SuspenseWrapper> },
           // Animated Stage Demo route
           { path: "/animated-stage-demo", element: <SuspenseWrapper><AnimatedStageDemo /></SuspenseWrapper> },
+          // Button Ripple Demo route
+          { path: "/button-ripple-demo", element: <SuspenseWrapper><ButtonRippleDemo /></SuspenseWrapper> },
+          // Simple Button Test route
+          { path: "/simple-button-test", element: <SuspenseWrapper><SimpleButtonTest /></SuspenseWrapper> },
           // Add the route to the settings routes
           {
             path: "/settings/integrations/database",

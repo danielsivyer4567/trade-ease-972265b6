@@ -1,0 +1,27 @@
+/* Button Ripple Animations */
+@keyframes ripple-effect {
+  0% {
+    transform: scale(0);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(0.5);
+    opacity: 0.4;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 0;
+  }
+}
+
+/* Fallback class if needed */
+.animate-ripple {
+  animation: ripple-effect 600ms ease-out;
+  animation-fill-mode: forwards;
+}
+
+/* Debug class to make ripples more visible */
+.debug-ripple {
+  border: 2px solid red !important;
+  background-color: rgba(255, 0, 0, 0.5) !important;
+} 
