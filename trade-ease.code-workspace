@@ -1,0 +1,23 @@
+{
+  "folders": [
+    {
+      "path": "."
+    }
+  ],
+  "settings": {
+    "terminal.integrated.defaultProfile.windows": "Ubuntu-22.04 (WSL)",
+    "remote.WSL.fileWatcher.polling": true,
+    "remote.WSL.fileWatcher.pollingInterval": 1000,
+    "terminal.integrated.profiles.windows": {
+      "Ubuntu-22.04 (WSL)": {
+        "path": "C:\\Windows\\System32\\wsl.exe",
+        "args": ["-d", "Ubuntu-22.04"]
+      }
+    }
+  },
+  "extensions": {
+    "recommendations": [
+      "ms-vscode-remote.remote-wsl"
+    ]
+  }
+} 
