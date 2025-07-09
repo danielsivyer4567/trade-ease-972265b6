@@ -488,7 +488,7 @@ export default function DashboardPage() {
                   </TabsTrigger>
                   <TabsTrigger value="jobs" className="flex items-center gap-2 px-4 py-3 rounded-t-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-600 data-[state=active]:text-white data-[state=active]:font-medium data-[state=inactive]:text-gray-600 data-[state=inactive]:bg-gray-100 data-[state=inactive]:hover:bg-gray-200 transition-all duration-200">
                     <Clock className="w-4 h-4" />
-                    Queued Jobs
+                    Jobs
                   </TabsTrigger>
                   <TabsTrigger value="team" className="flex items-center gap-2 px-4 py-3 rounded-t-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-600 data-[state=active]:text-white data-[state=active]:font-medium data-[state=inactive]:text-gray-600 data-[state=inactive]:bg-gray-100 data-[state=inactive]:hover:bg-gray-200 transition-all duration-200">
                     <Users className="w-4 h-4" />
