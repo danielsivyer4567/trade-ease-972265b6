@@ -1,0 +1,20 @@
+{
+  "mcpServers": {
+    "trade-ease-mcp": {
+      "command": "node",
+      "args": [
+        "C:\\Users\\danie\\Downloads\\dansversion\\trade-ease-972265b6\\trade-ease-mcp\\build\\index.js"
+      ],
+      "env": {
+        "NODE_ENV": "production"
+      }
+    },
+    "filesystem": {
+      "command": "npx",
+      "args": [
+        "@modelcontextprotocol/server-filesystem",
+        "C:\\Users\\danie\\Downloads\\dansversion\\trade-ease-972265b6"
+      ]
+    }
+  }
+} 
