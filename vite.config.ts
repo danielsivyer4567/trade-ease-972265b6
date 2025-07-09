@@ -12,7 +12,7 @@ export default defineConfig(({ mode }) => {
     server: {
       port: 8080,
       host: '0.0.0.0',
-      open: true,
+      open: false, // Disable auto-open in WSL
       strictPort: false,
       hmr: {
         host: 'localhost',
@@ -21,7 +21,10 @@ export default defineConfig(({ mode }) => {
         timeout: 5000
       },
       watch: {
-        usePolling: true,
+        usePolling: true, // Enable polling for WSL
+        interval: 1000,
+        binaryInterval: 1000,
+        ignored: ['**/node_modules/**', '**/.git/**']
       },
       middlewareMode: false,
       proxy: {
@@ -197,6 +200,11 @@ export default defineConfig(({ mode }) => {
       '__REACT_REFRESH_RUNTIME__': JSON.stringify(true)
     },
     base: '/',
-    publicDir: 'public'
+    publicDir: 'public',
+    // WSL-specific optimizations
+    esbuild: {
+      target: 'es2020',
+      logOverride: { 'this-is-undefined-in-esm': 'silent' }
+    }
   };
 });
