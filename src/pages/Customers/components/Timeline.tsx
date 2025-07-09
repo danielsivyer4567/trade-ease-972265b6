@@ -79,7 +79,7 @@ export function Timeline({ steps, onStepAction }: TimelineProps) {
   return (
     <>
       <style>{flashingRedAnimation}</style>
-      <div className="relative flex justify-center pt-3 pb-12 bg-slate-50 min-h-screen overflow-hidden">
+      <div className="relative flex justify-center pt-3 pb-12 bg-slate-50 h-full overflow-hidden">
         {/* Static background image */}
         <motion.div
           initial={{ opacity: 0 }}
