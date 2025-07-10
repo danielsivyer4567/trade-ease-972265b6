@@ -17,6 +17,7 @@ import JobMap from "@/components/JobMap";
 import { ActiveJobCards } from "@/components/ActiveJobCards";
 import { StatisticsSection } from "@/components/dashboard/StatisticsSection";
 import { KeyStatistics } from "@/components/statistics/KeyStatistics";
+import ModernFinancialDashboard from "@/pages/TradeDash/components/ModernFinancialDashboard";
 
 export default function DashboardPage() {
   const [calendarDate, setCalendarDate] = useState<Date | undefined>(new Date());
@@ -484,7 +485,7 @@ export default function DashboardPage() {
                 <TabsList className="flex space-x-0 mb-4 border-b-0 pb-0 w-full bg-transparent justify-between overflow-x-auto">
                   <TabsTrigger value="analytics" className="flex items-center gap-2 px-4 py-3 rounded-t-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-600 data-[state=active]:text-white data-[state=active]:font-medium data-[state=inactive]:text-gray-600 data-[state=inactive]:bg-gray-100 data-[state=inactive]:hover:bg-gray-200 transition-all duration-200">
                     <BarChart3 className="w-4 h-4" />
-                    Analytics
+                    Stats
                   </TabsTrigger>
                   <TabsTrigger value="jobs" className="flex items-center gap-2 px-4 py-3 rounded-t-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-600 data-[state=active]:text-white data-[state=active]:font-medium data-[state=inactive]:text-gray-600 data-[state=inactive]:bg-gray-100 data-[state=inactive]:hover:bg-gray-200 transition-all duration-200">
                     <Clock className="w-4 h-4" />
@@ -506,10 +507,6 @@ export default function DashboardPage() {
                     <FileText className="w-4 h-4" />
                     Notes
                   </TabsTrigger>
-                  <TabsTrigger value="finance" className="flex items-center gap-2 px-4 py-3 rounded-t-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-600 data-[state=active]:text-white data-[state=active]:font-medium data-[state=inactive]:text-gray-600 data-[state=inactive]:bg-gray-100 data-[state=inactive]:hover:bg-gray-200 transition-all duration-200">
-                    <DollarSign className="w-4 h-4" />
-                    Finance
-                  </TabsTrigger>
                   <TabsTrigger value="forms" className="flex items-center gap-2 px-4 py-3 rounded-t-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-600 data-[state=active]:text-white data-[state=active]:font-medium data-[state=inactive]:text-gray-600 data-[state=inactive]:bg-gray-100 data-[state=inactive]:hover:bg-gray-200 transition-all duration-200">
                     <ClipboardList className="w-4 h-4" />
                     Forms
@@ -523,6 +520,7 @@ export default function DashboardPage() {
                 {/* Tab Contents */}
                 <TabsContent value="analytics" className="mt-0">
                   <div className="space-y-6">
+                    <ModernFinancialDashboard />
                     <StatisticsSection />
                   </div>
                 </TabsContent>
@@ -576,14 +574,6 @@ export default function DashboardPage() {
                   </div>
                 </TabsContent>
 
-                <TabsContent value="finance" className="mt-0">
-                  <div className="text-center p-4 bg-gray-50 rounded-lg">
-                    <p className="text-gray-600 mb-2">Financial Overview</p>
-                    <Button onClick={() => navigate("/financials")} variant="outline" className="mt-2">
-                      View Financials
-                    </Button>
-                  </div>
-                </TabsContent>
 
                 <TabsContent value="forms" className="mt-0">
                   <div className="text-center p-4 bg-gray-50 rounded-lg">

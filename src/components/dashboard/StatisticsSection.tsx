@@ -68,7 +68,12 @@ const performanceLineData = [
 export function StatisticsSection() {
   
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 p-6 bg-gradient-to-br from-gray-50 to-blue-50" 
+         style={{
+           backgroundImage: `linear-gradient(rgba(156, 163, 175, 0.15) 1px, transparent 1px), 
+                           linear-gradient(90deg, rgba(156, 163, 175, 0.15) 1px, transparent 1px)`,
+           backgroundSize: '40px 40px'
+         }}>
       {/* Header Section */}
       <div className="flex items-center gap-3 pb-2 border-b border-gray-200">
         <div className="p-2 bg-blue-50 rounded-lg">
