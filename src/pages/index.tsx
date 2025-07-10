@@ -31,70 +31,61 @@ export default function DashboardPage() {
   const [isQueuedSectionDragOver, setIsQueuedSectionDragOver] = useState(false);
   const [selectedJobs, setSelectedJobs] = useState<string[]>([]);
 
-  // Mock technician data - memoized to prevent unnecessary re-renders
-  const mockTechnicians: Technician[] = useMemo(() => [
-    {
-      id: "1",
-      name: "John Smith",
-      email: "john.smith@tradeease.com",
-      phone: "+1 (555) 123-4567",
-      skills: ["Plumbing", "Electrical", "HVAC"],
-      shift: { start: "8:00 AM", end: "5:00 PM" },
-      isAvailable: true,
-      maxConcurrentJobs: 3,
-      hourlyRate: 45
-    },
-    {
-      id: "2",
-      name: "Sarah Johnson",
-      email: "sarah.johnson@tradeease.com",
-      phone: "+1 (555) 234-5678",
-      skills: ["Carpentry", "Painting", "Flooring"],
-      shift: { start: "7:00 AM", end: "4:00 PM" },
-      isAvailable: true,
-      maxConcurrentJobs: 2,
-      hourlyRate: 50
-    },
-    {
-      id: "3",
-      name: "Mike Davis",
-      email: "mike.davis@tradeease.com",
-      phone: "+1 (555) 345-6789",
-      skills: ["Roofing", "Siding", "Gutters"],
-      shift: { start: "8:00 AM", end: "6:00 PM" },
-      isAvailable: false,
-      maxConcurrentJobs: 4,
-      hourlyRate: 55
-    }
-  ], []);
+  // Real technician data from database
+  const [technicians, setTechnicians] = useState<Technician[]>([]);
 
 
   useEffect(() => {
-    const fetchJobs = async () => {
-      console.log("Fetching jobs from supabase...");
+    const fetchData = async () => {
+      console.log("Fetching data from supabase...");
       setLoading(true);
       try {
-        const { data, error } = await supabase.from('jobs').select('*');
-        console.log("Fetched jobs:", data);
+        // Fetch jobs
+        const { data: jobsData, error: jobsError } = await supabase.from('jobs').select('*');
+        console.log("Fetched jobs:", jobsData);
 
-        console.log("Supabase response:", { data, error });
-        if (error) {
-          console.error("Supabase error:", error);
+        if (jobsError) {
+          console.error("Jobs fetch error:", jobsError);
           toast.error("Failed to fetch jobs");
         } else {
-          setJobs(data || []);
-          if (data && data.length > 0) {
-            setSelectedJob(data[0].id);
+          setJobs(jobsData || []);
+          if (jobsData && jobsData.length > 0) {
+            setSelectedJob(jobsData[0].id);
           }
         }
+
+        // Fetch technicians/team members
+        const { data: techniciansData, error: techniciansError } = await supabase
+          .from('users')
+          .select('*')
+          .eq('role', 'technician');
+
+        if (techniciansError) {
+          console.error("Technicians fetch error:", techniciansError);
+          // Don't show error toast for technicians as it's not critical for dashboard
+        } else {
+          // Transform user data to technician format
+          const transformedTechnicians: Technician[] = (techniciansData || []).map(user => ({
+            id: user.id,
+            name: user.full_name || user.email || 'Unknown',
+            email: user.email || '',
+            phone: user.phone || '',
+            skills: user.skills || [],
+            shift: user.shift || { start: "8:00 AM", end: "5:00 PM" },
+            isAvailable: user.is_available ?? true,
+            maxConcurrentJobs: user.max_concurrent_jobs || 3,
+            hourlyRate: user.hourly_rate || 0
+          }));
+          setTechnicians(transformedTechnicians);
+        }
       } catch (err) {
-        console.error("Error in fetchJobs:", err);
-        toast.error("Failed to fetch jobs");
+        console.error("Error in fetchData:", err);
+        toast.error("Failed to fetch data");
       } finally {
         setLoading(false);
       }
     };
-    fetchJobs();
+    fetchData();
   }, []);
 
   const handleJobClick = useCallback((jobName: string) => {
@@ -277,7 +268,7 @@ export default function DashboardPage() {
         )
       );
 
-      const technician = mockTechnicians.find(t => t.id === technicianId);
+      const technician = technicians.find(t => t.id === technicianId);
       toast.success(`Job assigned to ${technician?.name || 'technician'}`);
     } catch (error) {
       console.error('Error assigning job to technician:', error);
@@ -470,8 +461,8 @@ export default function DashboardPage() {
   }, [transformJobsForActiveCards, filteredJobsForActiveCards]);
 
   const transformedTechnicians = useMemo(() => {
-    return transformTechniciansForActiveCards(mockTechnicians);
-  }, [transformTechniciansForActiveCards, mockTechnicians]);
+    return transformTechniciansForActiveCards(technicians);
+  }, [transformTechniciansForActiveCards, technicians]);
 
   return (
     <BaseLayout showQuickTabs>
@@ -580,7 +571,7 @@ export default function DashboardPage() {
                 <TabsContent value="team" className="mt-0">
                   <div className="text-center p-4 bg-gray-50 rounded-lg">
                     <p className="text-gray-600 mb-2">Team Management</p>
-                    <p className="text-2xl font-bold text-purple-600">{mockTechnicians.length}</p>
+                    <p className="text-2xl font-bold text-purple-600">{technicians.length}</p>
                     <p className="text-sm text-gray-500">Active team members</p>
                     <Button onClick={() => navigate("/teams")} variant="outline" className="mt-2">
                       Manage Team

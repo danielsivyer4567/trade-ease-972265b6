@@ -40,8 +40,7 @@ import { CostSummary } from './components/CostSummary';
 import { EstimateHistory } from './components/EstimateHistory';
 import { EstimateSettings as EstimateSettingsComponent } from './components/EstimateSettings';
 
-// Import sample data
-import { sampleMaterials, sampleLabor, sampleEquipment, sampleSubcontractors, sampleRisks } from './sampleData';
+// No sample data imports - using real data only
 
 const JobCostCalculator = () => {
   const { toast } = useToast();
@@ -232,53 +231,54 @@ const JobCostCalculator = () => {
   const errors = validateEstimate(materials, labor, projectDetails);
   const isValid = errors.length === 0;
 
-  // Load sample data for demonstration
-  const loadSampleData = () => {
+  // Clear all form data
+  const clearAllData = () => {
     setProjectDetails({
-      name: 'Modern Office Building Renovation',
-      client: 'ABC Corporation',
-      location: '123 Business Park Dr, Suite 100',
-      startDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days from now
-      duration: 90, // 90 days duration
-      type: 'commercial',
-      size: 15000,
-      sizeUnit: 'sqft',
+      name: '',
+      client: '',
+      location: '',
+      type: 'Commercial - Office',
+      size: 0,
+      sizeUnit: 'SF',
+      startDate: new Date(),
+      duration: 90,
       complexity: 'medium',
       weatherRisk: false,
-      siteConditions: 'normal',
-      workingHours: 'standard',
+      siteConditions: '',
+      accessRestrictions: '',
+      workingHours: '7AM-5PM Mon-Fri',
       unionRequirements: false
     });
     
-    setMaterials(sampleMaterials);
-    setLabor(sampleLabor);
-    setEquipment(sampleEquipment);
-    setSubcontractors(sampleSubcontractors);
-    setRisks(sampleRisks);
+    setMaterials([]);
+    setLabor([]);
+    setEquipment([]);
+    setSubcontractors([]);
+    setRisks([]);
     
-    // Add some sample overhead
+    // Reset basic overhead items
     setOverhead([
       {
         id: '1',
         category: 'Project Management',
-        description: 'Project manager and coordination',
+        description: 'PM and supervision',
         amount: 0,
         allocation: 'percentage',
-        percentage: 8
+        percentage: 5
       },
       {
         id: '2',
-        category: 'Permits & Fees',
-        description: 'Building permits and inspection fees',
-        amount: 5000,
-        allocation: 'fixed',
-        percentage: 0
+        category: 'Insurance & Bonds',
+        description: 'General liability and performance bond',
+        amount: 0,
+        allocation: 'percentage',
+        percentage: 2.5
       }
     ]);
     
     toast({
-      title: "Sample data loaded",
-      description: "The estimator has been populated with sample data.",
+      title: "Form cleared",
+      description: "All data has been cleared. You can start fresh.",
     });
   };
 
@@ -302,11 +302,11 @@ const JobCostCalculator = () => {
           {/* Action Buttons */}
           <div className="flex justify-between items-center mb-6">
             <button
-              onClick={loadSampleData}
+              onClick={clearAllData}
               style={{
-                background: '#3b82f6',
+                background: '#ef4444',
                 color: 'white',
-                border: '2px solid #3b82f6',
+                border: '2px solid #ef4444',
                 padding: '12px 24px',
                 borderRadius: '25px',
                 cursor: 'pointer',
@@ -316,7 +316,7 @@ const JobCostCalculator = () => {
               }}
             >
               <Gauge className="h-4 w-4 mr-2" style={{ display: 'inline' }} />
-              Load Sample Data
+              Clear All Data
             </button>
             <div className="flex gap-2">
               <button

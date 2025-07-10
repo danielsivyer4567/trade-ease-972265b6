@@ -8,7 +8,9 @@ import {
   SheetContent,
   SheetHeader,
   SheetTitle,
+  SheetTrigger,
 } from './sheet';
+import { Menu } from 'lucide-react';
 import { SidebarHeader } from './sidebar/SidebarHeader';
 import { sidebarVariants } from './sidebar/theme/sidebarTheme';
 import { useSidebarTheme } from './sidebar/theme/SidebarThemeContext';
@@ -44,19 +46,26 @@ export function AppSidebar({ className, isExpanded, onToggle, isDarkMode, onTogg
         </ScrollArea>
       </aside>
 
-      {/* Mobile Sidebar */}
-      <Sheet open={isMobileOpen} onOpenChange={setIsMobileOpen}>
-        <SheetContent side="left" className="w-[280px] p-0">
-          <SheetHeader className="h-16 bg-black border-b px-4 flex items-center">
-            <SheetTitle className="flex items-center">
-              
-            </SheetTitle>
-          </SheetHeader>
-          <ScrollArea className="flex-1 py-2 h-[calc(100vh-4rem)]">
-            <SidebarNavLinks isExpanded={true} isDarkMode={isDarkMode} onToggleDarkMode={onToggleDarkMode} />
-          </ScrollArea>
-        </SheetContent>
-      </Sheet>
+      {/* Mobile Sidebar Toggle Button */}
+      <div className="fixed top-4 left-4 z-50 md:hidden">
+        <Sheet open={isMobileOpen} onOpenChange={setIsMobileOpen}>
+          <SheetTrigger asChild>
+            <Button variant="outline" size="icon" className="bg-white/90 hover:bg-white">
+              <Menu className="h-4 w-4" />
+            </Button>
+          </SheetTrigger>
+          <SheetContent side="left" className="w-[280px] p-0">
+            <SheetHeader className="h-16 bg-black border-b px-4 flex items-center">
+              <SheetTitle className="flex items-center text-white">
+                Trade Ease
+              </SheetTitle>
+            </SheetHeader>
+            <ScrollArea className="flex-1 py-2 h-[calc(100vh-4rem)]">
+              <SidebarNavLinks isExpanded={true} isDarkMode={isDarkMode} onToggleDarkMode={onToggleDarkMode} />
+            </ScrollArea>
+          </SheetContent>
+        </Sheet>
+      </div>
     </>
   );
 }

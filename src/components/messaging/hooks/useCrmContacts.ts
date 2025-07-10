@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { mockCrmContacts } from "@/mocks/crm-contacts";
 
 export type CrmPipelineType = 'pre-quote' | 'post-quote' | 'complaints';
 
@@ -27,7 +26,7 @@ export function useCrmContacts() {
   const [loading, setLoading] = useState(true);
   const [activePipeline, setActivePipeline] = useState<CrmPipelineType>('pre-quote');
   const [searchTerm, setSearchTerm] = useState('');
-  const [isUsingMockData, setIsUsingMockData] = useState(true);
+  const [isUsingMockData, setIsUsingMockData] = useState(false);
 
   useEffect(() => {
     async function fetchContacts() {
@@ -39,28 +38,26 @@ export function useCrmContacts() {
         const userId = sessionData?.session?.user?.id;
         
         if (!userId) {
-          console.log('No authenticated user, using mock data');
-          await new Promise(resolve => setTimeout(resolve, 800));
-          setContacts(mockCrmContacts);
-          setIsUsingMockData(true);
+          console.log('No authenticated user, showing empty state');
+          setContacts([]);
+          setIsUsingMockData(false);
           setLoading(false);
           return;
         }
         
-        // Try to fetch real contacts from customers table
+        // Fetch real contacts from customers table
         const { data: customerData, error: customerError } = await supabase
           .from('customers')
           .select('*')
           .eq('user_id', userId);
           
-        if (customerError || !customerData || customerData.length === 0) {
-          console.log('No customer data found or error occurred, using mock data:', customerError);
-          await new Promise(resolve => setTimeout(resolve, 800));
-          setContacts(mockCrmContacts);
-          setIsUsingMockData(true);
+        if (customerError) {
+          console.error('Error fetching customer data:', customerError);
+          setContacts([]);
+          setIsUsingMockData(false);
         } else {
           // Transform customer data to CRM contact format
-          const transformedContacts: CrmContact[] = customerData.map(customer => ({
+          const transformedContacts: CrmContact[] = (customerData || []).map(customer => ({
             id: customer.id,
             name: customer.name,
             email: customer.email,
@@ -79,8 +76,8 @@ export function useCrmContacts() {
         }
       } catch (error) {
         console.error('Error fetching contacts:', error);
-        setContacts(mockCrmContacts);
-        setIsUsingMockData(true);
+        setContacts([]);
+        setIsUsingMockData(false);
       } finally {
         setLoading(false);
       }
@@ -91,12 +88,6 @@ export function useCrmContacts() {
 
   // Add new contact
   const addContact = async (contact: CrmContact) => {
-    if (isUsingMockData) {
-      // Just update local state with mock data
-      setContacts(prev => [contact, ...prev]);
-      return;
-    }
-
     try {
       // Get current user ID
       const { data: sessionData } = await supabase.auth.getSession();
@@ -144,12 +135,6 @@ export function useCrmContacts() {
 
   // Update contact status
   async function updateContactStatus(id: string, status: string) {
-    if (isUsingMockData) {
-      // Just update local state with mock data
-      setContacts(prev => prev.map(c => c.id === id ? { ...c, status, last_updated: new Date().toISOString() } : c));
-      return;
-    }
-    
     try {
       const { error } = await supabase
         .from('customers')
@@ -183,12 +168,6 @@ export function useCrmContacts() {
 
   // Delete contact
   const deleteContact = async (id: string) => {
-    if (isUsingMockData) {
-      // Just update local state with mock data
-      setContacts(prev => prev.filter(c => c.id !== id));
-      return;
-    }
-    
     try {
       const { error } = await supabase
         .from('customers')
