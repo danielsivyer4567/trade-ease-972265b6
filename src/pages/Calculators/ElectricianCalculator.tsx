@@ -222,7 +222,7 @@ const ElectricianCalculator = () => {
     const voltageDrop = (2 * length * current * resistance) / 1000; // Two-way length
     const percentageDrop = (voltageDrop / voltage) * 100;
     
-    let result = voltageDrop.toFixed(2) + " V";
+    const result = voltageDrop.toFixed(2) + " V";
     let percentage = percentageDrop.toFixed(2) + "%";
     
     // Add warning if voltage drop is excessive

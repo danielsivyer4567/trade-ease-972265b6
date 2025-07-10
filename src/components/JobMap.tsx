@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   GoogleMap,
   InfoWindow,
@@ -8,9 +8,11 @@ import {
 import type { Job } from '@/types/job';
 import { GOOGLE_MAPS_CONFIG, getMapId } from '@/config/google-maps';
 import { toast } from 'sonner';
+import { WeatherOverlay } from './ui/WeatherOverlay';
+import { Cloud } from 'lucide-react';
 
 const mapId = getMapId();
-const libraries = ['marker'];
+const libraries: ('marker')[] = ['marker'];
 
 interface JobMapProps {
   jobs?: Job[];
@@ -27,6 +29,7 @@ interface JobMapProps {
   }>;
   boundaries?: Array<Array<[number, number]>>;
   autoFit?: boolean;
+  showWeatherControls?: boolean;
 }
 
 const JobMapInternal = ({
@@ -37,6 +40,7 @@ const JobMapInternal = ({
   locationMarkers = [],
   boundaries = [],
   autoFit = true,
+  showWeatherControls = true,
 }: JobMapProps) => {
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
   const [selectedLocation, setSelectedLocation] = useState<{
@@ -44,6 +48,7 @@ const JobMapInternal = ({
     label?: string;
   } | null>(null);
   const [map, setMap] = useState<google.maps.Map | null>(null);
+  const [showWeatherPanel, setShowWeatherPanel] = useState(false);
 
   const mapContainerStyle = {
     width: '100%',
@@ -68,7 +73,7 @@ const JobMapInternal = ({
     zoomControl: true,
   };
 
-  const fitMapToMarkers = (map: google.maps.Map) => {
+  const fitMapToMarkers = useCallback((map: google.maps.Map) => {
     const bounds = new google.maps.LatLngBounds();
 
     jobs.forEach((job) => {
@@ -94,7 +99,7 @@ const JobMapInternal = ({
         }
       }
     }
-  };
+  }, [jobs, locationMarkers, markers]);
 
   const onLoad = (mapInstance: google.maps.Map) => {
     setMap(mapInstance);
@@ -187,59 +192,80 @@ const JobMapInternal = ({
     if (map && autoFit) {
       fitMapToMarkers(map);
     }
-  }, [jobs, locationMarkers, markers, map, autoFit]);
+  }, [jobs, locationMarkers, markers, map, autoFit, fitMapToMarkers]);
 
   return (
-    <GoogleMap
-      mapContainerStyle={mapContainerStyle}
-      center={mapCenter}
-      zoom={zoom}
-      options={options}
-      onLoad={onLoad}
-    >
-      {selectedJob && selectedJob.location && (
-        <InfoWindow
-          position={{
-            lat: selectedJob.location[1],
-            lng: selectedJob.location[0],
-          }}
-          onCloseClick={() => setSelectedJob(null)}
-          options={{
-            zIndex: 10000,
-            maxWidth: 300,
-          }}
-        >
-          <div style={{ padding: '8px', maxWidth: '250px' }}>
-            <h3 style={{ fontWeight: '600', margin: '0 0 4px 0' }}>
-              {selectedJob.customer || 'Unknown Customer'}
-            </h3>
-            <p style={{ margin: '0', fontSize: '14px', color: '#666' }}>
-              {selectedJob.title || 'No title'}
-            </p>
-            {selectedJob.address && (
-              <p style={{ margin: '4px 0 0 0', fontSize: '12px', color: '#999' }}>
-                {selectedJob.address}
+    <div className="relative w-full h-full">
+      <GoogleMap
+        mapContainerStyle={mapContainerStyle}
+        center={mapCenter}
+        zoom={zoom}
+        options={options}
+        onLoad={onLoad}
+      >
+        {selectedJob && selectedJob.location && (
+          <InfoWindow
+            position={{
+              lat: selectedJob.location[1],
+              lng: selectedJob.location[0],
+            }}
+            onCloseClick={() => setSelectedJob(null)}
+            options={{
+              zIndex: 10000,
+              maxWidth: 300,
+            }}
+          >
+            <div style={{ padding: '8px', maxWidth: '250px' }}>
+              <h3 style={{ fontWeight: '600', margin: '0 0 4px 0' }}>
+                {selectedJob.customer || 'Unknown Customer'}
+              </h3>
+              <p style={{ margin: '0', fontSize: '14px', color: '#666' }}>
+                {selectedJob.title || 'No title'}
               </p>
-            )}
-            <p style={{ margin: '4px 0 0 0', fontSize: '11px', color: '#999' }}>
-              Job #{selectedJob.job_number || 'N/A'}
-            </p>
-            {selectedJob.status && (
-              <p style={{ margin: '4px 0 0 0', fontSize: '11px', color: '#666' }}>
-                Status: {selectedJob.status}
+              {selectedJob.address && (
+                <p style={{ margin: '4px 0 0 0', fontSize: '12px', color: '#999' }}>
+                  {selectedJob.address}
+                </p>
+              )}
+              <p style={{ margin: '4px 0 0 0', fontSize: '11px', color: '#999' }}>
+                Job #{selectedJob.job_number || 'N/A'}
               </p>
-            )}
-          </div>
-        </InfoWindow>
+              {selectedJob.status && (
+                <p style={{ margin: '4px 0 0 0', fontSize: '11px', color: '#666' }}>
+                  Status: {selectedJob.status}
+                </p>
+              )}
+            </div>
+          </InfoWindow>
+        )}
+      </GoogleMap>
+
+      {/* Weather Controls */}
+      {showWeatherControls && (
+        <div className="absolute top-4 right-4 z-10">
+          <button
+            onClick={() => setShowWeatherPanel(!showWeatherPanel)}
+            className="mb-2 px-3 py-2 bg-white rounded-lg shadow-sm border border-gray-200 hover:bg-gray-50 text-sm font-medium flex items-center gap-2 transition-colors"
+          >
+            <Cloud className="w-4 h-4" />
+            {showWeatherPanel ? 'Hide Weather' : 'Show Weather'}
+          </button>
+          
+          {showWeatherPanel && (
+            <div className="animate-in slide-in-from-top-2 duration-200">
+              <WeatherOverlay map={map} />
+            </div>
+          )}
+        </div>
       )}
-    </GoogleMap>
+    </div>
   );
 };
 
 const JobMap = (props: JobMapProps) => {
   const { isLoaded, loadError } = useLoadScript({
     googleMapsApiKey: GOOGLE_MAPS_CONFIG.apiKey,
-    libraries: libraries as any,
+    libraries: libraries,
     version: 'beta',
     mapIds: [mapId],
   });

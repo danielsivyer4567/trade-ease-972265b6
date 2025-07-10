@@ -4,7 +4,7 @@ import UpcomingJobs from "@/components/dashboard/UpcomingJobs";
 import { Card } from "@/components/ui/card";
 import { ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Calendar, MapPin, Filter, Plus, Link, Copy, CheckCircle, Zap, Wrench, AlertTriangle, Settings, Droplets, Building, Clock, BarChart3, Users, MessageCircle, Camera, FileText, DollarSign, ClipboardList, Star } from "lucide-react";
 import { TeamCalendar } from "@/components/team/TeamCalendar";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { DashboardCalendar } from "@/components/dashboard/DashboardCalendar";
@@ -31,8 +31,8 @@ export default function DashboardPage() {
   const [isQueuedSectionDragOver, setIsQueuedSectionDragOver] = useState(false);
   const [selectedJobs, setSelectedJobs] = useState<string[]>([]);
 
-  // Mock technician data
-  const mockTechnicians: Technician[] = [
+  // Mock technician data - memoized to prevent unnecessary re-renders
+  const mockTechnicians: Technician[] = useMemo(() => [
     {
       id: "1",
       name: "John Smith",
@@ -66,7 +66,7 @@ export default function DashboardPage() {
       maxConcurrentJobs: 4,
       hourlyRate: 55
     }
-  ];
+  ], []);
 
 
   useEffect(() => {
@@ -97,10 +97,10 @@ export default function DashboardPage() {
     fetchJobs();
   }, []);
 
-  const handleJobClick = (jobName: string) => {
+  const handleJobClick = useCallback((jobName: string) => {
     toast.info(`Navigating to ${jobName}`);
     navigate('/jobs');
-  };
+  }, [navigate]);
 
   const handleStatusChange = async (jobId: string, newStatus: Job['status']) => {
     setActionLoading(jobId);
@@ -254,13 +254,13 @@ export default function DashboardPage() {
     }
   };
 
-  const handleJobSelect = (jobId: string) => {
+  const handleJobSelect = useCallback((jobId: string) => {
     setSelectedJobs(prev => 
       prev.includes(jobId) 
         ? prev.filter(id => id !== jobId)
         : [...prev, jobId]
     );
-  };
+  }, []);
 
   const handleJobAssignToTechnician = async (jobId: string, technicianId: string) => {
     try {
@@ -291,57 +291,84 @@ export default function DashboardPage() {
     handleStatusChange(jobId, mappedStatus);
   };
 
-  // Transform jobs to match ActiveJobCards interface
-  const transformJobsForActiveCards = (jobs: Job[]) => {
-    return jobs.map(job => ({
-      id: job.id,
-      type: job.type || job.title || 'General Service',
-      customer: job.customer || 'Unknown Customer',
-      status: (job.status === 'to-invoice' || job.status === 'invoiced' ? 'ready' : job.status) as "pending" | "ready" | "in-progress" | "completed" | "cancelled",
-      priority: ((job as any).priority || (job.type?.toLowerCase().includes('emergency') ? 'urgent' : 'medium')) as "low" | "medium" | "high" | "urgent",
-      category: job.type?.toLowerCase().includes('emergency') ? 'emergency' :
-                job.type?.toLowerCase().includes('electrical') ? 'electrical' :
-                job.type?.toLowerCase().includes('hvac') ? 'hvac' :
-                job.type?.toLowerCase().includes('plumbing') ? 'plumbing' :
-                'maintenance' as "emergency" | "maintenance" | "electrical" | "hvac" | "plumbing",
-      size: ((job as any).size || 'M') as "S" | "M" | "L" | "XL",
-      assignedTo: job.assignedTo,
-      estimatedDuration: (job as any).estimatedDuration || 120,
-      value: (job as any).value || 450,
-      cost: (job as any).cost || 280,
-      location: {
-        address: typeof job.location === 'string' ? job.location : job.address || 'Unknown Address',
-        lat: (job as any).lat || 0,
-        lng: (job as any).lng || 0
-      },
-      createdAt: new Date((job as any).created_at || Date.now()),
-      dueDate: new Date((job as any).due_date || job.date || Date.now()),
-      completedAt: (job as any).completed_at ? new Date((job as any).completed_at) : undefined,
-      customerRating: (job as any).customerRating,
-      notes: (job as any).notes || [],
-      tags: (job as any).tags || [],
-      weatherSensitive: (job as any).weatherSensitive || false,
-      requiresSpecialEquipment: (job as any).requiresSpecialEquipment || false
-    }));
-  };
+  // Transform jobs to match ActiveJobCards interface - memoized for performance
+  const transformJobsForActiveCards = useCallback((jobs: Job[]) => {
+    return jobs.map(job => {
+      const jobData = job as Job & {
+        priority?: "low" | "medium" | "high" | "urgent";
+        size?: "S" | "M" | "L" | "XL";
+        estimatedDuration?: number;
+        value?: number;
+        cost?: number;
+        lat?: number;
+        lng?: number;
+        created_at?: string;
+        due_date?: string;
+        completed_at?: string;
+        customerRating?: number;
+        notes?: string[];
+        tags?: string[];
+        weatherSensitive?: boolean;
+        requiresSpecialEquipment?: boolean;
+      };
 
-  // Transform technicians to match ActiveJobCards interface
-  const transformTechniciansForActiveCards = (technicians: Technician[]) => {
-    return technicians.map(tech => ({
-      id: tech.id,
-      name: tech.name,
-      email: tech.email,
-      phone: tech.phone,
-      skills: tech.skills,
-      certifications: (tech as any).certifications || [],
-      currentJobs: (tech as any).currentJobs || [],
-      maxConcurrentJobs: tech.maxConcurrentJobs,
-      hourlyRate: tech.hourlyRate,
-      isAvailable: tech.isAvailable
-    }));
-  };
+      return {
+        id: job.id,
+        type: job.type || job.title || 'General Service',
+        customer: job.customer || 'Unknown Customer',
+        status: (job.status === 'to-invoice' || job.status === 'invoiced' ? 'ready' : job.status) as "pending" | "ready" | "in-progress" | "completed" | "cancelled",
+        priority: (jobData.priority || (job.type?.toLowerCase().includes('emergency') ? 'urgent' : 'medium')) as "low" | "medium" | "high" | "urgent",
+        category: job.type?.toLowerCase().includes('emergency') ? 'emergency' :
+                  job.type?.toLowerCase().includes('electrical') ? 'electrical' :
+                  job.type?.toLowerCase().includes('hvac') ? 'hvac' :
+                  job.type?.toLowerCase().includes('plumbing') ? 'plumbing' :
+                  'maintenance' as "emergency" | "maintenance" | "electrical" | "hvac" | "plumbing",
+        size: (jobData.size || 'M') as "S" | "M" | "L" | "XL",
+        assignedTo: job.assignedTo,
+        estimatedDuration: jobData.estimatedDuration || 120,
+        value: jobData.value || 450,
+        cost: jobData.cost || 280,
+        location: {
+          address: typeof job.location === 'string' ? job.location : job.address || 'Unknown Address',
+          lat: jobData.lat || 0,
+          lng: jobData.lng || 0
+        },
+        createdAt: new Date(jobData.created_at || Date.now()),
+        dueDate: new Date(jobData.due_date || job.date || Date.now()),
+        completedAt: jobData.completed_at ? new Date(jobData.completed_at) : undefined,
+        customerRating: jobData.customerRating,
+        notes: jobData.notes || [],
+        tags: jobData.tags || [],
+        weatherSensitive: jobData.weatherSensitive || false,
+        requiresSpecialEquipment: jobData.requiresSpecialEquipment || false
+      };
+    });
+  }, []);
 
-  const getTeamColor = (assignedTeam?: string) => {
+  // Transform technicians to match ActiveJobCards interface - memoized for performance
+  const transformTechniciansForActiveCards = useCallback((technicians: Technician[]) => {
+    return technicians.map(tech => {
+      const techData = tech as Technician & {
+        certifications?: string[];
+        currentJobs?: string[];
+      };
+
+      return {
+        id: tech.id,
+        name: tech.name,
+        email: tech.email,
+        phone: tech.phone,
+        skills: tech.skills,
+        certifications: techData.certifications || [],
+        currentJobs: techData.currentJobs || [],
+        maxConcurrentJobs: tech.maxConcurrentJobs,
+        hourlyRate: tech.hourlyRate,
+        isAvailable: tech.isAvailable
+      };
+    });
+  }, []);
+
+  const getTeamColor = useCallback((assignedTeam?: string) => {
     if (!assignedTeam) return 'white'; // No team assigned
     
     switch (assignedTeam.toLowerCase()) {
@@ -360,9 +387,9 @@ export default function DashboardPage() {
       default:
         return 'white'; // Unknown team or unassigned
     }
-  };
+  }, []);
 
-  const getTeamColorClasses = (assignedTeam?: string) => {
+  const getTeamColorClasses = useCallback((assignedTeam?: string) => {
     const teamColor = getTeamColor(assignedTeam);
     
     switch (teamColor) {
@@ -399,7 +426,7 @@ export default function DashboardPage() {
           text: 'group-hover:text-blue-700'
         };
     }
-  };
+  }, [getTeamColor]);
 
   const getJobIcon = (jobType: string) => {
     const type = jobType.toLowerCase();
@@ -425,12 +452,26 @@ export default function DashboardPage() {
     return '$250';
   };
 
-  const isJobOverdue = (job: Job) => {
+  const isJobOverdue = useCallback((job: Job) => {
     if (!job.date || job.date_undecided) return false;
     const jobDate = new Date(job.date);
     const today = new Date();
     return jobDate < today && job.status !== 'completed';
-  };
+  }, []);
+
+  // Memoize filtered jobs for better performance
+  const filteredJobsForActiveCards = useMemo(() => {
+    return jobs.filter(job => job.status === 'ready' || job.status === 'in-progress' || job.date_undecided);
+  }, [jobs]);
+
+  // Memoize transformed jobs and technicians
+  const transformedJobs = useMemo(() => {
+    return transformJobsForActiveCards(filteredJobsForActiveCards);
+  }, [transformJobsForActiveCards, filteredJobsForActiveCards]);
+
+  const transformedTechnicians = useMemo(() => {
+    return transformTechniciansForActiveCards(mockTechnicians);
+  }, [transformTechniciansForActiveCards, mockTechnicians]);
 
   return (
     <BaseLayout showQuickTabs>
@@ -438,47 +479,47 @@ export default function DashboardPage() {
         <div className="p-0 space-y-0">
           {/* Job Site Map - Google Maps Satellite View */}
           <div className="mt-0 relative px-4">
-            <div className="h-[400px]">
-
             {loading ? (
-          <div className="h-[400px] flex items-center justify-center">
-            <div className="flex flex-col items-center">
-              <div className="h-8 w-8 border-4 border-t-blue-500 border-r-transparent border-b-transparent border-l-transparent rounded-full animate-spin mb-2"></div>
-              <p className="text-gray-500">Loading jobs data...</p>
-            </div>
-          </div>
-        ) : (
-          <div className="w-full mb-0">
-            <div className="bg-gray-50 p-2 rounded-t-lg border border-gray-200 border-b-0">
-              <div className="flex justify-between items-center relative">
-                <h2 className="text-sm font-medium flex items-center">
-                  <MapPin className="h-3 w-3 mr-1 text-blue-500" /> 
-                  Job Locations
-                </h2>
-                <div className="absolute left-1/2 transform -translate-x-1/2">
-                  <p className="text-xl font-semibold text-white drop-shadow-md border border-black bg-black/60 px-3 py-1 rounded inline-block backdrop-blur-sm">
-                    Welcome back to your dashboard
-                  </p>
-                </div>
-                <div className="text-xs text-gray-500">
-                  {jobs.filter(job => 
-                    (job.location && job.location[0] && job.location[1]) || 
-                    (job.locations && job.locations.length > 0)
-                  ).length} jobs with locations
+              <div className="h-[400px] flex items-center justify-center">
+                <div className="flex flex-col items-center">
+                  <div className="h-8 w-8 border-4 border-t-blue-500 border-r-transparent border-b-transparent border-l-transparent rounded-full animate-spin mb-2"></div>
+                  <p className="text-gray-500">Loading jobs data...</p>
                 </div>
               </div>
-            </div>
-            <div className="h-[400px] bg-gray-50 rounded-b-lg border border-gray-200">
-            <JobMap jobs={jobs} />
-            </div>
-          </div>
-        )}
-
-            </div>
+            ) : (
+              <div className="w-full mb-0">
+                <div className="bg-gray-50 p-2 rounded-t-lg border border-gray-200 border-b-0">
+                  <div className="flex justify-between items-center relative py-4">
+                    <h2 className="text-sm font-medium flex items-center">
+                      <MapPin className="h-3 w-3 mr-1 text-blue-500" /> 
+                      Job Locations
+                    </h2>
+                    <div className="absolute left-1/2 transform -translate-x-1/2">
+                      <p className="text-xl font-semibold text-white drop-shadow-md border border-black bg-black/60 px-4 py-2 rounded inline-block backdrop-blur-sm">
+                        Welcome back to your dashboard
+                      </p>
+                    </div>
+                    <div className="text-xs text-gray-500">
+                      {jobs.filter(job => 
+                        (job.location && Array.isArray(job.location) && job.location.length >= 2) || 
+                        (job.locations && Array.isArray(job.locations) && job.locations.length > 0)
+                      ).length} jobs with locations
+                    </div>
+                  </div>
+                </div>
+                <div className="h-[400px] bg-gray-50 rounded-b-lg border border-gray-200">
+                  <JobMap 
+                    jobs={jobs} 
+                    showWeatherControls={true}
+                    autoFit={true}
+                  />
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Job Management Controls - Integrated from Jobs Page */}
-          <div className="px-4 mt-32">
+          <div className="px-4 mt-6">
             <div className="bg-white/80 backdrop-blur-sm rounded-lg shadow-sm p-4 mb-4">
               {/* Job Management Tabs */}
               <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
@@ -527,8 +568,8 @@ export default function DashboardPage() {
 
                 <TabsContent value="jobs" className="mt-0">
                   <ActiveJobCards
-                    jobs={transformJobsForActiveCards(jobs.filter(job => job.status === 'ready' || job.status === 'in-progress' || job.date_undecided))}
-                    technicians={transformTechniciansForActiveCards(mockTechnicians)}
+                    jobs={transformedJobs}
+                    technicians={transformedTechnicians}
                     selectedJobs={selectedJobs}
                     onJobSelect={handleJobSelect}
                     onStatusUpdate={handleActiveJobStatusUpdate}
@@ -574,7 +615,6 @@ export default function DashboardPage() {
                   </div>
                 </TabsContent>
 
-
                 <TabsContent value="forms" className="mt-0">
                   <div className="text-center p-4 bg-gray-50 rounded-lg">
                     <p className="text-gray-600 mb-2">Job Forms</p>
@@ -596,11 +636,10 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* Staff Calendar - Only show when in Queued Jobs tab */}
+          {/* Staff Calendar - Only show when in Jobs tab */}
           {activeTab === "jobs" && (
             <div className="px-4 mt-4">
               <div className="relative bg-white rounded-lg border shadow-sm overflow-hidden mb-6">
-                {/* Replace the existing calendar with our new synchronized DashboardCalendar */}
                 <DashboardCalendar jobs={jobs} onJobAssign={handleJobAssign} />
               </div>
             </div>

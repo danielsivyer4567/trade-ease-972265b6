@@ -27,6 +27,7 @@ const GoogleCloudFixPage = lazy(() => import('@/pages/google-cloud-fix'));
 const TestGoogleMapsPage = lazy(() => import('@/pages/TestGoogleMaps'));
 const JobMapTestPage = lazy(() => import('@/pages/JobMapTest'));
 const ToolboxTalkTemplatePage = lazy(() => import('@/pages/ToolboxTalkTemplate'));
+const WeatherMapDemoPage = lazy(() => import('@/pages/WeatherMapDemo'));
 
 // Workflow Dashboard
 const WorkflowDashboard = lazy(() => import('@/components/workflow/WorkflowDashboard').then(module => ({ default: module.default })));
@@ -304,6 +305,8 @@ const routeObjects: RouteObject[] = [
           { path: "/test-google-maps", element: <SuspenseWrapper><TestGoogleMapsPage /></SuspenseWrapper> },
           // Job Map Test route
           { path: "/job-map-test", element: <SuspenseWrapper><JobMapTestPage /></SuspenseWrapper> },
+          // Weather Map Demo route
+          { path: "/weather-map-demo", element: <SuspenseWrapper><WeatherMapDemoPage /></SuspenseWrapper> },
           // Animated Stage Demo route
           { path: "/animated-stage-demo", element: <SuspenseWrapper><AnimatedStageDemo /></SuspenseWrapper> },
           // Button Ripple Demo route

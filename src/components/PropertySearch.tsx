@@ -1,8 +1,16 @@
 import { useState } from 'react';
 import { searchProperty } from '../utils/propertySearch';
 
+interface PropertySearchResult {
+  address?: string;
+  coordinates?: [number, number];
+  boundaries?: Array<[number, number]>;
+  propertyDetails?: Record<string, unknown>;
+  [key: string]: unknown;
+}
+
 export default function PropertySearch() {
-  const [result, setResult] = useState<any>(null);
+  const [result, setResult] = useState<PropertySearchResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 

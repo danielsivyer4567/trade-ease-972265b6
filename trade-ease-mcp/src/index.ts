@@ -19,6 +19,50 @@ import {
 } from "@modelcontextprotocol/sdk/types.js";
 import { createClient } from '@supabase/supabase-js';
 
+// Interface for customer update data
+interface CustomerUpdateData {
+  name?: string;
+  email?: string;
+  phone?: string;
+  address?: string;
+  city?: string;
+  state?: string;
+  zipcode?: string;
+  status?: string;
+}
+
+// Interface for dimensions
+interface Dimensions {
+  length?: number;
+  width?: number;
+  height?: number;
+  area?: number;
+  [key: string]: unknown;
+}
+
+// Interface for material
+interface Material {
+  name: string;
+  quantity: number;
+  unit_price: number;
+  category?: string;
+}
+
+// Interface for job update data
+interface JobUpdateData {
+  customer?: string;
+  description?: string;
+  status?: string;
+  priority?: string;
+  scheduled_date?: string;
+  location?: string;
+  estimated_hours?: number;
+  notes?: string;
+  title?: string;
+  start_time?: string;
+  end_time?: string;
+}
+
 // Supabase configuration - SECURE: No hardcoded credentials
 const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_ANON_KEY;
@@ -796,7 +840,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       }
 
       case "update_customer": {
-        const updateData: any = {};
+        const updateData: CustomerUpdateData = {};
         if (args.name) updateData.name = String(args.name);
         if (args.email) updateData.email = String(args.email);
         if (args.phone) updateData.phone = String(args.phone);
@@ -1123,7 +1167,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
              // Area & Material Calculators
        case "calculate_area": {
          const shape = String(args.shape);
-         const dimensions = args.dimensions as any;
+         const dimensions = args.dimensions as Dimensions;
          const unit = String(args.unit || 'm');
          let area: number;
 
@@ -1195,12 +1239,12 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
          const job_title = String(args.job_title);
          const customer_name = String(args.customer_name);
          const job_type = String(args.job_type);
-         const materials = (args.materials as any[]) || [];
+         const materials = (args.materials as Material[]) || [];
          const labor_hours = Number(args.labor_hours);
          const labor_rate = Number(args.labor_rate);
          const markup_percentage = Number(args.markup_percentage || 20);
          const gst_rate = Number(args.gst_rate || 10);
-         const material_costs = materials.reduce((sum: number, material: any) => sum + (Number(material.quantity) * Number(material.unit_price)), 0);
+         const material_costs = materials.reduce((sum: number, material: Material) => sum + (Number(material.quantity) * Number(material.unit_price)), 0);
          const labor_costs = labor_hours * labor_rate;
          const total_cost = material_costs + labor_costs;
          const markup = (markup_percentage / 100) * total_cost;
@@ -1406,7 +1450,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       }
 
       case "update_calendar_event": {
-        const updateData: any = {};
+        const updateData: JobUpdateData = {};
         if (args.title) updateData.title = String(args.title);
         if (args.description) updateData.description = String(args.description);
         if (args.start_time) updateData.start_time = String(args.start_time);

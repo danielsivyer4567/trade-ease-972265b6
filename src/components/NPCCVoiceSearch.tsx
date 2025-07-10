@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -35,7 +35,7 @@ export const NCCVoiceSearch: React.FC = () => {
   const [isPlaying, setIsPlaying] = useState(false);
   const { nccVoiceSearch, isLoading } = useFeatureAccess();
   const { toast } = useToast();
-  const recognitionRef = useRef<any>(null);
+  const recognitionRef = useRef<SpeechRecognition | null>(null);
 
   // Mock NCC codes data - in real implementation, this would come from an API
   const mockNCCCodes: NCCCode[] = [
@@ -74,13 +74,13 @@ export const NCCVoiceSearch: React.FC = () => {
   useEffect(() => {
     // Initialize speech recognition
     if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-      const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-      recognitionRef.current = new SpeechRecognition();
+      const SpeechRecognitionClass = (window as never)['SpeechRecognition'] || (window as never)['webkitSpeechRecognition'];
+      recognitionRef.current = new SpeechRecognitionClass();
       recognitionRef.current.continuous = true;
       recognitionRef.current.interimResults = true;
       recognitionRef.current.lang = 'en-AU';
 
-      recognitionRef.current.onresult = (event: any) => {
+      recognitionRef.current.onresult = (event: SpeechRecognitionEvent) => {
         let finalTranscript = '';
         for (let i = event.resultIndex; i < event.results.length; i++) {
           if (event.results[i].isFinal) {
@@ -93,7 +93,7 @@ export const NCCVoiceSearch: React.FC = () => {
         }
       };
 
-      recognitionRef.current.onerror = (event: any) => {
+      recognitionRef.current.onerror = (event: SpeechRecognitionErrorEvent) => {
         console.error('Speech recognition error:', event.error);
         setIsListening(false);
         toast({
@@ -113,7 +113,7 @@ export const NCCVoiceSearch: React.FC = () => {
         recognitionRef.current.stop();
       }
     };
-  }, [toast]);
+  }, [toast, handleSearch]);
 
   const startListening = () => {
     if (!recognitionRef.current) {
@@ -151,7 +151,7 @@ export const NCCVoiceSearch: React.FC = () => {
     setIsListening(false);
   };
 
-  const handleSearch = async (query: string) => {
+  const handleSearch = useCallback(async (query: string) => {
     if (!query.trim()) return;
 
     setIsSearching(true);
@@ -175,7 +175,7 @@ export const NCCVoiceSearch: React.FC = () => {
         description: "Try a different search term or check the spelling.",
       });
     }
-  };
+  }, [toast]);
 
   const handleTextSearch = (e: React.FormEvent) => {
     e.preventDefault();

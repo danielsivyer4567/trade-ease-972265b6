@@ -23,8 +23,6 @@ const server = http.createServer((req, res) => {
   }[ext] || 'text/plain';
   
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   
   if (fs.existsSync(filePath)) {
     res.writeHead(200, { 'Content-Type': contentType });
@@ -36,8 +34,8 @@ const server = http.createServer((req, res) => {
 });
 
 server.listen(3001, '0.0.0.0', () => {
-  console.log('Server running at:');
-  console.log('- http://localhost:3001/');
-  console.log('- http://172.31.136.169:3001/');
-  console.log('- http://10.255.255.254:3001/');
+  console.log('🚀 Server running at:');
+  console.log('📱 http://172.31.136.169:3001/');
+  console.log('🌐 http://10.255.255.254:3001/');
+  console.log('💻 http://localhost:3001/');
 });
