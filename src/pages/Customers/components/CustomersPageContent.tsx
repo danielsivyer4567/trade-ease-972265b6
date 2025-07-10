@@ -12,6 +12,9 @@ import { CustomerList } from "./CustomerList";
 import { CustomerEditModal } from "./CustomerEditModal";
 import { CustomerData } from "./CustomerCard";
 import { fetchCustomersFromAPI } from "@/services/api";
+import { ModernCustomerTable } from "./ModernCustomerTable";
+import { CustomerTabs } from "./CustomerTabs";
+import { CustomerActionToolbar } from "./CustomerActionToolbar";
 
 const formSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -206,22 +209,22 @@ export function CustomersPageContent() {
   };
 
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex flex-col space-y-4">
-        <CustomerHeader 
-          handleFileUpload={handleFileUpload} 
-        />
-        
-        <CustomerSearchBar 
-          searchQuery={searchQuery}
-          setSearchQuery={setSearchQuery}
-          selectedFilter={selectedFilter}
-          setSelectedFilter={setSelectedFilter}
-          filteredCustomers={filteredCustomers}
-        />
-      </div>
-
-      <CustomerList 
+    <div className="flex flex-col h-full bg-white">
+      {/* Navigation Tabs */}
+      <CustomerTabs />
+      
+      {/* Action Toolbar */}
+      <CustomerActionToolbar 
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
+        selectedFilter={selectedFilter}
+        setSelectedFilter={setSelectedFilter}
+        filteredCustomers={filteredCustomers}
+        handleFileUpload={handleFileUpload}
+      />
+      
+      {/* Modern Table View */}
+      <ModernCustomerTable 
         isLoading={isLoading || isApiLoading}
         filteredCustomers={filteredCustomers}
         searchQuery={searchQuery}

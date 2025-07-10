@@ -13,6 +13,7 @@ import { AuthDebugger } from '@/components/debug/AuthDebugger';
 // Lazy load n8n workflow pages
 const N8nWorkflowPage = lazy(() => import('@/pages/Workflow/n8n-workflow'));
 const N8nWorkflowListPage = lazy(() => import('@/pages/Workflow/n8n-workflow-list'));
+const N8nAssistantPage = lazy(() => import('@/pages/N8nAssistantPage'));
 
 // Development mode debugging component
 const DevelopmentEntry = lazy(() => import('@/pages/DevelopmentEntry'));
@@ -287,6 +288,7 @@ const routeObjects: RouteObject[] = [
           { path: "/forms", element: <SuspenseWrapper><FormsPage /></SuspenseWrapper> },
           { path: "/tasks", element: <SuspenseWrapper><TasksPage /></SuspenseWrapper> },
           { path: "/ai-features", element: <SuspenseWrapper><AIFeaturesPage /></SuspenseWrapper> },
+          { path: "/n8n-assistant", element: <SuspenseWrapper><N8nAssistantPage /></SuspenseWrapper> },
           { path: "/networks", element: <SuspenseWrapper><NetworksPage /></SuspenseWrapper> },
           // Credentials route
           { path: "/credentials", element: <SuspenseWrapper><CredentialsPage /></SuspenseWrapper> },
