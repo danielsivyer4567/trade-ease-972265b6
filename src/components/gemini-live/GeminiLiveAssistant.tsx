@@ -78,11 +78,13 @@ export const GeminiLiveAssistant: React.FC<GeminiLiveAssistantProps> = ({
   const [showMicTest, setShowMicTest] = useState(false);
   const [annotations, setAnnotations] = useState<Annotation[]>([]);
   const [recognitionStatus, setRecognitionStatus] = useState('Idle');
+  const [isSpeaking, setIsSpeaking] = useState(false);
   
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const mediaStreamRef = useRef<MediaStream | null>(null);
   const chatRef = useRef<ChatSession | null>(null);
+  const recognitionRef = useRef<any>(null);
   const { toast } = useToast();
 
   // Initialize Gemini Live connection
@@ -167,6 +169,12 @@ export const GeminiLiveAssistant: React.FC<GeminiLiveAssistantProps> = ({
   // Start audio capture for voice input using Web Speech API
   const startAudioCapture = async () => {
     try {
+      // Stop any existing recognition
+      if (recognitionRef.current) {
+        recognitionRef.current.stop();
+        recognitionRef.current = null;
+      }
+
       // Proactively get the audio stream to ensure microphone is active, then release it.
       const tempStream = await navigator.mediaDevices.getUserMedia({ 
         audio: {
@@ -189,6 +197,7 @@ export const GeminiLiveAssistant: React.FC<GeminiLiveAssistantProps> = ({
       recognition.lang = 'en-US';
 
       recognition.onstart = () => {
+        console.log('Speech recognition started');
         setRecognitionStatus('Listening...');
       };
 
@@ -226,19 +235,27 @@ export const GeminiLiveAssistant: React.FC<GeminiLiveAssistantProps> = ({
       };
 
       recognition.onend = () => {
-        setRecognitionStatus('Ended. Will restart if connected.');
-        // Restart if still connected and not muted
-        if (isConnected && !isMuted) {
-          recognition.start();
+        console.log('Speech recognition ended');
+        setRecognitionStatus('Idle');
+        // Only restart if connected, not muted, and not currently speaking
+        if (isConnected && !isMuted && !isSpeaking && recognitionRef.current) {
+          setTimeout(() => {
+            if (recognitionRef.current && isConnected && !isMuted && !isSpeaking) {
+              try {
+                recognitionRef.current.start();
+              } catch (error) {
+                console.log('Could not restart recognition:', error);
+              }
+            }
+          }, 100);
         }
       };
 
-      if (!isMuted) {
+      recognitionRef.current = recognition;
+
+      if (!isMuted && !isSpeaking) {
         recognition.start();
       }
-
-      // Store recognition instance
-      (window as any).speechRecognition = recognition;
       
       console.log('Audio capture started.');
       
@@ -382,14 +399,18 @@ export const GeminiLiveAssistant: React.FC<GeminiLiveAssistantProps> = ({
 
   // Convert text to speech
   const speakText = (text: string) => {
-    const recognition = (window as any).speechRecognition;
-    let originalOnEnd: (() => void) | null = null;
+    if (!text.trim()) return;
 
-    if (recognition) {
-      originalOnEnd = recognition.onend;
-      recognition.onend = null; // Temporarily disable auto-restart
-      recognition.stop();
-      setRecognitionStatus('Speaking...');
+    setIsSpeaking(true);
+    setRecognitionStatus('Speaking...');
+
+    // Stop speech recognition during synthesis
+    if (recognitionRef.current) {
+      try {
+        recognitionRef.current.stop();
+      } catch (error) {
+        console.log('Error stopping recognition for speech:', error);
+      }
     }
 
     const utterance = new SpeechSynthesisUtterance(text);
@@ -397,14 +418,43 @@ export const GeminiLiveAssistant: React.FC<GeminiLiveAssistantProps> = ({
     utterance.pitch = 1.0;
     utterance.volume = 1.0;
 
+    utterance.onstart = () => {
+      console.log('Speech synthesis started');
+      setIsSpeaking(true);
+    };
+
     utterance.onend = () => {
-      console.log("Speech synthesis finished, restoring recognition.");
-      if (recognition) {
-        recognition.onend = originalOnEnd; // Restore the handler
-        if (isConnected && !isMuted) {
-          recognition.start();
+      console.log('Speech synthesis finished, preparing to restart recognition.');
+      setIsSpeaking(false);
+      setRecognitionStatus('Idle');
+      
+      // Restart recognition after a small delay to ensure speech synthesis has fully ended
+      setTimeout(() => {
+        if (isConnected && !isMuted && recognitionRef.current) {
+          try {
+            recognitionRef.current.start();
+          } catch (error) {
+            console.log('Could not restart recognition after speech:', error);
+          }
         }
-      }
+      }, 500);
+    };
+
+    utterance.onerror = (event) => {
+      console.error('Speech synthesis error:', event.error);
+      setIsSpeaking(false);
+      setRecognitionStatus('Idle');
+      
+      // Try to restart recognition even if speech failed
+      setTimeout(() => {
+        if (isConnected && !isMuted && recognitionRef.current) {
+          try {
+            recognitionRef.current.start();
+          } catch (error) {
+            console.log('Could not restart recognition after speech error:', error);
+          }
+        }
+      }, 500);
     };
     
     // Find a better voice
@@ -434,9 +484,22 @@ export const GeminiLiveAssistant: React.FC<GeminiLiveAssistantProps> = ({
   // Disconnect from Gemini Live
   const disconnect = () => {
     // Stop speech recognition
-    if ((window as any).speechRecognition) {
-      (window as any).speechRecognition.stop();
+    if (recognitionRef.current) {
+      try {
+        recognitionRef.current.stop();
+        recognitionRef.current = null;
+      } catch (error) {
+        console.log('Error stopping recognition during disconnect:', error);
+      }
     }
+    
+    // Stop any ongoing speech synthesis
+    if (speechSynthesis.speaking) {
+      speechSynthesis.cancel();
+    }
+    
+    setIsSpeaking(false);
+    setRecognitionStatus('Disconnected');
     stopScreenShare();
     setIsConnected(false);
   };
@@ -574,11 +637,21 @@ export const GeminiLiveAssistant: React.FC<GeminiLiveAssistantProps> = ({
                             <Button
                                 onClick={() => {
                                 setIsMuted(!isMuted);
-                                if ((window as any).speechRecognition) {
+                                if (recognitionRef.current) {
                                     if (isMuted) {
-                                    (window as any).speechRecognition.start();
+                                    // Enabling microphone - start recognition
+                                    try {
+                                        recognitionRef.current.start();
+                                    } catch (error) {
+                                        console.log('Could not start recognition:', error);
+                                    }
                                     } else {
-                                    (window as any).speechRecognition.stop();
+                                    // Disabling microphone - stop recognition
+                                    try {
+                                        recognitionRef.current.stop();
+                                    } catch (error) {
+                                        console.log('Could not stop recognition:', error);
+                                    }
                                     }
                                 }
                                 }}
