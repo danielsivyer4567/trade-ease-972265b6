@@ -80,7 +80,14 @@ export const DraggableNotificationsPanel = ({
   currentUserId,
   availableStaff
 }: DraggableNotificationsPanelProps) => {
-  const { user } = useAuth();
+  // Safely get user from auth context
+  let user = null;
+  try {
+    const authContext = useAuth();
+    user = authContext?.user;
+  } catch (error) {
+    console.warn('Auth context not available:', error);
+  }
   
   // Remove debug logging and test override
   const effectiveIsOpen = isOpen;
@@ -89,6 +96,7 @@ export const DraggableNotificationsPanel = ({
   const [isPinned, setIsPinned] = useState(false);
   const [customWidth, setCustomWidth] = useState(350);
   const [isDrawingMode, setIsDrawingMode] = useState(false); // General panel drawing mode
+  const [isMouseOverPaintMenu, setIsMouseOverPaintMenu] = useState(false); // Track mouse over paint menu
   const [drawingState, setDrawingState] = useState<DrawingState>({
     isActive: false,
     tool: 'pencil',
@@ -263,12 +271,19 @@ export const DraggableNotificationsPanel = ({
   const toggleTagDropMode = () => {
     setTagDropModeActive(prev => {
       const nextState = !prev;
+      console.log('Toggling tag drop mode:', nextState);
       if (!nextState) {
         closeTagPopup();
-        document.body.style.cursor = '';
+        // Only reset cursor if not in drawing mode
+        if (!isDrawingMode) {
+          document.body.style.cursor = '';
+        }
       } else {
-        document.body.style.cursor = 'crosshair';
-        toast.info('Tag Drop Mode Active - Drag your profile picture to place a tag');
+        // Only set crosshair cursor if not in drawing mode
+        if (!isDrawingMode) {
+          document.body.style.cursor = 'crosshair';
+        }
+        toast.info('Tag Drop Mode Active - Click anywhere or drag your profile picture to place a tag');
       }
       return nextState;
     });
@@ -315,6 +330,7 @@ export const DraggableNotificationsPanel = ({
 
   // Handle click on page to place a new tag (for CREATION) - now only as fallback
   const handlePlaceNewTag = useCallback((event: MouseEvent) => {
+    // Don't handle if not in tag drop mode or if currently dragging bubble
     if (!tagDropModeActive || isDraggingBubble) return;
 
     const target = event.target as HTMLElement;
@@ -366,6 +382,8 @@ export const DraggableNotificationsPanel = ({
     // Prevent default behavior for this click
     event.preventDefault();
     event.stopPropagation();
+
+    console.log('Placing tag at:', event.clientX, event.clientY); // Debug log
 
     // Calculate popup position with bounds check
     const popupWidth = 320;
@@ -648,26 +666,92 @@ export const DraggableNotificationsPanel = ({
     }
   };
 
+  // Test function to force open tag popup
+  const testTagPopup = () => {
+    console.log('Test: Opening tag popup');
+    setTagPopupCoords({ x: 200, y: 200 });
+    setIsTagPopupOpen(true);
+  };
+
   // --- Event Listener for Placing Tag (useEffect) ---
   useEffect(() => {
+    console.log('useEffect running, tagDropModeActive:', tagDropModeActive, 'isDraggingBubble:', isDraggingBubble, 'isDrawingMode:', isDrawingMode);
+    
     const listener = (event: MouseEvent) => {
-      if (isMountedRef.current) {
-        handlePlaceNewTag(event);
+      console.log('🔥 RAW CLICK EVENT FIRED!', event);
+      console.log('Click event triggered, tagDropModeActive:', tagDropModeActive, 'isDraggingBubble:', isDraggingBubble, 'isDrawingMode:', isDrawingMode);
+      
+      // Don't interfere with drawing mode
+      if (isDrawingMode) {
+        console.log('Drawing mode active, ignoring tag drop click');
+        return;
       }
+
+      if (!tagDropModeActive) {
+        console.log('Tag drop mode not active, ignoring');
+        return;
+      }
+
+      if (isDraggingBubble) {
+        console.log('Currently dragging bubble, ignoring');
+        return;
+      }
+
+      const target = event.target as HTMLElement;
+      console.log('Clicked on:', target.tagName, target.className);
+      
+      // Enhanced check - avoid all UI elements and drawing controls
+      if (target.closest('.notifications-panel') || 
+          target.closest('.tag-popup-content') ||
+          target.closest('#page-drawing-overlay') ||
+          target.closest('#page-drawing-canvas') ||
+          target.closest('.drawing-controls') ||
+          target.closest('button') ||
+          target.closest('[role="button"]')) {
+        console.log('Clicked on UI element, ignoring');
+        return;
+      }
+
+      // Prevent default behavior for this click
+      event.preventDefault();
+      event.stopPropagation();
+
+      console.log('✅ PLACING TAG AT:', event.clientX, event.clientY);
+
+      // Calculate popup position with bounds check
+      const popupWidth = 320;
+      const popupHeight = 380;
+      let x = event.clientX;
+      let y = event.clientY;
+      
+      if (x + popupWidth > window.innerWidth) {
+        x = window.innerWidth - popupWidth - 10;
+      }
+      if (y + popupHeight > window.innerHeight) {
+        y = window.innerHeight - popupHeight - 10;
+      }
+      if (x < 10) x = 10;
+      if (y < 10) y = 10;
+
+      // Set popup position and open
+      setTagPopupCoords({ x, y });
+      setIsTagPopupOpen(true);
     };
 
-    if (tagDropModeActive) {
-      // Use capture phase to intercept clicks before they reach other handlers
-      document.addEventListener('click', listener, { capture: true, passive: false });
+    // Only add tag drop listeners if not in drawing mode
+    if (tagDropModeActive && !isDrawingMode) {
+      console.log('🚀 Adding click listener for tag drop mode');
+      // Try both capture and bubble phases
+      document.addEventListener('click', listener, { capture: true });
+      document.addEventListener('click', listener, { capture: false });
     }
     
     return () => {
+      console.log('🧹 Removing click listeners');
       document.removeEventListener('click', listener, { capture: true });
-      if (tagDropModeActive) {
-        document.body.style.cursor = '';
-      }
+      document.removeEventListener('click', listener, { capture: false });
     };
-  }, [tagDropModeActive, handlePlaceNewTag]);
+  }, [tagDropModeActive, isDraggingBubble, isDrawingMode]);
   
   // Effect to set mounted state and cleanup drawing events
   useEffect(() => {
@@ -698,9 +782,23 @@ export const DraggableNotificationsPanel = ({
     
     // Enable/disable page drawing mode
     if (active) {
+      // Override cursor for drawing mode only if not over paint menu
+      if (!isMouseOverPaintMenu) {
+        document.body.style.cursor = 'crosshair';
+      }
       enablePageDrawing();
+      // Disable tag drop mode temporarily when drawing
+      if (tagDropModeActive) {
+        toast.info('Tag Drop Mode temporarily disabled while drawing');
+      }
     } else {
+      // Restore cursor based on tag drop mode state
+      document.body.style.cursor = tagDropModeActive ? 'crosshair' : '';
       disablePageDrawing();
+      // Re-enable tag drop mode notification if it was active
+      if (tagDropModeActive) {
+        toast.info('Tag Drop Mode re-enabled');
+      }
     }
   };
 
@@ -732,6 +830,7 @@ export const DraggableNotificationsPanel = ({
       width: 100%;
       height: 100%;
       pointer-events: auto;
+      cursor: crosshair;
     `;
     
     // Scale canvas for high DPI displays
@@ -850,6 +949,11 @@ export const DraggableNotificationsPanel = ({
     };
 
     const startDrawing = (e: MouseEvent | TouchEvent) => {
+      // Don't start drawing if mouse is over paint menu
+      if (isMouseOverPaintMenu) {
+        return;
+      }
+      
       e.preventDefault();
       isDrawing = true;
       const pos = getEventPos(e);
@@ -868,7 +972,7 @@ export const DraggableNotificationsPanel = ({
     };
     
     const draw = (e: MouseEvent | TouchEvent) => {
-      if (!isDrawing || !startPoint) return;
+      if (!isDrawing || !startPoint || isMouseOverPaintMenu) return;
       e.preventDefault();
       
       const pos = getEventPos(e);
@@ -1344,167 +1448,324 @@ export const DraggableNotificationsPanel = ({
           </div>
       )}
 
-      {/* Enhanced Page Drawing Controls */}
+      {/* Compact Elegant Paint Menu */}
       {isDrawingMode && (
-        <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-[9999] bg-white rounded-xl shadow-2xl border border-gray-200 p-4 min-w-[600px]">
-          <div className="space-y-4">
-            
-            {/* Header with close button */}
-            <div className="flex items-center justify-between">
-              <h3 className="text-sm font-bold text-gray-800 flex items-center gap-2">
-                <Palette className="h-4 w-4 text-purple-600" />
-                Drawing Tools - Click and drag on page
-              </h3>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => toggleFullScreenDrawingMode(false)}
-                className="h-6 w-6 p-0 hover:bg-gray-100"
-              >
-                <X className="h-4 w-4" />
-              </Button>
+        <>
+          {/* Invisible drawing blocker overlay for paint menu area */}
+          <div 
+            className="fixed top-0 left-1/2 transform -translate-x-1/2 z-[9998]"
+            style={{ 
+              zIndex: 9998,
+              width: '340px',
+              height: '200px',
+              pointerEvents: 'auto',
+              backgroundColor: 'transparent'
+            }}
+            onMouseEnter={() => setIsMouseOverPaintMenu(true)}
+            onMouseLeave={() => setIsMouseOverPaintMenu(false)}
+            onMouseDown={(e) => { e.stopPropagation(); e.preventDefault(); }}
+            onMouseMove={(e) => { e.stopPropagation(); e.preventDefault(); }}
+            onMouseUp={(e) => { e.stopPropagation(); e.preventDefault(); }}
+            onClick={(e) => { e.stopPropagation(); e.preventDefault(); }}
+            onTouchStart={(e) => { e.stopPropagation(); e.preventDefault(); }}
+            onTouchMove={(e) => { e.stopPropagation(); e.preventDefault(); }}
+            onTouchEnd={(e) => { e.stopPropagation(); e.preventDefault(); }}
+            onPointerDown={(e) => { e.stopPropagation(); e.preventDefault(); }}
+            onPointerMove={(e) => { e.stopPropagation(); e.preventDefault(); }}
+            onPointerUp={(e) => { e.stopPropagation(); e.preventDefault(); }}
+          />
+          
+          <div 
+            className="drawing-controls fixed top-4 left-1/2 transform -translate-x-1/2 z-[9999] bg-gradient-to-r from-white to-gray-50 rounded-2xl shadow-2xl border border-gray-200 p-3 pointer-events-auto"
+            style={{ 
+              zIndex: 10000, 
+              cursor: 'default', 
+              minWidth: '240px', 
+              maxWidth: '320px',
+              pointerEvents: 'auto' 
+            }}
+          onMouseEnter={() => {
+            setIsMouseOverPaintMenu(true);
+            // Completely disable drawing cursor and canvas interactions
+            document.body.style.cursor = 'default';
+            const canvas = document.getElementById('page-drawing-canvas') as HTMLCanvasElement;
+            const overlay = document.getElementById('page-drawing-overlay') as HTMLElement;
+            if (canvas) {
+              canvas.style.pointerEvents = 'none';
+              canvas.style.display = 'none';
+              canvas.style.visibility = 'hidden';
+              canvas.style.zIndex = '-1';
+            }
+            if (overlay) {
+              overlay.style.pointerEvents = 'none';
+              overlay.style.display = 'none';
+              overlay.style.visibility = 'hidden';
+              overlay.style.zIndex = '-1';
+            }
+          }}
+          onMouseLeave={() => {
+            setIsMouseOverPaintMenu(false);
+            // Re-enable drawing cursor and canvas interactions
+            if (isDrawingMode && !isMouseOverPaintMenu) {
+              document.body.style.cursor = 'crosshair';
+              const canvas = document.getElementById('page-drawing-canvas') as HTMLCanvasElement;
+              const overlay = document.getElementById('page-drawing-overlay') as HTMLElement;
+              if (canvas) {
+                canvas.style.pointerEvents = 'auto';
+                canvas.style.display = 'block';
+                canvas.style.visibility = 'visible';
+                canvas.style.zIndex = '9998';
+              }
+              if (overlay) {
+                overlay.style.pointerEvents = 'auto';
+                overlay.style.display = 'block';
+                overlay.style.visibility = 'visible';
+                overlay.style.zIndex = '9998';
+              }
+            }
+          }}
+          onMouseMove={(e) => {
+            // Force cursor to stay normal and prevent any drawing
+            e.currentTarget.style.cursor = 'default';
+            document.body.style.cursor = 'default';
+            e.stopPropagation();
+            e.preventDefault();
+          }}
+          onClick={(e) => {
+            // Completely prevent any click events from propagating
+            e.stopPropagation();
+            e.preventDefault();
+          }}
+          onMouseDown={(e) => {
+            // Prevent mousedown events that could trigger drawing
+            e.stopPropagation();
+            e.preventDefault();
+          }}
+          onMouseUp={(e) => {
+            // Prevent mouseup events
+            e.stopPropagation();
+            e.preventDefault();
+          }}
+          onTouchStart={(e) => {
+            // Prevent touch events on mobile
+            e.stopPropagation();
+            e.preventDefault();
+          }}
+          onTouchMove={(e) => {
+            // Prevent touch move events on mobile
+            e.stopPropagation();
+            e.preventDefault();
+          }}
+          onTouchEnd={(e) => {
+            // Prevent touch end events on mobile
+            e.stopPropagation();
+            e.preventDefault();
+          }}
+          onPointerDown={(e) => {
+            // Prevent pointer events
+            e.stopPropagation();
+            e.preventDefault();
+          }}
+          onPointerMove={(e) => {
+            // Prevent pointer move events
+            e.stopPropagation();
+            e.preventDefault();
+          }}
+          onPointerUp={(e) => {
+            // Prevent pointer up events
+            e.stopPropagation();
+            e.preventDefault();
+          }}
+          onDragStart={(e) => {
+            // Prevent drag events
+            e.stopPropagation();
+            e.preventDefault();
+          }}
+          onDrag={(e) => {
+            // Prevent drag events
+            e.stopPropagation();
+            e.preventDefault();
+          }}
+          onDragEnd={(e) => {
+            // Prevent drag end events
+            e.stopPropagation();
+            e.preventDefault();
+          }}
+        >
+          {/* Header */}
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <Palette className="h-4 w-4 text-purple-600" />
+              <span className="text-xs font-semibold text-gray-800">Paint Tools</span>
             </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => toggleFullScreenDrawingMode(false)}
+              className="h-6 w-6 p-0 hover:bg-gray-100"
+            >
+              <X className="h-3 w-3" />
+            </Button>
+          </div>
 
-            <div className="flex items-center gap-6">
-              {/* Shape Tools */}
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-medium text-gray-600">Tools:</span>
-                <div className="flex items-center gap-1">
-                  {[
-                    { tool: 'highlight', icon: Highlighter, label: 'Highlight' },
-                    { tool: 'pencil', icon: Edit3, label: 'Draw' },
-                    { tool: 'circle', icon: Circle, label: 'Circle' },
-                    { tool: 'rectangle', icon: Square, label: 'Rectangle' },
-                    { tool: 'arrow', icon: ArrowUp, label: 'Arrow' }
-                  ].map(({ tool, icon: Icon, label }) => (
-                    <button
-                      key={tool}
-                      onClick={() => setSelectedShape(tool as any)}
-                      className={`p-2 rounded-lg border-2 transition-all hover:scale-105 ${
-                        selectedShape === tool 
-                          ? 'bg-purple-100 border-purple-500 text-purple-700' 
-                          : 'bg-gray-50 border-gray-200 text-gray-600 hover:bg-gray-100'
-                      }`}
-                      title={label}
-                    >
-                      <Icon className="h-4 w-4" />
-                    </button>
-                  ))}
-                </div>
-              </div>
-              
-              {/* Highlight Colors */}
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-medium text-gray-600">Highlights:</span>
-                <div className="flex items-center gap-1">
-                  {highlightColors.map(color => (
-                    <button
-                      key={color}
-                      onClick={() => {
-                        setSelectedShape('highlight');
-                        handleDrawingStateChange('color', color);
-                        handleDrawingStateChange('lineWidth', 12);
-                      }}
-                      className={`w-6 h-6 rounded-lg border-2 transition-all hover:scale-110 ${
-                        drawingState.color === color && selectedShape === 'highlight' 
-                          ? 'ring-2 ring-offset-1 ring-purple-500 scale-110' 
-                          : 'hover:scale-110'
-                      }`}
-                      style={{ backgroundColor: color, opacity: 0.7 }}
-                      title={`Highlight ${color}`}
-                    />
-                  ))}
-                </div>
-              </div>
-              
-              {/* Standard Colors */}
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-medium text-gray-600">Colors:</span>
-                <div className="flex items-center gap-1">
-                  {standardColors.map(color => (
-                    <button
-                      key={color}
-                      onClick={() => {
-                        handleDrawingStateChange('color', color);
-                        handleDrawingStateChange('lineWidth', selectedShape === 'highlight' ? 12 : 4);
-                      }}
-                      className={`w-6 h-6 rounded-full border-2 transition-all hover:scale-110 ${
-                        drawingState.color === color ? 'ring-2 ring-offset-1 ring-blue-500 scale-110' : 'hover:scale-110'
-                      }`}
-                      style={{ backgroundColor: color }}
-                      title={color}
-                    />
-                  ))}
-                  <input
-                    type="color"
-                    value={drawingState.color}
-                    onChange={(e) => handleDrawingStateChange('color', e.target.value)}
-                    className="w-6 h-6 rounded border border-gray-300 cursor-pointer"
-                    title="Custom Color"
-                  />
-                </div>
-                
-                {/* Brush Size */}
-                <div className="flex items-center gap-2">
-                  <span className="text-xs font-medium text-gray-600">Size:</span>
-                  <div className="flex items-center gap-1">
-                    {[4, 8, 12, 16].map(width => (
-                      <button
-                        key={width}
-                        onClick={() => handleDrawingStateChange('lineWidth', width)}
-                        className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all hover:scale-105 ${
-                          drawingState.lineWidth === width ? 'bg-purple-500 text-white' : 'bg-gray-100 hover:bg-gray-200'
-                        }`}
-                        title={`${width}px`}
-                      >
-                        <div 
-                          className="bg-current rounded-full" 
-                          style={{ width: `${Math.min(width/2, 6)}px`, height: `${Math.min(width/2, 6)}px` }}
-                        />
-                      </button>
-                    ))}
-                  </div>
-                </div>
-                
-                {/* Actions */}
-                <div className="flex items-center gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
-                      const canvas = document.getElementById('page-drawing-canvas') as HTMLCanvasElement;
-                      if (canvas) {
-                        const ctx = canvas.getContext('2d');
-                        if (ctx) {
-                          ctx.clearRect(0, 0, canvas.width, canvas.height);
-                        }
-                      }
-                    }}
-                    className="h-8 px-3 text-xs"
-                  >
-                    Clear
-                  </Button>
-                  <Button
-                    variant="default"
-                    size="sm"
-                    onClick={() => {
-                      const canvas = document.getElementById('page-drawing-canvas') as HTMLCanvasElement;
-                      if (canvas) {
-                        const dataUrl = canvas.toDataURL('image/png');
-                        handleDrawingComplete(dataUrl);
-                        toggleFullScreenDrawingMode(false);
-                        toast.success('Drawing saved! 🎨');
-                      }
-                    }}
-                    className="h-8 px-3 text-xs bg-purple-600 hover:bg-purple-700"
-                  >
-                    Save Drawing
-                  </Button>
-                </div>
-              </div>
+          {/* Tools Row */}
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-xs font-medium text-gray-600">Tools:</span>
+            <div className="flex items-center gap-1">
+              {[
+                { tool: 'highlight', icon: Highlighter, label: 'Highlight' },
+                { tool: 'pencil', icon: Edit3, label: 'Draw' },
+                { tool: 'circle', icon: Circle, label: 'Circle' },
+                { tool: 'rectangle', icon: Square, label: 'Rectangle' },
+                { tool: 'arrow', icon: ArrowUp, label: 'Arrow' }
+              ].map(({ tool, icon: Icon, label }) => (
+                <button
+                  key={tool}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    e.preventDefault();
+                    setSelectedShape(tool as any);
+                    // Also update the drawing state tool
+                    handleDrawingStateChange('tool', tool);
+                  }}
+                  onMouseDown={(e) => {
+                    e.stopPropagation();
+                    e.preventDefault();
+                  }}
+                  className={`p-1.5 rounded-lg border transition-all hover:scale-105 ${
+                    selectedShape === tool 
+                      ? 'bg-purple-100 border-purple-500 text-purple-700' 
+                      : 'bg-gray-50 border-gray-200 text-gray-600 hover:bg-gray-100'
+                  }`}
+                  title={label}
+                >
+                  <Icon className="h-3 w-3" />
+                </button>
+              ))}
             </div>
           </div>
+
+          {/* Colors Row - Single Horizontal Row */}
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-xs font-medium text-gray-600">Colors:</span>
+            <div className="flex items-center gap-1">
+              {/* Essential Color Palette - 12 circles in one horizontal row */}
+              {[
+                // Primary colors
+                '#000000', '#FF0000', '#00FF00', '#0000FF', '#FFFF00', '#FF00FF',
+                // Secondary colors  
+                '#FFFFFF', '#808080', '#FFA500', '#800080', '#00FFFF', '#FFC0CB'
+              ].map((color, index) => (
+                <div
+                  key={color}
+                  className="w-3 h-3 rounded-full border border-gray-500 transition-all hover:scale-150 hover:z-10 cursor-pointer"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    e.preventDefault();
+                    handleDrawingStateChange('color', color);
+                    handleDrawingStateChange('lineWidth', 4);
+                  }}
+                  onMouseDown={(e) => {
+                    e.stopPropagation();
+                    e.preventDefault();
+                  }}
+                  style={{ 
+                    backgroundColor: color,
+                    minWidth: '12px',
+                    minHeight: '12px',
+                    transform: drawingState.color === color ? 'scale(1.3)' : 'scale(1)',
+                    boxShadow: drawingState.color === color ? '0 0 0 1px #3b82f6' : 'none'
+                  }}
+                  title={color}
+                />
+              ))}
+            </div>
+          </div>
+
+          {/* Size Row */}
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-xs font-medium text-gray-600">Size:</span>
+            <div className="flex items-center gap-1">
+              {[4, 8, 12, 16].map(width => (
+                <button
+                  key={width}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    e.preventDefault();
+                    handleDrawingStateChange('lineWidth', width);
+                  }}
+                  onMouseDown={(e) => {
+                    e.stopPropagation();
+                    e.preventDefault();
+                  }}
+                  className={`w-6 h-6 rounded-lg flex items-center justify-center transition-all hover:scale-105 ${
+                    drawingState.lineWidth === width ? 'bg-purple-500 text-white' : 'bg-gray-100 hover:bg-gray-200'
+                  }`}
+                  title={`${width}px`}
+                >
+                  <div 
+                    className="bg-current rounded-full" 
+                    style={{ width: `${Math.min(width/3, 4)}px`, height: `${Math.min(width/3, 4)}px` }}
+                  />
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Actions Row */}
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={(e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                const canvas = document.getElementById('page-drawing-canvas') as HTMLCanvasElement;
+                if (canvas) {
+                  const ctx = canvas.getContext('2d');
+                  if (ctx) {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                  }
+                }
+              }}
+              onMouseDown={(e) => {
+                e.stopPropagation();
+                e.preventDefault();
+              }}
+              className="h-7 px-2 text-xs flex-1"
+            >
+              Clear
+            </Button>
+            <Button
+              variant="default"
+              size="sm"
+              onClick={(e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                console.log('Save Drawing button clicked');
+                const canvas = document.getElementById('page-drawing-canvas') as HTMLCanvasElement;
+                if (canvas) {
+                  console.log('Canvas found, saving drawing');
+                  const dataUrl = canvas.toDataURL('image/png');
+                  handleDrawingComplete(dataUrl);
+                  toggleFullScreenDrawingMode(false);
+                  toast.success('Drawing saved! 🎨');
+                } else {
+                  console.error('Canvas not found');
+                  toast.error('Error: Drawing canvas not found');
+                }
+              }}
+              onMouseDown={(e) => {
+                e.stopPropagation();
+                e.preventDefault();
+              }}
+              className="h-7 px-2 text-xs bg-purple-600 hover:bg-purple-700 flex-1"
+            >
+              Save
+            </Button>
+          </div>
         </div>
+        </>
       )}
 
       {/* Notifications Panel */}
@@ -1541,7 +1802,7 @@ export const DraggableNotificationsPanel = ({
                 <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
                   <Bell className="h-4 w-4 text-white" />
                 </div>
-                <h2 className="text-lg font-semibold text-gray-800">Collaboration Hub</h2>
+                <h2 className="text-lg font-semibold text-gray-800">Notifications</h2>
               </div>
               <div className="flex space-x-1">
                 <Button variant="ghost" size="icon" onClick={togglePin} title={isPinned ? "Unpin panel" : "Pin panel"}>
@@ -1551,12 +1812,16 @@ export const DraggableNotificationsPanel = ({
                   {panelSize === 'quarter' ? <Maximize2 className="h-4 w-4 text-gray-500" /> : <Minimize2 className="h-4 w-4 text-gray-500" />} 
                 </Button>
                 <Button variant="ghost" size="icon" onClick={minimizePanel} title="Minimize panel"><ArrowLeftRight className="h-4 w-4 text-gray-500" /></Button>
-                <Button variant="ghost" size="icon" onClick={onClose} title="Close panel"><X className="h-4 w-4 text-gray-500" /></Button>
+                <Button variant="ghost" size="icon" onClick={onClose} title="Close panel">
+                  <div className="w-6 h-6 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                    <span className="text-white font-bold text-xs">DS</span>
+                  </div>
+                </Button>
               </div>
             </div>
 
             {/* Start Tag Drop Button */}
-            <div className="p-4">
+            <div className="p-4 space-y-2">
               <Button
                 size="lg"
                 className={cn(
@@ -1569,6 +1834,16 @@ export const DraggableNotificationsPanel = ({
               >
                 <Tag className="h-5 w-5" />
                 {tagDropModeActive ? "Cancel Tag Drop" : "Start Tag Drop"}
+              </Button>
+              
+              {/* Test Button */}
+              <Button
+                size="sm"
+                variant="outline"
+                className="w-full"
+                onClick={testTagPopup}
+              >
+                Test Tag Popup
               </Button>
             </div>
 
