@@ -1,14 +1,16 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { X, Bell, Maximize2, Minimize2, ArrowLeftRight, Pin, Calendar, MessageSquare, Tag, Edit3, Image, Save, Mic, Trash2, Brush, AlertCircle, Minus, MoveUpRight, Square, Circle, Star } from 'lucide-react';
+import { X, Bell, Maximize2, Minimize2, ArrowLeftRight, Pin, Calendar, MessageSquare, Tag, Edit3, Image, Save, Mic, Trash2, Brush, AlertCircle, Minus, MoveUpRight, Square, Circle, Star, Search, Settings, Users, Hash, Activity, CheckCircle, XCircle, Upload, Palette, Video, ArrowUp, Highlighter } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { NotificationItem } from './NotificationItem';
+import { DraggableProfileBubble } from './DraggableProfileBubble';
 import { cn } from '@/lib/utils';
 import { useNotifications, type Notification } from './NotificationContextProvider';
 import { createTag, type TagData } from '@/services/tagService';
 import { toast } from 'sonner';
-import DrawingCanvas, { DrawingToolbar } from './DrawingCanvas';
-import { Point, DrawingState, DrawingTool } from './types';
+import { DrawingState } from './types';
+import { useAuth } from '@/contexts/AuthContext';
+// Drawing canvas removed - only full-page drawing is available
 
 type PanelSize = 'quarter' | 'half' | 'custom' | 'minimized';
 type ActiveTab = 'all' | 'team' | 'trades' | 'account' | 'security' | 'calendar' | 'comments';
@@ -29,7 +31,7 @@ interface StaffMember {
 interface UploadedFile {
     file: File;
     previewUrl: string; // For images
-    type: 'image' | 'audio' | 'drawing';
+    type: 'image' | 'audio' | 'drawing' | 'video';
     supabaseUrl?: string; // Set after successful upload
 }
 
@@ -47,34 +49,58 @@ interface DraggableNotificationsPanelProps {
   availableStaff: StaffMember[]; // Pass the list of available staff
 }
 
-// Placeholder for Supabase upload functions - replace with your actual implementation
+// Real Supabase upload function
 const uploadFileToSupabase = async (file: File, folder: string, fileName: string): Promise<string> => {
-  console.log(`[Placeholder] Uploading ${fileName} to Supabase folder: ${folder}`);
-  await new Promise(resolve => setTimeout(resolve, 500)); // Simulate upload delay
-  const mockUrl = `https://mock-supabase.com/${folder}/${fileName}`;
-  console.log(`[Placeholder] Uploaded to: ${mockUrl}`);
-  return mockUrl;
+  const { supabase } = await import('@/integrations/supabase/client');
+  
+  const filePath = `${folder}/${fileName}`;
+  const { data, error } = await supabase.storage
+    .from('attachments')
+    .upload(filePath, file, {
+      cacheControl: '3600',
+      upsert: false
+    });
+
+  if (error) {
+    console.error('Upload failed:', error);
+    throw new Error(`Upload failed: ${error.message}`);
+  }
+
+  const { data: { publicUrl } } = supabase.storage
+    .from('attachments')
+    .getPublicUrl(filePath);
+
+  return publicUrl;
 };
 
 export const DraggableNotificationsPanel = ({
   isOpen,
   onClose,
-  businessLogoUrl = '/business-logo.png', // Trade tools business logo
-  currentUserId = 'user_abc', // Example user ID
-  availableStaff = [ { id: 'staff1', name: 'Alice' }, { id: 'staff2', name: 'Bob' }] // Example staff
+  businessLogoUrl = '/business-logo.png',
+  currentUserId,
+  availableStaff
 }: DraggableNotificationsPanelProps) => {
+  const { user } = useAuth();
   
-  // Debug logging
-  console.log('DraggableNotificationsPanel render:', { isOpen, currentUserId, availableStaff: availableStaff.length });
-  
-  // Add local override state for testing
-  const [forceOpen, setForceOpen] = useState(false);
-  const effectiveIsOpen = forceOpen || isOpen;
+  // Remove debug logging and test override
+  const effectiveIsOpen = isOpen;
   const [activeTab, setActiveTab] = useState<ActiveTab>('all');
   const [panelSize, setPanelSize] = useState<PanelSize>('quarter');
   const [isPinned, setIsPinned] = useState(false);
   const [customWidth, setCustomWidth] = useState(350);
   const [isDrawingMode, setIsDrawingMode] = useState(false); // General panel drawing mode
+  const [drawingState, setDrawingState] = useState<DrawingState>({
+    isActive: false,
+    tool: 'pencil',
+    color: '#FFFF00', // Default to yellow highlighter
+    lineWidth: 8,
+    isDrawingOnPage: false
+  });
+  
+  // Enhanced drawing tools state
+  const [selectedShape, setSelectedShape] = useState<'pencil' | 'circle' | 'rectangle' | 'arrow' | 'highlight'>('highlight');
+  const highlightColors = ['#FFFF00', '#00FF00', '#FF00FF', '#00FFFF', '#FFA500', '#FF0000'];
+  const standardColors = ['#000000', '#FF0000', '#0000FF', '#00FF00', '#FFFF00', '#FF00FF'];
   const [sortLater, setSortLater] = useState<string[]>([]);
   
   // --- Tag Drop State ---
@@ -83,6 +109,9 @@ export const DraggableNotificationsPanel = ({
   const [tagPopupCoords, setTagPopupCoords] = useState<TagPopupPosition | null>(null);
   const [tagMarkers, setTagMarkers] = useState<TagMarker[]>([]);
   const activeTagPopupElement = useRef<HTMLDivElement | null>(null);
+  
+  // --- Draggable Bubble State ---
+  const [isDraggingBubble, setIsDraggingBubble] = useState(false);
   
   // Add drag state for the tag popup
   const [isDraggingPopup, setIsDraggingPopup] = useState(false);
@@ -93,15 +122,23 @@ export const DraggableNotificationsPanel = ({
   const [selectedStaff, setSelectedStaff] = useState<StaffMember[]>([]);
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
   const [isRecordingAudio, setIsRecordingAudio] = useState(false);
-  const [isDrawingActive, setIsDrawingActive] = useState(false); // For drawing within the tag
+  const [isRecordingScreen, setIsRecordingScreen] = useState(false);
+  // Drawing is now only available in full-page mode
   const [staffSelectionError, setStaffSelectionError] = useState<string | null>(null);
+  const [audioRecorder, setAudioRecorder] = useState<MediaRecorder | null>(null);
+  const [screenRecorder, setScreenRecorder] = useState<MediaRecorder | null>(null);
+  const [audioStream, setAudioStream] = useState<MediaStream | null>(null);
+  const [screenStream, setScreenStream] = useState<MediaStream | null>(null);
+  const [requiresApproval, setRequiresApproval] = useState(false);
   
   const panelRef = useRef<HTMLDivElement>(null);
   const leftResizeHandleRef = useRef<HTMLDivElement>(null);
-  const { notifications, markAllAsRead } = useNotifications(); // Assuming this context provides notifications
+  // Canvas ref removed - only full-page drawing is available
+  const { notifications, markAllAsRead, replyToNotification, getConversationNotifications } = useNotifications(); // Assuming this context provides notifications
 
   const SIDEBAR_WIDTH = 50;
-  const isDevelopment = import.meta.env.DEV;
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
 
   const getPanelWidth = () => {
     if (panelSize === 'minimized') return '60px';
@@ -120,12 +157,83 @@ export const DraggableNotificationsPanel = ({
     return () => clearInterval(interval);
   }, []);
   
+  // NEW: Store the preview URL of the drawing
+  const [drawingPreviewUrl, setDrawingPreviewUrl] = useState<string | null>(null);
+  
+  // Conversation threading state
+  const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
+  const [isReplyMode, setIsReplyMode] = useState(false);
+  const [replyToNotificationId, setReplyToNotificationId] = useState<string | number | null>(null);
+
+  // Resets the state associated with the tag popup content
+  const resetTagPopupState = useCallback(() => {
+      setTagComment('');
+      setSelectedStaff([]);
+      // Clean up uploaded files URLs
+      uploadedFiles.forEach(file => {
+        if (file.previewUrl && file.previewUrl.startsWith('blob:')) {
+          URL.revokeObjectURL(file.previewUrl);
+        }
+      });
+      setUploadedFiles([]);
+      setIsRecordingAudio(false);
+      // Drawing state cleanup removed
+      setStaffSelectionError(null);
+      setTagPopupCoords(null);
+      setDrawingPreviewUrl(null);
+      setActiveConversationId(null);
+      setIsReplyMode(false);
+      setReplyToNotificationId(null);
+      // Clean up audio recording
+      if (audioRecorder && audioRecorder.state === 'recording') {
+        audioRecorder.stop();
+      }
+      if (audioStream) {
+        audioStream.getTracks().forEach(track => track.stop());
+      }
+      setAudioRecorder(null);
+      setAudioStream(null);
+  }, [uploadedFiles, audioRecorder, audioStream]);
+
+  // Handle reply to notification
+  const handleReplyToNotification = useCallback((notificationId: string | number) => {
+    const notification = notifications.find(n => n.id === notificationId);
+    if (!notification) return;
+    
+    setReplyToNotificationId(notificationId);
+    setIsReplyMode(true);
+    
+    // If the notification has a conversation ID, use it; otherwise create one
+    const conversationId = notification.conversationId || `conv_${notificationId}`;
+    setActiveConversationId(conversationId);
+    
+    // Pre-populate with selected staff if replying to a tag
+    if (notification.senderId) {
+      const sender = availableStaff.find(staff => staff.id === notification.senderId);
+      if (sender) {
+        setSelectedStaff([sender]);
+      }
+    }
+    
+    // Open the tag popup at the original coordinates or center
+    const coords = notification.coordinates || { x: window.innerWidth / 2, y: window.innerHeight / 2 };
+    setTagPopupCoords(coords);
+    setIsTagPopupOpen(true);
+  }, [notifications, availableStaff]);
+
+  // Forward declare closeTagPopup to avoid initialization issues
+  const closeTagPopup = useCallback(() => {
+    setIsTagPopupOpen(false);
+    resetTagPopupState();
+    document.body.style.cursor = tagDropModeActive ? 'crosshair' : '';
+  }, [tagDropModeActive, resetTagPopupState]);
+
   // --- Cleanup active popup if panel closes ---
    useEffect(() => {
-     if (!isOpen && isTagPopupOpen) {
+     if (!effectiveIsOpen && isTagPopupOpen) {
        closeTagPopup();
      }
-   }, [isOpen, isTagPopupOpen]);
+   }, [effectiveIsOpen, isTagPopupOpen, closeTagPopup]);
 
 
   // --- Panel Control Functions ---
@@ -135,92 +243,149 @@ export const DraggableNotificationsPanel = ({
   const addToSortLater = (id: string) => setSortLater(prev => [...prev, id]);
   const toggleGeneralDrawingMode = () => setIsDrawingMode(!isDrawingMode);
 
-  const showOverlay = isOpen && !isPinned;
-  const notificationCounts = { all: 25, team: 5, trades: 9, calendar: 3, comments: 6, account: 0, security: 0 };
+  const showOverlay = effectiveIsOpen && !isPinned;
+  
+  // Calculate real notification counts
+  const notificationCounts = {
+    all: notifications.length,
+    team: notifications.filter(n => n.type === 'team').length,
+    trades: notifications.filter(n => ['job', 'quote', 'payment'].includes(n.type)).length,
+    calendar: notifications.filter(n => n.type === 'calendar').length,
+    comments: notifications.filter(n => ['message', 'comment', 'tag'].includes(n.type)).length,
+    account: notifications.filter(n => n.type === 'account').length,
+    security: notifications.filter(n => n.type === 'security').length
+  };
 
 
   // --- Tag Drop Core Logic ---
 
   // Toggles the overall Tag Drop mode on/off
   const toggleTagDropMode = () => {
-    console.log('[TagDropMode] Toggling tag drop mode. Current state:', tagDropModeActive);
     setTagDropModeActive(prev => {
       const nextState = !prev;
-      console.log('[TagDropMode] New state will be:', nextState);
       if (!nextState) {
-        console.log('[TagDropMode] Deactivating - closing popup and resetting cursor');
         closeTagPopup();
         document.body.style.cursor = '';
       } else {
-        console.log('[TagDropMode] Activating - setting cursor to crosshair');
         document.body.style.cursor = 'crosshair';
+        toast.info('Tag Drop Mode Active - Drag your profile picture to place a tag');
       }
       return nextState;
     });
   };
 
-  // Resets the state associated with the tag popup content
-  const resetTagPopupState = () => {
-      setTagComment('');
-      setSelectedStaff([]);
-      setUploadedFiles([]);
-      setIsRecordingAudio(false);
-      setIsDrawingActive(false);
-      setStaffSelectionError(null);
-      setTagPopupCoords(null);
-      setDrawingPreviewUrl(null); // NEW: reset drawing preview
-  };
+  // --- Draggable Bubble Handlers ---
+  const handleBubbleDragStart = useCallback(() => {
+    setIsDraggingBubble(true);
+    document.body.style.cursor = 'grabbing';
+  }, []);
 
-  // NEW: Store the preview URL of the drawing
-  const [drawingPreviewUrl, setDrawingPreviewUrl] = useState<string | null>(null);
+  const handleBubbleDragEnd = useCallback((x: number, y: number) => {
+    setIsDraggingBubble(false);
+    document.body.style.cursor = tagDropModeActive ? 'crosshair' : '';
+    
+    // Calculate popup position with bounds check
+    const popupWidth = 320;
+    const popupHeight = 380;
+    let adjustedX = x;
+    let adjustedY = y;
+    
+    if (adjustedX + popupWidth > window.innerWidth) {
+      adjustedX = window.innerWidth - popupWidth - 10;
+    }
+    if (adjustedY + popupHeight > window.innerHeight) {
+      adjustedY = window.innerHeight - popupHeight - 10;
+    }
+    if (adjustedX < 10) adjustedX = 10;
+    if (adjustedY < 10) adjustedY = 10;
 
-  // Closes the tag pop-up window and resets state
-  const closeTagPopup = useCallback(() => {
-    setIsTagPopupOpen(false);
-    resetTagPopupState();
+    // Set popup position and open
+    setTagPopupCoords({ x: adjustedX, y: adjustedY });
+    setIsTagPopupOpen(true);
+  }, [tagDropModeActive]);
+
+  const handleBubbleDragCancel = useCallback(() => {
+    setIsDraggingBubble(false);
     document.body.style.cursor = tagDropModeActive ? 'crosshair' : '';
   }, [tagDropModeActive]);
 
-  // Handle click on page to place a new tag (for CREATION)
+
+  // Drawing state removed - only full-page drawing is available
+
+
+  // Handle click on page to place a new tag (for CREATION) - now only as fallback
   const handlePlaceNewTag = useCallback((event: MouseEvent) => {
-    console.log('[TagDrop] Handling click event. Mode active:', tagDropModeActive);
-    
-    // Don't prevent default or stop propagation immediately
-    // Only do this if we're actually going to handle the click
-    if (!tagDropModeActive) {
-      console.log('[TagDrop] Mode not active, ignoring click');
-      return;
-    }
+    if (!tagDropModeActive || isDraggingBubble) return;
 
     const target = event.target as HTMLElement;
-    const isNotification = target.closest('.notification-item');
-    const isPanel = target.closest('.notifications-panel');
+    
+    // Check if clicked on any interactive element including the draggable bubble
+    const isInteractive = target.closest(`
+      button, 
+      [role="button"], 
+      a, 
+      input, 
+      textarea, 
+      select, 
+      .notification-item, 
+      .notifications-panel, 
+      .tag-popup-content,
+      .draggable-profile-bubble,
+      nav,
+      .sidebar,
+      .menu,
+      .dropdown,
+      .modal,
+      .dialog,
+      [data-interactive="true"]
+    `);
 
-    if (isNotification || isPanel) {
-      console.log('[TagDrop] Click was on notification or panel, ignoring');
-      return;
+    // Also check for common UI component class patterns
+    const isUIComponent = target.closest(`
+      [class*="button"],
+      [class*="btn"],
+      [class*="menu"],
+      [class*="nav"],
+      [class*="sidebar"],
+      [class*="header"],
+      [class*="toolbar"],
+      [class*="control"],
+      [class*="input"],
+      [class*="select"],
+      [class*="dropdown"],
+      [class*="popup"],
+      [class*="modal"],
+      [class*="dialog"],
+      [class*="tooltip"]
+    `);
+
+    if (isInteractive || isUIComponent) {
+      return; // Don't place tag on interactive elements
     }
 
-    // Now we know we're handling this click
+    // Prevent default behavior for this click
     event.preventDefault();
     event.stopPropagation();
 
-    console.log('[TagDrop] Placing new tag at:', event.clientX, event.clientY);
-
-    // Place popup at click location (with bounds check)
-    const popupWidth = 380;
-    const popupHeight = 400;
+    // Calculate popup position with bounds check
+    const popupWidth = 320;
+    const popupHeight = 380;
     let x = event.clientX;
     let y = event.clientY;
-    if (x + popupWidth > window.innerWidth) x = window.innerWidth - popupWidth - 10;
-    if (y + popupHeight > window.innerHeight) y = window.innerHeight - popupHeight - 10;
+    
+    if (x + popupWidth > window.innerWidth) {
+      x = window.innerWidth - popupWidth - 10;
+    }
+    if (y + popupHeight > window.innerHeight) {
+      y = window.innerHeight - popupHeight - 10;
+    }
+    if (x < 10) x = 10;
+    if (y < 10) y = 10;
 
-    setTimeout(() => {
-      console.log('[TagDrop] Setting popup coordinates:', x, y);
-      setTagPopupCoords({ x, y });
-      setIsTagPopupOpen(true);
-    }, 0);
-  }, [tagDropModeActive]);
+    // Set popup position and open
+    setTagPopupCoords({ x, y });
+    setIsTagPopupOpen(true);
+  }, [tagDropModeActive, isDraggingBubble]);
 
 
   // --- Handlers for actions WITHIN the tag pop-up ---
@@ -254,47 +419,147 @@ export const DraggableNotificationsPanel = ({
       }
   };
   
-  // Clear canvas function
-  const clearCanvas = useCallback(() => {
-    setDrawingPreviewUrl(null);
-    setUploadedFiles(prev => prev.filter(f => f.type !== 'drawing'));
-    // Force re-render of canvas by toggling drawing state
-    setIsDrawingActive(false);
-    setTimeout(() => setIsDrawingActive(true), 10);
-  }, []);
-  
-  // Placeholder for drawing
-  const handleToggleDrawing = () => {
-    const nextIsDrawingActive = !isDrawingActive;
-    setIsDrawingActive(nextIsDrawingActive);
-    setDrawingState(prev => ({ ...prev, isActive: nextIsDrawingActive }));
-    if (!nextIsDrawingActive) {
-      clearCanvas();
+  // Drawing functions removed - only full-page drawing is available
+
+  // Enhanced audio recording with hold-to-record functionality
+  const handleAudioRecordStart = async () => {
+    if (isRecordingAudio) return;
+    
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mediaRecorder = new MediaRecorder(stream);
+      const chunks: Blob[] = [];
+
+      mediaRecorder.ondataavailable = (e) => {
+        if (e.data.size > 0) {
+          chunks.push(e.data);
+        }
+      };
+      
+      mediaRecorder.onstop = () => {
+        const blob = new Blob(chunks, { type: 'audio/webm' });
+        const audioFile = new File([blob], `recording-${Date.now()}.webm`, { type: 'audio/webm' });
+        const audioUrl = URL.createObjectURL(blob);
+        
+        const newFile: UploadedFile = {
+          file: audioFile,
+          previewUrl: audioUrl,
+          type: 'audio'
+        };
+        setUploadedFiles(prev => [...prev, newFile]);
+        
+        // Clean up
+        stream.getTracks().forEach(track => track.stop());
+        setAudioStream(null);
+        setAudioRecorder(null);
+        toast.success('Audio recorded successfully!');
+      };
+
+      mediaRecorder.start();
+      setIsRecordingAudio(true);
+      setAudioRecorder(mediaRecorder);
+      setAudioStream(stream);
+      
+    } catch (error) {
+      console.error('Failed to start recording:', error);
+      toast.error('Failed to access microphone. Please check your permissions.');
     }
   };
 
-  // Placeholder for audio recording
-  const handleToggleAudioRecord = () => {
-      console.log("[Placeholder] Toggle audio recording");
-      setIsRecordingAudio(!isRecordingAudio);
-       // Simulate adding/removing audio placeholder
-      if (!isRecordingAudio && !uploadedFiles.some(f => f.type === 'audio')) {
-         const audioPlaceholder: UploadedFile = {
-             file: new File([], "recording.mp3"), // Dummy file
-             previewUrl: "", // No visual preview for audio usually
-             type: 'audio'
-         };
-         setUploadedFiles(prev => [...prev, audioPlaceholder]);
-      } else if (isRecordingAudio) {
-         setUploadedFiles(prev => prev.filter(f => f.type !== 'audio'));
+  const handleAudioRecordStop = () => {
+    if (audioRecorder && audioRecorder.state === 'recording') {
+      audioRecorder.stop();
+    }
+    setIsRecordingAudio(false);
+  };
+
+  // Legacy toggle function for backward compatibility
+  const handleToggleAudioRecord = async () => {
+    if (!isRecordingAudio) {
+      await handleAudioRecordStart();
+    } else {
+      handleAudioRecordStop();
+    }
+  };
+
+  const handleToggleScreenRecord = async () => {
+    if (!isRecordingScreen) {
+      try {
+        const stream = await navigator.mediaDevices.getDisplayMedia({ 
+          video: { mediaSource: 'screen' }, 
+          audio: true 
+        });
+        const mediaRecorder = new MediaRecorder(stream);
+        const chunks: Blob[] = [];
+
+        mediaRecorder.ondataavailable = (e) => {
+          if (e.data.size > 0) {
+            chunks.push(e.data);
+          }
+        };
+        
+        mediaRecorder.onstop = () => {
+          const blob = new Blob(chunks, { type: 'video/webm' });
+          const videoFile = new File([blob], `screen-recording-${Date.now()}.webm`, { type: 'video/webm' });
+          const videoUrl = URL.createObjectURL(blob);
+          
+          const newFile: UploadedFile = {
+            file: videoFile,
+            previewUrl: videoUrl,
+            type: 'video'
+          };
+          setUploadedFiles(prev => [...prev, newFile]);
+          
+          // Clean up
+          stream.getTracks().forEach(track => track.stop());
+          setScreenStream(null);
+          setScreenRecorder(null);
+        };
+
+        // Stop recording when user stops sharing screen
+        stream.getVideoTracks()[0].addEventListener('ended', () => {
+          if (mediaRecorder.state === 'recording') {
+            mediaRecorder.stop();
+          }
+          setIsRecordingScreen(false);
+        });
+
+        mediaRecorder.start();
+        setIsRecordingScreen(true);
+        setScreenRecorder(mediaRecorder);
+        setScreenStream(stream);
+        
+        // Auto-stop after 5 minutes
+        setTimeout(() => {
+          if (mediaRecorder.state === 'recording') {
+            mediaRecorder.stop();
+            setIsRecordingScreen(false);
+          }
+        }, 300000);
+        
+      } catch (error) {
+        console.error('Failed to start screen recording:', error);
+        toast.error('Failed to access screen. Please check your permissions.');
       }
+    } else {
+      // Stop recording
+      if (screenRecorder && screenRecorder.state === 'recording') {
+        screenRecorder.stop();
+      }
+      setIsRecordingScreen(false);
+    }
   };
   
   const removeUploadedFile = (index: number) => {
       const fileToRemove = uploadedFiles[index];
-      // If removing drawing/audio placeholder, update the respective state
-      if (fileToRemove.type === 'drawing') setIsDrawingActive(false);
+      // Clean up blob URLs to prevent memory leaks
+      if (fileToRemove.previewUrl && fileToRemove.previewUrl.startsWith('blob:')) {
+        URL.revokeObjectURL(fileToRemove.previewUrl);
+      }
+      // If removing audio/video placeholder, update the respective state
+      // Drawing removed from popup
       if (fileToRemove.type === 'audio') setIsRecordingAudio(false);
+      if (fileToRemove.type === 'video') setIsRecordingScreen(false);
       setUploadedFiles(prev => prev.filter((_, i) => i !== index));
   };
 
@@ -305,25 +570,30 @@ export const DraggableNotificationsPanel = ({
       return;
     }
     setStaffSelectionError(null);
+    setIsUploading(true);
+    setUploadProgress(0);
 
     try {
       // 1. Upload files first
-      const uploadPromises = uploadedFiles.map(async (uploadedFile) => {
-        const folderPath = `tag_drops/${Date.now()}`;
+      const uploadPromises = uploadedFiles.map(async (uploadedFile, index) => {
+        const folderPath = `tag_drops/${currentUserId}/${Date.now()}`;
         let fileName = uploadedFile.file.name;
-        if (uploadedFile.type === 'drawing') fileName = 'drawing.png';
-        if (uploadedFile.type === 'audio') fileName = 'recording.mp3';
+        if (uploadedFile.type === 'drawing') fileName = `drawing-${Date.now()}.png`;
+        if (uploadedFile.type === 'audio') fileName = `recording-${Date.now()}.mp3`;
         
         try {
           const url = await uploadFileToSupabase(uploadedFile.file, folderPath, fileName);
+          setUploadProgress(((index + 1) / uploadedFiles.length) * 50); // 50% for uploads
           return { ...uploadedFile, supabaseUrl: url };
         } catch (error) {
           console.error("Upload failed:", error);
+          toast.error(`Failed to upload ${fileName}`);
           return { ...uploadedFile, supabaseUrl: undefined };
         }
       });
       
       const uploadedFilesWithUrls = await Promise.all(uploadPromises);
+      setUploadProgress(60);
 
       // 2. Create tag data
       const tagData: Omit<TagData, 'id' | 'timestamp'> = {
@@ -334,26 +604,37 @@ export const DraggableNotificationsPanel = ({
           .filter(f => f.supabaseUrl)
           .map(f => ({ type: f.type, url: f.supabaseUrl! })),
         coords: tagPopupCoords!,
-        drawingData: drawingPreviewUrl || tagCanvasRef.current?.toDataURL('image/png') // Use preview if available
+        drawingData: drawingPreviewUrl || undefined,
+        conversationId: activeConversationId || undefined,
+        replyToId: replyToNotificationId || undefined
       };
+
+      setUploadProgress(80);
 
       // 3. Save tag to database
       const savedTag = await createTag(tagData);
+      setUploadProgress(100);
 
-      // 4. Show success notification
-      toast.success('Tag created successfully!');
+      // 4. If this is a reply, use the reply function from context
+      if (isReplyMode && replyToNotificationId) {
+        replyToNotification(replyToNotificationId, tagComment, uploadedFilesWithUrls);
+        toast.success('Reply sent successfully!');
+      } else {
+        // 5. Show success notification for new tag
+        toast.success('Tag created successfully!');
+      }
 
-      // 5. Close popup and reset state
+      // 6. Close popup and reset state
       closeTagPopup();
 
-      // 6. Add marker to the page
-      if (tagPopupCoords) {
+      // 7. Add marker to the page (only for new tags, not replies)
+      if (tagPopupCoords && !isReplyMode) {
         const newMarker: TagMarker = {
           id: savedTag.id,
           x: tagPopupCoords.x,
           y: tagPopupCoords.y,
           timestamp: Date.now(),
-          drawingData: drawingPreviewUrl || savedTag.drawingData // Use preview if available
+          drawingData: savedTag.drawingData
         };
         setTagMarkers(prev => [...prev, newMarker]);
       }
@@ -361,36 +642,29 @@ export const DraggableNotificationsPanel = ({
     } catch (error) {
       console.error('Failed to save tag:', error);
       toast.error('Failed to save tag. Please try again.');
+    } finally {
+      setIsUploading(false);
+      setUploadProgress(0);
     }
   };
 
   // --- Event Listener for Placing Tag (useEffect) ---
   useEffect(() => {
-    console.log('[TagDropEffect] Running effect. Mode active:', tagDropModeActive); // Log effect run
-    
     const listener = (event: MouseEvent) => {
-      // Only process the event if the component is still mounted
       if (isMountedRef.current) {
         handlePlaceNewTag(event);
       }
     };
 
     if (tagDropModeActive) {
-        console.log('[TagDropEffect] Adding click listener.'); // Log listener add
-        document.addEventListener('click', listener); // Removed true parameter for bubbling
-    } else {
-        console.log('[TagDropEffect] Removing click listener.'); // Log listener remove
-        document.removeEventListener('click', listener);
+      // Use capture phase to intercept clicks before they reach other handlers
+      document.addEventListener('click', listener, { capture: true, passive: false });
     }
     
-    // Cleanup function
     return () => {
-      console.log('[TagDropEffect] Cleanup: Removing click listener.'); // Log cleanup
-      document.removeEventListener('click', listener);
-      // Ensure cursor is reset if component unmounts while mode is active
+      document.removeEventListener('click', listener, { capture: true });
       if (tagDropModeActive) {
-          console.log('[TagDropEffect] Cleanup: Resetting cursor.'); // Log cursor reset
-          document.body.style.cursor = '';
+        document.body.style.cursor = '';
       }
     };
   }, [tagDropModeActive, handlePlaceNewTag]);
@@ -400,80 +674,325 @@ export const DraggableNotificationsPanel = ({
     isMountedRef.current = true;
     return () => {
       isMountedRef.current = false;
-      // Clean up any pending drawing operations
-      setIsDrawing(false);
-      setLastPoint(null);
+      // Drawing operations cleanup removed
       // Reset cursor if tag drop mode was active
       if (tagDropModeActive) {
         document.body.style.cursor = '';
       }
+      // Clean up uploaded file URLs to prevent memory leaks
+      uploadedFiles.forEach(file => {
+        if (file.previewUrl && file.previewUrl.startsWith('blob:')) {
+          URL.revokeObjectURL(file.previewUrl);
+        }
+      });
     };
-  }, [tagDropModeActive]); 
+  }, [tagDropModeActive, uploadedFiles]); 
 
-  // Add states for drawing
-  const [drawingState, setDrawingState] = useState<DrawingState>({
-    isActive: false,
-    tool: 'pencil',
-    color: '#000000',
-    lineWidth: 2,
-    isDrawingOnPage: false
-  });
-  
-  const [isDrawing, setIsDrawing] = useState(false);
-  const [lastPoint, setLastPoint] = useState<Point | null>(null);
-  
-  // Refs for canvases
-  const tagCanvasRef = useRef<HTMLCanvasElement>(null);
-  const pageCanvasRef = useRef<HTMLCanvasElement>(null);
-  const canvasContainerRef = useRef<HTMLDivElement>(null);
-  
   // Ref to track if component is mounted (for cleanup)
   const isMountedRef = useRef(true);
   
-  // Simple drawing state tracking with proper initialization
-  const drawingStateRef = useRef(drawingState);
-  const isDrawingRef = useRef(isDrawing);
-  const lastPointRef = useRef(lastPoint);
-  
-  // Drawing tool refs to prevent conflicts
-  const drawingToolsRef = useRef<HTMLDivElement>(null);
-  
-  // Keep refs in sync with state
-  useEffect(() => {
-    drawingStateRef.current = drawingState;
-  }, [drawingState]);
-  
-  useEffect(() => {
-    isDrawingRef.current = isDrawing;
-  }, [isDrawing]);
-  
-  useEffect(() => {
-    lastPointRef.current = lastPoint;
-  }, [lastPoint]);
-  
-  // Helper function to update drawing state
-  const updateDrawingState = useCallback(<K extends keyof DrawingState>(key: K, value: DrawingState[K]) => {
-    setDrawingState(prev => ({ ...prev, [key]: value }));
-  }, []);
-  
-  
+  const toggleFullScreenDrawingMode = (active: boolean) => {
+    // Instead of opening a separate canvas, enable drawing directly on the page
+    setIsDrawingMode(active);
+    setDrawingState(prev => ({ ...prev, isActive: active, isDrawingOnPage: active }));
+    
+    // Enable/disable page drawing mode
+    if (active) {
+      enablePageDrawing();
+    } else {
+      disablePageDrawing();
+    }
+  };
 
-  // Helper to convert data URL to File
-  const dataURLtoFile = (dataurl: string, filename: string): File | null => {
-    const arr = dataurl.split(',');
-    if (arr.length < 2) return null;
+  const enablePageDrawing = () => {
+    // Add drawing overlay to the page
+    const drawingOverlay = document.createElement('div');
+    drawingOverlay.id = 'page-drawing-overlay';
+    drawingOverlay.style.cssText = `
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 9998;
+      pointer-events: auto;
+      cursor: crosshair;
+      background: transparent;
+    `;
     
-    const mime = arr[0].match(/:(.*?);/)?.[1];
-    const bstr = atob(arr[1]);
-    let n = bstr.length;
-    const u8arr = new Uint8Array(n);
+    // Create canvas for drawing
+    const canvas = document.createElement('canvas');
+    canvas.id = 'page-drawing-canvas';
+    canvas.width = window.innerWidth * window.devicePixelRatio;
+    canvas.height = window.innerHeight * window.devicePixelRatio;
+    canvas.style.cssText = `
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: auto;
+    `;
     
-    while (n--) {
-      u8arr[n] = bstr.charCodeAt(n);
+    // Scale canvas for high DPI displays
+    const ctx = canvas.getContext('2d');
+    if (ctx) {
+      ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
     }
     
-    return new File([u8arr], filename, { type: mime || 'image/png' });
+    drawingOverlay.appendChild(canvas);
+    document.body.appendChild(drawingOverlay);
+    
+    // Add visual indicator
+    const indicator = document.createElement('div');
+    indicator.id = 'drawing-mode-indicator';
+    indicator.innerHTML = '🎨 Drawing Mode Active - Draw on the page';
+    indicator.style.cssText = `
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0, 0, 0, 0.8);
+      color: white;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 14px;
+      z-index: 9999;
+      pointer-events: none;
+    `;
+    document.body.appendChild(indicator);
+    
+    // Initialize drawing functionality
+    initializePageDrawing(canvas);
   };
+
+  const disablePageDrawing = () => {
+    const overlay = document.getElementById('page-drawing-overlay');
+    if (overlay) {
+      overlay.remove();
+    }
+    
+    const indicator = document.getElementById('drawing-mode-indicator');
+    if (indicator) {
+      indicator.remove();
+    }
+  };
+
+  const initializePageDrawing = (canvas: HTMLCanvasElement) => {
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    
+    let isDrawing = false;
+    let startPoint: { x: number; y: number } | null = null;
+    let lastPoint: { x: number; y: number } | null = null;
+    let currentPath: ImageData | null = null;
+    
+    const getEventPos = (e: MouseEvent | TouchEvent) => {
+      if (e instanceof TouchEvent) {
+        const touch = e.touches[0] || e.changedTouches[0];
+        return { x: touch.clientX, y: touch.clientY };
+      }
+      return { x: e.clientX, y: e.clientY };
+    };
+    
+    const setupDrawingStyle = () => {
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.strokeStyle = drawingState.color;
+      ctx.lineWidth = drawingState.lineWidth;
+      
+      // Set opacity for highlighting
+      if (selectedShape === 'highlight') {
+        ctx.globalAlpha = 0.4;
+        ctx.globalCompositeOperation = 'multiply';
+      } else {
+        ctx.globalAlpha = 1;
+        ctx.globalCompositeOperation = 'source-over';
+      }
+    };
+
+    const drawShape = (start: { x: number; y: number }, end: { x: number; y: number }) => {
+      ctx.beginPath();
+      
+      switch (selectedShape) {
+        case 'circle':
+          const radius = Math.sqrt(Math.pow(end.x - start.x, 2) + Math.pow(end.y - start.y, 2));
+          ctx.arc(start.x, start.y, radius, 0, 2 * Math.PI);
+          ctx.stroke();
+          break;
+          
+        case 'rectangle':
+          ctx.rect(start.x, start.y, end.x - start.x, end.y - start.y);
+          ctx.stroke();
+          break;
+          
+        case 'arrow':
+          const headLength = 20;
+          const angle = Math.atan2(end.y - start.y, end.x - start.x);
+          
+          // Draw line
+          ctx.moveTo(start.x, start.y);
+          ctx.lineTo(end.x, end.y);
+          
+          // Draw arrow head
+          ctx.lineTo(end.x - headLength * Math.cos(angle - Math.PI / 6), end.y - headLength * Math.sin(angle - Math.PI / 6));
+          ctx.moveTo(end.x, end.y);
+          ctx.lineTo(end.x - headLength * Math.cos(angle + Math.PI / 6), end.y - headLength * Math.sin(angle + Math.PI / 6));
+          ctx.stroke();
+          break;
+          
+        case 'highlight':
+        case 'pencil':
+        default:
+          // For pencil and highlight, continue drawing as normal
+          break;
+      }
+    };
+
+    const startDrawing = (e: MouseEvent | TouchEvent) => {
+      e.preventDefault();
+      isDrawing = true;
+      const pos = getEventPos(e);
+      startPoint = pos;
+      lastPoint = pos;
+      
+      setupDrawingStyle();
+      
+      if (selectedShape === 'pencil' || selectedShape === 'highlight') {
+        ctx.beginPath();
+        ctx.moveTo(pos.x, pos.y);
+      } else {
+        // For shapes, save the current canvas state
+        currentPath = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      }
+    };
+    
+    const draw = (e: MouseEvent | TouchEvent) => {
+      if (!isDrawing || !startPoint) return;
+      e.preventDefault();
+      
+      const pos = getEventPos(e);
+      
+      if (selectedShape === 'pencil' || selectedShape === 'highlight') {
+        // Free drawing
+        ctx.lineTo(pos.x, pos.y);
+        ctx.stroke();
+        lastPoint = pos;
+      } else {
+        // Shape drawing - restore canvas and draw preview
+        if (currentPath) {
+          ctx.putImageData(currentPath, 0, 0);
+        }
+        setupDrawingStyle();
+        drawShape(startPoint, pos);
+      }
+    };
+    
+    const stopDrawing = (e?: MouseEvent | TouchEvent) => {
+      if (isDrawing) {
+        isDrawing = false;
+        
+        if (startPoint && lastPoint && selectedShape !== 'pencil' && selectedShape !== 'highlight') {
+          // Final shape drawing
+          const pos = e ? getEventPos(e) : lastPoint;
+          if (currentPath) {
+            ctx.putImageData(currentPath, 0, 0);
+          }
+          setupDrawingStyle();
+          drawShape(startPoint, pos);
+        }
+        
+        startPoint = null;
+        lastPoint = null;
+        currentPath = null;
+        
+        // Save the drawing
+        const dataUrl = canvas.toDataURL('image/png');
+        setDrawingPreviewUrl(dataUrl);
+      }
+    };
+    
+    // Mouse events
+    canvas.addEventListener('mousedown', startDrawing);
+    canvas.addEventListener('mousemove', draw);
+    canvas.addEventListener('mouseup', stopDrawing);
+    canvas.addEventListener('mouseleave', stopDrawing);
+    
+    // Touch events for mobile
+    canvas.addEventListener('touchstart', startDrawing, { passive: false });
+    canvas.addEventListener('touchmove', draw, { passive: false });
+    canvas.addEventListener('touchend', stopDrawing, { passive: false });
+    canvas.addEventListener('touchcancel', stopDrawing, { passive: false });
+    
+    // Prevent scrolling when drawing
+    canvas.addEventListener('touchstart', (e) => e.preventDefault(), { passive: false });
+    canvas.addEventListener('touchmove', (e) => e.preventDefault(), { passive: false });
+    
+    // Store event listeners for cleanup
+    (canvas as any)._drawingListeners = { startDrawing, draw, stopDrawing };
+  };
+
+  const handleDrawingStateChange = <K extends keyof DrawingState>(key: K, value: DrawingState[K]) => {
+    setDrawingState(prev => ({ ...prev, [key]: value }));
+  };
+
+  const handleDrawingComplete = (dataUrl: string) => {
+    setDrawingPreviewUrl(dataUrl);
+    
+    // Convert data URL to file and add to uploaded files
+    const byteString = atob(dataUrl.split(',')[1]);
+    const mimeString = dataUrl.split(',')[0].split(':')[1].split(';')[0];
+    const ab = new ArrayBuffer(byteString.length);
+    const ia = new Uint8Array(ab);
+    for (let i = 0; i < byteString.length; i++) {
+      ia[i] = byteString.charCodeAt(i);
+    }
+    const blob = new Blob([ab], { type: mimeString });
+    const file = new File([blob], `drawing-${Date.now()}.png`, { type: 'image/png' });
+    
+    const newUploadedFile: UploadedFile = {
+      file,
+      previewUrl: dataUrl,
+      type: 'drawing'
+    };
+    
+    setUploadedFiles(prev => [...prev, newUploadedFile]);
+  };
+
+  const handleSaveDrawing = () => {
+    const canvas = document.getElementById('page-drawing-canvas') as HTMLCanvasElement;
+    if (canvas) {
+      const dataUrl = canvas.toDataURL('image/png');
+      handleDrawingComplete(dataUrl);
+    }
+    
+    // Close drawing mode
+    toggleFullScreenDrawingMode(false);
+  };
+
+  const handleCancelDrawing = () => {
+    toggleFullScreenDrawingMode(false);
+  };
+
+  const clearPageDrawing = () => {
+    const canvas = document.getElementById('page-drawing-canvas') as HTMLCanvasElement;
+    if (canvas) {
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+      }
+    }
+  };
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      disablePageDrawing();
+    };
+  }, []);
+  
+
+  // Data URL to File helper removed - only needed for drawing
   
 
   // Handle starting popup drag operation
@@ -542,58 +1061,22 @@ export const DraggableNotificationsPanel = ({
   }, []);
 
 
-  // When drawing is finished in the popup, update preview
-  const handleDrawingFinish = useCallback((dataUrl: string) => {
-    setDrawingPreviewUrl(dataUrl);
-    // Add/replace drawing in uploadedFiles
-    setUploadedFiles(prev => {
-      const others = prev.filter(f => f.type !== 'drawing');
-      return [
-        ...others,
-        {
-          file: dataURLtoFile(dataUrl, 'drawing.png')!,
-          previewUrl: dataUrl,
-          type: 'drawing',
-        },
-      ];
-    });
-  }, []);
+  // Drawing finish handler removed - only full-page drawing is available
 
   return (
     <>
-      {/* Debug Test Button - ALWAYS VISIBLE */}
-      <div className="fixed top-4 left-4 z-[9999] flex gap-2">
-        <Button 
-          onClick={() => {
-            console.log('🔄 Test button clicked! isOpen:', isOpen, 'forceOpen:', forceOpen);
-            setForceOpen(!forceOpen);
-          }}
-          className={cn(
-            "px-4 py-2 rounded text-sm font-bold",
-            forceOpen ? "bg-green-500 text-white" : "bg-purple-500 text-white"
-          )}
-        >
-          🧪 FORCE PANEL {forceOpen ? 'ON' : 'OFF'}
-        </Button>
-        <Button 
-          onClick={() => {
-            console.log('📊 Status - isOpen:', isOpen, 'forceOpen:', forceOpen, 'effectiveIsOpen:', effectiveIsOpen);
-          }}
-          className="bg-blue-500 text-white px-4 py-2 rounded text-sm font-bold"
-        >
-          📊 DEBUG STATUS
-        </Button>
-      </div>
-      
-      {/* Debug indicator */}
-      {effectiveIsOpen && (
-        <div className="fixed top-4 right-4 z-[9999] bg-green-500 text-white p-2 rounded text-sm font-bold">
-          PANEL OPEN - isOpen:{isOpen ? 'T' : 'F'} force:{forceOpen ? 'T' : 'F'} - {panelSize}
-        </div>
-      )}
+      {/* Draggable Profile Bubble */}
+      <DraggableProfileBubble
+        user={user}
+        isActive={tagDropModeActive}
+        onDragEnd={handleBubbleDragEnd}
+        onDragStart={handleBubbleDragStart}
+        onDragCancel={handleBubbleDragCancel}
+        className="draggable-profile-bubble"
+      />
       
       {/* Overlay */}
-      {showOverlay && ( <div className="fixed inset-0 bg-black/20 z-40" onClick={isPinned ? undefined : onClose} aria-hidden="true" /> )}
+      {showOverlay && <div className="fixed inset-0 bg-black/20 z-40" onClick={isPinned ? undefined : onClose} aria-hidden="true" />}
 
       {/* Temporary Tag Markers (Logos) */}
       {tagMarkers.map(marker => (
@@ -611,11 +1094,11 @@ export const DraggableNotificationsPanel = ({
         </div>
       ))}
 
-      {/* --- Tag Drop Popup (Updated with draggable header) --- */}
+      {/* --- REDESIGNED TAG DROP POPUP --- */}
       {isTagPopupOpen && tagPopupCoords && (
           <div
               ref={activeTagPopupElement}
-              className="tag-popup-content fixed bg-white border border-gray-300 rounded-lg shadow-xl z-[100] w-[380px] flex flex-col"
+              className="tag-popup-content fixed bg-white border border-gray-300 rounded-xl shadow-2xl z-[100] w-[320px] h-[380px] flex flex-col overflow-hidden"
               style={{ 
                 left: `${tagPopupCoords.x}px`, 
                 top: `${tagPopupCoords.y}px`,
@@ -624,211 +1107,412 @@ export const DraggableNotificationsPanel = ({
                 zIndex: 999999
               }}
           >
-              {/* Header - Drag handle */}
+              {/* Minimal Drag Handle */}
               <div 
-                className="popup-drag-handle flex justify-between items-center p-3 border-b bg-slate-400 rounded-t-lg cursor-move"
-                onMouseDown={handlePopupDragStart} 
+                className="popup-drag-handle flex justify-end items-center p-2 cursor-move flex-shrink-0 border-b border-gray-200"
+                onMouseDown={handlePopupDragStart}
+                style={{ height: '35px' }}
               >
-                  <div className="flex items-center gap-2 text-white">
-                      <Tag className="h-5 w-5" />
-                      <span className="font-semibold">Create Tag</span>
-                  </div>
-                  <Button variant="ghost" size="icon" className="h-7 w-7 text-white hover:bg-slate-500" onClick={closeTagPopup}>
-                      <X className="h-4 w-4" />
+                  <Button variant="ghost" size="icon" className="h-5 w-5 text-gray-500 hover:bg-gray-100 rounded-full" onClick={closeTagPopup}>
+                      <X className="h-3 w-3" />
                   </Button>
               </div>
 
-              {/* Content Area */}
-              <div className="p-4 flex flex-col gap-4 overflow-y-auto max-h-[70vh]">
-                  {/* Comment */}
-                  <textarea
-                      className="w-full p-2 text-sm border rounded-md resize-none focus:ring-1 focus:ring-blue-500 focus:outline-none"
-                      placeholder="Add a comment... (optional)"
-                      rows={3}
-                      value={tagComment}
-                      onChange={handleCommentChange}
-                  />
+              {/* White Content Area with Centered Title */}
+              <div className="flex-1 min-h-0 overflow-hidden flex flex-col">
+                {/* Centered Title */}
+                <div className="text-center py-2 border-b border-gray-100">
+                  <h3 className="text-sm font-semibold text-gray-800">{isReplyMode ? 'Reply to Tag' : 'Create Tag'}</h3>
+                </div>
 
-                  {/* Staff Selection */}
-                  <div className="border rounded-md p-3">
-                      <label className="text-sm font-medium text-gray-700 block mb-2">Notify Staff <span className="text-red-500">*</span></label>
-                      <div className="max-h-24 overflow-y-auto mb-2 border-t border-b py-1">
-                          {availableStaff.map(staff => (
-                              <div key={staff.id} className="flex items-center justify-between px-2 py-1 hover:bg-gray-50">
-                                  <span className="text-sm">{staff.name}</span>
-                                  <input
-                                      type="checkbox"
-                                      className="form-checkbox h-4 w-4 text-blue-600 rounded"
-                                      checked={selectedStaff.some(s => s.id === staff.id)}
-                                      onChange={() => handleStaffSelect(staff)}
-                                  />
-                              </div>
-                          ))}
-                      </div>
-                      {selectedStaff.length > 0 && (
-                         <div className="flex flex-wrap gap-1 mt-1">
-                             {selectedStaff.map(s => (
-                                <span key={s.id} className="bg-blue-100 text-blue-700 text-xs px-2 py-0.5 rounded-full">{s.name}</span>
-                             ))}
-                         </div>
-                      )}
-                      {staffSelectionError && (
-                           <p className="text-red-500 text-xs mt-1 flex items-center gap-1">
-                               <AlertCircle className="h-3 w-3" /> {staffSelectionError}
-                           </p>
-                      )}
-                  </div>
+                {/* Scrollable Content */}
+                <div className="flex-1 overflow-y-auto p-3">
+                  <div className="space-y-3">
+                    {/* Conversation Context */}
+                    {isReplyMode && activeConversationId && (
+                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-2">
+                            <div className="text-xs font-semibold text-blue-800 mb-1">💬 Replying to conversation</div>
+                            <div className="max-h-10 overflow-y-auto">
+                                <div className="text-xs text-blue-700 truncate">
+                                    {getConversationNotifications(activeConversationId)[0]?.comment || 'Previous message'}
+                                </div>
+                            </div>
+                        </div>
+                    )}
 
-                  {/* Attachments */}
-                  <div>
-                      <label className="text-sm font-medium text-gray-700 block mb-1">Attachments</label>
-                      {/* Previews */}
-                      {uploadedFiles.length > 0 && (
-                          <div className="flex flex-wrap gap-2 mb-2 border p-2 rounded-md bg-gray-50">
-                              {uploadedFiles.map((uploadedFile, index) => (
-                                  <div key={index} className="relative w-14 h-14">
-                                      {uploadedFile.type === 'image' && (
-                                         <img src={uploadedFile.previewUrl} alt="Preview" className="w-full h-full object-cover rounded border" />
-                                      )}
-                                      {uploadedFile.type === 'drawing' && uploadedFile.previewUrl && (
-                                        <img src={uploadedFile.previewUrl} alt="Drawing Preview" className="w-full h-full object-cover rounded border bg-white" />
-                                      )}
-                                      {uploadedFile.type === 'drawing' && !uploadedFile.previewUrl && (
-                                        <div className="w-full h-full flex items-center justify-center bg-gray-200 rounded border">
-                                          <Brush className="h-6 w-6 text-gray-600"/>
-                                        </div>
-                                      )}
-                                      {uploadedFile.type === 'audio' && (
-                                         <div className="w-full h-full flex items-center justify-center bg-gray-200 rounded border">
-                                             <Mic className="h-6 w-6 text-gray-600"/>
-                                         </div>
-                                      )}
-                                      <Button
-                                          variant="destructive" size="icon"
-                                          className="absolute -top-1 -right-1 h-4 w-4 rounded-full p-0"
-                                          onClick={() => removeUploadedFile(index)}
-                                      >
-                                          <X className="h-2.5 w-2.5" />
-                                      </Button>
-                                  </div>
-                              ))}
-                          </div>
-                      )}
-                      {/* Attachment Action Buttons */}
-                      <div className="flex items-center gap-2">
-                           <Button 
-                               variant="outline" 
-                               size="sm" 
-                               className="flex-1 text-xs gap-1" 
-                               onClick={() => document.getElementById('tag-image-upload')?.click()}
-                           >
-                               <Image className="h-3.5 w-3.5"/> Image
-                               <input type="file" id="tag-image-upload" accept="image/*" className="hidden" onChange={handleImageUpload}/>
-                           </Button>
-                           <Button 
-                               variant="outline" 
-                               size="sm" 
-                               className={cn(
-                                   "flex-1 text-xs gap-1", 
-                                   isDrawingActive ? 'bg-blue-100 text-blue-700 border-blue-300' : '' 
-                               )} 
-                               onClick={() => {
-                                   setIsDrawingActive(!isDrawingActive);
-                                   setDrawingState(prev => ({ ...prev, isActive: !isDrawingActive }));
-                               }}
-                           >
-                               <Brush className="h-3.5 w-3.5"/> Draw
-                           </Button>
-                           <Button 
-                               variant="outline" 
-                               size="sm" 
-                               className={cn(
-                                   "flex-1 text-xs gap-1", 
-                                   isRecordingAudio ? 'bg-red-100 text-red-700 border-red-300' : '' 
-                               )} 
-                               onClick={() => {
-                                   setIsRecordingAudio(!isRecordingAudio);
-                                   if (!isRecordingAudio && !uploadedFiles.some(f => f.type === 'audio')) {
-                                       const audioPlaceholder: UploadedFile = {
-                                           file: new File([], "recording.mp3"),
-                                           previewUrl: "",
-                                           type: 'audio'
-                                       };
-                                       setUploadedFiles(prev => [...prev, audioPlaceholder]);
-                                   } else if (isRecordingAudio) {
-                                       setUploadedFiles(prev => prev.filter(f => f.type !== 'audio'));
-                                   }
-                               }}
-                           >
-                               <Mic className="h-3.5 w-3.5"/> Voice
-                           </Button>
-                      </div>
-                      
-                      {/* Drawing Toolbar */}
-                      {isDrawingActive && (
-                          <div className="mt-3 pt-3 border-t border-gray-200">
-                              <DrawingToolbar 
-                                  drawingState={drawingState}
-                                  onStateChange={updateDrawingState}
-                                  className="mb-3"
-                              />
-                              
-                              <DrawingCanvas 
-                                  width={340} 
-                                  height={200} 
-                                  drawingState={drawingState}
-                                  onDrawEnd={handleDrawingFinish}
-                                  initialDrawingDataUrl={drawingPreviewUrl || undefined}
-                              />
-                              
-                              <div className="flex gap-2 mt-2">
-                                  <Button
-                                      variant="outline"
-                                      size="sm"
-                                      className="flex-1 text-xs"
-                                      onClick={clearCanvas}
-                                  >
-                                      Clear Canvas
-                                  </Button>
-                                  <Button
-                                      variant="outline"
-                                      size="sm"
-                                      className="flex-1 text-xs"
-                                      onClick={() => toast.info('Full-page drawing coming soon!')}
-                                  >
-                                      <Brush className="h-3.5 w-3.5 mr-1" />
-                                      Full Page (Soon)
-                                  </Button>
-                              </div>
-                          </div>
-                      )}
+                    {/* Comment Input */}
+                    <div className="space-y-1">
+                        <label className="text-xs font-semibold text-gray-700">💭 Your Message</label>
+                        <textarea
+                            className="w-full p-2 text-sm border border-gray-200 rounded-lg resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            placeholder={isReplyMode ? "Reply to conversation..." : "Add your comment..."}
+                            rows={2}
+                            value={tagComment}
+                            onChange={handleCommentChange}
+                        />
+                    </div>
+
+                    {/* Staff Selection */}
+                    <div className="space-y-1">
+                        <label className="text-xs font-semibold text-gray-700">👥 Notify Staff <span className="text-red-500">*</span></label>
+                        <div className="border border-gray-200 rounded-lg p-2">
+                            <div className="max-h-16 overflow-y-auto space-y-1">
+                                {availableStaff.map(staff => (
+                                    <div key={staff.id} className="flex items-center justify-between p-1 hover:bg-gray-50 rounded">
+                                        <span className="text-xs truncate">{staff.name}</span>
+                                        <input
+                                            type="checkbox"
+                                            className="h-3 w-3 text-blue-600 rounded"
+                                            checked={selectedStaff.some(s => s.id === staff.id)}
+                                            onChange={() => handleStaffSelect(staff)}
+                                        />
+                                    </div>
+                                ))}
+                            </div>
+                            {selectedStaff.length > 0 && (
+                               <div className="flex flex-wrap gap-1 mt-2 pt-2 border-t border-gray-200">
+                                   {selectedStaff.map(s => (
+                                      <span key={s.id} className="bg-blue-100 text-blue-700 text-xs px-2 py-1 rounded-full">{s.name.split(' ')[0]}</span>
+                                   ))}
+                               </div>
+                            )}
+                            {staffSelectionError && (
+                                 <p className="text-red-500 text-xs flex items-center gap-1 mt-1">
+                                     <AlertCircle className="h-3 w-3" /> Please select at least one staff member
+                                 </p>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Compact Red/Green Approval Switch */}
+                    <div className="flex items-center justify-between">
+                        <span className="text-xs font-medium text-gray-700">Request Approval</span>
+                        <label className="relative inline-flex items-center cursor-pointer">
+                            <input 
+                                type="checkbox" 
+                                className="sr-only peer"
+                                checked={requiresApproval}
+                                onChange={(e) => setRequiresApproval(e.target.checked)}
+                            />
+                            <div className={`w-8 h-4 rounded-full peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-300 ${
+                                requiresApproval ? 'bg-green-500' : 'bg-red-500'
+                            } peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[1px] after:left-[1px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all`}></div>
+                        </label>
+                    </div>
+
+                    {/* Media Features */}
+                    <div className="space-y-2">
+                        <label className="text-xs font-semibold text-gray-700">📎 Attachments</label>
+                        
+                        {/* File Previews */}
+                        {uploadedFiles.length > 0 && (
+                            <div className="grid grid-cols-4 gap-1 p-2 bg-gray-50 rounded-lg">
+                                {uploadedFiles.map((uploadedFile, index) => (
+                                    <div key={index} className="relative group">
+                                        {uploadedFile.type === 'image' && (
+                                           <img src={uploadedFile.previewUrl} alt="Preview" className="w-full h-8 object-cover rounded border border-gray-200" />
+                                        )}
+                                        {uploadedFile.type === 'audio' && (
+                                           <div className="w-full h-8 flex items-center justify-center bg-blue-100 rounded border border-blue-200">
+                                               <Mic className="h-3 w-3 text-blue-600"/>
+                                           </div>
+                                        )}
+                                        {uploadedFile.type === 'video' && (
+                                           <div className="w-full h-8 flex items-center justify-center bg-green-100 rounded border border-green-200">
+                                               <Video className="h-3 w-3 text-green-600"/>
+                                           </div>
+                                        )}
+                                        {uploadedFile.type === 'drawing' && (
+                                           <div className="w-full h-8 flex items-center justify-center bg-purple-100 rounded border border-purple-200">
+                                               <Palette className="h-3 w-3 text-purple-600"/>
+                                           </div>
+                                        )}
+                                        <Button
+                                            variant="destructive" size="icon"
+                                            className="absolute -top-1 -right-1 h-4 w-4 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                                            onClick={() => removeUploadedFile(index)}
+                                        >
+                                            <X className="h-2 w-2" />
+                                        </Button>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                        
+                        {/* Media Action Buttons - ALL FEATURES VISIBLE */}
+                        <div className="grid grid-cols-4 gap-1">
+                             {/* Screen Record */}
+                             <Button 
+                                 variant="outline" 
+                                 size="sm" 
+                                 className={cn(
+                                     "flex flex-col items-center gap-1 h-12 border-2 transition-all hover:scale-105 text-xs",
+                                     isRecordingScreen ? 'bg-red-50 text-red-700 border-red-300' : 'hover:bg-gray-50'
+                                 )} 
+                                 onClick={handleToggleScreenRecord}
+                             >
+                                 <Video className="h-4 w-4" />
+                                 <span className="text-[10px] font-medium">{isRecordingScreen ? 'Stop' : 'Screen'}</span>
+                             </Button>
+                             
+                             {/* Image Upload */}
+                             <Button 
+                                 variant="outline" 
+                                 size="sm" 
+                                 className="flex flex-col items-center gap-1 h-12 border-2 transition-all hover:scale-105 hover:bg-blue-50 text-xs"
+                                 onClick={() => document.getElementById('tag-image-upload')?.click()}
+                             >
+                                 <Upload className="h-4 w-4 text-blue-600" />
+                                 <span className="text-[10px] font-medium">Image</span>
+                                 <input type="file" id="tag-image-upload" accept="image/*" className="hidden" onChange={handleImageUpload}/>
+                             </Button>
+                             
+                             {/* Audio Record - Hold to Record */}
+                             <Button 
+                                 variant="outline" 
+                                 size="sm" 
+                                 className={cn(
+                                     "flex flex-col items-center gap-1 h-12 border-2 transition-all hover:scale-105 select-none text-xs",
+                                     isRecordingAudio ? 'bg-red-50 text-red-700 border-red-300 shadow-lg' : 'hover:bg-green-50'
+                                 )} 
+                                 onMouseDown={handleAudioRecordStart}
+                                 onMouseUp={handleAudioRecordStop}
+                                 onMouseLeave={handleAudioRecordStop}
+                                 onTouchStart={handleAudioRecordStart}
+                                 onTouchEnd={handleAudioRecordStop}
+                                 onTouchCancel={handleAudioRecordStop}
+                             >
+                                 <Mic className={cn("h-4 w-4 transition-all", isRecordingAudio && "animate-pulse")} />
+                                 <span className="text-[10px] font-medium">{isRecordingAudio ? 'Recording...' : 'Hold Audio'}</span>
+                             </Button>
+                             
+                             {/* Paint Feature */}
+                             <Button 
+                                 variant="outline" 
+                                 size="sm" 
+                                 className="flex flex-col items-center gap-1 h-12 border-2 transition-all hover:scale-105 hover:bg-purple-50 text-xs"
+                                 onClick={() => {
+                                     toggleFullScreenDrawingMode(true);
+                                     closeTagPopup();
+                                 }}
+                             >
+                                 <Palette className="h-4 w-4 text-purple-600" />
+                                 <span className="text-[10px] font-medium">Paint</span>
+                             </Button>
+                        </div>
+                    </div>
+
+                    {/* Bottom padding for scroll */}
+                    <div className="h-2"></div>
                   </div>
+                </div>
               </div>
 
-              {/* Footer Actions */}
-              <div className="flex justify-end gap-3 p-3 border-t bg-gray-50 rounded-b-lg">
+              {/* Footer */}
+              <div 
+                className="bg-white p-2 flex gap-2 border-t border-gray-200 flex-shrink-0"
+                style={{ height: '45px' }}
+              >
+                  {isUploading && (
+                      <div className="flex items-center gap-2 text-sm text-gray-600 flex-1">
+                          <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
+                              <div 
+                                  className="h-full bg-gradient-to-r from-blue-500 to-green-500 transition-all duration-300"
+                                  style={{ width: `${uploadProgress}%` }}
+                              />
+                          </div>
+                          <span className="text-xs font-medium">{uploadProgress}%</span>
+                      </div>
+                  )}
                   <Button 
-                      variant="ghost" 
+                      variant="outline" 
+                      className="flex-1 h-8 text-gray-700 border border-gray-300 hover:bg-gray-50 font-medium text-sm"
                       onClick={closeTagPopup}
+                      disabled={isUploading}
                   >
                       Cancel
                   </Button>
                   <Button 
+                      className="flex-1 h-8 bg-blue-600 hover:bg-blue-700 text-white font-semibold transition-all text-sm"
                       onClick={handleSaveTag}
+                      disabled={isUploading || selectedStaff.length === 0}
                   >
-                      <Save className="h-4 w-4 mr-1"/> Save Tag
+                      <Save className="h-3 w-3 mr-1" /> 
+                      {isUploading ? 'Saving...' : (isReplyMode ? 'Reply' : 'Send Tag')}
                   </Button>
               </div>
           </div>
       )}
 
+      {/* Enhanced Page Drawing Controls */}
+      {isDrawingMode && (
+        <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-[9999] bg-white rounded-xl shadow-2xl border border-gray-200 p-4 min-w-[600px]">
+          <div className="space-y-4">
+            
+            {/* Header with close button */}
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-bold text-gray-800 flex items-center gap-2">
+                <Palette className="h-4 w-4 text-purple-600" />
+                Drawing Tools - Click and drag on page
+              </h3>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => toggleFullScreenDrawingMode(false)}
+                className="h-6 w-6 p-0 hover:bg-gray-100"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+
+            <div className="flex items-center gap-6">
+              {/* Shape Tools */}
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-medium text-gray-600">Tools:</span>
+                <div className="flex items-center gap-1">
+                  {[
+                    { tool: 'highlight', icon: Highlighter, label: 'Highlight' },
+                    { tool: 'pencil', icon: Edit3, label: 'Draw' },
+                    { tool: 'circle', icon: Circle, label: 'Circle' },
+                    { tool: 'rectangle', icon: Square, label: 'Rectangle' },
+                    { tool: 'arrow', icon: ArrowUp, label: 'Arrow' }
+                  ].map(({ tool, icon: Icon, label }) => (
+                    <button
+                      key={tool}
+                      onClick={() => setSelectedShape(tool as any)}
+                      className={`p-2 rounded-lg border-2 transition-all hover:scale-105 ${
+                        selectedShape === tool 
+                          ? 'bg-purple-100 border-purple-500 text-purple-700' 
+                          : 'bg-gray-50 border-gray-200 text-gray-600 hover:bg-gray-100'
+                      }`}
+                      title={label}
+                    >
+                      <Icon className="h-4 w-4" />
+                    </button>
+                  ))}
+                </div>
+              </div>
+              
+              {/* Highlight Colors */}
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-medium text-gray-600">Highlights:</span>
+                <div className="flex items-center gap-1">
+                  {highlightColors.map(color => (
+                    <button
+                      key={color}
+                      onClick={() => {
+                        setSelectedShape('highlight');
+                        handleDrawingStateChange('color', color);
+                        handleDrawingStateChange('lineWidth', 12);
+                      }}
+                      className={`w-6 h-6 rounded-lg border-2 transition-all hover:scale-110 ${
+                        drawingState.color === color && selectedShape === 'highlight' 
+                          ? 'ring-2 ring-offset-1 ring-purple-500 scale-110' 
+                          : 'hover:scale-110'
+                      }`}
+                      style={{ backgroundColor: color, opacity: 0.7 }}
+                      title={`Highlight ${color}`}
+                    />
+                  ))}
+                </div>
+              </div>
+              
+              {/* Standard Colors */}
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-medium text-gray-600">Colors:</span>
+                <div className="flex items-center gap-1">
+                  {standardColors.map(color => (
+                    <button
+                      key={color}
+                      onClick={() => {
+                        handleDrawingStateChange('color', color);
+                        handleDrawingStateChange('lineWidth', selectedShape === 'highlight' ? 12 : 4);
+                      }}
+                      className={`w-6 h-6 rounded-full border-2 transition-all hover:scale-110 ${
+                        drawingState.color === color ? 'ring-2 ring-offset-1 ring-blue-500 scale-110' : 'hover:scale-110'
+                      }`}
+                      style={{ backgroundColor: color }}
+                      title={color}
+                    />
+                  ))}
+                  <input
+                    type="color"
+                    value={drawingState.color}
+                    onChange={(e) => handleDrawingStateChange('color', e.target.value)}
+                    className="w-6 h-6 rounded border border-gray-300 cursor-pointer"
+                    title="Custom Color"
+                  />
+                </div>
+                
+                {/* Brush Size */}
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-medium text-gray-600">Size:</span>
+                  <div className="flex items-center gap-1">
+                    {[4, 8, 12, 16].map(width => (
+                      <button
+                        key={width}
+                        onClick={() => handleDrawingStateChange('lineWidth', width)}
+                        className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all hover:scale-105 ${
+                          drawingState.lineWidth === width ? 'bg-purple-500 text-white' : 'bg-gray-100 hover:bg-gray-200'
+                        }`}
+                        title={`${width}px`}
+                      >
+                        <div 
+                          className="bg-current rounded-full" 
+                          style={{ width: `${Math.min(width/2, 6)}px`, height: `${Math.min(width/2, 6)}px` }}
+                        />
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                
+                {/* Actions */}
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      const canvas = document.getElementById('page-drawing-canvas') as HTMLCanvasElement;
+                      if (canvas) {
+                        const ctx = canvas.getContext('2d');
+                        if (ctx) {
+                          ctx.clearRect(0, 0, canvas.width, canvas.height);
+                        }
+                      }
+                    }}
+                    className="h-8 px-3 text-xs"
+                  >
+                    Clear
+                  </Button>
+                  <Button
+                    variant="default"
+                    size="sm"
+                    onClick={() => {
+                      const canvas = document.getElementById('page-drawing-canvas') as HTMLCanvasElement;
+                      if (canvas) {
+                        const dataUrl = canvas.toDataURL('image/png');
+                        handleDrawingComplete(dataUrl);
+                        toggleFullScreenDrawingMode(false);
+                        toast.success('Drawing saved! 🎨');
+                      }
+                    }}
+                    className="h-8 px-3 text-xs bg-purple-600 hover:bg-purple-700"
+                  >
+                    Save Drawing
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Notifications Panel */}
       <div
         ref={panelRef}
         className={cn(
-          "fixed right-0 top-0 h-screen bg-white z-50 shadow-lg transition-all duration-300 ease-in-out", // Keep base styles & transition
-          effectiveIsOpen ? "" : "hidden", // Use effectiveIsOpen for testing
+          "notifications-panel fixed right-0 top-0 h-screen bg-white z-50 shadow-lg transition-all duration-300 ease-in-out",
+          effectiveIsOpen ? "" : "hidden",
           isPinned ? "border-l border-gray-200" : ""
         )}
         style={{ width: getPanelWidth() }}
@@ -852,75 +1536,100 @@ export const DraggableNotificationsPanel = ({
         ) : (
           <div className="flex flex-col h-full">
             {/* Header */}
-            <div className="flex justify-between items-center p-4 border-b">
-              <h2 className="text-xl font-bold flex items-center gap-2"><Bell className="h-5 w-5" /> Notifications</h2>
+            <div className="flex justify-between items-center p-4 border-b bg-white">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+                  <Bell className="h-4 w-4 text-white" />
+                </div>
+                <h2 className="text-lg font-semibold text-gray-800">Collaboration Hub</h2>
+              </div>
               <div className="flex space-x-1">
-                <Button variant="outline" size="icon" onClick={togglePin} title={isPinned ? "Unpin panel" : "Pin panel"}>
-                    <Pin className={cn("h-4 w-4", isPinned && "fill-current text-blue-600")} />
+                <Button variant="ghost" size="icon" onClick={togglePin} title={isPinned ? "Unpin panel" : "Pin panel"}>
+                    <Pin className={cn("h-4 w-4 text-gray-500", isPinned && "fill-current text-blue-600")} />
                 </Button>
-                <Button variant="outline" size="icon" onClick={togglePanelSize} title="Resize panel">
-                  {panelSize === 'quarter' ? <Maximize2 className="h-4 w-4" /> : <Minimize2 className="h-4 w-4" />} 
+                <Button variant="ghost" size="icon" onClick={togglePanelSize} title="Resize panel">
+                  {panelSize === 'quarter' ? <Maximize2 className="h-4 w-4 text-gray-500" /> : <Minimize2 className="h-4 w-4 text-gray-500" />} 
                 </Button>
-                <Button variant="outline" size="icon" onClick={minimizePanel} title="Minimize panel"><ArrowLeftRight className="h-4 w-4" /></Button>
-                <Button variant="ghost" size="icon" onClick={onClose} title="Close panel"><X className="h-5 w-5" /></Button>
+                <Button variant="ghost" size="icon" onClick={minimizePanel} title="Minimize panel"><ArrowLeftRight className="h-4 w-4 text-gray-500" /></Button>
+                <Button variant="ghost" size="icon" onClick={onClose} title="Close panel"><X className="h-4 w-4 text-gray-500" /></Button>
               </div>
             </div>
 
+            {/* Start Tag Drop Button */}
+            <div className="p-4">
+              <Button
+                size="lg"
+                className={cn(
+                  "w-full h-12 text-base font-medium flex items-center justify-center gap-2",
+                  tagDropModeActive
+                    ? "bg-red-500 hover:bg-red-600 text-white" 
+                    : "bg-blue-500 hover:bg-blue-600 text-white"
+                )}
+                onClick={toggleTagDropMode}
+              >
+                <Tag className="h-5 w-5" />
+                {tagDropModeActive ? "Cancel Tag Drop" : "Start Tag Drop"}
+              </Button>
+            </div>
+
             {/* Filter Tabs */}
-            <div className="border-b">
-              <div className="flex overflow-x-auto px-4 py-2 gap-2 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
-                {(Object.keys(notificationCounts) as ActiveTab[]).map(tab => (
-                    <div key={tab} className={cn(
-                        "relative flex items-center justify-center px-3 py-1.5 rounded-md cursor-pointer whitespace-nowrap text-sm",
-                        activeTab === tab ? "bg-gray-100 font-medium" : "hover:bg-gray-50"
-                      )} onClick={() => setActiveTab(tab)}>
-                          {tab.charAt(0).toUpperCase() + tab.slice(1).replace(/([A-Z])/g, ' $1').trim()}
-                          {notificationCounts[tab] > 0 && (
-                            <span className="absolute -top-1 -right-1 flex items-center justify-center bg-red-500 text-white text-xs font-bold rounded-full h-4 w-4 leading-none">
-                              {notificationCounts[tab]}
-                            </span>
-                          )}
-                    </div>
+            <div className="px-4 pb-4">
+              <div className="grid grid-cols-3 gap-2 mb-4">
+                {[
+                  { key: 'all', label: 'All Tags', icon: Hash },
+                  { key: 'team', label: 'Teams', icon: Users },
+                  { key: 'calendar', label: 'Calendar', icon: Calendar },
+                  { key: 'comments', label: 'Comments', icon: MessageSquare },
+                  { key: 'account', label: 'Mentions', icon: Bell },
+                  { key: 'security', label: 'Activity', icon: Activity, badge: notificationCounts.security }
+                ].map(({ key, label, icon: Icon, badge }) => (
+                  <div key={key} className={cn(
+                    "relative flex flex-col items-center justify-center p-3 rounded-lg cursor-pointer transition-colors",
+                    activeTab === key ? "bg-blue-50 text-blue-600" : "hover:bg-gray-50 text-gray-600"
+                  )} onClick={() => setActiveTab(key as ActiveTab)}>
+                    <Icon className="h-5 w-5 mb-1" />
+                    <span className="text-xs font-medium">{label}</span>
+                    {badge && badge > 0 && (
+                      <span className="absolute -top-1 -right-1 flex items-center justify-center bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 leading-none">
+                        {badge}
+                      </span>
+                    )}
+                  </div>
                 ))}
               </div>
             </div>
 
-            {/* Activity Dashboard Section (Tag Drop Control) */}
-            <div className="bg-gray-50 p-4 border-b">
-              <div className="flex justify-between items-center">
-                <div>
-                  <h3 className="text-sm font-medium text-gray-700 mb-1">Tag Drop</h3>
-                  <p className="text-xs text-gray-500">
-                    {tagDropModeActive ? "Click anywhere on the page to place a tag." : "Tag specific parts of the page for comments."}
-                  </p>
-                </div>
-                <Button
-                  size="sm"
-                  className={cn(
-                    "text-xs flex items-center gap-1",
-                    tagDropModeActive
-                      ? "bg-red-100 text-red-700 hover:bg-red-200" 
-                      : "bg-blue-100 text-blue-700 hover:bg-blue-200" 
-                  )}
-                  onClick={toggleTagDropMode}
-                >
-                  <Tag className="h-3.5 w-3.5" />
-                  {tagDropModeActive ? "Cancel Tag Drop" : "Start Tag Drop"}
-                </Button>
+            {/* Search Bar */}
+            <div className="px-4 pb-4 border-b">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <input
+                  type="text"
+                  placeholder="Search in Activity..."
+                  className="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
               </div>
             </div>
 
             {/* Notification List Area */}
-            <div className="flex-1 overflow-y-auto divide-y">
+            <div className="flex-1 overflow-y-auto">
               {(() => {
                  type NotificationType = Notification['type']; 
 
                 const getVisibleTypesForTab = (tab: ActiveTab): Array<NotificationType> => {
                     switch (tab) {
+                        case 'team':
+                            return ['team'];
                         case 'trades':
                             return ['job', 'quote', 'payment']; 
+                        case 'calendar':
+                            return ['calendar'];
                         case 'comments':
-                            return ['message', 'other']; 
+                            return ['message', 'comment', 'tag']; 
+                        case 'account':
+                            return ['account'];
+                        case 'security':
+                            return ['security'];
                         default:
                             return []; 
                     }
@@ -933,31 +1642,43 @@ export const DraggableNotificationsPanel = ({
                 });
 
                  if (filteredNotifications.length === 0) {
-                     let emptyMessage = `No ${activeTab} notifications`;
-                     if (activeTab === 'all') emptyMessage = "No notifications";
-                     if (activeTab === 'comments') emptyMessage = "Comment & Tag notifications will show here.";
+                     const emptyMessages = {
+                       all: "No notifications",
+                       team: "No team notifications",
+                       trades: "No trade notifications",
+                       calendar: "No calendar notifications",
+                       comments: "No comments or tags",
+                       account: "No account notifications",
+                       security: "No security notifications"
+                     };
                      
                      return (
-                         <div className="flex flex-col items-center justify-center h-full text-center p-6 text-gray-500">
-                             <Bell className="h-10 w-10 mb-3 text-gray-300" />
-                             <p className="text-sm">{emptyMessage}</p>
+                         <div className="flex flex-col items-center justify-center h-full text-center p-8 text-gray-500">
+                             <Bell className="h-12 w-12 mb-4 text-gray-300" />
+                             <p className="text-sm">{emptyMessages[activeTab]}</p>
                          </div>
                      );
                  }
 
-                return filteredNotifications.map(notification =>
-                    <NotificationItem
-                        key={notification.id}
-                        {...notification}
-                        isPanelPinned={isPinned}
-                    />
+                return (
+                  <div className="space-y-1 p-4">
+                    {filteredNotifications.map(notification =>
+                      <div key={notification.id} className="hover:bg-gray-50 rounded-lg transition-colors">
+                        <NotificationItem
+                          {...notification}
+                          isPanelPinned={isPinned}
+                          onReply={handleReplyToNotification}
+                        />
+                      </div>
+                    )}
+                  </div>
                 );
               })()}
             </div>
 
             {/* Footer */}
-            <div className="p-4 border-t">
-              <Link to="/notifications" className="text-blue-600 text-sm text-center block w-full hover:underline" onClick={isPinned ? undefined : onClose}>
+            <div className="p-4 border-t bg-gray-50">
+              <Link to="/notifications" className="text-blue-600 text-sm text-center block w-full hover:underline font-medium" onClick={isPinned ? undefined : onClose}>
                 View all notifications
               </Link>
             </div>

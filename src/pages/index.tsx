@@ -585,6 +585,17 @@ export default function DashboardPage() {
                     <Button onClick={() => navigate("/messaging")} variant="outline" className="mt-2">
                       Open Chat
                     </Button>
+                    
+                    {/* Sample button for tag overlay demo */}
+                    <div className="mt-4 pt-4 border-t border-gray-200">
+                      <p className="text-sm text-gray-500 mb-2">Sample Button for Tag Demo</p>
+                      <Button 
+                        className="bg-gray-500 hover:bg-gray-600 text-white"
+                        onClick={() => toast.success('Button clicked!')}
+                      >
+                        This button needs a different color
+                      </Button>
+                    </div>
                   </div>
                 </TabsContent>
 

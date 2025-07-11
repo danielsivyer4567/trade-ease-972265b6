@@ -144,6 +144,7 @@ export const ModernCustomerTable = ({
                 <Checkbox
                   checked={selectedCustomers.size === currentCustomers.length && currentCustomers.length > 0}
                   onCheckedChange={handleSelectAll}
+                  className="h-2 w-2"
                 />
               </TableHead>
               <TableHead className="font-medium">Name</TableHead>
@@ -173,12 +174,13 @@ export const ModernCustomerTable = ({
                     <Checkbox
                       checked={selectedCustomers.has(customer.id)}
                       onCheckedChange={(checked) => handleSelectCustomer(customer.id, checked as boolean)}
+                      className="h-2 w-2"
                     />
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center space-x-3">
                       <Avatar className={cn("h-8 w-8 transition-all duration-200 hover:scale-110 hover:shadow-md", avatarColor)}>
-                        <AvatarFallback className="text-white font-medium text-sm">
+                        <AvatarFallback className="text-slate-900 font-medium text-sm">
                           {initials}
                         </AvatarFallback>
                       </Avatar>

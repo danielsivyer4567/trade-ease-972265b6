@@ -15,6 +15,10 @@ export interface TagData {
   };
   timestamp: number;
   drawingData?: string;
+  conversationId?: string;
+  replyToId?: string | number;
+  requiresApproval?: boolean;
+  approvalStatus?: 'pending' | 'approved' | 'rejected';
 }
 
 export async function fetchTagData(tagId: string): Promise<TagData> {

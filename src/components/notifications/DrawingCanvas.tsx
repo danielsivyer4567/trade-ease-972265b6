@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState, useCallback } from 'react';
+import React, { useRef, useEffect, useState, useCallback, forwardRef } from 'react';
 import { Point, DrawingState, DrawingTool } from './types';
 import { Edit3, Eraser, Minus, ArrowUpRight, Square, Circle as CircleIcon, Star as StarIcon } from 'lucide-react'; // Renamed Circle to CircleIcon
 
@@ -13,36 +13,27 @@ interface DrawingCanvasProps {
   isReadOnly?: boolean; // If true, disable drawing
 }
 
-const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
-  width,
-  height,
-  drawingState,
-  onDrawEnd,
-  initialDrawingDataUrl,
-  className = '',
-  style = {},
-  isReadOnly = false,
-}) => {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+const DrawingCanvas = forwardRef<HTMLCanvasElement, DrawingCanvasProps>(({ width, height, drawingState, onDrawEnd, initialDrawingDataUrl, className = '', style = {}, isReadOnly = false }, forwardedRef) => {
+  const internalRef = useRef<HTMLCanvasElement>(null);
   const [isDrawing, setIsDrawing] = useState(false);
   const [lastPoint, setLastPoint] = useState<Point | null>(null);
 
   const getCanvasContext = useCallback(() => {
-    return canvasRef.current?.getContext('2d') || null;
+    return internalRef.current?.getContext('2d') || null;
   }, []);
   
   // Initialize canvas with existing drawing or clear it
    useEffect(() => {
     const ctx = getCanvasContext();
-    if (!ctx || !canvasRef.current) return;
+    if (!ctx || !internalRef.current) return;
 
     // Clear canvas before drawing anything new
-    ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
+    ctx.clearRect(0, 0, internalRef.current.width, internalRef.current.height);
 
     if (initialDrawingDataUrl) {
       const image = new Image();
       image.onload = () => {
-        ctx.drawImage(image, 0, 0, canvasRef.current!.width, canvasRef.current!.height);
+        ctx.drawImage(image, 0, 0, internalRef.current!.width, internalRef.current!.height);
       };
       image.src = initialDrawingDataUrl;
     }
@@ -50,7 +41,7 @@ const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
 
 
   const getPointFromEvent = (e: React.MouseEvent<HTMLCanvasElement>): Point => {
-    const rect = canvasRef.current!.getBoundingClientRect();
+    const rect = internalRef.current!.getBoundingClientRect();
     return {
       x: e.clientX - rect.left,
       y: e.clientY - rect.top,
@@ -157,8 +148,8 @@ const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
     setIsDrawing(false);
     setLastPoint(null);
 
-    if (onDrawEnd && canvasRef.current) {
-      onDrawEnd(canvasRef.current.toDataURL('image/png'));
+    if (onDrawEnd && internalRef.current) {
+      onDrawEnd(internalRef.current.toDataURL('image/png'));
     }
   };
   
@@ -170,8 +161,8 @@ const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
         } else { // For pencil/eraser, just stop drawing
             setIsDrawing(false);
             setLastPoint(null);
-            if (onDrawEnd && canvasRef.current) {
-              onDrawEnd(canvasRef.current.toDataURL('image/png'));
+            if (onDrawEnd && internalRef.current) {
+              onDrawEnd(internalRef.current.toDataURL('image/png'));
             }
         }
     }
@@ -237,7 +228,11 @@ const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
 
   return (
     <canvas
-      ref={canvasRef}
+      ref={(el) => {
+        internalRef.current = el;
+        if (typeof forwardedRef === 'function') forwardedRef(el);
+        else if (forwardedRef) forwardedRef.current = el;
+      }}
       width={width}
       height={height}
       className={`${className} ${isReadOnly ? 'cursor-not-allowed' : 'cursor-crosshair'} bg-white border border-gray-300 rounded-md`}
@@ -248,7 +243,7 @@ const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
       onMouseLeave={handleMouseLeave} // Important to stop drawing if mouse leaves canvas
     />
   );
-};
+});
 
 interface DrawingToolbarProps {
   drawingState: DrawingState;
