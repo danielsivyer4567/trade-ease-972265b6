@@ -23,6 +23,7 @@
     "n8n:reset": "powershell -command \"if (Test-Path '$env:USERPROFILE\\.n8n') { Remove-Item -Recurse -Force '$env:USERPROFILE\\.n8n'; Write-Host 'n8n database reset - fresh start ready!' } else { Write-Host 'No n8n data to reset' }\""
   },
   "dependencies": {
+    "@google/generative-ai": "^0.21.0",
     "@hookform/resolvers": "^3.3.4",
     "@lottiefiles/react-lottie-player": "^3.5.3",
     "@mapbox/mapbox-gl-geocoder": "^5.0.3",
@@ -100,8 +101,7 @@
     "uuid": "^9.0.1",
     "vaul": "^0.9.0",
     "zod": "^3.22.4",
-    "zustand": "^5.0.5",
-    "@google/generative-ai": "^0.21.0"
+    "zustand": "^5.0.5"
   },
   "devDependencies": {
     "@21st-extension/toolbar": "^0.5.7",
@@ -113,6 +113,7 @@
     "@types/node": "^20.11.19",
     "@types/react": "^18.2.57",
     "@types/react-dom": "^18.2.19",
+    "@vitejs/plugin-react": "^4.6.0",
     "@vitejs/plugin-react-swc": "^3.5.0",
     "autoprefixer": "^10.4.17",
     "cross-env": "^7.0.3",
@@ -127,5 +128,8 @@
     "typescript-eslint": "^7.0.1",
     "vite": "^6.3.2",
     "vitest": "^3.2.3"
+  },
+  "optionalDependencies": {
+    "@rollup/rollup-linux-x64-gnu": "^4.44.2"
   }
 }
