@@ -99,7 +99,10 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
   
   const closeDraggableNotifications = () => setIsDraggableNotificationOpen(false);
   const toggleDraggableNotifications = () => {
-    setIsDraggableNotificationOpen(!isDraggableNotificationOpen);
+    console.log('toggleDraggableNotifications called, current state:', isDraggableNotificationOpen);
+    const newState = !isDraggableNotificationOpen;
+    console.log('Setting isDraggableNotificationOpen to:', newState);
+    setIsDraggableNotificationOpen(newState);
     if (!isDraggableNotificationOpen) {
       setIsNotificationOpen(false);
     }

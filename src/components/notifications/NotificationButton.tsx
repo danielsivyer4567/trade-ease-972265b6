@@ -314,14 +314,26 @@ export const NotificationButton = ({ className }: NotificationButtonProps) => {
       {/* Notifications Button */}
       <Button 
         variant="ghost" 
-        size="icon" 
+        size="lg" 
         className={cn(
-          "relative border-2 border-primary rounded-full",
+          "relative border-4 border-blue-500 rounded-full bg-blue-50 hover:bg-blue-100 w-16 h-16 text-2xl",
           className, 
-          isDraggableNotificationOpen && "text-primary bg-primary/10"
+          isDraggableNotificationOpen && "text-blue-600 bg-blue-200 border-blue-600"
         )} 
-        onClick={toggleDraggableNotifications}
+        onClick={() => {
+          console.log('🔘 NOTIFICATION BUTTON CLICKED!');
+          console.log('🔘 Current isDraggableNotificationOpen state:', isDraggableNotificationOpen);
+          console.log('🔘 About to call toggleDraggableNotifications...');
+          toggleDraggableNotifications();
+          console.log('🔘 toggleDraggableNotifications called');
+          
+          // Add a timeout to check if state changed
+          setTimeout(() => {
+            console.log('🔘 State after 100ms:', isDraggableNotificationOpen);
+          }, 100);
+        }}
         aria-label={`${unreadCount} unread notifications`}
+        title="Open Enhanced Notifications Panel"
       >
         <svg 
           xmlns="http://www.w3.org/2000/svg" 
@@ -337,11 +349,10 @@ export const NotificationButton = ({ className }: NotificationButtonProps) => {
           <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
         </svg>
         
-        {unreadCount > 0 && (
-          <span className="absolute top-0 right-0 -mt-1 -mr-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] font-medium text-white">
-            {unreadCount > 99 ? '99+' : unreadCount}
-          </span>
-        )}
+        {/* Always show badge for testing */}
+        <span className="absolute top-0 right-0 -mt-1 -mr-1 flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-[11px] font-bold text-white animate-pulse">
+          {unreadCount > 99 ? '99+' : Math.max(1, unreadCount)}
+        </span>
       </Button>
     </div>
   );

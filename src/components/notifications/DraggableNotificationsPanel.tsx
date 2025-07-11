@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { X, Bell, PinIcon, Maximize2, Minimize2, ArrowLeftRight, Pin, Calendar, MessageSquare, Tag, Edit3, Image, UploadCloud, MessageCircle, Save, Mic, Trash2, Brush, Paperclip, UserPlus, AlertCircle, Minus, MoveUpRight, Square, Circle, Star, Reply } from 'lucide-react';
+import { X, Bell, Maximize2, Minimize2, ArrowLeftRight, Pin, Calendar, MessageSquare, Tag, Edit3, Image, Save, Mic, Trash2, Brush, AlertCircle, Minus, MoveUpRight, Square, Circle, Star } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { NotificationItem } from './NotificationItem';
@@ -7,6 +7,8 @@ import { cn } from '@/lib/utils';
 import { useNotifications, type Notification } from './NotificationContextProvider';
 import { createTag, type TagData } from '@/services/tagService';
 import { toast } from 'sonner';
+import DrawingCanvas, { DrawingToolbar } from './DrawingCanvas';
+import { Point, DrawingState, DrawingTool } from './types';
 
 type PanelSize = 'quarter' | 'half' | 'custom' | 'minimized';
 type ActiveTab = 'all' | 'team' | 'trades' | 'account' | 'security' | 'calendar' | 'comments';
@@ -31,18 +33,6 @@ interface UploadedFile {
     supabaseUrl?: string; // Set after successful upload
 }
 
-interface DrawingState {
-  isActive: boolean;
-  tool: 'pencil' | 'text' | 'eraser' | 'line' | 'arrow' | 'rectangle' | 'circle' | 'star';
-  color: string;
-  lineWidth: number;
-  isDrawingOnPage: boolean; // Whether drawing is happening on the whole page
-}
-
-interface Point {
-  x: number;
-  y: number;
-}
 
 interface TagPopupPosition {
   x: number;
@@ -66,200 +56,6 @@ const uploadFileToSupabase = async (file: File, folder: string, fileName: string
   return mockUrl;
 };
 
-// DrawingCanvas component for simpler, direct drawing
-const DrawingCanvas = ({ 
-  width, 
-  height, 
-  drawingState, 
-  canvasRef,
-  drawArrow,
-  drawStar
-}: { 
-  width: number, 
-  height: number, 
-  drawingState: DrawingState, 
-  canvasRef: React.RefObject<HTMLCanvasElement>,
-  drawArrow: (ctx: CanvasRenderingContext2D, from: Point, to: Point, color: string, lineWidth: number) => void,
-  drawStar: (ctx: CanvasRenderingContext2D, centerX: number, centerY: number, points: number, radius: number, color: string, lineWidth: number) => void
-}) => {
-  const [isDrawing, setIsDrawing] = useState(false);
-  const [lastPoint, setLastPoint] = useState<Point | null>(null);
-
-  const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
-    console.log('[DrawingCanvas] Mouse Down Event:', e.nativeEvent.offsetX, e.nativeEvent.offsetY);
-    e.stopPropagation();
-    e.preventDefault();
-    
-    const rect = canvasRef.current?.getBoundingClientRect();
-    if (!rect || !canvasRef.current) return;
-    
-    const point = {
-      x: e.nativeEvent.offsetX,
-      y: e.nativeEvent.offsetY
-    };
-    
-    setIsDrawing(true);
-    setLastPoint(point);
-    console.log('[DrawingCanvas] State after Mouse Down:', { isDrawing: true, lastPoint: point });
-    
-    const ctx = canvasRef.current.getContext('2d');
-    if (!ctx) {
-      console.error('[DrawingCanvas] Failed to get 2D context');
-      return;
-    }
-    
-    console.log('[DrawingCanvas] Setting up context style:', { color: drawingState.color, lineWidth: drawingState.lineWidth });
-    ctx.beginPath();
-    ctx.moveTo(point.x, point.y);
-    ctx.lineCap = 'round';
-    ctx.lineJoin = 'round';
-    ctx.strokeStyle = drawingState.color;
-    ctx.lineWidth = drawingState.lineWidth;
-  };
-  
-  const handleMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
-    if (!isDrawing || !lastPoint || !canvasRef.current) return;
-    console.log('[DrawingCanvas] Mouse Move Event:', e.nativeEvent.offsetX, e.nativeEvent.offsetY, 'isDrawing:', isDrawing);
-    
-    e.stopPropagation();
-    e.preventDefault();
-    
-    const point = {
-      x: e.nativeEvent.offsetX,
-      y: e.nativeEvent.offsetY
-    };
-    
-    const ctx = canvasRef.current.getContext('2d');
-    if (!ctx) return;
-    
-    console.log('[DrawingCanvas] Drawing with tool:', drawingState.tool);
-    switch (drawingState.tool) {
-      case 'pencil':
-        ctx.beginPath();
-        ctx.moveTo(lastPoint.x, lastPoint.y);
-        ctx.lineTo(point.x, point.y);
-        ctx.strokeStyle = drawingState.color;
-        ctx.lineWidth = drawingState.lineWidth;
-        ctx.lineCap = 'round';
-        ctx.lineJoin = 'round';
-        ctx.stroke();
-        console.log('[DrawingCanvas] Pencil stroke drawn');
-        break;
-      case 'eraser':
-        ctx.clearRect(
-          point.x - drawingState.lineWidth * 5,
-          point.y - drawingState.lineWidth * 5,
-          drawingState.lineWidth * 10,
-          drawingState.lineWidth * 10
-        );
-        console.log('[DrawingCanvas] Eraser area cleared');
-        break;
-    }
-    
-    setLastPoint(point);
-  };
-  
-  const handleMouseUp = (e: React.MouseEvent<HTMLCanvasElement>) => {
-    console.log('[DrawingCanvas] Mouse Up Event:', e.nativeEvent.offsetX, e.nativeEvent.offsetY);
-    if (!isDrawing || !lastPoint || !canvasRef.current) {
-      setIsDrawing(false);
-      setLastPoint(null);
-      return;
-    }
-    
-    e.stopPropagation();
-    e.preventDefault();
-    
-    const point = {
-      x: e.nativeEvent.offsetX,
-      y: e.nativeEvent.offsetY
-    };
-    
-    const ctx = canvasRef.current.getContext('2d');
-    if (!ctx) return;
-    
-    console.log('[DrawingCanvas] Finalizing shape with tool:', drawingState.tool);
-    // Handle shape tools
-    switch (drawingState.tool) {
-      case 'line':
-        ctx.beginPath();
-        ctx.moveTo(lastPoint.x, lastPoint.y);
-        ctx.lineTo(point.x, point.y);
-        ctx.strokeStyle = drawingState.color;
-        ctx.lineWidth = drawingState.lineWidth;
-        ctx.stroke();
-        break;
-      case 'arrow':
-        drawArrow(ctx, lastPoint, point, drawingState.color, drawingState.lineWidth);
-        break;
-      case 'rectangle':
-        ctx.beginPath();
-        ctx.rect(
-          lastPoint.x,
-          lastPoint.y,
-          point.x - lastPoint.x,
-          point.y - lastPoint.y
-        );
-        ctx.strokeStyle = drawingState.color;
-        ctx.lineWidth = drawingState.lineWidth;
-        ctx.stroke();
-        break;
-      case 'circle':
-        const radius = Math.sqrt(
-          Math.pow(point.x - lastPoint.x, 2) + Math.pow(point.y - lastPoint.y, 2)
-        );
-        ctx.beginPath();
-        ctx.arc(lastPoint.x, lastPoint.y, radius, 0, 2 * Math.PI);
-        ctx.strokeStyle = drawingState.color;
-        ctx.lineWidth = drawingState.lineWidth;
-        ctx.stroke();
-        break;
-      case 'star':
-        drawStar(ctx, lastPoint.x, lastPoint.y, 5, 
-          Math.sqrt(Math.pow(point.x - lastPoint.x, 2) + Math.pow(point.y - lastPoint.y, 2)), 
-          drawingState.color, drawingState.lineWidth);
-        break;
-    }
-    
-    setIsDrawing(false);
-    setLastPoint(null);
-    console.log('[DrawingCanvas] State after Mouse Up:', { isDrawing: false, lastPoint: null });
-  };
-  
-  const handleMouseLeave = () => {
-    setIsDrawing(false);
-    setLastPoint(null);
-  };
-  
-  return (
-    <canvas
-      ref={canvasRef}
-      width={width}
-      height={height}
-      className="border rounded w-full cursor-crosshair bg-white"
-      onMouseDown={handleMouseDown}
-      onMouseMove={handleMouseMove}
-      onMouseUp={handleMouseUp}
-      onMouseLeave={handleMouseLeave}
-      style={{ 
-        touchAction: 'none',
-        display: 'block',
-        pointerEvents: 'all' // Set pointer events correctly
-      }}
-    />
-  );
-};
-
-// Helper component to log when the drawing area becomes active
-const EffectLogger = ({ active }: { active: boolean }) => {
-  useEffect(() => {
-    if (active) {
-      console.log('[Popup] Drawing Toolbar and Canvas rendered.');
-    }
-  }, [active]);
-  return null; // This component doesn't render anything visible
-};
-
 export const DraggableNotificationsPanel = ({
   isOpen,
   onClose,
@@ -267,6 +63,13 @@ export const DraggableNotificationsPanel = ({
   currentUserId = 'user_abc', // Example user ID
   availableStaff = [ { id: 'staff1', name: 'Alice' }, { id: 'staff2', name: 'Bob' }] // Example staff
 }: DraggableNotificationsPanelProps) => {
+  
+  // Debug logging
+  console.log('DraggableNotificationsPanel render:', { isOpen, currentUserId, availableStaff: availableStaff.length });
+  
+  // Add local override state for testing
+  const [forceOpen, setForceOpen] = useState(false);
+  const effectiveIsOpen = forceOpen || isOpen;
   const [activeTab, setActiveTab] = useState<ActiveTab>('all');
   const [panelSize, setPanelSize] = useState<PanelSize>('quarter');
   const [isPinned, setIsPinned] = useState(false);
@@ -307,11 +110,6 @@ export const DraggableNotificationsPanel = ({
     return `${customWidth}px`;
   };
   
-  // --- Effects for Layout & Resize (mostly unchanged) ---
-  useEffect(() => { /* Layout adjustment effect */ }, [isPinned, isOpen, panelSize, customWidth]);
-  useEffect(() => { /* Initial layout setup */ }, []);
-  useEffect(() => { /* Resize handle effect */ }, []);
-  useEffect(() => { /* Auto-resize on team tab */ }, [activeTab, panelSize]);
 
 
   // --- Cleanup temporary markers ---
@@ -338,7 +136,7 @@ export const DraggableNotificationsPanel = ({
   const toggleGeneralDrawingMode = () => setIsDrawingMode(!isDrawingMode);
 
   const showOverlay = isOpen && !isPinned;
-  const notificationCounts = { all: 98, team: 5, trades: 9, calendar: 3, comments: 6, account: 0, security: 0 };
+  const notificationCounts = { all: 25, team: 5, trades: 9, calendar: 3, comments: 6, account: 0, security: 0 };
 
 
   // --- Tag Drop Core Logic ---
@@ -456,14 +254,22 @@ export const DraggableNotificationsPanel = ({
       }
   };
   
+  // Clear canvas function
+  const clearCanvas = useCallback(() => {
+    setDrawingPreviewUrl(null);
+    setUploadedFiles(prev => prev.filter(f => f.type !== 'drawing'));
+    // Force re-render of canvas by toggling drawing state
+    setIsDrawingActive(false);
+    setTimeout(() => setIsDrawingActive(true), 10);
+  }, []);
+  
   // Placeholder for drawing
   const handleToggleDrawing = () => {
     const nextIsDrawingActive = !isDrawingActive;
     setIsDrawingActive(nextIsDrawingActive);
     setDrawingState(prev => ({ ...prev, isActive: nextIsDrawingActive }));
     if (!nextIsDrawingActive) {
-      setDrawingPreviewUrl(null);
-      setUploadedFiles(prev => prev.filter(f => f.type !== 'drawing'));
+      clearCanvas();
     }
   };
 
@@ -589,13 +395,20 @@ export const DraggableNotificationsPanel = ({
     };
   }, [tagDropModeActive, handlePlaceNewTag]);
   
-  // Effect to set mounted state on unmount
+  // Effect to set mounted state and cleanup drawing events
   useEffect(() => {
     isMountedRef.current = true;
     return () => {
       isMountedRef.current = false;
+      // Clean up any pending drawing operations
+      setIsDrawing(false);
+      setLastPoint(null);
+      // Reset cursor if tag drop mode was active
+      if (tagDropModeActive) {
+        document.body.style.cursor = '';
+      }
     };
-  }, []); 
+  }, [tagDropModeActive]); 
 
   // Add states for drawing
   const [drawingState, setDrawingState] = useState<DrawingState>({
@@ -617,10 +430,13 @@ export const DraggableNotificationsPanel = ({
   // Ref to track if component is mounted (for cleanup)
   const isMountedRef = useRef(true);
   
-  // Simple drawing state tracking
+  // Simple drawing state tracking with proper initialization
   const drawingStateRef = useRef(drawingState);
   const isDrawingRef = useRef(isDrawing);
   const lastPointRef = useRef(lastPoint);
+  
+  // Drawing tool refs to prevent conflicts
+  const drawingToolsRef = useRef<HTMLDivElement>(null);
   
   // Keep refs in sync with state
   useEffect(() => {
@@ -635,497 +451,12 @@ export const DraggableNotificationsPanel = ({
     lastPointRef.current = lastPoint;
   }, [lastPoint]);
   
-  // Drawing functions
-  const startDrawing = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
-    // If we're dragging the popup, don't start drawing
-    if (isDraggingPopup) return;
-    
-    const canvas = tagCanvasRef.current; // Only tag canvas for now
-    if (!canvas) return;
-    
-    // These are critical to prevent the popup from being dragged when drawing on the canvas
-    e.stopPropagation();
-    e.nativeEvent.stopImmediatePropagation();
-    
-    const rect = canvas.getBoundingClientRect();
-    const point = {
-      x: e.clientX - rect.left,
-      y: e.clientY - rect.top
-    };
-    
-    setIsDrawing(true);
-    setLastPoint(point);
-    
-    // Start path for pencil tool
-    if (drawingState.tool === 'pencil') {
-      const ctx = canvas.getContext('2d');
-      if (!ctx) return;
-      
-      ctx.beginPath();
-      ctx.moveTo(point.x, point.y);
-      ctx.lineCap = 'round';
-      ctx.lineJoin = 'round';
-      ctx.strokeStyle = drawingState.color;
-      ctx.lineWidth = drawingState.lineWidth;
-    }
-  }, [isDraggingPopup, drawingState.tool, drawingState.color, drawingState.lineWidth]);
+  // Helper function to update drawing state
+  const updateDrawingState = useCallback(<K extends keyof DrawingState>(key: K, value: DrawingState[K]) => {
+    setDrawingState(prev => ({ ...prev, [key]: value }));
+  }, []);
   
-  const draw = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
-    if (!isDrawing || !lastPoint) return;
-    
-    // These are critical to prevent the popup from being dragged when drawing on the canvas
-    e.stopPropagation();
-    e.nativeEvent.stopImmediatePropagation();
-    e.preventDefault();
-    
-    const canvas = tagCanvasRef.current; // Only tag canvas for now
-    if (!canvas) return;
-    
-    const rect = canvas.getBoundingClientRect();
-    const point = {
-      x: e.clientX - rect.left,
-      y: e.clientY - rect.top
-    };
-    
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-    
-    switch (drawingState.tool) {
-      case 'pencil':
-        ctx.beginPath();
-        ctx.moveTo(lastPoint.x, lastPoint.y);
-        ctx.lineTo(point.x, point.y);
-        ctx.strokeStyle = drawingState.color;
-        ctx.lineWidth = drawingState.lineWidth;
-        ctx.lineCap = 'round';
-        ctx.lineJoin = 'round';
-        ctx.stroke();
-        break;
-      case 'eraser':
-        ctx.clearRect(
-          point.x - drawingState.lineWidth * 5,
-          point.y - drawingState.lineWidth * 5,
-          drawingState.lineWidth * 10,
-          drawingState.lineWidth * 10
-        );
-        break;
-    }
-    
-    setLastPoint(point);
-  }, [isDrawing, lastPoint, drawingState]);
   
-  const endDrawing = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
-    // These are critical to prevent the popup from being dragged when drawing on the canvas
-    e.stopPropagation();
-    e.nativeEvent.stopImmediatePropagation();
-    e.preventDefault();
-    
-    if (!isDrawing || !lastPoint) {
-      setIsDrawing(false);
-      setLastPoint(null);
-      return;
-    }
-    
-    const canvas = tagCanvasRef.current; // Only tag canvas for now
-    if (!canvas) return;
-    
-    const rect = canvas.getBoundingClientRect();
-    const endPoint = {
-      x: e.clientX - rect.left,
-      y: e.clientY - rect.top
-    };
-    
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-    
-    // Handle shape tools that draw on mouse up
-    switch (drawingState.tool) {
-      case 'line':
-        ctx.beginPath();
-        ctx.moveTo(lastPoint.x, lastPoint.y);
-        ctx.lineTo(endPoint.x, endPoint.y);
-        ctx.strokeStyle = drawingState.color;
-        ctx.lineWidth = drawingState.lineWidth;
-        ctx.stroke();
-        break;
-      case 'arrow':
-        drawArrow(ctx, lastPoint, endPoint, drawingState.color, drawingState.lineWidth);
-        break;
-      case 'rectangle':
-        ctx.beginPath();
-        ctx.rect(
-          lastPoint.x,
-          lastPoint.y,
-          endPoint.x - lastPoint.x,
-          endPoint.y - lastPoint.y
-        );
-        ctx.strokeStyle = drawingState.color;
-        ctx.lineWidth = drawingState.lineWidth;
-        ctx.stroke();
-        break;
-      case 'circle': {
-        const radius = Math.sqrt(
-          Math.pow(endPoint.x - lastPoint.x, 2) + Math.pow(endPoint.y - lastPoint.y, 2)
-        );
-        ctx.beginPath();
-        ctx.arc(lastPoint.x, lastPoint.y, radius, 0, 2 * Math.PI);
-        ctx.strokeStyle = drawingState.color;
-        ctx.lineWidth = drawingState.lineWidth;
-        ctx.stroke();
-        break;
-      }
-      case 'star':
-        drawStar(ctx, lastPoint.x, lastPoint.y, 5, 
-          Math.sqrt(Math.pow(endPoint.x - lastPoint.x, 2) + Math.pow(endPoint.y - lastPoint.y, 2)), 
-          drawingState.color, drawingState.lineWidth);
-        break;
-    }
-    
-    setIsDrawing(false);
-    setLastPoint(null);
-  }, [isDrawing, lastPoint, drawingState]);
-  
-  // Helper function to draw arrow
-  const drawArrow = (
-    ctx: CanvasRenderingContext2D,
-    from: Point,
-    to: Point,
-    color: string,
-    lineWidth: number
-  ) => {
-    const headLength = 10;
-    const angle = Math.atan2(to.y - from.y, to.x - from.x);
-    
-    // Draw main line
-    ctx.beginPath();
-    ctx.moveTo(from.x, from.y);
-    ctx.lineTo(to.x, to.y);
-    ctx.strokeStyle = color;
-    ctx.lineWidth = lineWidth;
-    ctx.stroke();
-    
-    // Draw arrow head
-    ctx.beginPath();
-    ctx.moveTo(to.x, to.y);
-    ctx.lineTo(
-      to.x - headLength * Math.cos(angle - Math.PI / 6),
-      to.y - headLength * Math.sin(angle - Math.PI / 6)
-    );
-    ctx.lineTo(
-      to.x - headLength * Math.cos(angle + Math.PI / 6),
-      to.y - headLength * Math.sin(angle + Math.PI / 6)
-    );
-    ctx.closePath();
-    ctx.fillStyle = color;
-    ctx.fill();
-  };
-  
-  // Helper function to draw star
-  const drawStar = (
-    ctx: CanvasRenderingContext2D,
-    centerX: number,
-    centerY: number,
-    points: number,
-    radius: number,
-    color: string,
-    lineWidth: number
-  ) => {
-    ctx.beginPath();
-    ctx.strokeStyle = color;
-    ctx.fillStyle = color;
-    ctx.lineWidth = lineWidth;
-    
-    const angle = Math.PI / points;
-    
-    for (let i = 0; i < 2 * points; i++) {
-      const r = i % 2 === 0 ? radius : radius / 2;
-      const x = centerX + r * Math.cos(i * angle - Math.PI / 2);
-      const y = centerY + r * Math.sin(i * angle - Math.PI / 2);
-      
-      if (i === 0) {
-        ctx.moveTo(x, y);
-      } else {
-        ctx.lineTo(x, y);
-      }
-    }
-    
-    ctx.closePath();
-    ctx.stroke();
-  };
-  
-  // Set up page-wide canvas when drawing on page
-  useEffect(() => {
-    // Only log when the effect is actually creating or cleaning up
-    if (drawingState.isDrawingOnPage) {
-      console.log('[FullPage Draw Effect] Creating overlay canvas and controls...');
-    }
-
-    const cleanup = () => {
-      const existingContainer = document.querySelector('.drawing-overlay');
-      if (existingContainer && existingContainer.parentNode) {
-        console.log('[FullPage Draw Effect] Cleanup: Removing previous canvas...');
-        existingContainer.parentNode.removeChild(existingContainer);
-      }
-    };
-
-    // Clean up any existing canvas before creating a new one
-    cleanup();
-
-    if (drawingState.isDrawingOnPage) {
-      // Create a full-page canvas overlay for drawing
-      const container = document.createElement('div');
-      container.style.position = 'fixed';
-      container.style.top = '0';
-      container.style.left = '0';
-      container.style.width = '100vw';
-      container.style.height = '100vh';
-      container.style.zIndex = '9999'; 
-      container.style.pointerEvents = 'all';
-      container.classList.add('drawing-overlay');
-      
-      const canvas = document.createElement('canvas');
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-      canvas.style.position = 'absolute';
-      canvas.style.top = '0';
-      canvas.style.left = '0';
-      canvas.style.width = '100%';
-      canvas.style.height = '100%';
-      canvas.style.cursor = 'crosshair';
-      canvas.style.pointerEvents = 'all'; 
-      
-      const controls = document.createElement('div');
-      controls.style.position = 'fixed';
-      controls.style.bottom = '20px';
-      controls.style.left = '50%';
-      controls.style.transform = 'translateX(-50%)';
-      controls.style.backgroundColor = '#fff';
-      controls.style.padding = '10px';
-      controls.style.borderRadius = '8px';
-      controls.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
-      controls.style.display = 'flex';
-      controls.style.gap = '10px';
-      controls.style.zIndex = '10000'; 
-      controls.innerHTML = `
-        <button class="drawing-done-btn px-4 py-2 bg-blue-600 text-white rounded">Done</button>
-        <button class="drawing-cancel-btn px-4 py-2 bg-gray-300 text-gray-700 rounded">Cancel</button>
-      `;
-      
-      // CORRECTED toolsbar.innerHTML
-      const toolsbar = document.createElement('div');
-      toolsbar.style.position = 'fixed';
-      toolsbar.style.top = '20px';
-      toolsbar.style.left = '50%';
-      toolsbar.style.transform = 'translateX(-50%)';
-      toolsbar.style.backgroundColor = '#fff';
-      toolsbar.style.padding = '8px';
-      toolsbar.style.borderRadius = '8px';
-      toolsbar.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
-      toolsbar.style.display = 'flex';
-      toolsbar.style.alignItems = 'center';
-      toolsbar.style.gap = '8px';
-      toolsbar.style.zIndex = '10000';
-      toolsbar.innerHTML = `
-        <div class="tool-group" style="display: flex; gap: 4px; border-right: 1px solid #ddd; padding-right: 8px;">
-          <button class="tool-btn pencil ${drawingStateRef.current.tool === 'pencil' ? 'active' : ''}" title="Pencil" style="width: 32px; height: 32px; border-radius: 4px; display: flex; align-items: center; justify-content: center; ${drawingStateRef.current.tool === 'pencil' ? 'background-color: #e6f0ff; border: 1px solid #3b82f6;' : 'background-color: #f1f5f9; border: 1px solid #ddd;'}">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"></path></svg>
-          </button>
-          <button class="tool-btn eraser ${drawingStateRef.current.tool === 'eraser' ? 'active' : ''}" title="Eraser" style="width: 32px; height: 32px; border-radius: 4px; display: flex; align-items: center; justify-content: center; ${drawingStateRef.current.tool === 'eraser' ? 'background-color: #e6f0ff; border: 1px solid #3b82f6;' : 'background-color: #f1f5f9; border: 1px solid #ddd;'}">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 20H7L3 16c-1.5-1.45-1.5-3.55 0-5l6.5-6.5c1.45-1.5 3.55-1.5 5 0l7 7c1.5 1.45 1.5 3.55 0 5L20 18"></path></svg>
-          </button>
-        </div>
-        <div class="tool-group" style="display: flex; gap: 4px; border-right: 1px solid #ddd; padding-right: 8px;">
-          <button class="tool-btn line ${drawingStateRef.current.tool === 'line' ? 'active' : ''}" title="Line" style="width: 32px; height: 32px; border-radius: 4px; display: flex; align-items: center; justify-content: center; ${drawingStateRef.current.tool === 'line' ? 'background-color: #e6f0ff; border: 1px solid #3b82f6;' : 'background-color: #f1f5f9; border: 1px solid #ddd;'}">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path></svg>
-          </button>
-          <button class="tool-btn arrow ${drawingStateRef.current.tool === 'arrow' ? 'active' : ''}" title="Arrow" style="width: 32px; height: 32px; border-radius: 4px; display: flex; align-items: center; justify-content: center; ${drawingStateRef.current.tool === 'arrow' ? 'background-color: #e6f0ff; border: 1px solid #3b82f6;' : 'background-color: #f1f5f9; border: 1px solid #ddd;'}">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
-          </button>
-          <button class="tool-btn rectangle ${drawingStateRef.current.tool === 'rectangle' ? 'active' : ''}" title="Rectangle" style="width: 32px; height: 32px; border-radius: 4px; display: flex; align-items: center; justify-content: center; ${drawingStateRef.current.tool === 'rectangle' ? 'background-color: #e6f0ff; border: 1px solid #3b82f6;' : 'background-color: #f1f5f9; border: 1px solid #ddd;'}">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"></rect></svg>
-          </button>
-          <button class="tool-btn circle ${drawingStateRef.current.tool === 'circle' ? 'active' : ''}" title="Circle" style="width: 32px; height: 32px; border-radius: 4px; display: flex; align-items: center; justify-content: center; ${drawingStateRef.current.tool === 'circle' ? 'background-color: #e6f0ff; border: 1px solid #3b82f6;' : 'background-color: #f1f5f9; border: 1px solid #ddd;'}">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle></svg>
-          </button>
-        </div>
-        <div class="tool-group" style="display: flex; gap: 4px; border-right: 1px solid #ddd; padding-right: 8px;">
-          <select class="brush-width" style="padding: 4px; border-radius: 4px; border: 1px solid #ddd;">
-            <option value="1" ${drawingStateRef.current.lineWidth === 1 ? 'selected' : ''}>Thin</option>
-            <option value="3" ${drawingStateRef.current.lineWidth === 3 ? 'selected' : ''}>Normal</option>
-            <option value="5" ${drawingStateRef.current.lineWidth === 5 ? 'selected' : ''}>Thick</option>
-            <option value="10" ${drawingStateRef.current.lineWidth === 10 ? 'selected' : ''}>Extra Thick</option>
-          </select>
-        </div>
-        <div class="color-pickers" style="display: flex; gap: 4px;">
-          ${['#FF0000', '#000000', '#FFFFFF', '#CCCCCC', '#888888', '#FFFF00', '#00FF00', '#0000FF'].map(color => 
-            `<button class="color-btn" data-color="${color}" style="width: 24px; height: 24px; border-radius: 50%; background-color: ${color}; border: ${drawingStateRef.current.color === color ? '2px solid #3b82f6' : '1px solid #ddd'}; ${color === '#FFFFFF' ? 'border: 1px solid #ddd;' : ''}"></button>`
-          ).join('')}
-        </div>
-      `;
-      
-      container.appendChild(canvas);
-      container.appendChild(controls);
-      container.appendChild(toolsbar);
-      document.body.appendChild(container);
-      
-      // Store references to the created elements
-      const containerRef = container;
-      const canvasRef = canvas;
-
-      // Add event listeners for drawing
-      const mouseDownListener = (e: MouseEvent) => {
-        if (!canvas || !canvas.parentNode) return; // Check if canvas still exists
-        console.log('[FullPage Canvas] Mouse Down Event', e.clientX, e.clientY);
-        e.preventDefault();
-        e.stopPropagation();
-        
-        const point = {
-          x: e.clientX,
-          y: e.clientY
-        };
-        setIsDrawing(true); 
-        setLastPoint(point); 
-        
-        if (drawingStateRef.current.tool === 'pencil') {
-          const ctx = canvas.getContext('2d');
-          if (!ctx) return;
-          ctx.beginPath();
-          ctx.moveTo(point.x, point.y);
-          ctx.lineCap = 'round';
-          ctx.lineJoin = 'round';
-          ctx.strokeStyle = drawingStateRef.current.color;
-          ctx.lineWidth = drawingStateRef.current.lineWidth;
-        }
-      };
-      
-      const mouseMoveListener = (e: MouseEvent) => {
-        if (!canvas || !canvas.parentNode || !isDrawingRef.current || !lastPointRef.current) return;
-        console.log('[FullPage Canvas] Mouse Move Event', e.clientX, e.clientY);
-        
-        e.preventDefault();
-        e.stopPropagation();
-        
-        const point = {
-          x: e.clientX,
-          y: e.clientY
-        };
-        
-        const ctx = canvas.getContext('2d');
-        if (!ctx) return;
-        
-        switch (drawingStateRef.current.tool) {
-          case 'pencil':
-            ctx.beginPath();
-            ctx.moveTo(lastPointRef.current.x, lastPointRef.current.y);
-            ctx.lineTo(point.x, point.y);
-            ctx.strokeStyle = drawingStateRef.current.color;
-            ctx.lineWidth = drawingStateRef.current.lineWidth;
-            ctx.lineCap = 'round';
-            ctx.lineJoin = 'round';
-            ctx.stroke();
-            break;
-          case 'eraser':
-             ctx.clearRect(
-              point.x - drawingStateRef.current.lineWidth * 5,
-              point.y - drawingStateRef.current.lineWidth * 5,
-              drawingStateRef.current.lineWidth * 10,
-              drawingStateRef.current.lineWidth * 10
-            );
-            break;
-        }
-        
-        setLastPoint(point); 
-      };
-      
-      const mouseUpListener = (e: MouseEvent) => {
-        if (!canvas || !canvas.parentNode) return;
-        console.log('[FullPage Canvas] Mouse Up/Leave Event', e.clientX, e.clientY);
-        
-        if (!isDrawingRef.current || !lastPointRef.current) {
-          setIsDrawing(false); 
-          setLastPoint(null); 
-          return;
-        }
-        
-        e.preventDefault();
-        e.stopPropagation();
-        
-        const endPoint = {
-          x: e.clientX,
-          y: e.clientY
-        };
-        
-        const ctx = canvas.getContext('2d');
-        if (!ctx) return;
-        
-        const currentTool = drawingStateRef.current.tool;
-        const currentLastPoint = lastPointRef.current;
-        const currentColor = drawingStateRef.current.color;
-        const currentLineWidth = drawingStateRef.current.lineWidth;
-        
-        // Redraw the switch statement for drawing shapes using refs
-        switch (currentTool) {
-          case 'line':
-            ctx.beginPath();
-            ctx.moveTo(currentLastPoint.x, currentLastPoint.y);
-            ctx.lineTo(endPoint.x, endPoint.y);
-            ctx.strokeStyle = currentColor;
-            ctx.lineWidth = currentLineWidth;
-            ctx.stroke();
-            break;
-          case 'arrow':
-            drawArrow(ctx, currentLastPoint, endPoint, currentColor, currentLineWidth);
-            break;
-          case 'rectangle':
-            ctx.beginPath();
-            ctx.rect(
-              currentLastPoint.x,
-              currentLastPoint.y,
-              endPoint.x - currentLastPoint.x,
-              endPoint.y - currentLastPoint.y
-            );
-            ctx.strokeStyle = currentColor;
-            ctx.lineWidth = currentLineWidth;
-            ctx.stroke();
-            break;
-          case 'circle': {
-            const radius = Math.sqrt(
-              Math.pow(endPoint.x - currentLastPoint.x, 2) + Math.pow(endPoint.y - currentLastPoint.y, 2)
-            );
-            ctx.beginPath();
-            ctx.arc(currentLastPoint.x, currentLastPoint.y, radius, 0, 2 * Math.PI);
-            ctx.strokeStyle = currentColor;
-            ctx.lineWidth = currentLineWidth;
-            ctx.stroke();
-            break;
-          }
-          case 'star':
-            drawStar(ctx, currentLastPoint.x, currentLastPoint.y, 5, 
-                Math.sqrt(Math.pow(endPoint.x - currentLastPoint.x, 2) + Math.pow(endPoint.y - currentLastPoint.y, 2)), 
-                currentColor, currentLineWidth);
-            break;
-        }
-        
-        setIsDrawing(false); 
-        setLastPoint(null); 
-      };
-      
-      canvas.addEventListener('mousedown', mouseDownListener);
-      canvas.addEventListener('mousemove', mouseMoveListener);
-      canvas.addEventListener('mouseup', mouseUpListener);
-      canvas.addEventListener('mouseleave', mouseUpListener);
-
-      // Return cleanup function
-      return () => {
-        console.log('[FullPage Draw Effect] Cleanup: Removing event listeners and canvas...');
-        canvas.removeEventListener('mousedown', mouseDownListener);
-        canvas.removeEventListener('mousemove', mouseMoveListener);
-        canvas.removeEventListener('mouseup', mouseUpListener);
-        canvas.removeEventListener('mouseleave', mouseUpListener);
-        cleanup();
-      };
-    }
-  }, [drawingState.isDrawingOnPage]); // Only depend on isDrawingOnPage
 
   // Helper to convert data URL to File
   const dataURLtoFile = (dataurl: string, filename: string): File | null => {
@@ -1144,27 +475,6 @@ export const DraggableNotificationsPanel = ({
     return new File([u8arr], filename, { type: mime || 'image/png' });
   };
   
-  // Handle tool changes
-  const handleToolChange = (tool: DrawingState['tool']) => {
-    setDrawingState(prev => ({...prev, tool}));
-  };
-  
-  const handleBrushSizeChange = (size: number) => {
-    setDrawingState(prev => ({...prev, lineWidth: size}));
-  };
-  
-  const handleColorChange = (color: string) => {
-    setDrawingState(prev => ({...prev, color}));
-  };
-  
-  // Toggle drawing on the entire page
-  const handleTogglePageDrawing = () => {
-    setDrawingState(prev => ({
-      ...prev,
-      isActive: true,
-      isDrawingOnPage: !prev.isDrawingOnPage
-    }));
-  };
 
   // Handle starting popup drag operation
   const handlePopupDragStart = (e: React.MouseEvent) => {
@@ -1220,59 +530,9 @@ export const DraggableNotificationsPanel = ({
     }
   }, [isDraggingPopup, handlePopupDrag, handlePopupDragEnd]);
 
-  useEffect(() => {
-    if (isDrawing && tagCanvasRef.current) {
-      const ctx = tagCanvasRef.current.getContext('2d');
-      if (ctx) {
-        ctx.lineWidth = drawingState.lineWidth;
-        ctx.strokeStyle = drawingState.color;
-        ctx.lineCap = 'round';
-      }
-    }
-  }, [isDrawing, drawingState.lineWidth, drawingState.color]);
 
-  const drawPencil = (ctx: CanvasRenderingContext2D, startPoint: Point, endPoint: Point) => {
-    ctx.beginPath();
-    ctx.moveTo(startPoint.x, startPoint.y);
-    ctx.lineTo(endPoint.x, endPoint.y);
-    ctx.stroke();
-  };
 
-  const eraseArea = (ctx: CanvasRenderingContext2D, point: Point, size: number) => {
-    ctx.clearRect(point.x - size, point.y - size, size * 2, size * 2);
-  };
 
-  // Similar functions for other tools
-
-  const [tagCoordinates, setTagCoordinates] = useState<TagPopupPosition>({ x: 0, y: 0 });
-  const [showTagPopup, setShowTagPopup] = useState(false);
-
-  // --- Tag Drop Effect ---
-  useEffect(() => {
-    if (isDevelopment) console.log('[TagDropEffect] Running effect. Mode active:', tagDropModeActive);
-    
-    if (tagDropModeActive) {
-      // Add click listener to the document
-      document.addEventListener('click', handlePlaceNewTag);
-      
-      // Add a class to the body to indicate tag drop mode
-      document.body.classList.add('tag-drop-mode-active');
-      
-      return () => {
-        if (isDevelopment) console.log('[TagDropEffect] Removing click listener.');
-        document.removeEventListener('click', handlePlaceNewTag);
-        document.body.classList.remove('tag-drop-mode-active');
-      };
-    } else {
-      // Clean up any existing listeners
-      document.removeEventListener('click', handlePlaceNewTag);
-      document.body.classList.remove('tag-drop-mode-active');
-      
-      return () => {
-        if (isDevelopment) console.log('[TagDropEffect] Cleanup: Removing click listener.');
-      };
-    }
-  }, [tagDropModeActive, handlePlaceNewTag, isDevelopment]);
 
   // Defensive: On mouseup anywhere, always stop dragging
   useEffect(() => {
@@ -1281,73 +541,57 @@ export const DraggableNotificationsPanel = ({
     return () => document.removeEventListener('mouseup', stopDrag);
   }, []);
 
-  // --- Full-page Drawing Overlay ---
-  // Add a callback to handle Done/Cancel
-  const handleFullPageDrawingDone = () => {
-    // Find the canvas element in the DOM
-    const canvas = document.querySelector('.drawing-overlay canvas') as HTMLCanvasElement;
-    if (canvas) {
-      const url = canvas.toDataURL('image/png');
-      setDrawingPreviewUrl(url);
-      setUploadedFiles(prev => {
-        const others = prev.filter(f => f.type !== 'drawing');
-        return [
-          ...others,
-          {
-            file: dataURLtoFile(url, 'drawing.png')!,
-            previewUrl: url,
-            type: 'drawing',
-          },
-        ];
-      });
-    }
-    setDrawingState(prev => ({ ...prev, isDrawingOnPage: false, isActive: false }));
-    setIsDrawingActive(false);
-  };
-  const handleFullPageDrawingCancel = () => {
-    setDrawingState(prev => ({ ...prev, isDrawingOnPage: false, isActive: false }));
-    setIsDrawingActive(false);
-  };
-  // ... existing code ...
-  // In the full-page drawing overlay effect, wire up the buttons
-  useEffect(() => {
-    if (!drawingState.isDrawingOnPage) return;
-    const container = document.querySelector('.drawing-overlay');
-    if (!container) return;
-    
-    const doneBtn = container.querySelector('.drawing-done-btn');
-    const cancelBtn = container.querySelector('.drawing-cancel-btn');
-    if (doneBtn) doneBtn.addEventListener('click', handleFullPageDrawingDone);
-    if (cancelBtn) cancelBtn.addEventListener('click', handleFullPageDrawingCancel);
-    return () => {
-      if (doneBtn) doneBtn.removeEventListener('click', handleFullPageDrawingDone);
-      if (cancelBtn) cancelBtn.removeEventListener('click', handleFullPageDrawingCancel);
-    };
-  }, [drawingState.isDrawingOnPage]);
 
-  // ... existing code ...
   // When drawing is finished in the popup, update preview
-  const handleDrawingFinish = () => {
-    if (tagCanvasRef.current) {
-      const url = tagCanvasRef.current.toDataURL('image/png');
-      setDrawingPreviewUrl(url);
-      // Add/replace drawing in uploadedFiles
-      setUploadedFiles(prev => {
-        const others = prev.filter(f => f.type !== 'drawing');
-        return [
-          ...others,
-          {
-            file: dataURLtoFile(url, 'drawing.png')!,
-            previewUrl: url,
-            type: 'drawing',
-          },
-        ];
-      });
-    }
-  };
+  const handleDrawingFinish = useCallback((dataUrl: string) => {
+    setDrawingPreviewUrl(dataUrl);
+    // Add/replace drawing in uploadedFiles
+    setUploadedFiles(prev => {
+      const others = prev.filter(f => f.type !== 'drawing');
+      return [
+        ...others,
+        {
+          file: dataURLtoFile(dataUrl, 'drawing.png')!,
+          previewUrl: dataUrl,
+          type: 'drawing',
+        },
+      ];
+    });
+  }, []);
 
   return (
     <>
+      {/* Debug Test Button - ALWAYS VISIBLE */}
+      <div className="fixed top-4 left-4 z-[9999] flex gap-2">
+        <Button 
+          onClick={() => {
+            console.log('🔄 Test button clicked! isOpen:', isOpen, 'forceOpen:', forceOpen);
+            setForceOpen(!forceOpen);
+          }}
+          className={cn(
+            "px-4 py-2 rounded text-sm font-bold",
+            forceOpen ? "bg-green-500 text-white" : "bg-purple-500 text-white"
+          )}
+        >
+          🧪 FORCE PANEL {forceOpen ? 'ON' : 'OFF'}
+        </Button>
+        <Button 
+          onClick={() => {
+            console.log('📊 Status - isOpen:', isOpen, 'forceOpen:', forceOpen, 'effectiveIsOpen:', effectiveIsOpen);
+          }}
+          className="bg-blue-500 text-white px-4 py-2 rounded text-sm font-bold"
+        >
+          📊 DEBUG STATUS
+        </Button>
+      </div>
+      
+      {/* Debug indicator */}
+      {effectiveIsOpen && (
+        <div className="fixed top-4 right-4 z-[9999] bg-green-500 text-white p-2 rounded text-sm font-bold">
+          PANEL OPEN - isOpen:{isOpen ? 'T' : 'F'} force:{forceOpen ? 'T' : 'F'} - {panelSize}
+        </div>
+      )}
+      
       {/* Overlay */}
       {showOverlay && ( <div className="fixed inset-0 bg-black/20 z-40" onClick={isPinned ? undefined : onClose} aria-hidden="true" /> )}
 
@@ -1522,142 +766,38 @@ export const DraggableNotificationsPanel = ({
                       
                       {/* Drawing Toolbar */}
                       {isDrawingActive && (
-                          <div className="mt-3 pt-3 border-t border-gray-200 flex flex-col gap-3">
-                              {/* Row 1: Tools & Brush Options */}
-                              <div className="flex items-center gap-4">
-                                  {/* Tools Section */}
-                                  <div className="flex items-center gap-1 border-r pr-3">
-                                      <span className="text-xs font-medium mr-1">Tools:</span>
-                                      <Button 
-                                          variant={drawingState.tool === 'pencil' ? 'default' : 'ghost'} 
-                                          size="icon" 
-                                          className="h-7 w-7" 
-                                          title="Pencil"
-                                          onClick={() => setDrawingState(prev => ({ ...prev, tool: 'pencil' }))}
-                                      >
-                                          <Edit3 className="h-4 w-4" />
-                                      </Button>
-                                      <Button 
-                                          variant={drawingState.tool === 'eraser' ? 'default' : 'ghost'} 
-                                          size="icon" 
-                                          className="h-7 w-7" 
-                                          title="Eraser"
-                                          onClick={() => setDrawingState(prev => ({ ...prev, tool: 'eraser' }))}
-                                      >
-                                          <Trash2 className="h-4 w-4" />
-                                      </Button>
-                                  </div>
-                                  {/* Brush Section */}
-                                  <div className="flex items-center gap-1">
-                                      <span className="text-xs font-medium mr-1">Brush:</span>
-                                      <select 
-                                          className="text-xs border rounded px-1 py-0.5"
-                                          value={drawingState.lineWidth}
-                                          onChange={(e) => setDrawingState(prev => ({ ...prev, lineWidth: Number(e.target.value) }))}
-                                      >
-                                          <option value="1">Thin</option>
-                                          <option value="3">Normal</option>
-                                          <option value="5">Thick</option>
-                                          <option value="10">Extra Thick</option>
-                                      </select>
-                                  </div>
-                              </div>
-
-                              {/* Row 2: Shapes & Colors */}
-                              <div className="flex items-center gap-4">
-                                  {/* Shapes Section */}
-                                  <div className="flex items-center gap-1 border-r pr-3 flex-wrap">
-                                      <span className="text-xs font-medium mr-1 w-full mb-1">Shapes:</span>
-                                      <Button 
-                                          variant={drawingState.tool === 'line' ? 'default' : 'ghost'} 
-                                          size="icon" 
-                                          className="h-6 w-6"
-                                          onClick={() => setDrawingState(prev => ({ ...prev, tool: 'line' }))}
-                                      >
-                                          <Minus className="h-4 w-4"/>
-                                      </Button>
-                                      <Button 
-                                          variant={drawingState.tool === 'arrow' ? 'default' : 'ghost'} 
-                                          size="icon" 
-                                          className="h-6 w-6"
-                                          onClick={() => setDrawingState(prev => ({ ...prev, tool: 'arrow' }))}
-                                      >
-                                          <MoveUpRight className="h-4 w-4"/>
-                                      </Button>
-                                      <Button 
-                                          variant={drawingState.tool === 'rectangle' ? 'default' : 'ghost'} 
-                                          size="icon" 
-                                          className="h-6 w-6"
-                                          onClick={() => setDrawingState(prev => ({ ...prev, tool: 'rectangle' }))}
-                                      >
-                                          <Square className="h-4 w-4"/>
-                                      </Button>
-                                      <Button 
-                                          variant={drawingState.tool === 'circle' ? 'default' : 'ghost'} 
-                                          size="icon" 
-                                          className="h-6 w-6"
-                                          onClick={() => setDrawingState(prev => ({ ...prev, tool: 'circle' }))}
-                                      >
-                                          <Circle className="h-4 w-4"/>
-                                      </Button>
-                                      <Button 
-                                          variant={drawingState.tool === 'star' ? 'default' : 'ghost'} 
-                                          size="icon" 
-                                          className="h-6 w-6"
-                                          onClick={() => setDrawingState(prev => ({ ...prev, tool: 'star' }))}
-                                      >
-                                          <Star className="h-4 w-4"/>
-                                      </Button>
-                                  </div>
-                                  {/* Colors Section */}
-                                  <div className="flex items-center gap-1 flex-wrap">
-                                      <span className="text-xs font-medium mr-1 w-full mb-1">Colors:</span>
-                                      {['#FF0000', '#000000', '#FFFFFF', '#CCCCCC', '#888888', '#FFFF00', '#00FF00', '#0000FF', '#FF00FF', '#00FFFF'].map(color => (
-                                          <Button 
-                                              key={color} 
-                                              variant="outline" 
-                                              size="icon" 
-                                              className={cn(
-                                                  "h-5 w-5 p-0 border rounded-full", 
-                                                  drawingState.color === color ? "ring-2 ring-offset-1 ring-blue-500" : ""
-                                              )} 
-                                              style={{ backgroundColor: color }} 
-                                              title={color}
-                                              onClick={() => setDrawingState(prev => ({ ...prev, color }))}
-                                          />
-                                      ))}
-                                  </div>
-                              </div>
-
-                              {/* Row 3: Canvas and Drawing Outside the Tag */}
-                              <div className="mt-2">
-                                  <DrawingCanvas 
-                                      width={340} 
-                                      height={200} 
-                                      drawingState={drawingState} 
-                                      canvasRef={tagCanvasRef}
-                                      drawArrow={drawArrow}
-                                      drawStar={drawStar}
-                                  />
-                                  {/* Save Drawing Button */}
+                          <div className="mt-3 pt-3 border-t border-gray-200">
+                              <DrawingToolbar 
+                                  drawingState={drawingState}
+                                  onStateChange={updateDrawingState}
+                                  className="mb-3"
+                              />
+                              
+                              <DrawingCanvas 
+                                  width={340} 
+                                  height={200} 
+                                  drawingState={drawingState}
+                                  onDrawEnd={handleDrawingFinish}
+                                  initialDrawingDataUrl={drawingPreviewUrl || undefined}
+                              />
+                              
+                              <div className="flex gap-2 mt-2">
                                   <Button
                                       variant="outline"
                                       size="sm"
-                                      className="mt-2 w-full text-xs"
-                                      onClick={handleDrawingFinish}
+                                      className="flex-1 text-xs"
+                                      onClick={clearCanvas}
                                   >
-                                      <Save className="h-3.5 w-3.5 mr-1" />
-                                      Save Drawing to Attachments
+                                      Clear Canvas
                                   </Button>
-                                  {/* Draw Outside Tag Button */}
                                   <Button
                                       variant="outline"
                                       size="sm"
-                                      className="mt-2 w-full text-xs"
-                                      onClick={() => setDrawingState(prev => ({ ...prev, isDrawingOnPage: true }))}
+                                      className="flex-1 text-xs"
+                                      onClick={() => toast.info('Full-page drawing coming soon!')}
                                   >
                                       <Brush className="h-3.5 w-3.5 mr-1" />
-                                      Draw Outside Tag (Full Page)
+                                      Full Page (Soon)
                                   </Button>
                               </div>
                           </div>
@@ -1688,7 +828,7 @@ export const DraggableNotificationsPanel = ({
         ref={panelRef}
         className={cn(
           "fixed right-0 top-0 h-screen bg-white z-50 shadow-lg transition-all duration-300 ease-in-out", // Keep base styles & transition
-          isOpen ? "" : "hidden", // Use hidden class when not open
+          effectiveIsOpen ? "" : "hidden", // Use effectiveIsOpen for testing
           isPinned ? "border-l border-gray-200" : ""
         )}
         style={{ width: getPanelWidth() }}
