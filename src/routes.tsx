@@ -1,5 +1,5 @@
 import { TagNotificationView } from '@/components/tags/TagNotificationView';
-import { fetchTagData } from '@/services/tagService';
+import { fetchTagData } from '@/services/enhancedTagService';
 import { Route } from 'react-router-dom';
 import Automations from '@/pages/Automations';
 import N8nWorkflowListPage from '@/pages/Workflow/n8n-workflow-list';

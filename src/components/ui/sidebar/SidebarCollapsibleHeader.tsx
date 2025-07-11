@@ -56,19 +56,21 @@ export function SidebarCollapsibleHeader() {
       </div>
       
       {/* Search Bar */}
-      <div className="mt-3 flex items-center gap-2">
-        <div className="flex-1 relative flex items-center bg-gray-700 rounded px-3 py-1.5">
-          <Search className="h-4 w-4 text-gray-400 absolute left-2" />
+      <div className="mt-3 relative">
+        <div className="flex items-center bg-gray-700 rounded px-3 py-1.5 pr-16">
+          <Search className="h-4 w-4 text-gray-400 mr-2" />
           <input 
             type="text" 
             placeholder="Search" 
-            className="w-full bg-transparent border-none outline-none text-white pl-6 text-sm placeholder-gray-400"
+            className="w-full bg-transparent border-none outline-none text-white text-sm placeholder-gray-400"
           />
-          <span className="text-xs text-gray-400 ml-1">ctrl K</span>
         </div>
-        <button className="p-1 bg-green-500 text-white rounded">
-          <Plus className="h-4 w-4" />
-        </button>
+        <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
+          <span className="text-xs text-gray-400">ctrl K</span>
+          <button className="p-0.5 bg-green-500 text-white rounded">
+            <Plus className="h-3 w-3" />
+          </button>
+        </div>
       </div>
     </div>
   );

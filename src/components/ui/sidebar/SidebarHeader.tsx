@@ -195,11 +195,11 @@ export function SidebarHeader({ isExpanded, onToggle, className }: SidebarHeader
             <input 
               type="text" 
               placeholder="Search" 
-              className="w-full bg-white text-gray-800 px-3 py-1.5 pr-8 rounded text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="w-full bg-white text-gray-800 px-3 py-1.5 pr-16 rounded text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
             />
-            <div className="absolute right-1 top-1/2 -translate-y-1/2 flex items-center gap-1">
+            <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
               <span className="text-[10px] text-gray-400">ctrl K</span>
-              <button className="bg-green-500 text-white p-1 rounded">
+              <button className="bg-green-500 text-white p-0.5 rounded text-xs">
                 <Plus className="h-3 w-3" />
               </button>
             </div>
