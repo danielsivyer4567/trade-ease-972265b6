@@ -1,0 +1,109 @@
+graph TD
+    A[Collaborative Tagging & Annotation Tool] --> B[Application Core]
+    A --> C[User Interface Layer]
+    A --> D[Data & Service Layer]
+    A --> E[Media & Recording Subsystem]
+    
+    B --> B1[App.tsx Main State Controller]
+    B --> B2[NotificationContext]
+    
+    B1 --> B1a[Manages Global Tags State]
+    B1 --> B1b[Controls TagPopup Lifecycle]
+    B1 --> B1c[Handles Tag Save/Update Logic]
+    B1 --> B1d[Manages Media Upload State]
+    
+    B2 --> B2a[Manages Global Notifications]
+    B2 --> B2b[Add/Mark Notifications as Read]
+    
+    C --> C1[Main Page View DummyPageContent]
+    C --> C2[TaggingDock Central Hub]
+    C --> C3[TagPopup Modal Component]
+    C --> C4[Tag Drop Mode Interaction State]
+    C --> C5[Reply System]
+    
+    C1 --> C1a[Displays Web Content]
+    C1 --> C1b[Renders Tag Markers]
+    C1 --> C1c[Handles Marker Interaction]
+    
+    C2 --> C2a[Manages Dock Layout & State]
+    C2 --> C2b[Provides Core Actions]
+    C2 --> C2c[Navigation Tabs]
+    C2 --> C2d[Search & Filter Functionality]
+    C2 --> C2e[Media Upload Controls]
+    
+    C3 --> C3a[New Tag Mode]
+    C3 --> C3b[View Tag Mode]
+    C3 --> C3c[Media Attachment Preview]
+    
+    C3a --> C3a1[Comment Input]
+    C3a --> C3a2[Staff Notification]
+    C3a --> C3a3[Attachment Handling]
+    C3a --> C3a4[Media Upload Interface]
+    
+    C3b --> C3b1[Comment History]
+    C3b --> C3b2[Attachments Display]
+    C3b --> C3b3[Reply/Edit Functionality]
+    C3b --> C3b4[Media Gallery View]
+    
+    C4 --> C4a[Activates Crosshair Cursor]
+    C4 --> C4b[Places New Tag on Click]
+    C4 --> C4c[Initiates TagPopup in New Mode]
+    
+    C5 --> C5a[Threaded Reply System]
+    C5 --> C5b[Reply Notifications]
+    C5 --> C5c[Reply Media Attachments]
+    C5 --> C5d[Reply Mention System]
+    
+    D --> D1[tagService.ts Mock Backend]
+    D --> D2[mediaService.ts Upload Handler]
+    
+    D1 --> D1a[Simulates Database Operations CRUD]
+    D1 --> D1b[Comment & Reply Management]
+    D1 --> D1c[Tag Relationship Tracking]
+    
+    D2 --> D2a[Image Upload Processing]
+    D2 --> D2b[Video Upload Processing]
+    D2 --> D2c[Audio Record Upload]
+    D2 --> D2d[Screen Recording Upload]
+    D2 --> D2e[File Compression & Optimization]
+    D2 --> D2f[Upload Progress Tracking]
+    
+    E --> E1[DrawingCanvas]
+    E --> E2[DrawingToolbar]
+    E --> E3[useAudioRecorder]
+    E --> E4[useScreenRecorder]
+    E --> E5[MediaCapture]
+    
+    E1 --> E1a[Inline Drawing Embedded]
+    E1 --> E1b[Full-Page Drawing Overlay]
+    E1 --> E1c[Drawing Export to Media]
+    
+    E2 --> E2a[Tool Selection]
+    E2 --> E2b[Color/Line Width Selection]
+    E2 --> E2c[Media Recording Controls]
+    
+    E3 --> E3a[Audio Recording Module]
+    E3 --> E3b[Real-time Audio Preview]
+    E3 --> E3c[Audio Format Options]
+    
+    E4 --> E4a[Screen Capture Interface]
+    E4 --> E4b[Region Selection Tool]
+    E4 --> E4c[Recording Controls]
+    E4 --> E4d[Screen Recording Preview]
+    
+    E5 --> E5a[Image Capture from Camera]
+    E5 --> E5b[Video Recording Interface]
+    E5 --> E5c[Media Preview & Edit]
+    E5 --> E5d[Quick Media Actions]
+    
+    classDef coreClass fill:#e1f5fe,stroke:#01579b,stroke-width:2px
+    classDef uiClass fill:#f3e5f5,stroke:#4a148c,stroke-width:2px
+    classDef dataClass fill:#e8f5e8,stroke:#1b5e20,stroke-width:2px
+    classDef mediaClass fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    classDef replyClass fill:#fce4ec,stroke:#880e4f,stroke-width:2px
+    
+    class B,B1,B2,B1a,B1b,B1c,B1d,B2a,B2b coreClass
+    class C,C1,C2,C3,C4,C1a,C1b,C1c,C2a,C2b,C2c,C2d,C2e,C3a,C3b,C3c,C3a1,C3a2,C3a3,C3a4,C3b1,C3b2,C3b3,C3b4,C4a,C4b,C4c uiClass
+    class D,D1,D2,D1a,D1b,D1c,D2a,D2b,D2c,D2d,D2e,D2f dataClass
+    class E,E1,E2,E3,E4,E5,E1a,E1b,E1c,E2a,E2b,E2c,E3a,E3b,E3c,E4a,E4b,E4c,E4d,E5a,E5b,E5c,E5d mediaClass
+    class C5,C5a,C5b,C5c,C5d replyClass
