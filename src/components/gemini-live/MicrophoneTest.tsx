@@ -14,6 +14,24 @@ import {
   Activity
 } from 'lucide-react';
 
+// Speech Recognition types
+interface SpeechRecognitionEvent extends Event {
+  results: SpeechRecognitionResultList;
+  resultIndex: number;
+}
+
+interface SpeechRecognitionErrorEvent extends Event {
+  error: string;
+}
+
+declare global {
+  interface Window {
+    SpeechRecognition: any;
+    webkitSpeechRecognition: any;
+    testRecognition?: any;
+  }
+}
+
 interface MicrophoneTestProps {
   onClose?: () => void;
 }
@@ -115,13 +133,13 @@ export const MicrophoneTest: React.FC<MicrophoneTestProps> = ({ onClose }) => {
       setTranscript('Listening... Say something!');
     };
 
-    recognition.onresult = (event: any) => {
+    recognition.onresult = (event: SpeechRecognitionEvent) => {
       const last = event.results.length - 1;
       const text = event.results[last][0].transcript;
       setTranscript(text);
     };
 
-    recognition.onerror = (event: any) => {
+    recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
       console.error('Speech recognition error:', event.error);
       setTranscript(`Error: ${event.error}`);
       setIsListening(false);
@@ -134,13 +152,13 @@ export const MicrophoneTest: React.FC<MicrophoneTestProps> = ({ onClose }) => {
     recognition.start();
     
     // Store recognition instance for stopping
-    (window as any).testRecognition = recognition;
+    window.testRecognition = recognition;
   };
 
   const stopSpeechRecognition = () => {
-    if ((window as any).testRecognition) {
-      (window as any).testRecognition.stop();
-      delete (window as any).testRecognition;
+    if (window.testRecognition) {
+      window.testRecognition.stop();
+      delete window.testRecognition;
     }
     setIsListening(false);
   };

@@ -11,7 +11,7 @@
     "allowImportingTsExtensions": true,
     "isolatedModules": true,
     "moduleDetection": "force",
-    "noEmit": true, // important for Vite (keeps emit off)
+    "noEmit": true,
     "jsx": "react-jsx",
 
     /* Linting */
@@ -27,7 +27,7 @@
     },
 
     /* Required for project references */
-    "composite": true
+    "composite": false
   },
   "include": ["src"]
 }

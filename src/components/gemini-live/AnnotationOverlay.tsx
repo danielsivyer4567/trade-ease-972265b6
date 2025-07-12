@@ -112,8 +112,25 @@ export const AnnotationOverlay: React.FC<AnnotationOverlayProps> = ({ annotation
     const textWidth = ctx.measureText(text).width;
     const padding = 10;
     
+    // Draw rounded rectangle background using arcs instead of roundRect
     ctx.fillStyle = 'rgba(255, 0, 0, 0.9)';
-    ctx.roundRect(x - textWidth / 2 - padding, y - 20 - padding, textWidth + padding * 2, 30 + padding, 8);
+    const rectX = x - textWidth / 2 - padding;
+    const rectY = y - 20 - padding;
+    const rectWidth = textWidth + padding * 2;
+    const rectHeight = 30 + padding;
+    const radius = 8;
+    
+    ctx.beginPath();
+    ctx.moveTo(rectX + radius, rectY);
+    ctx.lineTo(rectX + rectWidth - radius, rectY);
+    ctx.quadraticCurveTo(rectX + rectWidth, rectY, rectX + rectWidth, rectY + radius);
+    ctx.lineTo(rectX + rectWidth, rectY + rectHeight - radius);
+    ctx.quadraticCurveTo(rectX + rectWidth, rectY + rectHeight, rectX + rectWidth - radius, rectY + rectHeight);
+    ctx.lineTo(rectX + radius, rectY + rectHeight);
+    ctx.quadraticCurveTo(rectX, rectY + rectHeight, rectX, rectY + rectHeight - radius);
+    ctx.lineTo(rectX, rectY + radius);
+    ctx.quadraticCurveTo(rectX, rectY, rectX + radius, rectY);
+    ctx.closePath();
     ctx.fill();
 
     ctx.fillStyle = 'white';
