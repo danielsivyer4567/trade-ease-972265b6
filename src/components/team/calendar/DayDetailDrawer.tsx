@@ -5,7 +5,7 @@ import { Job } from '@/types/job';
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerFooter } from '@/components/ui/drawer';
 import { Button } from '@/components/ui/button';
 import { CalendarIcon, ListFilter, Search, Plus } from 'lucide-react';
-import { SearchQuotes } from '@/pages/Jobs/components/tabs/financials/SearchQuotes';
+import { SearchQuotes } from '@/pages/SiteAudits/components/tabs/financials/SearchQuotes';
 import { SearchBar } from './components/SearchBar';
 import { Input } from '@/components/ui/input';
 import { JobsList } from './components/JobsList';

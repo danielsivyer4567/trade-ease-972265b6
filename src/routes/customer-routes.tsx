@@ -10,8 +10,8 @@ const CustomerStatementPage = React.lazy(() => import('@/pages/Customers/Custome
 const NewCustomerPage = React.lazy(() => import('@/pages/Customers/NewCustomer'));
 const EditCustomerPage = React.lazy(() => import('@/pages/Customers/EditCustomer'));
 const NetworksPage = React.lazy(() => import('@/pages/Networks'));
-const CustomerProgressPage = React.lazy(() => import('@/pages/Jobs/CustomerProgress'));
-const JobMaterialOrderingPage = React.lazy(() => import('@/pages/Jobs/JobMaterialOrdering'));
+const CustomerProgressPage = React.lazy(() => import('@/pages/SiteAudits/CustomerProgress'));
+const JobMaterialOrderingPage = React.lazy(() => import('@/pages/SiteAudits/JobMaterialOrdering'));
 const ExternalCustomerListPage = React.lazy(() => import('@/pages/Customers/ExternalList'));
 const CustomerConsolePage = React.lazy(() => import('@/pages/Customers/CustomerConsole'));
 const CustomerPortfolioPage = React.lazy(() => import('@/pages/Customers/CustomerPortfolio'));

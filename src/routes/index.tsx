@@ -46,9 +46,9 @@ const CustomerPortfolioPage = lazy(() => import('@/pages/Customers/CustomerPortf
 const SiteAuditsPage = lazy(() => import('@/pages/SiteAudits'));
 
 // Jobs
-const JobsPage = lazy(() => import('@/pages/Jobs'));
-const NewJobPage = lazy(() => import('@/pages/Jobs/NewJob'));
-const JobDetailsPage = lazy(() => import('@/pages/Jobs/JobDetails'));
+const JobsPage = lazy(() => import('@/pages/SiteAudits'));
+const NewJobPage = lazy(() => import('@/pages/SiteAudits/NewJob'));
+const JobDetailsPage = lazy(() => import('@/pages/SiteAudits/JobDetails'));
 
 // Quotes and Invoices
 const QuotesPage = lazy(() => import('@/pages/Quotes'));

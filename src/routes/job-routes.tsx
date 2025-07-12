@@ -5,13 +5,13 @@ import { LoadingFallback } from './loading-fallback';
 import ErrorBoundary from '@/components/ErrorBoundary';
 
 // Import pages
-const JobsPage = React.lazy(() => import('@/pages/Jobs'));
-const NewJobPage = React.lazy(() => import('@/pages/Jobs/NewJob'));
-const JobDetailsPage = React.lazy(() => import('@/pages/Jobs/JobDetails'));
-const NewTemplatePage = React.lazy(() => import('@/pages/Jobs/NewTemplate'));
+const JobsPage = React.lazy(() => import('@/pages/SiteAudits'));
+const NewJobPage = React.lazy(() => import('@/pages/SiteAudits/NewJob'));
+const JobDetailsPage = React.lazy(() => import('@/pages/SiteAudits/JobDetails'));
+const NewTemplatePage = React.lazy(() => import('@/pages/SiteAudits/NewTemplate'));
 const PropertyBoundariesPage = React.lazy(() => import('@/pages/PropertyBoundaries'));
-const CustomerProgressPage = React.lazy(() => import('@/pages/Jobs/CustomerProgress'));
-const NewJobNewTablePage = React.lazy(() => import('@/pages/Jobs/NewJobNewTable'));
+const CustomerProgressPage = React.lazy(() => import('@/pages/SiteAudits/CustomerProgress'));
+const NewJobNewTablePage = React.lazy(() => import('@/pages/SiteAudits/NewJobNewTable'));
 
 // Export routes as JSX elements
 export const jobRoutes = (
