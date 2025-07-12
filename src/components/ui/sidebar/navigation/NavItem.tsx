@@ -85,11 +85,11 @@ export function NavItem({
             className={cn(
               "group flex items-center gap-x-1.5 relative rounded-md px-2 py-1 text-sm font-medium transition-colors text-white",
               expanded ? "justify-start" : "justify-center",
-              isActive && variant === "default" && "bg-white/20 text-white",
-              isActive && variant === "destructive" && "bg-destructive text-destructive-foreground",
+              isActive && variant === "default" && "bg-white/20 text-white border border-foreground/10",
+              isActive && variant === "destructive" && "bg-destructive text-destructive-foreground border border-foreground/10",
               disabled && "pointer-events-none opacity-50",
-              variant === "default" && !isActive && "hover:bg-white/10 hover:text-white",
-              variant === "destructive" && !isActive && "hover:bg-destructive hover:text-destructive-foreground",
+              variant === "default" && !isActive && "hover:bg-white/10 hover:text-white border-b border-border",
+              variant === "destructive" && !isActive && "hover:bg-destructive hover:text-destructive-foreground border-b border-border",
               className
             )}
             {...props}

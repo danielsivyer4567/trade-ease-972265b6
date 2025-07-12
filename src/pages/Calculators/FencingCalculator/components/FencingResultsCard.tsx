@@ -3,10 +3,23 @@ import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 import { Square } from "lucide-react";
 import { FencingResult, FenceType } from "../hooks/useFencingCalculator";
 
+export interface FencingComponents {
+  palings: number;
+  panels: number;
+  postHeight: string;
+  posts: number;
+  rails: number;
+  nails: number;
+  screws: number;
+  rapidSets: number;
+  caps?: number;
+  sleepers?: number;
+}
+
 interface FencingResultsCardProps {
   result: FencingResult | null;
   fenceType: FenceType;
-  FENCING_COMPONENTS_PER_10M: Record<string, any>;
+  FENCING_COMPONENTS_PER_10M: Record<FenceType, FencingComponents>;
   gateCount: number;
 }
 
