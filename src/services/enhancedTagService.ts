@@ -546,7 +546,6 @@ export async function uploadTagAttachment(
 
 // Backward compatibility exports (for existing code)
 export { fetchTag as fetchTagData };
-export { createTag as createTag };
 export { createTagReply as addTagReply };
 export { fetchTagReplies as getTagReplies };
 

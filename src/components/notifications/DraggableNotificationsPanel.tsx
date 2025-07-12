@@ -134,6 +134,8 @@ export const DraggableNotificationsPanel = ({
   const panelRef = useRef<HTMLDivElement>(null);
   const leftResizeHandleRef = useRef<HTMLDivElement>(null);
   // Canvas ref removed - only full-page drawing is available
+  // Ref to track if component is mounted (for cleanup)
+  const isMountedRef = useRef(true);
   const { notifications, markAllAsRead, replyToNotification, getConversationNotifications } = useNotifications(); // Assuming this context provides notifications
 
   const SIDEBAR_WIDTH = 50;
@@ -696,9 +698,6 @@ export const DraggableNotificationsPanel = ({
     };
   }, [tagDropModeActive, uploadedFiles]); 
 
-  // Ref to track if component is mounted (for cleanup)
-  const isMountedRef = useRef(true);
-  
   const toggleFullScreenDrawingMode = (active: boolean) => {
     // Instead of opening a separate canvas, enable drawing directly on the page
     setIsDrawingMode(active);
