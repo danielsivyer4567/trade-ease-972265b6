@@ -6,7 +6,7 @@ import { NotificationItem } from './NotificationItem';
 import { DraggableProfileBubble } from './DraggableProfileBubble';
 import { cn } from '@/lib/utils';
 import { useNotifications, type Notification } from './NotificationContextProvider';
-import { createTag, type TagData } from '@/services/tagService';
+import { createTag, type TagData, type CreateTagPayload } from '@/services/enhancedTagService';
 import { toast } from 'sonner';
 import { DrawingState } from './types';
 import { useAuth } from '@/contexts/AuthContext';
@@ -24,15 +24,15 @@ interface TagMarker {
 }
 
 interface StaffMember {
-  id: string;
-  name: string;
+    id: string;
+    name: string;
 }
 
 interface UploadedFile {
-  file: File;
-  previewUrl: string; // For images
-  type: 'image' | 'audio' | 'drawing' | 'video';
-  supabaseUrl?: string; // Set after successful upload
+    file: File;
+    previewUrl: string; // For images
+    type: 'image' | 'audio' | 'drawing' | 'video';
+    supabaseUrl?: string; // Set after successful upload
 }
 
 
@@ -80,7 +80,6 @@ export const DraggableNotificationsPanel = ({
   currentUserId,
   availableStaff
 }: DraggableNotificationsPanelProps) => {
-  // Get user from auth context
   const { user } = useAuth();
   
   // Remove debug logging and test override
@@ -90,7 +89,6 @@ export const DraggableNotificationsPanel = ({
   const [isPinned, setIsPinned] = useState(false);
   const [customWidth, setCustomWidth] = useState(350);
   const [isDrawingMode, setIsDrawingMode] = useState(false); // General panel drawing mode
-  const [isMouseOverPaintMenu, setIsMouseOverPaintMenu] = useState(false); // Track mouse over paint menu
   const [drawingState, setDrawingState] = useState<DrawingState>({
     isActive: false,
     tool: 'pencil',
@@ -136,8 +134,6 @@ export const DraggableNotificationsPanel = ({
   const panelRef = useRef<HTMLDivElement>(null);
   const leftResizeHandleRef = useRef<HTMLDivElement>(null);
   // Canvas ref removed - only full-page drawing is available
-  // Ref to track if component is mounted (for cleanup)
-  const isMountedRef = useRef(true);
   const { notifications, markAllAsRead, replyToNotification, getConversationNotifications } = useNotifications(); // Assuming this context provides notifications
 
   const SIDEBAR_WIDTH = 50;
@@ -151,6 +147,7 @@ export const DraggableNotificationsPanel = ({
     return `${customWidth}px`;
   };
   
+
 
   // --- Cleanup temporary markers ---
   useEffect(() => {
@@ -170,37 +167,36 @@ export const DraggableNotificationsPanel = ({
 
   // Resets the state associated with the tag popup content
   const resetTagPopupState = useCallback(() => {
-    setTagComment('');
-    setSelectedStaff([]);
-    // Clean up uploaded files URLs
-    uploadedFiles.forEach(file => {
-      if (file.previewUrl && file.previewUrl.startsWith('blob:')) {
-        URL.revokeObjectURL(file.previewUrl);
+      setTagComment('');
+      setSelectedStaff([]);
+      // Clean up uploaded files URLs
+      uploadedFiles.forEach(file => {
+        if (file.previewUrl && file.previewUrl.startsWith('blob:')) {
+          URL.revokeObjectURL(file.previewUrl);
+        }
+      });
+      setUploadedFiles([]);
+      setIsRecordingAudio(false);
+      // Drawing state cleanup removed
+      setStaffSelectionError(null);
+      setTagPopupCoords(null);
+      setDrawingPreviewUrl(null);
+      setActiveConversationId(null);
+      setIsReplyMode(false);
+      setReplyToNotificationId(null);
+      // Clean up audio recording
+      if (audioRecorder && audioRecorder.state === 'recording') {
+        audioRecorder.stop();
       }
-    });
-    setUploadedFiles([]);
-    setIsRecordingAudio(false);
-    // Drawing state cleanup removed
-    setStaffSelectionError(null);
-    setTagPopupCoords(null);
-    setDrawingPreviewUrl(null);
-    setActiveConversationId(null);
-    setIsReplyMode(false);
-    setReplyToNotificationId(null);
-    // Clean up audio recording
-    if (audioRecorder && audioRecorder.state === 'recording') {
-      audioRecorder.stop();
-    }
-    if (audioStream) {
-      audioStream.getTracks().forEach(track => track.stop());
-    }
-    setAudioRecorder(null);
-    setAudioStream(null);
+      if (audioStream) {
+        audioStream.getTracks().forEach(track => track.stop());
+      }
+      setAudioRecorder(null);
+      setAudioStream(null);
   }, [uploadedFiles, audioRecorder, audioStream]);
 
   // Handle reply to notification
   const handleReplyToNotification = useCallback((notificationId: string | number) => {
-    if (!notifications || notifications.length === 0) return;
     const notification = notifications.find(n => n.id === notificationId);
     if (!notification) return;
     
@@ -212,7 +208,7 @@ export const DraggableNotificationsPanel = ({
     setActiveConversationId(conversationId);
     
     // Pre-populate with selected staff if replying to a tag
-    if (notification.senderId && availableStaff && availableStaff.length > 0) {
+    if (notification.senderId) {
       const sender = availableStaff.find(staff => staff.id === notification.senderId);
       if (sender) {
         setSelectedStaff([sender]);
@@ -233,11 +229,11 @@ export const DraggableNotificationsPanel = ({
   }, [tagDropModeActive, resetTagPopupState]);
 
   // --- Cleanup active popup if panel closes ---
-  useEffect(() => {
-    if (!effectiveIsOpen && isTagPopupOpen) {
-      closeTagPopup();
-    }
-  }, [effectiveIsOpen, isTagPopupOpen, closeTagPopup]);
+   useEffect(() => {
+     if (!effectiveIsOpen && isTagPopupOpen) {
+       closeTagPopup();
+     }
+   }, [effectiveIsOpen, isTagPopupOpen, closeTagPopup]);
 
 
   // --- Panel Control Functions ---
@@ -251,13 +247,13 @@ export const DraggableNotificationsPanel = ({
   
   // Calculate real notification counts
   const notificationCounts = {
-    all: notifications?.length || 0,
-    team: notifications?.filter(n => n.type === 'team').length || 0,
-    trades: notifications?.filter(n => ['job', 'quote', 'payment'].includes(n.type)).length || 0,
-    calendar: notifications?.filter(n => n.type === 'calendar').length || 0,
-    comments: notifications?.filter(n => ['message', 'comment', 'tag'].includes(n.type)).length || 0,
-    account: notifications?.filter(n => n.type === 'account').length || 0,
-    security: notifications?.filter(n => n.type === 'security').length || 0
+    all: notifications.length,
+    team: notifications.filter(n => n.type === 'team').length,
+    trades: notifications.filter(n => ['job', 'quote', 'payment'].includes(n.type)).length,
+    calendar: notifications.filter(n => n.type === 'calendar').length,
+    comments: notifications.filter(n => ['message', 'comment', 'tag'].includes(n.type)).length,
+    account: notifications.filter(n => n.type === 'account').length,
+    security: notifications.filter(n => n.type === 'security').length
   };
 
 
@@ -269,16 +265,10 @@ export const DraggableNotificationsPanel = ({
       const nextState = !prev;
       if (!nextState) {
         closeTagPopup();
-        // Only reset cursor if not in drawing mode
-        if (!isDrawingMode) {
-          document.body.style.cursor = '';
-        }
+        document.body.style.cursor = '';
       } else {
-        // Only set crosshair cursor if not in drawing mode
-        if (!isDrawingMode) {
-          document.body.style.cursor = 'crosshair';
-        }
-        toast.info('Tag Drop Mode Active - Click anywhere or drag your profile picture to place a tag');
+        document.body.style.cursor = 'crosshair';
+        toast.info('Tag Drop Mode Active - Drag your profile picture to place a tag');
       }
       return nextState;
     });
@@ -325,7 +315,6 @@ export const DraggableNotificationsPanel = ({
 
   // Handle click on page to place a new tag (for CREATION) - now only as fallback
   const handlePlaceNewTag = useCallback((event: MouseEvent) => {
-    // Don't handle if not in tag drop mode or if currently dragging bubble
     if (!tagDropModeActive || isDraggingBubble) return;
 
     const target = event.target as HTMLElement;
@@ -378,7 +367,6 @@ export const DraggableNotificationsPanel = ({
     event.preventDefault();
     event.stopPropagation();
 
-
     // Calculate popup position with bounds check
     const popupWidth = 320;
     const popupHeight = 380;
@@ -416,19 +404,19 @@ export const DraggableNotificationsPanel = ({
 
   // Placeholder for image upload
   const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file && file.type.startsWith('image/')) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const newFile: UploadedFile = {
-          file,
-          previewUrl: reader.result as string,
-          type: 'image'
-        };
-        setUploadedFiles(prev => [...prev, newFile]);
+      const file = event.target.files?.[0];
+      if (file && file.type.startsWith('image/')) {
+          const reader = new FileReader();
+          reader.onloadend = () => {
+              const newFile: UploadedFile = {
+                  file,
+                  previewUrl: reader.result as string,
+                  type: 'image'
+              };
+              setUploadedFiles(prev => [...prev, newFile]);
+          }
+          reader.readAsDataURL(file);
       }
-      reader.readAsDataURL(file);
-    }
   };
   
   // Drawing functions removed - only full-page drawing is available
@@ -497,9 +485,9 @@ export const DraggableNotificationsPanel = ({
   const handleToggleScreenRecord = async () => {
     if (!isRecordingScreen) {
       try {
-        const stream = await navigator.mediaDevices.getDisplayMedia({ 
-          video: true, 
-          audio: true 
+        const stream = await navigator.mediaDevices.getDisplayMedia({
+          video: true, // Use boolean for compatibility; 'mediaSource' is not standard in getDisplayMedia
+          audio: true
         });
         const mediaRecorder = new MediaRecorder(stream);
         const chunks: Blob[] = [];
@@ -529,15 +517,12 @@ export const DraggableNotificationsPanel = ({
         };
 
         // Stop recording when user stops sharing screen
-        const videoTracks = stream.getVideoTracks();
-        if (videoTracks.length > 0) {
-          videoTracks[0].addEventListener('ended', () => {
-            if (mediaRecorder.state === 'recording') {
-              mediaRecorder.stop();
-            }
-            setIsRecordingScreen(false);
-          });
-        }
+        stream.getVideoTracks()[0].addEventListener('ended', () => {
+          if (mediaRecorder.state === 'recording') {
+            mediaRecorder.stop();
+          }
+          setIsRecordingScreen(false);
+        });
 
         mediaRecorder.start();
         setIsRecordingScreen(true);
@@ -566,16 +551,16 @@ export const DraggableNotificationsPanel = ({
   };
   
   const removeUploadedFile = (index: number) => {
-    const fileToRemove = uploadedFiles[index];
-    // Clean up blob URLs to prevent memory leaks
-    if (fileToRemove.previewUrl && fileToRemove.previewUrl.startsWith('blob:')) {
-      URL.revokeObjectURL(fileToRemove.previewUrl);
-    }
-    // If removing audio/video placeholder, update the respective state
-    // Drawing removed from popup
-    if (fileToRemove.type === 'audio') setIsRecordingAudio(false);
-    if (fileToRemove.type === 'video') setIsRecordingScreen(false);
-    setUploadedFiles(prev => prev.filter((_, i) => i !== index));
+      const fileToRemove = uploadedFiles[index];
+      // Clean up blob URLs to prevent memory leaks
+      if (fileToRemove.previewUrl && fileToRemove.previewUrl.startsWith('blob:')) {
+        URL.revokeObjectURL(fileToRemove.previewUrl);
+      }
+      // If removing audio/video placeholder, update the respective state
+      // Drawing removed from popup
+      if (fileToRemove.type === 'audio') setIsRecordingAudio(false);
+      if (fileToRemove.type === 'video') setIsRecordingScreen(false);
+      setUploadedFiles(prev => prev.filter((_, i) => i !== index));
   };
 
   // --- Save Tag Logic ---
@@ -611,7 +596,7 @@ export const DraggableNotificationsPanel = ({
       setUploadProgress(60);
 
       // 2. Create tag data
-      const tagData: Omit<TagData, 'id' | 'timestamp'> = {
+      const tagData: CreateTagPayload = {
         creatorId: currentUserId,
         comment: tagComment,
         taggedStaffIds: selectedStaff.map(s => s.id),
@@ -621,14 +606,22 @@ export const DraggableNotificationsPanel = ({
         coords: tagPopupCoords!,
         drawingData: drawingPreviewUrl || undefined,
         conversationId: activeConversationId || undefined,
-        replyToId: replyToNotificationId || undefined
+        replyToId: replyToNotificationId || undefined,
+        requiresApproval: requiresApproval
       };
 
       setUploadProgress(80);
 
       // 3. Save tag to database
-      const savedTag = await createTag(tagData);
+      const tagResponse = await createTag(tagData);
       setUploadProgress(100);
+
+      // Check if tag creation was successful
+      if (tagResponse.error) {
+        throw new Error(tagResponse.error.message);
+      }
+
+      const savedTag = tagResponse.data!;
 
       // 4. If this is a reply, use the reply function from context
       if (isReplyMode && replyToNotificationId) {
@@ -663,80 +656,26 @@ export const DraggableNotificationsPanel = ({
     }
   };
 
-  // Test function to force open tag popup
-  const testTagPopup = () => {
-    setTagPopupCoords({ x: 200, y: 200 });
-    setIsTagPopupOpen(true);
-  };
-
   // --- Event Listener for Placing Tag (useEffect) ---
   useEffect(() => {
-    
     const listener = (event: MouseEvent) => {
-      
-      // Don't interfere with drawing mode
-      if (isDrawingMode) {
-        return;
+      if (isMountedRef.current) {
+        handlePlaceNewTag(event);
       }
-
-      if (!tagDropModeActive) {
-        return;
-      }
-
-      if (isDraggingBubble) {
-        return;
-      }
-
-      const target = event.target as HTMLElement;
-      
-      // Enhanced check - avoid all UI elements and drawing controls
-      if (target.closest('.notifications-panel') || 
-          target.closest('.tag-popup-content') ||
-          target.closest('#page-drawing-overlay') ||
-          target.closest('#page-drawing-canvas') ||
-          target.closest('.drawing-controls') ||
-          target.closest('button') ||
-          target.closest('[role="button"]')) {
-        return;
-      }
-
-      // Prevent default behavior for this click
-      event.preventDefault();
-      event.stopPropagation();
-
-
-      // Calculate popup position with bounds check
-      const popupWidth = 320;
-      const popupHeight = 380;
-      let x = event.clientX;
-      let y = event.clientY;
-      
-      if (x + popupWidth > window.innerWidth) {
-        x = window.innerWidth - popupWidth - 10;
-      }
-      if (y + popupHeight > window.innerHeight) {
-        y = window.innerHeight - popupHeight - 10;
-      }
-      if (x < 10) x = 10;
-      if (y < 10) y = 10;
-
-      // Set popup position and open
-      setTagPopupCoords({ x, y });
-      setIsTagPopupOpen(true);
     };
 
-    // Only add tag drop listeners if not in drawing mode
-    if (tagDropModeActive && !isDrawingMode) {
-      // Try both capture and bubble phases
-      document.addEventListener('click', listener, { capture: true });
-      document.addEventListener('click', listener, { capture: false });
+    if (tagDropModeActive) {
+      // Use capture phase to intercept clicks before they reach other handlers
+      document.addEventListener('click', listener, { capture: true, passive: false });
     }
     
     return () => {
       document.removeEventListener('click', listener, { capture: true });
-      document.removeEventListener('click', listener, { capture: false });
+      if (tagDropModeActive) {
+        document.body.style.cursor = '';
+      }
     };
-  }, [tagDropModeActive, isDraggingBubble, isDrawingMode]);
+  }, [tagDropModeActive, handlePlaceNewTag]);
   
   // Effect to set mounted state and cleanup drawing events
   useEffect(() => {
@@ -755,7 +694,10 @@ export const DraggableNotificationsPanel = ({
         }
       });
     };
-  }, [tagDropModeActive, uploadedFiles]);
+  }, [tagDropModeActive, uploadedFiles]); 
+
+  // Ref to track if component is mounted (for cleanup)
+  const isMountedRef = useRef(true);
   
   const toggleFullScreenDrawingMode = (active: boolean) => {
     // Instead of opening a separate canvas, enable drawing directly on the page
@@ -764,23 +706,9 @@ export const DraggableNotificationsPanel = ({
     
     // Enable/disable page drawing mode
     if (active) {
-      // Override cursor for drawing mode only if not over paint menu
-      if (!isMouseOverPaintMenu) {
-        document.body.style.cursor = 'crosshair';
-      }
       enablePageDrawing();
-      // Disable tag drop mode temporarily when drawing
-      if (tagDropModeActive) {
-        toast.info('Tag Drop Mode temporarily disabled while drawing');
-      }
     } else {
-      // Restore cursor based on tag drop mode state
-      document.body.style.cursor = tagDropModeActive ? 'crosshair' : '';
       disablePageDrawing();
-      // Re-enable tag drop mode notification if it was active
-      if (tagDropModeActive) {
-        toast.info('Tag Drop Mode re-enabled');
-      }
     }
   };
 
@@ -812,7 +740,6 @@ export const DraggableNotificationsPanel = ({
       width: 100%;
       height: 100%;
       pointer-events: auto;
-      cursor: crosshair;
     `;
     
     // Scale canvas for high DPI displays
@@ -896,19 +823,18 @@ export const DraggableNotificationsPanel = ({
       ctx.beginPath();
       
       switch (selectedShape) {
-        case 'circle': {
+        case 'circle':
           const radius = Math.sqrt(Math.pow(end.x - start.x, 2) + Math.pow(end.y - start.y, 2));
           ctx.arc(start.x, start.y, radius, 0, 2 * Math.PI);
           ctx.stroke();
           break;
-        }
           
         case 'rectangle':
           ctx.rect(start.x, start.y, end.x - start.x, end.y - start.y);
           ctx.stroke();
           break;
           
-        case 'arrow': {
+        case 'arrow':
           const headLength = 20;
           const angle = Math.atan2(end.y - start.y, end.x - start.x);
           
@@ -922,7 +848,6 @@ export const DraggableNotificationsPanel = ({
           ctx.lineTo(end.x - headLength * Math.cos(angle + Math.PI / 6), end.y - headLength * Math.sin(angle + Math.PI / 6));
           ctx.stroke();
           break;
-        }
           
         case 'highlight':
         case 'pencil':
@@ -933,11 +858,6 @@ export const DraggableNotificationsPanel = ({
     };
 
     const startDrawing = (e: MouseEvent | TouchEvent) => {
-      // Don't start drawing if mouse is over paint menu
-      if (isMouseOverPaintMenu) {
-        return;
-      }
-      
       e.preventDefault();
       isDrawing = true;
       const pos = getEventPos(e);
@@ -956,7 +876,7 @@ export const DraggableNotificationsPanel = ({
     };
     
     const draw = (e: MouseEvent | TouchEvent) => {
-      if (!isDrawing || !startPoint || isMouseOverPaintMenu) return;
+      if (!isDrawing || !startPoint) return;
       e.preventDefault();
       
       const pos = getEventPos(e);
@@ -1016,7 +936,8 @@ export const DraggableNotificationsPanel = ({
     canvas.addEventListener('touchstart', (e) => e.preventDefault(), { passive: false });
     canvas.addEventListener('touchmove', (e) => e.preventDefault(), { passive: false });
     
-    // Event listeners are attached directly to canvas for cleanup
+    // Store event listeners for cleanup
+    (canvas as any)._drawingListeners = { startDrawing, draw, stopDrawing };
   };
 
   const handleDrawingStateChange = <K extends keyof DrawingState>(key: K, value: DrawingState[K]) => {
@@ -1027,36 +948,23 @@ export const DraggableNotificationsPanel = ({
     setDrawingPreviewUrl(dataUrl);
     
     // Convert data URL to file and add to uploaded files
-    try {
-      if (!dataUrl || !dataUrl.includes(',')) {
-        throw new Error('Invalid data URL format');
-      }
-      const parts = dataUrl.split(',');
-      if (parts.length < 2) {
-        throw new Error('Malformed data URL');
-      }
-      const byteString = atob(parts[1]);
-      const mimeString = dataUrl.split(',')[0].split(':')[1].split(';')[0];
-      const ab = new ArrayBuffer(byteString.length);
-      const ia = new Uint8Array(ab);
-      for (let i = 0; i < byteString.length; i++) {
-        ia[i] = byteString.charCodeAt(i);
-      }
-      const blob = new Blob([ab], { type: mimeString });
-      const file = new File([blob], `drawing-${Date.now()}.png`, { type: 'image/png' });
-      
-      const newUploadedFile: UploadedFile = {
-        file,
-        previewUrl: dataUrl,
-        type: 'drawing'
-      };
-      
-      setUploadedFiles(prev => [...prev, newUploadedFile]);
-    } catch (error) {
-      console.error('Failed to process drawing data:', error);
-      toast.error('Failed to save drawing. Please try again.');
-      return;
+    const byteString = atob(dataUrl.split(',')[1]);
+    const mimeString = dataUrl.split(',')[0].split(':')[1].split(';')[0];
+    const ab = new ArrayBuffer(byteString.length);
+    const ia = new Uint8Array(ab);
+    for (let i = 0; i < byteString.length; i++) {
+      ia[i] = byteString.charCodeAt(i);
     }
+    const blob = new Blob([ab], { type: mimeString });
+    const file = new File([blob], `drawing-${Date.now()}.png`, { type: 'image/png' });
+    
+    const newUploadedFile: UploadedFile = {
+      file,
+      previewUrl: dataUrl,
+      type: 'drawing'
+    };
+    
+    setUploadedFiles(prev => [...prev, newUploadedFile]);
   };
 
   const handleSaveDrawing = () => {
@@ -1152,6 +1060,7 @@ export const DraggableNotificationsPanel = ({
 
 
 
+
   // Defensive: On mouseup anywhere, always stop dragging
   useEffect(() => {
     const stopDrag = () => setIsDraggingPopup(false);
@@ -1195,572 +1104,415 @@ export const DraggableNotificationsPanel = ({
 
       {/* --- REDESIGNED TAG DROP POPUP --- */}
       {isTagPopupOpen && tagPopupCoords && (
-        <div
-          ref={activeTagPopupElement}
-          className="tag-popup-content fixed bg-white border border-gray-300 rounded-xl shadow-2xl z-[100] w-[320px] h-[380px] flex flex-col overflow-hidden"
-          style={{ 
-            left: `${tagPopupCoords.x}px`, 
-            top: `${tagPopupCoords.y}px`,
-            cursor: isDraggingPopup ? 'move' : 'default',
-            pointerEvents: 'auto',
-            zIndex: 999999
-          }}
-        >
-          {/* Minimal Drag Handle */}
-          <div 
-            className="popup-drag-handle flex justify-end items-center p-2 cursor-move flex-shrink-0 border-b border-gray-200"
-            onMouseDown={handlePopupDragStart}
-            style={{ height: '35px' }}
+          <div
+              ref={activeTagPopupElement}
+              className="tag-popup-content fixed bg-white border border-gray-300 rounded-xl shadow-2xl z-[100] w-[320px] h-[380px] flex flex-col overflow-hidden"
+              style={{ 
+                left: `${tagPopupCoords.x}px`, 
+                top: `${tagPopupCoords.y}px`,
+                cursor: isDraggingPopup ? 'move' : 'default',
+                pointerEvents: 'auto',
+                zIndex: 999999
+              }}
           >
-            <Button variant="ghost" size="icon" className="h-5 w-5 text-gray-500 hover:bg-gray-100 rounded-full" onClick={closeTagPopup}>
-              <X className="h-3 w-3" />
-            </Button>
-          </div>
+              {/* Minimal Drag Handle */}
+              <div 
+                className="popup-drag-handle flex justify-end items-center p-2 cursor-move flex-shrink-0 border-b border-gray-200"
+                onMouseDown={handlePopupDragStart}
+                style={{ height: '35px' }}
+              >
+                  <Button variant="ghost" size="icon" className="h-5 w-5 text-gray-500 hover:bg-gray-100 rounded-full" onClick={closeTagPopup}>
+                      <X className="h-3 w-3" />
+                  </Button>
+              </div>
 
-          {/* White Content Area with Centered Title */}
-          <div className="flex-1 min-h-0 overflow-hidden flex flex-col">
-            {/* Centered Title */}
-            <div className="text-center py-2 border-b border-gray-100">
-              <h3 className="text-sm font-semibold text-gray-800">{isReplyMode ? 'Reply to Tag' : 'Create Tag'}</h3>
-            </div>
-
-            {/* Scrollable Content */}
-            <div className="flex-1 overflow-y-auto p-3">
-              <div className="space-y-3">
-                {/* Conversation Context */}
-                {isReplyMode && activeConversationId && (
-                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-2">
-                    <div className="text-xs font-semibold text-blue-800 mb-1">💬 Replying to conversation</div>
-                    <div className="max-h-10 overflow-y-auto">
-                      <div className="text-xs text-blue-700 truncate">
-                        {getConversationNotifications && activeConversationId ? 
-                          getConversationNotifications(activeConversationId)?.[0]?.comment || 'Previous message' : 
-                          'Previous message'}
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* Comment Input */}
-                <div className="space-y-1">
-                  <label className="text-xs font-semibold text-gray-700">💭 Your Message</label>
-                  <textarea
-                    className="w-full p-2 text-sm border border-gray-200 rounded-lg resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder={isReplyMode ? "Reply to conversation..." : "Add your comment..."}
-                    rows={2}
-                    value={tagComment}
-                    onChange={handleCommentChange}
-                  />
+              {/* White Content Area with Centered Title */}
+              <div className="flex-1 min-h-0 overflow-hidden flex flex-col">
+                {/* Centered Title */}
+                <div className="text-center py-2 border-b border-gray-100">
+                  <h3 className="text-sm font-semibold text-gray-800">{isReplyMode ? 'Reply to Tag' : 'Create Tag'}</h3>
                 </div>
 
-                {/* Staff Selection */}
-                <div className="space-y-1">
-                  <label className="text-xs font-semibold text-gray-700">👥 Notify Staff <span className="text-red-500">*</span></label>
-                  <div className="border border-gray-200 rounded-lg p-2">
-                    <div className="max-h-16 overflow-y-auto space-y-1">
-                      {availableStaff.map(staff => (
-                        <div key={staff.id} className="flex items-center justify-between p-1 hover:bg-gray-50 rounded">
-                          <span className="text-xs truncate">{staff.name}</span>
-                          <input
-                            type="checkbox"
-                            className="h-3 w-3 text-blue-600 rounded"
-                            checked={selectedStaff.some(s => s.id === staff.id)}
-                            onChange={() => handleStaffSelect(staff)}
-                          />
+                {/* Scrollable Content */}
+                <div className="flex-1 overflow-y-auto p-3">
+                  <div className="space-y-3">
+                    {/* Conversation Context */}
+                    {isReplyMode && activeConversationId && (
+                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-2">
+                            <div className="text-xs font-semibold text-blue-800 mb-1">💬 Replying to conversation</div>
+                            <div className="max-h-10 overflow-y-auto">
+                                <div className="text-xs text-blue-700 truncate">
+                                    {getConversationNotifications(activeConversationId)[0]?.comment || 'Previous message'}
+                                </div>
+                            </div>
                         </div>
-                      ))}
+                    )}
+
+                    {/* Comment Input */}
+                    <div className="space-y-1">
+                        <label className="text-xs font-semibold text-gray-700">💭 Your Message</label>
+                        <textarea
+                            className="w-full p-2 text-sm border border-gray-200 rounded-lg resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            placeholder={isReplyMode ? "Reply to conversation..." : "Add your comment..."}
+                            rows={2}
+                            value={tagComment}
+                            onChange={handleCommentChange}
+                        />
                     </div>
-                    {selectedStaff.length > 0 && (
-                      <div className="flex flex-wrap gap-1 mt-2 pt-2 border-t border-gray-200">
-                        {selectedStaff.map(s => (
-                          <span key={s.id} className="bg-blue-100 text-blue-700 text-xs px-2 py-1 rounded-full">{s.name.split(' ')[0]}</span>
-                        ))}
-                      </div>
-                    )}
-                    {staffSelectionError && (
-                      <p className="text-red-500 text-xs flex items-center gap-1 mt-1">
-                        <AlertCircle className="h-3 w-3" /> Please select at least one staff member
-                      </p>
-                    )}
+
+                    {/* Staff Selection */}
+                    <div className="space-y-1">
+                        <label className="text-xs font-semibold text-gray-700">👥 Notify Staff <span className="text-red-500">*</span></label>
+                        <div className="border border-gray-200 rounded-lg p-2">
+                            <div className="max-h-16 overflow-y-auto space-y-1">
+                                {availableStaff.map(staff => (
+                                    <div key={staff.id} className="flex items-center justify-between p-1 hover:bg-gray-50 rounded">
+                                        <span className="text-xs truncate">{staff.name}</span>
+                                        <input
+                                            type="checkbox"
+                                            className="h-3 w-3 text-blue-600 rounded"
+                                            checked={selectedStaff.some(s => s.id === staff.id)}
+                                            onChange={() => handleStaffSelect(staff)}
+                                        />
+                                    </div>
+                                ))}
+                            </div>
+                            {selectedStaff.length > 0 && (
+                               <div className="flex flex-wrap gap-1 mt-2 pt-2 border-t border-gray-200">
+                                   {selectedStaff.map(s => (
+                                      <span key={s.id} className="bg-blue-100 text-blue-700 text-xs px-2 py-1 rounded-full">{s.name.split(' ')[0]}</span>
+                                   ))}
+                               </div>
+                            )}
+                            {staffSelectionError && (
+                                 <p className="text-red-500 text-xs flex items-center gap-1 mt-1">
+                                     <AlertCircle className="h-3 w-3" /> Please select at least one staff member
+                                 </p>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Compact Red/Green Approval Switch */}
+                    <div className="flex items-center justify-between">
+                        <span className="text-xs font-medium text-gray-700">Request Approval</span>
+                        <label className="relative inline-flex items-center cursor-pointer">
+                            <input 
+                                type="checkbox" 
+                                className="sr-only peer"
+                                checked={requiresApproval}
+                                onChange={(e) => setRequiresApproval(e.target.checked)}
+                            />
+                            <div className={`w-8 h-4 rounded-full peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-300 ${
+                                requiresApproval ? 'bg-green-500' : 'bg-red-500'
+                            } peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[1px] after:left-[1px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all`}></div>
+                        </label>
+                    </div>
+
+                    {/* Media Features */}
+                    <div className="space-y-2">
+                        <label className="text-xs font-semibold text-gray-700">📎 Attachments</label>
+                        
+                        {/* File Previews */}
+                        {uploadedFiles.length > 0 && (
+                            <div className="grid grid-cols-4 gap-1 p-2 bg-gray-50 rounded-lg">
+                                {uploadedFiles.map((uploadedFile, index) => (
+                                    <div key={index} className="relative group">
+                                        {uploadedFile.type === 'image' && (
+                                           <img src={uploadedFile.previewUrl} alt="Preview" className="w-full h-8 object-cover rounded border border-gray-200" />
+                                        )}
+                                        {uploadedFile.type === 'audio' && (
+                                           <div className="w-full h-8 flex items-center justify-center bg-blue-100 rounded border border-blue-200">
+                                               <Mic className="h-3 w-3 text-blue-600"/>
+                                           </div>
+                                        )}
+                                        {uploadedFile.type === 'video' && (
+                                           <div className="w-full h-8 flex items-center justify-center bg-green-100 rounded border border-green-200">
+                                               <Video className="h-3 w-3 text-green-600"/>
+                                           </div>
+                                        )}
+                                        {uploadedFile.type === 'drawing' && (
+                                           <div className="w-full h-8 flex items-center justify-center bg-purple-100 rounded border border-purple-200">
+                                               <Palette className="h-3 w-3 text-purple-600"/>
+                                           </div>
+                                        )}
+                                        <Button
+                                            variant="destructive" size="icon"
+                                            className="absolute -top-1 -right-1 h-4 w-4 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                                            onClick={() => removeUploadedFile(index)}
+                                        >
+                                            <X className="h-2 w-2" />
+                                        </Button>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                        
+                        {/* Media Action Buttons - ALL FEATURES VISIBLE */}
+                        <div className="grid grid-cols-4 gap-1">
+                             {/* Screen Record */}
+                             <Button 
+                                 variant="outline" 
+                                 size="sm" 
+                                 className={cn(
+                                     "flex flex-col items-center gap-1 h-12 border-2 transition-all hover:scale-105 text-xs",
+                                     isRecordingScreen ? 'bg-red-50 text-red-700 border-red-300' : 'hover:bg-gray-50'
+                                 )} 
+                                 onClick={handleToggleScreenRecord}
+                             >
+                                 <Video className="h-4 w-4" />
+                                 <span className="text-[10px] font-medium">{isRecordingScreen ? 'Stop' : 'Screen'}</span>
+                             </Button>
+                             
+                             {/* Image Upload */}
+                             <Button 
+                                 variant="outline" 
+                                 size="sm" 
+                                 className="flex flex-col items-center gap-1 h-12 border-2 transition-all hover:scale-105 hover:bg-blue-50 text-xs"
+                                 onClick={() => document.getElementById('tag-image-upload')?.click()}
+                             >
+                                 <Upload className="h-4 w-4 text-blue-600" />
+                                 <span className="text-[10px] font-medium">Image</span>
+                                 <input type="file" id="tag-image-upload" accept="image/*" className="hidden" onChange={handleImageUpload}/>
+                             </Button>
+                             
+                             {/* Audio Record - Hold to Record */}
+                             <Button 
+                                 variant="outline" 
+                                 size="sm" 
+                                 className={cn(
+                                     "flex flex-col items-center gap-1 h-12 border-2 transition-all hover:scale-105 select-none text-xs",
+                                     isRecordingAudio ? 'bg-red-50 text-red-700 border-red-300 shadow-lg' : 'hover:bg-green-50'
+                                 )} 
+                                 onMouseDown={handleAudioRecordStart}
+                                 onMouseUp={handleAudioRecordStop}
+                                 onMouseLeave={handleAudioRecordStop}
+                                 onTouchStart={handleAudioRecordStart}
+                                 onTouchEnd={handleAudioRecordStop}
+                                 onTouchCancel={handleAudioRecordStop}
+                             >
+                                 <Mic className={cn("h-4 w-4 transition-all", isRecordingAudio && "animate-pulse")} />
+                                 <span className="text-[10px] font-medium">{isRecordingAudio ? 'Recording...' : 'Hold Audio'}</span>
+                             </Button>
+                             
+                             {/* Paint Feature */}
+                             <Button 
+                                 variant="outline" 
+                                 size="sm" 
+                                 className="flex flex-col items-center gap-1 h-12 border-2 transition-all hover:scale-105 hover:bg-purple-50 text-xs"
+                                 onClick={() => {
+                                     toggleFullScreenDrawingMode(true);
+                                     closeTagPopup();
+                                 }}
+                             >
+                                 <Palette className="h-4 w-4 text-purple-600" />
+                                 <span className="text-[10px] font-medium">Paint</span>
+                             </Button>
+                        </div>
+                    </div>
+
+                    {/* Bottom padding for scroll */}
+                    <div className="h-2"></div>
                   </div>
                 </div>
+              </div>
 
-                {/* Compact Red/Green Approval Switch */}
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-medium text-gray-700">Request Approval</span>
-                  <label className="relative inline-flex items-center cursor-pointer">
-                    <input 
-                      type="checkbox" 
-                      className="sr-only peer"
-                      checked={requiresApproval}
-                      onChange={(e) => setRequiresApproval(e.target.checked)}
-                    />
-                    <div className={`w-8 h-4 rounded-full peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-300 ${
-                      requiresApproval ? 'bg-green-500' : 'bg-red-500'
-                    } peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[1px] after:left-[1px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all`}></div>
-                  </label>
-                </div>
-
-                {/* Media Features */}
-                <div className="space-y-2">
-                  <label className="text-xs font-semibold text-gray-700">📎 Attachments</label>
-                  
-                  {/* File Previews */}
-                  {uploadedFiles.length > 0 && (
-                    <div className="grid grid-cols-4 gap-1 p-2 bg-gray-50 rounded-lg">
-                      {uploadedFiles.map((uploadedFile, index) => (
-                        <div key={index} className="relative group">
-                          {uploadedFile.type === 'image' && (
-                            <img src={uploadedFile.previewUrl} alt="Preview" className="w-full h-8 object-cover rounded border border-gray-200" />
-                          )}
-                          {uploadedFile.type === 'audio' && (
-                            <div className="w-full h-8 flex items-center justify-center bg-blue-100 rounded border border-blue-200">
-                              <Mic className="h-3 w-3 text-blue-600"/>
-                            </div>
-                          )}
-                          {uploadedFile.type === 'video' && (
-                            <div className="w-full h-8 flex items-center justify-center bg-green-100 rounded border border-green-200">
-                              <Video className="h-3 w-3 text-green-600"/>
-                            </div>
-                          )}
-                          {uploadedFile.type === 'drawing' && (
-                            <div className="w-full h-8 flex items-center justify-center bg-purple-100 rounded border border-purple-200">
-                              <Palette className="h-3 w-3 text-purple-600"/>
-                            </div>
-                          )}
-                          <Button
-                            variant="destructive" size="icon"
-                            className="absolute -top-1 -right-1 h-4 w-4 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-                            onClick={() => removeUploadedFile(index)}
-                          >
-                            <X className="h-2 w-2" />
-                          </Button>
-                        </div>
-                      ))}
-                    </div>
+              {/* Footer */}
+              <div 
+                className="bg-white p-2 flex gap-2 border-t border-gray-200 flex-shrink-0"
+                style={{ height: '45px' }}
+              >
+                  {isUploading && (
+                      <div className="flex items-center gap-2 text-sm text-gray-600 flex-1">
+                          <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
+                              <div 
+                                  className="h-full bg-gradient-to-r from-blue-500 to-green-500 transition-all duration-300"
+                                  style={{ width: `${uploadProgress}%` }}
+                              />
+                          </div>
+                          <span className="text-xs font-medium">{uploadProgress}%</span>
+                      </div>
                   )}
-                  
-                  {/* Media Action Buttons - ALL FEATURES VISIBLE */}
-                  <div className="grid grid-cols-4 gap-1">
-                    {/* Screen Record */}
-                    <Button 
+                  <Button 
                       variant="outline" 
-                      size="sm" 
-                      className={cn(
-                        "flex flex-col items-center gap-1 h-12 border-2 transition-all hover:scale-105 text-xs",
-                        isRecordingScreen ? 'bg-red-50 text-red-700 border-red-300' : 'hover:bg-gray-50'
-                      )} 
-                      onClick={handleToggleScreenRecord}
-                    >
-                      <Video className="h-4 w-4" />
-                      <span className="text-[10px] font-medium">{isRecordingScreen ? 'Stop' : 'Screen'}</span>
-                    </Button>
-                    
-                    {/* Image Upload */}
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      className="flex flex-col items-center gap-1 h-12 border-2 transition-all hover:scale-105 hover:bg-blue-50 text-xs"
-                      onClick={() => document.getElementById('tag-image-upload')?.click()}
-                    >
-                      <Upload className="h-4 w-4 text-blue-600" />
-                      <span className="text-[10px] font-medium">Image</span>
-                      <input type="file" id="tag-image-upload" accept="image/*" className="hidden" onChange={handleImageUpload}/>
-                    </Button>
-                    
-                    {/* Audio Record - Hold to Record */}
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      className={cn(
-                        "flex flex-col items-center gap-1 h-12 border-2 transition-all hover:scale-105 select-none text-xs",
-                        isRecordingAudio ? 'bg-red-50 text-red-700 border-red-300 shadow-lg' : 'hover:bg-green-50'
-                      )} 
-                      onMouseDown={handleAudioRecordStart}
-                      onMouseUp={handleAudioRecordStop}
-                      onMouseLeave={handleAudioRecordStop}
-                      onTouchStart={handleAudioRecordStart}
-                      onTouchEnd={handleAudioRecordStop}
-                      onTouchCancel={handleAudioRecordStop}
-                    >
-                      <Mic className={cn("h-4 w-4 transition-all", isRecordingAudio && "animate-pulse")} />
-                      <span className="text-[10px] font-medium">{isRecordingAudio ? 'Recording...' : 'Hold Audio'}</span>
-                    </Button>
-                    
-                    {/* Paint Feature */}
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      className="flex flex-col items-center gap-1 h-12 border-2 transition-all hover:scale-105 hover:bg-purple-50 text-xs"
-                      onClick={() => {
-                        toggleFullScreenDrawingMode(true);
-                        closeTagPopup();
-                      }}
-                    >
-                      <Palette className="h-4 w-4 text-purple-600" />
-                      <span className="text-[10px] font-medium">Paint</span>
-                    </Button>
-                  </div>
-                </div>
-
-                {/* Bottom padding for scroll */}
-                <div className="h-2"></div>
+                      className="flex-1 h-8 text-gray-700 border border-gray-300 hover:bg-gray-50 font-medium text-sm"
+                      onClick={closeTagPopup}
+                      disabled={isUploading}
+                  >
+                      Cancel
+                  </Button>
+                  <Button 
+                      className="flex-1 h-8 bg-blue-600 hover:bg-blue-700 text-white font-semibold transition-all text-sm"
+                      onClick={handleSaveTag}
+                      disabled={isUploading || selectedStaff.length === 0}
+                  >
+                      <Save className="h-3 w-3 mr-1" /> 
+                      {isUploading ? 'Saving...' : (isReplyMode ? 'Reply' : 'Send Tag')}
+                  </Button>
               </div>
-            </div>
           </div>
-
-          {/* Footer */}
-          <div 
-            className="bg-white p-2 flex gap-2 border-t border-gray-200 flex-shrink-0"
-            style={{ height: '45px' }}
-          >
-            {isUploading && (
-              <div className="flex items-center gap-2 text-sm text-gray-600 flex-1">
-                <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
-                  <div 
-                    className="h-full bg-gradient-to-r from-blue-500 to-green-500 transition-all duration-300"
-                    style={{ width: `${uploadProgress}%` }}
-                  />
-                </div>
-                <span className="text-xs font-medium">{uploadProgress}%</span>
-              </div>
-            )}
-            <Button 
-              variant="outline" 
-              className="flex-1 h-8 text-gray-700 border border-gray-300 hover:bg-gray-50 font-medium text-sm"
-              onClick={closeTagPopup}
-              disabled={isUploading}
-            >
-              Cancel
-            </Button>
-            <Button 
-              className="flex-1 h-8 bg-blue-600 hover:bg-blue-700 text-white font-semibold transition-all text-sm"
-              onClick={handleSaveTag}
-              disabled={isUploading || selectedStaff.length === 0}
-            >
-              <Save className="h-3 w-3 mr-1" /> 
-              {isUploading ? 'Saving...' : (isReplyMode ? 'Reply' : 'Send Tag')}
-            </Button>
-          </div>
-        </div>
       )}
 
-      {/* Compact Elegant Paint Menu */}
+      {/* Enhanced Page Drawing Controls */}
       {isDrawingMode && (
-        <>
-          {/* Invisible drawing blocker overlay for paint menu area */}
-          <div 
-            className="fixed top-0 left-1/2 transform -translate-x-1/2 z-[9998]"
-            style={{ 
-              zIndex: 9998,
-              width: '340px',
-              height: '200px',
-              pointerEvents: 'auto',
-              backgroundColor: 'transparent'
-            }}
-            onMouseEnter={() => setIsMouseOverPaintMenu(true)}
-            onMouseLeave={() => setIsMouseOverPaintMenu(false)}
-            onMouseDown={(e) => { e.stopPropagation(); e.preventDefault(); }}
-            onMouseMove={(e) => { e.stopPropagation(); e.preventDefault(); }}
-            onMouseUp={(e) => { e.stopPropagation(); e.preventDefault(); }}
-            onClick={(e) => { e.stopPropagation(); e.preventDefault(); }}
-            onTouchStart={(e) => { e.stopPropagation(); e.preventDefault(); }}
-            onTouchMove={(e) => { e.stopPropagation(); e.preventDefault(); }}
-            onTouchEnd={(e) => { e.stopPropagation(); e.preventDefault(); }}
-            onPointerDown={(e) => { e.stopPropagation(); e.preventDefault(); }}
-            onPointerMove={(e) => { e.stopPropagation(); e.preventDefault(); }}
-            onPointerUp={(e) => { e.stopPropagation(); e.preventDefault(); }}
-          />
-          
-          <div 
-            className="drawing-controls fixed top-4 left-1/2 transform -translate-x-1/2 z-[9999] bg-gradient-to-r from-white to-gray-50 rounded-2xl shadow-2xl border border-gray-200 p-3 pointer-events-auto"
-            style={{ 
-              zIndex: 10000, 
-              cursor: 'default', 
-              minWidth: '240px', 
-              maxWidth: '320px',
-              pointerEvents: 'auto' 
-            }}
-            onMouseEnter={() => {
-              setIsMouseOverPaintMenu(true);
-              // Completely disable drawing cursor and canvas interactions
-              document.body.style.cursor = 'default';
-              const canvas = document.getElementById('page-drawing-canvas') as HTMLCanvasElement;
-              const overlay = document.getElementById('page-drawing-overlay') as HTMLElement;
-              if (canvas && canvas.style) {
-                canvas.style.pointerEvents = 'none';
-                canvas.style.display = 'none';
-                canvas.style.visibility = 'hidden';
-                canvas.style.zIndex = '-1';
-              }
-              if (overlay && overlay.style) {
-                overlay.style.pointerEvents = 'none';
-                overlay.style.display = 'none';
-                overlay.style.visibility = 'hidden';
-                overlay.style.zIndex = '-1';
-              }
-            }}
-            onMouseLeave={() => {
-              setIsMouseOverPaintMenu(false);
-              // Re-enable drawing cursor and canvas interactions
-              if (isDrawingMode && !isMouseOverPaintMenu) {
-                document.body.style.cursor = 'crosshair';
-                const canvas = document.getElementById('page-drawing-canvas') as HTMLCanvasElement;
-                const overlay = document.getElementById('page-drawing-overlay') as HTMLElement;
-                if (canvas) {
-                  canvas.style.pointerEvents = 'auto';
-                  canvas.style.display = 'block';
-                  canvas.style.visibility = 'visible';
-                  canvas.style.zIndex = '9998';
-                }
-                if (overlay) {
-                  overlay.style.pointerEvents = 'auto';
-                  overlay.style.display = 'block';
-                  overlay.style.visibility = 'visible';
-                  overlay.style.zIndex = '9998';
-                }
-              }
-            }}
-            onMouseMove={(e) => {
-              // Force cursor to stay normal and prevent any drawing
-              e.currentTarget.style.cursor = 'default';
-              document.body.style.cursor = 'default';
-              e.stopPropagation();
-              e.preventDefault();
-            }}
-            onClick={(e) => {
-              // Completely prevent any click events from propagating
-              e.stopPropagation();
-              e.preventDefault();
-            }}
-            onMouseDown={(e) => {
-              // Prevent mousedown events that could trigger drawing
-              e.stopPropagation();
-              e.preventDefault();
-            }}
-            onMouseUp={(e) => {
-              // Prevent mouseup events
-              e.stopPropagation();
-              e.preventDefault();
-            }}
-            onTouchStart={(e) => {
-              // Prevent touch events on mobile
-              e.stopPropagation();
-              e.preventDefault();
-            }}
-            onTouchMove={(e) => {
-              // Prevent touch move events on mobile
-              e.stopPropagation();
-              e.preventDefault();
-            }}
-            onTouchEnd={(e) => {
-              // Prevent touch end events on mobile
-              e.stopPropagation();
-              e.preventDefault();
-            }}
-            onPointerDown={(e) => {
-              // Prevent pointer events
-              e.stopPropagation();
-              e.preventDefault();
-            }}
-            onPointerMove={(e) => {
-              // Prevent pointer move events
-              e.stopPropagation();
-              e.preventDefault();
-            }}
-            onPointerUp={(e) => {
-              // Prevent pointer up events
-              e.stopPropagation();
-              e.preventDefault();
-            }}
-            onDragStart={(e) => {
-              // Prevent drag events
-              e.stopPropagation();
-              e.preventDefault();
-            }}
-            onDrag={(e) => {
-              // Prevent drag events
-              e.stopPropagation();
-              e.preventDefault();
-            }}
-            onDragEnd={(e) => {
-              // Prevent drag end events
-              e.stopPropagation();
-              e.preventDefault();
-            }}
-          >
-            {/* Header */}
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2">
+        <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-[9999] bg-white rounded-xl shadow-2xl border border-gray-200 p-4 min-w-[600px]">
+          <div className="space-y-4">
+            
+            {/* Header with close button */}
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-bold text-gray-800 flex items-center gap-2">
                 <Palette className="h-4 w-4 text-purple-600" />
-                <span className="text-xs font-semibold text-gray-800">Paint Tools</span>
-              </div>
+                Drawing Tools - Click and drag on page
+              </h3>
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => toggleFullScreenDrawingMode(false)}
                 className="h-6 w-6 p-0 hover:bg-gray-100"
               >
-                <X className="h-3 w-3" />
+                <X className="h-4 w-4" />
               </Button>
             </div>
 
-            {/* Tools Row */}
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-medium text-gray-600">Tools:</span>
-              <div className="flex items-center gap-1">
-                {[
-                  { tool: 'highlight', icon: Highlighter, label: 'Highlight' },
-                  { tool: 'pencil', icon: Edit3, label: 'Draw' },
-                  { tool: 'circle', icon: Circle, label: 'Circle' },
-                  { tool: 'rectangle', icon: Square, label: 'Rectangle' },
-                  { tool: 'arrow', icon: ArrowUp, label: 'Arrow' }
-                ].map(({ tool, icon: Icon, label }) => (
-                  <button
-                    key={tool}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      e.preventDefault();
-                      setSelectedShape(tool as 'pencil' | 'circle' | 'rectangle' | 'arrow' | 'highlight');
-                      // Also update the drawing state tool
-                      handleDrawingStateChange('tool', tool);
-                    }}
-                    onMouseDown={(e) => {
-                      e.stopPropagation();
-                      e.preventDefault();
-                    }}
-                    className={`p-1.5 rounded-lg border transition-all hover:scale-105 ${
-                      selectedShape === tool 
-                        ? 'bg-purple-100 border-purple-500 text-purple-700' 
-                        : 'bg-gray-50 border-gray-200 text-gray-600 hover:bg-gray-100'
-                    }`}
-                    title={label}
-                  >
-                    <Icon className="h-3 w-3" />
-                  </button>
-                ))}
+            <div className="flex items-center gap-6">
+              {/* Shape Tools */}
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-medium text-gray-600">Tools:</span>
+                <div className="flex items-center gap-1">
+                  {[
+                    { tool: 'highlight', icon: Highlighter, label: 'Highlight' },
+                    { tool: 'pencil', icon: Edit3, label: 'Draw' },
+                    { tool: 'circle', icon: Circle, label: 'Circle' },
+                    { tool: 'rectangle', icon: Square, label: 'Rectangle' },
+                    { tool: 'arrow', icon: ArrowUp, label: 'Arrow' }
+                  ].map(({ tool, icon: Icon, label }) => (
+                    <button
+                      key={tool}
+                      onClick={() => setSelectedShape(tool as any)}
+                      className={`p-2 rounded-lg border-2 transition-all hover:scale-105 ${
+                        selectedShape === tool 
+                          ? 'bg-purple-100 border-purple-500 text-purple-700' 
+                          : 'bg-gray-50 border-gray-200 text-gray-600 hover:bg-gray-100'
+                      }`}
+                      title={label}
+                    >
+                      <Icon className="h-4 w-4" />
+                    </button>
+                  ))}
+                </div>
               </div>
-            </div>
-
-            {/* Colors Row - Single Horizontal Row */}
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-medium text-gray-600">Colors:</span>
-              <div className="flex items-center gap-1">
-                {/* Essential Color Palette - 12 circles in one horizontal row */}
-                {[
-                  // Primary colors
-                  '#000000', '#FF0000', '#00FF00', '#0000FF', '#FFFF00', '#FF00FF',
-                  // Secondary colors  
-                  '#FFFFFF', '#808080', '#FFA500', '#800080', '#00FFFF', '#FFC0CB'
-                ].map((color, index) => (
-                  <div
-                    key={color}
-                    className="w-3 h-3 rounded-full border border-gray-500 transition-all hover:scale-150 hover:z-10 cursor-pointer"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      e.preventDefault();
-                      handleDrawingStateChange('color', color);
-                      handleDrawingStateChange('lineWidth', 4);
-                    }}
-                    onMouseDown={(e) => {
-                      e.stopPropagation();
-                      e.preventDefault();
-                    }}
-                    style={{ 
-                      backgroundColor: color,
-                      minWidth: '12px',
-                      minHeight: '12px',
-                      transform: drawingState.color === color ? 'scale(1.3)' : 'scale(1)',
-                      boxShadow: drawingState.color === color ? '0 0 0 1px #3b82f6' : 'none'
-                    }}
-                    title={color}
-                  />
-                ))}
-              </div>
-            </div>
-
-            {/* Size Row */}
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-xs font-medium text-gray-600">Size:</span>
-              <div className="flex items-center gap-1">
-                {[4, 8, 12, 16].map(width => (
-                  <button
-                    key={width}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      e.preventDefault();
-                      handleDrawingStateChange('lineWidth', width);
-                    }}
-                    onMouseDown={(e) => {
-                      e.stopPropagation();
-                      e.preventDefault();
-                    }}
-                    className={`w-6 h-6 rounded-lg flex items-center justify-center transition-all hover:scale-105 ${
-                      drawingState.lineWidth === width ? 'bg-purple-500 text-white' : 'bg-gray-100 hover:bg-gray-200'
-                    }`}
-                    title={`${width}px`}
-                  >
-                    <div 
-                      className="bg-current rounded-full" 
-                      style={{ width: `${Math.min(width/3, 4)}px`, height: `${Math.min(width/3, 4)}px` }}
+              
+              {/* Highlight Colors */}
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-medium text-gray-600">Highlights:</span>
+                <div className="flex items-center gap-1">
+                  {highlightColors.map(color => (
+                    <button
+                      key={color}
+                      onClick={() => {
+                        setSelectedShape('highlight');
+                        handleDrawingStateChange('color', color);
+                        handleDrawingStateChange('lineWidth', 12);
+                      }}
+                      className={`w-6 h-6 rounded-lg border-2 transition-all hover:scale-110 ${
+                        drawingState.color === color && selectedShape === 'highlight' 
+                          ? 'ring-2 ring-offset-1 ring-purple-500 scale-110' 
+                          : 'hover:scale-110'
+                      }`}
+                      style={{ backgroundColor: color, opacity: 0.7 }}
+                      title={`Highlight ${color}`}
                     />
-                  </button>
-                ))}
+                  ))}
+                </div>
               </div>
-            </div>
-
-            {/* Actions Row */}
-            <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  e.preventDefault();
-                  const canvas = document.getElementById('page-drawing-canvas') as HTMLCanvasElement;
-                  if (canvas) {
-                    const ctx = canvas.getContext('2d');
-                    if (ctx) {
-                      ctx.clearRect(0, 0, canvas.width, canvas.height);
-                    }
-                  }
-                }}
-                onMouseDown={(e) => {
-                  e.stopPropagation();
-                  e.preventDefault();
-                }}
-                className="h-7 px-2 text-xs flex-1"
-              >
-                Clear
-              </Button>
-              <Button
-                variant="default"
-                size="sm"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  e.preventDefault();
-                  const canvas = document.getElementById('page-drawing-canvas') as HTMLCanvasElement;
-                  if (canvas) {
-                    const dataUrl = canvas.toDataURL('image/png');
-                    handleDrawingComplete(dataUrl);
-                    toggleFullScreenDrawingMode(false);
-                    toast.success('Drawing saved! 🎨');
-                  } else {
-                    console.error('Canvas not found');
-                    toast.error('Error: Drawing canvas not found');
-                  }
-                }}
-                onMouseDown={(e) => {
-                  e.stopPropagation();
-                  e.preventDefault();
-                }}
-                className="h-7 px-2 text-xs bg-purple-600 hover:bg-purple-700 flex-1"
-              >
-                Save
-              </Button>
+              
+              {/* Standard Colors */}
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-medium text-gray-600">Colors:</span>
+                <div className="flex items-center gap-1">
+                  {standardColors.map(color => (
+                    <button
+                      key={color}
+                      onClick={() => {
+                        handleDrawingStateChange('color', color);
+                        handleDrawingStateChange('lineWidth', selectedShape === 'highlight' ? 12 : 4);
+                      }}
+                      className={`w-6 h-6 rounded-full border-2 transition-all hover:scale-110 ${
+                        drawingState.color === color ? 'ring-2 ring-offset-1 ring-blue-500 scale-110' : 'hover:scale-110'
+                      }`}
+                      style={{ backgroundColor: color }}
+                      title={color}
+                    />
+                  ))}
+                  <input
+                    type="color"
+                    value={drawingState.color}
+                    onChange={(e) => handleDrawingStateChange('color', e.target.value)}
+                    className="w-6 h-6 rounded border border-gray-300 cursor-pointer"
+                    title="Custom Color"
+                  />
+                </div>
+                
+                {/* Brush Size */}
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-medium text-gray-600">Size:</span>
+                  <div className="flex items-center gap-1">
+                    {[4, 8, 12, 16].map(width => (
+                      <button
+                        key={width}
+                        onClick={() => handleDrawingStateChange('lineWidth', width)}
+                        className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all hover:scale-105 ${
+                          drawingState.lineWidth === width ? 'bg-purple-500 text-white' : 'bg-gray-100 hover:bg-gray-200'
+                        }`}
+                        title={`${width}px`}
+                      >
+                        <div 
+                          className="bg-current rounded-full" 
+                          style={{ width: `${Math.min(width/2, 6)}px`, height: `${Math.min(width/2, 6)}px` }}
+                        />
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                
+                {/* Actions */}
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      const canvas = document.getElementById('page-drawing-canvas') as HTMLCanvasElement;
+                      if (canvas) {
+                        const ctx = canvas.getContext('2d');
+                        if (ctx) {
+                          ctx.clearRect(0, 0, canvas.width, canvas.height);
+                        }
+                      }
+                    }}
+                    className="h-8 px-3 text-xs"
+                  >
+                    Clear
+                  </Button>
+                  <Button
+                    variant="default"
+                    size="sm"
+                    onClick={() => {
+                      const canvas = document.getElementById('page-drawing-canvas') as HTMLCanvasElement;
+                      if (canvas) {
+                        const dataUrl = canvas.toDataURL('image/png');
+                        handleDrawingComplete(dataUrl);
+                        toggleFullScreenDrawingMode(false);
+                        toast.success('Drawing saved! 🎨');
+                      }
+                    }}
+                    className="h-8 px-3 text-xs bg-purple-600 hover:bg-purple-700"
+                  >
+                    Save Drawing
+                  </Button>
+                </div>
+              </div>
             </div>
           </div>
-        </>
+        </div>
       )}
 
       {/* Notifications Panel */}
@@ -1779,16 +1531,16 @@ export const DraggableNotificationsPanel = ({
         )}
 
         {panelSize === 'minimized' ? (
-          <div className="flex flex-col h-full items-center pt-4 gap-4">
-            {/* Minimized Icons */}
-            <Button variant="ghost" size="icon" onClick={() => setPanelSize('quarter')}><Bell className="h-5 w-5" /></Button>
-            <Button variant="ghost" size="icon" onClick={() => {setActiveTab('calendar'); setPanelSize('quarter')}}><Calendar className="h-5 w-5" /></Button>
-            <Button variant="ghost" size="icon" onClick={() => {setActiveTab('comments'); setPanelSize('quarter')}}><MessageSquare className="h-5 w-5" /></Button>
-            {/* Use specific toggle for tag drop mode */}
-            <Button variant="ghost" size="icon" onClick={toggleTagDropMode} className={tagDropModeActive ? "text-blue-500" : ""} title="Tag Drop Mode">
-              <Tag className="h-5 w-5" />
-            </Button>
-          </div>
+           <div className="flex flex-col h-full items-center pt-4 gap-4">
+                {/* Minimized Icons */}
+                <Button variant="ghost" size="icon" onClick={() => setPanelSize('quarter')}><Bell className="h-5 w-5" /></Button>
+                <Button variant="ghost" size="icon" onClick={() => {setActiveTab('calendar'); setPanelSize('quarter')}}><Calendar className="h-5 w-5" /></Button>
+                <Button variant="ghost" size="icon" onClick={() => {setActiveTab('comments'); setPanelSize('quarter')}}><MessageSquare className="h-5 w-5" /></Button>
+                 {/* Use specific toggle for tag drop mode */}
+                 <Button variant="ghost" size="icon" onClick={toggleTagDropMode} className={tagDropModeActive ? "text-blue-500" : ""} title="Tag Drop Mode">
+                     <Tag className="h-5 w-5" />
+                 </Button>
+           </div>
         ) : (
           <div className="flex flex-col h-full">
             {/* Header */}
@@ -1797,26 +1549,22 @@ export const DraggableNotificationsPanel = ({
                 <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
                   <Bell className="h-4 w-4 text-white" />
                 </div>
-                <h2 className="text-lg font-semibold text-gray-800">Notifications</h2>
+                <h2 className="text-lg font-semibold text-gray-800">Collaboration Hub</h2>
               </div>
               <div className="flex space-x-1">
                 <Button variant="ghost" size="icon" onClick={togglePin} title={isPinned ? "Unpin panel" : "Pin panel"}>
-                  <Pin className={cn("h-4 w-4 text-gray-500", isPinned && "fill-current text-blue-600")} />
+                    <Pin className={cn("h-4 w-4 text-gray-500", isPinned && "fill-current text-blue-600")} />
                 </Button>
                 <Button variant="ghost" size="icon" onClick={togglePanelSize} title="Resize panel">
                   {panelSize === 'quarter' ? <Maximize2 className="h-4 w-4 text-gray-500" /> : <Minimize2 className="h-4 w-4 text-gray-500" />} 
                 </Button>
                 <Button variant="ghost" size="icon" onClick={minimizePanel} title="Minimize panel"><ArrowLeftRight className="h-4 w-4 text-gray-500" /></Button>
-                <Button variant="ghost" size="icon" onClick={onClose} title="Close panel">
-                  <div className="w-6 h-6 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
-                    <span className="text-white font-bold text-xs">DS</span>
-                  </div>
-                </Button>
+                <Button variant="ghost" size="icon" onClick={onClose} title="Close panel"><X className="h-4 w-4 text-gray-500" /></Button>
               </div>
             </div>
 
             {/* Start Tag Drop Button */}
-            <div className="p-4 space-y-2">
+            <div className="p-4">
               <Button
                 size="lg"
                 className={cn(
@@ -1829,16 +1577,6 @@ export const DraggableNotificationsPanel = ({
               >
                 <Tag className="h-5 w-5" />
                 {tagDropModeActive ? "Cancel Tag Drop" : "Start Tag Drop"}
-              </Button>
-              
-              {/* Test Button */}
-              <Button
-                size="sm"
-                variant="outline"
-                className="w-full"
-                onClick={testTagPopup}
-              >
-                Test Tag Popup
               </Button>
             </div>
 
@@ -1884,51 +1622,51 @@ export const DraggableNotificationsPanel = ({
             {/* Notification List Area */}
             <div className="flex-1 overflow-y-auto">
               {(() => {
-                type NotificationType = Notification['type']; 
+                 type NotificationType = Notification['type']; 
 
                 const getVisibleTypesForTab = (tab: ActiveTab): Array<NotificationType> => {
-                  switch (tab) {
-                    case 'team':
-                      return ['team'];
-                    case 'trades':
-                      return ['job', 'quote', 'payment']; 
-                    case 'calendar':
-                      return ['calendar'];
-                    case 'comments':
-                      return ['message', 'comment', 'tag']; 
-                    case 'account':
-                      return ['account'];
-                    case 'security':
-                      return ['security'];
-                    default:
-                      return []; 
-                  }
+                    switch (tab) {
+                        case 'team':
+                            return ['team'];
+                        case 'trades':
+                            return ['job', 'quote', 'payment']; 
+                        case 'calendar':
+                            return ['calendar'];
+                        case 'comments':
+                            return ['message', 'comment', 'tag']; 
+                        case 'account':
+                            return ['account'];
+                        case 'security':
+                            return ['security'];
+                        default:
+                            return []; 
+                    }
                 };
 
-                const filteredNotifications = (notifications || []).filter(n => {
-                  if (activeTab === 'all') return true;
-                  const visibleTypes = getVisibleTypesForTab(activeTab);
-                  return visibleTypes.includes(n.type);
+                const filteredNotifications = notifications.filter(n => {
+                    if (activeTab === 'all') return true;
+                    const visibleTypes = getVisibleTypesForTab(activeTab);
+                    return visibleTypes.includes(n.type);
                 });
 
-                if (filteredNotifications.length === 0) {
-                  const emptyMessages = {
-                    all: "No notifications",
-                    team: "No team notifications",
-                    trades: "No trade notifications",
-                    calendar: "No calendar notifications",
-                    comments: "No comments or tags",
-                    account: "No account notifications",
-                    security: "No security notifications"
-                  };
-                  
-                  return (
-                    <div className="flex flex-col items-center justify-center h-full text-center p-8 text-gray-500">
-                      <Bell className="h-12 w-12 mb-4 text-gray-300" />
-                      <p className="text-sm">{emptyMessages[activeTab]}</p>
-                    </div>
-                  );
-                }
+                 if (filteredNotifications.length === 0) {
+                     const emptyMessages = {
+                       all: "No notifications",
+                       team: "No team notifications",
+                       trades: "No trade notifications",
+                       calendar: "No calendar notifications",
+                       comments: "No comments or tags",
+                       account: "No account notifications",
+                       security: "No security notifications"
+                     };
+                     
+                     return (
+                         <div className="flex flex-col items-center justify-center h-full text-center p-8 text-gray-500">
+                             <Bell className="h-12 w-12 mb-4 text-gray-300" />
+                             <p className="text-sm">{emptyMessages[activeTab]}</p>
+                         </div>
+                     );
+                 }
 
                 return (
                   <div className="space-y-1 p-4">
@@ -1957,4 +1695,4 @@ export const DraggableNotificationsPanel = ({
       </div>
     </>
   );
-};
+}; 
