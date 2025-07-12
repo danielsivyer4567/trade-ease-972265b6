@@ -3,7 +3,7 @@ import {
   Home, 
   Users, 
   FileText, 
-  Briefcase, 
+  FileSearch, 
   Calendar, 
   Settings, 
   FileCheck,
@@ -21,7 +21,7 @@ export const Sidebar = () => {
   const navItems = [
     { path: '/', title: 'Dashboard', icon: <Home className="w-5 h-5" /> },
     { path: '/customers', title: 'Customers', icon: <Users className="w-5 h-5" /> },
-    { path: '/jobs', title: 'Jobs', icon: <Briefcase className="w-5 h-5" /> },
+    { path: '/jobs', title: 'Site Audits', icon: <FileSearch className="w-5 h-5" /> },
     { path: '/quotes', title: 'Quotes', icon: <FileText className="w-5 h-5" /> },
     { path: '/calendar', title: 'Calendar', icon: <Calendar className="w-5 h-5" /> },
     { path: '/calculators', title: 'Tricks of the Trade', icon: <FileCheck className="w-5 h-5" /> },

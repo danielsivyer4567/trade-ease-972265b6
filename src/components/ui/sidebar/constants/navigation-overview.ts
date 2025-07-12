@@ -1,4 +1,4 @@
-import { LayoutDashboard, Briefcase, MessageSquare, UserSquare2 } from 'lucide-react';
+import { LayoutDashboard, FileSearch, MessageSquare, UserSquare2 } from 'lucide-react';
 import type { NavigationItem } from '../navigation/NavigationGroup';
 
 export const overviewNavigation = {
@@ -12,9 +12,9 @@ export const overviewNavigation = {
     },
     {
       type: 'link' as const,
-      label: 'Jobs',
+      label: 'Site Audits',
       path: '/jobs',
-      icon: Briefcase,
+      icon: FileSearch,
     },
     {
       type: 'link' as const,

@@ -23,6 +23,14 @@ import {
   CheckCircle2,
   PlayCircle,
   Plus,
+  Banknote,
+  Package,
+  Truck,
+  Shield,
+  Pause,
+  Play,
+  CloudRain,
+  Sun,
 } from "lucide-react"
 import { useState } from "react"
 
@@ -52,6 +60,15 @@ interface Job {
   tags: string[]
   weatherSensitive: boolean
   requiresSpecialEquipment: boolean
+  checklist: {
+    depositReceived: boolean
+    materialsOrdered: boolean
+    materialsDelivered: boolean
+    safetyPaperworkComplete: boolean
+    onHold: boolean
+    siteReady: boolean
+    weatherAffected: boolean
+  }
 }
 
 interface Technician {
@@ -65,6 +82,7 @@ interface Technician {
   maxConcurrentJobs: number
   hourlyRate: number
   isAvailable: boolean
+  team?: 'green' | 'blue' | 'red'
 }
 
 interface ActiveJobCardsProps {
@@ -88,6 +106,39 @@ export function ActiveJobCards({
 
   const toggleJobDetails = (jobId: string) => {
     setExpandedJobs((prev) => (prev.includes(jobId) ? prev.filter((id) => id !== jobId) : [...prev, jobId]))
+  }
+
+  // Team border colors based on assignment
+  const getTeamBorderColor = (job: Job) => {
+    if (!job.assignedTo) return 'border-slate-300'
+    
+    const assignedTech = technicians.find(t => t.id === job.assignedTo)
+    if (!assignedTech || !assignedTech.team) return 'border-slate-300'
+    
+    // Team border colors: green, blue, red
+    const teamColors = {
+      'green': 'border-green-500',
+      'blue': 'border-blue-500', 
+      'red': 'border-red-500'
+    }
+    
+    return teamColors[assignedTech.team] || 'border-slate-300'
+  }
+
+  // Checklist icons with tiny symbols
+  const checklistIcons = {
+    depositReceived: { icon: Banknote, symbol: '$' },
+    materialsOrdered: { icon: Package, symbol: 'O' },
+    materialsDelivered: { icon: Truck, symbol: 'D' },
+    safetyPaperworkComplete: { icon: Shield, symbol: 'S' },
+    onHold: { icon: Pause, symbol: 'H' },
+    siteReady: { icon: Play, symbol: 'R' },
+    weatherAffected: { icon: CloudRain, symbol: 'W' }
+  }
+
+  const handleChecklistUpdate = (jobId: string, checklistItem: keyof Job['checklist'], value: boolean) => {
+    // This would be handled by your state management
+    console.log(`Job ${jobId}: ${checklistItem} = ${value}`)
   }
 
   const categoryGradients = {
@@ -195,18 +246,56 @@ export function ActiveJobCards({
         )}
       </div>
       
-      {/* Drag & Drop Instructions */}
-      <div className="mb-4 p-3 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200/50">
-        <div className="flex items-center gap-2 text-sm text-blue-700">
-          <GripVertical className="w-4 h-4" />
-          <span className="font-medium">
-            💡 Drag jobs to schedule them, click to expand details, use checkboxes for multi-select actions
-          </span>
+      {/* Instructions and Legend */}
+      <div className="mb-4 space-y-2">
+        {/* Drag & Drop Instructions */}
+        <div className="p-3 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200/50">
+          <div className="flex items-center gap-2 text-sm text-blue-700">
+            <GripVertical className="w-4 h-4" />
+            <span className="font-medium">
+              💡 Drag jobs to schedule them, click to expand details, use checkboxes for multi-select actions
+            </span>
+          </div>
+        </div>
+        
+        {/* Checklist Legend */}
+        <div className="p-2 bg-gradient-to-r from-gray-50 to-slate-50 rounded-lg border border-gray-200/50">
+          <div className="text-xs font-semibold text-gray-700 mb-1">Checklist Legend:</div>
+          <div className="grid grid-cols-4 gap-2 text-[10px] text-gray-600">
+            <div className="flex items-center gap-1">
+              <span className="font-bold text-green-600">$</span>
+              <span>Deposit</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <span className="font-bold text-blue-600">O</span>
+              <span>Ordered</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <span className="font-bold text-purple-600">D</span>
+              <span>Delivered</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <span className="font-bold text-orange-600">S</span>
+              <span>Safety</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <span className="font-bold text-red-600">H</span>
+              <span>On Hold</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <span className="font-bold text-emerald-600">R</span>
+              <span>Site Ready</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <span className="font-bold text-sky-600">W</span>
+              <span>Weather</span>
+            </div>
+          </div>
         </div>
       </div>
 
       {/* Responsive Job Cards Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4 auto-rows-max">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 2xl:grid-cols-10 gap-2 auto-rows-fr items-start">
         {jobs.map((job) => {
           const isSelected = selectedJobs.includes(job.id)
           const isExpanded = expandedJobs.includes(job.id)
@@ -230,67 +319,85 @@ export function ActiveJobCards({
               onDragEnd={(e) => {
                 e.currentTarget.style.opacity = '1';
               }}
-              className={`group transition-all duration-300 cursor-grab active:cursor-grabbing hover:cursor-pointer ${
+              className={`group transition-all duration-300 cursor-grab active:cursor-grabbing hover:cursor-pointer w-full ${
+                isExpanded ? "h-auto min-h-[200px] z-10 absolute bg-slate-200 shadow-2xl scale-110 rounded-lg" : "aspect-square h-[120px]"
+              } ${
                 isSelected ? "ring-2 ring-blue-500 shadow-lg scale-105" : "hover:shadow-xl hover:scale-102"
-              } bg-gradient-to-br ${categoryGradients[job.category]} backdrop-blur-sm border-0 ${
+              } bg-slate-200 border-2 ${getTeamBorderColor(job)} ${
                 isOverdue ? "ring-1 ring-red-400" : ""
-              } ${isExpanded ? "shadow-2xl scale-105" : ""}`}
+              }`}
               onClick={() => toggleJobDetails(job.id)}
             >
-              <CardHeader className="p-3 relative">
-                <div className="flex items-start justify-between mb-2">
-                  <div className="flex items-center gap-2 flex-1 min-w-0">
-                    <Checkbox
-                      checked={isSelected}
-                      onCheckedChange={() => onJobSelect(job.id)}
-                      onClick={(e) => e.stopPropagation()}
-                      className="flex-shrink-0"
-                    />
-                    <div className="flex items-center gap-1 flex-1 min-w-0">
-                      <div className="p-1 bg-white/80 rounded flex-shrink-0">{getCategoryIcon(job.category)}</div>
-                      <h3 className="font-bold text-gray-800 text-xs truncate">{job.type}</h3>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-1 flex-shrink-0">
-                    <GripVertical className="w-3 h-3 text-gray-400" />
-                    {isOverdue && (
-                      <Badge variant="destructive" className="text-xs px-1 py-0 text-[10px]">
-                        OVERDUE
-                      </Badge>
-                    )}
-                  </div>
+              <CardHeader className="p-2 relative overflow-hidden">
+                <div className="flex items-center justify-between mb-1">
+                  <Checkbox
+                    checked={isSelected}
+                    onCheckedChange={() => onJobSelect(job.id)}
+                    onClick={(e) => e.stopPropagation()}
+                    className="w-1 h-1 flex-shrink-0 scale-50"
+                  />
+                  <div className="p-0.5 bg-white/80 rounded flex-shrink-0">{getCategoryIcon(job.category)}</div>
+                  <GripVertical className="w-3 h-3 text-gray-400" />
                 </div>
 
-                {/* Customer */}
-                <div className="flex items-center text-xs text-gray-600 mb-2">
-                  <User className="w-3 h-3 mr-1 flex-shrink-0" />
-                  <span className="truncate">{job.customer}</span>
+                {/* Job Title */}
+                <h3 className="font-bold text-gray-800 text-[10px] leading-tight mb-1 line-clamp-2">{job.type}</h3>
+                
+                {/* Customer - Highlighted and Enlarged */}
+                <div className="text-[11px] font-bold text-blue-800 bg-yellow-100/60 px-1 py-0.5 rounded mb-1 truncate">
+                  {job.customer}
                 </div>
 
-                {/* Job Number and Size */}
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center text-xs text-gray-500">
-                    <Hash className="w-3 h-3 mr-1" />
-                    <span className="font-mono text-[10px]">{job.id}</span>
-                  </div>
-                  <div className={`flex items-center text-xs font-bold rounded-full px-1.5 py-0.5 ${sizeStyles[job.size]}`}>
-                    <Scale className="w-3 h-3 mr-1" />
-                    {job.size}
-                  </div>
+                {/* Street Address and Size */}
+                <div className="text-[8px] text-gray-700 mb-1 truncate">
+                  {job.location.address} • {job.size}
                 </div>
 
-                {/* Status and Priority */}
+                {/* Duration and Due Date */}
+                <div className="text-[8px] text-purple-600 mb-1 truncate">
+                  {job.estimatedDuration >= 1440 
+                    ? `${Math.floor(job.estimatedDuration / 1440)}d ${Math.floor((job.estimatedDuration % 1440) / 60)}h`
+                    : job.estimatedDuration >= 60 
+                      ? `${Math.floor(job.estimatedDuration / 60)}h ${job.estimatedDuration % 60}m`
+                      : `${job.estimatedDuration}min`
+                  } • {job.dueDate.toLocaleDateString()}
+                </div>
+
+                {/* Checklist */}
+                <div className="grid grid-cols-4 gap-0.5 mb-1">
+                  {Object.entries(checklistIcons).map(([key, { icon: Icon, symbol }]) => {
+                    const isChecked = job.checklist[key as keyof Job['checklist']]
+                    return (
+                      <div
+                        key={key}
+                        className="relative group"
+                        title={key.replace(/([A-Z])/g, ' $1').toLowerCase()}
+                      >
+                        <Checkbox
+                          checked={isChecked}
+                          onCheckedChange={(checked) => handleChecklistUpdate(job.id, key as keyof Job['checklist'], checked as boolean)}
+                          onClick={(e) => e.stopPropagation()}
+                          className="w-2 h-2 scale-75"
+                        />
+                        <span className="absolute -top-1 -right-1 text-[6px] font-bold text-gray-700 pointer-events-none">
+                          {symbol}
+                        </span>
+                      </div>
+                    )
+                  })}
+                </div>
+
+                {/* Status and Value */}
                 <div className="flex items-center justify-between">
-                  <Badge className={`${statusColors[job.status]} border-0 text-xs px-2 py-0.5`}>
+                  <Badge className={`${statusColors[job.status]} border-0 text-[7px] px-1 py-0`}>
                     {job.status.replace("-", " ").toUpperCase()}
                   </Badge>
-
-                  <div className="text-xs font-semibold text-green-600">${job.value}</div>
+                  <div className="text-[9px] font-semibold text-green-600">${job.value}</div>
                 </div>
 
                 {/* Expanded Details with Animation */}
                 <div className={`overflow-hidden transition-all duration-500 ease-in-out ${
-                  isExpanded ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
+                  isExpanded ? 'max-h-[300px] opacity-100' : 'max-h-0 opacity-0'
                 }`}>
                   <div className="mt-4 pt-4 border-t border-white/30 space-y-3">
                     {/* Quick Info Grid */}
