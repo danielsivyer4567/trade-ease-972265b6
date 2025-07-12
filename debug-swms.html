@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>SWMS Generator Debug</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .debug-info { background: #f0f0f0; padding: 15px; margin: 10px 0; border-radius: 5px; }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+    </style>
+</head>
+<body>
+    <h1>SWMS Generator Debug Information</h1>
+    
+    <div class="debug-info success">
+        <h3>✅ Routes Configured</h3>
+        <p><strong>Landing Page:</strong> /calculators/ai-swms-creator</p>
+        <p><strong>Generator:</strong> /calculators/ai-swms</p>
+    </div>
+    
+    <div class="debug-info success">
+        <h3>✅ Components Found</h3>
+        <p><strong>Landing:</strong> src/pages/Calculators/AISWMSCreator/index.tsx</p>
+        <p><strong>Generator:</strong> src/pages/Calculators/AISWMSCreator.tsx</p>
+    </div>
+    
+    <div class="debug-info success">
+        <h3>✅ Dependencies Installed</h3>
+        <p><strong>framer-motion:</strong> v12.23.0</p>
+        <p><strong>All UI components:</strong> Available</p>
+    </div>
+    
+    <div class="debug-info">
+        <h3>🔍 Common Issues to Check</h3>
+        <ul>
+            <li><strong>Browser Console:</strong> Press F12 and check for JavaScript errors</li>
+            <li><strong>Network Tab:</strong> Check if components are loading properly</li>
+            <li><strong>Local Storage:</strong> Ensure browser allows localStorage access</li>
+            <li><strong>File Permissions:</strong> Check if uploads are blocked</li>
+        </ul>
+    </div>
+    
+    <div class="debug-info">
+        <h3>🚀 Quick Test Steps</h3>
+        <ol>
+            <li>Navigate to: <code>http://localhost:8081/calculators/ai-swms-creator</code></li>
+            <li>Fill in business details</li>
+            <li>Select or create a job</li>
+            <li>Click "Generate SWMS" button</li>
+            <li>Navigate to the generator page</li>
+            <li>Add hazards and generate document</li>
+        </ol>
+    </div>
+    
+    <div class="debug-info">
+        <h3>🛠️ Troubleshooting Commands</h3>
+        <pre>
+# Clear browser cache and data for localhost
+# Try incognito/private mode
+# Check browser console for errors
+# Verify network requests in DevTools
+        </pre>
+    </div>
+</body>
+</html>

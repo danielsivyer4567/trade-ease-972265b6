@@ -36,7 +36,7 @@ export const DropdownMenu: React.FC<DropdownMenuProps> = ({
         <Button 
           variant="ghost" 
           size="sm" 
-          className="w-full justify-between h-8 px-2"
+          className="w-full justify-between h-8 px-2 border-b border-border"
         >
           <div className="flex items-center">
             <DropdownIcon className="h-4 w-4 text-muted-foreground" />
@@ -59,7 +59,7 @@ export const DropdownMenu: React.FC<DropdownMenuProps> = ({
               size="sm" 
               className={cn(
                 "w-full justify-start h-7 pl-8", 
-                isSubActive && "bg-white border border-foreground/10"
+                isSubActive ? "bg-white border border-foreground/10" : "border-b border-border"
               )}
             >
               <Link to={subItem.path}>

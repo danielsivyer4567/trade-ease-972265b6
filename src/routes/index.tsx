@@ -114,6 +114,7 @@ const QBCCFormsCalculator = lazy(() => import('@/pages/Calculators/QBCCFormsCalc
 const FenceCalculatorPage = lazy(() => import('@/pages/Calculators/FenceCalculatorPage'));
 const AISWMSCreator = lazy(() => import('@/pages/Calculators/AISWMSCreator'));
 const AISWMSCreatorPage = lazy(() => import('@/pages/Calculators/AISWMSCreator/index'));
+const SWMSDebugTest = lazy(() => import('@/pages/Calculators/SWMSDebugTest'));
 
 
 // Demo pages
@@ -278,6 +279,7 @@ const routeObjects: RouteObject[] = [
           { path: "/calculators/fence", element: <SuspenseWrapper><FenceCalculatorPage /></SuspenseWrapper> },
           { path: "/calculators/ai-swms-creator", element: <SuspenseWrapper><AISWMSCreatorPage /></SuspenseWrapper> },
           { path: "/calculators/ai-swms", element: <SuspenseWrapper><AISWMSCreator /></SuspenseWrapper> },
+          { path: "/calculators/swms-debug", element: <SuspenseWrapper><SWMSDebugTest /></SuspenseWrapper> },
 
           { path: "/workflow", element: <SuspenseWrapper><N8nWorkflowListPage /></SuspenseWrapper> },
           { path: "/workflow/new", element: <SuspenseWrapper><N8nWorkflowPage /></SuspenseWrapper> },

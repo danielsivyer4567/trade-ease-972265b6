@@ -25,17 +25,30 @@ const AnimatedHeaderWithCheck = () => {
 
   useEffect(() => {
     if (!ref.current) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setInView(true);
-          observer.unobserve(ref.current as Element);
-        }
-      },
-      { threshold: 0.1 }
-    );
-    observer.observe(ref.current);
-    return () => observer.disconnect();
+    
+    const currentRef = ref.current; // Store ref value to avoid stale closure
+    
+    try {
+      const observer = new IntersectionObserver(
+        ([entry]) => {
+          if (entry.isIntersecting) {
+            setInView(true);
+            observer.unobserve(entry.target);
+          }
+        },
+        { threshold: 0.1 }
+      );
+      
+      observer.observe(currentRef);
+      
+      return () => {
+        observer.disconnect();
+      };
+    } catch (error) {
+      // Fallback: immediately show animation if IntersectionObserver fails
+      console.warn('IntersectionObserver not supported, showing animation immediately:', error);
+      setInView(true);
+    }
   }, []);
 
   const words = ["AI", "SWMS", "Generator"];
@@ -264,40 +277,51 @@ const AISWMSCreatorPage = () => {
 
     console.log('File upload triggered:', fileType, file.name);
 
-    // Validate file type for logo
-    if (fileType === 'logo') {
-      if (!file.type.startsWith('image/')) {
-        toast.error("Invalid file type - Please select an image file (PNG, JPG, SVG, etc.)");
+    try {
+      // Validate file type for logo
+      if (fileType === 'logo') {
+        if (!file.type.startsWith('image/')) {
+          toast.error("Invalid file type - Please select an image file (PNG, JPG, SVG, etc.)");
+          return;
+        }
+      }
+
+      // Validate file size (2MB limit)
+      if (file.size > 2 * 1024 * 1024) {
+        toast.error("File too large - File size must be less than 2MB");
         return;
       }
-    }
 
-    // Validate file size (2MB limit)
-    if (file.size > 2 * 1024 * 1024) {
-      toast.error("File too large - File size must be less than 2MB");
-      return;
-    }
-
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      setBusinessDetails(prev => ({
-        ...prev,
-        [fileType]: {
-          name: file.name,
-          size: file.size,
-          type: file.type,
-          data: e.target.result
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          setBusinessDetails(prev => ({
+            ...prev,
+            [fileType]: {
+              name: file.name,
+              size: file.size,
+              type: file.type,
+              data: e.target?.result
+            }
+          }));
+          
+          toast.success(`File uploaded successfully - ${file.name} has been uploaded`);
+        } catch (error) {
+          console.error('Error setting business details:', error);
+          toast.error("Failed to process uploaded file");
         }
-      }));
+      };
       
-      toast.success(`File uploaded successfully - ${file.name} has been uploaded`);
-    };
-    
-    reader.onerror = () => {
-      toast.error("Upload failed - There was an error reading the file");
-    };
-    
-    reader.readAsDataURL(file);
+      reader.onerror = (error) => {
+        console.error('FileReader error:', error);
+        toast.error("Upload failed - There was an error reading the file");
+      };
+      
+      reader.readAsDataURL(file);
+    } catch (error) {
+      console.error('File upload error:', error);
+      toast.error("Upload failed - Unexpected error occurred");
+    }
   };
 
   // Handle file input button clicks
@@ -418,24 +442,43 @@ const AISWMSCreatorPage = () => {
   );
 
   const proceedToSWMSGeneration = () => {
-    // Store business details (including logo) in localStorage
-    localStorage.setItem('swms_business_details', JSON.stringify(businessDetails));
-    
-    // Navigate to the actual SWMS generation page with project details
-    const params = new URLSearchParams({
-      projectName: projectDetails.projectName,
-      jobNumber: projectDetails.jobNumber,
-      location: projectDetails.location,
-      clientName: projectDetails.clientName,
-      tradeType: projectDetails.tradeType,
-      supervisor: projectDetails.supervisor,
-      projectDate: projectDetails.projectDate,
-      estimatedDuration: projectDetails.estimatedDuration,
-      crewSize: projectDetails.crewSize,
-      description: projectDetails.description
-    });
-    
-    window.location.href = `/calculators/ai-swms?${params.toString()}`;
+    try {
+      // Validate required fields
+      if (!projectDetails.projectName?.trim()) {
+        toast.error("Project name is required");
+        return;
+      }
+      if (!projectDetails.tradeType?.trim()) {
+        toast.error("Trade type is required");
+        return;
+      }
+      
+      // Store business details (including logo) in localStorage
+      localStorage.setItem('swms_business_details', JSON.stringify(businessDetails));
+      
+      // Navigate to the actual SWMS generation page with project details
+      const params = new URLSearchParams({
+        projectName: projectDetails.projectName,
+        jobNumber: projectDetails.jobNumber,
+        location: projectDetails.location,
+        clientName: projectDetails.clientName,
+        tradeType: projectDetails.tradeType,
+        supervisor: projectDetails.supervisor,
+        projectDate: projectDetails.projectDate,
+        estimatedDuration: projectDetails.estimatedDuration,
+        crewSize: projectDetails.crewSize,
+        description: projectDetails.description
+      });
+      
+      console.log('Navigating to SWMS generator with params:', params.toString());
+      
+      // Use navigate instead of window.location.href for better SPA behavior
+      navigate(`/calculators/ai-swms?${params.toString()}`);
+      
+    } catch (error) {
+      console.error('Error proceeding to SWMS generation:', error);
+      toast.error("Failed to proceed to SWMS generation. Please try again.");
+    }
   };
 
   // Glowing Card wrapper component

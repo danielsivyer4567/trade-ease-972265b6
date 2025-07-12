@@ -11,6 +11,7 @@ import { useAuditData } from './hooks/useAuditData';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
+import JobSiteMap from '@/components/dashboard/JobSiteMap';
 
 // Interface for SiteAudit
 interface SiteAudit {
@@ -157,20 +158,32 @@ export default function SiteAudits() {
         </div>
 
         <div className="max-w-7xl mx-auto px-6 -mt-12 relative z-10">
-          {/* Audit Categories Grid - Reduced by 50% */}
+          {/* Audit Categories Grid - Enhanced with Colors */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            {auditCategories.map((category) => {
+            {auditCategories.map((category, index) => {
               const IconComponent = category.icon;
+              const backgroundColors = [
+                'bg-gradient-to-br from-red-50 via-pink-50 to-red-100',
+                'bg-gradient-to-br from-blue-50 via-indigo-50 to-blue-100', 
+                'bg-gradient-to-br from-green-50 via-emerald-50 to-green-100',
+                'bg-gradient-to-br from-purple-50 via-violet-50 to-purple-100'
+              ];
+              const borderColors = [
+                'border-red-300 hover:border-red-400',
+                'border-blue-300 hover:border-blue-400',
+                'border-green-300 hover:border-green-400', 
+                'border-purple-300 hover:border-purple-400'
+              ];
               return (
-                <Card key={category.id} className="group hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 bg-white/80 backdrop-blur-sm border-0">
-                  <CardContent className="p-3">
-                    <div className={`w-8 h-8 rounded-lg bg-gradient-to-r ${category.color} flex items-center justify-center mb-2 group-hover:scale-110 transition-transform duration-300`}>
-                      <IconComponent className="h-4 w-4 text-white" />
+                <Card key={category.id} className={`group hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 ${backgroundColors[index]} backdrop-blur-sm border-2 ${borderColors[index]} shadow-lg hover:shadow-xl`}>
+                  <CardContent className="p-4">
+                    <div className={`w-10 h-10 rounded-xl bg-gradient-to-r ${category.color} flex items-center justify-center mb-3 group-hover:scale-125 transition-all duration-300 shadow-md`}>
+                      <IconComponent className="h-5 w-5 text-white" />
                     </div>
-                    <h3 className="text-sm font-semibold text-gray-900 mb-1">{category.name}</h3>
+                    <h3 className="text-sm font-bold text-gray-800 mb-2">{category.name}</h3>
                     <div className="flex items-center justify-between">
-                      <span className="text-lg font-bold text-gray-900">{category.count}</span>
-                      <span className="text-xs text-gray-500">Active</span>
+                      <span className="text-xl font-bold text-gray-900">{category.count}</span>
+                      <span className="text-xs text-gray-600 font-medium px-2 py-1 bg-white/50 rounded-full">Active</span>
                     </div>
                   </CardContent>
                 </Card>
@@ -178,7 +191,7 @@ export default function SiteAudits() {
             })}
           </div>
           {/* Enhanced Quick Upload Section */}
-          <Card className="mb-8 bg-gradient-to-r from-white to-blue-50/50 border-0 shadow-lg">
+          <Card className="mb-8 bg-gradient-to-r from-cyan-50 via-blue-50 to-indigo-100 border-2 border-blue-300 hover:border-blue-400 shadow-xl">
             <CardContent className="p-8">
               <div className="flex flex-col lg:flex-row items-center gap-8">
                 <div className="flex-1">
@@ -236,7 +249,7 @@ export default function SiteAudits() {
           />
         )}
         
-        <div className="bg-white rounded-lg shadow-sm p-4 mb-6">
+        <div className="bg-gradient-to-r from-emerald-50 via-green-50 to-teal-100 rounded-lg shadow-lg p-4 mb-6 border-2 border-green-300 hover:border-green-400">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl font-medium">Weekly Audit Schedule</h2>
             <div className="flex items-center gap-2">
@@ -270,20 +283,29 @@ export default function SiteAudits() {
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-              {auditsByDayList.map((dayData, index) => (
-                <div key={index} className="border rounded-lg overflow-hidden">
-                  <DailyAuditList 
-                    dayData={dayData} 
-                    onAddPhoto={handleTakePhoto}
-                  />
-                </div>
-              ))}
+              {auditsByDayList.map((dayData, index) => {
+                const dayColors = [
+                  'bg-gradient-to-br from-red-50 to-rose-100 border-2 border-red-300',
+                  'bg-gradient-to-br from-blue-50 to-sky-100 border-2 border-blue-300',
+                  'bg-gradient-to-br from-green-50 to-emerald-100 border-2 border-green-300',
+                  'bg-gradient-to-br from-yellow-50 to-amber-100 border-2 border-yellow-300',
+                  'bg-gradient-to-br from-purple-50 to-violet-100 border-2 border-purple-300'
+                ];
+                return (
+                  <div key={index} className={`${dayColors[index % dayColors.length]} rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-all duration-300`}>
+                    <DailyAuditList 
+                      dayData={dayData} 
+                      onAddPhoto={handleTakePhoto}
+                    />
+                  </div>
+                );
+              })}
             </div>
           )}
         </div>
         
         <Tabs defaultValue="active" value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid grid-cols-4 max-w-lg">
+          <TabsList className="grid grid-cols-4 max-w-lg bg-gradient-to-r from-violet-100 via-purple-100 to-fuchsia-100 border-2 border-purple-300">
             <TabsTrigger value="active">Active Audits</TabsTrigger>
             <TabsTrigger value="scheduled">Scheduled</TabsTrigger>
             <TabsTrigger value="completed">Completed</TabsTrigger>
@@ -298,7 +320,7 @@ export default function SiteAudits() {
             ) : auditsList.filter(a => a.status === 'in_progress').length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {auditsList.filter(a => a.status === 'in_progress').map((audit) => (
-                  <Card key={audit.id} className="border border-border hover:shadow-md transition-shadow">
+                  <Card key={audit.id} className="hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 bg-gradient-to-br from-orange-50 via-red-50 to-pink-100 border-2 border-orange-300 hover:border-orange-400">
                     <CardContent className="p-4">
                       <div className="flex justify-between items-start">
                         <div>
@@ -335,10 +357,10 @@ export default function SiteAudits() {
                 ))}
               </div>
             ) : (
-              <div className="text-center py-10 text-muted-foreground">
-                <FileSearch className="w-12 h-12 mx-auto mb-4 opacity-30" />
-                <h3 className="text-lg font-medium mb-2">No active audits</h3>
-                <p className="mb-4">Start a new site audit to begin capturing data</p>
+              <div className="text-center py-10 text-muted-foreground bg-gradient-to-br from-blue-50 via-indigo-50 to-cyan-100 rounded-lg border-2 border-blue-300 shadow-md">
+                <FileSearch className="w-12 h-12 mx-auto mb-4 opacity-50 text-blue-600" />
+                <h3 className="text-lg font-medium mb-2 text-blue-800">No active audits</h3>
+                <p className="mb-4 text-blue-700">Start a new site audit to begin capturing data</p>
                 <Button onClick={() => {
                   if (!selectedCustomerId) {
                     toast({
@@ -357,35 +379,40 @@ export default function SiteAudits() {
           </TabsContent>
           
           <TabsContent value="scheduled" className="pt-4">
-            <div className="text-center py-10 text-muted-foreground">
-              <FileSearch className="w-12 h-12 mx-auto mb-4 opacity-30" />
-              <h3 className="text-lg font-medium mb-2">No scheduled audits</h3>
-              <p>Schedule a new site audit to get started</p>
+            <div className="text-center py-10 text-muted-foreground bg-gradient-to-br from-yellow-50 via-amber-50 to-orange-100 rounded-lg border-2 border-yellow-300 shadow-md">
+              <FileSearch className="w-12 h-12 mx-auto mb-4 opacity-50 text-yellow-600" />
+              <h3 className="text-lg font-medium mb-2 text-yellow-800">No scheduled audits</h3>
+              <p className="text-yellow-700">Schedule a new site audit to get started</p>
             </div>
           </TabsContent>
           
           <TabsContent value="completed" className="pt-4">
-            <div className="text-center py-10 text-muted-foreground">
-              <CheckSquare className="w-12 h-12 mx-auto mb-4 opacity-30" />
-              <h3 className="text-lg font-medium mb-2">No completed audits</h3>
-              <p>Complete an audit to see it here</p>
+            <div className="text-center py-10 text-muted-foreground bg-gradient-to-br from-green-50 via-emerald-50 to-teal-100 rounded-lg border-2 border-green-300 shadow-md">
+              <CheckSquare className="w-12 h-12 mx-auto mb-4 opacity-50 text-green-600" />
+              <h3 className="text-lg font-medium mb-2 text-green-800">No completed audits</h3>
+              <p className="text-green-700">Complete an audit to see it here</p>
             </div>
           </TabsContent>
           
           <TabsContent value="templates" className="pt-4">
-            <div className="text-center py-10 text-muted-foreground">
-              <Clipboard className="w-12 h-12 mx-auto mb-4 opacity-30" />
-              <h3 className="text-lg font-medium mb-2">No audit templates</h3>
-              <p>Create a template to streamline your audit process</p>
+            <div className="text-center py-10 text-muted-foreground bg-gradient-to-br from-purple-50 via-violet-50 to-indigo-100 rounded-lg border-2 border-purple-300 shadow-md">
+              <Clipboard className="w-12 h-12 mx-auto mb-4 opacity-50 text-purple-600" />
+              <h3 className="text-lg font-medium mb-2 text-purple-800">No audit templates</h3>
+              <p className="text-purple-700">Create a template to streamline your audit process</p>
             </div>
           </TabsContent>
         </Tabs>
 
-        <div className="mt-6">
-          <h2 className="text-2xl font-bold mb-4">Site Audits</h2>
+        <div className="w-full mb-6 bg-gradient-to-br from-slate-50 via-gray-50 to-zinc-100 rounded-lg p-6 border-2 border-gray-300 hover:border-gray-400 shadow-lg">
+          <h2 className="text-2xl font-semibold mb-4 text-gray-800">Site Locations Map</h2>
+          <JobSiteMap />
+        </div>
+
+        <div className="mt-6 bg-gradient-to-br from-rose-50 via-pink-50 to-red-100 rounded-lg p-6 border-2 border-rose-300 hover:border-rose-400 shadow-lg">
+          <h2 className="text-2xl font-bold mb-4 text-rose-800">Site Audits</h2>
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {siteAudits.map((audit) => (
-              <Card key={audit.id} className="hover:shadow-lg transition-shadow">
+              <Card key={audit.id} className="hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 bg-gradient-to-br from-white via-rose-25 to-pink-50 border-2 border-rose-300 hover:border-rose-400">
                 <CardHeader>
                   <CardTitle className="text-lg">{audit.name}</CardTitle>
                   <div className="text-sm text-gray-500">

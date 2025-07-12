@@ -331,7 +331,16 @@ export default function DashboardPage() {
         notes: jobData.notes || [],
         tags: jobData.tags || [],
         weatherSensitive: jobData.weatherSensitive || false,
-        requiresSpecialEquipment: jobData.requiresSpecialEquipment || false
+        requiresSpecialEquipment: jobData.requiresSpecialEquipment || false,
+        checklist: {
+          depositReceived: false,
+          materialsOrdered: false,
+          materialsDelivered: false,
+          safetyPaperworkComplete: false,
+          onHold: false,
+          siteReady: false,
+          weatherAffected: false,
+        }
       };
     });
   }, []);
@@ -352,9 +361,10 @@ export default function DashboardPage() {
         skills: tech.skills,
         certifications: techData.certifications || [],
         currentJobs: techData.currentJobs || [],
-        maxConcurrentJobs: tech.maxConcurrentJobs,
-        hourlyRate: tech.hourlyRate,
-        isAvailable: tech.isAvailable
+        maxConcurrentJobs: tech.maxConcurrentJobs || 3,
+        hourlyRate: tech.hourlyRate || 45,
+        isAvailable: tech.isAvailable !== false,
+        team: (tech as any).team || (['green', 'blue', 'red'][Math.floor(Math.random() * 3)] as 'green' | 'blue' | 'red')
       };
     });
   }, []);

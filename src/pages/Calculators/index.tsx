@@ -601,8 +601,10 @@ const Calculators = () => {
     description: "Calculate materials needed for fencing projects including posts, panels, and gates",
     icon: <TimberPicketIcon />,
     path: "/calculators/fencing"
-  }, {
-    title: "NCC Codes Reference",
+  }];
+
+  const regulatorReferences = [{
+    title: "NCC Codes Reference", 
     description: "Search and reference National Construction Code clauses for building compliance",
     icon: (
       <div className="relative">
@@ -612,9 +614,8 @@ const Calculators = () => {
     ),
     path: "/calculators/ncc-codes"
   }, {
-
     title: "TDS Reference",
-    description: "Timber Queensland Data Sheets - specifications, grades, and technical data",
+    description: "Timber Queensland Data Sheets - specifications, grades, and technical data", 
     icon: <FileText className="h-6 w-6 text-green-500" />,
     path: "/calculators/tds"
   }, {
@@ -634,17 +635,7 @@ const Calculators = () => {
         </p>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {calculators.filter(c => ![
-            "NCC Codes Reference",
-            "Timber Qld Technical Data Sheet",
-            "Qbcc Forms",
-            "SafeWork NSW",
-            "Consumer and Business Services",
-            "Building and Energy",
-            "Building Practitioners Board",
-            "Access Canberra (Building and Planning)",
-            "Consumer, Building and Occupational Services"
-          ].includes(c.title)).map((calculator, index) => (
+          {calculators.map((calculator, index) => (
             <Card key={index} className="hover:shadow-md transition-shadow">
               <CardHeader className="bg-slate-200 p-4">
                 <div className="flex items-center justify-between">
@@ -808,17 +799,7 @@ const Calculators = () => {
           <div className="border-t-2 border-gray-300 my-8 w-full"></div>
           <h2 className="text-2xl font-bold text-center text-gray-700 mt-8 mb-8">Building industry regulators</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {calculators.filter(c => [
-              "NCC Codes Reference",
-              "Qbcc Forms",
-              "Timber Qld Technical Data Sheet",
-              "SafeWork NSW",
-              "Consumer and Business Services",
-              "Building and Energy",
-              "Building Practitioners Board",
-              "Access Canberra (Building and Planning)",
-              "Consumer, Building and Occupational Services"
-            ].includes(c.title)).map((calculator, index) => (
+            {regulatorReferences.map((calculator, index) => (
               <Card key={index} className="hover:shadow-md transition-shadow">
                 <CardHeader className="bg-slate-200 p-4">
                   <div className="flex items-center justify-between">
