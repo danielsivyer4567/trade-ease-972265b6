@@ -4,14 +4,52 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { TrendingUp, Users, DollarSign, ArrowRight } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 import { PurchasedLeadsTab } from './PurchasedLeadsTab';
 import { MarketplaceTab } from './MarketplaceTab';
 import { RankingsTab } from './RankingsTab';
 
+// UserAvatar component matching notification avatar style
+const UserAvatar = () => {
+  const { user } = useAuth();
+  
+  // Extract initials from user email or name
+  const getInitials = () => {
+    if (!user) return 'U';
+    
+    // Try to get name first, fallback to email
+    const name = user.user_metadata?.name || user.email || 'User';
+    
+    if (name.includes('@')) {
+      // If it's an email, use the first letter of the local part
+      return name.charAt(0).toUpperCase();
+    }
+    
+    // If it's a name, get initials from each word
+    return name
+      .split(' ')
+      .map(n => n[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
+  };
+
+  return (
+    <div className="relative inline-flex items-center justify-center">
+      <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-medium text-sm shadow-md hover:shadow-lg transition-shadow cursor-pointer">
+        {getInitials()}
+      </div>
+    </div>
+  );
+};
+
 export function DashboardContent() {
   return (
     <div className="container p-6 max-w-7xl mx-auto">
-      <h1 className="text-3xl font-bold mb-6">Trade Dashboard</h1>
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-3xl font-bold">Trade Dashboard</h1>
+        <UserAvatar />
+      </div>
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
         <Card>

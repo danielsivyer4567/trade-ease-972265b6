@@ -14,6 +14,7 @@ import { AlertTriangle, Share2, ArrowLeft, Minimize2 } from "lucide-react";
 import { Card } from '@/components/ui/card';
 import { PhotoSharingModal } from '@/components/sharing/PhotoSharingModal';
 import { CustomerStageIndicator } from '@/components/dashboard/CustomerStageIndicator';
+import { formatCustomerName } from '@/utils/customerNameUtils';
 
 // Define the CustomerProgressBar component inline to avoid import issues
 function CustomerProgressBar({ customerId }: { customerId: string }) {
@@ -39,6 +40,7 @@ function useOpenInTab() {
   
   return { openInTab };
 }
+
 
 // Create a simple hook for photo sharing
 function usePhotoSharing() {
@@ -159,7 +161,8 @@ export default function CustomerDetail() {
   useEffect(() => {
     if (customer && !isLoadingData && id) {
       // Only set tab information if we have a customer loaded
-      openInTab(`/customers/${id}`, customer?.name || 'Customer Details', `customer-${id}`);
+      const tabTitle = formatCustomerName(customer.name);
+      openInTab(`/customers/${id}`, tabTitle, `customer-${id}`);
     }
   }, [customer, id, isLoadingData, openInTab]);
 

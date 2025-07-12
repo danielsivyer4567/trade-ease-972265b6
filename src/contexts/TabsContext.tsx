@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useCallback, useRef, useLayoutEffect, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { trackHistoryCall } from '@/utils/performanceMonitor';
+import { isCustomerPath, getCustomerTabTitle } from '@/utils/customerNameUtils';
 
 export interface Tab {
   id: string;
@@ -24,6 +25,21 @@ const TabsContext = createContext<TabsContextType | undefined>(undefined);
 // Helper function to generate unique tab IDs
 const generateUniqueTabId = (): string => {
   return `tab-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+};
+
+// Helper function to generate tab title from pathname
+const generateTabTitle = async (pathname: string): Promise<string> => {
+  const { isCustomer, customerId } = isCustomerPath(pathname);
+  
+  if (isCustomer && customerId) {
+    return await getCustomerTabTitle(customerId);
+  }
+  
+  // Fallback to original logic for non-customer paths
+  const pathSegments = pathname.split('/');
+  const lastSegment = pathSegments[pathSegments.length - 1];
+  let title = lastSegment || 'Home';
+  return title.charAt(0).toUpperCase() + title.slice(1);
 };
 
 // Main provider that decides which implementation to use
@@ -101,25 +117,45 @@ function TabsProviderWithRouter({ children }: { children: React.ReactNode }) {
       
       // Create a default tab for the current location
       const defaultTabId = generateUniqueTabId();
-      const pathSegments = location.pathname.split('/');
-      const lastSegment = pathSegments[pathSegments.length - 1];
       
-      // Generate a title from the path
-      let title = lastSegment || 'Home';
-      title = title.charAt(0).toUpperCase() + title.slice(1);
-      
-      // Set initial state in a single update to prevent multiple renders
-      const initialTab = { 
-        id: defaultTabId, 
-        title, 
-        path: location.pathname 
-      };
-      
-      // Use requestAnimationFrame to ensure state update happens after render
-      requestAnimationFrame(() => {
+      // Generate title asynchronously
+      generateTabTitle(location.pathname).then(title => {
         if (mountedRef.current) {
-          setTabs([initialTab]);
-          setActiveTabId(defaultTabId);
+          const initialTab = { 
+            id: defaultTabId, 
+            title, 
+            path: location.pathname 
+          };
+          
+          // Use requestAnimationFrame to ensure state update happens after render
+          requestAnimationFrame(() => {
+            if (mountedRef.current) {
+              setTabs([initialTab]);
+              setActiveTabId(defaultTabId);
+            }
+          });
+        }
+      }).catch(error => {
+        console.warn('Failed to generate initial tab title, using fallback:', error);
+        // Fallback to simple title generation
+        const pathSegments = location.pathname.split('/');
+        const lastSegment = pathSegments[pathSegments.length - 1];
+        let title = lastSegment || 'Home';
+        title = title.charAt(0).toUpperCase() + title.slice(1);
+        
+        if (mountedRef.current) {
+          const initialTab = { 
+            id: defaultTabId, 
+            title, 
+            path: location.pathname 
+          };
+          
+          requestAnimationFrame(() => {
+            if (mountedRef.current) {
+              setTabs([initialTab]);
+              setActiveTabId(defaultTabId);
+            }
+          });
         }
       });
     }
@@ -148,25 +184,64 @@ function TabsProviderWithRouter({ children }: { children: React.ReactNode }) {
             });
             return currentTabs; // No change to tabs
           } else if (location.pathname !== '/') {
-            // New path, create a new tab
-            const pathSegments = location.pathname.split('/');
-            const lastSegment = pathSegments[pathSegments.length - 1];
-            let title = lastSegment || 'Home';
-            title = title.charAt(0).toUpperCase() + title.slice(1);
+            // New path, create a new tab with async title generation
+            const newTabId = generateUniqueTabId();
             
-            const newTab = {
-              id: generateUniqueTabId(),
-              title,
-              path: location.pathname
-            };
-            
-            // Schedule the active tab update for the next frame
-            requestAnimationFrame(() => {
+            // Generate title asynchronously and update tab
+            generateTabTitle(location.pathname).then(title => {
               if (mountedRef.current) {
-                setActiveTabId(newTab.id);
+                setTabs(prevTabs => {
+                  // Check if tab was already added by another process
+                  const existingTab = prevTabs.find(tab => tab.path === location.pathname);
+                  if (existingTab) {
+                    return prevTabs;
+                  }
+                  
+                  const newTab = {
+                    id: newTabId,
+                    title,
+                    path: location.pathname
+                  };
+                  
+                  // Schedule the active tab update for the next frame
+                  requestAnimationFrame(() => {
+                    if (mountedRef.current) {
+                      setActiveTabId(newTab.id);
+                    }
+                  });
+                  
+                  return [...prevTabs, newTab];
+                });
+              }
+            }).catch(error => {
+              console.warn('Failed to generate tab title, using fallback:', error);
+              // Fallback to simple title generation
+              const pathSegments = location.pathname.split('/');
+              const lastSegment = pathSegments[pathSegments.length - 1];
+              let title = lastSegment || 'Home';
+              title = title.charAt(0).toUpperCase() + title.slice(1);
+              
+              if (mountedRef.current) {
+                setTabs(prevTabs => {
+                  const newTab = {
+                    id: newTabId,
+                    title,
+                    path: location.pathname
+                  };
+                  
+                  requestAnimationFrame(() => {
+                    if (mountedRef.current) {
+                      setActiveTabId(newTab.id);
+                    }
+                  });
+                  
+                  return [...prevTabs, newTab];
+                });
               }
             });
-            return [...currentTabs, newTab];
+            
+            // Return current tabs for now, they'll be updated when the async title resolves
+            return currentTabs;
           }
           
           return currentTabs; // No change
