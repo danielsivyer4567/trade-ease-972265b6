@@ -3,7 +3,8 @@
     "allow": [
       "Bash(npx eslint:*)",
       "Bash(npx tsc:*)",
-      "Bash(sed:*)"
+      "Bash(sed:*)",
+      "Bash(git remote:*)"
     ],
     "deny": []
   }
