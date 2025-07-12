@@ -15,7 +15,8 @@ import {
   Database,
   Building,
   CreditCard,
-  Calculator
+  Calculator,
+  LucideIcon
 } from 'lucide-react';
 import { aiAccountingService } from '@/services/AIAccountingService';
 import { supabase } from '@/integrations/supabase/client';
@@ -33,7 +34,7 @@ interface IntegrationSyncManagerProps {
 
 interface IntegrationStatus {
   name: string;
-  icon: React.ComponentType<any>;
+  icon: LucideIcon;
   connected: boolean;
   lastSync?: string;
   status: 'idle' | 'syncing' | 'completed' | 'error';

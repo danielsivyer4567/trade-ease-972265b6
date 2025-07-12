@@ -6,8 +6,21 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { FenceType } from "../hooks/useFencingCalculator";
 
+export interface FencingComponents {
+  palings: number;
+  panels: number;
+  postHeight: string;
+  posts: number;
+  rails: number;
+  nails: number;
+  screws: number;
+  rapidSets: number;
+  caps?: number;
+  sleepers?: number;
+}
+
 interface FencingReferenceTableProps {
-  FENCING_COMPONENTS_PER_10M: Record<string, any>;
+  FENCING_COMPONENTS_PER_10M: Record<FenceType, FencingComponents>;
 }
 
 export const FencingReferenceTable: React.FC<FencingReferenceTableProps> = ({ 

@@ -9,9 +9,20 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
+export interface Automation {
+  id: number;
+  title: string;
+  description: string;
+  category: string;
+  trigger: string;
+  action: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 interface AutomationsHeaderProps {
   selectedCategory: string;
-  onAutomationCreated?: (automation: any) => void;
+  onAutomationCreated?: (automation: Automation) => void;
 }
 
 const AutomationsHeader = ({ selectedCategory, onAutomationCreated }: AutomationsHeaderProps) => {
